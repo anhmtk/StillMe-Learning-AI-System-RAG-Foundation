@@ -1,0 +1,6 @@
+2025-07-21 20:24:06,918 | INFO | [SecureMemory] Stored key: history
+2025-07-21 20:24:06,919 | INFO | [SecureMemory] Backup completed → conversation_memory.json
+2025-07-21 20:24:06,919 | INFO | [2025-07-21 20:24:06] user: Hôm nay thời tiết thế nào?
+2025-07-21 20:24:06,919 | INFO | [SecureMemory] Stored key: history
+2025-07-21 20:24:06,920 | INFO | [SecureMemory] Backup completed → conversation_memory.json
+2025-07-21 20:24:06,920 | INFO | [2025-07-21 20:24:06] ai: Dạ, a chờ e xíu nhé... E hiểu rồi, a muốn hỏi về: 'Hôm nay thời tiết thế nào?' đúng không?

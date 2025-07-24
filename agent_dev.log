@@ -1,0 +1,131 @@
+2025-07-21 22:38:00,391 | INFO | Attempt 1/3
+2025-07-21 22:38:02,228 | ERROR | Framework failed: INFO:root:\U0001f527 \u0110ang kh\u1edfi t\u1ea1o c�c module c\u1ed1t l�i...
+Traceback (most recent call last):
+  File "D:\stillme_ai\framework.py", line 195, in <module>
+    modules = initialize_modules()
+  File "D:\stillme_ai\framework.py", line 182, in initialize_modules
+    smart_api_manager = SmartGPTAPIManager(api_keys=["mock-key"],
+                                           model_preferences=["gpt-4", "claude-3-opus"],
+                                           fallback_model="gpt-3.5-turbo")
+TypeError: SmartGPTAPIManager.__init__() got an unexpected keyword argument 'api_keys'
+
+2025-07-21 22:38:02,229 | ERROR | Framework failed after tests passed
+2025-07-21 22:38:02,257 | INFO | AgentDev 9.5/10 completed
+2025-07-21 22:46:49,714 | INFO | Starting AgentDev (DeepSeek + GPT-4o)...
+2025-07-21 22:46:49,714 | INFO | Attempt 1/3
+2025-07-21 22:46:50,497 | INFO | All tests passed!
+2025-07-21 22:46:51,340 | ERROR | Framework failed: INFO:root:\U0001f527 \u0110ang kh\u1edfi t\u1ea1o các module c\u1ed1t lõi...
+INFO:root:\u2705 T\u1ea5t c\u1ea3 module \u0111ã \u0111\u01b0\u1ee3c kh\u1edfi t\u1ea1o.
+Traceback (most recent call last):
+  File "D:\stillme_ai\framework.py", line 196, in <module>
+    asyncio.run(StillMeFramework().run())
+                ~~~~~~~~~~~~~~~~^^
+  File "D:\stillme_ai\framework.py", line 57, in __init__
+    self._setup_framework(config or {})
+    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "D:\stillme_ai\framework.py", line 63, in _setup_framework
+    self.logger = self._init_logger()
+                  ~~~~~~~~~~~~~~~~~^^
+  File "D:\stillme_ai\framework.py", line 77, in _init_logger
+    file_handler = logging.handlers.RotatingFileHandler('stillme.log', maxBytes=10*1024*1024, backupCount=5)
+                   ^^^^^^^^^^^^^^^^
+AttributeError: module 'logging' has no attribute 'handlers'. Did you mean: 'Handler'?
+
+2025-07-21 22:46:51,340 | ERROR | Framework failed after test pass
+2025-07-21 22:46:51,340 | INFO | AgentDev completed
+2025-07-22 14:05:28,200 | INFO | Attempt 1/3
+2025-07-22 14:05:31,205 | WARNING | No recognizable errors.
+2025-07-22 14:05:31,205 | INFO | AgentDev completed.
+2025-07-22 15:05:21,610 | INFO | Starting AgentDev (Enhanced)...
+2025-07-22 15:05:21,611 | INFO | Attempt 1/3
+2025-07-22 15:05:24,439 | WARNING | No recognizable errors.
+2025-07-22 15:05:24,439 | INFO | AgentDev completed.
+2025-07-22 15:12:17,482 | INFO | 🚀 Starting AgentDev Ultimate...
+2025-07-22 15:12:17,482 | INFO | Attempt 1/5
+2025-07-22 15:12:20,040 | WARNING | No recognizable errors.
+2025-07-22 15:12:20,041 | INFO | 🔚 AgentDev completed.
+2025-07-22 15:13:41,192 | INFO | 🚀 Starting AgentDev Ultimate...
+2025-07-22 15:13:41,193 | INFO | Attempt 1/5
+2025-07-22 15:13:43,594 | WARNING | No recognizable errors, vẫn chạy framework để kiểm tra...
+2025-07-22 15:13:43,594 | INFO | Adding missing import: from modules.conversational_core_v1 import *
+2025-07-22 15:13:43,595 | INFO | Adding missing import: from modules.layered_memory_v1 import *
+2025-07-22 15:13:43,595 | INFO | Adding missing import: from modules.smart_gpt_api_manager_v1 import *
+2025-07-22 15:13:43,595 | INFO | Adding missing import: from modules.token_optimizer_v1 import *
+2025-07-22 15:13:45,011 | INFO | 🎉 Framework ran successfully!
+2025-07-22 15:13:45,011 | INFO | 🔚 AgentDev completed.
+2025-07-22 22:24:59,462 | INFO | 🚀 Starting AgentDev Pro++...
+2025-07-22 22:24:59,462 | INFO | Attempt 1/5
+2025-07-22 22:25:01,889 | INFO | Test pass rate: 37.50%
+2025-07-22 22:25:01,889 | WARNING | No recognizable test failures.
+2025-07-22 22:25:01,890 | INFO | 🔚 AgentDev Pro++ completed.
+2025-07-22 22:33:50,973 | INFO | 🚀 Starting AgentDev...
+2025-07-22 22:33:50,973 | INFO | Attempt 1/3
+2025-07-22 22:33:52,952 | WARNING | No simple runtime errors found, trying logic fix...
+2025-07-22 22:41:33,881 | INFO | HTTP Request: POST http://127.0.0.1:11434/api/generate "HTTP/1.1 200 OK"
+2025-07-22 22:41:33,887 | INFO | Logic fix applied. Retesting...
+2025-07-22 22:41:33,887 | INFO | Attempt 2/3
+2025-07-22 22:41:36,382 | WARNING | No simple runtime errors found, trying logic fix...
+2025-07-22 22:46:34,880 | INFO | HTTP Request: POST http://127.0.0.1:11434/api/generate "HTTP/1.1 200 OK"
+2025-07-22 22:46:34,883 | INFO | Logic fix applied. Retesting...
+2025-07-22 22:46:34,883 | INFO | Attempt 3/3
+2025-07-22 22:46:37,222 | WARNING | No simple runtime errors found, trying logic fix...
+2025-07-22 22:52:10,534 | INFO | HTTP Request: POST http://127.0.0.1:11434/api/generate "HTTP/1.1 200 OK"
+2025-07-22 22:52:10,538 | INFO | Logic fix applied. Retesting...
+2025-07-22 22:52:10,538 | INFO | 🔚 AgentDev completed.
+2025-07-22 23:28:34,199 - AgentDev - INFO - Attempt 1/3
+2025-07-22 23:28:36,519 - AgentDev - WARNING - Tests failed, analyzing errors...
+2025-07-22 23:28:36,519 - AgentDev - INFO - Detected SyntaxError in D:\stillme_ai\modules\layered_memory_v1.py: '(' was never closed
+2025-07-22 23:28:36,520 - AgentDev - INFO - Created backup at backup_legacy\layered_memory_v1_20250722_232836.py
+2025-07-22 18:41:01,418 - AgentDev-SafeMode - INFO - EthicsChecker initialized with level: high
+2025-07-22 18:41:01,419 - AgentDev-SafeMode - INFO - StillMeFramework (simplified) initialized for ethics checks.
+2025-07-22 18:41:01,422 - AgentDev-SafeMode - INFO - 🚀 Starting AgentDev Main Loop in SafeMode
+2025-07-22 18:41:01,423 - AgentDev-SafeMode - INFO - Agent performing self-healing checks for its own dependencies...
+2025-07-22 18:41:01,776 - AgentDev-SafeMode - INFO - pylint is installed.
+2025-07-22 18:41:02,036 - AgentDev-SafeMode - INFO - pytest is installed.
+2025-07-22 18:41:02,292 - AgentDev-SafeMode - INFO - ollama is installed.
+2025-07-22 18:41:02,553 - AgentDev-SafeMode - INFO - openai is installed.
+2025-07-22 18:41:02,812 - AgentDev-SafeMode - INFO - cryptography is installed.
+2025-07-22 18:41:03,063 - AgentDev-SafeMode - INFO - jsonschema is installed.
+2025-07-22 18:41:03,065 - AgentDev-SafeMode - ERROR - Git command not found. Please ensure Git is installed and in your PATH.
+2025-07-22 18:41:03,065 - AgentDev-SafeMode - CRITICAL - Git command not found. Please install Git manually. Agent cannot proceed.
+2025-07-23 01:41:27,049 - AgentDev-SafeMode - INFO - EthicsChecker initialized with level: high
+2025-07-23 01:41:27,049 - AgentDev-SafeMode - INFO - StillMeFramework (simplified) initialized for ethics checks.
+2025-07-23 01:41:27,050 - AgentDev-SafeMode - INFO - 🚀 Starting AgentDev Main Loop in SafeMode
+2025-07-23 01:41:27,051 - AgentDev-SafeMode - INFO - Agent performing self-healing checks for its own dependencies...
+2025-07-23 01:41:28,089 - AgentDev-SafeMode - INFO - pylint is installed.
+2025-07-23 01:41:28,970 - AgentDev-SafeMode - INFO - pytest is installed.
+2025-07-23 01:41:29,848 - AgentDev-SafeMode - INFO - ollama is installed.
+2025-07-23 01:41:30,661 - AgentDev-SafeMode - INFO - openai is installed.
+2025-07-23 01:41:31,402 - AgentDev-SafeMode - INFO - cryptography is installed.
+2025-07-23 01:41:32,014 - AgentDev-SafeMode - INFO - jsonschema is installed.
+2025-07-23 01:41:32,081 - AgentDev-SafeMode - INFO - Running in sandbox: docker run --rm -v D:\stillme_ai:/app -w /app hello-world echo Docker is running
+2025-07-23 01:41:38,862 - AgentDev-SafeMode - WARNING - Sandbox command failed with exit code 127:
+Unable to find image 'hello-world:latest' locally
+latest: Pulling from library/hello-world
+e6590344b1a5: Pulling fs layer
+e6590344b1a5: Download complete
+e6590344b1a5: Pull complete
+Digest: sha256:ec153840d1e635ac434fab5e377081f17e0e15afab27beb3f726c3265039cfff
+Status: Downloaded newer image for hello-world:latest
+docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: error during container init: exec: "echo": executable file not found in $PATH: unknown
+
+Run 'docker run --help' for more information
+
+2025-07-23 01:41:38,863 - AgentDev-SafeMode - CRITICAL - Docker is not running or not accessible. Please ensure Docker is installed and started. Agent cannot proceed in safe mode.
+2025-07-24 22:17:43,508 - AgentDev-SafeMode - INFO - EthicsChecker initialized with level: high
+2025-07-24 22:17:43,508 - AgentDev-SafeMode - INFO - StillMeFramework (simplified) initialized for ethics checks.
+2025-07-24 22:17:43,509 - AgentDev-SafeMode - INFO - 🚀 Starting AgentDev Main Loop in SafeMode
+2025-07-24 22:17:43,509 - AgentDev-SafeMode - INFO - Agent performing self-healing checks for its own dependencies...
+2025-07-24 22:17:44,415 - AgentDev-SafeMode - INFO - pylint is installed.
+2025-07-24 22:17:45,257 - AgentDev-SafeMode - INFO - pytest is installed.
+2025-07-24 22:17:46,097 - AgentDev-SafeMode - INFO - ollama is installed.
+2025-07-24 22:17:46,946 - AgentDev-SafeMode - INFO - openai is installed.
+2025-07-24 22:17:47,640 - AgentDev-SafeMode - INFO - cryptography is installed.
+2025-07-24 22:17:48,263 - AgentDev-SafeMode - INFO - jsonschema is installed.
+2025-07-24 22:17:48,331 - AgentDev-SafeMode - INFO - Running in sandbox: docker run --rm -v D:\stillme_ai:/app -w /app hello-world echo Docker is running
+2025-07-24 22:17:49,560 - AgentDev-SafeMode - WARNING - Sandbox command failed with exit code 127:
+docker: Error response from daemon: failed to create task for container: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: error during container init: exec: "echo": executable file not found in $PATH: unknown
+
+Run 'docker run --help' for more information
+
+2025-07-24 22:17:49,560 - AgentDev-SafeMode - CRITICAL - Docker is not running or not accessible. Please ensure Docker is installed and started. Agent cannot proceed in safe mode.

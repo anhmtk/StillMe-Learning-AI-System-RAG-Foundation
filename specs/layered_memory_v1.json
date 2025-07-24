@@ -1,0 +1,39 @@
+{
+  "name": "LayeredMemory_v1",
+  "description": "Bộ nhớ phân tầng cho AI – ghi nhớ thông tin tạm thời, dài hạn, cảm xúc, và sự kiện theo lớp. Đây là não bộ trung tâm giúp AI phản hồi có chiều sâu và logic.",
+  "core_functions": [
+    "store_memory(data, layer='short_term')",
+    "retrieve_memory(query, layer='auto')",
+    "forget_memory(layer=None, keyword=None)",
+    "summarize_layer(layer='long_term')",
+    "inject_memory_directly(memory_blob, layer='manual')"
+  ],
+  "tests_required": [
+    "test_store_and_retrieve_short_term",
+    "test_store_and_retrieve_long_term",
+    "test_forget_specific_keyword",
+    "test_auto_layer_selection",
+    "test_memory_injection_and_safety"
+  ],
+  "dependencies": [],
+  "external_deps": ["json", "datetime", "uuid", "threading"],
+  "estimated_complexity": 4,
+  "security_level": "critical",
+  "constraints": {
+    "memory_limit_per_layer_mb": 50,
+    "max_entries_short_term": 1000,
+    "auto_forget_policy": true
+  },
+  "usage_context": "Được gọi bởi tất cả modules cần truy xuất thông tin người dùng hoặc nội dung AI đã từng xử lý.",
+  "failure_modes": [
+    "Không retrieve đúng memory do sai layer",
+    "Quên mất dữ liệu quan trọng vì auto-forget quá sớm",
+    "Memory bị overwrite do trùng UUID hoặc lỗi lock thread",
+    "Memory injection sai format → crash toàn hệ thống"
+  ],
+  "notes": [
+    "Layer gồm: short_term, long_term, emotional, event_log, manual",
+    "Phải đảm bảo thread-safe trong multi-thread môi trường async",
+    "Sau này có thể tích hợp SQLite hoặc Redis nếu cần persistence"
+  ]
+}

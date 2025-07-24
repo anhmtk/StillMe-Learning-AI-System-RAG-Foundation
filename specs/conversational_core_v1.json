@@ -1,0 +1,37 @@
+{
+  "name": "ConversationalCore_v1",
+  "description": "Module giao tiếp trung tâm – xử lý đối thoại người dùng, duy trì ngữ cảnh, che giấu delay kỹ thuật",
+  "core_functions": [
+    "handle_user_input",
+    "maintain_conversational_context",
+    "delay_masking",
+    "route_to_intent_handlers"
+  ],
+  "tests_required": [
+    "context_retention_test",
+    "multi_turn_dialog_test",
+    "latency_masking_simulation"
+  ],
+  "dependencies": [
+    "LayeredMemory_v1"
+  ],
+  "external_deps": [],
+  "estimated_complexity": 4,
+  "security_level": "medium",
+  "failure_modes": [
+    "context_drift",
+    "repeated_responses",
+    "response_delay_unmasked"
+  ],
+  "constraints": [
+    "Không được gây overload cho memory",
+    "Phải phản hồi trong 1.5s với input cơ bản",
+    "Không được tự sinh logic thay thế module khác"
+  ],
+  "extensions": {
+    "logging": true,
+    "ethical_decorator": true,
+    "deep_memory_access": true
+  },
+  "notes": "Đây là giao diện đầu tiên giữa người dùng và hệ thống AI – cần đảm bảo phản hồi tự nhiên, không lộ máy. Có thể bổ sung thêm logger, decorator đạo đức hoặc memory sâu tùy kiến trúc."
+}

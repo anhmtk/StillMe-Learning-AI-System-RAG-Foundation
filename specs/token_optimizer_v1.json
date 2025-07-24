@@ -1,0 +1,29 @@
+{
+  "name": "TokenOptimizer_v1",
+  "description": "Module tối ưu prompt và context để giảm token sử dụng mà vẫn giữ nguyên ý nghĩa, hỗ trợ tiết kiệm chi phí",
+  "core_functions": [
+    "compress_prompt",
+    "semantic_token_analysis",
+    "remove_redundancy"
+  ],
+  "tests_required": [
+    "token_saving_vs_meaning_loss_test",
+    "semantic_equivalence_test",
+    "cost_impact_test"
+  ],
+  "dependencies": ["SmartGPT_API_Manager_v1"],
+  "external_deps": [],
+  "estimated_complexity": 5,
+  "security_level": "medium",
+  "failure_modes": [
+    "meaning_loss_due_to_optimization",
+    "non-deterministic output",
+    "incompatible_format_for_API"
+  ],
+  "notes": "Là công cụ sống còn trong việc làm cho hệ thống AI vận hành lâu dài với chi phí thấp.",
+  "constraints": [
+    "Phải giữ nguyên semantic trong 95% trường hợp",
+    "Không dùng thuật toán nén general-purpose",
+    "Phải dễ mở rộng sang các model khác nhau"
+  ]
+}

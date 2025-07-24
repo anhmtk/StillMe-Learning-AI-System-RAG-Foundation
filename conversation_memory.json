@@ -1,0 +1,12 @@
+{
+    "history": [
+        {
+            "speaker": "user",
+            "message": "Hôm nay thời tiết thế nào?"
+        },
+        {
+            "speaker": "ai",
+            "message": "Dạ, a chờ e xíu nhé... E hiểu rồi, a muốn hỏi về: 'Hôm nay thời tiết thế nào?' đúng không?"
+        }
+    ]
+}

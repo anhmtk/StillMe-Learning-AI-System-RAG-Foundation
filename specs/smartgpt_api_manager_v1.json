@@ -1,0 +1,54 @@
+{
+  "name": "SmartGPT_API_Manager_v1",
+  "description": "Module quản lý việc gọi GPT API linh hoạt – lựa chọn model phù hợp với nhu cầu và ngân sách",
+  "core_functions": [
+    "select_model_based_on_prompt",
+    "rotate_api_key",
+    "log_api_usage",
+    "fallback_to_backup_model"
+  ],
+  "tests_required": [
+    "model_selection_accuracy_test",
+    "key_rotation_safety_test",
+    "fallback_efficiency_test"
+  ],
+  "dependencies": [],
+  "external_deps": ["openai", "requests"],
+  "estimated_complexity": 4,
+  "security_level": "high",
+  "constraints": {
+    "constructor_params": {
+      "api_keys": {
+        "default": [],
+        "description": "Danh sách API keys cho OpenRouter"
+      },
+      "models": {
+        "default": {
+          "gpt-3.5-turbo": { "cost_per_token": 0.000002, "max_tokens": 4096 },
+          "claude-3-haiku": { "cost_per_token": 0.000003, "max_tokens": 200000 }
+        },
+        "description": "Cấu hình từng model với chi phí và giới hạn token"
+      }
+    },
+    "requirements": [
+      "Không gọi GPT-4 nếu không cần thiết",
+      "Phải có cơ chế dự phòng key",
+      "Log rõ ràng nhưng không lưu nội dung nhạy cảm"
+    ]
+  },
+  "usage_context": "Dùng cho các hệ thống cần tối ưu chi phí API AI",
+  "failure_modes": [
+    "API key rate limit exceeded",
+    "wrong model selection",
+    "silent fail without fallback"
+  ],
+  "notes": "Là trung tâm định tuyến API – ảnh hưởng trực tiếp đến chi phí và độ ổn định toàn hệ thống",
+  "class_name": "SmartGPTAPIManager",
+  "init_parameters": {
+    "api_keys": [],
+    "models": {
+      "gpt-3.5-turbo": { "cost_per_token": 0.000002, "max_tokens": 4096 },
+      "claude-3-haiku": { "cost_per_token": 0.000003, "max_tokens": 200000 }
+    }
+  }
+}
