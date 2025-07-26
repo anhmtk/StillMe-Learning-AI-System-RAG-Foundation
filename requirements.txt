@@ -19,3 +19,4 @@ rich>=13.6.0
 
 # Docker SDK (Python)
 docker>=6.1.3
+pyyaml
