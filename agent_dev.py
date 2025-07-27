@@ -440,47 +440,34 @@ class SafeExecutor:
         """
         Runs a command inside a Docker container sandbox.
         The current working directory is mounted into the container.
-        Args:
-            command: List of strings representing the command and its arguments.
-            mount_path: The host path to mount into the container at /app.
-            timeout: Maximum time in seconds to wait for the command to complete.
-            docker_image: The Docker image to use (e.g., "python:3.9-slim-buster" or your custom "stillme-dev-env").
-        Returns:
-            A tuple (success: bool, output: str)
         """
-        
-        # Lệnh Docker để chạy command trong container
-        docker_cmd = [
-            "docker", "run", "--rm", # --rm để tự động xóa container sau khi chạy
-            "-v", f"{mount_path.resolve()}:/app", # Mount thư mục hiện tại vào /app trong container
-            "-w", "/app", # Đặt thư mục làm việc trong container là /app
-            docker_image, # Image Docker để sử dụng (thay thế bằng image bạn đã build)
-            *command # Lệnh cần chạy
-        ]
-        
-        logger.info(f"Running in sandbox: {' '.join(docker_cmd)}")
         try:
+            # Đảm bảo không dùng python.exe trong Linux container
+            if len(command) > 0 and ("python.exe" in command[0] or "python" in command[0].lower()):
+                command[0] = "python3"
+
+            docker_cmd = [
+                "docker", "run", "--rm",
+                "-v", f"{mount_path.resolve()}:/app",
+                "-w", "/app",
+                docker_image
+            ] + command
+
+            logger.info(f"[Docker Sandbox] Running: {' '.join(docker_cmd)}")
+
             result = subprocess.run(
                 docker_cmd,
                 capture_output=True,
                 text=True,
                 timeout=timeout,
-                check=False # Không raise exception, chúng ta tự kiểm tra return code
+                check=False
             )
-            success = result.returncode == 0
-            output = result.stdout + result.stderr
-            if not success:
-                logger.warning(f"Sandbox command failed with exit code {result.returncode}:\n{output}")
-            return success, output
-        except subprocess.TimeoutExpired:
-            logger.error(f"Sandbox command timed out after {timeout} seconds.")
-            return False, "Sandbox execution timed out."
-        except FileNotFoundError:
-            logger.error("Docker command not found. Please ensure Docker is installed and running.")
-            return False, "Docker not found."
+
+            return (result.returncode == 0), result.stdout + result.stderr
         except Exception as e:
-            logger.error(f"Unexpected error running sandbox command: {str(e)}")
+            logger.error(f"Sandbox execution failed: {str(e)}")
             return False, str(e)
+
 
     def git_init_and_branch(self, context: AgentContext) -> bool:
         """Initialize git repo if not exists and create/checkout agent branch."""
@@ -989,10 +976,12 @@ class AgentDev:
             self.context.current_attempt += 1
             logger.info(f"\n--- Attempt {self.context.current_attempt}/{max_attempts} ---")
             
-            # Tạo branch mới cho lần thử này
-            if not self.executor.git_init_and_branch(self.context):
-                logger.critical("Failed to initialize Git or checkout agent branch for new attempt. Exiting.")
-                sys.exit(1)
+            
+            # Tắt cơ chế Git auto-reset vì gây xung đột
+            git_ok = self.executor._run_git_command(["status"])
+            if not git_ok[0]:
+                logger.warning("Git not initialized or error detected, but skipping auto-checkout to avoid data loss.")
+
 
             # Bước 1: Chạy test và framework để nhận thức môi trường (Perceive)
             logger.info("Perceiving environment: Running tests and framework check in sandbox...")
