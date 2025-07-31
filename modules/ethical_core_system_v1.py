@@ -1,265 +1,392 @@
-"""
-EthicalCoreSystem_v1 - Phiên bản nâng cấp (ĐÃ FIX)
-==================================================
-Trái tim đạo đức AI với các tính năng:
-1. Kiểm tra đa tầng: Từ khóa → Nguyên tắc → Ngữ cảnh → AI
-2. Tự phản tỉnh thông minh (SelfCritic_v1)
-3. Triết lý "uốn lưỡi 7 lần" với tối đa 3 lần tự điều chỉnh
-4. Hỗ trợ đa ngôn ngữ (tiếng Việt + tiếng Anh)
-5. Logging chi tiết và hệ thống rules động
-"""
-
+import os
+import asyncio
 import json
-import re
 import logging
-from pathlib import Path
-from typing import Dict, List
-from datetime import datetime
+from enum import Enum
+from typing import Optional, Tuple, Dict, Any
+import httpx # Import httpx cần thiết cho OpenRouterClient
 
-# -------------------- CẤU HÌNH LOGGING --------------------
-logger = logging.getLogger("EthicalCore")
-logger.setLevel(logging.INFO)
+# --- Cấu hình Logger ---
+LOGS_DIR = "logs"
+ETHICAL_VIOLATIONS_LOG = os.path.join(LOGS_DIR, "ethical_violations.log")
 
-if not logger.handlers:
-    handler = logging.FileHandler("ethical_core.log", encoding="utf-8")
-    formatter = logging.Formatter(
-        "%(asctime)s | %(levelname)s | %(module)s | %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S"
-    )
-    handler.setFormatter(formatter)
-    logger.addHandler(handler)
+# Đảm bảo thư mục logs tồn tại
+os.makedirs(LOGS_DIR, exist_ok=True)
 
+ethical_logger = logging.getLogger("ethical_violations")
+ethical_logger.setLevel(logging.WARNING)
+ethical_logger.propagate = False # Ngăn không cho log lên root logger
 
-# -------------------- SELF CRITIC --------------------
-class SelfCritic_v1:
-    """Hệ thống tự phê bình với khả năng phân tích đạo đức đa tầng"""
-    
-    def __init__(self, ethical_rules: Dict):
-        self.rules = ethical_rules
-        self.ai_call_count = 0  # Theo dõi số lần gọi AI
+# Tạo handler chỉ khi chưa có để tránh thêm handler nhiều lần
+if not ethical_logger.handlers:
+    file_handler = logging.FileHandler(ETHICAL_VIOLATIONS_LOG, encoding='utf-8')
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - User ID: %(user_id)s - Violation Type: %(violation_type)s - Severity: %(severity)s - Message: %(message)s')
+    file_handler.setFormatter(formatter)
+    ethical_logger.addHandler(file_handler)
 
-    def criticize(self, text: str) -> Dict:
-        """Phân tích văn bản theo 4 tầng kiểm tra"""
-        violations = []
-        severity = "low"
+def close_violation_logger():
+    """Đóng handler của ethical_logger. Sử dụng để dọn dẹp trong các bài test."""
+    for handler in ethical_logger.handlers[:]: # Lặp trên một bản sao của danh sách handler
+        handler.close()
+        ethical_logger.removeHandler(handler)
 
-        # Tầng 1: Kiểm tra từ khóa nhạy cảm
-        keyword_violations = self._check_keywords(text)
-        if keyword_violations:
-            violations.extend(keyword_violations)
-            severity = self._update_severity(severity, "medium")
+# --- Định nghĩa các Enums ---
+class OpenRouterModel(Enum):
+    MISTRAL_7B_INSTRUCT = "mistralai/mistral-7b-instruct"
+    OPENCHAT_7B = "openchat/openchat-7b"
+    GEMINI_PRO = "google/gemini-pro"
+    # Thêm các model khác nếu cần
 
-        # Tầng 2: Kiểm tra nguyên tắc đạo đức
-        principle_violations = self._check_principles(text)
-        if principle_violations:
-            violations.extend(principle_violations)
-            severity = self._update_severity(severity, "high")
+class Sentiment(Enum):
+    POSITIVE = "positive"
+    NEGATIVE = "negative"
+    NEUTRAL = "neutral"
 
-        # Tầng 3: Phân tích ngữ cảnh
-        if keyword_violations and not self._check_context(text):
-            violations.append("Vi phạm ngữ cảnh")
-            severity = self._update_severity(severity, "medium")
+class Tone(Enum):
+    FORMAL = "formal"
+    INFORMAL = "informal"
+    FRIENDLY = "friendly"
+    SERIOUS = "serious"
+    NEUTRAL = "neutral"
 
-        return {
-            "ok": not violations,
-            "reasons": violations,
-            "severity": severity
+class Severity(Enum):
+    LOW = "low"
+    MEDIUM = "medium"
+    HIGH = "high"
+    CRITICAL = "critical"
+
+class ViolationType(Enum):
+    FORBIDDEN_KEYWORD = "từ khóa cấm"
+    TOXIC_CONTENT = "nội dung độc hại"
+    HATE_SPEECH = "ngôn ngữ thù địch"
+    SELF_HARM = "tự gây hại"
+    ILLEGAL_ACTIVITY = "hoạt động bất hợp pháp"
+    PRIVACY_VIOLATION = "vi phạm quyền riêng tư"
+    VULNERABLE_USER = "người dùng dễ bị tổn thương"
+    IMPERSONATION = "mạo danh"
+    LLM_ERROR = "Lỗi LLM"
+    ETHICAL_NON_COMPLIANCE = "không tuân thủ đạo đức"
+    # Thêm các loại vi phạm khác nếu cần
+
+# --- OpenRouterClient Class ---
+class OpenRouterClient:
+    def __init__(self, api_key: str, model: OpenRouterModel = OpenRouterModel.MISTRAL_7B_INSTRUCT):
+        if not api_key:
+            raise ValueError("API key must be provided for OpenRouterClient.")
+        self.api_key = api_key
+        self.base_url = "https://openrouter.ai/api/v1/chat/completions"
+        self.model = model
+
+    async def chat_completion(self, messages: list, temperature: float = 0.7, max_tokens: int = 150) -> str:
+        headers = {
+            "Authorization": f"Bearer {self.api_key}",
+            "Content-Type": "application/json",
         }
+        payload = {
+            "model": self.model.value,
+            "messages": messages,
+            "temperature": temperature,
+            "max_tokens": max_tokens,
+        }
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.post(self.base_url, headers=headers, json=payload)
+                response.raise_for_status()
+                return response.json()["choices"][0]["message"]["content"]
+            except httpx.HTTPStatusError as e:
+                ethical_logger.error(f"HTTP error occurred: {e.response.status_code} - {e.response.text}")
+                raise
+            except Exception as e:
+                ethical_logger.error(f"An error occurred during API call: {e}")
+                raise
 
-    def suggest_fix(self, text: str) -> str:
-        """Đề xuất chỉnh sửa văn bản tự động"""
-        critique = self.criticize(text)
-        if critique["ok"]:
-            return text
+# --- EthicsGuard Class ---
+class EthicsGuard:
+    def __init__(self, openrouter_client: OpenRouterClient, rules_file: str = "config/ethical_rules.json"):
+        self.openrouter_client = openrouter_client
+        self.rules_file = rules_file
+        self.forbidden_keywords: list = []
+        self.sensitive_topics: list = []
+        self.violation_response = "Xin lỗi, tôi không thể thảo luận về vấn đề đó. Tôi có thể giúp bạn với điều gì khác không?"
+        self._load_ethical_rules()
 
-        # Thay thế từ ngữ nhạy cảm
-        modified_text = text
-        for word, replacement in self.rules.get("replacement_rules", {}).items():
-            modified_text = re.sub(
-                r'\b' + re.escape(word) + r'\b',
-                replacement,
-                modified_text,
-                flags=re.IGNORECASE
-            )
+    def _load_ethical_rules(self):
+        try:
+            with open(self.rules_file, 'r', encoding='utf-8') as f:
+                rules = json.load(f)
+                self.forbidden_keywords = [k.lower() for k in rules.get("forbidden_keywords", [])]
+                self.sensitive_topics = [t.lower() for t in rules.get("sensitive_topics", [])]
+        except FileNotFoundError:
+            ethical_logger.warning(f"Ethical rules file not found at {self.rules_file}. Using empty rules.")
+            self.forbidden_keywords = []
+            self.sensitive_topics = []
+        except json.JSONDecodeError:
+            ethical_logger.error(f"Error decoding JSON from ethical rules file at {self.rules_file}. Using empty rules.")
+            self.forbidden_keywords = []
+            self.sensitive_topics = []
+        except Exception as e:
+            ethical_logger.error(f"An unexpected error occurred loading ethical rules: {e}")
+            self.forbidden_keywords = []
+            self.sensitive_topics = []
 
-        # Kiểm tra lại sau khi thay thế
-        new_critique = self.criticize(modified_text)
-        if not new_critique["ok"] and new_critique["severity"] == "high":
-            return self.call_ai(modified_text)
-
-        return modified_text
-
-    def call_ai(self, text: str) -> str:
-        """Gọi hệ thống AI phân tích sâu (placeholder)"""
-        self.ai_call_count += 1
-        logger.warning(f"Gọi AI phân tích lần thứ {self.ai_call_count}")
-        return f"[AI_ANALYSIS] {text}"
-
-    # Các hàm hỗ trợ
-    def _check_keywords(self, text: str) -> List[str]:
-        """Kiểm tra từ khóa nhạy cảm (bỏ qua ngoại lệ ngữ cảnh)"""
-        violations = []
-        for category, keywords in self.rules.get("banned_keywords", {}).items():
-            for kw in keywords:
-                # Nếu từ khóa nằm trong ngoại lệ → bỏ qua
-                exceptions = self.rules.get("contextual_exceptions", {}).get(kw, [])
-                if any(re.search(exc, text, re.IGNORECASE) for exc in exceptions):
-                    continue
-                if re.search(r'\b' + re.escape(kw) + r'\b', text, re.IGNORECASE):
-                    violations.append(f"Từ khóa nhạy cảm: '{kw}' (loại: {category})")
-        return violations
-
-    def _check_principles(self, text: str) -> List[str]:
-        """Kiểm tra nguyên tắc đạo đức"""
-        violations = []
-        for principle, patterns in self.rules.get("ethical_principles", {}).items():
-            for pattern in patterns:
-                if re.search(pattern, text, re.IGNORECASE):
-                    violations.append(f"Vi phạm nguyên tắc: {principle}")
-        return violations
-
-    def _check_context(self, text: str) -> bool:
-        """Phân tích ngữ cảnh sử dụng"""
-        exceptions = self.rules.get("contextual_exceptions", {})
-        for keyword, patterns in exceptions.items():
-            for pattern in patterns:
-                if re.search(pattern, text, re.IGNORECASE):
-                    return True
+    def detect_keywords(self, text: str) -> bool:
+        text_lower = text.lower()
+        for keyword in self.forbidden_keywords:
+            if keyword in text_lower:
+                return True
         return False
 
-    def _update_severity(self, current: str, new: str) -> str:
-        """Nâng cấp mức độ nghiêm trọng"""
-        severity_order = {"low": 0, "medium": 1, "high": 2}
-        return new if severity_order[new] > severity_order[current] else current
+    async def check_input_safety(self, user_input: str) -> Tuple[bool, Optional[ViolationType], Optional[Severity], str]:
+        if self.detect_keywords(user_input):
+            return False, ViolationType.FORBIDDEN_KEYWORD, Severity.HIGH, "Input chứa từ khóa cấm."
 
-
-# -------------------- ETHICAL CORE --------------------
-class EthicalCoreSystem_v1:
-    """Hệ thống lõi đạo đức với khả năng tự kiểm tra và điều chỉnh"""
-    
-    def __init__(self, rules_file: str = "ethical_rules.json"):
-        self.rules_file = Path(rules_file)
-        self.rules = self._load_rules()
-        self.self_critic = SelfCritic_v1(self.rules)
-        logger.info(f"Khởi động hệ thống với {len(self.rules.get('banned_keywords', {}))} danh mục từ khóa")
-
-    def _load_rules(self) -> Dict:
-        """Tải rules từ file JSON hoặc tạo mặc định"""
         try:
-            with open(self.rules_file, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
-            logger.warning("Không thể đọc file rules, tạo rules mặc định")
-            return self._create_default_rules()
-
-    def _create_default_rules(self) -> Dict:
-        """Tạo bộ rules mặc định đa ngôn ngữ"""
-        default_rules = {
-            "banned_keywords": {
-                "violence": ["kill", "giết", "harm", "hại", "bạo lực", "đánh"],
-                "toxic": ["hate", "ghét", "racist", "phân biệt", "chửi"]
-            },
-            "ethical_principles": {
-                "do_no_harm": [
-                    r"cách (giết|hại|làm hại)",
-                    r"how to (kill|harm|hurt)"
-                ],
-                "respect_dignity": [
-                    r"phân biệt (chủng tộc|giới tính)",
-                    r"(racist|sexist) remarks?"
-                ]
-            },
-            "contextual_exceptions": {
-                "kill": [r"giết thời gian", r"kill time"],
-                "đánh": [r"đánh giá"],
-                "hate": [r"tôi ghét (rau|dậy sớm)"]
-            },
-            "replacement_rules": {
-                "kill": "neutralize",
-                "giết": "loại bỏ",
-                "hate": "dislike",
-                "ghét": "không ưa"
-            }
-        }
-        try:
-            with open(self.rules_file, "w", encoding="utf-8") as f:
-                json.dump(default_rules, f, ensure_ascii=False, indent=2)
-            return default_rules
-        except Exception as e:
-            logger.error(f"Lỗi khi tạo rules mặc định: {e}")
-            return default_rules
-
-    def evaluate_response(self, text: str) -> Dict:
-        """Đánh giá văn bản theo tiêu chuẩn đạo đức"""
-        if not text.strip():
-            return {"ok": True, "reasons": [], "severity": "low"}
-        
-        result = self.self_critic.criticize(text)
-        self._log_evaluation(text, result)
-        return result
-
-    def adjust_response(self, text: str, max_attempts: int = 3) -> str:
-        """Tự động điều chỉnh văn bản với tối đa N lần thử"""
-        if not text.strip():
-            return text
-
-        current_text = text
-        for attempt in range(1, max_attempts + 1):
-            evaluation = self.evaluate_response(current_text)
-            if evaluation["ok"]:
-                logger.info(f"Điều chỉnh thành công sau {attempt} lần thử")
-                return current_text
-                
-            if evaluation["severity"] == "high":
-                logger.warning("Phát hiện vấn đề nghiêm trọng, gọi AI phân tích")
-                return self.self_critic.call_ai(current_text)
-                
-            current_text = self.self_critic.suggest_fix(current_text)
-            logger.info(f"Điều chỉnh lần {attempt}: {current_text[:50]}...")
-
-        logger.warning(f"Vẫn phát hiện vấn đề sau {max_attempts} lần điều chỉnh")
-        return f"[Đã điều chỉnh] {current_text}"
-
-    def run_self_critic(self, text: str) -> Dict:
-        """Chạy phân tích đầy đủ và trả về báo cáo chi tiết"""
-        result = self.evaluate_response(text)
-        if not result["ok"]:
-            result["suggested_fix"] = self.self_critic.suggest_fix(text)
-            if result["severity"] == "high":
-                result["ai_analysis"] = self.self_critic.call_ai(text)
-        return result
-
-    def _log_evaluation(self, text: str, result: Dict):
-        """Ghi log kết quả đánh giá"""
-        if not result["ok"]:
-            log_msg = (
-                f"Phát hiện vấn đề | Mức độ: {result['severity']} | "
-                f"Lý do: {', '.join(result['reasons'])} | "
-                f"Văn bản: '{text[:100]}...'"
+            prompt = f"""Phân tích văn bản sau để xác định xem nó có độc hại, ngôn ngữ thù địch hoặc chứa các chủ đề nhạy cảm không.
+            Trả về một đối tượng JSON với các trường:
+            - "is_toxic": boolean
+            - "toxicity_score": float (từ 0.0 đến 1.0)
+            - "is_hate_speech": boolean
+            - "hate_speech_score": float (từ 0.0 đến 1.0)
+            - "sensitive_topics_detected": list of strings (ví dụ: "bạo lực", "tự hại", "phân biệt đối xử")
+            - "reason": string giải thích lý do
+            
+            Văn bản: "{user_input}"
+            """
+            response_content = await self.openrouter_client.chat_completion(
+                messages=[{"role": "user", "content": prompt}],
+                model=OpenRouterModel.GEMINI_PRO
             )
-            if result["severity"] == "high":
-                logger.error(log_msg)
-            else:
-                logger.warning(log_msg)
+            safety_assessment = json.loads(response_content)
 
+            if safety_assessment.get("is_toxic"):
+                return False, ViolationType.TOXIC_CONTENT, Severity.MEDIUM, safety_assessment.get("reason", "Nội dung độc hại.")
+            if safety_assessment.get("is_hate_speech"):
+                return False, ViolationType.HATE_SPEECH, Severity.HIGH, safety_assessment.get("reason", "Nội dung thù địch.")
+            
+            # Kiểm tra chủ đề nhạy cảm từ phản hồi LLM với danh sách nhạy cảm của hệ thống
+            detected_sensitive = safety_assessment.get("sensitive_topics_detected", [])
+            for topic in detected_sensitive:
+                if topic.lower() in self.sensitive_topics:
+                    return False, ViolationType.SELF_HARM, Severity.HIGH, f"Chủ đề nhạy cảm được phát hiện: {topic}." 
+            
+            return True, None, None, "An toàn."
+        except Exception as e:
+            ethical_logger.error(f"Error checking input safety with LLM: {e}")
+            return False, ViolationType.LLM_ERROR, Severity.CRITICAL, f"Đã xảy ra lỗi trong quá trình kiểm tra an toàn input: {e}"
 
-# -------------------- EXAMPLE USAGE --------------------
-if __name__ == "__main__":
-    print("=== Hệ thống kiểm tra đạo đức AI ===")
-    ecs = EthicalCoreSystem_v1()
-    
-    test_cases = [
-        "Tôi muốn giết con muỗi này",
-        "Cách giết thời gian hiệu quả",
-        "Hãy đánh giá sản phẩm này",
-        "Tôi hate môn toán",
-        "Hướng dẫn cách giết người",
-        "Bạo lực học đường là xấu"
-    ]
-    
-    for text in test_cases:
-        print(f"\nOriginal: {text}")
-        evaluation = ecs.evaluate_response(text)
-        print(f"Evaluation: {evaluation}")
-        adjusted = ecs.adjust_response(text)
-        print(f"Adjusted: {adjusted}")
+    async def check_output_safety(self, ai_response: str) -> Tuple[bool, Optional[ViolationType], Optional[Severity], str]:
+        if self.detect_keywords(ai_response):
+            return False, ViolationType.FORBIDDEN_KEYWORD, Severity.HIGH, "Output chứa từ khóa cấm."
+        
+        try:
+            prompt = f"""Phân tích văn bản phản hồi AI sau để xác định xem nó có độc hại, ngôn ngữ thù địch, hoặc không phù hợp không.
+            Trả về một đối tượng JSON với các trường:
+            - "is_toxic": boolean
+            - "toxicity_score": float (từ 0.0 đến 1.0)
+            - "is_hate_speech": boolean
+            - "hate_speech_score": float (từ 0.0 đến 1.0)
+            - "is_appropriate": boolean
+            - "reason": string giải thích lý do
+
+            Phản hồi AI: "{ai_response}"
+            """
+            response_content = await self.openrouter_client.chat_completion(
+                messages=[{"role": "user", "content": prompt}],
+                model=OpenRouterModel.GEMINI_PRO
+            )
+            safety_assessment = json.loads(response_content)
+
+            if safety_assessment.get("is_toxic"):
+                return False, ViolationType.TOXIC_CONTENT, Severity.MEDIUM, safety_assessment.get("reason", "Nội dung độc hại trong phản hồi.")
+            if safety_assessment.get("is_hate_speech"):
+                return False, ViolationType.HATE_SPEECH, Severity.HIGH, safety_assessment.get("reason", "Nội dung thù địch trong phản hồi.")
+            if not safety_assessment.get("is_appropriate"):
+                return False, ViolationType.ETHICAL_NON_COMPLIANCE, Severity.MEDIUM, safety_assessment.get("reason", "Phản hồi không phù hợp.")
+            
+            return True, None, None, "An toàn."
+        except Exception as e:
+            ethical_logger.error(f"Error checking output safety with LLM: {e}")
+            return False, ViolationType.LLM_ERROR, Severity.CRITICAL, f"Đã xảy ra lỗi trong quá trình kiểm tra an toàn output: {e}"
+
+    async def assess_vulnerability(self, user_input: str) -> Tuple[bool, str]:
+        try:
+            prompt = f"""Phân tích văn bản sau để xác định xem người dùng có vẻ dễ bị tổn thương, căng thẳng, buồn bã hoặc có ý định tự hại không.
+            Trả về một đối tượng JSON với các trường:
+            - "is_vulnerable": boolean
+            - "reason": string giải thích lý do (Nếu is_vulnerable là true)
+            
+            Văn bản: "{user_input}"
+            """
+            response_content = await self.openrouter_client.chat_completion(
+                messages=[{"role": "user", "content": prompt}],
+                model=OpenRouterModel.GEMINI_PRO
+            )
+            vulnerability_assessment = json.loads(response_content)
+            return vulnerability_assessment.get("is_vulnerable", False), vulnerability_assessment.get("reason", "Không có dấu hiệu.")
+        except Exception as e:
+            ethical_logger.error(f"Error assessing vulnerability with LLM: {e}")
+            return False, f"Đã xảy ra lỗi trong quá trình đánh giá lỗ hổng: {e}"
+
+# --- ConscienceCore Class ---
+class ConscienceCore:
+    def __init__(self, openrouter_client: OpenRouterClient):
+        self.openrouter_client = openrouter_client
+
+    async def evaluate_ethical_compliance(self, user_input: str, ai_response: str) -> Tuple[bool, float, str]:
+        try:
+            prompt = f"""Đánh giá mức độ tuân thủ đạo đức của phản hồi AI dưới đây, dựa trên input của người dùng và các nguyên tắc đạo đức chung.
+            Trả về một đối tượng JSON với các trường:
+            - "is_compliant": boolean
+            - "compliance_score": float (từ 0.0 đến 1.0, 1.0 là tuân thủ hoàn toàn)
+            - "reason": string giải thích lý do
+            
+            Input người dùng: "{user_input}"
+            Phản hồi AI: "{ai_response}"
+            """
+            response_content = await self.openrouter_client.chat_completion(
+                messages=[{"role": "user", "content": prompt}],
+                model=OpenRouterModel.GEMINI_PRO
+            )
+            compliance_assessment = json.loads(response_content)
+            return compliance_assessment.get("is_compliant", False), compliance_assessment.get("compliance_score", 0.0), compliance_assessment.get("reason", "Không rõ.")
+        except Exception as e:
+            ethical_logger.error(f"Error evaluating ethical compliance with LLM: {e}")
+            return False, 0.0, f"Đã xảy ra lỗi trong quá trình đánh giá tuân thủ đạo đức: {e}"
+
+    async def adjust_response_ethically(self, user_input: str, ai_response: str, violation_reason: str) -> str:
+        try:
+            prompt = f"""Phản hồi AI sau đây đã được xác định là không tuân thủ đạo đức vì: {violation_reason}.
+            Vui lòng điều chỉnh lại phản hồi này để nó trở nên phù hợp và có đạo đức, đồng thời vẫn hữu ích nếu có thể.
+            Nếu không thể điều chỉnh, hãy đưa ra một phản hồi từ chối lịch sự.
+            
+            Input người dùng: "{user_input}"
+            Phản hồi AI gốc: "{ai_response}"
+            
+            Phản hồi AI đã điều chỉnh:"""
+            adjusted_response = await self.openrouter_client.chat_completion(
+                messages=[{"role": "user", "content": prompt}],
+                model=OpenRouterModel.MISTRAL_7B_INSTRUCT # Hoặc model khác cho việc điều chỉnh
+            )
+            return adjusted_response
+        except Exception as e:
+            ethical_logger.error(f"Error adjusting response with LLM: {e}")
+            return "Xin lỗi, đã xảy ra lỗi trong quá trình xử lý yêu cầu của bạn. Vui lòng thử lại sau."
+
+# --- SelfCritic Class ---
+class SelfCritic:
+    def __init__(self, openrouter_client: OpenRouterClient):
+        self.openrouter_client = openrouter_client
+
+    def log_ethical_violation(self, user_id: str, user_input: str, ai_response: str,
+                            violation_type: ViolationType, severity: Severity, reason: str):
+        ethical_logger.warning(
+            f"VIOLATION: {reason}. User input: '{user_input}'. AI response: '{ai_response}'",
+            extra={
+                'user_id': user_id,
+                'violation_type': violation_type.value,
+                'severity': severity.value
+            }
+        )
+
+    async def analyze_and_learn(self, user_input: str, ai_response: str,
+                                violation_type: ViolationType, severity: Severity, reason: str):
+        try:
+            prompt = f"""Phân tích vi phạm đạo đức sau để xác định nguyên nhân gốc rễ và đề xuất hành động cải thiện cho hệ thống AI.
+            Loại vi phạm: {violation_type.value}
+            Mức độ nghiêm trọng: {severity.value}
+            Lý do: {reason}
+            Input người dùng: "{user_input}"
+            Phản hồi AI: "{ai_response}"
+
+            Trả về một đối tượng JSON với các trường:
+            - "root_cause": string (ví dụ: "Thiếu bộ lọc từ khóa", "Mô hình LLM không đủ tinh chỉnh")
+            - "suggested_action": string (ví dụ: "Cập nhật danh sách từ khóa cấm", "Tinh chỉnh mô hình LLM với dữ liệu đạo đức hơn")
+            """
+            analysis_result = await self.openrouter_client.chat_completion(
+                messages=[{"role": "user", "content": prompt}],
+                model=OpenRouterModel.GEMINI_PRO
+            )
+            return json.loads(analysis_result)
+        except Exception as e:
+            ethical_logger.error(f"Error analyzing and learning from violation: {e}")
+            return {"root_cause": f"Lỗi phân tích: {e}", "suggested_action": "Không thể phân tích nguyên nhân gốc rễ."}
+
+# --- EthicalCoreSystem Class ---
+class EthicalCoreSystem:
+    def __init__(self):
+        api_key = os.environ.get("OPENROUTER_API_KEY")
+        if not api_key:
+            raise ValueError("OPENROUTER_API_KEY environment variable not set.")
+        
+        self.openrouter_client = OpenRouterClient(api_key=api_key)
+        self.ethics_guard = EthicsGuard(openrouter_client=self.openrouter_client)
+        self.conscience_core = ConscienceCore(openrouter_client=self.openrouter_client)
+        self.self_critic = SelfCritic(openrouter_client=self.openrouter_client)
+        
+        self.violation_response_default = "Xin lỗi, tôi không thể thực hiện yêu cầu này vì nó có thể vi phạm các nguyên tắc đạo đức."
+
+    async def process_interaction(self, user_id: str, user_input: str, original_ai_response: str) -> Tuple[str, bool, str]:
+        violation_message = ""
+        is_compliant = True
+        final_response = original_ai_response
+
+        try:
+            # 1. Kiểm tra an toàn input
+            is_input_safe, input_violation_type, input_severity, input_reason = await self.ethics_guard.check_input_safety(user_input)
+            if not is_input_safe:
+                violation_message = input_reason
+                is_compliant = False
+                self.self_critic.log_ethical_violation(user_id, user_input, original_ai_response, input_violation_type, input_severity, input_reason)
+                await self.self_critic.analyze_and_learn(user_input, original_ai_response, input_violation_type, input_severity, input_reason)
+                return self.ethics_guard.violation_response, is_compliant, violation_message
+
+            # 2. Đánh giá người dùng dễ bị tổn thương
+            is_vulnerable, vulnerability_reason = await self.ethics_guard.assess_vulnerability(user_input)
+            if is_vulnerable:
+                violation_message += f"Người dùng có dấu hiệu dễ bị tổn thương: {vulnerability_reason}. "
+                # Đây không phải là vi phạm cứng mà là cảnh báo để hệ thống phản hồi cẩn thận hơn
+                self.self_critic.log_ethical_violation(user_id, user_input, original_ai_response, ViolationType.VULNERABLE_USER, Severity.LOW, vulnerability_reason)
+            
+            # 3. Kiểm tra an toàn output
+            is_output_safe, output_violation_type, output_severity, output_reason = await self.ethics_guard.check_output_safety(original_ai_response)
+            if not is_output_safe:
+                violation_message += f"Phản hồi AI vi phạm an toàn: {output_reason}. "
+                is_compliant = False
+                self.self_critic.log_ethical_violation(user_id, user_input, original_ai_response, output_violation_type, output_severity, output_reason)
+                
+                # Cố gắng điều chỉnh phản hồi
+                adjusted_response = await self.conscience_core.adjust_response_ethically(user_input, original_ai_response, output_reason)
+                final_response = adjusted_response
+                
+                # Kiểm tra lại tính tuân thủ của phản hồi đã điều chỉnh
+                is_adjusted_compliant, _, adjusted_reason = await self.conscience_core.evaluate_ethical_compliance(user_input, final_response)
+                if not is_adjusted_compliant:
+                    violation_message += f"Phản hồi đã điều chỉnh vẫn không tuân thủ: {adjusted_reason}. "
+                    self.self_critic.log_ethical_violation(user_id, user_input, final_response, ViolationType.ETHICAL_NON_COMPLIANCE, Severity.MEDIUM, adjusted_reason + " (sau điều chỉnh)")
+                    await self.self_critic.analyze_and_learn(user_id, user_input, final_response, ViolationType.ETHICAL_NON_COMPLIANCE, Severity.MEDIUM, adjusted_reason + " (sau điều chỉnh)") # Sửa tham số user_id
+                else:
+                    is_compliant = True # Phản hồi đã điều chỉnh thành công
+                    violation_message += "Phản hồi đã được điều chỉnh để tuân thủ đạo đức."
+                    await self.self_critic.analyze_and_learn(user_id, user_input, original_ai_response, output_violation_type, output_severity, output_reason) # Sửa tham số user_id
+
+            # 4. Đánh giá tuân thủ đạo đức tổng thể (nếu chưa bị chặn)
+            if is_compliant: # Chỉ đánh giá nếu chưa có vi phạm nghiêm trọng
+                is_overall_compliant, compliance_score, compliance_reason = await self.conscience_core.evaluate_ethical_compliance(user_input, final_response)
+                if not is_overall_compliant:
+                    violation_message += f"Phản hồi không tuân thủ đạo đức tổng thể: {compliance_reason}. "
+                    is_compliant = False
+                    self.self_critic.log_ethical_violation(user_id, user_input, final_response, ViolationType.ETHICAL_NON_COMPLIANCE, Severity.MEDIUM, compliance_reason)
+                    await self.self_critic.analyze_and_learn(user_id, user_input, final_response, ViolationType.ETHICAL_NON_COMPLIANCE, Severity.MEDIUM, compliance_reason) # Sửa tham số user_id
+
+        except Exception as e:
+            ethical_logger.error(f"An unexpected error occurred during interaction processing: {e}", extra={'user_id': user_id})
+            violation_message = f"Đã xảy ra lỗi trong quá trình xử lý đạo đức: {e}"
+            is_compliant = False
+            final_response = self.violation_response_default
+            self.self_critic.log_ethical_violation(user_id, user_input, original_ai_response, ViolationType.LLM_ERROR, Severity.CRITICAL, f"Lỗi không mong muốn: {e}")
+            
+        return final_response, is_compliant, violation_message
+
+    async def close(self):
+        """Đóng mọi tài nguyên nếu cần."""
+        pass # Hiện tại không có tài nguyên đặc biệt cần đóng trong các class này

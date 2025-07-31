@@ -5,9 +5,10 @@ from modules.conversational_core_v1 import ConversationalCore
 import logging
 
 class TestPersonaEngine:
-    def __init__(self):
+    def setup_method(self):
+        # Hàm này sẽ được pytest gọi trước mỗi test case
         self.call_count = 0
-        
+
     def generate_response(self, user_input, history):
         self.call_count += 1
         if "error" in user_input:

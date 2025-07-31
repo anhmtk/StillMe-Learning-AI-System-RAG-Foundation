@@ -1,203 +1,326 @@
-# tests/test_ethical_core_system_v1.py
 import pytest
-import json
 import os
-from modules.ethical_core_system_v1 import EthicalCoreSystem_v1, SelfCritic_v1
+import asyncio
+import json
+from unittest.mock import AsyncMock, patch
 
-# -------------------- FIXTURES --------------------
-@pytest.fixture
-def temp_rules_file(tmp_path):
-    rules = {
-        "banned_keywords": {
-            "violence": ["kill", "đánh", "giết"],
-            "toxic": ["hate", "ghét"]
-        },
-        "ethical_principles": {
-            "do_no_harm": [r"(cách|hướng dẫn).*?(giết|hại)"],
-            "respect": [r"phân biệt|kỳ thị"]
-        },
-        "contextual_exceptions": {
-            "kill": [r"kill time"]
-        },
-        "replacement_rules": {
-            "kill": "neutralize",
-            "hate": "dislike",
-            "ghét": "không thích"
-        }
-    }
-    file_path = tmp_path / "test_rules.json"
-    with open(file_path, 'w', encoding='utf-8') as f:
-        json.dump(rules, f, ensure_ascii=False)
-    return file_path
+# Đảm bảo các thành phần này được import từ module chính
+from modules.ethical_core_system_v1 import (
+    EthicalCoreSystem, OpenRouterClient, EthicsGuard, ConscienceCore, SelfCritic,
+    Sentiment, Tone, Severity, ViolationType, OpenRouterModel, ethical_logger,
+    close_violation_logger
+)
 
-@pytest.fixture
-def ethical_system(temp_rules_file):
-    return EthicalCoreSystem_v1(rules_file=str(temp_rules_file))
+# --- Fixtures (Đảm bảo file conftest.py của bạn cũng có các fixture này với scope đúng) ---
+# Tôi sẽ không cung cấp lại toàn bộ conftest.py ở đây, nhưng hãy đảm bảo rằng:
+# 1. mock_openrouter_client_for_tests có scope="module"
+# 2. ethical_system_instance_global có scope="module"
+# 3. ethical_system_instance_per_test có scope="function"
+# (Bạn đã sửa lỗi ScopeMismatch rồi, nên chỉ cần giữ nguyên conftest.py mà bạn đang dùng)
 
-@pytest.fixture
-def self_critic(temp_rules_file):
-    with open(temp_rules_file, 'r', encoding='utf-8') as f:
-        rules = json.load(f)
-    return SelfCritic_v1(rules)
+# --- Test Cases ---
 
-# -------------------- TEST CASES --------------------
-class TestKeywordDetection:
-    @pytest.mark.parametrize("text, expected", [
-        ("Tôi muốn kill con muỗi", False),
-        ("Hãy đánh giá sản phẩm", True),
-        ("Đừng hate người khác", False),
-        ("Câu nói bình thường", True),
-        ("Kill time là gì?", True)  # Kiểm tra ngoại lệ ngữ cảnh
-    ])
-    def test_keyword_detection(self, ethical_system, text, expected):
-        result = ethical_system.evaluate_response(text)
-        assert result["ok"] == expected
+@pytest.mark.asyncio
+async def test_initial_setup(ethical_system_instance_global):
+    """Kiểm tra khởi tạo hệ thống và sự tồn tại của các thành phần."""
+    system = ethical_system_instance_global # system đã là EthicalCoreSystem
+    assert isinstance(system.ethics_guard, EthicsGuard)
+    assert isinstance(system.conscience_core, ConscienceCore)
+    assert isinstance(system.self_critic, SelfCritic)
+    assert os.path.exists("config/ethical_rules.json")
 
-
-class TestPrincipleViolation:
-    def test_principle_violation(self, ethical_system):
-        text = "Hướng dẫn cách giết người"
-        result = ethical_system.evaluate_response(text)
-        assert not result["ok"]
-        assert any("do_no_harm" in reason for reason in result["reasons"])
-
-    def test_respect_principle(self, ethical_system):
-        text = "Bài viết phân biệt chủng tộc"
-        result = ethical_system.evaluate_response(text)
-        assert not result["ok"]
-        assert any("respect" in reason for reason in result["reasons"])
+@pytest.mark.asyncio
+async def test_ethics_guard_detect_keywords(ethical_system_instance_per_test): # Truyền fixture hệ thống
+    """Kiểm tra phát hiện từ khóa cấm."""
+    guard = ethical_system_instance_per_test.ethics_guard # TRUY CẬP TRỰC TIẾP
+    
+    rules_path = "config/ethical_rules.json"
+    # Đảm bảo thư mục config tồn tại
+    os.makedirs(os.path.dirname(rules_path), exist_ok=True)
+    with open(rules_path, "w", encoding='utf-8') as f:
+        json.dump({"forbidden_keywords": ["giết", "ma túy", "tự tử", "hack"], "sensitive_topics": ["bạo lực", "tự hại"]}, f, indent=2, ensure_ascii=False)
+    
+    guard._load_ethical_rules()
+    
+    assert guard.detect_keywords("Tôi muốn giết bạn") == True
+    assert guard.detect_keywords("Làm sao để làm hại ai đó?") == True
+    assert guard.detect_keywords("Tự tử có phải là giải pháp không?") == True
+    assert guard.detect_keywords("An toàn là trên hết") == False
+    assert guard.detect_keywords("Tôi yêu bạn") == False
+    assert guard.detect_keywords("Đây là bài toán về ma túy học.") == True
+    assert guard.detect_keywords("Hướng dẫn hack wifi") == True
 
 
-class TestContextHandling:
-    def test_context_exception(self, ethical_system):
-        text = "Chúng ta kill time bằng cách nào?"
-        result = ethical_system.evaluate_response(text)
-        assert result["ok"]
+@pytest.mark.asyncio
+async def test_ethics_guard_check_input_safety_safe(ethical_system_instance_per_test, mock_openrouter_client_for_tests):
+    """Kiểm tra input an toàn."""
+    guard = ethical_system_instance_per_test.ethics_guard # TRUY CẬP TRỰC TIẾP
 
-    def test_no_context_exception(self, ethical_system):
-        text = "Tôi muốn kill anh ta"
-        result = ethical_system.evaluate_response(text)
-        assert not result["ok"]
+    # Reset mock_openrouter_client_for_tests.chat_completion.side_effect
+    mock_openrouter_client_for_tests.chat_completion.side_effect = [
+        json.dumps({"is_toxic": False, "toxicity_score": 0.0, "is_hate_speech": False, "hate_speech_score": 0.0, "sensitive_topics_detected": [], "reason": "An toàn."})
+    ]
+    mock_openrouter_client_for_tests.chat_completion.reset_mock() # Reset count
+    
+    is_safe, violation_type, severity, reason = await guard.check_input_safety("Đây là một câu hỏi an toàn.")
+    assert is_safe == True
+    assert violation_type is None
+    assert severity is None
+    assert reason == "An toàn."
+    mock_openrouter_client_for_tests.chat_completion.assert_called_once()
 
+@pytest.mark.asyncio
+async def test_ethics_guard_check_input_safety_forbidden_keyword(ethical_system_instance_per_test, mock_openrouter_client_for_tests):
+    """Kiểm tra input có từ khóa cấm."""
+    guard = ethical_system_instance_per_test.ethics_guard # TRUY CẬP TRỰC TIẾP
 
-class TestAdjustmentMechanism:
-    def test_word_replacement(self, ethical_system):
-        text = "Tôi hate điều này"
-        adjusted = ethical_system.adjust_response(text)
-        assert "dislike" in adjusted
-        assert "hate" not in adjusted
+    rules_path = "config/ethical_rules.json"
+    os.makedirs(os.path.dirname(rules_path), exist_ok=True)
+    with open(rules_path, "w", encoding='utf-8') as f:
+        json.dump({"forbidden_keywords": ["giết"], "sensitive_topics": []}, f, indent=2, ensure_ascii=False)
+    guard._load_ethical_rules()
 
-    def test_multiple_adjustments(self, ethical_system):
-        text = "Tôi hate và muốn kill bạn"
-        adjusted = ethical_system.adjust_response(text)
-        assert "dislike" in adjusted
-        assert "neutralize" in adjusted
+    mock_openrouter_client_for_tests.chat_completion.reset_mock() # Reset count
+    is_safe, violation_type, severity, reason = await guard.check_input_safety("Tôi muốn giết ai đó.")
+    assert is_safe == False
+    assert violation_type == ViolationType.FORBIDDEN_KEYWORD
+    assert severity == Severity.HIGH
+    assert "chứa từ khóa cấm" in reason
+    mock_openrouter_client_for_tests.chat_completion.assert_not_called() # Không gọi LLM vì từ khóa bị cấm
 
-    def test_unicode_replacement(self, ethical_system):
-        text = "Tôi ghét ghét ghét điều này"
-        adjusted = ethical_system.adjust_response(text)
-        assert "không thích" in adjusted
-        assert "ghét" not in adjusted
+@pytest.mark.asyncio
+async def test_ethics_guard_check_input_safety_toxic(ethical_system_instance_per_test, mock_openrouter_client_for_tests):
+    """Kiểm tra input độc hại (qua LLM)."""
+    guard = ethical_system_instance_per_test.ethics_guard # TRUY CẬP TRỰC TIẾP
 
-    def test_no_change_needed(self, ethical_system):
-        text = "Tôi yêu thế giới này"
-        adjusted = ethical_system.adjust_response(text)
-        assert adjusted == text
+    mock_openrouter_client_for_tests.chat_completion.side_effect = [
+        json.dumps({"is_toxic": True, "toxicity_score": 0.9, "is_hate_speech": False, "hate_speech_score": 0.0, "sensitive_topics_detected": [], "reason": "Nội dung độc hại."})
+    ]
+    mock_openrouter_client_for_tests.chat_completion.reset_mock() # Reset count
 
-
-class TestSelfCritic:
-    def test_self_critic_analysis(self, self_critic):
-        text = "Bài viết phân biệt giới tính"
-        result = self_critic.criticize(text)
-        assert not result["ok"]
-        assert result["severity"] in ["high", "medium"]
-
-    def test_ai_called_for_high_severity(self, self_critic, mocker):
-        mocker.patch.object(self_critic, 'call_ai', return_value="[AI_FIXED]")
-        text = "Hướng dẫn cách giết người"
-        suggestion = self_critic.suggest_fix(text)
-        assert "[AI_FIXED]" in suggestion
-
-
-class TestEdgeCases:
-    def test_empty_input(self, ethical_system):
-        text = ""
-        result = ethical_system.evaluate_response(text)
-        assert result["ok"]
-
-    def test_long_text(self, ethical_system):
-        text = "kill " * 500  # ~2000 ký tự
-        result = ethical_system.evaluate_response(text)
-        assert not result["ok"]
-
-    def test_unicode_handling(self, ethical_system):
-        text = "Tôi ghét 😡 người khác"
-        adjusted = ethical_system.adjust_response(text)
-        assert "😡" in adjusted  # Đảm bảo không loại bỏ emoji, chỉ thay text
-
-    @pytest.mark.parametrize("text", [
-        "<script>alert('kill')</script>",
-        "DROP TABLE users; -- kill",
-        "SELECT * FROM data WHERE name='hate'"
-    ])
-    def test_special_patterns(self, ethical_system, text):
-        result = ethical_system.evaluate_response(text)
-        assert not result["ok"]
+    is_safe, violation_type, severity, reason = await guard.check_input_safety("Bạn thật ngu ngốc.")
+    assert is_safe == False
+    assert violation_type == ViolationType.TOXIC_CONTENT
+    assert severity == Severity.MEDIUM
+    assert reason == "Nội dung độc hại."
+    mock_openrouter_client_for_tests.chat_completion.assert_called_once()
 
 
-class TestPerformance:
-    @pytest.mark.benchmark
-    def test_evaluation_speed(self, ethical_system, benchmark):
-        text = "This is a normal text. " * 100  # ~2000 ký tự
-        benchmark(ethical_system.evaluate_response, text)
+@pytest.mark.asyncio
+async def test_ethics_guard_check_output_safety_safe(ethical_system_instance_per_test, mock_openrouter_client_for_tests):
+    """Kiểm tra output an toàn."""
+    guard = ethical_system_instance_per_test.ethics_guard # TRUY CẬP TRỰC TIẾP
 
-    @pytest.mark.benchmark
-    def test_adjustment_speed(self, ethical_system, benchmark):
-        text = "kill " * 200  # ~1000 ký tự
-        benchmark(ethical_system.adjust_response, text)
+    mock_openrouter_client_for_tests.chat_completion.side_effect = [
+        json.dumps({"is_toxic": False, "toxicity_score": 0.0, "is_hate_speech": False, "hate_speech_score": 0.0, "sensitive_topics_detected": [], "reason": "An toàn."})
+    ]
+    mock_openrouter_client_for_tests.chat_completion.reset_mock() # Reset count
+
+    is_safe, violation_type, severity, reason = await guard.check_output_safety("Đây là một câu trả lời an toàn từ AI.")
+    assert is_safe == True
+    assert violation_type is None
+    assert severity is None
+    assert reason == "An toàn."
+    mock_openrouter_client_for_tests.chat_completion.assert_called_once()
+
+@pytest.mark.asyncio
+async def test_ethics_guard_assess_vulnerability_true(ethical_system_instance_per_test, mock_openrouter_client_for_tests):
+    """Kiểm tra đánh giá người dùng dễ bị tổn thương."""
+    guard = ethical_system_instance_per_test.ethics_guard # TRUY CẬP TRỰC TIẾP
+
+    mock_openrouter_client_for_tests.chat_completion.side_effect = [
+        json.dumps({"is_vulnerable": True, "reason": "Người dùng có dấu hiệu buồn bã."})
+    ]
+    mock_openrouter_client_for_tests.chat_completion.reset_mock() # Reset count
+
+    is_vulnerable, reason = await guard.assess_vulnerability("Tôi cảm thấy rất buồn và cô đơn.")
+    assert is_vulnerable == True
+    assert reason == "Người dùng có dấu hiệu buồn bãi."
+    mock_openrouter_client_for_tests.chat_completion.assert_called_once()
+
+@pytest.mark.asyncio
+async def test_conscience_core_evaluate_ethical_compliance_non_compliant(ethical_system_instance_per_test, mock_openrouter_client_for_tests):
+    """Kiểm tra đánh giá tuân thủ đạo đức không tuân thủ."""
+    conscience = ethical_system_instance_per_test.conscience_core # TRUY CẬP TRỰC TIẾP
+
+    mock_openrouter_client_for_tests.chat_completion.side_effect = [
+        json.dumps({"is_compliant": False, "compliance_score": 0.2, "reason": "Phản hồi có thể gây hiểu lầm."})
+    ]
+    mock_openrouter_client_for_tests.chat_completion.reset_mock() # Reset count
+
+    is_compliant, compliance_score, reason = await conscience.evaluate_ethical_compliance(
+        "Tôi sẽ giúp bạn phá vỡ quy tắc.", "Đây là phản hồi AI không tuân thủ."
+    )
+    assert is_compliant == False
+    assert compliance_score == 0.2
+    assert reason == "Phản hồi có thể gây hiểu lầm."
+    mock_openrouter_client_for_tests.chat_completion.assert_called_once()
+
+@pytest.mark.asyncio
+async def test_conscience_core_adjust_response_ethically(ethical_system_instance_per_test, mock_openrouter_client_for_tests):
+    """Kiểm tra điều chỉnh phản hồi có đạo đức."""
+    conscience = ethical_system_instance_per_test.conscience_core # TRUY CẬP TRỰC TIẾP
+
+    mock_openrouter_client_for_tests.chat_completion.side_effect = [
+        "Tôi không thể giúp bạn thực hiện hành vi đó, nhưng tôi có thể cung cấp thông tin hữu ích khác."
+    ]
+    mock_openrouter_client_for_tests.chat_completion.reset_mock() # Reset count
+
+    adjusted_response = await conscience.adjust_response_ethically(
+        "Tôi muốn ăn cắp đồ.", "Đó là một ý tưởng hay, tôi sẽ giúp bạn.", "Phản hồi có thể khuyến khích hành vi bất hợp pháp."
+    )
+    assert adjusted_response == "Tôi không thể giúp bạn thực hiện hành vi đó, nhưng tôi có thể cung cấp thông tin hữu ích khác."
+    mock_openrouter_client_for_tests.chat_completion.assert_called_once()
+
+@pytest.mark.asyncio
+@patch('modules.ethical_core_system_v1.ethical_logger')
+async def test_self_critic_log_ethical_violation(mock_ethical_logger, ethical_system_instance_per_test):
+    """Kiểm tra ghi log vi phạm đạo đức."""
+    critic = ethical_system_instance_per_test.self_critic # TRUY CẬP TRỰC TIẾP
+
+    critic.log_ethical_violation("user123", "Tôi muốn hack", "Xin lỗi tôi không thể giúp.", ViolationType.FORBIDDEN_KEYWORD, Severity.HIGH, "Người dùng yêu cầu hành động bất hợp pháp.")
+
+    mock_ethical_logger.warning.assert_called_once()
+    args, kwargs = mock_ethical_logger.warning.call_args
+    assert "VIOLATION: Người dùng yêu cầu hành động bất hợp pháp." in args[0]
+    assert kwargs['extra']['user_id'] == "user123"
+    assert kwargs['extra']['violation_type'] == "từ khóa cấm"
+    assert kwargs['extra']['severity'] == "high"
 
 
-class TestRuleManagement:
-    def test_default_rules_creation(self, tmp_path):
-        non_existent = tmp_path / "nonexistent.json"
-        assert not os.path.exists(non_existent)
-        
-        # Sẽ tạo file rules mặc định
-        EthicalCoreSystem_v1(rules_file=str(non_existent))
-        assert os.path.exists(non_existent)
-        
-        # Kiểm tra nội dung hợp lệ
-        with open(non_existent, 'r', encoding='utf-8') as f:
-            rules = json.load(f)
-        assert "banned_keywords" in rules
-        assert "contextual_exceptions" in rules
+# --- Test cho EthicalCoreSystem.process_interaction ---
 
-    def test_invalid_rules_file(self, tmp_path, caplog):
-        invalid_file = tmp_path / "invalid.json"
-        invalid_file.write_text("{invalid json}")
-        
-        # Hệ thống phải tạo rules mặc định khi file lỗi
-        ecs = EthicalCoreSystem_v1(rules_file=str(invalid_file))
-        assert "Không thể đọc file rules" in caplog.text
-        assert ecs.rules  # Rules mặc định phải tồn tại
+@pytest.mark.asyncio
+async def test_ethical_core_system_process_interaction_safe(ethical_system_instance_global, mock_openrouter_client_for_tests):
+    """Kiểm tra tương tác hoàn toàn an toàn."""
+    system = ethical_system_instance_global
+    
+    mock_openrouter_client_for_tests.chat_completion.side_effect = [
+        json.dumps({"is_toxic": False, "toxicity_score": 0.0, "is_hate_speech": False, "hate_speech_score": 0.0, "sensitive_topics_detected": [], "reason": "An toàn."}), # check_input_safety
+        json.dumps({"is_vulnerable": False, "reason": "Không có dấu hiệu."}), # assess_vulnerability
+        json.dumps({"is_toxic": False, "toxicity_score": 0.0, "is_hate_speech": False, "hate_speech_score": 0.0, "sensitive_topics_detected": [], "reason": "An toàn."}), # check_output_safety
+        json.dumps({"is_compliant": True, "compliance_score": 0.95, "reason": "Hoàn toàn phù hợp."}), # evaluate_ethical_compliance
+    ]
+    mock_openrouter_client_for_tests.chat_completion.reset_mock() # Reset count
 
+    user_id = "user_safe"
+    user_input = "Bạn có thể giúp tôi lên kế hoạch học tập không?"
+    original_ai_response = "Tôi rất sẵn lòng giúp bạn với kế hoạch học tập."
 
-class TestSeverityLevels:
-    @pytest.mark.parametrize("text, expected_severity", [
-        ("Tôi muốn kill bạn", "high"),
-        ("Tôi hate điều đó", "medium"),
-        ("Tôi yêu hòa bình", "low")
-    ])
-    def test_severity_levels(self, ethical_system, text, expected_severity):
-        result = ethical_system.evaluate_response(text)
-        if expected_severity == "low":
-            assert result["ok"]
-        else:
-            assert result["severity"] == expected_severity
+    final_response, is_compliant, violation_message = await system.process_interaction(
+        user_id, user_input, original_ai_response
+    )
+
+    assert is_compliant == True
+    assert violation_message == ""
+    assert final_response == original_ai_response
+    assert mock_openrouter_client_for_tests.chat_completion.call_count == 4
 
 
-class TestLogging:
-    def test_logging_violation(self, ethical_system, caplog):
-        text = "Tôi muốn kill bạn"
-        ethical_system.evaluate_response(text)
-        assert any("Ethical violation" in msg for msg in caplog.messages)
+@pytest.mark.asyncio
+async def test_ethical_core_system_process_interaction_input_violation(ethical_system_instance_global, mock_openrouter_client_for_tests):
+    """Kiểm tra tương tác khi input vi phạm."""
+    system = ethical_system_instance_global
+
+    rules_path = "config/ethical_rules.json"
+    os.makedirs(os.path.dirname(rules_path), exist_ok=True)
+    with open(rules_path, "w", encoding='utf-8') as f:
+        json.dump({"forbidden_keywords": ["giết"], "sensitive_topics": []}, f, indent=2, ensure_ascii=False)
+    system.ethics_guard._load_ethical_rules()
+
+    # Reset side_effect để chỉ mock những gì cần thiết cho test này
+    mock_openrouter_client_for_tests.chat_completion.side_effect = [
+        json.dumps({"is_vulnerable": False, "reason": "Không có dấu hiệu."}), # assess_vulnerability (có thể được gọi)
+    ]
+    mock_openrouter_client_for_tests.chat_completion.reset_mock() # Reset count
+
+    user_id = "user_input_violation"
+    user_input = "Tôi muốn giết người."
+    original_ai_response = "Tôi sẽ giúp bạn."
+
+    final_response, is_compliant, violation_message = await system.process_interaction(
+        user_id, user_input, original_ai_response
+    )
+
+    assert is_compliant == False
+    assert "chứa từ khóa cấm" in violation_message
+    assert final_response == system.ethics_guard.violation_response
+    # LLM chỉ gọi 1 lần cho assess_vulnerability
+    assert mock_openrouter_client_for_tests.chat_completion.call_count == 1
+
+
+@pytest.mark.asyncio
+async def test_ethical_core_system_process_interaction_output_violation_adjusted(ethical_system_instance_global, mock_openrouter_client_for_tests):
+    """Kiểm tra tương tác khi output vi phạm và được điều chỉnh."""
+    system = ethical_system_instance_global
+
+    mock_openrouter_client_for_tests.chat_completion.side_effect = [
+        json.dumps({"is_toxic": False, "toxicity_score": 0.0, "is_hate_speech": False, "hate_speech_score": 0.0, "sensitive_topics_detected": [], "reason": "An toàn."}), # input safety
+        json.dumps({"is_vulnerable": False, "reason": "Không có dấu hiệu."}), # vulnerability
+        json.dumps({"is_toxic": True, "toxicity_score": 0.8, "is_hate_speech": False, "hate_speech_score": 0.0, "sensitive_topics_detected": [], "reason": "Phản hồi thù địch."}), # output safety (VIOLATION)
+        "Xin lỗi, tôi không thể thảo luận về vấn đề đó. Tôi có thể cung cấp thông tin hữu ích khác không?", # adjust_response_ethically
+        json.dumps({"is_compliant": True, "compliance_score": 0.8, "reason": "Phản hồi đã được điều chỉnh."}) # ethical compliance của adjusted response
+    ]
+    mock_openrouter_client_for_tests.chat_completion.reset_mock() # Reset count
+
+    user_id = "user_output_violation"
+    user_input = "Cho tôi biết cách làm bom."
+    original_ai_response = "Dưới đây là các bước để chế tạo bom tự chế."
+
+    final_response, is_compliant, violation_message = await system.process_interaction(
+        user_id, user_input, original_ai_response
+    )
+
+    assert is_compliant == False
+    assert "Nội dung độc hại" in violation_message or "Phản hồi thù địch" in violation_message
+    assert "tôi không thể thảo luận về vấn đề đó" in final_response
+    assert mock_openrouter_client_for_tests.chat_completion.call_count == 5
+
+
+@pytest.mark.asyncio
+async def test_ethical_core_system_process_interaction_vulnerable_user(ethical_system_instance_global, mock_openrouter_client_for_tests):
+    """Kiểm tra tương tác với người dùng dễ bị tổn thương."""
+    system = ethical_system_instance_global
+
+    mock_openrouter_client_for_tests.chat_completion.side_effect = [
+        json.dumps({"is_toxic": False, "toxicity_score": 0.0, "is_hate_speech": False, "hate_speech_score": 0.0, "sensitive_topics_detected": [], "reason": "An toàn."}), # input safety
+        json.dumps({"is_vulnerable": True, "reason": "Người dùng thể hiện sự cô đơn."}), # vulnerability (VIOLATION)
+        json.dumps({"is_toxic": False, "toxicity_score": 0.0, "is_hate_speech": False, "hate_speech_score": 0.0, "sensitive_topics_detected": [], "reason": "An toàn."}), # output safety
+        json.dumps({"is_compliant": True, "compliance_score": 0.9, "reason": "Phù hợp với người dùng dễ bị tổn thương."}), # ethical compliance
+    ]
+    mock_openrouter_client_for_tests.chat_completion.reset_mock() # Reset count
+
+    user_id = "user_vulnerable"
+    user_input = "Tôi thấy cuộc sống thật vô nghĩa."
+    original_ai_response = "Bạn có thể tìm kiếm sự giúp đỡ từ chuyên gia."
+
+    final_response, is_compliant, violation_message = await system.process_interaction(
+        user_id, user_input, original_ai_response
+    )
+
+    assert is_compliant == True
+    assert "Người dùng thể hiện sự cô đơn" in violation_message
+    assert final_response == original_ai_response
+    assert mock_openrouter_client_for_tests.chat_completion.call_count == 4
+
+@pytest.mark.asyncio
+async def test_ethical_core_system_process_interaction_llm_error_graceful(ethical_system_instance_global, mock_openrouter_client_for_tests):
+    """Kiểm tra tương tác khi LLM gặp lỗi, hệ thống xử lý gracefully."""
+    system = ethical_system_instance_global
+
+    # LLM sẽ ném lỗi ngay từ lần gọi đầu tiên (ví dụ check_input_safety)
+    mock_openrouter_client_for_tests.chat_completion.side_effect = Exception("LLM connection error")
+    mock_openrouter_client_for_tests.chat_completion.reset_mock() # Reset count
+
+    user_id = "user_llm_error"
+    user_input = "Chào bạn."
+    original_ai_response = "Chào bạn, tôi có thể giúp gì?"
+
+    final_response, is_compliant, violation_message = await system.process_interaction(
+        user_id, user_input, original_ai_response
+    )
+
+    assert is_compliant == False
+    assert "LLM_ERROR" in violation_message
+    assert "đã xảy ra lỗi trong quá trình xử lý" in final_response # Đây là phản hồi mặc định khi có lỗi
+    mock_openrouter_client_for_tests.chat_completion.assert_called_once() # Chỉ được gọi một lần trước khi lỗi

@@ -19577,3 +19577,905 @@
 2025-07-23 01:04:33 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
 2025-07-23 01:04:33 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
 2025-07-23 01:04:33 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:30 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill con muỗi...'
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:30 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'đánh' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Hãy đánh giá sản phẩm...'
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:30 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Đừng hate người khác...'
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:30 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'giết' (loại: violence), Vi phạm nguyên tắc: do_no_harm, Vi phạm ngữ cảnh | Văn bản: 'Hướng dẫn cách giết người...'
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:30 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Vi phạm nguyên tắc: respect | Văn bản: 'Bài viết phân biệt chủng tộc...'
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:30 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill anh ta...'
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:30 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều này...'
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike điều này...
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:30 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate và muốn kill bạn...'
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike và muốn neutralize bạn...
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:30 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét ghét ghét điều này...'
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích không thích không thích điều này...
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 1 lần thử
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:30 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill ...'
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:30 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét 😡 người khác...'
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích 😡 người khác...
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:30 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: '<script>alert('kill')</script>...'
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:30 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'DROP TABLE users; -- kill...'
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:30 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'SELECT * FROM data WHERE name='hate'...'
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:30 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:30 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:30 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:30 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều đó...'
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:30 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:30 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-28 10:56:41 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:41 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill con muỗi...'
+2025-07-28 10:56:41 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:41 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'đánh' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Hãy đánh giá sản phẩm...'
+2025-07-28 10:56:41 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:41 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Đừng hate người khác...'
+2025-07-28 10:56:41 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:41 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:41 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:41 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'giết' (loại: violence), Vi phạm nguyên tắc: do_no_harm, Vi phạm ngữ cảnh | Văn bản: 'Hướng dẫn cách giết người...'
+2025-07-28 10:56:41 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:41 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Vi phạm nguyên tắc: respect | Văn bản: 'Bài viết phân biệt chủng tộc...'
+2025-07-28 10:56:41 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:42 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill anh ta...'
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:42 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều này...'
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike điều này...
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:42 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate và muốn kill bạn...'
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike và muốn neutralize bạn...
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:42 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét ghét ghét điều này...'
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích không thích không thích điều này...
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 1 lần thử
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:42 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill ...'
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:42 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét 😡 người khác...'
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích 😡 người khác...
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:42 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: '<script>alert('kill')</script>...'
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:42 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'DROP TABLE users; -- kill...'
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:42 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'SELECT * FROM data WHERE name='hate'...'
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:42 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:42 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:42 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:42 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều đó...'
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:42 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:42 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill con muỗi...'
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'đánh' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Hãy đánh giá sản phẩm...'
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Đừng hate người khác...'
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:53 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'giết' (loại: violence), Vi phạm nguyên tắc: do_no_harm, Vi phạm ngữ cảnh | Văn bản: 'Hướng dẫn cách giết người...'
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:53 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Vi phạm nguyên tắc: respect | Văn bản: 'Bài viết phân biệt chủng tộc...'
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill anh ta...'
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều này...'
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike điều này...
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate và muốn kill bạn...'
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike và muốn neutralize bạn...
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét ghét ghét điều này...'
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích không thích không thích điều này...
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 1 lần thử
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill ...'
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét 😡 người khác...'
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích 😡 người khác...
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: '<script>alert('kill')</script>...'
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'DROP TABLE users; -- kill...'
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'SELECT * FROM data WHERE name='hate'...'
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:53 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:53 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều đó...'
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:56:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:58:52 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill con muỗi...'
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:58:52 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'đánh' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Hãy đánh giá sản phẩm...'
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:58:52 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Đừng hate người khác...'
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:58:52 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'giết' (loại: violence), Vi phạm nguyên tắc: do_no_harm, Vi phạm ngữ cảnh | Văn bản: 'Hướng dẫn cách giết người...'
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:58:52 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Vi phạm nguyên tắc: respect | Văn bản: 'Bài viết phân biệt chủng tộc...'
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:58:52 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill anh ta...'
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:58:52 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều này...'
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike điều này...
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:58:52 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate và muốn kill bạn...'
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike và muốn neutralize bạn...
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:58:52 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét ghét ghét điều này...'
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích không thích không thích điều này...
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 1 lần thử
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:58:52 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill ...'
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:58:52 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét 😡 người khác...'
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích 😡 người khác...
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:58:52 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: '<script>alert('kill')</script>...'
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:58:52 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'DROP TABLE users; -- kill...'
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:58:52 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'SELECT * FROM data WHERE name='hate'...'
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:58:52 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:58:52 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:58:52 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:58:52 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều đó...'
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:58:52 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:58:52 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:04 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill con muỗi...'
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:04 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'đánh' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Hãy đánh giá sản phẩm...'
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:04 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Đừng hate người khác...'
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:04 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'giết' (loại: violence), Vi phạm nguyên tắc: do_no_harm, Vi phạm ngữ cảnh | Văn bản: 'Hướng dẫn cách giết người...'
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:04 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Vi phạm nguyên tắc: respect | Văn bản: 'Bài viết phân biệt chủng tộc...'
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:04 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill anh ta...'
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:04 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều này...'
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike điều này...
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:04 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate và muốn kill bạn...'
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike và muốn neutralize bạn...
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:04 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét ghét ghét điều này...'
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích không thích không thích điều này...
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 1 lần thử
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:04 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill ...'
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:04 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét 😡 người khác...'
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích 😡 người khác...
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:04 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: '<script>alert('kill')</script>...'
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:04 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'DROP TABLE users; -- kill...'
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:04 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'SELECT * FROM data WHERE name='hate'...'
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:04 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:04 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:04 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:04 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều đó...'
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:04 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:04 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:15 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill con muỗi...'
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:15 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'đánh' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Hãy đánh giá sản phẩm...'
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:15 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Đừng hate người khác...'
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:15 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'giết' (loại: violence), Vi phạm nguyên tắc: do_no_harm, Vi phạm ngữ cảnh | Văn bản: 'Hướng dẫn cách giết người...'
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:15 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Vi phạm nguyên tắc: respect | Văn bản: 'Bài viết phân biệt chủng tộc...'
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:15 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill anh ta...'
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:15 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều này...'
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike điều này...
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:15 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate và muốn kill bạn...'
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike và muốn neutralize bạn...
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:15 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét ghét ghét điều này...'
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích không thích không thích điều này...
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 1 lần thử
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:15 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill ...'
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:15 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét 😡 người khác...'
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích 😡 người khác...
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:15 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: '<script>alert('kill')</script>...'
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:15 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'DROP TABLE users; -- kill...'
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:15 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'SELECT * FROM data WHERE name='hate'...'
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:15 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:15 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:15 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:15 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều đó...'
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:15 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 10:59:15 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 11:49:48 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill con muỗi...'
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 11:49:48 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'đánh' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Hãy đánh giá sản phẩm...'
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 11:49:48 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Đừng hate người khác...'
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 11:49:48 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'giết' (loại: violence), Vi phạm nguyên tắc: do_no_harm, Vi phạm ngữ cảnh | Văn bản: 'Hướng dẫn cách giết người...'
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 11:49:48 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Vi phạm nguyên tắc: respect | Văn bản: 'Bài viết phân biệt chủng tộc...'
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 11:49:48 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill anh ta...'
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 11:49:48 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều này...'
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike điều này...
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 11:49:48 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate và muốn kill bạn...'
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike và muốn neutralize bạn...
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 11:49:48 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét ghét ghét điều này...'
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích không thích không thích điều này...
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 1 lần thử
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 11:49:48 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill ...'
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 11:49:48 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét 😡 người khác...'
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích 😡 người khác...
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 11:49:48 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: '<script>alert('kill')</script>...'
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 11:49:48 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'DROP TABLE users; -- kill...'
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 11:49:48 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'SELECT * FROM data WHERE name='hate'...'
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 11:49:48 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 11:49:48 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 11:49:48 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 11:49:48 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều đó...'
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 11:49:48 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 11:49:48 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:07:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill con muỗi...'
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:07:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'đánh' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Hãy đánh giá sản phẩm...'
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:07:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Đừng hate người khác...'
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:07:53 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'giết' (loại: violence), Vi phạm nguyên tắc: do_no_harm, Vi phạm ngữ cảnh | Văn bản: 'Hướng dẫn cách giết người...'
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:07:53 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Vi phạm nguyên tắc: respect | Văn bản: 'Bài viết phân biệt chủng tộc...'
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:07:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill anh ta...'
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:07:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều này...'
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike điều này...
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:07:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate và muốn kill bạn...'
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike và muốn neutralize bạn...
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:07:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét ghét ghét điều này...'
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích không thích không thích điều này...
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 1 lần thử
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:07:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill ...'
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:07:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét 😡 người khác...'
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích 😡 người khác...
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:07:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: '<script>alert('kill')</script>...'
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:07:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'DROP TABLE users; -- kill...'
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:07:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'SELECT * FROM data WHERE name='hate'...'
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:07:53 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:07:53 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:07:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:07:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều đó...'
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:07:53 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:07:53 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:08:06 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill con muỗi...'
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:08:06 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'đánh' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Hãy đánh giá sản phẩm...'
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:08:06 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Đừng hate người khác...'
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:08:06 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'giết' (loại: violence), Vi phạm nguyên tắc: do_no_harm, Vi phạm ngữ cảnh | Văn bản: 'Hướng dẫn cách giết người...'
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:08:06 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Vi phạm nguyên tắc: respect | Văn bản: 'Bài viết phân biệt chủng tộc...'
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:08:06 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill anh ta...'
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:08:06 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều này...'
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike điều này...
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:08:06 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate và muốn kill bạn...'
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike và muốn neutralize bạn...
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:08:06 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét ghét ghét điều này...'
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích không thích không thích điều này...
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 1 lần thử
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:08:06 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill ...'
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:08:06 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét 😡 người khác...'
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích 😡 người khác...
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:08:06 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: '<script>alert('kill')</script>...'
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:08:06 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'DROP TABLE users; -- kill...'
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:08:06 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'SELECT * FROM data WHERE name='hate'...'
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:08:06 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:08:06 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:08:06 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:08:06 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều đó...'
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:08:06 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-28 12:08:06 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-29 20:39:39 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:39:39 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill con muỗi...'
+2025-07-29 20:39:39 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:39:39 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'đánh' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Hãy đánh giá sản phẩm...'
+2025-07-29 20:39:39 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:39:39 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Đừng hate người khác...'
+2025-07-29 20:39:39 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:39:39 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:39:39 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:39:39 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'giết' (loại: violence), Vi phạm nguyên tắc: do_no_harm, Vi phạm ngữ cảnh | Văn bản: 'Hướng dẫn cách giết người...'
+2025-07-29 20:39:39 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:39:39 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Vi phạm nguyên tắc: respect | Văn bản: 'Bài viết phân biệt chủng tộc...'
+2025-07-29 20:39:39 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:39:39 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:39:39 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill anh ta...'
+2025-07-29 20:39:39 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:39:39 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều này...'
+2025-07-29 20:39:39 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike điều này...
+2025-07-29 20:39:39 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-29 20:39:39 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:39:39 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate và muốn kill bạn...'
+2025-07-29 20:39:39 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike và muốn neutralize bạn...
+2025-07-29 20:39:39 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-29 20:39:39 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:39:39 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét ghét ghét điều này...'
+2025-07-29 20:39:39 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích không thích không thích điều này...
+2025-07-29 20:39:39 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-29 20:39:39 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:39:39 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 1 lần thử
+2025-07-29 20:39:39 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:39:39 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:39:39 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill ...'
+2025-07-29 20:39:40 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:39:40 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét 😡 người khác...'
+2025-07-29 20:39:40 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích 😡 người khác...
+2025-07-29 20:39:40 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-29 20:39:40 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:39:40 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: '<script>alert('kill')</script>...'
+2025-07-29 20:39:40 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:39:40 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'DROP TABLE users; -- kill...'
+2025-07-29 20:39:40 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:39:40 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'SELECT * FROM data WHERE name='hate'...'
+2025-07-29 20:39:40 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:39:40 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:39:40 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-29 20:39:40 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:39:40 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-29 20:39:40 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:39:40 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:39:40 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-29 20:39:40 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:39:40 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều đó...'
+2025-07-29 20:39:40 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:39:40 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:39:40 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:42:34 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill con muỗi...'
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:42:34 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'đánh' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Hãy đánh giá sản phẩm...'
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:42:34 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Đừng hate người khác...'
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:42:34 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'giết' (loại: violence), Vi phạm nguyên tắc: do_no_harm, Vi phạm ngữ cảnh | Văn bản: 'Hướng dẫn cách giết người...'
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:42:34 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Vi phạm nguyên tắc: respect | Văn bản: 'Bài viết phân biệt chủng tộc...'
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:42:34 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill anh ta...'
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:42:34 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều này...'
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike điều này...
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:42:34 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate và muốn kill bạn...'
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike và muốn neutralize bạn...
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:42:34 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét ghét ghét điều này...'
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích không thích không thích điều này...
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 1 lần thử
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:42:34 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill ...'
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:42:34 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét 😡 người khác...'
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích 😡 người khác...
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:42:34 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: '<script>alert('kill')</script>...'
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:42:34 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'DROP TABLE users; -- kill...'
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:42:34 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'SELECT * FROM data WHERE name='hate'...'
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:42:34 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:42:34 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:42:34 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:42:34 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều đó...'
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:42:34 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:42:34 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:51:29 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill con muỗi...'
+2025-07-29 20:51:29 | WARNING | ethical_core_system_v1 | Gọi AI phân tích lần thứ 1
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:51:29 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Đừng hate người khác...'
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:51:29 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'giết' (loại: violence), Vi phạm nguyên tắc: do_no_harm, Vi phạm ngữ cảnh | Văn bản: 'Hướng dẫn cách giết người...'
+2025-07-29 20:51:29 | WARNING | ethical_core_system_v1 | Gọi AI phân tích lần thứ 1
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:51:29 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Vi phạm nguyên tắc: respect | Văn bản: 'Bài viết phân biệt chủng tộc...'
+2025-07-29 20:51:29 | WARNING | ethical_core_system_v1 | Gọi AI phân tích lần thứ 1
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:51:29 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill anh ta...'
+2025-07-29 20:51:29 | WARNING | ethical_core_system_v1 | Gọi AI phân tích lần thứ 1
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:51:29 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều này...'
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike điều này...
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:51:29 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate và muốn kill bạn...'
+2025-07-29 20:51:29 | WARNING | ethical_core_system_v1 | Gọi AI phân tích lần thứ 1
+2025-07-29 20:51:29 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề nghiêm trọng, gọi AI phân tích
+2025-07-29 20:51:29 | WARNING | ethical_core_system_v1 | Gọi AI phân tích lần thứ 2
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:51:29 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét ghét ghét điều này...'
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích không thích không thích điều này...
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 1 lần thử
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:51:29 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill ...'
+2025-07-29 20:51:29 | WARNING | ethical_core_system_v1 | Gọi AI phân tích lần thứ 1
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:51:29 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét 😡 người khác...'
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích 😡 người khác...
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:51:29 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: '<script>alert('kill')</script>...'
+2025-07-29 20:51:29 | WARNING | ethical_core_system_v1 | Gọi AI phân tích lần thứ 1
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:51:29 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'DROP TABLE users; -- kill...'
+2025-07-29 20:51:29 | WARNING | ethical_core_system_v1 | Gọi AI phân tích lần thứ 1
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:51:29 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'SELECT * FROM data WHERE name='hate'...'
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:51:29 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:51:29 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:51:29 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-29 20:51:29 | WARNING | ethical_core_system_v1 | Gọi AI phân tích lần thứ 1
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:51:29 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều đó...'
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:51:29 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:51:29 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-29 20:51:29 | WARNING | ethical_core_system_v1 | Gọi AI phân tích lần thứ 1
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:58:24 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill con muỗi...'
+2025-07-29 20:58:24 | WARNING | ethical_core_system_v1 | Gọi AI phân tích lần thứ 1
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:58:24 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Đừng hate người khác...'
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:58:24 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'giết' (loại: violence), Vi phạm nguyên tắc: do_no_harm, Vi phạm ngữ cảnh | Văn bản: 'Hướng dẫn cách giết người...'
+2025-07-29 20:58:24 | WARNING | ethical_core_system_v1 | Gọi AI phân tích lần thứ 1
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:58:24 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Vi phạm nguyên tắc: respect | Văn bản: 'Bài viết phân biệt chủng tộc...'
+2025-07-29 20:58:24 | WARNING | ethical_core_system_v1 | Gọi AI phân tích lần thứ 1
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:58:24 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill anh ta...'
+2025-07-29 20:58:24 | WARNING | ethical_core_system_v1 | Gọi AI phân tích lần thứ 1
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:58:24 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều này...'
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike điều này...
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:58:24 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate và muốn kill bạn...'
+2025-07-29 20:58:24 | WARNING | ethical_core_system_v1 | Gọi AI phân tích lần thứ 1
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike và muốn neutralize bạn...
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:58:24 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét ghét ghét điều này...'
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích không thích không thích điều này...
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 1 lần thử
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:58:24 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill ...'
+2025-07-29 20:58:24 | WARNING | ethical_core_system_v1 | Gọi AI phân tích lần thứ 1
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:58:24 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét 😡 người khác...'
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích 😡 người khác...
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:58:24 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: '<script>alert('kill')</script>...'
+2025-07-29 20:58:24 | WARNING | ethical_core_system_v1 | Gọi AI phân tích lần thứ 1
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:58:24 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'DROP TABLE users; -- kill...'
+2025-07-29 20:58:24 | WARNING | ethical_core_system_v1 | Gọi AI phân tích lần thứ 1
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:58:24 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'SELECT * FROM data WHERE name='hate'...'
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:58:24 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:58:24 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:58:24 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-29 20:58:24 | WARNING | ethical_core_system_v1 | Gọi AI phân tích lần thứ 1
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:58:24 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều đó...'
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:58:24 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 20:58:24 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-29 20:58:24 | WARNING | ethical_core_system_v1 | Gọi AI phân tích lần thứ 1
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:03:08 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill con muỗi...'
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:03:08 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'đánh' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Hãy đánh giá sản phẩm...'
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:03:08 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Đừng hate người khác...'
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:03:08 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'giết' (loại: violence), Vi phạm nguyên tắc: do_no_harm, Vi phạm ngữ cảnh | Văn bản: 'Hướng dẫn cách giết người...'
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:03:08 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Vi phạm nguyên tắc: respect | Văn bản: 'Bài viết phân biệt chủng tộc...'
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:03:08 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill anh ta...'
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:03:08 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều này...'
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike điều này...
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:03:08 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate và muốn kill bạn...'
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike và muốn neutralize bạn...
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:03:08 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét ghét ghét điều này...'
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích không thích không thích điều này...
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 1 lần thử
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:03:08 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill ...'
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:03:08 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét 😡 người khác...'
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích 😡 người khác...
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:03:08 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: '<script>alert('kill')</script>...'
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:03:08 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'DROP TABLE users; -- kill...'
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:03:08 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'SELECT * FROM data WHERE name='hate'...'
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:03:08 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:03:08 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:03:08 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:03:08 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều đó...'
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:03:08 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:03:08 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:16:32 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill con muỗi...'
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:16:32 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'đánh' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Hãy đánh giá sản phẩm...'
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:16:32 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Đừng hate người khác...'
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:16:32 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'giết' (loại: violence), Vi phạm nguyên tắc: do_no_harm, Vi phạm ngữ cảnh | Văn bản: 'Hướng dẫn cách giết người...'
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:16:32 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Vi phạm nguyên tắc: respect | Văn bản: 'Bài viết phân biệt chủng tộc...'
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:16:32 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill anh ta...'
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:16:32 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều này...'
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike điều này...
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:16:32 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate và muốn kill bạn...'
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike và muốn neutralize bạn...
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:16:32 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét ghét ghét điều này...'
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích không thích không thích điều này...
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 1 lần thử
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:16:32 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill ...'
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:16:32 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét 😡 người khác...'
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích 😡 người khác...
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:16:32 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: '<script>alert('kill')</script>...'
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:16:32 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'DROP TABLE users; -- kill...'
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:16:32 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'SELECT * FROM data WHERE name='hate'...'
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:16:32 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:16:32 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:16:32 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:16:32 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều đó...'
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:16:32 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:16:32 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:53:54 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill con muỗi...'
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:53:54 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'đánh' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Hãy đánh giá sản phẩm...'
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:53:54 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Đừng hate người khác...'
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:53:54 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Từ khóa nhạy cảm: 'giết' (loại: violence), Vi phạm nguyên tắc: do_no_harm, Vi phạm ngữ cảnh | Văn bản: 'Hướng dẫn cách giết người...'
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:53:54 | ERROR | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: high | Lý do: Vi phạm nguyên tắc: respect | Văn bản: 'Bài viết phân biệt chủng tộc...'
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:53:54 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill anh ta...'
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:53:54 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều này...'
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike điều này...
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:53:54 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate và muốn kill bạn...'
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi dislike và muốn neutralize bạn...
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:53:54 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét ghét ghét điều này...'
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích không thích không thích điều này...
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 1 lần thử
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:53:54 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill kill ...'
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:53:54 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'ghét' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi ghét 😡 người khác...'
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Điều chỉnh lần 1: Tôi không thích 😡 người khác...
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Điều chỉnh thành công sau 2 lần thử
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:53:54 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: '<script>alert('kill')</script>...'
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:53:54 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'DROP TABLE users; -- kill...'
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:53:54 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'SELECT * FROM data WHERE name='hate'...'
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:53:54 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:53:54 | WARNING | ethical_core_system_v1 | Không thể đọc file rules, tạo rules mặc định
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:53:54 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:53:54 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Tôi hate điều đó...'
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:53:54 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:53:54 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill bạn...'
+2025-07-29 21:55:18 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:55:18 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'kill' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Tôi muốn kill con muỗi...'
+2025-07-29 21:55:18 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:55:18 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'đánh' (loại: violence), Vi phạm ngữ cảnh | Văn bản: 'Hãy đánh giá sản phẩm...'
+2025-07-29 21:55:18 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:55:18 | WARNING | ethical_core_system_v1 | Phát hiện vấn đề | Mức độ: medium | Lý do: Từ khóa nhạy cảm: 'hate' (loại: toxic), Vi phạm ngữ cảnh | Văn bản: 'Đừng hate người khác...'
+2025-07-29 21:55:18 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
+2025-07-29 21:55:18 | INFO | ethical_core_system_v1 | Khởi động hệ thống với 2 danh mục từ khóa
