@@ -1,0 +1,16 @@
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+select = ["E", "F", "W"]
+ignore = ["E501"]
+# force-exclude đảm bảo Ruff tôn trọng exclude
+exclude = [
+  "**/.venv*/**", "**/venv*/**", "**/site-packages/**", "**/dist-packages/**",
+  "**/__pycache__/**", "**/node_modules/**",
+  "modules/backup_legacy/**", "tests/fixtures/**"
+]
+force-exclude = true
+
+[tool.ruff.format]
+quote-style = "preserve"
+

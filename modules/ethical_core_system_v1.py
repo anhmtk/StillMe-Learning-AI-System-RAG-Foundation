@@ -153,8 +153,7 @@ class EthicsGuard:
             Văn bản: "{user_input}"
             """
             response_content = await self.openrouter_client.chat_completion(
-                messages=[{"role": "user", "content": prompt}],
-                model=OpenRouterModel.GEMINI_PRO
+                messages=[{"role": "user", "content": prompt}]
             )
             safety_assessment = json.loads(response_content)
 
@@ -191,8 +190,7 @@ class EthicsGuard:
             Phản hồi AI: "{ai_response}"
             """
             response_content = await self.openrouter_client.chat_completion(
-                messages=[{"role": "user", "content": prompt}],
-                model=OpenRouterModel.GEMINI_PRO
+                messages=[{"role": "user", "content": prompt}]
             )
             safety_assessment = json.loads(response_content)
 
@@ -218,8 +216,7 @@ class EthicsGuard:
             Văn bản: "{user_input}"
             """
             response_content = await self.openrouter_client.chat_completion(
-                messages=[{"role": "user", "content": prompt}],
-                model=OpenRouterModel.GEMINI_PRO
+                messages=[{"role": "user", "content": prompt}]
             )
             vulnerability_assessment = json.loads(response_content)
             return vulnerability_assessment.get("is_vulnerable", False), vulnerability_assessment.get("reason", "Không có dấu hiệu.")
@@ -244,8 +241,7 @@ class ConscienceCore:
             Phản hồi AI: "{ai_response}"
             """
             response_content = await self.openrouter_client.chat_completion(
-                messages=[{"role": "user", "content": prompt}],
-                model=OpenRouterModel.GEMINI_PRO
+                messages=[{"role": "user", "content": prompt}]
             )
             compliance_assessment = json.loads(response_content)
             return compliance_assessment.get("is_compliant", False), compliance_assessment.get("compliance_score", 0.0), compliance_assessment.get("reason", "Không rõ.")
@@ -264,8 +260,7 @@ class ConscienceCore:
             
             Phản hồi AI đã điều chỉnh:"""
             adjusted_response = await self.openrouter_client.chat_completion(
-                messages=[{"role": "user", "content": prompt}],
-                model=OpenRouterModel.MISTRAL_7B_INSTRUCT # Hoặc model khác cho việc điều chỉnh
+                messages=[{"role": "user", "content": prompt}]
             )
             return adjusted_response
         except Exception as e:
@@ -288,7 +283,7 @@ class SelfCritic:
             }
         )
 
-    async def analyze_and_learn(self, user_input: str, ai_response: str,
+    async def analyze_and_learn(self, user_id: str, user_input: str, ai_response: str,
                                 violation_type: ViolationType, severity: Severity, reason: str):
         try:
             prompt = f"""Phân tích vi phạm đạo đức sau để xác định nguyên nhân gốc rễ và đề xuất hành động cải thiện cho hệ thống AI.
@@ -303,8 +298,7 @@ class SelfCritic:
             - "suggested_action": string (ví dụ: "Cập nhật danh sách từ khóa cấm", "Tinh chỉnh mô hình LLM với dữ liệu đạo đức hơn")
             """
             analysis_result = await self.openrouter_client.chat_completion(
-                messages=[{"role": "user", "content": prompt}],
-                model=OpenRouterModel.GEMINI_PRO
+                messages=[{"role": "user", "content": prompt}]
             )
             return json.loads(analysis_result)
         except Exception as e:
@@ -336,8 +330,9 @@ class EthicalCoreSystem:
             if not is_input_safe:
                 violation_message = input_reason
                 is_compliant = False
-                self.self_critic.log_ethical_violation(user_id, user_input, original_ai_response, input_violation_type, input_severity, input_reason)
-                await self.self_critic.analyze_and_learn(user_input, original_ai_response, input_violation_type, input_severity, input_reason)
+                if input_violation_type is not None and input_severity is not None:
+                    self.self_critic.log_ethical_violation(user_id, user_input, original_ai_response, input_violation_type, input_severity, input_reason)
+                    await self.self_critic.analyze_and_learn(user_id, user_input, original_ai_response, input_violation_type, input_severity, input_reason)
                 return self.ethics_guard.violation_response, is_compliant, violation_message
 
             # 2. Đánh giá người dùng dễ bị tổn thương
@@ -352,7 +347,8 @@ class EthicalCoreSystem:
             if not is_output_safe:
                 violation_message += f"Phản hồi AI vi phạm an toàn: {output_reason}. "
                 is_compliant = False
-                self.self_critic.log_ethical_violation(user_id, user_input, original_ai_response, output_violation_type, output_severity, output_reason)
+                if output_violation_type is not None and output_severity is not None:
+                    self.self_critic.log_ethical_violation(user_id, user_input, original_ai_response, output_violation_type, output_severity, output_reason)
                 
                 # Cố gắng điều chỉnh phản hồi
                 adjusted_response = await self.conscience_core.adjust_response_ethically(user_input, original_ai_response, output_reason)
@@ -363,11 +359,12 @@ class EthicalCoreSystem:
                 if not is_adjusted_compliant:
                     violation_message += f"Phản hồi đã điều chỉnh vẫn không tuân thủ: {adjusted_reason}. "
                     self.self_critic.log_ethical_violation(user_id, user_input, final_response, ViolationType.ETHICAL_NON_COMPLIANCE, Severity.MEDIUM, adjusted_reason + " (sau điều chỉnh)")
-                    await self.self_critic.analyze_and_learn(user_id, user_input, final_response, ViolationType.ETHICAL_NON_COMPLIANCE, Severity.MEDIUM, adjusted_reason + " (sau điều chỉnh)") # Sửa tham số user_id
+                    await self.self_critic.analyze_and_learn(user_id, user_input, final_response, ViolationType.ETHICAL_NON_COMPLIANCE, Severity.MEDIUM, adjusted_reason + " (sau điều chỉnh)")
                 else:
                     is_compliant = True # Phản hồi đã điều chỉnh thành công
                     violation_message += "Phản hồi đã được điều chỉnh để tuân thủ đạo đức."
-                    await self.self_critic.analyze_and_learn(user_id, user_input, original_ai_response, output_violation_type, output_severity, output_reason) # Sửa tham số user_id
+                    if output_violation_type is not None and output_severity is not None:
+                        await self.self_critic.analyze_and_learn(user_id, user_input, original_ai_response, output_violation_type, output_severity, output_reason)
 
             # 4. Đánh giá tuân thủ đạo đức tổng thể (nếu chưa bị chặn)
             if is_compliant: # Chỉ đánh giá nếu chưa có vi phạm nghiêm trọng
@@ -376,7 +373,7 @@ class EthicalCoreSystem:
                     violation_message += f"Phản hồi không tuân thủ đạo đức tổng thể: {compliance_reason}. "
                     is_compliant = False
                     self.self_critic.log_ethical_violation(user_id, user_input, final_response, ViolationType.ETHICAL_NON_COMPLIANCE, Severity.MEDIUM, compliance_reason)
-                    await self.self_critic.analyze_and_learn(user_id, user_input, final_response, ViolationType.ETHICAL_NON_COMPLIANCE, Severity.MEDIUM, compliance_reason) # Sửa tham số user_id
+                    await self.self_critic.analyze_and_learn(user_id, user_input, final_response, ViolationType.ETHICAL_NON_COMPLIANCE, Severity.MEDIUM, compliance_reason)
 
         except Exception as e:
             ethical_logger.error(f"An unexpected error occurred during interaction processing: {e}", extra={'user_id': user_id})

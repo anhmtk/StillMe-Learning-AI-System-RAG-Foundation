@@ -1,0 +1,49 @@
+{
+  "secure_memory": {
+    "version": "2.0.0",
+    "description": "Configuration for SecureMemoryManager with advanced features",
+    "file_path": "secure_memory.enc",
+    "key_path": "secure_memory.key",
+    "backup_dir": "secure_backups",
+    "max_backups": 20,
+    "key_rotation_days": 30,
+    "compression_enabled": true,
+    "auto_backup": true,
+    "encryption_algorithm": "fernet",
+    "performance": {
+      "max_memory_usage_mb": 100,
+      "max_file_size_mb": 50,
+      "compression_threshold_kb": 10,
+      "batch_operations": true,
+      "async_io": true
+    },
+    "security": {
+      "key_strength_bits": 256,
+      "salt_length": 32,
+      "iterations": 100000,
+      "enable_key_derivation": true,
+      "secure_deletion": true
+    },
+    "backup": {
+      "auto_backup_interval_minutes": 15,
+      "backup_retention_days": 90,
+      "backup_compression": true,
+      "backup_encryption": true,
+      "cloud_backup_enabled": false,
+      "cloud_provider": "local"
+    },
+    "monitoring": {
+      "enable_metrics": true,
+      "log_encryption_operations": true,
+      "performance_tracking": true,
+      "error_reporting": true,
+      "health_check_interval_minutes": 5
+    },
+    "integration": {
+      "layered_memory": true,
+      "framework_auto_save": true,
+      "memory_change_detection": true,
+      "cross_module_sync": true
+    }
+  }
+}

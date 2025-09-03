@@ -1,0 +1,35 @@
+{
+    "typeCheckingMode": "basic",
+    "pythonVersion": "3.12",
+  
+    // CHỈ phân tích đúng code dự án:
+    "include": [
+      "framework.py",
+      "modules",
+      "api",
+      "utils",
+      "stillme_ai"
+    ],
+  
+    // LOẠI HẾT mọi thứ ngoài dự án:
+    "exclude": [
+      "**/.venv*/**",
+      "**/venv*/**",
+      "**/site-packages/**",
+      "**/dist-packages/**",
+      "**/__pycache__/**",
+      "**/node_modules/**",
+      "modules/backup_legacy/**",
+      "tests/**",              // nếu tests của anh chưa cần check tĩnh, tạm loại
+      "**/Lib/**/test/**",
+      "**/Tests/**"
+    ],
+  
+    // tránh “đọc mã nguồn thư viện” khi suy luận type
+    "useLibraryCodeForTypes": false,
+  
+    // giúp Pyright tìm venv đúng
+    "venvPath": ".",
+    "venv": ".venv312"
+  }
+  

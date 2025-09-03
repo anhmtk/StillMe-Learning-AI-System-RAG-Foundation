@@ -1,6 +1,44 @@
 {
-  "forbidden_keywords": [
-    "giết"
-  ],
-  "sensitive_topics": []
+  "version": "1.0.0",
+  "description": "Ethical rules for StillMe Framework",
+  "rules": {
+    "banned_keywords": [
+      "hack",
+      "crack",
+      "steal",
+      "cheat",
+      "fraud",
+      "scam",
+      "phishing",
+      "malware",
+      "virus",
+      "exploit",
+      "vulnerability",
+      "backdoor",
+      "rootkit",
+      "keylogger",
+      "spyware"
+    ],
+    "banned_topics": [
+      "illegal activities",
+      "harmful content",
+      "violence",
+      "discrimination",
+      "hate speech",
+      "cyberbullying",
+      "privacy violations"
+    ],
+    "safety_thresholds": {
+      "harmful_content": 0.7,
+      "inappropriate_language": 0.6,
+      "sensitive_topics": 0.8
+    },
+    "ethical_guidelines": [
+      "Respect user privacy and data protection",
+      "Promote positive and constructive content",
+      "Avoid generating harmful or misleading information",
+      "Maintain cultural sensitivity and inclusivity",
+      "Support educational and beneficial use cases"
+    ]
+  }
 }

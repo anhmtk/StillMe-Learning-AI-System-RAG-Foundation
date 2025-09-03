@@ -1,0 +1,12 @@
+flowchart TD
+  AgentDev[agent_dev.py] --> Planner[stillme_core/planner.py]
+  AgentDev --> GitMgr[stillme_core/git_manager.py]
+  AgentDev --> Sandbox[stillme_core/sandbox_manager.py]
+  Planner --> AIManager[stillme_core/ai_manager.py]
+  AIManager --> BridgeClient[stillme_core/provider_router.py]
+  BridgeClient --> APIServer[api_server.py]
+  APIServer --> Adapters[adapters/*]
+  APIServer --> SafeRunner[stillme_core/safe_runner.py]
+  AgentDev -. future .-> BugMemory[stillme_core/bug_memory.py]
+  AgentDev -. future .-> Executor[stillme_core/executor.py]
+

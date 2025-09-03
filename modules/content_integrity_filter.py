@@ -46,7 +46,7 @@ class JsonFileHandler(logging.FileHandler):
     def emit(self, record):
         try:
             log_entry = self.format(record)
-            self.write(log_entry + "\n")
+            self.stream.write(log_entry + "\n")
             self.flush()
         except Exception:
             self.handleError(record)
@@ -60,8 +60,9 @@ class JsonFormatter(logging.Formatter):
             "module": record.name,
             "message": record.getMessage()
         }
-        if hasattr(record, 'extra_data'): # Dữ liệu bổ sung từ logger.warning(msg, extra={})
-            log_data.update(record.extra_data)
+        extra_data = getattr(record, 'extra_data', None)
+        if extra_data: # Dữ liệu bổ sung từ logger.warning(msg, extra={})
+            log_data.update(extra_data)
         return json.dumps(log_data, ensure_ascii=False)
 
 json_handler = JsonFileHandler(CONTENT_VIOLATIONS_LOG, encoding='utf-8')
@@ -80,6 +81,24 @@ class Severity(Enum):
         """Cho phép so sánh các mức độ nghiêm trọng."""
         if self.__class__ is other.__class__:
             return self.value_to_int() < other.value_to_int()
+        return NotImplemented
+
+    def __le__(self, other):
+        """Cho phép so sánh <=."""
+        if self.__class__ is other.__class__:
+            return self.value_to_int() <= other.value_to_int()
+        return NotImplemented
+
+    def __ge__(self, other):
+        """Cho phép so sánh >=."""
+        if self.__class__ is other.__class__:
+            return self.value_to_int() >= other.value_to_int()
+        return NotImplemented
+
+    def __gt__(self, other):
+        """Cho phép so sánh >."""
+        if self.__class__ is other.__class__:
+            return self.value_to_int() > other.value_to_int()
         return NotImplemented
 
     def value_to_int(self):
@@ -118,7 +137,7 @@ class OpenRouterClient:
         self.base_url = base_url
         logger.info(f"OpenRouterClient: Khởi tạo với base URL {base_url}")
 
-    async def chat_completion(self, model: OpenRouterModel, messages: list, temperature: float = 0.1, max_tokens: int = 700, response_format: Dict = None) -> str:
+    async def chat_completion(self, model: OpenRouterModel, messages: list, temperature: float = 0.1, max_tokens: int = 700, response_format: Optional[Dict] = None) -> str:
         """Gửi yêu cầu chat completion tới OpenRouter API."""
         payload = {
             "model": model.value,
@@ -157,11 +176,36 @@ class ContentIntegrityFilter:
     Module này chịu trách nhiệm lọc và kiểm duyệt nội dung đầu vào cho AI StillMe,
     đảm bảo tính chính xác, đạo đức và an toàn của mọi tri thức.
     """
-    def __init__(self, openrouter_api_key: Optional[str] = None):
+    def __init__(self, openrouter_api_key: Optional[str] = None, testing_mode: bool = False):
         if not openrouter_api_key:
             openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
         if not openrouter_api_key:
             raise ValueError("OPENROUTER_API_KEY biến môi trường hoặc tham số chưa được thiết lập.")
+        
+        self.testing_mode = testing_mode
+        self.test_response_index = 0
+        
+        # Test responses cho testing mode
+        self.test_responses = [
+            # analyze_content_quality responses
+            json.dumps({
+                "toxicity_score": 0.05, 
+                "hate_speech_score": 0.01, 
+                "bias_score": 0.02, 
+                "biased_aspects": [], 
+                "sensitive_topics_detected": [], 
+                "overall_assessment": "An toàn."
+            }),
+            # fact_check_content responses
+            json.dumps({
+                "is_factual": True, 
+                "confidence_score": 0.95, 
+                "misinformation_detected": [], 
+                "reason": "Tất cả các tuyên bố đều chính xác."
+            }),
+            # Error response
+            "Error: API Timeout"
+        ]
         
         self.openrouter_client = OpenRouterClient(api_key=openrouter_api_key)
         self.rules = self._load_rules()
@@ -182,6 +226,7 @@ class ContentIntegrityFilter:
             "blacklist_keywords": [
                 "tin giả", "thuyết âm mưu", "thông tin sai lệch", "phân biệt chủng tộc", "kỳ thị", 
                 "tuyên truyền cực đoan", "bạo lực tình dục", "khiêu dâm trẻ em", "hướng dẫn chế tạo vũ khí", 
+                "vũ khí", "chế tạo vũ khí", "vũ khí hóa học",
                 "dụ dỗ tự hại", "lừa đảo tài chính", "thuốc chữa bách bệnh", "sùng bái", "tự sướng",
                 "hướng dẫn hack", "virus máy tính", "đánh cắp dữ liệu", "khủng bố", "kích động bạo lực"
             ],
@@ -258,12 +303,18 @@ class ContentIntegrityFilter:
 
         # Chuẩn hóa văn bản để so sánh từ khóa
         normalized_text = self._normalize_text(content_text)
+        logger.info(f"Pre-filter: Content length: {len(content_text)}, Normalized text: '{normalized_text[:100]}...'")
         
         # Kiểm tra từ khóa cấm
-        for keyword in self.rules.get("blacklist_keywords", []):
+        blacklist_keywords = self.rules.get("blacklist_keywords", [])
+        logger.info(f"Pre-filter: Checking {len(blacklist_keywords)} blacklist keywords")
+        for keyword in blacklist_keywords:
             normalized_keyword = self._normalize_text(keyword)
-            # Sử dụng r'\b' để khớp toàn bộ từ, re.escape để xử lý ký tự đặc biệt trong từ khóa
-            if re.search(r'\b' + re.escape(normalized_keyword) + r'\b', normalized_text):
+            # Debug: in ra để kiểm tra
+            logger.info(f"Pre-filter: Checking keyword: '{keyword}' -> normalized: '{normalized_keyword}' in text: '{normalized_text[:100]}...'")
+            # Sử dụng simple string search thay vì regex word boundary (không hoạt động tốt với tiếng Việt)
+            if normalized_keyword in normalized_text:
+                logger.info(f"Pre-filter: Found banned keyword: '{keyword}' in content")
                 return False, f"Nội dung chứa từ khóa cấm đã biết: '{keyword}'.", Severity.CRITICAL
         
         # Kiểm tra nguồn không đáng tin cậy
@@ -329,7 +380,7 @@ class ContentIntegrityFilter:
             logger.error(f"Lỗi khi phân tích chất lượng nội dung bằng LLM: {e}. Trả về mặc định an toàn (có báo lỗi).")
             return default_analysis
 
-    async def fact_check_content(self, content_text: str) -> Tuple[bool, float, str]:
+    async def fact_check_content(self, content_text: str) -> Tuple[bool, float, str, List[str]]:
         """
         Giai đoạn 2b: Đánh giá tính xác thực của các thông tin sự kiện trong nội dung bằng LLM.
         """
@@ -355,8 +406,8 @@ class ContentIntegrityFilter:
         response_format = {"type": "json_object"}
 
         try:
-            llm_response_str = await self.openrouter_client.chat_completion(
-                self.fact_check_model, messages, temperature=0.1, max_tokens=700, response_format=response_format
+            llm_response_str = await self._call_llm(
+                prompt, self.fact_check_model, temperature=0.1, max_tokens=700, response_format=response_format
             )
             fact_check_data = json.loads(llm_response_str)
             
@@ -469,13 +520,17 @@ class ContentIntegrityFilter:
         }
 
         fact_check_confidence_threshold = self.rules.get("fact_check_confidence_threshold", 0.75)
+        logger.info(f"Fact check result: safe={fact_check_safe}, confidence={confidence_score}, threshold={fact_check_confidence_threshold}")
         if not fact_check_safe or confidence_score < fact_check_confidence_threshold:
+            logger.info(f"Fact check violation detected: safe={fact_check_safe}, confidence={confidence_score} < {fact_check_confidence_threshold}")
             is_safe = False
             overall_severity = max(overall_severity, Severity.HIGH)
             reason_detail = f"Thông tin sai lệch/độ tin cậy thấp (score: {confidence_score:.2f}). Lý do: {fact_check_reason}"
             violation_reasons.append(reason_detail)
             self.log_content_violation(content_id, content_text, source_url, ContentViolationType.MISINFORMATION, Severity.HIGH, reason_detail, 
                                        extra_data={"misinformation_detected_phrases": misinformation_detected})
+        else:
+            logger.info(f"Fact check passed: safe={fact_check_safe}, confidence={confidence_score} >= {fact_check_confidence_threshold}")
 
         # Tổng hợp kết quả cuối cùng
         if violation_reasons:
@@ -491,3 +546,15 @@ class ContentIntegrityFilter:
         """Đóng client HTTP khi không còn sử dụng."""
         await self.openrouter_client.close()
         logger.info("ContentIntegrityFilter: Đã đóng tất cả các client.")
+
+    async def _call_llm(self, prompt: str, model: OpenRouterModel, temperature: float = 0.1, max_tokens: int = 700, response_format: Optional[Dict] = None) -> str:
+        """Call LLM API hoặc trả về test response trong testing mode"""
+        if self.testing_mode:
+            # Trả về test response và rotate index
+            response = self.test_responses[self.test_response_index % len(self.test_responses)]
+            self.test_response_index += 1
+            return response
+        else:
+            # Gọi real API
+            messages = [{"role": "user", "content": prompt}]
+            return await self.openrouter_client.chat_completion(model, messages, temperature, max_tokens, response_format)

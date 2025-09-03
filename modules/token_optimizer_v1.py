@@ -11,7 +11,7 @@ Chức năng chính:
 import hashlib
 import logging
 import time
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Optional, Tuple, Any, Callable, Union
 from datetime import datetime, timedelta
 from collections import OrderedDict
 import numpy as np
@@ -60,7 +60,7 @@ class CacheItem(BaseModel):
 # Semantic Hybrid Cache
 # ======================
 class SemanticHybridCache:
-    def __init__(self, config: TokenOptimizerConfig):
+    def __init__(self, config: TokenOptimizerConfig) -> None:
         self.cache: OrderedDict[str, CacheItem] = OrderedDict()
         self.max_size = config.max_cache_size
         self.embedding_model = SentenceTransformer(config.embedding_model)
@@ -116,7 +116,7 @@ class SemanticHybridCache:
             return best_match, best_score
         return None
 
-    def add_item(self, query: str, response: str, token_count: int, ttl: Optional[timedelta] = None):
+    def add_item(self, query: str, response: str, token_count: int, ttl: Optional[timedelta] = None) -> None:
         key = self._generate_key(query)
         item = CacheItem(
             query=query,
@@ -143,7 +143,7 @@ class SemanticHybridCache:
 # Token Optimizer Core
 # ======================
 class TokenOptimizer:
-    def __init__(self, config: TokenOptimizerConfig):
+    def __init__(self, config: TokenOptimizerConfig) -> None:
         self.config = config
         self.cache = SemanticHybridCache(config)
         self.tokenizer = tiktoken.get_encoding(config.token_encoding)
@@ -152,7 +152,7 @@ class TokenOptimizer:
         self.rate_limiter = TokenRateLimiter(max_tokens_per_minute=90000)
         self.quality_monitor = QualityMonitor()
 
-    def process_request(self, query: str, context: List[str], api_callback: callable) -> Tuple[str, bool]:
+    def process_request(self, query: str, context: List[str], api_callback: Callable[[str], str]) -> Tuple[str, bool]:
         self.total_requests += 1
 
         try:
@@ -222,7 +222,7 @@ class TokenOptimizer:
     def _count_tokens(self, text: str) -> int:
         return len(self.tokenizer.encode(text))
 
-    def warmup_cache(self, qa_pairs: List[Dict[str, str]]):
+    def warmup_cache(self, qa_pairs: List[Dict[str, str]]) -> None:
         for pair in qa_pairs:
             self.cache.add_item(
                 query=pair['question'],
@@ -235,13 +235,13 @@ class TokenOptimizer:
 # Supporting Classes
 # ======================
 class TokenRateLimiter:
-    def __init__(self, max_tokens_per_minute: int):
+    def __init__(self, max_tokens_per_minute: int) -> None:
         self.max_tokens = max_tokens_per_minute
         self.token_count = 0
         self.last_reset = time.time()
         self.used_tokens = 0  # Thêm thuộc tính này
 
-    def check_limit(self, tokens: int):
+    def check_limit(self, tokens: int) -> None:
         if time.time() - self.last_reset > 60:
             self.token_count = 0
             self.used_tokens = 0
@@ -255,10 +255,10 @@ class TokenRateLimiter:
         self.used_tokens += tokens
 
 class QualityMonitor:
-    def __init__(self):
-        self.comparisons = []
+    def __init__(self) -> None:
+        self.comparisons: List[Dict[str, Any]] = []
 
-    def log_quality(self, original_query: str, optimized_response: str):
+    def log_quality(self, original_query: str, optimized_response: str) -> None:
         diff = len(original_query) - len(optimized_response)
         self.comparisons.append({
             'timestamp': datetime.now(),

@@ -22,7 +22,7 @@ from functools import wraps
 from concurrent.futures import ThreadPoolExecutor
 import yaml
 import psutil
-from restrictedpython import compile_restricted
+from RestrictedPython import compile_restricted
 
 # ------------------- CONSTANTS -------------------
 DEFAULT_CONFIG = {

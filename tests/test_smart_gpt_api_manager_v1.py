@@ -35,7 +35,17 @@ def test_choose_model_logic():
 def test_usage_analysis():
     """Kiểm tra thống kê sử dụng."""
     manager = SmartGPTAPIManager(model_preferences=["mock"])
+    
+    # Gọi call_api - sẽ fallback về gpt-3.5-turbo vì "mock" không phải model hợp lệ
     manager.call_api("Test 1")
     manager.call_api("Test 2")
+    
     stats = manager.analyze_usage()
-    assert stats["mock"]["total_calls"] == 2
+    
+    # Kiểm tra rằng gpt-3.5-turbo (fallback model) được sử dụng
+    assert "gpt-3.5-turbo" in stats
+    assert stats["gpt-3.5-turbo"]["total_calls"] == 2
+    
+    # Kiểm tra tổng số calls
+    total_calls = sum(model_stats["total_calls"] for model_stats in stats.values())
+    assert total_calls == 2

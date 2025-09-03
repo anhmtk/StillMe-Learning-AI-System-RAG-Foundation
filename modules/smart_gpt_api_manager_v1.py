@@ -23,8 +23,8 @@ class SmartGPTAPIManager:
             model_preferences: Danh sách model ưu tiên (vd: ['deepseek-coder', 'gpt-4o'])
             fallback_model: Model dự phòng khi các model chính fail
         """
-        self.model_preferences = model_preferences
-        self.fallback_model = fallback_model
+        self.model_preferences = model_preferences or ["gpt-3.5-turbo"]  # Ensure non-empty
+        self.fallback_model = fallback_model or "gpt-3.5-turbo"  # Ensure non-None
         self.openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY")) if os.getenv("OPENAI_API_KEY") else None
         self.usage_stats: Dict[str, Dict] = {}
         self.logger = logging.getLogger("SmartGPTAPIManager")
@@ -48,6 +48,7 @@ class SmartGPTAPIManager:
             if model in ["deepseek-coder", "gpt-4o", "gpt-3.5-turbo"]:
                 return model
                 
+        # Final fallback - ensure we always return a string
         return self.fallback_model
     
     def call_api(self, prompt: str, max_retries: int = 2) -> str:
@@ -74,7 +75,7 @@ class SmartGPTAPIManager:
                         prompt=optimized_prompt,
                         options={"temperature": 0.7}
                     )
-                    result = response["response"]
+                    result = response.get("response", "No response from DeepSeek")
                 elif model.startswith("gpt-"):
                     if not self.openai_client:
                         raise RuntimeError("OpenAI client chưa được cấu hình")

@@ -1,0 +1,287 @@
+2025-09-02 22:57:01,414 - ContentIntegrityFilter - WARNING - File rules không tồn tại tại D:\stillme_ai\modules\..\config\content_filter_rules.json. Đang tạo file mặc định.
+2025-09-02 22:57:01,415 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-02 22:57:34,427 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-02 22:57:34,428 - ContentIntegrityFilter - WARNING - File rules không tồn tại tại D:\stillme_ai\modules\..\config\content_filter_rules.json. Đang tạo file mặc định.
+2025-09-02 22:57:34,428 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-02 22:57:43,398 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-02 22:57:43,399 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-02 22:58:26,632 - ContentIntegrityFilter - WARNING - File rules không tồn tại tại D:\stillme_ai\modules\..\config\content_filter_rules.json. Đang tạo file mặc định.
+2025-09-02 22:58:26,633 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-02 22:58:26,781 - ContentIntegrityFilter - INFO - ContentIntegrityFilter: Đã đóng tất cả các client.
+2025-09-02 22:58:52,430 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-02 22:58:52,430 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-02 22:59:08,970 - ContentIntegrityFilter - WARNING - File rules không tồn tại tại D:\stillme_ai\modules\..\config\content_filter_rules.json. Đang tạo file mặc định.
+2025-09-02 22:59:08,971 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-02 22:59:50,934 - ContentIntegrityFilter - WARNING - File rules không tồn tại tại D:\stillme_ai\modules\..\config\content_filter_rules.json. Đang tạo file mặc định.
+2025-09-02 22:59:50,934 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-02 22:59:56,155 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-02 22:59:56,155 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-02 23:00:31,474 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-02 23:00:31,474 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-02 23:01:26,585 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-02 23:01:26,585 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-02 23:01:32,192 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-02 23:01:32,192 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-02 23:01:54,998 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-02 23:01:54,998 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-02 23:02:00,946 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-02 23:02:00,947 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-02 23:02:16,720 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-02 23:02:16,721 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-02 23:02:23,612 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-02 23:02:23,613 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-02 23:02:30,158 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-02 23:02:30,158 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-02 23:02:36,593 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-02 23:02:36,593 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-02 23:02:44,317 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-02 23:02:44,317 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 11:27:56,012 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 11:27:56,013 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 11:28:52,604 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 11:28:52,604 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 11:28:57,556 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 11:28:57,557 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 11:30:26,440 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 11:30:26,440 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 11:30:30,962 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 11:30:30,962 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 11:31:24,971 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 11:31:24,971 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 11:31:47,906 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 11:31:47,906 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 11:41:04,864 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 11:41:04,864 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 11:41:32,458 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 11:41:32,459 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 11:42:15,179 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 11:42:15,179 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:08:03,760 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:08:03,760 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:08:33,447 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:08:33,447 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:08:38,997 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:08:38,997 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:14:09,530 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:14:09,530 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:14:15,312 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:14:15,313 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:14:43,925 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:14:43,925 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:14:54,108 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:14:54,109 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:23:21,951 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:23:21,951 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:24:23,222 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:24:23,222 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:24:29,474 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:24:29,474 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:24:57,573 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:24:57,574 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:25:03,293 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:25:03,293 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:30:11,004 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:30:11,004 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:30:17,831 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:30:17,832 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:30:23,303 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:30:23,303 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:30:28,515 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:30:28,515 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:30:35,409 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:30:35,409 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:31:21,781 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:31:21,781 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:31:57,717 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:31:57,718 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:32:34,346 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:32:34,346 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:34:36,745 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:34:36,745 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:34:58,609 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:34:58,609 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:35:19,877 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:35:19,877 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:35:45,321 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:35:45,322 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:48:14,874 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:48:14,874 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:48:21,742 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:48:21,742 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:49:34,984 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:49:34,984 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:49:42,743 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:49:42,743 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:50:29,009 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:50:29,009 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:50:53,294 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:50:53,298 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:51:19,708 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:51:19,709 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:51:45,311 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:51:45,311 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:53:35,152 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:53:35,152 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:53:59,525 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:53:59,527 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:54:25,876 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:54:25,876 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:54:50,449 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:54:50,449 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:55:17,272 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:55:17,275 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:55:40,491 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:55:40,491 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:56:06,811 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:56:06,811 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 17:56:31,193 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 17:56:31,193 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 18:00:51,023 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 18:00:51,023 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 18:01:27,303 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 18:01:27,303 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 18:01:47,169 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 18:01:47,169 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 18:02:28,031 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 18:02:28,031 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 18:02:53,016 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 18:02:53,016 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 18:03:39,380 - ContentIntegrityFilter - WARNING - File rules không tồn tại tại D:\stillme_ai\modules\..\config\content_filter_rules.json. Đang tạo file mặc định.
+2025-09-03 18:03:39,380 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 18:03:45,196 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 18:03:45,197 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 18:03:51,070 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 18:03:51,072 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 18:04:06,213 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 18:04:06,214 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 18:04:28,793 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 18:04:28,793 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 18:05:02,424 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 18:05:02,424 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 18:05:38,674 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 18:05:38,674 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 18:06:15,696 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 18:06:15,696 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 18:06:48,196 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 18:06:48,196 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 18:07:22,500 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 18:07:22,500 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 18:07:51,155 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 18:07:51,155 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 18:08:58,028 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 18:08:58,028 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 18:09:45,294 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 18:09:45,295 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 18:19:13,023 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-03 18:19:13,025 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 18:19:13,025 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 18:19:40,125 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 18:19:40,125 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 18:24:01,724 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 18:24:01,724 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 18:26:08,950 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 18:26:08,950 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 18:27:31,728 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-03 18:27:31,729 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 18:27:31,729 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 18:32:29,848 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-03 18:32:29,850 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 18:32:29,850 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 18:37:28,806 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-03 18:37:28,806 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 18:37:28,808 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 22:43:37,863 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 22:43:37,864 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 22:44:28,705 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-03 22:44:28,705 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 22:44:28,705 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 23:05:13,420 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-03 23:05:13,420 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 23:05:13,420 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 23:15:10,897 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-03 23:15:10,897 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 23:15:10,898 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 23:15:56,178 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-03 23:15:56,181 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 23:15:56,181 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 23:15:56,656 - ContentIntegrityFilter - INFO - Pre-filter: Content length: 51, Normalized text: 'user prefers dark coffee and is allergic to peanuts...'
+2025-09-03 23:15:56,656 - ContentIntegrityFilter - INFO - Pre-filter: Checking 22 blacklist keywords
+2025-09-03 23:15:56,656 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'tin giả' -> normalized: 'tin gia' in text: 'user prefers dark coffee and is allergic to peanuts...'
+2025-09-03 23:15:56,656 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'thuyết âm mưu' -> normalized: 'thuyet am muu' in text: 'user prefers dark coffee and is allergic to peanuts...'
+2025-09-03 23:15:56,656 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'thông tin sai lệch' -> normalized: 'thong tin sai lech' in text: 'user prefers dark coffee and is allergic to peanuts...'
+2025-09-03 23:15:56,656 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'phân biệt chủng tộc' -> normalized: 'phan biet chung toc' in text: 'user prefers dark coffee and is allergic to peanuts...'
+2025-09-03 23:15:56,656 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'kỳ thị' -> normalized: 'ky thi' in text: 'user prefers dark coffee and is allergic to peanuts...'
+2025-09-03 23:15:56,656 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'tuyên truyền cực đoan' -> normalized: 'tuyen truyen cuc doan' in text: 'user prefers dark coffee and is allergic to peanuts...'
+2025-09-03 23:15:56,656 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'bạo lực tình dục' -> normalized: 'bao luc tinh duc' in text: 'user prefers dark coffee and is allergic to peanuts...'
+2025-09-03 23:15:56,656 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'khiêu dâm trẻ em' -> normalized: 'khieu dam tre em' in text: 'user prefers dark coffee and is allergic to peanuts...'
+2025-09-03 23:15:56,661 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'hướng dẫn chế tạo vũ khí' -> normalized: 'huong dan che tao vu khi' in text: 'user prefers dark coffee and is allergic to peanuts...'
+2025-09-03 23:15:56,661 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'vũ khí' -> normalized: 'vu khi' in text: 'user prefers dark coffee and is allergic to peanuts...'
+2025-09-03 23:15:56,661 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'chế tạo vũ khí' -> normalized: 'che tao vu khi' in text: 'user prefers dark coffee and is allergic to peanuts...'
+2025-09-03 23:15:56,661 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'vũ khí hóa học' -> normalized: 'vu khi hoa hoc' in text: 'user prefers dark coffee and is allergic to peanuts...'
+2025-09-03 23:15:56,661 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'dụ dỗ tự hại' -> normalized: 'du do tu hai' in text: 'user prefers dark coffee and is allergic to peanuts...'
+2025-09-03 23:15:56,661 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'lừa đảo tài chính' -> normalized: 'lua dao tai chinh' in text: 'user prefers dark coffee and is allergic to peanuts...'
+2025-09-03 23:15:56,661 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'thuốc chữa bách bệnh' -> normalized: 'thuoc chua bach benh' in text: 'user prefers dark coffee and is allergic to peanuts...'
+2025-09-03 23:15:56,661 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'sùng bái' -> normalized: 'sung bai' in text: 'user prefers dark coffee and is allergic to peanuts...'
+2025-09-03 23:15:56,661 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'tự sướng' -> normalized: 'tu suong' in text: 'user prefers dark coffee and is allergic to peanuts...'
+2025-09-03 23:15:56,661 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'hướng dẫn hack' -> normalized: 'huong dan hack' in text: 'user prefers dark coffee and is allergic to peanuts...'
+2025-09-03 23:15:56,661 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'virus máy tính' -> normalized: 'virus may tinh' in text: 'user prefers dark coffee and is allergic to peanuts...'
+2025-09-03 23:15:56,661 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'đánh cắp dữ liệu' -> normalized: 'danh cap du lieu' in text: 'user prefers dark coffee and is allergic to peanuts...'
+2025-09-03 23:15:56,661 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'khủng bố' -> normalized: 'khung bo' in text: 'user prefers dark coffee and is allergic to peanuts...'
+2025-09-03 23:15:56,661 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'kích động bạo lực' -> normalized: 'kich dong bao luc' in text: 'user prefers dark coffee and is allergic to peanuts...'
+2025-09-03 23:16:45,179 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-03 23:16:45,179 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 23:16:45,179 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 23:25:12,922 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-03 23:25:12,922 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 23:25:12,922 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 23:27:36,417 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-03 23:27:36,418 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 23:27:36,418 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 23:37:51,491 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-03 23:37:51,492 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 23:37:51,492 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-03 23:37:57,121 - ContentIntegrityFilter - INFO - Pre-filter: Content length: 99, Normalized text: 'mock response cho: hay viet mot doan van dai ve tam quan trong cua tri tue nhan tao trong the ky 21...'
+2025-09-03 23:37:57,121 - ContentIntegrityFilter - INFO - Pre-filter: Checking 22 blacklist keywords
+2025-09-03 23:37:57,128 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'tin giả' -> normalized: 'tin gia' in text: 'mock response cho: hay viet mot doan van dai ve tam quan trong cua tri tue nhan tao trong the ky 21...'
+2025-09-03 23:37:57,128 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'thuyết âm mưu' -> normalized: 'thuyet am muu' in text: 'mock response cho: hay viet mot doan van dai ve tam quan trong cua tri tue nhan tao trong the ky 21...'
+2025-09-03 23:37:57,128 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'thông tin sai lệch' -> normalized: 'thong tin sai lech' in text: 'mock response cho: hay viet mot doan van dai ve tam quan trong cua tri tue nhan tao trong the ky 21...'
+2025-09-03 23:37:57,128 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'phân biệt chủng tộc' -> normalized: 'phan biet chung toc' in text: 'mock response cho: hay viet mot doan van dai ve tam quan trong cua tri tue nhan tao trong the ky 21...'
+2025-09-03 23:37:57,128 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'kỳ thị' -> normalized: 'ky thi' in text: 'mock response cho: hay viet mot doan van dai ve tam quan trong cua tri tue nhan tao trong the ky 21...'
+2025-09-03 23:37:57,128 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'tuyên truyền cực đoan' -> normalized: 'tuyen truyen cuc doan' in text: 'mock response cho: hay viet mot doan van dai ve tam quan trong cua tri tue nhan tao trong the ky 21...'
+2025-09-03 23:37:57,128 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'bạo lực tình dục' -> normalized: 'bao luc tinh duc' in text: 'mock response cho: hay viet mot doan van dai ve tam quan trong cua tri tue nhan tao trong the ky 21...'
+2025-09-03 23:37:57,128 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'khiêu dâm trẻ em' -> normalized: 'khieu dam tre em' in text: 'mock response cho: hay viet mot doan van dai ve tam quan trong cua tri tue nhan tao trong the ky 21...'
+2025-09-03 23:37:57,128 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'hướng dẫn chế tạo vũ khí' -> normalized: 'huong dan che tao vu khi' in text: 'mock response cho: hay viet mot doan van dai ve tam quan trong cua tri tue nhan tao trong the ky 21...'
+2025-09-03 23:37:57,128 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'vũ khí' -> normalized: 'vu khi' in text: 'mock response cho: hay viet mot doan van dai ve tam quan trong cua tri tue nhan tao trong the ky 21...'
+2025-09-03 23:37:57,130 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'chế tạo vũ khí' -> normalized: 'che tao vu khi' in text: 'mock response cho: hay viet mot doan van dai ve tam quan trong cua tri tue nhan tao trong the ky 21...'
+2025-09-03 23:37:57,130 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'vũ khí hóa học' -> normalized: 'vu khi hoa hoc' in text: 'mock response cho: hay viet mot doan van dai ve tam quan trong cua tri tue nhan tao trong the ky 21...'
+2025-09-03 23:37:57,130 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'dụ dỗ tự hại' -> normalized: 'du do tu hai' in text: 'mock response cho: hay viet mot doan van dai ve tam quan trong cua tri tue nhan tao trong the ky 21...'
+2025-09-03 23:37:57,130 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'lừa đảo tài chính' -> normalized: 'lua dao tai chinh' in text: 'mock response cho: hay viet mot doan van dai ve tam quan trong cua tri tue nhan tao trong the ky 21...'
+2025-09-03 23:37:57,130 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'thuốc chữa bách bệnh' -> normalized: 'thuoc chua bach benh' in text: 'mock response cho: hay viet mot doan van dai ve tam quan trong cua tri tue nhan tao trong the ky 21...'
+2025-09-03 23:37:57,131 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'sùng bái' -> normalized: 'sung bai' in text: 'mock response cho: hay viet mot doan van dai ve tam quan trong cua tri tue nhan tao trong the ky 21...'
+2025-09-03 23:37:57,131 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'tự sướng' -> normalized: 'tu suong' in text: 'mock response cho: hay viet mot doan van dai ve tam quan trong cua tri tue nhan tao trong the ky 21...'
+2025-09-03 23:37:57,131 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'hướng dẫn hack' -> normalized: 'huong dan hack' in text: 'mock response cho: hay viet mot doan van dai ve tam quan trong cua tri tue nhan tao trong the ky 21...'
+2025-09-03 23:37:57,131 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'virus máy tính' -> normalized: 'virus may tinh' in text: 'mock response cho: hay viet mot doan van dai ve tam quan trong cua tri tue nhan tao trong the ky 21...'
+2025-09-03 23:37:57,131 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'đánh cắp dữ liệu' -> normalized: 'danh cap du lieu' in text: 'mock response cho: hay viet mot doan van dai ve tam quan trong cua tri tue nhan tao trong the ky 21...'
+2025-09-03 23:37:57,131 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'khủng bố' -> normalized: 'khung bo' in text: 'mock response cho: hay viet mot doan van dai ve tam quan trong cua tri tue nhan tao trong the ky 21...'
+2025-09-03 23:37:57,132 - ContentIntegrityFilter - INFO - Pre-filter: Checking keyword: 'kích động bạo lực' -> normalized: 'kich dong bao luc' in text: 'mock response cho: hay viet mot doan van dai ve tam quan trong cua tri tue nhan tao trong the ky 21...'
+2025-09-03 23:39:28,071 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-03 23:39:28,072 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-03 23:39:28,072 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-04 00:07:37,559 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-04 00:07:37,565 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-04 00:07:37,565 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-04 00:26:41,794 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-04 00:26:41,801 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-04 00:26:41,802 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-04 00:27:08,531 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-04 00:27:08,531 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-04 00:27:08,531 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-04 00:27:29,891 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-04 00:27:29,892 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-04 00:27:29,892 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-04 00:28:33,426 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-04 00:28:33,426 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-04 00:28:33,426 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-04 00:28:41,610 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-04 00:28:41,610 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-04 00:28:41,610 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.

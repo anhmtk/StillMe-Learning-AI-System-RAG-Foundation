@@ -1,0 +1,545 @@
+{
+  "test_user_positive": {
+    "style_history": [
+      {
+        "formality": 0.3,
+        "sentiment": "tích cực",
+        "humor_level": 0.7,
+        "conciseness": 0.8,
+        "vocabulary_complexity": 0.4,
+        "tone": "thân thiện",
+        "keywords": [
+          "vui vẻ",
+          "thích thú",
+          "tuyệt vời"
+        ]
+      },
+      {
+        "formality": 0.3,
+        "sentiment": "tích cực",
+        "humor_level": 0.7,
+        "conciseness": 0.8,
+        "vocabulary_complexity": 0.4,
+        "tone": "thân thiện",
+        "keywords": [
+          "vui vẻ",
+          "thích thú",
+          "tuyệt vời"
+        ]
+      },
+      {
+        "formality": 0.3,
+        "sentiment": "tích cực",
+        "humor_level": 0.7,
+        "conciseness": 0.8,
+        "vocabulary_complexity": 0.4,
+        "tone": "thân thiện",
+        "keywords": [
+          "vui vẻ",
+          "thích thú",
+          "tuyệt vời"
+        ]
+      },
+      {
+        "formality": 0.3,
+        "sentiment": "tích cực",
+        "humor_level": 0.7,
+        "conciseness": 0.8,
+        "vocabulary_complexity": 0.4,
+        "tone": "thân thiện",
+        "keywords": [
+          "vui vẻ",
+          "thích thú",
+          "tuyệt vời"
+        ]
+      },
+      {
+        "formality": 0.3,
+        "sentiment": "tích cực",
+        "humor_level": 0.7,
+        "conciseness": 0.8,
+        "vocabulary_complexity": 0.4,
+        "tone": "thân thiện",
+        "keywords": [
+          "vui vẻ",
+          "thích thú",
+          "tuyệt vời"
+        ]
+      },
+      {
+        "formality": 0.3,
+        "sentiment": "tích cực",
+        "humor_level": 0.7,
+        "conciseness": 0.8,
+        "vocabulary_complexity": 0.4,
+        "tone": "thân thiện",
+        "keywords": [
+          "vui vẻ",
+          "thích thú",
+          "tuyệt vời"
+        ]
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      }
+    ],
+    "current_style": {
+      "formality": 0.49272727272727274,
+      "sentiment": "trung lập",
+      "humor_level": 0.025454545454545455,
+      "conciseness": 0.510909090909091,
+      "vocabulary_complexity": 0.4963636363636364,
+      "tone": "thân thiện",
+      "keywords": []
+    }
+  },
+  "test_user_negative": {
+    "style_history": [
+      {
+        "formality": 0.7,
+        "sentiment": "tiêu cực",
+        "humor_level": 0.0,
+        "conciseness": 0.8,
+        "vocabulary_complexity": 0.6,
+        "tone": "nghiêm túc",
+        "keywords": [
+          "không hài lòng",
+          "vấn đề",
+          "thất vọng"
+        ]
+      },
+      {
+        "formality": 0.7,
+        "sentiment": "tiêu cực",
+        "humor_level": 0.0,
+        "conciseness": 0.7,
+        "vocabulary_complexity": 0.6,
+        "tone": "nghiêm túc",
+        "keywords": [
+          "không hài lòng",
+          "vấn đề",
+          "thất vọng"
+        ]
+      },
+      {
+        "formality": 0.7,
+        "sentiment": "tiêu cực",
+        "humor_level": 0.0,
+        "conciseness": 0.7,
+        "vocabulary_complexity": 0.6,
+        "tone": "nghiêm túc",
+        "keywords": [
+          "không hài lòng",
+          "vấn đề",
+          "thất vọng"
+        ]
+      },
+      {
+        "formality": 0.7,
+        "sentiment": "tiêu cực",
+        "humor_level": 0.0,
+        "conciseness": 0.7,
+        "vocabulary_complexity": 0.6,
+        "tone": "nghiêm túc",
+        "keywords": [
+          "không hài lòng",
+          "vấn đề",
+          "thất vọng"
+        ]
+      },
+      {
+        "formality": 0.7,
+        "sentiment": "tiêu cực",
+        "humor_level": 0.0,
+        "conciseness": 0.7,
+        "vocabulary_complexity": 0.6,
+        "tone": "nghiêm túc",
+        "keywords": [
+          "không hài lòng",
+          "vấn đề",
+          "thất vọng"
+        ]
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      }
+    ],
+    "current_style": {
+      "formality": 0.5072727272727273,
+      "sentiment": "trung lập",
+      "humor_level": 0.0,
+      "conciseness": 0.5072727272727273,
+      "vocabulary_complexity": 0.5036363636363637,
+      "tone": "thân thiện",
+      "keywords": []
+    }
+  },
+  "test_user_formal": {
+    "style_history": [
+      {
+        "formality": 0.8,
+        "sentiment": "trung lập",
+        "humor_level": 0.1,
+        "conciseness": 0.7,
+        "vocabulary_complexity": 0.7,
+        "tone": "trang trọng",
+        "keywords": [
+          "quy định",
+          "thông tin",
+          "chi tiết"
+        ]
+      },
+      {
+        "formality": 0.8,
+        "sentiment": "trung lập",
+        "humor_level": 0.1,
+        "conciseness": 0.7,
+        "vocabulary_complexity": 0.7,
+        "tone": "trang trọng",
+        "keywords": [
+          "quy định",
+          "thông tin",
+          "chi tiết"
+        ]
+      },
+      {
+        "formality": 0.8,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.7,
+        "vocabulary_complexity": 0.7,
+        "tone": "trang trọng",
+        "keywords": [
+          "quy định",
+          "thông tin",
+          "chi tiết"
+        ]
+      },
+      {
+        "formality": 0.8,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.7,
+        "vocabulary_complexity": 0.7,
+        "tone": "trang trọng",
+        "keywords": [
+          "quy định",
+          "thông tin",
+          "chi tiết"
+        ]
+      },
+      {
+        "formality": 0.8,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.7,
+        "vocabulary_complexity": 0.7,
+        "tone": "trang trọng",
+        "keywords": [
+          "quy định",
+          "thông tin",
+          "chi tiết"
+        ]
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      }
+    ],
+    "current_style": {
+      "formality": 0.510909090909091,
+      "sentiment": "trung lập",
+      "humor_level": 0.0,
+      "conciseness": 0.5072727272727273,
+      "vocabulary_complexity": 0.5072727272727273,
+      "tone": "thân thiện",
+      "keywords": []
+    }
+  },
+  "test_user_smoothing": {
+    "style_history": [
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      }
+    ],
+    "current_style": {
+      "formality": 0.5,
+      "sentiment": "trung lập",
+      "humor_level": 0.0,
+      "conciseness": 0.5,
+      "vocabulary_complexity": 0.5,
+      "tone": "thân thiện",
+      "keywords": []
+    }
+  },
+  "test_user_empty": {
+    "style_history": [
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      },
+      {
+        "formality": 0.5,
+        "sentiment": "trung lập",
+        "humor_level": 0.0,
+        "conciseness": 0.5,
+        "vocabulary_complexity": 0.5,
+        "tone": "thân thiện",
+        "keywords": []
+      }
+    ],
+    "current_style": {
+      "formality": 0.5,
+      "sentiment": "trung lập",
+      "humor_level": 0.0,
+      "conciseness": 0.5,
+      "vocabulary_complexity": 0.5,
+      "tone": "thân thiện",
+      "keywords": []
+    }
+  }
+}

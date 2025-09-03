@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from unittest.mock import MagicMock, patch
 import numpy as np
 import time
+from typing import List, Dict, Any, Callable
 from modules.token_optimizer_v1 import (
     TokenOptimizer,
     TokenOptimizerConfig,
@@ -16,7 +17,7 @@ from modules.token_optimizer_v1 import (
 # FIXTURES
 # ============================
 @pytest.fixture
-def sample_config():
+def sample_config() -> TokenOptimizerConfig:
     return TokenOptimizerConfig(
         min_similarity_threshold=0.8,
         max_prompt_tokens=200,
@@ -25,18 +26,18 @@ def sample_config():
     )
 
 @pytest.fixture
-def mock_embedding():
+def mock_embedding() -> np.ndarray:
     return np.random.rand(384)
 
 @pytest.fixture
-def optimizer(sample_config):
+def optimizer(sample_config: TokenOptimizerConfig) -> TokenOptimizer:
     with patch('sentence_transformers.SentenceTransformer'):
         return TokenOptimizer(sample_config)
 
 # ============================
 # TEST CACHE
 # ============================
-def test_cache_operations(optimizer):
+def test_cache_operations(optimizer: TokenOptimizer) -> None:
     test_query = "Xin chào, bạn khỏe không?"
     test_response = "Tôi khỏe, cảm ơn bạn!"
 
@@ -58,7 +59,7 @@ def test_cache_operations(optimizer):
     assert item.response == test_response
     assert similarity >= 0.8
 
-def test_cache_expiration(optimizer):
+def test_cache_expiration(optimizer: TokenOptimizer) -> None:
     test_query = "Câu hỏi tạm thời"
     optimizer.cache.add_item(
         query=test_query,
@@ -74,7 +75,7 @@ def test_cache_expiration(optimizer):
 # ============================
 # TEST TOKEN COUNTING
 # ============================
-def test_token_counting(optimizer):
+def test_token_counting(optimizer: TokenOptimizer) -> None:
     text = "Xin chào thế giới"
     token_count = optimizer._count_tokens(text)
     assert token_count > 0
@@ -83,7 +84,7 @@ def test_token_counting(optimizer):
 # ============================
 # TEST PROMPT OPTIMIZATION
 # ============================
-def test_prompt_optimization(optimizer):
+def test_prompt_optimization(optimizer: TokenOptimizer) -> None:
     query = "Giải thích về AI"
     context = [
         "Chúng ta đang nói về công nghệ",
@@ -97,7 +98,7 @@ def test_prompt_optimization(optimizer):
 # ============================
 # TEST VIETNAMESE NORMALIZATION
 # ============================
-def test_vietnamese_normalization(optimizer):
+def test_vietnamese_normalization(optimizer: TokenOptimizer) -> None:
     normalized = optimizer._normalize_query("Tôi ko biết")
     assert "không" in normalized
     assert "ko" not in normalized
@@ -105,14 +106,14 @@ def test_vietnamese_normalization(optimizer):
 # ============================
 # TEST RATE LIMITER
 # ============================
-def test_rate_limiting():
+def test_rate_limiting() -> None:
     limiter = TokenRateLimiter(max_tokens_per_minute=100)
     limiter.check_limit(50)
     limiter.check_limit(49)
     with pytest.raises(TokenLimitExceededError):
         limiter.check_limit(2)
 
-def test_rate_limiter_reset():
+def test_rate_limiter_reset() -> None:
     limiter = TokenRateLimiter(max_tokens_per_minute=100)
     limiter.check_limit(60)
     time.sleep(1.2)  # Chờ reset
@@ -123,7 +124,7 @@ def test_rate_limiter_reset():
 # ============================
 # TEST QUALITY MONITOR
 # ============================
-def test_quality_monitoring():
+def test_quality_monitoring() -> None:
     monitor = QualityMonitor()
     monitor.log_quality("Câu hỏi dài", "Trả lời ngắn")
     assert len(monitor.comparisons) == 1
@@ -134,8 +135,8 @@ def test_quality_monitoring():
 # ============================
 # FULL PROCESS FLOW
 # ============================
-def test_full_process_flow(optimizer):
-    mock_api = MagicMock(return_value="Câu trả lời mẫu")
+def test_full_process_flow(optimizer: TokenOptimizer) -> None:
+    mock_api: Callable[[str], str] = MagicMock(return_value="Câu trả lời mẫu")
 
     response, cached = optimizer.process_request(
         query="Câu hỏi mới",
@@ -158,8 +159,13 @@ def test_full_process_flow(optimizer):
 # TEST CONFIG LOADING
 # ============================
 @patch('modules.token_optimizer_v1.tiktoken.get_encoding')
-def test_config_loading(mock_encoding):
-    config = TokenOptimizerConfig(language="en", max_prompt_tokens=500)
+def test_config_loading(mock_encoding: MagicMock) -> None:
+    config = TokenOptimizerConfig(
+        language="en", 
+        max_prompt_tokens=500,
+        min_similarity_threshold=0.8,
+        max_cache_size=100
+    )
     optimizer = TokenOptimizer(config)
     assert optimizer.config.language == "en"
     assert optimizer.config.max_prompt_tokens == 500
@@ -167,7 +173,7 @@ def test_config_loading(mock_encoding):
 # ============================
 # SEMANTIC MATCH ACCURACY
 # ============================
-def test_semantic_match_accuracy(optimizer):
+def test_semantic_match_accuracy(optimizer: TokenOptimizer) -> None:
     query = "Xin chào"
     response = "Chào bạn"
     optimizer.cache.add_item(query, response, token_count=5, ttl=timedelta(minutes=1))

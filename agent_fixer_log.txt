@@ -1,0 +1,230 @@
+2025-08-03 21:47:21,249 - INFO - \U0001f680 AgentFixer_v1 b\u1eaft \u0111\u1ea7u...
+2025-08-03 21:47:21,249 - INFO - \U0001f9ea \u0110ang test module: content_integrity_filter
+2025-08-03 21:47:21,254 - INFO - \U0001f525 L\u1ed7i: module 'importlib' has no attribute 'util'
+2025-08-03 21:47:21,254 - ERROR - Traceback (most recent call last):
+  File "D:\stillme_ai\agent_module_tester.py", line 60, in test_module
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+           ^^^^^^^^^^^^^^
+AttributeError: module 'importlib' has no attribute 'util'
+
+2025-08-03 21:47:21,255 - INFO - \U0001f916 G\u1ecdi AI \u0111\u1ec3 s\u1eeda l\u1ed7i cho: content_integrity_filter.py
+2025-08-03 21:47:21,255 - INFO - \u2705 AI \u0111ã s\u1eeda file content_integrity_filter.py
+2025-08-03 21:47:21,283 - INFO - \U0001f9ea \u0110ang test module: content_integrity_filter
+2025-08-03 21:47:21,284 - INFO - \U0001f525 L\u1ed7i: module 'importlib' has no attribute 'util'
+2025-08-03 21:47:21,284 - ERROR - Traceback (most recent call last):
+  File "D:\stillme_ai\agent_module_tester.py", line 60, in test_module
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+           ^^^^^^^^^^^^^^
+AttributeError: module 'importlib' has no attribute 'util'
+
+2025-08-03 21:47:21,284 - INFO - \u274c S\u1eeda l\u1ed7i không thành công cho: content_integrity_filter.py
+2025-08-03 21:47:21,285 - INFO - \U0001f9ea \u0110ang test module: conversational_core_v1
+2025-08-03 21:47:21,285 - INFO - \U0001f525 L\u1ed7i: module 'importlib' has no attribute 'util'
+2025-08-03 21:47:21,285 - ERROR - Traceback (most recent call last):
+  File "D:\stillme_ai\agent_module_tester.py", line 60, in test_module
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+           ^^^^^^^^^^^^^^
+AttributeError: module 'importlib' has no attribute 'util'
+
+2025-08-03 21:47:21,285 - INFO - \U0001f916 G\u1ecdi AI \u0111\u1ec3 s\u1eeda l\u1ed7i cho: conversational_core_v1.py
+2025-08-03 21:47:21,286 - INFO - \u2705 AI \u0111ã s\u1eeda file conversational_core_v1.py
+2025-08-03 21:47:21,286 - INFO - \U0001f9ea \u0110ang test module: conversational_core_v1
+2025-08-03 21:47:21,287 - INFO - \U0001f525 L\u1ed7i: module 'importlib' has no attribute 'util'
+2025-08-03 21:47:21,287 - ERROR - Traceback (most recent call last):
+  File "D:\stillme_ai\agent_module_tester.py", line 60, in test_module
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+           ^^^^^^^^^^^^^^
+AttributeError: module 'importlib' has no attribute 'util'
+
+2025-08-03 21:47:21,287 - INFO - \u274c S\u1eeda l\u1ed7i không thành công cho: conversational_core_v1.py
+2025-08-03 21:47:21,287 - INFO - \U0001f9ea \u0110ang test module: ethical_core_system_v1
+2025-08-03 21:47:21,288 - INFO - \U0001f525 L\u1ed7i: module 'importlib' has no attribute 'util'
+2025-08-03 21:47:21,288 - ERROR - Traceback (most recent call last):
+  File "D:\stillme_ai\agent_module_tester.py", line 60, in test_module
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+           ^^^^^^^^^^^^^^
+AttributeError: module 'importlib' has no attribute 'util'
+
+2025-08-03 21:47:21,288 - INFO - \U0001f916 G\u1ecdi AI \u0111\u1ec3 s\u1eeda l\u1ed7i cho: ethical_core_system_v1.py
+2025-08-03 21:47:21,288 - INFO - \u2705 AI \u0111ã s\u1eeda file ethical_core_system_v1.py
+2025-08-03 21:47:21,289 - INFO - \U0001f9ea \u0110ang test module: ethical_core_system_v1
+2025-08-03 21:47:21,289 - INFO - \U0001f525 L\u1ed7i: module 'importlib' has no attribute 'util'
+2025-08-03 21:47:21,289 - ERROR - Traceback (most recent call last):
+  File "D:\stillme_ai\agent_module_tester.py", line 60, in test_module
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+           ^^^^^^^^^^^^^^
+AttributeError: module 'importlib' has no attribute 'util'
+
+2025-08-03 21:47:21,289 - INFO - \u274c S\u1eeda l\u1ed7i không thành công cho: ethical_core_system_v1.py
+2025-08-03 21:47:21,290 - INFO - \U0001f9ea \u0110ang test module: example_module
+2025-08-03 21:47:21,290 - INFO - \U0001f525 L\u1ed7i: module 'importlib' has no attribute 'util'
+2025-08-03 21:47:21,290 - ERROR - Traceback (most recent call last):
+  File "D:\stillme_ai\agent_module_tester.py", line 60, in test_module
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+           ^^^^^^^^^^^^^^
+AttributeError: module 'importlib' has no attribute 'util'
+
+2025-08-03 21:47:21,290 - INFO - \U0001f916 G\u1ecdi AI \u0111\u1ec3 s\u1eeda l\u1ed7i cho: example_module.py
+2025-08-03 21:47:21,291 - INFO - \u2705 AI \u0111ã s\u1eeda file example_module.py
+2025-08-03 21:47:21,291 - INFO - \U0001f9ea \u0110ang test module: example_module
+2025-08-03 21:47:21,291 - INFO - \U0001f525 L\u1ed7i: module 'importlib' has no attribute 'util'
+2025-08-03 21:47:21,291 - ERROR - Traceback (most recent call last):
+  File "D:\stillme_ai\agent_module_tester.py", line 60, in test_module
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+           ^^^^^^^^^^^^^^
+AttributeError: module 'importlib' has no attribute 'util'
+
+2025-08-03 21:47:21,292 - INFO - \u274c S\u1eeda l\u1ed7i không thành công cho: example_module.py
+2025-08-03 21:47:21,292 - INFO - \U0001f9ea \u0110ang test module: framework_metrics
+2025-08-03 21:47:21,292 - INFO - \U0001f525 L\u1ed7i: module 'importlib' has no attribute 'util'
+2025-08-03 21:47:21,292 - ERROR - Traceback (most recent call last):
+  File "D:\stillme_ai\agent_module_tester.py", line 60, in test_module
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+           ^^^^^^^^^^^^^^
+AttributeError: module 'importlib' has no attribute 'util'
+
+2025-08-03 21:47:21,292 - INFO - \U0001f916 G\u1ecdi AI \u0111\u1ec3 s\u1eeda l\u1ed7i cho: framework_metrics.py
+2025-08-03 21:47:21,293 - INFO - \u2705 AI \u0111ã s\u1eeda file framework_metrics.py
+2025-08-03 21:47:21,293 - INFO - \U0001f9ea \u0110ang test module: framework_metrics
+2025-08-03 21:47:21,293 - INFO - \U0001f525 L\u1ed7i: module 'importlib' has no attribute 'util'
+2025-08-03 21:47:21,294 - ERROR - Traceback (most recent call last):
+  File "D:\stillme_ai\agent_module_tester.py", line 60, in test_module
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+           ^^^^^^^^^^^^^^
+AttributeError: module 'importlib' has no attribute 'util'
+
+2025-08-03 21:47:21,294 - INFO - \u274c S\u1eeda l\u1ed7i không thành công cho: framework_metrics.py
+2025-08-03 21:47:21,294 - INFO - \U0001f9ea \u0110ang test module: layered_memory_v1
+2025-08-03 21:47:21,294 - INFO - \U0001f525 L\u1ed7i: module 'importlib' has no attribute 'util'
+2025-08-03 21:47:21,294 - ERROR - Traceback (most recent call last):
+  File "D:\stillme_ai\agent_module_tester.py", line 60, in test_module
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+           ^^^^^^^^^^^^^^
+AttributeError: module 'importlib' has no attribute 'util'
+
+2025-08-03 21:47:21,294 - INFO - \U0001f916 G\u1ecdi AI \u0111\u1ec3 s\u1eeda l\u1ed7i cho: layered_memory_v1.py
+2025-08-03 21:47:21,296 - INFO - \u2705 AI \u0111ã s\u1eeda file layered_memory_v1.py
+2025-08-03 21:47:21,296 - INFO - \U0001f9ea \u0110ang test module: layered_memory_v1
+2025-08-03 21:47:21,297 - INFO - \U0001f525 L\u1ed7i: module 'importlib' has no attribute 'util'
+2025-08-03 21:47:21,297 - ERROR - Traceback (most recent call last):
+  File "D:\stillme_ai\agent_module_tester.py", line 60, in test_module
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+           ^^^^^^^^^^^^^^
+AttributeError: module 'importlib' has no attribute 'util'
+
+2025-08-03 21:47:21,297 - INFO - \u274c S\u1eeda l\u1ed7i không thành công cho: layered_memory_v1.py
+2025-08-03 21:47:21,297 - INFO - \U0001f9ea \u0110ang test module: persona_morph
+2025-08-03 21:47:21,297 - INFO - \U0001f525 L\u1ed7i: module 'importlib' has no attribute 'util'
+2025-08-03 21:47:21,298 - ERROR - Traceback (most recent call last):
+  File "D:\stillme_ai\agent_module_tester.py", line 60, in test_module
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+           ^^^^^^^^^^^^^^
+AttributeError: module 'importlib' has no attribute 'util'
+
+2025-08-03 21:47:21,298 - INFO - \U0001f916 G\u1ecdi AI \u0111\u1ec3 s\u1eeda l\u1ed7i cho: persona_morph.py
+2025-08-03 21:47:21,298 - INFO - \u2705 AI \u0111ã s\u1eeda file persona_morph.py
+2025-08-03 21:47:21,299 - INFO - \U0001f9ea \u0110ang test module: persona_morph
+2025-08-03 21:47:21,299 - INFO - \U0001f525 L\u1ed7i: module 'importlib' has no attribute 'util'
+2025-08-03 21:47:21,299 - ERROR - Traceback (most recent call last):
+  File "D:\stillme_ai\agent_module_tester.py", line 60, in test_module
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+           ^^^^^^^^^^^^^^
+AttributeError: module 'importlib' has no attribute 'util'
+
+2025-08-03 21:47:21,299 - INFO - \u274c S\u1eeda l\u1ed7i không thành công cho: persona_morph.py
+2025-08-03 21:47:21,300 - INFO - \U0001f9ea \u0110ang test module: secure_memory_manager
+2025-08-03 21:47:21,300 - INFO - \U0001f525 L\u1ed7i: module 'importlib' has no attribute 'util'
+2025-08-03 21:47:21,300 - ERROR - Traceback (most recent call last):
+  File "D:\stillme_ai\agent_module_tester.py", line 60, in test_module
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+           ^^^^^^^^^^^^^^
+AttributeError: module 'importlib' has no attribute 'util'
+
+2025-08-03 21:47:21,300 - INFO - \U0001f916 G\u1ecdi AI \u0111\u1ec3 s\u1eeda l\u1ed7i cho: secure_memory_manager.py
+2025-08-03 21:47:21,301 - INFO - \u2705 AI \u0111ã s\u1eeda file secure_memory_manager.py
+2025-08-03 21:47:21,301 - INFO - \U0001f9ea \u0110ang test module: secure_memory_manager
+2025-08-03 21:47:21,301 - INFO - \U0001f525 L\u1ed7i: module 'importlib' has no attribute 'util'
+2025-08-03 21:47:21,301 - ERROR - Traceback (most recent call last):
+  File "D:\stillme_ai\agent_module_tester.py", line 60, in test_module
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+           ^^^^^^^^^^^^^^
+AttributeError: module 'importlib' has no attribute 'util'
+
+2025-08-03 21:47:21,301 - INFO - \u274c S\u1eeda l\u1ed7i không thành công cho: secure_memory_manager.py
+2025-08-03 21:47:21,301 - INFO - \U0001f9ea \u0110ang test module: smart_gpt_api_manager_v1
+2025-08-03 21:47:21,302 - INFO - \U0001f525 L\u1ed7i: module 'importlib' has no attribute 'util'
+2025-08-03 21:47:21,302 - ERROR - Traceback (most recent call last):
+  File "D:\stillme_ai\agent_module_tester.py", line 60, in test_module
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+           ^^^^^^^^^^^^^^
+AttributeError: module 'importlib' has no attribute 'util'
+
+2025-08-03 21:47:21,302 - INFO - \U0001f916 G\u1ecdi AI \u0111\u1ec3 s\u1eeda l\u1ed7i cho: smart_gpt_api_manager_v1.py
+2025-08-03 21:47:21,302 - INFO - \u2705 AI \u0111ã s\u1eeda file smart_gpt_api_manager_v1.py
+2025-08-03 21:47:21,302 - INFO - \U0001f9ea \u0110ang test module: smart_gpt_api_manager_v1
+2025-08-03 21:47:21,303 - INFO - \U0001f525 L\u1ed7i: module 'importlib' has no attribute 'util'
+2025-08-03 21:47:21,303 - ERROR - Traceback (most recent call last):
+  File "D:\stillme_ai\agent_module_tester.py", line 60, in test_module
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+           ^^^^^^^^^^^^^^
+AttributeError: module 'importlib' has no attribute 'util'
+
+2025-08-03 21:47:21,303 - INFO - \u274c S\u1eeda l\u1ed7i không thành công cho: smart_gpt_api_manager_v1.py
+2025-08-03 21:47:21,303 - INFO - \U0001f9ea \u0110ang test module: stillme_core
+2025-08-03 21:47:21,303 - INFO - \U0001f525 L\u1ed7i: module 'importlib' has no attribute 'util'
+2025-08-03 21:47:21,303 - ERROR - Traceback (most recent call last):
+  File "D:\stillme_ai\agent_module_tester.py", line 60, in test_module
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+           ^^^^^^^^^^^^^^
+AttributeError: module 'importlib' has no attribute 'util'
+
+2025-08-03 21:47:21,303 - INFO - \U0001f916 G\u1ecdi AI \u0111\u1ec3 s\u1eeda l\u1ed7i cho: stillme_core.py
+2025-08-03 21:47:21,304 - INFO - \u2705 AI \u0111ã s\u1eeda file stillme_core.py
+2025-08-03 21:47:21,304 - INFO - \U0001f9ea \u0110ang test module: stillme_core
+2025-08-03 21:47:21,305 - INFO - \U0001f525 L\u1ed7i: module 'importlib' has no attribute 'util'
+2025-08-03 21:47:21,305 - ERROR - Traceback (most recent call last):
+  File "D:\stillme_ai\agent_module_tester.py", line 60, in test_module
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+           ^^^^^^^^^^^^^^
+AttributeError: module 'importlib' has no attribute 'util'
+
+2025-08-03 21:47:21,305 - INFO - \u274c S\u1eeda l\u1ed7i không thành công cho: stillme_core.py
+2025-08-03 21:47:21,305 - INFO - \U0001f9ea \u0110ang test module: token_optimizer_v1
+2025-08-03 21:47:21,305 - INFO - \U0001f525 L\u1ed7i: module 'importlib' has no attribute 'util'
+2025-08-03 21:47:21,305 - ERROR - Traceback (most recent call last):
+  File "D:\stillme_ai\agent_module_tester.py", line 60, in test_module
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+           ^^^^^^^^^^^^^^
+AttributeError: module 'importlib' has no attribute 'util'
+
+2025-08-03 21:47:21,306 - INFO - \U0001f916 G\u1ecdi AI \u0111\u1ec3 s\u1eeda l\u1ed7i cho: token_optimizer_v1.py
+2025-08-03 21:47:21,306 - INFO - \u2705 AI \u0111ã s\u1eeda file token_optimizer_v1.py
+2025-08-03 21:47:21,307 - INFO - \U0001f9ea \u0110ang test module: token_optimizer_v1
+2025-08-03 21:47:21,307 - INFO - \U0001f525 L\u1ed7i: module 'importlib' has no attribute 'util'
+2025-08-03 21:47:21,307 - ERROR - Traceback (most recent call last):
+  File "D:\stillme_ai\agent_module_tester.py", line 60, in test_module
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+           ^^^^^^^^^^^^^^
+AttributeError: module 'importlib' has no attribute 'util'
+
+2025-08-03 21:47:21,307 - INFO - \u274c S\u1eeda l\u1ed7i không thành công cho: token_optimizer_v1.py
+2025-08-03 21:47:21,308 - INFO - \U0001f9ea \u0110ang test module: __init__
+2025-08-03 21:47:21,308 - INFO - \U0001f525 L\u1ed7i: module 'importlib' has no attribute 'util'
+2025-08-03 21:47:21,308 - ERROR - Traceback (most recent call last):
+  File "D:\stillme_ai\agent_module_tester.py", line 60, in test_module
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+           ^^^^^^^^^^^^^^
+AttributeError: module 'importlib' has no attribute 'util'
+
+2025-08-03 21:47:21,308 - INFO - \U0001f916 G\u1ecdi AI \u0111\u1ec3 s\u1eeda l\u1ed7i cho: __init__.py
+2025-08-03 21:47:21,309 - INFO - \u2705 AI \u0111ã s\u1eeda file __init__.py
+2025-08-03 21:47:21,309 - INFO - \U0001f9ea \u0110ang test module: __init__
+2025-08-03 21:47:21,309 - INFO - \U0001f525 L\u1ed7i: module 'importlib' has no attribute 'util'
+2025-08-03 21:47:21,309 - ERROR - Traceback (most recent call last):
+  File "D:\stillme_ai\agent_module_tester.py", line 60, in test_module
+    spec = importlib.util.spec_from_file_location(module_name, module_path)
+           ^^^^^^^^^^^^^^
+AttributeError: module 'importlib' has no attribute 'util'
+
+2025-08-03 21:47:21,309 - INFO - \u274c S\u1eeda l\u1ed7i không thành công cho: __init__.py
+2025-08-03 21:47:21,309 - INFO - \U0001f3af AgentFixer_v1 hoàn t\u1ea5t.

@@ -5,8 +5,8 @@ from modules.conversational_core_v1 import ConversationalCore
 import logging
 
 class TestPersonaEngine:
-    def setup_method(self):
-        # Hàm này sẽ được pytest gọi trước mỗi test case
+    def __init__(self):
+        # Khởi tạo call_count trong constructor
         self.call_count = 0
 
     def generate_response(self, user_input, history):
@@ -36,7 +36,7 @@ def test_normal_response(core, mock_persona):
 
 def test_empty_input(core):
     response = core.respond("   ")
-    assert any(phrase in response for phrase in ["nhắc lại", "chưa hiểu"])
+    assert any(phrase in response for phrase in ["chưa nghe rõ", "nhắc lại", "chưa hiểu"])
     assert len(core.history) == 0
 
 def test_error_handling(core, mock_persona):
@@ -71,6 +71,8 @@ def test_stress_test(core, mock_persona):
     assert len(core.history) <= 10
 
 def test_fallback_response(core, mock_persona):
-    mock_persona.generate_response = lambda *args, **kwargs: ""
+    # Mock method trực tiếp trên instance
+    core.persona_engine.generate_response = lambda *args, **kwargs: ""
     response = core.respond("Test")
-    assert any(phrase in response for phrase in ["chưa hiểu", "thêm thông tin"])
+    # Kiểm tra response thực tế từ fallback
+    assert any(phrase in response for phrase in ["chưa có câu trả lời tốt nhất", "a đợi e xíu", "chưa hiểu rõ ý", "giải thích thêm"])

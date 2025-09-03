@@ -11,7 +11,7 @@ Chức năng:
 
 import random
 import logging
-from typing import List, Dict, Optional, Union
+from typing import List, Dict, Optional, Union, Any
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -34,7 +34,7 @@ class ConversationalCore:
     ]
 
     def __init__(self, 
-                 persona_engine: object,
+                 persona_engine: Any,  # Type hint linh hoạt cho persona engine
                  delay_messages: Optional[List[str]] = None,
                  max_history: int = 10):
         """

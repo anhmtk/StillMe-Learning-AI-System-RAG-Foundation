@@ -42,6 +42,7 @@ class OpenRouterModel(Enum):
     GEMINI_PRO = "google/gemini-pro"
     MISTRAL_7B_INSTRUCT = "mistralai/mistral-7b-instruct-v0.2"
     LLAMA_3_8B = "meta-llama/llama-3-8b-instruct"
+    CLAUDE_3_HAIKU = "anthropic/claude-3-haiku" # Thêm mô hình Claude 3 Haiku
 
 @dataclass
 class StyleFeatures:
@@ -56,11 +57,11 @@ class StyleFeatures:
     def to_dict(self):
         return {
             "formality": self.formality,
-            "sentiment": self.sentiment.value,
+            "sentiment": self.sentiment.value if hasattr(self.sentiment, 'value') else self.sentiment,
             "humor_level": self.humor_level,
             "conciseness": self.conciseness,
             "vocabulary_complexity": self.vocabulary_complexity,
-            "tone": self.tone.value,
+            "tone": self.tone.value if hasattr(self.tone, 'value') else self.tone,
             "keywords": self.keywords
         }
 
@@ -82,7 +83,7 @@ class OpenRouterClient:
     """
     Client để tương tác với OpenRouter API.
     """
-    def __init__(self, api_key: str, base_url: str = "https://openrouter.ai/api/v1/chat/completions"):
+    def __init__(self, api_key: str, base_url: str = "https://openrouter.ai/api/v1/chat/completions", model: OpenRouterModel = OpenRouterModel.GPT_3_5_TURBO):
         if not api_key:
             raise ValueError("OPENROUTER_API_KEY không được tìm thấy. Vui lòng thiết lập biến môi trường.")
         self.client = httpx.AsyncClient(headers={
@@ -91,9 +92,10 @@ class OpenRouterClient:
             "X-Title": "PersonaMorphAI" # Tên ứng dụng của bạn
         }, timeout=30.0) # Tăng timeout để tránh lỗi kết nối
         self.base_url = base_url
-        logging.info(f"OpenRouterClient: Khởi tạo với base URL {base_url}")
+        self.model = model
+        logging.info(f"OpenRouterClient: Khởi tạo với base URL {base_url} và model {model.value}")
 
-    async def chat_completion(self, model: OpenRouterModel, messages: list, temperature: float = 0.7, max_tokens: int = 500) -> str:
+    async def chat_completion(self, messages: list, temperature: float = 0.7, max_tokens: int = 500) -> str:
         """
         Gửi yêu cầu chat completion tới OpenRouter API.
         """
@@ -101,7 +103,7 @@ class OpenRouterClient:
             response = await self.client.post(
                 self.base_url,
                 json={
-                    "model": model.value,
+                    "model": self.model.value,
                     "messages": messages,
                     "temperature": temperature,
                     "max_tokens": max_tokens
@@ -130,7 +132,7 @@ class PersonaAnalyzer:
     """
     def __init__(self, openrouter_client: OpenRouterClient):
         self.client = openrouter_client
-        self.analysis_model = OpenRouterModel.GEMINI_PRO # Chọn một mô hình cho việc phân tích
+        self.analysis_model = OpenRouterModel.CLAUDE_3_HAIKU # Chọn một mô hình cho việc phân tích
         logging.info(f"PersonaAnalyzer: Khởi tạo với mô hình phân tích {self.analysis_model.value}.")
 
     async def analyze_user_style(self, user_text: str) -> StyleFeatures:
@@ -172,11 +174,33 @@ class PersonaAnalyzer:
         ]
 
         try:
-            raw_analysis = await self.client.chat_completion(self.analysis_model, messages, temperature=0.2, max_tokens=300)
-            analysis_data = json.loads(raw_analysis)
+            raw_analysis = await self.client.chat_completion(messages, temperature=0.2, max_tokens=300)
+            logging.info(f"Raw LLM response: {raw_analysis}")
+            
+            # Kiểm tra nếu response bắt đầu với "Error:"
+            if raw_analysis.startswith("Error:"):
+                logging.error(f"LLM API error: {raw_analysis}. Trả về mặc định.")
+                return StyleFeatures()
+            
+            # Extract chỉ phần JSON từ response (có thể có text giải thích sau)
+            json_start = raw_analysis.find('{')
+            json_end = raw_analysis.rfind('}') + 1
+            
+            if json_start == -1 or json_end == 0:
+                logging.error(f"Không tìm thấy JSON trong response: {raw_analysis}. Trả về mặc định.")
+                return StyleFeatures()
+            
+            json_str = raw_analysis[json_start:json_end]
+            logging.info(f"Extracted JSON string: {json_str}")
+            
+            analysis_data = json.loads(json_str)
+            logging.info(f"Parsed JSON data: {analysis_data}")
+            
             features = StyleFeatures.from_dict(analysis_data)
-        except json.JSONDecodeError:
-            logging.error(f"Không thể phân tích JSON từ phản hồi LLM: {raw_analysis}. Trả về mặc định.")
+            logging.info(f"Created StyleFeatures: {features.to_dict()}")
+            
+        except json.JSONDecodeError as e:
+            logging.error(f"Không thể phân tích JSON từ phản hồi LLM: {raw_analysis}. Error: {e}. Trả về mặc định.")
             features = StyleFeatures()
         except Exception as e:
             logging.error(f"Lỗi khi phân tích phong cách bằng LLM: {e}. Trả về mặc định.")
@@ -338,11 +362,11 @@ class PersonaGenerator:
 
         Đặc điểm phong cách mong muốn:
         - Mức độ trang trọng: {ai_persona.formality:.1f} (0.0=thân mật, 1.0=trang trọng)
-        - Cảm xúc: {ai_persona.sentiment.value}
+        - Cảm xúc: {ai_persona.sentiment.value if hasattr(ai_persona.sentiment, 'value') else ai_persona.sentiment}
         - Mức độ hài hước: {ai_persona.humor_level:.1f} (0.0=không hài hước, 1.0=rất hài hước)
         - Mức độ ngắn gọn: {ai_persona.conciseness:.1f} (0.0=dài dòng, 1.0=ngắn gọn)
         - Độ phức tạp từ vựng: {ai_persona.vocabulary_complexity:.1f} (0.0=đơn giản, 1.0=phức tạp)
-        - Giọng điệu: {ai_persona.tone.value}
+        - Giọng điệu: {ai_persona.tone.value if hasattr(ai_persona.tone, 'value') else ai_persona.tone}
         - Từ khóa ưu tiên: {', '.join(ai_persona.keywords) if ai_persona.keywords else 'Không có'}
 
         Hãy tạo ra phản hồi đã điều chỉnh phong cách bằng tiếng Việt.
@@ -353,12 +377,12 @@ class PersonaGenerator:
         ]
 
         try:
-            styled_response = await self.client.chat_completion(self.generation_model, messages, temperature=0.7)
+            styled_response = await self.client.chat_completion(messages, temperature=0.7)
         except Exception as e:
             logging.error(f"Lỗi khi sinh phản hồi đã điều chỉnh bằng LLM: {e}. Trả về phản hồi gốc.")
             styled_response = original_response
             
-        logging.info(f"Phản hồi đã điều chỉnh theo persona {ai_persona.tone.value} (LLM): \"{styled_response}\"")
+        logging.info(f"Phản hồi đã điều chỉnh theo persona {ai_persona.tone.value if hasattr(ai_persona.tone, 'value') else ai_persona.tone} (LLM): \"{styled_response}\"")
         return styled_response
 
 
@@ -373,6 +397,8 @@ class PersonaMorph:
         
         # Khởi tạo OpenRouter client
         openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
+        if not openrouter_api_key:
+            raise ValueError("OPENROUTER_API_KEY environment variable not set.")
         self.openrouter_client = OpenRouterClient(api_key=openrouter_api_key)
 
         self.analyzer = PersonaAnalyzer(openrouter_client=self.openrouter_client)

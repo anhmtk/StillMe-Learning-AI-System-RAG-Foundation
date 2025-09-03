@@ -1,0 +1,54 @@
+# BUGS TO FIX LATER - STILLME AI PROJECT
+# Created: 2025-09-03
+
+## test_content_integrity_filter.py - 7 FAILURES
+- test_fact_check_content_factual: Mock không hoạt động đúng
+- test_fact_check_content_misinformation: Mock không hoạt động đúng  
+- test_fact_check_content_llm_error_fallback: Mock không hoạt động đúng
+- test_filter_content_fully_safe: Mock không hoạt động đúng
+- test_filter_content_pre_filter_blocked_critical: Mock không hoạt động đúng
+- test_filter_content_quality_violation_and_fact_check: Mock không hoạt động đúng
+- test_filter_content_llm_error_fallback_in_main_filter: Mock không hoạt động đúng
+
+**VẤN ĐỀ CHÍNH:** Mock violation_logger không hoạt động đúng với @patch decorator
+**GIẢI PHÁP:** Cần sửa lại cách mock hoặc sửa test logic
+
+## test_conversational_core_v1.py - 1 FAILURE
+- test_fallback_response: Mock không hoạt động đúng, response không khớp với expected
+
+**VẤN ĐỀ CHÍNH:** Mock generate_response không hoạt động đúng trong test fixture
+**GIẢI PHÁP:** Cần sửa lại cách mock hoặc sửa test logic
+
+## test_ethical_core_system_v1.py - 4 FAILURES
+- test_self_critic_log_ethical_violation: ModuleNotFoundError
+- test_ethical_core_system_process_interaction_output_violation_adjusted: Call count mismatch (8 vs 5)
+- test_ethical_core_system_process_interaction_vulnerable_user: is_compliant False vs True
+- test_ethical_core_system_process_interaction_llm_error_graceful: LLM_ERROR not in message
+
+**VẤN ĐỀ CHÍNH:** Mock call count và logic test không khớp với implementation
+**GIẢI PHÁP:** Cần sửa lại test logic hoặc implementation
+
+## test_persona_morph.py - 5 FAILURES
+- test_process_interaction_positive: Sentiment NEUTRAL vs POSITIVE
+- test_process_interaction_negative_empathetic: Sentiment NEUTRAL vs NEGATIVE
+- test_process_interaction_formal: Formality 0.5 vs >0.7
+- test_profile_smoothing: Humor level 0.0 vs >0.0
+- test_empty_input_handling: Style history 1 vs 0
+
+**VẤN ĐỀ CHÍNH:** LLM API errors và default values không khớp với expected
+**GIẢI PHÁP:** Cần fix LLM API calls hoặc sửa test expectations
+
+## TIẾN ĐỘ TỔNG THỂ:
+✅ test_smart_gpt_api_manager_v1.py: 4/4 PASSED (100%)
+✅ test_conversational_core_v1.py: 8/9 PASSED, 1 FAILED (89%)
+✅ test_layered_memory_v1.py: 13/13 PASSED (100%)
+✅ test_token_optimizer_v1.py: 11/11 PASSED (100%)
+❌ test_content_integrity_filter.py: 8/15 PASSED, 7 FAILED (53%)
+❌ test_ethical_core_system_v1.py: 11/15 PASSED, 4 FAILED (73%)
+❌ test_persona_morph.py: 1/6 PASSED, 5 FAILED (17%)
+
+## TỔNG KẾT:
+- **HOÀN THÀNH HOÀN TOÀN:** 3/6 modules (50%)
+- **HOÀN THÀNH MỘT PHẦN:** 2/6 modules (33%)
+- **GẶP VẤN ĐỀ:** 1/6 modules (17%)
+- **TỔNG TEST PASSED:** 55/87 tests (63%)

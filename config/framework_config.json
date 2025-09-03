@@ -1,0 +1,56 @@
+{
+  "version": "2.1.1",
+  "framework_name": "StillMe AI Framework",
+  "description": "Enterprise-grade AI framework with 7 integrated modules",
+  
+  "core_settings": {
+    "modules_dir": "modules",
+    "auto_load": true,
+    "strict_mode": false,
+    "max_module_load_time": 30,
+    "security_level": "high",
+    "log_level": "INFO"
+  },
+  
+  "module_configs": {
+    "content_integrity_filter": {
+      "enabled": true,
+      "testing_mode": false,
+      "api_timeout": 30
+    },
+    "layered_memory": {
+      "enabled": true,
+      "max_memories": 10000,
+      "encryption_enabled": true
+    },
+    "conversational_core": {
+      "enabled": true,
+      "max_history": 20,
+      "context_window": 50
+    },
+    "ethical_system": {
+      "enabled": true,
+      "strict_mode": false,
+      "auto_block": true
+    },
+    "token_optimizer": {
+      "enabled": true,
+      "compression_threshold": 0.8,
+      "cache_ttl": 1800
+    }
+  },
+  
+  "performance": {
+    "max_concurrent_requests": 100,
+    "request_timeout": 60,
+    "memory_limit_mb": 2048,
+    "cpu_limit_percent": 80
+  },
+  
+  "security": {
+    "encryption_enabled": true,
+    "api_key_required": true,
+    "rate_limiting": true,
+    "input_validation": true
+  }
+}

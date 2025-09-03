@@ -1,0 +1,67 @@
+{
+  "emotion_sense": {
+    "model_path": "./models/phobert_emotion",
+    "confidence_threshold": 0.6,
+    "max_history_size": 1000,
+    "supported_languages": ["vi", "en"],
+    "fallback_strategy": "neutral",
+    "cache_size": 10000,
+    "enable_analytics": true,
+    "log_level": "INFO",
+    "model_config": {
+      "primary_model": "phobert-base",
+      "fallback_model": "bert-base-multilingual-cased",
+      "max_length": 512,
+      "batch_size": 1
+    },
+    "emotion_categories": {
+      "happy": {
+        "keywords_vi": ["vui", "hạnh phúc", "phấn khởi", "thích", "tuyệt vời"],
+        "keywords_en": ["happy", "joy", "excited", "great", "wonderful"],
+        "confidence_threshold": 0.6
+      },
+      "sad": {
+        "keywords_vi": ["buồn", "thất vọng", "chán nản", "đau khổ", "tuyệt vọng"],
+        "keywords_en": ["sad", "disappointed", "depressed", "suffering", "hopeless"],
+        "confidence_threshold": 0.6
+      },
+      "angry": {
+        "keywords_vi": ["tức giận", "bực bội", "khó chịu", "điên lên", "phát điên"],
+        "keywords_en": ["angry", "furious", "irritated", "mad", "furious"],
+        "confidence_threshold": 0.7
+      },
+      "fear": {
+        "keywords_vi": ["sợ hãi", "lo lắng", "bất an", "hoảng sợ", "kinh hãi"],
+        "keywords_en": ["fear", "afraid", "worried", "scared", "terrified"],
+        "confidence_threshold": 0.6
+      },
+      "surprise": {
+        "keywords_vi": ["ngạc nhiên", "bất ngờ", "kinh ngạc", "sửng sốt"],
+        "keywords_en": ["surprised", "amazed", "astonished", "shocked"],
+        "confidence_threshold": 0.6
+      },
+      "neutral": {
+        "keywords_vi": ["bình thường", "trung lập", "khách quan", "không có gì"],
+        "keywords_en": ["normal", "neutral", "objective", "nothing"],
+        "confidence_threshold": 0.5
+      },
+      "confused": {
+        "keywords_vi": ["bối rối", "không hiểu", "lúng túng", "mơ hồ"],
+        "keywords_en": ["confused", "unclear", "uncertain", "vague"],
+        "confidence_threshold": 0.6
+      }
+    },
+    "performance": {
+      "max_memory_usage_mb": 100,
+      "max_loading_time_seconds": 5,
+      "max_inference_time_ms": 100,
+      "max_cpu_usage_percent": 15
+    },
+    "integration": {
+      "conversational_core": true,
+      "layered_memory": true,
+      "ethical_core": true,
+      "content_filter": true
+    }
+  }
+}
