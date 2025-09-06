@@ -18,6 +18,12 @@ from pydantic import BaseModel
 from adapters.gpt5_client import GPT5Client
 from adapters.ollama_client import OllamaClient
 
+# Import AgentController for testing
+try:
+    from stillme_core.controller import AgentController
+except ImportError:
+    AgentController = None
+
 log = logging.getLogger("api")
 
 # -----------------------------------------------------------------------------
@@ -150,10 +156,8 @@ async def choose_provider() -> str:
 @app.post("/dev-agent/bridge")
 async def dev_agent_bridge(req: BridgeIn):
     """AgentDev bridge endpoint - runs AgentDev orchestration"""
-    try:
-        from stillme_core.controller import AgentController
-    except Exception as e:
-        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, f"AgentDev unavailable: {e}")
+    if AgentController is None:
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "AgentDev unavailable: AgentController not found")
     
     # Run AgentDev with the prompt as goal
     try:

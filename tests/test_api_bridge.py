@@ -145,7 +145,7 @@ class TestAPIBridge:
                 "mode": "safe"
             }
             
-            with patch('api_server.AgentController', side_effect=ImportError("Module not found")):
+            with patch('api_server.AgentController', None):
                 response = client.post("/dev-agent/bridge", json=payload)
                 
                 assert response.status_code == 503
