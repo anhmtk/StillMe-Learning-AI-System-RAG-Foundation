@@ -230,7 +230,12 @@ class LongTermMemory(BaseMemoryLayer):
         try:
             for item in items:
                 # Encrypt content before storing
-                encrypted_content = self._encrypt(item.content)
+                if isinstance(item.content, bytes):
+                    # Content is already encrypted, store as is
+                    encrypted_content = item.content
+                else:
+                    # Content is plain text, encrypt it
+                    encrypted_content = self._encrypt(item.content)
                 
                 self.conn.execute("""
                     INSERT INTO memories (content, priority, timestamp, metadata)
@@ -247,38 +252,29 @@ class LongTermMemory(BaseMemoryLayer):
             logging.error(f"[LongTermMemory] Add failed: {e}")
 
     def search(self, query: str) -> List[MemoryItem]:
-        """Search memories using FTS with fallback to LIKE"""
+        """Search memories by decrypting and searching content"""
         try:
-            # Normalize query for special characters
-            norm_query = query.replace('"', '""').strip()
-            fts_results = self.conn.execute(
-                "SELECT rowid FROM memories_fts WHERE content MATCH ?",
-                (norm_query,)
-            ).fetchall()
-
-            # If no FTS matches, fallback to LIKE search
-            if not fts_results:
-                fts_results = self.conn.execute(
-                    "SELECT id FROM memories WHERE content LIKE ?",
-                    (f"%{query}%",)
-                ).fetchall()
-
-            # Get all matching rows
-            all_ids = [r[0] for r in fts_results]
-            if not all_ids:
-                return []
-
-            placeholders = ",".join("?" for _ in all_ids)
-            rows = self.conn.execute(
-                f"SELECT * FROM memories WHERE id IN ({placeholders})",
-                all_ids
-            ).fetchall()
-
-            results = [self._row_to_item(row) for row in rows]
+            # Get all memories and search in decrypted content
+            all_rows = self.conn.execute("SELECT * FROM memories").fetchall()
+            matching_items = []
+            
+            for row in all_rows:
+                try:
+                    # Convert row to item (this will decrypt the content)
+                    item = self._row_to_item(row)
+                    # Search in decrypted content
+                    if query.lower() in item.content.lower():
+                        matching_items.append(item)
+                except Exception as e:
+                    # Skip items that can't be decrypted
+                    logging.warning(f"[LongTermMemory] Skipping corrupted item: {e}")
+                    continue
+            
+            return matching_items
+            
         except Exception as e:
             logging.error(f"[LongTermMemory] Search failed: {e}")
-
-        return results
+            return []
 
     def compress(self) -> List[MemoryItem]:
         """Compress memories by moving old items to archive"""
@@ -313,12 +309,23 @@ class LongTermMemory(BaseMemoryLayer):
             # Decrypt content before returning
             encrypted_content = row[1]
             if isinstance(encrypted_content, str):
-                decrypted_content = self._decrypt(encrypted_content.encode())
+                # If it's a string, it might be already decrypted or base64 encoded
+                try:
+                    decrypted_content = self._decrypt(encrypted_content.encode())
+                except:
+                    # If decryption fails, treat as plain text
+                    decrypted_content = encrypted_content.encode()
             else:
                 decrypted_content = self._decrypt(encrypted_content)
             
+            # Ensure content is string
+            if isinstance(decrypted_content, bytes):
+                content = decrypted_content.decode('utf-8')
+            else:
+                content = decrypted_content
+            
             return MemoryItem(
-                content=decrypted_content.decode('utf-8'),
+                content=content,
                 priority=row[2],
                 timestamp=datetime.fromisoformat(row[3]),
                 last_accessed=datetime.now(),
@@ -418,7 +425,7 @@ class LayeredMemoryV1:
             memory_data = {
                 'short_term': [
                     {
-                        'content': item.content,
+                        'content': item.content.decode('utf-8') if isinstance(item.content, bytes) else item.content,
                         'priority': item.priority,
                         'timestamp': item.timestamp.isoformat(),
                         'last_accessed': item.last_accessed.isoformat(),
@@ -428,7 +435,7 @@ class LayeredMemoryV1:
                 ],
                 'mid_term': [
                     {
-                        'content': item.content,
+                        'content': item.content.decode('utf-8') if isinstance(item.content, bytes) else item.content,
                         'priority': item.priority,
                         'timestamp': item.timestamp.isoformat(),
                         'last_accessed': item.last_accessed.isoformat(),
@@ -462,13 +469,13 @@ class LayeredMemoryV1:
             last_accessed=datetime.now(),
             metadata=metadata or {})
         
-        if priority > 0.8:  # High priority -> long-term
-            self.long_term.add([item])
-        else:
-            self.short_term.add(item)
+        # Always add to short-term first, then compress based on priority
+        self.short_term.add(item)
             
         if auto_compress:
-            self._auto_compress()
+            # Force compress if high priority item
+            force_compress = item.priority >= 0.8
+            self._auto_compress(force=force_compress)
         
         # Auto-save to secure storage if enabled
         if self.auto_save_enabled:
@@ -497,12 +504,31 @@ class LayeredMemoryV1:
     
     def _auto_compress(self, force=False):
         """Move memories between layers based on rules"""
-        # Short-term -> Mid-term
+        # Short-term -> Mid-term (based on priority and capacity)
         if force or len(self.short_term.buffer) > SHORT_TERM_CAPACITY * MID_TERM_COMPRESSION_THRESHOLD:
-            compressed = self.short_term.compress()
-            for item in compressed:
-                self.mid_term.add(item)
-            self.logger.info(f"Compressed {len(compressed)} items to mid-term")
+            # Compress high priority items (>= 0.8) directly to long-term
+            high_priority_items = []
+            mid_priority_items = []
+            
+            for item in self.short_term.buffer:
+                if item.priority >= 0.8:
+                    high_priority_items.append(item)
+                else:
+                    mid_priority_items.append(item)
+            
+            # Move high priority items to long-term
+            if high_priority_items:
+                self.long_term.add(high_priority_items)
+                self.logger.info(f"Compressed {len(high_priority_items)} high-priority items to long-term")
+            
+            # Move remaining items to mid-term
+            if mid_priority_items:
+                for item in mid_priority_items:
+                    self.mid_term.add(item)
+                self.logger.info(f"Compressed {len(mid_priority_items)} items to mid-term")
+            
+            # Clear short-term buffer
+            self.short_term.buffer.clear()
 
         # Mid-term -> Long-term
         if force or len(self.mid_term.memories) > 1000:  # Arbitrary threshold
