@@ -241,7 +241,16 @@ class DailySupervisor:
         with open(latest_pack, 'r', encoding='utf-8') as f:
             pack_data = json.load(f)
         
-        return KnowledgePack(**pack_data)
+        # Convert lessons back to LessonProposal objects
+        lessons = [LessonProposal(**lesson) for lesson in pack_data.get("lessons", [])]
+        
+        return KnowledgePack(
+            id=pack_data["id"],
+            version=pack_data["version"],
+            created_at=pack_data["created_at"],
+            lessons=lessons,
+            summary=pack_data["summary"]
+        )
 
 
 # Global supervisor instance
