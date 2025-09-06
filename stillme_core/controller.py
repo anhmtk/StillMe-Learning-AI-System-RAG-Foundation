@@ -10,6 +10,8 @@ from .planner import Planner
 from .executor import PatchExecutor
 from .verifier import Verifier
 from .plan_types import PlanItem
+from .logging_utils import log_session_start, log_session_end, log_step
+from .metrics import record_session
 
 logger = logging.getLogger("AgentDev-Controller")
 
@@ -43,6 +45,9 @@ class AgentController:
             }
         """
         logger.info(f"Starting AgentDev with goal: '{goal}', max_steps: {max_steps}")
+        
+        # Log session start
+        log_session_start(goal=goal, max_steps=max_steps)
         
         start_time = time.time()
         steps = []
@@ -120,6 +125,18 @@ class AgentController:
                     
                     steps.append(step_result)
                     
+                    # Log step execution
+                    log_step(
+                        step_id=step_id,
+                        action=plan_item.action,
+                        ok=step_passed,
+                        duration_s=step_result['duration_s'],
+                        stdout_tail=step_result['stdout_tail'],
+                        description=plan_item.title,
+                        target=getattr(plan_item, 'target', ''),
+                        tests_run=exec_result.get("tests_run", [])
+                    )
+                    
                     logger.info(f"Step {step_id} {'PASSED' if step_passed else 'FAILED'} "
                               f"({step_result['duration_s']}s)")
                     
@@ -143,6 +160,18 @@ class AgentController:
                     }
                     
                     steps.append(step_result)
+                    
+                    # Log step execution (for exception case)
+                    log_step(
+                        step_id=step_id,
+                        action=plan_item.action,
+                        ok=False,
+                        duration_s=step_result['duration_s'],
+                        stdout_tail=step_result['stdout_tail'],
+                        description=plan_item.title,
+                        target=getattr(plan_item, 'target', ''),
+                        tests_run=[]
+                    )
             
             # Calculate pass rate
             total_steps = len(steps)
@@ -152,6 +181,26 @@ class AgentController:
             summary = self._create_summary(goal, steps, passed_steps, total_steps)
             
             total_duration = time.time() - start_time
+            
+            # Log session end
+            log_session_end(
+                goal=goal,
+                total_steps=total_steps,
+                passed_steps=passed_steps,
+                pass_rate=pass_rate,
+                total_duration_s=total_duration
+            )
+            
+            # Record metrics
+            record_session(
+                goal=goal,
+                total_steps=total_steps,
+                passed_steps=passed_steps,
+                failed_steps=total_steps - passed_steps,
+                pass_rate=pass_rate,
+                total_duration_s=total_duration,
+                steps_details=steps
+            )
             
             logger.info(f"AgentDev completed: {passed_steps}/{total_steps} steps passed "
                        f"({pass_rate:.1%}) in {total_duration:.2f}s")
