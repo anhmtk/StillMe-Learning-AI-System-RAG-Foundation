@@ -83,15 +83,24 @@ class ShortTermMemory(BaseMemoryLayer):
             self.buffer.append(item)
         
         # Encrypt sensitive data
-        item.content = self._encrypt(item.content).decode('utf-8')
+        item.content = self._encrypt(item.content)
 
     def search(self, query: str) -> List[MemoryItem]:
         results = []
         for item in self.buffer:
-            decrypted_content = self._decrypt(item.content)
-            if query.lower() in decrypted_content.lower():
-                item.last_accessed = datetime.now()
-                results.append(item)
+            try:
+                # Handle both encrypted (bytes) and plain text content
+                if isinstance(item.content, bytes):
+                    decrypted_content = self._decrypt(item.content)
+                else:
+                    decrypted_content = item.content
+                
+                if query.lower() in decrypted_content.lower():
+                    item.last_accessed = datetime.now()
+                    results.append(item)
+            except Exception:
+                # If decryption fails, skip this item
+                continue
         return sorted(results, key=lambda x: x.priority, reverse=True)
 
     def _prune_expired(self, ttl_hours=24):
@@ -121,7 +130,11 @@ class MidTermMemory(BaseMemoryLayer):
     def _decrypt(self, encrypted: bytes) -> str:
         return self.cipher.decrypt(encrypted).decode()
 
-    def add(self, items: List[MemoryItem]):
+    def add(self, items):
+        # Handle both single item and list of items
+        if not isinstance(items, list):
+            items = [items]
+        
         for item in items:
             if len(self.memories) >= self.max_size:
                 # Remove lowest priority item
@@ -129,16 +142,25 @@ class MidTermMemory(BaseMemoryLayer):
                 self.memories.pop(0)
             
             # Encrypt content before storing
-            item.content = self._encrypt(item.content).decode('utf-8')
+            item.content = self._encrypt(item.content)
             self.memories.append(item)
 
     def search(self, query: str) -> List[MemoryItem]:
         results = []
         for item in self.memories:
-            decrypted_content = self._decrypt(item.content)
-            if query.lower() in decrypted_content.lower():
-                item.last_accessed = datetime.now()
-                results.append(item)
+            try:
+                # Handle both encrypted (bytes) and plain text content
+                if isinstance(item.content, bytes):
+                    decrypted_content = self._decrypt(item.content)
+                else:
+                    decrypted_content = item.content
+                
+                if query.lower() in decrypted_content.lower():
+                    item.last_accessed = datetime.now()
+                    results.append(item)
+            except Exception:
+                # If decryption fails, skip this item
+                continue
         return sorted(results, key=lambda x: x.priority, reverse=True)
 
     def compress(self) -> List[MemoryItem]:
@@ -287,20 +309,31 @@ class LongTermMemory(BaseMemoryLayer):
 
     def _row_to_item(self, row):
         """Convert DB row to MemoryItem"""
-        # Decrypt content before returning
-        encrypted_content = row[1]
-        if isinstance(encrypted_content, str):
-            decrypted_content = self._decrypt(encrypted_content.encode())
-        else:
-            decrypted_content = self._decrypt(encrypted_content)
-        
-        return MemoryItem(
-            content=decrypted_content.decode('utf-8'),
-            priority=row[2],
-            timestamp=datetime.fromisoformat(row[3]),
-            last_accessed=datetime.now(),
-            metadata=pickle.loads(row[4])
-        )
+        try:
+            # Decrypt content before returning
+            encrypted_content = row[1]
+            if isinstance(encrypted_content, str):
+                decrypted_content = self._decrypt(encrypted_content.encode())
+            else:
+                decrypted_content = self._decrypt(encrypted_content)
+            
+            return MemoryItem(
+                content=decrypted_content.decode('utf-8'),
+                priority=row[2],
+                timestamp=datetime.fromisoformat(row[3]),
+                last_accessed=datetime.now(),
+                metadata=pickle.loads(row[4])
+            )
+        except Exception as e:
+            logging.error(f"[LongTermMemory] Failed to decrypt row: {e}")
+            # Return item with encrypted content as fallback
+            return MemoryItem(
+                content=str(encrypted_content),
+                priority=row[2],
+                timestamp=datetime.fromisoformat(row[3]),
+                last_accessed=datetime.now(),
+                metadata=pickle.loads(row[4])
+            )
 
 # -------------------- LAYERED MEMORY --------------------
 class LayeredMemoryV1:
@@ -439,7 +472,13 @@ class LayeredMemoryV1:
         
         # Auto-save to secure storage if enabled
         if self.auto_save_enabled:
-            asyncio.create_task(self._save_to_secure_storage("memory_added"))
+            try:
+                # Try to get running event loop
+                loop = asyncio.get_running_loop()
+                loop.create_task(self._save_to_secure_storage("memory_added"))
+            except RuntimeError:
+                # No event loop running, skip async save
+                self.logger.warning("No event loop running, skipping async save")
     
     def search(self, query: str, time_range: Optional[Tuple[datetime, datetime]] = None
               ) -> List[MemoryItem]:
@@ -473,7 +512,13 @@ class LayeredMemoryV1:
         
         # Auto-save after compression
         if self.auto_save_enabled:
-            asyncio.create_task(self._save_to_secure_storage("compression"))
+            try:
+                # Try to get running event loop
+                loop = asyncio.get_running_loop()
+                loop.create_task(self._save_to_secure_storage("compression"))
+            except RuntimeError:
+                # No event loop running, skip async save
+                self.logger.warning("No event loop running, skipping async save")
     
     async def force_save(self):
         """Force save current memory state to secure storage"""
