@@ -30,6 +30,12 @@ try:
 except ImportError:
     get_sul = None
 
+# Import Supervisor
+try:
+    from stillme_core.supervisor import get_supervisor
+except ImportError:
+    get_supervisor = None
+
 log = logging.getLogger("api")
 
 # -----------------------------------------------------------------------------
@@ -255,6 +261,81 @@ async def sul_where_is(symbol: str):
     except Exception as e:
         log.exception("SUL symbol search failed")
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SUL symbol search failed: {e}")
+
+# -----------------------------------------------------------------------------
+# Supervisor
+# -----------------------------------------------------------------------------
+@app.post("/supervisor/run")
+async def supervisor_run():
+    """Run daily supervisor to collect signals and propose lessons"""
+    if get_supervisor is None:
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "Supervisor not available")
+    
+    try:
+        supervisor = get_supervisor()
+        signals = supervisor.collect_signals()
+        proposals = supervisor.propose_lessons(signals)
+        proposals_file = supervisor.save_lesson_proposals(proposals)
+        
+        return {
+            "ok": True,
+            "signals_collected": len(signals.get("agentdev_logs", [])),
+            "proposals_generated": len(proposals),
+            "proposals_file": proposals_file,
+            "proposals": [{"id": p.id, "title": p.title} for p in proposals]
+        }
+    except Exception as e:
+        log.exception("Supervisor run failed")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Supervisor run failed: {e}")
+
+@app.post("/supervisor/approve")
+async def supervisor_approve(proposal_ids: List[str]):
+    """Approve lesson proposals and create knowledge pack"""
+    if get_supervisor is None:
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "Supervisor not available")
+    
+    try:
+        supervisor = get_supervisor()
+        knowledge_pack = supervisor.approve_lessons(proposal_ids)
+        
+        return {
+            "ok": True,
+            "knowledge_pack_id": knowledge_pack.id,
+            "version": knowledge_pack.version,
+            "lessons_count": len(knowledge_pack.lessons),
+            "summary": knowledge_pack.summary
+        }
+    except Exception as e:
+        log.exception("Supervisor approve failed")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Supervisor approve failed: {e}")
+
+@app.get("/knowledge/current")
+async def knowledge_current():
+    """Get current knowledge pack"""
+    if get_supervisor is None:
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "Supervisor not available")
+    
+    try:
+        supervisor = get_supervisor()
+        knowledge_pack = supervisor.get_latest_knowledge_pack()
+        
+        if knowledge_pack is None:
+            return {"ok": True, "knowledge_pack": None}
+        
+        return {
+            "ok": True,
+            "knowledge_pack": {
+                "id": knowledge_pack.id,
+                "version": knowledge_pack.version,
+                "created_at": knowledge_pack.created_at,
+                "lessons_count": len(knowledge_pack.lessons),
+                "summary": knowledge_pack.summary,
+                "lessons": [{"id": l.id, "title": l.title} for l in knowledge_pack.lessons]
+            }
+        }
+    except Exception as e:
+        log.exception("Knowledge current failed")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Knowledge current failed: {e}")
 
 # -----------------------------------------------------------------------------
 # Plan (dry-run)
