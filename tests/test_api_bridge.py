@@ -39,7 +39,7 @@ class TestAPIBridge:
                 "mode": "safe"
             }
             
-            with patch('stillme_core.controller.AgentController') as mock_controller_class:
+            with patch('api_server.AgentController') as mock_controller_class:
                 mock_controller = Mock()
                 mock_controller.run_agent.return_value = {
                     "summary": "AgentDev completed for goal 'Run unit tests'",
@@ -102,7 +102,7 @@ class TestAPIBridge:
                 "mode": "fast"
             }
             
-            with patch('stillme_core.controller.AgentController') as mock_controller_class:
+            with patch('api_server.AgentController') as mock_controller_class:
                 mock_controller = Mock()
                 mock_controller.run_agent.return_value = {
                     "summary": "AgentDev completed for goal 'Fix failing tests'",
@@ -160,7 +160,7 @@ class TestAPIBridge:
                 "mode": "safe"
             }
             
-            with patch('stillme_core.controller.AgentController') as mock_controller_class:
+            with patch('api_server.AgentController') as mock_controller_class:
                 mock_controller = Mock()
                 mock_controller.run_agent.side_effect = Exception("Execution failed")
                 mock_controller_class.return_value = mock_controller
@@ -178,7 +178,7 @@ class TestAPIBridge:
                 "prompt": "Test"
             }
             
-            with patch('stillme_core.controller.AgentController') as mock_controller_class:
+            with patch('api_server.AgentController') as mock_controller_class:
                 mock_controller = Mock()
                 mock_controller.run_agent.return_value = {
                     "summary": "AgentDev completed",
