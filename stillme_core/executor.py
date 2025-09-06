@@ -41,12 +41,48 @@ class PatchExecutor:
         res = _run(["git", "apply", "--index", tmp_path], cwd=target_cwd)
         return res
 
+    def apply_patch_and_test(self, plan_item) -> Dict[str, Any]:
+        """
+        Apply patch from plan_item and run tests.
+        Returns dict with 'ok' boolean and execution details.
+        """
+        try:
+            # Apply patch if available
+            if hasattr(plan_item, 'patch') and plan_item.patch:
+                patch_result = self.apply_unified_diff(plan_item.patch)
+                if not patch_result.ok:
+                    return {
+                        "ok": False,
+                        "error": f"Patch application failed: {patch_result.stderr}",
+                        "stdout": patch_result.stdout,
+                        "stderr": patch_result.stderr
+                    }
+            
+            # Run tests
+            tests_to_run = getattr(plan_item, 'tests_to_run', None)
+            test_result = self.run_pytest(tests_to_run)
+            
+            return {
+                "ok": test_result.ok,
+                "stdout": test_result.stdout,
+                "stderr": test_result.stderr,
+                "tests_run": tests_to_run or []
+            }
+        except Exception as e:
+            return {
+                "ok": False,
+                "error": str(e),
+                "stdout": "",
+                "stderr": str(e)
+            }
+
     def run_pytest(self, tests: List[str] | None = None) -> ExecResult:
         args = ["python", "-m", "pytest", "-q"]
         if tests:
             args.extend(tests)
-        if self._ensure_sandbox():
-            ok, out, err = run_tests_in_sandbox(args, self._sandbox_path)
+        sandbox_path = self._ensure_sandbox()
+        if sandbox_path:
+            ok, out, err = run_tests_in_sandbox(args, sandbox_path)
             return ExecResult(ok, out, err)
         return _run(args, cwd=self.repo_root)
 

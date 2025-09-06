@@ -1,5 +1,6 @@
 import hashlib
 import json
+import time
 from pathlib import Path
 from typing import Dict, Any
 
@@ -61,5 +62,32 @@ class BugMemory:
                 except Exception:
                     continue
         return stats
+
+    def record(self, file: str, test_name: str | None = None, message: str = "", line: int | None = None) -> None:
+        """
+        Record a bug/failure in memory.
+        
+        Args:
+            file: File path where the issue occurred
+            test_name: Name of the test that failed (optional)
+            message: Error message or description
+            line: Line number where issue occurred (optional)
+        """
+        fingerprint = self.fingerprint(file, line, message)
+        
+        # Check if this exact issue was already recorded
+        if self.exists(fingerprint):
+            return
+        
+        record = {
+            "timestamp": json.dumps({"$date": {"$numberLong": str(int(time.time() * 1000))}}),
+            "file": file,
+            "test_name": test_name,
+            "message": message,
+            "line": line,
+            "fingerprint": fingerprint
+        }
+        
+        self.append(record)
 
 
