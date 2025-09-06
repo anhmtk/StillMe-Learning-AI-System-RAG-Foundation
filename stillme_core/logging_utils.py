@@ -8,6 +8,11 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 
 
+def ensure_parent_dir(file_path: str | Path) -> None:
+    """Ensure parent directory exists for a file path"""
+    Path(file_path).parent.mkdir(parents=True, exist_ok=True)
+
+
 class AgentDevLogger:
     """
     Structured JSONL logger for AgentDev steps
@@ -58,6 +63,7 @@ class AgentDevLogger:
         }
         
         # Write to JSONL file
+        ensure_parent_dir(self.log_file)
         with open(self.log_file, "a", encoding="utf-8") as f:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
     
@@ -70,6 +76,7 @@ class AgentDevLogger:
             "max_steps": max_steps
         }
         
+        ensure_parent_dir(self.log_file)
         with open(self.log_file, "a", encoding="utf-8") as f:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
     
@@ -92,6 +99,7 @@ class AgentDevLogger:
             "total_duration_s": round(total_duration_s, 3)
         }
         
+        ensure_parent_dir(self.log_file)
         with open(self.log_file, "a", encoding="utf-8") as f:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")
     

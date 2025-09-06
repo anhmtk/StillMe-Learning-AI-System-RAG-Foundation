@@ -8,6 +8,11 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 
 
+def ensure_parent_dir(file_path: str | Path) -> None:
+    """Ensure parent directory exists for a file path"""
+    Path(file_path).parent.mkdir(parents=True, exist_ok=True)
+
+
 class AgentDevMetrics:
     """
     Metrics collector for AgentDev performance
@@ -110,6 +115,7 @@ class AgentDevMetrics:
     
     def _save_metrics(self, metrics: Dict[str, Any]) -> None:
         """Save metrics to file"""
+        ensure_parent_dir(self.metrics_file)
         with open(self.metrics_file, "w", encoding="utf-8") as f:
             json.dump(metrics, f, ensure_ascii=False, indent=2)
     
