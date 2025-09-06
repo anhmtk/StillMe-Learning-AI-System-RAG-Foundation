@@ -24,6 +24,12 @@ try:
 except ImportError:
     AgentController = None
 
+# Import SUL
+try:
+    from stillme_core.sul import get_sul
+except ImportError:
+    get_sul = None
+
 log = logging.getLogger("api")
 
 # -----------------------------------------------------------------------------
@@ -218,6 +224,37 @@ async def health_ai():
             "agentdev": {"ok": agentdev_ok}
         }
     }
+
+# -----------------------------------------------------------------------------
+# SUL (System Understanding Layer)
+# -----------------------------------------------------------------------------
+@app.get("/sul/depends/on")
+async def sul_depends_on(module: str):
+    """Get dependencies and risk score for a module"""
+    if get_sul is None:
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "SUL not available")
+    
+    try:
+        sul = get_sul()
+        result = sul.get_dependencies(module)
+        return result
+    except Exception as e:
+        log.exception("SUL analysis failed")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SUL analysis failed: {e}")
+
+@app.get("/sul/where/is")
+async def sul_where_is(symbol: str):
+    """Find where a symbol is defined and used"""
+    if get_sul is None:
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "SUL not available")
+    
+    try:
+        sul = get_sul()
+        result = sul.find_symbol(symbol)
+        return result
+    except Exception as e:
+        log.exception("SUL symbol search failed")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"SUL symbol search failed: {e}")
 
 # -----------------------------------------------------------------------------
 # Plan (dry-run)
