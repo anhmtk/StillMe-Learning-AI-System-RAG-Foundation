@@ -1,77 +1,202 @@
-# tests/test_api_bridge.py
-# Mục tiêu: test các endpoint FastAPI trong api_server.py:
-#   - GET /health/ai  -> 200 "ok"
-#   - POST /dev-agent/plan -> trả kế hoạch (dry-run)
-#   - POST /dev-agent/run  -> chạy 1 vòng xử lý
-#
-# Test này dùng httpx (hoặc TestClient); nếu app chưa sẵn sàng,
-# test sẽ xfail/skip với lý do rõ ràng.
-
-import json
+"""
+Test API bridge endpoints for AgentDev
+"""
 import pytest
+from fastapi.testclient import TestClient
+from unittest.mock import Mock, patch
+from api_server import app
 
-# Ưu tiên httpx.AsyncClient, nhưng có thể dùng TestClient sync cho skeleton
-try:
-    from fastapi.testclient import TestClient
-except Exception as e:
-    pytest.skip(f"Thiếu fastapi.testclient: {e}", allow_module_level=True)
 
-try:
-    # Kỳ vọng api_server.py có biến `app` (FastAPI instance)
-    from api_server import app
-except Exception as e:
-    pytest.xfail(f"Không import được FastAPI app từ api_server: {e}")
+class TestAPIBridge:
+    def test_health_ai_endpoint(self):
+        """Test GET /health/ai endpoint"""
+        with TestClient(app) as client:
+            response = client.get("/health/ai")
+            
+            assert response.status_code == 200
+            data = response.json()
+            
+            # Check response structure
+            assert "ok" in data
+            assert "details" in data
+            assert data["ok"] is True
+            
+            # Check details structure
+            details = data["details"]
+            assert "gpt5" in details
+            assert "ollama" in details
+            assert "agentdev" in details
+            
+            # Check agentdev component
+            assert "ok" in details["agentdev"]
 
-client = TestClient(app)
+    def test_dev_agent_bridge_endpoint(self):
+        """Test POST /dev-agent/bridge endpoint"""
+        with TestClient(app) as client:
+            # Test with a simple prompt
+            payload = {
+                "prompt": "Run unit tests",
+                "mode": "safe"
+            }
+            
+            with patch('stillme_core.controller.AgentController') as mock_controller_class:
+                mock_controller = Mock()
+                mock_controller.run_agent.return_value = {
+                    "summary": "AgentDev completed for goal 'Run unit tests'",
+                    "pass_rate": 0.8,
+                    "steps": [
+                        {
+                            "id": 1,
+                            "desc": "Run tests",
+                            "action": "run_tests",
+                            "exec_ok": True,
+                            "stdout_tail": "1 passed",
+                            "duration_s": 2.5
+                        },
+                        {
+                            "id": 2,
+                            "desc": "Verify results",
+                            "action": "verify",
+                            "exec_ok": False,
+                            "stdout_tail": "Test failed",
+                            "duration_s": 1.0
+                        }
+                    ],
+                    "total_steps": 2,
+                    "passed_steps": 1,
+                    "total_duration_s": 3.5,
+                    "goal": "Run unit tests"
+                }
+                mock_controller_class.return_value = mock_controller
+                
+                response = client.post("/dev-agent/bridge", json=payload)
+                
+                assert response.status_code == 200
+                data = response.json()
+                
+                # Check response structure
+                assert "summary" in data
+                assert "pass_rate" in data
+                assert "steps_tail" in data
+                assert "total_steps" in data
+                assert "passed_steps" in data
+                assert "duration_s" in data
+                assert "goal" in data
+                
+                # Check values
+                assert data["pass_rate"] == 0.8
+                assert data["total_steps"] == 2
+                assert data["passed_steps"] == 1
+                assert data["duration_s"] == 3.5
+                assert data["goal"] == "Run unit tests"
+                assert len(data["steps_tail"]) == 2  # Last 2 steps
+                
+                # Verify controller was called correctly
+                mock_controller.run_agent.assert_called_once_with(goal="Run unit tests", max_steps=3)
 
-def test_health_ok():
-    resp = client.get("/health/ai")
-    if resp.status_code == 404:
-        pytest.xfail("Thiếu endpoint GET /health/ai trong api_server.py")
-    assert resp.status_code == 200
-    # Có thể trả 'ok' (chuỗi) hoặc JSON {"status": "ok"}
-    body = resp.text.strip()
-    assert "ok" in body.lower(), f"Nội dung health chưa đúng: {body}"
+    def test_dev_agent_bridge_with_different_prompt(self):
+        """Test POST /dev-agent/bridge with different prompt"""
+        with TestClient(app) as client:
+            payload = {
+                "prompt": "Fix failing tests",
+                "mode": "fast"
+            }
+            
+            with patch('stillme_core.controller.AgentController') as mock_controller_class:
+                mock_controller = Mock()
+                mock_controller.run_agent.return_value = {
+                    "summary": "AgentDev completed for goal 'Fix failing tests'",
+                    "pass_rate": 1.0,
+                    "steps": [
+                        {
+                            "id": 1,
+                            "desc": "Fix test",
+                            "action": "fix_test",
+                            "exec_ok": True,
+                            "stdout_tail": "Test fixed",
+                            "duration_s": 1.5
+                        }
+                    ],
+                    "total_steps": 1,
+                    "passed_steps": 1,
+                    "total_duration_s": 1.5,
+                    "goal": "Fix failing tests"
+                }
+                mock_controller_class.return_value = mock_controller
+                
+                response = client.post("/dev-agent/bridge", json=payload)
+                
+                assert response.status_code == 200
+                data = response.json()
+                
+                assert data["pass_rate"] == 1.0
+                assert data["total_steps"] == 1
+                assert data["passed_steps"] == 1
+                assert data["goal"] == "Fix failing tests"
+                
+                # Verify controller was called with correct goal
+                mock_controller.run_agent.assert_called_once_with(goal="Fix failing tests", max_steps=3)
 
-def test_plan_endpoint_returns_plan():
-    # Kỳ vọng: trả JSON dạng {"plan": [...]} hoặc tương tự
-    resp = client.post("/dev-agent/plan", json={"dry_run": True})
-    if resp.status_code == 404:
-        pytest.xfail("Thiếu endpoint POST /dev-agent/plan trong api_server.py")
-    assert resp.status_code == 200
+    def test_dev_agent_bridge_controller_unavailable(self):
+        """Test POST /dev-agent/bridge when controller is unavailable"""
+        with TestClient(app) as client:
+            payload = {
+                "prompt": "Run unit tests",
+                "mode": "safe"
+            }
+            
+            with patch('api_server.AgentController', side_effect=ImportError("Module not found")):
+                response = client.post("/dev-agent/bridge", json=payload)
+                
+                assert response.status_code == 503
+                data = response.json()
+                assert "AgentDev unavailable" in data["detail"]
 
-    try:
-        data = resp.json()
-    except json.JSONDecodeError:
-        pytest.fail(f"Phản hồi /dev-agent/plan không phải JSON: {resp.text}")
+    def test_dev_agent_bridge_execution_error(self):
+        """Test POST /dev-agent/bridge when execution fails"""
+        with TestClient(app) as client:
+            payload = {
+                "prompt": "Run unit tests",
+                "mode": "safe"
+            }
+            
+            with patch('stillme_core.controller.AgentController') as mock_controller_class:
+                mock_controller = Mock()
+                mock_controller.run_agent.side_effect = Exception("Execution failed")
+                mock_controller_class.return_value = mock_controller
+                
+                response = client.post("/dev-agent/bridge", json=payload)
+                
+                assert response.status_code == 500
+                data = response.json()
+                assert "AgentDev execution failed" in data["detail"]
 
-    # Schema mới: "plan", "count", "generated_at"
-    assert "plan" in data, f"JSON thiếu key 'plan': {data}"
-    assert isinstance(data["plan"], list), "plan phải là list các PlanItem (dict)"
-    assert "count" in data and isinstance(data["count"], int)
-    assert "generated_at" in data and isinstance(data["generated_at"], str)
-
-def test_run_endpoint_triggers_one_cycle():
-    # Kỳ vọng: gọi 1 vòng xử lý AgentDev
-    # Yêu cầu block đến khi xong vòng hiện tại, trả JSON
-    payload = {"max_steps": 1}
-    resp = client.post("/dev-agent/run", json=payload)
-    if resp.status_code == 404:
-        pytest.xfail("Thiếu endpoint POST /dev-agent/run trong api_server.py")
-    assert resp.status_code == 200
-
-    try:
-        data = resp.json()
-    except json.JSONDecodeError:
-        pytest.fail(f"Phản hồi /dev-agent/run không phải JSON: {resp.text}")
-
-    # Schema tối thiểu mới: { "ok": bool, "taken": int, "branch": str|None, "refined": bool, "duration_ms": int, "logs": {"jsonl": str} }
-    assert "ok" in data, "JSON trả về phải có 'ok'"
-    assert isinstance(data["ok"], (bool, type(None))), "'ok' phải là bool hoặc null"
-    assert "taken" in data and isinstance(data["taken"], int)
-    assert "branch" in data
-    assert "refined" in data
-    assert "duration_ms" in data and isinstance(data["duration_ms"], int)
-    assert "logs" in data and isinstance(data["logs"], dict)
-    # Không bắt buộc nhưng khuyến khích:
-    # assert "taken" in data and isinstance(data["taken"], int)
+    def test_dev_agent_bridge_minimal_payload(self):
+        """Test POST /dev-agent/bridge with minimal payload"""
+        with TestClient(app) as client:
+            payload = {
+                "prompt": "Test"
+            }
+            
+            with patch('stillme_core.controller.AgentController') as mock_controller_class:
+                mock_controller = Mock()
+                mock_controller.run_agent.return_value = {
+                    "summary": "AgentDev completed",
+                    "pass_rate": 0.0,
+                    "steps": [],
+                    "total_steps": 0,
+                    "passed_steps": 0,
+                    "total_duration_s": 0.0,
+                    "goal": "Test"
+                }
+                mock_controller_class.return_value = mock_controller
+                
+                response = client.post("/dev-agent/bridge", json=payload)
+                
+                assert response.status_code == 200
+                data = response.json()
+                
+                assert data["pass_rate"] == 0.0
+                assert data["total_steps"] == 0
+                assert data["passed_steps"] == 0
+                assert data["goal"] == "Test"

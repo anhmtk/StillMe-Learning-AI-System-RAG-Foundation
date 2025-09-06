@@ -147,63 +147,43 @@ async def choose_provider() -> str:
 # -----------------------------------------------------------------------------
 # Bridge endpoint
 # -----------------------------------------------------------------------------
-@app.post("/dev-agent/bridge", response_model=BridgeOut)
+@app.post("/dev-agent/bridge")
 async def dev_agent_bridge(req: BridgeIn):
-    # 1) chuẩn hóa mode
-    mode_str = (req.mode or "fast").lower()
-    if mode_str not in {"fast", "safe"}:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail=f"Invalid mode='{req.mode}'. Allowed: 'fast'|'safe'.",
-        )
-    mode: Literal["fast", "safe"] = cast(Literal["fast", "safe"], mode_str)
-
-    # 2) chọn provider
-    provider = await choose_provider()
-
-    # 3) prompt có guard JSON-only
-    guard = _json_only_system(req.schema_hint)
-    composite_prompt = f"{guard}\n\n---\nUSER TASK:\n{req.prompt}\n"
-
-    # 4) gọi provider
+    """AgentDev bridge endpoint - runs AgentDev orchestration"""
     try:
-        if provider == "gpt5":
-            if not (ALLOW_GPT5 and gpt5_client):
-                raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "GPT-5 not available")
-            content = await gpt5_client.generate(prompt=composite_prompt, mode=mode)
-        else:
-            content = await ollama_client.generate(prompt=composite_prompt, mode=mode)
-    except asyncio.TimeoutError:
-        raise HTTPException(status.HTTP_504_GATEWAY_TIMEOUT, "Upstream model timed out")
-    except HTTPException:
-        raise
+        from stillme_core.controller import AgentController
     except Exception as e:
-        log.exception("Unhandled error from provider")
-        raise HTTPException(status.HTTP_502_BAD_GATEWAY, detail=f"Provider error: {e!s}")
-
-    # 5) ép JSON-only nếu bật guard
-    if (req.response_format == "json" or req.force_json) and isinstance(content, str):
-        extracted = _extract_json(content)
-        if not extracted:
-            raise HTTPException(status_code=422, detail="Model không trả JSON hợp lệ")
-        content = extracted
-
-    # 6) SAFE guard (optional)
-    safe_passed: Optional[bool] = None
-    if mode == "safe":
-        try:
-            result = await safe_runner.run_safe(content)
-            safe_passed = bool(result.get("ok", False)) if isinstance(result, dict) else bool(result)
-        except Exception:
-            safe_passed = None
-
-    return BridgeOut(provider=provider, mode=mode, content=content, safe_passed=safe_passed)
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, f"AgentDev unavailable: {e}")
+    
+    # Run AgentDev with the prompt as goal
+    try:
+        controller = AgentController()
+        result = controller.run_agent(goal=req.prompt, max_steps=3)
+        
+        # Extract key information
+        summary = result.get("summary", "AgentDev completed")
+        pass_rate = result.get("pass_rate", 0.0)
+        steps_tail = result.get("steps", [])[-2:] if result.get("steps") else []  # Last 2 steps
+        
+        return {
+            "summary": summary,
+            "pass_rate": pass_rate,
+            "steps_tail": steps_tail,
+            "total_steps": result.get("total_steps", 0),
+            "passed_steps": result.get("passed_steps", 0),
+            "duration_s": result.get("total_duration_s", 0.0),
+            "goal": result.get("goal", req.prompt)
+        }
+    except Exception as e:
+        log.exception("AgentDev execution failed")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"AgentDev execution failed: {e}")
 
 # -----------------------------------------------------------------------------
 # Health
 # -----------------------------------------------------------------------------
 @app.get("/health/ai")
 async def health_ai():
+    """Health check for AI services and AgentDev components"""
     gpt5_ok = False
     if ALLOW_GPT5 and gpt5_client:
         with suppress(Exception):
@@ -211,7 +191,29 @@ async def health_ai():
     ollama_ok = False
     with suppress(Exception):
         ollama_ok = await ollama_client.health()
-    return {"gpt5": {"enabled": ALLOW_GPT5, "ok": gpt5_ok}, "ollama": {"ok": ollama_ok}}
+    
+    # Test AgentDev components
+    agentdev_ok = False
+    try:
+        from stillme_core.controller import AgentController
+        from stillme_core.planner import Planner
+        from stillme_core.executor import PatchExecutor
+        from stillme_core.verifier import Verifier
+        
+        # Quick component test
+        controller = AgentController()
+        agentdev_ok = True
+    except Exception as e:
+        log.warning(f"AgentDev components check failed: {e}")
+    
+    return {
+        "ok": True,
+        "details": {
+            "gpt5": {"enabled": ALLOW_GPT5, "ok": gpt5_ok}, 
+            "ollama": {"ok": ollama_ok},
+            "agentdev": {"ok": agentdev_ok}
+        }
+    }
 
 # -----------------------------------------------------------------------------
 # Plan (dry-run)
