@@ -17,6 +17,7 @@ from cryptography.fernet import Fernet
 import warnings
 import asyncio
 import json
+from pathlib import Path
 
 # Import SecureMemoryManager
 try:
@@ -27,7 +28,28 @@ except ImportError:
 # Constants
 SHORT_TERM_CAPACITY = 1000
 MID_TERM_COMPRESSION_THRESHOLD = 0.7
-MEMORY_ENCRYPTION_KEY = Fernet.generate_key()
+
+# Persistent encryption key
+def _get_or_create_encryption_key():
+    """Get or create persistent encryption key"""
+    key_file = Path("framework_memory.enc")
+    if key_file.exists():
+        try:
+            with open(key_file, 'rb') as f:
+                return f.read()
+        except:
+            pass
+    
+    # Create new key
+    key = Fernet.generate_key()
+    try:
+        with open(key_file, 'wb') as f:
+            f.write(key)
+    except:
+        pass
+    return key
+
+MEMORY_ENCRYPTION_KEY = _get_or_create_encryption_key()
 
 # -------------------- DATA STRUCTURES --------------------
 @dataclass
@@ -82,8 +104,8 @@ class ShortTermMemory(BaseMemoryLayer):
         else:
             self.buffer.append(item)
         
-        # Encrypt sensitive data
-        item.content = self._encrypt(item.content)
+        # Don't encrypt in short-term memory - keep content as plain text
+        # Encryption will happen when moving to long-term memory
 
     def search(self, query: str) -> List[MemoryItem]:
         results = []
@@ -141,25 +163,20 @@ class MidTermMemory(BaseMemoryLayer):
                 self.memories.sort(key=lambda x: x.priority)
                 self.memories.pop(0)
             
-            # Encrypt content before storing
-            item.content = self._encrypt(item.content)
+            # Don't encrypt in mid-term memory - keep content as plain text
+            # Encryption will happen when moving to long-term memory
             self.memories.append(item)
 
     def search(self, query: str) -> List[MemoryItem]:
         results = []
         for item in self.memories:
             try:
-                # Handle both encrypted (bytes) and plain text content
-                if isinstance(item.content, bytes):
-                    decrypted_content = self._decrypt(item.content)
-                else:
-                    decrypted_content = item.content
-                
-                if query.lower() in decrypted_content.lower():
+                # Content is now plain text in mid-term memory
+                if query.lower() in item.content.lower():
                     item.last_accessed = datetime.now()
                     results.append(item)
             except Exception:
-                # If decryption fails, skip this item
+                # If search fails, skip this item
                 continue
         return sorted(results, key=lambda x: x.priority, reverse=True)
 
@@ -241,7 +258,7 @@ class LongTermMemory(BaseMemoryLayer):
                     INSERT INTO memories (content, priority, timestamp, metadata)
                     VALUES (?, ?, ?, ?)
                 """, (
-                    encrypted_content.decode('utf-8'),
+                    encrypted_content,  # Store as bytes, not string
                     item.priority,
                     item.timestamp.isoformat(),
                     pickle.dumps(item.metadata)
@@ -308,28 +325,34 @@ class LongTermMemory(BaseMemoryLayer):
         try:
             # Decrypt content before returning
             encrypted_content = row[1]
-            if isinstance(encrypted_content, str):
-                # If it's a string, it might be already decrypted or base64 encoded
+            if isinstance(encrypted_content, bytes):
+                # If it's bytes, decrypt directly
+                content = self._decrypt(encrypted_content)
+            elif isinstance(encrypted_content, str):
+                # If it's a string, try to decrypt it
                 try:
-                    decrypted_content = self._decrypt(encrypted_content.encode())
+                    content = self._decrypt(encrypted_content.encode())
                 except:
                     # If decryption fails, treat as plain text
-                    decrypted_content = encrypted_content.encode()
+                    content = encrypted_content
             else:
-                decrypted_content = self._decrypt(encrypted_content)
+                # Fallback
+                content = str(encrypted_content)
             
-            # Ensure content is string
-            if isinstance(decrypted_content, bytes):
-                content = decrypted_content.decode('utf-8')
-            else:
-                content = decrypted_content
+            # Handle metadata
+            metadata = {}
+            if len(row) > 4 and row[4]:
+                try:
+                    metadata = pickle.loads(row[4])
+                except:
+                    metadata = {}
             
             return MemoryItem(
                 content=content,
                 priority=row[2],
                 timestamp=datetime.fromisoformat(row[3]),
                 last_accessed=datetime.now(),
-                metadata=pickle.loads(row[4])
+                metadata=metadata
             )
         except Exception as e:
             logging.error(f"[LongTermMemory] Failed to decrypt row: {e}")
@@ -477,8 +500,8 @@ class LayeredMemoryV1:
             force_compress = item.priority >= 0.8
             self._auto_compress(force=force_compress)
         
-        # Auto-save to secure storage if enabled
-        if self.auto_save_enabled:
+        # Auto-save to secure storage if enabled (only for high priority items)
+        if self.auto_save_enabled and item.priority >= 0.8:
             try:
                 # Try to get running event loop
                 loop = asyncio.get_running_loop()
@@ -504,6 +527,8 @@ class LayeredMemoryV1:
     
     def _auto_compress(self, force=False):
         """Move memories between layers based on rules"""
+        total_compressed = 0
+        
         # Short-term -> Mid-term (based on priority and capacity)
         if force or len(self.short_term.buffer) > SHORT_TERM_CAPACITY * MID_TERM_COMPRESSION_THRESHOLD:
             # Compress high priority items (>= 0.8) directly to long-term
@@ -520,12 +545,14 @@ class LayeredMemoryV1:
             if high_priority_items:
                 self.long_term.add(high_priority_items)
                 self.logger.info(f"Compressed {len(high_priority_items)} high-priority items to long-term")
+                total_compressed += len(high_priority_items)
             
             # Move remaining items to mid-term
             if mid_priority_items:
                 for item in mid_priority_items:
                     self.mid_term.add(item)
                 self.logger.info(f"Compressed {len(mid_priority_items)} items to mid-term")
+                total_compressed += len(mid_priority_items)
             
             # Clear short-term buffer
             self.short_term.buffer.clear()
@@ -535,9 +562,10 @@ class LayeredMemoryV1:
             compressed = self.mid_term.compress()
             self.long_term.add(compressed)
             self.logger.info(f"Compressed {len(compressed)} items to long-term")
+            total_compressed += len(compressed)
         
-        # Auto-save after compression
-        if self.auto_save_enabled:
+        # Auto-save after compression (only if significant changes)
+        if self.auto_save_enabled and (force or total_compressed > 10):
             try:
                 # Try to get running event loop
                 loop = asyncio.get_running_loop()
@@ -554,7 +582,7 @@ class LayeredMemoryV1:
         """Force reload memory data from secure storage"""
         await self._load_from_secure_storage()
     
-    def get_storage_status(self) -> Dict[str, any]:
+    def get_storage_status(self) -> Dict[str, Any]:
         """Get status of secure storage integration"""
         try:
             health = self.secure_storage.get_health_status()

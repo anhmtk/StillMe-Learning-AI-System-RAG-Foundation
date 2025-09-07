@@ -201,3 +201,412 @@
 {"time": "2025-09-04 00:28:48", "level": "INFO", "message": "✅ Tất cả module dependencies đã được setup", "logger": "StillMe"}
 {"time": "2025-09-04 00:28:48", "level": "INFO", "message": "🎉 Tất cả core modules đã được khởi tạo thành công!", "logger": "StillMe"}
 {"time": "2025-09-04 00:28:48", "level": "INFO", "message": "🎉 Tất cả core modules đã được khởi tạo thành công!", "logger": "StillMe"}
+{"time": "2025-09-07 23:28:11", "level": "WARNING", "message": "SecureMemoryManager not available: No module named 'cryptography'", "logger": "StillMe"}
+{"time": "2025-09-07 23:28:11", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:28:27", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:28:27", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:46:29", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:46:29", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:46:32", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:46:32", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:46:32", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:46:32", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:46:37", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:46:37", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:46:37", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:46:37", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:46:37", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:46:37", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:47:14", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:47:14", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:24", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:24", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:24", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:24", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:30", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:30", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:30", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:30", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:30", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:30", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:36", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:36", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:36", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:36", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:36", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:36", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:36", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:36", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:41", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:41", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:41", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:41", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:41", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:41", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:41", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:41", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:41", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:41", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:46", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:46", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:46", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:46", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:46", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:46", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:46", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:46", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:46", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:46", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:46", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:48:46", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:53:40", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:53:40", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:53:40", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:53:40", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:53:40", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:53:40", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:54:09", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:54:09", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:54:39", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:54:39", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:54:39", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:54:39", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:55:13", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:55:13", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:55:29", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:55:29", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-07 23:55:45", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-07 23:55:45", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:00:03", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:01:39", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:01:39", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:13:22", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:13:22", "level": "WARNING", "message": "Modules chưa được import, bỏ qua initialization", "logger": "StillMe"}
+{"time": "2025-09-08 00:15:03", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:15:04", "level": "INFO", "message": "✅ ContentIntegrityFilter initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:15:04", "level": "INFO", "message": "✅ LayeredMemoryV1 initialized with secure storage", "logger": "StillMe"}
+{"time": "2025-09-08 00:15:04", "level": "WARNING", "message": "⚠️ UnifiedAPIManager not available", "logger": "StillMe"}
+{"time": "2025-09-08 00:15:04", "level": "INFO", "message": "✅ ConversationalCore initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:15:04", "level": "INFO", "message": "✅ PersonaMorph initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:15:04", "level": "INFO", "message": "✅ EthicalCoreSystem initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:15:04", "level": "WARNING", "message": "⚠️ TokenOptimizer not available", "logger": "StillMe"}
+{"time": "2025-09-08 00:15:04", "level": "INFO", "message": "✅ EmotionSenseV1 initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:15:05", "level": "INFO", "message": "✅ SelfImprovementManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:15:05", "level": "INFO", "message": "✅ AutomatedScheduler initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:15:05", "level": "INFO", "message": "🔗 Setup dependency: ContentFilter ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 00:15:05", "level": "INFO", "message": "🔗 Setup dependency: APIManager ↔ Other modules", "logger": "StillMe"}
+{"time": "2025-09-08 00:15:05", "level": "INFO", "message": "✅ Tất cả module dependencies đã được setup", "logger": "StillMe"}
+{"time": "2025-09-08 00:15:05", "level": "INFO", "message": "🎉 Tất cả core modules đã được khởi tạo thành công!", "logger": "StillMe"}
+{"time": "2025-09-08 00:15:58", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:15:59", "level": "INFO", "message": "✅ ContentIntegrityFilter initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:15:59", "level": "INFO", "message": "✅ LayeredMemoryV1 initialized with secure storage", "logger": "StillMe"}
+{"time": "2025-09-08 00:15:59", "level": "WARNING", "message": "⚠️ UnifiedAPIManager not available", "logger": "StillMe"}
+{"time": "2025-09-08 00:15:59", "level": "INFO", "message": "✅ ConversationalCore initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:15:59", "level": "INFO", "message": "✅ PersonaMorph initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:15:59", "level": "INFO", "message": "✅ EthicalCoreSystem initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:15:59", "level": "WARNING", "message": "⚠️ TokenOptimizer not available", "logger": "StillMe"}
+{"time": "2025-09-08 00:15:59", "level": "INFO", "message": "✅ EmotionSenseV1 initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:16:00", "level": "INFO", "message": "✅ SelfImprovementManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:16:00", "level": "INFO", "message": "✅ AutomatedScheduler initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:16:00", "level": "INFO", "message": "🔗 Setup dependency: ContentFilter ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 00:16:00", "level": "INFO", "message": "🔗 Setup dependency: APIManager ↔ Other modules", "logger": "StillMe"}
+{"time": "2025-09-08 00:16:00", "level": "INFO", "message": "✅ Tất cả module dependencies đã được setup", "logger": "StillMe"}
+{"time": "2025-09-08 00:16:00", "level": "INFO", "message": "🎉 Tất cả core modules đã được khởi tạo thành công!", "logger": "StillMe"}
+{"time": "2025-09-08 00:16:13", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:16:14", "level": "INFO", "message": "✅ ContentIntegrityFilter initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:16:14", "level": "INFO", "message": "✅ LayeredMemoryV1 initialized with secure storage", "logger": "StillMe"}
+{"time": "2025-09-08 00:16:14", "level": "WARNING", "message": "⚠️ UnifiedAPIManager not available", "logger": "StillMe"}
+{"time": "2025-09-08 00:16:14", "level": "INFO", "message": "✅ ConversationalCore initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:16:14", "level": "INFO", "message": "✅ PersonaMorph initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:16:14", "level": "INFO", "message": "✅ EthicalCoreSystem initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:16:14", "level": "WARNING", "message": "⚠️ TokenOptimizer not available", "logger": "StillMe"}
+{"time": "2025-09-08 00:16:14", "level": "INFO", "message": "✅ EmotionSenseV1 initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:16:14", "level": "INFO", "message": "✅ SelfImprovementManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:16:14", "level": "INFO", "message": "✅ AutomatedScheduler initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:16:14", "level": "INFO", "message": "🔗 Setup dependency: ContentFilter ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 00:16:14", "level": "INFO", "message": "🔗 Setup dependency: APIManager ↔ Other modules", "logger": "StillMe"}
+{"time": "2025-09-08 00:16:14", "level": "INFO", "message": "✅ Tất cả module dependencies đã được setup", "logger": "StillMe"}
+{"time": "2025-09-08 00:16:14", "level": "INFO", "message": "🎉 Tất cả core modules đã được khởi tạo thành công!", "logger": "StillMe"}
+{"time": "2025-09-08 00:17:00", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:17:00", "level": "INFO", "message": "✅ ContentIntegrityFilter initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:17:00", "level": "INFO", "message": "✅ LayeredMemoryV1 initialized with secure storage", "logger": "StillMe"}
+{"time": "2025-09-08 00:17:00", "level": "WARNING", "message": "⚠️ UnifiedAPIManager not available", "logger": "StillMe"}
+{"time": "2025-09-08 00:17:00", "level": "INFO", "message": "✅ ConversationalCore initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:17:00", "level": "INFO", "message": "✅ PersonaMorph initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:17:00", "level": "INFO", "message": "✅ EthicalCoreSystem initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:17:00", "level": "WARNING", "message": "⚠️ TokenOptimizer not available", "logger": "StillMe"}
+{"time": "2025-09-08 00:17:00", "level": "INFO", "message": "✅ EmotionSenseV1 initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:17:01", "level": "INFO", "message": "✅ SelfImprovementManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:17:01", "level": "INFO", "message": "✅ AutomatedScheduler initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:17:01", "level": "INFO", "message": "🔗 Setup dependency: ContentFilter ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 00:17:01", "level": "INFO", "message": "🔗 Setup dependency: APIManager ↔ Other modules", "logger": "StillMe"}
+{"time": "2025-09-08 00:17:01", "level": "INFO", "message": "✅ Tất cả module dependencies đã được setup", "logger": "StillMe"}
+{"time": "2025-09-08 00:17:01", "level": "INFO", "message": "🎉 Tất cả core modules đã được khởi tạo thành công!", "logger": "StillMe"}
+{"time": "2025-09-08 00:41:04", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:41:04", "level": "INFO", "message": "✅ ContentIntegrityFilter initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:41:04", "level": "ERROR", "message": "❌ Lỗi khởi tạo core modules: Fernet key must be 32 url-safe base64-encoded bytes.", "logger": "StillMe"}
+{"time": "2025-09-08 00:41:16", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:41:16", "level": "INFO", "message": "✅ ContentIntegrityFilter initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:41:16", "level": "INFO", "message": "✅ LayeredMemoryV1 initialized with secure storage", "logger": "StillMe"}
+{"time": "2025-09-08 00:41:16", "level": "WARNING", "message": "⚠️ UnifiedAPIManager not available", "logger": "StillMe"}
+{"time": "2025-09-08 00:41:16", "level": "INFO", "message": "✅ ConversationalCore initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:41:16", "level": "INFO", "message": "✅ PersonaMorph initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:41:16", "level": "INFO", "message": "✅ EthicalCoreSystem initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:41:16", "level": "WARNING", "message": "⚠️ TokenOptimizer not available", "logger": "StillMe"}
+{"time": "2025-09-08 00:41:16", "level": "INFO", "message": "✅ EmotionSenseV1 initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:41:17", "level": "INFO", "message": "✅ SelfImprovementManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:41:17", "level": "INFO", "message": "✅ AutomatedScheduler initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:41:17", "level": "INFO", "message": "✅ MarketIntelligence initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:41:17", "level": "INFO", "message": "🔗 Setup dependency: ContentFilter ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 00:41:17", "level": "INFO", "message": "🔗 Setup dependency: APIManager ↔ Other modules", "logger": "StillMe"}
+{"time": "2025-09-08 00:41:17", "level": "INFO", "message": "🔗 Setup dependency: ConversationalCore ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 00:41:17", "level": "INFO", "message": "🔗 Setup dependency: PersonaMorph ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 00:41:17", "level": "INFO", "message": "🔗 Setup dependency: EthicalSystem ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 00:41:17", "level": "INFO", "message": "🔗 Setup dependency: MarketIntelligence ↔ ConversationalCore", "logger": "StillMe"}
+{"time": "2025-09-08 00:41:17", "level": "INFO", "message": "✅ Tất cả module dependencies đã được setup", "logger": "StillMe"}
+{"time": "2025-09-08 00:41:17", "level": "INFO", "message": "🎉 Tất cả core modules đã được khởi tạo thành công!", "logger": "StillMe"}
+{"time": "2025-09-08 00:44:42", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:44:42", "level": "INFO", "message": "✅ ContentIntegrityFilter initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:44:42", "level": "INFO", "message": "✅ LayeredMemoryV1 initialized with secure storage", "logger": "StillMe"}
+{"time": "2025-09-08 00:44:42", "level": "WARNING", "message": "⚠️ UnifiedAPIManager not available", "logger": "StillMe"}
+{"time": "2025-09-08 00:44:42", "level": "INFO", "message": "✅ ConversationalCore initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:44:43", "level": "INFO", "message": "✅ PersonaMorph initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:44:43", "level": "INFO", "message": "✅ EthicalCoreSystem initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:44:43", "level": "WARNING", "message": "⚠️ TokenOptimizer not available", "logger": "StillMe"}
+{"time": "2025-09-08 00:44:43", "level": "INFO", "message": "✅ EmotionSenseV1 initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:44:43", "level": "INFO", "message": "✅ SelfImprovementManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:44:43", "level": "INFO", "message": "✅ AutomatedScheduler initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:44:43", "level": "INFO", "message": "✅ MarketIntelligence initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:44:43", "level": "INFO", "message": "🔗 Setup dependency: ContentFilter ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 00:44:43", "level": "INFO", "message": "🔗 Setup dependency: APIManager ↔ Other modules", "logger": "StillMe"}
+{"time": "2025-09-08 00:44:43", "level": "INFO", "message": "🔗 Setup dependency: ConversationalCore ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 00:44:43", "level": "INFO", "message": "🔗 Setup dependency: PersonaMorph ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 00:44:43", "level": "INFO", "message": "🔗 Setup dependency: EthicalSystem ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 00:44:43", "level": "INFO", "message": "🔗 Setup dependency: MarketIntelligence ↔ ConversationalCore", "logger": "StillMe"}
+{"time": "2025-09-08 00:44:43", "level": "INFO", "message": "✅ Tất cả module dependencies đã được setup", "logger": "StillMe"}
+{"time": "2025-09-08 00:44:43", "level": "INFO", "message": "🎉 Tất cả core modules đã được khởi tạo thành công!", "logger": "StillMe"}
+{"time": "2025-09-08 00:45:25", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:45:25", "level": "INFO", "message": "✅ ContentIntegrityFilter initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:45:25", "level": "INFO", "message": "✅ LayeredMemoryV1 initialized with secure storage", "logger": "StillMe"}
+{"time": "2025-09-08 00:45:25", "level": "WARNING", "message": "⚠️ UnifiedAPIManager not available", "logger": "StillMe"}
+{"time": "2025-09-08 00:45:25", "level": "INFO", "message": "✅ ConversationalCore initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:45:26", "level": "INFO", "message": "✅ PersonaMorph initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:45:26", "level": "INFO", "message": "✅ EthicalCoreSystem initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:45:26", "level": "WARNING", "message": "⚠️ TokenOptimizer not available", "logger": "StillMe"}
+{"time": "2025-09-08 00:45:26", "level": "INFO", "message": "✅ EmotionSenseV1 initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:45:26", "level": "INFO", "message": "✅ SelfImprovementManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:45:26", "level": "INFO", "message": "✅ AutomatedScheduler initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:45:26", "level": "INFO", "message": "✅ MarketIntelligence initialized", "logger": "StillMe"}
+{"time": "2025-09-08 00:45:26", "level": "INFO", "message": "🔗 Setup dependency: ContentFilter ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 00:45:26", "level": "INFO", "message": "🔗 Setup dependency: APIManager ↔ Other modules", "logger": "StillMe"}
+{"time": "2025-09-08 00:45:26", "level": "INFO", "message": "🔗 Setup dependency: ConversationalCore ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 00:45:26", "level": "INFO", "message": "🔗 Setup dependency: PersonaMorph ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 00:45:26", "level": "INFO", "message": "🔗 Setup dependency: EthicalSystem ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 00:45:26", "level": "INFO", "message": "🔗 Setup dependency: MarketIntelligence ↔ ConversationalCore", "logger": "StillMe"}
+{"time": "2025-09-08 00:45:26", "level": "INFO", "message": "✅ Tất cả module dependencies đã được setup", "logger": "StillMe"}
+{"time": "2025-09-08 00:45:26", "level": "INFO", "message": "🎉 Tất cả core modules đã được khởi tạo thành công!", "logger": "StillMe"}
+{"time": "2025-09-08 01:21:43", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:21:44", "level": "INFO", "message": "✅ ContentIntegrityFilter initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:21:44", "level": "INFO", "message": "✅ LayeredMemoryV1 initialized with secure storage", "logger": "StillMe"}
+{"time": "2025-09-08 01:21:44", "level": "WARNING", "message": "⚠️ UnifiedAPIManager not available", "logger": "StillMe"}
+{"time": "2025-09-08 01:21:44", "level": "INFO", "message": "✅ ConversationalCore initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:21:44", "level": "INFO", "message": "✅ PersonaMorph initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:21:44", "level": "INFO", "message": "✅ EthicalCoreSystem initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:21:44", "level": "WARNING", "message": "⚠️ TokenOptimizer not available", "logger": "StillMe"}
+{"time": "2025-09-08 01:21:44", "level": "INFO", "message": "✅ EmotionSenseV1 initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:21:44", "level": "INFO", "message": "✅ SelfImprovementManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:21:44", "level": "INFO", "message": "✅ AutomatedScheduler initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:21:44", "level": "INFO", "message": "✅ MarketIntelligence initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:21:44", "level": "INFO", "message": "🔗 Setup dependency: ContentFilter ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 01:21:44", "level": "INFO", "message": "🔗 Setup dependency: APIManager ↔ Other modules", "logger": "StillMe"}
+{"time": "2025-09-08 01:21:44", "level": "INFO", "message": "🔗 Setup dependency: ConversationalCore ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 01:21:44", "level": "INFO", "message": "🔗 Setup dependency: PersonaMorph ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 01:21:44", "level": "INFO", "message": "🔗 Setup dependency: EthicalSystem ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 01:21:44", "level": "INFO", "message": "🔗 Setup dependency: MarketIntelligence ↔ ConversationalCore", "logger": "StillMe"}
+{"time": "2025-09-08 01:21:44", "level": "INFO", "message": "✅ Tất cả module dependencies đã được setup", "logger": "StillMe"}
+{"time": "2025-09-08 01:21:44", "level": "INFO", "message": "🎉 Tất cả core modules đã được khởi tạo thành công!", "logger": "StillMe"}
+{"time": "2025-09-08 01:32:38", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:32:39", "level": "INFO", "message": "✅ ContentIntegrityFilter initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:32:39", "level": "INFO", "message": "✅ LayeredMemoryV1 initialized with secure storage", "logger": "StillMe"}
+{"time": "2025-09-08 01:32:39", "level": "WARNING", "message": "⚠️ UnifiedAPIManager not available", "logger": "StillMe"}
+{"time": "2025-09-08 01:32:39", "level": "INFO", "message": "✅ ConversationalCore initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:32:39", "level": "INFO", "message": "✅ PersonaMorph initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:32:39", "level": "INFO", "message": "✅ EthicalCoreSystem initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:32:39", "level": "WARNING", "message": "⚠️ TokenOptimizer not available", "logger": "StillMe"}
+{"time": "2025-09-08 01:32:39", "level": "INFO", "message": "✅ EmotionSenseV1 initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:32:39", "level": "INFO", "message": "✅ SelfImprovementManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:32:39", "level": "INFO", "message": "✅ AutomatedScheduler initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:32:39", "level": "INFO", "message": "✅ MarketIntelligence initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:32:39", "level": "INFO", "message": "🔗 Setup dependency: ContentFilter ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 01:32:39", "level": "INFO", "message": "🔗 Setup dependency: APIManager ↔ Other modules", "logger": "StillMe"}
+{"time": "2025-09-08 01:32:39", "level": "INFO", "message": "🔗 Setup dependency: ConversationalCore ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 01:32:39", "level": "INFO", "message": "🔗 Setup dependency: PersonaMorph ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 01:32:39", "level": "INFO", "message": "🔗 Setup dependency: EthicalSystem ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 01:32:39", "level": "INFO", "message": "🔗 Setup dependency: MarketIntelligence ↔ ConversationalCore", "logger": "StillMe"}
+{"time": "2025-09-08 01:32:39", "level": "INFO", "message": "✅ Tất cả module dependencies đã được setup", "logger": "StillMe"}
+{"time": "2025-09-08 01:32:39", "level": "INFO", "message": "🎉 Tất cả core modules đã được khởi tạo thành công!", "logger": "StillMe"}
+{"time": "2025-09-08 01:36:33", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:36:34", "level": "INFO", "message": "✅ ContentIntegrityFilter initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:36:34", "level": "INFO", "message": "✅ LayeredMemoryV1 initialized with secure storage", "logger": "StillMe"}
+{"time": "2025-09-08 01:36:34", "level": "WARNING", "message": "⚠️ UnifiedAPIManager not available", "logger": "StillMe"}
+{"time": "2025-09-08 01:36:34", "level": "INFO", "message": "✅ ConversationalCore initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:36:34", "level": "INFO", "message": "✅ PersonaMorph initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:36:34", "level": "INFO", "message": "✅ EthicalCoreSystem initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:36:34", "level": "WARNING", "message": "⚠️ TokenOptimizer not available", "logger": "StillMe"}
+{"time": "2025-09-08 01:36:34", "level": "INFO", "message": "✅ EmotionSenseV1 initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:36:34", "level": "INFO", "message": "✅ SelfImprovementManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:36:34", "level": "INFO", "message": "✅ AutomatedScheduler initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:36:34", "level": "INFO", "message": "✅ MarketIntelligence initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:36:34", "level": "INFO", "message": "🔗 Setup dependency: ContentFilter ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 01:36:34", "level": "INFO", "message": "🔗 Setup dependency: APIManager ↔ Other modules", "logger": "StillMe"}
+{"time": "2025-09-08 01:36:34", "level": "INFO", "message": "🔗 Setup dependency: ConversationalCore ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 01:36:34", "level": "INFO", "message": "🔗 Setup dependency: PersonaMorph ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 01:36:34", "level": "INFO", "message": "🔗 Setup dependency: EthicalSystem ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 01:36:34", "level": "INFO", "message": "🔗 Setup dependency: MarketIntelligence ↔ ConversationalCore", "logger": "StillMe"}
+{"time": "2025-09-08 01:36:34", "level": "INFO", "message": "✅ Tất cả module dependencies đã được setup", "logger": "StillMe"}
+{"time": "2025-09-08 01:36:34", "level": "INFO", "message": "🎉 Tất cả core modules đã được khởi tạo thành công!", "logger": "StillMe"}
+{"time": "2025-09-08 01:40:27", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:40:28", "level": "INFO", "message": "✅ ContentIntegrityFilter initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:40:28", "level": "INFO", "message": "✅ LayeredMemoryV1 initialized with secure storage", "logger": "StillMe"}
+{"time": "2025-09-08 01:40:28", "level": "WARNING", "message": "⚠️ UnifiedAPIManager not available", "logger": "StillMe"}
+{"time": "2025-09-08 01:40:28", "level": "INFO", "message": "✅ ConversationalCore initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:40:28", "level": "INFO", "message": "✅ PersonaMorph initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:40:28", "level": "INFO", "message": "✅ EthicalCoreSystem initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:40:28", "level": "WARNING", "message": "⚠️ TokenOptimizer not available", "logger": "StillMe"}
+{"time": "2025-09-08 01:40:28", "level": "INFO", "message": "✅ EmotionSenseV1 initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:40:28", "level": "INFO", "message": "✅ SelfImprovementManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:40:28", "level": "INFO", "message": "✅ AutomatedScheduler initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:40:28", "level": "INFO", "message": "✅ MarketIntelligence initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:40:28", "level": "INFO", "message": "🔗 Setup dependency: ContentFilter ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 01:40:28", "level": "INFO", "message": "🔗 Setup dependency: APIManager ↔ Other modules", "logger": "StillMe"}
+{"time": "2025-09-08 01:40:28", "level": "INFO", "message": "🔗 Setup dependency: ConversationalCore ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 01:40:28", "level": "INFO", "message": "🔗 Setup dependency: PersonaMorph ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 01:40:28", "level": "INFO", "message": "🔗 Setup dependency: EthicalSystem ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 01:40:28", "level": "INFO", "message": "🔗 Setup dependency: MarketIntelligence ↔ ConversationalCore", "logger": "StillMe"}
+{"time": "2025-09-08 01:40:28", "level": "INFO", "message": "✅ Tất cả module dependencies đã được setup", "logger": "StillMe"}
+{"time": "2025-09-08 01:40:28", "level": "INFO", "message": "🎉 Tất cả core modules đã được khởi tạo thành công!", "logger": "StillMe"}
+{"time": "2025-09-08 01:42:44", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:42:44", "level": "INFO", "message": "✅ ContentIntegrityFilter initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:42:44", "level": "INFO", "message": "✅ LayeredMemoryV1 initialized with secure storage", "logger": "StillMe"}
+{"time": "2025-09-08 01:42:45", "level": "INFO", "message": "✅ UnifiedAPIManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:42:45", "level": "INFO", "message": "✅ ConversationalCore initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:42:45", "level": "INFO", "message": "✅ PersonaMorph initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:42:45", "level": "INFO", "message": "✅ EthicalCoreSystem initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:42:45", "level": "WARNING", "message": "⚠️ TokenOptimizer not available", "logger": "StillMe"}
+{"time": "2025-09-08 01:42:45", "level": "INFO", "message": "✅ EmotionSenseV1 initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:42:45", "level": "INFO", "message": "✅ SelfImprovementManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:42:45", "level": "INFO", "message": "✅ AutomatedScheduler initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:42:45", "level": "INFO", "message": "✅ MarketIntelligence initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:42:45", "level": "INFO", "message": "🔗 Setup dependency: ContentFilter ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 01:42:45", "level": "INFO", "message": "🔗 Setup dependency: APIManager ↔ Other modules", "logger": "StillMe"}
+{"time": "2025-09-08 01:42:45", "level": "INFO", "message": "🔗 Setup dependency: ConversationalCore ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 01:42:45", "level": "INFO", "message": "🔗 Setup dependency: PersonaMorph ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 01:42:45", "level": "INFO", "message": "🔗 Setup dependency: EthicalSystem ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 01:42:45", "level": "INFO", "message": "🔗 Setup dependency: MarketIntelligence ↔ ConversationalCore", "logger": "StillMe"}
+{"time": "2025-09-08 01:42:45", "level": "INFO", "message": "✅ Tất cả module dependencies đã được setup", "logger": "StillMe"}
+{"time": "2025-09-08 01:42:45", "level": "INFO", "message": "🎉 Tất cả core modules đã được khởi tạo thành công!", "logger": "StillMe"}
+{"time": "2025-09-08 01:50:16", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:50:16", "level": "INFO", "message": "✅ ContentIntegrityFilter initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:50:16", "level": "INFO", "message": "✅ LayeredMemoryV1 initialized with secure storage", "logger": "StillMe"}
+{"time": "2025-09-08 01:50:17", "level": "INFO", "message": "✅ UnifiedAPIManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:50:17", "level": "INFO", "message": "✅ ConversationalCore initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:50:17", "level": "INFO", "message": "✅ PersonaMorph initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:50:17", "level": "INFO", "message": "✅ EthicalCoreSystem initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:54:32", "level": "INFO", "message": "✅ TokenOptimizer initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:54:32", "level": "INFO", "message": "✅ EmotionSenseV1 initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:54:32", "level": "INFO", "message": "✅ SelfImprovementManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:54:32", "level": "INFO", "message": "✅ AutomatedScheduler initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:54:32", "level": "INFO", "message": "✅ MarketIntelligence initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:54:32", "level": "INFO", "message": "✅ DailyLearningManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:54:32", "level": "INFO", "message": "✅ Telemetry initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:54:32", "level": "INFO", "message": "✅ FrameworkMetrics initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:54:32", "level": "INFO", "message": "✅ CommunicationStyleManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 01:54:32", "level": "WARNING", "message": "⚠️ InputSketcher not available", "logger": "StillMe"}
+{"time": "2025-09-08 01:54:32", "level": "INFO", "message": "🔗 Setup dependency: ContentFilter ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 01:54:32", "level": "INFO", "message": "🔗 Setup dependency: APIManager ↔ Other modules", "logger": "StillMe"}
+{"time": "2025-09-08 01:54:32", "level": "INFO", "message": "🔗 Setup dependency: ConversationalCore ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 01:54:32", "level": "INFO", "message": "🔗 Setup dependency: PersonaMorph ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 01:54:32", "level": "INFO", "message": "🔗 Setup dependency: EthicalSystem ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 01:54:32", "level": "INFO", "message": "🔗 Setup dependency: MarketIntelligence ↔ ConversationalCore", "logger": "StillMe"}
+{"time": "2025-09-08 01:54:32", "level": "INFO", "message": "✅ Tất cả module dependencies đã được setup", "logger": "StillMe"}
+{"time": "2025-09-08 01:54:32", "level": "INFO", "message": "🎉 Tất cả core modules đã được khởi tạo thành công!", "logger": "StillMe"}
+{"time": "2025-09-08 02:03:59", "level": "INFO", "message": "✅ SecureMemoryManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 02:03:59", "level": "INFO", "message": "✅ ContentIntegrityFilter initialized", "logger": "StillMe"}
+{"time": "2025-09-08 02:03:59", "level": "INFO", "message": "✅ LayeredMemoryV1 initialized with secure storage", "logger": "StillMe"}
+{"time": "2025-09-08 02:03:59", "level": "INFO", "message": "✅ UnifiedAPIManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 02:03:59", "level": "INFO", "message": "✅ ConversationalCore initialized", "logger": "StillMe"}
+{"time": "2025-09-08 02:04:00", "level": "INFO", "message": "✅ PersonaMorph initialized", "logger": "StillMe"}
+{"time": "2025-09-08 02:04:00", "level": "INFO", "message": "✅ EthicalCoreSystem initialized", "logger": "StillMe"}
+{"time": "2025-09-08 02:04:06", "level": "INFO", "message": "✅ TokenOptimizer initialized", "logger": "StillMe"}
+{"time": "2025-09-08 02:04:06", "level": "INFO", "message": "✅ EmotionSenseV1 initialized", "logger": "StillMe"}
+{"time": "2025-09-08 02:04:06", "level": "INFO", "message": "✅ SelfImprovementManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 02:04:06", "level": "INFO", "message": "✅ AutomatedScheduler initialized", "logger": "StillMe"}
+{"time": "2025-09-08 02:04:06", "level": "INFO", "message": "✅ MarketIntelligence initialized", "logger": "StillMe"}
+{"time": "2025-09-08 02:04:06", "level": "INFO", "message": "✅ DailyLearningManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 02:04:06", "level": "INFO", "message": "✅ Telemetry initialized", "logger": "StillMe"}
+{"time": "2025-09-08 02:04:06", "level": "INFO", "message": "✅ FrameworkMetrics initialized", "logger": "StillMe"}
+{"time": "2025-09-08 02:04:06", "level": "INFO", "message": "✅ CommunicationStyleManager initialized", "logger": "StillMe"}
+{"time": "2025-09-08 02:04:06", "level": "INFO", "message": "✅ InputSketcher initialized", "logger": "StillMe"}
+{"time": "2025-09-08 02:04:06", "level": "INFO", "message": "🔗 Setup dependency: ContentFilter ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 02:04:06", "level": "INFO", "message": "🔗 Setup dependency: APIManager ↔ Other modules", "logger": "StillMe"}
+{"time": "2025-09-08 02:04:06", "level": "INFO", "message": "🔗 Setup dependency: ConversationalCore ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 02:04:06", "level": "INFO", "message": "🔗 Setup dependency: PersonaMorph ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 02:04:06", "level": "INFO", "message": "🔗 Setup dependency: EthicalSystem ↔ LayeredMemory", "logger": "StillMe"}
+{"time": "2025-09-08 02:04:06", "level": "INFO", "message": "🔗 Setup dependency: MarketIntelligence ↔ ConversationalCore", "logger": "StillMe"}
+{"time": "2025-09-08 02:04:06", "level": "INFO", "message": "✅ Tất cả module dependencies đã được setup", "logger": "StillMe"}
+{"time": "2025-09-08 02:04:06", "level": "INFO", "message": "🎉 Tất cả core modules đã được khởi tạo thành công!", "logger": "StillMe"}

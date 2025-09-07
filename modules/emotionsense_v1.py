@@ -255,7 +255,7 @@ class EmotionSenseV1:
             
             # Detect language if auto
             if language == "auto":
-                language = self.language_detector(text)
+                language = self.language_detector(text) if self.language_detector else "vi"
             
             # Try ML-based detection first
             if TORCH_AVAILABLE and self.emotion_model:
@@ -292,6 +292,9 @@ class EmotionSenseV1:
         """Detect emotion using ML models"""
         try:
             # Tokenize input
+            if not self.tokenizer:
+                return self._create_emotion_result("neutral", 0.0, "Tokenizer not available", language)
+                
             inputs = self.tokenizer(
                 text, 
                 return_tensors="pt", 
@@ -301,6 +304,9 @@ class EmotionSenseV1:
             )
             
             # Get embeddings
+            if not self.emotion_model:
+                return self._create_emotion_result("neutral", 0.0, "Emotion model not available", language)
+                
             with torch.no_grad():
                 outputs = self.emotion_model(**inputs)
                 embeddings = outputs.last_hidden_state.mean(dim=1)
@@ -323,7 +329,7 @@ class EmotionSenseV1:
             self.logger.warning(f"ML detection failed: {e}, falling back to keyword-based")
             return self._detect_emotion_keyword_based(text, language)
     
-    def _classify_emotion_from_embeddings(self, embeddings: torch.Tensor, text: str, language: str) -> Dict[str, float]:
+    def _classify_emotion_from_embeddings(self, embeddings, text: str, language: str) -> Dict[str, float]:
         """Classify emotion from embeddings using keyword enhancement"""
         emotion_scores = {emotion: 0.0 for emotion in EMOTION_CATEGORIES.keys()}
         

@@ -285,3 +285,281 @@
 2025-09-04 00:28:41,610 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
 2025-09-04 00:28:41,610 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
 2025-09-04 00:28:41,610 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-04 11:16:57,732 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-04 11:16:57,732 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-04 11:16:57,732 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-04 11:54:24,703 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-04 11:54:24,708 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-04 11:54:24,709 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-04 13:08:58,114 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-04 13:08:58,117 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-04 13:08:58,117 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-04 13:28:48,495 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-04 13:28:48,495 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-04 13:28:48,497 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-04 14:57:12,285 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-04 14:57:12,285 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-04 14:57:12,285 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-04 16:35:12,345 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-04 16:35:12,345 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-04 16:35:12,345 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-04 17:14:01,223 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-04 17:14:01,227 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-04 17:14:01,227 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-04 17:31:18,674 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-04 17:31:18,674 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-04 17:31:18,674 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-04 19:57:10,162 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-04 19:57:10,162 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-04 19:57:10,162 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-04 20:13:48,988 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-04 20:13:48,988 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-04 20:13:48,988 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-04 20:17:26,007 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-04 20:17:26,007 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-04 20:17:26,008 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-04 20:25:56,750 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-04 20:25:56,750 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-04 20:25:56,750 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-04 22:24:08,315 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-04 22:24:08,316 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-04 22:24:08,316 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-04 22:36:33,222 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-04 22:36:33,222 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-04 22:36:33,222 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-04 22:43:18,118 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-04 22:43:18,118 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-04 22:43:18,118 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-04 22:53:06,456 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-04 22:53:06,456 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-04 22:53:06,456 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-04 23:25:52,599 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-04 23:25:52,599 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-04 23:25:52,599 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-04 23:27:53,870 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-04 23:27:53,870 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-04 23:27:53,870 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-04 23:37:57,936 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-04 23:37:57,936 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-04 23:37:57,936 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-05 00:40:30,329 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-05 00:40:30,341 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-05 00:40:30,342 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-05 01:11:36,875 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-05 01:11:36,876 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-05 01:11:36,876 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-05 01:24:22,713 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-05 01:24:22,720 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-05 01:24:22,720 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-05 08:40:33,423 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-05 08:40:33,424 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-05 23:55:03,720 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-05 23:55:03,720 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-05 23:55:03,720 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 00:01:11,751 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 00:01:11,751 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 00:01:11,751 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 00:09:31,667 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 00:09:31,674 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 00:09:31,674 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:05:54,966 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:05:54,966 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:05:54,971 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:06:11,903 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:06:11,903 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:06:11,903 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:07:07,615 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:07:07,615 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:07:07,615 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:07:54,255 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:07:54,255 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:07:54,255 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:19:08,008 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:19:08,008 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:19:08,008 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:19:17,597 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:19:17,598 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:19:17,598 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:19:18,483 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:19:18,483 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:19:18,483 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:19:28,307 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:19:28,309 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:19:28,309 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:25:20,595 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:25:20,599 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:25:20,599 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:25:29,946 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:25:29,952 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:25:29,952 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:26:01,696 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:26:01,696 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:26:01,696 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:26:10,884 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:26:10,885 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:26:10,885 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:49:22,820 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:49:22,820 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:49:22,820 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:49:31,598 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:49:31,599 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:49:31,599 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:50:05,594 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:50:05,594 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:50:05,594 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:50:13,667 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:50:13,668 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:50:13,668 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:50:20,832 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:50:20,832 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:50:20,832 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:50:28,724 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:50:28,724 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:50:28,725 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:50:35,405 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:50:35,405 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:50:35,405 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:50:44,046 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:50:44,047 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:50:44,047 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:51:13,386 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:51:13,386 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:51:13,387 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:51:22,474 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:51:22,474 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:51:22,477 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:51:49,290 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:51:49,291 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:51:49,291 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:51:58,093 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:51:58,093 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:51:58,094 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:52:15,063 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:52:15,063 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:52:15,063 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:52:24,056 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:52:24,058 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:52:24,058 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:53:07,494 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:53:07,494 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:53:07,494 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:53:16,457 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:53:16,457 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:53:16,457 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:53:23,179 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:53:23,186 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:53:23,186 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:53:31,110 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:53:31,112 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:53:31,112 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:54:56,357 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:54:56,357 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:54:56,357 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:55:04,837 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:55:04,837 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:55:04,837 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:55:14,840 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:55:14,840 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:55:14,840 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:55:23,639 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:55:23,639 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:55:23,639 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:55:30,653 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:55:30,655 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:55:30,655 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 02:55:39,876 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-06 02:55:39,876 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 02:55:39,876 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 11:17:31,122 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 11:17:31,122 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 16:18:35,225 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 16:18:35,225 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-06 16:42:55,997 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-06 16:42:55,997 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 00:15:04,404 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 00:15:04,404 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 00:15:04,404 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 00:15:05,021 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 00:15:05,021 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 00:15:05,021 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 00:15:59,461 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 00:15:59,461 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 00:15:59,461 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 00:16:00,061 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 00:16:00,061 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 00:16:00,070 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 00:16:14,134 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 00:16:14,135 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 00:16:14,135 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 00:16:14,627 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 00:16:14,627 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 00:16:14,627 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 00:17:00,562 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 00:17:00,563 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 00:17:00,563 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 00:17:01,194 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 00:17:01,196 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 00:17:01,196 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 00:41:04,533 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 00:41:04,534 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 00:41:04,534 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 00:41:16,522 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 00:41:16,522 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 00:41:16,522 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 00:41:17,073 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 00:41:17,075 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 00:41:17,075 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 00:44:42,946 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 00:44:42,953 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 00:44:42,953 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 00:44:43,581 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 00:44:43,589 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 00:44:43,589 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 00:45:25,787 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 00:45:25,787 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 00:45:25,787 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 00:45:26,293 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 00:45:26,293 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 00:45:26,293 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 01:21:44,064 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 01:21:44,066 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 01:21:44,066 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 01:21:44,621 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 01:21:44,621 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 01:21:44,621 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 01:32:39,319 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 01:32:39,319 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 01:32:39,319 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 01:32:39,851 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 01:32:39,852 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 01:32:39,852 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 01:36:34,028 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 01:36:34,030 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 01:36:34,030 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 01:36:34,513 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 01:36:34,513 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 01:36:34,513 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 01:40:28,103 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 01:40:28,103 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 01:40:28,109 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 01:40:28,685 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 01:40:28,686 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 01:40:28,686 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 01:42:44,763 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 01:42:44,765 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 01:42:44,765 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 01:42:45,546 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 01:42:45,546 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 01:42:45,549 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 01:50:16,732 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 01:50:16,734 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 01:50:16,735 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 01:54:32,600 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 01:54:32,600 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 01:54:32,616 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 02:03:59,463 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 02:03:59,463 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 02:03:59,472 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.
+2025-09-08 02:04:06,824 - ContentIntegrityFilter - INFO - OpenRouterClient: Khởi tạo với base URL https://openrouter.ai/api/v1/chat/completions
+2025-09-08 02:04:06,824 - ContentIntegrityFilter - INFO - Đã tải và hợp nhất rules từ D:\stillme_ai\modules\..\config\content_filter_rules.json
+2025-09-08 02:04:06,824 - ContentIntegrityFilter - INFO - ContentIntegrityFilter initialized.

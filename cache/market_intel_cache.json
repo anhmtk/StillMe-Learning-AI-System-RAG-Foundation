@@ -1,0 +1,304 @@
+{
+  "timestamp": "2025-09-08T00:45:35.673483",
+  "data": {
+    "trends": [
+      {
+        "source": "GitHub",
+        "title": "parlant",
+        "description": "\n      LLM agents built for control. Designed for real-world use. Deployed in minutes.\n    ",
+        "url": "https://github.com/emcie-co/parlant",
+        "score": 9611,
+        "timestamp": "2025-09-08T00:45:28.444706",
+        "category": "Programming",
+        "metadata": {
+          "author": "emcie-co",
+          "language": "Python",
+          "stars": 9611,
+          "forks": 788
+        }
+      },
+      {
+        "source": "GitHub",
+        "title": "ottomator-agents",
+        "description": "\n      All the open source AI Agents hosted on the oTTomator Live Agent Studio platform!\n    ",
+        "url": "https://github.com/coleam00/ottomator-agents",
+        "score": 3992,
+        "timestamp": "2025-09-08T00:45:28.444706",
+        "category": "Programming",
+        "metadata": {
+          "author": "coleam00",
+          "language": "Python",
+          "stars": 3992,
+          "forks": 1437
+        }
+      },
+      {
+        "source": "GitHub",
+        "title": "BitNet",
+        "description": "\n      Official inference framework for 1-bit LLMs\n    ",
+        "url": "https://github.com/microsoft/BitNet",
+        "score": 21677,
+        "timestamp": "2025-09-08T00:45:28.444706",
+        "category": "Programming",
+        "metadata": {
+          "author": "microsoft",
+          "language": "Python",
+          "stars": 21677,
+          "forks": 1642
+        }
+      },
+      {
+        "source": "GitHub",
+        "title": "pathway",
+        "description": "\n      Python ETL framework for stream processing, real-time analytics, LLM pipelines, and RAG.\n    ",
+        "url": "https://github.com/pathwaycom/pathway",
+        "score": 37863,
+        "timestamp": "2025-09-08T00:45:28.444706",
+        "category": "Programming",
+        "metadata": {
+          "author": "pathwaycom",
+          "language": "Python",
+          "stars": 37863,
+          "forks": 1111
+        }
+      },
+      {
+        "source": "GitHub",
+        "title": "XLeRobot",
+        "description": "\n      XLeRobot: Practical Dual-Arm Mobile Home Robot for $660\n    ",
+        "url": "https://github.com/Vector-Wangel/XLeRobot",
+        "score": 1868,
+        "timestamp": "2025-09-08T00:45:28.444706",
+        "category": "Programming",
+        "metadata": {
+          "author": "Vector-Wangel",
+          "language": "Python",
+          "stars": 1868,
+          "forks": 184
+        }
+      },
+      {
+        "source": "GitHub",
+        "title": "kotaemon",
+        "description": "\n      An open-source RAG-based tool for chatting with your documents.\n    ",
+        "url": "https://github.com/Cinnamon/kotaemon",
+        "score": 23157,
+        "timestamp": "2025-09-08T00:45:28.444706",
+        "category": "Programming",
+        "metadata": {
+          "author": "Cinnamon",
+          "language": "Python",
+          "stars": 23157,
+          "forks": 1891
+        }
+      },
+      {
+        "source": "GitHub",
+        "title": "TensorRT-Model-Optimizer",
+        "description": "\n      A unified library of state-of-the-art model optimization techniques like quantization, pruning, distillation, speculative decoding, etc. It compresses deep learning models for downstream deployment frameworks like TensorRT-LLM or TensorRT to optimize inference speed.\n    ",
+        "url": "https://github.com/NVIDIA/TensorRT-Model-Optimizer",
+        "score": 1256,
+        "timestamp": "2025-09-08T00:45:28.444706",
+        "category": "Programming",
+        "metadata": {
+          "author": "NVIDIA",
+          "language": "Python",
+          "stars": 1256,
+          "forks": 139
+        }
+      },
+      {
+        "source": "GitHub",
+        "title": "13ft",
+        "description": "\n      My own custom 12ft.io replacement\n    ",
+        "url": "https://github.com/wasi-master/13ft",
+        "score": 3734,
+        "timestamp": "2025-09-08T00:45:28.444706",
+        "category": "Programming",
+        "metadata": {
+          "author": "wasi-master",
+          "language": "Python",
+          "stars": 3734,
+          "forks": 203
+        }
+      },
+      {
+        "source": "GitHub",
+        "title": "stable-diffusion-webui-forge",
+        "description": "",
+        "url": "https://github.com/lllyasviel/stable-diffusion-webui-forge",
+        "score": 11549,
+        "timestamp": "2025-09-08T00:45:28.444706",
+        "category": "Programming",
+        "metadata": {
+          "author": "lllyasviel",
+          "language": "Python",
+          "stars": 11549,
+          "forks": 1276
+        }
+      },
+      {
+        "source": "GitHub",
+        "title": "Bjorn",
+        "description": "\n      Bjorn is a powerful network scanning and offensive security tool for the Raspberry Pi with a 2.13-inch e-Paper HAT. It discovers network targets, identifies open ports, exposed services, and potential vulnerabilities. Bjorn can perform brute force attacks, file stealing, host zombification, and supports custom attack scripts.\n    ",
+        "url": "https://github.com/infinition/Bjorn",
+        "score": 4762,
+        "timestamp": "2025-09-08T00:45:28.444706",
+        "category": "Programming",
+        "metadata": {
+          "author": "infinition",
+          "language": "Python",
+          "stars": 4762,
+          "forks": 265
+        }
+      },
+      {
+        "source": "Hacker News",
+        "title": "Serverless Horrors",
+        "description": "Score: 389",
+        "url": "https://serverlesshorrors.com/",
+        "score": 389.0,
+        "timestamp": "2025-09-08T00:45:33.523098",
+        "category": "Tech News",
+        "metadata": {
+          "by": "operator-name",
+          "time": 1757242803,
+          "descendants": 252
+        }
+      },
+      {
+        "source": "Hacker News",
+        "title": "The MacBook has a sensor that knows the exact angle of the screen hinge",
+        "description": "Score: 167",
+        "url": "https://twitter.com/samhenrigold/status/1964428927159382261",
+        "score": 167.0,
+        "timestamp": "2025-09-08T00:45:33.770054",
+        "category": "Tech News",
+        "metadata": {
+          "by": "leephillips",
+          "time": 1757258429,
+          "descendants": 87
+        }
+      },
+      {
+        "source": "Hacker News",
+        "title": "A Queasy Selling of the Family Heirlooms",
+        "description": "Score: 49",
+        "url": "https://commonreader.wustl.edu/a-queasy-selling-of-the-family-heirlooms/",
+        "score": 49.0,
+        "timestamp": "2025-09-08T00:45:34.001716",
+        "category": "Tech News",
+        "metadata": {
+          "by": "ilamont",
+          "time": 1756911331,
+          "descendants": 39
+        }
+      },
+      {
+        "source": "Hacker News",
+        "title": "Show HN: Semantic grep for Claude Code (local embeddings)",
+        "description": "Score: 86",
+        "url": "https://github.com/BeaconBay/ck",
+        "score": 86.0,
+        "timestamp": "2025-09-08T00:45:34.220378",
+        "category": "Tech News",
+        "metadata": {
+          "by": "Runonthespot",
+          "time": 1757244037,
+          "descendants": 42
+        }
+      },
+      {
+        "source": "Hacker News",
+        "title": "The Expression Problem and its solutions",
+        "description": "Score: 43",
+        "url": "https://eli.thegreenplace.net/2016/the-expression-problem-and-its-solutions/",
+        "score": 43.0,
+        "timestamp": "2025-09-08T00:45:34.470644",
+        "category": "Tech News",
+        "metadata": {
+          "by": "andsoitis",
+          "time": 1757226484,
+          "descendants": 7
+        }
+      },
+      {
+        "source": "Hacker News",
+        "title": "Air pollution directly linked to increased dementia risk",
+        "description": "Score: 183",
+        "url": "https://www.nature.com/articles/d41586-025-02844-9",
+        "score": 183.0,
+        "timestamp": "2025-09-08T00:45:34.688180",
+        "category": "Tech News",
+        "metadata": {
+          "by": "rntn",
+          "time": 1757250822,
+          "descendants": 86
+        }
+      },
+      {
+        "source": "Hacker News",
+        "title": "Garmin Beats Apple to Market with Satellite-Connected Smartwatch",
+        "description": "Score: 104",
+        "url": "https://www.macrumors.com/2025/09/03/garmin-satellite-smartwatch/",
+        "score": 104.0,
+        "timestamp": "2025-09-08T00:45:34.922323",
+        "category": "Tech News",
+        "metadata": {
+          "by": "mgh2",
+          "time": 1756919889,
+          "descendants": 65
+        }
+      },
+      {
+        "source": "Hacker News",
+        "title": "Show HN: I'm a dermatologist and I vibe coded a skin cancer learning app",
+        "description": "Score: 180",
+        "url": "https://molecheck.info/",
+        "score": 180.0,
+        "timestamp": "2025-09-08T00:45:35.155342",
+        "category": "Tech News",
+        "metadata": {
+          "by": "sungam",
+          "time": 1757241509,
+          "descendants": 118
+        }
+      },
+      {
+        "source": "Hacker News",
+        "title": "Delayed Security Patches for AOSP (Android Open Source Project)",
+        "description": "Score: 112",
+        "url": "https://twitter.com/grapheneos/status/1964561043906048183",
+        "score": 112.0,
+        "timestamp": "2025-09-08T00:45:35.381935",
+        "category": "Tech News",
+        "metadata": {
+          "by": "transpute",
+          "time": 1757255792,
+          "descendants": 43
+        }
+      },
+      {
+        "source": "Hacker News",
+        "title": "US to target more businesses after Hyundai raid",
+        "description": "Score: 23",
+        "url": "https://www.reuters.com/business/autos-transportation/us-target-more-businesses-after-hyundai-raid-top-official-says-2025-09-07/",
+        "score": 23.0,
+        "timestamp": "2025-09-08T00:45:35.673483",
+        "category": "Tech News",
+        "metadata": {
+          "by": "DocFeind",
+          "time": 1757263754,
+          "descendants": 25
+        }
+      }
+    ],
+    "sources_used": [
+      "GitHub",
+      "Tech News"
+    ],
+    "keywords": [
+      "python"
+    ]
+  }
+}

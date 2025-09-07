@@ -7,7 +7,7 @@ __author__ = "StillMe Framework Team"
 
 # Import all modules for easy access
 try:
-    from .smart_gpt_api_manager_v1 import SmartGPTAPIManager
+    from .api_provider_manager import UnifiedAPIManager
     from .conversational_core_v1 import ConversationalCore
     from .layered_memory_v1 import LayeredMemoryV1
     from .token_optimizer_v1 import TokenOptimizer, TokenOptimizerConfig
@@ -16,7 +16,7 @@ try:
     from .content_integrity_filter import ContentIntegrityFilter
     
     __all__ = [
-        "SmartGPTAPIManager",
+        "UnifiedAPIManager",
         "ConversationalCore", 
         "LayeredMemoryV1",
         "TokenOptimizer",

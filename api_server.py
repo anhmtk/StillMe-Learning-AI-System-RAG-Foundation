@@ -12,6 +12,7 @@ from typing import Optional, Literal, cast, List
 from contextlib import asynccontextmanager, suppress
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import StreamingResponse
 from starlette import status
 from pydantic import BaseModel
 
@@ -149,6 +150,10 @@ class BridgeOut(BaseModel):
     content: str
     safe_passed: Optional[bool] = None
 
+class ChatRequest(BaseModel):
+    message: str
+    stream: bool = True
+
 # -----------------------------------------------------------------------------
 # Provider selection
 # -----------------------------------------------------------------------------
@@ -195,6 +200,62 @@ async def dev_agent_bridge(req: BridgeIn):
         raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"AgentDev execution failed: {e}")
 
 # -----------------------------------------------------------------------------
+# Chat endpoint with streaming
+# -----------------------------------------------------------------------------
+@app.post("/chat")
+async def chat_stream(req: ChatRequest):
+    """Main chat endpoint with streaming support"""
+    if not req.message.strip():
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Message cannot be empty")
+    
+    try:
+        # Import ModelRouter for streaming
+        try:
+            from modules.api_provider_manager import UnifiedAPIManager
+            router = UnifiedAPIManager()
+        except ImportError as e:
+            log.error(f"Failed to import UnifiedAPIManager: {e}")
+            raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "AI service unavailable")
+        
+        if req.stream:
+            # Return streaming response
+            def generate_stream():
+                try:
+                    for chunk in router.get_ai_response_stream(req.message):
+                        # Format as Server-Sent Events
+                        yield f"data: {chunk}\n\n"
+                    yield "data: [DONE]\n\n"
+                except Exception as e:
+                    log.exception("Streaming error")
+                    yield f"data: ⚠️ Lỗi xử lý: {str(e)}\n\n"
+                    yield "data: [DONE]\n\n"
+            
+            return StreamingResponse(
+                generate_stream(),
+                media_type="text/plain",
+                headers={
+                    "Cache-Control": "no-cache",
+                    "Connection": "keep-alive",
+                    "Access-Control-Allow-Origin": "*",
+                }
+            )
+        else:
+            # Non-streaming response (fallback)
+            response_chunks = []
+            for chunk in router.get_ai_response_stream(req.message):
+                response_chunks.append(chunk)
+            
+            return {
+                "message": "".join(response_chunks),
+                "chunks_count": len(response_chunks),
+                "stream": False
+            }
+            
+    except Exception as e:
+        log.exception("Chat endpoint error")
+        raise HTTPException(status.HTTP_500_INTERNAL_SERVER_ERROR, f"Chat processing failed: {e}")
+
+# -----------------------------------------------------------------------------
 # Health
 # -----------------------------------------------------------------------------
 @app.get("/health/ai")
@@ -230,6 +291,68 @@ async def health_ai():
             "agentdev": {"ok": agentdev_ok}
         }
     }
+
+# -----------------------------------------------------------------------------
+# Market Intelligence Dashboard API
+# -----------------------------------------------------------------------------
+@app.get("/api/market-dashboard")
+async def get_market_dashboard():
+    """
+    Market Dashboard API - Trả về 5-10 xu hướng hàng đầu với dự báo và khuyến nghị
+    
+    Returns:
+        JSON: Dashboard data với predictions và recommendations
+    """
+    try:
+        # Initialize framework if not already done
+        if not hasattr(get_market_dashboard, 'framework'):
+            from framework import StillMeFramework
+            get_market_dashboard.framework = StillMeFramework()
+        
+        framework = get_market_dashboard.framework
+        
+        if not (hasattr(framework, 'market_intelligence') and framework.market_intelligence):
+            return {
+                "error": "Market Intelligence module không khả dụng",
+                "status": "error"
+            }
+        
+        # Get predictive analysis
+        analysis = await framework.market_intelligence.get_predictive_analysis()
+        
+        if 'error' in analysis:
+            return {
+                "error": analysis['error'],
+                "status": "error"
+            }
+        
+        # Format for dashboard
+        dashboard_data = {
+            "status": "success",
+            "timestamp": datetime.now().isoformat(),
+            "market_overview": {
+                "confidence_score": analysis['market_report']['confidence_score'],
+                "sources_used": analysis['market_report']['sources_used'],
+                "summary": analysis['market_report']['summary']
+            },
+            "top_trends": analysis['predictions'][:5],  # Top 5 predictions
+            "recommendations": analysis['recommendations'][:5],  # Top 5 recommendations
+            "analytics": {
+                "total_predictions": analysis['analysis_metadata']['total_predictions'],
+                "high_confidence_predictions": analysis['analysis_metadata']['high_confidence_predictions'],
+                "total_recommendations": analysis['analysis_metadata']['total_recommendations']
+            }
+        }
+        
+        return dashboard_data
+        
+    except Exception as e:
+        log.error(f"❌ Error in market dashboard: {e}")
+        return {
+            "error": f"Lỗi khi tạo market dashboard: {str(e)}",
+            "status": "error",
+            "timestamp": datetime.now().isoformat()
+        }
 
 # -----------------------------------------------------------------------------
 # SUL (System Understanding Layer)
@@ -402,7 +525,6 @@ def dev_agent_run(req: RunReq):
 
     # Gọi loop đồng bộ (agentdev_run_once là hàm sync)
     summary = agentdev_run_once(
-        max_steps=req.max_steps,
         run_full_suite_after_pass=req.run_full_suite_after_pass,
         open_pr_after_pass=req.open_pr_after_pass,
         pr_draft=req.pr_draft,
@@ -414,19 +536,20 @@ def dev_agent_run(req: RunReq):
     )
 
     # Chuẩn hóa response theo schema mới
-    fs = (summary or {}).get("full_suite") or {}
-    pr = (summary or {}).get("pr") or {}
+    summary_dict = summary if isinstance(summary, dict) else {}
+    fs = summary_dict.get("full_suite") or {}
+    pr = summary_dict.get("pr") or {}
 
     # Lấy log JSONL mới nhất nếu caller không truyền sẵn
     log_candidates = sorted(glob.glob("logs/agentdev/*.jsonl"))
-    log_path = (summary or {}).get("logs", {}).get("jsonl") or (log_candidates[-1] if log_candidates else "logs/agentdev")
+    log_path = summary_dict.get("logs", {}).get("jsonl") or (log_candidates[-1] if log_candidates else "logs/agentdev")
 
     resp = {
-        "ok": bool((summary or {}).get("ok")),
-        "taken": int((summary or {}).get("taken") or 1),
-        "branch": (summary or {}).get("branch"),
-        "refined": bool((summary or {}).get("refined", False)),
-        "duration_ms": int((summary or {}).get("duration_ms") or 0),
+        "ok": bool(summary_dict.get("ok")),
+        "taken": int(summary_dict.get("taken") or 1),
+        "branch": summary_dict.get("branch"),
+        "refined": bool(summary_dict.get("refined", False)),
+        "duration_ms": int(summary_dict.get("duration_ms") or 0),
         "full_suite": {
             "attempted": bool(fs.get("attempted", False)),
             "ok": fs.get("ok"),

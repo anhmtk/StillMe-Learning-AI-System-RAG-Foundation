@@ -1,0 +1,105 @@
+{
+  "safety_mode": true,
+  "read_only_mode": true,
+  "auto_approve_low_risk": false,
+  "max_proposed_changes": 10,
+  "backup_retention_days": 30,
+  "sandbox_timeout_seconds": 300,
+  "required_approvals": [
+    "ethical",
+    "integrity",
+    "test"
+  ],
+  "forbidden_file_patterns": [
+    "*.pyc",
+    "__pycache__",
+    "*.log",
+    "*.tmp",
+    "backup_legacy",
+    "tests/fixtures",
+    "node_modules",
+    "**/Lib/**/test/**",
+    "**/Tests/**"
+  ],
+  "critical_files": [
+    "framework.py",
+    "app.py",
+    "modules/ethical_core_system.py",
+    "modules/content_integrity_filter.py",
+    "modules/self_improvement_manager.py"
+  ],
+  "risk_levels": {
+    "LOW": {
+      "description": "Thay đổi nhỏ, ít rủi ro",
+      "auto_approve": false,
+      "require_manual_review": false
+    },
+    "MEDIUM": {
+      "description": "Thay đổi trung bình, rủi ro vừa phải",
+      "auto_approve": false,
+      "require_manual_review": true
+    },
+    "HIGH": {
+      "description": "Thay đổi lớn, rủi ro cao",
+      "auto_approve": false,
+      "require_manual_review": true,
+      "require_sandbox_test": true
+    },
+    "CRITICAL": {
+      "description": "Thay đổi quan trọng, rủi ro rất cao",
+      "auto_approve": false,
+      "require_manual_review": true,
+      "require_sandbox_test": true,
+      "require_emergency_rollback": true
+    }
+  },
+  "safety_checks": {
+    "ethical_core_system": {
+      "enabled": true,
+      "timeout_seconds": 30,
+      "required_score": 0.8
+    },
+    "content_integrity_filter": {
+      "enabled": true,
+      "timeout_seconds": 30,
+      "required_score": 0.9
+    },
+    "syntax_check": {
+      "enabled": true,
+      "timeout_seconds": 10
+    },
+    "test_suite": {
+      "enabled": true,
+      "timeout_seconds": 300,
+      "required_pass_rate": 0.95
+    }
+  },
+  "backup_settings": {
+    "enabled": true,
+    "compression": true,
+    "encryption": false,
+    "max_backups_per_file": 10,
+    "backup_naming_pattern": "{filename}_{timestamp}.backup"
+  },
+  "sandbox_settings": {
+    "enabled": true,
+    "isolated_environment": true,
+    "timeout_seconds": 300,
+    "cleanup_after_test": true,
+    "max_sandbox_size_mb": 100
+  },
+  "logging": {
+    "level": "INFO",
+    "file_rotation": true,
+    "max_log_size_mb": 10,
+    "backup_count": 5,
+    "log_format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  },
+  "notifications": {
+    "email_alerts": false,
+    "console_alerts": true,
+    "file_alerts": true,
+    "alert_on_high_risk": true,
+    "alert_on_rollback": true
+  }
+}

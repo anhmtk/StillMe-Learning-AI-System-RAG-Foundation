@@ -1,0 +1,903 @@
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2598, "tokens_out": 13, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3213, "tokens_out": 32, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2771, "tokens_out": 22, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2245, "tokens_out": 19, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1444, "tokens_out": 7, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2961, "tokens_out": 26, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1171, "tokens_out": 5, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2253, "tokens_out": 20, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1939, "tokens_out": 17, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 786, "tokens_out": 3, "q_len": 1, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 955, "tokens_out": 3, "q_len": 2, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1477, "tokens_out": 8, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1783, "tokens_out": 7, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1530, "tokens_out": 10, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5451, "tokens_out": 24, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5572, "tokens_out": 52, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2935, "tokens_out": 25, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2715, "tokens_out": 25, "q_len": 8, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2789, "tokens_out": 25, "q_len": 8, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3639, "tokens_out": 29, "q_len": 9, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4225, "tokens_out": 41, "q_len": 10, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3028, "tokens_out": 29, "q_len": 8, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3842, "tokens_out": 28, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3402, "tokens_out": 33, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4516, "tokens_out": 46, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4789, "tokens_out": 44, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2483, "tokens_out": 21, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2090, "tokens_out": 12, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 7975, "tokens_out": 69, "q_len": 11, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1715, "tokens_out": 14, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3395, "tokens_out": 35, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1600, "tokens_out": 12, "q_len": 8, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4261, "tokens_out": 43, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2770, "tokens_out": 27, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2271, "tokens_out": 21, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2645, "tokens_out": 27, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2458, "tokens_out": 20, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1955, "tokens_out": 13, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1082, "tokens_out": 6, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2778, "tokens_out": 27, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1653, "tokens_out": 11, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 906, "tokens_out": 3, "q_len": 1, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1035, "tokens_out": 4, "q_len": 2, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 956, "tokens_out": 3, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2150, "tokens_out": 15, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1137, "tokens_out": 5, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2901, "tokens_out": 15, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2840, "tokens_out": 29, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2591, "tokens_out": 19, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3254, "tokens_out": 28, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1780, "tokens_out": 12, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2350, "tokens_out": 20, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3458, "tokens_out": 31, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1951, "tokens_out": 16, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2193, "tokens_out": 16, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3187, "tokens_out": 28, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4760, "tokens_out": 47, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4076, "tokens_out": 38, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2058, "tokens_out": 19, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1353, "tokens_out": 8, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2137, "tokens_out": 17, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3203, "tokens_out": 32, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5493, "tokens_out": 56, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2739, "tokens_out": 26, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3126, "tokens_out": 29, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2939, "tokens_out": 24, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1928, "tokens_out": 17, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1768, "tokens_out": 14, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2331, "tokens_out": 19, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2355, "tokens_out": 22, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2979, "tokens_out": 25, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3185, "tokens_out": 30, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2239, "tokens_out": 19, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2594, "tokens_out": 27, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3249, "tokens_out": 31, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2030, "tokens_out": 17, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3624, "tokens_out": 36, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2223, "tokens_out": 19, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4616, "tokens_out": 48, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1798, "tokens_out": 13, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2888, "tokens_out": 27, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2723, "tokens_out": 25, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2400, "tokens_out": 19, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3055, "tokens_out": 24, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1760, "tokens_out": 15, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1533, "tokens_out": 11, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1849, "tokens_out": 15, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1817, "tokens_out": 15, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2622, "tokens_out": 24, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 17817, "tokens_out": 160, "q_len": 7, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 10505, "tokens_out": 85, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 8186, "tokens_out": 69, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 14834, "tokens_out": 121, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 33697, "tokens_out": 262, "q_len": 4, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 13246, "tokens_out": 110, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 38047, "tokens_out": 298, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 16024, "tokens_out": 132, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 59552, "tokens_out": 565, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 15132, "tokens_out": 149, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 5973, "tokens_out": 46, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 7637, "tokens_out": 44, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 6959, "tokens_out": 60, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 23792, "tokens_out": 206, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 19774, "tokens_out": 180, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 13628, "tokens_out": 111, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 6776, "tokens_out": 60, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 13426, "tokens_out": 117, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 9222, "tokens_out": 81, "q_len": 8, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 16238, "tokens_out": 148, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 25723, "tokens_out": 271, "q_len": 7, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 18515, "tokens_out": 157, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 6812, "tokens_out": 54, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 31157, "tokens_out": 289, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 20492, "tokens_out": 186, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 24462, "tokens_out": 224, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 11072, "tokens_out": 98, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 16097, "tokens_out": 123, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 32960, "tokens_out": 304, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 33235, "tokens_out": 288, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 12898, "tokens_out": 104, "q_len": 4, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 34056, "tokens_out": 268, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 11837, "tokens_out": 96, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 9944, "tokens_out": 82, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 4933, "tokens_out": 34, "q_len": 3, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 10961, "tokens_out": 87, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 9855, "tokens_out": 79, "q_len": 4, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 5904, "tokens_out": 41, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 29407, "tokens_out": 260, "q_len": 4, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 11313, "tokens_out": 90, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 29, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 22, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 15, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 16, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 26, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 27, "tokens_out": 0, "q_len": 1, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5, "tokens_out": 0, "q_len": 2, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 28, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 16, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 25, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 19, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 15, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5, "tokens_out": 0, "q_len": 8, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 25, "tokens_out": 0, "q_len": 8, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 16, "tokens_out": 0, "q_len": 9, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5, "tokens_out": 0, "q_len": 10, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 18, "tokens_out": 0, "q_len": 8, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 7, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 30, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 6, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 26, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 16, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 16, "tokens_out": 0, "q_len": 11, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 16, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 16, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 15, "tokens_out": 0, "q_len": 8, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 23, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 30, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 16, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 16, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 16, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 15, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 17, "tokens_out": 0, "q_len": 1, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 16, "tokens_out": 0, "q_len": 2, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 19, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 6, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 15, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 18, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 17, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 25, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 15, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 26, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 17, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 23, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 19, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 6, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 19, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 19, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 14, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 16, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 15, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 14, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 16, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 17, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 15, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 22, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 21, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 16, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 15, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 19, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 18, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 19, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 14, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 20, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 14, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 19, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 23, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 16, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 17, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 18, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 19, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 26, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 15, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 5, "tokens_out": 0, "q_len": 7, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 15, "tokens_out": 0, "q_len": 6, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 4, "tokens_out": 0, "q_len": 4, "sig_len": 4, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 4, "tokens_out": 0, "q_len": 5, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 16, "tokens_out": 0, "q_len": 4, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 4, "tokens_out": 0, "q_len": 5, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 25, "tokens_out": 0, "q_len": 6, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 14, "tokens_out": 0, "q_len": 6, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 5, "tokens_out": 0, "q_len": 6, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 28, "tokens_out": 0, "q_len": 5, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 5, "tokens_out": 0, "q_len": 4, "sig_len": 4, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 25, "tokens_out": 0, "q_len": 4, "sig_len": 4, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 5, "tokens_out": 0, "q_len": 4, "sig_len": 4, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 18, "tokens_out": 0, "q_len": 4, "sig_len": 4, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 13, "tokens_out": 0, "q_len": 5, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 24, "tokens_out": 0, "q_len": 4, "sig_len": 4, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 17, "tokens_out": 0, "q_len": 4, "sig_len": 4, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 20, "tokens_out": 0, "q_len": 5, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 17, "tokens_out": 0, "q_len": 8, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 16, "tokens_out": 0, "q_len": 4, "sig_len": 4, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 15, "tokens_out": 0, "q_len": 7, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 16, "tokens_out": 0, "q_len": 5, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 15, "tokens_out": 0, "q_len": 6, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 5, "tokens_out": 0, "q_len": 5, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 26, "tokens_out": 0, "q_len": 5, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 18, "tokens_out": 0, "q_len": 5, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 28, "tokens_out": 0, "q_len": 6, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 15, "tokens_out": 0, "q_len": 5, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 6, "tokens_out": 0, "q_len": 6, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 28, "tokens_out": 0, "q_len": 5, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 5, "tokens_out": 0, "q_len": 4, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 26, "tokens_out": 0, "q_len": 6, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 4, "tokens_out": 0, "q_len": 5, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 26, "tokens_out": 0, "q_len": 4, "sig_len": 4, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 16, "tokens_out": 0, "q_len": 3, "sig_len": 4, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 15, "tokens_out": 0, "q_len": 6, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 15, "tokens_out": 0, "q_len": 4, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 15, "tokens_out": 0, "q_len": 6, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 15, "tokens_out": 0, "q_len": 4, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 6, "tokens_out": 0, "q_len": 5, "sig_len": 5, "success": false, "error": "Using http2=True, but the 'h2' package is not installed. Make sure to install httpx using `pip install httpx[http2]`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2601, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2973, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2551, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2632, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1506, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4633, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1162, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2203, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2232, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 716, "tokens_out": 0, "q_len": 1, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 873, "tokens_out": 0, "q_len": 2, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2176, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4181, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1327, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3189, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 9964, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4192, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4957, "tokens_out": 0, "q_len": 8, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2148, "tokens_out": 0, "q_len": 8, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3768, "tokens_out": 0, "q_len": 9, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3896, "tokens_out": 0, "q_len": 10, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3033, "tokens_out": 0, "q_len": 8, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3583, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 6534, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 7531, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 7680, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2433, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2044, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5418, "tokens_out": 0, "q_len": 11, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4480, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2750, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2319, "tokens_out": 0, "q_len": 8, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3431, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2230, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2319, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3051, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1457, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2363, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1106, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2667, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1503, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1023, "tokens_out": 0, "q_len": 1, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1226, "tokens_out": 0, "q_len": 2, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1248, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2047, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1076, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 7954, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2179, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2269, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2883, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1660, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2708, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3587, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2087, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3178, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3795, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 13733, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3645, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1452, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2272, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3371, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3045, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4112, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2598, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2788, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2527, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2166, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1487, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2699, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2203, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2342, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2498, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2624, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2382, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3719, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2700, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2756, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3066, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3489, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2477, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3462, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2702, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2165, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3532, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1716, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2535, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1893, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2354, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2655, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 8416, "tokens_out": 0, "q_len": 7, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 10611, "tokens_out": 0, "q_len": 6, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 15982, "tokens_out": 0, "q_len": 4, "sig_len": 4, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 10400, "tokens_out": 0, "q_len": 5, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 32014, "tokens_out": 0, "q_len": 4, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 6276, "tokens_out": 0, "q_len": 5, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 31471, "tokens_out": 0, "q_len": 6, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 28536, "tokens_out": 0, "q_len": 6, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 15232, "tokens_out": 0, "q_len": 6, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 8957, "tokens_out": 0, "q_len": 5, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 22614, "tokens_out": 0, "q_len": 4, "sig_len": 4, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 10995, "tokens_out": 0, "q_len": 4, "sig_len": 4, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 32126, "tokens_out": 0, "q_len": 4, "sig_len": 4, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 6914, "tokens_out": 0, "q_len": 4, "sig_len": 4, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 23882, "tokens_out": 0, "q_len": 5, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 9004, "tokens_out": 0, "q_len": 4, "sig_len": 4, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 26014, "tokens_out": 0, "q_len": 4, "sig_len": 4, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 13744, "tokens_out": 0, "q_len": 5, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 1801, "tokens_out": 0, "q_len": 8, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 14929, "tokens_out": 0, "q_len": 4, "sig_len": 4, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 28243, "tokens_out": 0, "q_len": 7, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 17647, "tokens_out": 0, "q_len": 5, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 29607, "tokens_out": 0, "q_len": 6, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 19816, "tokens_out": 0, "q_len": 5, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 30450, "tokens_out": 0, "q_len": 5, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 22617, "tokens_out": 0, "q_len": 5, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 8388, "tokens_out": 0, "q_len": 6, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 19281, "tokens_out": 0, "q_len": 5, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 48784, "tokens_out": 0, "q_len": 6, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 26962, "tokens_out": 0, "q_len": 5, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 16465, "tokens_out": 0, "q_len": 4, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 5487, "tokens_out": 0, "q_len": 6, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 5924, "tokens_out": 0, "q_len": 5, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 6897, "tokens_out": 0, "q_len": 4, "sig_len": 4, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 7073, "tokens_out": 0, "q_len": 3, "sig_len": 4, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 10041, "tokens_out": 0, "q_len": 6, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 10244, "tokens_out": 0, "q_len": 4, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 19596, "tokens_out": 0, "q_len": 6, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 13632, "tokens_out": 0, "q_len": 4, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 11860, "tokens_out": 0, "q_len": 5, "sig_len": 5, "success": false, "error": "Attempted to access streaming response content, without having called `read()`."}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2990, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2551, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3336, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2027, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1514, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2837, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1149, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2749, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2823, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 907, "tokens_out": 0, "q_len": 1, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 941, "tokens_out": 0, "q_len": 2, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1473, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2415, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1605, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5360, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2892, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3202, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1853, "tokens_out": 0, "q_len": 8, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3195, "tokens_out": 0, "q_len": 8, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2411, "tokens_out": 0, "q_len": 9, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2414, "tokens_out": 0, "q_len": 10, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3673, "tokens_out": 0, "q_len": 8, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4525, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5362, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 6480, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3446, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2437, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1693, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 6338, "tokens_out": 0, "q_len": 11, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3361, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3422, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3412, "tokens_out": 0, "q_len": 8, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3885, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3420, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2214, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2478, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1556, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1890, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1151, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2346, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1466, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 803, "tokens_out": 0, "q_len": 1, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1094, "tokens_out": 0, "q_len": 2, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 941, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2651, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1170, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3072, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2755, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2018, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2894, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2213, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2813, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2541, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2739, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2238, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3945, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5196, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3742, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1540, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2484, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2813, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1910, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1945, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5116, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2369, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2117, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2591, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2064, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2376, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2617, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3042, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3252, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1750, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2532, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3527, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2408, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3294, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2459, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2027, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3141, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2554, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2639, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1933, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2647, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2491, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1618, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1845, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1999, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1718, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 12630, "tokens_out": 95, "q_len": 7, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 10288, "tokens_out": 87, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 9497, "tokens_out": 74, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 19654, "tokens_out": 180, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 39811, "tokens_out": 342, "q_len": 4, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 12780, "tokens_out": 103, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 44849, "tokens_out": 348, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 15696, "tokens_out": 137, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 5222, "tokens_out": 44, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 11034, "tokens_out": 95, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 18812, "tokens_out": 171, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 8571, "tokens_out": 74, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 10252, "tokens_out": 90, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 7303, "tokens_out": 63, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 12200, "tokens_out": 111, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 8769, "tokens_out": 66, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 13021, "tokens_out": 103, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 13011, "tokens_out": 101, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 5718, "tokens_out": 41, "q_len": 8, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 20393, "tokens_out": 178, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 33992, "tokens_out": 345, "q_len": 7, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 12363, "tokens_out": 104, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 9191, "tokens_out": 62, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 31117, "tokens_out": 313, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 47570, "tokens_out": 462, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 17470, "tokens_out": 161, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 8326, "tokens_out": 64, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 21737, "tokens_out": 161, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 40122, "tokens_out": 333, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 5736, "tokens_out": 40, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 15101, "tokens_out": 126, "q_len": 4, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 28562, "tokens_out": 250, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 12602, "tokens_out": 96, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 29138, "tokens_out": 254, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 11296, "tokens_out": 94, "q_len": 3, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 12434, "tokens_out": 104, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 19315, "tokens_out": 155, "q_len": 4, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 1451, "tokens_out": 1, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 7264, "tokens_out": 49, "q_len": 4, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 13445, "tokens_out": 108, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3309, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3238, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3968, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2633, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3010, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2131, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1369, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2340, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2645, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 734, "tokens_out": 0, "q_len": 1, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 861, "tokens_out": 0, "q_len": 2, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1449, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3069, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2009, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5320, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 7403, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 7000, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3298, "tokens_out": 0, "q_len": 8, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3328, "tokens_out": 0, "q_len": 8, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4086, "tokens_out": 0, "q_len": 9, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2867, "tokens_out": 0, "q_len": 10, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3958, "tokens_out": 0, "q_len": 8, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2748, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4140, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4405, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 6859, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1183, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1743, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3300, "tokens_out": 0, "q_len": 11, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 7729, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3059, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3435, "tokens_out": 0, "q_len": 8, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2642, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3200, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3592, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2658, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1480, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2630, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1181, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2618, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2272, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 846, "tokens_out": 0, "q_len": 1, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1054, "tokens_out": 0, "q_len": 2, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1167, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1727, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1117, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5022, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3846, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2220, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5255, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1842, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2228, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3801, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1670, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2181, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3507, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3348, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3070, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2627, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1958, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1834, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5296, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3189, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3279, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2810, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2653, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3294, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1580, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2944, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2887, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2490, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2983, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2156, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2625, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2156, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2503, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2288, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2950, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3171, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2709, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2190, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2604, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2931, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3373, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1607, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1769, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1803, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2291, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1979, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 21873, "tokens_out": 179, "q_len": 7, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 18167, "tokens_out": 175, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 13467, "tokens_out": 103, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 7639, "tokens_out": 56, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 9868, "tokens_out": 86, "q_len": 4, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 13316, "tokens_out": 119, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 42117, "tokens_out": 327, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 7152, "tokens_out": 57, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 37665, "tokens_out": 299, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 11563, "tokens_out": 99, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 33090, "tokens_out": 297, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 4732, "tokens_out": 30, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 11799, "tokens_out": 103, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 24359, "tokens_out": 216, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 12526, "tokens_out": 103, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 14322, "tokens_out": 119, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 10148, "tokens_out": 84, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 7639, "tokens_out": 61, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 12290, "tokens_out": 102, "q_len": 8, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 28011, "tokens_out": 284, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 33425, "tokens_out": 347, "q_len": 7, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 12936, "tokens_out": 114, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 41325, "tokens_out": 362, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 23510, "tokens_out": 234, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 30222, "tokens_out": 312, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 9033, "tokens_out": 73, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 11421, "tokens_out": 99, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 18975, "tokens_out": 148, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 35121, "tokens_out": 297, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 6601, "tokens_out": 45, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 22023, "tokens_out": 201, "q_len": 4, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 34292, "tokens_out": 305, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 7043, "tokens_out": 60, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 5848, "tokens_out": 36, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 831, "tokens_out": 1, "q_len": 3, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 1421, "tokens_out": 1, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 17105, "tokens_out": 165, "q_len": 4, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 1417, "tokens_out": 1, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 6901, "tokens_out": 48, "q_len": 4, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 14540, "tokens_out": 115, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2930, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3271, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2900, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2805, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1399, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2390, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1130, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2137, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2320, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 715, "tokens_out": 0, "q_len": 1, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 877, "tokens_out": 0, "q_len": 2, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2082, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1853, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2588, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4926, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3596, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3510, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3285, "tokens_out": 0, "q_len": 8, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2527, "tokens_out": 0, "q_len": 8, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3248, "tokens_out": 0, "q_len": 9, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2670, "tokens_out": 0, "q_len": 10, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3381, "tokens_out": 0, "q_len": 8, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2899, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4195, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 8032, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 6509, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2202, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1620, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2529, "tokens_out": 0, "q_len": 11, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5376, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2828, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2554, "tokens_out": 0, "q_len": 8, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3553, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1973, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2047, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2196, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2819, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2703, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1094, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1984, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1663, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 798, "tokens_out": 0, "q_len": 1, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 878, "tokens_out": 0, "q_len": 2, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 877, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1978, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 869, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 6110, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2674, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1772, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3382, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1907, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2631, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2333, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2156, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2724, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4085, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 6322, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2409, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2205, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1837, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2276, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5649, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4694, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3441, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2042, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2449, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2526, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2172, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2393, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2179, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4121, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2247, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1665, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2695, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1924, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1984, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2466, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2248, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2243, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2391, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2399, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2637, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2396, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2753, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2633, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1427, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1420, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1959, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3508, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 11952, "tokens_out": 100, "q_len": 7, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 17276, "tokens_out": 165, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 15324, "tokens_out": 143, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 9651, "tokens_out": 82, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 39380, "tokens_out": 298, "q_len": 4, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 6545, "tokens_out": 48, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 3366, "tokens_out": 19, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 4586, "tokens_out": 45, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 6370, "tokens_out": 47, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 12224, "tokens_out": 95, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 7197, "tokens_out": 48, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 5928, "tokens_out": 50, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 15274, "tokens_out": 139, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 8188, "tokens_out": 67, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 31477, "tokens_out": 278, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 7176, "tokens_out": 53, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 13205, "tokens_out": 121, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 11571, "tokens_out": 85, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 41511, "tokens_out": 397, "q_len": 8, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 24939, "tokens_out": 190, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 26645, "tokens_out": 267, "q_len": 7, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 16157, "tokens_out": 138, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 33577, "tokens_out": 281, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 11962, "tokens_out": 105, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 9968, "tokens_out": 81, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 16128, "tokens_out": 145, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 26793, "tokens_out": 232, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 20243, "tokens_out": 168, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 35754, "tokens_out": 313, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 11436, "tokens_out": 85, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 10245, "tokens_out": 86, "q_len": 4, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 28549, "tokens_out": 223, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 15023, "tokens_out": 131, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 15372, "tokens_out": 132, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 25944, "tokens_out": 234, "q_len": 3, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 11035, "tokens_out": 87, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 10178, "tokens_out": 81, "q_len": 4, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 2588, "tokens_out": 12, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 10882, "tokens_out": 92, "q_len": 4, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 7140, "tokens_out": 62, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2941, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3590, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2652, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2389, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1490, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1836, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1081, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2289, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2116, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 724, "tokens_out": 0, "q_len": 1, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 810, "tokens_out": 0, "q_len": 2, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1570, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2418, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1450, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5115, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3486, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5700, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5470, "tokens_out": 0, "q_len": 8, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2944, "tokens_out": 0, "q_len": 8, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2744, "tokens_out": 0, "q_len": 9, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5187, "tokens_out": 0, "q_len": 10, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2982, "tokens_out": 0, "q_len": 8, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2717, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3446, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 8058, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4962, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1599, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2375, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3326, "tokens_out": 0, "q_len": 11, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5075, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3281, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2472, "tokens_out": 0, "q_len": 8, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2748, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2826, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2577, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2813, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2436, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4835, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1144, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2395, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1725, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 807, "tokens_out": 0, "q_len": 1, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 883, "tokens_out": 0, "q_len": 2, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1585, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2096, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1010, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4821, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2878, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2347, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2881, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1818, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2416, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2382, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2455, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2317, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3037, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 4782, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 5520, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2593, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1823, "tokens_out": 0, "q_len": 4, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2711, "tokens_out": 0, "q_len": 7, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3260, "tokens_out": 0, "q_len": 5, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1689, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2356, "tokens_out": 0, "q_len": 6, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2965, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3017, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1948, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2133, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2323, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2119, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3833, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2789, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1821, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3171, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2312, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2714, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3248, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2647, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3361, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2451, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2512, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2637, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 3171, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2737, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1707, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1719, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2025, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 1654, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "fastlane", "model": "gemma2:2b", "dt_ms": 2855, "tokens_out": 0, "q_len": 3, "sig_len": 0, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 12176, "tokens_out": 98, "q_len": 7, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 29239, "tokens_out": 237, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 7295, "tokens_out": 60, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 40075, "tokens_out": 307, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 39590, "tokens_out": 290, "q_len": 4, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 24902, "tokens_out": 209, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 12619, "tokens_out": 117, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 8936, "tokens_out": 74, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 48055, "tokens_out": 449, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 25257, "tokens_out": 232, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 7537, "tokens_out": 61, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 9895, "tokens_out": 85, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 6333, "tokens_out": 49, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 40221, "tokens_out": 392, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 14347, "tokens_out": 125, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 8091, "tokens_out": 67, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 34582, "tokens_out": 325, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 10555, "tokens_out": 86, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 7639, "tokens_out": 59, "q_len": 8, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 16201, "tokens_out": 155, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 30113, "tokens_out": 318, "q_len": 7, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 15608, "tokens_out": 147, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 31459, "tokens_out": 252, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 29181, "tokens_out": 301, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 10998, "tokens_out": 90, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 11950, "tokens_out": 117, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 12676, "tokens_out": 106, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 20139, "tokens_out": 154, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 27800, "tokens_out": 240, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 17788, "tokens_out": 148, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 8327, "tokens_out": 69, "q_len": 4, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 39312, "tokens_out": 337, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 3329, "tokens_out": 24, "q_len": 5, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 13949, "tokens_out": 117, "q_len": 4, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 3421, "tokens_out": 25, "q_len": 3, "sig_len": 4, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 18486, "tokens_out": 163, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 6028, "tokens_out": 41, "q_len": 4, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 2379, "tokens_out": 8, "q_len": 6, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 11064, "tokens_out": 85, "q_len": 4, "sig_len": 5, "success": true}
+{"mode": "classify", "model": "gemma2:2b", "dt_ms": 11533, "tokens_out": 91, "q_len": 5, "sig_len": 5, "success": true}

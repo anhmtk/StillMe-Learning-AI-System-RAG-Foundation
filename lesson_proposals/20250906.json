@@ -1,0 +1,48 @@
+{
+  "date": "20250906",
+  "proposals": [
+    {
+      "id": "memory_stability_001",
+      "title": "Memory Module Stability Best Practices",
+      "guideline": "Always test memory operations in isolation before integration. Use proper async handling and error recovery.",
+      "examples": [
+        "Test encryption/decryption separately",
+        "Handle async operations with proper event loop checks",
+        "Implement fallback mechanisms for failed operations"
+      ],
+      "safety_notes": "Memory operations are critical - always have backup and recovery mechanisms",
+      "success_criteria": "All memory tests pass with 100% success rate",
+      "created_at": "2025-09-06T14:54:50.469166",
+      "source": "memory_analysis"
+    },
+    {
+      "id": "error_handling_001",
+      "title": "Robust Error Handling in AgentDev",
+      "guideline": "Implement comprehensive error handling with proper logging and recovery mechanisms.",
+      "examples": [
+        "Use try-catch blocks around critical operations",
+        "Log errors with sufficient context",
+        "Provide fallback behaviors for common failures"
+      ],
+      "safety_notes": "Never let unhandled exceptions crash the system",
+      "success_criteria": "Zero unhandled exceptions in production logs",
+      "created_at": "2025-09-06T14:54:50.469166",
+      "source": "error_analysis"
+    },
+    {
+      "id": "test_coverage_001",
+      "title": "Comprehensive Test Coverage",
+      "guideline": "Maintain high test coverage for all critical components, especially memory and async operations.",
+      "examples": [
+        "Write unit tests for all public methods",
+        "Include integration tests for complex workflows",
+        "Test edge cases and error conditions"
+      ],
+      "safety_notes": "Tests should cover both happy path and failure scenarios",
+      "success_criteria": "Test coverage > 90% for critical modules",
+      "created_at": "2025-09-06T14:54:50.469166",
+      "source": "test_analysis"
+    }
+  ],
+  "count": 3
+}

@@ -1,0 +1,26 @@
+{
+  "classify": {
+    "p50": 13021,
+    "p90": 34292,
+    "p95": 40075
+  },
+  "fastlane": {
+    "p50": 2554,
+    "p90": 4261,
+    "p95": 5376
+  },
+  "fastlane_tokens": {
+    "p50": 0,
+    "p90": 19,
+    "p95": 27
+  },
+  "targets_met": false,
+  "warnings": [
+    "⚠️ Classifier p95 > 400ms: 40075ms",
+    "⚠️ Fast-lane p95 > 1500ms: 5376ms"
+  ],
+  "performance_targets": {
+    "classify_p95_threshold": 400,
+    "fastlane_p95_threshold": 1500
+  }
+}

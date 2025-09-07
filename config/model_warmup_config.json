@@ -1,0 +1,21 @@
+{
+  "target_models": [
+    "gemma2:2b",
+    "deepseek-coder:6.7b"
+  ],
+  "heartbeat_interval_seconds": 300,
+  "heartbeat_prompt": "ok",
+  "warmup_timeout_seconds": 30,
+  "max_retries": 3,
+  "retry_delay_seconds": 5,
+  "performance_targets": {
+    "max_warmup_time_ms": 5000,
+    "max_heartbeat_time_ms": 1000,
+    "target_uptime_percent": 99.5
+  },
+  "logging": {
+    "log_level": "INFO",
+    "log_heartbeats": false,
+    "log_performance": true
+  }
+}
