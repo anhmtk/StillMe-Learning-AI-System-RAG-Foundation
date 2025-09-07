@@ -1943,16 +1943,48 @@
           ]
         }
       ]
+    },
+    {
+      "timestamp": "2025-09-08T02:36:49.754416",
+      "goal": "Test performance optimization",
+      "total_steps": 1,
+      "passed_steps": 0,
+      "failed_steps": 1,
+      "pass_rate": 0.0,
+      "total_duration_s": 56.787,
+      "steps_details": [
+        {
+          "id": 1,
+          "desc": "Review & fix stillme_core/executor.py",
+          "action": "edit_file",
+          "exec_ok": false,
+          "stdout_tail": ".\n  The use of platformdirs will be the default in `jupyter_core` v6\n    from jupyter_core.paths import jupyter_data_dir, jupyter_runtime_dir, secure_write\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ===========================\nFAILED tests/test_executor.py::test_executor_basic_methods - AssertionError: ...\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 3 warnings in 6.26s\n",
+          "duration_s": 56.49,
+          "verification": {
+            "success": false,
+            "reason": "Execution failed",
+            "details": {
+              "stdout": "F\n================================== FAILURES ===================================\n_________________________ test_executor_basic_methods _________________________\ntests\\test_executor.py:15: in test_executor_basic_methods\n    assert ex.create_feature_branch(\"feature/agentdev\").ok\nE   AssertionError: assert False\nE    +  where False = <stillme_core.executor.ExecResult object at 0x000002615FEB4BF0>.ok\nE    +    where <stillme_core.executor.ExecResult object at 0x000002615FEB4BF0> = create_feature_branch('feature/agentdev')\nE    +      where create_feature_branch = <stillme_core.executor.PatchExecutor object at 0x000002615FE54CE0>.create_feature_branch\n---------------------------- Captured stdout call -----------------------------\nInitialized empty Git repository in C:/Users/LENOVO/AppData/Local/Temp/pytest-of-LENOVO/pytest-94/test_executor_basic_methods0/.git/\n[master (root-commit) f2121f3] init\n 1 file changed, 1 insertion(+)\n create mode 100644 a.txt\n============================== warnings summary ===============================\nC:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\interpreter\\core\\utils\\system_debug_info.py:4\n  C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\interpreter\\core\\utils\\system_debug_info.py:4: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.\n    import pkg_resources\n\nC:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pkg_resources\\__init__.py:3146\n  C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pkg_resources\\__init__.py:3146: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('google')`.\n  Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages\n    declare_namespace(pkg)\n\nC:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\jupyter_client\\connect.py:22\n  C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\jupyter_client\\connect.py:22: DeprecationWarning: Jupyter is migrating its paths to use standard platformdirs\n  given by the platformdirs library.  To remove this warning and\n  see the appropriate new directories, set the environment variable\n  `JUPYTER_PLATFORM_DIRS=1` and then run `jupyter --paths`.\n  The use of platformdirs will be the default in `jupyter_core` v6\n    from jupyter_core.paths import jupyter_data_dir, jupyter_runtime_dir, secure_write\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ===========================\nFAILED tests/test_executor.py::test_executor_basic_methods - AssertionError: ...\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\n1 failed, 3 warnings in 6.26s\n",
+              "stderr": "",
+              "error": "Unknown error"
+            }
+          },
+          "target": "stillme_core/executor.py",
+          "tests_run": [
+            "tests/test_executor.py"
+          ]
+        }
+      ]
     }
   ],
   "summary": {
-    "total_sessions": 39,
-    "total_steps": 79,
+    "total_sessions": 40,
+    "total_steps": 80,
     "total_passed": 12,
-    "total_failed": 67,
-    "overall_pass_rate": 0.152,
-    "avg_duration_s": 13.857,
-    "avg_steps_per_session": 2.026,
-    "last_updated": "2025-09-08T02:33:52.302085"
+    "total_failed": 68,
+    "overall_pass_rate": 0.15,
+    "avg_duration_s": 14.93,
+    "avg_steps_per_session": 2.0,
+    "last_updated": "2025-09-08T02:36:49.755920"
   }
 }

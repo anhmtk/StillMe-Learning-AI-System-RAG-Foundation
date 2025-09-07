@@ -171,6 +171,8 @@ class Planner:
         self.last_raw_ai_response = None
         self.fallback_cache: Dict[str, Dict[str, Any]] = {}
         self.bugmem = BugMemory()
+        self.plan_cache = {}
+        self.cache_ttl = 300  # 5 minutes
 
     def create_plan(
         self,
@@ -375,6 +377,17 @@ class Planner:
     # Multi-step builder (heuristic)
     # ------------------------------
     def build_plan(self, max_items: int = 5) -> List[PlanItem]:
+        # Check cache first
+        cache_key = f"plan_{max_items}"
+        import time
+        current_time = time.time()
+        
+        if cache_key in self.plan_cache:
+            cached_time, cached_items = self.plan_cache[cache_key]
+            if current_time - cached_time < self.cache_ttl:
+                logger.info(f"Using cached plan for max_items={max_items}")
+                return cached_items
+        
         items: List[PlanItem] = []
         
         try:
@@ -382,7 +395,7 @@ class Planner:
 
             # a) git status with better error handling
             try:
-                p = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, timeout=5)
+                p = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, timeout=3)
                 if p.returncode == 0:
                     for ln in p.stdout.splitlines():
                         ln = ln.strip()
@@ -426,12 +439,15 @@ class Planner:
                     risk="low",
                 ))
             
-            return items[:max_items]
+            result_items = items[:max_items]
+            # Cache the result
+            self.plan_cache[cache_key] = (current_time, result_items)
+            return result_items
             
         except Exception as e:
             logger.error(f"Plan building failed: {e}")
             # Return minimal fallback plan
-            return [PlanItem(
+            fallback_items = [PlanItem(
                 id="EMERGENCY-1",
                 title="Emergency fallback: Run basic tests",
                 action="run_tests",
@@ -440,6 +456,9 @@ class Planner:
                 tests_to_run=["tests/"],
                 risk="low",
             )]
+            # Cache the fallback too
+            self.plan_cache[cache_key] = (current_time, fallback_items)
+            return fallback_items
 
         # b) pytest last-failed cache
         try:

@@ -77,7 +77,7 @@ class PatchExecutor:
             }
 
     def run_pytest(self, tests: List[str] | None = None) -> ExecResult:
-        args = ["python", "-m", "pytest", "-v", "--tb=short"]
+        args = ["python", "-m", "pytest", "-q", "--tb=short", "--maxfail=1"]
         if tests:
             args.extend(tests)
         else:
