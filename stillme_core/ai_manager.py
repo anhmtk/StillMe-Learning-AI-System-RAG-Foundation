@@ -8,21 +8,213 @@ Các chế độ:
 """
 
 from __future__ import annotations
-from typing import Optional, Dict, Any
-
+from typing import Optional, Dict, Any, List, Tuple
 import asyncio
-from .config_defaults import try_load_dotenv, DEFAULT_MODE
-from .plan_types import PlanItem
-import os
+import time
 import json
+import os
 import httpx
 from pathlib import Path
+from dataclasses import dataclass, asdict
+from collections import defaultdict, deque
+
+from .config_defaults import try_load_dotenv, DEFAULT_MODE
+from .plan_types import PlanItem
+from .bug_memory import BugMemory
 
 # 1) Bridge (Dev Agent)
 from stillme_core.provider_router import ask  # async def ask(...)
 
 # 2) Code path (giữ như cũ)
 from oi_adapter.interpreter_controller import OpenInterpreterController as C
+
+# =======================
+# Enhanced AI Manager with Context-Aware Planning
+# =======================
+
+@dataclass
+class ContextInfo:
+    """Context information for AI planning"""
+    file_dependencies: List[str]
+    recent_changes: List[str]
+    test_failures: List[str]
+    similar_bugs: List[Dict[str, Any]]
+    code_complexity: float
+    risk_factors: List[str]
+
+@dataclass
+class LearningEntry:
+    """Learning entry from previous bugs and solutions"""
+    bug_type: str
+    solution: str
+    success_rate: float
+    context: Dict[str, Any]
+    timestamp: float
+
+class ContextAnalyzer:
+    """Analyzes code context for better AI planning"""
+    
+    def __init__(self, repo_root: str = "."):
+        self.repo_root = Path(repo_root)
+        self.dependency_cache = {}
+        self.change_history = deque(maxlen=100)
+    
+    def analyze_file_dependencies(self, file_path: str) -> List[str]:
+        """Analyze file dependencies using import statements"""
+        if file_path in self.dependency_cache:
+            return self.dependency_cache[file_path]
+        
+        dependencies = []
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+                
+            # Simple import analysis
+            import re
+            imports = re.findall(r'from\s+(\S+)\s+import|import\s+(\S+)', content)
+            for imp in imports:
+                dep = imp[0] or imp[1]
+                if dep and not dep.startswith('.'):
+                    dependencies.append(dep)
+                    
+        except Exception:
+            pass
+            
+        self.dependency_cache[file_path] = dependencies
+        return dependencies
+    
+    def analyze_code_complexity(self, file_path: str) -> float:
+        """Simple code complexity analysis"""
+        try:
+            with open(file_path, 'r', encoding='utf-8') as f:
+                content = f.read()
+                
+            # Basic metrics
+            lines = len(content.splitlines())
+            functions = content.count('def ')
+            classes = content.count('class ')
+            imports = content.count('import ')
+            
+            # Simple complexity score
+            complexity = (functions * 2 + classes * 3 + imports * 0.5) / max(lines, 1)
+            return min(complexity, 10.0)  # Cap at 10
+            
+        except Exception:
+            return 1.0
+    
+    def get_context_info(self, file_path: str) -> ContextInfo:
+        """Get comprehensive context information for a file"""
+        dependencies = self.analyze_file_dependencies(file_path)
+        complexity = self.analyze_code_complexity(file_path)
+        
+        # Get recent changes
+        recent_changes = list(self.change_history)[-10:]
+        
+        # Risk factors
+        risk_factors = []
+        if complexity > 5:
+            risk_factors.append("high_complexity")
+        if len(dependencies) > 10:
+            risk_factors.append("many_dependencies")
+        if file_path.endswith('__init__.py'):
+            risk_factors.append("init_file")
+            
+        return ContextInfo(
+            file_dependencies=dependencies,
+            recent_changes=recent_changes,
+            test_failures=[],
+            similar_bugs=[],
+            code_complexity=complexity,
+            risk_factors=risk_factors
+        )
+
+class LearningManager:
+    """Manages learning from previous bugs and solutions"""
+    
+    def __init__(self, max_entries: int = 1000):
+        self.learning_entries: deque = deque(maxlen=max_entries)
+        self.bug_patterns: Dict[str, List[LearningEntry]] = defaultdict(list)
+        self.success_rates: Dict[str, float] = {}
+    
+    def add_learning_entry(self, bug_type: str, solution: str, success: bool, context: Dict[str, Any]):
+        """Add a new learning entry"""
+        entry = LearningEntry(
+            bug_type=bug_type,
+            solution=solution,
+            success_rate=1.0 if success else 0.0,
+            context=context,
+            timestamp=time.time()
+        )
+        
+        self.learning_entries.append(entry)
+        self.bug_patterns[bug_type].append(entry)
+        
+        # Update success rate
+        if bug_type in self.success_rates:
+            current_rate = self.success_rates[bug_type]
+            new_rate = (current_rate * 0.9) + (1.0 if success else 0.0) * 0.1
+            self.success_rates[bug_type] = new_rate
+        else:
+            self.success_rates[bug_type] = 1.0 if success else 0.0
+    
+    def get_similar_solutions(self, bug_type: str, context: Dict[str, Any]) -> List[LearningEntry]:
+        """Get similar solutions for a bug type"""
+        if bug_type not in self.bug_patterns:
+            return []
+        
+        # Simple similarity based on context keys
+        similar = []
+        for entry in self.bug_patterns[bug_type]:
+            if entry.success_rate > 0.7:  # Only successful solutions
+                similar.append(entry)
+        
+        return sorted(similar, key=lambda x: x.success_rate, reverse=True)[:5]
+    
+    def get_best_solution_strategy(self, bug_type: str) -> str:
+        """Get the best solution strategy for a bug type"""
+        if bug_type not in self.success_rates:
+            return "standard"
+        
+        success_rate = self.success_rates[bug_type]
+        if success_rate > 0.8:
+            return "proven"
+        elif success_rate > 0.5:
+            return "cautious"
+        else:
+            return "experimental"
+
+class FallbackStrategy:
+    """Intelligent fallback strategies for AI failures"""
+    
+    def __init__(self):
+        self.fallback_chain = [
+            "fast",      # Try fast mode first
+            "think",     # Then think mode
+            "code",      # Then code mode
+            "cached",    # Finally use cached response
+        ]
+        self.cache: Dict[str, str] = {}
+        self.failure_counts: Dict[str, int] = defaultdict(int)
+    
+    def get_fallback_mode(self, original_mode: str, failure_reason: str) -> str:
+        """Get next fallback mode based on failure"""
+        self.failure_counts[original_mode] += 1
+        
+        # If too many failures, skip to next mode
+        if self.failure_counts[original_mode] > 3:
+            current_index = self.fallback_chain.index(original_mode)
+            if current_index < len(self.fallback_chain) - 1:
+                return self.fallback_chain[current_index + 1]
+        
+        return original_mode
+    
+    def get_cached_response(self, prompt_hash: str) -> Optional[str]:
+        """Get cached response if available"""
+        return self.cache.get(prompt_hash)
+    
+    def cache_response(self, prompt_hash: str, response: str):
+        """Cache a successful response"""
+        self.cache[prompt_hash] = response
 
 # =======================
 # Singleton controller cho nhánh "code"
@@ -205,11 +397,348 @@ def compute_number(task: str) -> str:
 # =========================
 class AIManager:
     """
-    Lớp bọc mỏng quanh các hàm module-level để tương thích import từ các module khác
-    (ví dụ: stillme_core.planner). Dùng Bridge cho text-mode; giữ controller cho code-mode.
+    Enhanced AI Manager with context-aware planning, learning, and fallback strategies
     """
 
-    # ====== API đang có ======
+    def __init__(self, repo_root: str = "."):
+        self.repo_root = repo_root
+        self.context_analyzer = ContextAnalyzer(repo_root)
+        self.learning_manager = LearningManager()
+        self.fallback_strategy = FallbackStrategy()
+        self.bugmem = BugMemory()
+        
+        # Performance tracking
+        self.request_times: Dict[str, List[float]] = defaultdict(list)
+        self.success_rates: Dict[str, float] = defaultdict(lambda: 1.0)
+
+    # ====== Enhanced Planning Methods ======
+    
+    def get_context_aware_plan(self, goal: str, max_items: int = 5) -> List[PlanItem]:
+        """Generate context-aware plan using AI with enhanced context"""
+        try:
+            # Analyze current repository state
+            context_info = self._analyze_repository_context()
+            
+            # Get learning insights
+            learning_insights = self._get_learning_insights(goal)
+            
+            # Build enhanced prompt
+            prompt = self._build_context_aware_prompt(goal, context_info, learning_insights, max_items)
+            
+            # Get AI response with fallback
+            response = self._get_ai_response_with_fallback(prompt, mode="think")
+            
+            # Parse and enhance plan
+            plan_items = self._parse_enhanced_plan(response, context_info)
+            
+            return plan_items[:max_items]
+            
+        except Exception as e:
+            # Fallback to basic planning
+            return self._get_fallback_plan(goal, max_items)
+    
+    def _analyze_repository_context(self) -> Dict[str, Any]:
+        """Analyze current repository context"""
+        context = {
+            "git_status": self._get_git_status(),
+            "recent_files": self._get_recent_files(),
+            "test_status": self._get_test_status(),
+            "dependencies": self._get_dependency_info(),
+        }
+        return context
+    
+    def _get_git_status(self) -> List[str]:
+        """Get git status information"""
+        try:
+            import subprocess
+            result = subprocess.run(
+                ["git", "status", "--porcelain"],
+                capture_output=True, text=True, timeout=5
+            )
+            if result.returncode == 0:
+                return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+        except Exception:
+            pass
+        return []
+    
+    def _get_recent_files(self) -> List[str]:
+        """Get recently modified files"""
+        try:
+            import subprocess
+            result = subprocess.run(
+                ["git", "log", "--name-only", "--oneline", "-10"],
+                capture_output=True, text=True, timeout=5
+            )
+            if result.returncode == 0:
+                files = []
+                for line in result.stdout.splitlines():
+                    if line.strip() and not line.startswith(' '):
+                        files.append(line.strip())
+                return files[:10]
+        except Exception:
+            pass
+        return []
+    
+    def _get_test_status(self) -> Dict[str, Any]:
+        """Get current test status"""
+        try:
+            import subprocess
+            result = subprocess.run(
+                ["python", "-m", "pytest", "--collect-only", "-q"],
+                capture_output=True, text=True, timeout=10
+            )
+            return {
+                "status": "success" if result.returncode == 0 else "failed",
+                "output": result.stdout,
+                "error": result.stderr
+            }
+        except Exception:
+            return {"status": "unknown", "output": "", "error": ""}
+    
+    def _get_dependency_info(self) -> Dict[str, Any]:
+        """Get dependency information"""
+        try:
+            requirements_file = Path(self.repo_root) / "requirements.txt"
+            if requirements_file.exists():
+                with open(requirements_file, 'r') as f:
+                    deps = [line.strip() for line in f if line.strip() and not line.startswith('#')]
+                return {"requirements": deps, "count": len(deps)}
+        except Exception:
+            pass
+        return {"requirements": [], "count": 0}
+    
+    def _get_learning_insights(self, goal: str) -> Dict[str, Any]:
+        """Get learning insights from previous similar goals"""
+        # Simple keyword matching for now
+        keywords = goal.lower().split()
+        insights = {
+            "similar_bugs": [],
+            "success_strategies": [],
+            "risk_factors": []
+        }
+        
+        for keyword in keywords:
+            if keyword in self.learning_manager.bug_patterns:
+                similar = self.learning_manager.get_similar_solutions(keyword, {})
+                insights["similar_bugs"].extend(similar[:3])
+        
+        return insights
+    
+    def _build_context_aware_prompt(self, goal: str, context: Dict[str, Any], 
+                                  learning: Dict[str, Any], max_items: int) -> str:
+        """Build enhanced prompt with context and learning"""
+        prompt = f"""
+You are an expert software engineer analyzing a codebase. Generate a detailed plan to achieve: "{goal}"
+
+CONTEXT ANALYSIS:
+- Git Status: {context.get('git_status', [])}
+- Recent Files: {context.get('recent_files', [])}
+- Test Status: {context.get('test_status', {}).get('status', 'unknown')}
+- Dependencies: {context.get('dependencies', {}).get('count', 0)} packages
+
+LEARNING INSIGHTS:
+- Similar Previous Issues: {len(learning.get('similar_bugs', []))}
+- Success Strategies: {learning.get('success_strategies', [])}
+
+REQUIREMENTS:
+1. Generate exactly {max_items} plan items
+2. Each item should be specific and actionable
+3. Consider dependencies between files
+4. Include risk assessment for each item
+5. Suggest appropriate tests for each change
+
+FORMAT: Return as JSON array of plan items with fields:
+- id: unique identifier
+- title: descriptive title
+- action: action type (fix, add, modify, test)
+- target: file or component to work on
+- diff_hint: brief description of changes needed
+- tests_to_run: list of tests to run
+- risk: risk level (low, medium, high)
+- dependencies: list of other plan items this depends on
+"""
+        return prompt
+    
+    def _parse_enhanced_plan(self, response: str, context: Dict[str, Any]) -> List[PlanItem]:
+        """Parse AI response into PlanItem objects"""
+        try:
+            # Try to parse as JSON first
+            import json
+            data = json.loads(response)
+            if isinstance(data, list):
+                items = []
+                for item_data in data:
+                    if isinstance(item_data, dict):
+                        item = PlanItem(
+                            id=item_data.get('id', f"AI-{len(items)+1}"),
+                            title=item_data.get('title', 'AI Generated Task'),
+                            action=item_data.get('action', 'modify'),
+                            target=item_data.get('target', ''),
+                            diff_hint=item_data.get('diff_hint', ''),
+                            tests_to_run=item_data.get('tests_to_run', []),
+                            risk=item_data.get('risk', 'medium'),
+                        )
+                        items.append(item)
+                return items
+        except Exception:
+            pass
+        
+        # Fallback: parse as text
+        return self._parse_text_plan(response)
+    
+    def _parse_text_plan(self, response: str) -> List[PlanItem]:
+        """Parse text response into PlanItem objects"""
+        items = []
+        lines = response.split('\n')
+        current_item = None
+        
+        for line in lines:
+            line = line.strip()
+            if not line:
+                continue
+                
+            if line.startswith(('1.', '2.', '3.', '4.', '5.')):
+                if current_item:
+                    items.append(current_item)
+                current_item = PlanItem(
+                    id=f"AI-{len(items)+1}",
+                    title=line[2:].strip(),
+                    action="modify",
+                    target="",
+                    diff_hint="",
+                    tests_to_run=[],
+                    risk="medium",
+                )
+            elif current_item and line.startswith('-'):
+                # Add details to current item
+                detail = line[1:].strip()
+                if 'test' in detail.lower():
+                    current_item.tests_to_run.append(detail)
+                elif 'file' in detail.lower():
+                    current_item.target = detail
+        
+        if current_item:
+            items.append(current_item)
+        
+        return items
+    
+    def _get_fallback_plan(self, goal: str, max_items: int) -> List[PlanItem]:
+        """Generate fallback plan when AI fails"""
+        return [
+            PlanItem(
+                id="FALLBACK-1",
+                title=f"Analyze goal: {goal}",
+                action="analyze",
+                target="",
+                diff_hint="",
+                tests_to_run=[],
+                risk="low",
+            ),
+            PlanItem(
+                id="FALLBACK-2",
+                title="Run basic tests to verify system",
+                action="test",
+                target="tests/",
+                diff_hint="",
+                tests_to_run=["tests/"],
+                risk="low",
+            )
+        ]
+    
+    # ====== Enhanced AI Response Methods ======
+    
+    def _get_ai_response_with_fallback(self, prompt: str, mode: str = "fast") -> str:
+        """Get AI response with intelligent fallback"""
+        prompt_hash = str(hash(prompt))
+        
+        # Check cache first
+        cached = self.fallback_strategy.get_cached_response(prompt_hash)
+        if cached:
+            return cached
+        
+        # Try different modes with fallback
+        current_mode = mode
+        max_attempts = 3
+        
+        for attempt in range(max_attempts):
+            try:
+                start_time = time.time()
+                response = self._get_ai_response(prompt, current_mode)
+                end_time = time.time()
+                
+                # Track performance
+                self.request_times[current_mode].append(end_time - start_time)
+                
+                # Cache successful response
+                if response and len(response) > 10:
+                    self.fallback_strategy.cache_response(prompt_hash, response)
+                    return response
+                
+            except Exception as e:
+                # Get next fallback mode
+                current_mode = self.fallback_strategy.get_fallback_mode(current_mode, str(e))
+                if attempt < max_attempts - 1:
+                    continue
+        
+        # Final fallback: return empty response
+        return ""
+    
+    def _get_ai_response(self, prompt: str, mode: str) -> str:
+        """Get AI response using the original method"""
+        mode_lower = mode.lower()
+        
+        if mode_lower == "code":
+            ctl = controller()
+            try:
+                ctl.set_model("deepseek-coder:6.7b")
+                return ctl.run_python_via_model(prompt)
+            except Exception as e:
+                raise Exception(f"Code mode failed: {e}")
+        
+        bridge_mode = _TEXT_MODE_MAP.get(mode_lower, "fast")
+        try:
+            return _bridge_sync_ask(prompt, mode=bridge_mode)
+        except RuntimeError:
+            # Try async if sync fails
+            try:
+                return asyncio.run(_bridge_async_ask(prompt, mode=bridge_mode))
+            except Exception as e:
+                raise Exception(f"Bridge mode {bridge_mode} failed: {e}")
+        except Exception as e:
+            raise Exception(f"Bridge mode {bridge_mode} failed: {e}")
+    
+    # ====== Learning and Feedback Methods ======
+    
+    def record_success(self, plan_item: PlanItem, success: bool, context: Dict[str, Any]):
+        """Record success/failure for learning"""
+        bug_type = self._classify_bug_type(plan_item, context)
+        solution = plan_item.diff_hint or plan_item.title
+        
+        self.learning_manager.add_learning_entry(
+            bug_type=bug_type,
+            solution=solution,
+            success=success,
+            context=context
+        )
+    
+    def _classify_bug_type(self, plan_item: PlanItem, context: Dict[str, Any]) -> str:
+        """Classify the type of bug/issue"""
+        title = plan_item.title.lower()
+        action = plan_item.action.lower()
+        
+        if 'test' in title or 'test' in action:
+            return 'test_failure'
+        elif 'import' in title or 'import' in action:
+            return 'import_error'
+        elif 'syntax' in title or 'syntax' in action:
+            return 'syntax_error'
+        elif 'runtime' in title or 'runtime' in action:
+            return 'runtime_error'
+        else:
+            return 'general_issue'
+    
+    # ====== Original API Methods (for compatibility) ======
+    
     def set_mode(self, mode: str) -> str:
         return set_mode(mode)
 
