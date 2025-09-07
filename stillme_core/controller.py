@@ -54,9 +54,19 @@ class AgentController:
         passed_steps = 0
         
         try:
-            # Step 1: Create plan
+            # Step 1: Create plan with error handling
             logger.info("Creating plan...")
-            plan_items = self.planner.build_plan(max_items=max_steps)
+            try:
+                plan_items = self.planner.build_plan(max_items=max_steps)
+            except Exception as e:
+                logger.error(f"Failed to create plan: {e}")
+                return self._create_result(
+                    goal=goal,
+                    steps=[],
+                    passed_steps=0,
+                    total_duration=time.time() - start_time,
+                    summary=f"Plan creation failed: {str(e)}"
+                )
             
             if not plan_items:
                 logger.warning("No plan items generated")
@@ -78,19 +88,28 @@ class AgentController:
                 logger.info(f"Executing step {step_id}: {plan_item.title}")
                 
                 try:
-                    # Execute the plan item
-                    exec_result = self.executor.apply_patch_and_test(plan_item)
-                    exec_ok = exec_result.get("ok", False)
+                    # Execute the plan item with error handling
+                    try:
+                        exec_result = self.executor.apply_patch_and_test(plan_item)
+                        exec_ok = exec_result.get("ok", False)
+                    except Exception as e:
+                        logger.error(f"Execution failed for step {step_id}: {e}")
+                        exec_result = {"ok": False, "error": str(e), "stdout": "", "stderr": str(e)}
+                        exec_ok = False
                     
-                    # Verify the result
-                    verification = self.verifier.verify(
-                        step={
-                            "action": plan_item.action,
-                            "title": plan_item.title,
-                            "success_criteria": getattr(plan_item, 'success_criteria', None)
-                        },
-                        exec_result=exec_result
-                    )
+                    # Verify the result with error handling
+                    try:
+                        verification = self.verifier.verify(
+                            step={
+                                "action": plan_item.action,
+                                "title": plan_item.title,
+                                "success_criteria": getattr(plan_item, 'success_criteria', None)
+                            },
+                            exec_result=exec_result
+                        )
+                    except Exception as e:
+                        logger.error(f"Verification failed for step {step_id}: {e}")
+                        verification = {"passed": False, "error": str(e)}
                     
                     # Determine if step passed
                     step_passed = exec_ok and (
@@ -100,6 +119,9 @@ class AgentController:
                     
                     if step_passed:
                         passed_steps += 1
+                        logger.info(f"Step {step_id} passed")
+                    else:
+                        logger.warning(f"Step {step_id} failed")
                     
                     # Extract stdout tail (last 500 chars)
                     stdout = exec_result.get("stdout", "")

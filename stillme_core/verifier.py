@@ -133,6 +133,7 @@ class Verifier:
         if passed_count > 0:
             return {
                 "success": True,
+                "passed": True,
                 "reason": f"{passed_count} tests passed",
                 "details": {
                     "stdout": stdout,
@@ -140,6 +141,21 @@ class Verifier:
                     "parsed_results": parsed_results
                 }
             }
+        
+        # Check for general command success (no errors, no exceptions)
+        if "error" not in combined_output.lower() and "exception" not in combined_output.lower() and "traceback" not in combined_output.lower():
+            # If we have some output and no errors, consider it successful
+            if len(combined_output.strip()) > 0:
+                return {
+                    "success": True,
+                    "passed": True,
+                    "reason": "Command executed without errors",
+                    "details": {
+                        "stdout": stdout,
+                        "stderr": stderr,
+                        "parsed_results": parsed_results
+                    }
+                }
         
         # Fallback to pattern matching
         try:

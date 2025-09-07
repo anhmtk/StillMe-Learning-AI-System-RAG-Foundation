@@ -376,33 +376,70 @@ class Planner:
     # ------------------------------
     def build_plan(self, max_items: int = 5) -> List[PlanItem]:
         items: List[PlanItem] = []
-
-        # a) git status
+        
         try:
-            p = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, timeout=3)
-            if p.returncode == 0:
-                for ln in p.stdout.splitlines():
-                    ln = ln.strip()
-                    if not ln:
-                        continue
-                    # format: ' M path' or '?? path'
-                    parts = ln.split()
-                    file_path = parts[-1]
-                    if file_path.endswith(".py") and not file_path.startswith("tests/"):
-                        test_guess = f"tests/test_{Path(file_path).stem}.py"
-                        items.append(PlanItem(
-                            id=f"GIT-{len(items)+1}",
-                            title=f"Review & fix {file_path}",
-                            action="edit_file",
-                            target=file_path,
-                            diff_hint="",
-                            tests_to_run=[test_guess],
-                            risk="medium",
-                        ))
-                        if len(items) >= max_items:
-                            return items
-        except Exception:
-            pass
+            logger.info(f"Building plan with max_items={max_items}")
+
+            # a) git status with better error handling
+            try:
+                p = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, timeout=5)
+                if p.returncode == 0:
+                    for ln in p.stdout.splitlines():
+                        ln = ln.strip()
+                        if not ln:
+                            continue
+                        # format: ' M path' or '?? path'
+                        parts = ln.split()
+                        if len(parts) < 2:
+                            continue
+                        file_path = parts[-1]
+                        if file_path.endswith(".py") and not file_path.startswith("tests/"):
+                            test_guess = f"tests/test_{Path(file_path).stem}.py"
+                            items.append(PlanItem(
+                                id=f"GIT-{len(items)+1}",
+                                title=f"Review & fix {file_path}",
+                                action="edit_file",
+                                target=file_path,
+                                diff_hint="",
+                                tests_to_run=[test_guess],
+                                risk="medium",
+                            ))
+                            if len(items) >= max_items:
+                                return items
+                else:
+                    logger.warning(f"Git status failed: {p.stderr}")
+            except subprocess.TimeoutExpired:
+                logger.warning("Git status timed out")
+            except Exception as e:
+                logger.warning(f"Git status error: {e}")
+            
+            # If no items found, create fallback plan
+            if not items:
+                logger.info("No git changes found, creating fallback plan")
+                items.append(PlanItem(
+                    id="FALLBACK-1",
+                    title="Run basic tests to verify system",
+                    action="run_tests",
+                    target="tests/",
+                    diff_hint="",
+                    tests_to_run=["tests/"],
+                    risk="low",
+                ))
+            
+            return items[:max_items]
+            
+        except Exception as e:
+            logger.error(f"Plan building failed: {e}")
+            # Return minimal fallback plan
+            return [PlanItem(
+                id="EMERGENCY-1",
+                title="Emergency fallback: Run basic tests",
+                action="run_tests",
+                target="tests/",
+                diff_hint="",
+                tests_to_run=["tests/"],
+                risk="low",
+            )]
 
         # b) pytest last-failed cache
         try:
