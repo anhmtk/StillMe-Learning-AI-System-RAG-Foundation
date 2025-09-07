@@ -77,9 +77,13 @@ class PatchExecutor:
             }
 
     def run_pytest(self, tests: List[str] | None = None) -> ExecResult:
-        args = ["python", "-m", "pytest", "-q"]
+        args = ["python", "-m", "pytest", "-v", "--tb=short"]
         if tests:
             args.extend(tests)
+        else:
+            # Default to running all tests if none specified
+            args.append("tests/")
+        
         sandbox_path = self._ensure_sandbox()
         if sandbox_path:
             ok, out, err = run_tests_in_sandbox(args, sandbox_path)

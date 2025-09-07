@@ -1879,16 +1879,48 @@
           ]
         }
       ]
+    },
+    {
+      "timestamp": "2025-09-08T02:30:33.015942",
+      "goal": "Test terminal parsing",
+      "total_steps": 1,
+      "passed_steps": 0,
+      "failed_steps": 1,
+      "pass_rate": 0.0,
+      "total_duration_s": 68.811,
+      "steps_details": [
+        {
+          "id": 1,
+          "desc": "Review & fix stillme_core/executor.py",
+          "action": "edit_file",
+          "exec_ok": false,
+          "stdout_tail": "and then run `jupyter --paths`.\n  The use of platformdirs will be the default in `jupyter_core` v6\n    from jupyter_core.paths import jupyter_data_dir, jupyter_runtime_dir, secure_write\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ===========================\nFAILED tests/test_executor.py::test_executor_basic_methods - AssertionError: ...\n======================= 1 failed, 3 warnings in 10.77s ========================\n",
+          "duration_s": 68.53,
+          "verification": {
+            "success": false,
+            "reason": "Execution failed",
+            "details": {
+              "stdout": "============================= test session starts =============================\nplatform win32 -- Python 3.12.10, pytest-8.4.1, pluggy-1.6.0 -- C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\python.exe\ncachedir: .pytest_cache\nrootdir: D:\\stillme_ai\\.sandbox\nconfigfile: pytest.ini\nplugins: anyio-4.10.0, asyncio-1.1.0\nasyncio: mode=Mode.STRICT, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function\ncollecting ... collected 1 item\n\ntests/test_executor.py::test_executor_basic_methods FAILED               [100%]\n\n================================== FAILURES ===================================\n_________________________ test_executor_basic_methods _________________________\ntests\\test_executor.py:15: in test_executor_basic_methods\n    assert ex.create_feature_branch(\"feature/agentdev\").ok\nE   AssertionError: assert False\nE    +  where False = <stillme_core.executor.ExecResult object at 0x0000014112B78C20>.ok\nE    +    where <stillme_core.executor.ExecResult object at 0x0000014112B78C20> = create_feature_branch('feature/agentdev')\nE    +      where create_feature_branch = <stillme_core.executor.PatchExecutor object at 0x0000014112AC74A0>.create_feature_branch\n---------------------------- Captured stdout call -----------------------------\nInitialized empty Git repository in C:/Users/LENOVO/AppData/Local/Temp/pytest-of-LENOVO/pytest-93/test_executor_basic_methods0/.git/\n[master (root-commit) 5b57a4f] init\n 1 file changed, 1 insertion(+)\n create mode 100644 a.txt\n============================== warnings summary ===============================\nC:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\interpreter\\core\\utils\\system_debug_info.py:4\n  C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\interpreter\\core\\utils\\system_debug_info.py:4: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.\n    import pkg_resources\n\nC:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pkg_resources\\__init__.py:3146\n  C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pkg_resources\\__init__.py:3146: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('google')`.\n  Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages\n    declare_namespace(pkg)\n\nC:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\jupyter_client\\connect.py:22\n  C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\jupyter_client\\connect.py:22: DeprecationWarning: Jupyter is migrating its paths to use standard platformdirs\n  given by the platformdirs library.  To remove this warning and\n  see the appropriate new directories, set the environment variable\n  `JUPYTER_PLATFORM_DIRS=1` and then run `jupyter --paths`.\n  The use of platformdirs will be the default in `jupyter_core` v6\n    from jupyter_core.paths import jupyter_data_dir, jupyter_runtime_dir, secure_write\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ===========================\nFAILED tests/test_executor.py::test_executor_basic_methods - AssertionError: ...\n======================= 1 failed, 3 warnings in 10.77s ========================\n",
+              "stderr": "",
+              "error": "Unknown error"
+            }
+          },
+          "target": "stillme_core/executor.py",
+          "tests_run": [
+            "tests/test_executor.py"
+          ]
+        }
+      ]
     }
   ],
   "summary": {
-    "total_sessions": 37,
-    "total_steps": 77,
+    "total_sessions": 38,
+    "total_steps": 78,
     "total_passed": 12,
-    "total_failed": 65,
-    "overall_pass_rate": 0.156,
-    "avg_duration_s": 11.418,
-    "avg_steps_per_session": 2.081,
-    "last_updated": "2025-09-08T02:11:57.706762"
+    "total_failed": 66,
+    "overall_pass_rate": 0.154,
+    "avg_duration_s": 12.928,
+    "avg_steps_per_session": 2.053,
+    "last_updated": "2025-09-08T02:30:33.017314"
   }
 }

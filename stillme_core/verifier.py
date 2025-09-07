@@ -49,11 +49,104 @@ class Verifier:
             bool: True if verification passes
             dict: Detailed verification result with reasons
         """
+        # Improved terminal output parsing
+        stdout = exec_result.get("stdout", "")
+        stderr = exec_result.get("stderr", "")
+        combined_output = f"{stdout}\n{stderr}".strip()
+        
+        logger.debug(f"Verifying step: {step.get('step_id', 'unknown')}")
+        logger.debug(f"Combined output: {combined_output[:200]}...")
+        
+        # Check for basic execution success
+        if not exec_result.get("ok", False):
+            return {
+                "success": False,
+                "reason": "Execution failed",
+                "details": {
+                    "stdout": stdout,
+                    "stderr": stderr,
+                    "error": exec_result.get("error", "Unknown error")
+                }
+            }
+        # Enhanced pytest output parsing
+        pytest_patterns = {
+            "passed": r"(\d+)\s+passed",
+            "failed": r"(\d+)\s+failed", 
+            "xfailed": r"(\d+)\s+xfailed",
+            "warnings": r"(\d+)\s+warnings",
+            "no_tests": r"no tests ran",
+            "collected": r"collected\s+(\d+)\s+items",
+            "session_starts": r"test session starts",
+            "session_ends": r"test session ends"
+        }
+        
+        parsed_results = {}
+        for key, pattern in pytest_patterns.items():
+            match = re.search(pattern, combined_output, re.IGNORECASE)
+            if match:
+                parsed_results[key] = int(match.group(1)) if match.groups() else True
+        
+        logger.debug(f"Parsed pytest results: {parsed_results}")
+        
+        # Determine success based on parsed results
+        if "no_tests" in parsed_results:
+            return {
+                "success": False,
+                "reason": "No tests were executed",
+                "details": {
+                    "stdout": stdout,
+                    "stderr": stderr,
+                    "parsed_results": parsed_results
+                }
+            }
+        
+        # If we have session info but no test results, it might be a different type of command
+        if "session_starts" in parsed_results and not any(k in parsed_results for k in ["passed", "failed", "xfailed"]):
+            # This might be a non-test command, check for general success patterns
+            if "error" not in combined_output.lower() and "exception" not in combined_output.lower():
+                return {
+                    "success": True,
+                    "reason": "Command executed without errors",
+                    "details": {
+                        "stdout": stdout,
+                        "stderr": stderr,
+                        "parsed_results": parsed_results
+                    }
+                }
+        
+        # Check for test failures
+        failed_count = parsed_results.get("failed", 0)
+        passed_count = parsed_results.get("passed", 0)
+        
+        if failed_count > 0:
+            return {
+                "success": False,
+                "reason": f"{failed_count} tests failed",
+                "details": {
+                    "stdout": stdout,
+                    "stderr": stderr,
+                    "parsed_results": parsed_results
+                }
+            }
+        
+        # Success if tests passed
+        if passed_count > 0:
+            return {
+                "success": True,
+                "reason": f"{passed_count} tests passed",
+                "details": {
+                    "stdout": stdout,
+                    "stderr": stderr,
+                    "parsed_results": parsed_results
+                }
+            }
+        
+        # Fallback to pattern matching
         try:
             # Basic checks
             if not isinstance(exec_result, dict):
                 return {
-                    "passed": False,
+                    "success": False,
                     "reason": "exec_result is not a dictionary",
                     "details": {"type": type(exec_result).__name__}
                 }
