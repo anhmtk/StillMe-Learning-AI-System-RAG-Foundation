@@ -21,10 +21,14 @@ from pathlib import Path
 
 # Import SecureMemoryManager
 try:
-    from .secure_memory_manager import SecureMemoryManager, SecureMemoryConfig
+    from .secure_memory_manager import SecureMemoryManager as _SecureMemoryManager, SecureMemoryConfig as _SecureMemoryConfig
+    SecureMemoryManager = _SecureMemoryManager  # type: ignore
+    SecureMemoryConfig = _SecureMemoryConfig  # type: ignore
 except ImportError:
     try:
-        from secure_memory_manager import SecureMemoryManager, SecureMemoryConfig
+        from secure_memory_manager import SecureMemoryManager as _SecureMemoryManager, SecureMemoryConfig as _SecureMemoryConfig
+        SecureMemoryManager = _SecureMemoryManager  # type: ignore
+        SecureMemoryConfig = _SecureMemoryConfig  # type: ignore
     except ImportError:
         # Mock classes for testing
         class SecureMemoryManager:
@@ -33,6 +37,9 @@ except ImportError:
             def decrypt(self, data): return data
             def save(self, data): return True
             def load(self): return {}
+            def get_health_status(self): return {"status": "healthy"}
+            def get_performance_metrics(self): return {"memory_usage": 0}
+            def shutdown(self): pass
         
         class SecureMemoryConfig:
             def __init__(self): pass
@@ -417,10 +424,13 @@ class LayeredMemoryV1:
         """Load memory data from secure storage on startup"""
         try:
             self.logger.info("🔄 Loading memory data from secure storage...")
-            stored_data = await self.secure_storage.load()
+            stored_data = self.secure_storage.load()
             
             if stored_data:
-                memory_data = json.loads(stored_data)
+                if isinstance(stored_data, str):
+                    memory_data = json.loads(stored_data)
+                else:
+                    memory_data = stored_data
                 
                 # Restore short-term memories
                 if 'short_term' in memory_data:
@@ -483,7 +493,7 @@ class LayeredMemoryV1:
             }
             
             # Save to secure storage
-            success = await self.secure_storage.save(memory_data, auto_backup=True)
+            success = self.secure_storage.save(memory_data)
             
             if success:
                 self.last_save_time = datetime.now()
@@ -630,7 +640,7 @@ class LayeredMemoryV1:
             await self._save_to_secure_storage("shutdown")
             
             # Shutdown secure storage
-            await self.secure_storage.shutdown()
+            self.secure_storage.shutdown()
             
             self.logger.info("🔄 LayeredMemoryV1 shutdown completed")
             

@@ -120,8 +120,10 @@ class PatchExecutor:
         
         if os.getenv("SANDBOX_DIR"):
             if not self._sandbox_path:
-                self._sandbox_path = str(prepare_sandbox(self.repo_root, os.getenv("SANDBOX_DIR")))
-            return self._sandbox_path
+                sandbox_dir = os.getenv("SANDBOX_DIR")
+                if sandbox_dir:
+                    self._sandbox_path = str(prepare_sandbox(self.repo_root, sandbox_dir))
+            return self._sandbox_path or self.repo_root
         return self.repo_root
 
     @property
