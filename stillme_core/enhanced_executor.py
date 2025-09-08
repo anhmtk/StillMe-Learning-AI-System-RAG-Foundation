@@ -1,3 +1,4 @@
+import os
 # stillme_core/enhanced_executor.py
 """
 Enhanced Executor with multiple testing frameworks support
@@ -341,7 +342,7 @@ class EnhancedExecutor:
     
     def analyze_test_impact(self, changed_files: List[str]) -> TestImpact:
         """Analyze which tests are affected by code changes"""
-        cache_key = "|".join(sorted(changed_files))
+        cache_key = os.getenv("KEY", "").join(sorted(changed_files))
         
         if cache_key in self.impact_cache:
             return self.impact_cache[cache_key]

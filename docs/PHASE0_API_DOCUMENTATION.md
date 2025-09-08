@@ -1,507 +1,289 @@
-# 📚 PHASE 0 - API DOCUMENTATION
+# 📚 **PHASE 0 - API DOCUMENTATION**
 
-## 🔗 **INTERNAL INTEGRATION BRIDGE API**
+## 🎯 **TỔNG QUAN API**
 
-### **Base URL**: `http://localhost:8765`
-
----
-
-## 🔐 **AUTHENTICATION**
-
-### **JWT Token Authentication**
-All protected endpoints require a valid JWT token in the Authorization header:
-
-```http
-Authorization: Bearer <your_jwt_token>
-```
-
-### **Token Generation**
-Tokens are generated through the `/auth/login` endpoint and expire after 24 hours.
+Phase 0 đã implement 8 core modules với comprehensive API documentation.
 
 ---
 
-## 📋 **API ENDPOINTS**
+## 🛡️ **1. SECURITY REMEDIATION API**
 
-### **1. Health Check**
+### **SecurityRemediationSystem**
 
-#### **GET /health**
-Check the health status of the integration bridge.
-
-**Authentication**: Public  
-**Rate Limit**: 100 requests/minute  
-
-**Request:**
-```http
-GET /health
-```
-
-**Response:**
-```json
-{
-  "status": "success",
-  "data": {
-    "status": "healthy",
-    "timestamp": "2025-09-08T10:46:02.035337",
-    "active_connections": 5,
-    "queue_size": 0
-  },
-  "timestamp": "2025-09-08T10:46:02.035337",
-  "request_time_ms": 12.5
-}
-```
-
-**Status Codes:**
-- `200 OK`: Service is healthy
-- `500 Internal Server Error`: Service is unhealthy
-
----
-
-### **2. Authentication**
-
-#### **POST /auth/login**
-Authenticate user and receive JWT token.
-
-**Authentication**: Public  
-**Rate Limit**: 10 requests/minute  
-
-**Request:**
-```http
-POST /auth/login
-Content-Type: application/json
-
-{
-  "username": "your_username",
-  "password": "your_password"
-}
-```
-
-**Response:**
-```json
-{
-  "status": "success",
-  "data": {
-    "token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9...",
-    "expires": "2025-09-09T10:46:02.035337"
-  },
-  "timestamp": "2025-09-08T10:46:02.035337",
-  "request_time_ms": 45.2
-}
-```
-
-**Error Response:**
-```json
-{
-  "status": "error",
-  "error": "Invalid credentials",
-  "timestamp": "2025-09-08T10:46:02.035337"
-}
-```
-
-**Status Codes:**
-- `200 OK`: Authentication successful
-- `401 Unauthorized`: Invalid credentials
-- `429 Too Many Requests`: Rate limit exceeded
-
----
-
-### **3. System Metrics**
-
-#### **GET /metrics**
-Get system performance metrics and statistics.
-
-**Authentication**: Authenticated  
-**Rate Limit**: 60 requests/minute  
-
-**Request:**
-```http
-GET /metrics
-Authorization: Bearer <your_jwt_token>
-```
-
-**Response:**
-```json
-{
-  "status": "success",
-  "data": {
-    "metrics": {
-      "request_times": [12.5, 15.2, 8.9, 11.3],
-      "error_counts": {
-        "RateLimitExceeded": 2,
-        "AuthenticationError": 1
-      },
-      "active_connections": 5,
-      "queue_size": 0,
-      "endpoints": 3
-    }
-  },
-  "timestamp": "2025-09-08T10:46:02.035337",
-  "request_time_ms": 8.7
-}
-```
-
-**Status Codes:**
-- `200 OK`: Metrics retrieved successfully
-- `401 Unauthorized`: Authentication required
-- `429 Too Many Requests`: Rate limit exceeded
-
----
-
-## 🔌 **WEBSOCKET API**
-
-### **Connection**
-```javascript
-const ws = new WebSocket('ws://localhost:8765');
-```
-
-### **Message Types**
-
-#### **1. Ping/Pong**
-```json
-// Client -> Server
-{
-  "type": "ping"
-}
-
-// Server -> Client
-{
-  "type": "pong",
-  "timestamp": "2025-09-08T10:46:02.035337"
-}
-```
-
-#### **2. Subscribe to Message Types**
-```json
-// Client -> Server
-{
-  "type": "subscribe",
-  "message_types": ["request", "response", "notification"]
-}
-
-// Server -> Client
-{
-  "type": "subscribed",
-  "message_types": ["request", "response", "notification"]
-}
-```
-
-#### **3. API Request via WebSocket**
-```json
-// Client -> Server
-{
-  "type": "request",
-  "method": "GET",
-  "path": "/health",
-  "headers": {
-    "Authorization": "Bearer <token>"
-  },
-  "body": {}
-}
-
-// Server -> Client
-{
-  "type": "response",
-  "status": "success",
-  "data": {
-    "status": "healthy",
-    "timestamp": "2025-09-08T10:46:02.035337"
-  }
-}
-```
-
----
-
-## 📊 **MESSAGE QUEUE API**
-
-### **Message Structure**
 ```python
-{
-  "id": "uuid4",
-  "type": "request|response|notification|error|heartbeat|authentication|authorization",
-  "source": "agentdev",
-  "target": "target_module",
-  "payload": {
-    "data": "any"
-  },
-  "timestamp": "2025-09-08T10:46:02.035337",
-  "auth_level": "public|authenticated|authorized|admin",
-  "correlation_id": "optional_correlation_id",
-  "retry_count": 0,
-  "max_retries": 3,
-  "ttl": "optional_ttl"
-}
+# Khởi tạo
+system = SecurityRemediationSystem()
+
+# Scan security issues
+issues = system.scan_security_issues()
+
+# Fix issues
+remediation = system.fix_security_issues()
+
+# Save report
+report_path = system.save_security_report(remediation)
 ```
 
-### **Publishing Messages**
+**Data Classes:**
+- `SecurityIssue`: Security issue definition
+- `SecurityRemediation`: Remediation result
+
+---
+
+## 🔄 **2. DEPENDENCY RESOLVER API**
+
+### **DependencyResolver**
+
 ```python
-# Python example
-message_id = await bridge.send_message(
-    target="stillme_core",
-    message_type=MessageType.REQUEST,
-    payload={"action": "health_check"},
-    auth_level=AuthLevel.AUTHENTICATED
-)
+# Khởi tạo
+resolver = DependencyResolver()
+
+# Analyze dependencies
+dependencies = resolver.analyze_dependencies()
+
+# Resolve circular dependencies
+resolution = resolver.resolve_circular_dependencies()
+
+# Create DI framework
+framework_path = resolver.create_dependency_injection_framework()
 ```
 
-### **Subscribing to Messages**
+**Data Classes:**
+- `DependencyInfo`: Dependency information
+- `CircularDependency`: Circular dependency definition
+
+---
+
+## ⚡ **3. PERFORMANCE OPTIMIZER API**
+
+### **PerformanceOptimizer**
+
 ```python
-# Python example
-async def handle_request(message):
-    print(f"Received request: {message.payload}")
+# Khởi tạo
+optimizer = PerformanceOptimizer()
 
-await bridge.message_queue.subscribe(MessageType.REQUEST, handle_request)
+# Analyze performance
+metrics = optimizer.analyze_performance()
+
+# Apply optimizations
+report = optimizer.optimize_modules()
+
+# Create monitoring
+monitoring_path = optimizer.create_performance_monitoring()
 ```
+
+**Data Classes:**
+- `PerformanceMetric`: Performance metric definition
+- `PerformanceReport`: Performance report
 
 ---
 
-## 🛡️ **SECURITY**
+## 🔍 **4. ECOSYSTEM DISCOVERY API**
 
-### **Authentication Levels**
-- **PUBLIC**: No authentication required
-- **AUTHENTICATED**: Valid JWT token required
-- **AUTHORIZED**: Valid JWT token with specific permissions
-- **ADMIN**: Valid JWT token with admin permissions
+### **EcosystemDiscovery**
 
-### **Rate Limiting**
-Each endpoint has configurable rate limits:
-- **Health Check**: 100 requests/minute
-- **Login**: 10 requests/minute
-- **Metrics**: 60 requests/minute
-
-### **Security Headers**
-```http
-X-Forwarded-For: client_ip_address
-Authorization: Bearer <jwt_token>
-Content-Type: application/json
-```
-
----
-
-## ⚠️ **ERROR HANDLING**
-
-### **Error Response Format**
-```json
-{
-  "status": "error",
-  "error": "Error message description",
-  "timestamp": "2025-09-08T10:46:02.035337"
-}
-```
-
-### **Common Error Codes**
-- **400 Bad Request**: Invalid request format
-- **401 Unauthorized**: Authentication required or invalid
-- **403 Forbidden**: Insufficient permissions
-- **404 Not Found**: Endpoint not found
-- **429 Too Many Requests**: Rate limit exceeded
-- **500 Internal Server Error**: Server error
-
----
-
-## 🔄 **CIRCUIT BREAKER**
-
-### **Circuit Breaker States**
-- **CLOSED**: Normal operation
-- **OPEN**: Circuit is open, requests are blocked
-- **HALF_OPEN**: Testing if service is back online
-
-### **Configuration**
 ```python
-circuit_breaker_config = {
-    "threshold": 5,  # Number of failures before opening
-    "timeout": "1 minute",  # Time before attempting reset
-    "monitoring_window": "5 minutes"  # Time window for failure counting
-}
+# Khởi tạo
+discovery = EcosystemDiscovery()
+
+# Discover modules
+modules = discovery.discover_modules()
+
+# Build dependency graph
+graph = discovery.build_dependency_graph()
+
+# Assess health
+health = discovery.assess_module_health()
+
+# Generate report
+report = discovery.generate_report()
 ```
 
 ---
 
-## 📈 **MONITORING & METRICS**
+## 🔗 **5. INTEGRATION BRIDGE API**
 
-### **Available Metrics**
-- **Request Times**: Response time distribution
-- **Error Counts**: Error type and frequency
-- **Active Connections**: Current WebSocket connections
-- **Queue Size**: Message queue depth
-- **Endpoint Count**: Number of registered endpoints
-- **Circuit Breakers**: Circuit breaker states
+### **IntegrationBridge**
 
-### **Performance Targets**
-- **API Response Time**: <50ms (P95)
-- **WebSocket Latency**: <10ms
-- **Authentication Time**: <5ms
-- **Rate Limit Check**: <1ms
-
----
-
-## 🧪 **TESTING**
-
-### **Test Endpoints**
-```bash
-# Health check
-curl -X GET http://localhost:8765/health
-
-# Login
-curl -X POST http://localhost:8765/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"username": "test", "password": "test"}'
-
-# Metrics (with token)
-curl -X GET http://localhost:8765/metrics \
-  -H "Authorization: Bearer <your_token>"
-```
-
-### **WebSocket Testing**
-```javascript
-// Browser console
-const ws = new WebSocket('ws://localhost:8765');
-ws.onopen = () => {
-  ws.send(JSON.stringify({type: 'ping'}));
-};
-ws.onmessage = (event) => {
-  console.log('Received:', JSON.parse(event.data));
-};
-```
-
----
-
-## 📚 **SDK EXAMPLES**
-
-### **Python SDK**
 ```python
-from stillme_core.integration_bridge import IntegrationBridge
-
-# Initialize bridge
+# Khởi tạo
 bridge = IntegrationBridge()
+
+# Start bridge
 await bridge.start()
 
-# Make API request
-response = await bridge.handle_request(
-    method="GET",
-    path="/health",
-    headers={}
-)
+# Register endpoint
+bridge.register_endpoint("GET", "/health", handler)
 
-# Send message
-message_id = await bridge.send_message(
-    target="stillme_core",
-    message_type=MessageType.REQUEST,
-    payload={"action": "test"}
-)
+# Handle request
+response = await bridge.handle_request("GET", "/health", {}, None)
 
 # Stop bridge
 await bridge.stop()
 ```
 
-### **JavaScript SDK**
-```javascript
-// WebSocket connection
-const ws = new WebSocket('ws://localhost:8765');
+**Default Endpoints:**
+- `GET /health` - Health check
+- `POST /auth/login` - Authentication
+- `GET /metrics` - System metrics
 
-// Send ping
-ws.send(JSON.stringify({type: 'ping'}));
+---
 
-// Subscribe to messages
-ws.send(JSON.stringify({
-  type: 'subscribe',
-  message_types: ['request', 'response']
-}));
+## 🛡️ **6. SECURITY MIDDLEWARE API**
 
-// Make API request
-ws.send(JSON.stringify({
-  type: 'request',
-  method: 'GET',
-  path: '/health',
-  headers: {}
-}));
+### **SecurityMiddleware**
+
+```python
+# Khởi tạo
+middleware = SecurityMiddleware()
+
+# Check rate limit
+allowed = middleware.check_rate_limit(client_ip, endpoint)
+
+# Validate input
+result = middleware.validate_input(data)
+
+# Add security headers
+headers = middleware.add_security_headers(headers)
+
+# Get security report
+report = middleware.get_security_report()
 ```
 
 ---
 
-## 🔧 **CONFIGURATION**
+## 📊 **7. PERFORMANCE MONITORING API**
 
-### **Environment Variables**
-```bash
-# Bridge configuration
-INTEGRATION_BRIDGE_HOST=localhost
-INTEGRATION_BRIDGE_PORT=8765
-INTEGRATION_BRIDGE_SECRET_KEY=your_secret_key
+### **PerformanceMonitor**
 
-# Rate limiting
-DEFAULT_RATE_LIMIT=100
-LOGIN_RATE_LIMIT=10
-METRICS_RATE_LIMIT=60
+```python
+# Khởi tạo
+monitor = PerformanceMonitor()
 
-# Circuit breaker
-CIRCUIT_BREAKER_THRESHOLD=5
-CIRCUIT_BREAKER_TIMEOUT=60
+# Start monitoring
+monitor.start_monitoring()
 
-# Monitoring
-METRICS_COLLECTION_INTERVAL=30
-CLEANUP_INTERVAL=300
+# Get summary
+summary = monitor.get_performance_summary()
+
+# Stop monitoring
+monitor.stop_monitoring()
 ```
 
-### **Configuration File**
-```json
+---
+
+## 🔧 **8. DEPENDENCY INJECTION API**
+
+### **ServiceContainer**
+
+```python
+# Khởi tạo
+container = ServiceContainer()
+
+# Register singleton
+container.register_singleton(interface, implementation)
+
+# Register factory
+container.register_factory(interface, factory)
+
+# Get service
+service = container.get(interface)
+
+# Use decorator
+@inject(interface)
+def my_function(service, *args, **kwargs):
+    pass
+```
+
+---
+
+## 📋 **9. ERROR HANDLING**
+
+### **Error Response Format:**
+```python
 {
-  "bridge": {
-    "host": "localhost",
-    "port": 8765,
-    "secret_key": "auto_generated"
-  },
-  "rate_limiting": {
-    "default": 100,
-    "login": 10,
-    "metrics": 60
-  },
-  "circuit_breaker": {
-    "threshold": 5,
-    "timeout": 60
-  },
-  "monitoring": {
-    "metrics_interval": 30,
-    "cleanup_interval": 300
-  }
+    "status": "error",
+    "error_type": "ErrorType",
+    "message": "Error message",
+    "details": {},
+    "timestamp": "2025-09-08T11:00:00Z"
 }
 ```
 
 ---
 
-## 📝 **CHANGELOG**
+## 🔐 **10. AUTHENTICATION**
 
-### **Version 1.0.0** (2025-09-08)
-- ✅ Initial release
-- ✅ RESTful API endpoints
-- ✅ WebSocket support
-- ✅ JWT authentication
-- ✅ Rate limiting
-- ✅ Circuit breaker pattern
-- ✅ Message queue system
-- ✅ Comprehensive testing
-- ✅ Complete documentation
+### **JWT Token Format:**
+```python
+{
+    "user_id": "user123",
+    "role": "admin",
+    "permissions": ["read", "write", "admin"],
+    "exp": 1694160000,
+    "iat": 1694073600
+}
+```
 
----
-
-## 🆘 **SUPPORT**
-
-### **Documentation**
-- **API Reference**: This document
-- **Architecture Guide**: `PHASE0_INTEGRATION_FOUNDATION_REPORT.md`
-- **Testing Guide**: `test_integration_bridge_fixed.py`
-
-### **Troubleshooting**
-1. **Connection Issues**: Check host/port configuration
-2. **Authentication Errors**: Verify JWT token validity
-3. **Rate Limit Errors**: Implement exponential backoff
-4. **Circuit Breaker Open**: Wait for timeout period
-
-### **Contact**
-- **Technical Issues**: Check logs in `logs/` directory
-- **Performance Issues**: Monitor metrics endpoint
-- **Security Issues**: Review security assessment report
+### **Access Levels:**
+- **Public**: No authentication
+- **Authenticated**: Valid JWT required
+- **Authorized**: Specific permissions required
+- **Admin**: Admin role required
 
 ---
 
-**Documentation Version**: 1.0.0  
-**Last Updated**: 2025-09-08  
-**Generated By**: AgentDev System  
-**Phase**: 0 - Internal Integration Foundation
+## 📊 **11. RESPONSE FORMATS**
+
+### **Success Response:**
+```python
+{
+    "status": "success",
+    "data": {},
+    "timestamp": "2025-09-08T11:00:00Z"
+}
+```
+
+---
+
+## 🚀 **12. USAGE EXAMPLES**
+
+### **Security Workflow:**
+```python
+# Initialize security system
+security_system = SecurityRemediationSystem()
+issues = security_system.scan_security_issues()
+remediation = security_system.fix_security_issues()
+report_path = security_system.save_security_report(remediation)
+```
+
+### **Performance Workflow:**
+```python
+# Initialize optimizer
+optimizer = PerformanceOptimizer()
+metrics = optimizer.analyze_performance()
+report = optimizer.optimize_modules()
+monitor = PerformanceMonitor()
+monitor.start_monitoring()
+```
+
+### **Integration Workflow:**
+```python
+# Initialize bridge
+bridge = IntegrationBridge()
+await bridge.start()
+bridge.register_endpoint("GET", "/health", health_handler)
+response = await bridge.handle_request("GET", "/health", {}, None)
+await bridge.stop()
+```
+
+---
+
+## 🔚 **CONCLUSION**
+
+Phase 0 APIs provide comprehensive functionality for security, performance, dependencies, and integration. All APIs are well-documented, tested, and ready for production use! 🚀
+
+---
+
+*API Documentation - Phase 0*
+*Last Updated: 2025-09-08*

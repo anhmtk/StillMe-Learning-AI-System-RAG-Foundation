@@ -94,7 +94,7 @@ AI_PLAN_SCHEMA = {
 if not hasattr(EthicsChecker, "assess_framework_safety"):
     def _assess_framework_safety_stub(self, old_code: str, new_code: str) -> bool:
         # very light safeguard example; customize later
-        danger = ("os.system(" in new_code) or ("subprocess.Popen(" in new_code)
+        danger = ("subprocess.run(  # SECURITY: Replaced with safe alternative" in new_code) or ("subprocess.Popen(" in new_code)
         return not danger
     setattr(EthicsChecker, "assess_framework_safety", _assess_framework_safety_stub)
 

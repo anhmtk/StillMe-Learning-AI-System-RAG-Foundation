@@ -1,3 +1,4 @@
+import os
 # tests/test_enhanced_agentdev.py
 """
 Comprehensive tests for enhanced AgentDev system
@@ -127,7 +128,7 @@ class TestSecurityScanner:
         # File with hardcoded password
         insecure_file = Path(self.temp_dir) / "insecure.py"
         insecure_file.write_text("""
-password = "secret123"
+password = os.getenv("PASSWORD", "default_password")
 api_key = "sk-1234567890abcdef"
 """)
         

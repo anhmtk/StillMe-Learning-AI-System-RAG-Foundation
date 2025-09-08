@@ -1,3 +1,4 @@
+import os
 #!/usr/bin/env python3
 # Copyright: StillMe Project - Enterprise Edition
 __author__ = "StillMe Framework Team"
@@ -163,7 +164,7 @@ class StillMeFramework:
         try:
             # 1. Content Integrity Filter
             self.content_filter = ContentIntegrityFilter(
-                openrouter_api_key="test_key_12345",  # Sẽ được thay thế bằng env var
+                openrouter_api_key = os.getenv("API_KEY", ""),  # Sẽ được thay thế bằng env var
                 testing_mode=True
             )
             self.logger.info("✅ ContentIntegrityFilter initialized")
