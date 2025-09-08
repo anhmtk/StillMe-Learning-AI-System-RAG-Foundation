@@ -1,0 +1,2142 @@
+{
+  "timestamp": "2025-09-08T10:46:02.035337",
+  "overall_health_score": 99.82758620689656,
+  "total_modules": 58,
+  "core_modules_found": 56,
+  "extension_modules": 2,
+  "critical_issues": [
+    "Potential hardcoded API key",
+    "Use of potentially dangerous function: exec",
+    "Potential hardcoded API key",
+    "Potential hardcoded API key",
+    "Use of potentially dangerous function: eval",
+    "Use of potentially dangerous function: exec",
+    "Use of potentially dangerous function: exec",
+    "Potential SQL injection vulnerability",
+    "Potential hardcoded API key",
+    "Potential hardcoded API key",
+    "Potential SQL injection vulnerability",
+    "Use of potentially dangerous function: exec",
+    "Potential hardcoded API key",
+    "Use of potentially dangerous function: exec",
+    "Use of potentially dangerous function: exec",
+    "Potential hardcoded password",
+    "Potential hardcoded API key",
+    "Use of potentially dangerous function: eval",
+    "Use of potentially dangerous function: exec",
+    "Use of potentially dangerous function: os.system",
+    "Use of potentially dangerous function: subprocess.call",
+    "Potential SQL injection vulnerability",
+    "Use of potentially dangerous function: exec",
+    "Use of potentially dangerous function: exec",
+    "Use of potentially dangerous function: exec",
+    "Use of potentially dangerous function: exec",
+    "Use of potentially dangerous function: exec",
+    "Use of potentially dangerous function: exec",
+    "Use of potentially dangerous function: exec",
+    "Use of potentially dangerous function: exec",
+    "Use of potentially dangerous function: eval",
+    "Use of potentially dangerous function: exec",
+    "Potential SQL injection vulnerability",
+    "Use of potentially dangerous function: eval",
+    "Use of potentially dangerous function: eval",
+    "Potential hardcoded password",
+    "Use of potentially dangerous function: eval",
+    "Use of potentially dangerous function: exec",
+    "Potential SQL injection vulnerability",
+    "Potential hardcoded password",
+    "Use of potentially dangerous function: exec",
+    "Potential hardcoded password",
+    "Use of potentially dangerous function: exec",
+    "Potential SQL injection vulnerability",
+    "Use of potentially dangerous function: exec",
+    "Potential SQL injection vulnerability",
+    "Potential hardcoded API key",
+    "Use of potentially dangerous function: eval"
+  ],
+  "performance_bottlenecks": [],
+  "circular_dependencies": [
+    [
+      "ecosystem_discovery"
+    ],
+    [
+      "git_manager"
+    ],
+    [
+      "decision_engine"
+    ],
+    [
+      "ecosystem_discovery",
+      "logging_utils"
+    ]
+  ],
+  "complexity_metrics": {
+    "total_modules": 58,
+    "total_dependencies": 104,
+    "average_dependencies_per_module": 7.706896551724138,
+    "most_connected_module": "logging_utils",
+    "least_connected_module": "example_module",
+    "graph_density": 0.03145795523290986,
+    "centrality_measures": {
+      "api_provider_manager": 0.05263157894736842,
+      "automated_scheduler": 0.07017543859649122,
+      "communication_style_manager": 0.017543859649122806,
+      "content_integrity_filter": 0.07017543859649122,
+      "conversational_core_v1": 0.24561403508771928,
+      "daily_learning_manager": 0.05263157894736842,
+      "emotionsense_v1": 0.05263157894736842,
+      "ethical_core_system_v1": 0.08771929824561403,
+      "example_module": 0.0,
+      "framework_metrics": 0.0,
+      "input_sketcher": 0.017543859649122806,
+      "layered_memory_v1": 0.03508771929824561,
+      "market_intel": 0.05263157894736842,
+      "persona_morph": 0.05263157894736842,
+      "prediction_engine": 0.03508771929824561,
+      "secure_memory_manager": 0.05263157894736842,
+      "self_improvement_manager": 0.07017543859649122,
+      "stillme_core": 0.08771929824561403,
+      "telemetry": 0.017543859649122806,
+      "token_optimizer_v1": 0.017543859649122806,
+      "agent_dev": 0.017543859649122806,
+      "agent_dev_bridge": 0.017543859649122806,
+      "ai_manager": 0.12280701754385964,
+      "ai_plan_schema": 0.0,
+      "bug_memory": 0.017543859649122806,
+      "config": 0.017543859649122806,
+      "config_defaults": 0.05263157894736842,
+      "conscience_core_v1": 0.017543859649122806,
+      "controller": 0.14035087719298245,
+      "ecosystem_discovery": 0.42105263157894735,
+      "enhanced_executor": 0.08771929824561403,
+      "error_recovery": 0.017543859649122806,
+      "executor": 0.12280701754385964,
+      "git_manager": 0.05263157894736842,
+      "logging_utils": 0.631578947368421,
+      "metrics": 0.05263157894736842,
+      "planner": 0.07017543859649122,
+      "plan_types": 0.05263157894736842,
+      "provider_router": 0.03508771929824561,
+      "safe_runner": 0.0,
+      "sandbox": 0.03508771929824561,
+      "sandbox_manager": 0.05263157894736842,
+      "sul": 0.03508771929824561,
+      "supervisor": 0.03508771929824561,
+      "supervisor_cli": 0.03508771929824561,
+      "ui_state": 0.0,
+      "verifier": 0.05263157894736842,
+      "__main__": 0.05263157894736842,
+      "safe_attack_simulator": 0.017543859649122806,
+      "decision_engine": 0.05263157894736842,
+      "ethical_guardrails": 0.017543859649122806,
+      "quality_governor": 0.017543859649122806,
+      "risk_assessor": 0.03508771929824561,
+      "attack_simulator": 0.017543859649122806,
+      "security_scanner": 0.05263157894736842,
+      "experience_memory": 0.017543859649122806,
+      "gpt5_client": 0.017543859649122806,
+      "ollama_client": 0.07017543859649122
+    }
+  },
+  "health_metrics": {},
+  "module_details": {
+    "api_provider_manager": {
+      "name": "api_provider_manager",
+      "path": "modules\\api_provider_manager.py",
+      "type": "core",
+      "size_bytes": 12420,
+      "line_count": 298,
+      "function_count": 15,
+      "class_count": 2,
+      "import_count": 8,
+      "dependencies": [
+        "os",
+        "logging",
+        "time",
+        "requests",
+        "typing",
+        "openai",
+        "ollama",
+        "dotenv"
+      ],
+      "dependents": [],
+      "last_modified": "2025-09-08 02:04:48.449956",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.520774"
+      },
+      "security_issues": [
+        "Potential hardcoded API key"
+      ],
+      "documentation_quality": 25.191275167785236
+    },
+    "automated_scheduler": {
+      "name": "automated_scheduler",
+      "path": "modules\\automated_scheduler.py",
+      "type": "core",
+      "size_bytes": 19491,
+      "line_count": 493,
+      "function_count": 9,
+      "class_count": 2,
+      "import_count": 17,
+      "dependencies": [
+        "asyncio",
+        "logging",
+        "signal",
+        "sys",
+        "time",
+        "datetime",
+        "pathlib",
+        "typing",
+        "dataclasses",
+        "apscheduler.schedulers.asyncio",
+        "apscheduler.triggers.cron",
+        "apscheduler.triggers.interval",
+        "apscheduler.triggers.date",
+        "apscheduler.jobstores.memory",
+        "apscheduler.executors.asyncio",
+        "apscheduler.events",
+        "modules.daily_learning_manager"
+      ],
+      "dependents": [],
+      "last_modified": "2025-09-08 02:04:48.449956",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.526429"
+      },
+      "security_issues": [
+        "Use of potentially dangerous function: exec"
+      ],
+      "documentation_quality": 47.17383367139959
+    },
+    "communication_style_manager": {
+      "name": "communication_style_manager",
+      "path": "modules\\communication_style_manager.py",
+      "type": "core",
+      "size_bytes": 8073,
+      "line_count": 198,
+      "function_count": 6,
+      "class_count": 1,
+      "import_count": 2,
+      "dependencies": [
+        "re",
+        "typing"
+      ],
+      "dependents": [],
+      "last_modified": "2025-09-05 23:50:35.668682",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.530827"
+      },
+      "security_issues": [],
+      "documentation_quality": 45.3979797979798
+    },
+    "content_integrity_filter": {
+      "name": "content_integrity_filter",
+      "path": "modules\\content_integrity_filter.py",
+      "type": "core",
+      "size_bytes": 30405,
+      "line_count": 560,
+      "function_count": 14,
+      "class_count": 7,
+      "import_count": 10,
+      "dependencies": [
+        "json",
+        "os",
+        "re",
+        "asyncio",
+        "logging",
+        "typing",
+        "enum",
+        "httpx",
+        "dotenv",
+        "datetime"
+      ],
+      "dependents": [
+        "self_improvement_manager"
+      ],
+      "last_modified": "2025-09-03 22:42:31.416685",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.544053"
+      },
+      "security_issues": [
+        "Potential hardcoded API key"
+      ],
+      "documentation_quality": 27.46785714285714
+    },
+    "conversational_core_v1": {
+      "name": "conversational_core_v1",
+      "path": "modules\\conversational_core_v1.py",
+      "type": "core",
+      "size_bytes": 5662,
+      "line_count": 134,
+      "function_count": 8,
+      "class_count": 1,
+      "import_count": 3,
+      "dependencies": [
+        "random",
+        "logging",
+        "typing"
+      ],
+      "dependents": [
+        "communication_style_manager",
+        "content_integrity_filter",
+        "emotionsense_v1",
+        "input_sketcher",
+        "persona_morph",
+        "ai_manager",
+        "conscience_core_v1",
+        "enhanced_executor",
+        "enhanced_executor",
+        "enhanced_executor",
+        "enhanced_executor",
+        "enhanced_executor",
+        "executor",
+        "planner",
+        "verifier",
+        "risk_assessor",
+        "security_scanner"
+      ],
+      "last_modified": "2025-09-03 22:42:52.397415",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.547697"
+      },
+      "security_issues": [],
+      "documentation_quality": 44.158208955223884
+    },
+    "daily_learning_manager": {
+      "name": "daily_learning_manager",
+      "path": "modules\\daily_learning_manager.py",
+      "type": "core",
+      "size_bytes": 29515,
+      "line_count": 707,
+      "function_count": 23,
+      "class_count": 3,
+      "import_count": 7,
+      "dependencies": [
+        "json",
+        "random",
+        "logging",
+        "datetime",
+        "pathlib",
+        "typing",
+        "dataclasses"
+      ],
+      "dependents": [
+        "automated_scheduler",
+        "self_improvement_manager"
+      ],
+      "last_modified": "2025-09-08 02:04:48.444918",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.554903"
+      },
+      "security_issues": [],
+      "documentation_quality": 46.118953323903824
+    },
+    "emotionsense_v1": {
+      "name": "emotionsense_v1",
+      "path": "modules\\emotionsense_v1.py",
+      "type": "core",
+      "size_bytes": 24291,
+      "line_count": 599,
+      "function_count": 16,
+      "class_count": 1,
+      "import_count": 14,
+      "dependencies": [
+        "asyncio",
+        "json",
+        "logging",
+        "re",
+        "time",
+        "datetime",
+        "pathlib",
+        "typing",
+        "collections",
+        "numpy",
+        "torch",
+        "transformers",
+        "sklearn.feature_extraction.text",
+        "sklearn.metrics.pairwise"
+      ],
+      "dependents": [],
+      "last_modified": "2025-09-08 00:17:24.168743",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.571590"
+      },
+      "security_issues": [],
+      "documentation_quality": 47.04140233722872
+    },
+    "ethical_core_system_v1": {
+      "name": "ethical_core_system_v1",
+      "path": "modules\\ethical_core_system_v1.py",
+      "type": "core",
+      "size_bytes": 22483,
+      "line_count": 389,
+      "function_count": 9,
+      "class_count": 10,
+      "import_count": 7,
+      "dependencies": [
+        "os",
+        "asyncio",
+        "json",
+        "logging",
+        "enum",
+        "typing",
+        "httpx"
+      ],
+      "dependents": [
+        "automated_scheduler",
+        "supervisor_cli",
+        "__main__"
+      ],
+      "last_modified": "2025-09-03 22:54:08.404698",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.581150"
+      },
+      "security_issues": [
+        "Potential hardcoded API key",
+        "Use of potentially dangerous function: eval"
+      ],
+      "documentation_quality": 25.013367609254498
+    },
+    "example_module": {
+      "name": "example_module",
+      "path": "modules\\example_module.py",
+      "type": "core",
+      "size_bytes": 53,
+      "line_count": 4,
+      "function_count": 1,
+      "class_count": 0,
+      "import_count": 0,
+      "dependencies": [],
+      "dependents": [],
+      "last_modified": "2025-08-14 22:03:15.111110",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.581150"
+      },
+      "security_issues": [],
+      "documentation_quality": 0.1
+    },
+    "framework_metrics": {
+      "name": "framework_metrics",
+      "path": "modules\\framework_metrics.py",
+      "type": "core",
+      "size_bytes": 1811,
+      "line_count": 52,
+      "function_count": 7,
+      "class_count": 1,
+      "import_count": 3,
+      "dependencies": [
+        "time",
+        "json",
+        "pathlib"
+      ],
+      "dependents": [],
+      "last_modified": "2025-08-03 21:47:21.290719",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.581150"
+      },
+      "security_issues": [
+        "Use of potentially dangerous function: exec"
+      ],
+      "documentation_quality": 41.661538461538456
+    },
+    "input_sketcher": {
+      "name": "input_sketcher",
+      "path": "modules\\input_sketcher.py",
+      "type": "core",
+      "size_bytes": 4859,
+      "line_count": 116,
+      "function_count": 7,
+      "class_count": 1,
+      "import_count": 2,
+      "dependencies": [
+        "re",
+        "typing"
+      ],
+      "dependents": [],
+      "last_modified": "2025-09-08 02:04:48.408922",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.586334"
+      },
+      "security_issues": [],
+      "documentation_quality": 24.679310344827584
+    },
+    "layered_memory_v1": {
+      "name": "layered_memory_v1",
+      "path": "modules\\layered_memory_v1.py",
+      "type": "core",
+      "size_bytes": 26231,
+      "line_count": 648,
+      "function_count": 34,
+      "class_count": 6,
+      "import_count": 15,
+      "dependencies": [
+        "sqlite3",
+        "logging",
+        "typing",
+        "dataclasses",
+        "datetime",
+        "numpy",
+        "abc",
+        "pickle",
+        "cryptography.fernet",
+        "warnings",
+        "asyncio",
+        "json",
+        "pathlib",
+        "secure_memory_manager",
+        "secure_memory_manager"
+      ],
+      "dependents": [],
+      "last_modified": "2025-09-08 00:17:24.168743",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.596330"
+      },
+      "security_issues": [
+        "Use of potentially dangerous function: exec",
+        "Potential SQL injection vulnerability"
+      ],
+      "documentation_quality": 49.401234567901234
+    },
+    "market_intel": {
+      "name": "market_intel",
+      "path": "modules\\market_intel.py",
+      "type": "core",
+      "size_bytes": 48215,
+      "line_count": 1063,
+      "function_count": 17,
+      "class_count": 3,
+      "import_count": 16,
+      "dependencies": [
+        "os",
+        "json",
+        "logging",
+        "asyncio",
+        "aiohttp",
+        "random",
+        "datetime",
+        "typing",
+        "dataclasses",
+        "pathlib",
+        "time",
+        "modules.prediction_engine",
+        "gtrending",
+        "pytrends.request",
+        "gnews",
+        "requests"
+      ],
+      "dependents": [],
+      "last_modified": "2025-09-08 02:08:28.893687",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.628410"
+      },
+      "security_issues": [
+        "Potential hardcoded API key"
+      ],
+      "documentation_quality": 46.286641580432736
+    },
+    "persona_morph": {
+      "name": "persona_morph",
+      "path": "modules\\persona_morph.py",
+      "type": "core",
+      "size_bytes": 21639,
+      "line_count": 436,
+      "function_count": 12,
+      "class_count": 9,
+      "import_count": 10,
+      "dependencies": [
+        "json",
+        "os",
+        "re",
+        "collections",
+        "numpy",
+        "dataclasses",
+        "enum",
+        "logging",
+        "httpx",
+        "dotenv"
+      ],
+      "dependents": [],
+      "last_modified": "2025-09-06 10:59:14.443981",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.639718"
+      },
+      "security_issues": [
+        "Potential hardcoded API key"
+      ],
+      "documentation_quality": 25.69908256880734
+    },
+    "prediction_engine": {
+      "name": "prediction_engine",
+      "path": "modules\\prediction_engine.py",
+      "type": "core",
+      "size_bytes": 20326,
+      "line_count": 517,
+      "function_count": 16,
+      "class_count": 6,
+      "import_count": 6,
+      "dependencies": [
+        "logging",
+        "math",
+        "datetime",
+        "typing",
+        "dataclasses",
+        "enum"
+      ],
+      "dependents": [
+        "market_intel"
+      ],
+      "last_modified": "2025-09-08 01:38:57.599649",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.653798"
+      },
+      "security_issues": [
+        "Potential SQL injection vulnerability"
+      ],
+      "documentation_quality": 47.78955512572534
+    },
+    "secure_memory_manager": {
+      "name": "secure_memory_manager",
+      "path": "modules\\secure_memory_manager.py",
+      "type": "core",
+      "size_bytes": 15545,
+      "line_count": 408,
+      "function_count": 8,
+      "class_count": 2,
+      "import_count": 13,
+      "dependencies": [
+        "asyncio",
+        "json",
+        "logging",
+        "os",
+        "shutil",
+        "time",
+        "datetime",
+        "pathlib",
+        "typing",
+        "cryptography.fernet",
+        "cryptography.hazmat.primitives",
+        "cryptography.hazmat.primitives.kdf.pbkdf2",
+        "base64"
+      ],
+      "dependents": [
+        "layered_memory_v1",
+        "layered_memory_v1"
+      ],
+      "last_modified": "2025-09-04 01:20:46.907231",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.663025"
+      },
+      "security_issues": [],
+      "documentation_quality": 44.66372549019608
+    },
+    "self_improvement_manager": {
+      "name": "self_improvement_manager",
+      "path": "modules\\self_improvement_manager.py",
+      "type": "core",
+      "size_bytes": 35956,
+      "line_count": 878,
+      "function_count": 32,
+      "class_count": 5,
+      "import_count": 13,
+      "dependencies": [
+        "json",
+        "os",
+        "shutil",
+        "time",
+        "hashlib",
+        "datetime",
+        "pathlib",
+        "typing",
+        "dataclasses",
+        "logging",
+        "modules.content_integrity_filter",
+        "modules.daily_learning_manager",
+        "subprocess"
+      ],
+      "dependents": [],
+      "last_modified": "2025-09-07 23:19:52.153872",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.679050"
+      },
+      "security_issues": [
+        "Use of potentially dangerous function: exec"
+      ],
+      "documentation_quality": 46.787699316628704
+    },
+    "stillme_core": {
+      "name": "stillme_core",
+      "path": "modules\\stillme_core.py",
+      "type": "core",
+      "size_bytes": 1069,
+      "line_count": 40,
+      "function_count": 7,
+      "class_count": 3,
+      "import_count": 1,
+      "dependencies": [
+        "logging"
+      ],
+      "dependents": [
+        "ai_manager",
+        "planner",
+        "planner",
+        "planner",
+        "planner",
+        "sandbox_manager",
+        "supervisor_cli"
+      ],
+      "last_modified": "2025-09-06 10:59:14.445012",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.679050"
+      },
+      "security_issues": [],
+      "documentation_quality": 40.7
+    },
+    "telemetry": {
+      "name": "telemetry",
+      "path": "modules\\telemetry.py",
+      "type": "core",
+      "size_bytes": 2722,
+      "line_count": 105,
+      "function_count": 6,
+      "class_count": 0,
+      "import_count": 5,
+      "dependencies": [
+        "json",
+        "threading",
+        "time",
+        "pathlib",
+        "typing"
+      ],
+      "dependents": [
+        "ollama_client"
+      ],
+      "last_modified": "2025-09-05 21:10:50.066141",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.679050"
+      },
+      "security_issues": [],
+      "documentation_quality": 42.50476190476191
+    },
+    "token_optimizer_v1": {
+      "name": "token_optimizer_v1",
+      "path": "modules\\token_optimizer_v1.py",
+      "type": "core",
+      "size_bytes": 10124,
+      "line_count": 272,
+      "function_count": 20,
+      "class_count": 7,
+      "import_count": 10,
+      "dependencies": [
+        "hashlib",
+        "logging",
+        "time",
+        "typing",
+        "datetime",
+        "collections",
+        "numpy",
+        "tiktoken",
+        "sentence_transformers",
+        "pydantic"
+      ],
+      "dependents": [],
+      "last_modified": "2025-09-03 18:48:31.220538",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.687134"
+      },
+      "security_issues": [],
+      "documentation_quality": 45.86029411764706
+    },
+    "agent_dev": {
+      "name": "agent_dev",
+      "path": "stillme_core\\agent_dev.py",
+      "type": "core",
+      "size_bytes": 105,
+      "line_count": 8,
+      "function_count": 0,
+      "class_count": 0,
+      "import_count": 1,
+      "dependencies": [
+        "__main__"
+      ],
+      "dependents": [],
+      "last_modified": "2025-09-06 14:10:30.350408",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.693200"
+      },
+      "security_issues": [],
+      "documentation_quality": 20.0
+    },
+    "agent_dev_bridge": {
+      "name": "agent_dev_bridge",
+      "path": "stillme_core\\agent_dev_bridge.py",
+      "type": "core",
+      "size_bytes": 1296,
+      "line_count": 35,
+      "function_count": 1,
+      "class_count": 1,
+      "import_count": 4,
+      "dependencies": [
+        "__future__",
+        "os",
+        "typing",
+        "httpx"
+      ],
+      "dependents": [],
+      "last_modified": "2025-08-13 00:17:13.159602",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.693200"
+      },
+      "security_issues": [],
+      "documentation_quality": 23.15714285714286
+    },
+    "ai_manager": {
+      "name": "ai_manager",
+      "path": "stillme_core\\ai_manager.py",
+      "type": "core",
+      "size_bytes": 34858,
+      "line_count": 911,
+      "function_count": 48,
+      "class_count": 6,
+      "import_count": 22,
+      "dependencies": [
+        "__future__",
+        "typing",
+        "asyncio",
+        "time",
+        "json",
+        "os",
+        "httpx",
+        "pathlib",
+        "dataclasses",
+        "collections",
+        "config_defaults",
+        "plan_types",
+        "bug_memory",
+        "stillme_core.provider_router",
+        "oi_adapter.interpreter_controller",
+        "openai",
+        "re",
+        "subprocess",
+        "subprocess",
+        "subprocess",
+        "json",
+        "openai"
+      ],
+      "dependents": [],
+      "last_modified": "2025-09-08 02:57:58.285774",
+      "health_score": 90.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.707311"
+      },
+      "security_issues": [
+        "Potential hardcoded API key",
+        "Use of potentially dangerous function: exec"
+      ],
+      "documentation_quality": 49.53589462129528
+    },
+    "ai_plan_schema": {
+      "name": "ai_plan_schema",
+      "path": "stillme_core\\ai_plan_schema.py",
+      "type": "core",
+      "size_bytes": 1448,
+      "line_count": 43,
+      "function_count": 0,
+      "class_count": 0,
+      "import_count": 0,
+      "dependencies": [],
+      "dependents": [],
+      "last_modified": "2025-08-03 22:12:18.617078",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.710821"
+      },
+      "security_issues": [],
+      "documentation_quality": 41.16279069767442
+    },
+    "bug_memory": {
+      "name": "bug_memory",
+      "path": "stillme_core\\bug_memory.py",
+      "type": "core",
+      "size_bytes": 3205,
+      "line_count": 94,
+      "function_count": 7,
+      "class_count": 1,
+      "import_count": 5,
+      "dependencies": [
+        "hashlib",
+        "json",
+        "time",
+        "pathlib",
+        "typing"
+      ],
+      "dependents": [
+        "ai_manager"
+      ],
+      "last_modified": "2025-09-06 11:00:23.812877",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.710821"
+      },
+      "security_issues": [],
+      "documentation_quality": 21.23191489361702
+    },
+    "config": {
+      "name": "config",
+      "path": "stillme_core\\config.py",
+      "type": "core",
+      "size_bytes": 363,
+      "line_count": 12,
+      "function_count": 1,
+      "class_count": 0,
+      "import_count": 1,
+      "dependencies": [
+        "os"
+      ],
+      "dependents": [],
+      "last_modified": "2025-08-11 18:30:50.418381",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.714294"
+      },
+      "security_issues": [],
+      "documentation_quality": 20.1
+    },
+    "config_defaults": {
+      "name": "config_defaults",
+      "path": "stillme_core\\config_defaults.py",
+      "type": "core",
+      "size_bytes": 939,
+      "line_count": 32,
+      "function_count": 2,
+      "class_count": 0,
+      "import_count": 3,
+      "dependencies": [
+        "os",
+        "typing",
+        "dotenv"
+      ],
+      "dependents": [
+        "ai_manager",
+        "executor"
+      ],
+      "last_modified": "2025-09-02 17:22:31.413785",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.715316"
+      },
+      "security_issues": [],
+      "documentation_quality": 24.8875
+    },
+    "conscience_core_v1": {
+      "name": "conscience_core_v1",
+      "path": "stillme_core\\conscience_core_v1.py",
+      "type": "core",
+      "size_bytes": 5745,
+      "line_count": 138,
+      "function_count": 2,
+      "class_count": 0,
+      "import_count": 2,
+      "dependencies": [
+        "re",
+        "typing"
+      ],
+      "dependents": [],
+      "last_modified": "2025-09-06 14:31:35.105489",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.715939"
+      },
+      "security_issues": [],
+      "documentation_quality": 45.99710144927536
+    },
+    "controller": {
+      "name": "controller",
+      "path": "stillme_core\\controller.py",
+      "type": "core",
+      "size_bytes": 12564,
+      "line_count": 313,
+      "function_count": 5,
+      "class_count": 1,
+      "import_count": 10,
+      "dependencies": [
+        "time",
+        "logging",
+        "typing",
+        "pathlib",
+        "planner",
+        "executor",
+        "verifier",
+        "plan_types",
+        "logging_utils",
+        "metrics"
+      ],
+      "dependents": [
+        "ai_manager",
+        "__main__"
+      ],
+      "last_modified": "2025-09-08 02:32:16.867971",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.718965"
+      },
+      "security_issues": [
+        "Use of potentially dangerous function: exec"
+      ],
+      "documentation_quality": 43.37539936102236
+    },
+    "ecosystem_discovery": {
+      "name": "ecosystem_discovery",
+      "path": "stillme_core\\ecosystem_discovery.py",
+      "type": "core",
+      "size_bytes": 21953,
+      "line_count": 572,
+      "function_count": 20,
+      "class_count": 4,
+      "import_count": 15,
+      "dependencies": [
+        "os",
+        "json",
+        "ast",
+        "importlib",
+        "inspect",
+        "networkx",
+        "time",
+        "logging",
+        "pathlib",
+        "typing",
+        "dataclasses",
+        "datetime",
+        "psutil",
+        "threading",
+        "concurrent.futures"
+      ],
+      "dependents": [
+        "api_provider_manager",
+        "content_integrity_filter",
+        "ethical_core_system_v1",
+        "market_intel",
+        "persona_morph",
+        "secure_memory_manager",
+        "self_improvement_manager",
+        "agent_dev_bridge",
+        "ai_manager",
+        "config",
+        "config_defaults",
+        "ecosystem_discovery",
+        "enhanced_executor",
+        "executor",
+        "logging_utils",
+        "metrics",
+        "provider_router",
+        "sandbox",
+        "sandbox_manager",
+        "security_scanner",
+        "gpt5_client",
+        "ollama_client"
+      ],
+      "last_modified": "2025-09-08 10:45:28.581993",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.727145"
+      },
+      "security_issues": [
+        "Potential hardcoded password",
+        "Potential hardcoded API key",
+        "Use of potentially dangerous function: eval",
+        "Use of potentially dangerous function: exec",
+        "Use of potentially dangerous function: os.system",
+        "Use of potentially dangerous function: subprocess.call",
+        "Potential SQL injection vulnerability"
+      ],
+      "documentation_quality": 48.056643356643356
+    },
+    "enhanced_executor": {
+      "name": "enhanced_executor",
+      "path": "stillme_core\\enhanced_executor.py",
+      "type": "core",
+      "size_bytes": 18634,
+      "line_count": 502,
+      "function_count": 21,
+      "class_count": 4,
+      "import_count": 19,
+      "dependencies": [
+        "__future__",
+        "typing",
+        "subprocess",
+        "asyncio",
+        "concurrent.futures",
+        "time",
+        "json",
+        "os",
+        "pathlib",
+        "dataclasses",
+        "enum",
+        "logging",
+        "plan_types",
+        "executor",
+        "re",
+        "re",
+        "re",
+        "re",
+        "re"
+      ],
+      "dependents": [],
+      "last_modified": "2025-09-08 03:19:35.365290",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.738820"
+      },
+      "security_issues": [
+        "Use of potentially dangerous function: exec"
+      ],
+      "documentation_quality": 45.08804780876494
+    },
+    "error_recovery": {
+      "name": "error_recovery",
+      "path": "stillme_core\\error_recovery.py",
+      "type": "core",
+      "size_bytes": 16152,
+      "line_count": 429,
+      "function_count": 24,
+      "class_count": 8,
+      "import_count": 10,
+      "dependencies": [
+        "__future__",
+        "typing",
+        "asyncio",
+        "time",
+        "random",
+        "logging",
+        "dataclasses",
+        "enum",
+        "functools",
+        "traceback"
+      ],
+      "dependents": [],
+      "last_modified": "2025-09-08 03:21:21.639404",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.744915"
+      },
+      "security_issues": [
+        "Use of potentially dangerous function: exec"
+      ],
+      "documentation_quality": 45.5972027972028
+    },
+    "executor": {
+      "name": "executor",
+      "path": "stillme_core\\executor.py",
+      "type": "core",
+      "size_bytes": 9875,
+      "line_count": 219,
+      "function_count": 15,
+      "class_count": 2,
+      "import_count": 11,
+      "dependencies": [
+        "subprocess",
+        "tempfile",
+        "pathlib",
+        "typing",
+        "os",
+        "config_defaults",
+        "sandbox",
+        "re",
+        "shutil",
+        "time",
+        "httpx"
+      ],
+      "dependents": [
+        "automated_scheduler",
+        "controller",
+        "enhanced_executor"
+      ],
+      "last_modified": "2025-09-08 02:34:57.943083",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.752526"
+      },
+      "security_issues": [
+        "Use of potentially dangerous function: exec"
+      ],
+      "documentation_quality": 23.554794520547944
+    },
+    "git_manager": {
+      "name": "git_manager",
+      "path": "stillme_core\\git_manager.py",
+      "type": "core",
+      "size_bytes": 2249,
+      "line_count": 52,
+      "function_count": 5,
+      "class_count": 1,
+      "import_count": 3,
+      "dependencies": [
+        "git",
+        "logging",
+        "typing"
+      ],
+      "dependents": [
+        "git_manager"
+      ],
+      "last_modified": "2025-07-31 20:00:10.638330",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.755750"
+      },
+      "security_issues": [],
+      "documentation_quality": 23.384615384615383
+    },
+    "logging_utils": {
+      "name": "logging_utils",
+      "path": "stillme_core\\logging_utils.py",
+      "type": "core",
+      "size_bytes": 5300,
+      "line_count": 178,
+      "function_count": 10,
+      "class_count": 1,
+      "import_count": 5,
+      "dependencies": [
+        "json",
+        "os",
+        "datetime",
+        "pathlib",
+        "typing"
+      ],
+      "dependents": [
+        "api_provider_manager",
+        "automated_scheduler",
+        "content_integrity_filter",
+        "conversational_core_v1",
+        "daily_learning_manager",
+        "emotionsense_v1",
+        "ethical_core_system_v1",
+        "layered_memory_v1",
+        "market_intel",
+        "persona_morph",
+        "prediction_engine",
+        "secure_memory_manager",
+        "self_improvement_manager",
+        "stillme_core",
+        "token_optimizer_v1",
+        "controller",
+        "controller",
+        "ecosystem_discovery",
+        "enhanced_executor",
+        "error_recovery",
+        "git_manager",
+        "planner",
+        "provider_router",
+        "sandbox_manager",
+        "sul",
+        "supervisor",
+        "verifier",
+        "safe_attack_simulator",
+        "decision_engine",
+        "ethical_guardrails",
+        "quality_governor",
+        "risk_assessor",
+        "attack_simulator",
+        "security_scanner",
+        "experience_memory",
+        "ollama_client"
+      ],
+      "last_modified": "2025-09-06 14:37:07.364417",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.758494"
+      },
+      "security_issues": [
+        "Use of potentially dangerous function: exec"
+      ],
+      "documentation_quality": 41.84269662921348
+    },
+    "metrics": {
+      "name": "metrics",
+      "path": "stillme_core\\metrics.py",
+      "type": "core",
+      "size_bytes": 6889,
+      "line_count": 202,
+      "function_count": 14,
+      "class_count": 1,
+      "import_count": 5,
+      "dependencies": [
+        "json",
+        "os",
+        "datetime",
+        "pathlib",
+        "typing"
+      ],
+      "dependents": [
+        "emotionsense_v1",
+        "controller"
+      ],
+      "last_modified": "2025-09-06 14:40:49.847503",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.761566"
+      },
+      "security_issues": [
+        "Use of potentially dangerous function: exec"
+      ],
+      "documentation_quality": 43.38019801980198
+    },
+    "planner": {
+      "name": "planner",
+      "path": "stillme_core\\planner.py",
+      "type": "core",
+      "size_bytes": 21362,
+      "line_count": 545,
+      "function_count": 13,
+      "class_count": 1,
+      "import_count": 13,
+      "dependencies": [
+        "logging",
+        "json",
+        "re",
+        "hashlib",
+        "pathlib",
+        "typing",
+        "jsonschema",
+        "stillme_core.ai_plan_schema",
+        "stillme_core.ai_manager",
+        "stillme_core.plan_types",
+        "stillme_core.bug_memory",
+        "subprocess",
+        "time"
+      ],
+      "dependents": [
+        "controller"
+      ],
+      "last_modified": "2025-09-08 02:35:42.468477",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.770271"
+      },
+      "security_issues": [],
+      "documentation_quality": 45.24495412844037
+    },
+    "plan_types": {
+      "name": "plan_types",
+      "path": "stillme_core\\plan_types.py",
+      "type": "core",
+      "size_bytes": 1317,
+      "line_count": 45,
+      "function_count": 2,
+      "class_count": 1,
+      "import_count": 2,
+      "dependencies": [
+        "dataclasses",
+        "typing"
+      ],
+      "dependents": [
+        "ai_manager",
+        "controller",
+        "enhanced_executor"
+      ],
+      "last_modified": "2025-09-02 18:03:20.939627",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.772390"
+      },
+      "security_issues": [],
+      "documentation_quality": 20.2
+    },
+    "provider_router": {
+      "name": "provider_router",
+      "path": "stillme_core\\provider_router.py",
+      "type": "core",
+      "size_bytes": 5830,
+      "line_count": 162,
+      "function_count": 4,
+      "class_count": 1,
+      "import_count": 6,
+      "dependencies": [
+        "__future__",
+        "os",
+        "json",
+        "typing",
+        "httpx",
+        "logging"
+      ],
+      "dependents": [],
+      "last_modified": "2025-08-22 21:28:14.125910",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.777038"
+      },
+      "security_issues": [],
+      "documentation_quality": 22.451851851851853
+    },
+    "safe_runner": {
+      "name": "safe_runner",
+      "path": "stillme_core\\safe_runner.py",
+      "type": "core",
+      "size_bytes": 705,
+      "line_count": 19,
+      "function_count": 1,
+      "class_count": 1,
+      "import_count": 3,
+      "dependencies": [
+        "__future__",
+        "asyncio",
+        "typing"
+      ],
+      "dependents": [],
+      "last_modified": "2025-08-12 15:50:31.587194",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.777038"
+      },
+      "security_issues": [],
+      "documentation_quality": 48.09473684210526
+    },
+    "sandbox": {
+      "name": "sandbox",
+      "path": "stillme_core\\sandbox.py",
+      "type": "core",
+      "size_bytes": 703,
+      "line_count": 22,
+      "function_count": 2,
+      "class_count": 0,
+      "import_count": 5,
+      "dependencies": [
+        "os",
+        "shutil",
+        "pathlib",
+        "typing",
+        "subprocess"
+      ],
+      "dependents": [
+        "executor"
+      ],
+      "last_modified": "2025-09-02 18:03:20.955177",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.778600"
+      },
+      "security_issues": [],
+      "documentation_quality": 20.2
+    },
+    "sandbox_manager": {
+      "name": "sandbox_manager",
+      "path": "stillme_core\\sandbox_manager.py",
+      "type": "core",
+      "size_bytes": 6919,
+      "line_count": 127,
+      "function_count": 7,
+      "class_count": 1,
+      "import_count": 5,
+      "dependencies": [
+        "os",
+        "subprocess",
+        "logging",
+        "typing",
+        "stillme_core.ai_manager"
+      ],
+      "dependents": [],
+      "last_modified": "2025-08-03 13:15:46.544392",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.780915"
+      },
+      "security_issues": [
+        "Use of potentially dangerous function: exec"
+      ],
+      "documentation_quality": 28.18031496062992
+    },
+    "sul": {
+      "name": "sul",
+      "path": "stillme_core\\sul.py",
+      "type": "core",
+      "size_bytes": 8580,
+      "line_count": 249,
+      "function_count": 6,
+      "class_count": 2,
+      "import_count": 7,
+      "dependencies": [
+        "ast",
+        "importlib",
+        "json",
+        "logging",
+        "pathlib",
+        "typing",
+        "dataclasses"
+      ],
+      "dependents": [
+        "supervisor"
+      ],
+      "last_modified": "2025-09-06 15:07:59.877253",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.783928"
+      },
+      "security_issues": [],
+      "documentation_quality": 43.00963855421687
+    },
+    "supervisor": {
+      "name": "supervisor",
+      "path": "stillme_core\\supervisor.py",
+      "type": "core",
+      "size_bytes": 10678,
+      "line_count": 266,
+      "function_count": 8,
+      "class_count": 3,
+      "import_count": 7,
+      "dependencies": [
+        "json",
+        "logging",
+        "datetime",
+        "pathlib",
+        "typing",
+        "dataclasses",
+        "sul"
+      ],
+      "dependents": [],
+      "last_modified": "2025-09-06 15:08:06.377748",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.788388"
+      },
+      "security_issues": [],
+      "documentation_quality": 43.43157894736842
+    },
+    "supervisor_cli": {
+      "name": "supervisor_cli",
+      "path": "stillme_core\\supervisor_cli.py",
+      "type": "core",
+      "size_bytes": 3373,
+      "line_count": 84,
+      "function_count": 1,
+      "class_count": 0,
+      "import_count": 4,
+      "dependencies": [
+        "argparse",
+        "sys",
+        "pathlib",
+        "stillme_core.supervisor"
+      ],
+      "dependents": [],
+      "last_modified": "2025-09-06 15:08:01.819241",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.788388"
+      },
+      "security_issues": [],
+      "documentation_quality": 40.695238095238096
+    },
+    "ui_state": {
+      "name": "ui_state",
+      "path": "stillme_core\\ui_state.py",
+      "type": "core",
+      "size_bytes": 701,
+      "line_count": 26,
+      "function_count": 4,
+      "class_count": 0,
+      "import_count": 3,
+      "dependencies": [
+        "__future__",
+        "pathlib",
+        "json"
+      ],
+      "dependents": [],
+      "last_modified": "2025-09-05 08:23:35.838623",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.792408"
+      },
+      "security_issues": [],
+      "documentation_quality": 20.4
+    },
+    "verifier": {
+      "name": "verifier",
+      "path": "stillme_core\\verifier.py",
+      "type": "core",
+      "size_bytes": 12913,
+      "line_count": 346,
+      "function_count": 5,
+      "class_count": 1,
+      "import_count": 4,
+      "dependencies": [
+        "re",
+        "logging",
+        "typing",
+        "pathlib"
+      ],
+      "dependents": [
+        "controller"
+      ],
+      "last_modified": "2025-09-08 02:34:01.586187",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.793392"
+      },
+      "security_issues": [
+        "Use of potentially dangerous function: exec"
+      ],
+      "documentation_quality": 43.96820809248555
+    },
+    "__main__": {
+      "name": "__main__",
+      "path": "stillme_core\\__main__.py",
+      "type": "core",
+      "size_bytes": 4118,
+      "line_count": 131,
+      "function_count": 1,
+      "class_count": 0,
+      "import_count": 6,
+      "dependencies": [
+        "argparse",
+        "sys",
+        "time",
+        "typing",
+        "controller",
+        "traceback"
+      ],
+      "dependents": [
+        "agent_dev"
+      ],
+      "last_modified": "2025-09-06 14:02:18.253932",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.793392"
+      },
+      "security_issues": [
+        "Use of potentially dangerous function: exec"
+      ],
+      "documentation_quality": 42.390076335877865
+    },
+    "safe_attack_simulator": {
+      "name": "safe_attack_simulator",
+      "path": "stillme_core\\advanced_security\\safe_attack_simulator.py",
+      "type": "core",
+      "size_bytes": 41291,
+      "line_count": 999,
+      "function_count": 29,
+      "class_count": 7,
+      "import_count": 17,
+      "dependencies": [
+        "__future__",
+        "typing",
+        "asyncio",
+        "json",
+        "time",
+        "logging",
+        "uuid",
+        "hashlib",
+        "dataclasses",
+        "enum",
+        "pathlib",
+        "subprocess",
+        "tempfile",
+        "shutil",
+        "threading",
+        "queue",
+        "psutil"
+      ],
+      "dependents": [],
+      "last_modified": "2025-09-08 03:50:16.668468",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.810185"
+      },
+      "security_issues": [
+        "Use of potentially dangerous function: eval",
+        "Use of potentially dangerous function: exec",
+        "Potential SQL injection vulnerability"
+      ],
+      "documentation_quality": 46.7038038038038
+    },
+    "decision_engine": {
+      "name": "decision_engine",
+      "path": "stillme_core\\decision_making\\decision_engine.py",
+      "type": "core",
+      "size_bytes": 34361,
+      "line_count": 869,
+      "function_count": 37,
+      "class_count": 8,
+      "import_count": 11,
+      "dependencies": [
+        "__future__",
+        "typing",
+        "json",
+        "time",
+        "logging",
+        "dataclasses",
+        "enum",
+        "pathlib",
+        "hashlib",
+        "uuid",
+        "decision_engine"
+      ],
+      "dependents": [
+        "decision_engine"
+      ],
+      "last_modified": "2025-09-08 04:00:02.220429",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.822023"
+      },
+      "security_issues": [
+        "Use of potentially dangerous function: eval"
+      ],
+      "documentation_quality": 48.130379746835445
+    },
+    "ethical_guardrails": {
+      "name": "ethical_guardrails",
+      "path": "stillme_core\\decision_making\\ethical_guardrails.py",
+      "type": "core",
+      "size_bytes": 25016,
+      "line_count": 605,
+      "function_count": 20,
+      "class_count": 6,
+      "import_count": 9,
+      "dependencies": [
+        "__future__",
+        "typing",
+        "json",
+        "time",
+        "logging",
+        "dataclasses",
+        "enum",
+        "pathlib",
+        "hashlib"
+      ],
+      "dependents": [],
+      "last_modified": "2025-09-08 04:00:08.154952",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.826507"
+      },
+      "security_issues": [
+        "Use of potentially dangerous function: eval"
+      ],
+      "documentation_quality": 45.22314049586777
+    },
+    "quality_governor": {
+      "name": "quality_governor",
+      "path": "stillme_core\\quality\\quality_governor.py",
+      "type": "core",
+      "size_bytes": 26773,
+      "line_count": 653,
+      "function_count": 21,
+      "class_count": 5,
+      "import_count": 9,
+      "dependencies": [
+        "__future__",
+        "typing",
+        "ast",
+        "json",
+        "time",
+        "pathlib",
+        "dataclasses",
+        "enum",
+        "logging"
+      ],
+      "dependents": [],
+      "last_modified": "2025-09-08 03:20:53.054780",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.842717"
+      },
+      "security_issues": [],
+      "documentation_quality": 47.4833078101072
+    },
+    "risk_assessor": {
+      "name": "risk_assessor",
+      "path": "stillme_core\\risk\\risk_assessor.py",
+      "type": "core",
+      "size_bytes": 27313,
+      "line_count": 648,
+      "function_count": 20,
+      "class_count": 6,
+      "import_count": 10,
+      "dependencies": [
+        "__future__",
+        "typing",
+        "ast",
+        "json",
+        "time",
+        "pathlib",
+        "dataclasses",
+        "enum",
+        "logging",
+        "re"
+      ],
+      "dependents": [],
+      "last_modified": "2025-09-08 03:20:45.928820",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.851680"
+      },
+      "security_issues": [
+        "Potential hardcoded password",
+        "Use of potentially dangerous function: eval",
+        "Use of potentially dangerous function: exec",
+        "Potential SQL injection vulnerability"
+      ],
+      "documentation_quality": 44.46913580246914
+    },
+    "attack_simulator": {
+      "name": "attack_simulator",
+      "path": "stillme_core\\security\\attack_simulator.py",
+      "type": "core",
+      "size_bytes": 22953,
+      "line_count": 567,
+      "function_count": 6,
+      "class_count": 5,
+      "import_count": 12,
+      "dependencies": [
+        "__future__",
+        "typing",
+        "asyncio",
+        "aiohttp",
+        "json",
+        "time",
+        "random",
+        "string",
+        "pathlib",
+        "dataclasses",
+        "enum",
+        "logging"
+      ],
+      "dependents": [],
+      "last_modified": "2025-09-08 03:20:33.206608",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.860245"
+      },
+      "security_issues": [
+        "Potential hardcoded password",
+        "Use of potentially dangerous function: exec"
+      ],
+      "documentation_quality": 43.99276895943562
+    },
+    "security_scanner": {
+      "name": "security_scanner",
+      "path": "stillme_core\\security\\security_scanner.py",
+      "type": "core",
+      "size_bytes": 19352,
+      "line_count": 473,
+      "function_count": 12,
+      "class_count": 4,
+      "import_count": 11,
+      "dependencies": [
+        "__future__",
+        "typing",
+        "subprocess",
+        "json",
+        "os",
+        "re",
+        "time",
+        "pathlib",
+        "dataclasses",
+        "enum",
+        "logging"
+      ],
+      "dependents": [],
+      "last_modified": "2025-09-08 03:19:57.614319",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:01.997048"
+      },
+      "security_issues": [
+        "Potential hardcoded password",
+        "Use of potentially dangerous function: exec",
+        "Potential SQL injection vulnerability"
+      ],
+      "documentation_quality": 44.05412262156448
+    },
+    "experience_memory": {
+      "name": "experience_memory",
+      "path": "stillme_core\\self_learning\\experience_memory.py",
+      "type": "core",
+      "size_bytes": 33176,
+      "line_count": 835,
+      "function_count": 32,
+      "class_count": 6,
+      "import_count": 11,
+      "dependencies": [
+        "__future__",
+        "typing",
+        "json",
+        "time",
+        "logging",
+        "hashlib",
+        "dataclasses",
+        "enum",
+        "pathlib",
+        "sqlite3",
+        "collections"
+      ],
+      "dependents": [],
+      "last_modified": "2025-09-08 04:00:35.867740",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:02.012310"
+      },
+      "security_issues": [
+        "Use of potentially dangerous function: exec",
+        "Potential SQL injection vulnerability"
+      ],
+      "documentation_quality": 46.9125748502994
+    },
+    "gpt5_client": {
+      "name": "gpt5_client",
+      "path": "adapters\\gpt5_client.py",
+      "type": "extension",
+      "size_bytes": 2407,
+      "line_count": 62,
+      "function_count": 1,
+      "class_count": 1,
+      "import_count": 4,
+      "dependencies": [
+        "__future__",
+        "os",
+        "httpx",
+        "typing"
+      ],
+      "dependents": [],
+      "last_modified": "2025-08-12 15:49:24.546005",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:02.012310"
+      },
+      "security_issues": [
+        "Potential hardcoded API key"
+      ],
+      "documentation_quality": 41.91290322580645
+    },
+    "ollama_client": {
+      "name": "ollama_client",
+      "path": "clients\\ollama_client.py",
+      "type": "extension",
+      "size_bytes": 15138,
+      "line_count": 399,
+      "function_count": 12,
+      "class_count": 0,
+      "import_count": 10,
+      "dependencies": [
+        "os",
+        "json",
+        "time",
+        "logging",
+        "requests",
+        "httpx",
+        "threading",
+        "typing",
+        "modules.telemetry",
+        "modules.intelligent_router"
+      ],
+      "dependents": [
+        "api_provider_manager"
+      ],
+      "last_modified": "2025-09-07 22:44:18.957948",
+      "health_score": 100.0,
+      "performance_metrics": {
+        "import_time_ms": 0.0,
+        "memory_usage_kb": 0,
+        "cpu_usage_percent": 0,
+        "last_accessed": "2025-09-08T10:46:02.028959"
+      },
+      "security_issues": [
+        "Use of potentially dangerous function: eval"
+      ],
+      "documentation_quality": 44.83408521303258
+    }
+  },
+  "recommendations": [
+    "Address security issues in 30 modules",
+    "Improve documentation for 58 modules"
+  ]
+}
