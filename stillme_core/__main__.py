@@ -50,7 +50,7 @@ Examples:
     args = parser.parse_args()
     
     # Print header
-    print("🤖 AgentDev CLI")
+    print("AgentDev CLI")
     print("=" * 50)
     print(f"Goal: {args.goal}")
     print(f"Max steps: {args.max_steps}")
@@ -71,7 +71,7 @@ Examples:
         duration = time.time() - start_time
         
         # Print results
-        print("📊 RESULTS")
+        print("RESULTS")
         print("=" * 50)
         print(f"Summary: {result['summary']}")
         print(f"Pass rate: {result['pass_rate']:.1%}")
@@ -88,7 +88,7 @@ Examples:
             print("-" * 50)
             
             for step in result['steps']:
-                status = "✅ PASS" if step['exec_ok'] else "❌ FAIL"
+                status = "PASS" if step['exec_ok'] else "FAIL"
                 duration_str = f"{step['duration_s']:.2f}s"
                 description = step['desc'][:30] + "..." if len(step['desc']) > 30 else step['desc']
                 
@@ -99,7 +99,7 @@ Examples:
             # Print failed steps details if any
             failed_steps = [s for s in result['steps'] if not s['exec_ok']]
             if failed_steps:
-                print("❌ FAILED STEPS DETAILS")
+                print("FAILED STEPS DETAILS")
                 print("=" * 50)
                 for step in failed_steps:
                     print(f"Step {step['id']}: {step['desc']}")
@@ -109,17 +109,17 @@ Examples:
         
         # Exit with appropriate code
         if result['pass_rate'] == 1.0:
-            print("🎉 All steps passed!")
+            print("All steps passed!")
             sys.exit(0)
         elif result['pass_rate'] > 0:
-            print("⚠️  Some steps failed, but partial success")
+            print("Some steps failed, but partial success")
             sys.exit(1)
         else:
-            print("💥 All steps failed")
+            print("All steps failed")
             sys.exit(2)
             
     except Exception as e:
-        print(f"💥 AgentDev failed: {e}")
+        print(f"AgentDev failed: {e}")
         if args.verbose:
             import traceback
             traceback.print_exc()

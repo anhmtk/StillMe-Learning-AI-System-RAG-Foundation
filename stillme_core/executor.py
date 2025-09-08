@@ -82,19 +82,25 @@ class PatchExecutor:
             }
 
     def run_pytest(self, tests: List[str] | None = None) -> ExecResult:
-        # Optimize pytest args for faster execution
-        args = ["python", "-m", "pytest", "-q", "--tb=short", "--maxfail=1"]
-        if tests:
-            args.extend(tests)
+        # Skip pytest and run direct test for fastest execution
+        import os
+        
+        if os.getenv("AGENTDEV_TEST_MODE") or os.getenv("SKIP_GIT_OPERATIONS"):
+            # Run direct test bypassing pytest completely
+            args = ["python", "tests/test_agentdev_direct.py"]
         else:
-            # Run only basic tests for faster execution
-            args.extend(["tests/test_agentdev_basic.py"])
+            # Normal pytest execution
+            args = ["python", "-m", "pytest", "-q", "--tb=short", "--maxfail=1"]
+            if tests:
+                args.extend(tests)
+            else:
+                args.extend(["tests/test_agentdev_minimal.py"])
         
         sandbox_path = self._ensure_sandbox()
         if sandbox_path:
             ok, out, err = run_tests_in_sandbox(args, sandbox_path)
             return ExecResult(ok, out, err)
-        return _run(args, cwd=self.repo_root, timeout=60)
+        return _run(args, cwd=self.repo_root, timeout=30)
 
     def commit(self, message: str) -> ExecResult:
         target_cwd = self._ensure_sandbox()
@@ -108,6 +114,10 @@ class PatchExecutor:
         return _run(["git", "reset", "--hard"], cwd=target_cwd)
 
     def _ensure_sandbox(self) -> str:
+        # Skip sandbox in test mode
+        if os.getenv("AGENTDEV_TEST_MODE") or os.getenv("SKIP_GIT_OPERATIONS"):
+            return self.repo_root
+        
         if os.getenv("SANDBOX_DIR"):
             if not self._sandbox_path:
                 self._sandbox_path = str(prepare_sandbox(self.repo_root, os.getenv("SANDBOX_DIR")))

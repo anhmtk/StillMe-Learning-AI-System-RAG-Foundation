@@ -448,18 +448,28 @@ class AIManager:
         return context
     
     def _get_git_status(self) -> List[str]:
-        """Get git status information"""
+        """Get git status information with enhanced timeout handling"""
         try:
             import subprocess
+            import os
+            
+            # Skip git operations in test mode or if AGENTDEV_TEST_MODE is set
+            if os.getenv("AGENTDEV_TEST_MODE") or os.getenv("SKIP_GIT_OPERATIONS"):
+                return ["Git operations skipped in test mode"]
+            
+            # Try git status with very short timeout
             result = subprocess.run(
                 ["git", "status", "--porcelain"],
-                capture_output=True, text=True, timeout=5
+                capture_output=True, text=True, timeout=2
             )
             if result.returncode == 0:
                 return [line.strip() for line in result.stdout.splitlines() if line.strip()]
-        except Exception:
-            pass
-        return []
+            else:
+                return ["Git status failed - non-zero return code"]
+        except subprocess.TimeoutExpired:
+            return ["Git status timed out - skipping"]
+        except Exception as e:
+            return [f"Git status error: {str(e)}"]
     
     def _get_recent_files(self) -> List[str]:
         """Get recently modified files"""

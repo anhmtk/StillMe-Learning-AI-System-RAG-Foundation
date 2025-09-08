@@ -393,34 +393,40 @@ class Planner:
         try:
             logger.info(f"Building plan with max_items={max_items}")
 
-            # a) git status with better error handling
+            # a) git status with enhanced timeout handling
             try:
-                p = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, timeout=3)
-                if p.returncode == 0:
-                    for ln in p.stdout.splitlines():
-                        ln = ln.strip()
-                        if not ln:
-                            continue
-                        # format: ' M path' or '?? path'
-                        parts = ln.split()
-                        if len(parts) < 2:
-                            continue
-                        file_path = parts[-1]
-                        if file_path.endswith(".py") and not file_path.startswith("tests/"):
-                            test_guess = f"tests/test_{Path(file_path).stem}.py"
-                            items.append(PlanItem(
-                                id=f"GIT-{len(items)+1}",
-                                title=f"Review & fix {file_path}",
-                                action="edit_file",
-                                target=file_path,
-                                diff_hint="",
-                                tests_to_run=[test_guess],
-                                risk="medium",
-                            ))
-                            if len(items) >= max_items:
-                                return items
+                import os
+                
+                # Skip git operations in test mode
+                if os.getenv("AGENTDEV_TEST_MODE") or os.getenv("SKIP_GIT_OPERATIONS"):
+                    logger.info("Skipping git status in test mode")
                 else:
-                    logger.warning(f"Git status failed: {p.stderr}")
+                    p = subprocess.run(["git", "status", "--porcelain"], capture_output=True, text=True, timeout=2)
+                    if p.returncode == 0:
+                        for ln in p.stdout.splitlines():
+                            ln = ln.strip()
+                            if not ln:
+                                continue
+                            # format: ' M path' or '?? path'
+                            parts = ln.split()
+                            if len(parts) < 2:
+                                continue
+                            file_path = parts[-1]
+                            if file_path.endswith(".py") and not file_path.startswith("tests/"):
+                                test_guess = f"tests/test_{Path(file_path).stem}.py"
+                                items.append(PlanItem(
+                                    id=f"GIT-{len(items)+1}",
+                                    title=f"Review & fix {file_path}",
+                                    action="edit_file",
+                                    target=file_path,
+                                    diff_hint="",
+                                    tests_to_run=[test_guess],
+                                    risk="medium",
+                                ))
+                                if len(items) >= max_items:
+                                    return items
+                    else:
+                        logger.warning(f"Git status failed: {p.stderr}")
             except subprocess.TimeoutExpired:
                 logger.warning("Git status timed out")
             except Exception as e:

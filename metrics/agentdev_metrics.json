@@ -2103,16 +2103,240 @@
           ]
         }
       ]
+    },
+    {
+      "timestamp": "2025-09-09T00:29:44.054169",
+      "goal": "Test basic functionality",
+      "total_steps": 1,
+      "passed_steps": 0,
+      "failed_steps": 1,
+      "pass_rate": 0.0,
+      "total_duration_s": 82.041,
+      "steps_details": [
+        {
+          "id": 1,
+          "desc": "Run basic tests to verify system",
+          "action": "run_tests",
+          "exec_ok": false,
+          "stdout_tail": "TFORM_DIRS=1` and then run `jupyter --paths`.\n  The use of platformdirs will be the default in `jupyter_core` v6\n    from jupyter_core.paths import jupyter_data_dir, jupyter_runtime_dir, secure_write\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ===========================\nERROR tests/test_advanced_agentdev.py\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\n3 warnings, 1 error in 8.31s\n",
+          "duration_s": 82.04,
+          "verification": {
+            "success": false,
+            "reason": "Execution failed",
+            "details": {
+              "stdout": "\n=================================== ERRORS ====================================\n______________ ERROR collecting tests/test_advanced_agentdev.py _______________\nImportError while importing test module 'D:\\stillme_ai\\.sandbox\\tests\\test_advanced_agentdev.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\nC:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\importlib\\__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests\\test_advanced_agentdev.py:15: in <module>\n    from stillme_core.decision_making.decision_engine import (\nstillme_core\\decision_making\\__init__.py:7: in <module>\n    from .validation_framework import ValidationFramework, ValidationResult\nE   ModuleNotFoundError: No module named 'stillme_core.decision_making.validation_framework'\n------------------------------- Captured stdout -------------------------------\n\\u2705 API Provider Manager: Environment variables loaded from .env file\n============================== warnings summary ===============================\nC:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\interpreter\\core\\utils\\system_debug_info.py:4\n  C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\interpreter\\core\\utils\\system_debug_info.py:4: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.\n    import pkg_resources\n\nC:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pkg_resources\\__init__.py:3146\n  C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pkg_resources\\__init__.py:3146: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('google')`.\n  Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages\n    declare_namespace(pkg)\n\nC:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\jupyter_client\\connect.py:22\n  C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\jupyter_client\\connect.py:22: DeprecationWarning: Jupyter is migrating its paths to use standard platformdirs\n  given by the platformdirs library.  To remove this warning and\n  see the appropriate new directories, set the environment variable\n  `JUPYTER_PLATFORM_DIRS=1` and then run `jupyter --paths`.\n  The use of platformdirs will be the default in `jupyter_core` v6\n    from jupyter_core.paths import jupyter_data_dir, jupyter_runtime_dir, secure_write\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ===========================\nERROR tests/test_advanced_agentdev.py\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\n3 warnings, 1 error in 8.31s\n",
+              "stderr": "",
+              "error": "Unknown error"
+            }
+          },
+          "target": "tests/",
+          "tests_run": [
+            "tests/"
+          ]
+        }
+      ]
+    },
+    {
+      "timestamp": "2025-09-09T00:31:45.932407",
+      "goal": "Test basic functionality",
+      "total_steps": 1,
+      "passed_steps": 0,
+      "failed_steps": 1,
+      "pass_rate": 0.0,
+      "total_duration_s": 89.967,
+      "steps_details": [
+        {
+          "id": 1,
+          "desc": "Run basic tests to verify system",
+          "action": "run_tests",
+          "exec_ok": false,
+          "stdout_tail": "TFORM_DIRS=1` and then run `jupyter --paths`.\n  The use of platformdirs will be the default in `jupyter_core` v6\n    from jupyter_core.paths import jupyter_data_dir, jupyter_runtime_dir, secure_write\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ===========================\nERROR tests/test_advanced_agentdev.py\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\n3 warnings, 1 error in 8.57s\n",
+          "duration_s": 89.96,
+          "verification": {
+            "success": false,
+            "reason": "Execution failed",
+            "details": {
+              "stdout": "\n=================================== ERRORS ====================================\n______________ ERROR collecting tests/test_advanced_agentdev.py _______________\nImportError while importing test module 'D:\\stillme_ai\\.sandbox\\tests\\test_advanced_agentdev.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\nC:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\importlib\\__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests\\test_advanced_agentdev.py:15: in <module>\n    from stillme_core.decision_making.decision_engine import (\nstillme_core\\decision_making\\__init__.py:7: in <module>\n    from .validation_framework import ValidationFramework, ValidationResult\nE   ModuleNotFoundError: No module named 'stillme_core.decision_making.validation_framework'\n------------------------------- Captured stdout -------------------------------\n\\u2705 API Provider Manager: Environment variables loaded from .env file\n============================== warnings summary ===============================\nC:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\interpreter\\core\\utils\\system_debug_info.py:4\n  C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\interpreter\\core\\utils\\system_debug_info.py:4: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.\n    import pkg_resources\n\nC:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pkg_resources\\__init__.py:3146\n  C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pkg_resources\\__init__.py:3146: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('google')`.\n  Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages\n    declare_namespace(pkg)\n\nC:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\jupyter_client\\connect.py:22\n  C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\jupyter_client\\connect.py:22: DeprecationWarning: Jupyter is migrating its paths to use standard platformdirs\n  given by the platformdirs library.  To remove this warning and\n  see the appropriate new directories, set the environment variable\n  `JUPYTER_PLATFORM_DIRS=1` and then run `jupyter --paths`.\n  The use of platformdirs will be the default in `jupyter_core` v6\n    from jupyter_core.paths import jupyter_data_dir, jupyter_runtime_dir, secure_write\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ===========================\nERROR tests/test_advanced_agentdev.py\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\n3 warnings, 1 error in 8.57s\n",
+              "stderr": "",
+              "error": "Unknown error"
+            }
+          },
+          "target": "tests/",
+          "tests_run": [
+            "tests/"
+          ]
+        }
+      ]
+    },
+    {
+      "timestamp": "2025-09-09T00:33:37.781047",
+      "goal": "Test basic functionality",
+      "total_steps": 1,
+      "passed_steps": 0,
+      "failed_steps": 1,
+      "pass_rate": 0.0,
+      "total_duration_s": 65.216,
+      "steps_details": [
+        {
+          "id": 1,
+          "desc": "Run basic tests to verify system",
+          "action": "run_tests",
+          "exec_ok": false,
+          "stdout_tail": "TFORM_DIRS=1` and then run `jupyter --paths`.\n  The use of platformdirs will be the default in `jupyter_core` v6\n    from jupyter_core.paths import jupyter_data_dir, jupyter_runtime_dir, secure_write\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ===========================\nERROR tests/test_advanced_agentdev.py\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\n3 warnings, 1 error in 4.67s\n",
+          "duration_s": 65.22,
+          "verification": {
+            "success": false,
+            "reason": "Execution failed",
+            "details": {
+              "stdout": "\n=================================== ERRORS ====================================\n______________ ERROR collecting tests/test_advanced_agentdev.py _______________\nImportError while importing test module 'D:\\stillme_ai\\.sandbox\\tests\\test_advanced_agentdev.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\nC:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\importlib\\__init__.py:90: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests\\test_advanced_agentdev.py:15: in <module>\n    from stillme_core.decision_making.decision_engine import (\nstillme_core\\decision_making\\__init__.py:7: in <module>\n    from .validation_framework import ValidationFramework, ValidationResult\nE   ModuleNotFoundError: No module named 'stillme_core.decision_making.validation_framework'\n------------------------------- Captured stdout -------------------------------\n\\u2705 API Provider Manager: Environment variables loaded from .env file\n============================== warnings summary ===============================\nC:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\interpreter\\core\\utils\\system_debug_info.py:4\n  C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\interpreter\\core\\utils\\system_debug_info.py:4: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.\n    import pkg_resources\n\nC:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pkg_resources\\__init__.py:3146\n  C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\pkg_resources\\__init__.py:3146: DeprecationWarning: Deprecated call to `pkg_resources.declare_namespace('google')`.\n  Implementing implicit namespace packages (as specified in PEP 420) is preferred to `pkg_resources.declare_namespace`. See https://setuptools.pypa.io/en/latest/references/keywords.html#keyword-namespace-packages\n    declare_namespace(pkg)\n\nC:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\jupyter_client\\connect.py:22\n  C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\jupyter_client\\connect.py:22: DeprecationWarning: Jupyter is migrating its paths to use standard platformdirs\n  given by the platformdirs library.  To remove this warning and\n  see the appropriate new directories, set the environment variable\n  `JUPYTER_PLATFORM_DIRS=1` and then run `jupyter --paths`.\n  The use of platformdirs will be the default in `jupyter_core` v6\n    from jupyter_core.paths import jupyter_data_dir, jupyter_runtime_dir, secure_write\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n=========================== short test summary info ===========================\nERROR tests/test_advanced_agentdev.py\n!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 1 failures !!!!!!!!!!!!!!!!!!!!!!!!!!\n3 warnings, 1 error in 4.67s\n",
+              "stderr": "",
+              "error": "Unknown error"
+            }
+          },
+          "target": "tests/",
+          "tests_run": [
+            "tests/"
+          ]
+        }
+      ]
+    },
+    {
+      "timestamp": "2025-09-09T00:34:45.543477",
+      "goal": "Test basic functionality",
+      "total_steps": 1,
+      "passed_steps": 0,
+      "failed_steps": 1,
+      "pass_rate": 0.0,
+      "total_duration_s": 35.665,
+      "steps_details": [
+        {
+          "id": 1,
+          "desc": "Run basic tests to verify system",
+          "action": "run_tests",
+          "exec_ok": false,
+          "stdout_tail": "\n[('D:\\\\stillme_ai\\\\QUICK_REFERENCE.md', 'D:\\\\stillme_ai\\\\.sandbox\\\\QUICK_REFERENCE.md', '[WinError 2] The system cannot find the file specified')]",
+          "duration_s": 35.66,
+          "verification": {
+            "success": false,
+            "reason": "Execution failed",
+            "details": {
+              "stdout": "",
+              "stderr": "[('D:\\\\stillme_ai\\\\QUICK_REFERENCE.md', 'D:\\\\stillme_ai\\\\.sandbox\\\\QUICK_REFERENCE.md', '[WinError 2] The system cannot find the file specified')]",
+              "error": "[('D:\\\\stillme_ai\\\\QUICK_REFERENCE.md', 'D:\\\\stillme_ai\\\\.sandbox\\\\QUICK_REFERENCE.md', '[WinError 2] The system cannot find the file specified')]"
+            }
+          },
+          "target": "tests/",
+          "tests_run": []
+        }
+      ]
+    },
+    {
+      "timestamp": "2025-09-09T00:35:10.701862",
+      "goal": "Test basic functionality",
+      "total_steps": 1,
+      "passed_steps": 0,
+      "failed_steps": 1,
+      "pass_rate": 0.0,
+      "total_duration_s": 0.059,
+      "steps_details": [
+        {
+          "id": 1,
+          "desc": "Run basic tests to verify system",
+          "action": "run_tests",
+          "exec_ok": false,
+          "stdout_tail": "Running direct test...\nTest failed: 'charmap' codec can't encode character '\\u2713' in position 0: character maps to <undefined>\n",
+          "duration_s": 0.06,
+          "verification": {
+            "success": false,
+            "reason": "Execution failed",
+            "details": {
+              "stdout": "Running direct test...\nTest failed: 'charmap' codec can't encode character '\\u2713' in position 0: character maps to <undefined>\n",
+              "stderr": "",
+              "error": "Unknown error"
+            }
+          },
+          "target": "tests/",
+          "tests_run": [
+            "tests/"
+          ]
+        }
+      ]
+    },
+    {
+      "timestamp": "2025-09-09T00:35:29.028145",
+      "goal": "Test basic functionality",
+      "total_steps": 1,
+      "passed_steps": 1,
+      "failed_steps": 0,
+      "pass_rate": 1.0,
+      "total_duration_s": 0.056,
+      "steps_details": [
+        {
+          "id": 1,
+          "desc": "Run basic tests to verify system",
+          "action": "run_tests",
+          "exec_ok": true,
+          "stdout_tail": "Running direct test...\nBasic math test passed\nBasic string test passed\nBasic list test passed\nEnvironment variable test passed\nAll direct tests passed!\n",
+          "duration_s": 0.06,
+          "verification": {
+            "success": true,
+            "passed": true,
+            "reason": "Command executed without errors",
+            "details": {
+              "stdout": "Running direct test...\nBasic math test passed\nBasic string test passed\nBasic list test passed\nEnvironment variable test passed\nAll direct tests passed!\n",
+              "stderr": "",
+              "parsed_results": {}
+            }
+          },
+          "target": "tests/",
+          "tests_run": [
+            "tests/"
+          ]
+        }
+      ]
+    },
+    {
+      "timestamp": "2025-09-09T00:35:42.824284",
+      "goal": "Test multiple steps",
+      "total_steps": 1,
+      "passed_steps": 1,
+      "failed_steps": 0,
+      "pass_rate": 1.0,
+      "total_duration_s": 0.058,
+      "steps_details": [
+        {
+          "id": 1,
+          "desc": "Run basic tests to verify system",
+          "action": "run_tests",
+          "exec_ok": true,
+          "stdout_tail": "Running direct test...\nBasic math test passed\nBasic string test passed\nBasic list test passed\nEnvironment variable test passed\nAll direct tests passed!\n",
+          "duration_s": 0.06,
+          "verification": {
+            "success": true,
+            "passed": true,
+            "reason": "Command executed without errors",
+            "details": {
+              "stdout": "Running direct test...\nBasic math test passed\nBasic string test passed\nBasic list test passed\nEnvironment variable test passed\nAll direct tests passed!\n",
+              "stderr": "",
+              "parsed_results": {}
+            }
+          },
+          "target": "tests/",
+          "tests_run": [
+            "tests/"
+          ]
+        }
+      ]
     }
   ],
   "summary": {
-    "total_sessions": 44,
-    "total_steps": 84,
-    "total_passed": 12,
-    "total_failed": 72,
-    "overall_pass_rate": 0.143,
-    "avg_duration_s": 22.455,
-    "avg_steps_per_session": 1.909,
-    "last_updated": "2025-09-09T00:18:43.808921"
+    "total_sessions": 51,
+    "total_steps": 91,
+    "total_passed": 14,
+    "total_failed": 77,
+    "overall_pass_rate": 0.154,
+    "avg_duration_s": 24.727,
+    "avg_steps_per_session": 1.784,
+    "last_updated": "2025-09-09T00:35:42.832484"
   }
 }
