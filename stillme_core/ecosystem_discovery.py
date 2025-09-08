@@ -390,8 +390,13 @@ class StillMeEcosystemDiscovery:
             # Most/least connected
             if self.dependency_graph.number_of_nodes() > 0:
                 degree_centrality = nx.degree_centrality(self.dependency_graph)
-                metrics["most_connected_module"] = max(degree_centrality, key=degree_centrality.get)
-                metrics["least_connected_module"] = min(degree_centrality, key=degree_centrality.get)
+                # Fix type issues with max/min functions
+                if degree_centrality:
+                    metrics["most_connected_module"] = max(degree_centrality.keys(), key=lambda x: degree_centrality[x])
+                    metrics["least_connected_module"] = min(degree_centrality.keys(), key=lambda x: degree_centrality[x])
+                else:
+                    metrics["most_connected_module"] = None
+                    metrics["least_connected_module"] = None
                 metrics["graph_density"] = nx.density(self.dependency_graph)
                 metrics["centrality_measures"] = degree_centrality
         
@@ -525,7 +530,7 @@ class StillMeEcosystemDiscovery:
         
         return recommendations
     
-    def save_report(self, report: Dict[str, Any], filename: str = None):
+    def save_report(self, report: Dict[str, Any], filename: Optional[str] = None):
         """Lưu report ra file"""
         if filename is None:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
