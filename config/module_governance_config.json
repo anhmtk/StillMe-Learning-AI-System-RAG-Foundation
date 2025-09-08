@@ -1,0 +1,992 @@
+{
+  "api_provider_manager": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "automated_scheduler": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "communication_style_manager": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "content_integrity_filter": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "conversational_core_v1": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "daily_learning_manager": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "emotionsense_v1": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "ethical_core_system_v1": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "example_module": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "framework_metrics": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "input_sketcher": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "layered_memory_v1": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "market_intel": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "persona_morph": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "prediction_engine": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "secure_memory_manager": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "self_improvement_manager": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "stillme_core": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "telemetry": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "token_optimizer_v1": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "conversational_core": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "layered_memory": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "smart_g_p_t__a_p_i__manager": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "token_optimizer": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "agent_dev": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "agent_dev_bridge": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "ai_manager": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "ai_plan_schema": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "bug_memory": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "config": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "config_defaults": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "conscience_core_v1": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "controller": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "dependency_resolver": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "ecosystem_discovery": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "enhanced_executor": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "error_recovery": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "executor": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "git_manager": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "integration_bridge": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "logging_utils": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "memory_security_integration": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "metrics": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "module_governance_system": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "performance_optimizer": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "planner": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "plan_types": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "provider_router": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "safe_runner": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "sandbox": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "sandbox_manager": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "security_middleware": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "security_remediation": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "sul": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "supervisor": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "supervisor_cli": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "ui_state": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "verifier": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "safe_attack_simulator": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "decision_engine": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "ethical_guardrails": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "quality_governor": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "risk_assessor": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "attack_simulator": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "security_scanner": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  },
+  "experience_memory": {
+    "version": "1.0.0",
+    "enabled": true,
+    "auto_start": true,
+    "restart_on_failure": true,
+    "max_restart_attempts": 3,
+    "health_check_interval": 30,
+    "timeout_seconds": 60,
+    "resource_limits": {
+      "max_memory_mb": 512,
+      "max_cpu_percent": 80
+    },
+    "environment_variables": {},
+    "custom_settings": {}
+  }
+}
