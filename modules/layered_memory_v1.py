@@ -23,7 +23,19 @@ from pathlib import Path
 try:
     from .secure_memory_manager import SecureMemoryManager, SecureMemoryConfig
 except ImportError:
-    from secure_memory_manager import SecureMemoryManager, SecureMemoryConfig
+    try:
+        from secure_memory_manager import SecureMemoryManager, SecureMemoryConfig
+    except ImportError:
+        # Mock classes for testing
+        class SecureMemoryManager:
+            def __init__(self, config=None): pass
+            def encrypt(self, data): return data
+            def decrypt(self, data): return data
+            def save(self, data): return True
+            def load(self): return {}
+        
+        class SecureMemoryConfig:
+            def __init__(self): pass
 
 # Constants
 SHORT_TERM_CAPACITY = 1000

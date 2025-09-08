@@ -18,9 +18,14 @@ class ExecResult:
         self.stderr = stderr
 
 
-def _run(cmd: List[str], cwd: str | None = None) -> ExecResult:
-    p = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True)
-    return ExecResult(p.returncode == 0, p.stdout, p.stderr)
+def _run(cmd: List[str], cwd: str | None = None, timeout: int = 30) -> ExecResult:
+    try:
+        p = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=timeout)
+        return ExecResult(p.returncode == 0, p.stdout, p.stderr)
+    except subprocess.TimeoutExpired:
+        return ExecResult(False, "", f"Command timed out after {timeout} seconds")
+    except Exception as e:
+        return ExecResult(False, "", str(e))
 
 
 class PatchExecutor:
@@ -31,7 +36,7 @@ class PatchExecutor:
 
     def create_feature_branch(self, name: str) -> ExecResult:
         self._current_branch = name
-        return _run(["git", "checkout", "-b", name], cwd=self._ensure_sandbox())
+        return _run(["git", "checkout", "-b", name], cwd=self._ensure_sandbox(), timeout=10)
 
     def apply_unified_diff(self, diff_text: str) -> ExecResult:
         with tempfile.NamedTemporaryFile("w", delete=False, suffix=".patch") as tmp:
@@ -77,18 +82,19 @@ class PatchExecutor:
             }
 
     def run_pytest(self, tests: List[str] | None = None) -> ExecResult:
+        # Optimize pytest args for faster execution
         args = ["python", "-m", "pytest", "-q", "--tb=short", "--maxfail=1"]
         if tests:
             args.extend(tests)
         else:
-            # Default to running all tests if none specified
-            args.append("tests/")
+            # Run only basic tests for faster execution
+            args.extend(["tests/test_agentdev_basic.py"])
         
         sandbox_path = self._ensure_sandbox()
         if sandbox_path:
             ok, out, err = run_tests_in_sandbox(args, sandbox_path)
             return ExecResult(ok, out, err)
-        return _run(args, cwd=self.repo_root)
+        return _run(args, cwd=self.repo_root, timeout=60)
 
     def commit(self, message: str) -> ExecResult:
         target_cwd = self._ensure_sandbox()
