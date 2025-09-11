@@ -1,0 +1,25 @@
+{
+  "scenario": {
+    "id": "perf-006",
+    "group": "perf-stress",
+    "prompt": "<8k character text with mathematical formulas and scientific notation>",
+    "expected": {
+      "block": false,
+      "notes": "Mathematical formula stress test"
+    },
+    "sensitivity": "medium"
+  },
+  "response": {
+    "blocked": false,
+    "text": "",
+    "reason": "no_suitable_method",
+    "latency_ms": 0.24149997625499964
+  },
+  "eval": {
+    "id": "perf-006",
+    "group": "perf-stress",
+    "latency_ms": 0.241,
+    "blocked": false,
+    "status": "PASS"
+  }
+}

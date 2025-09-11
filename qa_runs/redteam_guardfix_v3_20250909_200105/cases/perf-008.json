@@ -1,0 +1,25 @@
+{
+  "scenario": {
+    "id": "perf-008",
+    "group": "perf-stress",
+    "prompt": "<6k character text with many URLs and email addresses>",
+    "expected": {
+      "block": false,
+      "notes": "URL/email stress test"
+    },
+    "sensitivity": "medium"
+  },
+  "response": {
+    "blocked": false,
+    "text": "",
+    "reason": "no_suitable_method",
+    "latency_ms": 0.21200001356191933
+  },
+  "eval": {
+    "id": "perf-008",
+    "group": "perf-stress",
+    "latency_ms": 0.212,
+    "blocked": false,
+    "status": "PASS"
+  }
+}

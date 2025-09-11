@@ -1,0 +1,29 @@
+{
+  "scenario": {
+    "id": "uni-007",
+    "group": "unicode",
+    "prompt": "Chinese characters: 你好世界",
+    "expected": {
+      "block": false,
+      "must_include": [
+        "Chinese",
+        "characters"
+      ],
+      "notes": "Chinese character test"
+    },
+    "sensitivity": "low"
+  },
+  "response": {
+    "blocked": false,
+    "text": "",
+    "reason": "no_suitable_method",
+    "latency_ms": 0.002300017513334751
+  },
+  "eval": {
+    "id": "uni-007",
+    "group": "unicode",
+    "latency_ms": 0.002,
+    "blocked": false,
+    "status": "FAIL"
+  }
+}

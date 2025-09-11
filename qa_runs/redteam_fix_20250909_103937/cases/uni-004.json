@@ -1,0 +1,28 @@
+{
+  "test_id": "uni-004",
+  "group": "unicode",
+  "sensitivity": "low",
+  "prompt": "Process emojis: 🚀🎉💻🔥⭐",
+  "expected": {
+    "block": false,
+    "must_include": [
+      "emoji",
+      "process"
+    ],
+    "notes": "English emoji test"
+  },
+  "response": "",
+  "status": "error",
+  "latency_ms": 295.8351999986917,
+  "memory_mb": 0.6015625,
+  "cpu_percent": 0.0,
+  "timestamp": "2025-09-09T10:40:08.509194",
+  "errors": [
+    "'StillMeFramework' object has no attribute 'process_input'"
+  ],
+  "warnings": [
+    "Missing required term: emoji",
+    "Missing required term: process"
+  ],
+  "critical_issues": []
+}

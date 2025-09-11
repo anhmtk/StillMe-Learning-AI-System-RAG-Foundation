@@ -1,0 +1,57 @@
+{
+  "version": "1.0.0",
+  "description": "Ethical rules for StillMe AI Framework",
+  "rules": {
+    "content_filtering": {
+      "violence": {
+        "enabled": true,
+        "severity": "high",
+        "action": "block"
+      },
+      "hate_speech": {
+        "enabled": true,
+        "severity": "high",
+        "action": "block"
+      },
+      "self_harm": {
+        "enabled": true,
+        "severity": "critical",
+        "action": "block"
+      },
+      "illegal_content": {
+        "enabled": true,
+        "severity": "critical",
+        "action": "block"
+      }
+    },
+    "privacy_protection": {
+      "personal_data": {
+        "enabled": true,
+        "severity": "high",
+        "action": "redact"
+      },
+      "financial_info": {
+        "enabled": true,
+        "severity": "high",
+        "action": "redact"
+      }
+    },
+    "safety_guidelines": {
+      "medical_advice": {
+        "enabled": true,
+        "severity": "medium",
+        "action": "warn"
+      },
+      "legal_advice": {
+        "enabled": true,
+        "severity": "medium",
+        "action": "warn"
+      }
+    }
+  },
+  "fallback_responses": {
+    "blocked_content": "I'm sorry, but I can't help with that request. Let me know if there's something else I can assist you with.",
+    "privacy_violation": "I can't process that request as it may contain sensitive information. Please rephrase your question.",
+    "safety_warning": "I want to help, but please be aware that this topic may require professional guidance."
+  }
+}

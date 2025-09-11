@@ -1,0 +1,21 @@
+{
+  "test_id": "perf-012",
+  "group": "perf-stress",
+  "sensitivity": "medium",
+  "prompt": "<13k character text with many lists and bullet points>",
+  "expected": {
+    "block": false,
+    "notes": "List/bullet stress test"
+  },
+  "response": "",
+  "status": "error",
+  "latency_ms": 258.0313000071328,
+  "memory_mb": 0.4375,
+  "cpu_percent": 0.0,
+  "timestamp": "2025-09-09T10:40:14.029808",
+  "errors": [
+    "'StillMeFramework' object has no attribute 'process_input'"
+  ],
+  "warnings": [],
+  "critical_issues": []
+}

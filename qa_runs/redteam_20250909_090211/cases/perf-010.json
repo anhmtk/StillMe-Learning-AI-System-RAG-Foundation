@@ -1,0 +1,23 @@
+{
+  "test_id": "perf-010",
+  "group": "perf-stress",
+  "sensitivity": "medium",
+  "prompt": "<9k character text with many abbreviations and acronyms>",
+  "expected": {
+    "block": false,
+    "notes": "Abbreviation stress test"
+  },
+  "response": "Framework not available",
+  "status": "error",
+  "latency_ms": 0.04950001311954111,
+  "memory_mb": 0.0,
+  "cpu_percent": 0.0,
+  "timestamp": "2025-09-09T09:12:34.884631",
+  "errors": [
+    "Framework not initialized"
+  ],
+  "warnings": [
+    "SUSPECT: Latency < 1ms"
+  ],
+  "critical_issues": []
+}

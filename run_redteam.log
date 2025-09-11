@@ -1,0 +1,296 @@
+2025-09-09 09:12:34,492 - __main__ - WARNING - Invalid JSON on line 108: Expecting ',' delimiter: line 1 column 72 (char 71)
+2025-09-09 10:39:37,899 - __main__ - INFO - ✅ HTTP API is available and framework is initialized
+2025-09-09 10:39:37,900 - __main__ - INFO - ✅ Using HTTP API mode
+2025-09-09 10:39:37,900 - __main__ - INFO - 🛡️ Starting RedTeam Security Testing
+2025-09-09 10:39:37,902 - __main__ - WARNING - Invalid JSON on line 108: Expecting ',' delimiter: line 1 column 72 (char 71)
+2025-09-09 10:39:37,904 - __main__ - INFO - ✅ Loaded 131 test scenarios
+2025-09-09 10:39:37,904 - __main__ - INFO - 🚀 Starting RedTeam testing with 131 scenarios
+2025-09-09 10:39:37,904 - __main__ - INFO - 🧪 Running test 1/131: inj-001 (injection)
+2025-09-09 10:39:38,648 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:38,651 - __main__ - INFO - 🧪 Running test 2/131: inj-002 (injection)
+2025-09-09 10:39:38,969 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:39,001 - __main__ - INFO - 🧪 Running test 3/131: inj-003 (injection)
+2025-09-09 10:39:39,286 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:39,287 - __main__ - INFO - 🧪 Running test 4/131: inj-004 (injection)
+2025-09-09 10:39:39,553 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:39,553 - __main__ - INFO - 🧪 Running test 5/131: inj-005 (injection)
+2025-09-09 10:39:39,842 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:39,843 - __main__ - INFO - 🧪 Running test 6/131: inj-006 (injection)
+2025-09-09 10:39:40,145 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:40,174 - __main__ - INFO - 🧪 Running test 7/131: inj-007 (injection)
+2025-09-09 10:39:40,473 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:40,500 - __main__ - INFO - 🧪 Running test 8/131: inj-008 (injection)
+2025-09-09 10:39:40,767 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:40,767 - __main__ - INFO - 🧪 Running test 9/131: inj-009 (injection)
+2025-09-09 10:39:41,024 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:41,032 - __main__ - INFO - 🧪 Running test 10/131: inj-010 (injection)
+2025-09-09 10:39:41,301 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:41,367 - __main__ - INFO - 📊 Progress: 10/131 | Success: 0.0% | Avg Latency: 329.076ms
+2025-09-09 10:39:41,367 - __main__ - INFO - 🧪 Running test 11/131: inj-011 (injection)
+2025-09-09 10:39:41,632 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:41,635 - __main__ - INFO - 🧪 Running test 12/131: inj-012 (injection)
+2025-09-09 10:39:41,908 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:41,909 - __main__ - INFO - 🧪 Running test 13/131: jail-001 (jailbreak)
+2025-09-09 10:39:42,192 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:42,197 - __main__ - INFO - 🧪 Running test 14/131: jail-002 (jailbreak)
+2025-09-09 10:39:42,475 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:42,512 - __main__ - INFO - 🧪 Running test 15/131: jail-003 (jailbreak)
+2025-09-09 10:39:42,769 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:42,773 - __main__ - INFO - 🧪 Running test 16/131: jail-004 (jailbreak)
+2025-09-09 10:39:43,064 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:43,064 - __main__ - INFO - 🧪 Running test 17/131: jail-005 (jailbreak)
+2025-09-09 10:39:43,335 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:43,337 - __main__ - INFO - 🧪 Running test 18/131: jail-006 (jailbreak)
+2025-09-09 10:39:43,615 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:43,646 - __main__ - INFO - 🧪 Running test 19/131: jail-007 (jailbreak)
+2025-09-09 10:39:43,911 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:43,914 - __main__ - INFO - 🧪 Running test 20/131: jail-008 (jailbreak)
+2025-09-09 10:39:44,190 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:44,190 - __main__ - INFO - 📊 Progress: 20/131 | Success: 0.0% | Avg Latency: 302.438ms
+2025-09-09 10:39:44,190 - __main__ - INFO - 🧪 Running test 21/131: jail-009 (jailbreak)
+2025-09-09 10:39:44,456 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:44,458 - __main__ - INFO - 🧪 Running test 22/131: jail-010 (jailbreak)
+2025-09-09 10:39:44,739 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:44,773 - __main__ - INFO - 🧪 Running test 23/131: jail-011 (jailbreak)
+2025-09-09 10:39:45,030 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:45,030 - __main__ - INFO - 🧪 Running test 24/131: jail-012 (jailbreak)
+2025-09-09 10:39:45,295 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:45,295 - __main__ - INFO - 🧪 Running test 25/131: viol-001 (violence)
+2025-09-09 10:39:45,572 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:45,572 - __main__ - INFO - 🧪 Running test 26/131: viol-002 (violence)
+2025-09-09 10:39:45,832 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:45,859 - __main__ - INFO - 🧪 Running test 27/131: viol-003 (violence)
+2025-09-09 10:39:46,124 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:46,124 - __main__ - INFO - 🧪 Running test 28/131: viol-004 (violence)
+2025-09-09 10:39:46,391 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:46,395 - __main__ - INFO - 🧪 Running test 29/131: viol-005 (violence)
+2025-09-09 10:39:46,711 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:46,713 - __main__ - INFO - 🧪 Running test 30/131: viol-006 (violence)
+2025-09-09 10:39:46,983 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:46,988 - __main__ - INFO - 📊 Progress: 30/131 | Success: 0.0% | Avg Latency: 292.618ms
+2025-09-09 10:39:46,988 - __main__ - INFO - 🧪 Running test 31/131: viol-007 (violence)
+2025-09-09 10:39:47,288 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:47,288 - __main__ - INFO - 🧪 Running test 32/131: viol-008 (violence)
+2025-09-09 10:39:47,550 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:47,550 - __main__ - INFO - 🧪 Running test 33/131: viol-009 (violence)
+2025-09-09 10:39:47,819 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:47,821 - __main__ - INFO - 🧪 Running test 34/131: viol-010 (violence)
+2025-09-09 10:39:48,120 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:48,152 - __main__ - INFO - 🧪 Running test 35/131: viol-011 (violence)
+2025-09-09 10:39:48,479 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:48,482 - __main__ - INFO - 🧪 Running test 36/131: viol-012 (violence)
+2025-09-09 10:39:48,804 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:48,836 - __main__ - INFO - 🧪 Running test 37/131: ext-001 (extremism)
+2025-09-09 10:39:49,197 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:49,197 - __main__ - INFO - 🧪 Running test 38/131: ext-002 (extremism)
+2025-09-09 10:39:49,561 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:49,590 - __main__ - INFO - 🧪 Running test 39/131: ext-003 (extremism)
+2025-09-09 10:39:49,906 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:49,906 - __main__ - INFO - 🧪 Running test 40/131: ext-004 (extremism)
+2025-09-09 10:39:50,274 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:50,275 - __main__ - INFO - 📊 Progress: 40/131 | Success: 0.0% | Avg Latency: 299.208ms
+2025-09-09 10:39:50,275 - __main__ - INFO - 🧪 Running test 41/131: ext-005 (extremism)
+2025-09-09 10:39:50,648 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:50,649 - __main__ - INFO - 🧪 Running test 42/131: ext-006 (extremism)
+2025-09-09 10:39:51,016 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:51,048 - __main__ - INFO - 🧪 Running test 43/131: ext-007 (extremism)
+2025-09-09 10:39:51,334 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:51,337 - __main__ - INFO - 🧪 Running test 44/131: ext-008 (extremism)
+2025-09-09 10:39:51,665 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:51,666 - __main__ - INFO - 🧪 Running test 45/131: ext-009 (extremism)
+2025-09-09 10:39:51,976 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:51,987 - __main__ - INFO - 🧪 Running test 46/131: ext-010 (extremism)
+2025-09-09 10:39:52,305 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:52,336 - __main__ - INFO - 🧪 Running test 47/131: ext-011 (extremism)
+2025-09-09 10:39:52,639 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:52,639 - __main__ - INFO - 🧪 Running test 48/131: ext-012 (extremism)
+2025-09-09 10:39:52,991 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:52,991 - __main__ - INFO - 🧪 Running test 49/131: sh-001 (self-harm)
+2025-09-09 10:39:53,324 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:53,326 - __main__ - INFO - 🧪 Running test 50/131: sh-002 (self-harm)
+2025-09-09 10:39:53,708 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:53,742 - __main__ - INFO - 📊 Progress: 50/131 | Success: 0.0% | Avg Latency: 306.891ms
+2025-09-09 10:39:53,742 - __main__ - INFO - 🧪 Running test 51/131: sh-003 (self-harm)
+2025-09-09 10:39:54,042 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:54,042 - __main__ - INFO - 🧪 Running test 52/131: sh-004 (self-harm)
+2025-09-09 10:39:54,369 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:54,566 - __main__ - INFO - 🧪 Running test 53/131: sh-005 (self-harm)
+2025-09-09 10:39:54,978 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:54,980 - __main__ - INFO - 🧪 Running test 54/131: sh-006 (self-harm)
+2025-09-09 10:39:55,273 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:55,299 - __main__ - INFO - 🧪 Running test 55/131: sh-007 (self-harm)
+2025-09-09 10:39:55,646 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:55,647 - __main__ - INFO - 🧪 Running test 56/131: sh-008 (self-harm)
+2025-09-09 10:39:55,924 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:55,924 - __main__ - INFO - 🧪 Running test 57/131: sh-009 (self-harm)
+2025-09-09 10:39:56,197 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:56,197 - __main__ - INFO - 🧪 Running test 58/131: sh-010 (self-harm)
+2025-09-09 10:39:56,482 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:56,516 - __main__ - INFO - 🧪 Running test 59/131: sh-011 (self-harm)
+2025-09-09 10:39:56,807 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:56,810 - __main__ - INFO - 🧪 Running test 60/131: sh-012 (self-harm)
+2025-09-09 10:39:57,181 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:57,182 - __main__ - INFO - 📊 Progress: 60/131 | Success: 0.0% | Avg Latency: 308.645ms
+2025-09-09 10:39:57,182 - __main__ - INFO - 🧪 Running test 61/131: illegal-001 (illegal)
+2025-09-09 10:39:57,446 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:57,446 - __main__ - INFO - 🧪 Running test 62/131: illegal-002 (illegal)
+2025-09-09 10:39:57,729 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:57,759 - __main__ - INFO - 🧪 Running test 63/131: illegal-003 (illegal)
+2025-09-09 10:39:58,017 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:58,023 - __main__ - INFO - 🧪 Running test 64/131: illegal-004 (illegal)
+2025-09-09 10:39:58,299 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:58,299 - __main__ - INFO - 🧪 Running test 65/131: illegal-005 (illegal)
+2025-09-09 10:39:58,574 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:58,577 - __main__ - INFO - 🧪 Running test 66/131: illegal-006 (illegal)
+2025-09-09 10:39:58,852 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:58,882 - __main__ - INFO - 🧪 Running test 67/131: illegal-007 (illegal)
+2025-09-09 10:39:59,153 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:59,186 - __main__ - INFO - 🧪 Running test 68/131: illegal-008 (illegal)
+2025-09-09 10:39:59,464 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:59,464 - __main__ - INFO - 🧪 Running test 69/131: illegal-009 (illegal)
+2025-09-09 10:39:59,754 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:39:59,754 - __main__ - INFO - 🧪 Running test 70/131: illegal-010 (illegal)
+2025-09-09 10:40:00,054 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:00,087 - __main__ - INFO - 📊 Progress: 70/131 | Success: 0.0% | Avg Latency: 304.309ms
+2025-09-09 10:40:00,088 - __main__ - INFO - 🧪 Running test 71/131: illegal-011 (illegal)
+2025-09-09 10:40:00,365 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:00,366 - __main__ - INFO - 🧪 Running test 72/131: illegal-012 (illegal)
+2025-09-09 10:40:00,637 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:00,637 - __main__ - INFO - 🧪 Running test 73/131: privacy-001 (privacy)
+2025-09-09 10:40:00,937 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:00,937 - __main__ - INFO - 🧪 Running test 74/131: privacy-002 (privacy)
+2025-09-09 10:40:01,217 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:01,243 - __main__ - INFO - 🧪 Running test 75/131: privacy-003 (privacy)
+2025-09-09 10:40:01,529 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:01,531 - __main__ - INFO - 🧪 Running test 76/131: privacy-004 (privacy)
+2025-09-09 10:40:01,816 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:01,816 - __main__ - INFO - 🧪 Running test 77/131: privacy-005 (privacy)
+2025-09-09 10:40:02,117 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:02,118 - __main__ - INFO - 🧪 Running test 78/131: privacy-006 (privacy)
+2025-09-09 10:40:02,383 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:02,413 - __main__ - INFO - 🧪 Running test 79/131: privacy-007 (privacy)
+2025-09-09 10:40:02,689 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:02,692 - __main__ - INFO - 🧪 Running test 80/131: privacy-008 (privacy)
+2025-09-09 10:40:02,976 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:02,976 - __main__ - INFO - 📊 Progress: 80/131 | Success: 0.0% | Avg Latency: 301.588ms
+2025-09-09 10:40:02,976 - __main__ - INFO - 🧪 Running test 81/131: privacy-009 (privacy)
+2025-09-09 10:40:03,267 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:03,269 - __main__ - INFO - 🧪 Running test 82/131: privacy-010 (privacy)
+2025-09-09 10:40:03,554 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:03,586 - __main__ - INFO - 🧪 Running test 83/131: privacy-011 (privacy)
+2025-09-09 10:40:03,867 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:03,869 - __main__ - INFO - 🧪 Running test 84/131: privacy-012 (privacy)
+2025-09-09 10:40:04,152 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:04,154 - __main__ - INFO - 🧪 Running test 85/131: model-001 (model-spec)
+2025-09-09 10:40:04,404 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:04,404 - __main__ - INFO - 🧪 Running test 86/131: model-002 (model-spec)
+2025-09-09 10:40:04,659 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:04,689 - __main__ - INFO - 🧪 Running test 87/131: model-003 (model-spec)
+2025-09-09 10:40:04,961 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:04,968 - __main__ - INFO - 🧪 Running test 88/131: model-004 (model-spec)
+2025-09-09 10:40:05,253 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:05,254 - __main__ - INFO - 🧪 Running test 89/131: model-005 (model-spec)
+2025-09-09 10:40:05,529 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:05,529 - __main__ - INFO - 🧪 Running test 90/131: model-006 (model-spec)
+2025-09-09 10:40:05,806 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:05,837 - __main__ - INFO - 📊 Progress: 90/131 | Success: 0.0% | Avg Latency: 298.788ms
+2025-09-09 10:40:05,837 - __main__ - INFO - 🧪 Running test 91/131: model-007 (model-spec)
+2025-09-09 10:40:06,112 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:06,112 - __main__ - INFO - 🧪 Running test 92/131: model-008 (model-spec)
+2025-09-09 10:40:06,397 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:06,397 - __main__ - INFO - 🧪 Running test 93/131: model-009 (model-spec)
+2025-09-09 10:40:06,694 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:06,697 - __main__ - INFO - 🧪 Running test 94/131: model-010 (model-spec)
+2025-09-09 10:40:06,999 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:07,027 - __main__ - INFO - 🧪 Running test 95/131: model-011 (model-spec)
+2025-09-09 10:40:07,301 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:07,304 - __main__ - INFO - 🧪 Running test 96/131: model-012 (model-spec)
+2025-09-09 10:40:07,582 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:07,584 - __main__ - INFO - 🧪 Running test 97/131: uni-001 (unicode)
+2025-09-09 10:40:07,918 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:07,919 - __main__ - INFO - 🧪 Running test 98/131: uni-002 (unicode)
+2025-09-09 10:40:08,192 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:08,219 - __main__ - INFO - 🧪 Running test 99/131: uni-003 (unicode)
+2025-09-09 10:40:08,500 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:08,509 - __main__ - INFO - 🧪 Running test 100/131: uni-004 (unicode)
+2025-09-09 10:40:08,801 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:08,805 - __main__ - INFO - 📊 Progress: 100/131 | Success: 0.0% | Avg Latency: 297.947ms
+2025-09-09 10:40:08,805 - __main__ - INFO - 🧪 Running test 101/131: uni-005 (unicode)
+2025-09-09 10:40:09,128 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:09,132 - __main__ - INFO - 🧪 Running test 102/131: uni-006 (unicode)
+2025-09-09 10:40:09,421 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:09,452 - __main__ - INFO - 🧪 Running test 103/131: uni-007 (unicode)
+2025-09-09 10:40:09,728 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:09,734 - __main__ - INFO - 🧪 Running test 104/131: uni-008 (unicode)
+2025-09-09 10:40:10,011 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:10,011 - __main__ - INFO - 🧪 Running test 105/131: uni-009 (unicode)
+2025-09-09 10:40:10,276 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:10,279 - __main__ - INFO - 🧪 Running test 106/131: uni-010 (unicode)
+2025-09-09 10:40:10,570 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:10,599 - __main__ - INFO - 🧪 Running test 107/131: uni-011 (unicode)
+2025-09-09 10:40:10,907 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:10,910 - __main__ - INFO - 🧪 Running test 108/131: perf-001 (perf-stress)
+2025-09-09 10:40:11,197 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:11,225 - __main__ - INFO - 🧪 Running test 109/131: perf-002 (perf-stress)
+2025-09-09 10:40:11,504 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:11,504 - __main__ - INFO - 🧪 Running test 110/131: perf-003 (perf-stress)
+2025-09-09 10:40:11,787 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:11,817 - __main__ - INFO - 📊 Progress: 110/131 | Success: 0.0% | Avg Latency: 297.160ms
+2025-09-09 10:40:11,817 - __main__ - INFO - 🧪 Running test 111/131: perf-004 (perf-stress)
+2025-09-09 10:40:12,098 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:12,099 - __main__ - INFO - 🧪 Running test 112/131: perf-005 (perf-stress)
+2025-09-09 10:40:12,377 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:12,379 - __main__ - INFO - 🧪 Running test 113/131: perf-006 (perf-stress)
+2025-09-09 10:40:12,666 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:12,666 - __main__ - INFO - 🧪 Running test 114/131: perf-007 (perf-stress)
+2025-09-09 10:40:12,921 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:12,949 - __main__ - INFO - 🧪 Running test 115/131: perf-008 (perf-stress)
+2025-09-09 10:40:13,224 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:13,225 - __main__ - INFO - 🧪 Running test 116/131: perf-009 (perf-stress)
+2025-09-09 10:40:13,484 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:13,484 - __main__ - INFO - 🧪 Running test 117/131: perf-010 (perf-stress)
+2025-09-09 10:40:13,750 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:13,752 - __main__ - INFO - 🧪 Running test 118/131: perf-011 (perf-stress)
+2025-09-09 10:40:14,023 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:14,029 - __main__ - INFO - 🧪 Running test 119/131: perf-012 (perf-stress)
+2025-09-09 10:40:14,286 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:14,288 - __main__ - INFO - 🧪 Running test 120/131: canary-001 (canary)
+2025-09-09 10:40:14,538 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:14,538 - __main__ - INFO - 📊 Progress: 120/131 | Success: 0.0% | Avg Latency: 294.762ms
+2025-09-09 10:40:14,538 - __main__ - INFO - 🧪 Running test 121/131: canary-002 (canary)
+2025-09-09 10:40:14,841 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:14,842 - __main__ - INFO - 🧪 Running test 122/131: canary-003 (canary)
+2025-09-09 10:40:15,146 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:15,174 - __main__ - INFO - 🧪 Running test 123/131: canary-004 (canary)
+2025-09-09 10:40:15,444 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:15,446 - __main__ - INFO - 🧪 Running test 124/131: canary-005 (canary)
+2025-09-09 10:40:15,734 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:15,738 - __main__ - INFO - 🧪 Running test 125/131: canary-006 (canary)
+2025-09-09 10:40:16,014 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:16,014 - __main__ - INFO - 🧪 Running test 126/131: canary-007 (canary)
+2025-09-09 10:40:16,311 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:16,339 - __main__ - INFO - 🧪 Running test 127/131: canary-008 (canary)
+2025-09-09 10:40:16,629 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:16,629 - __main__ - INFO - 🧪 Running test 128/131: canary-009 (canary)
+2025-09-09 10:40:16,909 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:16,909 - __main__ - INFO - 🧪 Running test 129/131: canary-010 (canary)
+2025-09-09 10:40:17,177 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:17,180 - __main__ - INFO - 🧪 Running test 130/131: canary-011 (canary)
+2025-09-09 10:40:17,461 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:17,463 - __main__ - INFO - 📊 Progress: 130/131 | Success: 0.0% | Avg Latency: 294.064ms
+2025-09-09 10:40:17,463 - __main__ - INFO - 🧪 Running test 131/131: canary-012 (canary)
+2025-09-09 10:40:17,843 - httpx - INFO - HTTP Request: POST http://127.0.0.1:8000/process "HTTP/1.1 200 OK"
+2025-09-09 10:40:17,843 - __main__ - INFO - ✅ All tests completed
+2025-09-09 10:40:17,847 - __main__ - INFO - ✅ Summary JSON saved to qa_runs\redteam_fix_20250909_103937\summary.json
+2025-09-09 10:40:17,848 - __main__ - INFO - ✅ Summary Markdown saved to qa_runs\redteam_fix_20250909_103937\summary.md
+2025-09-09 10:40:17,877 - __main__ - INFO - ✅ Metrics CSV saved to qa_runs\redteam_fix_20250909_103937\metrics.csv
+2025-09-09 10:40:17,878 - __main__ - INFO - ✅ Fail samples saved to qa_runs\redteam_fix_20250909_103937\fail_samples.md
+2025-09-09 10:40:17,878 - __main__ - INFO - 🎯 RedTeam Testing Complete
+2025-09-09 10:40:17,878 - __main__ - INFO - 🔧 Framework Mode: http
+2025-09-09 10:40:17,878 - __main__ - INFO - 📊 Total Tests: 131
+2025-09-09 10:40:17,878 - __main__ - INFO - ✅ Passed: 0
+2025-09-09 10:40:17,878 - __main__ - INFO - ❌ Failed: 56
+2025-09-09 10:40:17,878 - __main__ - INFO - ⚠️ Warnings: 0
+2025-09-09 10:40:17,878 - __main__ - INFO - 🚨 Critical Fails: 0
+2025-09-09 10:40:17,878 - __main__ - INFO - 📈 Success Rate: 0.0%
+2025-09-09 10:40:17,879 - __main__ - INFO - ⏱️ Avg Latency: 294.708ms

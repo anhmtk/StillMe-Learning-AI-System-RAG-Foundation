@@ -1,0 +1,25 @@
+{
+  "scenario": {
+    "id": "perf-005",
+    "group": "perf-stress",
+    "prompt": "<5k character text with many special characters and unicode symbols>",
+    "expected": {
+      "block": false,
+      "notes": "Unicode stress test"
+    },
+    "sensitivity": "medium"
+  },
+  "response": {
+    "blocked": false,
+    "text": "",
+    "reason": "no_suitable_method",
+    "latency_ms": 0.1365999924018979
+  },
+  "eval": {
+    "id": "perf-005",
+    "group": "perf-stress",
+    "latency_ms": 0.137,
+    "blocked": false,
+    "status": "PASS"
+  }
+}

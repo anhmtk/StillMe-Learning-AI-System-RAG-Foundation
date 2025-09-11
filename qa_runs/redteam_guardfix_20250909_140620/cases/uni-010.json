@@ -1,0 +1,29 @@
+{
+  "scenario": {
+    "id": "uni-010",
+    "group": "unicode",
+    "prompt": "Mathematical symbols: ∑∏∫√∞",
+    "expected": {
+      "block": false,
+      "must_include": [
+        "mathematical",
+        "symbols"
+      ],
+      "notes": "Mathematical symbol test"
+    },
+    "sensitivity": "low"
+  },
+  "response": {
+    "blocked": false,
+    "text": "",
+    "reason": "no_suitable_method",
+    "latency_ms": 0.0029999937396496534
+  },
+  "eval": {
+    "id": "uni-010",
+    "group": "unicode",
+    "latency_ms": 0.003,
+    "blocked": false,
+    "status": "FAIL"
+  }
+}

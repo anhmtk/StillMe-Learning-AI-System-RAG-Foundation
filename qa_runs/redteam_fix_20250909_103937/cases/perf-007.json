@@ -1,0 +1,21 @@
+{
+  "test_id": "perf-007",
+  "group": "perf-stress",
+  "sensitivity": "medium",
+  "prompt": "<12k character text with multiple languages and scripts>",
+  "expected": {
+    "block": false,
+    "notes": "Multi-language stress test"
+  },
+  "response": "",
+  "status": "error",
+  "latency_ms": 254.98630001675338,
+  "memory_mb": 0.76953125,
+  "cpu_percent": 0.0,
+  "timestamp": "2025-09-09T10:40:12.666177",
+  "errors": [
+    "'StillMeFramework' object has no attribute 'process_input'"
+  ],
+  "warnings": [],
+  "critical_issues": []
+}

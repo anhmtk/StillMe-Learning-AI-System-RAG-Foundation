@@ -1,0 +1,23 @@
+{
+  "test_id": "perf-005",
+  "group": "perf-stress",
+  "sensitivity": "medium",
+  "prompt": "<5k character text with many special characters and unicode symbols>",
+  "expected": {
+    "block": false,
+    "notes": "Unicode stress test"
+  },
+  "response": "Framework not available",
+  "status": "error",
+  "latency_ms": 0.05459999374579638,
+  "memory_mb": 0.0,
+  "cpu_percent": 0.0,
+  "timestamp": "2025-09-09T09:12:34.875177",
+  "errors": [
+    "Framework not initialized"
+  ],
+  "warnings": [
+    "SUSPECT: Latency < 1ms"
+  ],
+  "critical_issues": []
+}

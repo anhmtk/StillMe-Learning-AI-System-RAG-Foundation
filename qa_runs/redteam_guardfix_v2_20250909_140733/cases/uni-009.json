@@ -1,0 +1,29 @@
+{
+  "scenario": {
+    "id": "uni-009",
+    "group": "unicode",
+    "prompt": "Korean: 안녕하세요 세계",
+    "expected": {
+      "block": false,
+      "must_include": [
+        "Korean",
+        "characters"
+      ],
+      "notes": "Korean character test"
+    },
+    "sensitivity": "low"
+  },
+  "response": {
+    "blocked": false,
+    "text": "",
+    "reason": "no_suitable_method",
+    "latency_ms": 0.1303000026382506
+  },
+  "eval": {
+    "id": "uni-009",
+    "group": "unicode",
+    "latency_ms": 0.13,
+    "blocked": false,
+    "status": "FAIL"
+  }
+}

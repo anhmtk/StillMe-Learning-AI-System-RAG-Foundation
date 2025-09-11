@@ -1,0 +1,1370 @@
+{
+  "analysis_timestamp": "2025-09-10T00:03:05.304781",
+  "total_apis": 17,
+  "apis": [
+    {
+      "api_id": "59d88a1d-a876-48f4-953f-548e3b1c118e",
+      "name": "OpenAI API",
+      "provider": "OpenAI",
+      "category": "ai_services",
+      "description": "Advanced AI models for text generation, completion, and analysis",
+      "base_url": "https://api.openai.com/v1",
+      "endpoints": [
+        {
+          "endpoint_id": "feaec5c6-8f39-4708-92df-e4f6165c85ad",
+          "name": "Chat Completion",
+          "url": "/chat/completions",
+          "method": "POST",
+          "description": "Generate chat completions using GPT models",
+          "parameters": [],
+          "response_format": "JSON",
+          "rate_limit": null,
+          "authentication_required": true
+        },
+        {
+          "endpoint_id": "02f89d4f-049b-46d5-b951-d599c3c7df3e",
+          "name": "Text Completion",
+          "url": "/completions",
+          "method": "POST",
+          "description": "Generate text completions",
+          "parameters": [],
+          "response_format": "JSON",
+          "rate_limit": null,
+          "authentication_required": true
+        }
+      ],
+      "authentication_method": "Bearer Token",
+      "security_level": "high",
+      "integration_complexity": "moderate",
+      "documentation_quality": 0.9,
+      "priority_score": 0.9,
+      "business_value": 0.95,
+      "urgency_level": 0.8,
+      "cost_estimate": "Pay-per-token",
+      "compliance_requirements": [
+        "GDPR",
+        "SOC 2"
+      ],
+      "risks": [
+        "API rate limiting",
+        "Service availability",
+        "Data privacy concerns",
+        "Cost overruns",
+        "Authentication vulnerabilities",
+        "Data exposure risk"
+      ],
+      "benefits": [
+        "Enhanced AI capabilities",
+        "Cost-effective AI processing",
+        "Scalable AI solutions"
+      ]
+    },
+    {
+      "api_id": "d1280726-925b-4c5e-baad-aae04179a15d",
+      "name": "DeepSeek API",
+      "provider": "DeepSeek",
+      "category": "ai_services",
+      "description": "Cost-effective AI models for various tasks",
+      "base_url": "https://api.deepseek.com/v1",
+      "endpoints": [
+        {
+          "endpoint_id": "6a11ffae-98c4-47cf-ba42-faff92959639",
+          "name": "Chat Completion",
+          "url": "/chat/completions",
+          "method": "POST",
+          "description": "Generate chat completions",
+          "parameters": [],
+          "response_format": "JSON",
+          "rate_limit": null,
+          "authentication_required": true
+        }
+      ],
+      "authentication_method": "Bearer Token",
+      "security_level": "medium",
+      "integration_complexity": "simple",
+      "documentation_quality": 0.7,
+      "priority_score": 0.7,
+      "business_value": 0.8,
+      "urgency_level": 0.6,
+      "cost_estimate": "Pay-per-token (lower cost)",
+      "compliance_requirements": [
+        "GDPR"
+      ],
+      "risks": [
+        "API rate limiting",
+        "Service availability",
+        "Data privacy concerns",
+        "Cost overruns"
+      ],
+      "benefits": [
+        "Enhanced AI capabilities",
+        "Cost-effective AI processing",
+        "Scalable AI solutions"
+      ]
+    },
+    {
+      "api_id": "6449605f-c601-4ee2-abd9-19eb60a45a4e",
+      "name": "Anthropic Claude API",
+      "provider": "Anthropic",
+      "category": "ai_services",
+      "description": "Advanced AI assistant with strong safety features",
+      "base_url": "https://api.anthropic.com/v1",
+      "endpoints": [
+        {
+          "endpoint_id": "cfd699ad-e3a3-4c4f-aeee-75f3a736f6fb",
+          "name": "Message Completion",
+          "url": "/messages",
+          "method": "POST",
+          "description": "Generate message completions",
+          "parameters": [],
+          "response_format": "JSON",
+          "rate_limit": null,
+          "authentication_required": true
+        }
+      ],
+      "authentication_method": "API Key",
+      "security_level": "high",
+      "integration_complexity": "moderate",
+      "documentation_quality": 0.8,
+      "priority_score": 0.8,
+      "business_value": 0.9,
+      "urgency_level": 0.7,
+      "cost_estimate": "Pay-per-token",
+      "compliance_requirements": [
+        "GDPR",
+        "SOC 2"
+      ],
+      "risks": [
+        "API rate limiting",
+        "Service availability",
+        "Data privacy concerns",
+        "Cost overruns",
+        "Authentication vulnerabilities",
+        "Data exposure risk"
+      ],
+      "benefits": [
+        "Enhanced AI capabilities",
+        "Cost-effective AI processing",
+        "Scalable AI solutions"
+      ]
+    },
+    {
+      "api_id": "ef968148-00aa-4def-98b6-8015a1278d10",
+      "name": "Google Analytics API",
+      "provider": "Google",
+      "category": "data_services",
+      "description": "Access Google Analytics data and reports",
+      "base_url": "https://analyticsreporting.googleapis.com/v4",
+      "endpoints": [
+        {
+          "endpoint_id": "607be724-414d-408b-99c8-da912ccab999",
+          "name": "Reports",
+          "url": "/reports:batchGet",
+          "method": "POST",
+          "description": "Get analytics reports",
+          "parameters": [],
+          "response_format": "JSON",
+          "rate_limit": null,
+          "authentication_required": true
+        }
+      ],
+      "authentication_method": "OAuth 2.0",
+      "security_level": "high",
+      "integration_complexity": "complex",
+      "documentation_quality": 0.8,
+      "priority_score": 0.6,
+      "business_value": 0.7,
+      "urgency_level": 0.5,
+      "cost_estimate": "Free with quotas",
+      "compliance_requirements": [
+        "GDPR",
+        "CCPA"
+      ],
+      "risks": [
+        "API rate limiting",
+        "Service availability",
+        "Data privacy concerns",
+        "Cost overruns",
+        "Authentication vulnerabilities",
+        "Data exposure risk"
+      ],
+      "benefits": [
+        "Rich data insights",
+        "Real-time data access",
+        "Data analytics capabilities"
+      ]
+    },
+    {
+      "api_id": "0736e4aa-2d81-481a-979b-74b7dcc42671",
+      "name": "Weather API",
+      "provider": "OpenWeatherMap",
+      "category": "data_services",
+      "description": "Weather data and forecasts",
+      "base_url": "https://api.openweathermap.org/data/2.5",
+      "endpoints": [
+        {
+          "endpoint_id": "60cd850c-c178-48ff-be04-77372707a660",
+          "name": "Current Weather",
+          "url": "/weather",
+          "method": "GET",
+          "description": "Get current weather data",
+          "parameters": [],
+          "response_format": "JSON",
+          "rate_limit": null,
+          "authentication_required": true
+        }
+      ],
+      "authentication_method": "API Key",
+      "security_level": "low",
+      "integration_complexity": "simple",
+      "documentation_quality": 0.6,
+      "priority_score": 0.3,
+      "business_value": 0.4,
+      "urgency_level": 0.2,
+      "cost_estimate": "Free tier available",
+      "compliance_requirements": [],
+      "risks": [
+        "API rate limiting",
+        "Service availability",
+        "Data privacy concerns",
+        "Cost overruns"
+      ],
+      "benefits": [
+        "Rich data insights",
+        "Real-time data access",
+        "Data analytics capabilities"
+      ]
+    },
+    {
+      "api_id": "10c7ead7-286a-4eb8-a23a-87b65b0b9ecd",
+      "name": "Twilio API",
+      "provider": "Twilio",
+      "category": "communication",
+      "description": "SMS, voice, and messaging services",
+      "base_url": "https://api.twilio.com/2010-04-01",
+      "endpoints": [
+        {
+          "endpoint_id": "65a2c3b8-7d33-405e-8774-0217c2ea3fae",
+          "name": "Send SMS",
+          "url": "/Accounts/{AccountSid}/Messages.json",
+          "method": "POST",
+          "description": "Send SMS messages",
+          "parameters": [],
+          "response_format": "JSON",
+          "rate_limit": null,
+          "authentication_required": true
+        }
+      ],
+      "authentication_method": "Basic Auth",
+      "security_level": "high",
+      "integration_complexity": "moderate",
+      "documentation_quality": 0.9,
+      "priority_score": 0.5,
+      "business_value": 0.6,
+      "urgency_level": 0.4,
+      "cost_estimate": "Pay-per-message",
+      "compliance_requirements": [
+        "GDPR",
+        "SOC 2",
+        "HIPAA"
+      ],
+      "risks": [
+        "API rate limiting",
+        "Service availability",
+        "Data privacy concerns",
+        "Cost overruns",
+        "Authentication vulnerabilities",
+        "Data exposure risk"
+      ],
+      "benefits": [
+        "Multi-channel communication",
+        "Automated messaging",
+        "User engagement"
+      ]
+    },
+    {
+      "api_id": "c6fbd624-fe20-43a3-a730-1260d6675483",
+      "name": "SendGrid API",
+      "provider": "SendGrid",
+      "category": "communication",
+      "description": "Email delivery service",
+      "base_url": "https://api.sendgrid.com/v3",
+      "endpoints": [
+        {
+          "endpoint_id": "f43cc3c3-d600-4f52-8f61-f95cc8b09aaf",
+          "name": "Send Email",
+          "url": "/mail/send",
+          "method": "POST",
+          "description": "Send emails",
+          "parameters": [],
+          "response_format": "JSON",
+          "rate_limit": null,
+          "authentication_required": true
+        }
+      ],
+      "authentication_method": "Bearer Token",
+      "security_level": "medium",
+      "integration_complexity": "simple",
+      "documentation_quality": 0.8,
+      "priority_score": 0.4,
+      "business_value": 0.5,
+      "urgency_level": 0.3,
+      "cost_estimate": "Pay-per-email",
+      "compliance_requirements": [
+        "GDPR",
+        "SOC 2"
+      ],
+      "risks": [
+        "API rate limiting",
+        "Service availability",
+        "Data privacy concerns",
+        "Cost overruns"
+      ],
+      "benefits": [
+        "Multi-channel communication",
+        "Automated messaging",
+        "User engagement"
+      ]
+    },
+    {
+      "api_id": "5cf1384c-38a2-42f0-aff7-fb14a5c19ffb",
+      "name": "AWS S3 API",
+      "provider": "Amazon Web Services",
+      "category": "storage",
+      "description": "Object storage service",
+      "base_url": "https://s3.amazonaws.com",
+      "endpoints": [
+        {
+          "endpoint_id": "94a582e7-1c41-467e-938c-2a320b0760db",
+          "name": "Put Object",
+          "url": "/{bucket}/{key}",
+          "method": "PUT",
+          "description": "Upload objects to S3",
+          "parameters": [],
+          "response_format": "JSON",
+          "rate_limit": null,
+          "authentication_required": true
+        }
+      ],
+      "authentication_method": "AWS Signature",
+      "security_level": "critical",
+      "integration_complexity": "complex",
+      "documentation_quality": 0.9,
+      "priority_score": 0.7,
+      "business_value": 0.8,
+      "urgency_level": 0.6,
+      "cost_estimate": "Pay-per-storage and requests",
+      "compliance_requirements": [
+        "GDPR",
+        "SOC 2",
+        "HIPAA",
+        "PCI DSS"
+      ],
+      "risks": [
+        "API rate limiting",
+        "Service availability",
+        "Data privacy concerns",
+        "Cost overruns",
+        "Security breach risk",
+        "Compliance violations",
+        "Data loss risk"
+      ],
+      "benefits": [
+        "Scalable storage",
+        "Data backup and recovery",
+        "File sharing capabilities"
+      ]
+    },
+    {
+      "api_id": "06a2c572-cd8e-470c-9c1e-347d00630891",
+      "name": "Google Drive API",
+      "provider": "Google",
+      "category": "storage",
+      "description": "File storage and sharing",
+      "base_url": "https://www.googleapis.com/drive/v3",
+      "endpoints": [
+        {
+          "endpoint_id": "9547d3a2-c41e-4677-8b52-15eff07220fc",
+          "name": "Files",
+          "url": "/files",
+          "method": "GET",
+          "description": "List and manage files",
+          "parameters": [],
+          "response_format": "JSON",
+          "rate_limit": null,
+          "authentication_required": true
+        }
+      ],
+      "authentication_method": "OAuth 2.0",
+      "security_level": "high",
+      "integration_complexity": "moderate",
+      "documentation_quality": 0.8,
+      "priority_score": 0.5,
+      "business_value": 0.6,
+      "urgency_level": 0.4,
+      "cost_estimate": "Free with quotas",
+      "compliance_requirements": [
+        "GDPR",
+        "SOC 2"
+      ],
+      "risks": [
+        "API rate limiting",
+        "Service availability",
+        "Data privacy concerns",
+        "Cost overruns",
+        "Authentication vulnerabilities",
+        "Data exposure risk"
+      ],
+      "benefits": [
+        "Scalable storage",
+        "Data backup and recovery",
+        "File sharing capabilities"
+      ]
+    },
+    {
+      "api_id": "fe4f35d7-7a48-4a35-b121-ec5b7f904d59",
+      "name": "Auth0 API",
+      "provider": "Auth0",
+      "category": "authentication",
+      "description": "Identity and access management",
+      "base_url": "https://{domain}.auth0.com/api/v2",
+      "endpoints": [
+        {
+          "endpoint_id": "cba2c46b-54af-41ac-a4b6-a5621d45c124",
+          "name": "Users",
+          "url": "/users",
+          "method": "GET",
+          "description": "Manage user accounts",
+          "parameters": [],
+          "response_format": "JSON",
+          "rate_limit": null,
+          "authentication_required": true
+        }
+      ],
+      "authentication_method": "Bearer Token",
+      "security_level": "critical",
+      "integration_complexity": "complex",
+      "documentation_quality": 0.9,
+      "priority_score": 0.8,
+      "business_value": 0.9,
+      "urgency_level": 0.7,
+      "cost_estimate": "Subscription-based",
+      "compliance_requirements": [
+        "GDPR",
+        "SOC 2",
+        "HIPAA"
+      ],
+      "risks": [
+        "API rate limiting",
+        "Service availability",
+        "Data privacy concerns",
+        "Cost overruns",
+        "Security breach risk",
+        "Compliance violations",
+        "Data loss risk"
+      ],
+      "benefits": [
+        "Secure user management",
+        "SSO capabilities",
+        "Identity verification"
+      ]
+    },
+    {
+      "api_id": "4966b030-3d79-4c14-8a9e-3a62250e8b81",
+      "name": "Firebase Auth API",
+      "provider": "Google",
+      "category": "authentication",
+      "description": "Authentication service",
+      "base_url": "https://identitytoolkit.googleapis.com/v1",
+      "endpoints": [
+        {
+          "endpoint_id": "a662d773-5923-4880-9658-aa322964eabf",
+          "name": "Sign In",
+          "url": "/accounts:signInWithPassword",
+          "method": "POST",
+          "description": "User authentication",
+          "parameters": [],
+          "response_format": "JSON",
+          "rate_limit": null,
+          "authentication_required": true
+        }
+      ],
+      "authentication_method": "API Key",
+      "security_level": "high",
+      "integration_complexity": "moderate",
+      "documentation_quality": 0.8,
+      "priority_score": 0.6,
+      "business_value": 0.7,
+      "urgency_level": 0.5,
+      "cost_estimate": "Free with quotas",
+      "compliance_requirements": [
+        "GDPR",
+        "SOC 2"
+      ],
+      "risks": [
+        "API rate limiting",
+        "Service availability",
+        "Data privacy concerns",
+        "Cost overruns",
+        "Authentication vulnerabilities",
+        "Data exposure risk"
+      ],
+      "benefits": [
+        "Secure user management",
+        "SSO capabilities",
+        "Identity verification"
+      ]
+    },
+    {
+      "api_id": "3de76196-32bc-4877-9e60-d3a0a22cfb90",
+      "name": "Datadog API",
+      "provider": "Datadog",
+      "category": "monitoring",
+      "description": "Application monitoring and analytics",
+      "base_url": "https://api.datadoghq.com/api/v1",
+      "endpoints": [
+        {
+          "endpoint_id": "eb31bc5e-9c43-4401-9269-6268c4435845",
+          "name": "Metrics",
+          "url": "/series",
+          "method": "POST",
+          "description": "Send metrics data",
+          "parameters": [],
+          "response_format": "JSON",
+          "rate_limit": null,
+          "authentication_required": true
+        }
+      ],
+      "authentication_method": "API Key + App Key",
+      "security_level": "high",
+      "integration_complexity": "moderate",
+      "documentation_quality": 0.8,
+      "priority_score": 0.6,
+      "business_value": 0.7,
+      "urgency_level": 0.5,
+      "cost_estimate": "Subscription-based",
+      "compliance_requirements": [
+        "GDPR",
+        "SOC 2"
+      ],
+      "risks": [
+        "API rate limiting",
+        "Service availability",
+        "Data privacy concerns",
+        "Cost overruns",
+        "Authentication vulnerabilities",
+        "Data exposure risk"
+      ],
+      "benefits": [
+        "Application monitoring",
+        "Performance insights",
+        "Proactive issue detection"
+      ]
+    },
+    {
+      "api_id": "d79de386-99c3-404d-b4c3-0e601870ca87",
+      "name": "New Relic API",
+      "provider": "New Relic",
+      "category": "monitoring",
+      "description": "Application performance monitoring",
+      "base_url": "https://api.newrelic.com/v2",
+      "endpoints": [
+        {
+          "endpoint_id": "2cde5085-4b5e-4d26-b2ad-5e07192941ee",
+          "name": "Applications",
+          "url": "/applications.json",
+          "method": "GET",
+          "description": "Get application data",
+          "parameters": [],
+          "response_format": "JSON",
+          "rate_limit": null,
+          "authentication_required": true
+        }
+      ],
+      "authentication_method": "API Key",
+      "security_level": "medium",
+      "integration_complexity": "moderate",
+      "documentation_quality": 0.7,
+      "priority_score": 0.5,
+      "business_value": 0.6,
+      "urgency_level": 0.4,
+      "cost_estimate": "Subscription-based",
+      "compliance_requirements": [
+        "GDPR",
+        "SOC 2"
+      ],
+      "risks": [
+        "API rate limiting",
+        "Service availability",
+        "Data privacy concerns",
+        "Cost overruns"
+      ],
+      "benefits": [
+        "Application monitoring",
+        "Performance insights",
+        "Proactive issue detection"
+      ]
+    },
+    {
+      "api_id": "374e8c6b-a49d-4dab-a440-75076a0832ca",
+      "name": "Stripe API",
+      "provider": "Stripe",
+      "category": "payment",
+      "description": "Payment processing service",
+      "base_url": "https://api.stripe.com/v1",
+      "endpoints": [
+        {
+          "endpoint_id": "735e9651-fb9c-4468-9090-f505e2cad00c",
+          "name": "Create Payment Intent",
+          "url": "/payment_intents",
+          "method": "POST",
+          "description": "Create payment intents",
+          "parameters": [],
+          "response_format": "JSON",
+          "rate_limit": null,
+          "authentication_required": true
+        }
+      ],
+      "authentication_method": "Bearer Token",
+      "security_level": "critical",
+      "integration_complexity": "complex",
+      "documentation_quality": 0.9,
+      "priority_score": 0.7,
+      "business_value": 0.8,
+      "urgency_level": 0.6,
+      "cost_estimate": "Transaction-based fees",
+      "compliance_requirements": [
+        "PCI DSS",
+        "GDPR",
+        "SOC 2"
+      ],
+      "risks": [
+        "API rate limiting",
+        "Service availability",
+        "Data privacy concerns",
+        "Cost overruns",
+        "Security breach risk",
+        "Compliance violations",
+        "Data loss risk"
+      ],
+      "benefits": [
+        "Payment processing",
+        "Financial transactions",
+        "Revenue generation"
+      ]
+    },
+    {
+      "api_id": "8f131d95-908c-45bd-8045-35ba415d502c",
+      "name": "PayPal API",
+      "provider": "PayPal",
+      "category": "payment",
+      "description": "Payment and money transfer service",
+      "base_url": "https://api.paypal.com/v1",
+      "endpoints": [
+        {
+          "endpoint_id": "304309e8-f7eb-4381-b5c5-f275669dddfa",
+          "name": "Create Order",
+          "url": "/checkout/orders",
+          "method": "POST",
+          "description": "Create payment orders",
+          "parameters": [],
+          "response_format": "JSON",
+          "rate_limit": null,
+          "authentication_required": true
+        }
+      ],
+      "authentication_method": "OAuth 2.0",
+      "security_level": "critical",
+      "integration_complexity": "very_complex",
+      "documentation_quality": 0.8,
+      "priority_score": 0.6,
+      "business_value": 0.7,
+      "urgency_level": 0.5,
+      "cost_estimate": "Transaction-based fees",
+      "compliance_requirements": [
+        "PCI DSS",
+        "GDPR",
+        "SOC 2"
+      ],
+      "risks": [
+        "API rate limiting",
+        "Service availability",
+        "Data privacy concerns",
+        "Cost overruns",
+        "Security breach risk",
+        "Compliance violations",
+        "Data loss risk"
+      ],
+      "benefits": [
+        "Payment processing",
+        "Financial transactions",
+        "Revenue generation"
+      ]
+    },
+    {
+      "api_id": "bd9fef08-043e-4035-b5be-4b572577351e",
+      "name": "Zapier API",
+      "provider": "Zapier",
+      "category": "integration",
+      "description": "Workflow automation platform",
+      "base_url": "https://api.zapier.com/v1",
+      "endpoints": [
+        {
+          "endpoint_id": "778219b1-d062-44a8-a2c8-627ab0150a37",
+          "name": "Triggers",
+          "url": "/triggers",
+          "method": "GET",
+          "description": "List available triggers",
+          "parameters": [],
+          "response_format": "JSON",
+          "rate_limit": null,
+          "authentication_required": true
+        }
+      ],
+      "authentication_method": "API Key",
+      "security_level": "medium",
+      "integration_complexity": "simple",
+      "documentation_quality": 0.7,
+      "priority_score": 0.5,
+      "business_value": 0.6,
+      "urgency_level": 0.4,
+      "cost_estimate": "Subscription-based",
+      "compliance_requirements": [
+        "GDPR",
+        "SOC 2"
+      ],
+      "risks": [
+        "API rate limiting",
+        "Service availability",
+        "Data privacy concerns",
+        "Cost overruns"
+      ],
+      "benefits": [
+        "Workflow automation",
+        "System integration",
+        "Process optimization"
+      ]
+    },
+    {
+      "api_id": "140e0549-d4f7-4614-be57-1af89f7d0c8c",
+      "name": "IFTTT API",
+      "provider": "IFTTT",
+      "category": "integration",
+      "description": "If This Then That automation service",
+      "base_url": "https://ifttt.com/api/v1",
+      "endpoints": [
+        {
+          "endpoint_id": "6eedf67f-ec42-4444-ad09-2c16ec126a99",
+          "name": "Applets",
+          "url": "/applets",
+          "method": "GET",
+          "description": "List applets",
+          "parameters": [],
+          "response_format": "JSON",
+          "rate_limit": null,
+          "authentication_required": true
+        }
+      ],
+      "authentication_method": "API Key",
+      "security_level": "low",
+      "integration_complexity": "simple",
+      "documentation_quality": 0.6,
+      "priority_score": 0.3,
+      "business_value": 0.4,
+      "urgency_level": 0.2,
+      "cost_estimate": "Free with limitations",
+      "compliance_requirements": [
+        "GDPR"
+      ],
+      "risks": [
+        "API rate limiting",
+        "Service availability",
+        "Data privacy concerns",
+        "Cost overruns"
+      ],
+      "benefits": [
+        "Workflow automation",
+        "System integration",
+        "Process optimization"
+      ]
+    }
+  ],
+  "analysis_results": {
+    "high_priority_apis": [
+      "OpenAI API",
+      "DeepSeek API",
+      "Anthropic Claude API",
+      "AWS S3 API",
+      "Auth0 API",
+      "Stripe API"
+    ],
+    "medium_priority_apis": [
+      "Google Analytics API",
+      "Twilio API",
+      "SendGrid API",
+      "Google Drive API",
+      "Firebase Auth API",
+      "Datadog API",
+      "New Relic API",
+      "PayPal API",
+      "Zapier API"
+    ],
+    "low_priority_apis": [
+      "Weather API",
+      "IFTTT API"
+    ],
+    "security_analysis": {
+      "OpenAI API": {
+        "level": "high",
+        "risks": [
+          "API rate limiting",
+          "Service availability",
+          "Data privacy concerns",
+          "Cost overruns",
+          "Authentication vulnerabilities",
+          "Data exposure risk"
+        ],
+        "compliance": [
+          "GDPR",
+          "SOC 2"
+        ]
+      },
+      "DeepSeek API": {
+        "level": "medium",
+        "risks": [
+          "API rate limiting",
+          "Service availability",
+          "Data privacy concerns",
+          "Cost overruns"
+        ],
+        "compliance": [
+          "GDPR"
+        ]
+      },
+      "Anthropic Claude API": {
+        "level": "high",
+        "risks": [
+          "API rate limiting",
+          "Service availability",
+          "Data privacy concerns",
+          "Cost overruns",
+          "Authentication vulnerabilities",
+          "Data exposure risk"
+        ],
+        "compliance": [
+          "GDPR",
+          "SOC 2"
+        ]
+      },
+      "Google Analytics API": {
+        "level": "high",
+        "risks": [
+          "API rate limiting",
+          "Service availability",
+          "Data privacy concerns",
+          "Cost overruns",
+          "Authentication vulnerabilities",
+          "Data exposure risk"
+        ],
+        "compliance": [
+          "GDPR",
+          "CCPA"
+        ]
+      },
+      "Weather API": {
+        "level": "low",
+        "risks": [
+          "API rate limiting",
+          "Service availability",
+          "Data privacy concerns",
+          "Cost overruns"
+        ],
+        "compliance": []
+      },
+      "Twilio API": {
+        "level": "high",
+        "risks": [
+          "API rate limiting",
+          "Service availability",
+          "Data privacy concerns",
+          "Cost overruns",
+          "Authentication vulnerabilities",
+          "Data exposure risk"
+        ],
+        "compliance": [
+          "GDPR",
+          "SOC 2",
+          "HIPAA"
+        ]
+      },
+      "SendGrid API": {
+        "level": "medium",
+        "risks": [
+          "API rate limiting",
+          "Service availability",
+          "Data privacy concerns",
+          "Cost overruns"
+        ],
+        "compliance": [
+          "GDPR",
+          "SOC 2"
+        ]
+      },
+      "AWS S3 API": {
+        "level": "critical",
+        "risks": [
+          "API rate limiting",
+          "Service availability",
+          "Data privacy concerns",
+          "Cost overruns",
+          "Security breach risk",
+          "Compliance violations",
+          "Data loss risk"
+        ],
+        "compliance": [
+          "GDPR",
+          "SOC 2",
+          "HIPAA",
+          "PCI DSS"
+        ]
+      },
+      "Google Drive API": {
+        "level": "high",
+        "risks": [
+          "API rate limiting",
+          "Service availability",
+          "Data privacy concerns",
+          "Cost overruns",
+          "Authentication vulnerabilities",
+          "Data exposure risk"
+        ],
+        "compliance": [
+          "GDPR",
+          "SOC 2"
+        ]
+      },
+      "Auth0 API": {
+        "level": "critical",
+        "risks": [
+          "API rate limiting",
+          "Service availability",
+          "Data privacy concerns",
+          "Cost overruns",
+          "Security breach risk",
+          "Compliance violations",
+          "Data loss risk"
+        ],
+        "compliance": [
+          "GDPR",
+          "SOC 2",
+          "HIPAA"
+        ]
+      },
+      "Firebase Auth API": {
+        "level": "high",
+        "risks": [
+          "API rate limiting",
+          "Service availability",
+          "Data privacy concerns",
+          "Cost overruns",
+          "Authentication vulnerabilities",
+          "Data exposure risk"
+        ],
+        "compliance": [
+          "GDPR",
+          "SOC 2"
+        ]
+      },
+      "Datadog API": {
+        "level": "high",
+        "risks": [
+          "API rate limiting",
+          "Service availability",
+          "Data privacy concerns",
+          "Cost overruns",
+          "Authentication vulnerabilities",
+          "Data exposure risk"
+        ],
+        "compliance": [
+          "GDPR",
+          "SOC 2"
+        ]
+      },
+      "New Relic API": {
+        "level": "medium",
+        "risks": [
+          "API rate limiting",
+          "Service availability",
+          "Data privacy concerns",
+          "Cost overruns"
+        ],
+        "compliance": [
+          "GDPR",
+          "SOC 2"
+        ]
+      },
+      "Stripe API": {
+        "level": "critical",
+        "risks": [
+          "API rate limiting",
+          "Service availability",
+          "Data privacy concerns",
+          "Cost overruns",
+          "Security breach risk",
+          "Compliance violations",
+          "Data loss risk"
+        ],
+        "compliance": [
+          "PCI DSS",
+          "GDPR",
+          "SOC 2"
+        ]
+      },
+      "PayPal API": {
+        "level": "critical",
+        "risks": [
+          "API rate limiting",
+          "Service availability",
+          "Data privacy concerns",
+          "Cost overruns",
+          "Security breach risk",
+          "Compliance violations",
+          "Data loss risk"
+        ],
+        "compliance": [
+          "PCI DSS",
+          "GDPR",
+          "SOC 2"
+        ]
+      },
+      "Zapier API": {
+        "level": "medium",
+        "risks": [
+          "API rate limiting",
+          "Service availability",
+          "Data privacy concerns",
+          "Cost overruns"
+        ],
+        "compliance": [
+          "GDPR",
+          "SOC 2"
+        ]
+      },
+      "IFTTT API": {
+        "level": "low",
+        "risks": [
+          "API rate limiting",
+          "Service availability",
+          "Data privacy concerns",
+          "Cost overruns"
+        ],
+        "compliance": [
+          "GDPR"
+        ]
+      }
+    },
+    "complexity_analysis": {
+      "OpenAI API": {
+        "level": "moderate",
+        "authentication": "Bearer Token",
+        "endpoints_count": 2
+      },
+      "DeepSeek API": {
+        "level": "simple",
+        "authentication": "Bearer Token",
+        "endpoints_count": 1
+      },
+      "Anthropic Claude API": {
+        "level": "moderate",
+        "authentication": "API Key",
+        "endpoints_count": 1
+      },
+      "Google Analytics API": {
+        "level": "complex",
+        "authentication": "OAuth 2.0",
+        "endpoints_count": 1
+      },
+      "Weather API": {
+        "level": "simple",
+        "authentication": "API Key",
+        "endpoints_count": 1
+      },
+      "Twilio API": {
+        "level": "moderate",
+        "authentication": "Basic Auth",
+        "endpoints_count": 1
+      },
+      "SendGrid API": {
+        "level": "simple",
+        "authentication": "Bearer Token",
+        "endpoints_count": 1
+      },
+      "AWS S3 API": {
+        "level": "complex",
+        "authentication": "AWS Signature",
+        "endpoints_count": 1
+      },
+      "Google Drive API": {
+        "level": "moderate",
+        "authentication": "OAuth 2.0",
+        "endpoints_count": 1
+      },
+      "Auth0 API": {
+        "level": "complex",
+        "authentication": "Bearer Token",
+        "endpoints_count": 1
+      },
+      "Firebase Auth API": {
+        "level": "moderate",
+        "authentication": "API Key",
+        "endpoints_count": 1
+      },
+      "Datadog API": {
+        "level": "moderate",
+        "authentication": "API Key + App Key",
+        "endpoints_count": 1
+      },
+      "New Relic API": {
+        "level": "moderate",
+        "authentication": "API Key",
+        "endpoints_count": 1
+      },
+      "Stripe API": {
+        "level": "complex",
+        "authentication": "Bearer Token",
+        "endpoints_count": 1
+      },
+      "PayPal API": {
+        "level": "very_complex",
+        "authentication": "OAuth 2.0",
+        "endpoints_count": 1
+      },
+      "Zapier API": {
+        "level": "simple",
+        "authentication": "API Key",
+        "endpoints_count": 1
+      },
+      "IFTTT API": {
+        "level": "simple",
+        "authentication": "API Key",
+        "endpoints_count": 1
+      }
+    },
+    "cost_analysis": {
+      "OpenAI API": {
+        "estimate": "Pay-per-token",
+        "business_value": 0.95,
+        "urgency": 0.8
+      },
+      "DeepSeek API": {
+        "estimate": "Pay-per-token (lower cost)",
+        "business_value": 0.8,
+        "urgency": 0.6
+      },
+      "Anthropic Claude API": {
+        "estimate": "Pay-per-token",
+        "business_value": 0.9,
+        "urgency": 0.7
+      },
+      "Google Analytics API": {
+        "estimate": "Free with quotas",
+        "business_value": 0.7,
+        "urgency": 0.5
+      },
+      "Weather API": {
+        "estimate": "Free tier available",
+        "business_value": 0.4,
+        "urgency": 0.2
+      },
+      "Twilio API": {
+        "estimate": "Pay-per-message",
+        "business_value": 0.6,
+        "urgency": 0.4
+      },
+      "SendGrid API": {
+        "estimate": "Pay-per-email",
+        "business_value": 0.5,
+        "urgency": 0.3
+      },
+      "AWS S3 API": {
+        "estimate": "Pay-per-storage and requests",
+        "business_value": 0.8,
+        "urgency": 0.6
+      },
+      "Google Drive API": {
+        "estimate": "Free with quotas",
+        "business_value": 0.6,
+        "urgency": 0.4
+      },
+      "Auth0 API": {
+        "estimate": "Subscription-based",
+        "business_value": 0.9,
+        "urgency": 0.7
+      },
+      "Firebase Auth API": {
+        "estimate": "Free with quotas",
+        "business_value": 0.7,
+        "urgency": 0.5
+      },
+      "Datadog API": {
+        "estimate": "Subscription-based",
+        "business_value": 0.7,
+        "urgency": 0.5
+      },
+      "New Relic API": {
+        "estimate": "Subscription-based",
+        "business_value": 0.6,
+        "urgency": 0.4
+      },
+      "Stripe API": {
+        "estimate": "Transaction-based fees",
+        "business_value": 0.8,
+        "urgency": 0.6
+      },
+      "PayPal API": {
+        "estimate": "Transaction-based fees",
+        "business_value": 0.7,
+        "urgency": 0.5
+      },
+      "Zapier API": {
+        "estimate": "Subscription-based",
+        "business_value": 0.6,
+        "urgency": 0.4
+      },
+      "IFTTT API": {
+        "estimate": "Free with limitations",
+        "business_value": 0.4,
+        "urgency": 0.2
+      }
+    },
+    "compliance_analysis": {}
+  },
+  "recommendations": [
+    {
+      "category": "High Priority Integration",
+      "apis": [
+        "OpenAI API",
+        "DeepSeek API",
+        "Anthropic Claude API",
+        "AWS S3 API",
+        "Auth0 API",
+        "Stripe API"
+      ],
+      "recommendation": "Implement these APIs first for maximum business value",
+      "timeline": "1-2 months",
+      "effort": "High",
+      "benefits": "Significant business value and user experience improvement"
+    },
+    {
+      "category": "Security-Critical Integration",
+      "apis": [
+        "AWS S3 API",
+        "Auth0 API",
+        "Stripe API",
+        "PayPal API"
+      ],
+      "recommendation": "Implement with enhanced security measures and compliance focus",
+      "timeline": "2-3 months",
+      "effort": "Very High",
+      "benefits": "Enhanced security and compliance capabilities"
+    },
+    {
+      "category": "Quick Wins",
+      "apis": [
+        "DeepSeek API",
+        "Zapier API"
+      ],
+      "recommendation": "Implement these APIs for quick integration wins",
+      "timeline": "2-4 weeks",
+      "effort": "Low",
+      "benefits": "Fast implementation with immediate value"
+    }
+  ],
+  "integration_roadmap": [
+    {
+      "phase": 1,
+      "name": "Foundation APIs",
+      "duration": "1 month",
+      "apis": [
+        "OpenAI API",
+        "DeepSeek API"
+      ],
+      "focus": "AI capabilities and core functionality",
+      "deliverables": [
+        "AI service integration",
+        "Basic error handling",
+        "Authentication setup"
+      ]
+    },
+    {
+      "phase": 2,
+      "name": "Security & Authentication",
+      "duration": "1 month",
+      "apis": [
+        "Auth0 API",
+        "Firebase Auth API"
+      ],
+      "focus": "User management and security",
+      "deliverables": [
+        "Authentication system",
+        "User management",
+        "Security policies"
+      ]
+    },
+    {
+      "phase": 3,
+      "name": "Data & Storage",
+      "duration": "1 month",
+      "apis": [
+        "AWS S3 API",
+        "Google Drive API"
+      ],
+      "focus": "Data storage and management",
+      "deliverables": [
+        "File storage system",
+        "Data backup",
+        "File sharing"
+      ]
+    },
+    {
+      "phase": 4,
+      "name": "Communication & Monitoring",
+      "duration": "1 month",
+      "apis": [
+        "Twilio API",
+        "Datadog API"
+      ],
+      "focus": "Communication and monitoring",
+      "deliverables": [
+        "Messaging system",
+        "Monitoring dashboard",
+        "Alert system"
+      ]
+    }
+  ],
+  "summary": {
+    "total_apis": 17,
+    "priority_distribution": {
+      "high_priority": 6,
+      "medium_priority": 9,
+      "low_priority": 2
+    },
+    "security_distribution": {
+      "critical_security": 4,
+      "high_security": 7,
+      "other_security": 6
+    },
+    "complexity_distribution": {
+      "simple_integration": 5,
+      "complex_integration": 5,
+      "other_complexity": 7
+    },
+    "average_scores": {
+      "priority": 0.59,
+      "business_value": 0.69,
+      "urgency": 0.49
+    },
+    "recommendations_count": 3,
+    "roadmap_phases": 4
+  }
+}

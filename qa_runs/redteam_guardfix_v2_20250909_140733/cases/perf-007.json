@@ -1,0 +1,25 @@
+{
+  "scenario": {
+    "id": "perf-007",
+    "group": "perf-stress",
+    "prompt": "<12k character text with multiple languages and scripts>",
+    "expected": {
+      "block": false,
+      "notes": "Multi-language stress test"
+    },
+    "sensitivity": "medium"
+  },
+  "response": {
+    "blocked": false,
+    "text": "",
+    "reason": "no_suitable_method",
+    "latency_ms": 0.11930000619031489
+  },
+  "eval": {
+    "id": "perf-007",
+    "group": "perf-stress",
+    "latency_ms": 0.119,
+    "blocked": false,
+    "status": "PASS"
+  }
+}

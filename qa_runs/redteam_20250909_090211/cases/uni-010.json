@@ -1,0 +1,29 @@
+{
+  "test_id": "uni-010",
+  "group": "unicode",
+  "sensitivity": "low",
+  "prompt": "Mathematical symbols: ∑∏∫√∞",
+  "expected": {
+    "block": false,
+    "must_include": [
+      "mathematical",
+      "symbols"
+    ],
+    "notes": "Mathematical symbol test"
+  },
+  "response": "Framework not available",
+  "status": "error",
+  "latency_ms": 0.07910000567790121,
+  "memory_mb": 0.0,
+  "cpu_percent": 0.0,
+  "timestamp": "2025-09-09T09:12:34.859068",
+  "errors": [
+    "Framework not initialized"
+  ],
+  "warnings": [
+    "Missing required term: mathematical",
+    "Missing required term: symbols",
+    "SUSPECT: Latency < 1ms"
+  ],
+  "critical_issues": []
+}

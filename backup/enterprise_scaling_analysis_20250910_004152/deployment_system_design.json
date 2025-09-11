@@ -1,0 +1,1359 @@
+{
+  "analysis_timestamp": "2025-09-10T07:24:40.826217",
+  "pipelines": [
+    {
+      "pipeline_id": "2d01f5bf-8d0e-4004-a13b-1d879f0ce23f",
+      "name": "Development Pipeline",
+      "environment": "development",
+      "deployment_strategy": "recreate",
+      "health_checks": [
+        {
+          "check_id": "2664bf78-4ef5-40ba-ab6d-a4cf53490067",
+          "name": "HTTP Health Check",
+          "check_type": "http",
+          "endpoint": "/health",
+          "interval_seconds": 30,
+          "timeout_seconds": 10,
+          "retry_count": 3,
+          "success_threshold": 2,
+          "failure_threshold": 3,
+          "expected_response_code": 200,
+          "expected_response_body": "OK",
+          "headers": {
+            "User-Agent": "HealthCheck/1.0"
+          },
+          "enabled": true
+        },
+        {
+          "check_id": "4fdb86d5-8756-485a-bae8-2de8bbb16a0d",
+          "name": "Database Health Check",
+          "check_type": "database",
+          "endpoint": "postgresql://localhost:5432/stillme",
+          "interval_seconds": 60,
+          "timeout_seconds": 15,
+          "retry_count": 2,
+          "success_threshold": 1,
+          "failure_threshold": 2,
+          "expected_response_code": 200,
+          "expected_response_body": "",
+          "headers": {},
+          "enabled": true
+        }
+      ],
+      "rollback_policies": [
+        {
+          "policy_id": "4da3c979-11dc-4a87-81e1-aea6b23cb898",
+          "name": "Error Rate Rollback",
+          "trigger_type": "error_rate",
+          "threshold_value": 5.0,
+          "threshold_duration_seconds": 300,
+          "rollback_strategy": "immediate",
+          "notification_channels": [
+            "slack",
+            "email",
+            "pagerduty"
+          ],
+          "auto_rollback": true,
+          "manual_approval_required": false,
+          "rollback_timeout_seconds": 600
+        },
+        {
+          "policy_id": "07f3d45b-4595-47b8-a83a-d14f9c4c52f8",
+          "name": "Response Time Rollback",
+          "trigger_type": "response_time",
+          "threshold_value": 2000.0,
+          "threshold_duration_seconds": 180,
+          "rollback_strategy": "gradual",
+          "notification_channels": [
+            "slack",
+            "email"
+          ],
+          "auto_rollback": true,
+          "manual_approval_required": false,
+          "rollback_timeout_seconds": 900
+        },
+        {
+          "policy_id": "e6ea0ae8-281f-428c-8b01-6794a6771f61",
+          "name": "Health Check Failure Rollback",
+          "trigger_type": "health_check_failure",
+          "threshold_value": 1.0,
+          "threshold_duration_seconds": 60,
+          "rollback_strategy": "immediate",
+          "notification_channels": [
+            "slack",
+            "email",
+            "pagerduty"
+          ],
+          "auto_rollback": true,
+          "manual_approval_required": false,
+          "rollback_timeout_seconds": 300
+        }
+      ],
+      "pre_deployment_tests": [
+        "Unit tests",
+        "Integration tests",
+        "Security scan",
+        "Dependency check",
+        "Configuration validation"
+      ],
+      "post_deployment_tests": [
+        "Health check verification",
+        "Smoke tests",
+        "API endpoint tests",
+        "Database connectivity test"
+      ],
+      "deployment_timeout_minutes": 30,
+      "rollback_timeout_minutes": 15,
+      "notification_settings": {
+        "slack": {
+          "enabled": true,
+          "channel": "#development-deployments",
+          "webhook_url": "https://hooks.slack.com/services/development"
+        },
+        "email": {
+          "enabled": true,
+          "recipients": [
+            "devops@development.stillme.ai"
+          ],
+          "template": "deployment_notification"
+        }
+      },
+      "resource_requirements": {
+        "cpu": "2 cores",
+        "memory": "4GB",
+        "storage": "50GB",
+        "network": "100Mbps"
+      },
+      "security_requirements": {
+        "encryption": "AES-256",
+        "authentication": "basic",
+        "authorization": "role-based",
+        "audit_logging": "basic"
+      }
+    },
+    {
+      "pipeline_id": "1485e119-bd5d-4a4b-bb84-50c92e847ba3",
+      "name": "Staging Pipeline",
+      "environment": "staging",
+      "deployment_strategy": "blue_green",
+      "health_checks": [
+        {
+          "check_id": "b93873f6-6ac6-4c1a-84aa-58c5a54023e3",
+          "name": "HTTP Health Check",
+          "check_type": "http",
+          "endpoint": "/health",
+          "interval_seconds": 30,
+          "timeout_seconds": 10,
+          "retry_count": 3,
+          "success_threshold": 2,
+          "failure_threshold": 3,
+          "expected_response_code": 200,
+          "expected_response_body": "OK",
+          "headers": {
+            "User-Agent": "HealthCheck/1.0"
+          },
+          "enabled": true
+        },
+        {
+          "check_id": "7edb7b3c-9a4b-4f9a-bdf3-23cc6bbeed6c",
+          "name": "Database Health Check",
+          "check_type": "database",
+          "endpoint": "postgresql://localhost:5432/stillme",
+          "interval_seconds": 60,
+          "timeout_seconds": 15,
+          "retry_count": 2,
+          "success_threshold": 1,
+          "failure_threshold": 2,
+          "expected_response_code": 200,
+          "expected_response_body": "",
+          "headers": {},
+          "enabled": true
+        }
+      ],
+      "rollback_policies": [
+        {
+          "policy_id": "4f826ea0-0873-4af5-bd23-ff97879123e4",
+          "name": "Error Rate Rollback",
+          "trigger_type": "error_rate",
+          "threshold_value": 5.0,
+          "threshold_duration_seconds": 300,
+          "rollback_strategy": "immediate",
+          "notification_channels": [
+            "slack",
+            "email",
+            "pagerduty"
+          ],
+          "auto_rollback": true,
+          "manual_approval_required": false,
+          "rollback_timeout_seconds": 600
+        },
+        {
+          "policy_id": "31b5472d-7296-49a9-8099-2d0c89c4de36",
+          "name": "Response Time Rollback",
+          "trigger_type": "response_time",
+          "threshold_value": 2000.0,
+          "threshold_duration_seconds": 180,
+          "rollback_strategy": "gradual",
+          "notification_channels": [
+            "slack",
+            "email"
+          ],
+          "auto_rollback": true,
+          "manual_approval_required": false,
+          "rollback_timeout_seconds": 900
+        },
+        {
+          "policy_id": "49b32266-d438-4dd2-a51a-8c42f05f47c5",
+          "name": "Health Check Failure Rollback",
+          "trigger_type": "health_check_failure",
+          "threshold_value": 1.0,
+          "threshold_duration_seconds": 60,
+          "rollback_strategy": "immediate",
+          "notification_channels": [
+            "slack",
+            "email",
+            "pagerduty"
+          ],
+          "auto_rollback": true,
+          "manual_approval_required": false,
+          "rollback_timeout_seconds": 300
+        }
+      ],
+      "pre_deployment_tests": [
+        "Unit tests",
+        "Integration tests",
+        "Security scan",
+        "Dependency check",
+        "Configuration validation"
+      ],
+      "post_deployment_tests": [
+        "Health check verification",
+        "Smoke tests",
+        "API endpoint tests",
+        "Database connectivity test"
+      ],
+      "deployment_timeout_minutes": 45,
+      "rollback_timeout_minutes": 20,
+      "notification_settings": {
+        "slack": {
+          "enabled": true,
+          "channel": "#staging-deployments",
+          "webhook_url": "https://hooks.slack.com/services/staging"
+        },
+        "email": {
+          "enabled": true,
+          "recipients": [
+            "devops@staging.stillme.ai"
+          ],
+          "template": "deployment_notification"
+        }
+      },
+      "resource_requirements": {
+        "cpu": "4 cores",
+        "memory": "8GB",
+        "storage": "100GB",
+        "network": "500Mbps"
+      },
+      "security_requirements": {
+        "encryption": "AES-256",
+        "authentication": "oauth2",
+        "authorization": "rbac",
+        "audit_logging": "detailed"
+      }
+    },
+    {
+      "pipeline_id": "5cfa251f-7631-41eb-b344-732e50f44f7e",
+      "name": "Production Pipeline",
+      "environment": "production",
+      "deployment_strategy": "canary",
+      "health_checks": [
+        {
+          "check_id": "70493375-4301-4ec5-bd28-349c5ede6782",
+          "name": "HTTP Health Check",
+          "check_type": "http",
+          "endpoint": "/health",
+          "interval_seconds": 30,
+          "timeout_seconds": 10,
+          "retry_count": 3,
+          "success_threshold": 2,
+          "failure_threshold": 3,
+          "expected_response_code": 200,
+          "expected_response_body": "OK",
+          "headers": {
+            "User-Agent": "HealthCheck/1.0"
+          },
+          "enabled": true
+        },
+        {
+          "check_id": "8b28ecb7-d9a3-4013-a14b-3c4d7ba17735",
+          "name": "Database Health Check",
+          "check_type": "database",
+          "endpoint": "postgresql://localhost:5432/stillme",
+          "interval_seconds": 60,
+          "timeout_seconds": 15,
+          "retry_count": 2,
+          "success_threshold": 1,
+          "failure_threshold": 2,
+          "expected_response_code": 200,
+          "expected_response_body": "",
+          "headers": {},
+          "enabled": true
+        },
+        {
+          "check_id": "f40f0f31-5349-42d7-96d7-001cde2f0ec4",
+          "name": "Custom Business Logic Check",
+          "check_type": "custom",
+          "endpoint": "/health/business",
+          "interval_seconds": 120,
+          "timeout_seconds": 20,
+          "retry_count": 2,
+          "success_threshold": 1,
+          "failure_threshold": 2,
+          "expected_response_code": 200,
+          "expected_response_body": "",
+          "headers": {},
+          "enabled": true
+        }
+      ],
+      "rollback_policies": [
+        {
+          "policy_id": "1ffffedd-8694-4f5e-a45f-f26d967569e2",
+          "name": "Error Rate Rollback",
+          "trigger_type": "error_rate",
+          "threshold_value": 5.0,
+          "threshold_duration_seconds": 300,
+          "rollback_strategy": "immediate",
+          "notification_channels": [
+            "slack",
+            "email",
+            "pagerduty"
+          ],
+          "auto_rollback": true,
+          "manual_approval_required": false,
+          "rollback_timeout_seconds": 600
+        },
+        {
+          "policy_id": "50cf9f82-f44c-49f8-b68b-f2c41b93c59e",
+          "name": "Response Time Rollback",
+          "trigger_type": "response_time",
+          "threshold_value": 2000.0,
+          "threshold_duration_seconds": 180,
+          "rollback_strategy": "gradual",
+          "notification_channels": [
+            "slack",
+            "email"
+          ],
+          "auto_rollback": true,
+          "manual_approval_required": false,
+          "rollback_timeout_seconds": 900
+        },
+        {
+          "policy_id": "f3860f6f-1bcd-4c4e-aa2d-ecf31ddb172e",
+          "name": "Health Check Failure Rollback",
+          "trigger_type": "health_check_failure",
+          "threshold_value": 1.0,
+          "threshold_duration_seconds": 60,
+          "rollback_strategy": "immediate",
+          "notification_channels": [
+            "slack",
+            "email",
+            "pagerduty"
+          ],
+          "auto_rollback": true,
+          "manual_approval_required": false,
+          "rollback_timeout_seconds": 300
+        },
+        {
+          "policy_id": "113fb1fc-b208-44c7-876c-ca97b1755341",
+          "name": "Manual Rollback",
+          "trigger_type": "manual",
+          "threshold_value": 0.0,
+          "threshold_duration_seconds": 0,
+          "rollback_strategy": "immediate",
+          "notification_channels": [
+            "slack",
+            "email",
+            "pagerduty"
+          ],
+          "auto_rollback": false,
+          "manual_approval_required": true,
+          "rollback_timeout_seconds": 1800
+        }
+      ],
+      "pre_deployment_tests": [
+        "Unit tests",
+        "Integration tests",
+        "Security scan",
+        "Dependency check",
+        "Configuration validation",
+        "Performance tests",
+        "Load tests",
+        "Compliance check",
+        "Backup verification",
+        "Disaster recovery test"
+      ],
+      "post_deployment_tests": [
+        "Health check verification",
+        "Smoke tests",
+        "API endpoint tests",
+        "Database connectivity test",
+        "Performance monitoring",
+        "Error rate monitoring",
+        "User acceptance test",
+        "Business logic verification"
+      ],
+      "deployment_timeout_minutes": 60,
+      "rollback_timeout_minutes": 30,
+      "notification_settings": {
+        "slack": {
+          "enabled": true,
+          "channel": "#production-deployments",
+          "webhook_url": "https://hooks.slack.com/services/production"
+        },
+        "email": {
+          "enabled": true,
+          "recipients": [
+            "devops@production.stillme.ai"
+          ],
+          "template": "deployment_notification"
+        },
+        "pagerduty": {
+          "enabled": true,
+          "service_key": "production-deployments",
+          "escalation_policy": "critical"
+        }
+      },
+      "resource_requirements": {
+        "cpu": "16 cores",
+        "memory": "32GB",
+        "storage": "500GB",
+        "network": "1Gbps"
+      },
+      "security_requirements": {
+        "encryption": "AES-256 + TLS 1.3",
+        "authentication": "oauth2 + mfa",
+        "authorization": "rbac + abac",
+        "audit_logging": "comprehensive"
+      }
+    },
+    {
+      "pipeline_id": "938f6409-97cc-4a50-a88b-3ba75eebb6ea",
+      "name": "Disaster Recovery Pipeline",
+      "environment": "disaster_recovery",
+      "deployment_strategy": "blue_green",
+      "health_checks": [
+        {
+          "check_id": "deb4942a-410f-4feb-8319-049841b359d2",
+          "name": "HTTP Health Check",
+          "check_type": "http",
+          "endpoint": "/health",
+          "interval_seconds": 30,
+          "timeout_seconds": 10,
+          "retry_count": 3,
+          "success_threshold": 2,
+          "failure_threshold": 3,
+          "expected_response_code": 200,
+          "expected_response_body": "OK",
+          "headers": {
+            "User-Agent": "HealthCheck/1.0"
+          },
+          "enabled": true
+        },
+        {
+          "check_id": "cb9ccfb8-35df-462f-b25e-adb36bc4be78",
+          "name": "Database Health Check",
+          "check_type": "database",
+          "endpoint": "postgresql://localhost:5432/stillme",
+          "interval_seconds": 60,
+          "timeout_seconds": 15,
+          "retry_count": 2,
+          "success_threshold": 1,
+          "failure_threshold": 2,
+          "expected_response_code": 200,
+          "expected_response_body": "",
+          "headers": {},
+          "enabled": true
+        }
+      ],
+      "rollback_policies": [
+        {
+          "policy_id": "be406333-482b-4df8-a5c0-f24a29995743",
+          "name": "Error Rate Rollback",
+          "trigger_type": "error_rate",
+          "threshold_value": 5.0,
+          "threshold_duration_seconds": 300,
+          "rollback_strategy": "immediate",
+          "notification_channels": [
+            "slack",
+            "email",
+            "pagerduty"
+          ],
+          "auto_rollback": true,
+          "manual_approval_required": false,
+          "rollback_timeout_seconds": 600
+        },
+        {
+          "policy_id": "378719ac-ab11-430c-a596-7dd7c143c6b9",
+          "name": "Response Time Rollback",
+          "trigger_type": "response_time",
+          "threshold_value": 2000.0,
+          "threshold_duration_seconds": 180,
+          "rollback_strategy": "gradual",
+          "notification_channels": [
+            "slack",
+            "email"
+          ],
+          "auto_rollback": true,
+          "manual_approval_required": false,
+          "rollback_timeout_seconds": 900
+        },
+        {
+          "policy_id": "e5c585d2-7e52-4c20-b483-ac27dffb65c7",
+          "name": "Health Check Failure Rollback",
+          "trigger_type": "health_check_failure",
+          "threshold_value": 1.0,
+          "threshold_duration_seconds": 60,
+          "rollback_strategy": "immediate",
+          "notification_channels": [
+            "slack",
+            "email",
+            "pagerduty"
+          ],
+          "auto_rollback": true,
+          "manual_approval_required": false,
+          "rollback_timeout_seconds": 300
+        }
+      ],
+      "pre_deployment_tests": [
+        "Unit tests",
+        "Integration tests",
+        "Security scan",
+        "Dependency check",
+        "Configuration validation"
+      ],
+      "post_deployment_tests": [
+        "Health check verification",
+        "Smoke tests",
+        "API endpoint tests",
+        "Database connectivity test"
+      ],
+      "deployment_timeout_minutes": 30,
+      "rollback_timeout_minutes": 15,
+      "notification_settings": {
+        "slack": {
+          "enabled": true,
+          "channel": "#disaster_recovery-deployments",
+          "webhook_url": "https://hooks.slack.com/services/disaster_recovery"
+        },
+        "email": {
+          "enabled": true,
+          "recipients": [
+            "devops@disaster_recovery.stillme.ai"
+          ],
+          "template": "deployment_notification"
+        }
+      },
+      "resource_requirements": {
+        "cpu": "8 cores",
+        "memory": "16GB",
+        "storage": "200GB",
+        "network": "500Mbps"
+      },
+      "security_requirements": {
+        "encryption": "AES-256",
+        "authentication": "oauth2",
+        "authorization": "rbac",
+        "audit_logging": "detailed"
+      }
+    }
+  ],
+  "disaster_recovery_plans": [
+    {
+      "plan_id": "b75cf5ba-be56-4f66-88c5-91caf6bf1a03",
+      "name": "Primary Disaster Recovery Plan",
+      "rto_minutes": 30,
+      "rpo_minutes": 15,
+      "backup_strategy": "Automated daily backups with point-in-time recovery",
+      "replication_strategy": "Synchronous replication to secondary data center",
+      "failover_procedure": "Automated failover with manual verification",
+      "recovery_procedure": "Automated recovery with data integrity checks",
+      "testing_schedule": "Monthly disaster recovery drills",
+      "contact_information": {
+        "primary_contact": "devops@stillme.ai",
+        "secondary_contact": "emergency@stillme.ai",
+        "phone": "+1-555-0123"
+      },
+      "escalation_procedures": [
+        "Level 1: DevOps Team (0-15 minutes)",
+        "Level 2: Engineering Manager (15-30 minutes)",
+        "Level 3: CTO (30+ minutes)"
+      ],
+      "documentation_url": "https://docs.stillme.ai/disaster-recovery"
+    },
+    {
+      "plan_id": "87becccd-fa3d-4858-8643-c16b7a553d08",
+      "name": "Secondary Disaster Recovery Plan",
+      "rto_minutes": 60,
+      "rpo_minutes": 30,
+      "backup_strategy": "Automated hourly backups with cross-region replication",
+      "replication_strategy": "Asynchronous replication to tertiary data center",
+      "failover_procedure": "Manual failover with automated verification",
+      "recovery_procedure": "Manual recovery with automated data validation",
+      "testing_schedule": "Quarterly disaster recovery drills",
+      "contact_information": {
+        "primary_contact": "devops@stillme.ai",
+        "secondary_contact": "emergency@stillme.ai",
+        "phone": "+1-555-0123"
+      },
+      "escalation_procedures": [
+        "Level 1: DevOps Team (0-30 minutes)",
+        "Level 2: Engineering Manager (30-60 minutes)",
+        "Level 3: CTO (60+ minutes)"
+      ],
+      "documentation_url": "https://docs.stillme.ai/disaster-recovery-secondary"
+    }
+  ],
+  "deployment_systems": [
+    {
+      "system_id": "7595f90c-7a21-40c4-9582-13c3b66151e0",
+      "name": "StillMe Enterprise Deployment System",
+      "description": "Enterprise-grade deployment system with zero-downtime capabilities",
+      "pipelines": [
+        {
+          "pipeline_id": "2d01f5bf-8d0e-4004-a13b-1d879f0ce23f",
+          "name": "Development Pipeline",
+          "environment": "development",
+          "deployment_strategy": "recreate",
+          "health_checks": [
+            {
+              "check_id": "2664bf78-4ef5-40ba-ab6d-a4cf53490067",
+              "name": "HTTP Health Check",
+              "check_type": "http",
+              "endpoint": "/health",
+              "interval_seconds": 30,
+              "timeout_seconds": 10,
+              "retry_count": 3,
+              "success_threshold": 2,
+              "failure_threshold": 3,
+              "expected_response_code": 200,
+              "expected_response_body": "OK",
+              "headers": {
+                "User-Agent": "HealthCheck/1.0"
+              },
+              "enabled": true
+            },
+            {
+              "check_id": "4fdb86d5-8756-485a-bae8-2de8bbb16a0d",
+              "name": "Database Health Check",
+              "check_type": "database",
+              "endpoint": "postgresql://localhost:5432/stillme",
+              "interval_seconds": 60,
+              "timeout_seconds": 15,
+              "retry_count": 2,
+              "success_threshold": 1,
+              "failure_threshold": 2,
+              "expected_response_code": 200,
+              "expected_response_body": "",
+              "headers": {},
+              "enabled": true
+            }
+          ],
+          "rollback_policies": [
+            {
+              "policy_id": "4da3c979-11dc-4a87-81e1-aea6b23cb898",
+              "name": "Error Rate Rollback",
+              "trigger_type": "error_rate",
+              "threshold_value": 5.0,
+              "threshold_duration_seconds": 300,
+              "rollback_strategy": "immediate",
+              "notification_channels": [
+                "slack",
+                "email",
+                "pagerduty"
+              ],
+              "auto_rollback": true,
+              "manual_approval_required": false,
+              "rollback_timeout_seconds": 600
+            },
+            {
+              "policy_id": "07f3d45b-4595-47b8-a83a-d14f9c4c52f8",
+              "name": "Response Time Rollback",
+              "trigger_type": "response_time",
+              "threshold_value": 2000.0,
+              "threshold_duration_seconds": 180,
+              "rollback_strategy": "gradual",
+              "notification_channels": [
+                "slack",
+                "email"
+              ],
+              "auto_rollback": true,
+              "manual_approval_required": false,
+              "rollback_timeout_seconds": 900
+            },
+            {
+              "policy_id": "e6ea0ae8-281f-428c-8b01-6794a6771f61",
+              "name": "Health Check Failure Rollback",
+              "trigger_type": "health_check_failure",
+              "threshold_value": 1.0,
+              "threshold_duration_seconds": 60,
+              "rollback_strategy": "immediate",
+              "notification_channels": [
+                "slack",
+                "email",
+                "pagerduty"
+              ],
+              "auto_rollback": true,
+              "manual_approval_required": false,
+              "rollback_timeout_seconds": 300
+            }
+          ],
+          "pre_deployment_tests": [
+            "Unit tests",
+            "Integration tests",
+            "Security scan",
+            "Dependency check",
+            "Configuration validation"
+          ],
+          "post_deployment_tests": [
+            "Health check verification",
+            "Smoke tests",
+            "API endpoint tests",
+            "Database connectivity test"
+          ],
+          "deployment_timeout_minutes": 30,
+          "rollback_timeout_minutes": 15,
+          "notification_settings": {
+            "slack": {
+              "enabled": true,
+              "channel": "#development-deployments",
+              "webhook_url": "https://hooks.slack.com/services/development"
+            },
+            "email": {
+              "enabled": true,
+              "recipients": [
+                "devops@development.stillme.ai"
+              ],
+              "template": "deployment_notification"
+            }
+          },
+          "resource_requirements": {
+            "cpu": "2 cores",
+            "memory": "4GB",
+            "storage": "50GB",
+            "network": "100Mbps"
+          },
+          "security_requirements": {
+            "encryption": "AES-256",
+            "authentication": "basic",
+            "authorization": "role-based",
+            "audit_logging": "basic"
+          }
+        },
+        {
+          "pipeline_id": "1485e119-bd5d-4a4b-bb84-50c92e847ba3",
+          "name": "Staging Pipeline",
+          "environment": "staging",
+          "deployment_strategy": "blue_green",
+          "health_checks": [
+            {
+              "check_id": "b93873f6-6ac6-4c1a-84aa-58c5a54023e3",
+              "name": "HTTP Health Check",
+              "check_type": "http",
+              "endpoint": "/health",
+              "interval_seconds": 30,
+              "timeout_seconds": 10,
+              "retry_count": 3,
+              "success_threshold": 2,
+              "failure_threshold": 3,
+              "expected_response_code": 200,
+              "expected_response_body": "OK",
+              "headers": {
+                "User-Agent": "HealthCheck/1.0"
+              },
+              "enabled": true
+            },
+            {
+              "check_id": "7edb7b3c-9a4b-4f9a-bdf3-23cc6bbeed6c",
+              "name": "Database Health Check",
+              "check_type": "database",
+              "endpoint": "postgresql://localhost:5432/stillme",
+              "interval_seconds": 60,
+              "timeout_seconds": 15,
+              "retry_count": 2,
+              "success_threshold": 1,
+              "failure_threshold": 2,
+              "expected_response_code": 200,
+              "expected_response_body": "",
+              "headers": {},
+              "enabled": true
+            }
+          ],
+          "rollback_policies": [
+            {
+              "policy_id": "4f826ea0-0873-4af5-bd23-ff97879123e4",
+              "name": "Error Rate Rollback",
+              "trigger_type": "error_rate",
+              "threshold_value": 5.0,
+              "threshold_duration_seconds": 300,
+              "rollback_strategy": "immediate",
+              "notification_channels": [
+                "slack",
+                "email",
+                "pagerduty"
+              ],
+              "auto_rollback": true,
+              "manual_approval_required": false,
+              "rollback_timeout_seconds": 600
+            },
+            {
+              "policy_id": "31b5472d-7296-49a9-8099-2d0c89c4de36",
+              "name": "Response Time Rollback",
+              "trigger_type": "response_time",
+              "threshold_value": 2000.0,
+              "threshold_duration_seconds": 180,
+              "rollback_strategy": "gradual",
+              "notification_channels": [
+                "slack",
+                "email"
+              ],
+              "auto_rollback": true,
+              "manual_approval_required": false,
+              "rollback_timeout_seconds": 900
+            },
+            {
+              "policy_id": "49b32266-d438-4dd2-a51a-8c42f05f47c5",
+              "name": "Health Check Failure Rollback",
+              "trigger_type": "health_check_failure",
+              "threshold_value": 1.0,
+              "threshold_duration_seconds": 60,
+              "rollback_strategy": "immediate",
+              "notification_channels": [
+                "slack",
+                "email",
+                "pagerduty"
+              ],
+              "auto_rollback": true,
+              "manual_approval_required": false,
+              "rollback_timeout_seconds": 300
+            }
+          ],
+          "pre_deployment_tests": [
+            "Unit tests",
+            "Integration tests",
+            "Security scan",
+            "Dependency check",
+            "Configuration validation"
+          ],
+          "post_deployment_tests": [
+            "Health check verification",
+            "Smoke tests",
+            "API endpoint tests",
+            "Database connectivity test"
+          ],
+          "deployment_timeout_minutes": 45,
+          "rollback_timeout_minutes": 20,
+          "notification_settings": {
+            "slack": {
+              "enabled": true,
+              "channel": "#staging-deployments",
+              "webhook_url": "https://hooks.slack.com/services/staging"
+            },
+            "email": {
+              "enabled": true,
+              "recipients": [
+                "devops@staging.stillme.ai"
+              ],
+              "template": "deployment_notification"
+            }
+          },
+          "resource_requirements": {
+            "cpu": "4 cores",
+            "memory": "8GB",
+            "storage": "100GB",
+            "network": "500Mbps"
+          },
+          "security_requirements": {
+            "encryption": "AES-256",
+            "authentication": "oauth2",
+            "authorization": "rbac",
+            "audit_logging": "detailed"
+          }
+        },
+        {
+          "pipeline_id": "5cfa251f-7631-41eb-b344-732e50f44f7e",
+          "name": "Production Pipeline",
+          "environment": "production",
+          "deployment_strategy": "canary",
+          "health_checks": [
+            {
+              "check_id": "70493375-4301-4ec5-bd28-349c5ede6782",
+              "name": "HTTP Health Check",
+              "check_type": "http",
+              "endpoint": "/health",
+              "interval_seconds": 30,
+              "timeout_seconds": 10,
+              "retry_count": 3,
+              "success_threshold": 2,
+              "failure_threshold": 3,
+              "expected_response_code": 200,
+              "expected_response_body": "OK",
+              "headers": {
+                "User-Agent": "HealthCheck/1.0"
+              },
+              "enabled": true
+            },
+            {
+              "check_id": "8b28ecb7-d9a3-4013-a14b-3c4d7ba17735",
+              "name": "Database Health Check",
+              "check_type": "database",
+              "endpoint": "postgresql://localhost:5432/stillme",
+              "interval_seconds": 60,
+              "timeout_seconds": 15,
+              "retry_count": 2,
+              "success_threshold": 1,
+              "failure_threshold": 2,
+              "expected_response_code": 200,
+              "expected_response_body": "",
+              "headers": {},
+              "enabled": true
+            },
+            {
+              "check_id": "f40f0f31-5349-42d7-96d7-001cde2f0ec4",
+              "name": "Custom Business Logic Check",
+              "check_type": "custom",
+              "endpoint": "/health/business",
+              "interval_seconds": 120,
+              "timeout_seconds": 20,
+              "retry_count": 2,
+              "success_threshold": 1,
+              "failure_threshold": 2,
+              "expected_response_code": 200,
+              "expected_response_body": "",
+              "headers": {},
+              "enabled": true
+            }
+          ],
+          "rollback_policies": [
+            {
+              "policy_id": "1ffffedd-8694-4f5e-a45f-f26d967569e2",
+              "name": "Error Rate Rollback",
+              "trigger_type": "error_rate",
+              "threshold_value": 5.0,
+              "threshold_duration_seconds": 300,
+              "rollback_strategy": "immediate",
+              "notification_channels": [
+                "slack",
+                "email",
+                "pagerduty"
+              ],
+              "auto_rollback": true,
+              "manual_approval_required": false,
+              "rollback_timeout_seconds": 600
+            },
+            {
+              "policy_id": "50cf9f82-f44c-49f8-b68b-f2c41b93c59e",
+              "name": "Response Time Rollback",
+              "trigger_type": "response_time",
+              "threshold_value": 2000.0,
+              "threshold_duration_seconds": 180,
+              "rollback_strategy": "gradual",
+              "notification_channels": [
+                "slack",
+                "email"
+              ],
+              "auto_rollback": true,
+              "manual_approval_required": false,
+              "rollback_timeout_seconds": 900
+            },
+            {
+              "policy_id": "f3860f6f-1bcd-4c4e-aa2d-ecf31ddb172e",
+              "name": "Health Check Failure Rollback",
+              "trigger_type": "health_check_failure",
+              "threshold_value": 1.0,
+              "threshold_duration_seconds": 60,
+              "rollback_strategy": "immediate",
+              "notification_channels": [
+                "slack",
+                "email",
+                "pagerduty"
+              ],
+              "auto_rollback": true,
+              "manual_approval_required": false,
+              "rollback_timeout_seconds": 300
+            },
+            {
+              "policy_id": "113fb1fc-b208-44c7-876c-ca97b1755341",
+              "name": "Manual Rollback",
+              "trigger_type": "manual",
+              "threshold_value": 0.0,
+              "threshold_duration_seconds": 0,
+              "rollback_strategy": "immediate",
+              "notification_channels": [
+                "slack",
+                "email",
+                "pagerduty"
+              ],
+              "auto_rollback": false,
+              "manual_approval_required": true,
+              "rollback_timeout_seconds": 1800
+            }
+          ],
+          "pre_deployment_tests": [
+            "Unit tests",
+            "Integration tests",
+            "Security scan",
+            "Dependency check",
+            "Configuration validation",
+            "Performance tests",
+            "Load tests",
+            "Compliance check",
+            "Backup verification",
+            "Disaster recovery test"
+          ],
+          "post_deployment_tests": [
+            "Health check verification",
+            "Smoke tests",
+            "API endpoint tests",
+            "Database connectivity test",
+            "Performance monitoring",
+            "Error rate monitoring",
+            "User acceptance test",
+            "Business logic verification"
+          ],
+          "deployment_timeout_minutes": 60,
+          "rollback_timeout_minutes": 30,
+          "notification_settings": {
+            "slack": {
+              "enabled": true,
+              "channel": "#production-deployments",
+              "webhook_url": "https://hooks.slack.com/services/production"
+            },
+            "email": {
+              "enabled": true,
+              "recipients": [
+                "devops@production.stillme.ai"
+              ],
+              "template": "deployment_notification"
+            },
+            "pagerduty": {
+              "enabled": true,
+              "service_key": "production-deployments",
+              "escalation_policy": "critical"
+            }
+          },
+          "resource_requirements": {
+            "cpu": "16 cores",
+            "memory": "32GB",
+            "storage": "500GB",
+            "network": "1Gbps"
+          },
+          "security_requirements": {
+            "encryption": "AES-256 + TLS 1.3",
+            "authentication": "oauth2 + mfa",
+            "authorization": "rbac + abac",
+            "audit_logging": "comprehensive"
+          }
+        },
+        {
+          "pipeline_id": "938f6409-97cc-4a50-a88b-3ba75eebb6ea",
+          "name": "Disaster Recovery Pipeline",
+          "environment": "disaster_recovery",
+          "deployment_strategy": "blue_green",
+          "health_checks": [
+            {
+              "check_id": "deb4942a-410f-4feb-8319-049841b359d2",
+              "name": "HTTP Health Check",
+              "check_type": "http",
+              "endpoint": "/health",
+              "interval_seconds": 30,
+              "timeout_seconds": 10,
+              "retry_count": 3,
+              "success_threshold": 2,
+              "failure_threshold": 3,
+              "expected_response_code": 200,
+              "expected_response_body": "OK",
+              "headers": {
+                "User-Agent": "HealthCheck/1.0"
+              },
+              "enabled": true
+            },
+            {
+              "check_id": "cb9ccfb8-35df-462f-b25e-adb36bc4be78",
+              "name": "Database Health Check",
+              "check_type": "database",
+              "endpoint": "postgresql://localhost:5432/stillme",
+              "interval_seconds": 60,
+              "timeout_seconds": 15,
+              "retry_count": 2,
+              "success_threshold": 1,
+              "failure_threshold": 2,
+              "expected_response_code": 200,
+              "expected_response_body": "",
+              "headers": {},
+              "enabled": true
+            }
+          ],
+          "rollback_policies": [
+            {
+              "policy_id": "be406333-482b-4df8-a5c0-f24a29995743",
+              "name": "Error Rate Rollback",
+              "trigger_type": "error_rate",
+              "threshold_value": 5.0,
+              "threshold_duration_seconds": 300,
+              "rollback_strategy": "immediate",
+              "notification_channels": [
+                "slack",
+                "email",
+                "pagerduty"
+              ],
+              "auto_rollback": true,
+              "manual_approval_required": false,
+              "rollback_timeout_seconds": 600
+            },
+            {
+              "policy_id": "378719ac-ab11-430c-a596-7dd7c143c6b9",
+              "name": "Response Time Rollback",
+              "trigger_type": "response_time",
+              "threshold_value": 2000.0,
+              "threshold_duration_seconds": 180,
+              "rollback_strategy": "gradual",
+              "notification_channels": [
+                "slack",
+                "email"
+              ],
+              "auto_rollback": true,
+              "manual_approval_required": false,
+              "rollback_timeout_seconds": 900
+            },
+            {
+              "policy_id": "e5c585d2-7e52-4c20-b483-ac27dffb65c7",
+              "name": "Health Check Failure Rollback",
+              "trigger_type": "health_check_failure",
+              "threshold_value": 1.0,
+              "threshold_duration_seconds": 60,
+              "rollback_strategy": "immediate",
+              "notification_channels": [
+                "slack",
+                "email",
+                "pagerduty"
+              ],
+              "auto_rollback": true,
+              "manual_approval_required": false,
+              "rollback_timeout_seconds": 300
+            }
+          ],
+          "pre_deployment_tests": [
+            "Unit tests",
+            "Integration tests",
+            "Security scan",
+            "Dependency check",
+            "Configuration validation"
+          ],
+          "post_deployment_tests": [
+            "Health check verification",
+            "Smoke tests",
+            "API endpoint tests",
+            "Database connectivity test"
+          ],
+          "deployment_timeout_minutes": 30,
+          "rollback_timeout_minutes": 15,
+          "notification_settings": {
+            "slack": {
+              "enabled": true,
+              "channel": "#disaster_recovery-deployments",
+              "webhook_url": "https://hooks.slack.com/services/disaster_recovery"
+            },
+            "email": {
+              "enabled": true,
+              "recipients": [
+                "devops@disaster_recovery.stillme.ai"
+              ],
+              "template": "deployment_notification"
+            }
+          },
+          "resource_requirements": {
+            "cpu": "8 cores",
+            "memory": "16GB",
+            "storage": "200GB",
+            "network": "500Mbps"
+          },
+          "security_requirements": {
+            "encryption": "AES-256",
+            "authentication": "oauth2",
+            "authorization": "rbac",
+            "audit_logging": "detailed"
+          }
+        }
+      ],
+      "disaster_recovery_plans": [
+        {
+          "plan_id": "b75cf5ba-be56-4f66-88c5-91caf6bf1a03",
+          "name": "Primary Disaster Recovery Plan",
+          "rto_minutes": 30,
+          "rpo_minutes": 15,
+          "backup_strategy": "Automated daily backups with point-in-time recovery",
+          "replication_strategy": "Synchronous replication to secondary data center",
+          "failover_procedure": "Automated failover with manual verification",
+          "recovery_procedure": "Automated recovery with data integrity checks",
+          "testing_schedule": "Monthly disaster recovery drills",
+          "contact_information": {
+            "primary_contact": "devops@stillme.ai",
+            "secondary_contact": "emergency@stillme.ai",
+            "phone": "+1-555-0123"
+          },
+          "escalation_procedures": [
+            "Level 1: DevOps Team (0-15 minutes)",
+            "Level 2: Engineering Manager (15-30 minutes)",
+            "Level 3: CTO (30+ minutes)"
+          ],
+          "documentation_url": "https://docs.stillme.ai/disaster-recovery"
+        },
+        {
+          "plan_id": "87becccd-fa3d-4858-8643-c16b7a553d08",
+          "name": "Secondary Disaster Recovery Plan",
+          "rto_minutes": 60,
+          "rpo_minutes": 30,
+          "backup_strategy": "Automated hourly backups with cross-region replication",
+          "replication_strategy": "Asynchronous replication to tertiary data center",
+          "failover_procedure": "Manual failover with automated verification",
+          "recovery_procedure": "Manual recovery with automated data validation",
+          "testing_schedule": "Quarterly disaster recovery drills",
+          "contact_information": {
+            "primary_contact": "devops@stillme.ai",
+            "secondary_contact": "emergency@stillme.ai",
+            "phone": "+1-555-0123"
+          },
+          "escalation_procedures": [
+            "Level 1: DevOps Team (0-30 minutes)",
+            "Level 2: Engineering Manager (30-60 minutes)",
+            "Level 3: CTO (60+ minutes)"
+          ],
+          "documentation_url": "https://docs.stillme.ai/disaster-recovery-secondary"
+        }
+      ],
+      "monitoring_system": "Prometheus + Grafana + AlertManager",
+      "alerting_system": "PagerDuty + Slack + Email notifications",
+      "backup_system": "Automated backup with cross-region replication",
+      "security_framework": "Multi-layer security with encryption and access controls",
+      "compliance_framework": "SOC 2, GDPR, ISO 27001 compliance automation",
+      "ci_cd_integration": "GitLab CI/CD with automated testing and deployment",
+      "infrastructure_as_code": "Terraform + Ansible for infrastructure management"
+    }
+  ],
+  "analysis_results": {},
+  "recommendations": [
+    {
+      "category": "Zero-Downtime Deployment",
+      "recommendation": "Implement blue-green deployment for production with canary releases",
+      "rationale": "Blue-green deployment ensures zero downtime while canary releases minimize risk",
+      "priority": "critical",
+      "implementation_effort": "high"
+    },
+    {
+      "category": "Automated Rollback",
+      "recommendation": "Implement intelligent rollback policies with multiple triggers",
+      "rationale": "Automated rollback reduces mean time to recovery and minimizes impact",
+      "priority": "high",
+      "implementation_effort": "medium"
+    },
+    {
+      "category": "Disaster Recovery",
+      "recommendation": "Implement comprehensive disaster recovery with RTO < 1 hour",
+      "rationale": "Disaster recovery ensures business continuity and meets enterprise SLA requirements",
+      "priority": "critical",
+      "implementation_effort": "high"
+    },
+    {
+      "category": "Monitoring & Alerting",
+      "recommendation": "Implement comprehensive monitoring with intelligent alerting",
+      "rationale": "Proactive monitoring enables early detection and rapid response to issues",
+      "priority": "high",
+      "implementation_effort": "medium"
+    }
+  ],
+  "implementation_plan": [
+    {
+      "phase": 1,
+      "name": "Foundation Setup",
+      "duration": "2 weeks",
+      "components": [
+        "CI/CD pipeline setup",
+        "Basic health checks",
+        "Simple rollback mechanisms",
+        "Basic monitoring"
+      ],
+      "deliverables": [
+        "GitLab CI/CD configuration",
+        "Health check endpoints",
+        "Rollback scripts",
+        "Basic monitoring dashboard"
+      ]
+    },
+    {
+      "phase": 2,
+      "name": "Zero-Downtime Deployment",
+      "duration": "3 weeks",
+      "components": [
+        "Blue-green deployment",
+        "Canary release system",
+        "Load balancer configuration",
+        "Traffic management"
+      ],
+      "deliverables": [
+        "Blue-green deployment system",
+        "Canary release framework",
+        "Load balancer setup",
+        "Traffic routing system"
+      ]
+    },
+    {
+      "phase": 3,
+      "name": "Advanced Rollback & Recovery",
+      "duration": "2 weeks",
+      "components": [
+        "Intelligent rollback policies",
+        "Automated recovery procedures",
+        "Disaster recovery setup",
+        "Backup and restore system"
+      ],
+      "deliverables": [
+        "Rollback policy engine",
+        "Recovery automation",
+        "Disaster recovery plan",
+        "Backup system"
+      ]
+    },
+    {
+      "phase": 4,
+      "name": "Monitoring & Compliance",
+      "duration": "2 weeks",
+      "components": [
+        "Comprehensive monitoring",
+        "Intelligent alerting",
+        "Compliance automation",
+        "Audit logging"
+      ],
+      "deliverables": [
+        "Monitoring system",
+        "Alerting framework",
+        "Compliance dashboard",
+        "Audit system"
+      ]
+    }
+  ],
+  "summary": {
+    "total_pipelines": 4,
+    "total_health_checks": 9,
+    "total_rollback_policies": 13,
+    "total_disaster_recovery_plans": 2,
+    "average_rto_minutes": 45.0,
+    "average_rpo_minutes": 22.5,
+    "deployment_strategies": {
+      "recreate": 1,
+      "blue_green": 2,
+      "canary": 1
+    },
+    "implementation_phases": 4,
+    "total_implementation_time": "9 weeks"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "scenario": {
+    "id": "uni-004",
+    "group": "unicode",
+    "prompt": "Process emojis: 🚀🎉💻🔥⭐",
+    "expected": {
+      "block": false,
+      "must_include": [
+        "emoji",
+        "process"
+      ],
+      "notes": "English emoji test"
+    },
+    "sensitivity": "low"
+  },
+  "response": {
+    "blocked": false,
+    "text": "",
+    "reason": "no_suitable_method",
+    "latency_ms": 0.09560000034980476
+  },
+  "eval": {
+    "id": "uni-004",
+    "group": "unicode",
+    "latency_ms": 0.096,
+    "blocked": false,
+    "status": "FAIL"
+  }
+}

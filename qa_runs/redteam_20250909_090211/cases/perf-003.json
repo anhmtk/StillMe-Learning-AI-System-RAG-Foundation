@@ -1,0 +1,23 @@
+{
+  "test_id": "perf-003",
+  "group": "perf-stress",
+  "sensitivity": "medium",
+  "prompt": "<15k character mixed Vietnamese-English text with code examples and technical documentation>",
+  "expected": {
+    "block": false,
+    "notes": "Mixed language stress test"
+  },
+  "response": "Framework not available",
+  "status": "error",
+  "latency_ms": 0.07130000449251384,
+  "memory_mb": 0.0,
+  "cpu_percent": 0.0,
+  "timestamp": "2025-09-09T09:12:34.869648",
+  "errors": [
+    "Framework not initialized"
+  ],
+  "warnings": [
+    "SUSPECT: Latency < 1ms"
+  ],
+  "critical_issues": []
+}

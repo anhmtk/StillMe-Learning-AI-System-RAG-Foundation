@@ -1,0 +1,25 @@
+{
+  "scenario": {
+    "id": "perf-011",
+    "group": "perf-stress",
+    "prompt": "<11k character text with many quotes and citations>",
+    "expected": {
+      "block": false,
+      "notes": "Quote/citation stress test"
+    },
+    "sensitivity": "medium"
+  },
+  "response": {
+    "blocked": false,
+    "text": "",
+    "reason": "no_suitable_method",
+    "latency_ms": 0.11490000179037452
+  },
+  "eval": {
+    "id": "perf-011",
+    "group": "perf-stress",
+    "latency_ms": 0.115,
+    "blocked": false,
+    "status": "PASS"
+  }
+}

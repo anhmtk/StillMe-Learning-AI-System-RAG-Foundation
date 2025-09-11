@@ -117,11 +117,11 @@ class EthicsGuard:
                 self.forbidden_keywords = [k.lower() for k in rules.get("forbidden_keywords", [])]
                 self.sensitive_topics = [t.lower() for t in rules.get("sensitive_topics", [])]
         except FileNotFoundError:
-            ethical_logger.warning(f"Ethical rules file not found at {self.rules_file}. Using empty rules.")
+            ethical_logger.warning("Ethical rules file not found. Using empty rules.")
             self.forbidden_keywords = []
             self.sensitive_topics = []
         except json.JSONDecodeError:
-            ethical_logger.error(f"Error decoding JSON from ethical rules file at {self.rules_file}. Using empty rules.")
+            ethical_logger.error("Error decoding JSON from ethical rules file. Using empty rules.")
             self.forbidden_keywords = []
             self.sensitive_topics = []
         except Exception as e:

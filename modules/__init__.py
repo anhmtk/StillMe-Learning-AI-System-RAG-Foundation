@@ -14,6 +14,7 @@ try:
     from .secure_memory_manager import SecureMemoryManager
     from .persona_morph import PersonaMorph
     from .content_integrity_filter import ContentIntegrityFilter
+    from .identity_handler import IdentityHandler
     
     __all__ = [
         "UnifiedAPIManager",
@@ -23,7 +24,8 @@ try:
         "TokenOptimizerConfig",
         "SecureMemoryManager",
         "PersonaMorph",
-        "ContentIntegrityFilter"
+        "ContentIntegrityFilter",
+        "IdentityHandler"
     ]
     
 except ImportError as e:

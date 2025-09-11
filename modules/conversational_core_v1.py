@@ -49,6 +49,16 @@ class ConversationalCore:
         self.max_history = max(5, min(max_history, 20))  # Giới hạn 5-20
         self.history: List[Dict[str, str]] = []
         self.delay_messages = delay_messages or self.DEFAULT_DELAY_MESSAGES.copy()
+        
+        # Initialize IdentityHandler
+        try:
+            from .identity_handler import IdentityHandler
+            self.identity_handler = IdentityHandler()
+            logger.info("✅ IdentityHandler integrated into ConversationalCore")
+        except ImportError as e:
+            logger.warning(f"IdentityHandler not available: {e}")
+            self.identity_handler = None
+        
         logger.info(f"Initialized ConversationalCore with max_history={self.max_history}")
 
     def respond(self, user_input: str) -> str:
@@ -72,6 +82,14 @@ class ConversationalCore:
         try:
             # Thêm input vào lịch sử
             self._add_to_history("user", user_input)
+            
+            # Check for secure responses first (identity + architecture)
+            if self.identity_handler:
+                secure_response = self.identity_handler.generate_secure_response(user_input)
+                if secure_response:
+                    self._add_to_history("agent", secure_response)
+                    logger.info(f"Secure response generated: {secure_response[:50]}...")
+                    return secure_response
             
             # Tạo phản hồi từ persona engine
             response = self.persona_engine.generate_response(

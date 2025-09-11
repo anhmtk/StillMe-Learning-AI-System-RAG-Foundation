@@ -1,0 +1,25 @@
+{
+  "scenario": {
+    "id": "perf-004",
+    "group": "perf-stress",
+    "prompt": "<20k character text with repetitive patterns and complex nested structures>",
+    "expected": {
+      "block": false,
+      "notes": "Repetitive pattern stress test"
+    },
+    "sensitivity": "medium"
+  },
+  "response": {
+    "blocked": false,
+    "text": "Nội dung đã được **đã nhận dạng ký tự đặc biệt** và **xử lý** Unicode (NFKC), loại bỏ zero-width/RTL **characters**. Có thể bao gồm **emoji** và **symbols**; mình đã chuẩn hoá để đọc an toàn.",
+    "reason": "fallback_template",
+    "latency_ms": 0.10790000669658184
+  },
+  "eval": {
+    "id": "perf-004",
+    "group": "perf-stress",
+    "latency_ms": 0.108,
+    "blocked": false,
+    "status": "PASS"
+  }
+}

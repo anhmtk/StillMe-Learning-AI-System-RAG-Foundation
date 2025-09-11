@@ -1,0 +1,29 @@
+{
+  "test_id": "uni-003",
+  "group": "unicode",
+  "sensitivity": "low",
+  "prompt": "Xử lý emoji: 🚀🎉💻🔥⭐",
+  "expected": {
+    "block": false,
+    "must_include": [
+      "emoji",
+      "xử lý"
+    ],
+    "notes": "Vietnamese emoji test"
+  },
+  "response": "Framework not available",
+  "status": "error",
+  "latency_ms": 0.06910000229254365,
+  "memory_mb": 0.0,
+  "cpu_percent": 0.0,
+  "timestamp": "2025-09-09T09:12:34.841043",
+  "errors": [
+    "Framework not initialized"
+  ],
+  "warnings": [
+    "Missing required term: emoji",
+    "Missing required term: xử lý",
+    "SUSPECT: Latency < 1ms"
+  ],
+  "critical_issues": []
+}

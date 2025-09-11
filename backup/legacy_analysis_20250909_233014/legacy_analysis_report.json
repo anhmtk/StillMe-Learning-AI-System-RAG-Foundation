@@ -1,0 +1,157 @@
+{
+  "analysis_timestamp": "2025-09-09T23:30:14Z",
+  "total_modules": 4,
+  "modules": [
+    {
+      "name": "conversational_core",
+      "class_name": "SecureMemoryManager",
+      "config_class": "ConversationalcoreConfig",
+      "description": "Configuration for Conversationalcore",
+      "method_count": 8,
+      "methods": [
+        "store",
+        "retrieve",
+        "check",
+        "log",
+        "handle_user_input",
+        "maintain_conversational_context",
+        "delay_masking",
+        "route_to_intent_handlers"
+      ],
+      "dependency_count": 3,
+      "dependencies": [
+        "dataclasses",
+        "typing",
+        "logging"
+      ],
+      "patterns": [
+        "uses_dataclass",
+        "uses_logging",
+        "uses_type_hints",
+        "has_configuration",
+        "has_constructor"
+      ],
+      "anti_patterns": [
+        "has_todo_comments"
+      ]
+    },
+    {
+      "name": "layered_memory",
+      "class_name": "SecureMemoryManager",
+      "config_class": "LayeredmemoryConfig",
+      "description": "Configuration for Layeredmemory",
+      "method_count": 9,
+      "methods": [
+        "store",
+        "retrieve",
+        "check",
+        "log",
+        "store_memory",
+        "retrieve_memory",
+        "forget_memory",
+        "summarize_layer",
+        "inject_memory_directly"
+      ],
+      "dependency_count": 3,
+      "dependencies": [
+        "dataclasses",
+        "typing",
+        "logging"
+      ],
+      "patterns": [
+        "uses_dataclass",
+        "uses_logging",
+        "uses_type_hints",
+        "has_configuration",
+        "has_constructor"
+      ],
+      "anti_patterns": [
+        "has_todo_comments"
+      ]
+    },
+    {
+      "name": "smart_g_p_t__a_p_i__manager",
+      "class_name": "SecureMemoryManager",
+      "config_class": "SmartGPTAPIManagerConfig",
+      "description": "Configuration for SmartGPTAPIManager",
+      "method_count": 8,
+      "methods": [
+        "store",
+        "retrieve",
+        "check",
+        "log",
+        "select_model_based_on_prompt",
+        "rotate_api_key",
+        "log_api_usage",
+        "fallback_to_backup_model"
+      ],
+      "dependency_count": 3,
+      "dependencies": [
+        "dataclasses",
+        "typing",
+        "logging"
+      ],
+      "patterns": [
+        "uses_dataclass",
+        "uses_logging",
+        "uses_type_hints",
+        "has_configuration",
+        "has_constructor"
+      ],
+      "anti_patterns": [
+        "has_todo_comments"
+      ]
+    },
+    {
+      "name": "token_optimizer",
+      "class_name": "SecureMemoryManager",
+      "config_class": "TokenoptimizerConfig",
+      "description": "Configuration for Tokenoptimizer",
+      "method_count": 7,
+      "methods": [
+        "store",
+        "retrieve",
+        "check",
+        "log",
+        "compress_prompt",
+        "semantic_token_analysis",
+        "remove_redundancy"
+      ],
+      "dependency_count": 3,
+      "dependencies": [
+        "dataclasses",
+        "typing",
+        "logging"
+      ],
+      "patterns": [
+        "uses_dataclass",
+        "uses_logging",
+        "uses_type_hints",
+        "has_configuration",
+        "has_constructor"
+      ],
+      "anti_patterns": [
+        "has_todo_comments"
+      ]
+    }
+  ],
+  "pattern_analysis": {
+    "common_patterns": {
+      "uses_dataclass": 4,
+      "uses_logging": 4,
+      "uses_type_hints": 4,
+      "has_configuration": 4,
+      "has_constructor": 4
+    },
+    "anti_patterns": {
+      "has_todo_comments": 4
+    },
+    "security_concerns": [],
+    "deprecation_indicators": []
+  },
+  "recommendations": [
+    "Address TODO/FIXME comments before migration",
+    "Good: Dataclass usage is modern and maintainable",
+    "Good: Type hints improve code maintainability"
+  ]
+}

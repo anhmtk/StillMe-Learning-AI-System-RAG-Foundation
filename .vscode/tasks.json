@@ -1,0 +1,114 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "dev:ai-server",
+      "type": "shell",
+      "command": "powershell -ExecutionPolicy Bypass -File scripts/start_api.ps1 -Port 1216 -App \"stable_ai_server:app\"",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "python",
+        "fileLocation": "absolute",
+        "pattern": [{ "regexp": "." }],
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "API READY on",
+          "endsPattern": "API READY on"
+        }
+      },
+      "options": { "env": { "PYTHONUNBUFFERED": "1" } },
+      "presentation": { 
+        "reveal": "never", 
+        "panel": "dedicated", 
+        "focus": false, 
+        "clear": false 
+      },
+      "group": "build"
+    },
+    {
+      "label": "dev:gateway",
+      "type": "shell",
+      "command": "powershell -ExecutionPolicy Bypass -File scripts/start_api.ps1 -Port 8000 -App \"simple_main:app\"",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "python",
+        "fileLocation": "absolute",
+        "pattern": [{ "regexp": "." }],
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "API READY on",
+          "endsPattern": "API READY on"
+        }
+      },
+      "options": { "env": { "PYTHONUNBUFFERED": "1" } },
+      "presentation": { 
+        "reveal": "never", 
+        "panel": "dedicated", 
+        "focus": false, 
+        "clear": false 
+      },
+      "group": "build"
+    },
+    {
+      "label": "dev:desktop",
+      "type": "shell",
+      "command": "powershell -ExecutionPolicy Bypass -File scripts/start_web.ps1",
+      "isBackground": true,
+      "problemMatcher": {
+        "owner": "node",
+        "fileLocation": "absolute",
+        "pattern": [{ "regexp": "." }],
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "WEB READY on",
+          "endsPattern": "WEB READY on"
+        }
+      },
+      "presentation": { 
+        "reveal": "never", 
+        "panel": "dedicated", 
+        "focus": false, 
+        "clear": false 
+      },
+      "group": "build"
+    },
+    {
+      "label": "stop:ai-server",
+      "type": "shell",
+      "command": "powershell -ExecutionPolicy Bypass -File scripts/kill-by-port.ps1 1216",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "stop:gateway",
+      "type": "shell",
+      "command": "powershell -ExecutionPolicy Bypass -File scripts/kill-by-port.ps1 8000",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "stop:desktop",
+      "type": "shell",
+      "command": "powershell -ExecutionPolicy Bypass -File scripts/kill-by-port.ps1 3000",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "stop:all",
+      "type": "shell",
+      "command": "powershell -ExecutionPolicy Bypass -Command \"& { .\\scripts\\kill-by-port.ps1 1216; .\\scripts\\kill-by-port.ps1 8000; .\\scripts\\kill-by-port.ps1 3000; .\\scripts\\kill-by-port.ps1 8081 }\"",
+      "problemMatcher": [],
+      "group": "build"
+    },
+    {
+      "label": "start:all",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "dev:ai-server",
+        "dev:gateway",
+        "dev:desktop"
+      ],
+      "group": "build"
+    }
+  ]
+}

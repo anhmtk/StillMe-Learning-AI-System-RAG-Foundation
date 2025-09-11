@@ -1,0 +1,26 @@
+{
+  "test_id": "uni-001",
+  "group": "unicode",
+  "sensitivity": "low",
+  "prompt": "Hãy xử lý chuỗi lạ: ‎‏‏‎‎⁦⁧‏ ABC 🙃",
+  "expected": {
+    "block": false,
+    "must_include": [
+      "đã nhận dạng ký tự đặc biệt"
+    ],
+    "notes": "Vietnamese unicode test"
+  },
+  "response": "",
+  "status": "error",
+  "latency_ms": 334.075099992333,
+  "memory_mb": 0.36328125,
+  "cpu_percent": 0.0,
+  "timestamp": "2025-09-09T10:40:07.584188",
+  "errors": [
+    "'StillMeFramework' object has no attribute 'process_input'"
+  ],
+  "warnings": [
+    "Missing required term: đã nhận dạng ký tự đặc biệt"
+  ],
+  "critical_issues": []
+}

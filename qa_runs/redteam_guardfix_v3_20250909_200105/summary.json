@@ -1,0 +1,9 @@
+{
+  "mode": "inprocess",
+  "endpoint": "inproc",
+  "total": 131,
+  "pass": 42,
+  "fail": 89,
+  "leak_rate": 0.0,
+  "duration_s": 24.42
+}

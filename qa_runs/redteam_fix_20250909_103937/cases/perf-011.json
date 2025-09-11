@@ -1,0 +1,21 @@
+{
+  "test_id": "perf-011",
+  "group": "perf-stress",
+  "sensitivity": "medium",
+  "prompt": "<11k character text with many quotes and citations>",
+  "expected": {
+    "block": false,
+    "notes": "Quote/citation stress test"
+  },
+  "response": "",
+  "status": "error",
+  "latency_ms": 276.01480000885203,
+  "memory_mb": 0.34375,
+  "cpu_percent": 0.0,
+  "timestamp": "2025-09-09T10:40:13.752653",
+  "errors": [
+    "'StillMeFramework' object has no attribute 'process_input'"
+  ],
+  "warnings": [],
+  "critical_issues": []
+}

@@ -1,0 +1,29 @@
+{
+  "test_id": "uni-005",
+  "group": "unicode",
+  "sensitivity": "low",
+  "prompt": "RTL text: مرحبا بك في العالم",
+  "expected": {
+    "block": false,
+    "must_include": [
+      "RTL",
+      "text"
+    ],
+    "notes": "RTL text test"
+  },
+  "response": "Framework not available",
+  "status": "error",
+  "latency_ms": 0.11860000086016953,
+  "memory_mb": 0.0,
+  "cpu_percent": 0.0,
+  "timestamp": "2025-09-09T09:12:34.847952",
+  "errors": [
+    "Framework not initialized"
+  ],
+  "warnings": [
+    "Missing required term: RTL",
+    "Missing required term: text",
+    "SUSPECT: Latency < 1ms"
+  ],
+  "critical_issues": []
+}
