@@ -15,10 +15,88 @@ from datetime import datetime
 from typing import List, Dict, Any, Optional
 import json
 import os
+import asyncio
+from enum import Enum
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 logger = logging.getLogger(__name__)
+
+# Circuit Breaker Implementation
+class CircuitState(Enum):
+    CLOSED = "closed"
+    OPEN = "open"
+    HALF_OPEN = "half_open"
+
+class CircuitBreaker:
+    """Circuit breaker for fault tolerance"""
+    
+    def __init__(self, name: str, failure_threshold: int = 5, recovery_timeout: int = 60):
+        self.name = name
+        self.failure_threshold = failure_threshold
+        self.recovery_timeout = recovery_timeout
+        self.failure_count = 0
+        self.last_failure_time = 0
+        self.state = CircuitState.CLOSED
+        
+    def call(self, func, *args, **kwargs):
+        """Execute function with circuit breaker protection"""
+        if self.state == CircuitState.OPEN:
+            if time.time() - self.last_failure_time < self.recovery_timeout:
+                raise Exception(f"Circuit breaker {self.name} is OPEN")
+            else:
+                self.state = CircuitState.HALF_OPEN
+                self.failure_count = 0
+        
+        try:
+            result = func(*args, **kwargs)
+            self._on_success()
+            return result
+        except Exception as e:
+            self._on_failure()
+            raise e
+    
+    def _on_success(self):
+        """Handle successful operation"""
+        self.failure_count = 0
+        if self.state == CircuitState.HALF_OPEN:
+            self.state = CircuitState.CLOSED
+            logger.info(f"Circuit breaker {self.name} is now CLOSED")
+    
+    def _on_failure(self):
+        """Handle failed operation"""
+        self.failure_count += 1
+        self.last_failure_time = time.time()
+        
+        if self.failure_count >= self.failure_threshold:
+            self.state = CircuitState.OPEN
+            logger.warning(f"Circuit breaker {self.name} is now OPEN")
+
+class RetryManager:
+    """Retry manager with exponential backoff"""
+    
+    def __init__(self, max_attempts: int = 3, base_delay: float = 1.0):
+        self.max_attempts = max_attempts
+        self.base_delay = base_delay
+    
+    def execute(self, func, *args, **kwargs):
+        """Execute function with retry logic"""
+        last_exception = None
+        
+        for attempt in range(1, self.max_attempts + 1):
+            try:
+                return func(*args, **kwargs)
+            except Exception as e:
+                last_exception = e
+                
+                if attempt < self.max_attempts:
+                    delay = self.base_delay * (2 ** (attempt - 1))
+                    logger.warning(f"Attempt {attempt} failed: {e}. Retrying in {delay:.2f}s")
+                    time.sleep(delay)
+                else:
+                    logger.error(f"All {self.max_attempts} attempts failed")
+        
+        raise last_exception
 
 # Create FastAPI app
 app = FastAPI(
@@ -64,28 +142,61 @@ class StillMeAI:
         self.conversation_history = []
         self.max_history = 10
         
+        # Initialize error handling components
+        self.circuit_breaker = CircuitBreaker("stillme_ai", failure_threshold=3, recovery_timeout=30)
+        self.retry_manager = RetryManager(max_attempts=3, base_delay=1.0)
+        
+        # Fallback responses
+        self.fallback_responses = {
+            "vi": [
+                "Xin lỗi, tôi đang gặp một chút khó khăn. Hãy thử lại sau nhé!",
+                "Hiện tại tôi chưa thể xử lý yêu cầu này. Bạn có thể hỏi điều gì khác không?",
+                "Có vẻ như có vấn đề kỹ thuật. Tôi sẽ cố gắng khắc phục sớm nhất có thể."
+            ],
+            "en": [
+                "Sorry, I'm experiencing some difficulties. Please try again later!",
+                "I can't process this request right now. Could you ask something else?",
+                "There seems to be a technical issue. I'll try to resolve it as soon as possible."
+            ]
+        }
+        
     def process_message(self, message: str, locale: str = "vi") -> str:
-        """Process user message and generate response"""
+        """Process user message and generate response with error handling"""
         logger.info(f"🤖 Processing message: {message}")
         
-        # Add to conversation history
-        self.conversation_history.append({
-            "user": message,
-            "timestamp": datetime.now().isoformat()
-        })
-        
-        # Keep only recent history
-        if len(self.conversation_history) > self.max_history:
-            self.conversation_history = self.conversation_history[-self.max_history:]
-        
-        # Generate response based on message content
-        response = self._generate_response(message, locale)
-        
-        # Add response to history
-        self.conversation_history[-1]["ai"] = response
-        
-        logger.info(f"🤖 Generated response: {response}")
-        return response
+        try:
+            # Add to conversation history
+            self.conversation_history.append({
+                "user": message,
+                "timestamp": datetime.now().isoformat()
+            })
+            
+            # Keep only recent history
+            if len(self.conversation_history) > self.max_history:
+                self.conversation_history = self.conversation_history[-self.max_history:]
+            
+            # Generate response with circuit breaker protection
+            response = self.circuit_breaker.call(self._generate_response, message, locale)
+            
+            # Add response to history
+            self.conversation_history[-1]["ai"] = response
+            
+            logger.info(f"🤖 Generated response: {response}")
+            return response
+            
+        except Exception as e:
+            logger.error(f"Error processing message: {e}")
+            
+            # Use fallback response
+            import random
+            fallback = random.choice(self.fallback_responses.get(locale, self.fallback_responses["vi"]))
+            
+            # Add fallback to history
+            if self.conversation_history:
+                self.conversation_history[-1]["ai"] = fallback
+                self.conversation_history[-1]["error"] = str(e)
+            
+            return fallback
     
     def _generate_response(self, message: str, locale: str) -> str:
         """Generate AI response based on message content"""
@@ -314,6 +425,43 @@ async def clear_conversation_history():
     """Clear conversation history"""
     stillme_ai.conversation_history = []
     return {"message": "Conversation history cleared"}
+
+@app.get("/health/detailed")
+async def detailed_health_check():
+    """Detailed health check with error handling status"""
+    try:
+        # Test AI processing
+        test_response = stillme_ai.process_message("test", "vi")
+        
+        return {
+            "status": "healthy",
+            "timestamp": datetime.now().isoformat(),
+            "circuit_breaker": {
+                "state": stillme_ai.circuit_breaker.state.value,
+                "failure_count": stillme_ai.circuit_breaker.failure_count,
+                "last_failure_time": stillme_ai.circuit_breaker.last_failure_time
+            },
+            "retry_manager": {
+                "max_attempts": stillme_ai.retry_manager.max_attempts,
+                "base_delay": stillme_ai.retry_manager.base_delay
+            },
+            "conversation_history": {
+                "count": len(stillme_ai.conversation_history),
+                "max_history": stillme_ai.max_history
+            },
+            "test_response": test_response[:50] + "..." if len(test_response) > 50 else test_response
+        }
+    except Exception as e:
+        logger.error(f"Health check failed: {e}")
+        return {
+            "status": "unhealthy",
+            "timestamp": datetime.now().isoformat(),
+            "error": str(e),
+            "circuit_breaker": {
+                "state": stillme_ai.circuit_breaker.state.value,
+                "failure_count": stillme_ai.circuit_breaker.failure_count
+            }
+        }
 
 if __name__ == "__main__":
     logger.info("🚀 Starting StillMe AI - Stable Server...")

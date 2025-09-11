@@ -1,15 +1,30 @@
-# StillMe Gateway - Simple Version
+# StillMe Gateway - Development Version
 """
-Simple Gateway server for testing
+DEVELOPMENT GATEWAY - NOT FOR PRODUCTION USE
+
+This is a simplified gateway for development and testing purposes.
+For production, use main.py with full security and features.
+
+Features:
+- Basic WebSocket support
+- Simple message forwarding
+- StillMe AI integration
+- Development-friendly CORS settings
+
+Security Note: This gateway uses permissive CORS for development.
+DO NOT use in production environments.
 """
 
 import asyncio
 import logging
 import httpx
 import json
+import os
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 import uvicorn
+from cors_config import cors_config
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -22,14 +37,31 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Add CORS middleware
+# Add CORS middleware with environment-based configuration
+cors_settings = cors_config.get_cors_config()
+logger.info(f"🔒 CORS Configuration: {cors_config.get_security_warning()}")
+logger.info(f"🌐 Allowed Origins: {cors_settings['allow_origins']}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    **cors_settings
 )
+
+# Add CORS validation middleware
+@app.middleware("http")
+async def cors_validation_middleware(request, call_next):
+    """Validate CORS requests and log security events"""
+    origin = request.headers.get("origin")
+    
+    if origin and not cors_config.is_origin_allowed(origin):
+        logger.warning(f"🚨 BLOCKED CORS request from unauthorized origin: {origin}")
+        return JSONResponse(
+            status_code=403,
+            content={"error": "CORS: Origin not allowed", "origin": origin}
+        )
+    
+    response = await call_next(request)
+    return response
 
 # WebSocket connections storage
 active_connections: dict = {}
