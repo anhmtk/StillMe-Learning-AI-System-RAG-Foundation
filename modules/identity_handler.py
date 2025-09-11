@@ -1,12 +1,40 @@
 #!/usr/bin/env python3
 """
-IdentityHandler - Xử lý câu hỏi về nguồn gốc/tác giả/quốc gia của StillMe AI
+🆔 IDENTITY HANDLER - AI IDENTITY & SECURITY MANAGEMENT
+🆔 IDENTITY HANDLER - QUẢN LÝ DANH TÍNH AI & BẢO MẬT
 
-Chức năng:
-- Phát hiện intent về identity/origin/creator
-- Trả lời nhất quán về nguồn gốc từ config
-- Hỗ trợ đa ngôn ngữ (VI/EN)
-- Template rotation có kiểm soát
+PURPOSE / MỤC ĐÍCH:
+- Handles AI identity questions and origin inquiries
+- Xử lý câu hỏi về danh tính AI và nguồn gốc
+- Manages security responses for architecture questions
+- Quản lý phản hồi bảo mật cho câu hỏi kiến trúc
+- Prevents disclosure of internal framework details
+- Ngăn chặn tiết lộ chi tiết framework nội bộ
+
+FUNCTIONALITY / CHỨC NĂNG:
+- Identity detection and response generation
+- Phát hiện danh tính và tạo phản hồi
+- Architecture security protection
+- Bảo vệ bảo mật kiến trúc
+- Multi-language template rotation (VI/EN)
+- Xoay vòng template đa ngôn ngữ (VI/EN)
+- AgentDev protection (absolute secret)
+- Bảo vệ AgentDev (bí mật tuyệt đối)
+- Smart response generation
+- Tạo phản hồi thông minh
+
+RELATED FILES / FILES LIÊN QUAN:
+- config/framework_config.json - Identity configuration
+- modules/conversational_core_v1.py - Integration point
+- stable_ai_server.py - Server integration
+- tests/test_identity_handler.py - Unit tests
+
+TECHNICAL DETAILS / CHI TIẾT KỸ THUẬT:
+- Keyword-based intent detection
+- Template caching and rotation
+- Security-first architecture protection
+- Vietnamese creator identity management
+- OpenAI/Google/DeepSeek partnership recognition
 """
 
 import json

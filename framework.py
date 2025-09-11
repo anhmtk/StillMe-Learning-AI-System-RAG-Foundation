@@ -1,17 +1,37 @@
-import os
 #!/usr/bin/env python3
-# Copyright: StillMe Project - Enterprise Edition
-__author__ = "StillMe Framework Team"
-__license__ = "Commercial License"
-__version__ = "2.1.1"
-
 """
 🚀 STILLME AI FRAMEWORK - ENTERPRISE GRADE
+🚀 STILLME AI FRAMEWORK - CẤP DOANH NGHIỆP
+
+PURPOSE / MỤC ĐÍCH:
+- Main framework entry point and module manager
+- Điểm vào chính của framework và quản lý modules
+- Orchestrates all 9 core modules with dependency injection
+- Điều phối tất cả 9 core modules với dependency injection
+- Provides unified API for AI operations
+- Cung cấp API thống nhất cho các thao tác AI
+
+FUNCTIONALITY / CHỨC NĂNG:
+- Module loading and initialization
+- Tải và khởi tạo modules
+- Dependency resolution and injection
+- Giải quyết và inject dependencies
+- Error handling and recovery
+- Xử lý lỗi và phục hồi
+- Configuration management
+- Quản lý cấu hình
+
+RELATED FILES / FILES LIÊN QUAN:
+- modules/ - Core modules directory
+- config/framework_config.json - Framework configuration
+- stable_ai_server.py - AI server implementation
+- tests/ - Test suites
 
 ⚠️ IMPORTANT: This is a WORLD-CLASS AI Framework with 9 core modules!
+⚠️ QUAN TRỌNG: Đây là Framework AI đẳng cấp thế giới với 9 core modules!
 
 📊 PROJECT STATUS: PRODUCTION-READY
-- Size: 22.89 MB (cleaned from 5.3GB)
+
 - Modules: 9 core modules active
 - Tests: 29/29 passed ✅
 - Complexity: 8.5/10 (Enterprise-grade)

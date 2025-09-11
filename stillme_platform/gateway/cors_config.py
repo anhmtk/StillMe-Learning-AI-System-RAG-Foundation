@@ -1,6 +1,37 @@
-# CORS Configuration for StillMe Gateway
+#!/usr/bin/env python3
 """
-Environment-based CORS configuration for security
+🔒 CORS CONFIGURATION - SECURITY & ENVIRONMENT MANAGEMENT
+🔒 CẤU HÌNH CORS - QUẢN LÝ BẢO MẬT & MÔI TRƯỜNG
+
+PURPOSE / MỤC ĐÍCH:
+- Environment-based CORS configuration for security
+- Cấu hình CORS dựa trên môi trường cho bảo mật
+- Manages allowed origins for different environments
+- Quản lý origins được phép cho các môi trường khác nhau
+- Prevents Cross-Origin attacks
+- Ngăn chặn tấn công Cross-Origin
+
+FUNCTIONALITY / CHỨC NĂNG:
+- Development: Permissive CORS for localhost
+- Development: CORS cho phép cho localhost
+- Staging: Moderate CORS with specific domains
+- Staging: CORS vừa phải với domains cụ thể
+- Production: Strict CORS with whitelist
+- Production: CORS nghiêm ngặt với whitelist
+- Origin validation and security warnings
+- Xác thực origin và cảnh báo bảo mật
+
+RELATED FILES / FILES LIÊN QUAN:
+- dev_gateway.py - Development gateway usage
+- main.py - Production gateway usage
+- env.example - Environment configuration template
+- SECURITY_GUIDELINES.md - Security documentation
+
+TECHNICAL DETAILS / CHI TIẾT KỸ THUẬT:
+- Environment detection (development/staging/production)
+- Dynamic origin configuration
+- Security warning system
+- CORS validation middleware support
 """
 
 import os

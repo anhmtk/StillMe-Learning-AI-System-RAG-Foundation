@@ -1,3 +1,42 @@
+#!/usr/bin/env python3
+"""
+⚖️ ETHICAL CORE SYSTEM - AI SAFETY & COMPLIANCE
+⚖️ HỆ THỐNG ĐẠO ĐỨC CORE - AN TOÀN AI & TUÂN THỦ
+
+PURPOSE / MỤC ĐÍCH:
+- AI safety and ethical compliance system
+- Hệ thống an toàn AI và tuân thủ đạo đức
+- Content filtering and violation detection
+- Lọc nội dung và phát hiện vi phạm
+- Ensures AI responses meet ethical standards
+- Đảm bảo phản hồi AI đáp ứng tiêu chuẩn đạo đức
+
+FUNCTIONALITY / CHỨC NĂNG:
+- Content validation and filtering
+- Xác thực và lọc nội dung
+- Ethical rule enforcement
+- Thực thi quy tắc đạo đức
+- Violation logging and reporting
+- Ghi log và báo cáo vi phạm
+- Safety score calculation
+- Tính toán điểm an toàn
+- Multi-language support (VI/EN)
+- Hỗ trợ đa ngôn ngữ (VI/EN)
+
+RELATED FILES / FILES LIÊN QUAN:
+- config/ethical_rules.json - Ethical rules configuration
+- framework.py - Framework integration
+- stable_ai_server.py - AI server integration
+- logs/ethical_violations.log - Violation logs
+
+TECHNICAL DETAILS / CHI TIẾT KỸ THUẬT:
+- Async/await support for high performance
+- Rule-based and AI-powered validation
+- Configurable safety thresholds
+- Real-time violation detection
+- Comprehensive logging system
+"""
+
 import os
 import asyncio
 import json

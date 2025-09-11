@@ -1,4 +1,9 @@
 {
+  "_comment": "StillMe AI Framework Configuration - Cấu hình Framework AI StillMe",
+  "_purpose": "Main configuration file for StillMe AI Framework - File cấu hình chính cho Framework AI StillMe",
+  "_functionality": "Module settings, security config, identity management - Cài đặt module, cấu hình bảo mật, quản lý danh tính",
+  "_related_files": "framework.py, stable_ai_server.py, modules/ - Files liên quan",
+  
   "version": "2.1.1",
   "framework_name": "StillMe AI Framework",
   "description": "Enterprise-grade AI framework with 7 integrated modules",

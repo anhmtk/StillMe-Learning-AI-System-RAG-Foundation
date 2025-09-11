@@ -1,7 +1,43 @@
-# StillMe Gateway - Main Application
+#!/usr/bin/env python3
 """
-StillMe Gateway - Core Infrastructure
-Unified communication hub for StillMe multi-platform system
+🌐 STILLME GATEWAY - PRODUCTION SERVER
+🌐 STILLME GATEWAY - SERVER PRODUCTION
+
+PURPOSE / MỤC ĐÍCH:
+- Production gateway server with full enterprise features
+- Server gateway production với đầy đủ tính năng doanh nghiệp
+- Unified communication hub for multi-platform system
+- Trung tâm giao tiếp thống nhất cho hệ thống đa nền tảng
+- Handles WebSocket, REST API, and message routing
+- Xử lý WebSocket, REST API và routing tin nhắn
+
+FUNCTIONALITY / CHỨC NĂNG:
+- WebSocket connections management
+- Quản lý kết nối WebSocket
+- Authentication and authorization (JWT)
+- Xác thực và phân quyền (JWT)
+- Database integration (PostgreSQL/SQLite)
+- Tích hợp database (PostgreSQL/SQLite)
+- Redis caching and session management
+- Cache Redis và quản lý session
+- Rate limiting and security middleware
+- Rate limiting và security middleware
+- Health monitoring and logging
+- Giám sát sức khỏe và logging
+
+RELATED FILES / FILES LIÊN QUAN:
+- dev_gateway.py - Development version (simplified)
+- cors_config.py - CORS configuration
+- core/ - Core gateway modules
+- api/ - API route handlers
+- services/ - Business logic services
+
+TECHNICAL DETAILS / CHI TIẾT KỸ THUẬT:
+- FastAPI with WebSocket support
+- Database: PostgreSQL/SQLite with async support
+- Redis: Session storage and caching
+- Security: JWT tokens, CORS, rate limiting
+- Port: 8001 (configurable via environment)
 """
 
 import asyncio

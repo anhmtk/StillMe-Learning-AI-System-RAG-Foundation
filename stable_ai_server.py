@@ -1,7 +1,40 @@
 #!/usr/bin/env python3
 """
-Stable StillMe AI Server - Bền vững và ổn định
-Sử dụng FastAPI đơn giản, không phụ thuộc vào các thư viện phức tạp
+🤖 STILLME AI SERVER - STABLE & PRODUCTION-READY
+🤖 STILLME AI SERVER - ỔN ĐỊNH & SẴN SÀNG PRODUCTION
+
+PURPOSE / MỤC ĐÍCH:
+- Production-ready AI server with FastAPI
+- Server AI sẵn sàng production với FastAPI
+- Handles chat requests and AI responses
+- Xử lý yêu cầu chat và phản hồi AI
+- Provides REST API endpoints for AI operations
+- Cung cấp REST API endpoints cho các thao tác AI
+
+FUNCTIONALITY / CHỨC NĂNG:
+- Chat endpoint (/inference) for AI conversations
+- Endpoint chat (/inference) cho hội thoại AI
+- Health checks (/health, /health/detailed)
+- Kiểm tra sức khỏe (/health, /health/detailed)
+- Circuit breaker and retry mechanisms
+- Cơ chế circuit breaker và retry
+- Fallback responses for error handling
+- Phản hồi fallback cho xử lý lỗi
+- UTF-8 encoding support
+- Hỗ trợ mã hóa UTF-8
+
+RELATED FILES / FILES LIÊN QUAN:
+- framework.py - Core framework integration
+- modules/ - AI modules (conversational_core, identity_handler)
+- stillme_platform/gateway/ - Gateway communication
+- tests/ - Server tests
+
+TECHNICAL DETAILS / CHI TIẾT KỸ THUẬT:
+- FastAPI framework with async support
+- CircuitBreaker: failure_threshold=3, recovery_timeout=30s
+- RetryManager: exponential backoff (1s, 2s, 4s)
+- CORS enabled for cross-origin requests
+- Auto port detection for conflict avoidance
 """
 
 from fastapi import FastAPI, HTTPException, Request
