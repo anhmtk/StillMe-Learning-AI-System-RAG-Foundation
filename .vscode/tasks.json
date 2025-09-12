@@ -1,114 +1,114 @@
 {
-  "version": "2.0.0",
-  "tasks": [
-    {
-      "label": "dev:ai-server",
-      "type": "shell",
-      "command": "powershell -ExecutionPolicy Bypass -File scripts/start_api.ps1 -Port 1216 -App \"stable_ai_server:app\"",
-      "isBackground": true,
-      "problemMatcher": {
-        "owner": "python",
-        "fileLocation": "absolute",
-        "pattern": [{ "regexp": "." }],
-        "background": {
-          "activeOnStart": true,
-          "beginsPattern": "API READY on",
-          "endsPattern": "API READY on"
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "dev:baseurl",
+            "type": "shell",
+            "command": "${workspaceFolder}/scripts/compute_base_url.ps1",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Compute BASE_URL và ghi vào config/runtime_base_url.txt"
+        },
+        {
+            "label": "dev:server",
+            "type": "shell",
+            "command": "${workspaceFolder}/scripts/start_server.ps1",
+            "group": "build",
+            "dependsOn": "dev:baseurl",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Khởi động server detached và chờ sẵn sàng"
+        },
+        {
+            "label": "dev:wait",
+            "type": "shell",
+            "command": "${workspaceFolder}/scripts/wait_ready.ps1",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Chờ server sẵn sàng với health check"
+        },
+        {
+            "label": "dev:smoke",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-Command",
+                "$BASE_URL = Get-Content '${workspaceFolder}/config/runtime_base_url.txt'; Write-Host 'Testing BASE_URL:' $BASE_URL; try { $response = Invoke-WebRequest '$BASE_URL/version' -UseBasicParsing; Write-Host '✅ /version:' $response.StatusCode; $json = $response.Content | ConvertFrom-Json; Write-Host 'Name:' $json.name 'Version:' $json.version } catch { Write-Host '❌ /version failed:' $_.Exception.Message; Write-Host '📝 Server logs:'; Get-Content '${workspaceFolder}/logs/server.log' -Tail 20 }"
+            ],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Smoke test - kiểm tra /version endpoint"
+        },
+        {
+            "label": "dev:stop",
+            "type": "shell",
+            "command": "${workspaceFolder}/scripts/stop_server.ps1",
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "detail": "Dừng server process"
+        },
+        {
+            "label": "dev:full-pipeline",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "dev:baseurl",
+                "dev:server",
+                "dev:wait",
+                "dev:smoke"
+            ],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "problemMatcher": [],
+            "detail": "Chạy toàn bộ pipeline: baseurl → server → wait → smoke"
         }
-      },
-      "options": { "env": { "PYTHONUNBUFFERED": "1" } },
-      "presentation": { 
-        "reveal": "never", 
-        "panel": "dedicated", 
-        "focus": false, 
-        "clear": false 
-      },
-      "group": "build"
-    },
-    {
-      "label": "dev:gateway",
-      "type": "shell",
-      "command": "powershell -ExecutionPolicy Bypass -File scripts/start_api.ps1 -Port 8000 -App \"simple_main:app\"",
-      "isBackground": true,
-      "problemMatcher": {
-        "owner": "python",
-        "fileLocation": "absolute",
-        "pattern": [{ "regexp": "." }],
-        "background": {
-          "activeOnStart": true,
-          "beginsPattern": "API READY on",
-          "endsPattern": "API READY on"
-        }
-      },
-      "options": { "env": { "PYTHONUNBUFFERED": "1" } },
-      "presentation": { 
-        "reveal": "never", 
-        "panel": "dedicated", 
-        "focus": false, 
-        "clear": false 
-      },
-      "group": "build"
-    },
-    {
-      "label": "dev:desktop",
-      "type": "shell",
-      "command": "powershell -ExecutionPolicy Bypass -File scripts/start_web.ps1",
-      "isBackground": true,
-      "problemMatcher": {
-        "owner": "node",
-        "fileLocation": "absolute",
-        "pattern": [{ "regexp": "." }],
-        "background": {
-          "activeOnStart": true,
-          "beginsPattern": "WEB READY on",
-          "endsPattern": "WEB READY on"
-        }
-      },
-      "presentation": { 
-        "reveal": "never", 
-        "panel": "dedicated", 
-        "focus": false, 
-        "clear": false 
-      },
-      "group": "build"
-    },
-    {
-      "label": "stop:ai-server",
-      "type": "shell",
-      "command": "powershell -ExecutionPolicy Bypass -File scripts/kill-by-port.ps1 1216",
-      "problemMatcher": [],
-      "group": "build"
-    },
-    {
-      "label": "stop:gateway",
-      "type": "shell",
-      "command": "powershell -ExecutionPolicy Bypass -File scripts/kill-by-port.ps1 8000",
-      "problemMatcher": [],
-      "group": "build"
-    },
-    {
-      "label": "stop:desktop",
-      "type": "shell",
-      "command": "powershell -ExecutionPolicy Bypass -File scripts/kill-by-port.ps1 3000",
-      "problemMatcher": [],
-      "group": "build"
-    },
-    {
-      "label": "stop:all",
-      "type": "shell",
-      "command": "powershell -ExecutionPolicy Bypass -Command \"& { .\\scripts\\kill-by-port.ps1 1216; .\\scripts\\kill-by-port.ps1 8000; .\\scripts\\kill-by-port.ps1 3000; .\\scripts\\kill-by-port.ps1 8081 }\"",
-      "problemMatcher": [],
-      "group": "build"
-    },
-    {
-      "label": "start:all",
-      "dependsOrder": "sequence",
-      "dependsOn": [
-        "dev:ai-server",
-        "dev:gateway",
-        "dev:desktop"
-      ],
-      "group": "build"
-    }
-  ]
+    ]
 }

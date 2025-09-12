@@ -1,44 +1,28 @@
 Metadata-Version: 2.4
 Name: stillme-ai
-Version: 2.1.0
-Summary: STILLME AI Framework - Enterprise Edition
-Author: StillMe Framework Team
-Author-email: team@stillme.ai
-Classifier: Development Status :: 5 - Production/Stable
-Classifier: Intended Audience :: Developers
-Classifier: License :: Commercial
-Classifier: Programming Language :: Python :: 3.12
-Classifier: Topic :: Artificial Intelligence
-Classifier: Topic :: Software Development :: Libraries :: Python Modules
-Requires-Python: >=3.12
-Requires-Dist: cryptography>=45.0.0
-Requires-Dist: pytest>=8.4.0
-Requires-Dist: pytest-asyncio>=1.1.0
-Requires-Dist: httpx>=0.28.0
-Requires-Dist: openai>=1.0.0
-Requires-Dist: ollama>=0.5.0
-Requires-Dist: sentence-transformers>=5.1.0
-Requires-Dist: transformers>=4.56.0
-Requires-Dist: torch>=2.8.0
-Requires-Dist: numpy>=2.3.0
-Requires-Dist: PyYAML>=6.0.0
-Requires-Dist: psutil>=5.9.0
-Requires-Dist: fastapi>=0.104.0
-Requires-Dist: uvicorn>=0.24.0
+Version: 2.1.1
+Summary: StillMe AI Framework - Advanced AI Platform
+Author: StillMe AI Team
+Requires-Python: >=3.8
+Requires-Dist: fastapi>=0.68.0
+Requires-Dist: uvicorn>=0.15.0
+Requires-Dist: pydantic>=1.8.0
+Requires-Dist: httpx>=0.24.0
+Requires-Dist: aiofiles>=0.7.0
+Requires-Dist: pyyaml>=6.0
+Requires-Dist: pytest>=6.0.0
+Requires-Dist: pytest-asyncio>=0.15.0
+Requires-Dist: pytest-cov>=2.12.0
 Provides-Extra: dev
-Requires-Dist: pytest>=8.4.0; extra == "dev"
-Requires-Dist: pytest-asyncio>=1.1.0; extra == "dev"
-Requires-Dist: black>=23.0.0; extra == "dev"
-Requires-Dist: flake8>=6.0.0; extra == "dev"
-Provides-Extra: ai
-Requires-Dist: sentence-transformers>=5.1.0; extra == "ai"
-Requires-Dist: transformers>=4.56.0; extra == "ai"
-Requires-Dist: torch>=2.8.0; extra == "ai"
-Requires-Dist: ollama>=0.5.0; extra == "ai"
+Requires-Dist: ruff>=0.1.0; extra == "dev"
+Requires-Dist: pyright>=1.1.0; extra == "dev"
+Requires-Dist: radon>=5.1.0; extra == "dev"
+Requires-Dist: vulture>=2.0.0; extra == "dev"
 Dynamic: author
-Dynamic: author-email
-Dynamic: classifier
+Dynamic: description
 Dynamic: provides-extra
 Dynamic: requires-dist
 Dynamic: requires-python
 Dynamic: summary
+
+StillMe AI Framework with Common Layer architecture

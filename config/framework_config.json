@@ -1,86 +1,73 @@
 {
-  "_comment": "StillMe AI Framework Configuration - Cấu hình Framework AI StillMe",
-  "_purpose": "Main configuration file for StillMe AI Framework - File cấu hình chính cho Framework AI StillMe",
-  "_functionality": "Module settings, security config, identity management - Cài đặt module, cấu hình bảo mật, quản lý danh tính",
-  "_related_files": "framework.py, stable_ai_server.py, modules/ - Files liên quan",
-  
-  "version": "2.1.1",
-  "framework_name": "StillMe AI Framework",
-  "description": "Enterprise-grade AI framework with 7 integrated modules",
-  
-  "core_settings": {
-    "modules_dir": "modules",
-    "auto_load": true,
-    "strict_mode": false,
-    "max_module_load_time": 30,
-    "security_level": "high",
+  "framework": {
+    "version": "2.1.1",
+    "name": "StillMe AI Framework",
+    "description": "Enterprise-grade AI framework with 9 core modules",
+    "debug": false,
     "log_level": "INFO"
   },
-  
-  "module_configs": {
+  "modules": {
     "content_integrity_filter": {
       "enabled": true,
-      "testing_mode": false,
-      "api_timeout": 30
-    },
-    "layered_memory": {
-      "enabled": true,
-      "max_memories": 10000,
-      "encryption_enabled": true
+      "config_file": "config/content_integrity_config.json"
     },
     "conversational_core": {
       "enabled": true,
-      "max_history": 20,
-      "context_window": 50
+      "config_file": "config/conversational_core_config.json"
     },
-    "ethical_system": {
+    "ethical_core_system": {
       "enabled": true,
-      "strict_mode": false,
-      "auto_block": true
+      "config_file": "config/ethical_core_config.json"
+    },
+    "layered_memory": {
+      "enabled": true,
+      "config_file": "config/layered_memory_config.json"
+    },
+    "persona_morph": {
+      "enabled": true,
+      "config_file": "config/persona_morph_config.json"
+    },
+    "unified_api_manager": {
+      "enabled": true,
+      "config_file": "config/api_provider_config.json"
     },
     "token_optimizer": {
       "enabled": true,
-      "compression_threshold": 0.8,
-      "cache_ttl": 1800
+      "config_file": "config/token_optimizer_config.json"
+    },
+    "emotion_sense": {
+      "enabled": true,
+      "config_file": "config/emotion_sense_config.json"
+    },
+    "secure_memory_manager": {
+      "enabled": true,
+      "config_file": "config/secure_memory_config.json"
     }
   },
-  
+  "logging": {
+    "level": "INFO",
+    "format": "json",
+    "file": "logs/framework.log",
+    "max_size": "10MB",
+    "backup_count": 5,
+    "console_output": true
+  },
   "performance": {
-    "max_concurrent_requests": 100,
-    "request_timeout": 60,
-    "memory_limit_mb": 2048,
+    "max_concurrent_operations": 10,
+    "operation_timeout": 30,
+    "memory_limit_mb": 1024,
     "cpu_limit_percent": 80
   },
-  
   "security": {
-    "encryption_enabled": true,
-    "api_key_required": true,
-    "rate_limiting": true,
-    "input_validation": true
+    "sandbox_enabled": true,
+    "module_isolation": true,
+    "restricted_imports": true,
+    "execution_timeout": 60
   },
-  
-  "identity": {
-    "core": {
-      "creator": "Anh Nguyễn",
-      "nationality": "Việt Nam", 
-      "org_support": ["OpenAI", "Google", "DeepSeek"],
-      "project_name": "StillMe"
-    },
-    "templates": {
-      "vi": [
-        "Mình là StillMe – meta-AI cá nhân do Anh Nguyễn (Việt Nam) phát triển, đồng hành cùng công nghệ từ OpenAI, Google và DeepSeek.",
-        "Không phải của Hàn Quốc đâu 😄. Mình do một người Việt Nam phát triển – Anh Nguyễn – với sự hỗ trợ từ các tổ chức AI lớn như OpenAI, Google, DeepSeek.",
-        "Em là StillMe AI, được tạo ra bởi Anh Nguyễn (người Việt Nam) với sự đồng hành của OpenAI, Google, DeepSeek và các tổ chức AI hàng đầu.",
-        "Tôi là StillMe - trí tuệ nhân tạo được khởi xướng bởi Anh Nguyễn (Việt Nam), với sự hỗ trợ từ OpenAI, Google, DeepSeek.",
-        "StillMe là dự án AI do Anh Nguyễn (người Việt Nam) phát triển, kết hợp sức mạnh từ OpenAI, Google, DeepSeek."
-      ],
-      "en": [
-        "I'm StillMe, a personal meta-AI created by Anh Nguyen from Vietnam, built with support from OpenAI, Google, and DeepSeek.",
-        "Not Korean 😊. I was developed by a Vietnamese creator (Anh Nguyen), with technologies from OpenAI, Google, and DeepSeek.",
-        "I'm StillMe AI, created by Anh Nguyen (Vietnamese) with support from OpenAI, Google, DeepSeek and leading AI organizations.",
-        "StillMe is an AI project developed by Anh Nguyen (Vietnam), combining power from OpenAI, Google, DeepSeek.",
-        "I was built by Anh Nguyen from Vietnam, with collaboration from OpenAI, Google, and DeepSeek technologies."
-      ]
-    }
+  "monitoring": {
+    "health_check_interval": 30,
+    "metrics_collection": true,
+    "performance_tracking": true,
+    "error_reporting": true
   }
 }

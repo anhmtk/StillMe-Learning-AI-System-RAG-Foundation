@@ -41,8 +41,8 @@ TECHNICAL DETAILS / CHI TIẾT KỸ THUẬT:
 """
 
 import asyncio
-import logging
 import os
+import sys
 from contextlib import asynccontextmanager
 from typing import Dict, Any
 
@@ -65,16 +65,22 @@ from api.routes import auth, messages, devices, health
 from services.stillme_integration import StillMeIntegration
 from services.notification_service import NotificationService
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler("gateway.log")
-    ]
+# Import common utilities
+# Add project root to Python path
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+from common import (
+    ConfigManager, get_logger, AsyncHttpClient, FileManager,
+    StillMeException, APIError
 )
-logger = logging.getLogger(__name__)
+
+# Initialize common utilities
+config_manager = ConfigManager("config/gateway_config.json", {})
+logger = get_logger("StillMe.Gateway", log_file="logs/gateway.log", json_format=True)
+http_client = AsyncHttpClient()
+file_manager = FileManager()
 
 # Global instances
 settings = Settings()
@@ -163,7 +169,14 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
                 
             elif message.type == MessageType.STATUS:
                 # Handle status updates
-                await websocket_manager.broadcast_status(message)
+                status_dict = {
+                    "id": message.id,
+                    "type": message.type.value,
+                    "content": message.content,
+                    "timestamp": message.timestamp,
+                    "metadata": message.metadata
+                }
+                await websocket_manager.broadcast_status(status_dict)
                 
             elif message.type == MessageType.HEARTBEAT:
                 # Handle heartbeat
@@ -175,8 +188,11 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
     except WebSocketDisconnect:
         await websocket_manager.disconnect(client_id)
         logger.info(f"Client {client_id} disconnected")
+    except StillMeException as e:
+        logger.error(f"StillMe error for client {client_id}: {e}")
+        await websocket_manager.disconnect(client_id)
     except Exception as e:
-        logger.error(f"WebSocket error for client {client_id}: {e}")
+        logger.error(f"Unexpected error for client {client_id}: {e}")
         await websocket_manager.disconnect(client_id)
 
 # Root endpoint

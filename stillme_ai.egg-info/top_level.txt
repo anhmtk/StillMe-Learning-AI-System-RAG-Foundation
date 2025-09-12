@@ -1,4 +1,6 @@
 adapters
+clients
+common
 modules
 oi_adapter
 stillme_core

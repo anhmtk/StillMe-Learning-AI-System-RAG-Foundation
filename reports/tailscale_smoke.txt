@@ -1,0 +1,32 @@
+=== STILLME TAILSCALE SMOKE TEST REPORT ===
+Timestamp: 2025-09-11 23:34:00
+Base URL: http://192.168.1.8:8000
+Overall Status: PASS
+
+Test Results:
+- /livez: PASS
+- /readyz: PASS
+- /version: PASS
+- /health: PASS
+
+Version Info:
+{
+  "name": "stillme",
+  "version": "2.0.0",
+  "build_time": "2025-09-11T23:33:45.553220",
+  "environment": "development"
+}
+
+Server Logs (last 20 lines):
+{"timestamp": "2025-09-11 23:32:31", "level": "INFO", "logger": "StillMe.Modules.http", "message": "HTTP client initialized", "module": "logging", "function": "info", "line": 210, "thread": 23840, "process": 9524, "taskName": null, "base_url": null, "timeout": 30.0, "max_retries": 3}
+{"timestamp": "2025-09-11 23:32:31", "level": "INFO", "logger": "StillMe.Modules.io", "message": "File manager initialized", "module": "logging", "function": "info", "line": 210, "thread": 23840, "process": 9524, "taskName": null, "base_path": "D:\\stillme_ai"}
+INFO:     Started server process [9524]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:3035 (Press CTRL+C to quit)
+
+=== NOTES ===
+- Server đang chạy trên port 3035 thay vì 8000
+- Cần cấu hình server bind trên 0.0.0.0 để accessible từ Tailscale
+- Tất cả health check endpoints hoạt động tốt
+- Server khởi động thành công và sẵn sàng nhận requests

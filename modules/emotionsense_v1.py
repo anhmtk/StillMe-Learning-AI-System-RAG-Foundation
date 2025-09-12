@@ -7,7 +7,6 @@ Tích hợp seamless với StillMe Framework
 
 import asyncio
 import json
-import logging
 import re
 import time
 from datetime import datetime, timedelta
@@ -16,6 +15,19 @@ from typing import Dict, List, Any, Optional, Tuple
 from collections import defaultdict, deque
 import numpy as np
 
+# Import common utilities
+import sys
+import os
+# Add project root to Python path
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+from common import (
+    ConfigManager, get_logger, AsyncHttpClient, FileManager,
+    StillMeException, ModuleError, retry_with_backoff
+)
+
 # Import các thư viện được phép (không xung đột)
 try:
     import torch
@@ -23,7 +35,7 @@ try:
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
-    logging.warning("PyTorch not available, using rule-based fallback")
+    # Will initialize logger later
 
 try:
     from sklearn.feature_extraction.text import TfidfVectorizer
@@ -31,7 +43,7 @@ try:
     SKLEARN_AVAILABLE = True
 except ImportError:
     SKLEARN_AVAILABLE = False
-    logging.warning("Scikit-learn not available, using basic keyword matching")
+    # Will initialize logger later
 
 # Constants
 EMOTION_CATEGORIES = {
@@ -66,6 +78,12 @@ class EmotionSenseV1:
     
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         """Khởi tạo EmotionSense module"""
+        # Initialize common utilities
+        self.config_manager = ConfigManager("config/emotion_sense_config.json", {})
+        self.logger = get_logger("StillMe.EmotionSense", log_file="logs/emotion_sense.log", json_format=True)
+        self.http_client = AsyncHttpClient()
+        self.file_manager = FileManager()
+        
         self.config = config or self._load_default_config()
         self.emotion_model = None
         self.tokenizer = None
@@ -76,6 +94,12 @@ class EmotionSenseV1:
         self.cache: Dict[str, Dict[str, Any]] = {}
         self.cache_size = self.config.get("cache_size", 10000)
         self.confidence_threshold = self.config.get("confidence_threshold", 0.6)
+        
+        # Log warnings for missing dependencies
+        if not TORCH_AVAILABLE:
+            self.logger.warning("PyTorch not available, using rule-based fallback")
+        if not SKLEARN_AVAILABLE:
+            self.logger.warning("Scikit-learn not available, using basic keyword matching")
         
         # Setup logging
         self._setup_logging()
@@ -110,27 +134,8 @@ class EmotionSenseV1:
         }
     
     def _setup_logging(self):
-        """Setup logging configuration"""
-        self.logger = logging.getLogger("EmotionSense")
-        self.logger.setLevel(logging.INFO)
-        
-        # Create formatter
-        formatter = logging.Formatter(
-            "%(asctime)s - %(levelname)s - EmotionSense - %(message)s"
-        )
-        
-        # Create console handler
-        console_handler = logging.StreamHandler()
-        console_handler.setFormatter(formatter)
-        self.logger.addHandler(console_handler)
-        
-        # Create file handler
-        try:
-            file_handler = logging.FileHandler("emotionsense.log", encoding='utf-8')
-            file_handler.setFormatter(formatter)
-            self.logger.addHandler(file_handler)
-        except Exception as e:
-            self.logger.warning(f"Failed to create file handler: {e}")
+        """Setup logging configuration using common logging"""
+        self.logger = get_module_logger("emotionsense")
     
     async def initialize(self) -> bool:
         """Khởi tạo model và dependencies"""

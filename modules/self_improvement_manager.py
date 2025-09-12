@@ -22,7 +22,19 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, asdict
-import logging
+
+# Import common utilities
+import sys
+import os
+# Add project root to Python path
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+from common import (
+    ConfigManager, get_logger, AsyncHttpClient, FileManager,
+    StillMeException, ModuleError, retry_with_backoff
+)
 
 # Import các module an toàn
 try:
@@ -100,6 +112,12 @@ class SelfImprovementManager:
         Args:
             config_path: Đường dẫn đến file cấu hình
         """
+        # Initialize common utilities
+        self.config_manager = ConfigManager(config_path, {})
+        self.logger = get_logger("StillMe.SelfImprovement", log_file="logs/self_improvement.log", json_format=True)
+        self.http_client = AsyncHttpClient()
+        self.file_manager = FileManager()
+        
         self.config_path = config_path
         self.proposed_changes: List[ProposedChange] = []
         self.safety_reports: List[SafetyReport] = []
@@ -111,15 +129,15 @@ class SelfImprovementManager:
         self.ethical_checker = EthicalCoreSystem()
         self.integrity_filter = ContentIntegrityFilter()
         
-        # Cấu hình logging
-        self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.INFO)
+        # Cấu hình logging using common logging
+        self.logger = get_module_logger("self_improvement")
         
         # Tạo thư mục cần thiết
         self._create_directories()
         
-        # Load cấu hình
-        self.config = self._load_config()
+        # Load cấu hình using common config
+        self.config_manager = load_module_config("self_improvement", self.config_path)
+        self.config = self.config_manager.to_dict()
         
         # Trạng thái an toàn
         self.safety_mode = True  # Luôn ở chế độ an toàn

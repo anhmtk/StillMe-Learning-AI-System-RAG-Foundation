@@ -45,6 +45,18 @@ from enum import Enum
 from typing import Optional, Tuple, Dict, Any
 import httpx # Import httpx cần thiết cho OpenRouterClient
 
+# Import common utilities
+import sys
+# Add project root to Python path
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+
+from common import (
+    ConfigManager, get_logger, AsyncHttpClient, FileManager,
+    StillMeException, APIError, retry_with_backoff
+)
+
 # --- Cấu hình Logger ---
 LOGS_DIR = "logs"
 ETHICAL_VIOLATIONS_LOG = os.path.join(LOGS_DIR, "ethical_violations.log")
@@ -347,6 +359,12 @@ class SelfCritic:
 # --- EthicalCoreSystem Class ---
 class EthicalCoreSystem:
     def __init__(self):
+        # Initialize common utilities
+        self.config_manager = ConfigManager("config/ethical_core_config.json", {})
+        self.logger = get_logger("StillMe.EthicalCore", log_file="logs/ethical_core.log", json_format=True)
+        self.http_client = AsyncHttpClient()
+        self.file_manager = FileManager()
+        
         api_key = os.environ.get("OPENROUTER_API_KEY")
         if not api_key:
             raise ValueError("OPENROUTER_API_KEY environment variable not set.")

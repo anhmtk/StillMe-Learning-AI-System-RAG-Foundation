@@ -1,0 +1,48 @@
+// Android App Configuration for StillMe
+// Cấu hình Android App cho StillMe
+
+android {
+    // ... existing android config ...
+    
+    buildTypes {
+        debug {
+            // Debug configuration
+            buildConfigField "String", "SERVER_BASE_URL", "\"http://192.168.1.8:8000\""
+            buildConfigField "int", "SERVER_TIMEOUT", "10000"
+            buildConfigField "int", "RETRY_ATTEMPTS", "3"
+            buildConfigField "int", "RETRY_DELAY", "1000"
+            
+            // Enable cleartext traffic for development
+            manifestPlaceholders = [usesCleartextTraffic: "true"]
+        }
+        
+        release {
+            // Production configuration
+            buildConfigField "String", "SERVER_BASE_URL", "\"https://api.stillme.ai\""
+            buildConfigField "int", "SERVER_TIMEOUT", "15000"
+            buildConfigField "int", "RETRY_ATTEMPTS", "5"
+            buildConfigField "int", "RETRY_DELAY", "2000"
+            
+            manifestPlaceholders = [usesCleartextTraffic: "false"]
+        }
+    }
+}
+
+// Network security configuration
+android {
+    buildTypes {
+        debug {
+            // Allow cleartext traffic for development
+            manifestPlaceholders = [
+                networkSecurityConfig: "@xml/network_security_config_debug"
+            ]
+        }
+        
+        release {
+            // Secure configuration for production
+            manifestPlaceholders = [
+                networkSecurityConfig: "@xml/network_security_config_release"
+            ]
+        }
+    }
+}

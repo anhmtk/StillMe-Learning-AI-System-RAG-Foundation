@@ -83,7 +83,7 @@ import importlib.util
 import inspect
 import json
 import logging
-import logging.handlers
+import os
 import subprocess
 import sys
 import signal
@@ -98,6 +98,21 @@ import psutil
 from RestrictedPython import compile_restricted
 from types import ModuleType
 
+# Import common utilities
+from common import (
+    ConfigManager, get_logger, AsyncHttpClient, FileManager,
+    StillMeException, APIError, retry_with_backoff
+)
+
+# Version constant
+__version__ = "2.1.1"
+
+# Initialize common utilities
+config_manager = ConfigManager("config/framework_config.json", {})
+logger = get_logger("StillMe.Framework", log_file="logs/framework.log", json_format=True)
+http_client = AsyncHttpClient()
+file_manager = FileManager()
+
 # Import tất cả modules đã sửa với graceful handling
 MODULES_IMPORTED = True
 IMPORTED_MODULES = {}
@@ -107,56 +122,56 @@ try:
     from modules.content_integrity_filter import ContentIntegrityFilter
     IMPORTED_MODULES['ContentIntegrityFilter'] = ContentIntegrityFilter
 except ImportError as e:
-    logging.warning(f"ContentIntegrityFilter not available: {e}")
+    logger.warning(f"ContentIntegrityFilter not available: {e}")
     IMPORTED_MODULES['ContentIntegrityFilter'] = None
 
 try:
     from modules.conversational_core_v1 import ConversationalCore
     IMPORTED_MODULES['ConversationalCore'] = ConversationalCore
 except ImportError as e:
-    logging.warning(f"ConversationalCore not available: {e}")
+    logger.warning(f"ConversationalCore not available: {e}")
     IMPORTED_MODULES['ConversationalCore'] = None
 
 try:
     from modules.ethical_core_system_v1 import EthicalCoreSystem
     IMPORTED_MODULES['EthicalCoreSystem'] = EthicalCoreSystem
 except ImportError as e:
-    logging.warning(f"EthicalCoreSystem not available: {e}")
+    logger.warning(f"EthicalCoreSystem not available: {e}")
     IMPORTED_MODULES['EthicalCoreSystem'] = None
 
 try:
     from modules.layered_memory_v1 import LayeredMemoryV1
     IMPORTED_MODULES['LayeredMemoryV1'] = LayeredMemoryV1
 except ImportError as e:
-    logging.warning(f"LayeredMemoryV1 not available: {e}")
+    logger.warning(f"LayeredMemoryV1 not available: {e}")
     IMPORTED_MODULES['LayeredMemoryV1'] = None
 
 try:
     from modules.persona_morph import PersonaMorph
     IMPORTED_MODULES['PersonaMorph'] = PersonaMorph
 except ImportError as e:
-    logging.warning(f"PersonaMorph not available: {e}")
+    logger.warning(f"PersonaMorph not available: {e}")
     IMPORTED_MODULES['PersonaMorph'] = None
 
 try:
     from modules.api_provider_manager import UnifiedAPIManager
     IMPORTED_MODULES['UnifiedAPIManager'] = UnifiedAPIManager
 except ImportError as e:
-    logging.warning(f"UnifiedAPIManager not available: {e}")
+    logger.warning(f"UnifiedAPIManager not available: {e}")
     IMPORTED_MODULES['UnifiedAPIManager'] = None
 
 try:
     from modules.token_optimizer_v1 import TokenOptimizer
     IMPORTED_MODULES['TokenOptimizer'] = TokenOptimizer
 except ImportError as e:
-    logging.warning(f"TokenOptimizer not available: {e}")
+    logger.warning(f"TokenOptimizer not available: {e}")
     IMPORTED_MODULES['TokenOptimizer'] = None
 
 try:
     from modules.emotionsense_v1 import EmotionSenseV1
     IMPORTED_MODULES['EmotionSenseV1'] = EmotionSenseV1
 except ImportError as e:
-    logging.warning(f"EmotionSenseV1 not available: {e}")
+    logger.warning(f"EmotionSenseV1 not available: {e}")
     IMPORTED_MODULES['EmotionSenseV1'] = None
 
 try:

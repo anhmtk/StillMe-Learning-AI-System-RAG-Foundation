@@ -79,3 +79,85 @@ benchmark_*
 # Agent logs
 agent_*
 *_agent.*
+
+# Sandbox and temporary development files
+.sandbox/
+sandbox/
+*_temp/
+temp_*/
+StillMeMobileTemp
+*.temp.*
+
+# Large platform files
+stillme_platform/StillMeMobileTemp
+stillme_platform/*.zip
+stillme_platform/*.tar.gz
+stillme_platform/*.rar
+
+# Virtual environment files
+.vscode/
+.idea/
+*.swp
+*.swo
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build outputs
+dist/
+build/
+*.egg-info/
+*.dist-info/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Large media files
+*.mp4
+*.avi
+*.mov
+*.wmv
+*.flv
+*.webm
+*.mkv
+*.mp3
+*.wav
+*.flac
+*.aac
+*.ogg
+*.wma
+
+# Large archive files
+*.zip
+*.rar
+*.7z
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+
+# Large model files
+*.bin
+*.model
+*.pkl
+*.pickle
+*.h5
+*.hdf5
+*.pt
+*.pth
+*.onnx
+*.tflite
+
+# Large data files
+*.csv
+*.tsv
+*.json
+*.xml
+*.yaml
+*.yml
+!config/*.yaml
+!config/*.yml
+!pyproject.toml
+!stillme_manifest.yaml

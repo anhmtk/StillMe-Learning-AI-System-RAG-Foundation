@@ -2,10 +2,19 @@
 import os
 import logging
 import time
-import requests
 from typing import List, Dict, Optional, Any
 from openai import OpenAI
 import ollama
+
+# Import common utilities
+import sys
+import os
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from common.http import AsyncHttpClient, HTTPClientConfig, get_json, post_json
+from common.logging import get_module_logger
+from common.config import load_module_config
+from common.errors import APIError, NetworkError, StillMeException
 
 # CRITICAL: Load environment variables from .env file
 try:
@@ -36,6 +45,19 @@ class UnifiedAPIManager:
         """
         self.model_preferences = model_preferences or ["deepseek-chat"]  # Default to DeepSeek
         self.fallback_model = fallback_model or "deepseek-chat"
+        
+        # Initialize common utilities
+        self.logger = get_module_logger("api_provider_manager")
+        self.config = load_module_config("api_provider_manager", "config/api_provider_config.json")
+        
+        # HTTP client configuration
+        http_config = HTTPClientConfig(
+            timeout=30.0,
+            max_retries=3,
+            retry_delay=1.0,
+            default_headers={"User-Agent": "StillMe-API-Provider/2.1.1"}
+        )
+        self.http_client = AsyncHttpClient(http_config)
         
         # Provider configuration
         self.preferred_provider = os.getenv('PREFERRED_PROVIDER', 'deepseek')  # Default to DeepSeek
@@ -137,29 +159,23 @@ class UnifiedAPIManager:
             
             self.logger.info(f"Calling DeepSeek API with prompt: {prompt[:50]}...")
             
-            response = requests.post(url, headers=headers, json=payload, timeout=30)
+            # Use async HTTP client (will be made sync for compatibility)
+            import asyncio
+            response = asyncio.run(self.http_client.post(url, headers=headers, json_data=payload))
             response.raise_for_status()
             
-            data = response.json()
+            data = response.json_data
             content = data["choices"][0]["message"]["content"]
             
             self.logger.info("DeepSeek API call successful")
             return content
             
-        except requests.exceptions.HTTPError as e:
-            error_msg = f"DeepSeek HTTP error: {e.response.status_code}"
-            if hasattr(e, 'response') and e.response is not None:
-                try:
-                    error_details = e.response.json()
-                    error_msg += f" - {error_details}"
-                except:
-                    error_msg += f" - {e.response.text}"
+        except APIError as e:
+            self.logger.error(f"DeepSeek API error: {e}")
+            return f"Error: DeepSeek API failed"
             
-            self.logger.error(error_msg)
-            return f"Error: DeepSeek API failed ({e.response.status_code})"
-            
-        except requests.exceptions.RequestException as e:
-            self.logger.error(f"DeepSeek request error: {e}")
+        except NetworkError as e:
+            self.logger.error(f"DeepSeek network error: {e}")
             return f"Error: Network issue with DeepSeek API"
             
         except Exception as e:
@@ -231,22 +247,22 @@ class UnifiedAPIManager:
             
             self.logger.info(f"Ollama: Calling model gemma2:2b with prompt: {prompt[:50]}...")
             
-            response = requests.post(
+            # Use async HTTP client (will be made sync for compatibility)
+            import asyncio
+            response = asyncio.run(self.http_client.post(
                 "http://localhost:11434/api/chat",
-                json=payload,
+                json_data=payload,
                 timeout=60
-            )
+            ))
             
             response.raise_for_status()
-            data = response.json()
+            data = response.json_data
             
             self.logger.info("Ollama: Received response from gemma2:2b")
             return data.get("message", {}).get("content", "No response from Ollama")
             
-        except requests.exceptions.RequestException as e:
-            self.logger.error(f"Ollama request error: {e}")
-            if hasattr(e, 'response') and e.response is not None:
-                self.logger.error(f"Ollama error details: {e.response.text}")
+        except NetworkError as e:
+            self.logger.error(f"Ollama network error: {e}")
             return f"Error: Failed to connect to Ollama API"
         except Exception as e:
             self.logger.error(f"Ollama error: {e}")

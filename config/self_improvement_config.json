@@ -1,105 +1,52 @@
 {
-  "safety_mode": true,
-  "read_only_mode": true,
-  "auto_approve_low_risk": false,
-  "max_proposed_changes": 10,
-  "backup_retention_days": 30,
-  "sandbox_timeout_seconds": 300,
-  "required_approvals": [
-    "ethical",
-    "integrity",
-    "test"
-  ],
-  "forbidden_file_patterns": [
-    "*.pyc",
-    "__pycache__",
-    "*.log",
-    "*.tmp",
-    "backup_legacy",
-    "tests/fixtures",
-    "node_modules",
-    "**/Lib/**/test/**",
-    "**/Tests/**"
-  ],
-  "critical_files": [
-    "framework.py",
-    "app.py",
-    "modules/ethical_core_system.py",
-    "modules/content_integrity_filter.py",
-    "modules/self_improvement_manager.py"
-  ],
-  "risk_levels": {
-    "LOW": {
-      "description": "Thay đổi nhỏ, ít rủi ro",
-      "auto_approve": false,
-      "require_manual_review": false
-    },
-    "MEDIUM": {
-      "description": "Thay đổi trung bình, rủi ro vừa phải",
-      "auto_approve": false,
-      "require_manual_review": true
-    },
-    "HIGH": {
-      "description": "Thay đổi lớn, rủi ro cao",
-      "auto_approve": false,
-      "require_manual_review": true,
-      "require_sandbox_test": true
-    },
-    "CRITICAL": {
-      "description": "Thay đổi quan trọng, rủi ro rất cao",
-      "auto_approve": false,
-      "require_manual_review": true,
-      "require_sandbox_test": true,
-      "require_emergency_rollback": true
-    }
+  "self_improvement": {
+    "version": "1.0.0",
+    "name": "Self Improvement Manager",
+    "description": "Module tự cải thiện với cơ chế an toàn tối đa",
+    "safety_level": "MAXIMUM"
   },
-  "safety_checks": {
-    "ethical_core_system": {
-      "enabled": true,
-      "timeout_seconds": 30,
-      "required_score": 0.8
-    },
-    "content_integrity_filter": {
-      "enabled": true,
-      "timeout_seconds": 30,
-      "required_score": 0.9
-    },
-    "syntax_check": {
-      "enabled": true,
-      "timeout_seconds": 10
-    },
-    "test_suite": {
-      "enabled": true,
-      "timeout_seconds": 300,
-      "required_pass_rate": 0.95
-    }
+  "safety_rules": {
+    "read_only_default": true,
+    "require_approval": true,
+    "four_eye_check": true,
+    "sandbox_testing": true,
+    "auto_rollback": true
   },
-  "backup_settings": {
+  "approval_process": {
+    "ethical_core_required": true,
+    "content_integrity_required": true,
+    "test_suite_required": true,
+    "manual_review_required": true
+  },
+  "sandbox": {
     "enabled": true,
-    "compression": true,
-    "encryption": false,
-    "max_backups_per_file": 10,
-    "backup_naming_pattern": "{filename}_{timestamp}.backup"
+    "timeout": 300,
+    "memory_limit": "512MB",
+    "isolated_environment": true
   },
-  "sandbox_settings": {
+  "backup": {
     "enabled": true,
-    "isolated_environment": true,
-    "timeout_seconds": 300,
-    "cleanup_after_test": true,
-    "max_sandbox_size_mb": 100
+    "auto_backup": true,
+    "backup_retention": 7,
+    "compression": true
+  },
+  "monitoring": {
+    "track_changes": true,
+    "performance_metrics": true,
+    "safety_reports": true,
+    "audit_log": true
   },
   "logging": {
     "level": "INFO",
-    "file_rotation": true,
-    "max_log_size_mb": 10,
-    "backup_count": 5,
-    "log_format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    "format": "json",
+    "file": "logs/self_improvement.log",
+    "max_size": "10MB",
+    "backup_count": 5
   },
-  "notifications": {
-    "email_alerts": false,
-    "console_alerts": true,
-    "file_alerts": true,
-    "alert_on_high_risk": true,
-    "alert_on_rollback": true
+  "limits": {
+    "max_proposed_changes": 100,
+    "max_file_size": "10MB",
+    "max_operations_per_hour": 50,
+    "cooldown_period": 300
   }
 }

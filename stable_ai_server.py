@@ -42,7 +42,6 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import uvicorn
-import logging
 import time
 from datetime import datetime
 from typing import List, Dict, Any, Optional
@@ -51,85 +50,21 @@ import os
 import asyncio
 from enum import Enum
 
-# Setup logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-logger = logging.getLogger(__name__)
+# Import common utilities
+from common import (
+    ConfigManager, get_logger, AsyncHttpClient, FileManager,
+    StillMeException, APIError, CircuitBreaker, CircuitState, RetryManager
+)
+from common.retry import CircuitBreakerConfig
 
-# Circuit Breaker Implementation
-class CircuitState(Enum):
-    CLOSED = "closed"
-    OPEN = "open"
-    HALF_OPEN = "half_open"
+# Initialize common utilities
+config_manager = ConfigManager("config/ai_server_config.json", {})
+logger = get_logger("StillMe.AIServer", log_file="logs/ai_server.log", json_format=True)
+http_client = AsyncHttpClient()
+file_manager = FileManager()
 
-class CircuitBreaker:
-    """Circuit breaker for fault tolerance"""
-    
-    def __init__(self, name: str, failure_threshold: int = 5, recovery_timeout: int = 60):
-        self.name = name
-        self.failure_threshold = failure_threshold
-        self.recovery_timeout = recovery_timeout
-        self.failure_count = 0
-        self.last_failure_time = 0
-        self.state = CircuitState.CLOSED
-        
-    def call(self, func, *args, **kwargs):
-        """Execute function with circuit breaker protection"""
-        if self.state == CircuitState.OPEN:
-            if time.time() - self.last_failure_time < self.recovery_timeout:
-                raise Exception(f"Circuit breaker {self.name} is OPEN")
-            else:
-                self.state = CircuitState.HALF_OPEN
-                self.failure_count = 0
-        
-        try:
-            result = func(*args, **kwargs)
-            self._on_success()
-            return result
-        except Exception as e:
-            self._on_failure()
-            raise e
-    
-    def _on_success(self):
-        """Handle successful operation"""
-        self.failure_count = 0
-        if self.state == CircuitState.HALF_OPEN:
-            self.state = CircuitState.CLOSED
-            logger.info(f"Circuit breaker {self.name} is now CLOSED")
-    
-    def _on_failure(self):
-        """Handle failed operation"""
-        self.failure_count += 1
-        self.last_failure_time = time.time()
-        
-        if self.failure_count >= self.failure_threshold:
-            self.state = CircuitState.OPEN
-            logger.warning(f"Circuit breaker {self.name} is now OPEN")
-
-class RetryManager:
-    """Retry manager with exponential backoff"""
-    
-    def __init__(self, max_attempts: int = 3, base_delay: float = 1.0):
-        self.max_attempts = max_attempts
-        self.base_delay = base_delay
-    
-    def execute(self, func, *args, **kwargs):
-        """Execute function with retry logic"""
-        last_exception = None
-        
-        for attempt in range(1, self.max_attempts + 1):
-            try:
-                return func(*args, **kwargs)
-            except Exception as e:
-                last_exception = e
-                
-                if attempt < self.max_attempts:
-                    delay = self.base_delay * (2 ** (attempt - 1))
-                    logger.warning(f"Attempt {attempt} failed: {e}. Retrying in {delay:.2f}s")
-                    time.sleep(delay)
-                else:
-                    logger.error(f"All {self.max_attempts} attempts failed")
-        
-        raise last_exception
+# Circuit Breaker Implementation (using common utilities)
+# CircuitBreaker and RetryManager are now imported from common utilities
 
 # Create FastAPI app
 app = FastAPI(
@@ -176,8 +111,9 @@ class StillMeAI:
         self.max_history = 10
         
         # Initialize error handling components
-        self.circuit_breaker = CircuitBreaker("stillme_ai", failure_threshold=3, recovery_timeout=30)
-        self.retry_manager = RetryManager(max_attempts=3, base_delay=1.0)
+        circuit_config = CircuitBreakerConfig(failure_threshold=3, recovery_timeout=30.0)
+        self.circuit_breaker = CircuitBreaker(circuit_config, logger)
+        self.retry_manager = RetryManager()
         
         # Fallback responses
         self.fallback_responses = {
@@ -391,6 +327,31 @@ async def health():
         "uptime": "stable"
     }
 
+@app.get("/livez")
+async def liveness():
+    """Liveness probe - process is alive"""
+    return {"status": "alive", "timestamp": datetime.now().isoformat()}
+
+@app.get("/readyz")
+async def readiness():
+    """Readiness probe - server is ready to accept requests"""
+    try:
+        # Kiểm tra các dependency chính nếu có
+        # Trong dev mode, luôn trả về ready
+        return {"status": "ready", "timestamp": datetime.now().isoformat()}
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Not ready: {str(e)}")
+
+@app.get("/version")
+async def version():
+    """Version information"""
+    return {
+        "name": "stillme",
+        "version": "2.0.0",
+        "build_time": datetime.now().isoformat(),
+        "environment": "development"
+    }
+
 @app.get("/health/ai")
 async def health_ai():
     """AI-specific health check endpoint for VS Code Tasks"""
@@ -509,13 +470,13 @@ if __name__ == "__main__":
         return port
     
     port = find_free_port()
-    logger.info(f"🌐 Starting StillMe AI on http://127.0.0.1:{port}")
+    logger.info(f"🌐 Starting StillMe AI on http://0.0.0.0:{port}")
     logger.info("✅ Server is stable and production-ready!")
     
-    # Run server with UTF-8 encoding
+    # Run server with UTF-8 encoding - bind to 0.0.0.0 for Tailscale access
     uvicorn.run(
         app, 
-        host="127.0.0.1", 
+        host="0.0.0.0", 
         port=port,
         log_level="info",
         access_log=True,
