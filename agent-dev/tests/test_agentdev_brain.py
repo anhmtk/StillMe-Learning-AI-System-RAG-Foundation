@@ -9,7 +9,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # Import trực tiếp
-from stillme_core.agentdev_brain import get_agentdev_brain
+from stillme_core.core.legacy_agentdev.agentdev_brain import get_agentdev_brain
 
 
 def test_agentdev_brain():

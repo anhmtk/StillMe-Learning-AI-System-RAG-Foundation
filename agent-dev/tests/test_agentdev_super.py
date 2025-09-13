@@ -9,7 +9,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # Import trực tiếp
-from stillme_core.agentdev_super import execute_agentdev_super_task
+from stillme_core.core.legacy_agentdev.agentdev_super import execute_agentdev_super_task
 
 
 def test_agentdev_super():

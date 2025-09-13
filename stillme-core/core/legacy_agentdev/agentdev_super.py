@@ -11,8 +11,8 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Tuple
 
 from .agentdev_brain import FixResult, get_agentdev_brain
-from .quality.auto_fixer import AutoFixer
-from .quality.code_quality_enforcer import CodeQualityEnforcer
+from ...quality.auto_fixer import AutoFixer
+from ...quality.code_quality_enforcer import CodeQualityEnforcer
 
 
 @dataclass

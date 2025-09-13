@@ -14,7 +14,7 @@ from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.table import Table
 
-from stillme_core.quality.agentdev_integration import AgentDevQualityIntegration
+from ...quality.agentdev_integration import AgentDevQualityIntegration
 
 # Initialize Typer app
 app = typer.Typer(name="quality", help="Code quality management commands")
