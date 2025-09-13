@@ -6,7 +6,7 @@ def test_bugmemory_fingerprint_and_exists(tmp_path):
     bm = BugMemory(str(path))
     fp = bm.fingerprint("a.py", 10, "ZeroDivisionError")
     assert not bm.exists(fp)
-    bm.append({"fingerprint": fp, "file": "a.py", "line": 10, "message": "ZeroDivisionError"})
+    bm.append(
+        {"fingerprint": fp, "file": "a.py", "line": 10, "message": "ZeroDivisionError"}
+    )
     assert bm.exists(fp)
-
-

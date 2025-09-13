@@ -4,13 +4,14 @@ Message handling endpoints
 """
 
 import logging
+from typing import Any, Dict, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
+from services.stillme_integration import StillMeIntegration
 
 from core.auth import get_current_user
 from core.message_protocol import MessageProtocol, MessageType
-from services.stillme_integration import StillMeIntegration
 
 logger = logging.getLogger(__name__)
 
@@ -35,8 +36,7 @@ class MessageResponse(BaseModel):
 
 @router.post("/send", response_model=MessageResponse)
 async def send_message(
-    request: MessageRequest,
-    current_user: Dict[str, Any] = Depends(get_current_user)
+    request: MessageRequest, current_user: Dict[str, Any] = Depends(get_current_user)
 ) -> MessageResponse:
     """Send a message to StillMe Core"""
     try:
@@ -47,19 +47,19 @@ async def send_message(
             content=request.content,
             source=current_user["user_id"],
             target=request.target,
-            priority=request.priority
+            priority=request.priority,
         )
-        
+
         # Process command if it's a command message
         if message.type == MessageType.COMMAND:
             result = await stillme_integration.process_command(message)
-            
+
             return MessageResponse(
                 id=result["id"],
                 type=result["type"],
                 success=result["success"],
                 result=result.get("result"),
-                error=result.get("error")
+                error=result.get("error"),
             )
         else:
             # For non-command messages, just acknowledge
@@ -67,14 +67,14 @@ async def send_message(
                 id=message.id,
                 type=message.type,
                 success=True,
-                result={"message": "Message received"}
+                result={"message": "Message received"},
             )
-            
+
     except Exception as e:
         logger.error(f"Error sending message: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to send message: {str(e)}"
+            detail=f"Failed to send message: {e!s}",
         )
 
 
@@ -82,38 +82,33 @@ async def send_message(
 async def get_message_history(
     limit: int = 50,
     offset: int = 0,
-    current_user: Dict[str, Any] = Depends(get_current_user)
+    current_user: Dict[str, Any] = Depends(get_current_user),
 ) -> Dict[str, Any]:
     """Get message history for current user"""
     try:
         # TODO: Implement message history retrieval from database
-        return {
-            "messages": [],
-            "total": 0,
-            "limit": limit,
-            "offset": offset
-        }
-        
+        return {"messages": [], "total": 0, "limit": limit, "offset": offset}
+
     except Exception as e:
         logger.error(f"Error getting message history: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to get message history"
+            detail="Failed to get message history",
         )
 
 
 @router.delete("/history")
 async def clear_message_history(
-    current_user: Dict[str, Any] = Depends(get_current_user)
+    current_user: Dict[str, Any] = Depends(get_current_user),
 ) -> Dict[str, str]:
     """Clear message history for current user"""
     try:
         # TODO: Implement message history clearing
         return {"message": "Message history cleared"}
-        
+
     except Exception as e:
         logger.error(f"Error clearing message history: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to clear message history"
+            detail="Failed to clear message history",
         )

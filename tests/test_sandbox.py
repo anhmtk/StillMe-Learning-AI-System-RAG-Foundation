@@ -10,4 +10,3 @@ def test_prepare_and_run(tmp_path):
     assert path.exists()
     ok, out, err = run_tests_in_sandbox(["python", "-c", "print('ok')"], path)
     assert ok
-

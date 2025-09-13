@@ -4,7 +4,7 @@ StillMe AI Framework Setup
 Thiết lập StillMe AI Framework
 """
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 setup(
     name="stillme-ai",
@@ -32,5 +32,5 @@ setup(
             "radon>=5.1.0",
             "vulture>=2.0.0",
         ]
-    }
+    },
 )

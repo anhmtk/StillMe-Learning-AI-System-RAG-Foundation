@@ -5,50 +5,57 @@ SAFETY: Enterprise-grade design, isolated sandbox, no production modifications
 """
 
 import json
-import os
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Union
-from dataclasses import dataclass, asdict
-from enum import Enum
 import uuid
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
-import numpy as np
-from collections import defaultdict
+from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List
+
 
 class TenantType(Enum):
     """Types of tenants"""
+
     ENTERPRISE = "enterprise"
     SMB = "smb"
     STARTUP = "startup"
     INDIVIDUAL = "individual"
     GOVERNMENT = "government"
 
+
 class IsolationLevel(Enum):
     """Data isolation levels"""
+
     DATABASE = "database"
     SCHEMA = "schema"
     ROW_LEVEL = "row_level"
     APPLICATION = "application"
     PHYSICAL = "physical"
 
+
 class ResourceTier(Enum):
     """Resource tiers"""
+
     BASIC = "basic"
     STANDARD = "standard"
     PREMIUM = "premium"
     ENTERPRISE = "enterprise"
     CUSTOM = "custom"
 
+
 class SecurityLevel(Enum):
     """Security levels"""
+
     STANDARD = "standard"
     ENHANCED = "enhanced"
     HIGH = "high"
     CRITICAL = "critical"
     GOVERNMENT = "government"
 
+
 class ComplianceStandard(Enum):
     """Compliance standards"""
+
     GDPR = "gdpr"
     SOC2 = "soc2"
     ISO27001 = "iso27001"
@@ -56,9 +63,11 @@ class ComplianceStandard(Enum):
     PCI_DSS = "pci_dss"
     FEDRAMP = "fedramp"
 
+
 @dataclass
 class Tenant:
     """Represents a tenant"""
+
     tenant_id: str
     name: str
     tenant_type: TenantType
@@ -76,9 +85,11 @@ class Tenant:
     created_at: str
     status: str
 
+
 @dataclass
 class ResourceAllocation:
     """Represents resource allocation"""
+
     allocation_id: str
     tenant_id: str
     resource_type: str
@@ -91,9 +102,11 @@ class ResourceAllocation:
     scaling_threshold: float
     cost_per_unit: float
 
+
 @dataclass
 class PerformanceMetrics:
     """Represents performance metrics"""
+
     metrics_id: str
     tenant_id: str
     timestamp: str
@@ -107,9 +120,11 @@ class PerformanceMetrics:
     active_users: int
     api_calls: int
 
+
 @dataclass
 class BillingConfiguration:
     """Represents billing configuration"""
+
     billing_id: str
     tenant_id: str
     billing_model: str
@@ -123,9 +138,11 @@ class BillingConfiguration:
     cost_center: str
     budget_limit: float
 
+
 @dataclass
 class MultiTenantSystem:
     """Represents multi-tenant system"""
+
     system_id: str
     name: str
     description: str
@@ -140,9 +157,10 @@ class MultiTenantSystem:
     monitoring_system: str
     backup_strategy: str
 
+
 class MultiTenantArchitect:
     """Designs multi-tenant architecture"""
-    
+
     def __init__(self, project_root: str = "."):
         self.project_root = Path(project_root)
         self.tenants = []
@@ -151,72 +169,80 @@ class MultiTenantArchitect:
         self.billing_configurations = []
         self.multi_tenant_systems = []
         self.analysis_results = {}
-        
+
     def design_multi_tenant_architecture(self) -> Dict[str, Any]:
         """Main design function"""
         print("🏢 Starting multi-tenant architecture design...")
-        
+
         # Safety check: Ensure enterprise-grade design
         print("🛡️ Safety check: Operating in enterprise-grade design mode")
         print("🔒 Enterprise safety: SOC 2, GDPR, ISO 27001 compliance")
-        
+
         # Design tenant isolation
         self._design_tenant_isolation()
-        
+
         # Design resource allocation system
         self._design_resource_allocation_system()
-        
+
         # Design performance scaling
         self._design_performance_scaling()
-        
+
         # Design billing integration
         self._design_billing_integration()
-        
+
         # Create multi-tenant systems
         self._create_multi_tenant_systems()
-        
+
         # Generate recommendations
         recommendations = self._generate_enterprise_recommendations()
-        
+
         # Create implementation plan
         implementation_plan = self._create_implementation_plan()
-        
+
         # Convert tenants to serializable format
         serializable_tenants = []
         for tenant in self.tenants:
             tenant_dict = asdict(tenant)
-            tenant_dict['tenant_type'] = tenant.tenant_type.value
-            tenant_dict['isolation_level'] = tenant.isolation_level.value
-            tenant_dict['resource_tier'] = tenant.resource_tier.value
-            tenant_dict['security_level'] = tenant.security_level.value
-            tenant_dict['compliance_requirements'] = [req.value for req in tenant.compliance_requirements]
+            tenant_dict["tenant_type"] = tenant.tenant_type.value
+            tenant_dict["isolation_level"] = tenant.isolation_level.value
+            tenant_dict["resource_tier"] = tenant.resource_tier.value
+            tenant_dict["security_level"] = tenant.security_level.value
+            tenant_dict["compliance_requirements"] = [
+                req.value for req in tenant.compliance_requirements
+            ]
             serializable_tenants.append(tenant_dict)
-        
+
         # Convert multi-tenant systems to serializable format
         serializable_systems = []
         for system in self.multi_tenant_systems:
             system_dict = asdict(system)
             # Replace tenant objects with serializable tenant data
-            system_dict['tenants'] = serializable_tenants
+            system_dict["tenants"] = serializable_tenants
             serializable_systems.append(system_dict)
-        
+
         return {
             "analysis_timestamp": datetime.now().isoformat(),
             "tenants": serializable_tenants,
-            "resource_allocations": [asdict(allocation) for allocation in self.resource_allocations],
-            "performance_metrics": [asdict(metrics) for metrics in self.performance_metrics],
-            "billing_configurations": [asdict(billing) for billing in self.billing_configurations],
+            "resource_allocations": [
+                asdict(allocation) for allocation in self.resource_allocations
+            ],
+            "performance_metrics": [
+                asdict(metrics) for metrics in self.performance_metrics
+            ],
+            "billing_configurations": [
+                asdict(billing) for billing in self.billing_configurations
+            ],
             "multi_tenant_systems": serializable_systems,
             "analysis_results": self.analysis_results,
             "recommendations": recommendations,
             "implementation_plan": implementation_plan,
-            "summary": self._generate_enterprise_summary()
+            "summary": self._generate_enterprise_summary(),
         }
-    
+
     def _design_tenant_isolation(self):
         """Design tenant isolation strategies"""
         print("🔒 Designing tenant isolation strategies...")
-        
+
         tenants_data = [
             {
                 "name": "Enterprise Corp",
@@ -224,15 +250,24 @@ class MultiTenantArchitect:
                 "isolation_level": IsolationLevel.DATABASE,
                 "resource_tier": ResourceTier.ENTERPRISE,
                 "security_level": SecurityLevel.CRITICAL,
-                "compliance_requirements": [ComplianceStandard.SOC2, ComplianceStandard.ISO27001, ComplianceStandard.GDPR],
+                "compliance_requirements": [
+                    ComplianceStandard.SOC2,
+                    ComplianceStandard.ISO27001,
+                    ComplianceStandard.GDPR,
+                ],
                 "data_residency": "US",
                 "sla_uptime": 0.999,
                 "max_users": 10000,
                 "max_storage_gb": 100000,
                 "max_api_calls_per_month": 10000000,
                 "custom_domains": ["enterprise.stillme.ai", "corp.stillme.ai"],
-                "features": ["advanced_analytics", "custom_integrations", "dedicated_support", "sso"],
-                "status": "active"
+                "features": [
+                    "advanced_analytics",
+                    "custom_integrations",
+                    "dedicated_support",
+                    "sso",
+                ],
+                "status": "active",
             },
             {
                 "name": "SMB Solutions",
@@ -240,7 +275,10 @@ class MultiTenantArchitect:
                 "isolation_level": IsolationLevel.SCHEMA,
                 "resource_tier": ResourceTier.PREMIUM,
                 "security_level": SecurityLevel.HIGH,
-                "compliance_requirements": [ComplianceStandard.GDPR, ComplianceStandard.SOC2],
+                "compliance_requirements": [
+                    ComplianceStandard.GDPR,
+                    ComplianceStandard.SOC2,
+                ],
                 "data_residency": "EU",
                 "sla_uptime": 0.995,
                 "max_users": 1000,
@@ -248,7 +286,7 @@ class MultiTenantArchitect:
                 "max_api_calls_per_month": 1000000,
                 "custom_domains": ["smb.stillme.ai"],
                 "features": ["analytics", "integrations", "priority_support"],
-                "status": "active"
+                "status": "active",
             },
             {
                 "name": "Startup Inc",
@@ -264,7 +302,7 @@ class MultiTenantArchitect:
                 "max_api_calls_per_month": 100000,
                 "custom_domains": [],
                 "features": ["basic_analytics", "api_access"],
-                "status": "active"
+                "status": "active",
             },
             {
                 "name": "Individual Pro",
@@ -280,7 +318,7 @@ class MultiTenantArchitect:
                 "max_api_calls_per_month": 10000,
                 "custom_domains": [],
                 "features": ["basic_access"],
-                "status": "active"
+                "status": "active",
             },
             {
                 "name": "Government Agency",
@@ -288,18 +326,28 @@ class MultiTenantArchitect:
                 "isolation_level": IsolationLevel.PHYSICAL,
                 "resource_tier": ResourceTier.CUSTOM,
                 "security_level": SecurityLevel.GOVERNMENT,
-                "compliance_requirements": [ComplianceStandard.FEDRAMP, ComplianceStandard.ISO27001, ComplianceStandard.SOC2],
+                "compliance_requirements": [
+                    ComplianceStandard.FEDRAMP,
+                    ComplianceStandard.ISO27001,
+                    ComplianceStandard.SOC2,
+                ],
                 "data_residency": "US",
                 "sla_uptime": 0.9999,
                 "max_users": 5000,
                 "max_storage_gb": 50000,
                 "max_api_calls_per_month": 5000000,
                 "custom_domains": ["gov.stillme.ai"],
-                "features": ["advanced_analytics", "custom_integrations", "dedicated_support", "sso", "audit_logging"],
-                "status": "active"
-            }
+                "features": [
+                    "advanced_analytics",
+                    "custom_integrations",
+                    "dedicated_support",
+                    "sso",
+                    "audit_logging",
+                ],
+                "status": "active",
+            },
         ]
-        
+
         for tenant_data in tenants_data:
             tenant = Tenant(
                 tenant_id=str(uuid.uuid4()),
@@ -317,57 +365,59 @@ class MultiTenantArchitect:
                 custom_domains=tenant_data["custom_domains"],
                 features=tenant_data["features"],
                 created_at=datetime.now().isoformat(),
-                status=tenant_data["status"]
+                status=tenant_data["status"],
             )
             self.tenants.append(tenant)
-    
+
     def _design_resource_allocation_system(self):
         """Design resource allocation system"""
         print("📊 Designing resource allocation system...")
-        
+
         resource_types = [
             {
                 "resource_type": "CPU",
                 "unit": "cores",
                 "auto_scaling": True,
                 "scaling_threshold": 0.8,
-                "cost_per_unit": 0.1
+                "cost_per_unit": 0.1,
             },
             {
                 "resource_type": "Memory",
                 "unit": "GB",
                 "auto_scaling": True,
                 "scaling_threshold": 0.85,
-                "cost_per_unit": 0.05
+                "cost_per_unit": 0.05,
             },
             {
                 "resource_type": "Storage",
                 "unit": "GB",
                 "auto_scaling": True,
                 "scaling_threshold": 0.9,
-                "cost_per_unit": 0.01
+                "cost_per_unit": 0.01,
             },
             {
                 "resource_type": "Network",
                 "unit": "Mbps",
                 "auto_scaling": True,
                 "scaling_threshold": 0.75,
-                "cost_per_unit": 0.02
+                "cost_per_unit": 0.02,
             },
             {
                 "resource_type": "API_Calls",
                 "unit": "calls",
                 "auto_scaling": False,
                 "scaling_threshold": 1.0,
-                "cost_per_unit": 0.001
-            }
+                "cost_per_unit": 0.001,
+            },
         ]
-        
+
         for tenant in self.tenants:
             for resource_type in resource_types:
                 # Calculate allocation based on tenant tier
-                base_allocation = self._calculate_base_allocation(tenant.resource_tier, resource_type["resource_type"])
-                
+                base_allocation = self._calculate_base_allocation(
+                    tenant.resource_tier, resource_type["resource_type"]
+                )
+
                 allocation = ResourceAllocation(
                     allocation_id=str(uuid.uuid4()),
                     tenant_id=tenant.tenant_id,
@@ -379,39 +429,43 @@ class MultiTenantArchitect:
                     min_allocation=base_allocation * 0.5,
                     max_allocation=base_allocation * 3.0,
                     scaling_threshold=resource_type["scaling_threshold"],
-                    cost_per_unit=resource_type["cost_per_unit"]
+                    cost_per_unit=resource_type["cost_per_unit"],
                 )
                 self.resource_allocations.append(allocation)
-    
-    def _calculate_base_allocation(self, resource_tier: ResourceTier, resource_type: str) -> float:
+
+    def _calculate_base_allocation(
+        self, resource_tier: ResourceTier, resource_type: str
+    ) -> float:
         """Calculate base allocation based on resource tier"""
         tier_multipliers = {
             ResourceTier.BASIC: 1.0,
             ResourceTier.STANDARD: 2.0,
             ResourceTier.PREMIUM: 4.0,
             ResourceTier.ENTERPRISE: 8.0,
-            ResourceTier.CUSTOM: 10.0
+            ResourceTier.CUSTOM: 10.0,
         }
-        
+
         base_allocations = {
             "CPU": 2.0,
             "Memory": 8.0,
             "Storage": 100.0,
             "Network": 100.0,
-            "API_Calls": 10000.0
+            "API_Calls": 10000.0,
         }
-        
-        return base_allocations.get(resource_type, 1.0) * tier_multipliers.get(resource_tier, 1.0)
-    
+
+        return base_allocations.get(resource_type, 1.0) * tier_multipliers.get(
+            resource_tier, 1.0
+        )
+
     def _design_performance_scaling(self):
         """Design performance scaling system"""
         print("⚡ Designing performance scaling system...")
-        
+
         for tenant in self.tenants:
             # Generate performance metrics for each tenant
             for i in range(24):  # 24 hours of data
-                timestamp = (datetime.now() - timedelta(hours=24-i)).isoformat()
-                
+                timestamp = (datetime.now() - timedelta(hours=24 - i)).isoformat()
+
                 # Simulate different usage patterns based on tenant type
                 if tenant.tenant_type == TenantType.ENTERPRISE:
                     base_load = 0.7
@@ -425,10 +479,10 @@ class MultiTenantArchitect:
                 else:
                     base_load = 0.2
                     peak_hours = [12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22]
-                
+
                 hour = datetime.fromisoformat(timestamp).hour
                 load_multiplier = 1.5 if hour in peak_hours else 1.0
-                
+
                 metrics = PerformanceMetrics(
                     metrics_id=str(uuid.uuid4()),
                     tenant_id=tenant.tenant_id,
@@ -440,19 +494,27 @@ class MultiTenantArchitect:
                     memory_usage=base_load * load_multiplier * 0.7,
                     storage_usage=base_load * 0.6,
                     network_usage=base_load * load_multiplier * 0.5,
-                    active_users=int(tenant.max_users * base_load * load_multiplier * 0.1),
-                    api_calls=int(tenant.max_api_calls_per_month / 30 / 24 * base_load * load_multiplier)
+                    active_users=int(
+                        tenant.max_users * base_load * load_multiplier * 0.1
+                    ),
+                    api_calls=int(
+                        tenant.max_api_calls_per_month
+                        / 30
+                        / 24
+                        * base_load
+                        * load_multiplier
+                    ),
                 )
                 self.performance_metrics.append(metrics)
-    
+
     def _design_billing_integration(self):
         """Design billing integration system"""
         print("💰 Designing billing integration system...")
-        
+
         for tenant in self.tenants:
             # Calculate base cost based on tenant tier
             base_cost = self._calculate_base_cost(tenant.resource_tier)
-            
+
             billing = BillingConfiguration(
                 billing_id=str(uuid.uuid4()),
                 tenant_id=tenant.tenant_id,
@@ -465,7 +527,7 @@ class MultiTenantArchitect:
                     "Memory": 0.08,
                     "Storage": 0.02,
                     "Network": 0.03,
-                    "API_Calls": 0.002
+                    "API_Calls": 0.002,
                 },
                 billing_cycle="monthly",
                 payment_method="credit_card",
@@ -473,13 +535,13 @@ class MultiTenantArchitect:
                     "auto_pay": True,
                     "invoice_format": "detailed",
                     "currency": "USD",
-                    "tax_included": True
+                    "tax_included": True,
                 },
                 cost_center=tenant.name,
-                budget_limit=base_cost * 1.5
+                budget_limit=base_cost * 1.5,
             )
             self.billing_configurations.append(billing)
-    
+
     def _calculate_base_cost(self, resource_tier: ResourceTier) -> float:
         """Calculate base cost based on resource tier"""
         tier_costs = {
@@ -487,14 +549,14 @@ class MultiTenantArchitect:
             ResourceTier.STANDARD: 299.0,
             ResourceTier.PREMIUM: 799.0,
             ResourceTier.ENTERPRISE: 1999.0,
-            ResourceTier.CUSTOM: 5000.0
+            ResourceTier.CUSTOM: 5000.0,
         }
         return tier_costs.get(resource_tier, 99.0)
-    
+
     def _create_multi_tenant_systems(self):
         """Create multi-tenant systems"""
         print("🏢 Creating multi-tenant systems...")
-        
+
         # Create main multi-tenant system
         main_system = MultiTenantSystem(
             system_id=str(uuid.uuid4()),
@@ -509,53 +571,61 @@ class MultiTenantArchitect:
             security_framework="Multi-layer security with tenant-specific access controls and encryption",
             compliance_framework="Automated compliance monitoring with tenant-specific requirements",
             monitoring_system="Real-time monitoring with tenant-specific dashboards and alerting",
-            backup_strategy="Automated backup with tenant-specific retention policies and geographic distribution"
+            backup_strategy="Automated backup with tenant-specific retention policies and geographic distribution",
         )
-        
+
         self.multi_tenant_systems.append(main_system)
-    
+
     def _generate_enterprise_recommendations(self) -> List[Dict[str, Any]]:
         """Generate enterprise recommendations"""
         recommendations = []
-        
+
         # Isolation recommendations
-        recommendations.append({
-            "category": "Data Isolation",
-            "recommendation": "Implement hybrid isolation strategy with database-level for enterprise tenants",
-            "rationale": "Database-level isolation provides maximum security for enterprise customers while maintaining cost efficiency",
-            "priority": "critical",
-            "implementation_effort": "high"
-        })
-        
+        recommendations.append(
+            {
+                "category": "Data Isolation",
+                "recommendation": "Implement hybrid isolation strategy with database-level for enterprise tenants",
+                "rationale": "Database-level isolation provides maximum security for enterprise customers while maintaining cost efficiency",
+                "priority": "critical",
+                "implementation_effort": "high",
+            }
+        )
+
         # Scaling recommendations
-        recommendations.append({
-            "category": "Auto-Scaling",
-            "recommendation": "Implement intelligent auto-scaling with tenant-specific thresholds",
-            "rationale": "Tenant-specific thresholds ensure optimal resource utilization while maintaining SLA requirements",
-            "priority": "high",
-            "implementation_effort": "medium"
-        })
-        
+        recommendations.append(
+            {
+                "category": "Auto-Scaling",
+                "recommendation": "Implement intelligent auto-scaling with tenant-specific thresholds",
+                "rationale": "Tenant-specific thresholds ensure optimal resource utilization while maintaining SLA requirements",
+                "priority": "high",
+                "implementation_effort": "medium",
+            }
+        )
+
         # Security recommendations
-        recommendations.append({
-            "category": "Security",
-            "recommendation": "Implement multi-layer security with tenant-specific access controls",
-            "rationale": "Multi-layer security ensures enterprise-grade protection while maintaining flexibility",
-            "priority": "critical",
-            "implementation_effort": "high"
-        })
-        
+        recommendations.append(
+            {
+                "category": "Security",
+                "recommendation": "Implement multi-layer security with tenant-specific access controls",
+                "rationale": "Multi-layer security ensures enterprise-grade protection while maintaining flexibility",
+                "priority": "critical",
+                "implementation_effort": "high",
+            }
+        )
+
         # Compliance recommendations
-        recommendations.append({
-            "category": "Compliance",
-            "recommendation": "Automate compliance monitoring with tenant-specific requirements",
-            "rationale": "Automated compliance reduces manual overhead and ensures consistent adherence to regulations",
-            "priority": "high",
-            "implementation_effort": "medium"
-        })
-        
+        recommendations.append(
+            {
+                "category": "Compliance",
+                "recommendation": "Automate compliance monitoring with tenant-specific requirements",
+                "rationale": "Automated compliance reduces manual overhead and ensures consistent adherence to regulations",
+                "priority": "high",
+                "implementation_effort": "medium",
+            }
+        )
+
         return recommendations
-    
+
     def _create_implementation_plan(self) -> List[Dict[str, Any]]:
         """Create implementation plan for multi-tenant architecture"""
         return [
@@ -567,14 +637,14 @@ class MultiTenantArchitect:
                     "Database isolation setup",
                     "Basic tenant management",
                     "Resource allocation framework",
-                    "Basic monitoring"
+                    "Basic monitoring",
                 ],
                 "deliverables": [
                     "Isolated database schemas",
                     "Tenant management system",
                     "Resource allocation engine",
-                    "Basic monitoring dashboard"
-                ]
+                    "Basic monitoring dashboard",
+                ],
             },
             {
                 "phase": 2,
@@ -584,14 +654,14 @@ class MultiTenantArchitect:
                     "Auto-scaling implementation",
                     "Performance optimization",
                     "Load balancing",
-                    "Caching system"
+                    "Caching system",
                 ],
                 "deliverables": [
                     "Auto-scaling system",
                     "Performance optimization",
                     "Load balancer configuration",
-                    "Caching infrastructure"
-                ]
+                    "Caching infrastructure",
+                ],
             },
             {
                 "phase": 3,
@@ -601,14 +671,14 @@ class MultiTenantArchitect:
                     "Multi-layer security",
                     "Compliance automation",
                     "Audit logging",
-                    "Access controls"
+                    "Access controls",
                 ],
                 "deliverables": [
                     "Security framework",
                     "Compliance monitoring",
                     "Audit system",
-                    "Access control system"
-                ]
+                    "Access control system",
+                ],
             },
             {
                 "phase": 4,
@@ -618,41 +688,53 @@ class MultiTenantArchitect:
                     "Billing system integration",
                     "Usage tracking",
                     "Analytics dashboard",
-                    "Reporting system"
+                    "Reporting system",
                 ],
                 "deliverables": [
                     "Billing integration",
                     "Usage tracking system",
                     "Analytics dashboard",
-                    "Reporting framework"
-                ]
-            }
+                    "Reporting framework",
+                ],
+            },
         ]
-    
+
     def _generate_enterprise_summary(self) -> Dict[str, Any]:
         """Generate enterprise summary"""
         total_tenants = len(self.tenants)
         total_allocations = len(self.resource_allocations)
         total_metrics = len(self.performance_metrics)
         total_billing = len(self.billing_configurations)
-        
+
         # Calculate tenant distribution
         tenant_distribution = {}
         for tenant in self.tenants:
             tenant_type = tenant.tenant_type.value
-            tenant_distribution[tenant_type] = tenant_distribution.get(tenant_type, 0) + 1
-        
+            tenant_distribution[tenant_type] = (
+                tenant_distribution.get(tenant_type, 0) + 1
+            )
+
         # Calculate average SLA
-        avg_sla = sum(tenant.sla_uptime for tenant in self.tenants) / total_tenants if total_tenants > 0 else 0
-        
+        avg_sla = (
+            sum(tenant.sla_uptime for tenant in self.tenants) / total_tenants
+            if total_tenants > 0
+            else 0
+        )
+
         # Calculate total revenue potential
-        total_revenue = sum(billing.base_cost for billing in self.billing_configurations)
-        
+        total_revenue = sum(
+            billing.base_cost for billing in self.billing_configurations
+        )
+
         # Calculate resource utilization
-        total_allocated = sum(allocation.allocated_amount for allocation in self.resource_allocations)
-        total_used = sum(allocation.used_amount for allocation in self.resource_allocations)
+        total_allocated = sum(
+            allocation.allocated_amount for allocation in self.resource_allocations
+        )
+        total_used = sum(
+            allocation.used_amount for allocation in self.resource_allocations
+        )
         avg_utilization = total_used / total_allocated if total_allocated > 0 else 0
-        
+
         return {
             "total_tenants": total_tenants,
             "total_resource_allocations": total_allocations,
@@ -663,37 +745,53 @@ class MultiTenantArchitect:
             "total_revenue_potential": total_revenue,
             "average_resource_utilization": round(avg_utilization, 3),
             "implementation_phases": 4,
-            "total_implementation_time": "10 weeks"
+            "total_implementation_time": "10 weeks",
         }
+
 
 def main():
     """Main design function"""
     print("🏢 AgentDev Enterprise - Multi-Tenant Architecture Designer")
     print("=" * 60)
-    
+
     architect = MultiTenantArchitect()
-    
+
     try:
         design_result = architect.design_multi_tenant_architecture()
-        
+
         # Save design result
-        result_path = Path("backup/enterprise_scaling_analysis_20250910_004152/multi_tenant_architecture.json")
-        with open(result_path, 'w', encoding='utf-8') as f:
+        result_path = Path(
+            "backup/enterprise_scaling_analysis_20250910_004152/multi_tenant_architecture.json"
+        )
+        with open(result_path, "w", encoding="utf-8") as f:
             json.dump(design_result, f, indent=2, ensure_ascii=False)
-        
+
         print(f"✅ Design complete! Result saved to: {result_path}")
-        print(f"🏢 Designed {design_result['summary']['total_tenants']} tenant configurations")
-        print(f"📊 Created {design_result['summary']['total_resource_allocations']} resource allocations")
-        print(f"⚡ Generated {design_result['summary']['total_performance_metrics']} performance metrics")
-        print(f"💰 Configured {design_result['summary']['total_billing_configurations']} billing configurations")
-        print(f"📈 Average SLA uptime: {design_result['summary']['average_sla_uptime']}")
-        print(f"💵 Total revenue potential: ${design_result['summary']['total_revenue_potential']:,.0f}")
-        
+        print(
+            f"🏢 Designed {design_result['summary']['total_tenants']} tenant configurations"
+        )
+        print(
+            f"📊 Created {design_result['summary']['total_resource_allocations']} resource allocations"
+        )
+        print(
+            f"⚡ Generated {design_result['summary']['total_performance_metrics']} performance metrics"
+        )
+        print(
+            f"💰 Configured {design_result['summary']['total_billing_configurations']} billing configurations"
+        )
+        print(
+            f"📈 Average SLA uptime: {design_result['summary']['average_sla_uptime']}"
+        )
+        print(
+            f"💵 Total revenue potential: ${design_result['summary']['total_revenue_potential']:,.0f}"
+        )
+
         return design_result
-        
+
     except Exception as e:
         print(f"❌ Design failed: {e}")
         return None
+
 
 if __name__ == "__main__":
     main()

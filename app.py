@@ -1,14 +1,26 @@
-import importlib, importlib.util, inspect, asyncio, sys, logging, yaml, json, traceback, threading, time
-from pathlib import Path
-import gradio as gr
+import asyncio
+import importlib
+import importlib.util
+import inspect
+import json
+import logging
 
 # Tạm thời disable sentence_transformers để tránh lỗi import
 import os
-os.environ['DISABLE_SENTENCE_TRANSFORMERS'] = '1'
+import sys
+import threading
+import time
+from pathlib import Path
+
+import gradio as gr
+import yaml
+
+os.environ["DISABLE_SENTENCE_TRANSFORMERS"] = "1"
+
+import hashlib
 
 # Cache cho performance optimization
 from functools import lru_cache
-import hashlib
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 ROOT = Path(__file__).resolve().parent
@@ -16,6 +28,8 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 MANIFEST_PATH = Path("stillme_manifest.yaml")
+
+
 def _load_manifest():
     if MANIFEST_PATH.exists():
         try:
@@ -25,74 +39,98 @@ def _load_manifest():
             return {}
     return {}
 
+
 # --- manifest & ui_state giữ nguyên ---
-from stillme_core.ui_state import get_flag, set_flag
+from stillme_core.ui_state import get_flag
+
 
 # ---------- ConscienceCore loader ----------
 def _load_conscience_hook():
     """Load ConscienceCore from multiple possible locations."""
-    
+
     # Try 1: modules.conscience_core_v1
     try:
         from modules.conscience_core_v1 import conscience_hook
+
         logging.info("ConscienceCore loaded from modules.conscience_core_v1")
         return conscience_hook
     except Exception as e1:
         logging.debug("modules.conscience_core_v1 not found: %r", e1)
-    
+
     # Try 2: stillme_core.conscience_core_v1
     try:
         from stillme_core.conscience_core_v1 import conscience_hook
+
         logging.info("ConscienceCore loaded from stillme_core.conscience_core_v1")
         return conscience_hook
     except Exception as e2:
         logging.debug("stillme_core.conscience_core_v1 not found: %r", e2)
-    
+
     # Try 3: Load from file path - modules
     cc_path_modules = ROOT / "modules" / "conscience_core_v1.py"
     if cc_path_modules.exists():
         try:
-            spec = importlib.util.spec_from_file_location("conscience_core_v1", str(cc_path_modules))
+            spec = importlib.util.spec_from_file_location(
+                "conscience_core_v1", str(cc_path_modules)
+            )
             mod = importlib.util.module_from_spec(spec)
             sys.modules["conscience_core_v1"] = mod
             spec.loader.exec_module(mod)  # type: ignore
-            conscience_hook = getattr(mod, "conscience_hook")
-            logging.info("ConscienceCore loaded from file: modules/conscience_core_v1.py")
+            conscience_hook = mod.conscience_hook
+            logging.info(
+                "ConscienceCore loaded from file: modules/conscience_core_v1.py"
+            )
             return conscience_hook
         except Exception as e3:
             logging.debug("Failed to load from modules/conscience_core_v1.py: %r", e3)
-    
+
     # Try 4: Load from file path - stillme_core
     cc_path_stillme = ROOT / "stillme_core" / "conscience_core_v1.py"
     if cc_path_stillme.exists():
         try:
-            spec = importlib.util.spec_from_file_location("conscience_core_v1", str(cc_path_stillme))
+            spec = importlib.util.spec_from_file_location(
+                "conscience_core_v1", str(cc_path_stillme)
+            )
             mod = importlib.util.module_from_spec(spec)
             sys.modules["conscience_core_v1"] = mod
             spec.loader.exec_module(mod)  # type: ignore
-            conscience_hook = getattr(mod, "conscience_hook")
-            logging.info("ConscienceCore loaded from file: stillme_core/conscience_core_v1.py")
+            conscience_hook = mod.conscience_hook
+            logging.info(
+                "ConscienceCore loaded from file: stillme_core/conscience_core_v1.py"
+            )
             return conscience_hook
         except Exception as e4:
-            logging.debug("Failed to load from stillme_core/conscience_core_v1.py: %r", e4)
-    
+            logging.debug(
+                "Failed to load from stillme_core/conscience_core_v1.py: %r", e4
+            )
+
     # Fallback: tạo ConscienceCore mock
-    logging.info("ConscienceCore not found, creating mock ConscienceCore with basic ethical filtering")
-    
+    logging.info(
+        "ConscienceCore not found, creating mock ConscienceCore with basic ethical filtering"
+    )
+
     def mock_conscience_hook(prompt: str, raw_fn):
         """Mock ConscienceCore with basic ethical filtering."""
         # Basic ethical filtering
-        dangerous_keywords = ["hack", "crack", "exploit", "malware", "virus", "phishing"]
+        dangerous_keywords = [
+            "hack",
+            "crack",
+            "exploit",
+            "malware",
+            "virus",
+            "phishing",
+        ]
         prompt_lower = prompt.lower()
-        
+
         for keyword in dangerous_keywords:
             if keyword in prompt_lower:
                 return "⚠️ Tôi không thể hỗ trợ các hoạt động có thể gây hại hoặc bất hợp pháp."
-        
+
         # Call the raw function
         return raw_fn(prompt)
-    
+
     return mock_conscience_hook
+
 
 # ---------- Resolve raw generator (router) ----------
 def _resolve_raw_generator():
@@ -124,7 +162,9 @@ def _resolve_raw_generator():
                     router_instance = router_class()
                     fn = router_instance.get_ai_response
                     if callable(fn):
-                        logging.info("Using %s.%s instance as raw generator", mod_name, fn_name)
+                        logging.info(
+                            "Using %s.%s instance as raw generator", mod_name, fn_name
+                        )
                         return fn, f"{mod_name}.{fn_name}.get_ai_response"
             else:
                 fn = getattr(mod, fn_name, None)
@@ -136,7 +176,9 @@ def _resolve_raw_generator():
     # cuối cùng: thử load controller.py theo path
     ctrl_path = ROOT / "stillme_core" / "controller.py"
     if ctrl_path.exists():
-        spec = importlib.util.spec_from_file_location("stillme_controller_file", str(ctrl_path))
+        spec = importlib.util.spec_from_file_location(
+            "stillme_controller_file", str(ctrl_path)
+        )
         mod = importlib.util.module_from_spec(spec)
         sys.modules["stillme_controller_file"] = mod
         spec.loader.exec_module(mod)  # type: ignore
@@ -144,10 +186,14 @@ def _resolve_raw_generator():
         if callable(fn):
             logging.info("Using file controller.py respond/answer as raw generator")
             return fn, "file(controller.py)"
-    raise ImportError("Cannot find a raw answer function (get_ai_response/respond/answer)")
+    raise ImportError(
+        "Cannot find a raw answer function (get_ai_response/respond/answer)"
+    )
+
 
 conscience_hook = _load_conscience_hook()
 _raw_fn, _raw_desc = _resolve_raw_generator()
+
 
 def _call_raw(prompt: str) -> str:
     fn = _raw_fn
@@ -163,20 +209,70 @@ def _call_raw(prompt: str) -> str:
             try:
                 asyncio.set_event_loop(loop)
                 coro = fn(prompt)
-                return loop.run_until_complete(coro) if inspect.iscoroutine(coro) else coro
+                return (
+                    loop.run_until_complete(coro) if inspect.iscoroutine(coro) else coro
+                )
             finally:
                 loop.close()
         raise
 
+
+def _detect_dev_intent(prompt: str) -> bool:
+    """Detect if user request is for development task"""
+    dev_keywords = [
+        "viết code",
+        "tạo code",
+        "lập trình",
+        "code",
+        "programming",
+        "tạo app",
+        "tạo ứng dụng",
+        "build",
+        "compile",
+        "tạo tool",
+        "tạo công cụ",
+        "utility",
+        "script",
+        "sửa lỗi",
+        "fix bug",
+        "linting",
+        "quality",
+        "lỗi",
+        "error",
+        "bug",
+        "debug",
+        "refactor",
+        "optimize",
+    ]
+    prompt_lower = prompt.lower()
+    return any(keyword in prompt_lower for keyword in dev_keywords)
+
+
 def generate_answer(prompt: str) -> str:
+    # Check if this is a development request
+    if _detect_dev_intent(prompt):
+        try:
+            # Route to AgentDev for development tasks
+            from stillme_core.ai_manager import dev_agent
+
+            result = dev_agent(prompt, mode="fast")
+            if result and not result.startswith("[AIManager]"):
+                return result
+        except Exception as e:
+            logging.warning(f"AgentDev routing failed: {e}")
+            # Fallback to normal processing
+
     draft = conscience_hook(prompt, _call_raw)
     # Chuẩn hoá & bảo vệ rỗng
     text = _normalize_text(draft).strip()
     if not text:
         logging.warning("Empty draft from %s", _raw_desc)
-        return ("⚠️ Pipeline trả về rỗng từ "
-                f"`{_raw_desc}`. Kiểm tra router/model hoặc biến môi trường (nếu dùng API).")
+        return (
+            "⚠️ Pipeline trả về rỗng từ "
+            f"`{_raw_desc}`. Kiểm tra router/model hoặc biến môi trường (nếu dùng API)."
+        )
     return text
+
 
 # --- route getter giữ nguyên (dùng intelligent_router.explain_last_route nếu có) ---
 def _resolve_route_label_getter():
@@ -184,31 +280,71 @@ def _resolve_route_label_getter():
         try:
             m = importlib.import_module(cand)
             f = getattr(m, "explain_last_route", None)
-            if callable(f): return f
+            if callable(f):
+                return f
         except Exception:
             pass
     return None
 
+
 route_label_getter = _resolve_route_label_getter()
+
 
 def _normalize_text(x) -> str:
     try:
         if isinstance(x, (list, tuple)):
-            if not x: return ""
+            if not x:
+                return ""
             if isinstance(x[0], dict):
-                return x[0].get("text") or x[0].get("answer") or json.dumps(x[0], ensure_ascii=False)
+                return (
+                    x[0].get("text")
+                    or x[0].get("answer")
+                    or json.dumps(x[0], ensure_ascii=False)
+                )
             return str(x[0])
         if isinstance(x, dict):
-            return x.get("text") or x.get("answer") or x.get("output") or json.dumps(x, ensure_ascii=False)
+            return (
+                x.get("text")
+                or x.get("answer")
+                or x.get("output")
+                or json.dumps(x, ensure_ascii=False)
+            )
         return str(x)
     except Exception:
         return f"[Serialization error: {type(x).__name__}]"
+
 
 # --- phần UI pledge / Blocks / handle_query giữ nguyên, chỉ thay body của handle_query nếu cần ---
 def handle_query(user_input: str):
     try:
         ans = generate_answer(user_input)
-        logging.info("REQ route=%s | preview=%s", (route_label_getter() if route_label_getter else "hidden"), ans[:120].replace("\n"," "))
+
+        # NEW: Apply Reflection Controller enhancement
+        # Áp dụng nâng cao từ Reflection Controller
+        try:
+            from stillme_core.reflection_controller import get_default_controller
+
+            reflection_controller = get_default_controller()
+
+            if reflection_controller.should_reflect(user_input):
+                import asyncio
+
+                reflection_result = asyncio.run(
+                    reflection_controller.enhance_response(ans, user_input)
+                )
+                ans = reflection_result.final_response
+                logging.info(
+                    f"Reflection applied: {reflection_result.improvement:+.3f} improvement, {reflection_result.steps_taken} steps"
+                )
+        except Exception as reflection_error:
+            logging.warning(f"Reflection enhancement failed: {reflection_error}")
+            # Continue with original response if reflection fails
+
+        logging.info(
+            "REQ route=%s | preview=%s",
+            (route_label_getter() if route_label_getter else "hidden"),
+            ans[:120].replace("\n", " "),
+        )
     except Exception as e:
         logging.exception("generate_answer crashed")
         ans = f"⚠️ Lỗi khi xử lý câu hỏi. {type(e).__name__}: {e}"
@@ -216,8 +352,13 @@ def handle_query(user_input: str):
         route_txt = route_label_getter() if route_label_getter else ""
     except Exception:
         route_txt = ""
-    route_md = f"**Route:** {route_txt}" if route_txt else "**Route:** intelligent_router (ẩn chi tiết)"
+    route_md = (
+        f"**Route:** {route_txt}"
+        if route_txt
+        else "**Route:** intelligent_router (ẩn chi tiết)"
+    )
     return ans, route_md
+
 
 # Cache cho classification để tối ưu performance
 @lru_cache(maxsize=100)
@@ -225,9 +366,11 @@ def _cached_classify(message_hash: str):
     """Cache classification results để tránh gọi lại model"""
     try:
         from modules.intelligent_router import classify_query_with_gemma2
+
         return classify_query_with_gemma2(message_hash)
     except:
         return "complex"
+
 
 def stillme_chat_fn_stream(message: str, history):
     """
@@ -235,19 +378,21 @@ def stillme_chat_fn_stream(message: str, history):
     """
     if not message.strip():
         return ""
-    
+
     try:
         # Import router for streaming
         from modules.intelligent_router import ModelRouter
+
         router = ModelRouter()
-        
+
         # Stream response
         for chunk in router.get_ai_response_stream(message):
             yield chunk
-            
+
     except Exception as e:
         print(f"Streaming error: {e}")
         yield "⚠️ Có lỗi xảy ra khi xử lý yêu cầu của bạn."
+
 
 def stillme_chat_fn(message: str, history):
     """
@@ -255,31 +400,34 @@ def stillme_chat_fn(message: str, history):
     """
     if not message.strip():
         return ""
-    
+
     # Bắt đầu đo thời gian
     start_time = time.time()
-    
+
     # Tạo hash cho cache
     message_hash = hashlib.md5(message.lower().strip().encode()).hexdigest()
-    
+
     try:
         # Log bắt đầu xử lý
-        print(f"[START] Processing: '{message[:30]}{'...' if len(message) > 30 else ''}'")
-        
+        print(
+            f"[START] Processing: '{message[:30]}{'...' if len(message) > 30 else ''}'"
+        )
+
         # Gọi framework StillMe với timing chi tiết
         framework_start = time.time()
         ai_response = generate_answer(message)
         framework_time = round(time.time() - framework_start, 2)
-        
+
         # Tính thời gian xử lý tổng
         end_time = time.time()
         processing_time = round(end_time - start_time, 2)
-        
+
         # Lấy thông tin model thực tế từ intelligent_router
         real_model_name = "intelligent_router"
         try:
             # Import intelligent_router để lấy model thực tế
             from modules.intelligent_router import explain_last_route
+
             route_info = explain_last_route()
             if route_info and isinstance(route_info, dict):
                 real_model_name = route_info.get("model", "intelligent_router")
@@ -294,46 +442,68 @@ def stillme_chat_fn(message: str, history):
                     real_model_name = "openai-gpt"
         except Exception as e:
             print(f"[WARN] Cannot get real model name: {e}")
-        
+
         # Cải thiện chất lượng câu trả lời - chủ động đưa ra gợi ý
         enhanced_response = ai_response
         message_lower = message.lower().strip()
-        
+
         # Xử lý các câu hỏi chung chung
-        if any(keyword in message_lower for keyword in ["viết code javascript", "code js", "javascript"]):
-            if "cụ thể" not in ai_response.lower() and "ví dụ" not in ai_response.lower():
+        if any(
+            keyword in message_lower
+            for keyword in ["viết code javascript", "code js", "javascript"]
+        ):
+            if (
+                "cụ thể" not in ai_response.lower()
+                and "ví dụ" not in ai_response.lower()
+            ):
                 enhanced_response = f"{ai_response}\n\n**Gợi ý cụ thể:**\n- Tạo hàm xử lý sự kiện click\n- Viết code thao tác với mảng/object\n- Tạo request API bằng fetch\n\nBạn cần loại nào?"
-        
-        elif any(keyword in message_lower for keyword in ["viết code python", "code python", "python"]):
-            if "cụ thể" not in ai_response.lower() and "ví dụ" not in ai_response.lower():
+
+        elif any(
+            keyword in message_lower
+            for keyword in ["viết code python", "code python", "python"]
+        ):
+            if (
+                "cụ thể" not in ai_response.lower()
+                and "ví dụ" not in ai_response.lower()
+            ):
                 enhanced_response = f"{ai_response}\n\n**Gợi ý cụ thể:**\n- Tạo hàm xử lý dữ liệu\n- Viết class và object\n- Xử lý file và database\n\nBạn cần loại nào?"
-        
+
         elif any(keyword in message_lower for keyword in ["thuật toán", "algorithm"]):
-            if "cụ thể" not in ai_response.lower() and "ví dụ" not in ai_response.lower():
+            if (
+                "cụ thể" not in ai_response.lower()
+                and "ví dụ" not in ai_response.lower()
+            ):
                 enhanced_response = f"{ai_response}\n\n**Thuật toán phổ biến:**\n- Quicksort, Merge sort\n- BFS, DFS\n- Dynamic Programming\n\nBạn muốn tìm hiểu thuật toán nào?"
-        
+
         # Tạo response cuối cùng có kèm thông tin hiệu suất
         full_response = f"{enhanced_response}\n\n---\n*⚡ {processing_time}s | 🔧 {real_model_name}*"
-        
+
         # In log chuyên nghiệp ra terminal với thông tin chi tiết
-        print(f"[PERF] Query: '{message[:50]}{'...' if len(message) > 50 else ''}' -> Model: {real_model_name}, Framework: {framework_time}s, Total: {processing_time}s")
-        
+        print(
+            f"[PERF] Query: '{message[:50]}{'...' if len(message) > 50 else ''}' -> Model: {real_model_name}, Framework: {framework_time}s, Total: {processing_time}s"
+        )
+
         # Cảnh báo nếu quá chậm
         if processing_time > 5.0:
-            print(f"[SLOW] ⚠️ Response time {processing_time}s is slow! Consider optimization.")
+            print(
+                f"[SLOW] ⚠️ Response time {processing_time}s is slow! Consider optimization."
+            )
         elif processing_time > 2.0:
             print(f"[WARN] Response time {processing_time}s is moderate.")
         else:
             print(f"[FAST] ✅ Response time {processing_time}s is good.")
-        
+
         return full_response
-        
+
     except Exception as e:
         end_time = time.time()
         processing_time = round(end_time - start_time, 2)
-        error_response = f"⚠️ Lỗi khi xử lý câu hỏi: {str(e)}\n\n---\n*⚡ {processing_time}s | 🔧 error*"
-        print(f"[ERROR] [StillMe] Query: '{message[:50]}{'...' if len(message) > 50 else ''}' -> Error: '{str(e)}', Time: {processing_time}s")
+        error_response = f"⚠️ Lỗi khi xử lý câu hỏi: {e!s}\n\n---\n*⚡ {processing_time}s | 🔧 error*"
+        print(
+            f"[ERROR] [StillMe] Query: '{message[:50]}{'...' if len(message) > 50 else ''}' -> Error: '{e!s}', Time: {processing_time}s"
+        )
         return error_response
+
 
 cfg = _load_manifest()
 pledge = cfg.get("pledge", {})
@@ -350,22 +520,18 @@ demo = gr.ChatInterface(
         height=600,
         show_copy_button=True,
         avatar_images=("👤", "🧠"),  # User avatar: 👤, StillMe avatar: 🧠
-        bubble_full_width=False
+        bubble_full_width=False,
     ),
-    textbox=gr.Textbox(
-        placeholder="Nhập câu hỏi của bạn...",
-        container=False,
-        scale=7
-    ),
+    textbox=gr.Textbox(placeholder="Nhập câu hỏi của bạn...", container=False, scale=7),
     submit_btn="Gửi",
     examples=[
         ["Xin chào!"],
         ["Python là gì?"],
         ["Cách tạo hàm trong Python?"],
         ["Giải thích thuật toán quicksort"],
-        ["Viết code JavaScript đơn giản"]
+        ["Viết code JavaScript đơn giản"],
     ],
-    cache_examples=False
+    cache_examples=False,
 )
 
 # Thêm CSS tùy chỉnh cho giao diện đẹp hơn và thu hẹp khoảng cách
@@ -479,14 +645,15 @@ demo.css = """
 
 if __name__ == "__main__":
     # Blocking warmup of gemma2:2b before launch
-    from clients.ollama_client import warmup_blocking, call_ollama_chat
     import threading
     import time
-    
+
+    from clients.ollama_client import call_ollama_chat, warmup_blocking
+
     print("🔥 Prewarming gemma2:2b...")
     warmup_blocking("gemma2:2b")
     print("✅ gemma2:2b ready!")
-    
+
     # Background keepalive to maintain model warmth
     def keepalive_worker():
         """Background worker to keep model warm every 45 minutes"""
@@ -496,28 +663,31 @@ if __name__ == "__main__":
                 print("🔄 Keepalive: Maintaining gemma2:2b warmth...")
                 messages = [{"role": "user", "content": "ok"}]
                 options = {"num_predict": 1, "temperature": 0, "keep_alive": "1h"}
-                for chunk in call_ollama_chat("gemma2:2b", messages, stream=False, options=options, timeout=5.0):
+                for chunk in call_ollama_chat(
+                    "gemma2:2b", messages, stream=False, options=options, timeout=5.0
+                ):
                     break
                 print("✅ Keepalive: gemma2:2b maintained")
             except Exception as e:
                 print(f"⚠️ Keepalive failed: {e}")
-    
+
     # Start keepalive in background
     keepalive_thread = threading.Thread(target=keepalive_worker, daemon=True)
     keepalive_thread.start()
     print("🔄 Background keepalive started (every 45 minutes)")
-    
+
     # Find free port
     import socket
+
     def find_free_port():
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.bind(('', 0))
+            s.bind(("", 0))
             s.listen(1)
             port = s.getsockname()[1]
         return port
-    
+
     port = find_free_port()
     print(f"🚀 Starting StillMe AI on http://127.0.0.1:{port}")
-    
+
     # Launch Gradio app
     demo.launch(server_name="127.0.0.1", server_port=port, show_error=True)

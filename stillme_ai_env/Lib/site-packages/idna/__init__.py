@@ -21,6 +21,7 @@ from .core import (
 from .intranges import intranges_contain
 from .package_data import __version__
 
+
 __all__ = [
     "__version__",
     "IDNABidiError",

@@ -7,5 +7,3 @@ def test_plan_item_defaults():
     assert p.risk == "low"
     assert p.tests_to_run == []
     assert p.deps == []
-
-

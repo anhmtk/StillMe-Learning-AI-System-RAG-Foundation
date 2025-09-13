@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import json
+import typing
 from base64 import b64decode, b64encode
-from typing import Literal
 
 import itsdangerous
 from itsdangerous.exc import BadSignature
@@ -20,7 +20,7 @@ class SessionMiddleware:
         session_cookie: str = "session",
         max_age: int | None = 14 * 24 * 60 * 60,  # 14 days, in seconds
         path: str = "/",
-        same_site: Literal["lax", "strict", "none"] = "lax",
+        same_site: typing.Literal["lax", "strict", "none"] = "lax",
         https_only: bool = False,
         domain: str | None = None,
     ) -> None:
@@ -61,7 +61,7 @@ class SessionMiddleware:
                     data = b64encode(json.dumps(scope["session"]).encode("utf-8"))
                     data = self.signer.sign(data)
                     headers = MutableHeaders(scope=message)
-                    header_value = "{session_cookie}={data}; path={path}; {max_age}{security_flags}".format(
+                    header_value = "{session_cookie}={data}; path={path}; {max_age}{security_flags}".format(  # noqa E501
                         session_cookie=self.session_cookie,
                         data=data.decode("utf-8"),
                         path=self.path,
@@ -72,7 +72,7 @@ class SessionMiddleware:
                 elif not initial_session_was_empty:
                     # The session has been cleared.
                     headers = MutableHeaders(scope=message)
-                    header_value = "{session_cookie}={data}; path={path}; {expires}{security_flags}".format(
+                    header_value = "{session_cookie}={data}; path={path}; {expires}{security_flags}".format(  # noqa E501
                         session_cookie=self.session_cookie,
                         data="null",
                         path=self.path,

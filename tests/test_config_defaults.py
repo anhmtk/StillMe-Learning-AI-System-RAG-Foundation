@@ -1,5 +1,4 @@
 import importlib
-import os
 
 
 def test_defaults_loaded(monkeypatch):
@@ -13,5 +12,3 @@ def test_env_override(monkeypatch):
     # reload to pick new env
     mod = importlib.reload(importlib.import_module("stillme_core.config_defaults"))
     assert mod.DEFAULT_MODE == "think"
-
-

@@ -1,5 +1,6 @@
 # tests/test_health_ai_manager.py
-from stillme_core.ai_manager import set_mode, health
+from stillme_core.ai_manager import health, set_mode
+
 
 def test_health_llama3():
     set_mode("fast")  # -> llama3:8b

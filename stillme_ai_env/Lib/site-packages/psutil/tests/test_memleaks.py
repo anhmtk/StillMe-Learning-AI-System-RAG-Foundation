@@ -14,10 +14,12 @@ PyPy appears to be completely unstable for this framework, probably
 because of how its JIT handles memory, so tests are skipped.
 """
 
+from __future__ import print_function
 
 import functools
 import os
 import platform
+import unittest
 
 import psutil
 import psutil._common
@@ -27,6 +29,8 @@ from psutil import OPENBSD
 from psutil import POSIX
 from psutil import SUNOS
 from psutil import WINDOWS
+from psutil._compat import ProcessLookupError
+from psutil._compat import super
 from psutil.tests import HAS_CPU_AFFINITY
 from psutil.tests import HAS_CPU_FREQ
 from psutil.tests import HAS_ENVIRON
@@ -43,7 +47,6 @@ from psutil.tests import TestMemoryLeak
 from psutil.tests import create_sockets
 from psutil.tests import get_testfn
 from psutil.tests import process_namespace
-from psutil.tests import pytest
 from psutil.tests import skip_on_access_denied
 from psutil.tests import spawn_testproc
 from psutil.tests import system_namespace
@@ -108,12 +111,12 @@ class TestProcessObjectLeaks(TestMemoryLeak):
     def test_ppid(self):
         self.execute(self.proc.ppid)
 
-    @pytest.mark.skipif(not POSIX, reason="POSIX only")
+    @unittest.skipIf(not POSIX, "POSIX only")
     @fewtimes_if_linux()
     def test_uids(self):
         self.execute(self.proc.uids)
 
-    @pytest.mark.skipif(not POSIX, reason="POSIX only")
+    @unittest.skipIf(not POSIX, "POSIX only")
     @fewtimes_if_linux()
     def test_gids(self):
         self.execute(self.proc.gids)
@@ -129,11 +132,11 @@ class TestProcessObjectLeaks(TestMemoryLeak):
         niceness = thisproc.nice()
         self.execute(lambda: self.proc.nice(niceness))
 
-    @pytest.mark.skipif(not HAS_IONICE, reason="not supported")
+    @unittest.skipIf(not HAS_IONICE, "not supported")
     def test_ionice(self):
         self.execute(self.proc.ionice)
 
-    @pytest.mark.skipif(not HAS_IONICE, reason="not supported")
+    @unittest.skipIf(not HAS_IONICE, "not supported")
     def test_ionice_set(self):
         if WINDOWS:
             value = thisproc.ionice()
@@ -143,12 +146,12 @@ class TestProcessObjectLeaks(TestMemoryLeak):
             fun = functools.partial(cext.proc_ioprio_set, os.getpid(), -1, 0)
             self.execute_w_exc(OSError, fun)
 
-    @pytest.mark.skipif(not HAS_PROC_IO_COUNTERS, reason="not supported")
+    @unittest.skipIf(not HAS_PROC_IO_COUNTERS, "not supported")
     @fewtimes_if_linux()
     def test_io_counters(self):
         self.execute(self.proc.io_counters)
 
-    @pytest.mark.skipif(POSIX, reason="worthless on POSIX")
+    @unittest.skipIf(POSIX, "worthless on POSIX")
     def test_username(self):
         # always open 1 handle on Windows (only once)
         psutil.Process().username()
@@ -163,11 +166,11 @@ class TestProcessObjectLeaks(TestMemoryLeak):
     def test_num_threads(self):
         self.execute(self.proc.num_threads)
 
-    @pytest.mark.skipif(not WINDOWS, reason="WINDOWS only")
+    @unittest.skipIf(not WINDOWS, "WINDOWS only")
     def test_num_handles(self):
         self.execute(self.proc.num_handles)
 
-    @pytest.mark.skipif(not POSIX, reason="POSIX only")
+    @unittest.skipIf(not POSIX, "POSIX only")
     @fewtimes_if_linux()
     def test_num_fds(self):
         self.execute(self.proc.num_fds)
@@ -186,7 +189,7 @@ class TestProcessObjectLeaks(TestMemoryLeak):
         self.execute(self.proc.cpu_times)
 
     @fewtimes_if_linux()
-    @pytest.mark.skipif(not HAS_PROC_CPU_NUM, reason="not supported")
+    @unittest.skipIf(not HAS_PROC_CPU_NUM, "not supported")
     def test_cpu_num(self):
         self.execute(self.proc.cpu_num)
 
@@ -198,7 +201,7 @@ class TestProcessObjectLeaks(TestMemoryLeak):
     def test_memory_full_info(self):
         self.execute(self.proc.memory_full_info)
 
-    @pytest.mark.skipif(not POSIX, reason="POSIX only")
+    @unittest.skipIf(not POSIX, "POSIX only")
     @fewtimes_if_linux()
     def test_terminal(self):
         self.execute(self.proc.terminal)
@@ -211,11 +214,11 @@ class TestProcessObjectLeaks(TestMemoryLeak):
     def test_cwd(self):
         self.execute(self.proc.cwd)
 
-    @pytest.mark.skipif(not HAS_CPU_AFFINITY, reason="not supported")
+    @unittest.skipIf(not HAS_CPU_AFFINITY, "not supported")
     def test_cpu_affinity(self):
         self.execute(self.proc.cpu_affinity)
 
-    @pytest.mark.skipif(not HAS_CPU_AFFINITY, reason="not supported")
+    @unittest.skipIf(not HAS_CPU_AFFINITY, "not supported")
     def test_cpu_affinity_set(self):
         affinity = thisproc.cpu_affinity()
         self.execute(lambda: self.proc.cpu_affinity(affinity))
@@ -226,18 +229,18 @@ class TestProcessObjectLeaks(TestMemoryLeak):
         with open(get_testfn(), 'w'):
             self.execute(self.proc.open_files)
 
-    @pytest.mark.skipif(not HAS_MEMORY_MAPS, reason="not supported")
+    @unittest.skipIf(not HAS_MEMORY_MAPS, "not supported")
     @fewtimes_if_linux()
     def test_memory_maps(self):
         self.execute(self.proc.memory_maps)
 
-    @pytest.mark.skipif(not LINUX, reason="LINUX only")
-    @pytest.mark.skipif(not HAS_RLIMIT, reason="not supported")
+    @unittest.skipIf(not LINUX, "LINUX only")
+    @unittest.skipIf(not HAS_RLIMIT, "not supported")
     def test_rlimit(self):
         self.execute(lambda: self.proc.rlimit(psutil.RLIMIT_NOFILE))
 
-    @pytest.mark.skipif(not LINUX, reason="LINUX only")
-    @pytest.mark.skipif(not HAS_RLIMIT, reason="not supported")
+    @unittest.skipIf(not LINUX, "LINUX only")
+    @unittest.skipIf(not HAS_RLIMIT, "not supported")
     def test_rlimit_set(self):
         limit = thisproc.rlimit(psutil.RLIMIT_NOFILE)
         self.execute(lambda: self.proc.rlimit(psutil.RLIMIT_NOFILE, limit))
@@ -246,20 +249,20 @@ class TestProcessObjectLeaks(TestMemoryLeak):
     @fewtimes_if_linux()
     # Windows implementation is based on a single system-wide
     # function (tested later).
-    @pytest.mark.skipif(WINDOWS, reason="worthless on WINDOWS")
-    def test_net_connections(self):
+    @unittest.skipIf(WINDOWS, "worthless on WINDOWS")
+    def test_connections(self):
         # TODO: UNIX sockets are temporarily implemented by parsing
         # 'pfiles' cmd  output; we don't want that part of the code to
         # be executed.
         with create_sockets():
             kind = 'inet' if SUNOS else 'all'
-            self.execute(lambda: self.proc.net_connections(kind))
+            self.execute(lambda: self.proc.connections(kind))
 
-    @pytest.mark.skipif(not HAS_ENVIRON, reason="not supported")
+    @unittest.skipIf(not HAS_ENVIRON, "not supported")
     def test_environ(self):
         self.execute(self.proc.environ)
 
-    @pytest.mark.skipif(not WINDOWS, reason="WINDOWS only")
+    @unittest.skipIf(not WINDOWS, "WINDOWS only")
     def test_proc_info(self):
         self.execute(lambda: cext.proc_info(os.getpid()))
 
@@ -318,7 +321,7 @@ class TestTerminatedProcessLeaks(TestProcessObjectLeaks):
             self.execute(call)
 
 
-@pytest.mark.skipif(not WINDOWS, reason="WINDOWS only")
+@unittest.skipIf(not WINDOWS, "WINDOWS only")
 class TestProcessDualImplementation(TestMemoryLeak):
     def test_cmdline_peb_true(self):
         self.execute(lambda: cext.proc_cmdline(os.getpid(), use_peb=True))
@@ -363,14 +366,14 @@ class TestModuleFunctionsLeaks(TestMemoryLeak):
 
     @fewtimes_if_linux()
     # TODO: remove this once 1892 is fixed
-    @pytest.mark.skipif(
-        MACOS and platform.machine() == 'arm64', reason="skipped due to #1892"
+    @unittest.skipIf(
+        MACOS and platform.machine() == 'arm64', "skipped due to #1892"
     )
-    @pytest.mark.skipif(not HAS_CPU_FREQ, reason="not supported")
+    @unittest.skipIf(not HAS_CPU_FREQ, "not supported")
     def test_cpu_freq(self):
         self.execute(psutil.cpu_freq)
 
-    @pytest.mark.skipif(not WINDOWS, reason="WINDOWS only")
+    @unittest.skipIf(not WINDOWS, "WINDOWS only")
     def test_getloadavg(self):
         psutil.getloadavg()
         self.execute(psutil.getloadavg)
@@ -381,7 +384,7 @@ class TestModuleFunctionsLeaks(TestMemoryLeak):
         self.execute(psutil.virtual_memory)
 
     # TODO: remove this skip when this gets fixed
-    @pytest.mark.skipif(SUNOS, reason="worthless on SUNOS (uses a subprocess)")
+    @unittest.skipIf(SUNOS, "worthless on SUNOS (uses a subprocess)")
     def test_swap_memory(self):
         self.execute(psutil.swap_memory)
 
@@ -398,9 +401,9 @@ class TestModuleFunctionsLeaks(TestMemoryLeak):
     def test_disk_partitions(self):
         self.execute(psutil.disk_partitions)
 
-    @pytest.mark.skipif(
+    @unittest.skipIf(
         LINUX and not os.path.exists('/proc/diskstats'),
-        reason="/proc/diskstats not available on this Linux version",
+        '/proc/diskstats not available on this Linux version',
     )
     @fewtimes_if_linux()
     def test_disk_io_counters(self):
@@ -415,12 +418,12 @@ class TestModuleFunctionsLeaks(TestMemoryLeak):
     # --- net
 
     @fewtimes_if_linux()
-    @pytest.mark.skipif(not HAS_NET_IO_COUNTERS, reason="not supported")
+    @unittest.skipIf(not HAS_NET_IO_COUNTERS, 'not supported')
     def test_net_io_counters(self):
         self.execute(lambda: psutil.net_io_counters(nowrap=False))
 
     @fewtimes_if_linux()
-    @pytest.mark.skipif(MACOS and os.getuid() != 0, reason="need root access")
+    @unittest.skipIf(MACOS and os.getuid() != 0, "need root access")
     def test_net_connections(self):
         # always opens and handle on Windows() (once)
         psutil.net_connections(kind='all')
@@ -438,17 +441,17 @@ class TestModuleFunctionsLeaks(TestMemoryLeak):
     # --- sensors
 
     @fewtimes_if_linux()
-    @pytest.mark.skipif(not HAS_SENSORS_BATTERY, reason="not supported")
+    @unittest.skipIf(not HAS_SENSORS_BATTERY, "not supported")
     def test_sensors_battery(self):
         self.execute(psutil.sensors_battery)
 
     @fewtimes_if_linux()
-    @pytest.mark.skipif(not HAS_SENSORS_TEMPERATURES, reason="not supported")
+    @unittest.skipIf(not HAS_SENSORS_TEMPERATURES, "not supported")
     def test_sensors_temperatures(self):
         self.execute(psutil.sensors_temperatures)
 
     @fewtimes_if_linux()
-    @pytest.mark.skipif(not HAS_SENSORS_FANS, reason="not supported")
+    @unittest.skipIf(not HAS_SENSORS_FANS, "not supported")
     def test_sensors_fans(self):
         self.execute(psutil.sensors_fans)
 
@@ -485,3 +488,9 @@ class TestModuleFunctionsLeaks(TestMemoryLeak):
         def test_win_service_get_description(self):
             name = next(psutil.win_service_iter()).name()
             self.execute(lambda: cext.winservice_query_descr(name))
+
+
+if __name__ == '__main__':
+    from psutil.tests.runner import run_from_name
+
+    run_from_name(__file__)

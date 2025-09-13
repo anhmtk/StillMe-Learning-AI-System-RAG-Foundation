@@ -11,18 +11,20 @@ import inspect
 import json
 import logging
 import logging.handlers
+import signal
 import subprocess
 import sys
-import signal
 import time
-from pathlib import Path
-from typing import Dict, List, Optional, Any, Callable
 from collections import defaultdict
-from functools import wraps
 from concurrent.futures import ThreadPoolExecutor
-import yaml
+from functools import wraps
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional
+
 import psutil
+import yaml
 from RestrictedPython import compile_restricted
+
 
 # ------------------- CONSTANTS -------------------
 DEFAULT_CONFIG = {

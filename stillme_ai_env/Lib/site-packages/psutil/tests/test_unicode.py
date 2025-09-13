@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
 # Copyright (c) 2009, Giampaolo Rodola'. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
@@ -19,8 +20,13 @@ process exe(), cwd() or username():
 * instead, in case of badly encoded data returned by the OS, the
   following error handlers are used to replace the corrupted characters in
   the string:
-    * sys.getfilesystemencodeerrors() or "surrogatescape" on POSIX and
-      "replace" on Windows.
+    * Python 3: sys.getfilesystemencodeerrors() (PY 3.6+) or
+      "surrogatescape" on POSIX and "replace" on Windows
+    * Python 2: "replace"
+* on Python 2 all APIs return bytes (str type), never unicode
+* on Python 2, you can go back to unicode by doing:
+
+    >>> unicode(p.exe(), sys.getdefaultencoding(), errors="replace")
 
 For a detailed explanation of how psutil handles unicode see #1040.
 
@@ -31,12 +37,12 @@ List of APIs returning or dealing with a string:
 ('not tested' means they are not tested to deal with non-ASCII strings):
 
 * Process.cmdline()
+* Process.connections('unix')
 * Process.cwd()
 * Process.environ()
 * Process.exe()
 * Process.memory_maps()
 * Process.name()
-* Process.net_connections('unix')
 * Process.open_files()
 * Process.username()             (not tested)
 
@@ -68,6 +74,8 @@ etc.) and make sure that:
 
 import os
 import shutil
+import traceback
+import unittest
 import warnings
 from contextlib import closing
 
@@ -75,11 +83,15 @@ import psutil
 from psutil import BSD
 from psutil import POSIX
 from psutil import WINDOWS
+from psutil._compat import PY3
+from psutil._compat import super
+from psutil._compat import u
+from psutil.tests import APPVEYOR
 from psutil.tests import ASCII_FS
 from psutil.tests import CI_TESTING
+from psutil.tests import HAS_CONNECTIONS_UNIX
 from psutil.tests import HAS_ENVIRON
 from psutil.tests import HAS_MEMORY_MAPS
-from psutil.tests import HAS_NET_CONNECTIONS_UNIX
 from psutil.tests import INVALID_UNICODE_SUFFIX
 from psutil.tests import PYPY
 from psutil.tests import TESTFN_PREFIX
@@ -90,12 +102,33 @@ from psutil.tests import chdir
 from psutil.tests import copyload_shared_lib
 from psutil.tests import create_py_exe
 from psutil.tests import get_testfn
-from psutil.tests import pytest
 from psutil.tests import safe_mkdir
 from psutil.tests import safe_rmpath
+from psutil.tests import serialrun
 from psutil.tests import skip_on_access_denied
 from psutil.tests import spawn_testproc
 from psutil.tests import terminate
+
+
+if APPVEYOR:
+
+    def safe_rmpath(path):  # NOQA
+        # TODO - this is quite random and I'm not sure why it happens,
+        # nor I can reproduce it locally:
+        # https://ci.appveyor.com/project/giampaolo/psutil/build/job/
+        #     jiq2cgd6stsbtn60
+        # safe_rmpath() happens after reap_children() so this is weird
+        # Perhaps wait_procs() on Windows is broken? Maybe because
+        # of STILL_ACTIVE?
+        # https://github.com/giampaolo/psutil/blob/
+        #     68c7a70728a31d8b8b58f4be6c4c0baa2f449eda/psutil/arch/
+        #     windows/process_info.c#L146
+        from psutil.tests import safe_rmpath as rm
+
+        try:
+            return rm(path)
+        except WindowsError:
+            traceback.print_exc()
 
 
 def try_unicode(suffix):
@@ -110,7 +143,7 @@ def try_unicode(suffix):
         sproc = spawn_testproc(cmd=[testfn])
         shutil.copyfile(testfn, testfn + '-2')
         safe_rmpath(testfn + '-2')
-    except (UnicodeEncodeError, OSError):
+    except (UnicodeEncodeError, IOError):
         return False
     else:
         return True
@@ -143,61 +176,55 @@ class BaseUnicodeTest(PsutilTestCase):
     def setUp(self):
         super().setUp()
         if self.skip_tests:
-            raise pytest.skip("can't handle unicode str")
+            raise self.skipTest("can't handle unicode str")
 
 
-@pytest.mark.xdist_group(name="serial")
-@pytest.mark.skipif(ASCII_FS, reason="ASCII fs")
+@serialrun
+@unittest.skipIf(ASCII_FS, "ASCII fs")
+@unittest.skipIf(PYPY and not PY3, "too much trouble on PYPY2")
 class TestFSAPIs(BaseUnicodeTest):
     """Test FS APIs with a funky, valid, UTF8 path name."""
 
     funky_suffix = UNICODE_SUFFIX
 
     def expect_exact_path_match(self):
+        # Do not expect psutil to correctly handle unicode paths on
+        # Python 2 if os.listdir() is not able either.
+        here = '.' if isinstance(self.funky_name, str) else u('.')
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
-            return self.funky_name in os.listdir(".")
+            return self.funky_name in os.listdir(here)
 
     # ---
 
     def test_proc_exe(self):
-        cmd = [
-            self.funky_name,
-            "-c",
-            "import time; [time.sleep(0.1) for x in range(100)]",
-        ]
+        cmd = [self.funky_name, "-c", "import time; time.sleep(10)"]
         subp = self.spawn_testproc(cmd)
         p = psutil.Process(subp.pid)
         exe = p.exe()
-        assert isinstance(exe, str)
+        self.assertIsInstance(exe, str)
         if self.expect_exact_path_match():
-            assert os.path.normcase(exe) == os.path.normcase(self.funky_name)
+            self.assertEqual(
+                os.path.normcase(exe), os.path.normcase(self.funky_name)
+            )
 
     def test_proc_name(self):
-        cmd = [
-            self.funky_name,
-            "-c",
-            "import time; [time.sleep(0.1) for x in range(100)]",
-        ]
+        cmd = [self.funky_name, "-c", "import time; time.sleep(10)"]
         subp = self.spawn_testproc(cmd)
         name = psutil.Process(subp.pid).name()
-        assert isinstance(name, str)
+        self.assertIsInstance(name, str)
         if self.expect_exact_path_match():
-            assert name == os.path.basename(self.funky_name)
+            self.assertEqual(name, os.path.basename(self.funky_name))
 
     def test_proc_cmdline(self):
-        cmd = [
-            self.funky_name,
-            "-c",
-            "import time; [time.sleep(0.1) for x in range(100)]",
-        ]
+        cmd = [self.funky_name, "-c", "import time; time.sleep(10)"]
         subp = self.spawn_testproc(cmd)
         p = psutil.Process(subp.pid)
         cmdline = p.cmdline()
         for part in cmdline:
-            assert isinstance(part, str)
+            self.assertIsInstance(part, str)
         if self.expect_exact_path_match():
-            assert cmdline == cmd
+            self.assertEqual(cmdline, cmd)
 
     def test_proc_cwd(self):
         dname = self.funky_name + "2"
@@ -206,37 +233,43 @@ class TestFSAPIs(BaseUnicodeTest):
         with chdir(dname):
             p = psutil.Process()
             cwd = p.cwd()
-        assert isinstance(p.cwd(), str)
+        self.assertIsInstance(p.cwd(), str)
         if self.expect_exact_path_match():
-            assert cwd == dname
+            self.assertEqual(cwd, dname)
 
-    @pytest.mark.skipif(PYPY and WINDOWS, reason="fails on PYPY + WINDOWS")
+    @unittest.skipIf(PYPY and WINDOWS, "fails on PYPY + WINDOWS")
     def test_proc_open_files(self):
         p = psutil.Process()
         start = set(p.open_files())
         with open(self.funky_name, 'rb'):
             new = set(p.open_files())
         path = (new - start).pop().path
-        assert isinstance(path, str)
+        self.assertIsInstance(path, str)
         if BSD and not path:
             # XXX - see https://github.com/giampaolo/psutil/issues/595
-            raise pytest.skip("open_files on BSD is broken")
+            return self.skipTest("open_files on BSD is broken")
         if self.expect_exact_path_match():
-            assert os.path.normcase(path) == os.path.normcase(self.funky_name)
+            self.assertEqual(
+                os.path.normcase(path), os.path.normcase(self.funky_name)
+            )
 
-    @pytest.mark.skipif(not POSIX, reason="POSIX only")
-    def test_proc_net_connections(self):
+    @unittest.skipIf(not POSIX, "POSIX only")
+    def test_proc_connections(self):
         name = self.get_testfn(suffix=self.funky_suffix)
-        sock = bind_unix_socket(name)
+        try:
+            sock = bind_unix_socket(name)
+        except UnicodeEncodeError:
+            if PY3:
+                raise
+            else:
+                raise unittest.SkipTest("not supported")
         with closing(sock):
-            conn = psutil.Process().net_connections('unix')[0]
-            assert isinstance(conn.laddr, str)
-            assert conn.laddr == name
+            conn = psutil.Process().connections('unix')[0]
+            self.assertIsInstance(conn.laddr, str)
+            self.assertEqual(conn.laddr, name)
 
-    @pytest.mark.skipif(not POSIX, reason="POSIX only")
-    @pytest.mark.skipif(
-        not HAS_NET_CONNECTIONS_UNIX, reason="can't list UNIX sockets"
-    )
+    @unittest.skipIf(not POSIX, "POSIX only")
+    @unittest.skipIf(not HAS_CONNECTIONS_UNIX, "can't list UNIX sockets")
     @skip_on_access_denied()
     def test_net_connections(self):
         def find_sock(cons):
@@ -246,12 +279,18 @@ class TestFSAPIs(BaseUnicodeTest):
             raise ValueError("connection not found")
 
         name = self.get_testfn(suffix=self.funky_suffix)
-        sock = bind_unix_socket(name)
+        try:
+            sock = bind_unix_socket(name)
+        except UnicodeEncodeError:
+            if PY3:
+                raise
+            else:
+                raise unittest.SkipTest("not supported")
         with closing(sock):
             cons = psutil.net_connections(kind='unix')
             conn = find_sock(cons)
-            assert isinstance(conn.laddr, str)
-            assert conn.laddr == name
+            self.assertIsInstance(conn.laddr, str)
+            self.assertEqual(conn.laddr, name)
 
     def test_disk_usage(self):
         dname = self.funky_name + "2"
@@ -259,9 +298,12 @@ class TestFSAPIs(BaseUnicodeTest):
         safe_mkdir(dname)
         psutil.disk_usage(dname)
 
-    @pytest.mark.skipif(not HAS_MEMORY_MAPS, reason="not supported")
-    @pytest.mark.skipif(PYPY, reason="unstable on PYPY")
+    @unittest.skipIf(not HAS_MEMORY_MAPS, "not supported")
+    @unittest.skipIf(not PY3, "ctypes does not support unicode on PY2")
+    @unittest.skipIf(PYPY, "unstable on PYPY")
     def test_memory_maps(self):
+        # XXX: on Python 2, using ctypes.CDLL with a unicode path
+        # opens a message box which blocks the test run.
         with copyload_shared_lib(suffix=self.funky_suffix) as funky_path:
 
             def normpath(p):
@@ -272,18 +314,19 @@ class TestFSAPIs(BaseUnicodeTest):
             ]
             # ...just to have a clearer msg in case of failure
             libpaths = [x for x in libpaths if TESTFN_PREFIX in x]
-            assert normpath(funky_path) in libpaths
+            self.assertIn(normpath(funky_path), libpaths)
             for path in libpaths:
-                assert isinstance(path, str)
+                self.assertIsInstance(path, str)
 
 
-@pytest.mark.skipif(CI_TESTING, reason="unreliable on CI")
+@unittest.skipIf(CI_TESTING, "unreliable on CI")
 class TestFSAPIsWithInvalidPath(TestFSAPIs):
     """Test FS APIs with a funky, invalid path name."""
 
     funky_suffix = INVALID_UNICODE_SUFFIX
 
     def expect_exact_path_match(self):
+        # Invalid unicode names are supposed to work on Python 2.
         return True
 
 
@@ -295,19 +338,28 @@ class TestFSAPIsWithInvalidPath(TestFSAPIs):
 class TestNonFSAPIS(BaseUnicodeTest):
     """Unicode tests for non fs-related APIs."""
 
-    funky_suffix = UNICODE_SUFFIX
+    funky_suffix = UNICODE_SUFFIX if PY3 else 'è'
 
-    @pytest.mark.skipif(not HAS_ENVIRON, reason="not supported")
-    @pytest.mark.skipif(PYPY and WINDOWS, reason="segfaults on PYPY + WINDOWS")
+    @unittest.skipIf(not HAS_ENVIRON, "not supported")
+    @unittest.skipIf(PYPY and WINDOWS, "segfaults on PYPY + WINDOWS")
     def test_proc_environ(self):
         # Note: differently from others, this test does not deal
-        # with fs paths.
+        # with fs paths. On Python 2 subprocess module is broken as
+        # it's not able to handle with non-ASCII env vars, so
+        # we use "è", which is part of the extended ASCII table
+        # (unicode point <= 255).
         env = os.environ.copy()
         env['FUNNY_ARG'] = self.funky_suffix
         sproc = self.spawn_testproc(env=env)
         p = psutil.Process(sproc.pid)
         env = p.environ()
         for k, v in env.items():
-            assert isinstance(k, str)
-            assert isinstance(v, str)
-        assert env['FUNNY_ARG'] == self.funky_suffix
+            self.assertIsInstance(k, str)
+            self.assertIsInstance(v, str)
+        self.assertEqual(env['FUNNY_ARG'], self.funky_suffix)
+
+
+if __name__ == '__main__':
+    from psutil.tests.runner import run_from_name
+
+    run_from_name(__file__)

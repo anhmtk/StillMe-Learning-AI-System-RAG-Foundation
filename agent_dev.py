@@ -1,30 +1,36 @@
 # NOTE: AI Reminder: framework.py is sacred. Only modify if 100% sure.
-import os
-import subprocess
-import shutil
-import git
+import asyncio
 import json
 import logging
-from pathlib import Path
-from typing import Optional, Dict, Any
-from datetime import datetime
-from jsonschema import validate, ValidationError
+import os
+import shutil
+import subprocess
 import sys
-import asyncio
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, Optional
+
+import git
 from dotenv import load_dotenv
+from jsonschema import ValidationError, validate
+
 
 # Ensure local modules path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "modules")))
 
+from stillme_core.git_manager import GitManager
+from stillme_core.planner import Planner
+from stillme_core.sandbox_manager import DockerSandboxManager
+
 # Core components
 from stillme_ethical_core.ethics_checker import EthicsChecker
-from stillme_core.planner import Planner
-from stillme_core.git_manager import GitManager
-from stillme_core.sandbox_manager import DockerSandboxManager
+
 
 # --- Bridge: AgentDev -> API server (/dev-agent/bridge)
 try:
-    from stillme_core.agent_dev_bridge import DevAgentBridge as _RealDevAgentBridge  # type: ignore
+    from stillme_core.agent_dev_bridge import (
+        DevAgentBridge as _RealDevAgentBridge,  # type: ignore
+    )
     DevAgentBridge = _RealDevAgentBridge  # type: ignore[assignment]
 except Exception:
     class _DevAgentBridgeStub:
@@ -437,17 +443,19 @@ ZeroDivisionError: division by zero
     agent = AgentDev(problem_description, problem_file)
     agent.run()
 
+import datetime as _dt
+from pathlib import Path as _Path
+
 # =====================
 # AgentDev one-shot loop
 # =====================
 from typing import Optional
-from pathlib import Path as _Path
-import datetime as _dt
-from stillme_core.plan_types import PlanItem as _PlanItem
-from stillme_core.executor import PatchExecutor as _PatchExecutor
-from stillme_core.bug_memory import BugMemory as _BugMemory
-from stillme_core.planner import Planner as _Planner
+
 from stillme_core.ai_manager import AIManager as _AIManager
+from stillme_core.bug_memory import BugMemory as _BugMemory
+from stillme_core.executor import PatchExecutor as _PatchExecutor
+from stillme_core.plan_types import PlanItem as _PlanItem
+from stillme_core.planner import Planner as _Planner
 
 
 def _ensure_log_file(log_dir: _Path) -> _Path:

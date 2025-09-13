@@ -2,16 +2,16 @@
 
 from __future__ import annotations
 
+import os
 import subprocess
-from pathlib import Path
 
 
-def is_git_repo(dir: Path) -> bool:
+def is_git_repo(dir: str) -> bool:
     """Is the given directory version-controlled with git?"""
-    return dir.joinpath('.git').exists()
+    return os.path.exists(os.path.join(dir, '.git'))
 
 
-def have_git() -> bool:  # pragma: no cover
+def have_git() -> bool:
     """Can we run the git executable?"""
     try:
         subprocess.check_output(['git', '--help'])
@@ -22,6 +22,6 @@ def have_git() -> bool:  # pragma: no cover
         return False
 
 
-def git_revision(dir: Path) -> str:
+def git_revision(dir: str) -> str:
     """Get the SHA-1 of the HEAD of a git repository."""
     return subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'], cwd=dir).decode('utf-8').strip()

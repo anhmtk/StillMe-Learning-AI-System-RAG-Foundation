@@ -1,4 +1,3 @@
-import os
 from stillme_core.ai_manager import AIManager
 from stillme_core.plan_types import PlanItem
 
@@ -11,4 +10,3 @@ def test_generate_patch_returns_string(monkeypatch):
     monkeypatch.setenv("LOCAL_MODEL_ENDPOINT", "http://127.0.0.1:9/invalid")
     diff = ai.generate_patch(item, context="")
     assert isinstance(diff, str)
-

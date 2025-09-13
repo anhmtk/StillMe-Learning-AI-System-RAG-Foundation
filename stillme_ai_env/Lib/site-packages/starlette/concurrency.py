@@ -2,9 +2,8 @@ from __future__ import annotations
 
 import functools
 import sys
+import typing
 import warnings
-from collections.abc import AsyncIterator, Coroutine, Iterable, Iterator
-from typing import Callable, TypeVar
 
 import anyio.to_thread
 
@@ -14,18 +13,19 @@ else:  # pragma: no cover
     from typing_extensions import ParamSpec
 
 P = ParamSpec("P")
-T = TypeVar("T")
+T = typing.TypeVar("T")
 
 
-async def run_until_first_complete(*args: tuple[Callable, dict]) -> None:  # type: ignore[type-arg]
+async def run_until_first_complete(*args: tuple[typing.Callable, dict]) -> None:  # type: ignore[type-arg]  # noqa: E501
     warnings.warn(
-        "run_until_first_complete is deprecated and will be removed in a future version.",
+        "run_until_first_complete is deprecated "
+        "and will be removed in a future version.",
         DeprecationWarning,
     )
 
     async with anyio.create_task_group() as task_group:
 
-        async def run(func: Callable[[], Coroutine]) -> None:  # type: ignore[type-arg]
+        async def run(func: typing.Callable[[], typing.Coroutine]) -> None:  # type: ignore[type-arg]  # noqa: E501
             await func()
             task_group.cancel_scope.cancel()
 
@@ -33,16 +33,20 @@ async def run_until_first_complete(*args: tuple[Callable, dict]) -> None:  # typ
             task_group.start_soon(run, functools.partial(func, **kwargs))
 
 
-async def run_in_threadpool(func: Callable[P, T], *args: P.args, **kwargs: P.kwargs) -> T:
-    func = functools.partial(func, *args, **kwargs)
-    return await anyio.to_thread.run_sync(func)
+async def run_in_threadpool(
+    func: typing.Callable[P, T], *args: P.args, **kwargs: P.kwargs
+) -> T:
+    if kwargs:  # pragma: no cover
+        # run_sync doesn't accept 'kwargs', so bind them in here
+        func = functools.partial(func, **kwargs)
+    return await anyio.to_thread.run_sync(func, *args)
 
 
 class _StopIteration(Exception):
     pass
 
 
-def _next(iterator: Iterator[T]) -> T:
+def _next(iterator: typing.Iterator[T]) -> T:
     # We can't raise `StopIteration` from within the threadpool iterator
     # and catch it outside that context, so we coerce them into a different
     # exception type.
@@ -53,8 +57,8 @@ def _next(iterator: Iterator[T]) -> T:
 
 
 async def iterate_in_threadpool(
-    iterator: Iterable[T],
-) -> AsyncIterator[T]:
+    iterator: typing.Iterable[T],
+) -> typing.AsyncIterator[T]:
     as_iterator = iter(iterator)
     while True:
         try:

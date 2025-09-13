@@ -21,5 +21,3 @@ def test_executor_basic_methods(monkeypatch, tmp_path):
     # run pytest on empty repo (should still run and return result)
     res_test = ex.run_pytest([])
     assert res_test is not None
-
-

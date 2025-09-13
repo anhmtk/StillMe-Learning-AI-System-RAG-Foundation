@@ -5,12 +5,12 @@ executor.py - Thực thi các bước trong kế hoạch AI tạo ra
 Đọc JSON plan từ planner → thực hiện từng bước → log kết quả
 """
 
-import json
 import logging
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
 logger = logging.getLogger("StillmeCore-Executor")
+
 
 class PlanExecutor:
     def __init__(self, plan: Dict[str, Any]):

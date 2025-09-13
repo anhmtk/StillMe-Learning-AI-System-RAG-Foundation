@@ -4,9 +4,10 @@ Device management endpoints
 """
 
 import logging
+from typing import Any, Dict, List, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
-from typing import Dict, Any, List, Optional
 
 from core.auth import get_current_user
 
@@ -38,8 +39,7 @@ class DeviceRegistration(BaseModel):
 
 @router.post("/register", response_model=DeviceInfo)
 async def register_device(
-    device: DeviceRegistration,
-    current_user: Dict[str, Any] = Depends(get_current_user)
+    device: DeviceRegistration, current_user: Dict[str, Any] = Depends(get_current_user)
 ) -> DeviceInfo:
     """Register a new device"""
     try:
@@ -51,58 +51,56 @@ async def register_device(
             platform=device.platform,
             version=device.version,
             capabilities=device.capabilities,
-            last_seen=int(__import__('time').time()),
+            last_seen=int(__import__("time").time()),
             status="online",
-            metadata=device.metadata or {}
+            metadata=device.metadata or {},
         )
-        
+
         return device_info
-        
+
     except Exception as e:
         logger.error(f"Error registering device: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to register device"
+            detail="Failed to register device",
         )
 
 
 @router.get("/", response_model=List[DeviceInfo])
 async def get_devices(
-    current_user: Dict[str, Any] = Depends(get_current_user)
+    current_user: Dict[str, Any] = Depends(get_current_user),
 ) -> List[DeviceInfo]:
     """Get all devices for current user"""
     try:
         # TODO: Implement device retrieval from database
         return []
-        
+
     except Exception as e:
         logger.error(f"Error getting devices: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to get devices"
+            detail="Failed to get devices",
         )
 
 
 @router.get("/{device_id}", response_model=DeviceInfo)
 async def get_device(
-    device_id: str,
-    current_user: Dict[str, Any] = Depends(get_current_user)
+    device_id: str, current_user: Dict[str, Any] = Depends(get_current_user)
 ) -> DeviceInfo:
     """Get specific device information"""
     try:
         # TODO: Implement device retrieval by ID
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Device not found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Device not found"
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Error getting device {device_id}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to get device"
+            detail="Failed to get device",
         )
 
 
@@ -110,7 +108,7 @@ async def get_device(
 async def update_device(
     device_id: str,
     device: DeviceRegistration,
-    current_user: Dict[str, Any] = Depends(get_current_user)
+    current_user: Dict[str, Any] = Depends(get_current_user),
 ) -> DeviceInfo:
     """Update device information"""
     try:
@@ -122,43 +120,41 @@ async def update_device(
             platform=device.platform,
             version=device.version,
             capabilities=device.capabilities,
-            last_seen=int(__import__('time').time()),
+            last_seen=int(__import__("time").time()),
             status="online",
-            metadata=device.metadata or {}
+            metadata=device.metadata or {},
         )
-        
+
         return device_info
-        
+
     except Exception as e:
         logger.error(f"Error updating device {device_id}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to update device"
+            detail="Failed to update device",
         )
 
 
 @router.delete("/{device_id}")
 async def delete_device(
-    device_id: str,
-    current_user: Dict[str, Any] = Depends(get_current_user)
+    device_id: str, current_user: Dict[str, Any] = Depends(get_current_user)
 ) -> Dict[str, str]:
     """Delete device"""
     try:
         # TODO: Implement device deletion logic
         return {"message": "Device deleted successfully"}
-        
+
     except Exception as e:
         logger.error(f"Error deleting device {device_id}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to delete device"
+            detail="Failed to delete device",
         )
 
 
 @router.post("/{device_id}/heartbeat")
 async def device_heartbeat(
-    device_id: str,
-    current_user: Dict[str, Any] = Depends(get_current_user)
+    device_id: str, current_user: Dict[str, Any] = Depends(get_current_user)
 ) -> Dict[str, Any]:
     """Update device heartbeat"""
     try:
@@ -166,12 +162,12 @@ async def device_heartbeat(
         return {
             "device_id": device_id,
             "status": "online",
-            "last_seen": int(__import__('time').time())
+            "last_seen": int(__import__("time").time()),
         }
-        
+
     except Exception as e:
         logger.error(f"Error updating heartbeat for device {device_id}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to update heartbeat"
+            detail="Failed to update heartbeat",
         )

@@ -9,8 +9,12 @@ clients/ollama_client.py
 common/__init__.py
 common/config.py
 common/errors.py
+common/http.py
+common/io.py
 common/logging.py
 common/retry.py
+common/templates.py
+common/validation.py
 modules/__init__.py
 modules/api_provider_manager.py
 modules/automated_scheduler.py
@@ -132,6 +136,8 @@ tests/test_api_bridge.py
 tests/test_api_dev_agent.py
 tests/test_api_pr_fullsuite.py
 tests/test_api_provider_manager.py
+tests/test_batch2_http_io.py
+tests/test_batch3_templates_validation.py
 tests/test_bug_memory.py
 tests/test_bug_memory_record.py
 tests/test_bugmemory_priority.py

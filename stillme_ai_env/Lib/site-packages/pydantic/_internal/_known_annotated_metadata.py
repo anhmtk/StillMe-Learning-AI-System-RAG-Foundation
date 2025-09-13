@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from collections.abc import Iterable
 from copy import copy
 from functools import lru_cache, partial
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Callable, Iterable
 
 from pydantic_core import CoreSchema, PydanticCustomError, ValidationError, to_jsonable_python
 from pydantic_core import core_schema as cs
@@ -13,7 +12,7 @@ from ._fields import PydanticMetadata
 from ._import_utils import import_cached_field_info
 
 if TYPE_CHECKING:
-    pass
+    from ..annotated_handlers import GetJsonSchemaHandler
 
 STRICT = {'strict'}
 FAIL_FAST = {'fail_fast'}
@@ -97,6 +96,22 @@ for constraints, schemas in constraint_schema_pairings:
         CONSTRAINTS_TO_ALLOWED_SCHEMAS[c].update(schemas)
 
 
+def add_js_update_schema(s: cs.CoreSchema, f: Callable[[], dict[str, Any]]) -> None:
+    def update_js_schema(s: cs.CoreSchema, handler: GetJsonSchemaHandler) -> dict[str, Any]:
+        js_schema = handler(s)
+        js_schema.update(f())
+        return js_schema
+
+    if 'metadata' in s:
+        metadata = s['metadata']
+        if 'pydantic_js_functions' in s:
+            metadata['pydantic_js_functions'].append(update_js_schema)
+        else:
+            metadata['pydantic_js_functions'] = [update_js_schema]
+    else:
+        s['metadata'] = {'pydantic_js_functions': [update_js_schema]}
+
+
 def as_jsonable_value(v: Any) -> Any:
     if type(v) not in (int, str, float, bytes, bool, type(None)):
         return to_jsonable_python(v)
@@ -113,7 +128,7 @@ def expand_grouped_metadata(annotations: Iterable[Any]) -> Iterable[Any]:
         An iterable of expanded annotations.
 
     Example:
-        ```python
+        ```py
         from annotated_types import Ge, Len
 
         from pydantic._internal._known_annotated_metadata import expand_grouped_metadata
@@ -186,7 +201,7 @@ def apply_known_metadata(annotation: Any, schema: CoreSchema) -> CoreSchema | No
     """
     import annotated_types as at
 
-    from ._validators import NUMERIC_VALIDATOR_LOOKUP, forbid_inf_nan_check
+    from ._validators import forbid_inf_nan_check, get_constraint_validator
 
     schema = schema.copy()
     schema_update, other_metadata = collect_known_metadata([annotation])
@@ -248,8 +263,10 @@ def apply_known_metadata(annotation: Any, schema: CoreSchema) -> CoreSchema | No
                     _apply_constraint_with_incompatibility_info, cs.str_schema(**{constraint: value})
                 )
             )
-        elif constraint in NUMERIC_VALIDATOR_LOOKUP:
-            if constraint in LENGTH_CONSTRAINTS:
+        elif constraint in {*NUMERIC_CONSTRAINTS, *LENGTH_CONSTRAINTS}:
+            if constraint in NUMERIC_CONSTRAINTS:
+                json_schema_constraint = constraint
+            elif constraint in LENGTH_CONSTRAINTS:
                 inner_schema = schema
                 while inner_schema['type'] in {'function-before', 'function-wrap', 'function-after'}:
                     inner_schema = inner_schema['schema']  # type: ignore
@@ -257,24 +274,14 @@ def apply_known_metadata(annotation: Any, schema: CoreSchema) -> CoreSchema | No
                 if inner_schema_type == 'list' or (
                     inner_schema_type == 'json-or-python' and inner_schema['json_schema']['type'] == 'list'  # type: ignore
                 ):
-                    js_constraint_key = 'minItems' if constraint == 'min_length' else 'maxItems'
+                    json_schema_constraint = 'minItems' if constraint == 'min_length' else 'maxItems'
                 else:
-                    js_constraint_key = 'minLength' if constraint == 'min_length' else 'maxLength'
-            else:
-                js_constraint_key = constraint
+                    json_schema_constraint = 'minLength' if constraint == 'min_length' else 'maxLength'
 
             schema = cs.no_info_after_validator_function(
-                partial(NUMERIC_VALIDATOR_LOOKUP[constraint], **{constraint: value}), schema
+                partial(get_constraint_validator(constraint), **{'constraint_value': value}), schema
             )
-            metadata = schema.get('metadata', {})
-            if (existing_json_schema_updates := metadata.get('pydantic_js_updates')) is not None:
-                metadata['pydantic_js_updates'] = {
-                    **existing_json_schema_updates,
-                    **{js_constraint_key: as_jsonable_value(value)},
-                }
-            else:
-                metadata['pydantic_js_updates'] = {js_constraint_key: as_jsonable_value(value)}
-            schema['metadata'] = metadata
+            add_js_update_schema(schema, lambda: {json_schema_constraint: as_jsonable_value(value)})  # noqa: B023
         elif constraint == 'allow_inf_nan' and value is False:
             schema = cs.no_info_after_validator_function(
                 forbid_inf_nan_check,
@@ -288,11 +295,8 @@ def apply_known_metadata(annotation: Any, schema: CoreSchema) -> CoreSchema | No
     for annotation in other_metadata:
         if (annotation_type := type(annotation)) in (at_to_constraint_map := _get_at_to_constraint_map()):
             constraint = at_to_constraint_map[annotation_type]
-            validator = NUMERIC_VALIDATOR_LOOKUP.get(constraint)
-            if validator is None:
-                raise ValueError(f'Unknown constraint {constraint}')
             schema = cs.no_info_after_validator_function(
-                partial(validator, {constraint: getattr(annotation, constraint)}), schema
+                partial(get_constraint_validator(constraint), {constraint: getattr(annotation, constraint)}), schema
             )
             continue
         elif isinstance(annotation, (at.Predicate, at.Not)):
@@ -339,7 +343,7 @@ def collect_known_metadata(annotations: Iterable[Any]) -> tuple[dict[str, Any], 
         A tuple contains a dict of known metadata and a list of unknown annotations.
 
     Example:
-        ```python
+        ```py
         from annotated_types import Gt, Len
 
         from pydantic._internal._known_annotated_metadata import collect_known_metadata

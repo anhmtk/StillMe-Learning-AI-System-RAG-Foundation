@@ -6,7 +6,7 @@
 $ python -m psutil.tests.
 """
 
-from psutil.tests import pytest
+from .runner import main
 
 
-pytest.main(["-v", "-s", "--tb=short"])
+main()

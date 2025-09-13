@@ -5,16 +5,17 @@ SAFETY: Read-only analysis, no network calls, mock data only
 """
 
 import json
-import os
-from pathlib import Path
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass, asdict
-from enum import Enum
 import uuid
+from dataclasses import asdict, dataclass
 from datetime import datetime
+from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
 
 class APICategory(Enum):
     """Categories of external APIs"""
+
     AI_SERVICES = "ai_services"
     DATA_SERVICES = "data_services"
     COMMUNICATION = "communication"
@@ -24,23 +25,29 @@ class APICategory(Enum):
     PAYMENT = "payment"
     INTEGRATION = "integration"
 
+
 class SecurityLevel(Enum):
     """Security levels for APIs"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
 
+
 class IntegrationComplexity(Enum):
     """Integration complexity levels"""
+
     SIMPLE = "simple"
     MODERATE = "moderate"
     COMPLEX = "complex"
     VERY_COMPLEX = "very_complex"
 
+
 @dataclass
 class APIEndpoint:
     """Represents an API endpoint"""
+
     endpoint_id: str
     name: str
     url: str
@@ -51,9 +58,11 @@ class APIEndpoint:
     rate_limit: Optional[int]
     authentication_required: bool
 
+
 @dataclass
 class ExternalAPI:
     """Represents an external API"""
+
     api_id: str
     name: str
     provider: str
@@ -73,42 +82,43 @@ class ExternalAPI:
     risks: List[str]
     benefits: List[str]
 
+
 class APIInventoryAnalyzer:
     """Analyzes external APIs for integration potential"""
-    
+
     def __init__(self, project_root: str = "."):
         self.project_root = Path(project_root)
         self.external_apis = []
         self.analysis_results = {}
-        
+
     def analyze_external_apis(self) -> Dict[str, Any]:
         """Main analysis function"""
         print("🔍 Starting external APIs inventory analysis...")
-        
+
         # Safety check: Ensure no network access
         print("🛡️ Safety check: Operating in isolated sandbox mode")
-        
+
         # Generate comprehensive API inventory
         self._generate_api_inventory()
-        
+
         # Analyze each API
         self._analyze_apis()
-        
+
         # Generate recommendations
         recommendations = self._generate_recommendations()
-        
+
         # Create integration roadmap
         roadmap = self._create_integration_roadmap()
-        
+
         # Convert APIs to serializable format
         serializable_apis = []
         for api in self.external_apis:
             api_dict = asdict(api)
-            api_dict['category'] = api.category.value
-            api_dict['security_level'] = api.security_level.value
-            api_dict['integration_complexity'] = api.integration_complexity.value
+            api_dict["category"] = api.category.value
+            api_dict["security_level"] = api.security_level.value
+            api_dict["integration_complexity"] = api.integration_complexity.value
             serializable_apis.append(api_dict)
-        
+
         return {
             "analysis_timestamp": datetime.now().isoformat(),
             "total_apis": len(self.external_apis),
@@ -116,37 +126,37 @@ class APIInventoryAnalyzer:
             "analysis_results": self.analysis_results,
             "recommendations": recommendations,
             "integration_roadmap": roadmap,
-            "summary": self._generate_summary()
+            "summary": self._generate_summary(),
         }
-    
+
     def _generate_api_inventory(self):
         """Generate comprehensive API inventory"""
         print("📋 Generating API inventory...")
-        
+
         # AI Services APIs
         self._add_ai_services_apis()
-        
+
         # Data Services APIs
         self._add_data_services_apis()
-        
+
         # Communication APIs
         self._add_communication_apis()
-        
+
         # Storage APIs
         self._add_storage_apis()
-        
+
         # Authentication APIs
         self._add_authentication_apis()
-        
+
         # Monitoring APIs
         self._add_monitoring_apis()
-        
+
         # Payment APIs
         self._add_payment_apis()
-        
+
         # Integration APIs
         self._add_integration_apis()
-    
+
     def _add_ai_services_apis(self):
         """Add AI services APIs to inventory"""
         ai_apis = [
@@ -167,15 +177,15 @@ class APIInventoryAnalyzer:
                         "name": "Chat Completion",
                         "url": "/chat/completions",
                         "method": "POST",
-                        "description": "Generate chat completions using GPT models"
+                        "description": "Generate chat completions using GPT models",
                     },
                     {
                         "name": "Text Completion",
                         "url": "/completions",
                         "method": "POST",
-                        "description": "Generate text completions"
-                    }
-                ]
+                        "description": "Generate text completions",
+                    },
+                ],
             },
             {
                 "name": "DeepSeek API",
@@ -194,9 +204,9 @@ class APIInventoryAnalyzer:
                         "name": "Chat Completion",
                         "url": "/chat/completions",
                         "method": "POST",
-                        "description": "Generate chat completions"
+                        "description": "Generate chat completions",
                     }
-                ]
+                ],
             },
             {
                 "name": "Anthropic Claude API",
@@ -215,15 +225,15 @@ class APIInventoryAnalyzer:
                         "name": "Message Completion",
                         "url": "/messages",
                         "method": "POST",
-                        "description": "Generate message completions"
+                        "description": "Generate message completions",
                     }
-                ]
-            }
+                ],
+            },
         ]
-        
+
         for api_data in ai_apis:
             self._create_api_from_data(api_data, APICategory.AI_SERVICES)
-    
+
     def _add_data_services_apis(self):
         """Add data services APIs to inventory"""
         data_apis = [
@@ -244,9 +254,9 @@ class APIInventoryAnalyzer:
                         "name": "Reports",
                         "url": "/reports:batchGet",
                         "method": "POST",
-                        "description": "Get analytics reports"
+                        "description": "Get analytics reports",
                     }
-                ]
+                ],
             },
             {
                 "name": "Weather API",
@@ -265,15 +275,15 @@ class APIInventoryAnalyzer:
                         "name": "Current Weather",
                         "url": "/weather",
                         "method": "GET",
-                        "description": "Get current weather data"
+                        "description": "Get current weather data",
                     }
-                ]
-            }
+                ],
+            },
         ]
-        
+
         for api_data in data_apis:
             self._create_api_from_data(api_data, APICategory.DATA_SERVICES)
-    
+
     def _add_communication_apis(self):
         """Add communication APIs to inventory"""
         comm_apis = [
@@ -294,9 +304,9 @@ class APIInventoryAnalyzer:
                         "name": "Send SMS",
                         "url": "/Accounts/{AccountSid}/Messages.json",
                         "method": "POST",
-                        "description": "Send SMS messages"
+                        "description": "Send SMS messages",
                     }
-                ]
+                ],
             },
             {
                 "name": "SendGrid API",
@@ -315,15 +325,15 @@ class APIInventoryAnalyzer:
                         "name": "Send Email",
                         "url": "/mail/send",
                         "method": "POST",
-                        "description": "Send emails"
+                        "description": "Send emails",
                     }
-                ]
-            }
+                ],
+            },
         ]
-        
+
         for api_data in comm_apis:
             self._create_api_from_data(api_data, APICategory.COMMUNICATION)
-    
+
     def _add_storage_apis(self):
         """Add storage APIs to inventory"""
         storage_apis = [
@@ -344,9 +354,9 @@ class APIInventoryAnalyzer:
                         "name": "Put Object",
                         "url": "/{bucket}/{key}",
                         "method": "PUT",
-                        "description": "Upload objects to S3"
+                        "description": "Upload objects to S3",
                     }
-                ]
+                ],
             },
             {
                 "name": "Google Drive API",
@@ -365,15 +375,15 @@ class APIInventoryAnalyzer:
                         "name": "Files",
                         "url": "/files",
                         "method": "GET",
-                        "description": "List and manage files"
+                        "description": "List and manage files",
                     }
-                ]
-            }
+                ],
+            },
         ]
-        
+
         for api_data in storage_apis:
             self._create_api_from_data(api_data, APICategory.STORAGE)
-    
+
     def _add_authentication_apis(self):
         """Add authentication APIs to inventory"""
         auth_apis = [
@@ -394,9 +404,9 @@ class APIInventoryAnalyzer:
                         "name": "Users",
                         "url": "/users",
                         "method": "GET",
-                        "description": "Manage user accounts"
+                        "description": "Manage user accounts",
                     }
-                ]
+                ],
             },
             {
                 "name": "Firebase Auth API",
@@ -415,15 +425,15 @@ class APIInventoryAnalyzer:
                         "name": "Sign In",
                         "url": "/accounts:signInWithPassword",
                         "method": "POST",
-                        "description": "User authentication"
+                        "description": "User authentication",
                     }
-                ]
-            }
+                ],
+            },
         ]
-        
+
         for api_data in auth_apis:
             self._create_api_from_data(api_data, APICategory.AUTHENTICATION)
-    
+
     def _add_monitoring_apis(self):
         """Add monitoring APIs to inventory"""
         monitoring_apis = [
@@ -444,9 +454,9 @@ class APIInventoryAnalyzer:
                         "name": "Metrics",
                         "url": "/series",
                         "method": "POST",
-                        "description": "Send metrics data"
+                        "description": "Send metrics data",
                     }
-                ]
+                ],
             },
             {
                 "name": "New Relic API",
@@ -465,15 +475,15 @@ class APIInventoryAnalyzer:
                         "name": "Applications",
                         "url": "/applications.json",
                         "method": "GET",
-                        "description": "Get application data"
+                        "description": "Get application data",
                     }
-                ]
-            }
+                ],
+            },
         ]
-        
+
         for api_data in monitoring_apis:
             self._create_api_from_data(api_data, APICategory.MONITORING)
-    
+
     def _add_payment_apis(self):
         """Add payment APIs to inventory"""
         payment_apis = [
@@ -494,9 +504,9 @@ class APIInventoryAnalyzer:
                         "name": "Create Payment Intent",
                         "url": "/payment_intents",
                         "method": "POST",
-                        "description": "Create payment intents"
+                        "description": "Create payment intents",
                     }
-                ]
+                ],
             },
             {
                 "name": "PayPal API",
@@ -515,15 +525,15 @@ class APIInventoryAnalyzer:
                         "name": "Create Order",
                         "url": "/checkout/orders",
                         "method": "POST",
-                        "description": "Create payment orders"
+                        "description": "Create payment orders",
                     }
-                ]
-            }
+                ],
+            },
         ]
-        
+
         for api_data in payment_apis:
             self._create_api_from_data(api_data, APICategory.PAYMENT)
-    
+
     def _add_integration_apis(self):
         """Add integration APIs to inventory"""
         integration_apis = [
@@ -544,9 +554,9 @@ class APIInventoryAnalyzer:
                         "name": "Triggers",
                         "url": "/triggers",
                         "method": "GET",
-                        "description": "List available triggers"
+                        "description": "List available triggers",
                     }
-                ]
+                ],
             },
             {
                 "name": "IFTTT API",
@@ -565,15 +575,15 @@ class APIInventoryAnalyzer:
                         "name": "Applets",
                         "url": "/applets",
                         "method": "GET",
-                        "description": "List applets"
+                        "description": "List applets",
                     }
-                ]
-            }
+                ],
+            },
         ]
-        
+
         for api_data in integration_apis:
             self._create_api_from_data(api_data, APICategory.INTEGRATION)
-    
+
     def _create_api_from_data(self, api_data: Dict[str, Any], category: APICategory):
         """Create ExternalAPI object from data"""
         endpoints = []
@@ -587,10 +597,10 @@ class APIInventoryAnalyzer:
                 parameters=[],
                 response_format="JSON",
                 rate_limit=None,
-                authentication_required=True
+                authentication_required=True,
             )
             endpoints.append(endpoint)
-        
+
         api = ExternalAPI(
             api_id=str(uuid.uuid4()),
             name=api_data["name"],
@@ -607,13 +617,15 @@ class APIInventoryAnalyzer:
             business_value=api_data["business_value"],
             urgency_level=api_data["urgency_level"],
             cost_estimate=api_data["cost_estimate"],
-            compliance_requirements=self._assess_compliance_requirements(api_data["name"]),
+            compliance_requirements=self._assess_compliance_requirements(
+                api_data["name"]
+            ),
             risks=self._assess_risks(api_data["name"], api_data["security_level"]),
-            benefits=self._assess_benefits(api_data["name"], category)
+            benefits=self._assess_benefits(api_data["name"], category),
         )
-        
+
         self.external_apis.append(api)
-    
+
     def _assess_documentation_quality(self, api_name: str) -> float:
         """Assess documentation quality (mock assessment)"""
         # Mock assessment based on known API documentation quality
@@ -634,10 +646,10 @@ class APIInventoryAnalyzer:
             "Stripe API": 0.9,
             "PayPal API": 0.8,
             "Zapier API": 0.7,
-            "IFTTT API": 0.6
+            "IFTTT API": 0.6,
         }
         return quality_scores.get(api_name, 0.5)
-    
+
     def _assess_compliance_requirements(self, api_name: str) -> List[str]:
         """Assess compliance requirements (mock assessment)"""
         compliance_map = {
@@ -657,84 +669,79 @@ class APIInventoryAnalyzer:
             "Stripe API": ["PCI DSS", "GDPR", "SOC 2"],
             "PayPal API": ["PCI DSS", "GDPR", "SOC 2"],
             "Zapier API": ["GDPR", "SOC 2"],
-            "IFTTT API": ["GDPR"]
+            "IFTTT API": ["GDPR"],
         }
         return compliance_map.get(api_name, [])
-    
+
     def _assess_risks(self, api_name: str, security_level: SecurityLevel) -> List[str]:
         """Assess risks for API integration"""
         base_risks = [
             "API rate limiting",
             "Service availability",
             "Data privacy concerns",
-            "Cost overruns"
+            "Cost overruns",
         ]
-        
+
         if security_level == SecurityLevel.CRITICAL:
-            base_risks.extend([
-                "Security breach risk",
-                "Compliance violations",
-                "Data loss risk"
-            ])
+            base_risks.extend(
+                ["Security breach risk", "Compliance violations", "Data loss risk"]
+            )
         elif security_level == SecurityLevel.HIGH:
-            base_risks.extend([
-                "Authentication vulnerabilities",
-                "Data exposure risk"
-            ])
-        
+            base_risks.extend(["Authentication vulnerabilities", "Data exposure risk"])
+
         return base_risks
-    
+
     def _assess_benefits(self, api_name: str, category: APICategory) -> List[str]:
         """Assess benefits of API integration"""
         category_benefits = {
             APICategory.AI_SERVICES: [
                 "Enhanced AI capabilities",
                 "Cost-effective AI processing",
-                "Scalable AI solutions"
+                "Scalable AI solutions",
             ],
             APICategory.DATA_SERVICES: [
                 "Rich data insights",
                 "Real-time data access",
-                "Data analytics capabilities"
+                "Data analytics capabilities",
             ],
             APICategory.COMMUNICATION: [
                 "Multi-channel communication",
                 "Automated messaging",
-                "User engagement"
+                "User engagement",
             ],
             APICategory.STORAGE: [
                 "Scalable storage",
                 "Data backup and recovery",
-                "File sharing capabilities"
+                "File sharing capabilities",
             ],
             APICategory.AUTHENTICATION: [
                 "Secure user management",
                 "SSO capabilities",
-                "Identity verification"
+                "Identity verification",
             ],
             APICategory.MONITORING: [
                 "Application monitoring",
                 "Performance insights",
-                "Proactive issue detection"
+                "Proactive issue detection",
             ],
             APICategory.PAYMENT: [
                 "Payment processing",
                 "Financial transactions",
-                "Revenue generation"
+                "Revenue generation",
             ],
             APICategory.INTEGRATION: [
                 "Workflow automation",
                 "System integration",
-                "Process optimization"
-            ]
+                "Process optimization",
+            ],
         }
-        
+
         return category_benefits.get(category, ["General integration benefits"])
-    
+
     def _analyze_apis(self):
         """Analyze all APIs for integration potential"""
         print("🔍 Analyzing APIs for integration potential...")
-        
+
         self.analysis_results = {
             "high_priority_apis": [],
             "medium_priority_apis": [],
@@ -742,9 +749,9 @@ class APIInventoryAnalyzer:
             "security_analysis": {},
             "complexity_analysis": {},
             "cost_analysis": {},
-            "compliance_analysis": {}
+            "compliance_analysis": {},
         }
-        
+
         for api in self.external_apis:
             # Priority analysis
             if api.priority_score >= 0.7:
@@ -753,73 +760,90 @@ class APIInventoryAnalyzer:
                 self.analysis_results["medium_priority_apis"].append(api.name)
             else:
                 self.analysis_results["low_priority_apis"].append(api.name)
-            
+
             # Security analysis
             if api.name not in self.analysis_results["security_analysis"]:
                 self.analysis_results["security_analysis"][api.name] = {
                     "level": api.security_level.value,
                     "risks": api.risks,
-                    "compliance": api.compliance_requirements
+                    "compliance": api.compliance_requirements,
                 }
-            
+
             # Complexity analysis
             if api.name not in self.analysis_results["complexity_analysis"]:
                 self.analysis_results["complexity_analysis"][api.name] = {
                     "level": api.integration_complexity.value,
                     "authentication": api.authentication_method,
-                    "endpoints_count": len(api.endpoints)
+                    "endpoints_count": len(api.endpoints),
                 }
-            
+
             # Cost analysis
             if api.name not in self.analysis_results["cost_analysis"]:
                 self.analysis_results["cost_analysis"][api.name] = {
                     "estimate": api.cost_estimate,
                     "business_value": api.business_value,
-                    "urgency": api.urgency_level
+                    "urgency": api.urgency_level,
                 }
-    
+
     def _generate_recommendations(self) -> List[Dict[str, Any]]:
         """Generate integration recommendations"""
         recommendations = []
-        
+
         # High priority recommendations
-        high_priority_apis = [api for api in self.external_apis if api.priority_score >= 0.7]
+        high_priority_apis = [
+            api for api in self.external_apis if api.priority_score >= 0.7
+        ]
         if high_priority_apis:
-            recommendations.append({
-                "category": "High Priority Integration",
-                "apis": [api.name for api in high_priority_apis],
-                "recommendation": "Implement these APIs first for maximum business value",
-                "timeline": "1-2 months",
-                "effort": "High",
-                "benefits": "Significant business value and user experience improvement"
-            })
-        
+            recommendations.append(
+                {
+                    "category": "High Priority Integration",
+                    "apis": [api.name for api in high_priority_apis],
+                    "recommendation": "Implement these APIs first for maximum business value",
+                    "timeline": "1-2 months",
+                    "effort": "High",
+                    "benefits": "Significant business value and user experience improvement",
+                }
+            )
+
         # Security-focused recommendations
-        critical_security_apis = [api for api in self.external_apis if api.security_level == SecurityLevel.CRITICAL]
+        critical_security_apis = [
+            api
+            for api in self.external_apis
+            if api.security_level == SecurityLevel.CRITICAL
+        ]
         if critical_security_apis:
-            recommendations.append({
-                "category": "Security-Critical Integration",
-                "apis": [api.name for api in critical_security_apis],
-                "recommendation": "Implement with enhanced security measures and compliance focus",
-                "timeline": "2-3 months",
-                "effort": "Very High",
-                "benefits": "Enhanced security and compliance capabilities"
-            })
-        
+            recommendations.append(
+                {
+                    "category": "Security-Critical Integration",
+                    "apis": [api.name for api in critical_security_apis],
+                    "recommendation": "Implement with enhanced security measures and compliance focus",
+                    "timeline": "2-3 months",
+                    "effort": "Very High",
+                    "benefits": "Enhanced security and compliance capabilities",
+                }
+            )
+
         # Quick wins
-        simple_apis = [api for api in self.external_apis if api.integration_complexity == IntegrationComplexity.SIMPLE and api.priority_score >= 0.5]
+        simple_apis = [
+            api
+            for api in self.external_apis
+            if api.integration_complexity == IntegrationComplexity.SIMPLE
+            and api.priority_score >= 0.5
+        ]
         if simple_apis:
-            recommendations.append({
-                "category": "Quick Wins",
-                "apis": [api.name for api in simple_apis],
-                "recommendation": "Implement these APIs for quick integration wins",
-                "timeline": "2-4 weeks",
-                "effort": "Low",
-                "benefits": "Fast implementation with immediate value"
-            })
-        
+            recommendations.append(
+                {
+                    "category": "Quick Wins",
+                    "apis": [api.name for api in simple_apis],
+                    "recommendation": "Implement these APIs for quick integration wins",
+                    "timeline": "2-4 weeks",
+                    "effort": "Low",
+                    "benefits": "Fast implementation with immediate value",
+                }
+            )
+
         return recommendations
-    
+
     def _create_integration_roadmap(self) -> List[Dict[str, Any]]:
         """Create integration roadmap"""
         roadmap = [
@@ -832,8 +856,8 @@ class APIInventoryAnalyzer:
                 "deliverables": [
                     "AI service integration",
                     "Basic error handling",
-                    "Authentication setup"
-                ]
+                    "Authentication setup",
+                ],
             },
             {
                 "phase": 2,
@@ -844,8 +868,8 @@ class APIInventoryAnalyzer:
                 "deliverables": [
                     "Authentication system",
                     "User management",
-                    "Security policies"
-                ]
+                    "Security policies",
+                ],
             },
             {
                 "phase": 3,
@@ -853,11 +877,7 @@ class APIInventoryAnalyzer:
                 "duration": "1 month",
                 "apis": ["AWS S3 API", "Google Drive API"],
                 "focus": "Data storage and management",
-                "deliverables": [
-                    "File storage system",
-                    "Data backup",
-                    "File sharing"
-                ]
+                "deliverables": ["File storage system", "Data backup", "File sharing"],
             },
             {
                 "phase": 4,
@@ -868,86 +888,135 @@ class APIInventoryAnalyzer:
                 "deliverables": [
                     "Messaging system",
                     "Monitoring dashboard",
-                    "Alert system"
-                ]
-            }
+                    "Alert system",
+                ],
+            },
         ]
-        
+
         return roadmap
-    
+
     def _generate_summary(self) -> Dict[str, Any]:
         """Generate analysis summary"""
         total_apis = len(self.external_apis)
         if total_apis == 0:
             return {"error": "No APIs analyzed"}
-        
+
         # Calculate statistics
-        high_priority_count = len([api for api in self.external_apis if api.priority_score >= 0.7])
-        medium_priority_count = len([api for api in self.external_apis if 0.4 <= api.priority_score < 0.7])
-        low_priority_count = len([api for api in self.external_apis if api.priority_score < 0.4])
-        
-        critical_security_count = len([api for api in self.external_apis if api.security_level == SecurityLevel.CRITICAL])
-        high_security_count = len([api for api in self.external_apis if api.security_level == SecurityLevel.HIGH])
-        
-        simple_complexity_count = len([api for api in self.external_apis if api.integration_complexity == IntegrationComplexity.SIMPLE])
-        complex_complexity_count = len([api for api in self.external_apis if api.integration_complexity in [IntegrationComplexity.COMPLEX, IntegrationComplexity.VERY_COMPLEX]])
-        
-        avg_priority = sum(api.priority_score for api in self.external_apis) / total_apis
-        avg_business_value = sum(api.business_value for api in self.external_apis) / total_apis
+        high_priority_count = len(
+            [api for api in self.external_apis if api.priority_score >= 0.7]
+        )
+        medium_priority_count = len(
+            [api for api in self.external_apis if 0.4 <= api.priority_score < 0.7]
+        )
+        low_priority_count = len(
+            [api for api in self.external_apis if api.priority_score < 0.4]
+        )
+
+        critical_security_count = len(
+            [
+                api
+                for api in self.external_apis
+                if api.security_level == SecurityLevel.CRITICAL
+            ]
+        )
+        high_security_count = len(
+            [
+                api
+                for api in self.external_apis
+                if api.security_level == SecurityLevel.HIGH
+            ]
+        )
+
+        simple_complexity_count = len(
+            [
+                api
+                for api in self.external_apis
+                if api.integration_complexity == IntegrationComplexity.SIMPLE
+            ]
+        )
+        complex_complexity_count = len(
+            [
+                api
+                for api in self.external_apis
+                if api.integration_complexity
+                in [IntegrationComplexity.COMPLEX, IntegrationComplexity.VERY_COMPLEX]
+            ]
+        )
+
+        avg_priority = (
+            sum(api.priority_score for api in self.external_apis) / total_apis
+        )
+        avg_business_value = (
+            sum(api.business_value for api in self.external_apis) / total_apis
+        )
         avg_urgency = sum(api.urgency_level for api in self.external_apis) / total_apis
-        
+
         return {
             "total_apis": total_apis,
             "priority_distribution": {
                 "high_priority": high_priority_count,
                 "medium_priority": medium_priority_count,
-                "low_priority": low_priority_count
+                "low_priority": low_priority_count,
             },
             "security_distribution": {
                 "critical_security": critical_security_count,
                 "high_security": high_security_count,
-                "other_security": total_apis - critical_security_count - high_security_count
+                "other_security": total_apis
+                - critical_security_count
+                - high_security_count,
             },
             "complexity_distribution": {
                 "simple_integration": simple_complexity_count,
                 "complex_integration": complex_complexity_count,
-                "other_complexity": total_apis - simple_complexity_count - complex_complexity_count
+                "other_complexity": total_apis
+                - simple_complexity_count
+                - complex_complexity_count,
             },
             "average_scores": {
                 "priority": round(avg_priority, 2),
                 "business_value": round(avg_business_value, 2),
-                "urgency": round(avg_urgency, 2)
+                "urgency": round(avg_urgency, 2),
             },
             "recommendations_count": len(self._generate_recommendations()),
-            "roadmap_phases": 4
+            "roadmap_phases": 4,
         }
+
 
 def main():
     """Main analysis function"""
     print("🌐 AgentDev Advanced - External APIs Inventory Analysis")
     print("=" * 60)
-    
+
     analyzer = APIInventoryAnalyzer()
-    
+
     try:
         analysis_result = analyzer.analyze_external_apis()
-        
+
         # Save analysis result
-        result_path = Path("backup/external_apis_analysis_20250909_235623/api_inventory_analysis.json")
-        with open(result_path, 'w', encoding='utf-8') as f:
+        result_path = Path(
+            "backup/external_apis_analysis_20250909_235623/api_inventory_analysis.json"
+        )
+        with open(result_path, "w", encoding="utf-8") as f:
             json.dump(analysis_result, f, indent=2, ensure_ascii=False)
-        
+
         print(f"✅ Analysis complete! Result saved to: {result_path}")
         print(f"📊 Analyzed {analysis_result['total_apis']} external APIs")
-        print(f"🎯 High priority APIs: {len(analysis_result['analysis_results']['high_priority_apis'])}")
-        print(f"🛡️ Critical security APIs: {len([api for api in analysis_result['apis'] if api['security_level'] == 'critical'])}")
-        print(f"📈 Average priority score: {analysis_result['summary']['average_scores']['priority']}")
-        
+        print(
+            f"🎯 High priority APIs: {len(analysis_result['analysis_results']['high_priority_apis'])}"
+        )
+        print(
+            f"🛡️ Critical security APIs: {len([api for api in analysis_result['apis'] if api['security_level'] == 'critical'])}"
+        )
+        print(
+            f"📈 Average priority score: {analysis_result['summary']['average_scores']['priority']}"
+        )
+
         return analysis_result
-        
+
     except Exception as e:
         print(f"❌ Analysis failed: {e}")
         return None
+
 
 if __name__ == "__main__":
     main()

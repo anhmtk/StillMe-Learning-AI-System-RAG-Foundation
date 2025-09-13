@@ -3,8 +3,7 @@ from __future__ import annotations
 import importlib.metadata as importlib_metadata
 import os
 import warnings
-from collections.abc import Iterable
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Final, Iterable
 
 if TYPE_CHECKING:
     from . import PydanticPluginProtocol

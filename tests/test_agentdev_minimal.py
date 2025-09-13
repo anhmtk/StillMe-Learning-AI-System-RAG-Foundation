@@ -3,17 +3,20 @@
 Minimal test for AgentDev system - no external dependencies
 """
 
+
 def test_basic_math():
     """Test basic math operations"""
     assert 1 + 1 == 2
     assert 2 * 3 == 6
     assert 10 / 2 == 5
 
+
 def test_basic_string():
     """Test basic string operations"""
     assert "hello" + " " + "world" == "hello world"
     assert len("test") == 4
     assert "test".upper() == "TEST"
+
 
 def test_basic_list():
     """Test basic list operations"""
@@ -22,6 +25,7 @@ def test_basic_list():
     assert test_list[0] == 1
     assert test_list[-1] == 3
 
+
 def test_basic_dict():
     """Test basic dictionary operations"""
     test_dict = {"key": "value", "number": 42}
@@ -29,13 +33,15 @@ def test_basic_dict():
     assert test_dict["number"] == 42
     assert len(test_dict) == 2
 
+
 def test_basic_boolean():
     """Test basic boolean operations"""
     assert True is True
     assert False is False
-    assert not False is True
+    assert False is not True
     assert True and True is True
     assert True or False is True
+
 
 if __name__ == "__main__":
     # Run tests manually

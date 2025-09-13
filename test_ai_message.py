@@ -4,13 +4,14 @@ Test AI Message through Gateway
 Test gửi message đến AI qua Gateway
 """
 
-import requests
-import json
 from datetime import datetime
+
+import requests
+
 
 def test_ai_message():
     """Test AI message through Gateway REST API"""
-    
+
     # Test Gateway health
     print("🔍 Testing Gateway health...")
     try:
@@ -23,22 +24,20 @@ def test_ai_message():
     except Exception as e:
         print(f"❌ Gateway connection failed: {e}")
         return
-    
+
     # Test AI message
     print("🤖 Testing AI message...")
     message = {
         "message": "Xin chào StillMe! Bạn có thể giúp tôi không?",
         "language": "vi",
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
-    
+
     try:
         response = requests.post(
-            "http://192.168.1.8:8000/api/message",
-            json=message,
-            timeout=30
+            "http://192.168.1.8:8000/api/message", json=message, timeout=30
         )
-        
+
         if response.status_code == 200:
             result = response.json()
             print("✅ AI message sent successfully!")
@@ -46,9 +45,10 @@ def test_ai_message():
         else:
             print(f"❌ AI message failed: {response.status_code}")
             print(f"📝 Error: {response.text}")
-            
+
     except Exception as e:
         print(f"❌ AI message error: {e}")
+
 
 if __name__ == "__main__":
     print("🧪 Testing AI Message through Gateway")

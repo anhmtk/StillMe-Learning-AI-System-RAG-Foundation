@@ -1,27 +1,25 @@
 # oi_adapter/interpreter_controller.py
 from __future__ import annotations
 
-from typing import Optional, List, Any, Dict
 import logging
-import json
-import time
-import os
 import re
-import sys
-from pathlib import Path
 import subprocess
+import sys
+import time
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 import requests
 from interpreter import interpreter as oi  # pyright: ignore[reportMissingImports]
+
 from stillme_core.config import OLLAMA_HOST  # lấy host từ config
 
 # Mặc định vẫn để 20b, nhưng có thể gọi set_model('llama3:8b') để debug nhanh
 MODEL_NAME = "gpt-oss:20b"
-FULL_MODEL_ID = f"ollama/{MODEL_NAME}"      # yêu cầu OI gọi qua liteLLM/ollama
+FULL_MODEL_ID = f"ollama/{MODEL_NAME}"  # yêu cầu OI gọi qua liteLLM/ollama
 AVAILABLE = {"gpt-oss:20b", "llama3:8b", "deepseek-coder:6.7b"}
 
 logger = logging.getLogger("OI-Controller")
-
 
 
 class OpenInterpreterController:
@@ -33,7 +31,6 @@ class OpenInterpreterController:
         max_tokens: Optional[int] = 1024,
         auto_run: bool = True,
         execute: bool = True,
-        
     ):
         self.ollama_host = OLLAMA_HOST
         # lưu model hiện hành
@@ -185,9 +182,19 @@ class OpenInterpreterController:
             r.raise_for_status()
             data = r.json()
             text = data.get("response") or data.get("message") or ""
-            return {"ok": True, "text": (text or "").strip(), "raw": data, "error": None}
+            return {
+                "ok": True,
+                "text": (text or "").strip(),
+                "raw": data,
+                "error": None,
+            }
         except requests.exceptions.Timeout:
-            return {"ok": False, "text": "", "raw": None, "error": f"Timeout after {timeout}s"}
+            return {
+                "ok": False,
+                "text": "",
+                "raw": None,
+                "error": f"Timeout after {timeout}s",
+            }
         except Exception as e:
             return {"ok": False, "text": "", "raw": None, "error": str(e)}
 
@@ -197,11 +204,14 @@ class OpenInterpreterController:
         out = (self._say_exact(expected) or "").replace("\u200b", "").strip()
         if out == expected:
             return expected
-        fb = (self._ollama_direct(
-            "Reply with exactly the next line, and nothing else:\n"
-            f"{expected}\n"
-            "No quotes. No explanations. No extra whitespace."
-        ) or "").strip()
+        fb = (
+            self._ollama_direct(
+                "Reply with exactly the next line, and nothing else:\n"
+                f"{expected}\n"
+                "No quotes. No explanations. No extra whitespace."
+            )
+            or ""
+        ).strip()
         if fb == expected:
             return f"{expected}  (via fallback: Ollama REST; OI silent)"
         return f"[Mismatch] OI:{out!r} | Ollama:{fb!r}"
@@ -226,14 +236,20 @@ class OpenInterpreterController:
         # 2) Model present?
         try:
             tags = requests.get(f"{base}/api/tags", timeout=5)
-            names = [m.get("name") for m in tags.json().get("models", [])] if tags.ok else []
+            names = (
+                [m.get("name") for m in tags.json().get("models", [])]
+                if tags.ok
+                else []
+            )
             info["model_present"] = model in names
         except Exception:
             info["model_present"] = None
 
         # 3) Tiny generate (giới hạn token, nhiệt độ thấp)
         tiny_opts = {"temperature": 0.0, "num_predict": 8}
-        tiny = self._ollama_generate(prompt=".", model=model, options=tiny_opts, timeout=8)
+        tiny = self._ollama_generate(
+            prompt=".", model=model, options=tiny_opts, timeout=8
+        )
         if tiny["ok"]:
             info["tiny_generate_ok"] = True
             return info
@@ -241,7 +257,9 @@ class OpenInterpreterController:
         # 4) Nếu timeout → warmup + retry (timeout dài hơn)
         if "Timeout" in (tiny["error"] or ""):
             _ = self.warmup(model=model, tries=2, delay=1.5)  # hâm nóng nhanh
-            tiny2 = self._ollama_generate(prompt="ok", model=model, options=tiny_opts, timeout=30)
+            tiny2 = self._ollama_generate(
+                prompt="ok", model=model, options=tiny_opts, timeout=30
+            )
             info["tiny_generate_ok"] = tiny2["ok"]
             if not tiny2["ok"]:
                 info["tiny_generate_error"] = tiny2["error"]
@@ -252,8 +270,9 @@ class OpenInterpreterController:
         info["tiny_generate_error"] = tiny["error"]
         return info
 
-
-    def warmup(self, model: Optional[str] = None, tries: int = 3, delay: float = 2.0) -> Dict[str, Any]:
+    def warmup(
+        self, model: Optional[str] = None, tries: int = 3, delay: float = 2.0
+    ) -> Dict[str, Any]:
         """Gọi vài prompt ngắn để nạp model vào RAM, giảm ReadTimeout lần đầu."""
         model = model or self.model
         t0 = time.time()
@@ -267,10 +286,19 @@ class OpenInterpreterController:
                 host=OLLAMA_HOST,
             )
             if res["ok"]:
-                return {"ok": True, "elapsed": round(time.time() - t0, 2), "model": model}
+                return {
+                    "ok": True,
+                    "elapsed": round(time.time() - t0, 2),
+                    "model": model,
+                }
             last_err = res["error"]
             time.sleep(delay)
-        return {"ok": False, "elapsed": round(time.time() - t0, 2), "model": model, "error": last_err}
+        return {
+            "ok": False,
+            "elapsed": round(time.time() - t0, 2),
+            "model": model,
+            "error": last_err,
+        }
 
     # ---- text-only fast path --------------------------------------------
     def run_text_only(
@@ -312,7 +340,7 @@ class OpenInterpreterController:
             cwd=str(self._work_dir),
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            text=True
+            text=True,
         )
         try:
             out, err = proc.communicate(timeout=timeout)
@@ -337,7 +365,11 @@ class OpenInterpreterController:
         if not code:
             return "[PY_EXEC_ERROR] Model did not return a Python code block."
         res = self._run_python_subprocess(code, timeout=timeout)
-        return res["stdout"].strip() if res["ok"] else f"[PY_EXEC_ERROR] {res['stderr'].strip()}"
+        return (
+            res["stdout"].strip()
+            if res["ok"]
+            else f"[PY_EXEC_ERROR] {res['stderr'].strip()}"
+        )
 
     # ---- run_prompt với debug + soft-timeout + fallback ------------------
     def run_prompt_debug(
@@ -369,16 +401,27 @@ class OpenInterpreterController:
         if force_text_only_fallback:
             log("[run_prompt_debug] force_text_only_fallback=True → run_text_only()")
             text = self.run_text_only(
-                prompt, model=model, temperature=temperature, max_tokens=max_tokens, timeout=total_timeout
+                prompt,
+                model=model,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                timeout=total_timeout,
             )
             status = "ok" if not text.startswith("[TEXT_ONLY_ERROR]") else "error"
-            return {"status": status, "text": text, "log": debug_log, "used_fallback": True,
-                    "elapsed": round(time.time() - t0, 2)}
+            return {
+                "status": status,
+                "text": text,
+                "log": debug_log,
+                "used_fallback": True,
+                "elapsed": round(time.time() - t0, 2),
+            }
 
         # Preflight: ping Ollama
         ping = self._ollama_generate(prompt=".", model=model, stream=False, timeout=5)
         if not ping["ok"]:
-            log(f"[run_prompt_debug] preflight failed: {ping['error']} → fallback text_only")
+            log(
+                f"[run_prompt_debug] preflight failed: {ping['error']} → fallback text_only"
+            )
             used_fallback = True
 
         if not used_fallback:
@@ -398,8 +441,13 @@ class OpenInterpreterController:
                 text_from_oi = "".join(out_chunks).strip()
                 if text_from_oi:
                     log("[run_prompt_debug] got text from OI.")
-                    return {"status": "ok", "text": text_from_oi, "log": debug_log,
-                            "used_fallback": False, "elapsed": round(time.time() - t0, 2)}
+                    return {
+                        "status": "ok",
+                        "text": text_from_oi,
+                        "log": debug_log,
+                        "used_fallback": False,
+                        "elapsed": round(time.time() - t0, 2),
+                    }
                 else:
                     log("[run_prompt_debug] OI returned empty → fallback")
                     used_fallback = True
@@ -412,11 +460,24 @@ class OpenInterpreterController:
 
         # Fallback qua REST (non-stream)
         remain = max(5, total_timeout - int(time.time() - t0))
-        text = self.run_text_only(prompt, model=model, temperature=temperature, max_tokens=max_tokens, timeout=remain)
+        text = self.run_text_only(
+            prompt,
+            model=model,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            timeout=remain,
+        )
         status = "ok" if not text.startswith("[TEXT_ONLY_ERROR]") else "error"
-        log(f"[run_prompt_debug] fallback done; status={status}; elapsed={round(time.time()-t0,2)}s")
-        return {"status": status, "text": text, "log": debug_log, "used_fallback": True,
-                "elapsed": round(time.time() - t0, 2)}
+        log(
+            f"[run_prompt_debug] fallback done; status={status}; elapsed={round(time.time()-t0,2)}s"
+        )
+        return {
+            "status": status,
+            "text": text,
+            "log": debug_log,
+            "used_fallback": True,
+            "elapsed": round(time.time() - t0, 2),
+        }
 
     # ---- Convenience: luôn trả về CHỈ CHỮ SỐ ----------------------------
     def run_compute_number(self, task_prompt: str, *, timeout: int = 40) -> str:
@@ -426,8 +487,7 @@ class OpenInterpreterController:
         """
         # 1) thử OI (debug + fallback)
         res = self.run_prompt_debug(
-            f"{task_prompt}\nAnswer with ONLY digits, no words.",
-            total_timeout=timeout
+            f"{task_prompt}\nAnswer with ONLY digits, no words.", total_timeout=timeout
         )
         txt = (res.get("text") or "").strip()
         m = re.search(r"\b\d+\b", txt)
@@ -440,6 +500,8 @@ class OpenInterpreterController:
             return out
 
         # 3) text-only ràng buộc
-        txt2 = self.run_text_only(f"{task_prompt}\nAnswer with ONLY digits, no words.", timeout=timeout)
+        txt2 = self.run_text_only(
+            f"{task_prompt}\nAnswer with ONLY digits, no words.", timeout=timeout
+        )
         m2 = re.search(r"\b\d+\b", txt2 or "")
         return m2.group(0) if m2 else f"[NUM_ERROR] {txt2[:120]}"

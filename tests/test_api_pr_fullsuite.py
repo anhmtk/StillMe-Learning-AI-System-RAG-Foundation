@@ -2,6 +2,7 @@ import pytest
 
 try:
     from fastapi.testclient import TestClient
+
     from api_server import app
 except Exception as e:
     pytest.skip(f"FastAPI TestClient unavailable: {e}", allow_module_level=True)
@@ -11,7 +12,6 @@ client = TestClient(app)
 
 def test_happy_path_fullsuite_and_pr(monkeypatch):
     # Monkeypatch executor methods inside agentdev_run_once call path
-    import agent_dev as mod
     from stillme_core.executor import PatchExecutor
 
     def fake_run_all(self, tests_dir="tests"):
@@ -21,14 +21,28 @@ def test_happy_path_fullsuite_and_pr(monkeypatch):
         return True, ""
 
     def fake_pr(self, title, body, base="main", remote="origin", draft=True):
-        return {"attempted": True, "ok": True, "url": "https://github.com/acme/repo/pull/42", "number": 42, "provider": "gh", "error": None}
+        return {
+            "attempted": True,
+            "ok": True,
+            "url": "https://github.com/acme/repo/pull/42",
+            "number": 42,
+            "provider": "gh",
+            "error": None,
+        }
 
     monkeypatch.setenv("ALLOW_PR", "true")
     monkeypatch.setattr(PatchExecutor, "run_pytest_all", fake_run_all, raising=False)
     monkeypatch.setattr(PatchExecutor, "push_branch", fake_push, raising=False)
     monkeypatch.setattr(PatchExecutor, "create_pull_request", fake_pr, raising=False)
 
-    resp = client.post("/dev-agent/run", json={"max_steps": 1, "run_full_suite_after_pass": True, "open_pr_after_pass": True})
+    resp = client.post(
+        "/dev-agent/run",
+        json={
+            "max_steps": 1,
+            "run_full_suite_after_pass": True,
+            "open_pr_after_pass": True,
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["full_suite"]["attempted"] is True
@@ -38,7 +52,6 @@ def test_happy_path_fullsuite_and_pr(monkeypatch):
 
 
 def test_fullsuite_fail_no_pr(monkeypatch):
-    import agent_dev as mod
     from stillme_core.executor import PatchExecutor
 
     def fake_run_all(self, tests_dir="tests"):
@@ -46,7 +59,14 @@ def test_fullsuite_fail_no_pr(monkeypatch):
 
     monkeypatch.setattr(PatchExecutor, "run_pytest_all", fake_run_all, raising=False)
 
-    resp = client.post("/dev-agent/run", json={"max_steps": 1, "run_full_suite_after_pass": True, "open_pr_after_pass": True})
+    resp = client.post(
+        "/dev-agent/run",
+        json={
+            "max_steps": 1,
+            "run_full_suite_after_pass": True,
+            "open_pr_after_pass": True,
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["full_suite"]["attempted"] is True
@@ -55,24 +75,35 @@ def test_fullsuite_fail_no_pr(monkeypatch):
 
 
 def test_pr_disabled(monkeypatch):
-    import agent_dev as mod
     from stillme_core.executor import PatchExecutor
 
     def fake_run_all(self, tests_dir="tests"):
         return True, 1, 0, 100, None
 
     def fake_pr(self, *a, **kw):
-        return {"attempted": True, "ok": False, "url": None, "number": None, "provider": None, "error": "disabled"}
+        return {
+            "attempted": True,
+            "ok": False,
+            "url": None,
+            "number": None,
+            "provider": None,
+            "error": "disabled",
+        }
 
     monkeypatch.setenv("ALLOW_PR", "false")
     monkeypatch.setattr(PatchExecutor, "run_pytest_all", fake_run_all, raising=False)
     monkeypatch.setattr(PatchExecutor, "create_pull_request", fake_pr, raising=False)
 
-    resp = client.post("/dev-agent/run", json={"max_steps": 1, "run_full_suite_after_pass": True, "open_pr_after_pass": True})
+    resp = client.post(
+        "/dev-agent/run",
+        json={
+            "max_steps": 1,
+            "run_full_suite_after_pass": True,
+            "open_pr_after_pass": True,
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["pr"]["attempted"] is True
     assert data["pr"]["ok"] is False
     assert data["pr"]["error"]
-
-

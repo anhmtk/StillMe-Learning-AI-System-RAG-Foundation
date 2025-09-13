@@ -1,12 +1,12 @@
 # integration_test.py
 from __future__ import annotations
 
-import os
-import sys
-import json
-import time
 import argparse
 import asyncio
+import json
+import os
+import sys
+import time
 from typing import Any, Dict
 
 import httpx

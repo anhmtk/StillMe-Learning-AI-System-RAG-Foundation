@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
+import typing
 
 from starlette.datastructures import URL, Headers
 from starlette.responses import PlainTextResponse, RedirectResponse, Response
@@ -13,7 +13,7 @@ class TrustedHostMiddleware:
     def __init__(
         self,
         app: ASGIApp,
-        allowed_hosts: Sequence[str] | None = None,
+        allowed_hosts: typing.Sequence[str] | None = None,
         www_redirect: bool = True,
     ) -> None:
         if allowed_hosts is None:
@@ -41,7 +41,9 @@ class TrustedHostMiddleware:
         is_valid_host = False
         found_www_redirect = False
         for pattern in self.allowed_hosts:
-            if host == pattern or (pattern.startswith("*") and host.endswith(pattern[1:])):
+            if host == pattern or (
+                pattern.startswith("*") and host.endswith(pattern[1:])
+            ):
                 is_valid_host = True
                 break
             elif "www." + host == pattern:

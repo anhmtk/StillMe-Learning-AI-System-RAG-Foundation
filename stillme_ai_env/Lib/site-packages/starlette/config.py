@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import os
+import typing
 import warnings
-from collections.abc import Iterator, Mapping, MutableMapping
 from pathlib import Path
-from typing import Any, Callable, TypeVar, overload
 
 
 class undefined:
@@ -15,8 +14,8 @@ class EnvironError(Exception):
     pass
 
 
-class Environ(MutableMapping[str, str]):
-    def __init__(self, environ: MutableMapping[str, str] = os.environ):
+class Environ(typing.MutableMapping[str, str]):
+    def __init__(self, environ: typing.MutableMapping[str, str] = os.environ):
         self._environ = environ
         self._has_been_read: set[str] = set()
 
@@ -26,15 +25,21 @@ class Environ(MutableMapping[str, str]):
 
     def __setitem__(self, key: str, value: str) -> None:
         if key in self._has_been_read:
-            raise EnvironError(f"Attempting to set environ['{key}'], but the value has already been read.")
+            raise EnvironError(
+                f"Attempting to set environ['{key}'], but the value has already been "
+                "read."
+            )
         self._environ.__setitem__(key, value)
 
     def __delitem__(self, key: str) -> None:
         if key in self._has_been_read:
-            raise EnvironError(f"Attempting to delete environ['{key}'], but the value has already been read.")
+            raise EnvironError(
+                f"Attempting to delete environ['{key}'], but the value has already "
+                "been read."
+            )
         self._environ.__delitem__(key)
 
-    def __iter__(self) -> Iterator[str]:
+    def __iter__(self) -> typing.Iterator[str]:
         return iter(self._environ)
 
     def __len__(self) -> int:
@@ -43,14 +48,14 @@ class Environ(MutableMapping[str, str]):
 
 environ = Environ()
 
-T = TypeVar("T")
+T = typing.TypeVar("T")
 
 
 class Config:
     def __init__(
         self,
         env_file: str | Path | None = None,
-        environ: Mapping[str, str] = environ,
+        environ: typing.Mapping[str, str] = environ,
         env_prefix: str = "",
     ) -> None:
         self.environ = environ
@@ -62,40 +67,45 @@ class Config:
             else:
                 self.file_values = self._read_file(env_file)
 
-    @overload
-    def __call__(self, key: str, *, default: None) -> str | None: ...
+    @typing.overload
+    def __call__(self, key: str, *, default: None) -> str | None:
+        ...
 
-    @overload
-    def __call__(self, key: str, cast: type[T], default: T = ...) -> T: ...
+    @typing.overload
+    def __call__(self, key: str, cast: type[T], default: T = ...) -> T:
+        ...
 
-    @overload
-    def __call__(self, key: str, cast: type[str] = ..., default: str = ...) -> str: ...
+    @typing.overload
+    def __call__(self, key: str, cast: type[str] = ..., default: str = ...) -> str:
+        ...
 
-    @overload
+    @typing.overload
     def __call__(
         self,
         key: str,
-        cast: Callable[[Any], T] = ...,
-        default: Any = ...,
-    ) -> T: ...
+        cast: typing.Callable[[typing.Any], T] = ...,
+        default: typing.Any = ...,
+    ) -> T:
+        ...
 
-    @overload
-    def __call__(self, key: str, cast: type[str] = ..., default: T = ...) -> T | str: ...
+    @typing.overload
+    def __call__(self, key: str, cast: type[str] = ..., default: T = ...) -> T | str:
+        ...
 
     def __call__(
         self,
         key: str,
-        cast: Callable[[Any], Any] | None = None,
-        default: Any = undefined,
-    ) -> Any:
+        cast: typing.Callable[[typing.Any], typing.Any] | None = None,
+        default: typing.Any = undefined,
+    ) -> typing.Any:
         return self.get(key, cast, default)
 
     def get(
         self,
         key: str,
-        cast: Callable[[Any], Any] | None = None,
-        default: Any = undefined,
-    ) -> Any:
+        cast: typing.Callable[[typing.Any], typing.Any] | None = None,
+        default: typing.Any = undefined,
+    ) -> typing.Any:
         key = self.env_prefix + key
         if key in self.environ:
             value = self.environ[key]
@@ -122,18 +132,22 @@ class Config:
     def _perform_cast(
         self,
         key: str,
-        value: Any,
-        cast: Callable[[Any], Any] | None = None,
-    ) -> Any:
+        value: typing.Any,
+        cast: typing.Callable[[typing.Any], typing.Any] | None = None,
+    ) -> typing.Any:
         if cast is None or value is None:
             return value
         elif cast is bool and isinstance(value, str):
             mapping = {"true": True, "1": True, "false": False, "0": False}
             value = value.lower()
             if value not in mapping:
-                raise ValueError(f"Config '{key}' has value '{value}'. Not a valid bool.")
+                raise ValueError(
+                    f"Config '{key}' has value '{value}'. Not a valid bool."
+                )
             return mapping[value]
         try:
             return cast(value)
         except (TypeError, ValueError):
-            raise ValueError(f"Config '{key}' has value '{value}'. Not a valid {cast.__name__}.")
+            raise ValueError(
+                f"Config '{key}' has value '{value}'. Not a valid {cast.__name__}."
+            )

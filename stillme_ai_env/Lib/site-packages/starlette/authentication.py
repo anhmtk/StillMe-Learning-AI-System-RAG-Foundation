@@ -3,8 +3,7 @@ from __future__ import annotations
 import functools
 import inspect
 import sys
-from collections.abc import Sequence
-from typing import Any, Callable
+import typing
 from urllib.parse import urlencode
 
 if sys.version_info >= (3, 10):  # pragma: no cover
@@ -21,7 +20,7 @@ from starlette.websockets import WebSocket
 _P = ParamSpec("_P")
 
 
-def has_required_scope(conn: HTTPConnection, scopes: Sequence[str]) -> bool:
+def has_required_scope(conn: HTTPConnection, scopes: typing.Sequence[str]) -> bool:
     for scope in scopes:
         if scope not in conn.auth.scopes:
             return False
@@ -29,28 +28,34 @@ def has_required_scope(conn: HTTPConnection, scopes: Sequence[str]) -> bool:
 
 
 def requires(
-    scopes: str | Sequence[str],
+    scopes: str | typing.Sequence[str],
     status_code: int = 403,
     redirect: str | None = None,
-) -> Callable[[Callable[_P, Any]], Callable[_P, Any]]:
+) -> typing.Callable[
+    [typing.Callable[_P, typing.Any]], typing.Callable[_P, typing.Any]
+]:
     scopes_list = [scopes] if isinstance(scopes, str) else list(scopes)
 
     def decorator(
-        func: Callable[_P, Any],
-    ) -> Callable[_P, Any]:
+        func: typing.Callable[_P, typing.Any],
+    ) -> typing.Callable[_P, typing.Any]:
         sig = inspect.signature(func)
         for idx, parameter in enumerate(sig.parameters.values()):
             if parameter.name == "request" or parameter.name == "websocket":
                 type_ = parameter.name
                 break
         else:
-            raise Exception(f'No "request" or "websocket" argument on function "{func}"')
+            raise Exception(
+                f'No "request" or "websocket" argument on function "{func}"'
+            )
 
         if type_ == "websocket":
             # Handle websocket functions. (Always async)
             @functools.wraps(func)
             async def websocket_wrapper(*args: _P.args, **kwargs: _P.kwargs) -> None:
-                websocket = kwargs.get("websocket", args[idx] if idx < len(args) else None)
+                websocket = kwargs.get(
+                    "websocket", args[idx] if idx < len(args) else None
+                )
                 assert isinstance(websocket, WebSocket)
 
                 if not has_required_scope(websocket, scopes_list):
@@ -63,7 +68,7 @@ def requires(
         elif is_async_callable(func):
             # Handle async request/response functions.
             @functools.wraps(func)
-            async def async_wrapper(*args: _P.args, **kwargs: _P.kwargs) -> Any:
+            async def async_wrapper(*args: _P.args, **kwargs: _P.kwargs) -> typing.Any:
                 request = kwargs.get("request", args[idx] if idx < len(args) else None)
                 assert isinstance(request, Request)
 
@@ -80,7 +85,7 @@ def requires(
         else:
             # Handle sync request/response functions.
             @functools.wraps(func)
-            def sync_wrapper(*args: _P.args, **kwargs: _P.kwargs) -> Any:
+            def sync_wrapper(*args: _P.args, **kwargs: _P.kwargs) -> typing.Any:
                 request = kwargs.get("request", args[idx] if idx < len(args) else None)
                 assert isinstance(request, Request)
 
@@ -102,12 +107,14 @@ class AuthenticationError(Exception):
 
 
 class AuthenticationBackend:
-    async def authenticate(self, conn: HTTPConnection) -> tuple[AuthCredentials, BaseUser] | None:
+    async def authenticate(
+        self, conn: HTTPConnection
+    ) -> tuple[AuthCredentials, BaseUser] | None:
         raise NotImplementedError()  # pragma: no cover
 
 
 class AuthCredentials:
-    def __init__(self, scopes: Sequence[str] | None = None):
+    def __init__(self, scopes: typing.Sequence[str] | None = None):
         self.scopes = [] if scopes is None else list(scopes)
 
 

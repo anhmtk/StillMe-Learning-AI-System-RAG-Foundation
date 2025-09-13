@@ -9,9 +9,11 @@
 # nó sẽ xfail với lý do rõ ràng để team biết cần implement gì.
 
 from __future__ import annotations
+
+import datetime as dt
 import json
 from pathlib import Path
-import datetime as dt
+
 import pytest
 
 try:
@@ -19,6 +21,7 @@ try:
     from stillme_core.plan_types import PlanItem
 except Exception as e:
     pytest.skip(f"Thiếu stillme_core.plan_types.PlanItem: {e}", allow_module_level=True)
+
 
 @pytest.fixture
 def sample_plan_item() -> PlanItem:
@@ -29,8 +32,9 @@ def sample_plan_item() -> PlanItem:
         diff_hint="--- a/foo.py\n+++ b/foo.py\n@@ ...",
         tests_to_run=["tests/test_foo.py::test_bar"],
         risk="low",
-        deps=[]
+        deps=[],
     )
+
 
 class FakePlanner:
     def __init__(self, items):
@@ -39,6 +43,7 @@ class FakePlanner:
     def build_plan(self):
         # Cursor nên map test này vào planner.build_plan()
         return self._items
+
 
 class FakeExecutor:
     def __init__(self, will_pass=True):
@@ -50,16 +55,34 @@ class FakeExecutor:
         self.calls += 1
         return {"ok": self.will_pass, "tests_ran": plan_item.tests_to_run or []}
 
+
 class FakeBugMemory:
     def __init__(self):
         self.records = []
 
-    def record(self, *, file: str, test_name: str | None, message: str, fingerprint: str | None = None):
+    def record(
+        self,
+        *,
+        file: str,
+        test_name: str | None,
+        message: str,
+        fingerprint: str | None = None,
+    ):
         # Cursor nên map test này vào bug_memory.record(...)
-        self.records.append({"file": file, "test_name": test_name, "message": message, "fp": fingerprint})
+        self.records.append(
+            {
+                "file": file,
+                "test_name": test_name,
+                "message": message,
+                "fp": fingerprint,
+            }
+        )
+
 
 @pytest.mark.parametrize("executor_ok", [True, False])
-def test_agentdev_run_once(tmp_path: Path, sample_plan_item: PlanItem, executor_ok: bool, monkeypatch):
+def test_agentdev_run_once(
+    tmp_path: Path, sample_plan_item: PlanItem, executor_ok: bool, monkeypatch
+):
     """
     Kỳ vọng:
     - Khi executor_ok=True: vòng lặp trả True, tạo log JSONL.
@@ -83,14 +106,18 @@ def test_agentdev_run_once(tmp_path: Path, sample_plan_item: PlanItem, executor_
     # AgentDev nên cung cấp 1 hàm chạy 1 bước, ví dụ: agentdev_run_once(...)
     run_fn = getattr(agent_dev, "agentdev_run_once", None)
     if run_fn is None:
-        pytest.xfail("Thiếu hàm agentdev_run_once(planner, executor, bug_memory, log_dir: Path) trong agent_dev.py")
+        pytest.xfail(
+            "Thiếu hàm agentdev_run_once(planner, executor, bug_memory, log_dir: Path) trong agent_dev.py"
+        )
 
-    result = run_fn(planner=planner, executor=executor, bug_memory=bug_memory, log_dir=log_dir)
+    result = run_fn(
+        planner=planner, executor=executor, bug_memory=bug_memory, log_dir=log_dir
+    )
 
     # Hỗ trợ cả kiểu bool (cũ) lẫn dict (mới)
     if isinstance(result, dict):
         ok = result.get("ok")
-    # sanity check cho schema mới
+        # sanity check cho schema mới
         assert "branch" in result
         assert isinstance(result.get("refined"), bool)
         assert isinstance(result.get("duration_ms", 0), int)
@@ -106,8 +133,9 @@ def test_agentdev_run_once(tmp_path: Path, sample_plan_item: PlanItem, executor_
         assert len(bug_memory.records) == 0, "Không nên ghi BugMemory khi pass"
     else:
         assert ok in (False, None), "Khi executor fail, nên trả ok=False/None"
-        assert len(bug_memory.records) >= 1, "Phải ghi ít nhất 1 bản ghi BugMemory khi fail"
-
+        assert (
+            len(bug_memory.records) >= 1
+        ), "Phải ghi ít nhất 1 bản ghi BugMemory khi fail"
 
     # Kiểm tra log JSONL được tạo
     # Gợi ý đặt tên file theo ngày, ví dụ YYYYMMDD.jsonl
@@ -120,9 +148,12 @@ def test_agentdev_run_once(tmp_path: Path, sample_plan_item: PlanItem, executor_
         assert first_line, "File log rỗng"
         json.loads(first_line)  # hợp lệ JSON là đạt
 
+
 def test_agentdev_refine_on_fail(tmp_path: Path, sample_plan_item: PlanItem):
     """
     (Tùy chọn) Skeleton kiểm tra "refine 1 lần" khi fail.
     Test này để Cursor thấy yêu cầu refine và có thể bổ sung sau.
     """
-    pytest.xfail("TODO: Viết khi agent_dev hỗ trợ cơ chế refine-on-fail (lặp lại 1 lần).")
+    pytest.xfail(
+        "TODO: Viết khi agent_dev hỗ trợ cơ chế refine-on-fail (lặp lại 1 lần)."
+    )

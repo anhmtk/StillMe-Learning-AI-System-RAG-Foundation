@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Literal
+from typing import TYPE_CHECKING, Any, Callable
 
 from pydantic_core import core_schema
+from typing_extensions import Literal
 
 from ..annotated_handlers import GetCoreSchemaHandler, GetJsonSchemaHandler
 
@@ -12,7 +13,6 @@ if TYPE_CHECKING:
     from ..json_schema import GenerateJsonSchema, JsonSchemaValue
     from ._core_utils import CoreSchemaOrField
     from ._generate_schema import GenerateSchema
-    from ._namespace_utils import NamespacesTuple
 
     GetJsonSchemaFunction = Callable[[CoreSchemaOrField, GetJsonSchemaHandler], JsonSchemaValue]
     HandlerOverride = Callable[[CoreSchemaOrField], JsonSchemaValue]
@@ -81,15 +81,16 @@ class CallbackGetCoreSchemaHandler(GetCoreSchemaHandler):
 
     def __call__(self, source_type: Any, /) -> core_schema.CoreSchema:
         schema = self._handler(source_type)
+        ref = schema.get('ref')
         if self._ref_mode == 'to-def':
-            ref = schema.get('ref')
             if ref is not None:
-                return self._generate_schema.defs.create_definition_reference_schema(schema)
+                self._generate_schema.defs.definitions[ref] = schema
+                return core_schema.definition_reference_schema(ref)
             return schema
-        else:  # ref_mode = 'unpack'
+        else:  # ref_mode = 'unpack
             return self.resolve_ref_schema(schema)
 
-    def _get_types_namespace(self) -> NamespacesTuple:
+    def _get_types_namespace(self) -> dict[str, Any] | None:
         return self._generate_schema._types_namespace
 
     def generate_schema(self, source_type: Any, /) -> core_schema.CoreSchema:
@@ -113,13 +114,12 @@ class CallbackGetCoreSchemaHandler(GetCoreSchemaHandler):
         """
         if maybe_ref_schema['type'] == 'definition-ref':
             ref = maybe_ref_schema['schema_ref']
-            definition = self._generate_schema.defs.get_schema_from_ref(ref)
-            if definition is None:
+            if ref not in self._generate_schema.defs.definitions:
                 raise LookupError(
                     f'Could not find a ref for {ref}.'
                     ' Maybe you tried to call resolve_ref_schema from within a recursive model?'
                 )
-            return definition
+            return self._generate_schema.defs.definitions[ref]
         elif maybe_ref_schema['type'] == 'definitions':
             return self.resolve_ref_schema(maybe_ref_schema['schema'])
         return maybe_ref_schema

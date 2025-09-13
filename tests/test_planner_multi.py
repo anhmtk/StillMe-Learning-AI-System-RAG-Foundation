@@ -14,16 +14,18 @@ def test_planner_builds_multiple_items(monkeypatch):
         def __init__(self, rc=0, out=" M a.py\n M b.py\n"):
             self.returncode = rc
             self.stdout = out
+
     monkeypatch.setattr(_sp, "run", lambda *a, **kw: _P())
 
     p = Planner()
     # Create fake pytest cache lastfailed
-    import json, os
-    os.makedirs('.pytest_cache/v/cache', exist_ok=True)
-    with open('.pytest_cache/v/cache/lastfailed', 'w', encoding='utf-8') as f:
+    import json
+    import os
+
+    os.makedirs(".pytest_cache/v/cache", exist_ok=True)
+    with open(".pytest_cache/v/cache/lastfailed", "w", encoding="utf-8") as f:
         json.dump({"tests/test_a.py::test_x": True}, f)
 
     items = p.build_plan(max_items=5)
     assert isinstance(items, list)
     assert len(items) >= 2, "Should build at least 2 items from multiple signals"
-

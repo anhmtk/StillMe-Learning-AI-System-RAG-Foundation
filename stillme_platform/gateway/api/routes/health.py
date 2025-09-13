@@ -4,12 +4,13 @@ Health check endpoints
 """
 
 import logging
-from fastapi import APIRouter, Depends
-from typing import Dict, Any
+from typing import Any, Dict
+
+from fastapi import APIRouter
+from services.notification_service import NotificationService
+from services.stillme_integration import StillMeIntegration
 
 from core.config import Settings
-from services.stillme_integration import StillMeIntegration
-from services.notification_service import NotificationService
 from core.redis_client import RedisClient
 
 logger = logging.getLogger(__name__)
@@ -30,7 +31,7 @@ async def health_check() -> Dict[str, Any]:
         "status": "healthy",
         "service": "StillMe Gateway",
         "version": settings.VERSION,
-        "timestamp": "2024-01-01T00:00:00Z"
+        "timestamp": "2024-01-01T00:00:00Z",
     }
 
 
@@ -40,20 +41,20 @@ async def detailed_health_check() -> Dict[str, Any]:
     try:
         # Check StillMe Core
         stillme_status = await stillme_integration.get_status()
-        
+
         # Check Redis
         redis_healthy = redis_client.is_healthy()
-        
+
         # Check notification service
         notification_healthy = notification_service.is_healthy()
-        
+
         # Overall health
         overall_healthy = (
-            stillme_status.get('status') == 'healthy' and
-            redis_healthy and
-            notification_healthy
+            stillme_status.get("status") == "healthy"
+            and redis_healthy
+            and notification_healthy
         )
-        
+
         return {
             "status": "healthy" if overall_healthy else "unhealthy",
             "service": "StillMe Gateway",
@@ -61,15 +62,13 @@ async def detailed_health_check() -> Dict[str, Any]:
             "timestamp": "2024-01-01T00:00:00Z",
             "components": {
                 "stillme_core": stillme_status,
-                "redis": {
-                    "status": "healthy" if redis_healthy else "unhealthy"
-                },
+                "redis": {"status": "healthy" if redis_healthy else "unhealthy"},
                 "notifications": {
                     "status": "healthy" if notification_healthy else "unhealthy"
-                }
-            }
+                },
+            },
         }
-        
+
     except Exception as e:
         logger.error(f"Health check error: {e}")
         return {
@@ -77,7 +76,7 @@ async def detailed_health_check() -> Dict[str, Any]:
             "service": "StillMe Gateway",
             "version": settings.VERSION,
             "timestamp": "2024-01-01T00:00:00Z",
-            "error": str(e)
+            "error": str(e),
         }
 
 
@@ -88,27 +87,17 @@ async def readiness_check() -> Dict[str, Any]:
         # Check if all critical components are ready
         stillme_ready = stillme_integration.is_healthy()
         redis_ready = redis_client.is_healthy()
-        
+
         ready = stillme_ready and redis_ready
-        
-        return {
-            "ready": ready,
-            "timestamp": "2024-01-01T00:00:00Z"
-        }
-        
+
+        return {"ready": ready, "timestamp": "2024-01-01T00:00:00Z"}
+
     except Exception as e:
         logger.error(f"Readiness check error: {e}")
-        return {
-            "ready": False,
-            "error": str(e),
-            "timestamp": "2024-01-01T00:00:00Z"
-        }
+        return {"ready": False, "error": str(e), "timestamp": "2024-01-01T00:00:00Z"}
 
 
 @router.get("/live")
 async def liveness_check() -> Dict[str, Any]:
     """Liveness check for Kubernetes"""
-    return {
-        "alive": True,
-        "timestamp": "2024-01-01T00:00:00Z"
-    }
+    return {"alive": True, "timestamp": "2024-01-01T00:00:00Z"}

@@ -1,4 +1,7 @@
-import importlib, requests
+import importlib
+
+import requests
+
 
 def test_http_health():
     try:
@@ -6,6 +9,7 @@ def test_http_health():
         assert r.status_code == 200 and r.json().get("ok")
     except Exception:
         assert True  # server có thể chưa bật -> skip mềm
+
 
 def test_inproc_entry():
     se = importlib.import_module("stillme_entry")

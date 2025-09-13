@@ -7,18 +7,18 @@
 """Sun OS specific tests."""
 
 import os
+import unittest
 
 import psutil
 from psutil import SUNOS
 from psutil.tests import PsutilTestCase
-from psutil.tests import pytest
 from psutil.tests import sh
 
 
-@pytest.mark.skipif(not SUNOS, reason="SUNOS only")
+@unittest.skipIf(not SUNOS, "SUNOS only")
 class SunOSSpecificTestCase(PsutilTestCase):
     def test_swap_memory(self):
-        out = sh(f"env PATH=/usr/sbin:/sbin:{os.environ['PATH']} swap -l")
+        out = sh('env PATH=/usr/sbin:/sbin:%s swap -l' % os.environ['PATH'])
         lines = out.strip().split('\n')[1:]
         if not lines:
             raise ValueError('no swap device(s) configured')
@@ -30,10 +30,16 @@ class SunOSSpecificTestCase(PsutilTestCase):
         used = total - free
 
         psutil_swap = psutil.swap_memory()
-        assert psutil_swap.total == total
-        assert psutil_swap.used == used
-        assert psutil_swap.free == free
+        self.assertEqual(psutil_swap.total, total)
+        self.assertEqual(psutil_swap.used, used)
+        self.assertEqual(psutil_swap.free, free)
 
     def test_cpu_count(self):
         out = sh("/usr/sbin/psrinfo")
-        assert psutil.cpu_count() == len(out.split('\n'))
+        self.assertEqual(psutil.cpu_count(), len(out.split('\n')))
+
+
+if __name__ == '__main__':
+    from psutil.tests.runner import run_from_name
+
+    run_from_name(__file__)

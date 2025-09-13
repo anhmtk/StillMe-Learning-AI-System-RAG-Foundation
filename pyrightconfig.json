@@ -30,6 +30,11 @@
   
     // giúp Pyright tìm venv đúng
     "venvPath": ".",
-    "venv": ".venv312"
+    "venv": ".venv312",
+    
+    // Thêm đường dẫn Python
+    "extraPaths": [
+        "."
+    ]
   }
   
