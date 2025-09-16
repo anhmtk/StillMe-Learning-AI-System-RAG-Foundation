@@ -1047,6 +1047,55 @@ Ctrl+Shift+P → "Tasks: Run Task" → "stop:all"
 - **Mobile Metro**: ✅ Running on port 8081 (Stable)
 - **Communication**: ✅ All services communicating perfectly
 
+## 🌐 **TRANSLATION GATEWAY (Local-First)**
+
+### **✅ Multi-Language Support:**
+- **Local-First Translation**: Gemma (local) → NLLB fallback
+- **Smart Routing**: Automatic language detection and translation
+- **Code Preservation**: Code blocks and URLs remain unchanged
+- **Confidence Scoring**: Quality assessment for translation results
+
+### **🔧 Configuration:**
+```bash
+# Environment variables
+TRANSLATION_CORE_LANG=en
+TRANSLATOR_PRIORITY=gemma,nllb
+NLLB_MODEL_NAME=facebook/nllb-200-distilled-600M
+```
+
+### **📡 API Usage:**
+```bash
+# Send request with language header
+curl -X POST http://localhost:21568/send-message \
+  -H "Content-Type: application/json" \
+  -H "X-User-Lang: ja" \
+  -d '{"message":"Xin chào, hôm nay thế nào?", "language":"vi"}'
+```
+
+### **📊 Response Format:**
+```json
+{
+  "response": "こんにちは、今日はどうですか？",
+  "meta": {
+    "orig_lang": "vi",
+    "target_lang": "ja", 
+    "input_translated": true,
+    "engines": {"in": "gemma", "out": "nllb"},
+    "confidence": {"in": 0.8, "out": 0.9}
+  }
+}
+```
+
+### **🎯 Supported Languages:**
+- **Vietnamese** (vi) ↔ **English** (en)
+- **Japanese** (ja) ↔ **English** (en)
+- **Chinese** (zh) ↔ **English** (en)
+- **Korean** (ko) ↔ **English** (en)
+- **French** (fr) ↔ **English** (en)
+- **German** (de) ↔ **English** (en)
+- **Spanish** (es) ↔ **English** (en)
+- **Russian** (ru) ↔ **English** (en)
+
 **📖 Chi tiết: Xem `DEVELOPMENT_GUIDE.md`**
 
 ## 🔄 **COMMUNICATION FLOW (Updated 2025-09-11):**
