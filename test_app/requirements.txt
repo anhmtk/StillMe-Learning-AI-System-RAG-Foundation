@@ -1,2 +1,0 @@
-# Test Application Requirements
-# No external dependencies for this simple test app

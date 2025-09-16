@@ -1,8 +1,22 @@
+#!/usr/bin/env python3
 """
-Communication Style Manager for StillMe Framework
-================================================
-Optimizes AI responses to be more human-like, concise, and efficient.
-Reduces token usage while improving user experience.
+🎭 COMMUNICATION STYLE MANAGER - QUẢN LÝ PHONG CÁCH GIAO TIẾP
+PURPOSE / MỤC ĐÍCH:
+- Quản lý và tối ưu hóa phong cách giao tiếp cho StillMe AI
+- Làm cho phản hồi AI tự nhiên, ngắn gọn và hiệu quả hơn
+- Giảm token usage trong khi cải thiện trải nghiệm người dùng
+
+FUNCTIONALITY / CHỨC NĂNG:
+- Phát hiện và loại bỏ các phản hồi dài dòng, chung chung
+- Tối ưu hóa cấu trúc câu và từ ngữ
+- Quản lý phong cách xưng hô (anh/em, mình/bạn)
+- Tự động điều chỉnh tone và style theo ngữ cảnh
+
+TECHNICAL DETAILS / CHI TIẾT KỸ THUẬT:
+- Regex patterns để phát hiện verbose responses
+- Dynamic communication style preferences
+- Context-aware response optimization
+- Token usage reduction algorithms
 """
 
 import re
