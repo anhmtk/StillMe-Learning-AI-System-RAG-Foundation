@@ -1,0 +1,51 @@
+🚀 STILLME QUICK DEPLOY TO VPS
+================================
+VPS IP: 160.191.89.99
+Email: anhnguyen.nk86@gmail.com
+
+📋 CÁC LỆNH CHẠY TỪNG BƯỚC:
+
+1️⃣ TẠO DEPLOYMENT PACKAGE (Chạy trên máy local):
+------------------------------------------------
+mkdir deployment_package
+Copy-Item "docker-compose.yml" "deployment_package/"
+Copy-Item "Dockerfile.gateway" "deployment_package/"
+Copy-Item "Dockerfile.ai-server" "deployment_package/"
+Copy-Item "nginx.conf" "deployment_package/"
+Copy-Item "stable_ai_server.py" "deployment_package/"
+Copy-Item "requirements.txt" "deployment_package/"
+Copy-Item "health_check.simple.sh" "deployment_package/"
+Copy-Item "stillme_core" "deployment_package/" -Recurse
+Copy-Item "config" "deployment_package/" -Recurse
+Copy-Item "logs" "deployment_package/" -Recurse
+Copy-Item "data" "deployment_package/" -Recurse
+
+2️⃣ UPLOAD LÊN VPS:
+------------------
+scp -r deployment_package/* root@160.191.89.99:/opt/stillme/
+
+3️⃣ SSH VÀO VPS:
+---------------
+ssh root@160.191.89.99
+
+4️⃣ CHẠY DEPLOYMENT TRÊN VPS:
+----------------------------
+cd /opt/stillme
+chmod +x deploy_vps.sh
+./deploy_vps.sh
+
+5️⃣ TEST DEPLOYMENT:
+-------------------
+curl http://160.191.89.99:8000/health
+curl http://160.191.89.99:1216/health
+
+🎉 KẾT QUẢ:
+-----------
+Gateway: http://160.191.89.99:8000
+AI Server: http://160.191.89.99:1216
+Health Check: http://160.191.89.99:8000/health
+
+📱 UPDATE CLIENT APPS:
+---------------------
+Desktop App: Thay Gateway URL thành http://160.191.89.99:8000
+Mobile App: Update API endpoint thành http://160.191.89.99:8000

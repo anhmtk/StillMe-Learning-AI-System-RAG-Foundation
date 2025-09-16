@@ -33,8 +33,8 @@ app.add_middleware(
 # Store active connections
 active_connections: Dict[str, WebSocket] = {}
 
-# AI Server Configuration - Disabled for VPS deployment
-AI_SERVER_URL = None  # No AI Server on VPS
+# AI Server Configuration
+AI_SERVER_URL = "http://192.168.1.8:14725"
 
 
 # Pydantic models
@@ -52,10 +52,6 @@ class MessageResponse(BaseModel):
 
 async def send_to_ai_server(message: str, language: str = "vi") -> str:
     """Send message to real AI server and get response"""
-    # For VPS deployment, return simple response without AI Server
-    if AI_SERVER_URL is None:
-        return f"Xin chào! Tôi là StillMe AI. Bạn đã nói: '{message}'. Tôi đang hoạt động qua Gateway trên VPS! (Chế độ standalone - không có AI Server)"
-    
     try:
         async with httpx.AsyncClient(timeout=30.0) as client:
             # Try different AI server endpoints
@@ -101,28 +97,27 @@ async def send_to_ai_server(message: str, language: str = "vi") -> str:
         return f"Xin chào! Tôi là StillMe AI. Bạn đã nói: '{message}'. Tôi đang hoạt động qua Gateway! (Lỗi kết nối AI Server: {e!s})"
 
 
-@app.get("/")
+@app.get("/", response_class=HTMLResponse)
 async def root():
-    """Root endpoint - API Information"""
-    return {
-        "message": "StillMe Gateway - VPS Deployment",
-        "version": "1.0.0",
-        "status": "running",
-        "connections": len(active_connections),
-        "deployment": "VPS Standalone Mode",
-        "ai_server": {"available": False, "mode": "standalone"},
-        "endpoints": {
-            "health": "/health",
-            "version": "/version",
-            "send_message": "/send-message",
-            "websocket": "/ws/{client_id}",
-        },
-        "usage": {
-            "desktop_app": "POST /send-message with JSON: {\"message\": \"text\", \"language\": \"vi\"}",
-            "mobile_app": "POST /send-message with JSON: {\"message\": \"text\", \"language\": \"vi\"}",
-            "health_check": "GET /health",
+    """Root endpoint - Web Chat Interface"""
+    try:
+        with open("web_chat_interface.html", encoding="utf-8") as f:
+            html_content = f.read()
+        return HTMLResponse(content=html_content)
+    except FileNotFoundError:
+        # Fallback to JSON if HTML file not found
+        return {
+            "message": "StillMe Gateway - Simple Version",
+            "version": "1.0.0",
+            "status": "running",
+            "connections": len(active_connections),
+            "stillme_ai": {"available": True, "url": "http://192.168.1.8:14725"},
+            "endpoints": {
+                "websocket": "/ws/{client_id}",
+                "health": "/health",
+                "version": "/version",
+            },
         }
-    }
 
 
 @app.get("/api")

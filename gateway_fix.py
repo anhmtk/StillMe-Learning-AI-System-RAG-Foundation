@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Simple Gateway for Testing
-Gateway đơn giản để test kết nối
+Simple Gateway for Testing - FIXED VERSION
+Gateway đơn giản để test kết nối - Đã fix cho VPS
 """
 
 import json
@@ -133,7 +133,7 @@ async def api_info():
         "version": "1.0.0",
         "status": "running",
         "connections": len(active_connections),
-        "stillme_ai": {"available": True, "url": "http://192.168.1.8:4729"},
+        "stillme_ai": {"available": False, "mode": "standalone"},
         "endpoints": {
             "websocket": "/ws/{client_id}",
             "health": "/health",
@@ -325,6 +325,6 @@ async def api_health():
 if __name__ == "__main__":
     print("🚀 Starting StillMe Simple Gateway...")
     print("🌐 Server will be available at: http://0.0.0.0:8000")
-    print("📱 Desktop/Mobile apps can connect to: http://192.168.1.8:8000")
+    print("📱 Desktop/Mobile apps can connect to: http://160.191.89.99:8000")
 
     uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")

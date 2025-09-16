@@ -52,20 +52,22 @@ from pydantic import BaseModel
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from common import (
-    AsyncHttpClient,
-    CircuitBreaker,
+# Add stillme-core to path
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), 'stillme-core'))
+
+from stillme_core.common import (
     ConfigManager,
     FileManager,
-    RetryManager,
     get_logger,
 )
-from common.retry import CircuitBreakerConfig
+from stillme_core.common.retry import CircuitBreakerConfig, CircuitBreaker, RetryManager
 
 # Initialize common utilities
 config_manager = ConfigManager("config/ai_server_config.json", {})
 logger = get_logger("StillMe.AIServer", log_file="logs/ai_server.log", json_format=True)
-http_client = AsyncHttpClient()
+# http_client = AsyncHttpClient()  # Commented out - not available
 file_manager = FileManager()
 
 # Circuit Breaker Implementation (using common utilities)
@@ -185,15 +187,27 @@ class StillMeAI:
             return fallback
 
     def _detect_dev_intent(self, message: str) -> bool:
-        """Detect if user request is for development task"""
+        """Detect if user request is for development task (exclude simple coding questions)"""
+        # Simple coding questions should go to AI routing, not AgentDev
+        simple_coding_patterns = [
+            "viết code python để",
+            "tạo function",
+            "tính tổng",
+            "hello world",
+            "ví dụ code",
+            "code mẫu"
+        ]
+        
+        message_lower = message.lower()
+        
+        # If it's a simple coding question, don't route to AgentDev
+        if any(pattern in message_lower for pattern in simple_coding_patterns):
+            return False
+            
+        # Complex development tasks should go to AgentDev
         dev_keywords = [
-            "viết code",
-            "tạo code",
-            "lập trình",
-            "code",
-            "programming",
             "tạo app",
-            "tạo ứng dụng",
+            "tạo ứng dụng", 
             "build",
             "compile",
             "tạo tool",
@@ -211,7 +225,6 @@ class StillMeAI:
             "refactor",
             "optimize",
         ]
-        message_lower = message.lower()
         return any(keyword in message_lower for keyword in dev_keywords)
 
     def _generate_response(self, message: str, locale: str) -> str:
@@ -266,15 +279,17 @@ class StillMeAI:
         elif any(word in message_lower for word in ["help", "giúp", "hỗ trợ"]):
             return "🤖 Em có thể giúp anh:\n• Trả lời câu hỏi\n• Thảo luận về nhiều chủ đề\n• Hỗ trợ lập trình\n• Tư vấn kỹ thuật\n• Và nhiều hơn nữa!\n\nAnh hãy hỏi em bất cứ điều gì anh muốn biết nhé!"
 
-        # Programming related
-        elif any(
+        # Programming related - Let AI handle this with proper routing
+        if any(
             word in message_lower
-            for word in ["code", "programming", "lập trình", "python", "javascript"]
+            for word in ["code", "programming", "lập trình", "python", "javascript", "viết code", "tạo code"]
         ):
-            return "💻 Em có thể giúp anh với lập trình! Em am hiểu về:\n• Python, JavaScript, TypeScript\n• Web development (React, Node.js)\n• Mobile development (React Native)\n• AI/ML và data science\n• System architecture\n\nAnh muốn hỏi về chủ đề nào cụ thể?"
+            # Let the AI handle programming questions with proper model routing
+            # Continue to default AI response (don't return here)
+            pass
 
         # AI related
-        elif any(
+        if any(
             word in message_lower
             for word in [
                 "ai",
@@ -287,27 +302,51 @@ class StillMeAI:
         ):
             return "🧠 Em là StillMe AI - một trí tuệ nhân tạo được khởi xướng và dẫn dắt bởi Anh Nguyễn (người Việt Nam), với sự đồng hành và hỗ trợ to lớn từ các tổ chức AI hàng đầu thế giới như OpenAI, Google, DeepSeek và nhiều đối tác công nghệ khác.\n\n🌟 Mục đích của em:\n• Đồng hành và làm bạn cùng tất cả mọi người\n• Hỗ trợ, tư vấn và chia sẻ kiến thức\n• Kết nối con người với công nghệ AI một cách thân thiện\n• Góp phần xây dựng một tương lai nơi AI và con người cùng phát triển\n\nEm được sinh ra với tình yêu thương và mong muốn mang lại giá trị tích cực cho cuộc sống của anh. Anh có muốn tìm hiểu thêm về em không?"
 
-        # Default response
-        else:
-            responses = [
-                f"Em hiểu anh đang nói về: '{message}'. Đây là một chủ đề thú vị! Anh có thể chia sẻ thêm chi tiết không?",
-                f"Cảm ơn anh đã chia sẻ: '{message}'. Em rất muốn tìm hiểu thêm về điều này. Anh có thể giải thích rõ hơn không?",
-                f"Thú vị! Anh đang đề cập đến: '{message}'. Em có thể giúp gì cho anh về chủ đề này?",
-                f"Em đã ghi nhận: '{message}'. Đây là một câu hỏi hay! Anh muốn em trả lời như thế nào?",
-                f"Em hiểu anh quan tâm đến: '{message}'. Hãy cho em biết anh cần hỗ trợ gì cụ thể nhé!",
-            ]
-            import random
+        # Default response - Call real AI (always reached if no specific conditions match)
+        if True:  # This ensures the default response is always reached
+            try:
+                # Try to call real AI using UnifiedAPIManager
+                from stillme_core.modules.api_provider_manager import UnifiedAPIManager
+                
+                # Create system prompt for StillMe AI (natural and concise)
+                system_prompt = """Bạn là StillMe AI, một trợ lý AI thân thiện và hữu ích.
 
-            return random.choice(responses)
+QUAN TRỌNG: 
+- Trả lời ngắn gọn, tự nhiên, không dài dòng
+- Dùng xưng hô trung tính 'mình/bạn'
+- KHÔNG giới thiệu về nguồn gốc, OpenAI, Google, DeepSeek
+- KHÔNG nói về "được khởi xướng bởi Anh Nguyễn"
+- Chỉ trả lời câu hỏi một cách đơn giản và hữu ích
+
+Ví dụ: Khi người dùng chào, chỉ trả lời "Mình chào bạn! Rất vui được gặp bạn.""""
+                
+                # Create full prompt
+                full_prompt = f"{system_prompt}\n\nCâu hỏi của bạn: {message}"
+                
+                # Initialize API manager and get response
+                api_manager = UnifiedAPIManager()
+                ai_response = api_manager.get_response(full_prompt)
+                
+                if ai_response and not ai_response.startswith("Error:"):
+                    return ai_response
+                else:
+                    # Fallback to simple response if AI fails
+                    return f"Em hiểu anh đang hỏi về: '{message}'. Em đang gặp khó khăn trong việc truy cập thông tin lúc này. Anh có thể hỏi lại sau được không ạ?"
+                    
+            except Exception as e:
+                logger.warning(f"AI provider call failed: {e}")
+                # Fallback to simple response
+                return f"Em hiểu anh đang hỏi về: '{message}'. Em đang gặp khó khăn trong việc truy cập thông tin lúc này. Anh có thể hỏi lại sau được không ạ?"
 
     def _check_secure_intent(self, message: str, locale: str) -> Optional[str]:
         """Check for secure responses (identity + architecture) and return appropriate response"""
         message_lower = message.lower()
 
         # Architecture keywords (SECURITY SENSITIVE - HIGH PRIORITY)
+        # Exclude coding questions from security check
         architecture_keywords = [
             "kiến trúc",
-            "cấu tạo",
+            "cấu tạo", 
             "cấu trúc",
             "bên trong",
             "hoạt động thế nào",
@@ -319,9 +358,6 @@ class StillMeAI:
             "agentdev",
             "agent dev",
             "dev agent",
-            "lập trình",
-            "code",
-            "viết code",
             "chạy test",
             "dev-ops",
             "kiến trúc nội bộ",
@@ -338,8 +374,6 @@ class StillMeAI:
             "system",
             "mechanism",
             "how it works",
-            "programming",
-            "write code",
             "run tests",
             "dev-ops",
             "internal architecture",
@@ -648,17 +682,8 @@ async def detailed_health_check():
 if __name__ == "__main__":
     logger.info("🚀 Starting StillMe AI - Stable Server...")
 
-    # Find free port
-    import socket
-
-    def find_free_port():
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.bind(("", 0))
-            s.listen(1)
-            port = s.getsockname()[1]
-        return port
-
-    port = find_free_port()
+    # Use fixed port for Docker Compose compatibility
+    port = 1216
     logger.info(f"🌐 Starting StillMe AI on http://0.0.0.0:{port}")
     logger.info("✅ Server is stable and production-ready!")
 
