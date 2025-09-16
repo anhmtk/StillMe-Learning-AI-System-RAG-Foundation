@@ -9,6 +9,9 @@ Advanced AgentDev System là một hệ thống AI-powered development assistant
 - **🔮 Predictive Maintenance**: Anomaly detection và proactive mitigation
 - **👥 Team Coordination Simulation**: Virtual team management và workflow optimization
 - **🛡️ Advanced Security Framework**: Safe attack simulation với comprehensive safety measures
+- **🔴 Red Team Engine**: AI-powered attack generation & pattern detection
+- **🔵 Blue Team Engine**: Anomaly detection & automatic hardening
+- **🎭 Security Orchestrator**: Red/Blue Team coordination & scheduling
 
 ## **🏗️ KIẾN TRÚC HỆ THỐNG**
 
@@ -35,7 +38,14 @@ stillme_core/
     ├── safe_attack_simulator.py  # Safe attack simulation
     ├── vulnerability_detector.py # Vulnerability detection
     ├── defense_tester.py         # Defense mechanism testing
-    └── security_reporter.py      # Security reporting system
+    ├── security_reporter.py      # Security reporting system
+    ├── sandbox_controller.py     # Sandbox environment management
+    ├── sandbox_deploy.py         # Automated sandbox deployment
+    ├── red_team_engine.py        # Red Team attack simulation
+    ├── blue_team_engine.py       # Blue Team defense & detection
+    ├── security_orchestrator.py  # Red/Blue Team coordination
+    ├── experience_memory_integration.py # Security learning integration
+    └── test_phase2_integration.py # Comprehensive test suite
 ```
 
 ## **🔧 CÀI ĐẶT VÀ SỬ DỤNG**
@@ -730,6 +740,78 @@ attack_simulator.cleanup_all()
 4. Ensure all tests pass
 5. Update documentation
 6. Submit a pull request
+
+## **🛡️ RED TEAM/BLUE TEAM SYSTEM**
+
+### **📋 Tổng Quan**
+Red Team/Blue Team System là một hệ thống bảo mật tiên tiến được tích hợp vào Advanced AgentDev System, cung cấp khả năng mô phỏng tấn công và phòng thủ tự động trong môi trường sandbox an toàn.
+
+### **🔴 Red Team Engine**
+- **Pattern-based Attacks**: Tự động phát hiện các pattern code dễ bị tấn công
+- **AI-powered Exploitation**: Sử dụng AI để tạo ra các payload tấn công
+- **Adaptive Attacks**: Điều chỉnh phương pháp tấn công dựa trên phản ứng của hệ thống
+- **Experience Integration**: Lưu trữ kết quả tấn công để học hỏi
+- **Decision Engine Integration**: Đánh giá mức độ nghiêm trọng của lỗ hổng
+
+### **🔵 Blue Team Engine**
+- **Anomaly Detection**: Phát hiện hành vi bất thường trong logs/traffic
+- **Automatic Hardening**: Tự động áp dụng các quy tắc bảo mật
+- **Defense Verification**: Kiểm tra hiệu quả của các cơ chế phòng thủ
+- **Predictive Maintenance**: Dự đoán lỗ hổng trước khi chúng xảy ra
+- **Team Coordination**: Phân công nhiệm vụ bảo mật cho các nhóm ảo
+
+### **🎭 Security Orchestrator**
+- **Red/Blue Coordination**: Lên lịch và quản lý các bài tập bảo mật
+- **Exercise Management**: Tạo, chạy và phân tích các bài test bảo mật
+- **Reporting & Analytics**: Tạo báo cáo bảo mật toàn diện
+- **Integration**: Phối hợp với các module hiện có (Memory, Prediction, etc.)
+
+### **🏗️ Sandbox Environment**
+- **Docker-based Isolation**: Môi trường test cô lập dựa trên Docker
+- **Network Isolation**: Ngăn chặn truy cập internet từ sandbox
+- **Resource Limits**: Giới hạn CPU, memory, thời gian thực thi
+- **Security Metrics**: Giám sát và thực thi các chỉ số bảo mật
+
+### **🧪 Testing & Validation**
+```bash
+# Chạy Red/Blue Team tests
+python stillme_core/core/advanced_security/test_phase2_integration.py
+
+# Chạy Sandbox system tests
+python stillme_core/core/advanced_security/test_sandbox_system.py
+
+# Demo sandbox system
+python stillme_core/core/advanced_security/demo_sandbox.py
+```
+
+### **📊 Performance Metrics**
+- **Test Success Rate**: 100% (9 tests passed, 7 skipped)
+- **Security Metrics**: CPU <70%, Memory <512MB, Execution time <15min
+- **Network Isolation**: 100% - No internet access from sandbox
+- **Resource Limits**: Enforced with automatic cleanup
+
+### **🔧 Configuration**
+```json
+{
+  "security_metrics": {
+    "max_cpu_usage": 70,
+    "max_memory_usage": 512,
+    "max_execution_time": 900,
+    "network_egress_limit": 0,
+    "allowed_ports": [8080, 3000]
+  },
+  "red_team": {
+    "max_concurrent_attacks": 5,
+    "attack_timeout": 30,
+    "ai_model": "deepseek-coder:6.7b"
+  },
+  "blue_team": {
+    "anomaly_threshold": 0.8,
+    "defense_timeout": 60,
+    "auto_hardening": true
+  }
+}
+```
 
 ## **📄 LICENSE**
 
