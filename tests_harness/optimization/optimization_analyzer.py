@@ -87,13 +87,21 @@ class OptimizationAnalyzer:
         # Analyze trends
         trend_analysis = self._analyze_trends(reports)
         
-        # Generate comprehensive analysis
+        # Get mode from environment
+        mode = "offline" if os.getenv('OFFLINE_MODE', 'false').lower() == 'true' else "online"
+        
+        # Generate comprehensive analysis with new schema
         analysis = {
             "run_id": self.current_run_id,
             "git_sha": self._get_git_sha(),
+            "mode": mode,
             "model_matrix": latest_report.get('model_matrix', {}),
             "prices_version": latest_report.get('prices_version', 'v1'),
             "dataset_info": self._get_dataset_info(reports),
+            "overall_score": self._calculate_overall_score(reports),
+            "evaluations": self._get_evaluations_dict(reports),
+            "security": self._get_security_dict(reports),
+            "model_selection": self._get_model_selection_dict(reports),
             "slo_status": slo_status,
             "slo_message": slo_message,
             "slo_alerts": [self._alert_to_dict(alert) for alert in slo_alerts],
@@ -109,7 +117,8 @@ class OptimizationAnalyzer:
             "model_selection_analysis": self._analyze_model_selection(reports),
             "security_analysis": self._analyze_security_performance(reports),
             "failure_analysis": self._analyze_failures(reports),
-            "recommendations": self._generate_enhanced_recommendations(reports, slo_alerts)
+            "recommendations": self._generate_enhanced_recommendations(reports, slo_alerts),
+            "action_items": self._get_action_items(self.slo_manager.get_failed_slos())
         }
         
         # Create enhanced reports
@@ -134,6 +143,67 @@ class OptimizationAnalyzer:
             return result.stdout.strip()[:8] if result.returncode == 0 else "unknown"
         except:
             return "unknown"
+
+    def _calculate_overall_score(self, reports: List[Dict[str, Any]]) -> float:
+        """Tính overall score từ các reports"""
+        if not reports:
+            return 0.0
+        
+        latest_report = reports[0]
+        evaluations = latest_report.get('evaluations', {})
+        
+        scores = []
+        for category in ['persona', 'safety', 'translation', 'efficiency', 'agentdev']:
+            if category in evaluations and 'average_score' in evaluations[category]:
+                scores.append(evaluations[category]['average_score'])
+        
+        return sum(scores) / len(scores) if scores else 0.0
+
+    def _get_evaluations_dict(self, reports: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Lấy evaluations dict từ latest report"""
+        if not reports:
+            return {}
+        
+        latest_report = reports[0]
+        return latest_report.get('evaluations', {})
+
+    def _get_security_dict(self, reports: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Lấy security dict từ latest report"""
+        if not reports:
+            return {"sandbox_egress_blocked": False, "attack_block_rates": {}}
+        
+        latest_report = reports[0]
+        return latest_report.get('security', {"sandbox_egress_blocked": False, "attack_block_rates": {}})
+
+    def _get_model_selection_dict(self, reports: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Lấy model selection dict từ latest report"""
+        if not reports:
+            return {"confusion_matrix": [], "overall_accuracy": 0.0}
+        
+        latest_report = reports[0]
+        return latest_report.get('model_selection', {"confusion_matrix": [], "overall_accuracy": 0.0})
+
+    def _get_action_items(self, failed_slos: List[str]) -> List[str]:
+        """Lấy action items dựa trên failed SLOs"""
+        action_items = []
+        
+        # Load SLO policy để lấy action map
+        try:
+            slo_policy = self.slo_manager.load_policy()
+            action_map = slo_policy.get('action_map', {})
+            
+            for failed_slo in failed_slos:
+                # Parse SLO key (e.g., "performance.persona.min_score" -> "persona")
+                parts = failed_slo.split('.')
+                if len(parts) >= 2:
+                    category = parts[1]  # persona, safety, etc.
+                    if category in action_map:
+                        modules = action_map[category].get('modules', [])
+                        action_items.extend(modules)
+        except Exception as e:
+            logger.warning(f"Could not load action map: {e}")
+        
+        return list(set(action_items))  # Remove duplicates
     
     def _get_dataset_info(self, reports: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Get dataset information from reports"""

@@ -35,8 +35,9 @@ make open-report
 
 ### 2. **JSON Reports** (`*.json`)
 - **Raw Data**: Dữ liệu thô cho phân tích sâu
-- **Metadata**: run_id, git_sha, model_matrix
+- **Metadata**: run_id, git_sha, mode, model_matrix
 - **Structured Results**: Kết quả có cấu trúc cho automation
+- **Schema**: Đảm bảo có đủ các khóa bắt buộc: overall_score, evaluations, security, model_selection, slo_status, alert_summary, failed_slos, action_items
 
 ## 🎯 SLO (Service Level Objectives)
 
@@ -228,6 +229,12 @@ Khi có lỗi, hệ thống sẽ gợi ý file/module cần sửa:
 ### Debug Mode
 ```bash
 python runners/run_all.py --verbose  # Chi tiết logs
+```
+
+### Offline Mode
+```bash
+# Offline mode vẫn tạo report hợp lệ để CI pass phần cấu trúc
+OFFLINE_MODE=true MOCK_PROVIDERS=true python runners/run_all.py --since 7 --samples 100 --verbose
 ```
 
 ## 📚 Tài Liệu Tham Khảo

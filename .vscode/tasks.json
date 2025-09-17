@@ -280,6 +280,30 @@
             },
             "problemMatcher": [],
             "detail": "Run quick development cycle"
+        },
+        {
+            "label": "🧪 Run: CI Simulation (Offline)",
+            "type": "shell",
+            "command": "python",
+            "args": ["runners/run_all.py", "--since", "7", "--samples", "100", "--verbose"],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/tests_harness",
+                "env": {
+                    "OFFLINE_MODE": "true",
+                    "MOCK_PROVIDERS": "true"
+                }
+            },
+            "problemMatcher": [],
+            "detail": "Simulate CI pipeline in offline mode"
         }
     ]
 }

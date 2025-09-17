@@ -1,5 +1,8 @@
 # 🚀 STILLME AI FRAMEWORK
 
+[![Test & Evaluation Harness](https://github.com/OWNER/REPO/actions/workflows/test_harness.yml/badge.svg?branch=main)](https://github.com/OWNER/REPO/actions/workflows/test_harness.yml)
+[![Develop](https://github.com/OWNER/REPO/actions/workflows/test_harness.yml/badge.svg?branch=develop)](https://github.com/OWNER/REPO/actions/workflows/test_harness.yml)
+
 ## 🎯 **PROJECT STATUS: ENTERPRISE-READY & REFACTORED**
 
 **⚠️ IMPORTANT: This is a WORLD-CLASS AI Framework with 100+ modules + Enterprise Scaling + Clean Architecture!**
