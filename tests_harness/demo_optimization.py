@@ -37,9 +37,14 @@ def main():
     
     print(f"\n🎯 Top Recommendations:")
     for i, rec in enumerate(analysis['recommendations'][:3], 1):
-        print(f"  {i}. [{rec.priority.upper()}] {rec.title}")
-        print(f"     Current: {rec.current_score:.2f} → Target: {rec.target_score:.2f}")
-        print(f"     Impact: {rec.expected_impact}")
+        if isinstance(rec, dict):
+            print(f"  {i}. [{rec.get('priority', 'MEDIUM').upper()}] {rec.get('title', 'Unknown')}")
+            print(f"     Current: {rec.get('current_score', 0):.2f} → Target: {rec.get('target_score', 0):.2f}")
+            print(f"     Impact: {rec.get('expected_impact', 'No impact specified')}")
+        else:
+            print(f"  {i}. [{rec.priority.upper()}] {rec.title}")
+            print(f"     Current: {rec.current_score:.2f} → Target: {rec.target_score:.2f}")
+            print(f"     Impact: {rec.expected_impact}")
         print()
     
     print("✅ Optimization analysis completed!")

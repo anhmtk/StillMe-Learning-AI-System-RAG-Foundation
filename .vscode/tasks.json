@@ -2,113 +2,284 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "dev:baseurl",
+            "label": "🧪 Run: Test Harness (Quick)",
             "type": "shell",
-            "command": "${workspaceFolder}/scripts/compute_base_url.ps1",
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            },
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "problemMatcher": [],
-            "detail": "Compute BASE_URL và ghi vào config/runtime_base_url.txt"
-        },
-        {
-            "label": "dev:server",
-            "type": "shell",
-            "command": "${workspaceFolder}/scripts/start_server.ps1",
-            "group": "build",
-            "dependsOn": "dev:baseurl",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            },
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "problemMatcher": [],
-            "detail": "Khởi động server detached và chờ sẵn sàng"
-        },
-        {
-            "label": "dev:wait",
-            "type": "shell",
-            "command": "${workspaceFolder}/scripts/wait_ready.ps1",
-            "group": "build",
-            "presentation": {
-                "echo": true,
-                "reveal": "always",
-                "focus": false,
-                "panel": "shared"
-            },
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
-            "problemMatcher": [],
-            "detail": "Chờ server sẵn sàng với health check"
-        },
-        {
-            "label": "dev:smoke",
-            "type": "shell",
-            "command": "powershell",
-            "args": [
-                "-Command",
-                "$BASE_URL = Get-Content '${workspaceFolder}/config/runtime_base_url.txt'; Write-Host 'Testing BASE_URL:' $BASE_URL; try { $response = Invoke-WebRequest '$BASE_URL/version' -UseBasicParsing; Write-Host '✅ /version:' $response.StatusCode; $json = $response.Content | ConvertFrom-Json; Write-Host 'Name:' $json.name 'Version:' $json.version } catch { Write-Host '❌ /version failed:' $_.Exception.Message; Write-Host '📝 Server logs:'; Get-Content '${workspaceFolder}/logs/server.log' -Tail 20 }"
-            ],
+            "command": "make",
+            "args": ["test-quick"],
             "group": "test",
             "presentation": {
                 "echo": true,
                 "reveal": "always",
                 "focus": false,
-                "panel": "shared"
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
             },
             "options": {
-                "cwd": "${workspaceFolder}"
+                "cwd": "${workspaceFolder}/tests_harness"
             },
             "problemMatcher": [],
-            "detail": "Smoke test - kiểm tra /version endpoint"
+            "detail": "Run quick test suite (100 samples)"
         },
         {
-            "label": "dev:stop",
+            "label": "🧪 Run: Test Harness (Full)",
             "type": "shell",
-            "command": "${workspaceFolder}/scripts/stop_server.ps1",
-            "group": "build",
+            "command": "make",
+            "args": ["test"],
+            "group": "test",
             "presentation": {
                 "echo": true,
                 "reveal": "always",
                 "focus": false,
-                "panel": "shared"
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
             },
             "options": {
-                "cwd": "${workspaceFolder}"
+                "cwd": "${workspaceFolder}/tests_harness"
             },
             "problemMatcher": [],
-            "detail": "Dừng server process"
+            "detail": "Run comprehensive test suite"
         },
         {
-            "label": "dev:full-pipeline",
-            "dependsOrder": "sequence",
-            "dependsOn": [
-                "dev:baseurl",
-                "dev:server",
-                "dev:wait",
-                "dev:smoke"
-            ],
+            "label": "🎯 Run: Analyzer (HTML)",
+            "type": "shell",
+            "command": "make",
+            "args": ["analyze"],
             "group": "build",
             "presentation": {
                 "echo": true,
                 "reveal": "always",
                 "focus": false,
-                "panel": "shared"
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/tests_harness"
             },
             "problemMatcher": [],
-            "detail": "Chạy toàn bộ pipeline: baseurl → server → wait → smoke"
+            "detail": "Run optimization analysis and generate HTML report"
+        },
+        {
+            "label": "📊 Open Report",
+            "type": "shell",
+            "command": "make",
+            "args": ["open-report"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/tests_harness"
+            },
+            "problemMatcher": [],
+            "detail": "Open HTML report in browser"
+        },
+        {
+            "label": "🚀 Run: CI Simulation",
+            "type": "shell",
+            "command": "make",
+            "args": ["ci"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/tests_harness"
+            },
+            "problemMatcher": [],
+            "detail": "Simulate CI pipeline locally"
+        },
+        {
+            "label": "⚡ Run: Performance Benchmark",
+            "type": "shell",
+            "command": "make",
+            "args": ["benchmark"],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/tests_harness"
+            },
+            "problemMatcher": [],
+            "detail": "Run performance benchmark"
+        },
+        {
+            "label": "📊 Generate: Large Dataset",
+            "type": "shell",
+            "command": "make",
+            "args": ["dataset"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/tests_harness"
+            },
+            "problemMatcher": [],
+            "detail": "Generate large dataset (1000 samples)"
+        },
+        {
+            "label": "🔍 Validate: Reports",
+            "type": "shell",
+            "command": "make",
+            "args": ["validate"],
+            "group": "test",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/tests_harness"
+            },
+            "problemMatcher": [],
+            "detail": "Validate report structure"
+        },
+        {
+            "label": "📈 Run: Trend Analysis",
+            "type": "shell",
+            "command": "make",
+            "args": ["analyze-trend"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/tests_harness"
+            },
+            "problemMatcher": [],
+            "detail": "Run analysis with trend data (30 days)"
+        },
+        {
+            "label": "🧹 Clean: Generated Files",
+            "type": "shell",
+            "command": "make",
+            "args": ["clean"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/tests_harness"
+            },
+            "problemMatcher": [],
+            "detail": "Clean generated files"
+        },
+        {
+            "label": "📦 Install: Dependencies",
+            "type": "shell",
+            "command": "make",
+            "args": ["install"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/tests_harness"
+            },
+            "problemMatcher": [],
+            "detail": "Install dependencies"
+        },
+        {
+            "label": "📊 Show: Status",
+            "type": "shell",
+            "command": "make",
+            "args": ["status"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/tests_harness"
+            },
+            "problemMatcher": [],
+            "detail": "Show current status"
+        },
+        {
+            "label": "🎉 Run: Full Pipeline",
+            "type": "shell",
+            "command": "make",
+            "args": ["all"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/tests_harness"
+            },
+            "problemMatcher": [],
+            "detail": "Run full pipeline (clean, install, test, analyze, benchmark)"
+        },
+        {
+            "label": "🚀 Run: Development Cycle",
+            "type": "shell",
+            "command": "make",
+            "args": ["dev"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "options": {
+                "cwd": "${workspaceFolder}/tests_harness"
+            },
+            "problemMatcher": [],
+            "detail": "Run quick development cycle"
         }
     ]
 }
