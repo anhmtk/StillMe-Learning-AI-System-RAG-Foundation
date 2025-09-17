@@ -1,0 +1,26 @@
+
+============================================================
+Mock Augmentation Cost Analysis
+============================================================
+
+📊 OVERALL STATISTICS:
+  Total Requests: 42
+  Total Input Tokens: 415
+  Total Output Tokens: 469
+  Total Tokens: 884
+  Total Cost: $0.0014
+
+💰 COST BREAKDOWN BY MODEL:
+  unknown: $0.0014 (100.0%)
+
+🔧 COST BREAKDOWN BY METHOD:
+  paraphrase: $0.0009 (68.5%)
+  backtranslate: $0.0004 (31.5%)
+
+📈 EFFICIENCY METRICS:
+  Average Cost per Request: $0.0000
+  Average Tokens per Request: 21.0
+  Cost per 1K Tokens: $0.0015
+
+💡 OPTIMIZATION SUGGESTIONS:
+============================================================
