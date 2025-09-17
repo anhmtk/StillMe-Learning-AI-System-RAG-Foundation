@@ -183,8 +183,8 @@ class OptimizationAnalyzer:
         latest_report = reports[0]
         return latest_report.get('model_selection', {"confusion_matrix": [], "overall_accuracy": 0.0})
 
-    def _get_action_items(self, failed_slos: List[str]) -> List[str]:
-        """Lấy action items dựa trên failed SLOs"""
+    def _get_action_items(self, failed_slos: List[str]) -> List[Dict[str, Any]]:
+        """Lấy action items dựa trên failed SLOs với mapping chi tiết"""
         action_items = []
         
         # Load SLO policy để lấy action map
@@ -193,17 +193,93 @@ class OptimizationAnalyzer:
             action_map = slo_policy.get('action_map', {})
             
             for failed_slo in failed_slos:
-                # Parse SLO key (e.g., "performance.persona.min_score" -> "persona")
-                parts = failed_slo.split('.')
-                if len(parts) >= 2:
-                    category = parts[1]  # persona, safety, etc.
-                    if category in action_map:
-                        modules = action_map[category].get('modules', [])
-                        action_items.extend(modules)
+                # Parse SLO key (e.g., "persona_score" -> "persona")
+                category = None
+                failure_type = None
+                
+                # Map SLO names to categories
+                if "persona" in failed_slo.lower():
+                    category = "persona"
+                    failure_type = "wrong_pronoun"
+                elif "safety" in failed_slo.lower():
+                    category = "safety"
+                    failure_type = "jailbreak_success"
+                elif "translation" in failed_slo.lower():
+                    category = "translation"
+                    failure_type = "poor_accuracy"
+                elif "efficiency" in failed_slo.lower():
+                    category = "efficiency"
+                    failure_type = "high_latency"
+                elif "agentdev" in failed_slo.lower():
+                    category = "agentdev"
+                    failure_type = "decision_failure"
+                elif "sandbox" in failed_slo.lower():
+                    category = "security"
+                    failure_type = "sandbox_breach"
+                elif "jailbreak" in failed_slo.lower():
+                    category = "safety"
+                    failure_type = "jailbreak_success"
+                
+                if category and category in action_map:
+                    action_config = action_map[category]
+                    action_item = {
+                        "failure": failure_type or "unknown",
+                        "category": category,
+                        "modules": action_config.get('modules', []),
+                        "effort": action_config.get('effort', 'M'),
+                        "suggestion": self._get_suggestion_for_failure(category, failure_type)
+                    }
+                    action_items.append(action_item)
+                    
         except Exception as e:
             logger.warning(f"Could not load action map: {e}")
         
-        return list(set(action_items))  # Remove duplicates
+        # Remove duplicates based on category
+        seen_categories = set()
+        unique_action_items = []
+        for item in action_items:
+            if item['category'] not in seen_categories:
+                unique_action_items.append(item)
+                seen_categories.add(item['category'])
+        
+        return unique_action_items
+    
+    def _get_suggestion_for_failure(self, category: str, failure_type: str) -> str:
+        """Tạo suggestion cụ thể cho từng loại failure"""
+        suggestions = {
+            "persona": {
+                "wrong_pronoun": "increase PersonaMorph weight and review communication style manager",
+                "inconsistent_style": "improve PersonaMorph consistency algorithms",
+                "poor_personalization": "enhance user preference learning"
+            },
+            "safety": {
+                "jailbreak_success": "immediately review and strengthen jailbreak detection mechanisms",
+                "stacktrace_leak": "tighten error handling and stacktrace filtering",
+                "inappropriate_content": "enhance content filtering rules"
+            },
+            "translation": {
+                "poor_accuracy": "upgrade NLLB model and optimize Gemma translation",
+                "wrong_language": "improve language detection algorithms",
+                "code_corruption": "enhance code block preservation"
+            },
+            "efficiency": {
+                "high_latency": "optimize TokenOptimizer and implement caching",
+                "high_token_cost": "improve token optimization algorithms",
+                "poor_optimization": "review and enhance optimization strategies"
+            },
+            "agentdev": {
+                "decision_failure": "review Advanced Decision Making and Self-Learning mechanisms",
+                "learning_failure": "improve experience memory and pattern recognition",
+                "coordination_failure": "enhance team coordination algorithms"
+            },
+            "security": {
+                "sandbox_breach": "immediately review sandbox isolation and network restrictions",
+                "attack_success": "strengthen security detection and response",
+                "vulnerability_detected": "implement additional security measures"
+            }
+        }
+        
+        return suggestions.get(category, {}).get(failure_type, f"review and improve {category} system")
     
     def _get_dataset_info(self, reports: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Get dataset information from reports"""

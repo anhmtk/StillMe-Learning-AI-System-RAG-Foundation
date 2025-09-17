@@ -35,6 +35,10 @@ class SLOPolicyManager:
         self.slo_policy = slo_policy
         self.alerts: List[SLOAlert] = []
     
+    def load_policy(self) -> Dict[str, Any]:
+        """Load SLO policy (for compatibility)"""
+        return self.slo_policy
+    
     def evaluate_slos(self, report_data: Dict[str, Any]) -> List[SLOAlert]:
         """Evaluate all SLOs and generate alerts"""
         self.alerts = []

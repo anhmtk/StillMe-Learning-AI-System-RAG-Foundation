@@ -375,6 +375,14 @@ class HTMLReportBuilder:
                 </div>
             </div>
             
+            <!-- Action Items -->
+            <div class="section">
+                <h2>🔧 Action Items</h2>
+                <div class="action-items">
+                    {action_items}
+                </div>
+            </div>
+            
             <!-- Metadata -->
             <div class="section">
                 <h2>📋 Test Configuration</h2>
@@ -465,6 +473,7 @@ class HTMLReportBuilder:
             fair_count=overall_metrics.get('score_distribution', {}).get('fair', 0),
             poor_count=overall_metrics.get('score_distribution', {}).get('poor', 0),
             recommendations=self._generate_recommendations(overall_metrics),
+            action_items=self._generate_action_items(overall_metrics),
             test_date=metadata.get('test_date', datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
             dataset_size=metadata.get('dataset_size', 'N/A'),
             test_duration=metadata.get('test_duration', 'N/A'),
@@ -522,6 +531,43 @@ class HTMLReportBuilder:
             recommendations.append("⚠️ <strong>Needs Improvement:</strong> Cần cải thiện đáng kể để đạt hiệu suất tốt")
         
         return "<br>".join(recommendations) if recommendations else "No specific recommendations at this time."
+    
+    def _generate_action_items(self, overall_metrics: Dict[str, Any]) -> str:
+        """Tạo action items dựa trên failed SLOs"""
+        action_items = overall_metrics.get('action_items', [])
+        
+        if not action_items:
+            return "<p>✅ No action items required - all SLOs are passing!</p>"
+        
+        html_items = []
+        for item in action_items:
+            effort_color = {
+                'L': '#28a745',  # Green
+                'M': '#ffc107',  # Yellow  
+                'H': '#dc3545'   # Red
+            }.get(item.get('effort', 'M'), '#6c757d')
+            
+            modules_html = ', '.join([f'<code>{module}</code>' for module in item.get('modules', [])])
+            
+            html_item = f"""
+            <div class="action-item" style="border-left: 4px solid {effort_color}; padding: 15px; margin: 10px 0; background: #f8f9fa; border-radius: 4px;">
+                <h4 style="margin: 0 0 8px 0; color: #333;">
+                    [{item.get('category', 'unknown').upper()}] {item.get('failure', 'unknown')}
+                </h4>
+                <p style="margin: 5px 0; color: #666;">
+                    <strong>Modules:</strong> {modules_html}
+                </p>
+                <p style="margin: 5px 0; color: #666;">
+                    <strong>Effort:</strong> <span style="color: {effort_color}; font-weight: bold;">{item.get('effort', 'M')}</span>
+                </p>
+                <p style="margin: 5px 0; color: #333;">
+                    <strong>Suggestion:</strong> {item.get('suggestion', 'No suggestion available')}
+                </p>
+            </div>
+            """
+            html_items.append(html_item)
+        
+        return ''.join(html_items)
     
     def export_json_report(self, 
                           persona_scores: List[Dict],
