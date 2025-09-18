@@ -22,6 +22,11 @@ __pycache__/
 
 # Environment
 .env
+.env.*
+*.keystore
+*.jks
+*.pem
+*.p12
 .venv/
 venv/
 env/
@@ -109,6 +114,15 @@ dist/
 build/
 *.egg-info/
 *.dist-info/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.dart_tool/
+.gradle/
+android/app/build/
+ios/Pods/
+*.apk
+*.aab
 
 # Database files
 *.db

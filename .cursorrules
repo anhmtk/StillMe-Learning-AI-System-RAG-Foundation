@@ -1,0 +1,29 @@
+# StillMe — Engineering Guardrails & Execution Rules
+# This file is loaded every session by Cursor.
+
+## EXECUTION CONTROL
+- Khi mình bấm "Skip", đừng coi là hủy lệnh. Hãy dừng chờ, đọc log terminal mới nhất, tóm tắt tình hình và tiếp tục bước tiếp theo.
+
+## SECURITY (CLIENT/MOBILE)
+- Tuyệt đối không tạo hoặc đọc .env trên mobile. Không dùng flutter_dotenv.
+- Không embed API keys, token, secrets trong code, asset, dart-define, Gradle, Manifest, hoặc trong APK/IPA.
+- Mobile config chỉ chứa giá trị không nhạy cảm (public base URL, timeout, feature flag, theme).
+- Secrets chỉ tồn tại ở VPS gateway.
+- Build release:
+  - Tắt toàn bộ log request/response.
+  - Bắt buộc HTTPS, không cho cleartext.
+  - Bật minify + obfuscate.
+
+## NETWORKING
+- Kiến trúc: Mobile → VPS Gateway (giữ keys) → LLM Providers.
+- Auth: dùng session token ngắn hạn (X-Session). Có thể thêm request signing (HMAC) với secret chỉ ở server.
+
+## CLEAN REPO & CI
+- Không commit .env, keystore, build artifact.
+- Luôn quét secret trước commit/push (gitleaks).
+- Commit theo Conventional Commits.
+
+## ACCEPTANCE KHI ĐỤNG /chat
+- Cần có (1) screenshot UI, (2) raw JSON (đã ẩn nhạy cảm), (3) giải thích adapter, (4) chứng minh không dùng placeholder.
+
+# End of rules.
