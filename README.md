@@ -7,7 +7,19 @@
 
 **⚠️ IMPORTANT: This is a WORLD-CLASS AI Framework with 100+ modules + Enterprise Scaling + Clean Architecture!**
 
-## 🔄 **RECENT CHANGES (2025-09-21) - VPS CLEANUP:**
+## 🔄 **RECENT CHANGES (2025-09-21) - UX & PERSONA IMPROVEMENTS:**
+
+**✅ UX & PERSONA ENHANCEMENTS**: Cải thiện trải nghiệm người dùng và danh tính bot:
+
+- **Enter-to-Send**: Enter = gửi tin, Shift+Enter = xuống dòng (tôn trọng IME/tiếng Việt)
+- **Settings**: Toggle "Enter to send" (mặc định ON), có thể đảo chiều hành vi
+- **StillMe Persona**: Bot luôn xưng "StillMe", không bao giờ tự nhận là Gemma/OpenAI/DeepSeek
+- **Identity Sanitization**: `normalize_bot_identity()` lọc phản hồi AI để duy trì danh tính StillMe
+- **Engine Display**: Hiển thị engine như thông tin kỹ thuật (badge nhỏ), không thay danh tính
+- **Unit Tests**: Test cho identity normalization với các pattern tiếng Anh/Việt
+- **System Prompt**: Tự động gắn system prompt để enforce StillMe persona
+
+## 🔄 **PREVIOUS CHANGES (2025-09-21) - VPS CLEANUP:**
 
 **✅ CLEANUP COMPLETED**: Đã xóa toàn bộ code VPS/tunnel phức tạp, đơn giản hóa thành LAN IP testing:
 
@@ -16,7 +28,7 @@
   - `test_end_to_end.py`, `tools/start_tunnel.*`, `ARCHITECTURE.md`
   - `real_stillme_gateway*.py`, `gateway_*.py`, `vps_*.py`, `test_vps_*.py`
   - `VPS_DEPLOYMENT_*.md`, `DEPLOYMENT_GUIDE.md`, `QUICK_DEPLOY_COMMANDS.txt`
-- **Tạo**: `app.py` (backend chính), `desktop_chat_app.py` (với settings), `TEST_LOCAL.md`
+- **Tạo**: `app.py` (backend chính), `stillme_desktop_app.py` (với settings), `TEST_LOCAL.md`
 - **Cập nhật**: Desktop app có settings để đổi API URL, không cần VPS cho development
 - **Kết quả**: Repo sạch, dễ test, chỉ cần LAN IP cho desktop/mobile app
 
