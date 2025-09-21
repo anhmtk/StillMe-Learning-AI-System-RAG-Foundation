@@ -35,14 +35,26 @@ class ChatRepository {
       _dio.interceptors.add(InterceptorsWrapper(
         onRequest: (options, handler) {
           SecureLogger.logRequest(options);
+          debugPrint('[Dio] REQUEST: ${options.method} ${options.uri}');
+          debugPrint('[Dio] HEADERS: ${options.headers}');
+          if (options.data != null) {
+            debugPrint('[Dio] BODY: ${jsonEncode(options.data)}');
+          }
           handler.next(options);
         },
         onResponse: (response, handler) {
           SecureLogger.logResponse(response);
+          debugPrint('[Dio] RESPONSE: ${response.statusCode} ${response.requestOptions.uri}');
+          debugPrint('[Dio] RESPONSE BODY: ${jsonEncode(response.data)}');
           handler.next(response);
         },
         onError: (error, handler) {
           SecureLogger.logError(error);
+          debugPrint('[Dio] ERROR: ${error.message}');
+          if (error.response != null) {
+            debugPrint('[Dio] ERROR RESPONSE: ${error.response?.statusCode}');
+            debugPrint('[Dio] ERROR BODY: ${jsonEncode(error.response?.data)}');
+          }
           handler.next(error);
         },
       ));
@@ -92,12 +104,14 @@ class ChatRepository {
         String? extractText(dynamic d) {
           if (d == null) return null;
           if (d is Map<String, dynamic>) {
+            // Priority order: response -> text -> output -> choices[0].message.content
             return d['response'] ??  // StillMe VPS uses 'response'
-                   d['text'] ??
-                   d['reply'] ??
-                   d['message'] ??
-                   (d['choices'] is List && d['choices'].isNotEmpty ? d['choices'][0]['text'] : null) ??
-                   (d['choices']?[0]?['message']?['content']);
+                   d['text'] ??      // Standard text field
+                   d['output'] ??    // Alternative output field
+                   d['reply'] ??     // Reply field
+                   d['message'] ??   // Message field
+                   (d['choices'] is List && d['choices'].isNotEmpty ? 
+                     (d['choices'][0]['message']?['content'] ?? d['choices'][0]['text']) : null);
           }
           return null;
         }
@@ -107,15 +121,14 @@ class ChatRepository {
         final usage = _extractUsage(data['usage']);
         final latency = data['latency_ms'] ?? latencyMs;
         
-        // Check if this is a placeholder response
-        final isPlaceholder = _isPlaceholderResponse(data, text);
-        
-        // If status 200 but no text found, show schema mismatch warning
+        // If status 200 but no text found, show schema mismatch warning with available keys
         if (text == null || text.isEmpty) {
+          final availableKeys = data is Map<String, dynamic> ? data.keys.toList() : ['unknown'];
           debugPrint('[ChatRepository] WARNING: Schema mismatch - no text field found in response');
+          debugPrint('[ChatRepository] Available keys: $availableKeys');
           return ChatMessage(
             id: DateTime.now().millisecondsSinceEpoch.toString(),
-            content: '⚠️ Schema mismatch: Server response không có trường text. Raw: ${jsonEncode(data)}',
+            content: '⚠️ Unknown schema: ${availableKeys.join(", ")}',
             role: MessageRole.assistant,
             timestamp: DateTime.now(),
             model: model,
@@ -125,25 +138,6 @@ class ChatRepository {
             safety: const ChatSafety(
               filtered: false,
               flags: ['schema_mismatch'],
-            ),
-          );
-        }
-        
-        // If placeholder response, show warning
-        if (isPlaceholder) {
-          debugPrint('[ChatRepository] WARNING: Placeholder response detected');
-          return ChatMessage(
-            id: DateTime.now().millisecondsSinceEpoch.toString(),
-            content: '🚨 Gateway in placeholder mode – not a real LLM response\n\n$text',
-            role: MessageRole.assistant,
-            timestamp: DateTime.now(),
-            model: 'placeholder',
-            usage: usage,
-            latencyMs: latency,
-            costEstimateUsd: data['cost_estimate_usd']?.toDouble(),
-            safety: const ChatSafety(
-              filtered: false,
-              flags: ['placeholder_mode'],
             ),
           );
         }
@@ -167,19 +161,43 @@ class ChatRepository {
       
       debugPrint('[ChatRepository] Error: $e');
       
-      // Return fallback message only on real failure
-      return ChatMessage(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        content: 'Xin lỗi, tôi không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.',
-        role: MessageRole.assistant,
-        timestamp: DateTime.now(),
-        model: 'offline',
-        latencyMs: latencyMs,
-        safety: const ChatSafety(
-          filtered: false,
-          flags: ['network_error'],
-        ),
+      // Only return fallback message for network errors (timeout, 5xx, connection issues)
+      final isNetworkError = e is DioException && (
+        e.type == DioExceptionType.connectionTimeout ||
+        e.type == DioExceptionType.receiveTimeout ||
+        e.type == DioExceptionType.sendTimeout ||
+        e.type == DioExceptionType.connectionError ||
+        (e.response?.statusCode != null && e.response!.statusCode! >= 500)
       );
+      
+      if (isNetworkError) {
+        return ChatMessage(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          content: 'Xin lỗi, tôi không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.',
+          role: MessageRole.assistant,
+          timestamp: DateTime.now(),
+          model: 'offline',
+          latencyMs: latencyMs,
+          safety: const ChatSafety(
+            filtered: false,
+            flags: ['network_error'],
+          ),
+        );
+      } else {
+        // For other errors (4xx, parsing errors, etc.), show the actual error
+        return ChatMessage(
+          id: DateTime.now().millisecondsSinceEpoch.toString(),
+          content: 'Lỗi: ${e.toString()}',
+          role: MessageRole.assistant,
+          timestamp: DateTime.now(),
+          model: 'error',
+          latencyMs: latencyMs,
+          safety: const ChatSafety(
+            filtered: false,
+            flags: ['client_error'],
+          ),
+        );
+      }
     }
   }
 
@@ -196,17 +214,6 @@ class ChatRepository {
     return null;
   }
   
-  // Helper method to detect placeholder responses
-  bool _isPlaceholderResponse(Map<String, dynamic> data, String? text) {
-    final model = data['model']?.toString().toLowerCase() ?? '';
-    final textLower = text?.toLowerCase() ?? '';
-    
-    return model.contains('placeholder') || 
-           textLower.contains('đang trong quá trình triển khai') ||
-           textLower.contains('hiện tại mình đang') ||
-           textLower.contains('rất vui được làm quen') ||
-           textLower.contains('mình đã nhận được tin nhắn của bạn');
-  }
 
   Future<Map<String, dynamic>> testConnection() async {
     try {
