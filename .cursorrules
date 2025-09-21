@@ -26,4 +26,72 @@
 ## ACCEPTANCE KHI ĐỤNG /chat
 - Cần có (1) screenshot UI, (2) raw JSON (đã ẩn nhạy cảm), (3) giải thích adapter, (4) chứng minh không dùng placeholder.
 
+## MOBILE RELEASE SECURITY RULES
+
+# Mục tiêu: đảm bảo bản phát hành (APK/IPA – flavor prod) không chứa placeholder, không log nhạy cảm, và hoàn toàn không có API keys/secrets ở client.
+
+- Networking (prod):
+  - HTTPS-only. Không cho phép cleartext. Không dùng networkSecurityConfig cho prod.
+  - Không dùng IP hard-code trong prod; dùng domain. (Dev có thể dùng IP.)
+- Logging:
+  - Tắt toàn bộ HTTP/Dio logging ở prod (request/response/body/headers).
+  - Tắt mọi debug banner/verbose logs trong prod.
+- Placeholders & mocks:
+  - Cấm hiển thị placeholder hoặc mock khi status=200.
+  - Nếu detect model/flag là "placeholder|mock", FAIL nhiệm vụ phát hành và thông báo rõ: "Placeholder detected – not a real LLM."
+- Secrets:
+  - TUYỆT ĐỐI không có API keys/secrets/tokens trong:
+    - source code, assets, dart-define, Gradle, Manifest, keystore, APK/IPA.
+  - Không tạo/đọc `.env` phía mobile. Không dùng `flutter_dotenv`.
+  - Secrets chỉ tồn tại và được dùng ở VPS Gateway.
+- Config theo flavor:
+  - Dev: cho phép HTTP + log để debug.
+  - Prod: HTTPS-only, no logs, minify+obfuscate bật.
+- Pre-release checklist (bắt buộc tự kiểm tra trước khi build release):
+  1) Tắt Dio logs, debug banners, mock/placeholder flags.
+  2) BASE_URL là HTTPS domain (không phải IP) cho prod.
+  3) Gitleaks scan PASS; không có file `.env`, *.keystore, *.pem, secrets trong git.
+  4) Adapter nhận đúng field của gateway (`response|text|output|choices[0].text`); không fallback placeholder khi 200.
+  5) Build release kèm obfuscation và shrinkResources (Android).
+- Acceptance khi phát hành:
+  - Đính kèm ảnh UI + raw JSON (đã ẩn nhạy cảm) chứng minh là câu trả lời LLM thật, model ≠ placeholder.
+  - In đường dẫn artifact (APK/AAB/IPA) và metadata build (flavor, build time, package id).
+
+## DEVELOPER EXPERIENCE (DX) RULES
+
+# Skip button protocol
+- Khi người dùng bấm "Skip", KHÔNG coi là hủy.
+  1) Đọc log terminal mới nhất.
+  2) Tóm tắt trạng thái (success/fail/đang chờ).
+  3) Tiếp tục flow từ bước hợp lý, không reset.
+
+# Build & test errors
+- Khi build/test/deploy thất bại:
+  1) Parse log để tìm root cause.
+  2) Đề xuất fix ngắn gọn ngay trong output.
+  3) Nếu nhiều lỗi, liệt kê top 3 critical theo thứ tự ưu tiên.
+
+# Long-running tasks
+- Nếu task > 30s, hiển thị trạng thái định kỳ (progress).
+- Nếu log có vẻ treo, nhắc người dùng có thể bấm Skip để tiếp tục.
+
+# Logs
+- Highlight các dòng ERROR/FAIL/WARNING.
+- Với log dài, tự tóm tắt phần cuối (≈50 dòng) và nêu lỗi chính.
+
+# Commits
+- Dùng Conventional Commits. 
+- Thay đổi bảo mật prefix: `chore(security): …`.
+
+# Documentation
+- Sau mỗi thay đổi quan trọng (build config, security, CI), cập nhật README.md hoặc docs/*.
+- Nếu chưa cập nhật, tự thêm To-do "Update README.md".
+
+# Build outputs
+- Khi build mobile/desktop xong, in rõ:
+  - 📱 đường dẫn artifact
+  - 🔑 ghi chú ký (nếu cần)
+  - 🐞 debug: log đang bật
+  - 🔒 release: xác nhận đã tắt log nhạy cảm
+
 # End of rules.
