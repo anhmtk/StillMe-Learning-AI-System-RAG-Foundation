@@ -2,6 +2,15 @@
 
 StillMe AI là một hệ thống chat AI thông minh với khả năng routing tự động giữa các model AI khác nhau.
 
+## 🔄 **RECENT CHANGES (2025-09-21)**
+
+**✅ CLEANUP COMPLETED**: Đã xóa toàn bộ code VPS/tunnel phức tạp, đơn giản hóa thành LAN IP testing:
+
+- **Xóa**: `vps_gateway_proxy.py`, `local_stillme_backend.py`, `deploy_vps_proxy.sh`, `test_end_to_end.py`, `tools/start_tunnel.*`, `ARCHITECTURE.md`
+- **Tạo**: `app.py` (backend chính), `desktop_chat_app.py` (với settings), `TEST_LOCAL.md` (hướng dẫn test)
+- **Cập nhật**: Desktop app có settings để đổi API URL, không cần VPS cho development
+- **Kết quả**: Repo sạch, dễ test, chỉ cần LAN IP cho desktop/mobile app
+
 ## 🚀 Quick Start
 
 ### 1. Chạy Backend
