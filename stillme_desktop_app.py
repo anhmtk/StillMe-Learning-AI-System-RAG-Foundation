@@ -9,6 +9,7 @@ import json
 import threading
 from datetime import datetime
 import webbrowser
+import re
 
 class StillMeDesktopApp:
     def __init__(self, root):
@@ -160,8 +161,12 @@ class StillMeDesktopApp:
         )
         self.send_button.pack(side=tk.RIGHT, padx=2, pady=2)
         
-        # Bind Enter key
-        self.message_input.bind("<Control-Return>", lambda e: self.send_message())
+        # Bind Enter key - Enter = Send, Shift+Enter = newline
+        self.message_input.bind("<Return>", self._on_enter_key)
+        self.message_input.bind("<Shift-Return>", self._on_shift_enter_key)
+        
+        # Settings for Enter behavior
+        self.enter_to_send = True  # Default: Enter = Send
         
     def setup_status_bar(self, parent):
         """Setup status bar"""
@@ -207,6 +212,46 @@ class StillMeDesktopApp:
         self.chat_display.config(state=tk.DISABLED)
         self.chat_display.see(tk.END)
         
+    def normalize_bot_identity(self, text):
+        """Normalize bot identity - replace any model self-identification with StillMe"""
+        if not text:
+            return text
+            
+        # Patterns to replace model self-identification
+        patterns = [
+            # English patterns
+            (r'\b(I am|I\'m)\s+(Gemma|OpenAI|DeepSeek|GPT|ChatGPT|Claude|Anthropic|model|AI assistant)\b', 'I am StillMe'),
+            (r'\b(My name is|I\'m called)\s+(Gemma|OpenAI|DeepSeek|GPT|ChatGPT|Claude|Anthropic|model|AI assistant)\b', 'My name is StillMe'),
+            (r'\b(I\'m a|I am a)\s+(Gemma|OpenAI|DeepSeek|GPT|ChatGPT|Claude|Anthropic|model|AI assistant)\b', 'I am StillMe'),
+            
+            # Vietnamese patterns
+            (r'\b(Mình là|Tôi là|Mình tên|Tôi tên)\s+(Gemma|OpenAI|DeepSeek|GPT|ChatGPT|Claude|Anthropic|model|AI assistant|trợ lý AI)\b', 'Mình là StillMe'),
+            (r'\b(Mình là|Tôi là)\s+(một|một con|một cái)\s+(Gemma|OpenAI|DeepSeek|GPT|ChatGPT|Claude|Anthropic|model|AI assistant|trợ lý AI)\b', 'Mình là StillMe'),
+            
+            # Generic patterns
+            (r'\b(Gemma|OpenAI|DeepSeek|GPT|ChatGPT|Claude|Anthropic)\s+(here|đây|speaking|nói)\b', 'StillMe here'),
+            (r'\b(As a|Là một)\s+(Gemma|OpenAI|DeepSeek|GPT|ChatGPT|Claude|Anthropic|model|AI assistant)\b', 'As StillMe'),
+        ]
+        
+        normalized_text = text
+        for pattern, replacement in patterns:
+            normalized_text = re.sub(pattern, replacement, normalized_text, flags=re.IGNORECASE)
+            
+        return normalized_text
+        
+    def _on_enter_key(self, event):
+        """Handle Enter key - Send message if enter_to_send is True"""
+        if self.enter_to_send:
+            self.send_message()
+            return "break"  # Prevent default behavior
+        return None  # Allow default behavior (newline)
+    
+    def _on_shift_enter_key(self, event):
+        """Handle Shift+Enter key - Always insert newline"""
+        # Insert newline at cursor position
+        self.message_input.insert(tk.INSERT, "\n")
+        return "break"  # Prevent default behavior
+        
     def send_message(self):
         """Send message to StillMe AI"""
         message = self.message_input.get("1.0", tk.END).strip()
@@ -229,9 +274,13 @@ class StillMeDesktopApp:
     def _send_message_thread(self, message):
         """Send message in background thread"""
         try:
+            # Add system prompt to ensure StillMe persona
+            system_prompt = "You are StillMe — a personal AI companion. Always introduce and refer to yourself as 'StillMe'. Never claim to be Gemma, OpenAI, DeepSeek, or any underlying provider/model. If the user asks 'bạn là ai?', answer 'Mình là StillMe…' and avoid mentioning engine unless asked explicitly."
+            
             payload = {
                 "message": message,
-                "session_id": "desktop_user"
+                "session_id": "desktop_user",
+                "system_prompt": system_prompt
             }
             
             response = requests.post(
@@ -257,8 +306,12 @@ class StillMeDesktopApp:
             
     def _handle_success(self, response, model, latency):
         """Handle successful response"""
-        self.add_message("StillMe AI", response, "ai")
-        self.status_label.config(text=f"Model: {model} | Latency: {latency:.0f}ms", fg="#81c784")
+        # Normalize bot identity before displaying
+        normalized_response = self.normalize_bot_identity(response)
+        self.add_message("StillMe AI", normalized_response, "ai")
+        
+        # Show engine info as technical badge, not identity
+        self.status_label.config(text=f"Engine: {model} | Latency: {latency:.0f}ms", fg="#81c784")
         self.send_button.config(state=tk.NORMAL)
         
     def _handle_error(self, error_msg):
@@ -318,6 +371,33 @@ class StillMeDesktopApp:
         )
         url_entry.pack(fill=tk.X, pady=(5, 0), ipady=8)
         
+        # Enter behavior setting
+        enter_frame = tk.Frame(settings_window, bg="#0f0f23")
+        enter_frame.pack(fill=tk.X, padx=20, pady=10)
+        
+        enter_label = tk.Label(
+            enter_frame,
+            text="Enter Key Behavior:",
+            font=("Segoe UI", 12),
+            fg="#ffffff",
+            bg="#0f0f23"
+        )
+        enter_label.pack(anchor=tk.W)
+        
+        self.enter_to_send_var = tk.BooleanVar(value=self.enter_to_send)
+        enter_checkbox = tk.Checkbutton(
+            enter_frame,
+            text="Enter to send message (Shift+Enter for newline)",
+            variable=self.enter_to_send_var,
+            font=("Segoe UI", 10),
+            fg="#ffffff",
+            bg="#0f0f23",
+            selectcolor="#1a1a2e",
+            activebackground="#0f0f23",
+            activeforeground="#ffffff"
+        )
+        enter_checkbox.pack(anchor=tk.W, pady=(5, 0))
+        
         # Help text
         help_text = tk.Label(
             settings_window,
@@ -335,8 +415,9 @@ class StillMeDesktopApp:
         
         def save_settings():
             self.api_url = self.url_var.get()
+            self.enter_to_send = self.enter_to_send_var.get()
             settings_window.destroy()
-            self.add_message("System", f"API URL updated: {self.api_url}", "system")
+            self.add_message("System", f"Settings updated: API URL = {self.api_url}, Enter to send = {self.enter_to_send}", "system")
             
         def test_connection():
             try:
