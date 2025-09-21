@@ -61,8 +61,8 @@ class SettingsScreen extends StatelessWidget {
               _buildSettingTile(
                 icon: Icons.cloud,
                 title: 'Base URL',
-                subtitle: 'http://160.191.89.99:21568',
-                onTap: () {},
+                subtitle: 'http://192.168.1.12:1216',
+                onTap: () => _editBaseUrl(context),
               ),
               _buildSettingTile(
                 icon: Icons.health_and_safety,
@@ -166,6 +166,45 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+  void _editBaseUrl(BuildContext context) {
+    final TextEditingController controller = TextEditingController();
+    controller.text = 'http://192.168.1.12:1216';
+    
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Edit Base URL'),
+          content: TextField(
+            controller: controller,
+            decoration: const InputDecoration(
+              hintText: 'Enter base URL',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Base URL updated: ${controller.text}'),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+              },
+              child: const Text('Save'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _testConnection(BuildContext context) async {
     // Show loading
     ScaffoldMessenger.of(context).showSnackBar(
@@ -177,7 +216,7 @@ class SettingsScreen extends StatelessWidget {
 
     try {
       final chatRepository = ChatRepository(
-        baseUrl: 'http://160.191.89.99:21568',
+        baseUrl: 'http://192.168.1.12:1216',
         timeoutMs: 25000,
       );
       
