@@ -352,12 +352,10 @@ class StillMeFramework:
                 self.logger.warning("⚠️ ContentIntegrityFilter not available")
                 self.content_filter = None
 
-            # 2. Layered Memory System (with secure storage integration)
+            # 2. Layered Memory System (simple version)
             if IMPORTED_MODULES.get("LayeredMemoryV1"):
-                self.layered_memory = IMPORTED_MODULES["LayeredMemoryV1"](
-                    external_secure_storage=self.secure_memory
-                )
-                self.logger.info("✅ LayeredMemoryV1 initialized with secure storage")
+                self.layered_memory = IMPORTED_MODULES["LayeredMemoryV1"]()
+                self.logger.info("✅ LayeredMemoryV1 initialized")
             else:
                 self.logger.warning("⚠️ LayeredMemoryV1 not available")
                 self.layered_memory = None

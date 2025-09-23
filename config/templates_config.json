@@ -1,0 +1,61 @@
+{
+  "template_configs": {
+    "identity_response": {
+      "type": "response",
+      "security_level": "high",
+      "allowed_variables": ["user_name", "locale", "context"],
+      "required_variables": ["locale"],
+      "max_length": 1000,
+      "cache_enabled": true,
+      "audit_logging": true
+    },
+    "security_response": {
+      "type": "security_response",
+      "security_level": "critical",
+      "allowed_variables": ["locale", "context"],
+      "required_variables": ["locale"],
+      "max_length": 500,
+      "cache_enabled": true,
+      "audit_logging": true
+    },
+    "api_response": {
+      "type": "api_response",
+      "security_level": "medium",
+      "allowed_variables": ["data", "status", "message"],
+      "required_variables": ["status"],
+      "max_length": 5000,
+      "cache_enabled": true,
+      "audit_logging": false
+    },
+    "notification": {
+      "type": "notification",
+      "security_level": "medium",
+      "allowed_variables": ["title", "message", "user_id"],
+      "required_variables": ["title", "message"],
+      "max_length": 2000,
+      "cache_enabled": true,
+      "audit_logging": true
+    },
+    "log_message": {
+      "type": "log_message",
+      "security_level": "low",
+      "allowed_variables": ["level", "message", "context"],
+      "required_variables": ["level", "message"],
+      "max_length": 10000,
+      "cache_enabled": false,
+      "audit_logging": false
+    }
+  },
+  "default_security_level": "medium",
+  "cache_settings": {
+    "max_templates": 100,
+    "cache_ttl": 3600
+  },
+  "security_settings": {
+    "enable_xss_protection": true,
+    "enable_sql_injection_protection": true,
+    "enable_template_injection_protection": true,
+    "max_template_depth": 10,
+    "allowed_functions": ["upper", "lower", "strip", "replace"]
+  }
+}

@@ -1,0 +1,48 @@
+[
+  {
+    "source": "reddit",
+    "url": "https://reddit.com/r/MachineLearning/comments/123456",
+    "title": "New ML Framework Discussion",
+    "timestamp": "2024-09-22T10:00:00Z",
+    "metrics": {
+      "upvotes": 1250,
+      "comments": 89,
+      "engagement_score": 0.88
+    },
+    "raw": {
+      "id": "123456",
+      "title": "New ML Framework Discussion",
+      "selftext": "Discussion about the new machine learning framework...",
+      "score": 1250,
+      "num_comments": 89,
+      "created_utc": 1726992000,
+      "subreddit": "MachineLearning",
+      "author": "ml_enthusiast",
+      "url": "https://reddit.com/r/MachineLearning/comments/123456",
+      "permalink": "/r/MachineLearning/comments/123456/new_ml_framework_discussion/"
+    }
+  },
+  {
+    "source": "reddit",
+    "url": "https://reddit.com/r/programming/comments/123457",
+    "title": "Best Practices for API Design",
+    "timestamp": "2024-09-22T10:00:00Z",
+    "metrics": {
+      "upvotes": 890,
+      "comments": 156,
+      "engagement_score": 0.82
+    },
+    "raw": {
+      "id": "123457",
+      "title": "Best Practices for API Design",
+      "selftext": "Comprehensive guide to API design best practices...",
+      "score": 890,
+      "num_comments": 156,
+      "created_utc": 1726988400,
+      "subreddit": "programming",
+      "author": "api_guru",
+      "url": "https://reddit.com/r/programming/comments/123457/best_practices_for_api_design",
+      "permalink": "/r/programming/comments/123457/best_practices_for_api_design/"
+    }
+  }
+]

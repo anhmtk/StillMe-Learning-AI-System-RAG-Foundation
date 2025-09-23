@@ -1,0 +1,62 @@
+{
+  "ai_server": {
+    "host": "0.0.0.0",
+    "port": 8000,
+    "debug": false,
+    "reload": false,
+    "log_level": "info"
+  },
+  "cors": {
+    "allowed_origins": [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "http://127.0.0.1:3000",
+      "http://127.0.0.1:3001",
+      "http://localhost:8001"
+    ],
+    "allowed_methods": ["GET", "POST", "PUT", "DELETE"],
+    "allowed_headers": ["*"]
+  },
+  "circuit_breaker": {
+    "failure_threshold": 3,
+    "recovery_timeout": 30,
+    "name": "ai_server_circuit_breaker"
+  },
+  "retry": {
+    "max_attempts": 3,
+    "base_delay": 1.0,
+    "exponential_backoff": true
+  },
+  "fallback": {
+    "enabled": true,
+    "default_response": "I'm currently experiencing technical difficulties. Please try again later.",
+    "timeout_response": "Request timeout. Please try again with a simpler question."
+  },
+  "framework": {
+    "integration_enabled": true,
+    "framework_path": "framework.py",
+    "module_timeout": 30
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "json",
+    "file": "logs/ai_server.log",
+    "max_size": "10MB",
+    "backup_count": 5,
+    "console_output": true
+  },
+  "performance": {
+    "max_concurrent_requests": 100,
+    "request_timeout": 30,
+    "memory_limit_mb": 512
+  },
+  "security": {
+    "rate_limiting": {
+      "enabled": true,
+      "requests_per_minute": 60,
+      "burst_size": 10
+    },
+    "input_validation": true,
+    "output_sanitization": true
+  }
+}

@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 try:
     from stillme_core.modules.api_provider_manager import UnifiedAPIManager, ComplexityAnalyzer
 except ImportError:
-    print("⚠️ Could not import UnifiedAPIManager. Make sure you're in the project root.")
+    print("‚ö†Ô∏è Could not import UnifiedAPIManager. Make sure you're in the project root.")
     sys.exit(1)
 
 
@@ -36,10 +36,10 @@ class TestComplexityAnalyzer(unittest.TestCase):
     def test_simple_prompts(self):
         """Test simple prompts should get low complexity scores."""
         simple_prompts = [
-            "chào bạn",
-            "bạn tên gì?",
-            "2+2 bằng mấy?",
-            "thủ đô Việt Nam là gì?",
+            "ch√†o b·∫°n",
+            "b·∫°n t√™n g√¨?",
+            "2+2 b·∫±ng m·∫•y?",
+            "th·ªß ƒë√¥ Vi·ªát Nam l√† g√¨?",
             "hello",
             "how are you?",
             "what time is it?"
@@ -53,10 +53,10 @@ class TestComplexityAnalyzer(unittest.TestCase):
     def test_complex_prompts(self):
         """Test complex prompts should get high complexity scores."""
         complex_prompts = [
-            "Giải thích định lý bất toàn của Gödel và tác động của nó đến toán học hiện đại",
-            "Phân tích mối quan hệ giữa triết học và khoa học trong việc hiểu bản chất của thực tại",
-            "So sánh và đánh giá các phương pháp học máy khác nhau trong việc xử lý ngôn ngữ tự nhiên",
-            "Tại sao các hệ thống phức tạp lại có xu hướng tự tổ chức và phát triển theo quy luật nào?"
+            "Gi·∫£i th√≠ch ƒë·ªãnh l√Ω b·∫•t to√†n c·ªßa G√∂del v√† t√°c ƒë·ªông c·ªßa n√≥ ƒë·∫øn to√°n h·ªçc hi·ªán ƒë·∫°i",
+            "Ph√¢n t√≠ch m·ªëi quan h·ªá gi·ªØa tri·∫øt h·ªçc v√† khoa h·ªçc trong vi·ªác hi·ªÉu b·∫£n ch·∫•t c·ªßa th·ª±c t·∫°i",
+            "So s√°nh v√† ƒë√°nh gi√° c√°c ph∆∞∆°ng ph√°p h·ªçc m√°y kh√°c nhau trong vi·ªác x·ª≠ l√Ω ng√¥n ng·ªØ t·ª± nhi√™n",
+            "T·∫°i sao c√°c h·ªá th·ªëng ph·ª©c t·∫°p l·∫°i c√≥ xu h∆∞·ªõng t·ª± t·ªï ch·ª©c v√† ph√°t tri·ªÉn theo quy lu·∫≠t n√†o?"
         ]
         
         for prompt in complex_prompts:
@@ -67,10 +67,10 @@ class TestComplexityAnalyzer(unittest.TestCase):
     def test_coding_prompts(self):
         """Test coding prompts should get medium complexity scores."""
         coding_prompts = [
-            "viết code Python tính giai thừa",
-            "tạo function JavaScript để validate email",
-            "debug lỗi trong thuật toán sắp xếp",
-            "tối ưu hóa performance của database query"
+            "vi·∫øt code Python t√≠nh giai th·ª´a",
+            "t·∫°o function JavaScript ƒë·ªÉ validate email",
+            "debug l·ªói trong thu·∫≠t to√°n s·∫Øp x·∫øp",
+            "t·ªëi ∆∞u h√≥a performance c·ªßa database query"
         ]
         
         for prompt in coding_prompts:
@@ -81,7 +81,7 @@ class TestComplexityAnalyzer(unittest.TestCase):
     
     def test_performance(self):
         """Test that complexity analysis is fast (< 5ms)."""
-        test_prompt = "Giải thích định lý bất toàn của Gödel và tác động của nó đến toán học hiện đại"
+        test_prompt = "Gi·∫£i th√≠ch ƒë·ªãnh l√Ω b·∫•t to√†n c·ªßa G√∂del v√† t√°c ƒë·ªông c·ªßa n√≥ ƒë·∫øn to√°n h·ªçc hi·ªán ƒë·∫°i"
         
         # Run multiple times to get average
         times = []
@@ -98,12 +98,12 @@ class TestComplexityAnalyzer(unittest.TestCase):
         """Test fallback trigger detection."""
         # Negative feedback should trigger fallback
         negative_feedback = [
-            "sai rồi",
-            "không đúng",
-            "không hiểu",
+            "sai r·ªìi",
+            "kh√¥ng ƒë√∫ng",
+            "kh√¥ng hi·ªÉu",
             "???",
-            "không phải",
-            "chưa đúng"
+            "kh√¥ng ph·∫£i",
+            "ch∆∞a ƒë√∫ng"
         ]
         
         for feedback in negative_feedback:
@@ -115,10 +115,10 @@ class TestComplexityAnalyzer(unittest.TestCase):
         
         # Positive feedback should not trigger fallback
         positive_feedback = [
-            "đúng rồi",
-            "cảm ơn",
-            "tốt lắm",
-            "hiểu rồi",
+            "ƒë√∫ng r·ªìi",
+            "c·∫£m ∆°n",
+            "t·ªët l·∫Øm",
+            "hi·ªÉu r·ªìi",
             "ok"
         ]
         
@@ -140,10 +140,10 @@ class TestUnifiedAPIManager(unittest.TestCase):
     def test_simple_routing(self):
         """Test routing for simple prompts."""
         test_cases = [
-            ("chào bạn", "gemma2:2b"),
-            ("bạn tên gì?", "gemma2:2b"),
-            ("2+2 bằng mấy?", "gemma2:2b"),
-            ("thủ đô Việt Nam là gì?", "gemma2:2b"),
+            ("ch√†o b·∫°n", "gemma2:2b"),
+            ("b·∫°n t√™n g√¨?", "gemma2:2b"),
+            ("2+2 b·∫±ng m·∫•y?", "gemma2:2b"),
+            ("th·ªß ƒë√¥ Vi·ªát Nam l√† g√¨?", "gemma2:2b"),
             ("hello", "gemma2:2b"),
             ("how are you?", "gemma2:2b")
         ]
@@ -157,11 +157,11 @@ class TestUnifiedAPIManager(unittest.TestCase):
     def test_coding_routing(self):
         """Test routing for coding prompts."""
         test_cases = [
-            ("viết code Python", "deepseek-coder:6.7b"),
-            ("lập trình JavaScript", "deepseek-coder:6.7b"),
-            ("debug lỗi", "deepseek-coder:6.7b"),
-            ("tạo function", "deepseek-coder:6.7b"),
-            ("viết code", "deepseek-coder:6.7b")
+            ("vi·∫øt code Python", "deepseek-coder:6.7b"),
+            ("l·∫≠p tr√¨nh JavaScript", "deepseek-coder:6.7b"),
+            ("debug l·ªói", "deepseek-coder:6.7b"),
+            ("t·∫°o function", "deepseek-coder:6.7b"),
+            ("vi·∫øt code", "deepseek-coder:6.7b")
         ]
         
         for prompt, expected_model in test_cases:
@@ -173,10 +173,10 @@ class TestUnifiedAPIManager(unittest.TestCase):
     def test_complex_routing(self):
         """Test routing for complex prompts."""
         test_cases = [
-            ("Giải thích định lý bất toàn của Gödel", "deepseek-chat"),
-            ("Phân tích mối quan hệ giữa triết học và khoa học", "deepseek-chat"),
-            ("So sánh các phương pháp học máy", "deepseek-chat"),
-            ("Tại sao các hệ thống phức tạp lại tự tổ chức?", "deepseek-chat")
+            ("Gi·∫£i th√≠ch ƒë·ªãnh l√Ω b·∫•t to√†n c·ªßa G√∂del", "deepseek-chat"),
+            ("Ph√¢n t√≠ch m·ªëi quan h·ªá gi·ªØa tri·∫øt h·ªçc v√† khoa h·ªçc", "deepseek-chat"),
+            ("So s√°nh c√°c ph∆∞∆°ng ph√°p h·ªçc m√°y", "deepseek-chat"),
+            ("T·∫°i sao c√°c h·ªá th·ªëng ph·ª©c t·∫°p l·∫°i t·ª± t·ªï ch·ª©c?", "deepseek-chat")
         ]
         
         for prompt, expected_model in test_cases:
@@ -195,7 +195,7 @@ class TestUnifiedAPIManager(unittest.TestCase):
     
     def test_debug_mode(self):
         """Test debug mode provides detailed information."""
-        prompt = "Giải thích định lý bất toàn của Gödel"
+        prompt = "Gi·∫£i th√≠ch ƒë·ªãnh l√Ω b·∫•t to√†n c·ªßa G√∂del"
         
         # This should not raise an exception and should provide detailed logging
         selected_model = self.api_manager.choose_model(prompt, debug=True)
@@ -205,7 +205,7 @@ class TestUnifiedAPIManager(unittest.TestCase):
     def test_fallback_handling(self):
         """Test fallback handling mechanism."""
         original_prompt = "test prompt"
-        user_feedback = "sai rồi"
+        user_feedback = "sai r·ªìi"
         selected_model = "gemma2:2b"
         
         # Test fallback detection
@@ -220,9 +220,9 @@ class TestUnifiedAPIManager(unittest.TestCase):
         """Test analyzer statistics collection."""
         # Run some analyses to generate stats
         test_prompts = [
-            "chào bạn",
-            "viết code Python",
-            "Giải thích định lý bất toàn của Gödel"
+            "ch√†o b·∫°n",
+            "vi·∫øt code Python",
+            "Gi·∫£i th√≠ch ƒë·ªãnh l√Ω b·∫•t to√†n c·ªßa G√∂del"
         ]
         
         for prompt in test_prompts:
@@ -255,12 +255,12 @@ class TestRouterIntegration(unittest.TestCase):
         """Test complete routing flow from prompt to model selection."""
         test_cases = [
             # (prompt, expected_model_category, expected_complexity_range)
-            ("chào bạn", "simple", (0.0, 0.4)),
-            ("viết code Python", "coding", (0.3, 0.8)),
-            ("Giải thích định lý bất toàn của Gödel", "complex", (0.7, 1.0)),
-            ("GDP là gì?", "simple", (0.0, 0.4)),
-            ("Phân tích tác động của AI đến xã hội", "complex", (0.7, 1.0)),
-            ("tạo function tính tổng", "coding", (0.3, 0.8))
+            ("ch√†o b·∫°n", "simple", (0.0, 0.4)),
+            ("vi·∫øt code Python", "coding", (0.3, 0.8)),
+            ("Gi·∫£i th√≠ch ƒë·ªãnh l√Ω b·∫•t to√†n c·ªßa G√∂del", "complex", (0.7, 1.0)),
+            ("GDP l√† g√¨?", "simple", (0.0, 0.4)),
+            ("Ph√¢n t√≠ch t√°c ƒë·ªông c·ªßa AI ƒë·∫øn x√£ h·ªôi", "complex", (0.7, 1.0)),
+            ("t·∫°o function t√≠nh t·ªïng", "coding", (0.3, 0.8))
         ]
         
         for prompt, category, complexity_range in test_cases:
@@ -290,14 +290,14 @@ class TestRouterIntegration(unittest.TestCase):
         # Create test results
         test_results = [
             {
-                'prompt': 'chào bạn',
+                'prompt': 'ch√†o b·∫°n',
                 'expected_complexity': 0.1,
                 'actual_complexity': 0.15,
                 'expected_model': 'gemma2:2b',
                 'actual_model': 'gemma2:2b'
             },
             {
-                'prompt': 'Giải thích định lý bất toàn của Gödel',
+                'prompt': 'Gi·∫£i th√≠ch ƒë·ªãnh l√Ω b·∫•t to√†n c·ªßa G√∂del',
                 'expected_complexity': 0.9,
                 'actual_complexity': 0.85,
                 'expected_model': 'deepseek-chat',
@@ -323,17 +323,17 @@ class TestRouterIntegration(unittest.TestCase):
 
 def run_performance_benchmark():
     """Run performance benchmark for the routing system."""
-    print("\n🚀 Running Performance Benchmark...")
+    print("\nüöÄ Running Performance Benchmark...")
     
     api_manager = UnifiedAPIManager()
     
     # Test prompts of varying complexity
     test_prompts = [
-        "chào bạn",
-        "viết code Python tính giai thừa",
-        "Giải thích định lý bất toàn của Gödel và tác động của nó đến toán học hiện đại",
-        "Phân tích mối quan hệ giữa triết học và khoa học trong việc hiểu bản chất của thực tại",
-        "So sánh và đánh giá các phương pháp học máy khác nhau trong việc xử lý ngôn ngữ tự nhiên"
+        "ch√†o b·∫°n",
+        "vi·∫øt code Python t√≠nh giai th·ª´a",
+        "Gi·∫£i th√≠ch ƒë·ªãnh l√Ω b·∫•t to√†n c·ªßa G√∂del v√† t√°c ƒë·ªông c·ªßa n√≥ ƒë·∫øn to√°n h·ªçc hi·ªán ƒë·∫°i",
+        "Ph√¢n t√≠ch m·ªëi quan h·ªá gi·ªØa tri·∫øt h·ªçc v√† khoa h·ªçc trong vi·ªác hi·ªÉu b·∫£n ch·∫•t c·ªßa th·ª±c t·∫°i",
+        "So s√°nh v√† ƒë√°nh gi√° c√°c ph∆∞∆°ng ph√°p h·ªçc m√°y kh√°c nhau trong vi·ªác x·ª≠ l√Ω ng√¥n ng·ªØ t·ª± nhi√™n"
     ]
     
     total_time = 0
@@ -352,14 +352,14 @@ def run_performance_benchmark():
         total_time += elapsed
         total_analyses += 1
         
-        print(f"  📝 '{prompt[:50]}...'")
+        print(f"  üìù '{prompt[:50]}...'")
         print(f"     Model: {selected_model}")
         print(f"     Complexity: {complexity_score:.3f}")
         print(f"     Time: {elapsed:.2f}ms")
         print()
     
     avg_time = total_time / total_analyses
-    print(f"📊 Performance Summary:")
+    print(f"üìä Performance Summary:")
     print(f"   Total analyses: {total_analyses}")
     print(f"   Average time: {avg_time:.2f}ms")
     print(f"   Total time: {total_time:.2f}ms")
@@ -373,46 +373,46 @@ def run_performance_benchmark():
 
 def run_accuracy_test():
     """Run accuracy test with predefined test cases."""
-    print("\n🎯 Running Accuracy Test...")
+    print("\nüéØ Running Accuracy Test...")
     
     api_manager = UnifiedAPIManager()
     
     # Comprehensive test cases
     test_cases = [
         # Simple prompts (should go to gemma2:2b)
-        ("chào bạn", "gemma2:2b", "simple"),
-        ("bạn tên gì?", "gemma2:2b", "simple"),
-        ("2+2 bằng mấy?", "gemma2:2b", "simple"),
-        ("thủ đô Việt Nam là gì?", "gemma2:2b", "simple"),
+        ("ch√†o b·∫°n", "gemma2:2b", "simple"),
+        ("b·∫°n t√™n g√¨?", "gemma2:2b", "simple"),
+        ("2+2 b·∫±ng m·∫•y?", "gemma2:2b", "simple"),
+        ("th·ªß ƒë√¥ Vi·ªát Nam l√† g√¨?", "gemma2:2b", "simple"),
         ("hello", "gemma2:2b", "simple"),
         ("how are you?", "gemma2:2b", "simple"),
-        ("GDP là gì?", "gemma2:2b", "simple"),
-        ("nước nào lớn nhất thế giới?", "gemma2:2b", "simple"),
+        ("GDP l√† g√¨?", "gemma2:2b", "simple"),
+        ("n∆∞·ªõc n√†o l·ªõn nh·∫•t th·∫ø gi·ªõi?", "gemma2:2b", "simple"),
         
         # Coding prompts (should go to deepseek-coder:6.7b)
-        ("viết code Python", "deepseek-coder:6.7b", "coding"),
-        ("lập trình JavaScript", "deepseek-coder:6.7b", "coding"),
-        ("debug lỗi", "deepseek-coder:6.7b", "coding"),
-        ("tạo function", "deepseek-coder:6.7b", "coding"),
-        ("viết code", "deepseek-coder:6.7b", "coding"),
-        ("tối ưu thuật toán", "deepseek-coder:6.7b", "coding"),
-        ("sửa lỗi code", "deepseek-coder:6.7b", "coding"),
-        ("tạo class Python", "deepseek-coder:6.7b", "coding"),
+        ("vi·∫øt code Python", "deepseek-coder:6.7b", "coding"),
+        ("l·∫≠p tr√¨nh JavaScript", "deepseek-coder:6.7b", "coding"),
+        ("debug l·ªói", "deepseek-coder:6.7b", "coding"),
+        ("t·∫°o function", "deepseek-coder:6.7b", "coding"),
+        ("vi·∫øt code", "deepseek-coder:6.7b", "coding"),
+        ("t·ªëi ∆∞u thu·∫≠t to√°n", "deepseek-coder:6.7b", "coding"),
+        ("s·ª≠a l·ªói code", "deepseek-coder:6.7b", "coding"),
+        ("t·∫°o class Python", "deepseek-coder:6.7b", "coding"),
         
         # Complex prompts (should go to deepseek-chat)
-        ("Giải thích định lý bất toàn của Gödel", "deepseek-chat", "complex"),
-        ("Phân tích mối quan hệ giữa triết học và khoa học", "deepseek-chat", "complex"),
-        ("So sánh các phương pháp học máy", "deepseek-chat", "complex"),
-        ("Tại sao các hệ thống phức tạp lại tự tổ chức?", "deepseek-chat", "complex"),
-        ("Ý nghĩa của cuộc sống là gì?", "deepseek-chat", "complex"),
-        ("Bản chất của thực tại là gì?", "deepseek-chat", "complex"),
-        ("Tác động của AI đến xã hội", "deepseek-chat", "complex"),
-        ("Phân tích xu hướng phát triển công nghệ", "deepseek-chat", "complex"),
+        ("Gi·∫£i th√≠ch ƒë·ªãnh l√Ω b·∫•t to√†n c·ªßa G√∂del", "deepseek-chat", "complex"),
+        ("Ph√¢n t√≠ch m·ªëi quan h·ªá gi·ªØa tri·∫øt h·ªçc v√† khoa h·ªçc", "deepseek-chat", "complex"),
+        ("So s√°nh c√°c ph∆∞∆°ng ph√°p h·ªçc m√°y", "deepseek-chat", "complex"),
+        ("T·∫°i sao c√°c h·ªá th·ªëng ph·ª©c t·∫°p l·∫°i t·ª± t·ªï ch·ª©c?", "deepseek-chat", "complex"),
+        ("√ù nghƒ©a c·ªßa cu·ªôc s·ªëng l√† g√¨?", "deepseek-chat", "complex"),
+        ("B·∫£n ch·∫•t c·ªßa th·ª±c t·∫°i l√† g√¨?", "deepseek-chat", "complex"),
+        ("T√°c ƒë·ªông c·ªßa AI ƒë·∫øn x√£ h·ªôi", "deepseek-chat", "complex"),
+        ("Ph√¢n t√≠ch xu h∆∞·ªõng ph√°t tri·ªÉn c√¥ng ngh·ªá", "deepseek-chat", "complex"),
         
         # Edge cases
-        ("nếu tôi muốn học lập trình thì nên bắt đầu từ đâu?", "deepseek-coder:6.7b", "coding"),
-        ("giả sử tôi có một bài toán phức tạp, làm thế nào để giải quyết?", "deepseek-chat", "complex"),
-        ("trong trường hợp nào thì nên sử dụng AI?", "deepseek-chat", "complex"),
+        ("n·∫øu t√¥i mu·ªën h·ªçc l·∫≠p tr√¨nh th√¨ n√™n b·∫Øt ƒë·∫ßu t·ª´ ƒë√¢u?", "deepseek-coder:6.7b", "coding"),
+        ("gi·∫£ s·ª≠ t√¥i c√≥ m·ªôt b√†i to√°n ph·ª©c t·∫°p, l√†m th·∫ø n√†o ƒë·ªÉ gi·∫£i quy·∫øt?", "deepseek-chat", "complex"),
+        ("trong tr∆∞·ªùng h·ª£p n√†o th√¨ n√™n s·ª≠ d·ª•ng AI?", "deepseek-chat", "complex"),
     ]
     
     correct_predictions = 0
@@ -423,9 +423,9 @@ def run_accuracy_test():
         
         if selected_model == expected_model:
             correct_predictions += 1
-            status = "✅"
+            status = "‚úÖ"
         else:
-            status = "❌"
+            status = "‚ùå"
         
         print(f"  {status} '{prompt[:50]}...'")
         print(f"     Expected: {expected_model} ({category})")
@@ -433,7 +433,7 @@ def run_accuracy_test():
         print()
     
     accuracy = (correct_predictions / total_predictions) * 100
-    print(f"📊 Accuracy Summary:")
+    print(f"üìä Accuracy Summary:")
     print(f"   Correct predictions: {correct_predictions}/{total_predictions}")
     print(f"   Accuracy: {accuracy:.1f}%")
     
@@ -442,11 +442,11 @@ def run_accuracy_test():
 
 def main():
     """Main test runner."""
-    print("🧪 AI Router Test Suite")
+    print("üß™ AI Router Test Suite")
     print("=" * 50)
     
     # Run unit tests
-    print("\n📋 Running Unit Tests...")
+    print("\nüìã Running Unit Tests...")
     unittest.main(argv=[''], exit=False, verbosity=2)
     
     # Run performance benchmark
@@ -456,15 +456,15 @@ def main():
     accuracy_ok = run_accuracy_test()
     
     # Summary
-    print("\n📊 Test Summary:")
-    print(f"   Performance: {'✅ PASS' if performance_ok else '❌ FAIL'}")
-    print(f"   Accuracy: {'✅ PASS' if accuracy_ok else '❌ FAIL'}")
+    print("\nüìä Test Summary:")
+    print(f"   Performance: {'‚úÖ PASS' if performance_ok else '‚ùå FAIL'}")
+    print(f"   Accuracy: {'‚úÖ PASS' if accuracy_ok else '‚ùå FAIL'}")
     
     if performance_ok and accuracy_ok:
-        print("\n🎉 All tests passed! AI Router is ready for production.")
+        print("\nüéâ All tests passed! AI Router is ready for production.")
         return 0
     else:
-        print("\n⚠️ Some tests failed. Please review the results.")
+        print("\n‚ö†Ô∏è Some tests failed. Please review the results.")
         return 1
 
 

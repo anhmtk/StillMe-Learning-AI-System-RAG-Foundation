@@ -1,0 +1,58 @@
+{
+  "ethical_core": {
+    "version": "1.0.0",
+    "name": "Ethical Core System",
+    "description": "AI safety and ethical compliance system"
+  },
+  "safety_thresholds": {
+    "input_safety": 0.8,
+    "output_safety": 0.8,
+    "overall_compliance": 0.7
+  },
+  "violation_types": {
+    "hate_speech": {
+      "severity": "high",
+      "action": "block"
+    },
+    "violence": {
+      "severity": "high", 
+      "action": "block"
+    },
+    "harassment": {
+      "severity": "medium",
+      "action": "warn"
+    },
+    "inappropriate_content": {
+      "severity": "medium",
+      "action": "filter"
+    },
+    "bias": {
+      "severity": "low",
+      "action": "log"
+    }
+  },
+  "openrouter": {
+    "api_key_required": true,
+    "model": "anthropic/claude-3-haiku",
+    "timeout": 30,
+    "max_retries": 3
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "json",
+    "file": "logs/ethical_core.log",
+    "violations_file": "logs/ethical_violations.log",
+    "max_size": "10MB",
+    "backup_count": 5
+  },
+  "fallback_responses": {
+    "vi": "Xin lỗi, tôi không thể thực hiện yêu cầu này vì nó có thể vi phạm các nguyên tắc đạo đức.",
+    "en": "I'm sorry, I cannot fulfill this request as it may violate ethical principles."
+  },
+  "monitoring": {
+    "track_violations": true,
+    "generate_reports": true,
+    "alert_threshold": 10,
+    "report_interval": 3600
+  }
+}

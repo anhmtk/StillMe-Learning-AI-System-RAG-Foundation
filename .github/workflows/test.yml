@@ -1,0 +1,197 @@
+name: NicheRadar v1.5 Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.11, 3.12]
+        node-version: [18, 20]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Set up Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Cache Python dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements-test.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+
+    - name: Cache Node.js dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-test.txt
+
+    - name: Install Node.js dependencies
+      run: |
+        npm ci
+
+    - name: Install Playwright browsers
+      run: |
+        npx playwright install --with-deps
+
+    - name: Create necessary directories
+      run: |
+        mkdir -p reports logs tests/cassettes
+
+    - name: Run unit tests
+      run: |
+        python scripts/run_tests.py --unit
+
+    - name: Run integration tests
+      run: |
+        python scripts/run_tests.py --integration
+
+    - name: Run all tests with reports
+      run: |
+        python scripts/run_tests.py --all
+
+    - name: Run E2E tests
+      run: |
+        python scripts/run_tests.py --e2e
+      env:
+        CI: true
+
+    - name: Upload test reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-reports-${{ matrix.python-version }}-${{ matrix.node-version }}
+        path: |
+          reports/
+          logs/
+        retention-days: 30
+
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      if: always()
+      with:
+        file: reports/coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install security tools
+      run: |
+        pip install bandit safety
+
+    - name: Run security scan
+      run: |
+        bandit -r . -f json -o reports/bandit-report.json || true
+        safety check --json --output reports/safety-report.json || true
+
+    - name: Upload security reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: security-reports
+        path: reports/*-report.json
+        retention-days: 30
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install linting tools
+      run: |
+        pip install black isort flake8 mypy
+
+    - name: Run Black
+      run: |
+        black --check --diff .
+
+    - name: Run isort
+      run: |
+        isort --check-only --diff .
+
+    - name: Run flake8
+      run: |
+        flake8 .
+
+    - name: Run mypy
+      run: |
+        mypy . --ignore-missing-imports
+
+  policy-compliance:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements-test.txt
+
+    - name: Check policy compliance
+      run: |
+        python scripts/check_policy_compliance.py
+
+    - name: Validate test data
+      run: |
+        python scripts/validate_test_data.py
+
+    - name: Check coverage
+      run: |
+        python scripts/check_coverage.py
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: [test, security, lint, policy-compliance]
+    if: always()
+    steps:
+    - name: Notify on success
+      if: ${{ needs.test.result == 'success' && needs.security.result == 'success' && needs.lint.result == 'success' && needs.policy-compliance.result == 'success' }}
+      run: |
+        echo "✅ All tests passed successfully!"
+
+    - name: Notify on failure
+      if: ${{ needs.test.result == 'failure' || needs.security.result == 'failure' || needs.lint.result == 'failure' || needs.policy-compliance.result == 'failure' }}
+      run: |
+        echo "❌ Some tests failed. Check the logs for details."
+        exit 1

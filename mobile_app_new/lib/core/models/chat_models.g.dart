@@ -239,6 +239,8 @@ const _$QuickActionTypeEnumMap = {
   QuickActionType.clear: 'clear',
   QuickActionType.export: 'export',
   QuickActionType.founder: 'founder',
+  QuickActionType.nicheRadar: 'nicheRadar',
+  QuickActionType.webSearch: 'webSearch',
 };
 
 _$AppConfigImpl _$$AppConfigImplFromJson(Map<String, dynamic> json) =>
@@ -250,6 +252,8 @@ _$AppConfigImpl _$$AppConfigImplFromJson(Map<String, dynamic> json) =>
       ui: UiConfig.fromJson(json['ui'] as Map<String, dynamic>),
       security:
           SecurityConfig.fromJson(json['security'] as Map<String, dynamic>),
+      nicheRadar:
+          NicheRadarConfig.fromJson(json['nicheRadar'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$$AppConfigImplToJson(_$AppConfigImpl instance) =>
@@ -259,6 +263,7 @@ Map<String, dynamic> _$$AppConfigImplToJson(_$AppConfigImpl instance) =>
       'features': instance.features,
       'ui': instance.ui,
       'security': instance.security,
+      'nicheRadar': instance.nicheRadar,
     };
 
 _$AppInfoImpl _$$AppInfoImplFromJson(Map<String, dynamic> json) =>
@@ -298,12 +303,16 @@ _$ApiEndpointsImpl _$$ApiEndpointsImplFromJson(Map<String, dynamic> json) =>
     _$ApiEndpointsImpl(
       health: json['health'] as String,
       chat: json['chat'] as String,
+      nicheRadar: json['nicheRadar'] as String,
+      webSearch: json['webSearch'] as String,
     );
 
 Map<String, dynamic> _$$ApiEndpointsImplToJson(_$ApiEndpointsImpl instance) =>
     <String, dynamic>{
       'health': instance.health,
       'chat': instance.chat,
+      'nicheRadar': instance.nicheRadar,
+      'webSearch': instance.webSearch,
     };
 
 _$FeatureConfigImpl _$$FeatureConfigImplFromJson(Map<String, dynamic> json) =>
@@ -314,6 +323,10 @@ _$FeatureConfigImpl _$$FeatureConfigImplFromJson(Map<String, dynamic> json) =>
       safetyLevel: json['safetyLevel'] as String? ?? 'normal',
       tokenCap: (json['tokenCap'] as num?)?.toInt() ?? 4000,
       maxLatency: (json['maxLatency'] as num?)?.toInt() ?? 10000,
+      nicheRadar: json['nicheRadar'] as bool? ?? true,
+      webSearch: json['webSearch'] as bool? ?? true,
+      languageDetection: json['languageDetection'] as bool? ?? true,
+      performanceMetrics: json['performanceMetrics'] as bool? ?? true,
     );
 
 Map<String, dynamic> _$$FeatureConfigImplToJson(_$FeatureConfigImpl instance) =>
@@ -324,6 +337,10 @@ Map<String, dynamic> _$$FeatureConfigImplToJson(_$FeatureConfigImpl instance) =>
       'safetyLevel': instance.safetyLevel,
       'tokenCap': instance.tokenCap,
       'maxLatency': instance.maxLatency,
+      'nicheRadar': instance.nicheRadar,
+      'webSearch': instance.webSearch,
+      'languageDetection': instance.languageDetection,
+      'performanceMetrics': instance.performanceMetrics,
     };
 
 _$UiConfigImpl _$$UiConfigImplFromJson(Map<String, dynamic> json) =>
@@ -333,6 +350,11 @@ _$UiConfigImpl _$$UiConfigImplFromJson(Map<String, dynamic> json) =>
       secondaryColor: json['secondaryColor'] as String? ?? '#1E293B',
       accentColor: json['accentColor'] as String? ?? '#3B82F6',
       fontFamily: json['fontFamily'] as String? ?? 'Inter',
+      gradientColors: (json['gradientColors'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          const ['#8B5CF6', '#06B6D4'],
+      animationDuration: (json['animationDuration'] as num?)?.toInt() ?? 300,
     );
 
 Map<String, dynamic> _$$UiConfigImplToJson(_$UiConfigImpl instance) =>
@@ -342,6 +364,8 @@ Map<String, dynamic> _$$UiConfigImplToJson(_$UiConfigImpl instance) =>
       'secondaryColor': instance.secondaryColor,
       'accentColor': instance.accentColor,
       'fontFamily': instance.fontFamily,
+      'gradientColors': instance.gradientColors,
+      'animationDuration': instance.animationDuration,
     };
 
 _$SecurityConfigImpl _$$SecurityConfigImplFromJson(Map<String, dynamic> json) =>
@@ -357,4 +381,234 @@ Map<String, dynamic> _$$SecurityConfigImplToJson(
       'founderPasscode': instance.founderPasscode,
       'enableBiometrics': instance.enableBiometrics,
       'sessionTimeout': instance.sessionTimeout,
+    };
+
+_$NicheRadarConfigImpl _$$NicheRadarConfigImplFromJson(
+        Map<String, dynamic> json) =>
+    _$NicheRadarConfigImpl(
+      enabled: json['enabled'] as bool? ?? true,
+      autoRefresh: json['autoRefresh'] as bool? ?? false,
+      refreshInterval: (json['refreshInterval'] as num?)?.toInt() ?? 300000,
+      maxResults: (json['maxResults'] as num?)?.toInt() ?? 10,
+      confidenceThreshold:
+          (json['confidenceThreshold'] as num?)?.toDouble() ?? 0.7,
+    );
+
+Map<String, dynamic> _$$NicheRadarConfigImplToJson(
+        _$NicheRadarConfigImpl instance) =>
+    <String, dynamic>{
+      'enabled': instance.enabled,
+      'autoRefresh': instance.autoRefresh,
+      'refreshInterval': instance.refreshInterval,
+      'maxResults': instance.maxResults,
+      'confidenceThreshold': instance.confidenceThreshold,
+    };
+
+_$NicheOpportunityImpl _$$NicheOpportunityImplFromJson(
+        Map<String, dynamic> json) =>
+    _$NicheOpportunityImpl(
+      topic: json['topic'] as String,
+      score: (json['score'] as num).toDouble(),
+      confidence: (json['confidence'] as num).toDouble(),
+      keySignals: (json['keySignals'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList(),
+      sources: (json['sources'] as List<dynamic>)
+          .map((e) => NicheSource.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      category: json['category'] as String,
+      timestamp: DateTime.parse(json['timestamp'] as String),
+      description: json['description'] as String?,
+      recommendations: (json['recommendations'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
+    );
+
+Map<String, dynamic> _$$NicheOpportunityImplToJson(
+        _$NicheOpportunityImpl instance) =>
+    <String, dynamic>{
+      'topic': instance.topic,
+      'score': instance.score,
+      'confidence': instance.confidence,
+      'keySignals': instance.keySignals,
+      'sources': instance.sources,
+      'category': instance.category,
+      'timestamp': instance.timestamp.toIso8601String(),
+      'description': instance.description,
+      'recommendations': instance.recommendations,
+    };
+
+_$NicheSourceImpl _$$NicheSourceImplFromJson(Map<String, dynamic> json) =>
+    _$NicheSourceImpl(
+      name: json['name'] as String,
+      url: json['url'] as String,
+      domain: json['domain'] as String,
+      timestamp: DateTime.parse(json['timestamp'] as String),
+      snippet: json['snippet'] as String?,
+    );
+
+Map<String, dynamic> _$$NicheSourceImplToJson(_$NicheSourceImpl instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      'url': instance.url,
+      'domain': instance.domain,
+      'timestamp': instance.timestamp.toIso8601String(),
+      'snippet': instance.snippet,
+    };
+
+_$NicheRadarResponseImpl _$$NicheRadarResponseImplFromJson(
+        Map<String, dynamic> json) =>
+    _$NicheRadarResponseImpl(
+      opportunities: (json['opportunities'] as List<dynamic>)
+          .map((e) => NicheOpportunity.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      generatedAt: DateTime.parse(json['generatedAt'] as String),
+      totalSources: (json['totalSources'] as num).toInt(),
+      error: json['error'] as String?,
+    );
+
+Map<String, dynamic> _$$NicheRadarResponseImplToJson(
+        _$NicheRadarResponseImpl instance) =>
+    <String, dynamic>{
+      'opportunities': instance.opportunities,
+      'generatedAt': instance.generatedAt.toIso8601String(),
+      'totalSources': instance.totalSources,
+      'error': instance.error,
+    };
+
+_$PlaybookRequestImpl _$$PlaybookRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$PlaybookRequestImpl(
+      topic: json['topic'] as String,
+      score: (json['score'] as num).toDouble(),
+      confidence: (json['confidence'] as num).toDouble(),
+    );
+
+Map<String, dynamic> _$$PlaybookRequestImplToJson(
+        _$PlaybookRequestImpl instance) =>
+    <String, dynamic>{
+      'topic': instance.topic,
+      'score': instance.score,
+      'confidence': instance.confidence,
+    };
+
+_$PlaybookResponseImpl _$$PlaybookResponseImplFromJson(
+        Map<String, dynamic> json) =>
+    _$PlaybookResponseImpl(
+      topic: json['topic'] as String,
+      productBrief:
+          ProductBrief.fromJson(json['productBrief'] as Map<String, dynamic>),
+      mvpSpec: MVPSpec.fromJson(json['mvpSpec'] as Map<String, dynamic>),
+      pricingSuggestion: PricingSuggestion.fromJson(
+          json['pricingSuggestion'] as Map<String, dynamic>),
+      assets:
+          (json['assets'] as List<dynamic>).map((e) => e as String).toList(),
+      generatedAt: DateTime.parse(json['generatedAt'] as String),
+      error: json['error'] as String?,
+    );
+
+Map<String, dynamic> _$$PlaybookResponseImplToJson(
+        _$PlaybookResponseImpl instance) =>
+    <String, dynamic>{
+      'topic': instance.topic,
+      'productBrief': instance.productBrief,
+      'mvpSpec': instance.mvpSpec,
+      'pricingSuggestion': instance.pricingSuggestion,
+      'assets': instance.assets,
+      'generatedAt': instance.generatedAt.toIso8601String(),
+      'error': instance.error,
+    };
+
+_$ProductBriefImpl _$$ProductBriefImplFromJson(Map<String, dynamic> json) =>
+    _$ProductBriefImpl(
+      title: json['title'] as String,
+      description: json['description'] as String,
+      persona: json['persona'] as String,
+      painPoints: (json['painPoints'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList(),
+      jobToBeDone: (json['jobToBeDone'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList(),
+      uniqueSellingProposition: json['uniqueSellingProposition'] as String,
+    );
+
+Map<String, dynamic> _$$ProductBriefImplToJson(_$ProductBriefImpl instance) =>
+    <String, dynamic>{
+      'title': instance.title,
+      'description': instance.description,
+      'persona': instance.persona,
+      'painPoints': instance.painPoints,
+      'jobToBeDone': instance.jobToBeDone,
+      'uniqueSellingProposition': instance.uniqueSellingProposition,
+    };
+
+_$MVPSpecImpl _$$MVPSpecImplFromJson(Map<String, dynamic> json) =>
+    _$MVPSpecImpl(
+      features: (json['features'] as List<dynamic>)
+          .map((e) => Feature.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      estimatedDevelopmentDays:
+          (json['estimatedDevelopmentDays'] as num).toInt(),
+      architecture: json['architecture'] as String,
+      dependencies: (json['dependencies'] as List<dynamic>)
+          .map((e) => e as String)
+          .toList(),
+    );
+
+Map<String, dynamic> _$$MVPSpecImplToJson(_$MVPSpecImpl instance) =>
+    <String, dynamic>{
+      'features': instance.features,
+      'estimatedDevelopmentDays': instance.estimatedDevelopmentDays,
+      'architecture': instance.architecture,
+      'dependencies': instance.dependencies,
+    };
+
+_$FeatureImpl _$$FeatureImplFromJson(Map<String, dynamic> json) =>
+    _$FeatureImpl(
+      name: json['name'] as String,
+      description: json['description'] as String,
+      estimatedHours: (json['estimatedHours'] as num).toInt(),
+      priority: json['priority'] as String,
+    );
+
+Map<String, dynamic> _$$FeatureImplToJson(_$FeatureImpl instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      'description': instance.description,
+      'estimatedHours': instance.estimatedHours,
+      'priority': instance.priority,
+    };
+
+_$PricingSuggestionImpl _$$PricingSuggestionImplFromJson(
+        Map<String, dynamic> json) =>
+    _$PricingSuggestionImpl(
+      tiers: (json['tiers'] as List<dynamic>)
+          .map((e) => PricingTier.fromJson(e as Map<String, dynamic>))
+          .toList(),
+      rationale: json['rationale'] as String,
+    );
+
+Map<String, dynamic> _$$PricingSuggestionImplToJson(
+        _$PricingSuggestionImpl instance) =>
+    <String, dynamic>{
+      'tiers': instance.tiers,
+      'rationale': instance.rationale,
+    };
+
+_$PricingTierImpl _$$PricingTierImplFromJson(Map<String, dynamic> json) =>
+    _$PricingTierImpl(
+      name: json['name'] as String,
+      price: (json['price'] as num).toDouble(),
+      rationale: json['rationale'] as String,
+      features:
+          (json['features'] as List<dynamic>).map((e) => e as String).toList(),
+    );
+
+Map<String, dynamic> _$$PricingTierImplToJson(_$PricingTierImpl instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      'price': instance.price,
+      'rationale': instance.rationale,
+      'features': instance.features,
     };

@@ -1,0 +1,22 @@
+repos:
+  - repo: local
+    hooks:
+      - id: check-null-bytes
+        name: Check for null bytes in test files
+        entry: python tools/check_null_bytes_precommit.py
+        language: system
+        files: ^tests/.*\.py$
+        pass_filenames: true
+        
+      - id: check-crlf
+        name: Check for CRLF in test files
+        entry: python tools/check_crlf_precommit.py
+        language: system
+        files: ^tests/.*\.py$
+        pass_filenames: true
+        
+      - id: normalize-encoding
+        name: Normalize encoding for test files
+        entry: python tools/normalize_encoding.py
+        language: system
+        always_run: true

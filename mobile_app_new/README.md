@@ -1,16 +1,33 @@
-# mobile_app_new
+# StillMe Mobile App (New)
 
-A new Flutter project.
+Flutter mobile application for StillMe – Intelligent Personal Companion (IPC).
 
-## Getting Started
+## Quick Start
 
-This project is a starting point for a Flutter application.
+```bash
+# Install dependencies
+flutter pub get
 
-A few resources to get you started if this is your first Flutter project:
+# Run on Android
+flutter run
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+# Run on iOS  
+flutter run -d ios
+```
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Configuration
+
+- **Base URL**: Configure in Settings screen
+- **Default**: `http://127.0.0.1:1216` (local development)
+- **Production**: Update to your server URL
+
+## Features
+
+- Chat interface with StillMe AI
+- Language detection and response
+- Settings for API configuration
+- Real-time messaging
+
+## Development
+
+This is the new Flutter implementation of StillMe mobile client. For more details about the StillMe framework, see the main [README.md](../README.md).

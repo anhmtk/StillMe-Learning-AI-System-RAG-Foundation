@@ -2587,6 +2587,7 @@ mixin _$AppConfig {
   FeatureConfig get features => throw _privateConstructorUsedError;
   UiConfig get ui => throw _privateConstructorUsedError;
   SecurityConfig get security => throw _privateConstructorUsedError;
+  NicheRadarConfig get nicheRadar => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -2604,13 +2605,15 @@ abstract class $AppConfigCopyWith<$Res> {
       ApiConfig api,
       FeatureConfig features,
       UiConfig ui,
-      SecurityConfig security});
+      SecurityConfig security,
+      NicheRadarConfig nicheRadar});
 
   $AppInfoCopyWith<$Res> get app;
   $ApiConfigCopyWith<$Res> get api;
   $FeatureConfigCopyWith<$Res> get features;
   $UiConfigCopyWith<$Res> get ui;
   $SecurityConfigCopyWith<$Res> get security;
+  $NicheRadarConfigCopyWith<$Res> get nicheRadar;
 }
 
 /// @nodoc
@@ -2631,6 +2634,7 @@ class _$AppConfigCopyWithImpl<$Res, $Val extends AppConfig>
     Object? features = null,
     Object? ui = null,
     Object? security = null,
+    Object? nicheRadar = null,
   }) {
     return _then(_value.copyWith(
       app: null == app
@@ -2653,6 +2657,10 @@ class _$AppConfigCopyWithImpl<$Res, $Val extends AppConfig>
           ? _value.security
           : security // ignore: cast_nullable_to_non_nullable
               as SecurityConfig,
+      nicheRadar: null == nicheRadar
+          ? _value.nicheRadar
+          : nicheRadar // ignore: cast_nullable_to_non_nullable
+              as NicheRadarConfig,
     ) as $Val);
   }
 
@@ -2695,6 +2703,14 @@ class _$AppConfigCopyWithImpl<$Res, $Val extends AppConfig>
       return _then(_value.copyWith(security: value) as $Val);
     });
   }
+
+  @override
+  @pragma('vm:prefer-inline')
+  $NicheRadarConfigCopyWith<$Res> get nicheRadar {
+    return $NicheRadarConfigCopyWith<$Res>(_value.nicheRadar, (value) {
+      return _then(_value.copyWith(nicheRadar: value) as $Val);
+    });
+  }
 }
 
 /// @nodoc
@@ -2710,7 +2726,8 @@ abstract class _$$AppConfigImplCopyWith<$Res>
       ApiConfig api,
       FeatureConfig features,
       UiConfig ui,
-      SecurityConfig security});
+      SecurityConfig security,
+      NicheRadarConfig nicheRadar});
 
   @override
   $AppInfoCopyWith<$Res> get app;
@@ -2722,6 +2739,8 @@ abstract class _$$AppConfigImplCopyWith<$Res>
   $UiConfigCopyWith<$Res> get ui;
   @override
   $SecurityConfigCopyWith<$Res> get security;
+  @override
+  $NicheRadarConfigCopyWith<$Res> get nicheRadar;
 }
 
 /// @nodoc
@@ -2740,6 +2759,7 @@ class __$$AppConfigImplCopyWithImpl<$Res>
     Object? features = null,
     Object? ui = null,
     Object? security = null,
+    Object? nicheRadar = null,
   }) {
     return _then(_$AppConfigImpl(
       app: null == app
@@ -2762,6 +2782,10 @@ class __$$AppConfigImplCopyWithImpl<$Res>
           ? _value.security
           : security // ignore: cast_nullable_to_non_nullable
               as SecurityConfig,
+      nicheRadar: null == nicheRadar
+          ? _value.nicheRadar
+          : nicheRadar // ignore: cast_nullable_to_non_nullable
+              as NicheRadarConfig,
     ));
   }
 }
@@ -2774,7 +2798,8 @@ class _$AppConfigImpl implements _AppConfig {
       required this.api,
       required this.features,
       required this.ui,
-      required this.security});
+      required this.security,
+      required this.nicheRadar});
 
   factory _$AppConfigImpl.fromJson(Map<String, dynamic> json) =>
       _$$AppConfigImplFromJson(json);
@@ -2789,10 +2814,12 @@ class _$AppConfigImpl implements _AppConfig {
   final UiConfig ui;
   @override
   final SecurityConfig security;
+  @override
+  final NicheRadarConfig nicheRadar;
 
   @override
   String toString() {
-    return 'AppConfig(app: $app, api: $api, features: $features, ui: $ui, security: $security)';
+    return 'AppConfig(app: $app, api: $api, features: $features, ui: $ui, security: $security, nicheRadar: $nicheRadar)';
   }
 
   @override
@@ -2806,13 +2833,15 @@ class _$AppConfigImpl implements _AppConfig {
                 other.features == features) &&
             (identical(other.ui, ui) || other.ui == ui) &&
             (identical(other.security, security) ||
-                other.security == security));
+                other.security == security) &&
+            (identical(other.nicheRadar, nicheRadar) ||
+                other.nicheRadar == nicheRadar));
   }
 
   @JsonKey(ignore: true)
   @override
   int get hashCode =>
-      Object.hash(runtimeType, app, api, features, ui, security);
+      Object.hash(runtimeType, app, api, features, ui, security, nicheRadar);
 
   @JsonKey(ignore: true)
   @override
@@ -2834,7 +2863,8 @@ abstract class _AppConfig implements AppConfig {
       required final ApiConfig api,
       required final FeatureConfig features,
       required final UiConfig ui,
-      required final SecurityConfig security}) = _$AppConfigImpl;
+      required final SecurityConfig security,
+      required final NicheRadarConfig nicheRadar}) = _$AppConfigImpl;
 
   factory _AppConfig.fromJson(Map<String, dynamic> json) =
       _$AppConfigImpl.fromJson;
@@ -2849,6 +2879,8 @@ abstract class _AppConfig implements AppConfig {
   UiConfig get ui;
   @override
   SecurityConfig get security;
+  @override
+  NicheRadarConfig get nicheRadar;
   @override
   @JsonKey(ignore: true)
   _$$AppConfigImplCopyWith<_$AppConfigImpl> get copyWith =>
@@ -3264,6 +3296,8 @@ ApiEndpoints _$ApiEndpointsFromJson(Map<String, dynamic> json) {
 mixin _$ApiEndpoints {
   String get health => throw _privateConstructorUsedError;
   String get chat => throw _privateConstructorUsedError;
+  String get nicheRadar => throw _privateConstructorUsedError;
+  String get webSearch => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -3277,7 +3311,7 @@ abstract class $ApiEndpointsCopyWith<$Res> {
           ApiEndpoints value, $Res Function(ApiEndpoints) then) =
       _$ApiEndpointsCopyWithImpl<$Res, ApiEndpoints>;
   @useResult
-  $Res call({String health, String chat});
+  $Res call({String health, String chat, String nicheRadar, String webSearch});
 }
 
 /// @nodoc
@@ -3295,6 +3329,8 @@ class _$ApiEndpointsCopyWithImpl<$Res, $Val extends ApiEndpoints>
   $Res call({
     Object? health = null,
     Object? chat = null,
+    Object? nicheRadar = null,
+    Object? webSearch = null,
   }) {
     return _then(_value.copyWith(
       health: null == health
@@ -3304,6 +3340,14 @@ class _$ApiEndpointsCopyWithImpl<$Res, $Val extends ApiEndpoints>
       chat: null == chat
           ? _value.chat
           : chat // ignore: cast_nullable_to_non_nullable
+              as String,
+      nicheRadar: null == nicheRadar
+          ? _value.nicheRadar
+          : nicheRadar // ignore: cast_nullable_to_non_nullable
+              as String,
+      webSearch: null == webSearch
+          ? _value.webSearch
+          : webSearch // ignore: cast_nullable_to_non_nullable
               as String,
     ) as $Val);
   }
@@ -3317,7 +3361,7 @@ abstract class _$$ApiEndpointsImplCopyWith<$Res>
       __$$ApiEndpointsImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String health, String chat});
+  $Res call({String health, String chat, String nicheRadar, String webSearch});
 }
 
 /// @nodoc
@@ -3333,6 +3377,8 @@ class __$$ApiEndpointsImplCopyWithImpl<$Res>
   $Res call({
     Object? health = null,
     Object? chat = null,
+    Object? nicheRadar = null,
+    Object? webSearch = null,
   }) {
     return _then(_$ApiEndpointsImpl(
       health: null == health
@@ -3343,6 +3389,14 @@ class __$$ApiEndpointsImplCopyWithImpl<$Res>
           ? _value.chat
           : chat // ignore: cast_nullable_to_non_nullable
               as String,
+      nicheRadar: null == nicheRadar
+          ? _value.nicheRadar
+          : nicheRadar // ignore: cast_nullable_to_non_nullable
+              as String,
+      webSearch: null == webSearch
+          ? _value.webSearch
+          : webSearch // ignore: cast_nullable_to_non_nullable
+              as String,
     ));
   }
 }
@@ -3350,7 +3404,11 @@ class __$$ApiEndpointsImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$ApiEndpointsImpl implements _ApiEndpoints {
-  const _$ApiEndpointsImpl({required this.health, required this.chat});
+  const _$ApiEndpointsImpl(
+      {required this.health,
+      required this.chat,
+      required this.nicheRadar,
+      required this.webSearch});
 
   factory _$ApiEndpointsImpl.fromJson(Map<String, dynamic> json) =>
       _$$ApiEndpointsImplFromJson(json);
@@ -3359,10 +3417,14 @@ class _$ApiEndpointsImpl implements _ApiEndpoints {
   final String health;
   @override
   final String chat;
+  @override
+  final String nicheRadar;
+  @override
+  final String webSearch;
 
   @override
   String toString() {
-    return 'ApiEndpoints(health: $health, chat: $chat)';
+    return 'ApiEndpoints(health: $health, chat: $chat, nicheRadar: $nicheRadar, webSearch: $webSearch)';
   }
 
   @override
@@ -3371,12 +3433,17 @@ class _$ApiEndpointsImpl implements _ApiEndpoints {
         (other.runtimeType == runtimeType &&
             other is _$ApiEndpointsImpl &&
             (identical(other.health, health) || other.health == health) &&
-            (identical(other.chat, chat) || other.chat == chat));
+            (identical(other.chat, chat) || other.chat == chat) &&
+            (identical(other.nicheRadar, nicheRadar) ||
+                other.nicheRadar == nicheRadar) &&
+            (identical(other.webSearch, webSearch) ||
+                other.webSearch == webSearch));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, health, chat);
+  int get hashCode =>
+      Object.hash(runtimeType, health, chat, nicheRadar, webSearch);
 
   @JsonKey(ignore: true)
   @override
@@ -3395,7 +3462,9 @@ class _$ApiEndpointsImpl implements _ApiEndpoints {
 abstract class _ApiEndpoints implements ApiEndpoints {
   const factory _ApiEndpoints(
       {required final String health,
-      required final String chat}) = _$ApiEndpointsImpl;
+      required final String chat,
+      required final String nicheRadar,
+      required final String webSearch}) = _$ApiEndpointsImpl;
 
   factory _ApiEndpoints.fromJson(Map<String, dynamic> json) =
       _$ApiEndpointsImpl.fromJson;
@@ -3404,6 +3473,10 @@ abstract class _ApiEndpoints implements ApiEndpoints {
   String get health;
   @override
   String get chat;
+  @override
+  String get nicheRadar;
+  @override
+  String get webSearch;
   @override
   @JsonKey(ignore: true)
   _$$ApiEndpointsImplCopyWith<_$ApiEndpointsImpl> get copyWith =>
@@ -3422,6 +3495,10 @@ mixin _$FeatureConfig {
   String get safetyLevel => throw _privateConstructorUsedError;
   int get tokenCap => throw _privateConstructorUsedError;
   int get maxLatency => throw _privateConstructorUsedError;
+  bool get nicheRadar => throw _privateConstructorUsedError;
+  bool get webSearch => throw _privateConstructorUsedError;
+  bool get languageDetection => throw _privateConstructorUsedError;
+  bool get performanceMetrics => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -3441,7 +3518,11 @@ abstract class $FeatureConfigCopyWith<$Res> {
       bool autoTranslate,
       String safetyLevel,
       int tokenCap,
-      int maxLatency});
+      int maxLatency,
+      bool nicheRadar,
+      bool webSearch,
+      bool languageDetection,
+      bool performanceMetrics});
 }
 
 /// @nodoc
@@ -3463,6 +3544,10 @@ class _$FeatureConfigCopyWithImpl<$Res, $Val extends FeatureConfig>
     Object? safetyLevel = null,
     Object? tokenCap = null,
     Object? maxLatency = null,
+    Object? nicheRadar = null,
+    Object? webSearch = null,
+    Object? languageDetection = null,
+    Object? performanceMetrics = null,
   }) {
     return _then(_value.copyWith(
       founderMode: null == founderMode
@@ -3489,6 +3574,22 @@ class _$FeatureConfigCopyWithImpl<$Res, $Val extends FeatureConfig>
           ? _value.maxLatency
           : maxLatency // ignore: cast_nullable_to_non_nullable
               as int,
+      nicheRadar: null == nicheRadar
+          ? _value.nicheRadar
+          : nicheRadar // ignore: cast_nullable_to_non_nullable
+              as bool,
+      webSearch: null == webSearch
+          ? _value.webSearch
+          : webSearch // ignore: cast_nullable_to_non_nullable
+              as bool,
+      languageDetection: null == languageDetection
+          ? _value.languageDetection
+          : languageDetection // ignore: cast_nullable_to_non_nullable
+              as bool,
+      performanceMetrics: null == performanceMetrics
+          ? _value.performanceMetrics
+          : performanceMetrics // ignore: cast_nullable_to_non_nullable
+              as bool,
     ) as $Val);
   }
 }
@@ -3507,7 +3608,11 @@ abstract class _$$FeatureConfigImplCopyWith<$Res>
       bool autoTranslate,
       String safetyLevel,
       int tokenCap,
-      int maxLatency});
+      int maxLatency,
+      bool nicheRadar,
+      bool webSearch,
+      bool languageDetection,
+      bool performanceMetrics});
 }
 
 /// @nodoc
@@ -3527,6 +3632,10 @@ class __$$FeatureConfigImplCopyWithImpl<$Res>
     Object? safetyLevel = null,
     Object? tokenCap = null,
     Object? maxLatency = null,
+    Object? nicheRadar = null,
+    Object? webSearch = null,
+    Object? languageDetection = null,
+    Object? performanceMetrics = null,
   }) {
     return _then(_$FeatureConfigImpl(
       founderMode: null == founderMode
@@ -3553,6 +3662,22 @@ class __$$FeatureConfigImplCopyWithImpl<$Res>
           ? _value.maxLatency
           : maxLatency // ignore: cast_nullable_to_non_nullable
               as int,
+      nicheRadar: null == nicheRadar
+          ? _value.nicheRadar
+          : nicheRadar // ignore: cast_nullable_to_non_nullable
+              as bool,
+      webSearch: null == webSearch
+          ? _value.webSearch
+          : webSearch // ignore: cast_nullable_to_non_nullable
+              as bool,
+      languageDetection: null == languageDetection
+          ? _value.languageDetection
+          : languageDetection // ignore: cast_nullable_to_non_nullable
+              as bool,
+      performanceMetrics: null == performanceMetrics
+          ? _value.performanceMetrics
+          : performanceMetrics // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -3566,7 +3691,11 @@ class _$FeatureConfigImpl implements _FeatureConfig {
       this.autoTranslate = false,
       this.safetyLevel = 'normal',
       this.tokenCap = 4000,
-      this.maxLatency = 10000});
+      this.maxLatency = 10000,
+      this.nicheRadar = true,
+      this.webSearch = true,
+      this.languageDetection = true,
+      this.performanceMetrics = true});
 
   factory _$FeatureConfigImpl.fromJson(Map<String, dynamic> json) =>
       _$$FeatureConfigImplFromJson(json);
@@ -3589,10 +3718,22 @@ class _$FeatureConfigImpl implements _FeatureConfig {
   @override
   @JsonKey()
   final int maxLatency;
+  @override
+  @JsonKey()
+  final bool nicheRadar;
+  @override
+  @JsonKey()
+  final bool webSearch;
+  @override
+  @JsonKey()
+  final bool languageDetection;
+  @override
+  @JsonKey()
+  final bool performanceMetrics;
 
   @override
   String toString() {
-    return 'FeatureConfig(founderMode: $founderMode, telemetry: $telemetry, autoTranslate: $autoTranslate, safetyLevel: $safetyLevel, tokenCap: $tokenCap, maxLatency: $maxLatency)';
+    return 'FeatureConfig(founderMode: $founderMode, telemetry: $telemetry, autoTranslate: $autoTranslate, safetyLevel: $safetyLevel, tokenCap: $tokenCap, maxLatency: $maxLatency, nicheRadar: $nicheRadar, webSearch: $webSearch, languageDetection: $languageDetection, performanceMetrics: $performanceMetrics)';
   }
 
   @override
@@ -3611,13 +3752,31 @@ class _$FeatureConfigImpl implements _FeatureConfig {
             (identical(other.tokenCap, tokenCap) ||
                 other.tokenCap == tokenCap) &&
             (identical(other.maxLatency, maxLatency) ||
-                other.maxLatency == maxLatency));
+                other.maxLatency == maxLatency) &&
+            (identical(other.nicheRadar, nicheRadar) ||
+                other.nicheRadar == nicheRadar) &&
+            (identical(other.webSearch, webSearch) ||
+                other.webSearch == webSearch) &&
+            (identical(other.languageDetection, languageDetection) ||
+                other.languageDetection == languageDetection) &&
+            (identical(other.performanceMetrics, performanceMetrics) ||
+                other.performanceMetrics == performanceMetrics));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, founderMode, telemetry,
-      autoTranslate, safetyLevel, tokenCap, maxLatency);
+  int get hashCode => Object.hash(
+      runtimeType,
+      founderMode,
+      telemetry,
+      autoTranslate,
+      safetyLevel,
+      tokenCap,
+      maxLatency,
+      nicheRadar,
+      webSearch,
+      languageDetection,
+      performanceMetrics);
 
   @JsonKey(ignore: true)
   @override
@@ -3640,7 +3799,11 @@ abstract class _FeatureConfig implements FeatureConfig {
       final bool autoTranslate,
       final String safetyLevel,
       final int tokenCap,
-      final int maxLatency}) = _$FeatureConfigImpl;
+      final int maxLatency,
+      final bool nicheRadar,
+      final bool webSearch,
+      final bool languageDetection,
+      final bool performanceMetrics}) = _$FeatureConfigImpl;
 
   factory _FeatureConfig.fromJson(Map<String, dynamic> json) =
       _$FeatureConfigImpl.fromJson;
@@ -3658,6 +3821,14 @@ abstract class _FeatureConfig implements FeatureConfig {
   @override
   int get maxLatency;
   @override
+  bool get nicheRadar;
+  @override
+  bool get webSearch;
+  @override
+  bool get languageDetection;
+  @override
+  bool get performanceMetrics;
+  @override
   @JsonKey(ignore: true)
   _$$FeatureConfigImplCopyWith<_$FeatureConfigImpl> get copyWith =>
       throw _privateConstructorUsedError;
@@ -3674,6 +3845,8 @@ mixin _$UiConfig {
   String get secondaryColor => throw _privateConstructorUsedError;
   String get accentColor => throw _privateConstructorUsedError;
   String get fontFamily => throw _privateConstructorUsedError;
+  List<String> get gradientColors => throw _privateConstructorUsedError;
+  int get animationDuration => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -3691,7 +3864,9 @@ abstract class $UiConfigCopyWith<$Res> {
       String primaryColor,
       String secondaryColor,
       String accentColor,
-      String fontFamily});
+      String fontFamily,
+      List<String> gradientColors,
+      int animationDuration});
 }
 
 /// @nodoc
@@ -3712,6 +3887,8 @@ class _$UiConfigCopyWithImpl<$Res, $Val extends UiConfig>
     Object? secondaryColor = null,
     Object? accentColor = null,
     Object? fontFamily = null,
+    Object? gradientColors = null,
+    Object? animationDuration = null,
   }) {
     return _then(_value.copyWith(
       theme: null == theme
@@ -3734,6 +3911,14 @@ class _$UiConfigCopyWithImpl<$Res, $Val extends UiConfig>
           ? _value.fontFamily
           : fontFamily // ignore: cast_nullable_to_non_nullable
               as String,
+      gradientColors: null == gradientColors
+          ? _value.gradientColors
+          : gradientColors // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      animationDuration: null == animationDuration
+          ? _value.animationDuration
+          : animationDuration // ignore: cast_nullable_to_non_nullable
+              as int,
     ) as $Val);
   }
 }
@@ -3751,7 +3936,9 @@ abstract class _$$UiConfigImplCopyWith<$Res>
       String primaryColor,
       String secondaryColor,
       String accentColor,
-      String fontFamily});
+      String fontFamily,
+      List<String> gradientColors,
+      int animationDuration});
 }
 
 /// @nodoc
@@ -3770,6 +3957,8 @@ class __$$UiConfigImplCopyWithImpl<$Res>
     Object? secondaryColor = null,
     Object? accentColor = null,
     Object? fontFamily = null,
+    Object? gradientColors = null,
+    Object? animationDuration = null,
   }) {
     return _then(_$UiConfigImpl(
       theme: null == theme
@@ -3792,6 +3981,14 @@ class __$$UiConfigImplCopyWithImpl<$Res>
           ? _value.fontFamily
           : fontFamily // ignore: cast_nullable_to_non_nullable
               as String,
+      gradientColors: null == gradientColors
+          ? _value._gradientColors
+          : gradientColors // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      animationDuration: null == animationDuration
+          ? _value.animationDuration
+          : animationDuration // ignore: cast_nullable_to_non_nullable
+              as int,
     ));
   }
 }
@@ -3804,7 +4001,10 @@ class _$UiConfigImpl implements _UiConfig {
       this.primaryColor = '#0F172A',
       this.secondaryColor = '#1E293B',
       this.accentColor = '#3B82F6',
-      this.fontFamily = 'Inter'});
+      this.fontFamily = 'Inter',
+      final List<String> gradientColors = const ['#8B5CF6', '#06B6D4'],
+      this.animationDuration = 300})
+      : _gradientColors = gradientColors;
 
   factory _$UiConfigImpl.fromJson(Map<String, dynamic> json) =>
       _$$UiConfigImplFromJson(json);
@@ -3824,10 +4024,22 @@ class _$UiConfigImpl implements _UiConfig {
   @override
   @JsonKey()
   final String fontFamily;
+  final List<String> _gradientColors;
+  @override
+  @JsonKey()
+  List<String> get gradientColors {
+    if (_gradientColors is EqualUnmodifiableListView) return _gradientColors;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_gradientColors);
+  }
+
+  @override
+  @JsonKey()
+  final int animationDuration;
 
   @override
   String toString() {
-    return 'UiConfig(theme: $theme, primaryColor: $primaryColor, secondaryColor: $secondaryColor, accentColor: $accentColor, fontFamily: $fontFamily)';
+    return 'UiConfig(theme: $theme, primaryColor: $primaryColor, secondaryColor: $secondaryColor, accentColor: $accentColor, fontFamily: $fontFamily, gradientColors: $gradientColors, animationDuration: $animationDuration)';
   }
 
   @override
@@ -3843,13 +4055,24 @@ class _$UiConfigImpl implements _UiConfig {
             (identical(other.accentColor, accentColor) ||
                 other.accentColor == accentColor) &&
             (identical(other.fontFamily, fontFamily) ||
-                other.fontFamily == fontFamily));
+                other.fontFamily == fontFamily) &&
+            const DeepCollectionEquality()
+                .equals(other._gradientColors, _gradientColors) &&
+            (identical(other.animationDuration, animationDuration) ||
+                other.animationDuration == animationDuration));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, theme, primaryColor,
-      secondaryColor, accentColor, fontFamily);
+  int get hashCode => Object.hash(
+      runtimeType,
+      theme,
+      primaryColor,
+      secondaryColor,
+      accentColor,
+      fontFamily,
+      const DeepCollectionEquality().hash(_gradientColors),
+      animationDuration);
 
   @JsonKey(ignore: true)
   @override
@@ -3871,7 +4094,9 @@ abstract class _UiConfig implements UiConfig {
       final String primaryColor,
       final String secondaryColor,
       final String accentColor,
-      final String fontFamily}) = _$UiConfigImpl;
+      final String fontFamily,
+      final List<String> gradientColors,
+      final int animationDuration}) = _$UiConfigImpl;
 
   factory _UiConfig.fromJson(Map<String, dynamic> json) =
       _$UiConfigImpl.fromJson;
@@ -3886,6 +4111,10 @@ abstract class _UiConfig implements UiConfig {
   String get accentColor;
   @override
   String get fontFamily;
+  @override
+  List<String> get gradientColors;
+  @override
+  int get animationDuration;
   @override
   @JsonKey(ignore: true)
   _$$UiConfigImplCopyWith<_$UiConfigImpl> get copyWith =>
@@ -4073,5 +4302,2547 @@ abstract class _SecurityConfig implements SecurityConfig {
   @override
   @JsonKey(ignore: true)
   _$$SecurityConfigImplCopyWith<_$SecurityConfigImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+NicheRadarConfig _$NicheRadarConfigFromJson(Map<String, dynamic> json) {
+  return _NicheRadarConfig.fromJson(json);
+}
+
+/// @nodoc
+mixin _$NicheRadarConfig {
+  bool get enabled => throw _privateConstructorUsedError;
+  bool get autoRefresh => throw _privateConstructorUsedError;
+  int get refreshInterval => throw _privateConstructorUsedError;
+  int get maxResults => throw _privateConstructorUsedError;
+  double get confidenceThreshold => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $NicheRadarConfigCopyWith<NicheRadarConfig> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $NicheRadarConfigCopyWith<$Res> {
+  factory $NicheRadarConfigCopyWith(
+          NicheRadarConfig value, $Res Function(NicheRadarConfig) then) =
+      _$NicheRadarConfigCopyWithImpl<$Res, NicheRadarConfig>;
+  @useResult
+  $Res call(
+      {bool enabled,
+      bool autoRefresh,
+      int refreshInterval,
+      int maxResults,
+      double confidenceThreshold});
+}
+
+/// @nodoc
+class _$NicheRadarConfigCopyWithImpl<$Res, $Val extends NicheRadarConfig>
+    implements $NicheRadarConfigCopyWith<$Res> {
+  _$NicheRadarConfigCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? enabled = null,
+    Object? autoRefresh = null,
+    Object? refreshInterval = null,
+    Object? maxResults = null,
+    Object? confidenceThreshold = null,
+  }) {
+    return _then(_value.copyWith(
+      enabled: null == enabled
+          ? _value.enabled
+          : enabled // ignore: cast_nullable_to_non_nullable
+              as bool,
+      autoRefresh: null == autoRefresh
+          ? _value.autoRefresh
+          : autoRefresh // ignore: cast_nullable_to_non_nullable
+              as bool,
+      refreshInterval: null == refreshInterval
+          ? _value.refreshInterval
+          : refreshInterval // ignore: cast_nullable_to_non_nullable
+              as int,
+      maxResults: null == maxResults
+          ? _value.maxResults
+          : maxResults // ignore: cast_nullable_to_non_nullable
+              as int,
+      confidenceThreshold: null == confidenceThreshold
+          ? _value.confidenceThreshold
+          : confidenceThreshold // ignore: cast_nullable_to_non_nullable
+              as double,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$NicheRadarConfigImplCopyWith<$Res>
+    implements $NicheRadarConfigCopyWith<$Res> {
+  factory _$$NicheRadarConfigImplCopyWith(_$NicheRadarConfigImpl value,
+          $Res Function(_$NicheRadarConfigImpl) then) =
+      __$$NicheRadarConfigImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {bool enabled,
+      bool autoRefresh,
+      int refreshInterval,
+      int maxResults,
+      double confidenceThreshold});
+}
+
+/// @nodoc
+class __$$NicheRadarConfigImplCopyWithImpl<$Res>
+    extends _$NicheRadarConfigCopyWithImpl<$Res, _$NicheRadarConfigImpl>
+    implements _$$NicheRadarConfigImplCopyWith<$Res> {
+  __$$NicheRadarConfigImplCopyWithImpl(_$NicheRadarConfigImpl _value,
+      $Res Function(_$NicheRadarConfigImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? enabled = null,
+    Object? autoRefresh = null,
+    Object? refreshInterval = null,
+    Object? maxResults = null,
+    Object? confidenceThreshold = null,
+  }) {
+    return _then(_$NicheRadarConfigImpl(
+      enabled: null == enabled
+          ? _value.enabled
+          : enabled // ignore: cast_nullable_to_non_nullable
+              as bool,
+      autoRefresh: null == autoRefresh
+          ? _value.autoRefresh
+          : autoRefresh // ignore: cast_nullable_to_non_nullable
+              as bool,
+      refreshInterval: null == refreshInterval
+          ? _value.refreshInterval
+          : refreshInterval // ignore: cast_nullable_to_non_nullable
+              as int,
+      maxResults: null == maxResults
+          ? _value.maxResults
+          : maxResults // ignore: cast_nullable_to_non_nullable
+              as int,
+      confidenceThreshold: null == confidenceThreshold
+          ? _value.confidenceThreshold
+          : confidenceThreshold // ignore: cast_nullable_to_non_nullable
+              as double,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$NicheRadarConfigImpl implements _NicheRadarConfig {
+  const _$NicheRadarConfigImpl(
+      {this.enabled = true,
+      this.autoRefresh = false,
+      this.refreshInterval = 300000,
+      this.maxResults = 10,
+      this.confidenceThreshold = 0.7});
+
+  factory _$NicheRadarConfigImpl.fromJson(Map<String, dynamic> json) =>
+      _$$NicheRadarConfigImplFromJson(json);
+
+  @override
+  @JsonKey()
+  final bool enabled;
+  @override
+  @JsonKey()
+  final bool autoRefresh;
+  @override
+  @JsonKey()
+  final int refreshInterval;
+  @override
+  @JsonKey()
+  final int maxResults;
+  @override
+  @JsonKey()
+  final double confidenceThreshold;
+
+  @override
+  String toString() {
+    return 'NicheRadarConfig(enabled: $enabled, autoRefresh: $autoRefresh, refreshInterval: $refreshInterval, maxResults: $maxResults, confidenceThreshold: $confidenceThreshold)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$NicheRadarConfigImpl &&
+            (identical(other.enabled, enabled) || other.enabled == enabled) &&
+            (identical(other.autoRefresh, autoRefresh) ||
+                other.autoRefresh == autoRefresh) &&
+            (identical(other.refreshInterval, refreshInterval) ||
+                other.refreshInterval == refreshInterval) &&
+            (identical(other.maxResults, maxResults) ||
+                other.maxResults == maxResults) &&
+            (identical(other.confidenceThreshold, confidenceThreshold) ||
+                other.confidenceThreshold == confidenceThreshold));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(runtimeType, enabled, autoRefresh,
+      refreshInterval, maxResults, confidenceThreshold);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$NicheRadarConfigImplCopyWith<_$NicheRadarConfigImpl> get copyWith =>
+      __$$NicheRadarConfigImplCopyWithImpl<_$NicheRadarConfigImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$NicheRadarConfigImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _NicheRadarConfig implements NicheRadarConfig {
+  const factory _NicheRadarConfig(
+      {final bool enabled,
+      final bool autoRefresh,
+      final int refreshInterval,
+      final int maxResults,
+      final double confidenceThreshold}) = _$NicheRadarConfigImpl;
+
+  factory _NicheRadarConfig.fromJson(Map<String, dynamic> json) =
+      _$NicheRadarConfigImpl.fromJson;
+
+  @override
+  bool get enabled;
+  @override
+  bool get autoRefresh;
+  @override
+  int get refreshInterval;
+  @override
+  int get maxResults;
+  @override
+  double get confidenceThreshold;
+  @override
+  @JsonKey(ignore: true)
+  _$$NicheRadarConfigImplCopyWith<_$NicheRadarConfigImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+NicheOpportunity _$NicheOpportunityFromJson(Map<String, dynamic> json) {
+  return _NicheOpportunity.fromJson(json);
+}
+
+/// @nodoc
+mixin _$NicheOpportunity {
+  String get topic => throw _privateConstructorUsedError;
+  double get score => throw _privateConstructorUsedError;
+  double get confidence => throw _privateConstructorUsedError;
+  List<String> get keySignals => throw _privateConstructorUsedError;
+  List<NicheSource> get sources => throw _privateConstructorUsedError;
+  String get category => throw _privateConstructorUsedError;
+  DateTime get timestamp => throw _privateConstructorUsedError;
+  String? get description => throw _privateConstructorUsedError;
+  List<String>? get recommendations => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $NicheOpportunityCopyWith<NicheOpportunity> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $NicheOpportunityCopyWith<$Res> {
+  factory $NicheOpportunityCopyWith(
+          NicheOpportunity value, $Res Function(NicheOpportunity) then) =
+      _$NicheOpportunityCopyWithImpl<$Res, NicheOpportunity>;
+  @useResult
+  $Res call(
+      {String topic,
+      double score,
+      double confidence,
+      List<String> keySignals,
+      List<NicheSource> sources,
+      String category,
+      DateTime timestamp,
+      String? description,
+      List<String>? recommendations});
+}
+
+/// @nodoc
+class _$NicheOpportunityCopyWithImpl<$Res, $Val extends NicheOpportunity>
+    implements $NicheOpportunityCopyWith<$Res> {
+  _$NicheOpportunityCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? topic = null,
+    Object? score = null,
+    Object? confidence = null,
+    Object? keySignals = null,
+    Object? sources = null,
+    Object? category = null,
+    Object? timestamp = null,
+    Object? description = freezed,
+    Object? recommendations = freezed,
+  }) {
+    return _then(_value.copyWith(
+      topic: null == topic
+          ? _value.topic
+          : topic // ignore: cast_nullable_to_non_nullable
+              as String,
+      score: null == score
+          ? _value.score
+          : score // ignore: cast_nullable_to_non_nullable
+              as double,
+      confidence: null == confidence
+          ? _value.confidence
+          : confidence // ignore: cast_nullable_to_non_nullable
+              as double,
+      keySignals: null == keySignals
+          ? _value.keySignals
+          : keySignals // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      sources: null == sources
+          ? _value.sources
+          : sources // ignore: cast_nullable_to_non_nullable
+              as List<NicheSource>,
+      category: null == category
+          ? _value.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as String,
+      timestamp: null == timestamp
+          ? _value.timestamp
+          : timestamp // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      description: freezed == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String?,
+      recommendations: freezed == recommendations
+          ? _value.recommendations
+          : recommendations // ignore: cast_nullable_to_non_nullable
+              as List<String>?,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$NicheOpportunityImplCopyWith<$Res>
+    implements $NicheOpportunityCopyWith<$Res> {
+  factory _$$NicheOpportunityImplCopyWith(_$NicheOpportunityImpl value,
+          $Res Function(_$NicheOpportunityImpl) then) =
+      __$$NicheOpportunityImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String topic,
+      double score,
+      double confidence,
+      List<String> keySignals,
+      List<NicheSource> sources,
+      String category,
+      DateTime timestamp,
+      String? description,
+      List<String>? recommendations});
+}
+
+/// @nodoc
+class __$$NicheOpportunityImplCopyWithImpl<$Res>
+    extends _$NicheOpportunityCopyWithImpl<$Res, _$NicheOpportunityImpl>
+    implements _$$NicheOpportunityImplCopyWith<$Res> {
+  __$$NicheOpportunityImplCopyWithImpl(_$NicheOpportunityImpl _value,
+      $Res Function(_$NicheOpportunityImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? topic = null,
+    Object? score = null,
+    Object? confidence = null,
+    Object? keySignals = null,
+    Object? sources = null,
+    Object? category = null,
+    Object? timestamp = null,
+    Object? description = freezed,
+    Object? recommendations = freezed,
+  }) {
+    return _then(_$NicheOpportunityImpl(
+      topic: null == topic
+          ? _value.topic
+          : topic // ignore: cast_nullable_to_non_nullable
+              as String,
+      score: null == score
+          ? _value.score
+          : score // ignore: cast_nullable_to_non_nullable
+              as double,
+      confidence: null == confidence
+          ? _value.confidence
+          : confidence // ignore: cast_nullable_to_non_nullable
+              as double,
+      keySignals: null == keySignals
+          ? _value._keySignals
+          : keySignals // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      sources: null == sources
+          ? _value._sources
+          : sources // ignore: cast_nullable_to_non_nullable
+              as List<NicheSource>,
+      category: null == category
+          ? _value.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as String,
+      timestamp: null == timestamp
+          ? _value.timestamp
+          : timestamp // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      description: freezed == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String?,
+      recommendations: freezed == recommendations
+          ? _value._recommendations
+          : recommendations // ignore: cast_nullable_to_non_nullable
+              as List<String>?,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$NicheOpportunityImpl implements _NicheOpportunity {
+  const _$NicheOpportunityImpl(
+      {required this.topic,
+      required this.score,
+      required this.confidence,
+      required final List<String> keySignals,
+      required final List<NicheSource> sources,
+      required this.category,
+      required this.timestamp,
+      this.description,
+      final List<String>? recommendations})
+      : _keySignals = keySignals,
+        _sources = sources,
+        _recommendations = recommendations;
+
+  factory _$NicheOpportunityImpl.fromJson(Map<String, dynamic> json) =>
+      _$$NicheOpportunityImplFromJson(json);
+
+  @override
+  final String topic;
+  @override
+  final double score;
+  @override
+  final double confidence;
+  final List<String> _keySignals;
+  @override
+  List<String> get keySignals {
+    if (_keySignals is EqualUnmodifiableListView) return _keySignals;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_keySignals);
+  }
+
+  final List<NicheSource> _sources;
+  @override
+  List<NicheSource> get sources {
+    if (_sources is EqualUnmodifiableListView) return _sources;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_sources);
+  }
+
+  @override
+  final String category;
+  @override
+  final DateTime timestamp;
+  @override
+  final String? description;
+  final List<String>? _recommendations;
+  @override
+  List<String>? get recommendations {
+    final value = _recommendations;
+    if (value == null) return null;
+    if (_recommendations is EqualUnmodifiableListView) return _recommendations;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(value);
+  }
+
+  @override
+  String toString() {
+    return 'NicheOpportunity(topic: $topic, score: $score, confidence: $confidence, keySignals: $keySignals, sources: $sources, category: $category, timestamp: $timestamp, description: $description, recommendations: $recommendations)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$NicheOpportunityImpl &&
+            (identical(other.topic, topic) || other.topic == topic) &&
+            (identical(other.score, score) || other.score == score) &&
+            (identical(other.confidence, confidence) ||
+                other.confidence == confidence) &&
+            const DeepCollectionEquality()
+                .equals(other._keySignals, _keySignals) &&
+            const DeepCollectionEquality().equals(other._sources, _sources) &&
+            (identical(other.category, category) ||
+                other.category == category) &&
+            (identical(other.timestamp, timestamp) ||
+                other.timestamp == timestamp) &&
+            (identical(other.description, description) ||
+                other.description == description) &&
+            const DeepCollectionEquality()
+                .equals(other._recommendations, _recommendations));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      topic,
+      score,
+      confidence,
+      const DeepCollectionEquality().hash(_keySignals),
+      const DeepCollectionEquality().hash(_sources),
+      category,
+      timestamp,
+      description,
+      const DeepCollectionEquality().hash(_recommendations));
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$NicheOpportunityImplCopyWith<_$NicheOpportunityImpl> get copyWith =>
+      __$$NicheOpportunityImplCopyWithImpl<_$NicheOpportunityImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$NicheOpportunityImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _NicheOpportunity implements NicheOpportunity {
+  const factory _NicheOpportunity(
+      {required final String topic,
+      required final double score,
+      required final double confidence,
+      required final List<String> keySignals,
+      required final List<NicheSource> sources,
+      required final String category,
+      required final DateTime timestamp,
+      final String? description,
+      final List<String>? recommendations}) = _$NicheOpportunityImpl;
+
+  factory _NicheOpportunity.fromJson(Map<String, dynamic> json) =
+      _$NicheOpportunityImpl.fromJson;
+
+  @override
+  String get topic;
+  @override
+  double get score;
+  @override
+  double get confidence;
+  @override
+  List<String> get keySignals;
+  @override
+  List<NicheSource> get sources;
+  @override
+  String get category;
+  @override
+  DateTime get timestamp;
+  @override
+  String? get description;
+  @override
+  List<String>? get recommendations;
+  @override
+  @JsonKey(ignore: true)
+  _$$NicheOpportunityImplCopyWith<_$NicheOpportunityImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+NicheSource _$NicheSourceFromJson(Map<String, dynamic> json) {
+  return _NicheSource.fromJson(json);
+}
+
+/// @nodoc
+mixin _$NicheSource {
+  String get name => throw _privateConstructorUsedError;
+  String get url => throw _privateConstructorUsedError;
+  String get domain => throw _privateConstructorUsedError;
+  DateTime get timestamp => throw _privateConstructorUsedError;
+  String? get snippet => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $NicheSourceCopyWith<NicheSource> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $NicheSourceCopyWith<$Res> {
+  factory $NicheSourceCopyWith(
+          NicheSource value, $Res Function(NicheSource) then) =
+      _$NicheSourceCopyWithImpl<$Res, NicheSource>;
+  @useResult
+  $Res call(
+      {String name,
+      String url,
+      String domain,
+      DateTime timestamp,
+      String? snippet});
+}
+
+/// @nodoc
+class _$NicheSourceCopyWithImpl<$Res, $Val extends NicheSource>
+    implements $NicheSourceCopyWith<$Res> {
+  _$NicheSourceCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? name = null,
+    Object? url = null,
+    Object? domain = null,
+    Object? timestamp = null,
+    Object? snippet = freezed,
+  }) {
+    return _then(_value.copyWith(
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      url: null == url
+          ? _value.url
+          : url // ignore: cast_nullable_to_non_nullable
+              as String,
+      domain: null == domain
+          ? _value.domain
+          : domain // ignore: cast_nullable_to_non_nullable
+              as String,
+      timestamp: null == timestamp
+          ? _value.timestamp
+          : timestamp // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      snippet: freezed == snippet
+          ? _value.snippet
+          : snippet // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$NicheSourceImplCopyWith<$Res>
+    implements $NicheSourceCopyWith<$Res> {
+  factory _$$NicheSourceImplCopyWith(
+          _$NicheSourceImpl value, $Res Function(_$NicheSourceImpl) then) =
+      __$$NicheSourceImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String name,
+      String url,
+      String domain,
+      DateTime timestamp,
+      String? snippet});
+}
+
+/// @nodoc
+class __$$NicheSourceImplCopyWithImpl<$Res>
+    extends _$NicheSourceCopyWithImpl<$Res, _$NicheSourceImpl>
+    implements _$$NicheSourceImplCopyWith<$Res> {
+  __$$NicheSourceImplCopyWithImpl(
+      _$NicheSourceImpl _value, $Res Function(_$NicheSourceImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? name = null,
+    Object? url = null,
+    Object? domain = null,
+    Object? timestamp = null,
+    Object? snippet = freezed,
+  }) {
+    return _then(_$NicheSourceImpl(
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      url: null == url
+          ? _value.url
+          : url // ignore: cast_nullable_to_non_nullable
+              as String,
+      domain: null == domain
+          ? _value.domain
+          : domain // ignore: cast_nullable_to_non_nullable
+              as String,
+      timestamp: null == timestamp
+          ? _value.timestamp
+          : timestamp // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      snippet: freezed == snippet
+          ? _value.snippet
+          : snippet // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$NicheSourceImpl implements _NicheSource {
+  const _$NicheSourceImpl(
+      {required this.name,
+      required this.url,
+      required this.domain,
+      required this.timestamp,
+      this.snippet});
+
+  factory _$NicheSourceImpl.fromJson(Map<String, dynamic> json) =>
+      _$$NicheSourceImplFromJson(json);
+
+  @override
+  final String name;
+  @override
+  final String url;
+  @override
+  final String domain;
+  @override
+  final DateTime timestamp;
+  @override
+  final String? snippet;
+
+  @override
+  String toString() {
+    return 'NicheSource(name: $name, url: $url, domain: $domain, timestamp: $timestamp, snippet: $snippet)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$NicheSourceImpl &&
+            (identical(other.name, name) || other.name == name) &&
+            (identical(other.url, url) || other.url == url) &&
+            (identical(other.domain, domain) || other.domain == domain) &&
+            (identical(other.timestamp, timestamp) ||
+                other.timestamp == timestamp) &&
+            (identical(other.snippet, snippet) || other.snippet == snippet));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, name, url, domain, timestamp, snippet);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$NicheSourceImplCopyWith<_$NicheSourceImpl> get copyWith =>
+      __$$NicheSourceImplCopyWithImpl<_$NicheSourceImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$NicheSourceImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _NicheSource implements NicheSource {
+  const factory _NicheSource(
+      {required final String name,
+      required final String url,
+      required final String domain,
+      required final DateTime timestamp,
+      final String? snippet}) = _$NicheSourceImpl;
+
+  factory _NicheSource.fromJson(Map<String, dynamic> json) =
+      _$NicheSourceImpl.fromJson;
+
+  @override
+  String get name;
+  @override
+  String get url;
+  @override
+  String get domain;
+  @override
+  DateTime get timestamp;
+  @override
+  String? get snippet;
+  @override
+  @JsonKey(ignore: true)
+  _$$NicheSourceImplCopyWith<_$NicheSourceImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+NicheRadarResponse _$NicheRadarResponseFromJson(Map<String, dynamic> json) {
+  return _NicheRadarResponse.fromJson(json);
+}
+
+/// @nodoc
+mixin _$NicheRadarResponse {
+  List<NicheOpportunity> get opportunities =>
+      throw _privateConstructorUsedError;
+  DateTime get generatedAt => throw _privateConstructorUsedError;
+  int get totalSources => throw _privateConstructorUsedError;
+  String? get error => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $NicheRadarResponseCopyWith<NicheRadarResponse> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $NicheRadarResponseCopyWith<$Res> {
+  factory $NicheRadarResponseCopyWith(
+          NicheRadarResponse value, $Res Function(NicheRadarResponse) then) =
+      _$NicheRadarResponseCopyWithImpl<$Res, NicheRadarResponse>;
+  @useResult
+  $Res call(
+      {List<NicheOpportunity> opportunities,
+      DateTime generatedAt,
+      int totalSources,
+      String? error});
+}
+
+/// @nodoc
+class _$NicheRadarResponseCopyWithImpl<$Res, $Val extends NicheRadarResponse>
+    implements $NicheRadarResponseCopyWith<$Res> {
+  _$NicheRadarResponseCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? opportunities = null,
+    Object? generatedAt = null,
+    Object? totalSources = null,
+    Object? error = freezed,
+  }) {
+    return _then(_value.copyWith(
+      opportunities: null == opportunities
+          ? _value.opportunities
+          : opportunities // ignore: cast_nullable_to_non_nullable
+              as List<NicheOpportunity>,
+      generatedAt: null == generatedAt
+          ? _value.generatedAt
+          : generatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      totalSources: null == totalSources
+          ? _value.totalSources
+          : totalSources // ignore: cast_nullable_to_non_nullable
+              as int,
+      error: freezed == error
+          ? _value.error
+          : error // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$NicheRadarResponseImplCopyWith<$Res>
+    implements $NicheRadarResponseCopyWith<$Res> {
+  factory _$$NicheRadarResponseImplCopyWith(_$NicheRadarResponseImpl value,
+          $Res Function(_$NicheRadarResponseImpl) then) =
+      __$$NicheRadarResponseImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {List<NicheOpportunity> opportunities,
+      DateTime generatedAt,
+      int totalSources,
+      String? error});
+}
+
+/// @nodoc
+class __$$NicheRadarResponseImplCopyWithImpl<$Res>
+    extends _$NicheRadarResponseCopyWithImpl<$Res, _$NicheRadarResponseImpl>
+    implements _$$NicheRadarResponseImplCopyWith<$Res> {
+  __$$NicheRadarResponseImplCopyWithImpl(_$NicheRadarResponseImpl _value,
+      $Res Function(_$NicheRadarResponseImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? opportunities = null,
+    Object? generatedAt = null,
+    Object? totalSources = null,
+    Object? error = freezed,
+  }) {
+    return _then(_$NicheRadarResponseImpl(
+      opportunities: null == opportunities
+          ? _value._opportunities
+          : opportunities // ignore: cast_nullable_to_non_nullable
+              as List<NicheOpportunity>,
+      generatedAt: null == generatedAt
+          ? _value.generatedAt
+          : generatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      totalSources: null == totalSources
+          ? _value.totalSources
+          : totalSources // ignore: cast_nullable_to_non_nullable
+              as int,
+      error: freezed == error
+          ? _value.error
+          : error // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$NicheRadarResponseImpl implements _NicheRadarResponse {
+  const _$NicheRadarResponseImpl(
+      {required final List<NicheOpportunity> opportunities,
+      required this.generatedAt,
+      required this.totalSources,
+      this.error})
+      : _opportunities = opportunities;
+
+  factory _$NicheRadarResponseImpl.fromJson(Map<String, dynamic> json) =>
+      _$$NicheRadarResponseImplFromJson(json);
+
+  final List<NicheOpportunity> _opportunities;
+  @override
+  List<NicheOpportunity> get opportunities {
+    if (_opportunities is EqualUnmodifiableListView) return _opportunities;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_opportunities);
+  }
+
+  @override
+  final DateTime generatedAt;
+  @override
+  final int totalSources;
+  @override
+  final String? error;
+
+  @override
+  String toString() {
+    return 'NicheRadarResponse(opportunities: $opportunities, generatedAt: $generatedAt, totalSources: $totalSources, error: $error)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$NicheRadarResponseImpl &&
+            const DeepCollectionEquality()
+                .equals(other._opportunities, _opportunities) &&
+            (identical(other.generatedAt, generatedAt) ||
+                other.generatedAt == generatedAt) &&
+            (identical(other.totalSources, totalSources) ||
+                other.totalSources == totalSources) &&
+            (identical(other.error, error) || other.error == error));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(_opportunities),
+      generatedAt,
+      totalSources,
+      error);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$NicheRadarResponseImplCopyWith<_$NicheRadarResponseImpl> get copyWith =>
+      __$$NicheRadarResponseImplCopyWithImpl<_$NicheRadarResponseImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$NicheRadarResponseImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _NicheRadarResponse implements NicheRadarResponse {
+  const factory _NicheRadarResponse(
+      {required final List<NicheOpportunity> opportunities,
+      required final DateTime generatedAt,
+      required final int totalSources,
+      final String? error}) = _$NicheRadarResponseImpl;
+
+  factory _NicheRadarResponse.fromJson(Map<String, dynamic> json) =
+      _$NicheRadarResponseImpl.fromJson;
+
+  @override
+  List<NicheOpportunity> get opportunities;
+  @override
+  DateTime get generatedAt;
+  @override
+  int get totalSources;
+  @override
+  String? get error;
+  @override
+  @JsonKey(ignore: true)
+  _$$NicheRadarResponseImplCopyWith<_$NicheRadarResponseImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+PlaybookRequest _$PlaybookRequestFromJson(Map<String, dynamic> json) {
+  return _PlaybookRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$PlaybookRequest {
+  String get topic => throw _privateConstructorUsedError;
+  double get score => throw _privateConstructorUsedError;
+  double get confidence => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $PlaybookRequestCopyWith<PlaybookRequest> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $PlaybookRequestCopyWith<$Res> {
+  factory $PlaybookRequestCopyWith(
+          PlaybookRequest value, $Res Function(PlaybookRequest) then) =
+      _$PlaybookRequestCopyWithImpl<$Res, PlaybookRequest>;
+  @useResult
+  $Res call({String topic, double score, double confidence});
+}
+
+/// @nodoc
+class _$PlaybookRequestCopyWithImpl<$Res, $Val extends PlaybookRequest>
+    implements $PlaybookRequestCopyWith<$Res> {
+  _$PlaybookRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? topic = null,
+    Object? score = null,
+    Object? confidence = null,
+  }) {
+    return _then(_value.copyWith(
+      topic: null == topic
+          ? _value.topic
+          : topic // ignore: cast_nullable_to_non_nullable
+              as String,
+      score: null == score
+          ? _value.score
+          : score // ignore: cast_nullable_to_non_nullable
+              as double,
+      confidence: null == confidence
+          ? _value.confidence
+          : confidence // ignore: cast_nullable_to_non_nullable
+              as double,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$PlaybookRequestImplCopyWith<$Res>
+    implements $PlaybookRequestCopyWith<$Res> {
+  factory _$$PlaybookRequestImplCopyWith(_$PlaybookRequestImpl value,
+          $Res Function(_$PlaybookRequestImpl) then) =
+      __$$PlaybookRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String topic, double score, double confidence});
+}
+
+/// @nodoc
+class __$$PlaybookRequestImplCopyWithImpl<$Res>
+    extends _$PlaybookRequestCopyWithImpl<$Res, _$PlaybookRequestImpl>
+    implements _$$PlaybookRequestImplCopyWith<$Res> {
+  __$$PlaybookRequestImplCopyWithImpl(
+      _$PlaybookRequestImpl _value, $Res Function(_$PlaybookRequestImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? topic = null,
+    Object? score = null,
+    Object? confidence = null,
+  }) {
+    return _then(_$PlaybookRequestImpl(
+      topic: null == topic
+          ? _value.topic
+          : topic // ignore: cast_nullable_to_non_nullable
+              as String,
+      score: null == score
+          ? _value.score
+          : score // ignore: cast_nullable_to_non_nullable
+              as double,
+      confidence: null == confidence
+          ? _value.confidence
+          : confidence // ignore: cast_nullable_to_non_nullable
+              as double,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$PlaybookRequestImpl implements _PlaybookRequest {
+  const _$PlaybookRequestImpl(
+      {required this.topic, required this.score, required this.confidence});
+
+  factory _$PlaybookRequestImpl.fromJson(Map<String, dynamic> json) =>
+      _$$PlaybookRequestImplFromJson(json);
+
+  @override
+  final String topic;
+  @override
+  final double score;
+  @override
+  final double confidence;
+
+  @override
+  String toString() {
+    return 'PlaybookRequest(topic: $topic, score: $score, confidence: $confidence)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$PlaybookRequestImpl &&
+            (identical(other.topic, topic) || other.topic == topic) &&
+            (identical(other.score, score) || other.score == score) &&
+            (identical(other.confidence, confidence) ||
+                other.confidence == confidence));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(runtimeType, topic, score, confidence);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$PlaybookRequestImplCopyWith<_$PlaybookRequestImpl> get copyWith =>
+      __$$PlaybookRequestImplCopyWithImpl<_$PlaybookRequestImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$PlaybookRequestImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _PlaybookRequest implements PlaybookRequest {
+  const factory _PlaybookRequest(
+      {required final String topic,
+      required final double score,
+      required final double confidence}) = _$PlaybookRequestImpl;
+
+  factory _PlaybookRequest.fromJson(Map<String, dynamic> json) =
+      _$PlaybookRequestImpl.fromJson;
+
+  @override
+  String get topic;
+  @override
+  double get score;
+  @override
+  double get confidence;
+  @override
+  @JsonKey(ignore: true)
+  _$$PlaybookRequestImplCopyWith<_$PlaybookRequestImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+PlaybookResponse _$PlaybookResponseFromJson(Map<String, dynamic> json) {
+  return _PlaybookResponse.fromJson(json);
+}
+
+/// @nodoc
+mixin _$PlaybookResponse {
+  String get topic => throw _privateConstructorUsedError;
+  ProductBrief get productBrief => throw _privateConstructorUsedError;
+  MVPSpec get mvpSpec => throw _privateConstructorUsedError;
+  PricingSuggestion get pricingSuggestion => throw _privateConstructorUsedError;
+  List<String> get assets => throw _privateConstructorUsedError;
+  DateTime get generatedAt => throw _privateConstructorUsedError;
+  String? get error => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $PlaybookResponseCopyWith<PlaybookResponse> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $PlaybookResponseCopyWith<$Res> {
+  factory $PlaybookResponseCopyWith(
+          PlaybookResponse value, $Res Function(PlaybookResponse) then) =
+      _$PlaybookResponseCopyWithImpl<$Res, PlaybookResponse>;
+  @useResult
+  $Res call(
+      {String topic,
+      ProductBrief productBrief,
+      MVPSpec mvpSpec,
+      PricingSuggestion pricingSuggestion,
+      List<String> assets,
+      DateTime generatedAt,
+      String? error});
+
+  $ProductBriefCopyWith<$Res> get productBrief;
+  $MVPSpecCopyWith<$Res> get mvpSpec;
+  $PricingSuggestionCopyWith<$Res> get pricingSuggestion;
+}
+
+/// @nodoc
+class _$PlaybookResponseCopyWithImpl<$Res, $Val extends PlaybookResponse>
+    implements $PlaybookResponseCopyWith<$Res> {
+  _$PlaybookResponseCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? topic = null,
+    Object? productBrief = null,
+    Object? mvpSpec = null,
+    Object? pricingSuggestion = null,
+    Object? assets = null,
+    Object? generatedAt = null,
+    Object? error = freezed,
+  }) {
+    return _then(_value.copyWith(
+      topic: null == topic
+          ? _value.topic
+          : topic // ignore: cast_nullable_to_non_nullable
+              as String,
+      productBrief: null == productBrief
+          ? _value.productBrief
+          : productBrief // ignore: cast_nullable_to_non_nullable
+              as ProductBrief,
+      mvpSpec: null == mvpSpec
+          ? _value.mvpSpec
+          : mvpSpec // ignore: cast_nullable_to_non_nullable
+              as MVPSpec,
+      pricingSuggestion: null == pricingSuggestion
+          ? _value.pricingSuggestion
+          : pricingSuggestion // ignore: cast_nullable_to_non_nullable
+              as PricingSuggestion,
+      assets: null == assets
+          ? _value.assets
+          : assets // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      generatedAt: null == generatedAt
+          ? _value.generatedAt
+          : generatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      error: freezed == error
+          ? _value.error
+          : error // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ) as $Val);
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  $ProductBriefCopyWith<$Res> get productBrief {
+    return $ProductBriefCopyWith<$Res>(_value.productBrief, (value) {
+      return _then(_value.copyWith(productBrief: value) as $Val);
+    });
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  $MVPSpecCopyWith<$Res> get mvpSpec {
+    return $MVPSpecCopyWith<$Res>(_value.mvpSpec, (value) {
+      return _then(_value.copyWith(mvpSpec: value) as $Val);
+    });
+  }
+
+  @override
+  @pragma('vm:prefer-inline')
+  $PricingSuggestionCopyWith<$Res> get pricingSuggestion {
+    return $PricingSuggestionCopyWith<$Res>(_value.pricingSuggestion, (value) {
+      return _then(_value.copyWith(pricingSuggestion: value) as $Val);
+    });
+  }
+}
+
+/// @nodoc
+abstract class _$$PlaybookResponseImplCopyWith<$Res>
+    implements $PlaybookResponseCopyWith<$Res> {
+  factory _$$PlaybookResponseImplCopyWith(_$PlaybookResponseImpl value,
+          $Res Function(_$PlaybookResponseImpl) then) =
+      __$$PlaybookResponseImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String topic,
+      ProductBrief productBrief,
+      MVPSpec mvpSpec,
+      PricingSuggestion pricingSuggestion,
+      List<String> assets,
+      DateTime generatedAt,
+      String? error});
+
+  @override
+  $ProductBriefCopyWith<$Res> get productBrief;
+  @override
+  $MVPSpecCopyWith<$Res> get mvpSpec;
+  @override
+  $PricingSuggestionCopyWith<$Res> get pricingSuggestion;
+}
+
+/// @nodoc
+class __$$PlaybookResponseImplCopyWithImpl<$Res>
+    extends _$PlaybookResponseCopyWithImpl<$Res, _$PlaybookResponseImpl>
+    implements _$$PlaybookResponseImplCopyWith<$Res> {
+  __$$PlaybookResponseImplCopyWithImpl(_$PlaybookResponseImpl _value,
+      $Res Function(_$PlaybookResponseImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? topic = null,
+    Object? productBrief = null,
+    Object? mvpSpec = null,
+    Object? pricingSuggestion = null,
+    Object? assets = null,
+    Object? generatedAt = null,
+    Object? error = freezed,
+  }) {
+    return _then(_$PlaybookResponseImpl(
+      topic: null == topic
+          ? _value.topic
+          : topic // ignore: cast_nullable_to_non_nullable
+              as String,
+      productBrief: null == productBrief
+          ? _value.productBrief
+          : productBrief // ignore: cast_nullable_to_non_nullable
+              as ProductBrief,
+      mvpSpec: null == mvpSpec
+          ? _value.mvpSpec
+          : mvpSpec // ignore: cast_nullable_to_non_nullable
+              as MVPSpec,
+      pricingSuggestion: null == pricingSuggestion
+          ? _value.pricingSuggestion
+          : pricingSuggestion // ignore: cast_nullable_to_non_nullable
+              as PricingSuggestion,
+      assets: null == assets
+          ? _value._assets
+          : assets // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      generatedAt: null == generatedAt
+          ? _value.generatedAt
+          : generatedAt // ignore: cast_nullable_to_non_nullable
+              as DateTime,
+      error: freezed == error
+          ? _value.error
+          : error // ignore: cast_nullable_to_non_nullable
+              as String?,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$PlaybookResponseImpl implements _PlaybookResponse {
+  const _$PlaybookResponseImpl(
+      {required this.topic,
+      required this.productBrief,
+      required this.mvpSpec,
+      required this.pricingSuggestion,
+      required final List<String> assets,
+      required this.generatedAt,
+      this.error})
+      : _assets = assets;
+
+  factory _$PlaybookResponseImpl.fromJson(Map<String, dynamic> json) =>
+      _$$PlaybookResponseImplFromJson(json);
+
+  @override
+  final String topic;
+  @override
+  final ProductBrief productBrief;
+  @override
+  final MVPSpec mvpSpec;
+  @override
+  final PricingSuggestion pricingSuggestion;
+  final List<String> _assets;
+  @override
+  List<String> get assets {
+    if (_assets is EqualUnmodifiableListView) return _assets;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_assets);
+  }
+
+  @override
+  final DateTime generatedAt;
+  @override
+  final String? error;
+
+  @override
+  String toString() {
+    return 'PlaybookResponse(topic: $topic, productBrief: $productBrief, mvpSpec: $mvpSpec, pricingSuggestion: $pricingSuggestion, assets: $assets, generatedAt: $generatedAt, error: $error)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$PlaybookResponseImpl &&
+            (identical(other.topic, topic) || other.topic == topic) &&
+            (identical(other.productBrief, productBrief) ||
+                other.productBrief == productBrief) &&
+            (identical(other.mvpSpec, mvpSpec) || other.mvpSpec == mvpSpec) &&
+            (identical(other.pricingSuggestion, pricingSuggestion) ||
+                other.pricingSuggestion == pricingSuggestion) &&
+            const DeepCollectionEquality().equals(other._assets, _assets) &&
+            (identical(other.generatedAt, generatedAt) ||
+                other.generatedAt == generatedAt) &&
+            (identical(other.error, error) || other.error == error));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      topic,
+      productBrief,
+      mvpSpec,
+      pricingSuggestion,
+      const DeepCollectionEquality().hash(_assets),
+      generatedAt,
+      error);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$PlaybookResponseImplCopyWith<_$PlaybookResponseImpl> get copyWith =>
+      __$$PlaybookResponseImplCopyWithImpl<_$PlaybookResponseImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$PlaybookResponseImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _PlaybookResponse implements PlaybookResponse {
+  const factory _PlaybookResponse(
+      {required final String topic,
+      required final ProductBrief productBrief,
+      required final MVPSpec mvpSpec,
+      required final PricingSuggestion pricingSuggestion,
+      required final List<String> assets,
+      required final DateTime generatedAt,
+      final String? error}) = _$PlaybookResponseImpl;
+
+  factory _PlaybookResponse.fromJson(Map<String, dynamic> json) =
+      _$PlaybookResponseImpl.fromJson;
+
+  @override
+  String get topic;
+  @override
+  ProductBrief get productBrief;
+  @override
+  MVPSpec get mvpSpec;
+  @override
+  PricingSuggestion get pricingSuggestion;
+  @override
+  List<String> get assets;
+  @override
+  DateTime get generatedAt;
+  @override
+  String? get error;
+  @override
+  @JsonKey(ignore: true)
+  _$$PlaybookResponseImplCopyWith<_$PlaybookResponseImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+ProductBrief _$ProductBriefFromJson(Map<String, dynamic> json) {
+  return _ProductBrief.fromJson(json);
+}
+
+/// @nodoc
+mixin _$ProductBrief {
+  String get title => throw _privateConstructorUsedError;
+  String get description => throw _privateConstructorUsedError;
+  String get persona => throw _privateConstructorUsedError;
+  List<String> get painPoints => throw _privateConstructorUsedError;
+  List<String> get jobToBeDone => throw _privateConstructorUsedError;
+  String get uniqueSellingProposition => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $ProductBriefCopyWith<ProductBrief> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $ProductBriefCopyWith<$Res> {
+  factory $ProductBriefCopyWith(
+          ProductBrief value, $Res Function(ProductBrief) then) =
+      _$ProductBriefCopyWithImpl<$Res, ProductBrief>;
+  @useResult
+  $Res call(
+      {String title,
+      String description,
+      String persona,
+      List<String> painPoints,
+      List<String> jobToBeDone,
+      String uniqueSellingProposition});
+}
+
+/// @nodoc
+class _$ProductBriefCopyWithImpl<$Res, $Val extends ProductBrief>
+    implements $ProductBriefCopyWith<$Res> {
+  _$ProductBriefCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? title = null,
+    Object? description = null,
+    Object? persona = null,
+    Object? painPoints = null,
+    Object? jobToBeDone = null,
+    Object? uniqueSellingProposition = null,
+  }) {
+    return _then(_value.copyWith(
+      title: null == title
+          ? _value.title
+          : title // ignore: cast_nullable_to_non_nullable
+              as String,
+      description: null == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String,
+      persona: null == persona
+          ? _value.persona
+          : persona // ignore: cast_nullable_to_non_nullable
+              as String,
+      painPoints: null == painPoints
+          ? _value.painPoints
+          : painPoints // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      jobToBeDone: null == jobToBeDone
+          ? _value.jobToBeDone
+          : jobToBeDone // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      uniqueSellingProposition: null == uniqueSellingProposition
+          ? _value.uniqueSellingProposition
+          : uniqueSellingProposition // ignore: cast_nullable_to_non_nullable
+              as String,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$ProductBriefImplCopyWith<$Res>
+    implements $ProductBriefCopyWith<$Res> {
+  factory _$$ProductBriefImplCopyWith(
+          _$ProductBriefImpl value, $Res Function(_$ProductBriefImpl) then) =
+      __$$ProductBriefImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String title,
+      String description,
+      String persona,
+      List<String> painPoints,
+      List<String> jobToBeDone,
+      String uniqueSellingProposition});
+}
+
+/// @nodoc
+class __$$ProductBriefImplCopyWithImpl<$Res>
+    extends _$ProductBriefCopyWithImpl<$Res, _$ProductBriefImpl>
+    implements _$$ProductBriefImplCopyWith<$Res> {
+  __$$ProductBriefImplCopyWithImpl(
+      _$ProductBriefImpl _value, $Res Function(_$ProductBriefImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? title = null,
+    Object? description = null,
+    Object? persona = null,
+    Object? painPoints = null,
+    Object? jobToBeDone = null,
+    Object? uniqueSellingProposition = null,
+  }) {
+    return _then(_$ProductBriefImpl(
+      title: null == title
+          ? _value.title
+          : title // ignore: cast_nullable_to_non_nullable
+              as String,
+      description: null == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String,
+      persona: null == persona
+          ? _value.persona
+          : persona // ignore: cast_nullable_to_non_nullable
+              as String,
+      painPoints: null == painPoints
+          ? _value._painPoints
+          : painPoints // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      jobToBeDone: null == jobToBeDone
+          ? _value._jobToBeDone
+          : jobToBeDone // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+      uniqueSellingProposition: null == uniqueSellingProposition
+          ? _value.uniqueSellingProposition
+          : uniqueSellingProposition // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$ProductBriefImpl implements _ProductBrief {
+  const _$ProductBriefImpl(
+      {required this.title,
+      required this.description,
+      required this.persona,
+      required final List<String> painPoints,
+      required final List<String> jobToBeDone,
+      required this.uniqueSellingProposition})
+      : _painPoints = painPoints,
+        _jobToBeDone = jobToBeDone;
+
+  factory _$ProductBriefImpl.fromJson(Map<String, dynamic> json) =>
+      _$$ProductBriefImplFromJson(json);
+
+  @override
+  final String title;
+  @override
+  final String description;
+  @override
+  final String persona;
+  final List<String> _painPoints;
+  @override
+  List<String> get painPoints {
+    if (_painPoints is EqualUnmodifiableListView) return _painPoints;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_painPoints);
+  }
+
+  final List<String> _jobToBeDone;
+  @override
+  List<String> get jobToBeDone {
+    if (_jobToBeDone is EqualUnmodifiableListView) return _jobToBeDone;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_jobToBeDone);
+  }
+
+  @override
+  final String uniqueSellingProposition;
+
+  @override
+  String toString() {
+    return 'ProductBrief(title: $title, description: $description, persona: $persona, painPoints: $painPoints, jobToBeDone: $jobToBeDone, uniqueSellingProposition: $uniqueSellingProposition)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$ProductBriefImpl &&
+            (identical(other.title, title) || other.title == title) &&
+            (identical(other.description, description) ||
+                other.description == description) &&
+            (identical(other.persona, persona) || other.persona == persona) &&
+            const DeepCollectionEquality()
+                .equals(other._painPoints, _painPoints) &&
+            const DeepCollectionEquality()
+                .equals(other._jobToBeDone, _jobToBeDone) &&
+            (identical(
+                    other.uniqueSellingProposition, uniqueSellingProposition) ||
+                other.uniqueSellingProposition == uniqueSellingProposition));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      title,
+      description,
+      persona,
+      const DeepCollectionEquality().hash(_painPoints),
+      const DeepCollectionEquality().hash(_jobToBeDone),
+      uniqueSellingProposition);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$ProductBriefImplCopyWith<_$ProductBriefImpl> get copyWith =>
+      __$$ProductBriefImplCopyWithImpl<_$ProductBriefImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$ProductBriefImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _ProductBrief implements ProductBrief {
+  const factory _ProductBrief(
+      {required final String title,
+      required final String description,
+      required final String persona,
+      required final List<String> painPoints,
+      required final List<String> jobToBeDone,
+      required final String uniqueSellingProposition}) = _$ProductBriefImpl;
+
+  factory _ProductBrief.fromJson(Map<String, dynamic> json) =
+      _$ProductBriefImpl.fromJson;
+
+  @override
+  String get title;
+  @override
+  String get description;
+  @override
+  String get persona;
+  @override
+  List<String> get painPoints;
+  @override
+  List<String> get jobToBeDone;
+  @override
+  String get uniqueSellingProposition;
+  @override
+  @JsonKey(ignore: true)
+  _$$ProductBriefImplCopyWith<_$ProductBriefImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+MVPSpec _$MVPSpecFromJson(Map<String, dynamic> json) {
+  return _MVPSpec.fromJson(json);
+}
+
+/// @nodoc
+mixin _$MVPSpec {
+  List<Feature> get features => throw _privateConstructorUsedError;
+  int get estimatedDevelopmentDays => throw _privateConstructorUsedError;
+  String get architecture => throw _privateConstructorUsedError;
+  List<String> get dependencies => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $MVPSpecCopyWith<MVPSpec> get copyWith => throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $MVPSpecCopyWith<$Res> {
+  factory $MVPSpecCopyWith(MVPSpec value, $Res Function(MVPSpec) then) =
+      _$MVPSpecCopyWithImpl<$Res, MVPSpec>;
+  @useResult
+  $Res call(
+      {List<Feature> features,
+      int estimatedDevelopmentDays,
+      String architecture,
+      List<String> dependencies});
+}
+
+/// @nodoc
+class _$MVPSpecCopyWithImpl<$Res, $Val extends MVPSpec>
+    implements $MVPSpecCopyWith<$Res> {
+  _$MVPSpecCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? features = null,
+    Object? estimatedDevelopmentDays = null,
+    Object? architecture = null,
+    Object? dependencies = null,
+  }) {
+    return _then(_value.copyWith(
+      features: null == features
+          ? _value.features
+          : features // ignore: cast_nullable_to_non_nullable
+              as List<Feature>,
+      estimatedDevelopmentDays: null == estimatedDevelopmentDays
+          ? _value.estimatedDevelopmentDays
+          : estimatedDevelopmentDays // ignore: cast_nullable_to_non_nullable
+              as int,
+      architecture: null == architecture
+          ? _value.architecture
+          : architecture // ignore: cast_nullable_to_non_nullable
+              as String,
+      dependencies: null == dependencies
+          ? _value.dependencies
+          : dependencies // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$MVPSpecImplCopyWith<$Res> implements $MVPSpecCopyWith<$Res> {
+  factory _$$MVPSpecImplCopyWith(
+          _$MVPSpecImpl value, $Res Function(_$MVPSpecImpl) then) =
+      __$$MVPSpecImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {List<Feature> features,
+      int estimatedDevelopmentDays,
+      String architecture,
+      List<String> dependencies});
+}
+
+/// @nodoc
+class __$$MVPSpecImplCopyWithImpl<$Res>
+    extends _$MVPSpecCopyWithImpl<$Res, _$MVPSpecImpl>
+    implements _$$MVPSpecImplCopyWith<$Res> {
+  __$$MVPSpecImplCopyWithImpl(
+      _$MVPSpecImpl _value, $Res Function(_$MVPSpecImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? features = null,
+    Object? estimatedDevelopmentDays = null,
+    Object? architecture = null,
+    Object? dependencies = null,
+  }) {
+    return _then(_$MVPSpecImpl(
+      features: null == features
+          ? _value._features
+          : features // ignore: cast_nullable_to_non_nullable
+              as List<Feature>,
+      estimatedDevelopmentDays: null == estimatedDevelopmentDays
+          ? _value.estimatedDevelopmentDays
+          : estimatedDevelopmentDays // ignore: cast_nullable_to_non_nullable
+              as int,
+      architecture: null == architecture
+          ? _value.architecture
+          : architecture // ignore: cast_nullable_to_non_nullable
+              as String,
+      dependencies: null == dependencies
+          ? _value._dependencies
+          : dependencies // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$MVPSpecImpl implements _MVPSpec {
+  const _$MVPSpecImpl(
+      {required final List<Feature> features,
+      required this.estimatedDevelopmentDays,
+      required this.architecture,
+      required final List<String> dependencies})
+      : _features = features,
+        _dependencies = dependencies;
+
+  factory _$MVPSpecImpl.fromJson(Map<String, dynamic> json) =>
+      _$$MVPSpecImplFromJson(json);
+
+  final List<Feature> _features;
+  @override
+  List<Feature> get features {
+    if (_features is EqualUnmodifiableListView) return _features;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_features);
+  }
+
+  @override
+  final int estimatedDevelopmentDays;
+  @override
+  final String architecture;
+  final List<String> _dependencies;
+  @override
+  List<String> get dependencies {
+    if (_dependencies is EqualUnmodifiableListView) return _dependencies;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_dependencies);
+  }
+
+  @override
+  String toString() {
+    return 'MVPSpec(features: $features, estimatedDevelopmentDays: $estimatedDevelopmentDays, architecture: $architecture, dependencies: $dependencies)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$MVPSpecImpl &&
+            const DeepCollectionEquality().equals(other._features, _features) &&
+            (identical(
+                    other.estimatedDevelopmentDays, estimatedDevelopmentDays) ||
+                other.estimatedDevelopmentDays == estimatedDevelopmentDays) &&
+            (identical(other.architecture, architecture) ||
+                other.architecture == architecture) &&
+            const DeepCollectionEquality()
+                .equals(other._dependencies, _dependencies));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(
+      runtimeType,
+      const DeepCollectionEquality().hash(_features),
+      estimatedDevelopmentDays,
+      architecture,
+      const DeepCollectionEquality().hash(_dependencies));
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$MVPSpecImplCopyWith<_$MVPSpecImpl> get copyWith =>
+      __$$MVPSpecImplCopyWithImpl<_$MVPSpecImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$MVPSpecImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _MVPSpec implements MVPSpec {
+  const factory _MVPSpec(
+      {required final List<Feature> features,
+      required final int estimatedDevelopmentDays,
+      required final String architecture,
+      required final List<String> dependencies}) = _$MVPSpecImpl;
+
+  factory _MVPSpec.fromJson(Map<String, dynamic> json) = _$MVPSpecImpl.fromJson;
+
+  @override
+  List<Feature> get features;
+  @override
+  int get estimatedDevelopmentDays;
+  @override
+  String get architecture;
+  @override
+  List<String> get dependencies;
+  @override
+  @JsonKey(ignore: true)
+  _$$MVPSpecImplCopyWith<_$MVPSpecImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+Feature _$FeatureFromJson(Map<String, dynamic> json) {
+  return _Feature.fromJson(json);
+}
+
+/// @nodoc
+mixin _$Feature {
+  String get name => throw _privateConstructorUsedError;
+  String get description => throw _privateConstructorUsedError;
+  int get estimatedHours => throw _privateConstructorUsedError;
+  String get priority => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $FeatureCopyWith<Feature> get copyWith => throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $FeatureCopyWith<$Res> {
+  factory $FeatureCopyWith(Feature value, $Res Function(Feature) then) =
+      _$FeatureCopyWithImpl<$Res, Feature>;
+  @useResult
+  $Res call(
+      {String name, String description, int estimatedHours, String priority});
+}
+
+/// @nodoc
+class _$FeatureCopyWithImpl<$Res, $Val extends Feature>
+    implements $FeatureCopyWith<$Res> {
+  _$FeatureCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? name = null,
+    Object? description = null,
+    Object? estimatedHours = null,
+    Object? priority = null,
+  }) {
+    return _then(_value.copyWith(
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      description: null == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String,
+      estimatedHours: null == estimatedHours
+          ? _value.estimatedHours
+          : estimatedHours // ignore: cast_nullable_to_non_nullable
+              as int,
+      priority: null == priority
+          ? _value.priority
+          : priority // ignore: cast_nullable_to_non_nullable
+              as String,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$FeatureImplCopyWith<$Res> implements $FeatureCopyWith<$Res> {
+  factory _$$FeatureImplCopyWith(
+          _$FeatureImpl value, $Res Function(_$FeatureImpl) then) =
+      __$$FeatureImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String name, String description, int estimatedHours, String priority});
+}
+
+/// @nodoc
+class __$$FeatureImplCopyWithImpl<$Res>
+    extends _$FeatureCopyWithImpl<$Res, _$FeatureImpl>
+    implements _$$FeatureImplCopyWith<$Res> {
+  __$$FeatureImplCopyWithImpl(
+      _$FeatureImpl _value, $Res Function(_$FeatureImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? name = null,
+    Object? description = null,
+    Object? estimatedHours = null,
+    Object? priority = null,
+  }) {
+    return _then(_$FeatureImpl(
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      description: null == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String,
+      estimatedHours: null == estimatedHours
+          ? _value.estimatedHours
+          : estimatedHours // ignore: cast_nullable_to_non_nullable
+              as int,
+      priority: null == priority
+          ? _value.priority
+          : priority // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$FeatureImpl implements _Feature {
+  const _$FeatureImpl(
+      {required this.name,
+      required this.description,
+      required this.estimatedHours,
+      required this.priority});
+
+  factory _$FeatureImpl.fromJson(Map<String, dynamic> json) =>
+      _$$FeatureImplFromJson(json);
+
+  @override
+  final String name;
+  @override
+  final String description;
+  @override
+  final int estimatedHours;
+  @override
+  final String priority;
+
+  @override
+  String toString() {
+    return 'Feature(name: $name, description: $description, estimatedHours: $estimatedHours, priority: $priority)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$FeatureImpl &&
+            (identical(other.name, name) || other.name == name) &&
+            (identical(other.description, description) ||
+                other.description == description) &&
+            (identical(other.estimatedHours, estimatedHours) ||
+                other.estimatedHours == estimatedHours) &&
+            (identical(other.priority, priority) ||
+                other.priority == priority));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, name, description, estimatedHours, priority);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$FeatureImplCopyWith<_$FeatureImpl> get copyWith =>
+      __$$FeatureImplCopyWithImpl<_$FeatureImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$FeatureImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _Feature implements Feature {
+  const factory _Feature(
+      {required final String name,
+      required final String description,
+      required final int estimatedHours,
+      required final String priority}) = _$FeatureImpl;
+
+  factory _Feature.fromJson(Map<String, dynamic> json) = _$FeatureImpl.fromJson;
+
+  @override
+  String get name;
+  @override
+  String get description;
+  @override
+  int get estimatedHours;
+  @override
+  String get priority;
+  @override
+  @JsonKey(ignore: true)
+  _$$FeatureImplCopyWith<_$FeatureImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+PricingSuggestion _$PricingSuggestionFromJson(Map<String, dynamic> json) {
+  return _PricingSuggestion.fromJson(json);
+}
+
+/// @nodoc
+mixin _$PricingSuggestion {
+  List<PricingTier> get tiers => throw _privateConstructorUsedError;
+  String get rationale => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $PricingSuggestionCopyWith<PricingSuggestion> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $PricingSuggestionCopyWith<$Res> {
+  factory $PricingSuggestionCopyWith(
+          PricingSuggestion value, $Res Function(PricingSuggestion) then) =
+      _$PricingSuggestionCopyWithImpl<$Res, PricingSuggestion>;
+  @useResult
+  $Res call({List<PricingTier> tiers, String rationale});
+}
+
+/// @nodoc
+class _$PricingSuggestionCopyWithImpl<$Res, $Val extends PricingSuggestion>
+    implements $PricingSuggestionCopyWith<$Res> {
+  _$PricingSuggestionCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? tiers = null,
+    Object? rationale = null,
+  }) {
+    return _then(_value.copyWith(
+      tiers: null == tiers
+          ? _value.tiers
+          : tiers // ignore: cast_nullable_to_non_nullable
+              as List<PricingTier>,
+      rationale: null == rationale
+          ? _value.rationale
+          : rationale // ignore: cast_nullable_to_non_nullable
+              as String,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$PricingSuggestionImplCopyWith<$Res>
+    implements $PricingSuggestionCopyWith<$Res> {
+  factory _$$PricingSuggestionImplCopyWith(_$PricingSuggestionImpl value,
+          $Res Function(_$PricingSuggestionImpl) then) =
+      __$$PricingSuggestionImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({List<PricingTier> tiers, String rationale});
+}
+
+/// @nodoc
+class __$$PricingSuggestionImplCopyWithImpl<$Res>
+    extends _$PricingSuggestionCopyWithImpl<$Res, _$PricingSuggestionImpl>
+    implements _$$PricingSuggestionImplCopyWith<$Res> {
+  __$$PricingSuggestionImplCopyWithImpl(_$PricingSuggestionImpl _value,
+      $Res Function(_$PricingSuggestionImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? tiers = null,
+    Object? rationale = null,
+  }) {
+    return _then(_$PricingSuggestionImpl(
+      tiers: null == tiers
+          ? _value._tiers
+          : tiers // ignore: cast_nullable_to_non_nullable
+              as List<PricingTier>,
+      rationale: null == rationale
+          ? _value.rationale
+          : rationale // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$PricingSuggestionImpl implements _PricingSuggestion {
+  const _$PricingSuggestionImpl(
+      {required final List<PricingTier> tiers, required this.rationale})
+      : _tiers = tiers;
+
+  factory _$PricingSuggestionImpl.fromJson(Map<String, dynamic> json) =>
+      _$$PricingSuggestionImplFromJson(json);
+
+  final List<PricingTier> _tiers;
+  @override
+  List<PricingTier> get tiers {
+    if (_tiers is EqualUnmodifiableListView) return _tiers;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_tiers);
+  }
+
+  @override
+  final String rationale;
+
+  @override
+  String toString() {
+    return 'PricingSuggestion(tiers: $tiers, rationale: $rationale)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$PricingSuggestionImpl &&
+            const DeepCollectionEquality().equals(other._tiers, _tiers) &&
+            (identical(other.rationale, rationale) ||
+                other.rationale == rationale));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(
+      runtimeType, const DeepCollectionEquality().hash(_tiers), rationale);
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$PricingSuggestionImplCopyWith<_$PricingSuggestionImpl> get copyWith =>
+      __$$PricingSuggestionImplCopyWithImpl<_$PricingSuggestionImpl>(
+          this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$PricingSuggestionImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _PricingSuggestion implements PricingSuggestion {
+  const factory _PricingSuggestion(
+      {required final List<PricingTier> tiers,
+      required final String rationale}) = _$PricingSuggestionImpl;
+
+  factory _PricingSuggestion.fromJson(Map<String, dynamic> json) =
+      _$PricingSuggestionImpl.fromJson;
+
+  @override
+  List<PricingTier> get tiers;
+  @override
+  String get rationale;
+  @override
+  @JsonKey(ignore: true)
+  _$$PricingSuggestionImplCopyWith<_$PricingSuggestionImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+PricingTier _$PricingTierFromJson(Map<String, dynamic> json) {
+  return _PricingTier.fromJson(json);
+}
+
+/// @nodoc
+mixin _$PricingTier {
+  String get name => throw _privateConstructorUsedError;
+  double get price => throw _privateConstructorUsedError;
+  String get rationale => throw _privateConstructorUsedError;
+  List<String> get features => throw _privateConstructorUsedError;
+
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  @JsonKey(ignore: true)
+  $PricingTierCopyWith<PricingTier> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $PricingTierCopyWith<$Res> {
+  factory $PricingTierCopyWith(
+          PricingTier value, $Res Function(PricingTier) then) =
+      _$PricingTierCopyWithImpl<$Res, PricingTier>;
+  @useResult
+  $Res call(
+      {String name, double price, String rationale, List<String> features});
+}
+
+/// @nodoc
+class _$PricingTierCopyWithImpl<$Res, $Val extends PricingTier>
+    implements $PricingTierCopyWith<$Res> {
+  _$PricingTierCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? name = null,
+    Object? price = null,
+    Object? rationale = null,
+    Object? features = null,
+  }) {
+    return _then(_value.copyWith(
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      price: null == price
+          ? _value.price
+          : price // ignore: cast_nullable_to_non_nullable
+              as double,
+      rationale: null == rationale
+          ? _value.rationale
+          : rationale // ignore: cast_nullable_to_non_nullable
+              as String,
+      features: null == features
+          ? _value.features
+          : features // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$PricingTierImplCopyWith<$Res>
+    implements $PricingTierCopyWith<$Res> {
+  factory _$$PricingTierImplCopyWith(
+          _$PricingTierImpl value, $Res Function(_$PricingTierImpl) then) =
+      __$$PricingTierImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call(
+      {String name, double price, String rationale, List<String> features});
+}
+
+/// @nodoc
+class __$$PricingTierImplCopyWithImpl<$Res>
+    extends _$PricingTierCopyWithImpl<$Res, _$PricingTierImpl>
+    implements _$$PricingTierImplCopyWith<$Res> {
+  __$$PricingTierImplCopyWithImpl(
+      _$PricingTierImpl _value, $Res Function(_$PricingTierImpl) _then)
+      : super(_value, _then);
+
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? name = null,
+    Object? price = null,
+    Object? rationale = null,
+    Object? features = null,
+  }) {
+    return _then(_$PricingTierImpl(
+      name: null == name
+          ? _value.name
+          : name // ignore: cast_nullable_to_non_nullable
+              as String,
+      price: null == price
+          ? _value.price
+          : price // ignore: cast_nullable_to_non_nullable
+              as double,
+      rationale: null == rationale
+          ? _value.rationale
+          : rationale // ignore: cast_nullable_to_non_nullable
+              as String,
+      features: null == features
+          ? _value._features
+          : features // ignore: cast_nullable_to_non_nullable
+              as List<String>,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$PricingTierImpl implements _PricingTier {
+  const _$PricingTierImpl(
+      {required this.name,
+      required this.price,
+      required this.rationale,
+      required final List<String> features})
+      : _features = features;
+
+  factory _$PricingTierImpl.fromJson(Map<String, dynamic> json) =>
+      _$$PricingTierImplFromJson(json);
+
+  @override
+  final String name;
+  @override
+  final double price;
+  @override
+  final String rationale;
+  final List<String> _features;
+  @override
+  List<String> get features {
+    if (_features is EqualUnmodifiableListView) return _features;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_features);
+  }
+
+  @override
+  String toString() {
+    return 'PricingTier(name: $name, price: $price, rationale: $rationale, features: $features)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$PricingTierImpl &&
+            (identical(other.name, name) || other.name == name) &&
+            (identical(other.price, price) || other.price == price) &&
+            (identical(other.rationale, rationale) ||
+                other.rationale == rationale) &&
+            const DeepCollectionEquality().equals(other._features, _features));
+  }
+
+  @JsonKey(ignore: true)
+  @override
+  int get hashCode => Object.hash(runtimeType, name, price, rationale,
+      const DeepCollectionEquality().hash(_features));
+
+  @JsonKey(ignore: true)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$PricingTierImplCopyWith<_$PricingTierImpl> get copyWith =>
+      __$$PricingTierImplCopyWithImpl<_$PricingTierImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$PricingTierImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _PricingTier implements PricingTier {
+  const factory _PricingTier(
+      {required final String name,
+      required final double price,
+      required final String rationale,
+      required final List<String> features}) = _$PricingTierImpl;
+
+  factory _PricingTier.fromJson(Map<String, dynamic> json) =
+      _$PricingTierImpl.fromJson;
+
+  @override
+  String get name;
+  @override
+  double get price;
+  @override
+  String get rationale;
+  @override
+  List<String> get features;
+  @override
+  @JsonKey(ignore: true)
+  _$$PricingTierImplCopyWith<_$PricingTierImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

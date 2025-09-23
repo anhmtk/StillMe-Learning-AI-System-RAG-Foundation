@@ -1,29 +1,28 @@
 {
-  "name": "stillme-chat-ui",
-  "version": "1.0.0",
-  "description": "StillMe AI Chat UI - Beautiful interface like HuggingFace ChatUI",
-  "type": "module",
-  "main": "index.js",
+  "name": "stillme-nicheradar-tests",
+  "version": "1.5.0",
+  "description": "Test suite for NicheRadar v1.5",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "start": "vite --host 0.0.0.0 --port 3000"
-  },
-  "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "lucide-react": "^0.263.1",
-    "framer-motion": "^10.16.4",
-    "clsx": "^2.0.0"
+    "test:sanity": "set PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 && python tools/scan_null_bytes.py && set PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 && pytest -q",
+    "test:core": "set PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 && python tools/scan_null_bytes.py && set PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 && pytest -q -p pytest_cov --cov=stillme --cov-report=html:reports/coverage",
+    "test:full": "set PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 && python tools/scan_null_bytes.py && set PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 && pytest -q --html=reports/test_report.html --self-contained-html",
+    "test:all": "npm run test:sanity && npm run test:core && npm run test:full",
+    "clean:test": "tools/clean_test_artifacts.bat",
+    "install:test-deps": "pip install -r requirements-test.txt",
+    "inventory:primary": "python tools/repo_inventory.py --mode primary --with-hash",
+    "inventory:excluded": "python tools/repo_inventory.py --mode excluded",
+    "inventory:all": "npm run inventory:primary && npm run inventory:excluded",
+    "find:candidates": "python tools/find_candidates.py",
+    "quarantine:list": "python tools/quarantine_move.py --action list",
+    "quarantine:low": "python tools/quarantine_move.py --action quarantine --risk LOW --dry-run",
+    "quarantine:low:real": "python tools/quarantine_move.py --action quarantine --risk LOW",
+    "quarantine:medium": "python tools/quarantine_move.py --action quarantine --risk MEDIUM --dry-run",
+    "quarantine:high": "python tools/quarantine_move.py --action quarantine --risk HIGH --dry-run",
+    "restore": "python tools/restore_from_graveyard.py",
+    "cleanup": "python tools/quarantine_move.py --action cleanup",
+    "shadow:ci": "npm run inventory:primary && npm run find:candidates && npm run test:sanity && npm run quarantine:low && npm run test:sanity && npm run restore && npm run test:sanity"
   },
   "devDependencies": {
-    "@types/react": "^18.2.15",
-    "@types/react-dom": "^18.2.7",
-    "@vitejs/plugin-react": "^4.0.3",
-    "autoprefixer": "^10.4.14",
-    "postcss": "^8.4.27",
-    "tailwindcss": "^3.3.3",
-    "vite": "^4.4.5"
+    "playwright": "^1.40.0"
   }
 }

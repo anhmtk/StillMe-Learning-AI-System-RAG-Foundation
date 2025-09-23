@@ -1,0 +1,44 @@
+[
+  {
+    "source": "hackernews",
+    "url": "https://news.ycombinator.com/item?id=12345678",
+    "title": "New AI Framework for Developers",
+    "timestamp": "2024-09-22T10:00:00Z",
+    "metrics": {
+      "score": 245,
+      "comments": 89,
+      "heat_score": 0.82
+    },
+    "raw": {
+      "objectID": "12345678",
+      "title": "New AI Framework for Developers",
+      "url": "https://example.com/ai-framework",
+      "points": 245,
+      "num_comments": 89,
+      "created_at": "2024-09-22T09:30:00Z",
+      "author": "techdev",
+      "story_text": "A new framework that makes AI development easier..."
+    }
+  },
+  {
+    "source": "hackernews",
+    "url": "https://news.ycombinator.com/item?id=12345679",
+    "title": "Rust vs Go Performance Comparison",
+    "timestamp": "2024-09-22T10:00:00Z",
+    "metrics": {
+      "score": 189,
+      "comments": 156,
+      "heat_score": 0.75
+    },
+    "raw": {
+      "objectID": "12345679",
+      "title": "Rust vs Go Performance Comparison",
+      "url": "https://example.com/rust-vs-go",
+      "points": 189,
+      "num_comments": 156,
+      "created_at": "2024-09-22T08:45:00Z",
+      "author": "perfexpert",
+      "story_text": "Detailed comparison of Rust and Go performance..."
+    }
+  }
+]

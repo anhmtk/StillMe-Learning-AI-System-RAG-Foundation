@@ -1,0 +1,6 @@
+pytest==8.2.2
+pytest-cov==5.0.0
+pytest-html==4.1.1
+PyYAML==6.0.2
+vcrpy==7.0.0
+chardet==5.2.0

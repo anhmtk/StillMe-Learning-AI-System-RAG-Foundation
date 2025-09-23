@@ -1,0 +1,23 @@
+{
+  "timestamp": "2025-09-16T23:38:28.535394",
+  "test_summary": {
+    "tests_run": 23,
+    "failures": 0,
+    "errors": 9,
+    "skipped": 7,
+    "success_rate": 0.6086956521739131
+  },
+  "performance_metrics": {
+    "response_time": 0.10155391693115234,
+    "memory_usage": 407.27734375,
+    "cpu_usage": 0.0
+  },
+  "security_validation": {
+    "sandbox_isolation": true,
+    "attack_safety": true,
+    "data_protection": true
+  },
+  "recommendations": [
+    "Address test errors and exceptions"
+  ]
+}

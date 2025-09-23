@@ -1,0 +1,48 @@
+[
+  {
+    "source": "newsapi",
+    "url": "https://example.com/ai-breakthrough",
+    "title": "AI Breakthrough in Natural Language Processing",
+    "timestamp": "2024-09-22T10:00:00Z",
+    "metrics": {
+      "relevance_score": 0.92,
+      "sentiment": 0.8,
+      "engagement": 0.75
+    },
+    "raw": {
+      "source": {
+        "id": "tech-crunch",
+        "name": "TechCrunch"
+      },
+      "author": "John Doe",
+      "title": "AI Breakthrough in Natural Language Processing",
+      "description": "New research shows significant improvements in NLP models...",
+      "url": "https://example.com/ai-breakthrough",
+      "urlToImage": "https://example.com/image.jpg",
+      "publishedAt": "2024-09-22T09:30:00Z",
+      "content": "Full article content about AI breakthrough..."
+    }
+  },
+  {
+    "source": "gnews",
+    "url": "https://example.com/startup-funding",
+    "title": "Startup Raises $50M in Series A",
+    "timestamp": "2024-09-22T10:00:00Z",
+    "metrics": {
+      "relevance_score": 0.78,
+      "sentiment": 0.9,
+      "engagement": 0.65
+    },
+    "raw": {
+      "title": "Startup Raises $50M in Series A",
+      "description": "AI startup secures major funding round...",
+      "url": "https://example.com/startup-funding",
+      "image": "https://example.com/startup-image.jpg",
+      "publishedAt": "2024-09-22T08:15:00Z",
+      "source": {
+        "name": "VentureBeat",
+        "url": "https://venturebeat.com"
+      }
+    }
+  }
+]

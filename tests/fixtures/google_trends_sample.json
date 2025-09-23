@@ -1,0 +1,62 @@
+[
+  {
+    "source": "google_trends",
+    "url": "https://trends.google.com/trends/explore?q=artificial+intelligence",
+    "title": "Artificial Intelligence Trends",
+    "timestamp": "2024-09-22T10:00:00Z",
+    "metrics": {
+      "trend_score": 0.85,
+      "search_volume": 95000,
+      "growth_rate": 0.15
+    },
+    "raw": {
+      "keyword": "artificial intelligence",
+      "region": "US",
+      "timeframe": "7d",
+      "interest_over_time": [
+        {"date": "2024-09-15", "value": 80},
+        {"date": "2024-09-16", "value": 85},
+        {"date": "2024-09-17", "value": 90},
+        {"date": "2024-09-18", "value": 88},
+        {"date": "2024-09-19", "value": 92},
+        {"date": "2024-09-20", "value": 95},
+        {"date": "2024-09-21", "value": 98}
+      ],
+      "related_queries": [
+        {"query": "AI tools", "value": 95},
+        {"query": "machine learning", "value": 88},
+        {"query": "neural networks", "value": 82}
+      ]
+    }
+  },
+  {
+    "source": "google_trends",
+    "url": "https://trends.google.com/trends/explore?q=blockchain",
+    "title": "Blockchain Technology Trends",
+    "timestamp": "2024-09-22T10:00:00Z",
+    "metrics": {
+      "trend_score": 0.72,
+      "search_volume": 45000,
+      "growth_rate": 0.08
+    },
+    "raw": {
+      "keyword": "blockchain",
+      "region": "US",
+      "timeframe": "7d",
+      "interest_over_time": [
+        {"date": "2024-09-15", "value": 65},
+        {"date": "2024-09-16", "value": 68},
+        {"date": "2024-09-17", "value": 70},
+        {"date": "2024-09-18", "value": 72},
+        {"date": "2024-09-19", "value": 75},
+        {"date": "2024-09-20", "value": 78},
+        {"date": "2024-09-21", "value": 80}
+      ],
+      "related_queries": [
+        {"query": "cryptocurrency", "value": 90},
+        {"query": "DeFi", "value": 85},
+        {"query": "smart contracts", "value": 78}
+      ]
+    }
+  }
+]

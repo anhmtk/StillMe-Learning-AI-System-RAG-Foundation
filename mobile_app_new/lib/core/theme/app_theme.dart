@@ -11,6 +11,7 @@ class AppTheme {
   static const Color cardColor = Color(0xFF1E293B);
   static const Color textPrimary = Color(0xFFF8FAFC);
   static const Color textSecondary = Color(0xFF94A3B8);
+  static const Color borderColor = Color(0xFF475569);
   static const Color successColor = Color(0xFF10B981);
   static const Color warningColor = Color(0xFFF59E0B);
   static const Color errorColor = Color(0xFFEF4444);

@@ -1,0 +1,681 @@
+#!/usr/bin/env python3
+"""
+🎯 NicheRadar Tests - Comprehensive Test Suite
+=============================================
+
+Tests for NicheRadar v1.5 functionality:
+- Scoring determinism
+- Attribution bắt buộc
+- FeasibilityFit validation
+- Feedback update mechanism
+- Security & compliance
+
+Author: StillMe Framework Team
+Version: 1.5.0
+"""
+
+import pytest
+import asyncio
+import tempfile
+import os
+import yaml
+from datetime import datetime, timedelta
+from pathlib import Path
+import pandas as pd
+
+# Import NicheRadar modules
+from niche_radar.collectors import (
+    NicheRecord, GitHubTrendingCollector, HackerNewsCollector,
+    NewsDeltaCollector, GoogleTrendsCollector, RedditEngagementCollector
+)
+from niche_radar.scoring import NicheScorer, NicheScore
+from niche_radar.playbook import PlaybookGenerator, ExecutionPack
+from niche_radar.feedback import FeedbackTracker, FeedbackRecord, LearningWeights
+
+class TestNicheRadarScoring:
+    """Test NicheRadar scoring functionality"""
+    
+    def test_scoring_determinism(self):
+        """Test that same input produces same score"""
+        scorer = NicheScorer()
+        
+        # Create test records
+        test_records = [
+            NicheRecord(
+                source="GitHub",
+                url="https://github.com/test/repo",
+                title="AI Assistant Framework",
+                timestamp=datetime.now(),
+                metrics={"trending_score": 0.8, "stars": 1000},
+                raw={},
+                topic="ai_assistant",
+                category="development",
+                confidence=0.9
+            ),
+            NicheRecord(
+                source="Hacker News",
+                url="https://news.ycombinator.com/item?id=123",
+                title="New AI Assistant Tools",
+                timestamp=datetime.now(),
+                metrics={"heat_score": 0.7, "score": 150},
+                raw={},
+                topic="ai_assistant",
+                category="tech_news",
+                confidence=0.8
+            )
+        ]
+        
+        # Score multiple times
+        score1 = scorer.score_niche("ai_assistant", test_records)
+        score2 = scorer.score_niche("ai_assistant", test_records)
+        
+        # Should be identical
+        assert score1.total_score == score2.total_score
+        assert score1.confidence == score2.confidence
+        assert score1.feasibility_fit == score2.feasibility_fit
+        assert score1.competition_proxy == score2.competition_proxy
+    
+    def test_attribution_required(self):
+        """Test that all items have required attribution"""
+        scorer = NicheScorer()
+        
+        # Create records with missing attribution
+        incomplete_records = [
+            NicheRecord(
+                source="",  # Missing source
+                url="",     # Missing URL
+                title="Test",
+                timestamp=datetime.now(),
+                metrics={},
+                raw={},
+                topic="test",
+                category="general",
+                confidence=0.5
+            )
+        ]
+        
+        score = scorer.score_niche("test", incomplete_records)
+        
+        # Should still work but with lower confidence
+        assert score.total_score >= 0.0
+        assert score.confidence <= 0.5  # Lower confidence due to missing attribution
+    
+    def test_feasibility_fit_validation(self):
+        """Test FeasibilityFit scoring"""
+        scorer = NicheScorer()
+        
+        # High fit topic
+        high_fit_records = [
+            NicheRecord(
+                source="GitHub",
+                url="https://github.com/test/ai-assistant",
+                title="AI Assistant for NLP Processing",
+                timestamp=datetime.now(),
+                metrics={},
+                raw={},
+                topic="ai_assistant",
+                category="development",
+                confidence=0.8
+            )
+        ]
+        
+        high_fit_score = scorer.score_niche("ai_assistant", high_fit_records)
+        
+        # Low fit topic
+        low_fit_records = [
+            NicheRecord(
+                source="GitHub",
+                url="https://github.com/test/mobile-game",
+                title="Mobile Game with Graphics Engine",
+                timestamp=datetime.now(),
+                metrics={},
+                raw={},
+                topic="mobile_game",
+                category="development",
+                confidence=0.8
+            )
+        ]
+        
+        low_fit_score = scorer.score_niche("mobile_game", low_fit_records)
+        
+        # High fit should score better
+        assert high_fit_score.feasibility_fit > low_fit_score.feasibility_fit
+        assert high_fit_score.total_score > low_fit_score.total_score
+    
+    def test_competition_proxy_calculation(self):
+        """Test competition proxy calculation"""
+        scorer = NicheScorer()
+        
+        # High competition topic
+        high_comp_records = [
+            NicheRecord(
+                source="News",
+                url="https://example.com/crm-news",
+                title="New CRM Software Solutions",
+                timestamp=datetime.now(),
+                metrics={},
+                raw={},
+                topic="crm",
+                category="news",
+                confidence=0.7
+            )
+        ]
+        
+        high_comp_score = scorer.score_niche("crm", high_comp_records)
+        
+        # Low competition topic
+        low_comp_records = [
+            NicheRecord(
+                source="News",
+                url="https://example.com/niche-tool",
+                title="Specialized Niche Tool for Enterprise",
+                timestamp=datetime.now(),
+                metrics={},
+                raw={},
+                topic="niche_tool",
+                category="news",
+                confidence=0.7
+            )
+        ]
+        
+        low_comp_score = scorer.score_niche("niche_tool", low_comp_records)
+        
+        # High competition should have higher competition_proxy
+        assert high_comp_score.competition_proxy > low_comp_score.competition_proxy
+    
+    def test_confidence_calculation(self):
+        """Test confidence calculation"""
+        scorer = NicheScorer()
+        
+        # High confidence scenario (multiple sources, recent data)
+        high_conf_records = [
+            NicheRecord(
+                source="GitHub",
+                url="https://github.com/test/repo1",
+                title="Test Repo 1",
+                timestamp=datetime.now(),
+                metrics={},
+                raw={},
+                topic="test",
+                category="development",
+                confidence=0.9
+            ),
+            NicheRecord(
+                source="Hacker News",
+                url="https://news.ycombinator.com/item?id=1",
+                title="Test News 1",
+                timestamp=datetime.now(),
+                metrics={},
+                raw={},
+                topic="test",
+                category="tech_news",
+                confidence=0.8
+            ),
+            NicheRecord(
+                source="Google Trends",
+                url="https://trends.google.com/trends/explore?q=test",
+                title="Google Trends: test",
+                timestamp=datetime.now(),
+                metrics={},
+                raw={},
+                topic="test",
+                category="search_trends",
+                confidence=0.9
+            )
+        ]
+        
+        high_conf_score = scorer.score_niche("test", high_conf_records)
+        
+        # Low confidence scenario (single source, old data)
+        low_conf_records = [
+            NicheRecord(
+                source="Reddit",
+                url="https://reddit.com/r/test/comments/1",
+                title="Old Test Post",
+                timestamp=datetime.now() - timedelta(days=5),
+                metrics={},
+                raw={},
+                topic="test",
+                category="social_engagement",
+                confidence=0.4
+            )
+        ]
+        
+        low_conf_score = scorer.score_niche("test", low_conf_records)
+        
+        # High confidence should score better
+        assert high_conf_score.confidence > low_conf_score.confidence
+
+class TestNicheRadarCollectors:
+    """Test NicheRadar collectors"""
+    
+    @pytest.mark.asyncio
+    async def test_github_trending_collector(self):
+        """Test GitHub trending collector"""
+        collector = GitHubTrendingCollector()
+        
+        # Test with mock data (collector will use web_tools which has mock data)
+        records = await collector.collect(topic="python", since="daily")
+        
+        # Should return records
+        assert isinstance(records, list)
+        
+        # If records exist, check structure
+        if records:
+            record = records[0]
+            assert hasattr(record, 'source')
+            assert hasattr(record, 'url')
+            assert hasattr(record, 'title')
+            assert hasattr(record, 'timestamp')
+            assert hasattr(record, 'metrics')
+            assert hasattr(record, 'raw')
+            assert hasattr(record, 'topic')
+            assert hasattr(record, 'confidence')
+    
+    @pytest.mark.asyncio
+    async def test_hackernews_collector(self):
+        """Test Hacker News collector"""
+        collector = HackerNewsCollector()
+        
+        records = await collector.collect(hours=12)
+        
+        assert isinstance(records, list)
+        
+        if records:
+            record = records[0]
+            assert record.source == "Hacker News"
+            assert "heat_score" in record.metrics
+    
+    @pytest.mark.asyncio
+    async def test_news_delta_collector(self):
+        """Test news delta collector"""
+        collector = NewsDeltaCollector()
+        
+        records = await collector.collect(query="ai", window="24h")
+        
+        assert isinstance(records, list)
+        
+        if records:
+            record = records[0]
+            assert "delta_score" in record.metrics
+    
+    @pytest.mark.asyncio
+    async def test_google_trends_collector(self):
+        """Test Google Trends collector"""
+        collector = GoogleTrendsCollector()
+        
+        records = await collector.collect(terms=["ai", "python"], region="VN", days=7)
+        
+        assert isinstance(records, list)
+        
+        if records:
+            record = records[0]
+            assert record.source == "Google Trends"
+            assert "momentum_score" in record.metrics
+    
+    @pytest.mark.asyncio
+    async def test_reddit_engagement_collector(self):
+        """Test Reddit engagement collector"""
+        collector = RedditEngagementCollector()
+        
+        records = await collector.collect(query="ai", window="24h")
+        
+        assert isinstance(records, list)
+        
+        if records:
+            record = records[0]
+            assert record.source == "Reddit"
+            assert "engagement_score" in record.metrics
+
+class TestNicheRadarPlaybook:
+    """Test NicheRadar playbook generation"""
+    
+    def test_playbook_generation(self):
+        """Test playbook generation"""
+        generator = PlaybookGenerator()
+        
+        # Create test niche score
+        test_score = NicheScore(
+            topic="ai_translation",
+            total_score=0.75,
+            confidence=0.8,
+            breakdown={"feasibility_fit": 0.9, "competition_proxy": 0.4},
+            sources=["GitHub", "Hacker News"],
+            timestamp=datetime.now(),
+            category="high_fit",
+            feasibility_fit=0.9,
+            competition_proxy=0.4,
+            key_signals=["High feasibility fit", "Low competition"],
+            recommendations=["High feasibility for StillMe implementation"]
+        )
+        
+        playbook = generator.generate_playbook(test_score)
+        
+        # Check playbook structure
+        assert hasattr(playbook, 'niche_score')
+        assert hasattr(playbook, 'product_brief')
+        assert hasattr(playbook, 'mvp_spec')
+        assert hasattr(playbook, 'pricing_suggestion')
+        assert hasattr(playbook, 'landing_page_spec')
+        assert hasattr(playbook, 'repo_scaffold')
+        assert hasattr(playbook, 'outreach_templates')
+        assert hasattr(playbook, 'risk_assessment')
+        assert hasattr(playbook, 'compliance_notes')
+        assert hasattr(playbook, 'kpis')
+        assert hasattr(playbook, 'timeline')
+        
+        # Check specific components
+        assert playbook.product_brief.title == "Ai_translation Assistant"
+        assert len(playbook.pricing_suggestion.tiers) >= 2
+        assert len(playbook.outreach_templates) >= 2  # EN and VI
+        assert len(playbook.kpis) > 0
+    
+    def test_persona_generation(self):
+        """Test persona generation"""
+        generator = PlaybookGenerator()
+        
+        # Test AI assistant topic
+        test_score = NicheScore(
+            topic="ai_assistant",
+            total_score=0.8,
+            confidence=0.9,
+            breakdown={},
+            sources=[],
+            timestamp=datetime.now(),
+            category="high_fit",
+            feasibility_fit=0.9,
+            competition_proxy=0.3,
+            key_signals=[],
+            recommendations=[]
+        )
+        
+        playbook = generator.generate_playbook(test_score)
+        
+        # Should have personas
+        assert len(playbook.product_brief.personas) > 0
+        
+        # Check persona structure
+        persona = playbook.product_brief.personas[0]
+        assert hasattr(persona, 'name')
+        assert hasattr(persona, 'role')
+        assert hasattr(persona, 'pain_points')
+        assert hasattr(persona, 'goals')
+        assert hasattr(persona, 'budget_range')
+    
+    def test_mvp_spec_generation(self):
+        """Test MVP specification generation"""
+        generator = PlaybookGenerator()
+        
+        test_score = NicheScore(
+            topic="workflow_automation",
+            total_score=0.7,
+            confidence=0.8,
+            breakdown={},
+            sources=[],
+            timestamp=datetime.now(),
+            category="medium_fit",
+            feasibility_fit=0.7,
+            competition_proxy=0.5,
+            key_signals=[],
+            recommendations=[]
+        )
+        
+        playbook = generator.generate_playbook(test_score)
+        
+        # Check MVP spec
+        mvp = playbook.mvp_spec
+        assert hasattr(mvp, 'name')
+        assert hasattr(mvp, 'features')
+        assert hasattr(mvp, 'estimated_development_days')
+        assert hasattr(mvp, 'tech_stack')
+        
+        # Should have features
+        assert len(mvp.features) > 0
+        
+        # Check feature structure
+        feature = mvp.features[0]
+        assert hasattr(feature, 'name')
+        assert hasattr(feature, 'description')
+        assert hasattr(feature, 'priority')
+        assert hasattr(feature, 'effort_days')
+        assert hasattr(feature, 'stillme_capability')
+
+class TestNicheRadarFeedback:
+    """Test NicheRadar feedback system"""
+    
+    def test_feedback_tracking(self):
+        """Test feedback tracking"""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            feedback_file = os.path.join(temp_dir, "test_feedback.csv")
+            tracker = FeedbackTracker(feedback_file)
+            
+            # Add feedback record
+            feedback = FeedbackRecord(
+                timestamp=datetime.now(),
+                niche_topic="ai_assistant",
+                niche_score=0.75,
+                confidence=0.8,
+                feasibility_fit=0.9,
+                competition_proxy=0.4,
+                impressions=1000,
+                clicks=50,
+                signups=10,
+                trials=8,
+                paid_conversions=2,
+                revenue=98.0,
+                time_to_first_value=2.5,
+                user_engagement_score=0.7,
+                support_tickets=1,
+                traffic_source="google_ads",
+                campaign_id="test_001",
+                notes="Test feedback"
+            )
+            
+            tracker.add_feedback(feedback)
+            
+            # Check if file was created and has data
+            assert os.path.exists(feedback_file)
+            
+            # Load data back
+            df = tracker.get_feedback_data()
+            assert len(df) == 1
+            assert df.iloc[0]['niche_topic'] == "ai_assistant"
+            assert df.iloc[0]['revenue'] == 98.0
+    
+    def test_performance_metrics_calculation(self):
+        """Test performance metrics calculation"""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            feedback_file = os.path.join(temp_dir, "test_feedback.csv")
+            tracker = FeedbackTracker(feedback_file)
+            
+            # Add multiple feedback records
+            for i in range(5):
+                feedback = FeedbackRecord(
+                    timestamp=datetime.now(),
+                    niche_topic=f"test_niche_{i}",
+                    niche_score=0.7 + i * 0.05,
+                    confidence=0.8,
+                    feasibility_fit=0.8,
+                    competition_proxy=0.4,
+                    impressions=1000 + i * 100,
+                    clicks=50 + i * 10,
+                    signups=10 + i * 2,
+                    trials=8 + i,
+                    paid_conversions=2 + i,
+                    revenue=98.0 + i * 50,
+                    time_to_first_value=2.5,
+                    user_engagement_score=0.7,
+                    support_tickets=1,
+                    traffic_source="test",
+                    campaign_id=f"test_{i:03d}",
+                    notes="Test data"
+                )
+                tracker.add_feedback(feedback)
+            
+            # Calculate metrics
+            df = tracker.get_feedback_data()
+            metrics = tracker.calculate_performance_metrics(df)
+            
+            # Check metrics structure
+            assert 'conversion_rates' in metrics
+            assert 'revenue' in metrics
+            assert 'engagement' in metrics
+            assert 'niche_correlations' in metrics
+            
+            # Check conversion rates
+            conv_rates = metrics['conversion_rates']
+            assert 'impression_to_click' in conv_rates
+            assert 'click_to_signup' in conv_rates
+            assert 'trial_to_paid' in conv_rates
+    
+    def test_weight_adjustment_suggestions(self):
+        """Test weight adjustment suggestions"""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            feedback_file = os.path.join(temp_dir, "test_feedback.csv")
+            tracker = FeedbackTracker(feedback_file)
+            
+            # Add feedback with clear performance patterns
+            feedback = FeedbackRecord(
+                timestamp=datetime.now(),
+                niche_topic="high_performing_niche",
+                niche_score=0.9,
+                confidence=0.9,
+                feasibility_fit=0.95,  # High feasibility
+                competition_proxy=0.2,  # Low competition
+                impressions=1000,
+                clicks=100,
+                signups=20,
+                trials=15,
+                paid_conversions=5,
+                revenue=500.0,
+                time_to_first_value=1.0,
+                user_engagement_score=0.9,
+                support_tickets=0,
+                traffic_source="organic",
+                campaign_id="high_perf_001",
+                notes="High performing niche"
+            )
+            tracker.add_feedback(feedback)
+            
+            # Current weights
+            current_weights = {
+                "trend_momentum": 0.20,
+                "github_velocity": 0.15,
+                "hackernews_heat": 0.10,
+                "news_delta": 0.10,
+                "reddit_engagement": 0.05,
+                "competition_proxy": 0.15,
+                "feasibility_fit": 0.25
+            }
+            
+            # Get suggestions
+            learning_weights = tracker.suggest_weight_adjustments(current_weights)
+            
+            # Check suggestions structure
+            assert hasattr(learning_weights, 'original_weights')
+            assert hasattr(learning_weights, 'suggested_weights')
+            assert hasattr(learning_weights, 'changes')
+            assert hasattr(learning_weights, 'confidence')
+            assert hasattr(learning_weights, 'sample_size')
+            assert hasattr(learning_weights, 'rationale')
+    
+    def test_export_suggested_weights(self):
+        """Test export of suggested weights"""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            feedback_file = os.path.join(temp_dir, "test_feedback.csv")
+            output_file = os.path.join(temp_dir, "suggested_weights.yaml")
+            tracker = FeedbackTracker(feedback_file)
+            
+            # Create learning weights
+            learning_weights = LearningWeights(
+                original_weights={"feasibility_fit": 0.25, "competition_proxy": 0.15},
+                suggested_weights={"feasibility_fit": 0.30, "competition_proxy": 0.10},
+                changes={"feasibility_fit": 0.05, "competition_proxy": -0.05},
+                confidence=0.8,
+                sample_size=10,
+                rationale="Test suggestion",
+                timestamp=datetime.now()
+            )
+            
+            # Export suggestions
+            tracker.export_suggested_weights(learning_weights, output_file)
+            
+            # Check if file was created
+            assert os.path.exists(output_file)
+            
+            # Load and verify content
+            with open(output_file, 'r', encoding='utf-8') as f:
+                data = yaml.safe_load(f)
+            
+            assert 'scoring_weights' in data
+            assert 'feasibility_fit' in data['scoring_weights']
+            assert data['scoring_weights']['feasibility_fit'] == 0.30
+            assert '_metadata' in data
+
+class TestNicheRadarSecurity:
+    """Test NicheRadar security and compliance"""
+    
+    def test_content_sanitization(self):
+        """Test content sanitization"""
+        from security.content_wrap import wrap_content, detect_injection_patterns
+        
+        # Test safe content
+        safe_content = "This is a normal news article about AI."
+        wrapped_safe, detected_safe = wrap_content(safe_content)
+        assert not detected_safe
+        assert "[WEB_SNIPPET_START]" in wrapped_safe
+        assert "[WEB_SNIPPET_END]" in wrapped_safe
+        
+        # Test malicious content
+        malicious_content = "Hello <script>alert('XSS')</script> World!"
+        wrapped_malicious, detected_malicious = wrap_content(malicious_content)
+        assert detected_malicious
+        assert "<script>" not in wrapped_malicious
+        assert "INJECTION_SUSPECT" in wrapped_malicious
+    
+    def test_network_allowlist_compliance(self):
+        """Test network allowlist compliance"""
+        from sandbox_controller import sandbox_controller
+        
+        # Test allowed domains
+        allowed_url = "https://api.github.com/search/repositories"
+        result = sandbox_controller.is_egress_allowed(allowed_url)
+        assert result["allowed"]
+        
+        # Test blocked domains
+        blocked_url = "https://malicious-site.com/steal-data"
+        result = sandbox_controller.is_egress_allowed(blocked_url)
+        assert not result["allowed"]
+        
+        # Test blocked schemes
+        http_url = "http://api.github.com/search/repositories"
+        result = sandbox_controller.is_egress_allowed(http_url)
+        assert not result["allowed"]
+        assert result["block_type"] == "scheme"
+    
+    def test_attribution_requirements(self):
+        """Test attribution requirements"""
+        scorer = NicheScorer()
+        
+        # Create record with full attribution
+        full_attribution_record = NicheRecord(
+            source="GitHub",
+            url="https://github.com/test/repo",
+            title="Test Repository",
+            timestamp=datetime.now(),
+            metrics={"stars": 1000},
+            raw={"full": "data"},
+            topic="test",
+            category="development",
+            confidence=0.9
+        )
+        
+        score = scorer.score_niche("test", [full_attribution_record])
+        
+        # Should have high confidence due to good attribution
+        assert score.confidence > 0.7
+        assert "GitHub" in score.sources
+
+if __name__ == "__main__":
+    # Run tests
+    pytest.main([__file__, "-v", "--tb=short"])

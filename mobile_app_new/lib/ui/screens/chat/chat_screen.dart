@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/chat_models.dart';
+import '../../../core/navigation/app_router.dart';
 import '../../widgets/chat/chat_message_list.dart';
 import '../../widgets/chat/chat_input_bar.dart';
 import '../../widgets/chat/telemetry_strip.dart';
@@ -82,13 +83,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'StillMe',
+                  'StillMe – IPC',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.bold,
                   ),
                 ),
                 Text(
-                  'Personal AI',
+                  'Intelligent Personal Companion',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
                     color: AppTheme.textSecondary,
                   ),
@@ -142,6 +143,15 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               
               return const SizedBox.shrink();
             },
+          ),
+          
+          // NicheRadar Button
+          IconButton(
+            onPressed: () {
+              context.pushToNicheRadar();
+            },
+            icon: const Icon(Icons.radar),
+            tooltip: 'Niche Radar',
           ),
           
           // Metrics Button

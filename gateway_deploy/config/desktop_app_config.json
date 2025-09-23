@@ -1,0 +1,30 @@
+{
+  "desktop_app": {
+    "name": "StillMe Desktop",
+    "version": "1.0.0",
+    "description": "Desktop client for StillMe AI"
+  },
+  "server": {
+    "base_url": "http://192.168.1.8:8000",
+    "timeout": 10000,
+    "retry_attempts": 3,
+    "retry_delay": 1000
+  },
+  "endpoints": {
+    "health": "/health",
+    "version": "/version",
+    "websocket": "/ws/{client_id}",
+    "api": "/api/message"
+  },
+  "ui": {
+    "theme": "dark",
+    "language": "vi",
+    "auto_connect": true,
+    "show_server_status": true
+  },
+  "settings": {
+    "allow_custom_url": true,
+    "save_conversation": true,
+    "auto_save_interval": 30000
+  }
+}

@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from httpx import ASGITransport, AsyncClient
 
 
-# 🔒 Ép AnyIO chỉ chạy backend asyncio (tránh trio)
+# üîí √âp AnyIO ch·ªâ ch·∫°y backend asyncio (tr√°nh trio)
 @pytest.fixture(scope="session")
 def anyio_backend():
     return "asyncio"
@@ -15,18 +15,18 @@ def anyio_backend():
 
 @pytest.fixture(scope="module")
 def test_app():
-    os.environ["ALLOW_GPT5"] = "false"  # ép fallback sang Ollama
+    os.environ["ALLOW_GPT5"] = "false"  # √©p fallback sang Ollama
     from api_server import app
 
     return app
 
 
-# Helper: chạy app với lifespan + tắt keep-warm để khỏi rò task
+# Helper: ch·∫°y app v·ªõi lifespan + t·∫Øt keep-warm ƒë·ªÉ kh·ªèi r√≤ task
 @pytest.fixture
 async def app_with_lifespan(monkeypatch, test_app: FastAPI):
     import api_server as srv
 
-    # tắt vòng keep-warm (tránh task chạy nền)
+    # t·∫Øt v√≤ng keep-warm (tr√°nh task ch·∫°y n·ªÅn)
     async def _noop_keepwarm():
         return None
 

@@ -1,34 +1,34 @@
 #!/usr/bin/env python3
 """
-🧪 COMMON MODULES TESTS - UNIT TESTING
-🧪 TESTS CÁC MODULE CHUNG - KIỂM THỬ ĐƠN VỊ
+üß™ COMMON MODULES TESTS - UNIT TESTING
+üß™ TESTS C√ÅC MODULE CHUNG - KI·ªÇM TH·ª¨ ƒê∆†N V·ªä
 
-PURPOSE / MỤC ĐÍCH:
+PURPOSE / M·ª§C ƒê√çCH:
 - Unit tests for common modules (config, logging, errors, retry)
-- Kiểm thử đơn vị cho các module chung (config, logging, errors, retry)
+- Ki·ªÉm th·ª≠ ƒë∆°n v·ªã cho c√°c module chung (config, logging, errors, retry)
 - Validate refactoring functionality
-- Xác thực chức năng refactoring
+- X√°c th·ª±c ch·ª©c nƒÉng refactoring
 - Ensure backward compatibility
-- Đảm bảo tương thích ngược
+- ƒê·∫£m b·∫£o t∆∞∆°ng th√≠ch ng∆∞·ª£c
 
-FUNCTIONALITY / CHỨC NĂNG:
+FUNCTIONALITY / CH·ª®C NƒÇNG:
 - ConfigManager functionality tests
-- Kiểm thử chức năng ConfigManager
+- Ki·ªÉm th·ª≠ ch·ª©c nƒÉng ConfigManager
 - StructuredLogger functionality tests
-- Kiểm thử chức năng StructuredLogger
+- Ki·ªÉm th·ª≠ ch·ª©c nƒÉng StructuredLogger
 - Error handling and exception tests
-- Kiểm thử xử lý lỗi và exception
+- Ki·ªÉm th·ª≠ x·ª≠ l√Ω l·ªói v√† exception
 - Retry mechanism tests
-- Kiểm thử cơ chế retry
+- Ki·ªÉm th·ª≠ c∆° ch·∫ø retry
 
-RELATED FILES / FILES LIÊN QUAN:
+RELATED FILES / FILES LI√äN QUAN:
 - common/config.py - Configuration management
 - common/logging.py - Structured logging
 - common/errors.py - Error handling
 - common/retry.py - Retry mechanisms
 - modules/* - Modules using common utilities
 
-TECHNICAL DETAILS / CHI TIẾT KỸ THUẬT:
+TECHNICAL DETAILS / CHI TI·∫æT K·ª∏ THU·∫¨T:
 - pytest framework with async support
 - Mock objects for testing
 - Test coverage validation

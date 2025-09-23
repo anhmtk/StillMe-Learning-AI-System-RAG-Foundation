@@ -174,17 +174,17 @@ class _TelemetryStripState extends ConsumerState<TelemetryStrip>
                       Expanded(
                         child: _buildDetailedMetric(
                           context,
-                          'Prompt Tokens',
-                          '${telemetry.usage.promptTokens}',
-                          Icons.input,
+                          label: 'Prompt Tokens',
+                          value: '${telemetry.usage.promptTokens}',
+                          icon: Icons.input,
                         ),
                       ),
                       Expanded(
                         child: _buildDetailedMetric(
                           context,
-                          'Completion Tokens',
-                          '${telemetry.usage.completionTokens}',
-                          Icons.output,
+                          label: 'Completion Tokens',
+                          value: '${telemetry.usage.completionTokens}',
+                          icon: Icons.output,
                         ),
                       ),
                     ],
@@ -197,17 +197,17 @@ class _TelemetryStripState extends ConsumerState<TelemetryStrip>
                       Expanded(
                         child: _buildDetailedMetric(
                           context,
-                          'Total Tokens',
-                          '${telemetry.usage.totalTokens}',
-                          Icons.token,
+                          label: 'Total Tokens',
+                          value: '${telemetry.usage.totalTokens}',
+                          icon: Icons.token,
                         ),
                       ),
                       Expanded(
                         child: _buildDetailedMetric(
                           context,
-                          'Cost Estimate',
-                          '\$${telemetry.costEstimateUsd.toStringAsFixed(4)}',
-                          Icons.attach_money,
+                          label: 'Cost Estimate',
+                          value: '\$${telemetry.costEstimateUsd.toStringAsFixed(4)}',
+                          icon: Icons.attach_money,
                         ),
                       ),
                     ],

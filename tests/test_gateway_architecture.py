@@ -1,33 +1,33 @@
 #!/usr/bin/env python3
 """
-🧪 GATEWAY ARCHITECTURE TESTS - INTEGRATION TESTING
-🧪 TESTS KIẾN TRÚC GATEWAY - KIỂM THỬ TÍCH HỢP
+üß™ GATEWAY ARCHITECTURE TESTS - INTEGRATION TESTING
+üß™ TESTS KI·∫æN TR√öC GATEWAY - KI·ªÇM TH·ª¨ T√çCH H·ª¢P
 
-PURPOSE / MỤC ĐÍCH:
+PURPOSE / M·ª§C ƒê√çCH:
 - Integration tests for Gateway Architecture improvements
-- Kiểm thử tích hợp cho cải thiện kiến trúc Gateway
+- Ki·ªÉm th·ª≠ t√≠ch h·ª£p cho c·∫£i thi·ªán ki·∫øn tr√∫c Gateway
 - Validates security, error handling, and CORS fixes
-- Xác thực bảo mật, xử lý lỗi và sửa CORS
+- X√°c th·ª±c b·∫£o m·∫≠t, x·ª≠ l√Ω l·ªói v√† s·ª≠a CORS
 - Ensures production-ready gateway functionality
-- Đảm bảo chức năng gateway sẵn sàng production
+- ƒê·∫£m b·∫£o ch·ª©c nƒÉng gateway s·∫µn s√†ng production
 
-FUNCTIONALITY / CHỨC NĂNG:
+FUNCTIONALITY / CH·ª®C NƒÇNG:
 - Gateway file structure validation
-- Xác thực cấu trúc file gateway
+- X√°c th·ª±c c·∫•u tr√∫c file gateway
 - CORS configuration testing
-- Kiểm thử cấu hình CORS
+- Ki·ªÉm th·ª≠ c·∫•u h√¨nh CORS
 - Error handling component testing
-- Kiểm thử component xử lý lỗi
+- Ki·ªÉm th·ª≠ component x·ª≠ l√Ω l·ªói
 - Security middleware validation
-- Xác thực security middleware
+- X√°c th·ª±c security middleware
 
-RELATED FILES / FILES LIÊN QUAN:
+RELATED FILES / FILES LI√äN QUAN:
 - stillme_platform/gateway/ - Gateway implementation
 - cors_config.py - CORS configuration
 - stable_ai_server.py - AI server with error handling
 - SECURITY_GUIDELINES.md - Security documentation
 
-TECHNICAL DETAILS / CHI TIẾT KỸ THUẬT:
+TECHNICAL DETAILS / CHI TI·∫æT K·ª∏ THU·∫¨T:
 - pytest framework with async support
 - 10/10 tests passed (100% success rate)
 - Environment-based configuration testing
@@ -161,7 +161,7 @@ class TestErrorHandling:
 
         assert "fallback_responses" in content, "fallback_responses should exist"
         assert (
-            "Xin lỗi, tôi đang gặp một chút khó khăn" in content
+            "Xin l·ªói, t√¥i ƒëang g·∫∑p m·ªôt ch√∫t kh√≥ khƒÉn" in content
         ), "Vietnamese fallback should exist"
         assert (
             "Sorry, I'm experiencing some difficulties" in content

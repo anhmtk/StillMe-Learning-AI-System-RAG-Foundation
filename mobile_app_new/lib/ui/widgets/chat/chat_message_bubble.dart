@@ -97,7 +97,7 @@ class ChatMessageBubble extends StatelessWidget {
           
           if (isUser) ...[
             const SizedBox(height: AppTheme.spacingS),
-            _buildTimestamp(),
+            _buildTimestamp(context),
           ],
         ],
       ),
@@ -170,7 +170,7 @@ class ChatMessageBubble extends StatelessWidget {
     );
   }
 
-  Widget _buildTimestamp() {
+  Widget _buildTimestamp(BuildContext context) {
     final time = message.timestamp;
     final timeString = '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
     

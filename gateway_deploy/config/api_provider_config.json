@@ -1,0 +1,37 @@
+{
+  "api_providers": {
+    "deepseek": {
+      "base_url": "https://api.deepseek.com/v1",
+      "timeout": 30,
+      "max_retries": 3,
+      "retry_delay": 1.0
+    },
+    "openrouter": {
+      "base_url": "https://openrouter.ai/api/v1",
+      "timeout": 30,
+      "max_retries": 3,
+      "retry_delay": 1.0
+    },
+    "ollama": {
+      "base_url": "http://localhost:11434/api",
+      "timeout": 60,
+      "max_retries": 2,
+      "retry_delay": 2.0
+    }
+  },
+  "default_model_preferences": [
+    "deepseek-chat",
+    "gpt-4o",
+    "gpt-3.5-turbo"
+  ],
+  "fallback_model": "deepseek-chat",
+  "logging": {
+    "level": "INFO",
+    "log_api_calls": true,
+    "log_response_times": true
+  },
+  "rate_limiting": {
+    "requests_per_minute": 60,
+    "burst_limit": 10
+  }
+}

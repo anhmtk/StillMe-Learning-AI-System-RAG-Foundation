@@ -1,0 +1,39 @@
+{
+  "blacklist_keywords": [
+    "tin giả",
+    "thuyết âm mưu",
+    "thông tin sai lệch",
+    "phân biệt chủng tộc",
+    "kỳ thị",
+    "tuyên truyền cực đoan",
+    "bạo lực tình dục",
+    "khiêu dâm trẻ em",
+    "hướng dẫn chế tạo vũ khí",
+    "vũ khí",
+    "chế tạo vũ khí",
+    "vũ khí hóa học",
+    "dụ dỗ tự hại",
+    "lừa đảo tài chính",
+    "thuốc chữa bách bệnh",
+    "sùng bái",
+    "tự sướng",
+    "hướng dẫn hack",
+    "virus máy tính",
+    "đánh cắp dữ liệu",
+    "khủng bố",
+    "kích động bạo lực"
+  ],
+  "unreliable_sources": [
+    "somehoaxsite.com",
+    "fake-news-daily.net",
+    "conspiracytheorycentral.org",
+    "trollfarm.ru",
+    "extremist-blogs.info",
+    "hoax-buster.net"
+  ],
+  "toxicity_threshold": 0.8,
+  "hate_speech_threshold": 0.7,
+  "bias_threshold": 0.6,
+  "fact_check_confidence_threshold": 0.75,
+  "min_content_length": 50
+}

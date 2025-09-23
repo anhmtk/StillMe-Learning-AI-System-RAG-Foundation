@@ -7,7 +7,20 @@
 
 **⚠️ IMPORTANT: This is a WORLD-CLASS AI Framework with 100+ modules + Enterprise Scaling + Clean Architecture!**
 
-## 🔄 **RECENT CHANGES (2025-09-21) - UX & PERSONA IMPROVEMENTS:**
+## 🔄 **RECENT CHANGES (2025-09-22) - INTERNET ACCESS & SECURITY:**
+
+**✅ INTERNET ACCESS WITH CONTROLLED SECURITY**: Tích hợp tính năng truy cập internet có kiểm soát:
+
+- **Secure HTTP Client**: AsyncHttpClient với timeout ≤ 5s, retry ≤ 2, response limit ≤ 2MB
+- **Domain Allowlist**: Chỉ cho phép truy cập các domain được phê duyệt (GitHub, NewsAPI, GNews, etc.)
+- **Content Integrity Filter**: Lọc bỏ tất cả dangerous patterns (XSS, injection, scripts)
+- **Sandbox Controller**: Kiểm soát network access với egress limits
+- **Market Intelligence**: Hỗ trợ news search, GitHub trending, Hacker News
+- **Web Search Toggle**: User có thể bật/tắt web search trong desktop app
+- **Comprehensive Logging**: Log tất cả web access activities
+- **Test Suite**: 10 test cases đã pass, đảm bảo bảo mật tuyệt đối
+
+## 🔄 **PREVIOUS CHANGES (2025-09-21) - UX & PERSONA IMPROVEMENTS:**
 
 **✅ UX & PERSONA ENHANCEMENTS**: Cải thiện trải nghiệm người dùng và danh tính bot:
 

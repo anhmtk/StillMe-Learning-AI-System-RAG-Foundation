@@ -1,0 +1,12 @@
+{
+  "baseUrl": "https://stillme.ai",
+  "mock": false,
+  "timeoutMs": 15000,
+  "useDirectLlm": true,
+  "chatPath": "/chat",
+  "chatPathDirect": "/llm/chat",
+  "enableLogging": false,
+  "allowHttp": false,
+  "telemetryEnabled": true,
+  "environment": "production"
+}

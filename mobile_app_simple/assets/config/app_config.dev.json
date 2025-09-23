@@ -1,0 +1,12 @@
+{
+  "baseUrl": "http://160.191.89.99:21568",
+  "mock": false,
+  "timeoutMs": 25000,
+  "useDirectLlm": true,
+  "chatPath": "/chat",
+  "chatPathDirect": "/llm/chat",
+  "enableLogging": true,
+  "allowHttp": true,
+  "telemetryEnabled": true,
+  "environment": "development"
+}

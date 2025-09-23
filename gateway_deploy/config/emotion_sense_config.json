@@ -1,0 +1,53 @@
+{
+  "emotion_sense": {
+    "version": "1.0.0",
+    "name": "EmotionSense V1",
+    "description": "Intelligent emotion detection for Vietnamese text"
+  },
+  "model": {
+    "use_transformer": true,
+    "model_name": "vinai/phobert-base",
+    "fallback_to_rules": true,
+    "confidence_threshold": 0.6
+  },
+  "emotions": {
+    "categories": {
+      "happy": "vui vẻ, tích cực, phấn khởi",
+      "sad": "buồn bã, thất vọng, chán nản",
+      "angry": "tức giận, bực bội, khó chịu",
+      "fear": "sợ hãi, lo lắng, hoang mang",
+      "surprise": "ngạc nhiên, bất ngờ, shock",
+      "disgust": "ghê tởm, kinh tởm, chán ghét",
+      "neutral": "bình thường, trung tính, không cảm xúc"
+    },
+    "keywords": {
+      "happy": ["vui", "hạnh phúc", "tuyệt vời", "tốt", "hay", "thích", "yêu"],
+      "sad": ["buồn", "khóc", "thất vọng", "chán", "tệ", "xấu", "ghét"],
+      "angry": ["tức", "giận", "bực", "khó chịu", "phát điên", "tức giận"],
+      "fear": ["sợ", "lo", "hoang mang", "bất an", "lo lắng", "sợ hãi"],
+      "surprise": ["wow", "ôi", "trời", "bất ngờ", "ngạc nhiên", "shock"],
+      "disgust": ["ghê", "kinh", "tởm", "chán ghét", "ghê tởm", "kinh tởm"],
+      "neutral": ["ok", "được", "bình thường", "ổn", "tạm", "không sao"]
+    }
+  },
+  "performance": {
+    "max_history_size": 1000,
+    "cache_size": 10000,
+    "cache_ttl": 3600,
+    "batch_size": 32,
+    "max_text_length": 512
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "json",
+    "file": "logs/emotion_sense.log",
+    "max_size": "10MB",
+    "backup_count": 5
+  },
+  "fallback": {
+    "enabled": true,
+    "use_keyword_matching": true,
+    "use_rule_based": true,
+    "default_emotion": "neutral"
+  }
+}

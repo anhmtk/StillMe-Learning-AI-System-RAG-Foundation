@@ -1,0 +1,73 @@
+{
+  "framework": {
+    "version": "2.1.1",
+    "name": "StillMe AI Framework",
+    "description": "Enterprise-grade AI framework with 9 core modules",
+    "debug": false,
+    "log_level": "INFO"
+  },
+  "modules": {
+    "content_integrity_filter": {
+      "enabled": true,
+      "config_file": "config/content_integrity_config.json"
+    },
+    "conversational_core": {
+      "enabled": true,
+      "config_file": "config/conversational_core_config.json"
+    },
+    "ethical_core_system": {
+      "enabled": true,
+      "config_file": "config/ethical_core_config.json"
+    },
+    "layered_memory": {
+      "enabled": true,
+      "config_file": "config/layered_memory_config.json"
+    },
+    "persona_morph": {
+      "enabled": true,
+      "config_file": "config/persona_morph_config.json"
+    },
+    "unified_api_manager": {
+      "enabled": true,
+      "config_file": "config/api_provider_config.json"
+    },
+    "token_optimizer": {
+      "enabled": true,
+      "config_file": "config/token_optimizer_config.json"
+    },
+    "emotion_sense": {
+      "enabled": true,
+      "config_file": "config/emotion_sense_config.json"
+    },
+    "secure_memory_manager": {
+      "enabled": true,
+      "config_file": "config/secure_memory_config.json"
+    }
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "json",
+    "file": "logs/framework.log",
+    "max_size": "10MB",
+    "backup_count": 5,
+    "console_output": true
+  },
+  "performance": {
+    "max_concurrent_operations": 10,
+    "operation_timeout": 30,
+    "memory_limit_mb": 1024,
+    "cpu_limit_percent": 80
+  },
+  "security": {
+    "sandbox_enabled": true,
+    "module_isolation": true,
+    "restricted_imports": true,
+    "execution_timeout": 60
+  },
+  "monitoring": {
+    "health_check_interval": 30,
+    "metrics_collection": true,
+    "performance_tracking": true,
+    "error_reporting": true
+  }
+}

@@ -172,6 +172,8 @@ enum QuickActionType {
   clear,
   export,
   founder,
+  nicheRadar,
+  webSearch,
 }
 
 @freezed
@@ -182,6 +184,7 @@ class AppConfig with _$AppConfig {
     required FeatureConfig features,
     required UiConfig ui,
     required SecurityConfig security,
+    required NicheRadarConfig nicheRadar,
   }) = _AppConfig;
 
   factory AppConfig.fromJson(Map<String, dynamic> json) =>
@@ -219,6 +222,8 @@ class ApiEndpoints with _$ApiEndpoints {
   const factory ApiEndpoints({
     required String health,
     required String chat,
+    required String nicheRadar,
+    required String webSearch,
   }) = _ApiEndpoints;
 
   factory ApiEndpoints.fromJson(Map<String, dynamic> json) =>
@@ -234,6 +239,10 @@ class FeatureConfig with _$FeatureConfig {
     @Default('normal') String safetyLevel,
     @Default(4000) int tokenCap,
     @Default(10000) int maxLatency,
+    @Default(true) bool nicheRadar,
+    @Default(true) bool webSearch,
+    @Default(true) bool languageDetection,
+    @Default(true) bool performanceMetrics,
   }) = _FeatureConfig;
 
   factory FeatureConfig.fromJson(Map<String, dynamic> json) =>
@@ -248,6 +257,8 @@ class UiConfig with _$UiConfig {
     @Default('#1E293B') String secondaryColor,
     @Default('#3B82F6') String accentColor,
     @Default('Inter') String fontFamily,
+    @Default(['#8B5CF6', '#06B6D4']) List<String> gradientColors,
+    @Default(300) int animationDuration,
   }) = _UiConfig;
 
   factory UiConfig.fromJson(Map<String, dynamic> json) =>
@@ -264,4 +275,157 @@ class SecurityConfig with _$SecurityConfig {
 
   factory SecurityConfig.fromJson(Map<String, dynamic> json) =>
       _$SecurityConfigFromJson(json);
+}
+
+// NicheRadar Models
+@freezed
+class NicheRadarConfig with _$NicheRadarConfig {
+  const factory NicheRadarConfig({
+    @Default(true) bool enabled,
+    @Default(false) bool autoRefresh,
+    @Default(300000) int refreshInterval,
+    @Default(10) int maxResults,
+    @Default(0.7) double confidenceThreshold,
+  }) = _NicheRadarConfig;
+
+  factory NicheRadarConfig.fromJson(Map<String, dynamic> json) =>
+      _$NicheRadarConfigFromJson(json);
+}
+
+@freezed
+class NicheOpportunity with _$NicheOpportunity {
+  const factory NicheOpportunity({
+    required String topic,
+    required double score,
+    required double confidence,
+    required List<String> keySignals,
+    required List<NicheSource> sources,
+    required String category,
+    required DateTime timestamp,
+    String? description,
+    List<String>? recommendations,
+  }) = _NicheOpportunity;
+
+  factory NicheOpportunity.fromJson(Map<String, dynamic> json) =>
+      _$NicheOpportunityFromJson(json);
+}
+
+@freezed
+class NicheSource with _$NicheSource {
+  const factory NicheSource({
+    required String name,
+    required String url,
+    required String domain,
+    required DateTime timestamp,
+    String? snippet,
+  }) = _NicheSource;
+
+  factory NicheSource.fromJson(Map<String, dynamic> json) =>
+      _$NicheSourceFromJson(json);
+}
+
+@freezed
+class NicheRadarResponse with _$NicheRadarResponse {
+  const factory NicheRadarResponse({
+    required List<NicheOpportunity> opportunities,
+    required DateTime generatedAt,
+    required int totalSources,
+    String? error,
+  }) = _NicheRadarResponse;
+
+  factory NicheRadarResponse.fromJson(Map<String, dynamic> json) =>
+      _$NicheRadarResponseFromJson(json);
+}
+
+@freezed
+class PlaybookRequest with _$PlaybookRequest {
+  const factory PlaybookRequest({
+    required String topic,
+    required double score,
+    required double confidence,
+  }) = _PlaybookRequest;
+
+  factory PlaybookRequest.fromJson(Map<String, dynamic> json) =>
+      _$PlaybookRequestFromJson(json);
+}
+
+@freezed
+class PlaybookResponse with _$PlaybookResponse {
+  const factory PlaybookResponse({
+    required String topic,
+    required ProductBrief productBrief,
+    required MVPSpec mvpSpec,
+    required PricingSuggestion pricingSuggestion,
+    required List<String> assets,
+    required DateTime generatedAt,
+    String? error,
+  }) = _PlaybookResponse;
+
+  factory PlaybookResponse.fromJson(Map<String, dynamic> json) =>
+      _$PlaybookResponseFromJson(json);
+}
+
+@freezed
+class ProductBrief with _$ProductBrief {
+  const factory ProductBrief({
+    required String title,
+    required String description,
+    required String persona,
+    required List<String> painPoints,
+    required List<String> jobToBeDone,
+    required String uniqueSellingProposition,
+  }) = _ProductBrief;
+
+  factory ProductBrief.fromJson(Map<String, dynamic> json) =>
+      _$ProductBriefFromJson(json);
+}
+
+@freezed
+class MVPSpec with _$MVPSpec {
+  const factory MVPSpec({
+    required List<Feature> features,
+    required int estimatedDevelopmentDays,
+    required String architecture,
+    required List<String> dependencies,
+  }) = _MVPSpec;
+
+  factory MVPSpec.fromJson(Map<String, dynamic> json) =>
+      _$MVPSpecFromJson(json);
+}
+
+@freezed
+class Feature with _$Feature {
+  const factory Feature({
+    required String name,
+    required String description,
+    required int estimatedHours,
+    required String priority,
+  }) = _Feature;
+
+  factory Feature.fromJson(Map<String, dynamic> json) =>
+      _$FeatureFromJson(json);
+}
+
+@freezed
+class PricingSuggestion with _$PricingSuggestion {
+  const factory PricingSuggestion({
+    required List<PricingTier> tiers,
+    required String rationale,
+  }) = _PricingSuggestion;
+
+  factory PricingSuggestion.fromJson(Map<String, dynamic> json) =>
+      _$PricingSuggestionFromJson(json);
+}
+
+@freezed
+class PricingTier with _$PricingTier {
+  const factory PricingTier({
+    required String name,
+    required double price,
+    required String rationale,
+    required List<String> features,
+  }) = _PricingTier;
+
+  factory PricingTier.fromJson(Map<String, dynamic> json) =>
+      _$PricingTierFromJson(json);
 }

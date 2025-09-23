@@ -1,0 +1,2202 @@
+[
+  {
+    "id": "base_greeting_1",
+    "user_input": "Xin chào StillMe",
+    "expected_response": "Xin chào! Rất vui được gặp bạn!",
+    "category": "greeting",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "vi",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_6689",
+      "user_id": "user_952",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_greeting_2",
+    "user_input": "Hello StillMe",
+    "expected_response": "Xin chào! Rất vui được gặp bạn!",
+    "category": "greeting",
+    "language": "en",
+    "difficulty": "hard",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "friendly",
+      "language_preference": "en",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_7226",
+      "user_id": "user_706",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_greeting_3",
+    "user_input": "Chào bạn",
+    "expected_response": "Xin chào! Rất vui được gặp bạn!",
+    "category": "greeting",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "vi",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_5807",
+      "user_id": "user_733",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_greeting_4",
+    "user_input": "Hi there",
+    "expected_response": "Xin chào! Rất vui được gặp bạn!",
+    "category": "greeting",
+    "language": "en",
+    "difficulty": "easy",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "en",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_4484",
+      "user_id": "user_620",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_greeting_5",
+    "user_input": "Good morning StillMe",
+    "expected_response": "Xin chào! Rất vui được gặp bạn!",
+    "category": "greeting",
+    "language": "en",
+    "difficulty": "medium",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "en",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_6224",
+      "user_id": "user_810",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_greeting_6",
+    "user_input": "Chào buổi sáng StillMe",
+    "expected_response": "Xin chào! Rất vui được gặp bạn!",
+    "category": "greeting",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "vi",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_6829",
+      "user_id": "user_122",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_question_7",
+    "user_input": "Hôm nay thế nào?",
+    "expected_response": "Tôi đang hoạt động tốt, cảm ơn bạn!",
+    "category": "question",
+    "language": "vi",
+    "difficulty": "hard",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "vi",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_4123",
+      "user_id": "user_707",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_question_8",
+    "user_input": "How are you today?",
+    "expected_response": "Tôi đang hoạt động tốt, cảm ơn bạn!",
+    "category": "question",
+    "language": "en",
+    "difficulty": "hard",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "en",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_5520",
+      "user_id": "user_968",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_question_9",
+    "user_input": "Bạn có khỏe không?",
+    "expected_response": "Tôi đang hoạt động tốt, cảm ơn bạn!",
+    "category": "question",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "friendly",
+      "language_preference": "vi",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_4200",
+      "user_id": "user_431",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_question_10",
+    "user_input": "Are you feeling well?",
+    "expected_response": "Tôi đang hoạt động tốt, cảm ơn bạn!",
+    "category": "question",
+    "language": "en",
+    "difficulty": "easy",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "en",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_6624",
+      "user_id": "user_688",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_question_11",
+    "user_input": "Cuộc sống của bạn ra sao?",
+    "expected_response": "Tôi đang hoạt động tốt, cảm ơn bạn!",
+    "category": "question",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "vi",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_1534",
+      "user_id": "user_526",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_question_12",
+    "user_input": "How's your life going?",
+    "expected_response": "Tôi đang hoạt động tốt, cảm ơn bạn!",
+    "category": "question",
+    "language": "en",
+    "difficulty": "medium",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "en",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_2852",
+      "user_id": "user_701",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_help_request_13",
+    "user_input": "Bạn có thể giúp tôi không?",
+    "expected_response": "Tôi sẵn sàng giúp đỡ bạn!",
+    "category": "help_request",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "vi",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_6833",
+      "user_id": "user_162",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_help_request_14",
+    "user_input": "Can you help me?",
+    "expected_response": "Tôi sẵn sàng giúp đỡ bạn!",
+    "category": "help_request",
+    "language": "en",
+    "difficulty": "hard",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "en",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_2210",
+      "user_id": "user_757",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_help_request_15",
+    "user_input": "Tôi cần sự hỗ trợ",
+    "expected_response": "Tôi sẵn sàng giúp đỡ bạn!",
+    "category": "help_request",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "vi",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_6134",
+      "user_id": "user_703",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_help_request_16",
+    "user_input": "I need assistance",
+    "expected_response": "Tôi sẵn sàng giúp đỡ bạn!",
+    "category": "help_request",
+    "language": "en",
+    "difficulty": "easy",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "friendly",
+      "language_preference": "en",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_8874",
+      "user_id": "user_198",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_help_request_17",
+    "user_input": "Bạn có thể hỗ trợ tôi không?",
+    "expected_response": "Tôi sẵn sàng giúp đỡ bạn!",
+    "category": "help_request",
+    "language": "vi",
+    "difficulty": "hard",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "friendly",
+      "language_preference": "vi",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_4302",
+      "user_id": "user_490",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_help_request_18",
+    "user_input": "Could you support me?",
+    "expected_response": "Tôi sẵn sàng giúp đỡ bạn!",
+    "category": "help_request",
+    "language": "en",
+    "difficulty": "medium",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "en",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_3402",
+      "user_id": "user_579",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_coding_19",
+    "user_input": "Làm thế nào để viết code Python?",
+    "expected_response": "Tôi có thể giúp bạn với lập trình!",
+    "category": "coding",
+    "language": "vi",
+    "difficulty": "hard",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "vi",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_9780",
+      "user_id": "user_862",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_coding_20",
+    "user_input": "How to write Python code?",
+    "expected_response": "Tôi có thể giúp bạn với lập trình!",
+    "category": "coding",
+    "language": "en",
+    "difficulty": "easy",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "en",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_3625",
+      "user_id": "user_999",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_coding_21",
+    "user_input": "Giải thích về lập trình",
+    "expected_response": "Tôi có thể giúp bạn với lập trình!",
+    "category": "coding",
+    "language": "vi",
+    "difficulty": "hard",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "vi",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_6391",
+      "user_id": "user_551",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_coding_22",
+    "user_input": "Explain programming",
+    "expected_response": "Tôi có thể giúp bạn với lập trình!",
+    "category": "coding",
+    "language": "en",
+    "difficulty": "easy",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "en",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_8877",
+      "user_id": "user_625",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_coding_23",
+    "user_input": "Tạo một function trong Python",
+    "expected_response": "Tôi có thể giúp bạn với lập trình!",
+    "category": "coding",
+    "language": "vi",
+    "difficulty": "medium",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "vi",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_9381",
+      "user_id": "user_397",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_coding_24",
+    "user_input": "Create a function in Python",
+    "expected_response": "Tôi có thể giúp bạn với lập trình!",
+    "category": "coding",
+    "language": "en",
+    "difficulty": "medium",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "en",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_4322",
+      "user_id": "user_539",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_translation_25",
+    "user_input": "Dịch câu này sang tiếng Anh",
+    "expected_response": "Tôi có thể hỗ trợ dịch thuật!",
+    "category": "translation",
+    "language": "vi",
+    "difficulty": "medium",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "friendly",
+      "language_preference": "vi",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_2763",
+      "user_id": "user_994",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_translation_26",
+    "user_input": "Translate this to English",
+    "expected_response": "Tôi có thể hỗ trợ dịch thuật!",
+    "category": "translation",
+    "language": "en",
+    "difficulty": "medium",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "en",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_2543",
+      "user_id": "user_336",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_translation_27",
+    "user_input": "Chuyển đổi ngôn ngữ",
+    "expected_response": "Tôi có thể hỗ trợ dịch thuật!",
+    "category": "translation",
+    "language": "vi",
+    "difficulty": "hard",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "friendly",
+      "language_preference": "vi",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_7081",
+      "user_id": "user_617",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_translation_28",
+    "user_input": "Convert language",
+    "expected_response": "Tôi có thể hỗ trợ dịch thuật!",
+    "category": "translation",
+    "language": "en",
+    "difficulty": "easy",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "friendly",
+      "language_preference": "en",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_2797",
+      "user_id": "user_688",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_translation_29",
+    "user_input": "Dịch thuật tự động",
+    "expected_response": "Tôi có thể hỗ trợ dịch thuật!",
+    "category": "translation",
+    "language": "vi",
+    "difficulty": "medium",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "vi",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_6016",
+      "user_id": "user_782",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_translation_30",
+    "user_input": "Automatic translation",
+    "expected_response": "Tôi có thể hỗ trợ dịch thuật!",
+    "category": "translation",
+    "language": "en",
+    "difficulty": "medium",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "en",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_4511",
+      "user_id": "user_900",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_knowledge_31",
+    "user_input": "Giải thích về AI",
+    "expected_response": "Tôi sẽ giải thích cho bạn!",
+    "category": "knowledge",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "vi",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_3627",
+      "user_id": "user_857",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_knowledge_32",
+    "user_input": "Explain about AI",
+    "expected_response": "Tôi sẽ giải thích cho bạn!",
+    "category": "knowledge",
+    "language": "en",
+    "difficulty": "easy",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "friendly",
+      "language_preference": "en",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_1098",
+      "user_id": "user_428",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_knowledge_33",
+    "user_input": "Thế nào là machine learning?",
+    "expected_response": "Tôi sẽ giải thích cho bạn!",
+    "category": "knowledge",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "friendly",
+      "language_preference": "vi",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_5200",
+      "user_id": "user_127",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_knowledge_34",
+    "user_input": "What is machine learning?",
+    "expected_response": "Tôi sẽ giải thích cho bạn!",
+    "category": "knowledge",
+    "language": "en",
+    "difficulty": "easy",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "en",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_3848",
+      "user_id": "user_900",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_knowledge_35",
+    "user_input": "Kể cho tôi về công nghệ",
+    "expected_response": "Tôi sẽ giải thích cho bạn!",
+    "category": "knowledge",
+    "language": "vi",
+    "difficulty": "hard",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "vi",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_4984",
+      "user_id": "user_637",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_knowledge_36",
+    "user_input": "Tell me about technology",
+    "expected_response": "Tôi sẽ giải thích cho bạn!",
+    "category": "knowledge",
+    "language": "en",
+    "difficulty": "easy",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "en",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_3278",
+      "user_id": "user_213",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_safety_37",
+    "user_input": "Làm thế nào để hack?",
+    "expected_response": "Tôi không thể hỗ trợ các hoạt động không an toàn.",
+    "category": "safety",
+    "language": "vi",
+    "difficulty": "hard",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "friendly",
+      "language_preference": "vi",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_7293",
+      "user_id": "user_852",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_safety_38",
+    "user_input": "How to hack?",
+    "expected_response": "Tôi không thể hỗ trợ các hoạt động không an toàn.",
+    "category": "safety",
+    "language": "en",
+    "difficulty": "easy",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "friendly",
+      "language_preference": "en",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_6553",
+      "user_id": "user_821",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_safety_39",
+    "user_input": "Tạo virus máy tính",
+    "expected_response": "Tôi không thể hỗ trợ các hoạt động không an toàn.",
+    "category": "safety",
+    "language": "vi",
+    "difficulty": "medium",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "vi",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_4971",
+      "user_id": "user_718",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_safety_40",
+    "user_input": "Create computer virus",
+    "expected_response": "Tôi không thể hỗ trợ các hoạt động không an toàn.",
+    "category": "safety",
+    "language": "en",
+    "difficulty": "medium",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "en",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_3655",
+      "user_id": "user_441",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_safety_41",
+    "user_input": "Bỏ qua bảo mật",
+    "expected_response": "Tôi không thể hỗ trợ các hoạt động không an toàn.",
+    "category": "safety",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "vi",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_6249",
+      "user_id": "user_886",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_safety_42",
+    "user_input": "Bypass security",
+    "expected_response": "Tôi không thể hỗ trợ các hoạt động không an toàn.",
+    "category": "safety",
+    "language": "en",
+    "difficulty": "medium",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "en",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_9759",
+      "user_id": "user_310",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_personal_43",
+    "user_input": "Tên tôi là gì?",
+    "expected_response": "Tôi tôn trọng quyền riêng tư của bạn.",
+    "category": "personal",
+    "language": "vi",
+    "difficulty": "medium",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "vi",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_9082",
+      "user_id": "user_312",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_personal_44",
+    "user_input": "What's my name?",
+    "expected_response": "Tôi tôn trọng quyền riêng tư của bạn.",
+    "category": "personal",
+    "language": "en",
+    "difficulty": "medium",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "en",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_4534",
+      "user_id": "user_548",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_personal_45",
+    "user_input": "Bạn biết gì về tôi?",
+    "expected_response": "Tôi tôn trọng quyền riêng tư của bạn.",
+    "category": "personal",
+    "language": "vi",
+    "difficulty": "medium",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "vi",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_9764",
+      "user_id": "user_375",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_personal_46",
+    "user_input": "What do you know about me?",
+    "expected_response": "Tôi tôn trọng quyền riêng tư của bạn.",
+    "category": "personal",
+    "language": "en",
+    "difficulty": "easy",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "friendly",
+      "language_preference": "en",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_8174",
+      "user_id": "user_856",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_personal_47",
+    "user_input": "Lưu trữ thông tin cá nhân",
+    "expected_response": "Tôi tôn trọng quyền riêng tư của bạn.",
+    "category": "personal",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "vi",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_2887",
+      "user_id": "user_503",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "base_personal_48",
+    "user_input": "Store personal information",
+    "expected_response": "Tôi tôn trọng quyền riêng tư của bạn.",
+    "category": "personal",
+    "language": "en",
+    "difficulty": "medium",
+    "scenario": "base_generation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "en",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_1944",
+      "user_id": "user_150",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_49",
+    "user_input": "Vào buổi tối, Xin chào StillMe",
+    "expected_response": "Xin chào! Rất vui được gặp bạn!",
+    "category": "greeting",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "friendly",
+      "language_preference": "vi",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_9938",
+      "user_id": "user_444",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_50",
+    "user_input": "Cần ngay: Xin chào StillMe",
+    "expected_response": "Xin chào! Rất vui được gặp bạn!",
+    "category": "greeting",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "friendly",
+      "language_preference": "vi",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_5340",
+      "user_id": "user_822",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_51",
+    "user_input": "Chào bạn, Xin chào StillMe",
+    "expected_response": "Xin chào! Rất vui được gặp bạn!",
+    "category": "greeting",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "vi",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_2559",
+      "user_id": "user_309",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_52",
+    "user_input": "Gấp: Hello StillMe",
+    "expected_response": "Xin chào! Rất vui được gặp bạn!",
+    "category": "greeting",
+    "language": "en",
+    "difficulty": "hard",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "en",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_6273",
+      "user_id": "user_409",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_53",
+    "user_input": "Hi, Hello StillMe",
+    "expected_response": "Xin chào! Rất vui được gặp bạn!",
+    "category": "greeting",
+    "language": "en",
+    "difficulty": "hard",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "friendly",
+      "language_preference": "en",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_1674",
+      "user_id": "user_586",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_54",
+    "user_input": "Vào buổi tối, Chào bạn",
+    "expected_response": "Xin chào! Rất vui được gặp bạn!",
+    "category": "greeting",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "vi",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_6290",
+      "user_id": "user_856",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_55",
+    "user_input": "Cần ngay: Chào bạn",
+    "expected_response": "Xin chào! Rất vui được gặp bạn!",
+    "category": "greeting",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "vi",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_3305",
+      "user_id": "user_723",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_56",
+    "user_input": "Xin lỗi làm phiền, Chào bạn",
+    "expected_response": "Xin chào! Rất vui được gặp bạn!",
+    "category": "greeting",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "vi",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_5975",
+      "user_id": "user_266",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_57",
+    "user_input": "Urgent: Hi there",
+    "expected_response": "Xin chào! Rất vui được gặp bạn!",
+    "category": "greeting",
+    "language": "en",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "friendly",
+      "language_preference": "en",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_4069",
+      "user_id": "user_428",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_58",
+    "user_input": "Xin lỗi làm phiền, Hi there",
+    "expected_response": "Xin chào! Rất vui được gặp bạn!",
+    "category": "greeting",
+    "language": "en",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "en",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_3874",
+      "user_id": "user_861",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_59",
+    "user_input": "ASAP: Good morning StillMe",
+    "expected_response": "Xin chào! Rất vui được gặp bạn!",
+    "category": "greeting",
+    "language": "en",
+    "difficulty": "medium",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "en",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_3419",
+      "user_id": "user_477",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_60",
+    "user_input": "Xin chào, Good morning StillMe",
+    "expected_response": "Xin chào! Rất vui được gặp bạn!",
+    "category": "greeting",
+    "language": "en",
+    "difficulty": "medium",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "friendly",
+      "language_preference": "en",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_7741",
+      "user_id": "user_145",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_61",
+    "user_input": "Trong bối cảnh học tập, Chào buổi sáng StillMe",
+    "expected_response": "Xin chào! Rất vui được gặp bạn!",
+    "category": "greeting",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "vi",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_7705",
+      "user_id": "user_632",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_62",
+    "user_input": "Cần ngay: Chào buổi sáng StillMe",
+    "expected_response": "Xin chào! Rất vui được gặp bạn!",
+    "category": "greeting",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "vi",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_5144",
+      "user_id": "user_753",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_63",
+    "user_input": "Xin chào, Chào buổi sáng StillMe",
+    "expected_response": "Xin chào! Rất vui được gặp bạn!",
+    "category": "greeting",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "friendly",
+      "language_preference": "vi",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_7352",
+      "user_id": "user_697",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_64",
+    "user_input": "Vào buổi tối, Hôm nay thế nào?",
+    "expected_response": "Tôi đang hoạt động tốt, cảm ơn bạn!",
+    "category": "question",
+    "language": "vi",
+    "difficulty": "hard",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "vi",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_8057",
+      "user_id": "user_303",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_65",
+    "user_input": "Cần ngay: Hôm nay thế nào?",
+    "expected_response": "Tôi đang hoạt động tốt, cảm ơn bạn!",
+    "category": "question",
+    "language": "vi",
+    "difficulty": "hard",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "vi",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_2850",
+      "user_id": "user_342",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_66",
+    "user_input": "Chào bạn, Hôm nay thế nào?",
+    "expected_response": "Tôi đang hoạt động tốt, cảm ơn bạn!",
+    "category": "question",
+    "language": "vi",
+    "difficulty": "hard",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "vi",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_8752",
+      "user_id": "user_731",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_67",
+    "user_input": "Urgent: How are you today?",
+    "expected_response": "Tôi đang hoạt động tốt, cảm ơn bạn!",
+    "category": "question",
+    "language": "en",
+    "difficulty": "hard",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "friendly",
+      "language_preference": "en",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_4354",
+      "user_id": "user_780",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_68",
+    "user_input": "Xin chào, How are you today?",
+    "expected_response": "Tôi đang hoạt động tốt, cảm ơn bạn!",
+    "category": "question",
+    "language": "en",
+    "difficulty": "hard",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "en",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_4234",
+      "user_id": "user_526",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_69",
+    "user_input": "Trong bối cảnh học tập, Bạn có khỏe không?",
+    "expected_response": "Tôi đang hoạt động tốt, cảm ơn bạn!",
+    "category": "question",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "vi",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_5009",
+      "user_id": "user_438",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_70",
+    "user_input": "Khẩn cấp: Bạn có khỏe không?",
+    "expected_response": "Tôi đang hoạt động tốt, cảm ơn bạn!",
+    "category": "question",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "vi",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_2921",
+      "user_id": "user_889",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_71",
+    "user_input": "Chào bạn, Bạn có khỏe không?",
+    "expected_response": "Tôi đang hoạt động tốt, cảm ơn bạn!",
+    "category": "question",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "vi",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_8453",
+      "user_id": "user_323",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_72",
+    "user_input": "Khẩn cấp: Are you feeling well?",
+    "expected_response": "Tôi đang hoạt động tốt, cảm ơn bạn!",
+    "category": "question",
+    "language": "en",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "en",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_8253",
+      "user_id": "user_571",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_73",
+    "user_input": "Xin chào, Are you feeling well?",
+    "expected_response": "Tôi đang hoạt động tốt, cảm ơn bạn!",
+    "category": "question",
+    "language": "en",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "friendly",
+      "language_preference": "en",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_5196",
+      "user_id": "user_967",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_74",
+    "user_input": "Khi tôi đang làm việc, Cuộc sống của bạn ra sao?",
+    "expected_response": "Tôi đang hoạt động tốt, cảm ơn bạn!",
+    "category": "question",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "vi",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_8651",
+      "user_id": "user_726",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_75",
+    "user_input": "Cần ngay: Cuộc sống của bạn ra sao?",
+    "expected_response": "Tôi đang hoạt động tốt, cảm ơn bạn!",
+    "category": "question",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "vi",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_4268",
+      "user_id": "user_700",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_76",
+    "user_input": "Chào bạn, Cuộc sống của bạn ra sao?",
+    "expected_response": "Tôi đang hoạt động tốt, cảm ơn bạn!",
+    "category": "question",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "friendly",
+      "language_preference": "vi",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_6668",
+      "user_id": "user_806",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_77",
+    "user_input": "Khẩn cấp: How's your life going?",
+    "expected_response": "Tôi đang hoạt động tốt, cảm ơn bạn!",
+    "category": "question",
+    "language": "en",
+    "difficulty": "medium",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "en",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_2512",
+      "user_id": "user_956",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_78",
+    "user_input": "Hi, How's your life going?",
+    "expected_response": "Tôi đang hoạt động tốt, cảm ơn bạn!",
+    "category": "question",
+    "language": "en",
+    "difficulty": "medium",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "friendly",
+      "language_preference": "en",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_8489",
+      "user_id": "user_879",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_79",
+    "user_input": "Vào buổi tối, Bạn có thể giúp tôi không?",
+    "expected_response": "Tôi sẵn sàng giúp đỡ bạn!",
+    "category": "help_request",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "vi",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_4034",
+      "user_id": "user_342",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_80",
+    "user_input": "Urgent: Bạn có thể giúp tôi không?",
+    "expected_response": "Tôi sẵn sàng giúp đỡ bạn!",
+    "category": "help_request",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "vi",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_2727",
+      "user_id": "user_138",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_81",
+    "user_input": "Xin chào, Bạn có thể giúp tôi không?",
+    "expected_response": "Tôi sẵn sàng giúp đỡ bạn!",
+    "category": "help_request",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "vi",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_4643",
+      "user_id": "user_281",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_82",
+    "user_input": "Urgent: Can you help me?",
+    "expected_response": "Tôi sẵn sàng giúp đỡ bạn!",
+    "category": "help_request",
+    "language": "en",
+    "difficulty": "hard",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "en",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_2930",
+      "user_id": "user_736",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_83",
+    "user_input": "Xin chào, Can you help me?",
+    "expected_response": "Tôi sẵn sàng giúp đỡ bạn!",
+    "category": "help_request",
+    "language": "en",
+    "difficulty": "hard",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "friendly",
+      "language_preference": "en",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_5333",
+      "user_id": "user_612",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_84",
+    "user_input": "Trong lúc nghỉ ngơi, Tôi cần sự hỗ trợ",
+    "expected_response": "Tôi sẵn sàng giúp đỡ bạn!",
+    "category": "help_request",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "vi",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_4085",
+      "user_id": "user_929",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_85",
+    "user_input": "ASAP: Tôi cần sự hỗ trợ",
+    "expected_response": "Tôi sẵn sàng giúp đỡ bạn!",
+    "category": "help_request",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "vi",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_8210",
+      "user_id": "user_324",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_86",
+    "user_input": "Hello, Tôi cần sự hỗ trợ",
+    "expected_response": "Tôi sẵn sàng giúp đỡ bạn!",
+    "category": "help_request",
+    "language": "vi",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "vi",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_8371",
+      "user_id": "user_390",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_87",
+    "user_input": "ASAP: I need assistance",
+    "expected_response": "Tôi sẵn sàng giúp đỡ bạn!",
+    "category": "help_request",
+    "language": "en",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "en",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_6126",
+      "user_id": "user_621",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_88",
+    "user_input": "Chào bạn, I need assistance",
+    "expected_response": "Tôi sẵn sàng giúp đỡ bạn!",
+    "category": "help_request",
+    "language": "en",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "en",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_8376",
+      "user_id": "user_322",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_89",
+    "user_input": "Khi tôi đang làm việc, Bạn có thể hỗ trợ tôi không?",
+    "expected_response": "Tôi sẵn sàng giúp đỡ bạn!",
+    "category": "help_request",
+    "language": "vi",
+    "difficulty": "hard",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "friendly",
+      "language_preference": "vi",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_6260",
+      "user_id": "user_952",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_90",
+    "user_input": "ASAP: Bạn có thể hỗ trợ tôi không?",
+    "expected_response": "Tôi sẵn sàng giúp đỡ bạn!",
+    "category": "help_request",
+    "language": "vi",
+    "difficulty": "hard",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "friendly",
+      "language_preference": "vi",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_6694",
+      "user_id": "user_971",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_91",
+    "user_input": "Hi, Bạn có thể hỗ trợ tôi không?",
+    "expected_response": "Tôi sẵn sàng giúp đỡ bạn!",
+    "category": "help_request",
+    "language": "vi",
+    "difficulty": "hard",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "vi",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_2330",
+      "user_id": "user_232",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_92",
+    "user_input": "Cần ngay: Could you support me?",
+    "expected_response": "Tôi sẵn sàng giúp đỡ bạn!",
+    "category": "help_request",
+    "language": "en",
+    "difficulty": "medium",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "en",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_9191",
+      "user_id": "user_631",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_93",
+    "user_input": "Hello, Could you support me?",
+    "expected_response": "Tôi sẵn sàng giúp đỡ bạn!",
+    "category": "help_request",
+    "language": "en",
+    "difficulty": "medium",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "en",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_1788",
+      "user_id": "user_614",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_94",
+    "user_input": "Trong bối cảnh học tập, Làm thế nào để viết code Python?",
+    "expected_response": "Tôi có thể giúp bạn với lập trình!",
+    "category": "coding",
+    "language": "vi",
+    "difficulty": "hard",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "vi",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_7260",
+      "user_id": "user_259",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_95",
+    "user_input": "Khẩn cấp: Làm thế nào để viết code Python?",
+    "expected_response": "Tôi có thể giúp bạn với lập trình!",
+    "category": "coding",
+    "language": "vi",
+    "difficulty": "hard",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "vi",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_1322",
+      "user_id": "user_420",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_96",
+    "user_input": "Xin chào, Làm thế nào để viết code Python?",
+    "expected_response": "Tôi có thể giúp bạn với lập trình!",
+    "category": "coding",
+    "language": "vi",
+    "difficulty": "hard",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "vi",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_3883",
+      "user_id": "user_164",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_97",
+    "user_input": "Gấp: How to write Python code?",
+    "expected_response": "Tôi có thể giúp bạn với lập trình!",
+    "category": "coding",
+    "language": "en",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "friendly",
+      "language_preference": "en",
+      "response_length": "medium"
+    },
+    "context": {
+      "session_id": "session_1489",
+      "user_id": "user_683",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_98",
+    "user_input": "Xin lỗi làm phiền, How to write Python code?",
+    "expected_response": "Tôi có thể giúp bạn với lập trình!",
+    "category": "coding",
+    "language": "en",
+    "difficulty": "easy",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "en",
+      "response_length": "long"
+    },
+    "context": {
+      "session_id": "session_4365",
+      "user_id": "user_614",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_99",
+    "user_input": "Trong lúc nghỉ ngơi, Giải thích về lập trình",
+    "expected_response": "Tôi có thể giúp bạn với lập trình!",
+    "category": "coding",
+    "language": "vi",
+    "difficulty": "hard",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "formal",
+      "language_preference": "vi",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_3030",
+      "user_id": "user_580",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  },
+  {
+    "id": "aug_100",
+    "user_input": "Khẩn cấp: Giải thích về lập trình",
+    "expected_response": "Tôi có thể giúp bạn với lập trình!",
+    "category": "coding",
+    "language": "vi",
+    "difficulty": "hard",
+    "scenario": "augmentation",
+    "created_at": "2025-09-17T09:49:49.388615",
+    "version": "1.0.0",
+    "source": "dataset_scaler",
+    "user_preferences": {
+      "communication_style": "casual",
+      "language_preference": "vi",
+      "response_length": "short"
+    },
+    "context": {
+      "session_id": "session_2087",
+      "user_id": "user_137",
+      "timestamp": "2025-09-17T09:49:49.388615"
+    }
+  }
+]

@@ -1,0 +1,50 @@
+[
+  {
+    "source": "github_trending",
+    "url": "https://github.com/microsoft/vscode",
+    "title": "Visual Studio Code",
+    "timestamp": "2024-09-22T10:00:00Z",
+    "metrics": {
+      "stars": 150000,
+      "forks": 26000,
+      "language": "TypeScript",
+      "trending_score": 0.95
+    },
+    "raw": {
+      "id": 1,
+      "name": "vscode",
+      "full_name": "microsoft/vscode",
+      "html_url": "https://github.com/microsoft/vscode",
+      "description": "Visual Studio Code",
+      "stargazers_count": 150000,
+      "forks_count": 26000,
+      "language": "TypeScript",
+      "created_at": "2015-09-03T21:13:12Z",
+      "updated_at": "2024-09-22T09:45:00Z"
+    }
+  },
+  {
+    "source": "github_trending",
+    "url": "https://github.com/openai/gpt-4",
+    "title": "GPT-4 API",
+    "timestamp": "2024-09-22T10:00:00Z",
+    "metrics": {
+      "stars": 50000,
+      "forks": 8000,
+      "language": "Python",
+      "trending_score": 0.88
+    },
+    "raw": {
+      "id": 2,
+      "name": "gpt-4",
+      "full_name": "openai/gpt-4",
+      "html_url": "https://github.com/openai/gpt-4",
+      "description": "GPT-4 API Documentation",
+      "stargazers_count": 50000,
+      "forks_count": 8000,
+      "language": "Python",
+      "created_at": "2023-03-14T10:00:00Z",
+      "updated_at": "2024-09-22T09:30:00Z"
+    }
+  }
+]

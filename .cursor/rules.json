@@ -1,0 +1,36 @@
+{
+  "always_apply": [
+    "Always load and obey policies/SECURITY_POLICY.yaml, policies/CODE_QUALITY.yaml, policies/FILE_PROTECTION.yaml before editing or generating code.",
+    "Never delete/rename/commit any .env* files; use .env.example for templates.",
+    "Internet features must respect OFFLINE mode and network allowlist from SECURITY_POLICY.yaml.",
+    "Skip means DIAGNOSE, not CANCEL. Always load and obey policies/INTERACTION_POLICY.yaml",
+    "Never delete/rename any file listed in policies/FILE_PROTECTION.yaml",
+    "Always check FILE_PROTECTION policy before modifying .env files",
+    "All entrypoints must load runtime/policy_loader.py on startup",
+    "Code must pass linting and formatting checks defined in CODE_QUALITY.yaml",
+    "Security policy violations must be logged and blocked",
+    "PII and sensitive data must be redacted from logs"
+  ],
+  "file_protection": {
+    "protected_files": [".env", ".env.local", ".env.prod", ".env.dev"],
+    "actions": ["delete", "rename", "move"],
+    "policy": "deny"
+  },
+  "security": {
+    "offline_mode": false,
+    "network_allowlist": ["api.openai.com", "api.deepseek.com", "openrouter.ai"],
+    "secret_redaction": true,
+    "audit_logging": true
+  },
+  "code_quality": {
+    "linting": ["ruff", "pyright"],
+    "formatting": ["black"],
+    "testing": true,
+    "documentation": true
+  },
+  "interaction": {
+    "skip_behavior": "diagnose",
+    "cancel_on_skip": false,
+    "policy_loading": "mandatory"
+  }
+}

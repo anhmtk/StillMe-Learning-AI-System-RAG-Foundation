@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/models/chat_models.dart';
+import '../../../core/navigation/app_router.dart';
 
 class QuickActionsSheet extends StatelessWidget {
   const QuickActionsSheet({super.key});
@@ -56,6 +57,22 @@ class QuickActionsSheet extends StatelessWidget {
         command: ':founder',
         type: QuickActionType.founder,
         icon: '👑',
+      ),
+      QuickAction(
+        id: 'niche_radar',
+        title: 'Niche Radar',
+        description: 'Khám phá cơ hội thị trường',
+        command: '/niche',
+        type: QuickActionType.nicheRadar,
+        icon: '🎯',
+      ),
+      QuickAction(
+        id: 'web_search',
+        title: 'Web Search',
+        description: 'Tìm kiếm thông tin trên web',
+        command: '/search',
+        type: QuickActionType.webSearch,
+        icon: '🌐',
       ),
     ];
 
@@ -159,7 +176,7 @@ class QuickActionsSheet extends StatelessWidget {
           children: [
             // Icon
             Text(
-              action.icon,
+              action.icon ?? '⚡',
               style: const TextStyle(fontSize: 32),
             ),
             
@@ -213,6 +230,12 @@ class QuickActionsSheet extends StatelessWidget {
         break;
       case QuickActionType.founder:
         _openFounderConsole(context);
+        break;
+      case QuickActionType.nicheRadar:
+        _openNicheRadar(context);
+        break;
+      case QuickActionType.webSearch:
+        _openWebSearch(context);
         break;
     }
   }
@@ -348,6 +371,17 @@ class QuickActionsSheet extends StatelessWidget {
     // TODO: Navigate to founder console
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Mở Founder Console...')),
+    );
+  }
+
+  void _openNicheRadar(BuildContext context) {
+    context.pushToNicheRadar();
+  }
+
+  void _openWebSearch(BuildContext context) {
+    // TODO: Open web search dialog
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Mở Web Search...')),
     );
   }
 }

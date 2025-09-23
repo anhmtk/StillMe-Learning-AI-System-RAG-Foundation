@@ -9,8 +9,6 @@ All constants defined in this module should be either instances of
 in case of warnings which need to format their messages.
 """
 
-from __future__ import annotations
-
 from warnings import warn
 
 from _pytest.warning_types import PytestDeprecationWarning

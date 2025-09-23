@@ -91,6 +91,8 @@ class AppConfigService {
         endpoints: ApiEndpoints(
           health: '/health',
           chat: '/chat',
+          nicheRadar: '/niche-radar',
+          webSearch: '/web-search',
         ),
       ),
       features: FeatureConfig(
@@ -100,6 +102,10 @@ class AppConfigService {
         safetyLevel: 'normal',
         tokenCap: 4000,
         maxLatency: 10000,
+        nicheRadar: true,
+        webSearch: true,
+        languageDetection: true,
+        performanceMetrics: true,
       ),
       ui: UiConfig(
         theme: 'dark',
@@ -107,11 +113,20 @@ class AppConfigService {
         secondaryColor: '#1E293B',
         accentColor: '#3B82F6',
         fontFamily: 'Inter',
+        gradientColors: ['#8B5CF6', '#06B6D4'],
+        animationDuration: 300,
       ),
       security: SecurityConfig(
         founderPasscode: '0000',
         enableBiometrics: false,
         sessionTimeout: 3600,
+      ),
+      nicheRadar: NicheRadarConfig(
+        enabled: true,
+        autoRefresh: false,
+        refreshInterval: 300000,
+        maxResults: 10,
+        confidenceThreshold: 0.7,
       ),
     );
   }

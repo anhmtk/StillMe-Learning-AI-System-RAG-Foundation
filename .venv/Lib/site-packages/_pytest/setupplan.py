@@ -1,4 +1,5 @@
-from __future__ import annotations
+from typing import Optional
+from typing import Union
 
 from _pytest.config import Config
 from _pytest.config import ExitCode
@@ -22,7 +23,7 @@ def pytest_addoption(parser: Parser) -> None:
 @pytest.hookimpl(tryfirst=True)
 def pytest_fixture_setup(
     fixturedef: FixtureDef[object], request: SubRequest
-) -> object | None:
+) -> Optional[object]:
     # Will return a dummy fixture if the setuponly option is provided.
     if request.config.option.setupplan:
         my_cache_key = fixturedef.cache_key(request)
@@ -32,7 +33,7 @@ def pytest_fixture_setup(
 
 
 @pytest.hookimpl(tryfirst=True)
-def pytest_cmdline_main(config: Config) -> int | ExitCode | None:
+def pytest_cmdline_main(config: Config) -> Optional[Union[int, ExitCode]]:
     if config.option.setupplan:
         config.option.setuponly = True
         config.option.setupshow = True

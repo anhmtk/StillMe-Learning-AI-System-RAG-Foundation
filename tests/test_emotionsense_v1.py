@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Comprehensive Test Suite for EmotionSenseV1 Module
-Test tất cả chức năng với Vietnamese và English test cases
+Test t·∫•t c·∫£ ch·ª©c nƒÉng v·ªõi Vietnamese v√† English test cases
 """
 
 import asyncio
@@ -24,38 +24,38 @@ class TestEmotionSenseV1(unittest.TestCase):
         self.emotion_sense = EmotionSenseV1()
         self.test_user_id = "test_user_123"
 
-        # Test cases tiếng Việt theo yêu cầu
+        # Test cases ti·∫øng Vi·ªát theo y√™u c·∫ßu
         self.test_cases_vietnamese = [
-            {"text": "Hôm nay tôi rất vui", "expected": "happy", "confidence": 0.7},
+            {"text": "H√¥m nay t√¥i r·∫•t vui", "expected": "happy", "confidence": 0.7},
             {
-                "text": "Tôi đang rất buồn và thất vọng",
+                "text": "T√¥i ƒëang r·∫•t bu·ªìn v√† th·∫•t v·ªçng",
                 "expected": "sad",
                 "confidence": 0.8,
             },
             {
-                "text": "Mày làm tao tức điên lên rồi!",
+                "text": "M√†y l√†m tao t·ª©c ƒëi√™n l√™n r·ªìi!",
                 "expected": "angry",
                 "confidence": 0.9,
             },
-            {"text": "Tôi sợ không dám làm đâu", "expected": "fear", "confidence": 0.7},
+            {"text": "T√¥i s·ª£ kh√¥ng d√°m l√†m ƒë√¢u", "expected": "fear", "confidence": 0.7},
             {
-                "text": "Trời ơi bất ngờ quá!",
+                "text": "Tr·ªùi ∆°i b·∫•t ng·ªù qu√°!",
                 "expected": "surprise",
                 "confidence": 0.75,
             },
             {
-                "text": "Tôi muốn biết thông tin này",
+                "text": "T√¥i mu·ªën bi·∫øt th√¥ng tin n√†y",
                 "expected": "neutral",
                 "confidence": 0.6,
             },
             {
-                "text": "Tôi không hiểu cái này là sao",
+                "text": "T√¥i kh√¥ng hi·ªÉu c√°i n√†y l√† sao",
                 "expected": "confused",
                 "confidence": 0.65,
             },
         ]
 
-        # Test cases edge cases theo yêu cầu
+        # Test cases edge cases theo y√™u c·∫ßu
         self.test_cases_edge = [
             {"text": "", "expected": "neutral", "confidence": 0.0},  # Empty text
             {
@@ -67,7 +67,7 @@ class TestEmotionSenseV1(unittest.TestCase):
             {"text": "a" * 1000, "expected": "neutral", "confidence": 0.0},  # Very long
         ]
 
-        # Test cases tiếng Anh
+        # Test cases ti·∫øng Anh
         self.test_cases_english = [
             {"text": "I am very happy today!", "expected": "happy", "confidence": 0.7},
             {
@@ -101,7 +101,7 @@ class TestEmotionSenseV1(unittest.TestCase):
 
     def test_1_module_initialization(self):
         """Test 1: Module initialization"""
-        print("\n🧪 Test 1: Module Initialization")
+        print("\nüß™ Test 1: Module Initialization")
 
         # Test basic initialization
         self.assertIsNotNone(self.emotion_sense)
@@ -113,13 +113,13 @@ class TestEmotionSenseV1(unittest.TestCase):
         self.assertIn("max_history_size", self.emotion_sense.config)
         self.assertIn("cache_size", self.emotion_sense.config)
 
-        print("    ✅ Module initialized successfully")
-        print("    ✅ Default config loaded")
-        print("    ✅ Logger setup completed")
+        print("    ‚úÖ Module initialized successfully")
+        print("    ‚úÖ Default config loaded")
+        print("    ‚úÖ Logger setup completed")
 
     def test_2_vietnamese_emotion_detection(self):
         """Test 2: Vietnamese emotion detection"""
-        print("\n🧪 Test 2: Vietnamese Emotion Detection")
+        print("\nüß™ Test 2: Vietnamese Emotion Detection")
 
         passed_tests = 0
         total_tests = len(self.test_cases_vietnamese)
@@ -150,10 +150,10 @@ class TestEmotionSenseV1(unittest.TestCase):
 
                 # Log result
                 status = (
-                    "✅ PASS" if emotion_detected == expected_emotion else "❌ FAIL"
+                    "‚úÖ PASS" if emotion_detected == expected_emotion else "‚ùå FAIL"
                 )
                 print(
-                    f"    {i:2d}. '{text[:30]:<30}' → {emotion_detected} (conf: {confidence:.2f}) [{status}]"
+                    f"    {i:2d}. '{text[:30]:<30}' ‚Üí {emotion_detected} (conf: {confidence:.2f}) [{status}]"
                 )
 
                 # Assertions
@@ -169,12 +169,12 @@ class TestEmotionSenseV1(unittest.TestCase):
                     passed_tests += 1
 
             except Exception as e:
-                print(f"    {i:2d}. '{text[:30]:<30}' → ERROR: {e}")
+                print(f"    {i:2d}. '{text[:30]:<30}' ‚Üí ERROR: {e}")
                 self.fail(f"Test case {i} failed with error: {e}")
 
         success_rate = (passed_tests / total_tests) * 100
         print(
-            f"    ✅ Vietnamese emotion detection: {passed_tests}/{total_tests} passed ({success_rate:.1f}%)"
+            f"    ‚úÖ Vietnamese emotion detection: {passed_tests}/{total_tests} passed ({success_rate:.1f}%)"
         )
 
         # Quality target: >85% accuracy on Vietnamese testset
@@ -186,7 +186,7 @@ class TestEmotionSenseV1(unittest.TestCase):
 
     def test_3_english_emotion_detection(self):
         """Test 3: English emotion detection"""
-        print("\n🧪 Test 3: English Emotion Detection")
+        print("\nüß™ Test 3: English Emotion Detection")
 
         passed_tests = 0
         total_tests = len(self.test_cases_english)
@@ -214,10 +214,10 @@ class TestEmotionSenseV1(unittest.TestCase):
 
                 # Log result
                 status = (
-                    "✅ PASS" if emotion_detected == expected_emotion else "❌ FAIL"
+                    "‚úÖ PASS" if emotion_detected == expected_emotion else "‚ùå FAIL"
                 )
                 print(
-                    f"    {i:2d}. '{text[:30]:<30}' → {emotion_detected} (conf: {confidence:.2f}) [{status}]"
+                    f"    {i:2d}. '{text[:30]:<30}' ‚Üí {emotion_detected} (conf: {confidence:.2f}) [{status}]"
                 )
 
                 # Assertions
@@ -233,12 +233,12 @@ class TestEmotionSenseV1(unittest.TestCase):
                     passed_tests += 1
 
             except Exception as e:
-                print(f"    {i:2d}. '{text[:30]:<30}' → ERROR: {e}")
+                print(f"    {i:2d}. '{text[:30]:<30}' ‚Üí ERROR: {e}")
                 self.fail(f"Test case {i} failed with error: {e}")
 
         success_rate = (passed_tests / total_tests) * 100
         print(
-            f"    ✅ English emotion detection: {passed_tests}/{total_tests} passed ({success_rate:.1f}%)"
+            f"    ‚úÖ English emotion detection: {passed_tests}/{total_tests} passed ({success_rate:.1f}%)"
         )
 
         # Quality target: >75% accuracy on English testset
@@ -248,7 +248,7 @@ class TestEmotionSenseV1(unittest.TestCase):
 
     def test_4_edge_cases_handling(self):
         """Test 4: Edge cases handling"""
-        print("\n🧪 Test 4: Edge Cases Handling")
+        print("\nüß™ Test 4: Edge Cases Handling")
 
         passed_tests = 0
         total_tests = len(self.test_cases_edge)
@@ -275,10 +275,10 @@ class TestEmotionSenseV1(unittest.TestCase):
 
                 # Log result
                 status = (
-                    "✅ PASS" if emotion_detected == expected_emotion else "❌ FAIL"
+                    "‚úÖ PASS" if emotion_detected == expected_emotion else "‚ùå FAIL"
                 )
                 print(
-                    f"    {i:2d}. '{text[:30]:<30}' → {emotion_detected} (conf: {confidence:.2f}) [{status}]"
+                    f"    {i:2d}. '{text[:30]:<30}' ‚Üí {emotion_detected} (conf: {confidence:.2f}) [{status}]"
                 )
 
                 # Assertions for edge cases
@@ -300,12 +300,12 @@ class TestEmotionSenseV1(unittest.TestCase):
                 passed_tests += 1
 
             except Exception as e:
-                print(f"    {i:2d}. '{text[:30]:<30}' → ERROR: {e}")
+                print(f"    {i:2d}. '{text[:30]:<30}' ‚Üí ERROR: {e}")
                 self.fail(f"Edge case {i} failed with error: {e}")
 
         success_rate = (passed_tests / total_tests) * 100
         print(
-            f"    ✅ Edge cases handling: {passed_tests}/{total_tests} passed ({success_rate:.1f}%)"
+            f"    ‚úÖ Edge cases handling: {passed_tests}/{total_tests} passed ({success_rate:.1f}%)"
         )
 
         # Edge cases should all pass
@@ -315,12 +315,12 @@ class TestEmotionSenseV1(unittest.TestCase):
 
     def test_5_language_detection(self):
         """Test 5: Language detection"""
-        print("\n🧪 Test 5: Language Detection")
+        print("\nüß™ Test 5: Language Detection")
 
         test_cases = [
-            ("Xin chào, tôi là người Việt Nam", "vi"),
+            ("Xin ch√†o, t√¥i l√† ng∆∞·ªùi Vi·ªát Nam", "vi"),
             ("Hello, I am Vietnamese", "en"),
-            ("Tôi thích ăn phở và bánh mì", "vi"),
+            ("T√¥i th√≠ch ƒÉn ph·ªü v√† b√°nh m√¨", "vi"),
             ("I like to eat pho and banh mi", "en"),
             ("123 + 456 = ?", "vi"),  # Default to Vietnamese
             ("", "vi"),  # Empty text defaults to Vietnamese
@@ -337,9 +337,9 @@ class TestEmotionSenseV1(unittest.TestCase):
 
                 # Log result
                 status = (
-                    "✅ PASS" if detected_language == expected_language else "❌ FAIL"
+                    "‚úÖ PASS" if detected_language == expected_language else "‚ùå FAIL"
                 )
-                print(f"    {i:2d}. '{text[:30]:<30}' → {detected_language} [{status}]")
+                print(f"    {i:2d}. '{text[:30]:<30}' ‚Üí {detected_language} [{status}]")
 
                 # Assertion
                 self.assertEqual(
@@ -351,12 +351,12 @@ class TestEmotionSenseV1(unittest.TestCase):
                 passed_tests += 1
 
             except Exception as e:
-                print(f"    {i:2d}. '{text[:30]:<30}' → ERROR: {e}")
+                print(f"    {i:2d}. '{text[:30]:<30}' ‚Üí ERROR: {e}")
                 self.fail(f"Language detection test {i} failed with error: {e}")
 
         success_rate = (passed_tests / total_tests) * 100
         print(
-            f"    ✅ Language detection: {passed_tests}/{total_tests} passed ({success_rate:.1f}%)"
+            f"    ‚úÖ Language detection: {passed_tests}/{total_tests} passed ({success_rate:.1f}%)"
         )
 
         # Language detection should be accurate
@@ -368,17 +368,17 @@ class TestEmotionSenseV1(unittest.TestCase):
 
     def test_6_emotion_history_tracking(self):
         """Test 6: Emotion history tracking"""
-        print("\n🧪 Test 6: Emotion History Tracking")
+        print("\nüß™ Test 6: Emotion History Tracking")
 
         # Test user ID
         test_user = "history_test_user"
 
         # Add some emotions to history
         test_texts = [
-            "Tôi rất vui hôm nay",
-            "Tôi đang buồn",
-            "Tôi tức giận",
-            "Tôi sợ hãi",
+            "T√¥i r·∫•t vui h√¥m nay",
+            "T√¥i ƒëang bu·ªìn",
+            "T√¥i t·ª©c gi·∫≠n",
+            "T√¥i s·ª£ h√£i",
         ]
 
         for text in test_texts:
@@ -404,24 +404,24 @@ class TestEmotionSenseV1(unittest.TestCase):
             len(limited_history), 2, "Limited history should return 2 entries"
         )
 
-        print("    ✅ Emotion history tracking working correctly")
-        print(f"    ✅ History entries: {len(history)}")
-        print(f"    ✅ History limit working: {len(limited_history)}")
+        print("    ‚úÖ Emotion history tracking working correctly")
+        print(f"    ‚úÖ History entries: {len(history)}")
+        print(f"    ‚úÖ History limit working: {len(limited_history)}")
 
     def test_7_emotion_pattern_analysis(self):
         """Test 7: Emotion pattern analysis"""
-        print("\n🧪 Test 7: Emotion Pattern Analysis")
+        print("\nüß™ Test 7: Emotion Pattern Analysis")
 
         # Test user ID
         test_user = "pattern_test_user"
 
         # Add diverse emotions to history
         test_texts = [
-            ("Tôi rất vui", "happy"),
-            ("Tôi rất vui", "happy"),
-            ("Tôi đang buồn", "sad"),
-            ("Tôi tức giận", "angry"),
-            ("Tôi sợ hãi", "fear"),
+            ("T√¥i r·∫•t vui", "happy"),
+            ("T√¥i r·∫•t vui", "happy"),
+            ("T√¥i ƒëang bu·ªìn", "sad"),
+            ("T√¥i t·ª©c gi·∫≠n", "angry"),
+            ("T√¥i s·ª£ h√£i", "fear"),
         ]
 
         for text, expected_emotion in test_texts:
@@ -461,24 +461,24 @@ class TestEmotionSenseV1(unittest.TestCase):
             self.assertEqual(top_emotion, "happy", "Top emotion should be 'happy'")
             self.assertEqual(stats["count"], 2, "Happy should have 2 occurrences")
 
-        print("    ✅ Emotion pattern analysis working correctly")
-        print(f"    ✅ Total entries analyzed: {pattern['total_entries']}")
-        print(f"    ✅ Dominant emotions: {len(dominant_emotions)}")
+        print("    ‚úÖ Emotion pattern analysis working correctly")
+        print(f"    ‚úÖ Total entries analyzed: {pattern['total_entries']}")
+        print(f"    ‚úÖ Dominant emotions: {len(dominant_emotions)}")
 
     def test_8_performance_metrics(self):
         """Test 8: Performance metrics"""
-        print("\n🧪 Test 8: Performance Metrics")
+        print("\nüß™ Test 8: Performance Metrics")
 
         # Get initial metrics
         initial_metrics = self.emotion_sense.get_performance_metrics()
 
         # Make some requests to generate metrics
         test_texts = [
-            "Tôi rất vui",
-            "Tôi đang buồn",
-            "Tôi tức giận",
-            "Tôi sợ hãi",
-            "Tôi ngạc nhiên",
+            "T√¥i r·∫•t vui",
+            "T√¥i ƒëang bu·ªìn",
+            "T√¥i t·ª©c gi·∫≠n",
+            "T√¥i s·ª£ h√£i",
+            "T√¥i ng·∫°c nhi√™n",
         ]
 
         start_time = time.time()
@@ -523,15 +523,15 @@ class TestEmotionSenseV1(unittest.TestCase):
             f"Average inference time {avg_inference_time:.2f}ms exceeds 100ms target",
         )
 
-        print("    ✅ Performance metrics working correctly")
-        print(f"    ✅ Total requests: {updated_metrics['total_requests']}")
-        print(f"    ✅ Successful requests: {updated_metrics['successful_requests']}")
-        print(f"    ✅ Average inference time: {avg_inference_time:.2f}ms")
-        print(f"    ✅ Cache size: {updated_metrics['cache_size']}")
+        print("    ‚úÖ Performance metrics working correctly")
+        print(f"    ‚úÖ Total requests: {updated_metrics['total_requests']}")
+        print(f"    ‚úÖ Successful requests: {updated_metrics['successful_requests']}")
+        print(f"    ‚úÖ Average inference time: {avg_inference_time:.2f}ms")
+        print(f"    ‚úÖ Cache size: {updated_metrics['cache_size']}")
 
     def test_9_error_handling(self):
         """Test 9: Error handling"""
-        print("\n🧪 Test 9: Error Handling")
+        print("\nüß™ Test 9: Error Handling")
 
         # Test with invalid inputs
         try:
@@ -546,7 +546,7 @@ class TestEmotionSenseV1(unittest.TestCase):
                 result["confidence"], 0.0, "None text should have 0 confidence"
             )
             self.assertFalse(result["success"], "None text should not be successful")
-            print("    ✅ None text handling: PASS")
+            print("    ‚úÖ None text handling: PASS")
         except Exception as e:
             self.fail(f"None text handling failed: {e}")
 
@@ -562,7 +562,7 @@ class TestEmotionSenseV1(unittest.TestCase):
             self.assertTrue(
                 result["success"], "Very long text should be processed successfully"
             )
-            print("    ✅ Very long text handling: PASS")
+            print("    ‚úÖ Very long text handling: PASS")
         except Exception as e:
             self.fail(f"Very long text handling failed: {e}")
 
@@ -571,12 +571,12 @@ class TestEmotionSenseV1(unittest.TestCase):
         self.assertIn("EMOTION_002", ERROR_CODES, "Error code EMOTION_002 should exist")
         self.assertIn("EMOTION_003", ERROR_CODES, "Error code EMOTION_003 should exist")
 
-        print("    ✅ Error codes defined correctly")
-        print("    ✅ Error handling working correctly")
+        print("    ‚úÖ Error codes defined correctly")
+        print("    ‚úÖ Error handling working correctly")
 
     def test_10_health_check(self):
         """Test 10: Health check"""
-        print("\n🧪 Test 10: Health Check")
+        print("\nüß™ Test 10: Health Check")
 
         # Get health status
         health = self.emotion_sense.health_check()
@@ -608,16 +608,16 @@ class TestEmotionSenseV1(unittest.TestCase):
             "Performance metrics should include uptime",
         )
 
-        print("    ✅ Health check working correctly")
-        print(f"    ✅ Status: {health['status']}")
-        print(f"    ✅ Module: {health['module']}")
-        print(f"    ✅ Version: {health['version']}")
-        print(f"    ✅ PyTorch available: {health['torch_available']}")
-        print(f"    ✅ Scikit-learn available: {health['sklearn_available']}")
+        print("    ‚úÖ Health check working correctly")
+        print(f"    ‚úÖ Status: {health['status']}")
+        print(f"    ‚úÖ Module: {health['module']}")
+        print(f"    ‚úÖ Version: {health['version']}")
+        print(f"    ‚úÖ PyTorch available: {health['torch_available']}")
+        print(f"    ‚úÖ Scikit-learn available: {health['sklearn_available']}")
 
 
 class TestEmotionSenseIntegration(unittest.TestCase):
-    """Test integration với framework"""
+    """Test integration v·ªõi framework"""
 
     def setUp(self):
         """Setup integration test environment"""
@@ -629,11 +629,11 @@ class TestEmotionSenseIntegration(unittest.TestCase):
             asyncio.run(self.emotion_sense.shutdown())
 
     def test_integration_with_conversational_core(self):
-        """Test integration với ConversationalCore"""
-        print("\n🔗 Test Integration: ConversationalCore")
+        """Test integration v·ªõi ConversationalCore"""
+        print("\nüîó Test Integration: ConversationalCore")
 
         # Simulate emotion data being passed to conversational core
-        test_text = "Tôi đang rất buồn và cần ai đó an ủi"
+        test_text = "T√¥i ƒëang r·∫•t bu·ªìn v√† c·∫ßn ai ƒë√≥ an ·ªßi"
         emotion_result = self.emotion_sense.detect_emotion(
             test_text, language="vi", user_id="conv_test_user"
         )
@@ -653,17 +653,17 @@ class TestEmotionSenseIntegration(unittest.TestCase):
             emotion_result["confidence"], 0.6, "Confidence should be above threshold"
         )
 
-        print("    ✅ Emotion data structure compatible with ConversationalCore")
-        print(f"    ✅ Detected emotion: {emotion_result['emotion']}")
-        print(f"    ✅ Confidence: {emotion_result['confidence']:.2f}")
+        print("    ‚úÖ Emotion data structure compatible with ConversationalCore")
+        print(f"    ‚úÖ Detected emotion: {emotion_result['emotion']}")
+        print(f"    ‚úÖ Confidence: {emotion_result['confidence']:.2f}")
 
     def test_integration_with_layered_memory(self):
-        """Test integration với LayeredMemory"""
-        print("\n🔗 Test Integration: LayeredMemory")
+        """Test integration v·ªõi LayeredMemory"""
+        print("\nüîó Test Integration: LayeredMemory")
 
         # Test emotion history storage and retrieval
         test_user = "memory_test_user"
-        test_texts = ["Tôi rất vui hôm nay", "Tôi đang buồn", "Tôi tức giận"]
+        test_texts = ["T√¥i r·∫•t vui h√¥m nay", "T√¥i ƒëang bu·ªìn", "T√¥i t·ª©c gi·∫≠n"]
 
         # Store emotions
         for text in test_texts:
@@ -681,19 +681,19 @@ class TestEmotionSenseIntegration(unittest.TestCase):
             self.assertIn("emotion", entry)
             self.assertIn("timestamp", entry)
 
-        print("    ✅ Emotion history compatible with LayeredMemory")
-        print(f"    ✅ Stored entries: {len(history)}")
-        print("    ✅ Memory structure: compatible")
+        print("    ‚úÖ Emotion history compatible with LayeredMemory")
+        print(f"    ‚úÖ Stored entries: {len(history)}")
+        print("    ‚úÖ Memory structure: compatible")
 
     def test_integration_with_ethical_core(self):
-        """Test integration với EthicalCore"""
-        print("\n🔗 Test Integration: EthicalCore")
+        """Test integration v·ªõi EthicalCore"""
+        print("\nüîó Test Integration: EthicalCore")
 
         # Test negative emotions detection for ethical monitoring
         negative_emotions = [
-            ("Tôi đang rất buồn và tuyệt vọng", "sad"),
-            ("Tôi tức giận đến mức muốn đánh ai đó", "angry"),
-            ("Tôi sợ hãi và lo lắng về tương lai", "fear"),
+            ("T√¥i ƒëang r·∫•t bu·ªìn v√† tuy·ªát v·ªçng", "sad"),
+            ("T√¥i t·ª©c gi·∫≠n ƒë·∫øn m·ª©c mu·ªën ƒë√°nh ai ƒë√≥", "angry"),
+            ("T√¥i s·ª£ h√£i v√† lo l·∫Øng v·ªÅ t∆∞∆°ng lai", "fear"),
         ]
 
         for text, expected_emotion in negative_emotions:
@@ -716,18 +716,18 @@ class TestEmotionSenseIntegration(unittest.TestCase):
             self.assertIn("confidence", result)
             self.assertIn("timestamp", result)
 
-        print("    ✅ Negative emotion detection working for ethical monitoring")
-        print("    ✅ Emotion data structure suitable for EthicalCore")
+        print("    ‚úÖ Negative emotion detection working for ethical monitoring")
+        print("    ‚úÖ Emotion data structure suitable for EthicalCore")
 
     def test_integration_with_content_filter(self):
-        """Test integration với ContentFilter"""
-        print("\n🔗 Test Integration: ContentFilter")
+        """Test integration v·ªõi ContentFilter"""
+        print("\nüîó Test Integration: ContentFilter")
 
         # Test content that might need filtering
         test_cases = [
-            ("Tôi rất vui và hạnh phúc", "happy", "positive content"),
-            ("Tôi đang buồn và cần giúp đỡ", "sad", "negative but acceptable content"),
-            ("Tôi tức giận với ai đó", "angry", "angry content for monitoring"),
+            ("T√¥i r·∫•t vui v√† h·∫°nh ph√∫c", "happy", "positive content"),
+            ("T√¥i ƒëang bu·ªìn v√† c·∫ßn gi√∫p ƒë·ª°", "sad", "negative but acceptable content"),
+            ("T√¥i t·ª©c gi·∫≠n v·ªõi ai ƒë√≥", "angry", "angry content for monitoring"),
         ]
 
         for text, expected_emotion, description in test_cases:
@@ -748,26 +748,26 @@ class TestEmotionSenseIntegration(unittest.TestCase):
             self.assertIn("language", result)
 
             print(
-                f"    ✅ {description}: {result['emotion']} (conf: {result['confidence']:.2f})"
+                f"    ‚úÖ {description}: {result['emotion']} (conf: {result['confidence']:.2f})"
             )
 
-        print("    ✅ Emotion data compatible with ContentFilter")
-        print("    ✅ Can be used for content filtering decisions")
+        print("    ‚úÖ Emotion data compatible with ContentFilter")
+        print("    ‚úÖ Can be used for content filtering decisions")
 
 
 def run_performance_test():
     """Run performance test with 1000 requests"""
-    print("\n⚡ Performance Test: 1000 Requests")
+    print("\n‚ö° Performance Test: 1000 Requests")
 
     emotion_sense = EmotionSenseV1()
 
     # Test texts for performance
     test_texts = [
-        "Tôi rất vui",
-        "Tôi đang buồn",
-        "Tôi tức giận",
-        "Tôi sợ hãi",
-        "Tôi ngạc nhiên",
+        "T√¥i r·∫•t vui",
+        "T√¥i ƒëang bu·ªìn",
+        "T√¥i t·ª©c gi·∫≠n",
+        "T√¥i s·ª£ h√£i",
+        "T√¥i ng·∫°c nhi√™n",
     ] * 200  # 1000 total requests
 
     start_time = time.time()
@@ -802,15 +802,15 @@ def run_performance_test():
         and total_time < 120  # <2 minutes total
     )
 
-    print("\n    📊 Performance Test Results:")
+    print("\n    üìä Performance Test Results:")
     print(
-        f"    ✅ Successful requests: {successful_requests}/1000 ({successful_requests/10:.1f}%)"
+        f"    ‚úÖ Successful requests: {successful_requests}/1000 ({successful_requests/10:.1f}%)"
     )
-    print(f"    ❌ Failed requests: {failed_requests}/1000 ({failed_requests/10:.1f}%)")
-    print(f"    ⏱️  Total time: {total_time:.2f}s")
-    print(f"    ⚡ Average time: {avg_time:.2f}ms per request")
+    print(f"    ‚ùå Failed requests: {failed_requests}/1000 ({failed_requests/10:.1f}%)")
+    print(f"    ‚è±Ô∏è  Total time: {total_time:.2f}s")
+    print(f"    ‚ö° Average time: {avg_time:.2f}ms per request")
     print(
-        f"    🎯 Performance target: {'✅ ACHIEVED' if performance_good else '❌ NOT ACHIEVED'}"
+        f"    üéØ Performance target: {'‚úÖ ACHIEVED' if performance_good else '‚ùå NOT ACHIEVED'}"
     )
 
     # Cleanup
@@ -820,15 +820,15 @@ def run_performance_test():
 
 
 if __name__ == "__main__":
-    print("🚀 EMOTIONSENSE V1 COMPREHENSIVE TEST SUITE")
+    print("üöÄ EMOTIONSENSE V1 COMPREHENSIVE TEST SUITE")
     print("=" * 80)
 
     # Run unit tests
-    print("\n🧪 RUNNING UNIT TESTS...")
+    print("\nüß™ RUNNING UNIT TESTS...")
     unittest.main(argv=[""], exit=False, verbosity=2)
 
     # Run integration tests
-    print("\n🔗 RUNNING INTEGRATION TESTS...")
+    print("\nüîó RUNNING INTEGRATION TESTS...")
     integration_suite = unittest.TestLoader().loadTestsFromTestCase(
         TestEmotionSenseIntegration
     )
@@ -836,33 +836,33 @@ if __name__ == "__main__":
     integration_result = integration_runner.run(integration_suite)
 
     # Run performance test
-    print("\n⚡ RUNNING PERFORMANCE TEST...")
+    print("\n‚ö° RUNNING PERFORMANCE TEST...")
     performance_result = run_performance_test()
 
     # Final summary
     print("\n" + "=" * 80)
-    print("🏆 EMOTIONSENSE V1 TEST SUMMARY")
+    print("üèÜ EMOTIONSENSE V1 TEST SUMMARY")
     print("=" * 80)
 
     # Calculate overall results
     total_tests = 10  # Unit tests
     total_integration_tests = 4  # Integration tests
 
-    print("\n📊 TEST RESULTS:")
+    print("\nüìä TEST RESULTS:")
     print("   Unit Tests: 10 test methods")
     print("   Integration Tests: 4 test methods")
-    print(f"   Performance Test: {'✅ PASSED' if performance_result else '❌ FAILED'}")
+    print(f"   Performance Test: {'‚úÖ PASSED' if performance_result else '‚ùå FAILED'}")
 
-    print("\n🎯 QUALITY TARGETS:")
-    print("   Vietnamese Accuracy: >85% ✅")
-    print("   English Accuracy: >75% ✅")
-    print("   Performance: <100ms average ✅")
-    print("   Memory Usage: <50MB ✅")
+    print("\nüéØ QUALITY TARGETS:")
+    print("   Vietnamese Accuracy: >85% ‚úÖ")
+    print("   English Accuracy: >75% ‚úÖ")
+    print("   Performance: <100ms average ‚úÖ")
+    print("   Memory Usage: <50MB ‚úÖ")
 
-    print("\n🚀 EMOTIONSENSE V1 STATUS:")
+    print("\nüöÄ EMOTIONSENSE V1 STATUS:")
     if performance_result:
-        print("   🎉 ALL TESTS PASSED! Module is PRODUCTION-READY!")
+        print("   üéâ ALL TESTS PASSED! Module is PRODUCTION-READY!")
     else:
-        print("   ⚠️ MOST TESTS PASSED! Performance needs optimization.")
+        print("   ‚ö†Ô∏è MOST TESTS PASSED! Performance needs optimization.")
 
-    print("\n✅ Module ready for framework integration!")
+    print("\n‚úÖ Module ready for framework integration!")

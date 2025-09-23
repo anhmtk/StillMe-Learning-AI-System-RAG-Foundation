@@ -6,6 +6,7 @@ import '../../ui/screens/chat/chat_screen.dart';
 import '../../ui/screens/settings/settings_screen.dart';
 import '../../ui/screens/founder/founder_console_screen.dart';
 import '../../ui/screens/splash/splash_screen.dart';
+import '../../ui/screens/niche_radar/niche_radar_screen.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
@@ -38,6 +39,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/founder',
         name: 'founder',
         builder: (context, state) => const FounderConsoleScreen(),
+      ),
+      
+      // NicheRadar Screen
+      GoRoute(
+        path: '/niche-radar',
+        name: 'niche-radar',
+        builder: (context, state) => const NicheRadarScreen(),
       ),
     ],
     
@@ -81,9 +89,11 @@ extension AppRouterExtension on BuildContext {
   void goToSettings() => go('/settings');
   void goToFounder() => go('/founder');
   void goToSplash() => go('/splash');
+  void goToNicheRadar() => go('/niche-radar');
   
   void pushToSettings() => push('/settings');
   void pushToFounder() => push('/founder');
+  void pushToNicheRadar() => push('/niche-radar');
 }
 
 // Route names for type safety
@@ -92,4 +102,5 @@ class AppRoutes {
   static const String chat = '/chat';
   static const String settings = '/settings';
   static const String founder = '/founder';
+  static const String nicheRadar = '/niche-radar';
 }

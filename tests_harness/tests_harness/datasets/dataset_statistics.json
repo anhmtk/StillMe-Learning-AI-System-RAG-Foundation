@@ -1,0 +1,27 @@
+{
+  "total_cases": 1000,
+  "category_distribution": {
+    "greeting": 291,
+    "question": 291,
+    "help_request": 291,
+    "coding": 103,
+    "translation": 6,
+    "knowledge": 6,
+    "safety": 6,
+    "personal": 6
+  },
+  "language_distribution": {
+    "vi": 596,
+    "en": 404
+  },
+  "difficulty_distribution": {
+    "medium": 418,
+    "easy": 208,
+    "hard": 374
+  },
+  "scenario_distribution": {
+    "base_generation": 48,
+    "augmentation": 952
+  },
+  "generated_at": "2025-09-17T09:50:30.599683"
+}
