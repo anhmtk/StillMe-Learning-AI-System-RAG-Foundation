@@ -41,9 +41,13 @@ class TestClarificationHandler:
     def test_handler_initialization(self, handler):
         """Test handler initialization"""
         assert handler is not None
-        assert handler.confidence_threshold == 0.25
+        assert handler.confidence_threshold == 0.25  # Phase 1 compatible
+        assert handler.proceed_threshold == 0.80
+        assert handler.max_rounds == 2
+        assert handler.default_mode == "careful"
         assert len(handler.ambiguity_patterns) > 0
         assert len(handler.clarification_templates) > 0
+        assert handler.circuit_breaker is not None
     
     def test_empty_prompt(self, handler):
         """Test empty prompt detection"""
@@ -257,11 +261,99 @@ class TestClarificationHandler:
         assert "categories" in stats
         assert "templates_loaded" in stats
         assert "confidence_threshold" in stats
+        assert "proceed_threshold" in stats
+        assert "max_rounds" in stats
+        assert "default_mode" in stats
+        assert "phase2_enabled" in stats
+        assert "circuit_breaker" in stats
         
         assert stats["patterns_loaded"] > 0
+        assert stats["confidence_threshold"] == 0.25  # Phase 1 compatible
+        assert stats["proceed_threshold"] == 0.80
+        assert stats["max_rounds"] == 2
+        assert stats["default_mode"] == "careful"
         assert len(stats["categories"]) > 0
         assert stats["templates_loaded"] > 0
-        assert stats["confidence_threshold"] == 0.25
+    
+    def test_phase2_features(self, handler):
+        """Test Phase 2 features"""
+        # Test mode setting
+        handler.set_mode("quick")
+        assert handler.default_mode == "quick"
+        
+        handler.set_mode("careful")
+        assert handler.default_mode == "careful"
+        
+        # Test invalid mode
+        handler.set_mode("invalid")
+        assert handler.default_mode == "careful"  # Should remain unchanged
+    
+    def test_circuit_breaker(self, handler):
+        """Test circuit breaker functionality"""
+        # Initially closed
+        assert not handler.circuit_breaker.is_open()
+        
+        # Reset circuit breaker
+        handler.reset_circuit_breaker()
+        assert handler.circuit_breaker.failure_count == 0
+        assert handler.circuit_breaker.state == "closed"
+    
+    def test_max_rounds_enforcement(self, handler):
+        """Test max rounds enforcement"""
+        # Test exceeding max rounds
+        result = handler.detect_ambiguity(
+            "Write code for this", 
+            round_number=3  # Exceeds max_rounds=2
+        )
+        
+        assert not result.needs_clarification
+        assert result.category == "max_rounds_exceeded"
+        assert "Exceeded maximum clarification rounds" in result.reasoning
+    
+    def test_trace_id_support(self, handler):
+        """Test trace ID support"""
+        trace_id = "test_trace_123"
+        result = handler.detect_ambiguity(
+            "Write code for this",
+            trace_id=trace_id
+        )
+        
+        assert result.trace_id == trace_id
+        assert result.max_rounds == 2
+        assert result.round_number == 1
+    
+    def test_mode_based_clarification(self, handler):
+        """Test mode-based clarification behavior"""
+        prompt = "Build an app"
+        
+        # Quick mode - should be more restrictive
+        result_quick = handler.detect_ambiguity(prompt, mode="quick")
+        
+        # Careful mode - should be more permissive
+        result_careful = handler.detect_ambiguity(prompt, mode="careful")
+        
+        # Both should detect ambiguity, but careful mode might be more likely to ask
+        assert result_quick.needs_clarification or result_careful.needs_clarification
+    
+    def test_feedback_recording(self, handler):
+        """Test feedback recording functionality"""
+        if not handler.learner:
+            pytest.skip("Learner not available")
+        
+        # Record feedback using asyncio.run
+        import asyncio
+        asyncio.run(handler.record_clarification_feedback(
+            prompt="Build an app",
+            question="Which framework? Flask or FastAPI?",
+            user_reply="FastAPI",
+            success=True,
+            context={"domain_hint": "web"},
+            trace_id="test_trace"
+        ))
+        
+        # Check statistics
+        stats = handler.get_clarification_stats()
+        assert stats["successful_clarifications"] >= 1
     
     def test_dataset_prompts(self, handler, test_dataset):
         """Test all prompts from dataset"""

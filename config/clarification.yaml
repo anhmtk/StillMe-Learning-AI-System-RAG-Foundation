@@ -1,0 +1,22 @@
+clarification:
+  enabled: true
+  default_mode: careful   # careful | quick
+  max_rounds: 2
+  confidence_thresholds:
+    ask_clarify: 0.25     # nếu score > ngưỡng thì hỏi lại (Phase 1 compatible)
+    proceed: 0.80         # nếu chắc chắn đủ rõ thì trả lời
+  caching:
+    enabled: true
+    max_entries: 1024
+    ttl_seconds: 3600
+  learning:
+    enabled: true
+    min_samples_to_apply: 3       # đủ mẫu mới nâng pattern
+    decay: 0.90                   # giảm trọng số theo thời gian
+  telemetry:
+    log_level: info
+    sample_rate: 1.0
+  safety:
+    circuit_breaker:
+      max_failures: 5
+      reset_seconds: 60

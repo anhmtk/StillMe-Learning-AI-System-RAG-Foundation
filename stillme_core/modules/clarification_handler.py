@@ -2,6 +2,7 @@
 """
 Clarification Core - StillMe
 Phase 1: Basic Clarification Handler
+Phase 2: Intelligent Clarification with Learning
 
 This module provides the core functionality for detecting ambiguous prompts
 and generating clarification questions to improve user interaction quality.
@@ -9,9 +10,57 @@ and generating clarification questions to improve user interaction quality.
 
 import re
 import json
+import time
+import logging
+import yaml
 from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass
 from pathlib import Path
+
+logger = logging.getLogger(__name__)
+
+class CircuitBreaker:
+    """Circuit breaker for clarification safety"""
+    
+    def __init__(self, max_failures: int = 5, reset_seconds: int = 60):
+        self.max_failures = max_failures
+        self.reset_seconds = reset_seconds
+        self.failure_count = 0
+        self.last_failure_time = 0
+        self.state = "closed"  # closed, open, half-open
+    
+    def call(self, func, *args, **kwargs):
+        """Execute function with circuit breaker protection"""
+        if self.state == "open":
+            if time.time() - self.last_failure_time > self.reset_seconds:
+                self.state = "half-open"
+            else:
+                raise Exception("Circuit breaker is open")
+        
+        try:
+            result = func(*args, **kwargs)
+            if self.state == "half-open":
+                self.state = "closed"
+                self.failure_count = 0
+            return result
+        except Exception as e:
+            self.failure_count += 1
+            self.last_failure_time = time.time()
+            
+            if self.failure_count >= self.max_failures:
+                self.state = "open"
+                logger.warning(f"Circuit breaker opened after {self.failure_count} failures")
+            
+            raise e
+    
+    def is_open(self) -> bool:
+        """Check if circuit breaker is open"""
+        if self.state == "open":
+            if time.time() - self.last_failure_time > self.reset_seconds:
+                self.state = "half-open"
+                return False
+            return True
+        return False
 
 @dataclass
 class ClarificationResult:
@@ -21,6 +70,11 @@ class ClarificationResult:
     question: Optional[str]
     category: Optional[str]
     reasoning: str
+    options: Optional[List[str]] = None
+    domain: Optional[str] = None
+    round_number: int = 1
+    max_rounds: int = 2
+    trace_id: Optional[str] = None
 
 class ClarificationHandler:
     """
@@ -28,13 +82,119 @@ class ClarificationHandler:
     
     Detects ambiguous prompts and generates clarification questions
     to improve user interaction quality and reduce token waste.
+    
+    Phase 2 Features:
+    - Context-aware clarification
+    - Learning from user feedback
+    - Quick/Careful modes
+    - Circuit breaker protection
     """
     
-    def __init__(self):
+    def __init__(self, config_path: Optional[str] = None):
+        self.config = self._load_config(config_path)
         self.ambiguity_patterns = self._load_ambiguity_patterns()
         self.clarification_templates = self._load_clarification_templates()
-        self.confidence_threshold = 0.25
         
+        # Phase 2 components
+        self.context_aware_clarifier = None
+        self.learner = None
+        self.circuit_breaker = CircuitBreaker()
+        
+        # Initialize Phase 2 components if available
+        self._initialize_phase2_components()
+        
+        # Configuration
+        self.confidence_threshold = self.config.get("confidence_thresholds", {}).get("ask_clarify", 0.25)  # Keep Phase 1 threshold
+        self.proceed_threshold = self.config.get("confidence_thresholds", {}).get("proceed", 0.80)
+        self.max_rounds = self.config.get("max_rounds", 2)
+        self.default_mode = self.config.get("default_mode", "careful")
+        
+        # Statistics
+        self.stats = {
+            "total_requests": 0,
+            "clarifications_asked": 0,
+            "successful_clarifications": 0,
+            "failed_clarifications": 0,
+            "circuit_breaker_trips": 0
+        }
+    
+    def _load_config(self, config_path: Optional[str] = None) -> Dict[str, Any]:
+        """Load configuration from YAML file"""
+        default_config = {
+            "enabled": True,
+            "default_mode": "careful",
+            "max_rounds": 2,
+            "confidence_thresholds": {
+                "ask_clarify": 0.55,
+                "proceed": 0.80
+            },
+            "caching": {
+                "enabled": True,
+                "max_entries": 1024,
+                "ttl_seconds": 3600
+            },
+            "learning": {
+                "enabled": True,
+                "min_samples_to_apply": 3,
+                "decay": 0.90
+            },
+            "telemetry": {
+                "log_level": "info",
+                "sample_rate": 1.0
+            },
+            "safety": {
+                "circuit_breaker": {
+                    "max_failures": 5,
+                    "reset_seconds": 60
+                }
+            }
+        }
+        
+        if not config_path:
+            config_path = "config/clarification.yaml"
+        
+        try:
+            config_file = Path(config_path)
+            if config_file.exists():
+                with open(config_file, 'r', encoding='utf-8') as f:
+                    loaded_config = yaml.safe_load(f)
+                    # Merge with defaults
+                    clarification_config = loaded_config.get("clarification", {})
+                    default_config.update(clarification_config)
+                    logger.info(f"Loaded clarification config from {config_path}")
+            else:
+                logger.warning(f"Config file {config_path} not found, using defaults")
+        except Exception as e:
+            logger.warning(f"Failed to load config from {config_path}: {e}")
+        
+        return default_config
+    
+    def _initialize_phase2_components(self):
+        """Initialize Phase 2 components if available"""
+        try:
+            # Import Phase 2 components
+            from .clarification_learning import ClarificationLearner, ClarificationPatternStore
+            from .contextual_clarification import ContextAwareClarifier
+            
+            # Initialize pattern store and learner
+            pattern_store = ClarificationPatternStore(
+                decay=self.config.get("learning", {}).get("decay", 0.90)
+            )
+            self.learner = ClarificationLearner(pattern_store)
+            
+            # Initialize context-aware clarifier
+            self.context_aware_clarifier = ContextAwareClarifier(
+                context_analyzer=None,  # Will be injected later
+                semantic_search=None,   # Will be injected later
+                learner=self.learner
+            )
+            
+            logger.info("Phase 2 components initialized successfully")
+        except ImportError as e:
+            logger.warning(f"Phase 2 components not available: {e}")
+        except Exception as e:
+            logger.warning(f"Failed to initialize Phase 2 components: {e}")
+    
     def _load_ambiguity_patterns(self) -> Dict[str, List[str]]:
         """Load ambiguity detection patterns"""
         return {
@@ -123,26 +283,97 @@ class ClarificationHandler:
             ]
         }
     
-    def detect_ambiguity(self, prompt: str, context: Dict[str, Any] = None) -> ClarificationResult:
+    def detect_ambiguity(self, prompt: str, context: Optional[Dict[str, Any]] = None, 
+                        mode: str = None, round_number: int = 1, trace_id: Optional[str] = None) -> ClarificationResult:
         """
         Detect if a prompt is ambiguous and needs clarification
         
         Args:
             prompt: User input prompt
             context: Conversation context (optional)
+            mode: Clarification mode ("quick" or "careful")
+            round_number: Current clarification round (1-based)
+            trace_id: Trace ID for observability
             
         Returns:
             ClarificationResult with detection results
         """
+        # Update statistics
+        self.stats["total_requests"] += 1
+        
+        # Check circuit breaker
+        if self.circuit_breaker.is_open():
+            self.stats["circuit_breaker_trips"] += 1
+            logger.warning("Circuit breaker is open, skipping clarification")
+            return ClarificationResult(
+                needs_clarification=False,
+                confidence=0.0,
+                question=None,
+                category="circuit_breaker_open",
+                reasoning="Circuit breaker is open due to repeated failures",
+                round_number=round_number,
+                max_rounds=self.max_rounds,
+                trace_id=trace_id
+            )
+        
+        # Use provided mode or default
+        if mode is None:
+            mode = self.default_mode
+        
+        # Check if we've exceeded max rounds
+        if round_number > self.max_rounds:
+            logger.warning(f"Exceeded max rounds ({self.max_rounds}), proceeding with best effort")
+            return ClarificationResult(
+                needs_clarification=False,
+                confidence=0.0,
+                question=None,
+                category="max_rounds_exceeded",
+                reasoning=f"Exceeded maximum clarification rounds ({self.max_rounds})",
+                round_number=round_number,
+                max_rounds=self.max_rounds,
+                trace_id=trace_id
+            )
+        
         if not prompt or not prompt.strip():
             return ClarificationResult(
                 needs_clarification=True,
                 confidence=1.0,
                 question="Could you please provide your request?",
                 category="empty_prompt",
-                reasoning="Empty or whitespace-only prompt"
+                reasoning="Empty or whitespace-only prompt",
+                round_number=round_number,
+                max_rounds=self.max_rounds,
+                trace_id=trace_id
             )
         
+        # Phase 1: Basic ambiguity detection
+        basic_result = self._detect_basic_ambiguity(prompt)
+        
+        # Phase 2: Context-aware clarification if available
+        if self.context_aware_clarifier and context:
+            try:
+                enhanced_result = self._detect_context_aware_ambiguity(
+                    prompt, context, basic_result, mode, round_number, trace_id
+                )
+                return enhanced_result
+            except Exception as e:
+                logger.warning(f"Context-aware clarification failed: {e}")
+                # Fall back to basic result
+        
+        # Use basic result with Phase 2 enhancements
+        return ClarificationResult(
+            needs_clarification=basic_result.needs_clarification,
+            confidence=basic_result.confidence,
+            question=basic_result.question,
+            category=basic_result.category,
+            reasoning=basic_result.reasoning,
+            round_number=round_number,
+            max_rounds=self.max_rounds,
+            trace_id=trace_id
+        )
+    
+    def _detect_basic_ambiguity(self, prompt: str) -> ClarificationResult:
+        """Phase 1 basic ambiguity detection"""
         prompt_lower = prompt.lower().strip()
         max_confidence = 0.0
         best_category = None
@@ -162,7 +393,7 @@ class ClarificationHandler:
         needs_clarification = max_confidence >= self.confidence_threshold
         
         if needs_clarification:
-            question = self._generate_clarification_question(prompt, best_category, context)
+            question = self._generate_clarification_question(prompt, best_category, {})
         else:
             question = None
         
@@ -172,6 +403,44 @@ class ClarificationHandler:
             question=question,
             category=best_category,
             reasoning=best_reasoning
+        )
+    
+    def _detect_context_aware_ambiguity(self, prompt: str, context: Dict[str, Any], 
+                                      basic_result: ClarificationResult, mode: str, 
+                                      round_number: int, trace_id: Optional[str]) -> ClarificationResult:
+        """Phase 2 context-aware ambiguity detection"""
+        # Extract context information
+        conversation_history = context.get("conversation_history", [])
+        project_context = context.get("project_context", {})
+        
+        # Get context-aware clarification question
+        clarification_question = self.context_aware_clarifier.make_question(
+            prompt, conversation_history, project_context
+        )
+        
+        # Adjust confidence based on mode
+        if mode == "quick":
+            # Only ask if very confident
+            needs_clarification = basic_result.confidence >= self.proceed_threshold
+        else:  # careful mode
+            # Ask if not completely confident
+            needs_clarification = basic_result.confidence < self.proceed_threshold
+        
+        # Update statistics
+        if needs_clarification:
+            self.stats["clarifications_asked"] += 1
+        
+        return ClarificationResult(
+            needs_clarification=needs_clarification,
+            confidence=clarification_question.confidence,
+            question=clarification_question.question,
+            options=clarification_question.options,
+            category=basic_result.category,
+            reasoning=f"{basic_result.reasoning} | {clarification_question.reasoning}",
+            domain=clarification_question.domain,
+            round_number=round_number,
+            max_rounds=self.max_rounds,
+            trace_id=trace_id
         )
     
     def _calculate_confidence(self, prompt: str, pattern: str, category: str) -> float:
@@ -248,28 +517,115 @@ class ClarificationHandler:
         
         return template
     
-    def generate_clarification(self, prompt: str, context: Dict[str, Any] = None) -> Optional[str]:
+    def generate_clarification(self, prompt: str, context: Optional[Dict[str, Any]] = None, 
+                             mode: str = None, round_number: int = 1, trace_id: Optional[str] = None) -> Optional[str]:
         """
         Generate clarification question for ambiguous prompt
         
         Args:
             prompt: User input prompt
             context: Conversation context (optional)
+            mode: Clarification mode ("quick" or "careful")
+            round_number: Current clarification round (1-based)
+            trace_id: Trace ID for observability
             
         Returns:
             Clarification question or None if not needed
         """
-        result = self.detect_ambiguity(prompt, context)
+        result = self.detect_ambiguity(prompt, context, mode, round_number, trace_id)
         return result.question if result.needs_clarification else None
+    
+    async def record_clarification_feedback(self, prompt: str, question: str, user_reply: Optional[str], 
+                                          success: bool, context: Optional[Dict[str, Any]] = None, 
+                                          trace_id: Optional[str] = None):
+        """
+        Record feedback from clarification attempt
+        
+        Args:
+            prompt: Original user prompt
+            question: Clarification question asked
+            user_reply: User's response (None if skipped)
+            success: Whether the clarification led to successful outcome
+            context: Additional context
+            trace_id: Trace ID for observability
+        """
+        if not self.learner:
+            logger.warning("Learner not available, cannot record feedback")
+            return
+        
+        try:
+            await self.learner.record_attempt(
+                prompt=prompt,
+                question=question,
+                user_reply=user_reply,
+                success=success,
+                context=context or {},
+                trace_id=trace_id
+            )
+            
+            # Update statistics
+            if success:
+                self.stats["successful_clarifications"] += 1
+            else:
+                self.stats["failed_clarifications"] += 1
+                
+            logger.info(f"Recorded clarification feedback: success={success}, trace_id={trace_id}")
+        except Exception as e:
+            logger.error(f"Failed to record clarification feedback: {e}")
     
     def get_clarification_stats(self) -> Dict[str, Any]:
         """Get clarification handler statistics"""
-        return {
+        base_stats = {
             "patterns_loaded": sum(len(patterns) for patterns in self.ambiguity_patterns.values()),
             "categories": list(self.ambiguity_patterns.keys()),
             "templates_loaded": sum(len(templates) for templates in self.clarification_templates.values()),
-            "confidence_threshold": self.confidence_threshold
+            "confidence_threshold": self.confidence_threshold,
+            "proceed_threshold": self.proceed_threshold,
+            "max_rounds": self.max_rounds,
+            "default_mode": self.default_mode,
+            "phase2_enabled": self.context_aware_clarifier is not None and self.learner is not None
         }
+        
+        # Add Phase 2 statistics
+        base_stats.update(self.stats)
+        
+        # Add learning statistics if available
+        if self.learner:
+            try:
+                learning_stats = self.learner.get_learning_stats()
+                base_stats["learning"] = learning_stats
+            except Exception as e:
+                logger.warning(f"Failed to get learning stats: {e}")
+        
+        # Add circuit breaker status
+        base_stats["circuit_breaker"] = {
+            "is_open": self.circuit_breaker.is_open(),
+            "failure_count": self.circuit_breaker.failure_count,
+            "state": self.circuit_breaker.state
+        }
+        
+        return base_stats
+    
+    def set_mode(self, mode: str):
+        """Set clarification mode"""
+        if mode in ["quick", "careful"]:
+            self.default_mode = mode
+            logger.info(f"Clarification mode set to: {mode}")
+        else:
+            logger.warning(f"Invalid mode: {mode}, must be 'quick' or 'careful'")
+    
+    def reset_circuit_breaker(self):
+        """Reset circuit breaker"""
+        self.circuit_breaker.failure_count = 0
+        self.circuit_breaker.state = "closed"
+        self.circuit_breaker.last_failure_time = 0
+        logger.info("Circuit breaker reset")
+    
+    def clear_learning_data(self):
+        """Clear all learning data (for testing)"""
+        if self.learner:
+            self.learner.clear_learning_data()
+            logger.info("Learning data cleared")
 
 # Example usage and testing
 if __name__ == "__main__":

@@ -43,14 +43,27 @@ except Exception as e:
     print(f"❌ Internet access modules loading failed: {e}")
     # Continue anyway for development
 
-# Import Clarification Core
+# Import Clarification Core - Phase 2
 try:
     from stillme_core.modules.clarification_handler import ClarificationHandler
+    from stillme_core.modules.semantic_search import SemanticSearch
+    
+    # Initialize semantic search for context-aware clarification
+    semantic_search = SemanticSearch()
+    
+    # Initialize clarification handler with Phase 2 features
     clarification_handler = ClarificationHandler()
-    print("✅ Clarification Core loaded successfully")
+    
+    # Inject semantic search into context-aware clarifier if available
+    if clarification_handler.context_aware_clarifier:
+        clarification_handler.context_aware_clarifier.semantic_search = semantic_search
+        print("✅ Semantic search integrated with clarification handler")
+    
+    print("✅ Clarification Core Phase 2 loaded successfully")
 except Exception as e:
-    print(f"❌ Clarification Core loading failed: {e}")
+    print(f"❌ Clarification Core Phase 2 loading failed: {e}")
     clarification_handler = None
+    semantic_search = None
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -770,29 +783,60 @@ class StillMeHandler(BaseHTTPRequestHandler):
             
             logger.info(f"Processing message from user {user_id}: message_length={len(message)}")
             
-            # Check for clarification needs
+            # Phase 2: Enhanced clarification with context and modes
             clarification_needed = False
-            clarification_question = None
+            clarification_result = None
             
             if clarification_handler:
                 try:
-                    clarification_result = clarification_handler.detect_ambiguity(message)
+                    # Extract context information
+                    context = {
+                        "conversation_history": [],  # TODO: Implement conversation history
+                        "project_context": {
+                            "files": [],  # TODO: Implement project file detection
+                            "extensions": []
+                        },
+                        "user_id": user_id,
+                        "session_id": session_id
+                    }
+                    
+                    # Get clarification mode from request (default: careful)
+                    clarification_mode = data.get('clarification_mode', 'careful')
+                    round_number = data.get('clarification_round', 1)
+                    trace_id = f"{user_id}_{session_id}_{int(time.time())}"
+                    
+                    # Detect ambiguity with Phase 2 features
+                    clarification_result = clarification_handler.detect_ambiguity(
+                        message, 
+                        context=context,
+                        mode=clarification_mode,
+                        round_number=round_number,
+                        trace_id=trace_id
+                    )
+                    
                     if clarification_result.needs_clarification:
                         clarification_needed = True
-                        clarification_question = clarification_result.question
                         logger.info(f"Clarification needed: {clarification_result.category} - {clarification_result.reasoning}")
+                        logger.info(f"Mode: {clarification_mode}, Round: {round_number}, Domain: {clarification_result.domain}")
                 except Exception as e:
                     logger.warning(f"Clarification check failed: {e}")
             
-            # If clarification is needed, return clarification question
-            if clarification_needed and clarification_question:
-                self._send_json_response(200, {
+            # If clarification is needed, return enhanced clarification response
+            if clarification_needed and clarification_result:
+                response_data = {
                     "type": "clarification",
-                    "question": clarification_question,
-                    "category": "ambiguity_detected",
+                    "question": clarification_result.question,
+                    "category": clarification_result.category,
+                    "domain": clarification_result.domain,
+                    "options": clarification_result.options,
+                    "round_number": clarification_result.round_number,
+                    "max_rounds": clarification_result.max_rounds,
+                    "trace_id": clarification_result.trace_id,
                     "timestamp": time.time(),
                     "status": "awaiting_clarification"
-                })
+                }
+                
+                self._send_json_response(200, response_data)
                 return
             
             start_time = time.perf_counter()
