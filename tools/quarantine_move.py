@@ -11,7 +11,7 @@ import csv
 import shutil
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Any, Set
+from typing import Dict, List, Any, Optional, Set
 import argparse
 
 class QuarantineMover:
@@ -190,10 +190,10 @@ class QuarantineMover:
         for file_info in manifest["files"]:
             print(f"  - {file_info['original_path']} ({file_info['size']:,} bytes, {file_info['category']})")
 
-    def restore_from_graveyard(self, manifest_path: str = None) -> None:
+    def restore_from_graveyard(self, manifest_path: Optional[str] = None) -> None:
         """Restore files từ graveyard"""
         if manifest_path is None:
-            manifest_path = self.reports_dir / "quarantine_manifest.json"
+            manifest_path = str(self.reports_dir / "quarantine_manifest.json")
         
         if not Path(manifest_path).exists():
             print(f"❌ Manifest not found: {manifest_path}")

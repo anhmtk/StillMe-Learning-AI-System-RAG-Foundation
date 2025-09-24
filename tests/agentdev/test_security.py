@@ -408,7 +408,7 @@ class TestNetworkGuard:
                 max_per_minute = google_rule.rate_limit
                 
                 # Simulate rate limit by adding timestamps
-                guard.rate_limits["www.google.com"] = [time.time()] * max_per_minute
+                guard.rate_limits["www.google.com"] = [time.time()] * (max_per_minute or 1)
                 
                 # Test rate limited request
                 decision = await guard.validate_request(

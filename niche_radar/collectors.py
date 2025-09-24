@@ -448,7 +448,7 @@ def get_all_collectors() -> Dict[str, BaseCollector]:
         "reddit_engagement": RedditEngagementCollector()
     }
 
-async def collect_all_data(topics: List[str] = None) -> Dict[str, List[NicheRecord]]:
+async def collect_all_data(topics: Optional[List[str]] = None) -> Dict[str, List[NicheRecord]]:
     """Collect data from all sources"""
     if topics is None:
         topics = ["python", "ai", "startup", "saas", "crypto"]

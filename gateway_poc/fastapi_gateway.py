@@ -177,8 +177,11 @@ class StillMeGateway:
             
             # Check Redis
             try:
-                await self.redis_client.ping()
-                services["redis"] = "healthy"
+                if self.redis_client:
+                    await self.redis_client.ping()
+                    services["redis"] = "healthy"
+                else:
+                    services["redis"] = "unhealthy"
             except:
                 services["redis"] = "unhealthy"
             
@@ -199,7 +202,7 @@ class StillMeGateway:
             start_time = time.time()
             
             # Check cache first
-            cache_key = self._generate_cache_key(request.message, request.user_id)
+            cache_key = self._generate_cache_key(request.message, request.user_id or "anonymous")
             cached_response = await self._get_from_cache(cache_key)
             
             if cached_response and request.use_cache:
@@ -313,11 +316,14 @@ class StillMeGateway:
             "session_id": request.session_id
         }
         
-        response = await self.http_client.post(
-            f"{CONFIG['stillme_backend']}/chat",
-            json=payload,
-            timeout=10
-        )
+        if self.http_client:
+            response = await self.http_client.post(
+                f"{CONFIG['stillme_backend']}/chat",
+                json=payload,
+                timeout=10
+            )
+        else:
+            raise Exception("HTTP client not initialized")
         
         if response.status_code == 200:
             return response.json()
@@ -326,11 +332,14 @@ class StillMeGateway:
     
     async def _call_ollama_backend(self, request: dict):
         """Call Ollama backend"""
-        response = await self.http_client.post(
-            f"{CONFIG['ollama_backend']}/api/generate",
-            json=request,
-            timeout=15
-        )
+        if self.http_client:
+            response = await self.http_client.post(
+                f"{CONFIG['ollama_backend']}/api/generate",
+                json=request,
+                timeout=15
+            )
+        else:
+            raise Exception("HTTP client not initialized")
         
         if response.status_code == 200:
             return response.json()
@@ -345,7 +354,10 @@ class StillMeGateway:
     async def _get_from_cache(self, key: str) -> Optional[dict]:
         """Get response from cache"""
         try:
-            cached = await self.redis_client.get(key)
+            if self.redis_client:
+                cached = await self.redis_client.get(key)
+            else:
+                return None
             if cached:
                 return json.loads(cached)
         except Exception as e:
@@ -355,7 +367,8 @@ class StillMeGateway:
     async def _set_cache(self, key: str, data: dict, ttl: int):
         """Set response in cache"""
         try:
-            await self.redis_client.setex(key, ttl, json.dumps(data))
+            if self.redis_client:
+                await self.redis_client.setex(key, ttl, json.dumps(data))
         except Exception as e:
             logger.warning(f"Cache set error: {e}")
     

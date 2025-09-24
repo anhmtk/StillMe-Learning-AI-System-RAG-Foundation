@@ -88,7 +88,7 @@ class SmartRouter:
         self.ollama_url = OLLAMA_BASE_URL
         logger.info("🧠 Smart Router initialized")
     
-    def route_message(self, message: str, session_id: str = "default", system_prompt: str = None, web_search_enabled: bool = True) -> Dict[str, Any]:
+    def route_message(self, message: str, session_id: str = "default", system_prompt: Optional[str] = None, web_search_enabled: bool = True) -> Dict[str, Any]:
         """Route message to appropriate AI model with StillMe persona enforcement"""
         try:
             # Check if this is a web request and web search is enabled
@@ -228,7 +228,7 @@ class SmartRouter:
                 }
             
             # Check cache first
-            cache_key = generate_cache_key(tool_name, **decision.sanitized_params)
+            cache_key = generate_cache_key(tool_name, **(decision.sanitized_params or {}))
             cached_data, cache_hit = get_cached_data(cache_key, request_type)
             
             if cache_hit:
@@ -236,10 +236,10 @@ class SmartRouter:
                 return {
                     "is_web_request": True,
                     "model": f"web_{request_type}",
-                    "response": cached_data.get("response", "Cached response"),
+                    "response": cached_data.get("response", "Cached response") if cached_data else "Cached response",
                     "engine": "web",
                     "status": "success",
-                    "attribution": cached_data.get("attribution"),
+                    "attribution": cached_data.get("attribution") if cached_data else None,
                     "cache_hit": True
                 }
             
@@ -249,11 +249,11 @@ class SmartRouter:
             
             try:
                 # Call web tool with sanitized parameters
-                result = loop.run_until_complete(web_tools.call_tool(tool_name, **decision.sanitized_params))
+                result = loop.run_until_complete(web_tools.call_tool(tool_name, **(decision.sanitized_params or {})))
                 
                 if result.success:
                     # Format response
-                    formatted_response = self._format_web_response(request_type, result.data)
+                    formatted_response = self._format_web_response(request_type, result.data or {})
                     
                     # Cache the result
                     cache_data(cache_key, {
@@ -574,7 +574,7 @@ class SmartRouter:
             logger.error(f"❌ Web response formatting error: {e}")
             return "Lỗi khi định dạng dữ liệu web."
     
-    def _call_ollama(self, model: str, message: str, system_prompt: str = None) -> Dict[str, Any]:
+    def _call_ollama(self, model: str, message: str, system_prompt: Optional[str] = None) -> Dict[str, Any]:
         """Call Ollama API with system prompt"""
         try:
             # Use simple prompt format for better compatibility
@@ -634,7 +634,7 @@ class SmartRouter:
                 "status": "error"
             }
     
-    def _call_deepseek_cloud(self, message: str, system_prompt: str = None) -> Dict[str, Any]:
+    def _call_deepseek_cloud(self, message: str, system_prompt: Optional[str] = None) -> Dict[str, Any]:
         """Call DeepSeek Cloud API"""
         try:
             headers = {
@@ -672,7 +672,7 @@ class SmartRouter:
             logger.error(f"DeepSeek Cloud call error: {e}")
             return self._call_ollama("deepseek-coder:6.7b", message, system_prompt)  # Fallback
     
-    def _call_openrouter(self, model: str, message: str, system_prompt: str = None) -> Dict[str, Any]:
+    def _call_openrouter(self, model: str, message: str, system_prompt: Optional[str] = None) -> Dict[str, Any]:
         """Call OpenRouter API (GPT-5, Claude, etc.)"""
         try:
             headers = {
