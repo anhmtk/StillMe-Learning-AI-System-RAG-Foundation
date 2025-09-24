@@ -43,6 +43,15 @@ except Exception as e:
     print(f"❌ Internet access modules loading failed: {e}")
     # Continue anyway for development
 
+# Import Clarification Core
+try:
+    from stillme_core.modules.clarification_handler import ClarificationHandler
+    clarification_handler = ClarificationHandler()
+    print("✅ Clarification Core loaded successfully")
+except Exception as e:
+    print(f"❌ Clarification Core loading failed: {e}")
+    clarification_handler = None
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -760,6 +769,31 @@ class StillMeHandler(BaseHTTPRequestHandler):
                 return
             
             logger.info(f"Processing message from user {user_id}: message_length={len(message)}")
+            
+            # Check for clarification needs
+            clarification_needed = False
+            clarification_question = None
+            
+            if clarification_handler:
+                try:
+                    clarification_result = clarification_handler.detect_ambiguity(message)
+                    if clarification_result.needs_clarification:
+                        clarification_needed = True
+                        clarification_question = clarification_result.question
+                        logger.info(f"Clarification needed: {clarification_result.category} - {clarification_result.reasoning}")
+                except Exception as e:
+                    logger.warning(f"Clarification check failed: {e}")
+            
+            # If clarification is needed, return clarification question
+            if clarification_needed and clarification_question:
+                self._send_json_response(200, {
+                    "type": "clarification",
+                    "question": clarification_question,
+                    "category": "ambiguity_detected",
+                    "timestamp": time.time(),
+                    "status": "awaiting_clarification"
+                })
+                return
             
             start_time = time.perf_counter()
             result = smart_router.route_message(message, session_id, system_prompt, web_search_enabled)
