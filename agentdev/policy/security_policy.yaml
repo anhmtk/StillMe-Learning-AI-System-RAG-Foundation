@@ -1,0 +1,213 @@
+# AgentDev Security Policy - SEAL-GRADE
+# Enterprise-grade security configuration
+
+tools:
+  # Safe operations - Auto-approved
+  file_read:
+    allowed: true
+    security_level: safe
+    requires_approval: false
+    max_executions_per_hour: 100
+    allowed_parameters: ["path", "encoding"]
+    forbidden_parameters: []
+    parameter_constraints:
+      path:
+        type: string
+        max_length: 1000
+    dry_run_only: false
+    description: "Read file contents"
+
+  directory_list:
+    allowed: true
+    security_level: safe
+    requires_approval: false
+    max_executions_per_hour: 50
+    allowed_parameters: ["path", "recursive"]
+    forbidden_parameters: []
+    parameter_constraints:
+      path:
+        type: string
+        max_length: 1000
+    dry_run_only: false
+    description: "List directory contents"
+
+  # Medium risk operations - Require approval
+  file_write:
+    allowed: true
+    security_level: medium
+    requires_approval: true
+    max_executions_per_hour: 20
+    allowed_parameters: ["path", "content", "encoding"]
+    forbidden_parameters: ["password", "secret", "token", "key"]
+    parameter_constraints:
+      path:
+        type: string
+        max_length: 1000
+      content:
+        type: string
+        max_length: 1000000
+    dry_run_only: false
+    description: "Write file contents"
+
+  file_delete:
+    allowed: true
+    security_level: medium
+    requires_approval: true
+    max_executions_per_hour: 10
+    allowed_parameters: ["path"]
+    forbidden_parameters: []
+    parameter_constraints:
+      path:
+        type: string
+        max_length: 1000
+    dry_run_only: false
+    description: "Delete file"
+
+  directory_create:
+    allowed: true
+    security_level: medium
+    requires_approval: true
+    max_executions_per_hour: 15
+    allowed_parameters: ["path", "mode"]
+    forbidden_parameters: []
+    parameter_constraints:
+      path:
+        type: string
+        max_length: 1000
+    dry_run_only: false
+    description: "Create directory"
+
+  # High risk operations - Strict approval
+  http_request:
+    allowed: true
+    security_level: high
+    requires_approval: true
+    max_executions_per_hour: 50
+    allowed_parameters: ["url", "method", "headers", "data", "timeout"]
+    forbidden_parameters: ["password", "secret", "token", "key", "api_key"]
+    parameter_constraints:
+      url:
+        type: string
+        max_length: 2000
+      method:
+        type: string
+        max_length: 10
+    dry_run_only: false
+    description: "Make HTTP requests"
+
+  git_operation:
+    allowed: true
+    security_level: high
+    requires_approval: true
+    max_executions_per_hour: 30
+    allowed_parameters: ["operation", "repository", "branch", "message"]
+    forbidden_parameters: ["password", "secret", "token", "key"]
+    parameter_constraints:
+      operation:
+        type: string
+        max_length: 20
+      repository:
+        type: string
+        max_length: 1000
+    dry_run_only: false
+    description: "Git operations"
+
+  # Critical operations - Blocked by default
+  command_execute:
+    allowed: false
+    security_level: critical
+    requires_approval: true
+    max_executions_per_hour: 1
+    allowed_parameters: ["command"]
+    forbidden_parameters: []
+    parameter_constraints: {}
+    dry_run_only: true
+    description: "Execute system commands"
+
+  process_spawn:
+    allowed: false
+    security_level: critical
+    requires_approval: true
+    max_executions_per_hour: 1
+    allowed_parameters: ["program", "args"]
+    forbidden_parameters: []
+    parameter_constraints: {}
+    dry_run_only: true
+    description: "Spawn external processes"
+
+  network_scan:
+    allowed: false
+    security_level: critical
+    requires_approval: true
+    max_executions_per_hour: 1
+    allowed_parameters: ["target", "ports"]
+    forbidden_parameters: []
+    parameter_constraints: {}
+    dry_run_only: true
+    description: "Network scanning"
+
+  # Database operations - High risk
+  database_query:
+    allowed: true
+    security_level: high
+    requires_approval: true
+    max_executions_per_hour: 100
+    allowed_parameters: ["query", "database", "parameters"]
+    forbidden_parameters: ["password", "secret", "token", "key"]
+    parameter_constraints:
+      query:
+        type: string
+        max_length: 10000
+    dry_run_only: false
+    description: "Database queries"
+
+  database_write:
+    allowed: true
+    security_level: high
+    requires_approval: true
+    max_executions_per_hour: 50
+    allowed_parameters: ["operation", "table", "data"]
+    forbidden_parameters: ["password", "secret", "token", "key"]
+    parameter_constraints:
+      operation:
+        type: string
+        max_length: 20
+    dry_run_only: false
+    description: "Database write operations"
+
+# Global security settings
+global_settings:
+  max_concurrent_requests: 10
+  default_timeout: 30
+  audit_logging: true
+  encryption_required: true
+  session_timeout: 3600
+  max_session_size: 1000000
+
+# Security patterns to block
+blocked_patterns:
+  - "rm\\s+-rf"
+  - "sudo\\s+"
+  - "chmod\\s+777"
+  - "eval\\s*\\("
+  - "exec\\s*\\("
+  - "subprocess"
+  - "os\\.system"
+  - "shell=True"
+  - "password\\s*="
+  - "secret\\s*="
+  - "token\\s*="
+  - "key\\s*="
+
+# Rate limiting
+rate_limits:
+  default_per_hour: 100
+  high_risk_per_hour: 10
+  critical_per_hour: 1
+
+# Approval workflow
+approval_workflow:
+  auto_approve_safe: true
+  require_admin_approval: ["critical"]
+  approval_timeout: 300
+  max_pending_approvals: 50

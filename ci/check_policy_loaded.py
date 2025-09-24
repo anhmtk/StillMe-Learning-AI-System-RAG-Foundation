@@ -1,92 +1,141 @@
 #!/usr/bin/env python3
 """
-CI Check: Ensure all entrypoints load policy_loader
+Policy Loading Compliance Check
+Ensures all entrypoints load required policies
 """
 
+import ast
 import os
 import sys
-import re
 from pathlib import Path
+from typing import List, Set
 
-def find_entrypoints():
-    """Find all entrypoint files"""
+def find_entrypoints() -> List[Path]:
+    """Find all Python entrypoints in the project"""
     entrypoints = []
     
-    # Python entrypoints
-    python_files = [
+    # Main entrypoints
+    main_files = [
         "app.py",
-        "stillme_desktop_app.py", 
-        "app_with_core.py",
-        "stable_ai_server.py"
+        "main.py", 
+        "run.py",
+        "server.py",
+        "gateway.py"
     ]
     
-    for file in python_files:
-        if os.path.exists(file):
-            entrypoints.append(file)
+    for file_name in main_files:
+        if Path(file_name).exists():
+            entrypoints.append(Path(file_name))
     
-    # Find other Python entrypoints
-    for root, dirs, files in os.walk("."):
-        # Skip certain directories
-        if any(skip in root for skip in ["node_modules", ".git", "__pycache__", ".venv"]):
-            continue
-            
-        for file in files:
-            if file.endswith(".py") and file in ["main.py", "app.py", "server.py", "cli.py"]:
-                entrypoints.append(os.path.join(root, file))
+    # AgentDev entrypoints
+    agentdev_dir = Path("agentdev")
+    if agentdev_dir.exists():
+        for py_file in agentdev_dir.rglob("*.py"):
+            if py_file.name in ["__init__.py", "main.py", "cli.py", "server.py"]:
+                entrypoints.append(py_file)
+    
+    # API entrypoints
+    api_dir = Path("api")
+    if api_dir.exists():
+        for py_file in api_dir.rglob("*.py"):
+            if py_file.name in ["__init__.py", "main.py", "app.py", "server.py"]:
+                entrypoints.append(py_file)
     
     return entrypoints
 
-def check_policy_loading(file_path):
-    """Check if file loads policy_loader"""
+def check_policy_imports(file_path: Path) -> Set[str]:
+    """Check if file imports required policies"""
+    required_imports = {
+        "load_interaction_policy",
+        "get_interaction_policy", 
+        "load_file_policy",
+        "assert_protected_files",
+        "diagnose_on_skip"
+    }
+    
+    found_imports = set()
+    
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
             content = f.read()
-            
-        # Check for policy_loader import
-        if "policy_loader" in content or "load_policies" in content:
-            return True, "Policy loader found"
-        else:
-            return False, "Policy loader not found"
-            
+        
+        tree = ast.parse(content, filename=str(file_path))
+        
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    if alias.name.startswith('runtime.'):
+                        found_imports.add(alias.name.split('.')[-1])
+            elif isinstance(node, ast.ImportFrom):
+                if node.module and 'runtime' in node.module:
+                    for alias in node.names:
+                        found_imports.add(alias.name)
+    
     except Exception as e:
-        return False, f"Error reading file: {e}"
+        print(f"Error parsing {file_path}: {e}")
+        return set()
+    
+    return found_imports
+
+def check_policy_usage(file_path: Path) -> bool:
+    """Check if file actually uses policy functions"""
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = f.read()
+        
+        # Check for policy function calls
+        policy_calls = [
+            "load_interaction_policy()",
+            "get_interaction_policy()",
+            "load_file_policy()", 
+            "assert_protected_files()",
+            "diagnose_on_skip()"
+        ]
+        
+        for call in policy_calls:
+            if call in content:
+                return True
+        
+        return False
+    
+    except Exception as e:
+        print(f"Error reading {file_path}: {e}")
+        return False
 
 def main():
-    """Main CI check function"""
-    print("🔍 Checking policy loading in entrypoints...")
+    """Main compliance check"""
+    print("🔍 Checking policy loading compliance...")
     
     entrypoints = find_entrypoints()
     if not entrypoints:
         print("❌ No entrypoints found")
-        return 1
+        sys.exit(1)
     
-    print(f"Found {len(entrypoints)} entrypoints:")
-    for ep in entrypoints:
-        print(f"  - {ep}")
-    
-    failed_checks = []
+    violations = []
     
     for entrypoint in entrypoints:
-        print(f"\n🔍 Checking {entrypoint}...")
-        has_policy, message = check_policy_loading(entrypoint)
+        print(f"Checking {entrypoint}...")
         
-        if has_policy:
-            print(f"  ✅ {message}")
-        else:
-            print(f"  ❌ {message}")
-            failed_checks.append(entrypoint)
+        imports = check_policy_imports(entrypoint)
+        uses_policies = check_policy_usage(entrypoint)
+        
+        if not imports:
+            violations.append(f"{entrypoint}: No policy imports found")
+        elif not uses_policies:
+            violations.append(f"{entrypoint}: Imports policies but doesn't use them")
     
-    if failed_checks:
-        print(f"\n❌ {len(failed_checks)} entrypoints failed policy loading check:")
-        for ep in failed_checks:
-            print(f"  - {ep}")
-        print("\n💡 Add this to your entrypoint:")
-        print("from runtime.policy_loader import load_policies")
-        print("load_policies()  # Load all policies on startup")
-        return 1
+    if violations:
+        print("\n❌ Policy compliance violations found:")
+        for violation in violations:
+            print(f"  - {violation}")
+        print("\nRequired imports:")
+        print("  from runtime.interaction_policy import load_interaction_policy, get_interaction_policy")
+        print("  from runtime.file_policy import load_file_policy, assert_protected_files")
+        print("  from runtime.skip_diagnose import diagnose_on_skip")
+        sys.exit(1)
     else:
-        print(f"\n✅ All {len(entrypoints)} entrypoints load policies correctly!")
-        return 0
+        print("✅ All entrypoints comply with policy loading requirements")
+        sys.exit(0)
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()

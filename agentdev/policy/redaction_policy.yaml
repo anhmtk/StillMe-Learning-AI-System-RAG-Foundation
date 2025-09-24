@@ -1,0 +1,55 @@
+patterns:
+- confidence: 0.9
+  description: Basic password detection
+  pattern_id: password_basic
+  redaction_level: full
+  regex: (?i)(password|passwd|pwd)\s*[:=]\s*["\']?([^"\'\s]+)["\']?
+  secret_type: password
+- confidence: 0.8
+  description: API key detection
+  pattern_id: api_key_basic
+  redaction_level: partial
+  regex: (?i)(api[_-]?key|apikey)\s*[:=]\s*["\']?([a-zA-Z0-9_-]{20,})["\']?
+  secret_type: api_key
+- confidence: 0.8
+  description: Bearer token detection
+  pattern_id: token_bearer
+  redaction_level: partial
+  regex: (?i)(bearer\s+)?token\s*[:=]\s*["\']?([a-zA-Z0-9._-]{20,})["\']?
+  secret_type: token
+- confidence: 0.95
+  description: RSA private key detection
+  pattern_id: private_key_rsa
+  redaction_level: full
+  regex: '-----BEGIN\s+(?:RSA\s+)?PRIVATE\s+KEY-----.*?-----END\s+(?:RSA\s+)?PRIVATE\s+KEY-----'
+  secret_type: private_key
+- confidence: 0.9
+  description: Database URL detection
+  pattern_id: database_url
+  redaction_level: full
+  regex: (?i)(database[_-]?url|db[_-]?url)\s*[:=]\s*["\']?([^"\'\s]+)["\']?
+  secret_type: database_url
+- confidence: 0.7
+  description: Email address detection
+  pattern_id: email_address
+  redaction_level: partial
+  regex: \b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b
+  secret_type: email
+- confidence: 0.6
+  description: Phone number detection
+  pattern_id: phone_number
+  redaction_level: partial
+  regex: \b(?:\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})\b
+  secret_type: phone
+- confidence: 0.8
+  description: SSN detection
+  pattern_id: ssn
+  redaction_level: full
+  regex: \b(?!000|666|9\d{2})\d{3}[-.\s]?(?!00)\d{2}[-.\s]?(?!0000)\d{4}\b
+  secret_type: ssn
+- confidence: 0.7
+  description: Credit card detection
+  pattern_id: credit_card
+  redaction_level: partial
+  regex: \b(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13}|3[0-9]{13}|6(?:011|5[0-9]{2})[0-9]{12})\b
+  secret_type: credit_card

@@ -1,0 +1,511 @@
+openapi: 3.0.3
+info:
+  title: StillMe AgentDev API
+  description: Enterprise-grade development automation API
+  version: 1.0.0
+  contact:
+    name: StillMe Team
+    email: dev@stillme.ai
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+  - url: https://api.stillme.ai
+    description: Production server
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Check if the AgentDev service is healthy
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                  timestamp:
+                    type: string
+                    format: date-time
+                  version:
+                    type: string
+                    example: "1.0.0"
+                  uptime:
+                    type: number
+                    example: 3600
+
+  /agentdev/init-task:
+    post:
+      summary: Initialize a new task
+      description: Initialize a new AgentDev task with preflight Q&A
+      operationId: initTask
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - task_type
+              properties:
+                task_type:
+                  type: string
+                  enum: [deploy_edge, deploy_core, fix_bug, add_feature, optimize_performance]
+                  description: Type of task to initialize
+                inference_location:
+                  type: string
+                  enum: [CORE_LOCAL, CORE_CLOUD, EDGE_STATELESS]
+                  default: CORE_LOCAL
+                cloud_budget_usd:
+                  type: integer
+                  minimum: 0
+                  maximum: 10000
+                  description: Cloud budget in USD per month
+                downtime_tolerance:
+                  type: string
+                  enum: [ZERO, MINIMAL, MODERATE]
+                  default: MINIMAL
+                pii_handling:
+                  type: string
+                  enum: [STRICT, MODERATE, RELAXED]
+                  default: STRICT
+      responses:
+        '200':
+          description: Task initialized successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  task_id:
+                    type: string
+                    example: "task_123456"
+                  config_path:
+                    type: string
+                    example: ".agentdev/task.config.json"
+                  status:
+                    type: string
+                    example: "initialized"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agentdev/plan:
+    post:
+      summary: Generate execution plan
+      description: Generate a detailed execution plan for the task
+      operationId: generatePlan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - task_id
+              properties:
+                task_id:
+                  type: string
+                  description: Task ID to generate plan for
+                config_path:
+                  type: string
+                  description: Path to task configuration file
+      responses:
+        '200':
+          description: Plan generated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  task_id:
+                    type: string
+                  plan:
+                    type: object
+                    properties:
+                      steps:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            step_id:
+                              type: string
+                            action:
+                              type: string
+                            risk:
+                              type: string
+                            estimated_time:
+                              type: string
+                            dependencies:
+                              type: array
+                              items:
+                                type: string
+                      estimated_cost:
+                        type: number
+                      estimated_duration:
+                        type: string
+                      risk_assessment:
+                        type: string
+                        enum: [LOW, MEDIUM, HIGH]
+                  status:
+                    type: string
+                    example: "planned"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agentdev/dry-run:
+    post:
+      summary: Run dry run tests
+      description: Run conformance tests and contract validation
+      operationId: dryRun
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - task_id
+              properties:
+                task_id:
+                  type: string
+                  description: Task ID to run dry run for
+                config_path:
+                  type: string
+                  description: Path to task configuration file
+      responses:
+        '200':
+          description: Dry run completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  task_id:
+                    type: string
+                  results:
+                    type: object
+                    properties:
+                      conformance_tests:
+                        type: object
+                        properties:
+                          passed:
+                            type: boolean
+                          details:
+                            type: string
+                      contract_tests:
+                        type: object
+                        properties:
+                          passed:
+                            type: boolean
+                          details:
+                            type: string
+                      security_scan:
+                        type: object
+                        properties:
+                          passed:
+                            type: boolean
+                          issues:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                severity:
+                                  type: string
+                                  enum: [CRITICAL, HIGH, MEDIUM, LOW, INFO]
+                                title:
+                                  type: string
+                                description:
+                                  type: string
+                  overall_status:
+                    type: string
+                    enum: [PASSED, FAILED]
+                  status:
+                    type: string
+                    example: "dry_run_completed"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agentdev/execute:
+    post:
+      summary: Execute the plan
+      description: Execute the planned changes
+      operationId: executePlan
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - task_id
+              properties:
+                task_id:
+                  type: string
+                  description: Task ID to execute
+                config_path:
+                  type: string
+                  description: Path to task configuration file
+                force:
+                  type: boolean
+                  default: false
+                  description: Force execution even if dry run failed
+      responses:
+        '200':
+          description: Execution completed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  task_id:
+                    type: string
+                  execution_id:
+                    type: string
+                  results:
+                    type: object
+                    properties:
+                      success:
+                        type: boolean
+                      summary:
+                        type: string
+                      steps_completed:
+                        type: integer
+                      total_steps:
+                        type: integer
+                      duration:
+                        type: string
+                      artifacts:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                            path:
+                              type: string
+                            description:
+                              type: string
+                  status:
+                    type: string
+                    example: "executed"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Execution failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agentdev/status/{task_id}:
+    get:
+      summary: Get task status
+      description: Get the current status of a task
+      operationId: getTaskStatus
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Task ID
+      responses:
+        '200':
+          description: Task status retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  task_id:
+                    type: string
+                  status:
+                    type: string
+                    enum: [initialized, planned, dry_run_passed, dry_run_failed, executing, completed, failed]
+                  progress:
+                    type: number
+                    minimum: 0
+                    maximum: 100
+                  current_step:
+                    type: string
+                  started_at:
+                    type: string
+                    format: date-time
+                  updated_at:
+                    type: string
+                    format: date-time
+                  completed_at:
+                    type: string
+                    format: date-time
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /agentdev/logs/{task_id}:
+    get:
+      summary: Get task logs
+      description: Get execution logs for a task
+      operationId: getTaskLogs
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Task ID
+        - name: level
+          in: query
+          schema:
+            type: string
+            enum: [DEBUG, INFO, WARN, ERROR]
+            default: INFO
+          description: Log level filter
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 100
+          description: Maximum number of log entries
+      responses:
+        '200':
+          description: Task logs retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  task_id:
+                    type: string
+                  logs:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        timestamp:
+                          type: string
+                          format: date-time
+                        level:
+                          type: string
+                          enum: [DEBUG, INFO, WARN, ERROR]
+                        message:
+                          type: string
+                        step_id:
+                          type: string
+                        metadata:
+                          type: object
+                  total:
+                    type: integer
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Error:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Error message
+        details:
+          type: object
+          description: Additional error details
+        timestamp:
+          type: string
+          format: date-time
+          description: Error timestamp
+
+    TaskConfig:
+      type: object
+      required:
+        - task_type
+        - inference_location
+        - downtime_tolerance
+        - pii_handling
+      properties:
+        task_type:
+          type: string
+          enum: [deploy_edge, deploy_core, fix_bug, add_feature, optimize_performance]
+        inference_location:
+          type: string
+          enum: [CORE_LOCAL, CORE_CLOUD, EDGE_STATELESS]
+        cloud_budget_usd:
+          type: integer
+          minimum: 0
+        downtime_tolerance:
+          type: string
+          enum: [ZERO, MINIMAL, MODERATE]
+        pii_handling:
+          type: string
+          enum: [STRICT, MODERATE, RELAXED]
+        tunnel_endpoint:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+security:
+  - BearerAuth: []
+  - ApiKeyAuth: []
+
+tags:
+  - name: Health
+    description: Health check operations
+  - name: Tasks
+    description: Task management operations
+  - name: Execution
+    description: Plan execution operations
+  - name: Monitoring
+    description: Task monitoring operations
