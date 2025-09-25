@@ -18,6 +18,8 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from pathlib import Path
 
+from .normalizer import TextNormalizer
+
 logger = logging.getLogger(__name__)
 
 @dataclass
@@ -36,9 +38,12 @@ class ProactiveAbuseGuard:
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         self.config = config or {}
         
-        # Thresholds
-        self.suggestion_threshold = self.config.get("suggestion_threshold", 0.85)  # Balanced threshold
-        self.abuse_threshold = self.config.get("abuse_threshold", 0.20)  # Balanced threshold
+        # Initialize normalizer
+        self.normalizer = TextNormalizer(self.config.get("normalizer", {}))
+        
+        # Thresholds (calibrated)
+        self.suggestion_threshold = self.config.get("suggestion_threshold", 0.80)  # Calibrated threshold
+        self.abuse_threshold = self.config.get("abuse_threshold", 0.13)  # Calibrated threshold
         self.rate_limit_window = self.config.get("rate_limit_window", 30)  # seconds
         self.max_suggestions_per_window = self.config.get("max_suggestions_per_window", 2)
         
@@ -86,6 +91,9 @@ class ProactiveAbuseGuard:
             r"\b(vl|phết|thật)\b",  # Vietnamese slang words
             r"\b\w+\s+(vl|phết)\b",  # Word + Vietnamese slang suffix
             r"\b(vl|phết)\s+\w+\b",  # Vietnamese slang + word
+            # End-of-sentence slang patterns
+            r"\b(af|fr|ngl|lowkey|highkey|mid|tbh|imo|btw|fyi)\.?$",  # End of sentence slang
+            r"\b(af|fr|mid|tbh|imo|btw|fyi)([.!?😂🤣]*)$",  # End of sentence with emoji/punctuation
         ]
     
     def _load_stop_words(self):
@@ -124,6 +132,9 @@ class ProactiveAbuseGuard:
         # Update stats
         self.stats["total_requests"] += 1
         
+        # Normalize text first
+        normalized_text = self.normalizer.normalize(text)
+        
         # Check rate limiting first
         if not self._check_rate_limit(session_id):
             latency = (time.time() - start_time) * 1000
@@ -139,15 +150,15 @@ class ProactiveAbuseGuard:
                 latency_ms=latency
             )
         
-        # Calculate abuse score
-        abuse_score = self._calculate_abuse_score(text)
+        # Calculate abuse score using normalized text
+        abuse_score = self._calculate_abuse_score(normalized_text)
         
         # Calculate confidence
         confidence = 1.0 - abuse_score
         
         # Determine if should suggest
         # Block if abuse score is too high OR if vague score is significant
-        vague_score = self._calculate_vague_score(text.lower())
+        vague_score = self._calculate_vague_score(normalized_text)
         should_suggest = (confidence >= self.suggestion_threshold and 
                          abuse_score < self.abuse_threshold and 
                          vague_score < 0.2)  # Block if vague score >= 0.2
@@ -156,7 +167,7 @@ class ProactiveAbuseGuard:
         reasoning = self._generate_reasoning(abuse_score, confidence, should_suggest)
         
         # Extract features
-        features = self._extract_features(text, abuse_score)
+        features = self._extract_features(normalized_text, abuse_score)
         
         # Update stats
         if should_suggest:
@@ -368,10 +379,29 @@ class ProactiveAbuseGuard:
             # Borderline vague patterns
             r"\b(improve|optimize|enhance)\s+(system|user|performance|experience|efficiency)\b",  # "improve system performance"
             r"\b(make|fix|improve|optimize)\s+(it|this|that|something|everything)\s+(faster|better|good|great|nice|efficient)\b",  # "make it faster"
+            # Question-based vague patterns
+            r"^(can|could|would|should)\s+(you|u|we|it)\s+(make|fix|improve|change|do)\b.*\?$",  # "can you make..."
+            r"^(what|how)\s+should\s+(i|we)\s+(do|change|improve)\b.*\?$",  # "what should I do..."
+            r"^(what|how)\s+(do\s+you|should\s+i)\s+(think|feel)\s+(about|of)\s+(this|that|it)\b.*\?$",  # "what do you think about this?"
+            r"^(what|how|why|when|where)\s+(is|are|was|were)\s+(wrong|the\s+problem|the\s+issue)\s+(with|about)\s+(this|that|it)\b.*\?$",  # "what's wrong with this?"
+            # Additional vague patterns
+            r"^(how)\s+(should|can|do)\s+(i|we)\s+(handle|deal|manage)\s+(this|that|it)\b.*\?$",  # "how should I handle this?"
+            r"^(optimize|improve|enhance|refactor)\s+(the\s+)?(code|system|performance|efficiency)\b",  # "optimize the code"
+            r"^(make|fix|improve|optimize)\s+(it|this|that|something|everything)\s+(faster|better|good|great|nice|efficient|work)\b",  # "make it faster"
+            r"^(fix|repair|solve|resolve)\s+(the\s+)?(bug|issue|problem|error|thing|this|that|it)\b",  # "fix the bug", "fix the issue"
+            r"^(what|how|why|when|where)\s+(is|are|was|were)\s+(wrong|the\s+problem|the\s+issue)\s+(with|about)\s+(this|that|it)\b",  # "what's wrong with this" (without ?)
+            # Vietnamese vague patterns
+            r"^(làm\s+sao|như\s+thế\s+nào|bằng\s+cách\s+nào)\s+(để|để\s+fix|để\s+sửa|để\s+làm)\b",  # "làm sao để fix"
+            r"^(giúp|hỗ\s+trợ|assist)\s+(tôi|mình|em|bạn)\s+(với|về)\s+(cái\s+này|điều\s+này|việc\s+này|này)\b",  # "giúp tôi với cái này"
+            r"^(sửa|fix|repair|solve)\s+(cái\s+này|điều\s+này|việc\s+này|này|nó)\b",  # "sửa cái này"
+            r"^(cải\s+thiện|improve|enhance|optimize)\s+(nó|này|cái\s+này|điều\s+này|việc\s+này)\b",  # "cải thiện nó"
             # Edge case patterns
             r"^\s*$",  # Empty or whitespace only
             r"^\.+$",  # Only dots
             r"^[!?]+$",  # Only exclamation/question marks
+            # Special character abuse patterns
+            r"(.)\1{3,}",  # Character repeated 4+ times
+            r"[^\w\s\u4e00-\u9fff\u3400-\u4dbf]{4,}",  # 4+ consecutive special characters (excluding Chinese)
         ]
         
         vague_matches = 0
