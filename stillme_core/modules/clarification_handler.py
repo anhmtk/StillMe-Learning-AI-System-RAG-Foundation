@@ -287,6 +287,35 @@ class ClarificationHandler:
                 r"def\s+\w+\s*\([^)]*\):\s*$.*def\s+\w+\s*\([^)]*\):\s*$",  # Multiple function definitions
                 r"def.*def",  # Multiple functions in code block (very simple)
             ],
+            "unicode_chaos": [
+                r"[\U0001F600-\U0001F64F]",  # Emoticons
+                r"[\U0001F300-\U0001F5FF]",  # Misc Symbols and Pictographs
+                r"[\U0001F680-\U0001F6FF]",  # Transport and Map
+                r"[\U0001F1E0-\U0001F1FF]",  # Regional indicator symbols
+                r"[\u2600-\u26FF]",    # Miscellaneous symbols
+                r"[\u2700-\u27BF]",    # Dingbats
+                r"[\U0001F900-\U0001F9FF]",  # Supplemental Symbols and Pictographs
+                r"[\U0001FA70-\U0001FAFF]",  # Symbols and Pictographs Extended-A
+                r"[\u4E00-\u9FFF]",    # CJK Unified Ideographs
+                r"[\u0600-\u06FF]",    # Arabic
+                r"[\u0400-\u04FF]",    # Cyrillic
+                r"[\u0370-\u03FF]",    # Greek and Coptic
+                r"[\u2200-\u22FF]",    # Mathematical Operators
+            ],
+            "nested_vague": [
+                r"\b(make|do|create|build|develop|design|write|generate|analyze|review|check|test|debug|refactor|restructure|upgrade|update|modify|change|adjust|tune|configure|setup|install|deploy|run|execute|start|stop|restart|close|open|hide|show|enable|disable|activate|deactivate)\s+(it|this|that)\s+(better|faster|slower|smaller|bigger|cleaner|simpler|more\s+complex|worse|easier|harder|cheaper|more\s+expensive|more\s+secure|more\s+reliable|more\s+scalable|more\s+maintainable|more\s+testable|more\s+readable|more\s+efficient|more\s+flexible|more\s+robust|more\s+portable|more\s+compatible|more\s+accessible|more\s+user-friendly)\b",
+                r"\b(but|and|maybe|perhaps|possibly|probably|likely|unlikely|definitely|certainly|absolutely|totally|completely|entirely|partially|somewhat|quite|rather|very|extremely|incredibly|amazingly|surprisingly|unexpectedly|obviously|clearly|apparently|seemingly|supposedly|allegedly|reportedly|apparently|obviously|clearly|definitely|certainly|absolutely|totally|completely|entirely|partially|somewhat|quite|rather|very|extremely|incredibly|amazingly|surprisingly|unexpectedly)\b.*\b(but|and|maybe|perhaps|possibly|probably|likely|unlikely|definitely|certainly|absolutely|totally|completely|entirely|partially|somewhat|quite|rather|very|extremely|incredibly|amazingly|surprisingly|unexpectedly|obviously|clearly|apparently|seemingly|supposedly|allegedly|reportedly|apparently|obviously|clearly|definitely|certainly|absolutely|totally|completely|entirely|partially|somewhat|quite|rather|very|extremely|incredibly|amazingly|surprisingly|unexpectedly)\b",
+                r"\b(like|similar\s+to|as\s+good\s+as|better\s+than|worse\s+than|same\s+as|different\s+from|compared\s+to|in\s+comparison\s+to|unlike|instead\s+of|rather\s+than|other\s+than|except\s+for|apart\s+from|besides|in\s+addition\s+to|along\s+with|together\s+with|combined\s+with|mixed\s+with|blended\s+with|integrated\s+with|merged\s+with|fused\s+with|joined\s+with|connected\s+with|linked\s+with|associated\s+with|related\s+to|connected\s+to|linked\s+to|associated\s+to|related\s+with)\s+(the\s+)?(other|another|different|similar|same|previous|next|last|first|second|third|fourth|fifth|sixth|seventh|eighth|ninth|tenth)\b",
+            ],
+            "ambiguous_pronouns": [
+                r"\b(it|this|that|they|them|their|these|those)\s+(is|are|was|were|will\s+be|should\s+be|could\s+be|might\s+be|must\s+be|can\s+be|may\s+be|would\s+be|has\s+been|have\s+been|had\s+been|will\s+have\s+been|should\s+have\s+been|could\s+have\s+been|might\s+have\s+been|must\s+have\s+been|can\s+have\s+been|may\s+have\s+been|would\s+have\s+been)\b",
+                r"\b(do|does|did|will|should|could|might|must|can|may|would|has|have|had|will\s+have|should\s+have|could\s+have|might\s+have|must\s+have|can\s+have|may\s+have|would\s+have)\s+(it|this|that|they|them|their|these|those)\b",
+                r"\b(it|this|that|they|them|their|these|those)\s+(work|works|worked|working|function|functions|functioned|functioning|operate|operates|operated|operating|run|runs|ran|running|execute|executes|executed|executing|perform|performs|performed|performing|behave|behaves|behaved|behaving|act|acts|acted|acting|respond|responds|responded|responding|react|reacts|reacted|reacting|handle|handles|handled|handling|process|processes|processed|processing|manage|manages|managed|managing|control|controls|controlled|controlling|monitor|monitors|monitored|monitoring|track|tracks|tracked|tracking|measure|measures|measured|measuring|calculate|calculates|calculated|calculating|compute|computes|computed|computing|solve|solves|solved|solving|resolve|resolves|resolved|resolving|address|addresses|addressed|addressing|tackle|tackles|tackled|tackling|approach|approaches|approached|approaching|deal\s+with|deals\s+with|dealt\s+with|dealing\s+with|work\s+on|works\s+on|worked\s+on|working\s+on|focus\s+on|focuses\s+on|focused\s+on|focusing\s+on|concentrate\s+on|concentrates\s+on|concentrated\s+on|concentrating\s+on|emphasize|emphasizes|emphasized|emphasizing|highlight|highlights|highlighted|highlighting|spotlight|spotlights|spotlighted|spotlighting|feature|features|featured|featuring|showcase|showcases|showcased|showcasing|present|presents|presented|presenting)\b",
+                r"\b(update|updates|updated|updating|modify|modifies|modified|modifying|change|changes|changed|changing|edit|edits|edited|editing|fix|fixes|fixed|fixing|improve|improves|improved|improving|enhance|enhances|enhanced|enhancing|optimize|optimizes|optimized|optimizing|refactor|refactors|refactored|refactoring|restructure|restructures|restructured|restructuring|upgrade|upgrades|upgraded|upgrading|adjust|adjusts|adjusted|adjusting|tune|tunes|tuned|tuning|configure|configures|configured|configuring|setup|setups|set\s+up|setting\s+up|install|installs|installed|installing|deploy|deploys|deployed|deploying|run|runs|ran|running|execute|executes|executed|executing|start|starts|started|starting|stop|stops|stopped|stopping|restart|restarts|restarted|restarting|close|closes|closed|closing|open|opens|opened|opening|hide|hides|hid|hidden|hiding|show|shows|showed|shown|showing|enable|enables|enabled|enabling|disable|disables|disabled|disabling|activate|activates|activated|activating|deactivate|deactivates|deactivated|deactivating|turn\s+on|turns\s+on|turned\s+on|turning\s+on|turn\s+off|turns\s+off|turned\s+off|turning\s+off|switch|switches|switched|switching|delete|deletes|deleted|deleting|remove|removes|removed|removing|replace|replaces|replaced|replacing|move|moves|moved|moving|copy|copies|copied|copying|paste|pastes|pasted|pasting|cut|cuts|cutting|save|saves|saved|saving|load|loads|loaded|loading|open|opens|opened|opening|close|closes|closed|closing|create|creates|created|creating|make|makes|made|making|build|builds|built|building|generate|generates|generated|generating|write|writes|wrote|written|writing|read|reads|reading|find|finds|found|finding|search|searches|searched|searching|select|selects|selected|selecting|choose|chooses|chose|chosen|choosing|pick|picks|picked|picking|grab|grabs|grabbed|grabbing|take|takes|took|taken|taking|get|gets|got|gotten|getting|put|puts|putting|place|places|placed|placing|set|sets|setting|add|adds|added|adding|subtract|subtracts|subtracted|subtracting|multiply|multiplies|multiplied|multiplying|divide|divides|divided|dividing|calculate|calculates|calculated|calculating|compute|computes|computed|computing|solve|solves|solved|solving|resolve|resolves|resolved|resolving|address|addresses|addressed|addressing|tackle|tackles|tackled|tackling|approach|approaches|approached|approaching|deal\s+with|deals\s+with|dealt\s+with|dealing\s+with|work\s+on|works\s+on|worked\s+on|working\s+on|focus\s+on|focuses\s+on|focused\s+on|focusing\s+on|concentrate\s+on|concentrates\s+on|concentrated\s+on|concentrating\s+on|emphasize|emphasizes|emphasized|emphasizing|highlight|highlights|highlighted|highlighting|spotlight|spotlights|spotlighted|spotlighting|feature|features|featured|featuring|showcase|showcases|showcased|showcasing|present|presents|presented|presenting)\s+(it|this|that|they|them|their|these|those)\b",
+            ],
+            "context_switching": [
+                r"\b(now|then|next|after|before|later|earlier|previously|subsequently|meanwhile|simultaneously|concurrently|parallel|alternatively|instead|rather|however|nevertheless|nonetheless|moreover|furthermore|additionally|besides|also|too|as\s+well|in\s+addition|on\s+the\s+other\s+hand|on\s+the\s+contrary|in\s+contrast|by\s+contrast|conversely|oppositely|differently|similarly|likewise|correspondingly|analogously|equivalently|identically|exactly|precisely|specifically|particularly|especially|notably|remarkably|surprisingly|interestingly|curiously|strangely|oddly|unexpectedly|unfortunately|fortunately|luckily|unluckily|sadly|happily|ironically|paradoxically|contradictorily|confusingly|mysteriously|puzzlingly|bewilderingly|perplexingly|bafflingly|enigmatically|cryptically|obscurely|vaguely|ambiguously|unclearly|indistinctly|fuzzily|blurrily|hazily|dimly|faintly|weakly|softly|quietly|loudly|strongly|powerfully|forcefully|vigorously|energetically|actively|passively|aggressively|defensively|offensively|constructively|destructively|positively|negatively|optimistically|pessimistically|realistically|idealistically|pragmatically|theoretically|practically|technically|scientifically|mathematically|logically|rationally|emotionally|intuitively|instinctively|subconsciously|consciously|deliberately|intentionally|accidentally|unintentionally|purposely|aimlessly|randomly|systematically|methodically|carefully|carelessly|thoughtfully|thoughtlessly|mindfully|mindlessly|attentively|inattentively|concentratedly|distractedly|focused|unfocused|organized|disorganized|structured|unstructured|planned|unplanned|prepared|unprepared|ready|unready|set|unset|fixed|unfixed|stable|unstable|steady|unsteady|consistent|inconsistent|reliable|unreliable|dependable|undependable|trustworthy|untrustworthy|honest|dishonest|truthful|untruthful|accurate|inaccurate|precise|imprecise|exact|inexact|correct|incorrect|right|wrong|true|false|valid|invalid|legitimate|illegitimate|legal|illegal|lawful|unlawful|ethical|unethical|moral|immoral|good|bad|positive|negative|beneficial|harmful|helpful|unhelpful|useful|useless|valuable|worthless|important|unimportant|significant|insignificant|relevant|irrelevant|applicable|inapplicable|suitable|unsuitable|appropriate|inappropriate|proper|improper|correct|incorrect|right|wrong|true|false|valid|invalid|legitimate|illegitimate|legal|illegal|lawful|unlawful|ethical|unethical|moral|immoral|good|bad|positive|negative|beneficial|harmful|helpful|unhelpful|useful|useless|valuable|worthless|important|unimportant|significant|insignificant|relevant|irrelevant|applicable|inapplicable|suitable|unsuitable|appropriate|inappropriate|proper|improper)\b.*\b(but|however|nevertheless|nonetheless|moreover|furthermore|additionally|besides|also|too|as\s+well|in\s+addition|on\s+the\s+other\s+hand|on\s+the\s+contrary|in\s+contrast|by\s+contrast|conversely|oppositely|differently|similarly|likewise|correspondingly|analogously|equivalently|identically|exactly|precisely|specifically|particularly|especially|notably|remarkably|surprisingly|interestingly|curiously|strangely|oddly|unexpectedly|unfortunately|fortunately|luckily|unluckily|sadly|happily|ironically|paradoxically|contradictorily|confusingly|mysteriously|puzzlingly|bewilderingly|perplexingly|bafflingly|enigmatically|cryptically|obscurely|vaguely|ambiguously|unclearly|indistinctly|fuzzily|blurrily|hazily|dimly|faintly|weakly|softly|quietly|loudly|strongly|powerfully|forcefully|vigorously|energetically|actively|passively|aggressively|defensively|offensively|constructively|destructively|positively|negatively|optimistically|pessimistically|realistically|idealistically|pragmatically|theoretically|practically|technically|scientifically|mathematically|logically|rationally|emotionally|intuitively|instinctively|subconsciously|consciously|deliberately|intentionally|accidentally|unintentionally|purposely|aimlessly|randomly|systematically|methodically|carefully|carelessly|thoughtfully|thoughtlessly|mindfully|mindlessly|attentively|inattentively|concentratedly|distractedly|focused|unfocused|organized|disorganized|structured|unstructured|planned|unplanned|prepared|unprepared|ready|unready|set|unset|fixed|unfixed|stable|unstable|steady|unsteady|consistent|inconsistent|reliable|unreliable|dependable|undependable|trustworthy|untrustworthy|honest|dishonest|truthful|untruthful|accurate|inaccurate|precise|imprecise|exact|inexact|correct|incorrect|right|wrong|true|false|valid|invalid|legitimate|illegitimate|legal|illegal|lawful|unlawful|ethical|unethical|moral|immoral|good|bad|positive|negative|beneficial|harmful|helpful|unhelpful|useful|useless|valuable|worthless|important|unimportant|significant|insignificant|relevant|irrelevant|applicable|inapplicable|suitable|unsuitable|appropriate|inappropriate|proper|improper)\b",
+            ],
             "fuzzy_goal": [
                 r"\b(make|do)\s+(it|this|that)\s+(faster|slower|smaller|bigger|cleaner|simpler|more\s+complex|better|worse|easier|harder|cheaper|more\s+expensive|more\s+secure|more\s+reliable|more\s+scalable|more\s+maintainable|more\s+testable|more\s+readable|more\s+efficient|more\s+flexible|more\s+robust|more\s+portable|more\s+compatible|more\s+accessible|more\s+user-friendly)\b"
             ],
@@ -336,6 +365,24 @@ class ClarificationHandler:
                 "Do you want me to fix the syntax errors first?",
                 "Which function should I focus on?",
                 "What specific changes do you need in this code?"
+            ],
+            "nested_vague": [
+                "I see multiple requirements. Which one should I prioritize?",
+                "You mentioned several aspects. What's the most important?",
+                "There are many conditions here. What's the main goal?",
+                "I need to understand the primary objective from all these requirements."
+            ],
+            "ambiguous_pronouns": [
+                "What does 'it' refer to in this context?",
+                "Could you clarify what you mean by 'this'?",
+                "I need to know what 'that' refers to.",
+                "What specific item are you talking about?"
+            ],
+            "context_switching": [
+                "I notice you're switching topics. What should I focus on?",
+                "You mentioned multiple things. Which one is the priority?",
+                "There are several directions here. What's the main goal?",
+                "I need to understand what you want me to focus on."
             ],
             "fuzzy_goal": [
                 "What aspect should be {goal}?",
@@ -578,21 +625,29 @@ class ClarificationHandler:
         base_confidence = 0.5
         
         # Adjust based on prompt length (shorter = more ambiguous, but don't penalize too much)
-        length_factor = max(0.3, 1.0 - (len(prompt) / 200))  # Reduced penalty for long text
+        # Special handling for nested vague - don't penalize long text
+        if category == "nested_vague":
+            length_factor = 1.0  # No penalty for nested vague
+        else:
+            length_factor = max(0.3, 1.0 - (len(prompt) / 200))  # Reduced penalty for long text
         
         # Adjust based on category
         category_weights = {
-            "vague_instruction": 2.0,  # Increased from 0.9 to 2.0 for better detection
-            "missing_context": 0.8,
-            "ambiguous_reference": 1.5,  # Increased from 0.95 to 1.5 for better detection
-            "single_word_vague": 1.3,    # High weight for single-word vague instructions
-            "code_ambiguity": 2.1,        # High weight for code ambiguity detection
-            "fuzzy_goal": 0.85,
-            "missing_parameter": 0.8,
-            "slang_informal": 0.7,
-            "contextual_dependency": 0.9,
-            "cross_domain": 0.75
-        }
+                    "vague_instruction": 2.0,  # Increased from 0.9 to 2.0 for better detection
+                    "missing_context": 0.8,
+                    "ambiguous_reference": 1.5,  # Increased from 0.95 to 1.5 for better detection
+                    "single_word_vague": 1.3,    # High weight for single-word vague instructions
+                    "code_ambiguity": 2.1,        # High weight for code ambiguity detection
+                    "unicode_chaos": 1.8,         # High weight for unicode/emoji chaos
+                    "nested_vague": 2.5,          # Very high weight for nested vague phrases
+                    "ambiguous_pronouns": 1.8,    # High weight for ambiguous pronouns
+                    "context_switching": 1.9,     # High weight for context switching
+                    "fuzzy_goal": 0.85,
+                    "missing_parameter": 0.8,
+                    "slang_informal": 0.7,
+                    "contextual_dependency": 0.9,
+                    "cross_domain": 0.75
+                }
         
         category_weight = category_weights.get(category, 0.5)
         
@@ -633,6 +688,18 @@ class ClarificationHandler:
         
         elif category == "code_ambiguity":
             # Use first template for code ambiguity
+            template = templates[0]
+        
+        elif category == "nested_vague":
+            # Use first template for nested vague
+            template = templates[0]
+        
+        elif category == "ambiguous_pronouns":
+            # Use first template for ambiguous pronouns
+            template = templates[0]
+        
+        elif category == "context_switching":
+            # Use first template for context switching
             template = templates[0]
         
         elif category == "fuzzy_goal":

@@ -1,0 +1,92 @@
+{
+  "total": 15,
+  "passed": 6,
+  "failed": 9,
+  "pass_rate": 40.0,
+  "results": [
+    {
+      "test": "Single Character Input",
+      "passed": true,
+      "duration": 0.030629634857177734
+    },
+    {
+      "test": "Empty String",
+      "passed": true,
+      "duration": 0.0
+    },
+    {
+      "test": "Whitespace Only",
+      "passed": true,
+      "duration": 0.0
+    },
+    {
+      "test": "Unicode Chaos",
+      "passed": true,
+      "duration": 0.0009999275207519531
+    },
+    {
+      "test": "Nested Vague 5 Levels",
+      "passed": true,
+      "duration": 0.0010035037994384766
+    },
+    {
+      "test": "Ambiguous Pronouns",
+      "passed": true,
+      "duration": 0.001997232437133789
+    },
+    {
+      "test": "Context Switching",
+      "passed": false,
+      "duration": 0,
+      "error": ""
+    },
+    {
+      "test": "Mixed Languages",
+      "passed": false,
+      "duration": 0,
+      "error": ""
+    },
+    {
+      "test": "Slang & Internet Speak",
+      "passed": false,
+      "duration": 0,
+      "error": ""
+    },
+    {
+      "test": "Philosophical Vague",
+      "passed": false,
+      "duration": 0,
+      "error": ""
+    },
+    {
+      "test": "Technical Jargon Vague",
+      "passed": false,
+      "duration": 0,
+      "error": ""
+    },
+    {
+      "test": "Emotional Vague",
+      "passed": false,
+      "duration": 0,
+      "error": ""
+    },
+    {
+      "test": "Time-based Vague",
+      "passed": false,
+      "duration": 0,
+      "error": ""
+    },
+    {
+      "test": "Location Vague",
+      "passed": false,
+      "duration": 0,
+      "error": ""
+    },
+    {
+      "test": "Quantity Vague",
+      "passed": false,
+      "duration": 0,
+      "error": ""
+    }
+  ]
+}
