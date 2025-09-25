@@ -1,13 +1,13 @@
 {
   "total": 15,
-  "passed": 6,
-  "failed": 9,
-  "pass_rate": 40.0,
+  "passed": 8,
+  "failed": 7,
+  "pass_rate": 53.333333333333336,
   "results": [
     {
       "test": "Single Character Input",
       "passed": true,
-      "duration": 0.030629634857177734
+      "duration": 0.04781293869018555
     },
     {
       "test": "Empty String",
@@ -22,29 +22,27 @@
     {
       "test": "Unicode Chaos",
       "passed": true,
-      "duration": 0.0009999275207519531
+      "duration": 0.0015213489532470703
     },
     {
       "test": "Nested Vague 5 Levels",
       "passed": true,
-      "duration": 0.0010035037994384766
+      "duration": 0.0
     },
     {
       "test": "Ambiguous Pronouns",
       "passed": true,
-      "duration": 0.001997232437133789
+      "duration": 0.0016036033630371094
     },
     {
       "test": "Context Switching",
-      "passed": false,
-      "duration": 0,
-      "error": ""
+      "passed": true,
+      "duration": 0.003097057342529297
     },
     {
       "test": "Mixed Languages",
-      "passed": false,
-      "duration": 0,
-      "error": ""
+      "passed": true,
+      "duration": 0.002007007598876953
     },
     {
       "test": "Slang & Internet Speak",
