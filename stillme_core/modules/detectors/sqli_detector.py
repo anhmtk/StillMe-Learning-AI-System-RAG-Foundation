@@ -33,6 +33,16 @@ class SQLiDetector(BaseDetector):
             r"(?i)(;.*--)",  # Statement termination with comment
             r"(?i)(\bor\b\s+\w+\s*=\s*\w+)",  # OR condition
             r"(?i)(\band\b\s+\w+\s*=\s*\w+)",  # AND condition
+            r"(?i)(exec\s+\w+)",  # EXEC commands
+            r"(?i)(waitfor\s+delay)",  # WAITFOR DELAY
+            r"(?i)(sleep\s*\()",  # SLEEP function
+            r"(?i)(xp_cmdshell)",  # xp_cmdshell
+            r"(?i)(sp_executesql)",  # sp_executesql
+            r"(?i)(information_schema)",  # information_schema
+            r"(?i)(extractvalue\s*\()",  # EXTRACTVALUE
+            r"(?i)(substring\s*\()",  # SUBSTRING
+            r"(?i)(admin\s*--)",  # admin comment
+            r"(?i)(admin\s*/\*)",  # admin block comment
         ]
         
         # Test-specific SQL injection patterns
@@ -89,7 +99,7 @@ class SQLiDetector(BaseDetector):
             confidence += 0.1
         
         # Determine if clarification is needed
-        needs_clarification = confidence >= 0.5
+        needs_clarification = confidence >= 0.3
         
         return {
             "needs_clarification": needs_clarification,
