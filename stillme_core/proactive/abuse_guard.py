@@ -37,8 +37,8 @@ class ProactiveAbuseGuard:
         self.config = config or {}
         
         # Thresholds
-        self.suggestion_threshold = self.config.get("suggestion_threshold", 0.85)  # Increased from 0.8
-        self.abuse_threshold = self.config.get("abuse_threshold", 0.15)  # Decreased from 0.2
+        self.suggestion_threshold = self.config.get("suggestion_threshold", 0.85)  # Balanced threshold
+        self.abuse_threshold = self.config.get("abuse_threshold", 0.20)  # Balanced threshold
         self.rate_limit_window = self.config.get("rate_limit_window", 30)  # seconds
         self.max_suggestions_per_window = self.config.get("max_suggestions_per_window", 2)
         
@@ -82,6 +82,10 @@ class ProactiveAbuseGuard:
             # Context-aware patterns
             r"\b\w+\s+(af|fr|ngl|lowkey|highkey)\b",  # Word + slang suffix
             r"\b(it's|that's|this\s+is)\s+(giving|bussin|fire|lit|mid)\b",  # "it's giving X"
+            # Vietnamese slang patterns
+            r"\b(vl|phết|thật)\b",  # Vietnamese slang words
+            r"\b\w+\s+(vl|phết)\b",  # Word + Vietnamese slang suffix
+            r"\b(vl|phết)\s+\w+\b",  # Vietnamese slang + word
         ]
     
     def _load_stop_words(self):
@@ -142,7 +146,11 @@ class ProactiveAbuseGuard:
         confidence = 1.0 - abuse_score
         
         # Determine if should suggest
-        should_suggest = confidence >= self.suggestion_threshold
+        # Block if abuse score is too high OR if vague score is significant
+        vague_score = self._calculate_vague_score(text.lower())
+        should_suggest = (confidence >= self.suggestion_threshold and 
+                         abuse_score < self.abuse_threshold and 
+                         vague_score < 0.2)  # Block if vague score >= 0.2
         
         # Generate reasoning
         reasoning = self._generate_reasoning(abuse_score, confidence, should_suggest)
@@ -351,8 +359,19 @@ class ProactiveAbuseGuard:
             r"\b(help|assist|support)\s+(me|us|with)\s+(this|that|it)\b",
             r"\b(do|can\s+you)\s+(something|anything|this|that)\b",
             r"\b(what|how|why|when|where)\s+(should|can|do)\s+(i|we|you)\s+(do|make|fix)\b",
-            r"\b(make|fix|improve)\s+(it|this|that)\b",  # "make it better"
+            r"\b(make|fix|improve|change|update)\s+(it|this|that)\b",  # "make it better", "change it"
             r"\b(help\s+me|fix\s+this|do\s+something|what\s+should\s+i\s+do)\b",
+            # Additional vague patterns
+            r"\b(make|fix|improve|change|update)\s+(something|anything)\b",  # "change something"
+            r"\b(what|how|why|when|where)\s+(is|are|was|were)\s+(wrong|the\s+problem|the\s+issue)\s+(with|about)\s+(this|that|it)\b",  # "what's wrong with this"
+            r"\b(what|how)\s+(do\s+you|should\s+i)\s+(think|feel)\s+(about|of)\s+(this|that|it)\b",  # "what do you think about this"
+            # Borderline vague patterns
+            r"\b(improve|optimize|enhance)\s+(system|user|performance|experience|efficiency)\b",  # "improve system performance"
+            r"\b(make|fix|improve|optimize)\s+(it|this|that|something|everything)\s+(faster|better|good|great|nice|efficient)\b",  # "make it faster"
+            # Edge case patterns
+            r"^\s*$",  # Empty or whitespace only
+            r"^\.+$",  # Only dots
+            r"^[!?]+$",  # Only exclamation/question marks
         ]
         
         vague_matches = 0
