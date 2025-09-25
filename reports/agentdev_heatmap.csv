@@ -1,0 +1,13 @@
+Layer/Domain,Score,Status,Evidence,Notes
+Framework/Core Orchestration,2,Hooked,"agent_dev.py:101-118",Tích hợp vào framework chính
+Planning/Task Decomposition,3,Owns,"stillme_core/planner.py:167-551",Có hệ thống planning hoàn chỉnh
+Execution,3,Owns,"stillme_core/executor.py:31-237",Hỗ trợ pytest shell API calls
+Verification,3,Owns,"stillme_core/verifier.py:12-346",Đọc kết quả assert log/exit code
+Auto-fix/Auto-patch,2,Hooked,"stillme_core/executor.py:41-48",Có unified diff support
+Refactor Utilities,1,Partial,"check_tools.py",Chỉ có radon thiếu ruff/pylint
+Router/Intent/Persona,1,Partial,"stillme_core/ai_manager.py:346-394",Có bridge nhưng chưa tích hợp sâu
+Memory/Config,2,Hooked,"stillme_core/bug_memory.py",Có bug memory thiếu config management
+Ethics/Guard/Safety,2,Hooked,"agent_dev.py:111-112",Tích hợp EthicsChecker
+Observability,2,Hooked,"stillme_core/logging_utils.py",Có logging thiếu metrics
+CI Hooks,0,None,"",Chưa có CI integration
+Windows/Linux Compat,3,Owns,"test_agentdev_audit.py",Hoạt động tốt trên Windows

@@ -1,0 +1,24 @@
+{
+  "mode": "excluded",
+  "total_files": 175696,
+  "total_size": 9834353977,
+  "by_type": {
+    "other": 30148,
+    "test": 1188,
+    "config": 9279,
+    "doc": 7320,
+    "bin": 1555,
+    "code": 125944,
+    "media": 257,
+    "data": 4,
+    "archive": 1
+  },
+  "by_size_range": {
+    "small": 101893,
+    "medium": 73402,
+    "large": 314,
+    "huge": 87
+  },
+  "unreferenced_files": 175696,
+  "binary_files": 6509
+}

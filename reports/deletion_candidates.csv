@@ -1,0 +1,573 @@
+path,category,reason,risk,size,ref_count,last_commit,recommendation,source
+stillme_platform\mobile\package-lock.json,node,Matches pattern: package-lock.json,LOW,490734,0,35cce8b7,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\app.json,backup,Matches pattern: temp,LOW,72,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\App.tsx,backup,Matches pattern: temp,LOW,890,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\babel.config.js,backup,Matches pattern: temp,LOW,72,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\index.js,backup,Matches pattern: temp,LOW,187,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\jest.config.js,backup,Matches pattern: temp,LOW,48,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\metro.config.js,backup,Matches pattern: temp,LOW,301,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\package-lock.json,backup,Matches pattern: temp,LOW,538270,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\package.json,backup,Matches pattern: temp,LOW,2343,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\README.md,backup,Matches pattern: temp,LOW,3582,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\tsconfig.json,backup,Matches pattern: temp,LOW,134,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\android\gradlew.bat,backup,Matches pattern: temp,LOW,3134,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\android\app\src\main\java\com\stillmemobiletemp\MainActivity.kt,backup,Matches pattern: temp,LOW,865,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\android\app\src\main\java\com\stillmemobiletemp\MainApplication.kt,backup,Matches pattern: temp,LOW,1383,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\ios\StillMeMobileTemp\AppDelegate.swift,backup,Matches pattern: temp,LOW,1240,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\ios\StillMeMobileTemp\Images.xcassets\Contents.json,backup,Matches pattern: temp,LOW,63,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\ios\StillMeMobileTemp\Images.xcassets\AppIcon.appiconset\Contents.json,backup,Matches pattern: temp,LOW,849,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\src\hooks\redux.ts,backup,Matches pattern: temp,LOW,396,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\src\screens\AuthScreen.tsx,backup,Matches pattern: temp,LOW,6878,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\src\screens\ChatScreen.tsx,backup,Matches pattern: temp,LOW,9167,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\src\screens\SettingsScreen.tsx,backup,Matches pattern: temp,LOW,11356,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\src\screens\SplashScreen.tsx,backup,Matches pattern: temp,LOW,1313,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\src\services\biometric.ts,backup,Matches pattern: temp,LOW,9544,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\src\services\notifications.ts,backup,Matches pattern: temp,LOW,10926,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\src\services\storage.ts,backup,Matches pattern: temp,LOW,13171,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\src\services\websocket.ts,backup,Matches pattern: temp,LOW,8086,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\src\store\store.ts,backup,Matches pattern: temp,LOW,1415,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\src\store\slices\appSlice.ts,backup,Matches pattern: temp,LOW,1814,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\src\store\slices\authSlice.ts,backup,Matches pattern: temp,LOW,2442,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\src\store\slices\chatSlice.ts,backup,Matches pattern: temp,LOW,2666,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\src\store\slices\notificationSlice.ts,backup,Matches pattern: temp,LOW,3603,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\src\store\slices\settingsSlice.ts,backup,Matches pattern: temp,LOW,3204,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\src\theme\theme.ts,backup,Matches pattern: temp,LOW,1956,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\src\types\navigation.ts,backup,Matches pattern: temp,LOW,422,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeMobileTemp\__tests__\App.test.tsx,backup,Matches pattern: temp,LOW,254,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeSimple\package-lock.json,node,Matches pattern: package-lock.json,LOW,516992,0,unknown,QUARANTINE,primary
+tests\test_batch3_templates_validation.py,backup,Matches pattern: temp,LOW,25685,0,065c05c8,QUARANTINE,primary
+tests_harness\augmentor\template_filler.py,backup,Matches pattern: temp,LOW,19696,0,5daf33aa,QUARANTINE,primary
+package-lock.json,node,Matches pattern: package-lock.json,LOW,94387,0,e158fe44,QUARANTINE,primary
+stable_ai_server_backup.py,backup,Matches pattern: backup,LOW,27789,0,unknown,QUARANTINE,primary
+backup_agentdev_1757736199\agentdev_real_fix.py,backup,Matches pattern: backup,LOW,10275,0,unknown,QUARANTINE,primary
+backup_agentdev_1757736199\agentdev_simple.py,backup,Matches pattern: backup,LOW,5918,0,unknown,QUARANTINE,primary
+backup_agentdev_1757736199\agentdev_ultimate.py,backup,Matches pattern: backup,LOW,29546,0,unknown,QUARANTINE,primary
+cache\web_cache.py,backup,Matches pattern: cache,LOW,13771,0,unknown,QUARANTINE,primary
+config\templates_config.json,backup,Matches pattern: temp,LOW,1859,0,unknown,QUARANTINE,primary
+stillme_core\common\logging.py,backup,Matches pattern: log,LOW,13199,0,dde1d77f,QUARANTINE,primary
+stillme_core\common\templates.py,backup,Matches pattern: temp,LOW,21245,0,dde1d77f,QUARANTINE,primary
+stillme_core\core\logging_utils.py,backup,Matches pattern: log,LOW,5208,0,dde1d77f,QUARANTINE,primary
+stillme_core\core\policy_templates.py,backup,Matches pattern: temp,LOW,6383,0,dde1d77f,QUARANTINE,primary
+stillme_core\core\observability\logger.py,backup,Matches pattern: log,LOW,12545,0,dde1d77f,QUARANTINE,primary
+stillme_core\modules\api_provider_manager_old.py,backup,Matches pattern: old,LOW,40316,0,7810265e,QUARANTINE,primary
+stillme_core\modules\content_integrity_filter_old.py,backup,Matches pattern: old,LOW,35136,0,7810265e,QUARANTINE,primary
+stillme_core\modules\layered_memory_v1_old.py,backup,Matches pattern: old,LOW,28388,0,7810265e,QUARANTINE,primary
+stillme_core\modules\backup_legacy\conversational_core.py,backup,Matches pattern: backup,LOW,3550,0,unknown,QUARANTINE,primary
+stillme_core\modules\backup_legacy\layered_memory.py,backup,Matches pattern: backup,LOW,4687,0,unknown,QUARANTINE,primary
+stillme_core\modules\backup_legacy\smart_g_p_t__a_p_i__manager.py,backup,Matches pattern: backup,LOW,3504,0,unknown,QUARANTINE,primary
+stillme_core\modules\backup_legacy\token_optimizer.py,backup,Matches pattern: backup,LOW,2959,0,unknown,QUARANTINE,primary
+stillme_platform\desktop\package-lock.json,node,Matches pattern: package-lock.json,LOW,829364,0,35cce8b7,QUARANTINE,primary
+stillme_platform\StillMeSimple\jest.config.js,duplicate,Duplicate of stillme_platform\StillMeMobileTemp\jest.config.js (hash: ff34c1c3),LOW,48,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeSimple\ios\StillMeSimple\Images.xcassets\Contents.json,duplicate,Duplicate of stillme_platform\StillMeMobileTemp\ios\StillMeMobileTemp\Images.xcassets\Contents.json (hash: 991ae939),LOW,63,0,unknown,QUARANTINE,primary
+stillme_platform\StillMeSimple\ios\StillMeSimple\Images.xcassets\AppIcon.appiconset\Contents.json,duplicate,Duplicate of stillme_platform\StillMeMobileTemp\ios\StillMeMobileTemp\Images.xcassets\AppIcon.appiconset\Contents.json (hash: 8a18bd4a),LOW,849,0,unknown,QUARANTINE,primary
+stable_ai_server_simple.py,duplicate,Duplicate of stable_ai_server.py (hash: 70255abc),LOW,7860,0,7810265e,QUARANTINE,primary
+stillme_core\config\content_filter_rules.json,duplicate,Duplicate of config\content_filter_rules.json (hash: db529728),LOW,1015,0,unknown,QUARANTINE,primary
+mobile_app_simple\mobile_app_simple\pubspec.yaml,duplicate,Duplicate of mobile_app\pubspec.yaml (hash: 226b5b33),LOW,1595,0,unknown,QUARANTINE,primary
+mobile_app_simple\assets\app_config.json,duplicate,Duplicate of mobile_app\assets\config\app_config.json (hash: 8b9d1813),LOW,795,0,unknown,QUARANTINE,primary
+mobile_app_simple\mobile_app_simple\assets\config\app_config.json,duplicate,Duplicate of mobile_app\assets\config\app_config.json (hash: 8b9d1813),LOW,795,0,unknown,QUARANTINE,primary
+mobile_app_simple\analysis_options.yaml,duplicate,Duplicate of mobile_app_new\analysis_options.yaml (hash: b63207cf),LOW,1448,0,unknown,QUARANTINE,primary
+mobile_app_simple\android\gradlew.bat,duplicate,Duplicate of mobile_app_new\android\gradlew.bat (hash: c13c6e91),LOW,2404,0,unknown,QUARANTINE,primary
+mobile_app_simple\ios\Flutter\ephemeral\flutter_lldb_helper.py,duplicate,Duplicate of mobile_app_new\ios\Flutter\ephemeral\flutter_lldb_helper.py (hash: 05cfe397),LOW,1276,0,unknown,QUARANTINE,primary
+mobile_app_simple\ios\Runner\AppDelegate.swift,duplicate,Duplicate of mobile_app_new\ios\Runner\AppDelegate.swift (hash: 13e99dab),LOW,404,0,795ffb24,QUARANTINE,primary
+mobile_app_simple\ios\Runner\GeneratedPluginRegistrant.h,duplicate,Duplicate of mobile_app_new\ios\Runner\GeneratedPluginRegistrant.h (hash: a5f88cc6),LOW,378,0,unknown,QUARANTINE,primary
+mobile_app_simple\ios\Runner\Runner-Bridging-Header.h,duplicate,Duplicate of mobile_app_new\ios\Runner\Runner-Bridging-Header.h (hash: efe657d8),LOW,39,0,795ffb24,QUARANTINE,primary
+mobile_app_simple\ios\Runner\Assets.xcassets\AppIcon.appiconset\Contents.json,duplicate,Duplicate of mobile_app_new\ios\Runner\Assets.xcassets\AppIcon.appiconset\Contents.json (hash: 5f8b941b),LOW,2641,0,unknown,QUARANTINE,primary
+mobile_app_simple\ios\Runner\Assets.xcassets\LaunchImage.imageset\Contents.json,duplicate,Duplicate of mobile_app_new\ios\Runner\Assets.xcassets\LaunchImage.imageset\Contents.json (hash: fbd112a9),LOW,414,0,unknown,QUARANTINE,primary
+mobile_app_simple\ios\RunnerTests\RunnerTests.swift,duplicate,Duplicate of mobile_app_new\ios\RunnerTests\RunnerTests.swift (hash: c0e04141),LOW,297,0,795ffb24,QUARANTINE,primary
+mobile_app_simple\linux\flutter\generated_plugin_registrant.h,duplicate,Duplicate of mobile_app_new\linux\flutter\generated_plugin_registrant.h (hash: 00f93bb5),LOW,303,0,795ffb24,QUARANTINE,primary
+mobile_app_simple\linux\runner\my_application.h,duplicate,Duplicate of mobile_app_new\linux\runner\my_application.h (hash: b9be2b58),LOW,406,0,795ffb24,QUARANTINE,primary
+mobile_app_simple\macos\Runner\AppDelegate.swift,duplicate,Duplicate of mobile_app_new\macos\Runner\AppDelegate.swift (hash: 5b9cbdcb),LOW,324,0,795ffb24,QUARANTINE,primary
+mobile_app_simple\macos\Runner\MainFlutterWindow.swift,duplicate,Duplicate of mobile_app_new\macos\Runner\MainFlutterWindow.swift (hash: 8178ad75),LOW,403,0,795ffb24,QUARANTINE,primary
+mobile_app_simple\macos\Runner\Assets.xcassets\AppIcon.appiconset\Contents.json,duplicate,Duplicate of mobile_app_new\macos\Runner\Assets.xcassets\AppIcon.appiconset\Contents.json (hash: 992ba63d),LOW,1359,0,unknown,QUARANTINE,primary
+mobile_app_simple\macos\RunnerTests\RunnerTests.swift,duplicate,Duplicate of mobile_app_new\macos\RunnerTests\RunnerTests.swift (hash: 8a0ff977),LOW,302,0,795ffb24,QUARANTINE,primary
+mobile_app_simple\windows\flutter\generated_plugin_registrant.h,duplicate,Duplicate of mobile_app_new\windows\flutter\generated_plugin_registrant.h (hash: dbc11635),LOW,302,0,795ffb24,QUARANTINE,primary
+mobile_app_simple\windows\runner\flutter_window.cpp,duplicate,Duplicate of mobile_app_new\windows\runner\flutter_window.cpp (hash: d615eedc),LOW,2193,0,795ffb24,QUARANTINE,primary
+mobile_app_simple\windows\runner\flutter_window.h,duplicate,Duplicate of mobile_app_new\windows\runner\flutter_window.h (hash: 0252b804),LOW,961,0,795ffb24,QUARANTINE,primary
+mobile_app_simple\windows\runner\resource.h,duplicate,Duplicate of mobile_app_new\windows\runner\resource.h (hash: d0e8bf78),LOW,448,0,795ffb24,QUARANTINE,primary
+mobile_app_simple\windows\runner\utils.cpp,duplicate,Duplicate of mobile_app_new\windows\runner\utils.cpp (hash: fbb18524),LOW,1862,0,795ffb24,QUARANTINE,primary
+mobile_app_simple\windows\runner\utils.h,duplicate,Duplicate of mobile_app_new\windows\runner\utils.h (hash: 832e246b),LOW,691,0,795ffb24,QUARANTINE,primary
+mobile_app_simple\windows\runner\win32_window.cpp,duplicate,Duplicate of mobile_app_new\windows\runner\win32_window.cpp (hash: 4e4f4dcf),LOW,8822,0,795ffb24,QUARANTINE,primary
+mobile_app_simple\windows\runner\win32_window.h,duplicate,Duplicate of mobile_app_new\windows\runner\win32_window.h (hash: d154cf89),LOW,3624,0,795ffb24,QUARANTINE,primary
+stillme_core\adapters\__init__.py,duplicate,Duplicate of oi_adapter\__init__.py (hash: e3b0c442),LOW,0,0,dde1d77f,QUARANTINE,primary
+stillme_ethical_core\__init__.py,duplicate,Duplicate of oi_adapter\__init__.py (hash: e3b0c442),LOW,0,0,f814bff5,QUARANTINE,primary
+stillme_core\modules\api_provider_manager_simple.py,duplicate,Duplicate of stillme_core\modules\api_provider_manager.py (hash: 009d15c9),LOW,10397,0,7810265e,QUARANTINE,primary
+stillme_core\modules\layered_memory_v1_simple.py,duplicate,Duplicate of stillme_core\modules\layered_memory_v1.py (hash: 959289f6),LOW,10928,0,7810265e,QUARANTINE,primary
+stillme_platform\gateway\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,27,0,35cce8b7,REVIEW,primary
+stillme_platform\gateway\api\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,33,0,35cce8b7,REVIEW,primary
+stillme_platform\gateway\api\routes\auth.py,unreferenced,No references found (ref_count: 0),MEDIUM,4165,0,065c05c8,REVIEW,primary
+stillme_platform\gateway\api\routes\devices.py,unreferenced,No references found (ref_count: 0),MEDIUM,5161,0,065c05c8,REVIEW,primary
+stillme_platform\gateway\api\routes\health.py,unreferenced,No references found (ref_count: 0),MEDIUM,3090,0,065c05c8,REVIEW,primary
+stillme_platform\gateway\api\routes\messages.py,unreferenced,No references found (ref_count: 0),MEDIUM,3583,0,065c05c8,REVIEW,primary
+stillme_platform\gateway\api\routes\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,40,0,35cce8b7,REVIEW,primary
+stillme_platform\gateway\core\auth.py,unreferenced,No references found (ref_count: 0),MEDIUM,3494,0,065c05c8,REVIEW,primary
+stillme_platform\gateway\core\config.py,unreferenced,No references found (ref_count: 0),MEDIUM,2771,0,065c05c8,REVIEW,primary
+stillme_platform\gateway\core\message_protocol.py,unreferenced,No references found (ref_count: 0),MEDIUM,9802,0,065c05c8,REVIEW,primary
+stillme_platform\gateway\core\redis_client.py,unreferenced,No references found (ref_count: 0),MEDIUM,8584,0,065c05c8,REVIEW,primary
+stillme_platform\gateway\core\websocket_manager.py,unreferenced,No references found (ref_count: 0),MEDIUM,10520,0,065c05c8,REVIEW,primary
+stillme_platform\gateway\services\email_notifier.py,unreferenced,No references found (ref_count: 0),MEDIUM,19329,0,795ffb24,REVIEW,primary
+stillme_platform\gateway\services\notification_manager.py,unreferenced,No references found (ref_count: 0),MEDIUM,21941,0,795ffb24,REVIEW,primary
+stillme_platform\gateway\services\notification_service.py,unreferenced,No references found (ref_count: 0),MEDIUM,6264,0,065c05c8,REVIEW,primary
+stillme_platform\gateway\services\oauth2_email_notifier.py,unreferenced,No references found (ref_count: 0),MEDIUM,5279,0,795ffb24,REVIEW,primary
+stillme_platform\gateway\services\stillme_integration.py,unreferenced,No references found (ref_count: 0),MEDIUM,9643,0,065c05c8,REVIEW,primary
+stillme_platform\mobile\App.tsx,unreferenced,No references found (ref_count: 0),MEDIUM,4728,0,35cce8b7,REVIEW,primary
+stillme_platform\mobile\android\gradlew.bat,unreferenced,No references found (ref_count: 0),MEDIUM,2805,0,35cce8b7,REVIEW,primary
+stillme_platform\mobile\android\app\src\main\java\com\stillmemobile\MainActivity.java,unreferenced,No references found (ref_count: 0),MEDIUM,1137,0,35cce8b7,REVIEW,primary
+stillme_platform\mobile\android\app\src\main\java\com\stillmemobile\MainApplication.java,unreferenced,No references found (ref_count: 0),MEDIUM,2290,0,35cce8b7,REVIEW,primary
+stillme_platform\mobile\src\hooks\redux.ts,unreferenced,No references found (ref_count: 0),MEDIUM,396,0,35cce8b7,REVIEW,primary
+stillme_platform\mobile\src\screens\AuthScreen.tsx,unreferenced,No references found (ref_count: 0),MEDIUM,6878,0,35cce8b7,REVIEW,primary
+stillme_platform\mobile\src\screens\ChatScreen.tsx,unreferenced,No references found (ref_count: 0),MEDIUM,9167,0,35cce8b7,REVIEW,primary
+stillme_platform\mobile\src\screens\SettingsScreen.tsx,unreferenced,No references found (ref_count: 0),MEDIUM,11356,0,35cce8b7,REVIEW,primary
+stillme_platform\mobile\src\screens\SplashScreen.tsx,unreferenced,No references found (ref_count: 0),MEDIUM,1313,0,35cce8b7,REVIEW,primary
+stillme_platform\mobile\src\services\biometric.ts,unreferenced,No references found (ref_count: 0),MEDIUM,9544,0,35cce8b7,REVIEW,primary
+stillme_platform\mobile\src\services\notifications.ts,unreferenced,No references found (ref_count: 0),MEDIUM,10926,0,35cce8b7,REVIEW,primary
+stillme_platform\mobile\src\services\storage.ts,unreferenced,No references found (ref_count: 0),MEDIUM,13171,0,35cce8b7,REVIEW,primary
+stillme_platform\mobile\src\services\websocket.ts,unreferenced,No references found (ref_count: 0),MEDIUM,8086,0,35cce8b7,REVIEW,primary
+stillme_platform\mobile\src\store\store.ts,unreferenced,No references found (ref_count: 0),MEDIUM,1415,0,35cce8b7,REVIEW,primary
+stillme_platform\mobile\src\store\slices\appSlice.ts,unreferenced,No references found (ref_count: 0),MEDIUM,1814,0,35cce8b7,REVIEW,primary
+stillme_platform\mobile\src\store\slices\authSlice.ts,unreferenced,No references found (ref_count: 0),MEDIUM,2442,0,35cce8b7,REVIEW,primary
+stillme_platform\mobile\src\store\slices\chatSlice.ts,unreferenced,No references found (ref_count: 0),MEDIUM,2666,0,35cce8b7,REVIEW,primary
+stillme_platform\mobile\src\store\slices\notificationSlice.ts,unreferenced,No references found (ref_count: 0),MEDIUM,3603,0,35cce8b7,REVIEW,primary
+stillme_platform\mobile\src\store\slices\settingsSlice.ts,unreferenced,No references found (ref_count: 0),MEDIUM,3204,0,35cce8b7,REVIEW,primary
+stillme_platform\mobile\src\theme\theme.ts,unreferenced,No references found (ref_count: 0),MEDIUM,1956,0,35cce8b7,REVIEW,primary
+stillme_platform\mobile\src\types\navigation.ts,unreferenced,No references found (ref_count: 0),MEDIUM,422,0,35cce8b7,REVIEW,primary
+stillme_platform\shared\types.ts,unreferenced,No references found (ref_count: 0),MEDIUM,6838,0,35cce8b7,REVIEW,primary
+stillme_platform\shared\websocket-client.ts,unreferenced,No references found (ref_count: 0),MEDIUM,7837,0,35cce8b7,REVIEW,primary
+stillme_platform\StillMeSimple\App.tsx,unreferenced,No references found (ref_count: 0),MEDIUM,20861,0,unknown,REVIEW,primary
+stillme_platform\StillMeSimple\babel.config.js,unreferenced,No references found (ref_count: 0),MEDIUM,77,0,unknown,REVIEW,primary
+stillme_platform\StillMeSimple\metro.config.js,unreferenced,No references found (ref_count: 0),MEDIUM,302,0,unknown,REVIEW,primary
+stillme_platform\StillMeSimple\android\gradlew.bat,unreferenced,No references found (ref_count: 0),MEDIUM,2868,0,unknown,REVIEW,primary
+stillme_platform\StillMeSimple\android\app\src\debug\java\com\stillmesimple\ReactNativeFlipper.java,unreferenced,No references found (ref_count: 0),MEDIUM,3379,0,unknown,REVIEW,primary
+stillme_platform\StillMeSimple\android\app\src\main\java\com\stillmesimple\MainActivity.java,unreferenced,No references found (ref_count: 0),MEDIUM,1105,0,unknown,REVIEW,primary
+stillme_platform\StillMeSimple\android\app\src\main\java\com\stillmesimple\MainApplication.java,unreferenced,No references found (ref_count: 0),MEDIUM,1977,0,unknown,REVIEW,primary
+stillme_platform\StillMeSimple\android\app\src\release\java\com\stillmesimple\ReactNativeFlipper.java,unreferenced,No references found (ref_count: 0),MEDIUM,683,0,unknown,REVIEW,primary
+stillme_platform\StillMeSimple\ios\StillMeSimple\AppDelegate.h,unreferenced,No references found (ref_count: 0),MEDIUM,98,0,unknown,REVIEW,primary
+stillme_platform\StillMeSimple\__tests__\App.test.tsx,unreferenced,No references found (ref_count: 0),LOW,363,0,unknown,QUARANTINE,primary
+test\test_manager.py,unreferenced,No references found (ref_count: 0),LOW,1226,0,065c05c8,QUARANTINE,primary
+tests\conftest.py,unreferenced,No references found (ref_count: 0),MEDIUM,11520,0,065c05c8,REVIEW,primary
+tests\test_advanced_agentdev.py,unreferenced,No references found (ref_count: 0),LOW,29305,0,065c05c8,QUARANTINE,primary
+tests\test_agentdev_basic.py,unreferenced,No references found (ref_count: 0),LOW,2084,0,065c05c8,QUARANTINE,primary
+tests\test_agentdev_direct.py,unreferenced,No references found (ref_count: 0),LOW,1020,0,065c05c8,QUARANTINE,primary
+tests\test_agentdev_loop.py,unreferenced,No references found (ref_count: 0),LOW,5460,0,065c05c8,QUARANTINE,primary
+tests\test_agentdev_minimal.py,unreferenced,No references found (ref_count: 0),LOW,1206,0,065c05c8,QUARANTINE,primary
+tests\test_agentdev_simple.py,unreferenced,No references found (ref_count: 0),LOW,1480,0,065c05c8,QUARANTINE,primary
+tests\test_agent_flow.py,unreferenced,No references found (ref_count: 0),LOW,10238,0,065c05c8,QUARANTINE,primary
+tests\test_ai_manager_extended.py,unreferenced,No references found (ref_count: 0),LOW,1672,0,065c05c8,QUARANTINE,primary
+tests\test_api_bridge.py,unreferenced,No references found (ref_count: 0),LOW,7584,0,065c05c8,QUARANTINE,primary
+tests\test_api_dev_agent.py,unreferenced,No references found (ref_count: 0),LOW,804,0,f814bff5,QUARANTINE,primary
+tests\test_api_provider_manager.py,unreferenced,No references found (ref_count: 0),LOW,4281,0,d62e20a8,QUARANTINE,primary
+tests\test_api_pr_fullsuite.py,unreferenced,No references found (ref_count: 0),LOW,3289,0,065c05c8,QUARANTINE,primary
+tests\test_batch2_http_io.py,unreferenced,No references found (ref_count: 0),LOW,22006,0,065c05c8,QUARANTINE,primary
+tests\test_bugmemory_priority.py,unreferenced,No references found (ref_count: 0),LOW,584,0,065c05c8,QUARANTINE,primary
+tests\test_bug_memory.py,unreferenced,No references found (ref_count: 0),LOW,384,0,065c05c8,QUARANTINE,primary
+tests\test_bug_memory_record.py,unreferenced,No references found (ref_count: 0),LOW,3855,0,065c05c8,QUARANTINE,primary
+tests\test_code_quality_enforcer.py,unreferenced,No references found (ref_count: 0),LOW,18581,0,065c05c8,QUARANTINE,primary
+tests\test_common_modules.py,unreferenced,No references found (ref_count: 0),LOW,18328,0,065c05c8,QUARANTINE,primary
+tests\test_communication_style_manager.py,unreferenced,No references found (ref_count: 0),LOW,5876,0,065c05c8,QUARANTINE,primary
+tests\test_compute_ai_manager.py,unreferenced,No references found (ref_count: 0),LOW,208,0,065c05c8,QUARANTINE,primary
+tests\test_config_defaults.py,unreferenced,No references found (ref_count: 0),LOW,454,0,065c05c8,QUARANTINE,primary
+tests\test_connectivity.py,unreferenced,No references found (ref_count: 0),LOW,463,0,065c05c8,QUARANTINE,primary
+tests\test_content_integrity_filter.py,unreferenced,No references found (ref_count: 0),LOW,19095,0,065c05c8,QUARANTINE,primary
+tests\test_conversational_core_v1.py,unreferenced,No references found (ref_count: 0),LOW,2718,0,065c05c8,QUARANTINE,primary
+tests\test_emotionsense_v1.py,unreferenced,No references found (ref_count: 0),LOW,33069,0,065c05c8,QUARANTINE,primary
+tests\test_enhanced_agentdev.py,unreferenced,No references found (ref_count: 0),LOW,19750,0,065c05c8,QUARANTINE,primary
+tests\test_ethical_core_system_v1.py,unreferenced,No references found (ref_count: 0),LOW,21313,0,065c05c8,QUARANTINE,primary
+tests\test_example.py,unreferenced,No references found (ref_count: 0),LOW,220,0,065c05c8,QUARANTINE,primary
+tests\test_example_module.py,unreferenced,No references found (ref_count: 0),LOW,39,0,f814bff5,QUARANTINE,primary
+tests\test_executor.py,unreferenced,No references found (ref_count: 0),LOW,930,0,065c05c8,QUARANTINE,primary
+tests\test_executor_patch.py,unreferenced,No references found (ref_count: 0),LOW,2490,0,065c05c8,QUARANTINE,primary
+tests\test_gateway_architecture.py,unreferenced,No references found (ref_count: 0),LOW,8392,0,065c05c8,QUARANTINE,primary
+tests\test_generate_patch_stub.py,unreferenced,No references found (ref_count: 0),LOW,508,0,065c05c8,QUARANTINE,primary
+tests\test_gpt5_bridge.py,unreferenced,No references found (ref_count: 0),LOW,3147,0,065c05c8,QUARANTINE,primary
+tests\test_guard.py,unreferenced,No references found (ref_count: 0),LOW,6399,0,065c05c8,QUARANTINE,primary
+tests\test_guard_v3.py,unreferenced,No references found (ref_count: 0),LOW,5305,0,065c05c8,QUARANTINE,primary
+tests\test_guard_v4.py,unreferenced,No references found (ref_count: 0),LOW,5504,0,065c05c8,QUARANTINE,primary
+tests\test_health_ai_manager.py,unreferenced,No references found (ref_count: 0),LOW,340,0,065c05c8,QUARANTINE,primary
+tests\test_identity_handler.py,unreferenced,No references found (ref_count: 0),LOW,6283,0,065c05c8,QUARANTINE,primary
+tests\test_identity_integration.py,unreferenced,No references found (ref_count: 0),LOW,4552,0,065c05c8,QUARANTINE,primary
+tests\test_internet_access.py,unreferenced,No references found (ref_count: 0),LOW,12703,0,unknown,QUARANTINE,primary
+tests\test_layered_memory_v1.py,unreferenced,No references found (ref_count: 0),LOW,6007,0,065c05c8,QUARANTINE,primary
+tests\test_niche_e2e.py,unreferenced,No references found (ref_count: 0),LOW,17102,0,unknown,QUARANTINE,primary
+tests\test_niche_integration.py,unreferenced,No references found (ref_count: 0),LOW,15236,0,unknown,QUARANTINE,primary
+tests\test_niche_units.py,unreferenced,No references found (ref_count: 0),LOW,14481,0,unknown,QUARANTINE,primary
+tests\test_obs_files.py,unreferenced,No references found (ref_count: 0),LOW,8459,0,065c05c8,QUARANTINE,primary
+tests\test_persona_morph.py,unreferenced,No references found (ref_count: 0),LOW,8295,0,065c05c8,QUARANTINE,primary
+tests\test_planner_multi.py,unreferenced,No references found (ref_count: 0),LOW,931,0,065c05c8,QUARANTINE,primary
+tests\test_plan_types.py,unreferenced,No references found (ref_count: 0),LOW,239,0,065c05c8,QUARANTINE,primary
+tests\test_reflection_controller.py,unreferenced,No references found (ref_count: 0),LOW,18795,0,065c05c8,QUARANTINE,primary
+tests\test_reflection_integration.py,unreferenced,No references found (ref_count: 0),LOW,17256,0,065c05c8,QUARANTINE,primary
+tests\test_router.py,unreferenced,No references found (ref_count: 0),LOW,21203,0,7810265e,QUARANTINE,primary
+tests\test_router_v9.py,unreferenced,No references found (ref_count: 0),LOW,3586,0,065c05c8,QUARANTINE,primary
+tests\test_security_handler.py,unreferenced,No references found (ref_count: 0),LOW,9728,0,065c05c8,QUARANTINE,primary
+tests\test_self_improvement_manager.py,unreferenced,No references found (ref_count: 0),LOW,25004,0,065c05c8,QUARANTINE,primary
+tests\test_smart_gpt_api_manager_v1.py,unreferenced,No references found (ref_count: 0),LOW,1851,0,065c05c8,QUARANTINE,primary
+tests\test_stillme_behavior_matrix.py,unreferenced,No references found (ref_count: 0),LOW,42667,0,065c05c8,QUARANTINE,primary
+tests\test_supervisor_flow.py,unreferenced,No references found (ref_count: 0),LOW,5959,0,065c05c8,QUARANTINE,primary
+tests\test_token_optimizer_v1.py,unreferenced,No references found (ref_count: 0),LOW,6038,0,065c05c8,QUARANTINE,primary
+tests\test_verifier.py,unreferenced,No references found (ref_count: 0),LOW,5488,0,065c05c8,QUARANTINE,primary
+tests\test_web_access_v2.py,unreferenced,No references found (ref_count: 0),LOW,23888,0,unknown,QUARANTINE,primary
+tests\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,23,0,dde1d77f,REVIEW,primary
+tests_harness\cost_calculator.py,unreferenced,No references found (ref_count: 0),MEDIUM,13990,0,5daf33aa,REVIEW,primary
+tests_harness\demo_augmentation.py,unreferenced,No references found (ref_count: 0),MEDIUM,6721,0,5daf33aa,REVIEW,primary
+tests_harness\demo_comprehensive_test.py,unreferenced,No references found (ref_count: 0),LOW,15404,0,ee7ef7bd,QUARANTINE,primary
+tests_harness\demo_optimization.py,unreferenced,No references found (ref_count: 0),MEDIUM,2176,0,a74680b0,REVIEW,primary
+tests_harness\README_TESTS.md,unreferenced,No references found (ref_count: 0),LOW,7661,0,39058dc2,QUARANTINE,primary
+tests_harness\seed_generator.py,unreferenced,No references found (ref_count: 0),MEDIUM,11765,0,5daf33aa,REVIEW,primary
+tests_harness\simple_demo.py,unreferenced,No references found (ref_count: 0),MEDIUM,8746,0,5daf33aa,REVIEW,primary
+tests_harness\simple_html_report.py,unreferenced,No references found (ref_count: 0),MEDIUM,20749,0,ee7ef7bd,REVIEW,primary
+tests_harness\augmentor\augment_runner.py,unreferenced,No references found (ref_count: 0),MEDIUM,14205,0,5daf33aa,REVIEW,primary
+tests_harness\augmentor\backtranslate.py,unreferenced,No references found (ref_count: 0),MEDIUM,14193,0,5daf33aa,REVIEW,primary
+tests_harness\augmentor\paraphraser.py,unreferenced,No references found (ref_count: 0),MEDIUM,9914,0,5daf33aa,REVIEW,primary
+tests_harness\benchmarking\performance_benchmark.py,unreferenced,No references found (ref_count: 0),MEDIUM,20700,0,unknown,REVIEW,primary
+tests_harness\evaluators\agentdev_eval.py,unreferenced,No references found (ref_count: 0),MEDIUM,21954,0,2329240f,REVIEW,primary
+tests_harness\evaluators\efficiency_eval.py,unreferenced,No references found (ref_count: 0),MEDIUM,18283,0,2329240f,REVIEW,primary
+tests_harness\evaluators\persona_eval.py,unreferenced,No references found (ref_count: 0),MEDIUM,16987,0,ee7ef7bd,REVIEW,primary
+tests_harness\evaluators\safety_eval.py,unreferenced,No references found (ref_count: 0),MEDIUM,21930,0,ee7ef7bd,REVIEW,primary
+tests_harness\evaluators\translation_eval.py,unreferenced,No references found (ref_count: 0),MEDIUM,28012,0,ee7ef7bd,REVIEW,primary
+tests_harness\optimization\optimization_analyzer.py,unreferenced,No references found (ref_count: 0),MEDIUM,66646,0,128def0f,REVIEW,primary
+tests_harness\optimization\slo_policy.py,unreferenced,No references found (ref_count: 0),MEDIUM,16012,0,128def0f,REVIEW,primary
+tests_harness\runners\real_test_runner.py,unreferenced,No references found (ref_count: 0),LOW,22255,0,ee7ef7bd,QUARANTINE,primary
+tests_harness\runners\run_all.py,unreferenced,No references found (ref_count: 0),MEDIUM,8227,0,a74680b0,REVIEW,primary
+tools\check_crlf_precommit.py,unreferenced,No references found (ref_count: 0),MEDIUM,1315,0,unknown,REVIEW,primary
+tools\check_null_bytes_precommit.py,unreferenced,No references found (ref_count: 0),MEDIUM,1301,0,unknown,REVIEW,primary
+tools\clean_test_artifacts.bat,unreferenced,No references found (ref_count: 0),LOW,676,0,unknown,QUARANTINE,primary
+tools\clean_test_artifacts.sh,unreferenced,No references found (ref_count: 0),LOW,502,0,unknown,QUARANTINE,primary
+tools\find_candidates.py,unreferenced,No references found (ref_count: 0),MEDIUM,19558,0,unknown,REVIEW,primary
+tools\fresh_venv.bat,unreferenced,No references found (ref_count: 0),MEDIUM,799,0,unknown,REVIEW,primary
+tools\fresh_venv.sh,unreferenced,No references found (ref_count: 0),MEDIUM,747,0,unknown,REVIEW,primary
+tools\normalize_encoding.py,unreferenced,No references found (ref_count: 0),MEDIUM,5768,0,unknown,REVIEW,primary
+tools\pytest_bisect.py,unreferenced,No references found (ref_count: 0),LOW,4094,0,unknown,QUARANTINE,primary
+tools\quarantine_move.py,unreferenced,No references found (ref_count: 0),MEDIUM,12012,0,unknown,REVIEW,primary
+tools\repo_inventory.py,unreferenced,No references found (ref_count: 0),MEDIUM,19079,0,unknown,REVIEW,primary
+tools\restore_from_graveyard.py,unreferenced,No references found (ref_count: 0),MEDIUM,724,0,unknown,REVIEW,primary
+tools\run_redteam.py,unreferenced,No references found (ref_count: 0),MEDIUM,6688,0,065c05c8,REVIEW,primary
+tools\scan_null_bytes.py,unreferenced,No references found (ref_count: 0),MEDIUM,5113,0,unknown,REVIEW,primary
+agent_dev.py,unreferenced,No references found (ref_count: 0),MEDIUM,30849,0,065c05c8,REVIEW,primary
+api_server.py,unreferenced,No references found (ref_count: 0),MEDIUM,3954,0,065c05c8,REVIEW,primary
+app_with_core.py,unreferenced,No references found (ref_count: 0),MEDIUM,7855,0,unknown,REVIEW,primary
+content_integrity_filter.py,unreferenced,No references found (ref_count: 0),MEDIUM,13870,0,unknown,REVIEW,primary
+create_zip.py,unreferenced,No references found (ref_count: 0),MEDIUM,1173,0,795ffb24,REVIEW,primary
+daily_learning_session.py,unreferenced,No references found (ref_count: 0),MEDIUM,11202,0,065c05c8,REVIEW,primary
+debug_app_flow.py,unreferenced,No references found (ref_count: 0),MEDIUM,4019,0,unknown,REVIEW,primary
+debug_app_full_flow.py,unreferenced,No references found (ref_count: 0),MEDIUM,4608,0,unknown,REVIEW,primary
+debug_app_web_request.py,unreferenced,No references found (ref_count: 0),MEDIUM,4048,0,unknown,REVIEW,primary
+debug_backend.py,unreferenced,No references found (ref_count: 0),MEDIUM,1471,0,unknown,REVIEW,primary
+debug_full_flow.py,unreferenced,No references found (ref_count: 0),MEDIUM,4015,0,unknown,REVIEW,primary
+debug_web_search.py,unreferenced,No references found (ref_count: 0),MEDIUM,2248,0,unknown,REVIEW,primary
+desktop_app_server_config.py,unreferenced,No references found (ref_count: 0),MEDIUM,4388,0,065c05c8,REVIEW,primary
+dev_agent_cli.py,unreferenced,No references found (ref_count: 0),MEDIUM,1045,0,065c05c8,REVIEW,primary
+load_ollama_model.py,unreferenced,No references found (ref_count: 0),MEDIUM,1210,0,unknown,REVIEW,primary
+market_intel.py,unreferenced,No references found (ref_count: 0),MEDIUM,23350,0,unknown,REVIEW,primary
+phase2_test_report_20250916_233828.json,unreferenced,No references found (ref_count: 0),LOW,524,0,unknown,QUARANTINE,primary
+phase2_test_report_20250916_233907.json,unreferenced,No references found (ref_count: 0),LOW,462,0,unknown,QUARANTINE,primary
+playwright.config.ts,unreferenced,No references found (ref_count: 0),MEDIUM,2856,0,unknown,REVIEW,primary
+postcss.config.js,unreferenced,No references found (ref_count: 0),MEDIUM,86,0,e158fe44,REVIEW,primary
+run_automated_scheduler.py,unreferenced,No references found (ref_count: 0),MEDIUM,4336,0,065c05c8,REVIEW,primary
+run_tests.bat,unreferenced,No references found (ref_count: 0),LOW,2236,0,unknown,QUARANTINE,primary
+run_tests.sh,unreferenced,No references found (ref_count: 0),LOW,2053,0,unknown,QUARANTINE,primary
+SAFETY_TEST_README.md,unreferenced,No references found (ref_count: 0),LOW,6443,0,4df1a010,QUARANTINE,primary
+setup.py,unreferenced,No references found (ref_count: 0),MEDIUM,901,0,065c05c8,REVIEW,primary
+simple_email_test.py,unreferenced,No references found (ref_count: 0),LOW,2541,0,795ffb24,QUARANTINE,primary
+stable_ai_server.py,unreferenced,No references found (ref_count: 0),MEDIUM,7860,0,7810265e,REVIEW,primary
+stable_ai_server_clean.py,unreferenced,No references found (ref_count: 0),MEDIUM,23154,0,7810265e,REVIEW,primary
+stable_ai_server_complex.py,unreferenced,No references found (ref_count: 0),MEDIUM,22640,0,7810265e,REVIEW,primary
+STRESS_TEST_README.md,unreferenced,No references found (ref_count: 0),LOW,6972,0,4df1a010,QUARANTINE,primary
+tailwind.config.js,unreferenced,No references found (ref_count: 0),MEDIUM,1632,0,e158fe44,REVIEW,primary
+test_backend_simple.py,unreferenced,No references found (ref_count: 0),LOW,1116,0,84159316,QUARANTINE,primary
+test_basic.py,unreferenced,No references found (ref_count: 0),LOW,404,0,unknown,QUARANTINE,primary
+test_chat_direct.py,unreferenced,No references found (ref_count: 0),LOW,1243,0,unknown,QUARANTINE,primary
+test_clean.py,unreferenced,No references found (ref_count: 0),LOW,43,0,unknown,QUARANTINE,primary
+test_core_backend.py,unreferenced,No references found (ref_count: 0),LOW,1985,0,unknown,QUARANTINE,primary
+test_email_notifications.py,unreferenced,No references found (ref_count: 0),LOW,6162,0,795ffb24,QUARANTINE,primary
+test_gateway_status.py,unreferenced,No references found (ref_count: 0),LOW,3534,0,091644ec,QUARANTINE,primary
+test_lan_ip.py,unreferenced,No references found (ref_count: 0),LOW,1386,0,84159316,QUARANTINE,primary
+TEST_LOCAL.md,unreferenced,No references found (ref_count: 0),LOW,4047,0,25cb79a0,QUARANTINE,primary
+test_minimal.py,unreferenced,No references found (ref_count: 0),LOW,78,0,unknown,QUARANTINE,primary
+test_normalize_bot_identity.py,unreferenced,No references found (ref_count: 0),LOW,3165,0,3d885d2e,QUARANTINE,primary
+test_ollama_direct.py,unreferenced,No references found (ref_count: 0),LOW,1795,0,unknown,QUARANTINE,primary
+test_simple.py,unreferenced,No references found (ref_count: 0),LOW,4307,0,unknown,QUARANTINE,primary
+test_system_prompt.py,unreferenced,No references found (ref_count: 0),LOW,2557,0,66dc7145,QUARANTINE,primary
+test_ui_refresh.py,unreferenced,No references found (ref_count: 0),LOW,7608,0,unknown,QUARANTINE,primary
+test_ultra_clean.py,unreferenced,No references found (ref_count: 0),LOW,43,0,unknown,QUARANTINE,primary
+test_web_access_v2_quick.py,unreferenced,No references found (ref_count: 0),LOW,4695,0,unknown,QUARANTINE,primary
+test_web_integration.py,unreferenced,No references found (ref_count: 0),LOW,4392,0,unknown,QUARANTINE,primary
+test_web_search_toggle.py,unreferenced,No references found (ref_count: 0),LOW,3540,0,unknown,QUARANTINE,primary
+vite.config.js,unreferenced,No references found (ref_count: 0),MEDIUM,276,0,e158fe44,REVIEW,primary
+web_tools.py,unreferenced,No references found (ref_count: 0),MEDIUM,15167,0,unknown,REVIEW,primary
+__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,50,0,065c05c8,REVIEW,primary
+agent-dev\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,789,0,065c05c8,REVIEW,primary
+agent-dev\core\agentdev_honest.py,unreferenced,No references found (ref_count: 0),MEDIUM,11383,0,065c05c8,REVIEW,primary
+agent-dev\core\agentdev_real_fix.py,unreferenced,No references found (ref_count: 0),MEDIUM,10275,0,065c05c8,REVIEW,primary
+agent-dev\core\agentdev_simple.py,unreferenced,No references found (ref_count: 0),MEDIUM,5918,0,065c05c8,REVIEW,primary
+agent-dev\core\agentdev_ultimate.py,unreferenced,No references found (ref_count: 0),MEDIUM,29546,0,065c05c8,REVIEW,primary
+agent-dev\core\enhanced_agentdev.py,unreferenced,No references found (ref_count: 0),MEDIUM,10782,0,065c05c8,REVIEW,primary
+agent-dev\core\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,448,0,065c05c8,REVIEW,primary
+agent-dev\docs\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,188,0,065c05c8,REVIEW,primary
+agent-dev\tests\test_agentdev_brain.py,unreferenced,No references found (ref_count: 0),LOW,1643,0,d62d46c9,QUARANTINE,primary
+agent-dev\tests\test_agentdev_real.py,unreferenced,No references found (ref_count: 0),LOW,724,0,d62d46c9,QUARANTINE,primary
+agent-dev\tests\test_agentdev_super.py,unreferenced,No references found (ref_count: 0),LOW,741,0,d62d46c9,QUARANTINE,primary
+agent-dev\tests\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,180,0,065c05c8,REVIEW,primary
+agent-dev\tools\agent_module_tester.py,unreferenced,No references found (ref_count: 0),LOW,5603,0,unknown,QUARANTINE,primary
+agent-dev\tools\upgrade_agentdev.py,unreferenced,No references found (ref_count: 0),MEDIUM,17075,0,065c05c8,REVIEW,primary
+agent-dev\tools\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,208,0,065c05c8,REVIEW,primary
+agent-dev\validation\integration.py,unreferenced,No references found (ref_count: 0),MEDIUM,7439,0,065c05c8,REVIEW,primary
+agent-dev\validation\test_validation_system.py,unreferenced,No references found (ref_count: 0),LOW,1820,0,065c05c8,QUARANTINE,primary
+agent-dev\validation\validation_system.py,unreferenced,No references found (ref_count: 0),MEDIUM,16644,0,065c05c8,REVIEW,primary
+agent-dev\validation\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,407,0,065c05c8,REVIEW,primary
+ci\check_policy_loaded.py,unreferenced,No references found (ref_count: 0),MEDIUM,2771,0,unknown,REVIEW,primary
+ci\check_protected_files.py,unreferenced,No references found (ref_count: 0),MEDIUM,2502,0,unknown,REVIEW,primary
+ci\check_skip_not_cancel.py,unreferenced,No references found (ref_count: 0),MEDIUM,8792,0,unknown,REVIEW,primary
+clients\ollama_client.py,unreferenced,No references found (ref_count: 0),MEDIUM,15360,0,065c05c8,REVIEW,primary
+clients\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,252,0,065c05c8,REVIEW,primary
+common\http.py,unreferenced,No references found (ref_count: 0),MEDIUM,10463,0,065c05c8,REVIEW,primary
+config\brand.py,unreferenced,No references found (ref_count: 0),MEDIUM,4226,0,unknown,REVIEW,primary
+config\manager.py,unreferenced,No references found (ref_count: 0),MEDIUM,3749,0,d62d46c9,REVIEW,primary
+config\validate_env.py,unreferenced,No references found (ref_count: 0),MEDIUM,7170,0,unknown,REVIEW,primary
+config\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,621,0,d62d46c9,REVIEW,primary
+config\agent_dev\config.py,unreferenced,No references found (ref_count: 0),MEDIUM,1950,0,unknown,REVIEW,primary
+config\core\config.py,unreferenced,No references found (ref_count: 0),MEDIUM,1798,0,d62d46c9,REVIEW,primary
+config\platform\config.py,unreferenced,No references found (ref_count: 0),MEDIUM,1946,0,d62d46c9,REVIEW,primary
+config\shared\config.py,unreferenced,No references found (ref_count: 0),MEDIUM,1823,0,d62d46c9,REVIEW,primary
+core\performance\model_warmup_manager.py,unreferenced,No references found (ref_count: 0),MEDIUM,17198,0,065c05c8,REVIEW,primary
+desktop_app\test_ping.py,unreferenced,No references found (ref_count: 0),LOW,3755,0,795ffb24,QUARANTINE,primary
+e2e\global-setup.ts,unreferenced,No references found (ref_count: 0),MEDIUM,2973,0,unknown,REVIEW,primary
+e2e\global-teardown.ts,unreferenced,No references found (ref_count: 0),MEDIUM,2066,0,unknown,REVIEW,primary
+e2e\test_niche_ui.spec.ts,unreferenced,No references found (ref_count: 0),LOW,10729,0,unknown,QUARANTINE,primary
+gateway_poc\gateway\config.py,unreferenced,No references found (ref_count: 0),MEDIUM,7259,0,unknown,REVIEW,primary
+gateway_poc\scripts\load_test.js,unreferenced,No references found (ref_count: 0),LOW,4018,0,unknown,QUARANTINE,primary
+libs\design_tokens.py,unreferenced,No references found (ref_count: 0),MEDIUM,7099,0,unknown,REVIEW,primary
+libs\performance_tracker.py,unreferenced,No references found (ref_count: 0),MEDIUM,5022,0,unknown,REVIEW,primary
+libs\system_prompt.py,unreferenced,No references found (ref_count: 0),MEDIUM,3632,0,unknown,REVIEW,primary
+libs\lang\detect.py,unreferenced,No references found (ref_count: 0),MEDIUM,8129,0,unknown,REVIEW,primary
+metrics\web_metrics.py,unreferenced,No references found (ref_count: 0),MEDIUM,17952,0,unknown,REVIEW,primary
+mobile_app_new\android\gradlew.bat,unreferenced,No references found (ref_count: 0),MEDIUM,2404,0,unknown,REVIEW,primary
+mobile_app_new\android\app\src\main\java\io\flutter\plugins\GeneratedPluginRegistrant.java,unreferenced,No references found (ref_count: 0),MEDIUM,2130,0,unknown,REVIEW,primary
+mobile_app_new\android\app\src\main\kotlin\com\example\mobile_app_new\MainActivity.kt,unreferenced,No references found (ref_count: 0),MEDIUM,133,0,795ffb24,REVIEW,primary
+mobile_app_new\ios\Flutter\flutter_export_environment.sh,unreferenced,No references found (ref_count: 0),MEDIUM,512,0,unknown,REVIEW,primary
+mobile_app_new\ios\Flutter\ephemeral\flutter_lldb_helper.py,unreferenced,No references found (ref_count: 0),MEDIUM,1276,0,unknown,REVIEW,primary
+mobile_app_new\ios\Runner\AppDelegate.swift,unreferenced,No references found (ref_count: 0),MEDIUM,404,0,795ffb24,REVIEW,primary
+mobile_app_new\ios\Runner\GeneratedPluginRegistrant.h,unreferenced,No references found (ref_count: 0),MEDIUM,378,0,unknown,REVIEW,primary
+mobile_app_new\ios\Runner\Runner-Bridging-Header.h,unreferenced,No references found (ref_count: 0),MEDIUM,39,0,795ffb24,REVIEW,primary
+mobile_app_new\ios\RunnerTests\RunnerTests.swift,unreferenced,No references found (ref_count: 0),MEDIUM,297,0,795ffb24,REVIEW,primary
+mobile_app_new\linux\flutter\generated_plugin_registrant.h,unreferenced,No references found (ref_count: 0),MEDIUM,303,0,795ffb24,REVIEW,primary
+mobile_app_new\linux\runner\my_application.h,unreferenced,No references found (ref_count: 0),MEDIUM,406,0,795ffb24,REVIEW,primary
+mobile_app_new\macos\Flutter\GeneratedPluginRegistrant.swift,unreferenced,No references found (ref_count: 0),MEDIUM,883,0,795ffb24,REVIEW,primary
+mobile_app_new\macos\Flutter\ephemeral\flutter_export_environment.sh,unreferenced,No references found (ref_count: 0),MEDIUM,474,0,unknown,REVIEW,primary
+mobile_app_new\macos\Runner\AppDelegate.swift,unreferenced,No references found (ref_count: 0),MEDIUM,324,0,795ffb24,REVIEW,primary
+mobile_app_new\macos\Runner\MainFlutterWindow.swift,unreferenced,No references found (ref_count: 0),MEDIUM,403,0,795ffb24,REVIEW,primary
+mobile_app_new\macos\RunnerTests\RunnerTests.swift,unreferenced,No references found (ref_count: 0),MEDIUM,302,0,795ffb24,REVIEW,primary
+mobile_app_new\windows\flutter\generated_plugin_registrant.h,unreferenced,No references found (ref_count: 0),MEDIUM,302,0,795ffb24,REVIEW,primary
+mobile_app_new\windows\runner\flutter_window.cpp,unreferenced,No references found (ref_count: 0),MEDIUM,2193,0,795ffb24,REVIEW,primary
+mobile_app_new\windows\runner\flutter_window.h,unreferenced,No references found (ref_count: 0),MEDIUM,961,0,795ffb24,REVIEW,primary
+mobile_app_new\windows\runner\main.cpp,unreferenced,No references found (ref_count: 0),MEDIUM,1310,0,795ffb24,REVIEW,primary
+mobile_app_new\windows\runner\resource.h,unreferenced,No references found (ref_count: 0),MEDIUM,448,0,795ffb24,REVIEW,primary
+mobile_app_new\windows\runner\utils.cpp,unreferenced,No references found (ref_count: 0),MEDIUM,1862,0,795ffb24,REVIEW,primary
+mobile_app_new\windows\runner\utils.h,unreferenced,No references found (ref_count: 0),MEDIUM,691,0,795ffb24,REVIEW,primary
+mobile_app_new\windows\runner\win32_window.cpp,unreferenced,No references found (ref_count: 0),MEDIUM,8822,0,795ffb24,REVIEW,primary
+mobile_app_new\windows\runner\win32_window.h,unreferenced,No references found (ref_count: 0),MEDIUM,3624,0,795ffb24,REVIEW,primary
+mobile_app_simple\scan_secrets.sh,unreferenced,No references found (ref_count: 0),MEDIUM,1693,0,795ffb24,REVIEW,primary
+mobile_app_simple\android\app\src\main\java\io\flutter\plugins\GeneratedPluginRegistrant.java,unreferenced,No references found (ref_count: 0),MEDIUM,2399,0,unknown,REVIEW,primary
+mobile_app_simple\android\app\src\main\kotlin\com\stillme\mobile\MainActivity.kt,unreferenced,No references found (ref_count: 0),MEDIUM,125,0,795ffb24,REVIEW,primary
+mobile_app_simple\ios\Flutter\flutter_export_environment.sh,unreferenced,No references found (ref_count: 0),MEDIUM,515,0,unknown,REVIEW,primary
+mobile_app_simple\macos\Flutter\GeneratedPluginRegistrant.swift,unreferenced,No references found (ref_count: 0),MEDIUM,1009,0,795ffb24,REVIEW,primary
+mobile_app_simple\macos\Flutter\ephemeral\flutter_export_environment.sh,unreferenced,No references found (ref_count: 0),MEDIUM,477,0,unknown,REVIEW,primary
+mobile_app_simple\windows\runner\main.cpp,unreferenced,No references found (ref_count: 0),MEDIUM,1313,0,795ffb24,REVIEW,primary
+niche_radar\collectors.py,unreferenced,No references found (ref_count: 0),MEDIUM,19848,0,unknown,REVIEW,primary
+niche_radar\feedback.py,unreferenced,No references found (ref_count: 0),MEDIUM,18478,0,unknown,REVIEW,primary
+niche_radar\playbook.py,unreferenced,No references found (ref_count: 0),MEDIUM,28740,0,unknown,REVIEW,primary
+niche_radar\scoring.py,unreferenced,No references found (ref_count: 0),MEDIUM,20046,0,unknown,REVIEW,primary
+niche_radar\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,1592,0,unknown,REVIEW,primary
+oi_adapter\interpreter_controller.py,unreferenced,No references found (ref_count: 0),MEDIUM,19089,0,065c05c8,REVIEW,primary
+oi_adapter\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,0,0,f814bff5,REVIEW,primary
+policy\tool_gate.py,unreferenced,No references found (ref_count: 0),MEDIUM,17975,0,unknown,REVIEW,primary
+runtime\file_policy.py,unreferenced,No references found (ref_count: 0),MEDIUM,12880,0,unknown,REVIEW,primary
+runtime\file_policy.ts,unreferenced,No references found (ref_count: 0),MEDIUM,14811,0,unknown,REVIEW,primary
+runtime\interaction_policy.py,unreferenced,No references found (ref_count: 0),MEDIUM,8228,0,unknown,REVIEW,primary
+runtime\interaction_policy.ts,unreferenced,No references found (ref_count: 0),MEDIUM,8861,0,unknown,REVIEW,primary
+runtime\policy_loader.py,unreferenced,No references found (ref_count: 0),MEDIUM,4870,0,unknown,REVIEW,primary
+runtime\skip_diagnose.py,unreferenced,No references found (ref_count: 0),MEDIUM,12366,0,unknown,REVIEW,primary
+runtime\skip_diagnose.ts,unreferenced,No references found (ref_count: 0),MEDIUM,12536,0,unknown,REVIEW,primary
+scripts\benchmark_router.py,unreferenced,No references found (ref_count: 0),MEDIUM,23700,0,unknown,REVIEW,primary
+scripts\calibrate_router.py,unreferenced,No references found (ref_count: 0),MEDIUM,17452,0,7810265e,REVIEW,primary
+scripts\check_policy_compliance.py,unreferenced,No references found (ref_count: 0),MEDIUM,5020,0,unknown,REVIEW,primary
+scripts\compute_base_url.ps1,unreferenced,No references found (ref_count: 0),MEDIUM,1670,0,e5e7d55e,REVIEW,primary
+scripts\compute_base_url.sh,unreferenced,No references found (ref_count: 0),MEDIUM,1093,0,e5e7d55e,REVIEW,primary
+scripts\debug_router.py,unreferenced,No references found (ref_count: 0),MEDIUM,14032,0,7810265e,REVIEW,primary
+scripts\detect_server_port.ps1,unreferenced,No references found (ref_count: 0),MEDIUM,913,0,e5e7d55e,REVIEW,primary
+scripts\get_tailscale_ip.ps1,unreferenced,No references found (ref_count: 0),MEDIUM,959,0,e5e7d55e,REVIEW,primary
+scripts\get_tailscale_ip.sh,unreferenced,No references found (ref_count: 0),MEDIUM,748,0,e5e7d55e,REVIEW,primary
+scripts\install_hooks.py,unreferenced,No references found (ref_count: 0),MEDIUM,6960,0,unknown,REVIEW,primary
+scripts\kill-by-port.ps1,unreferenced,No references found (ref_count: 0),MEDIUM,756,0,35cce8b7,REVIEW,primary
+scripts\monitor_router.py,unreferenced,No references found (ref_count: 0),MEDIUM,12562,0,7810265e,REVIEW,primary
+scripts\router.py,unreferenced,No references found (ref_count: 0),MEDIUM,8739,0,7810265e,REVIEW,primary
+scripts\router_cli.py,unreferenced,No references found (ref_count: 0),MEDIUM,14672,0,7810265e,REVIEW,primary
+scripts\router_dashboard.py,unreferenced,No references found (ref_count: 0),MEDIUM,16896,0,7810265e,REVIEW,primary
+scripts\router_manager.py,unreferenced,No references found (ref_count: 0),MEDIUM,17608,0,7810265e,REVIEW,primary
+scripts\router_tools.py,unreferenced,No references found (ref_count: 0),MEDIUM,26424,0,7810265e,REVIEW,primary
+scripts\run_qa_suite.py,unreferenced,No references found (ref_count: 0),MEDIUM,9343,0,unknown,REVIEW,primary
+scripts\run_reflection_tests.py,unreferenced,No references found (ref_count: 0),LOW,12263,0,065c05c8,QUARANTINE,primary
+scripts\run_tests.py,unreferenced,No references found (ref_count: 0),LOW,6115,0,unknown,QUARANTINE,primary
+scripts\setup_qa_environment.py,unreferenced,No references found (ref_count: 0),MEDIUM,7388,0,unknown,REVIEW,primary
+scripts\smoke_test.ps1,unreferenced,No references found (ref_count: 0),LOW,4376,0,e5e7d55e,QUARANTINE,primary
+scripts\smoke_test.sh,unreferenced,No references found (ref_count: 0),LOW,2795,0,e5e7d55e,QUARANTINE,primary
+scripts\start_api.ps1,unreferenced,No references found (ref_count: 0),MEDIUM,1735,0,35cce8b7,REVIEW,primary
+scripts\start_server.ps1,unreferenced,No references found (ref_count: 0),MEDIUM,1274,0,e5e7d55e,REVIEW,primary
+scripts\start_server.sh,unreferenced,No references found (ref_count: 0),MEDIUM,1032,0,e5e7d55e,REVIEW,primary
+scripts\start_web.ps1,unreferenced,No references found (ref_count: 0),MEDIUM,1559,0,35cce8b7,REVIEW,primary
+scripts\stop_server.ps1,unreferenced,No references found (ref_count: 0),MEDIUM,1994,0,e5e7d55e,REVIEW,primary
+scripts\stop_server.sh,unreferenced,No references found (ref_count: 0),MEDIUM,1300,0,e5e7d55e,REVIEW,primary
+scripts\test_external_access.ps1,unreferenced,No references found (ref_count: 0),LOW,3407,0,e5e7d55e,QUARANTINE,primary
+scripts\test_router.py,unreferenced,No references found (ref_count: 0),LOW,23842,0,7810265e,QUARANTINE,primary
+scripts\validate_router.py,unreferenced,No references found (ref_count: 0),MEDIUM,20059,0,7810265e,REVIEW,primary
+scripts\wait_ready.ps1,unreferenced,No references found (ref_count: 0),MEDIUM,1391,0,e5e7d55e,REVIEW,primary
+scripts\wait_ready.sh,unreferenced,No references found (ref_count: 0),MEDIUM,1009,0,e5e7d55e,REVIEW,primary
+security\content_wrap.py,unreferenced,No references found (ref_count: 0),MEDIUM,18250,0,unknown,REVIEW,primary
+src\hooks\useChat.js,unreferenced,No references found (ref_count: 0),MEDIUM,1200,0,e158fe44,REVIEW,primary
+src\hooks\useGateway.js,unreferenced,No references found (ref_count: 0),MEDIUM,927,0,e158fe44,REVIEW,primary
+src\hooks\useTheme.js,unreferenced,No references found (ref_count: 0),MEDIUM,788,0,e158fe44,REVIEW,primary
+stillme_core\framework.py,unreferenced,No references found (ref_count: 0),MEDIUM,47881,0,dde1d77f,REVIEW,primary
+stillme_core\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,522,0,dde1d77f,REVIEW,primary
+stillme_core\adapters\gpt5_client.py,unreferenced,No references found (ref_count: 0),MEDIUM,2398,0,dde1d77f,REVIEW,primary
+stillme_core\adapters\ollama_client.py,unreferenced,No references found (ref_count: 0),MEDIUM,3435,0,dde1d77f,REVIEW,primary
+stillme_core\common\config.py,unreferenced,No references found (ref_count: 0),MEDIUM,11297,0,dde1d77f,REVIEW,primary
+stillme_core\common\errors.py,unreferenced,No references found (ref_count: 0),MEDIUM,14558,0,dde1d77f,REVIEW,primary
+stillme_core\common\http.py,unreferenced,No references found (ref_count: 0),MEDIUM,17418,0,dde1d77f,REVIEW,primary
+stillme_core\common\io.py,unreferenced,No references found (ref_count: 0),MEDIUM,22750,0,dde1d77f,REVIEW,primary
+stillme_core\common\retry.py,unreferenced,No references found (ref_count: 0),MEDIUM,16096,0,dde1d77f,REVIEW,primary
+stillme_core\common\validation.py,unreferenced,No references found (ref_count: 0),MEDIUM,25710,0,dde1d77f,REVIEW,primary
+stillme_core\common\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,192,0,dde1d77f,REVIEW,primary
+stillme_core\config\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,235,0,dde1d77f,REVIEW,primary
+stillme_core\core\advanced_visualization.py,unreferenced,No references found (ref_count: 0),MEDIUM,34117,0,dde1d77f,REVIEW,primary
+stillme_core\core\agent_dev.py,unreferenced,No references found (ref_count: 0),MEDIUM,105,0,unknown,REVIEW,primary
+stillme_core\core\agent_dev_bridge.py,unreferenced,No references found (ref_count: 0),MEDIUM,1296,0,unknown,REVIEW,primary
+stillme_core\core\ai_manager.py,unreferenced,No references found (ref_count: 0),MEDIUM,35769,0,dde1d77f,REVIEW,primary
+stillme_core\core\ai_plan_schema.py,unreferenced,No references found (ref_count: 0),MEDIUM,1416,0,dde1d77f,REVIEW,primary
+stillme_core\core\autonomous_management_system.py,unreferenced,No references found (ref_count: 0),MEDIUM,44248,0,dde1d77f,REVIEW,primary
+stillme_core\core\billing_foundation.py,unreferenced,No references found (ref_count: 0),MEDIUM,15653,0,dde1d77f,REVIEW,primary
+stillme_core\core\bug_memory.py,unreferenced,No references found (ref_count: 0),MEDIUM,3255,0,dde1d77f,REVIEW,primary
+stillme_core\core\config.py,unreferenced,No references found (ref_count: 0),MEDIUM,367,0,dde1d77f,REVIEW,primary
+stillme_core\core\config_defaults.py,unreferenced,No references found (ref_count: 0),MEDIUM,906,0,dde1d77f,REVIEW,primary
+stillme_core\core\conscience_core_v1.py,unreferenced,No references found (ref_count: 0),MEDIUM,5713,0,dde1d77f,REVIEW,primary
+stillme_core\core\controller.py,unreferenced,No references found (ref_count: 0),MEDIUM,12477,0,dde1d77f,REVIEW,primary
+stillme_core\core\core_dashboard.py,unreferenced,No references found (ref_count: 0),MEDIUM,39102,0,dde1d77f,REVIEW,primary
+stillme_core\core\core_metrics_collector.py,unreferenced,No references found (ref_count: 0),MEDIUM,26960,0,dde1d77f,REVIEW,primary
+stillme_core\core\dependency_resolver.py,unreferenced,No references found (ref_count: 0),MEDIUM,18551,0,dde1d77f,REVIEW,primary
+stillme_core\core\ecosystem_discovery.py,unreferenced,No references found (ref_count: 0),MEDIUM,22228,0,dde1d77f,REVIEW,primary
+stillme_core\core\enhanced_executor.py,unreferenced,No references found (ref_count: 0),MEDIUM,18707,0,dde1d77f,REVIEW,primary
+stillme_core\core\enterprise_readiness.py,unreferenced,No references found (ref_count: 0),MEDIUM,15411,0,dde1d77f,REVIEW,primary
+stillme_core\core\error_recovery.py,unreferenced,No references found (ref_count: 0),MEDIUM,15414,0,dde1d77f,REVIEW,primary
+stillme_core\core\essential_value_metrics.py,unreferenced,No references found (ref_count: 0),MEDIUM,30184,0,dde1d77f,REVIEW,primary
+stillme_core\core\executor.py,unreferenced,No references found (ref_count: 0),MEDIUM,13082,0,dde1d77f,REVIEW,primary
+stillme_core\core\financial_validation_engine.py,unreferenced,No references found (ref_count: 0),MEDIUM,16016,0,dde1d77f,REVIEW,primary
+stillme_core\core\git_manager.py,unreferenced,No references found (ref_count: 0),MEDIUM,2128,0,dde1d77f,REVIEW,primary
+stillme_core\core\integration_bridge.py,unreferenced,No references found (ref_count: 0),MEDIUM,27218,0,dde1d77f,REVIEW,primary
+stillme_core\core\integration_testing.py,unreferenced,No references found (ref_count: 0),LOW,30798,0,dde1d77f,QUARANTINE,primary
+stillme_core\core\intelligent_pricing_engine.py,unreferenced,No references found (ref_count: 0),MEDIUM,44539,0,dde1d77f,REVIEW,primary
+stillme_core\core\learning_optimization_engine.py,unreferenced,No references found (ref_count: 0),MEDIUM,46508,0,dde1d77f,REVIEW,primary
+stillme_core\core\memory_security_integration.py,unreferenced,No references found (ref_count: 0),MEDIUM,30968,0,dde1d77f,REVIEW,primary
+stillme_core\core\metrics.py,unreferenced,No references found (ref_count: 0),MEDIUM,6746,0,dde1d77f,REVIEW,primary
+stillme_core\core\module_governance_system.py,unreferenced,No references found (ref_count: 0),MEDIUM,40739,0,dde1d77f,REVIEW,primary
+stillme_core\core\multi_dimensional_analysis.py,unreferenced,No references found (ref_count: 0),MEDIUM,40292,0,dde1d77f,REVIEW,primary
+stillme_core\core\performance_optimizer.py,unreferenced,No references found (ref_count: 0),MEDIUM,19698,0,dde1d77f,REVIEW,primary
+stillme_core\core\phase2_integration_testing.py,unreferenced,No references found (ref_count: 0),LOW,41752,0,dde1d77f,QUARANTINE,primary
+stillme_core\core\planner.py,unreferenced,No references found (ref_count: 0),MEDIUM,22954,0,dde1d77f,REVIEW,primary
+stillme_core\core\plan_types.py,unreferenced,No references found (ref_count: 0),MEDIUM,1313,0,dde1d77f,REVIEW,primary
+stillme_core\core\predictive_capabilities.py,unreferenced,No references found (ref_count: 0),MEDIUM,31790,0,dde1d77f,REVIEW,primary
+stillme_core\core\provider_router.py,unreferenced,No references found (ref_count: 0),MEDIUM,5836,0,dde1d77f,REVIEW,primary
+stillme_core\core\reflection_controller.py,unreferenced,No references found (ref_count: 0),MEDIUM,22310,0,dde1d77f,REVIEW,primary
+stillme_core\core\reflection_scorer.py,unreferenced,No references found (ref_count: 0),MEDIUM,19897,0,dde1d77f,REVIEW,primary
+stillme_core\core\safety_guard.py,unreferenced,No references found (ref_count: 0),MEDIUM,17804,0,dde1d77f,REVIEW,primary
+stillme_core\core\safe_runner.py,unreferenced,No references found (ref_count: 0),MEDIUM,711,0,dde1d77f,REVIEW,primary
+stillme_core\core\secrecy_filter.py,unreferenced,No references found (ref_count: 0),MEDIUM,18443,0,dde1d77f,REVIEW,primary
+stillme_core\core\security_compliance_system.py,unreferenced,No references found (ref_count: 0),MEDIUM,47226,0,dde1d77f,REVIEW,primary
+stillme_core\core\security_middleware.py,unreferenced,No references found (ref_count: 0),MEDIUM,12745,0,dde1d77f,REVIEW,primary
+stillme_core\core\security_remediation.py,unreferenced,No references found (ref_count: 0),MEDIUM,16646,0,dde1d77f,REVIEW,primary
+stillme_core\core\sul.py,unreferenced,No references found (ref_count: 0),MEDIUM,8417,0,dde1d77f,REVIEW,primary
+stillme_core\core\supervisor.py,unreferenced,No references found (ref_count: 0),MEDIUM,10755,0,dde1d77f,REVIEW,primary
+stillme_core\core\supervisor_cli.py,unreferenced,No references found (ref_count: 0),MEDIUM,3370,0,dde1d77f,REVIEW,primary
+stillme_core\core\ui_state.py,unreferenced,No references found (ref_count: 0),MEDIUM,727,0,dde1d77f,REVIEW,primary
+stillme_core\core\usage_analytics_engine.py,unreferenced,No references found (ref_count: 0),MEDIUM,47385,0,dde1d77f,REVIEW,primary
+stillme_core\core\validation_testing.py,unreferenced,No references found (ref_count: 0),LOW,46424,0,dde1d77f,QUARANTINE,primary
+stillme_core\core\verifier.py,unreferenced,No references found (ref_count: 0),MEDIUM,12676,0,dde1d77f,REVIEW,primary
+stillme_core\core\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,317,0,dde1d77f,REVIEW,primary
+stillme_core\core\__main__.py,unreferenced,No references found (ref_count: 0),MEDIUM,4022,0,dde1d77f,REVIEW,primary
+stillme_core\core\advanced_security\blue_team_engine.py,unreferenced,No references found (ref_count: 0),MEDIUM,32990,0,7810265e,REVIEW,primary
+stillme_core\core\advanced_security\experience_memory_integration.py,unreferenced,No references found (ref_count: 0),MEDIUM,27378,0,7810265e,REVIEW,primary
+stillme_core\core\advanced_security\red_team_engine.py,unreferenced,No references found (ref_count: 0),MEDIUM,43636,0,7810265e,REVIEW,primary
+stillme_core\core\advanced_security\safe_attack_simulator.py,unreferenced,No references found (ref_count: 0),MEDIUM,41668,0,dde1d77f,REVIEW,primary
+stillme_core\core\advanced_security\security_orchestrator.py,unreferenced,No references found (ref_count: 0),MEDIUM,23126,0,7810265e,REVIEW,primary
+stillme_core\core\advanced_security\test_phase2_integration.py,unreferenced,No references found (ref_count: 0),LOW,22595,0,7810265e,QUARANTINE,primary
+stillme_core\core\advanced_security\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,1268,0,dde1d77f,REVIEW,primary
+stillme_core\core\cli\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,149,0,dde1d77f,REVIEW,primary
+stillme_core\core\cli\commands\agent.py,unreferenced,No references found (ref_count: 0),MEDIUM,16856,0,dde1d77f,REVIEW,primary
+stillme_core\core\cli\commands\config.py,unreferenced,No references found (ref_count: 0),MEDIUM,11482,0,dde1d77f,REVIEW,primary
+stillme_core\core\cli\commands\observability.py,unreferenced,No references found (ref_count: 0),MEDIUM,21304,0,dde1d77f,REVIEW,primary
+stillme_core\core\cli\commands\quality.py,unreferenced,No references found (ref_count: 0),MEDIUM,13937,0,dde1d77f,REVIEW,primary
+stillme_core\core\cli\commands\router.py,unreferenced,No references found (ref_count: 0),MEDIUM,26975,0,dde1d77f,REVIEW,primary
+stillme_core\core\cli\commands\status.py,unreferenced,No references found (ref_count: 0),MEDIUM,17358,0,dde1d77f,REVIEW,primary
+stillme_core\core\cli\commands\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,180,0,dde1d77f,REVIEW,primary
+stillme_core\core\decision_making\decision_engine.py,unreferenced,No references found (ref_count: 0),MEDIUM,33469,0,dde1d77f,REVIEW,primary
+stillme_core\core\decision_making\ethical_guardrails.py,unreferenced,No references found (ref_count: 0),MEDIUM,24480,0,dde1d77f,REVIEW,primary
+stillme_core\core\decision_making\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,1055,0,dde1d77f,REVIEW,primary
+stillme_core\core\legacy_agentdev\agentdev_brain.py,unreferenced,No references found (ref_count: 0),MEDIUM,16750,0,dde1d77f,REVIEW,primary
+stillme_core\core\legacy_agentdev\agentdev_real.py,unreferenced,No references found (ref_count: 0),MEDIUM,11189,0,dde1d77f,REVIEW,primary
+stillme_core\core\legacy_agentdev\agentdev_super.py,unreferenced,No references found (ref_count: 0),MEDIUM,18889,0,dde1d77f,REVIEW,primary
+stillme_core\core\legacy_agentdev\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,1030,0,dde1d77f,REVIEW,primary
+stillme_core\core\observability\dashboard.py,unreferenced,No references found (ref_count: 0),MEDIUM,24509,0,dde1d77f,REVIEW,primary
+stillme_core\core\observability\health.py,unreferenced,No references found (ref_count: 0),MEDIUM,20381,0,dde1d77f,REVIEW,primary
+stillme_core\core\observability\metrics.py,unreferenced,No references found (ref_count: 0),MEDIUM,15053,0,dde1d77f,REVIEW,primary
+stillme_core\core\observability\tracer.py,unreferenced,No references found (ref_count: 0),MEDIUM,18638,0,dde1d77f,REVIEW,primary
+stillme_core\core\observability\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,742,0,dde1d77f,REVIEW,primary
+stillme_core\core\quality\agentdev_integration.py,unreferenced,No references found (ref_count: 0),MEDIUM,16531,0,dde1d77f,REVIEW,primary
+stillme_core\core\quality\auto_fixer.py,unreferenced,No references found (ref_count: 0),MEDIUM,18624,0,dde1d77f,REVIEW,primary
+stillme_core\core\quality\code_quality_enforcer.py,unreferenced,No references found (ref_count: 0),MEDIUM,22468,0,dde1d77f,REVIEW,primary
+stillme_core\core\quality\quality_governor.py,unreferenced,No references found (ref_count: 0),MEDIUM,26830,0,dde1d77f,REVIEW,primary
+stillme_core\core\quality\quality_metrics.py,unreferenced,No references found (ref_count: 0),MEDIUM,19768,0,dde1d77f,REVIEW,primary
+stillme_core\core\quality\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,398,0,dde1d77f,REVIEW,primary
+stillme_core\core\risk\risk_assessor.py,unreferenced,No references found (ref_count: 0),MEDIUM,26750,0,dde1d77f,REVIEW,primary
+stillme_core\core\risk\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,809,0,dde1d77f,REVIEW,primary
+stillme_core\core\router\agent_coordinator.py,unreferenced,No references found (ref_count: 0),MEDIUM,46479,0,unknown,REVIEW,primary
+stillme_core\core\router\intelligent_router.py,unreferenced,No references found (ref_count: 0),MEDIUM,32651,0,dde1d77f,REVIEW,primary
+stillme_core\core\router\learning_engine.py,unreferenced,No references found (ref_count: 0),MEDIUM,17146,0,dde1d77f,REVIEW,primary
+stillme_core\core\router\memory_manager.py,unreferenced,No references found (ref_count: 0),MEDIUM,24594,0,dde1d77f,REVIEW,primary
+stillme_core\core\router\task_decomposer.py,unreferenced,No references found (ref_count: 0),MEDIUM,44738,0,dde1d77f,REVIEW,primary
+stillme_core\core\router\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,1024,0,dde1d77f,REVIEW,primary
+stillme_core\core\security\attack_simulator.py,unreferenced,No references found (ref_count: 0),MEDIUM,22644,0,dde1d77f,REVIEW,primary
+stillme_core\core\security\security_scanner.py,unreferenced,No references found (ref_count: 0),MEDIUM,19056,0,dde1d77f,REVIEW,primary
+stillme_core\core\security\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,636,0,dde1d77f,REVIEW,primary
+stillme_core\core\self_learning\experience_memory.py,unreferenced,No references found (ref_count: 0),MEDIUM,32948,0,dde1d77f,REVIEW,primary
+stillme_core\core\self_learning\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,910,0,dde1d77f,REVIEW,primary
+stillme_core\core\validation\enhanced_validation.py,unreferenced,No references found (ref_count: 0),MEDIUM,35444,0,dde1d77f,REVIEW,primary
+stillme_core\core\validation\final_validation_system.py,unreferenced,No references found (ref_count: 0),MEDIUM,49390,0,dde1d77f,REVIEW,primary
+stillme_core\core\validation\validation_framework.py,unreferenced,No references found (ref_count: 0),MEDIUM,42722,0,dde1d77f,REVIEW,primary
+stillme_core\core\validation\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,690,0,dde1d77f,REVIEW,primary
+stillme_core\modules\api_provider_manager.py,unreferenced,No references found (ref_count: 0),MEDIUM,10397,0,7810265e,REVIEW,primary
+stillme_core\modules\automated_scheduler.py,unreferenced,No references found (ref_count: 0),MEDIUM,19190,0,dde1d77f,REVIEW,primary
+stillme_core\modules\communication_style_manager.py,unreferenced,No references found (ref_count: 0),MEDIUM,8645,0,7810265e,REVIEW,primary
+stillme_core\modules\content_integrity_filter.py,unreferenced,No references found (ref_count: 0),MEDIUM,33413,0,dde1d77f,REVIEW,primary
+stillme_core\modules\conversational_core_v1.py,unreferenced,No references found (ref_count: 0),MEDIUM,6546,0,dde1d77f,REVIEW,primary
+stillme_core\modules\daily_learning_manager.py,unreferenced,No references found (ref_count: 0),MEDIUM,29694,0,dde1d77f,REVIEW,primary
+stillme_core\modules\emotionsense_v1.py,unreferenced,No references found (ref_count: 0),MEDIUM,24019,0,dde1d77f,REVIEW,primary
+stillme_core\modules\ethical_core_system_v1.py,unreferenced,No references found (ref_count: 0),MEDIUM,28441,0,dde1d77f,REVIEW,primary
+stillme_core\modules\example_module.py,unreferenced,No references found (ref_count: 0),MEDIUM,51,0,dde1d77f,REVIEW,primary
+stillme_core\modules\framework_metrics.py,unreferenced,No references found (ref_count: 0),MEDIUM,1808,0,dde1d77f,REVIEW,primary
+stillme_core\modules\identity_handler.py,unreferenced,No references found (ref_count: 0),MEDIUM,14808,0,dde1d77f,REVIEW,primary
+stillme_core\modules\input_sketcher.py,unreferenced,No references found (ref_count: 0),MEDIUM,5204,0,dde1d77f,REVIEW,primary
+stillme_core\modules\layered_memory_v1.py,unreferenced,No references found (ref_count: 0),MEDIUM,10928,0,7810265e,REVIEW,primary
+stillme_core\modules\market_intel.py,unreferenced,No references found (ref_count: 0),MEDIUM,49858,0,dde1d77f,REVIEW,primary
+stillme_core\modules\persona_morph.py,unreferenced,No references found (ref_count: 0),MEDIUM,22511,0,dde1d77f,REVIEW,primary
+stillme_core\modules\persona_morph_simple.py,unreferenced,No references found (ref_count: 0),MEDIUM,19980,0,7810265e,REVIEW,primary
+stillme_core\modules\prediction_engine.py,unreferenced,No references found (ref_count: 0),MEDIUM,20964,0,dde1d77f,REVIEW,primary
+stillme_core\modules\secure_memory_manager.py,unreferenced,No references found (ref_count: 0),MEDIUM,15183,0,dde1d77f,REVIEW,primary
+stillme_core\modules\self_improvement_manager.py,unreferenced,No references found (ref_count: 0),MEDIUM,37644,0,dde1d77f,REVIEW,primary
+stillme_core\modules\stillme_core.py,unreferenced,No references found (ref_count: 0),MEDIUM,1059,0,dde1d77f,REVIEW,primary
+stillme_core\modules\telemetry.py,unreferenced,No references found (ref_count: 0),MEDIUM,2657,0,dde1d77f,REVIEW,primary
+stillme_core\modules\token_optimizer_v1.py,unreferenced,No references found (ref_count: 0),MEDIUM,10376,0,dde1d77f,REVIEW,primary
+stillme_core\modules\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,1089,0,dde1d77f,REVIEW,primary
+stillme_core\tests\__init__.py,unreferenced,No references found (ref_count: 0),MEDIUM,191,0,dde1d77f,REVIEW,primary
+stillme_ethical_core\ethics_checker.py,unreferenced,No references found (ref_count: 0),MEDIUM,842,0,065c05c8,REVIEW,primary
+stillme_ethical_core\stillme_framework.py,unreferenced,No references found (ref_count: 0),MEDIUM,224,0,065c05c8,REVIEW,primary
+stillme_platform\desktop\public\electron.js,unreferenced,No references found (ref_count: 0),MEDIUM,9220,0,35cce8b7,REVIEW,primary
+stillme_platform\desktop\src\App.tsx,unreferenced,No references found (ref_count: 0),MEDIUM,7958,0,35cce8b7,REVIEW,primary
+stillme_platform\desktop\src\index.tsx,unreferenced,No references found (ref_count: 0),MEDIUM,290,0,35cce8b7,REVIEW,primary
+stillme_platform\gateway\cors_config.py,unreferenced,No references found (ref_count: 0),MEDIUM,4670,0,065c05c8,REVIEW,primary
+stillme_platform\gateway\dev_gateway.py,unreferenced,No references found (ref_count: 0),MEDIUM,10239,0,065c05c8,REVIEW,primary

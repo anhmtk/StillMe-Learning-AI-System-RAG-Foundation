@@ -1,0 +1,10 @@
+{
+  "timestamp": "2025-09-22T21:56:51.711483",
+  "reports_generated": [],
+  "reports_missing": [
+    "reports/test_report.html",
+    "reports/coverage/index.html",
+    "reports/junit.xml",
+    "reports/coverage.xml"
+  ]
+}

@@ -1,0 +1,2938 @@
+{
+  "nodes": [
+    {
+      "id": "stillme_platform\\gateway\\__init__.py",
+      "type": "code",
+      "size": 27,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\gateway\\api\\__init__.py",
+      "type": "code",
+      "size": 33,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\gateway\\api\\routes\\auth.py",
+      "type": "code",
+      "size": 4165,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\gateway\\api\\routes\\devices.py",
+      "type": "code",
+      "size": 5161,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\gateway\\api\\routes\\health.py",
+      "type": "code",
+      "size": 3090,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\gateway\\api\\routes\\messages.py",
+      "type": "code",
+      "size": 3583,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\gateway\\api\\routes\\__init__.py",
+      "type": "code",
+      "size": 40,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\gateway\\core\\auth.py",
+      "type": "code",
+      "size": 3494,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\gateway\\core\\config.py",
+      "type": "code",
+      "size": 2771,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\gateway\\core\\message_protocol.py",
+      "type": "code",
+      "size": 9802,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\gateway\\core\\redis_client.py",
+      "type": "code",
+      "size": 8584,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\gateway\\core\\websocket_manager.py",
+      "type": "code",
+      "size": 10520,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\gateway\\services\\email_notifier.py",
+      "type": "code",
+      "size": 19329,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\gateway\\services\\notification_manager.py",
+      "type": "code",
+      "size": 21941,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\gateway\\services\\notification_service.py",
+      "type": "code",
+      "size": 6264,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\gateway\\services\\oauth2_email_notifier.py",
+      "type": "code",
+      "size": 5279,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\gateway\\services\\stillme_integration.py",
+      "type": "code",
+      "size": 9643,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\mobile\\app.json",
+      "type": "config",
+      "size": 62,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\mobile\\index.js",
+      "type": "code",
+      "size": 192,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\mobile\\package-lock.json",
+      "type": "config",
+      "size": 490734,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\mobile\\package.json",
+      "type": "config",
+      "size": 1413,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\mobile\\android\\app\\src\\main\\java\\com\\stillmemobile\\MainActivity.java",
+      "type": "code",
+      "size": 1137,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\mobile\\android\\app\\src\\main\\java\\com\\stillmemobile\\MainApplication.java",
+      "type": "code",
+      "size": 2290,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\mobile\\src\\hooks\\redux.ts",
+      "type": "code",
+      "size": 396,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\mobile\\src\\services\\biometric.ts",
+      "type": "code",
+      "size": 9544,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\mobile\\src\\services\\notifications.ts",
+      "type": "code",
+      "size": 10926,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\mobile\\src\\services\\storage.ts",
+      "type": "code",
+      "size": 13171,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\mobile\\src\\services\\websocket.ts",
+      "type": "code",
+      "size": 8086,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\mobile\\src\\store\\store.ts",
+      "type": "code",
+      "size": 1415,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\mobile\\src\\store\\slices\\appSlice.ts",
+      "type": "code",
+      "size": 1814,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\mobile\\src\\store\\slices\\authSlice.ts",
+      "type": "code",
+      "size": 2442,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\mobile\\src\\store\\slices\\chatSlice.ts",
+      "type": "code",
+      "size": 2666,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\mobile\\src\\store\\slices\\notificationSlice.ts",
+      "type": "code",
+      "size": 3603,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\mobile\\src\\store\\slices\\settingsSlice.ts",
+      "type": "code",
+      "size": 3204,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\mobile\\src\\theme\\theme.ts",
+      "type": "code",
+      "size": 1956,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\mobile\\src\\types\\navigation.ts",
+      "type": "code",
+      "size": 422,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\shared\\types.ts",
+      "type": "code",
+      "size": 6838,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\shared\\websocket-client.ts",
+      "type": "code",
+      "size": 7837,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeMobileTemp\\app.json",
+      "type": "config",
+      "size": 72,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeMobileTemp\\babel.config.js",
+      "type": "code",
+      "size": 72,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeMobileTemp\\index.js",
+      "type": "code",
+      "size": 187,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeMobileTemp\\jest.config.js",
+      "type": "code",
+      "size": 48,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeMobileTemp\\metro.config.js",
+      "type": "code",
+      "size": 301,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeMobileTemp\\package-lock.json",
+      "type": "config",
+      "size": 538270,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeMobileTemp\\package.json",
+      "type": "config",
+      "size": 2343,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeMobileTemp\\tsconfig.json",
+      "type": "config",
+      "size": 134,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeMobileTemp\\android\\app\\src\\main\\java\\com\\stillmemobiletemp\\MainActivity.kt",
+      "type": "code",
+      "size": 865,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeMobileTemp\\android\\app\\src\\main\\java\\com\\stillmemobiletemp\\MainApplication.kt",
+      "type": "code",
+      "size": 1383,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeMobileTemp\\ios\\StillMeMobileTemp\\AppDelegate.swift",
+      "type": "code",
+      "size": 1240,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeMobileTemp\\ios\\StillMeMobileTemp\\Images.xcassets\\Contents.json",
+      "type": "config",
+      "size": 63,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeMobileTemp\\ios\\StillMeMobileTemp\\Images.xcassets\\AppIcon.appiconset\\Contents.json",
+      "type": "config",
+      "size": 849,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeMobileTemp\\src\\hooks\\redux.ts",
+      "type": "code",
+      "size": 396,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeMobileTemp\\src\\services\\biometric.ts",
+      "type": "code",
+      "size": 9544,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeMobileTemp\\src\\services\\notifications.ts",
+      "type": "code",
+      "size": 10926,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeMobileTemp\\src\\services\\storage.ts",
+      "type": "code",
+      "size": 13171,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeMobileTemp\\src\\services\\websocket.ts",
+      "type": "code",
+      "size": 8086,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeMobileTemp\\src\\store\\store.ts",
+      "type": "code",
+      "size": 1415,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeMobileTemp\\src\\store\\slices\\appSlice.ts",
+      "type": "code",
+      "size": 1814,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeMobileTemp\\src\\store\\slices\\authSlice.ts",
+      "type": "code",
+      "size": 2442,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeMobileTemp\\src\\store\\slices\\chatSlice.ts",
+      "type": "code",
+      "size": 2666,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeMobileTemp\\src\\store\\slices\\notificationSlice.ts",
+      "type": "code",
+      "size": 3603,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeMobileTemp\\src\\store\\slices\\settingsSlice.ts",
+      "type": "code",
+      "size": 3204,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeMobileTemp\\src\\theme\\theme.ts",
+      "type": "code",
+      "size": 1956,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeMobileTemp\\src\\types\\navigation.ts",
+      "type": "code",
+      "size": 422,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeSimple\\app.json",
+      "type": "config",
+      "size": 64,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeSimple\\babel.config.js",
+      "type": "code",
+      "size": 77,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeSimple\\index.js",
+      "type": "code",
+      "size": 183,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeSimple\\jest.config.js",
+      "type": "code",
+      "size": 48,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeSimple\\metro.config.js",
+      "type": "code",
+      "size": 302,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeSimple\\package-lock.json",
+      "type": "config",
+      "size": 516992,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeSimple\\package.json",
+      "type": "config",
+      "size": 956,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeSimple\\tsconfig.json",
+      "type": "config",
+      "size": 56,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeSimple\\android\\app\\src\\debug\\java\\com\\stillmesimple\\ReactNativeFlipper.java",
+      "type": "code",
+      "size": 3379,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeSimple\\android\\app\\src\\main\\java\\com\\stillmesimple\\MainActivity.java",
+      "type": "code",
+      "size": 1105,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeSimple\\android\\app\\src\\main\\java\\com\\stillmesimple\\MainApplication.java",
+      "type": "code",
+      "size": 1977,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeSimple\\android\\app\\src\\release\\java\\com\\stillmesimple\\ReactNativeFlipper.java",
+      "type": "code",
+      "size": 683,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeSimple\\ios\\StillMeSimple\\AppDelegate.h",
+      "type": "code",
+      "size": 98,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeSimple\\ios\\StillMeSimple\\Images.xcassets\\Contents.json",
+      "type": "config",
+      "size": 63,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeSimple\\ios\\StillMeSimple\\Images.xcassets\\AppIcon.appiconset\\Contents.json",
+      "type": "config",
+      "size": 849,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\StillMeSimple\\src\\config\\index.js",
+      "type": "code",
+      "size": 2218,
+      "ref_count": 0
+    },
+    {
+      "id": "tests\\conftest.py",
+      "type": "code",
+      "size": 11520,
+      "ref_count": 0
+    },
+    {
+      "id": "tests\\__init__.py",
+      "type": "code",
+      "size": 23,
+      "ref_count": 0
+    },
+    {
+      "id": "tests\\fixtures\\github_trending_sample.json",
+      "type": "config",
+      "size": 1376,
+      "ref_count": 0
+    },
+    {
+      "id": "tests\\fixtures\\google_trends_sample.json",
+      "type": "config",
+      "size": 1951,
+      "ref_count": 0
+    },
+    {
+      "id": "tests\\fixtures\\hackernews_sample.json",
+      "type": "config",
+      "size": 1286,
+      "ref_count": 0
+    },
+    {
+      "id": "tests\\fixtures\\news_sample.json",
+      "type": "config",
+      "size": 1501,
+      "ref_count": 0
+    },
+    {
+      "id": "tests\\fixtures\\reddit_sample.json",
+      "type": "config",
+      "size": 1569,
+      "ref_count": 0
+    },
+    {
+      "id": "tests_harness\\cost_calculator.py",
+      "type": "code",
+      "size": 13990,
+      "ref_count": 0
+    },
+    {
+      "id": "tests_harness\\demo_augmentation.py",
+      "type": "code",
+      "size": 6721,
+      "ref_count": 0
+    },
+    {
+      "id": "tests_harness\\demo_optimization.py",
+      "type": "code",
+      "size": 2176,
+      "ref_count": 0
+    },
+    {
+      "id": "tests_harness\\seed_generator.py",
+      "type": "code",
+      "size": 11765,
+      "ref_count": 0
+    },
+    {
+      "id": "tests_harness\\simple_demo.py",
+      "type": "code",
+      "size": 8746,
+      "ref_count": 0
+    },
+    {
+      "id": "tests_harness\\simple_html_report.py",
+      "type": "code",
+      "size": 20749,
+      "ref_count": 0
+    },
+    {
+      "id": "tests_harness\\slo_policy.yaml",
+      "type": "config",
+      "size": 3255,
+      "ref_count": 0
+    },
+    {
+      "id": "tests_harness\\augmentor\\augment_runner.py",
+      "type": "code",
+      "size": 14205,
+      "ref_count": 0
+    },
+    {
+      "id": "tests_harness\\augmentor\\backtranslate.py",
+      "type": "code",
+      "size": 14193,
+      "ref_count": 0
+    },
+    {
+      "id": "tests_harness\\augmentor\\paraphraser.py",
+      "type": "code",
+      "size": 9914,
+      "ref_count": 0
+    },
+    {
+      "id": "tests_harness\\augmentor\\template_filler.py",
+      "type": "code",
+      "size": 19696,
+      "ref_count": 0
+    },
+    {
+      "id": "tests_harness\\benchmarking\\performance_benchmark.py",
+      "type": "code",
+      "size": 20700,
+      "ref_count": 0
+    },
+    {
+      "id": "tests_harness\\evaluators\\agentdev_eval.py",
+      "type": "code",
+      "size": 21954,
+      "ref_count": 0
+    },
+    {
+      "id": "tests_harness\\evaluators\\efficiency_eval.py",
+      "type": "code",
+      "size": 18283,
+      "ref_count": 0
+    },
+    {
+      "id": "tests_harness\\evaluators\\persona_eval.py",
+      "type": "code",
+      "size": 16987,
+      "ref_count": 0
+    },
+    {
+      "id": "tests_harness\\evaluators\\safety_eval.py",
+      "type": "code",
+      "size": 21930,
+      "ref_count": 0
+    },
+    {
+      "id": "tests_harness\\evaluators\\translation_eval.py",
+      "type": "code",
+      "size": 28012,
+      "ref_count": 0
+    },
+    {
+      "id": "tests_harness\\optimization\\optimization_analyzer.py",
+      "type": "code",
+      "size": 66646,
+      "ref_count": 0
+    },
+    {
+      "id": "tests_harness\\optimization\\slo_policy.py",
+      "type": "code",
+      "size": 16012,
+      "ref_count": 0
+    },
+    {
+      "id": "tests_harness\\runners\\run_all.py",
+      "type": "code",
+      "size": 8227,
+      "ref_count": 0
+    },
+    {
+      "id": "tests_harness\\scenarios\\persona_scenarios.yaml",
+      "type": "config",
+      "size": 4175,
+      "ref_count": 0
+    },
+    {
+      "id": "tests_harness\\scenarios\\safety_scenarios.yaml",
+      "type": "config",
+      "size": 4848,
+      "ref_count": 0
+    },
+    {
+      "id": "tests_harness\\scenarios\\translation_scenarios.yaml",
+      "type": "config",
+      "size": 5152,
+      "ref_count": 0
+    },
+    {
+      "id": "tests_harness\\tests_harness\\benchmarking\\benchmark_report_20250917_095252.json",
+      "type": "config",
+      "size": 16133,
+      "ref_count": 0
+    },
+    {
+      "id": "tools\\check_crlf_precommit.py",
+      "type": "code",
+      "size": 1315,
+      "ref_count": 0
+    },
+    {
+      "id": "tools\\check_null_bytes_precommit.py",
+      "type": "code",
+      "size": 1301,
+      "ref_count": 0
+    },
+    {
+      "id": "tools\\find_candidates.py",
+      "type": "code",
+      "size": 19558,
+      "ref_count": 0
+    },
+    {
+      "id": "tools\\normalize_encoding.py",
+      "type": "code",
+      "size": 5768,
+      "ref_count": 0
+    },
+    {
+      "id": "tools\\quarantine_move.py",
+      "type": "code",
+      "size": 12012,
+      "ref_count": 0
+    },
+    {
+      "id": "tools\\repo_inventory.py",
+      "type": "code",
+      "size": 19079,
+      "ref_count": 0
+    },
+    {
+      "id": "tools\\restore_from_graveyard.py",
+      "type": "code",
+      "size": 724,
+      "ref_count": 0
+    },
+    {
+      "id": "tools\\run_redteam.py",
+      "type": "code",
+      "size": 6688,
+      "ref_count": 0
+    },
+    {
+      "id": "tools\\scan_null_bytes.py",
+      "type": "code",
+      "size": 5113,
+      "ref_count": 0
+    },
+    {
+      "id": "agent_dev.py",
+      "type": "code",
+      "size": 30849,
+      "ref_count": 0
+    },
+    {
+      "id": "api_server.py",
+      "type": "code",
+      "size": 3954,
+      "ref_count": 0
+    },
+    {
+      "id": "app.py",
+      "type": "code",
+      "size": 36512,
+      "ref_count": 0
+    },
+    {
+      "id": "app_with_core.py",
+      "type": "code",
+      "size": 7855,
+      "ref_count": 0
+    },
+    {
+      "id": "content_integrity_filter.py",
+      "type": "code",
+      "size": 13870,
+      "ref_count": 0
+    },
+    {
+      "id": "create_zip.py",
+      "type": "code",
+      "size": 1173,
+      "ref_count": 0
+    },
+    {
+      "id": "daily_learning_session.py",
+      "type": "code",
+      "size": 11202,
+      "ref_count": 0
+    },
+    {
+      "id": "debug_app_flow.py",
+      "type": "code",
+      "size": 4019,
+      "ref_count": 0
+    },
+    {
+      "id": "debug_app_full_flow.py",
+      "type": "code",
+      "size": 4608,
+      "ref_count": 0
+    },
+    {
+      "id": "debug_app_web_request.py",
+      "type": "code",
+      "size": 4048,
+      "ref_count": 0
+    },
+    {
+      "id": "debug_backend.py",
+      "type": "code",
+      "size": 1471,
+      "ref_count": 0
+    },
+    {
+      "id": "debug_full_flow.py",
+      "type": "code",
+      "size": 4015,
+      "ref_count": 0
+    },
+    {
+      "id": "debug_web_search.py",
+      "type": "code",
+      "size": 2248,
+      "ref_count": 0
+    },
+    {
+      "id": "desktop_app_server_config.py",
+      "type": "code",
+      "size": 4388,
+      "ref_count": 0
+    },
+    {
+      "id": "desktop_chat_app.py",
+      "type": "code",
+      "size": 8670,
+      "ref_count": 0
+    },
+    {
+      "id": "dev_agent_cli.py",
+      "type": "code",
+      "size": 1045,
+      "ref_count": 0
+    },
+    {
+      "id": "load_ollama_model.py",
+      "type": "code",
+      "size": 1210,
+      "ref_count": 0
+    },
+    {
+      "id": "market_intel.py",
+      "type": "code",
+      "size": 23350,
+      "ref_count": 0
+    },
+    {
+      "id": "package-lock.json",
+      "type": "config",
+      "size": 94387,
+      "ref_count": 0
+    },
+    {
+      "id": "package.json",
+      "type": "config",
+      "size": 2018,
+      "ref_count": 0
+    },
+    {
+      "id": "playwright.config.ts",
+      "type": "code",
+      "size": 2856,
+      "ref_count": 0
+    },
+    {
+      "id": "postcss.config.js",
+      "type": "code",
+      "size": 86,
+      "ref_count": 0
+    },
+    {
+      "id": "pyrightconfig.json",
+      "type": "config",
+      "size": 952,
+      "ref_count": 0
+    },
+    {
+      "id": "pytest.ini",
+      "type": "config",
+      "size": 366,
+      "ref_count": 0
+    },
+    {
+      "id": "run_automated_scheduler.py",
+      "type": "code",
+      "size": 4336,
+      "ref_count": 0
+    },
+    {
+      "id": "setup.py",
+      "type": "code",
+      "size": 901,
+      "ref_count": 0
+    },
+    {
+      "id": "stable_ai_server.py",
+      "type": "code",
+      "size": 7860,
+      "ref_count": 0
+    },
+    {
+      "id": "stable_ai_server_backup.py",
+      "type": "code",
+      "size": 27789,
+      "ref_count": 0
+    },
+    {
+      "id": "stable_ai_server_clean.py",
+      "type": "code",
+      "size": 23154,
+      "ref_count": 0
+    },
+    {
+      "id": "stable_ai_server_complex.py",
+      "type": "code",
+      "size": 22640,
+      "ref_count": 0
+    },
+    {
+      "id": "stable_ai_server_simple.py",
+      "type": "code",
+      "size": 7860,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_desktop_app.py",
+      "type": "code",
+      "size": 34023,
+      "ref_count": 0
+    },
+    {
+      "id": "tailwind.config.js",
+      "type": "code",
+      "size": 1632,
+      "ref_count": 0
+    },
+    {
+      "id": "tox.ini",
+      "type": "config",
+      "size": 288,
+      "ref_count": 0
+    },
+    {
+      "id": "vite.config.js",
+      "type": "code",
+      "size": 276,
+      "ref_count": 0
+    },
+    {
+      "id": "web_tools.py",
+      "type": "code",
+      "size": 15167,
+      "ref_count": 0
+    },
+    {
+      "id": "__init__.py",
+      "type": "code",
+      "size": 50,
+      "ref_count": 0
+    },
+    {
+      "id": "agent-dev\\__init__.py",
+      "type": "code",
+      "size": 789,
+      "ref_count": 0
+    },
+    {
+      "id": "agent-dev\\core\\agentdev_honest.py",
+      "type": "code",
+      "size": 11383,
+      "ref_count": 0
+    },
+    {
+      "id": "agent-dev\\core\\agentdev_real_fix.py",
+      "type": "code",
+      "size": 10275,
+      "ref_count": 0
+    },
+    {
+      "id": "agent-dev\\core\\agentdev_simple.py",
+      "type": "code",
+      "size": 5918,
+      "ref_count": 0
+    },
+    {
+      "id": "agent-dev\\core\\agentdev_ultimate.py",
+      "type": "code",
+      "size": 29546,
+      "ref_count": 0
+    },
+    {
+      "id": "agent-dev\\core\\enhanced_agentdev.py",
+      "type": "code",
+      "size": 10782,
+      "ref_count": 0
+    },
+    {
+      "id": "agent-dev\\core\\__init__.py",
+      "type": "code",
+      "size": 448,
+      "ref_count": 0
+    },
+    {
+      "id": "agent-dev\\docs\\__init__.py",
+      "type": "code",
+      "size": 188,
+      "ref_count": 0
+    },
+    {
+      "id": "agent-dev\\tests\\__init__.py",
+      "type": "code",
+      "size": 180,
+      "ref_count": 0
+    },
+    {
+      "id": "agent-dev\\tools\\upgrade_agentdev.py",
+      "type": "code",
+      "size": 17075,
+      "ref_count": 0
+    },
+    {
+      "id": "agent-dev\\tools\\__init__.py",
+      "type": "code",
+      "size": 208,
+      "ref_count": 0
+    },
+    {
+      "id": "agent-dev\\validation\\integration.py",
+      "type": "code",
+      "size": 7439,
+      "ref_count": 0
+    },
+    {
+      "id": "agent-dev\\validation\\validation_system.py",
+      "type": "code",
+      "size": 16644,
+      "ref_count": 0
+    },
+    {
+      "id": "agent-dev\\validation\\__init__.py",
+      "type": "code",
+      "size": 407,
+      "ref_count": 0
+    },
+    {
+      "id": "backup_agentdev_1757736199\\agentdev_real_fix.py",
+      "type": "code",
+      "size": 10275,
+      "ref_count": 0
+    },
+    {
+      "id": "backup_agentdev_1757736199\\agentdev_simple.py",
+      "type": "code",
+      "size": 5918,
+      "ref_count": 0
+    },
+    {
+      "id": "backup_agentdev_1757736199\\agentdev_ultimate.py",
+      "type": "code",
+      "size": 29546,
+      "ref_count": 0
+    },
+    {
+      "id": "cache\\web_cache.py",
+      "type": "code",
+      "size": 13771,
+      "ref_count": 0
+    },
+    {
+      "id": "ci\\check_policy_loaded.py",
+      "type": "code",
+      "size": 2771,
+      "ref_count": 0
+    },
+    {
+      "id": "ci\\check_protected_files.py",
+      "type": "code",
+      "size": 2502,
+      "ref_count": 0
+    },
+    {
+      "id": "ci\\check_skip_not_cancel.py",
+      "type": "code",
+      "size": 8792,
+      "ref_count": 0
+    },
+    {
+      "id": "ci\\shadow_inventory.yml",
+      "type": "config",
+      "size": 8238,
+      "ref_count": 0
+    },
+    {
+      "id": "clients\\ollama_client.py",
+      "type": "code",
+      "size": 15360,
+      "ref_count": 0
+    },
+    {
+      "id": "clients\\__init__.py",
+      "type": "code",
+      "size": 252,
+      "ref_count": 0
+    },
+    {
+      "id": "common\\http.py",
+      "type": "code",
+      "size": 10463,
+      "ref_count": 0
+    },
+    {
+      "id": "config\\ai_server_config.json",
+      "type": "config",
+      "size": 1526,
+      "ref_count": 0
+    },
+    {
+      "id": "config\\api_provider_config.json",
+      "type": "config",
+      "size": 805,
+      "ref_count": 0
+    },
+    {
+      "id": "config\\brand.py",
+      "type": "code",
+      "size": 4226,
+      "ref_count": 0
+    },
+    {
+      "id": "config\\content_filter_rules.json",
+      "type": "config",
+      "size": 1015,
+      "ref_count": 0
+    },
+    {
+      "id": "config\\desktop_app_config.json",
+      "type": "config",
+      "size": 661,
+      "ref_count": 0
+    },
+    {
+      "id": "config\\emotion_config.json",
+      "type": "config",
+      "size": 2499,
+      "ref_count": 0
+    },
+    {
+      "id": "config\\emotion_sense_config.json",
+      "type": "config",
+      "size": 1869,
+      "ref_count": 0
+    },
+    {
+      "id": "config\\ethical_core_config.json",
+      "type": "config",
+      "size": 1463,
+      "ref_count": 0
+    },
+    {
+      "id": "config\\ethical_rules.json",
+      "type": "config",
+      "size": 1571,
+      "ref_count": 0
+    },
+    {
+      "id": "config\\framework_config.json",
+      "type": "config",
+      "size": 1931,
+      "ref_count": 0
+    },
+    {
+      "id": "config\\gateway_config.json",
+      "type": "config",
+      "size": 1283,
+      "ref_count": 0
+    },
+    {
+      "id": "config\\manager.py",
+      "type": "code",
+      "size": 3749,
+      "ref_count": 0
+    },
+    {
+      "id": "config\\model_warmup_config.json",
+      "type": "config",
+      "size": 473,
+      "ref_count": 0
+    },
+    {
+      "id": "config\\module_governance_config.json",
+      "type": "config",
+      "size": 25244,
+      "ref_count": 0
+    },
+    {
+      "id": "config\\reflection.yaml",
+      "type": "config",
+      "size": 3865,
+      "ref_count": 0
+    },
+    {
+      "id": "config\\secure_memory_config.json",
+      "type": "config",
+      "size": 1411,
+      "ref_count": 0
+    },
+    {
+      "id": "config\\security_config.json",
+      "type": "config",
+      "size": 1598,
+      "ref_count": 0
+    },
+    {
+      "id": "config\\self_improvement_config.json",
+      "type": "config",
+      "size": 1265,
+      "ref_count": 0
+    },
+    {
+      "id": "config\\staging.yaml",
+      "type": "config",
+      "size": 1326,
+      "ref_count": 0
+    },
+    {
+      "id": "config\\templates_config.json",
+      "type": "config",
+      "size": 1859,
+      "ref_count": 0
+    },
+    {
+      "id": "config\\validate_env.py",
+      "type": "code",
+      "size": 7170,
+      "ref_count": 0
+    },
+    {
+      "id": "config\\__init__.py",
+      "type": "code",
+      "size": 621,
+      "ref_count": 0
+    },
+    {
+      "id": "config\\agent_dev\\config.py",
+      "type": "code",
+      "size": 1950,
+      "ref_count": 0
+    },
+    {
+      "id": "config\\core\\config.py",
+      "type": "code",
+      "size": 1798,
+      "ref_count": 0
+    },
+    {
+      "id": "config\\platform\\config.py",
+      "type": "code",
+      "size": 1946,
+      "ref_count": 0
+    },
+    {
+      "id": "config\\shared\\config.py",
+      "type": "code",
+      "size": 1823,
+      "ref_count": 0
+    },
+    {
+      "id": "core\\performance\\model_warmup_manager.py",
+      "type": "code",
+      "size": 17198,
+      "ref_count": 0
+    },
+    {
+      "id": "desktop_app\\stillme_desktop_app.py",
+      "type": "code",
+      "size": 27622,
+      "ref_count": 0
+    },
+    {
+      "id": "e2e\\global-setup.ts",
+      "type": "code",
+      "size": 2973,
+      "ref_count": 0
+    },
+    {
+      "id": "e2e\\global-teardown.ts",
+      "type": "code",
+      "size": 2066,
+      "ref_count": 0
+    },
+    {
+      "id": "gateway_poc\\docker-compose.yml",
+      "type": "config",
+      "size": 4466,
+      "ref_count": 0
+    },
+    {
+      "id": "gateway_poc\\gateway\\config.py",
+      "type": "code",
+      "size": 7259,
+      "ref_count": 0
+    },
+    {
+      "id": "gateway_poc\\gateway\\main.py",
+      "type": "code",
+      "size": 13289,
+      "ref_count": 0
+    },
+    {
+      "id": "knowledge_packs\\pack_20250906_2.json",
+      "type": "config",
+      "size": 1537,
+      "ref_count": 0
+    },
+    {
+      "id": "lesson_proposals\\20250906.json",
+      "type": "config",
+      "size": 2064,
+      "ref_count": 0
+    },
+    {
+      "id": "libs\\design_tokens.py",
+      "type": "code",
+      "size": 7099,
+      "ref_count": 0
+    },
+    {
+      "id": "libs\\performance_tracker.py",
+      "type": "code",
+      "size": 5022,
+      "ref_count": 0
+    },
+    {
+      "id": "libs\\system_prompt.py",
+      "type": "code",
+      "size": 3632,
+      "ref_count": 0
+    },
+    {
+      "id": "libs\\lang\\detect.py",
+      "type": "code",
+      "size": 8129,
+      "ref_count": 0
+    },
+    {
+      "id": "metrics\\web_metrics.py",
+      "type": "code",
+      "size": 17952,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app\\pubspec.yaml",
+      "type": "config",
+      "size": 1595,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app\\assets\\config\\app_config.json",
+      "type": "config",
+      "size": 795,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\analysis_options.yaml",
+      "type": "config",
+      "size": 1448,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\pubspec.yaml",
+      "type": "config",
+      "size": 1616,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\android\\app\\src\\main\\java\\io\\flutter\\plugins\\GeneratedPluginRegistrant.java",
+      "type": "code",
+      "size": 2130,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\android\\app\\src\\main\\kotlin\\com\\example\\mobile_app_new\\MainActivity.kt",
+      "type": "code",
+      "size": 133,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\assets\\config\\app_config.json",
+      "type": "config",
+      "size": 1399,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\ios\\Flutter\\ephemeral\\flutter_lldb_helper.py",
+      "type": "code",
+      "size": 1276,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\ios\\Runner\\AppDelegate.swift",
+      "type": "code",
+      "size": 404,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\ios\\Runner\\GeneratedPluginRegistrant.h",
+      "type": "code",
+      "size": 378,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\ios\\Runner\\Runner-Bridging-Header.h",
+      "type": "code",
+      "size": 39,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Contents.json",
+      "type": "config",
+      "size": 2641,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\Contents.json",
+      "type": "config",
+      "size": 414,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\ios\\RunnerTests\\RunnerTests.swift",
+      "type": "code",
+      "size": 297,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\linux\\flutter\\generated_plugin_registrant.h",
+      "type": "code",
+      "size": 303,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\linux\\runner\\my_application.h",
+      "type": "code",
+      "size": 406,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\macos\\Flutter\\GeneratedPluginRegistrant.swift",
+      "type": "code",
+      "size": 883,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\macos\\Runner\\AppDelegate.swift",
+      "type": "code",
+      "size": 324,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\macos\\Runner\\MainFlutterWindow.swift",
+      "type": "code",
+      "size": 403,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\macos\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Contents.json",
+      "type": "config",
+      "size": 1359,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\macos\\RunnerTests\\RunnerTests.swift",
+      "type": "code",
+      "size": 302,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\web\\manifest.json",
+      "type": "config",
+      "size": 959,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\windows\\flutter\\generated_plugin_registrant.h",
+      "type": "code",
+      "size": 302,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\windows\\runner\\flutter_window.cpp",
+      "type": "code",
+      "size": 2193,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\windows\\runner\\flutter_window.h",
+      "type": "code",
+      "size": 961,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\windows\\runner\\main.cpp",
+      "type": "code",
+      "size": 1310,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\windows\\runner\\resource.h",
+      "type": "code",
+      "size": 448,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\windows\\runner\\utils.cpp",
+      "type": "code",
+      "size": 1862,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\windows\\runner\\utils.h",
+      "type": "code",
+      "size": 691,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\windows\\runner\\win32_window.cpp",
+      "type": "code",
+      "size": 8822,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_new\\windows\\runner\\win32_window.h",
+      "type": "code",
+      "size": 3624,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\analysis_options.yaml",
+      "type": "config",
+      "size": 1448,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\pubspec.yaml",
+      "type": "config",
+      "size": 1658,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\android\\app\\src\\main\\java\\io\\flutter\\plugins\\GeneratedPluginRegistrant.java",
+      "type": "code",
+      "size": 2399,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\android\\app\\src\\main\\kotlin\\com\\stillme\\mobile\\MainActivity.kt",
+      "type": "code",
+      "size": 125,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\assets\\app_config.json",
+      "type": "config",
+      "size": 795,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\assets\\config\\app_config.dev.json",
+      "type": "config",
+      "size": 283,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\assets\\config\\app_config.json",
+      "type": "config",
+      "size": 171,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\assets\\config\\app_config.prod.json",
+      "type": "config",
+      "size": 276,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\ios\\Flutter\\ephemeral\\flutter_lldb_helper.py",
+      "type": "code",
+      "size": 1276,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\ios\\Runner\\AppDelegate.swift",
+      "type": "code",
+      "size": 404,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\ios\\Runner\\GeneratedPluginRegistrant.h",
+      "type": "code",
+      "size": 378,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\ios\\Runner\\Runner-Bridging-Header.h",
+      "type": "code",
+      "size": 39,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\ios\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Contents.json",
+      "type": "config",
+      "size": 2641,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\ios\\Runner\\Assets.xcassets\\LaunchImage.imageset\\Contents.json",
+      "type": "config",
+      "size": 414,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\ios\\RunnerTests\\RunnerTests.swift",
+      "type": "code",
+      "size": 297,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\linux\\flutter\\generated_plugin_registrant.h",
+      "type": "code",
+      "size": 303,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\linux\\runner\\my_application.h",
+      "type": "code",
+      "size": 406,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\macos\\Flutter\\GeneratedPluginRegistrant.swift",
+      "type": "code",
+      "size": 1009,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\macos\\Runner\\AppDelegate.swift",
+      "type": "code",
+      "size": 324,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\macos\\Runner\\MainFlutterWindow.swift",
+      "type": "code",
+      "size": 403,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\macos\\Runner\\Assets.xcassets\\AppIcon.appiconset\\Contents.json",
+      "type": "config",
+      "size": 1359,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\macos\\RunnerTests\\RunnerTests.swift",
+      "type": "code",
+      "size": 302,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\mobile_app_simple\\pubspec.yaml",
+      "type": "config",
+      "size": 1595,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\mobile_app_simple\\assets\\config\\app_config.json",
+      "type": "config",
+      "size": 795,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\web\\manifest.json",
+      "type": "config",
+      "size": 965,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\windows\\flutter\\generated_plugin_registrant.h",
+      "type": "code",
+      "size": 302,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\windows\\runner\\flutter_window.cpp",
+      "type": "code",
+      "size": 2193,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\windows\\runner\\flutter_window.h",
+      "type": "code",
+      "size": 961,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\windows\\runner\\main.cpp",
+      "type": "code",
+      "size": 1313,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\windows\\runner\\resource.h",
+      "type": "code",
+      "size": 448,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\windows\\runner\\utils.cpp",
+      "type": "code",
+      "size": 1862,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\windows\\runner\\utils.h",
+      "type": "code",
+      "size": 691,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\windows\\runner\\win32_window.cpp",
+      "type": "code",
+      "size": 8822,
+      "ref_count": 0
+    },
+    {
+      "id": "mobile_app_simple\\windows\\runner\\win32_window.h",
+      "type": "code",
+      "size": 3624,
+      "ref_count": 0
+    },
+    {
+      "id": "niche_radar\\collectors.py",
+      "type": "code",
+      "size": 19848,
+      "ref_count": 0
+    },
+    {
+      "id": "niche_radar\\feedback.py",
+      "type": "code",
+      "size": 18478,
+      "ref_count": 0
+    },
+    {
+      "id": "niche_radar\\playbook.py",
+      "type": "code",
+      "size": 28740,
+      "ref_count": 0
+    },
+    {
+      "id": "niche_radar\\scoring.py",
+      "type": "code",
+      "size": 20046,
+      "ref_count": 0
+    },
+    {
+      "id": "niche_radar\\__init__.py",
+      "type": "code",
+      "size": 1592,
+      "ref_count": 0
+    },
+    {
+      "id": "oi_adapter\\interpreter_controller.py",
+      "type": "code",
+      "size": 19089,
+      "ref_count": 0
+    },
+    {
+      "id": "oi_adapter\\__init__.py",
+      "type": "code",
+      "size": 0,
+      "ref_count": 0
+    },
+    {
+      "id": "packages\\package_info.json",
+      "type": "config",
+      "size": 350,
+      "ref_count": 0
+    },
+    {
+      "id": "policy\\tool_gate.py",
+      "type": "code",
+      "size": 17975,
+      "ref_count": 0
+    },
+    {
+      "id": "runtime\\file_policy.py",
+      "type": "code",
+      "size": 12880,
+      "ref_count": 0
+    },
+    {
+      "id": "runtime\\file_policy.ts",
+      "type": "code",
+      "size": 14811,
+      "ref_count": 0
+    },
+    {
+      "id": "runtime\\interaction_policy.py",
+      "type": "code",
+      "size": 8228,
+      "ref_count": 0
+    },
+    {
+      "id": "runtime\\interaction_policy.ts",
+      "type": "code",
+      "size": 8861,
+      "ref_count": 0
+    },
+    {
+      "id": "runtime\\policy_loader.py",
+      "type": "code",
+      "size": 4870,
+      "ref_count": 0
+    },
+    {
+      "id": "runtime\\skip_diagnose.py",
+      "type": "code",
+      "size": 12366,
+      "ref_count": 0
+    },
+    {
+      "id": "runtime\\skip_diagnose.ts",
+      "type": "code",
+      "size": 12536,
+      "ref_count": 0
+    },
+    {
+      "id": "scripts\\benchmark_router.py",
+      "type": "code",
+      "size": 23700,
+      "ref_count": 0
+    },
+    {
+      "id": "scripts\\calibrate_router.py",
+      "type": "code",
+      "size": 17452,
+      "ref_count": 0
+    },
+    {
+      "id": "scripts\\check_policy_compliance.py",
+      "type": "code",
+      "size": 5020,
+      "ref_count": 0
+    },
+    {
+      "id": "scripts\\debug_router.py",
+      "type": "code",
+      "size": 14032,
+      "ref_count": 0
+    },
+    {
+      "id": "scripts\\install_hooks.py",
+      "type": "code",
+      "size": 6960,
+      "ref_count": 0
+    },
+    {
+      "id": "scripts\\monitor_router.py",
+      "type": "code",
+      "size": 12562,
+      "ref_count": 0
+    },
+    {
+      "id": "scripts\\router.py",
+      "type": "code",
+      "size": 8739,
+      "ref_count": 0
+    },
+    {
+      "id": "scripts\\router_cli.py",
+      "type": "code",
+      "size": 14672,
+      "ref_count": 0
+    },
+    {
+      "id": "scripts\\router_dashboard.py",
+      "type": "code",
+      "size": 16896,
+      "ref_count": 0
+    },
+    {
+      "id": "scripts\\router_manager.py",
+      "type": "code",
+      "size": 17608,
+      "ref_count": 0
+    },
+    {
+      "id": "scripts\\router_tools.py",
+      "type": "code",
+      "size": 26424,
+      "ref_count": 0
+    },
+    {
+      "id": "scripts\\run_qa_suite.py",
+      "type": "code",
+      "size": 9343,
+      "ref_count": 0
+    },
+    {
+      "id": "scripts\\setup_qa_environment.py",
+      "type": "code",
+      "size": 7388,
+      "ref_count": 0
+    },
+    {
+      "id": "scripts\\validate_router.py",
+      "type": "code",
+      "size": 20059,
+      "ref_count": 0
+    },
+    {
+      "id": "security\\content_wrap.py",
+      "type": "code",
+      "size": 18250,
+      "ref_count": 0
+    },
+    {
+      "id": "specs\\conversational_core_v1.json",
+      "type": "config",
+      "size": 1272,
+      "ref_count": 0
+    },
+    {
+      "id": "specs\\layered_memory_v1.json",
+      "type": "config",
+      "size": 1728,
+      "ref_count": 0
+    },
+    {
+      "id": "specs\\smartgpt_api_manager_v1.json",
+      "type": "config",
+      "size": 1895,
+      "ref_count": 0
+    },
+    {
+      "id": "specs\\token_optimizer_v1.json",
+      "type": "config",
+      "size": 1032,
+      "ref_count": 0
+    },
+    {
+      "id": "src\\hooks\\useChat.js",
+      "type": "code",
+      "size": 1200,
+      "ref_count": 0
+    },
+    {
+      "id": "src\\hooks\\useGateway.js",
+      "type": "code",
+      "size": 927,
+      "ref_count": 0
+    },
+    {
+      "id": "src\\hooks\\useTheme.js",
+      "type": "code",
+      "size": 788,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\framework.py",
+      "type": "code",
+      "size": 47881,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\__init__.py",
+      "type": "code",
+      "size": 522,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\adapters\\gpt5_client.py",
+      "type": "code",
+      "size": 2398,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\adapters\\ollama_client.py",
+      "type": "code",
+      "size": 3435,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\adapters\\__init__.py",
+      "type": "code",
+      "size": 0,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\common\\config.py",
+      "type": "code",
+      "size": 11297,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\common\\errors.py",
+      "type": "code",
+      "size": 14558,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\common\\http.py",
+      "type": "code",
+      "size": 17418,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\common\\io.py",
+      "type": "code",
+      "size": 22750,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\common\\logging.py",
+      "type": "code",
+      "size": 13199,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\common\\retry.py",
+      "type": "code",
+      "size": 16096,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\common\\templates.py",
+      "type": "code",
+      "size": 21245,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\common\\validation.py",
+      "type": "code",
+      "size": 25710,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\common\\__init__.py",
+      "type": "code",
+      "size": 192,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\config\\content_filter_rules.json",
+      "type": "config",
+      "size": 1015,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\config\\__init__.py",
+      "type": "code",
+      "size": 235,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\advanced_visualization.py",
+      "type": "code",
+      "size": 34117,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\agent_dev.py",
+      "type": "code",
+      "size": 105,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\agent_dev_bridge.py",
+      "type": "code",
+      "size": 1296,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\ai_manager.py",
+      "type": "code",
+      "size": 35769,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\ai_plan_schema.py",
+      "type": "code",
+      "size": 1416,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\autonomous_management_system.py",
+      "type": "code",
+      "size": 44248,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\billing_foundation.py",
+      "type": "code",
+      "size": 15653,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\bug_memory.py",
+      "type": "code",
+      "size": 3255,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\config.py",
+      "type": "code",
+      "size": 367,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\config_defaults.py",
+      "type": "code",
+      "size": 906,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\conscience_core_v1.py",
+      "type": "code",
+      "size": 5713,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\controller.py",
+      "type": "code",
+      "size": 12477,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\core_dashboard.py",
+      "type": "code",
+      "size": 39102,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\core_metrics_collector.py",
+      "type": "code",
+      "size": 26960,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\dependency_resolver.py",
+      "type": "code",
+      "size": 18551,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\ecosystem_discovery.py",
+      "type": "code",
+      "size": 22228,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\enhanced_executor.py",
+      "type": "code",
+      "size": 18707,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\enterprise_readiness.py",
+      "type": "code",
+      "size": 15411,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\error_recovery.py",
+      "type": "code",
+      "size": 15414,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\essential_value_metrics.py",
+      "type": "code",
+      "size": 30184,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\executor.py",
+      "type": "code",
+      "size": 13082,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\financial_validation_engine.py",
+      "type": "code",
+      "size": 16016,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\git_manager.py",
+      "type": "code",
+      "size": 2128,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\integration_bridge.py",
+      "type": "code",
+      "size": 27218,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\intelligent_pricing_engine.py",
+      "type": "code",
+      "size": 44539,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\learning_optimization_engine.py",
+      "type": "code",
+      "size": 46508,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\logging_utils.py",
+      "type": "code",
+      "size": 5208,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\memory_security_integration.py",
+      "type": "code",
+      "size": 30968,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\metrics.py",
+      "type": "code",
+      "size": 6746,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\module_governance_system.py",
+      "type": "code",
+      "size": 40739,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\multi_dimensional_analysis.py",
+      "type": "code",
+      "size": 40292,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\performance_optimizer.py",
+      "type": "code",
+      "size": 19698,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\planner.py",
+      "type": "code",
+      "size": 22954,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\plan_types.py",
+      "type": "code",
+      "size": 1313,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\policy_map.json",
+      "type": "config",
+      "size": 1838,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\policy_templates.py",
+      "type": "code",
+      "size": 6383,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\predictive_capabilities.py",
+      "type": "code",
+      "size": 31790,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\provider_router.py",
+      "type": "code",
+      "size": 5836,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\reflection_controller.py",
+      "type": "code",
+      "size": 22310,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\reflection_scorer.py",
+      "type": "code",
+      "size": 19897,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\safety_guard.py",
+      "type": "code",
+      "size": 17804,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\safe_runner.py",
+      "type": "code",
+      "size": 711,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\secrecy_filter.py",
+      "type": "code",
+      "size": 18443,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\security_compliance_system.py",
+      "type": "code",
+      "size": 47226,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\security_middleware.py",
+      "type": "code",
+      "size": 12745,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\security_remediation.py",
+      "type": "code",
+      "size": 16646,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\sul.py",
+      "type": "code",
+      "size": 8417,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\supervisor.py",
+      "type": "code",
+      "size": 10755,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\supervisor_cli.py",
+      "type": "code",
+      "size": 3370,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\ui_state.py",
+      "type": "code",
+      "size": 727,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\usage_analytics_engine.py",
+      "type": "code",
+      "size": 47385,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\verifier.py",
+      "type": "code",
+      "size": 12676,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\__init__.py",
+      "type": "code",
+      "size": 317,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\__main__.py",
+      "type": "code",
+      "size": 4022,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\advanced_security\\blue_team_engine.py",
+      "type": "code",
+      "size": 32990,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\advanced_security\\experience_memory_integration.py",
+      "type": "code",
+      "size": 27378,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\advanced_security\\red_team_engine.py",
+      "type": "code",
+      "size": 43636,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\advanced_security\\safe_attack_simulator.py",
+      "type": "code",
+      "size": 41668,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\advanced_security\\security_orchestrator.py",
+      "type": "code",
+      "size": 23126,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\advanced_security\\__init__.py",
+      "type": "code",
+      "size": 1268,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\cli\\main.py",
+      "type": "code",
+      "size": 6084,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\cli\\__init__.py",
+      "type": "code",
+      "size": 149,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\cli\\commands\\agent.py",
+      "type": "code",
+      "size": 16856,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\cli\\commands\\config.py",
+      "type": "code",
+      "size": 11482,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\cli\\commands\\observability.py",
+      "type": "code",
+      "size": 21304,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\cli\\commands\\quality.py",
+      "type": "code",
+      "size": 13937,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\cli\\commands\\router.py",
+      "type": "code",
+      "size": 26975,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\cli\\commands\\status.py",
+      "type": "code",
+      "size": 17358,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\cli\\commands\\__init__.py",
+      "type": "code",
+      "size": 180,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\decision_making\\decision_engine.py",
+      "type": "code",
+      "size": 33469,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\decision_making\\ethical_guardrails.py",
+      "type": "code",
+      "size": 24480,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\decision_making\\__init__.py",
+      "type": "code",
+      "size": 1055,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\legacy_agentdev\\agentdev_brain.py",
+      "type": "code",
+      "size": 16750,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\legacy_agentdev\\agentdev_real.py",
+      "type": "code",
+      "size": 11189,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\legacy_agentdev\\agentdev_super.py",
+      "type": "code",
+      "size": 18889,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\legacy_agentdev\\__init__.py",
+      "type": "code",
+      "size": 1030,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\observability\\dashboard.py",
+      "type": "code",
+      "size": 24509,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\observability\\health.py",
+      "type": "code",
+      "size": 20381,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\observability\\logger.py",
+      "type": "code",
+      "size": 12545,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\observability\\metrics.py",
+      "type": "code",
+      "size": 15053,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\observability\\tracer.py",
+      "type": "code",
+      "size": 18638,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\observability\\__init__.py",
+      "type": "code",
+      "size": 742,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\quality\\agentdev_integration.py",
+      "type": "code",
+      "size": 16531,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\quality\\auto_fixer.py",
+      "type": "code",
+      "size": 18624,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\quality\\code_quality_enforcer.py",
+      "type": "code",
+      "size": 22468,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\quality\\quality_governor.py",
+      "type": "code",
+      "size": 26830,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\quality\\quality_metrics.py",
+      "type": "code",
+      "size": 19768,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\quality\\__init__.py",
+      "type": "code",
+      "size": 398,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\risk\\risk_assessor.py",
+      "type": "code",
+      "size": 26750,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\risk\\__init__.py",
+      "type": "code",
+      "size": 809,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\router\\agent_coordinator.py",
+      "type": "code",
+      "size": 46479,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\router\\intelligent_router.py",
+      "type": "code",
+      "size": 32651,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\router\\learning_engine.py",
+      "type": "code",
+      "size": 17146,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\router\\memory_manager.py",
+      "type": "code",
+      "size": 24594,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\router\\task_decomposer.py",
+      "type": "code",
+      "size": 44738,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\router\\__init__.py",
+      "type": "code",
+      "size": 1024,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\security\\attack_simulator.py",
+      "type": "code",
+      "size": 22644,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\security\\security_scanner.py",
+      "type": "code",
+      "size": 19056,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\security\\__init__.py",
+      "type": "code",
+      "size": 636,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\self_learning\\experience_memory.py",
+      "type": "code",
+      "size": 32948,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\self_learning\\__init__.py",
+      "type": "code",
+      "size": 910,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\validation\\enhanced_validation.py",
+      "type": "code",
+      "size": 35444,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\validation\\final_validation_system.py",
+      "type": "code",
+      "size": 49390,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\validation\\validation_framework.py",
+      "type": "code",
+      "size": 42722,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\core\\validation\\__init__.py",
+      "type": "code",
+      "size": 690,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\api_provider_manager.py",
+      "type": "code",
+      "size": 10397,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\api_provider_manager_old.py",
+      "type": "code",
+      "size": 40316,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\api_provider_manager_simple.py",
+      "type": "code",
+      "size": 10397,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\automated_scheduler.py",
+      "type": "code",
+      "size": 19190,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\communication_style_manager.py",
+      "type": "code",
+      "size": 8645,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\content_integrity_filter.py",
+      "type": "code",
+      "size": 33413,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\content_integrity_filter_old.py",
+      "type": "code",
+      "size": 35136,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\conversational_core_v1.py",
+      "type": "code",
+      "size": 6546,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\daily_learning_manager.py",
+      "type": "code",
+      "size": 29694,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\emotionsense_v1.py",
+      "type": "code",
+      "size": 24019,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\ethical_core_system_v1.py",
+      "type": "code",
+      "size": 28441,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\example_module.py",
+      "type": "code",
+      "size": 51,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\framework_metrics.py",
+      "type": "code",
+      "size": 1808,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\identity_handler.py",
+      "type": "code",
+      "size": 14808,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\input_sketcher.py",
+      "type": "code",
+      "size": 5204,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\layered_memory_v1.py",
+      "type": "code",
+      "size": 10928,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\layered_memory_v1_old.py",
+      "type": "code",
+      "size": 28388,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\layered_memory_v1_simple.py",
+      "type": "code",
+      "size": 10928,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\market_intel.py",
+      "type": "code",
+      "size": 49858,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\persona_morph.py",
+      "type": "code",
+      "size": 22511,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\persona_morph_simple.py",
+      "type": "code",
+      "size": 19980,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\prediction_engine.py",
+      "type": "code",
+      "size": 20964,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\secure_memory_manager.py",
+      "type": "code",
+      "size": 15183,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\self_improvement_manager.py",
+      "type": "code",
+      "size": 37644,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\stillme_core.py",
+      "type": "code",
+      "size": 1059,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\telemetry.py",
+      "type": "code",
+      "size": 2657,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\token_optimizer_v1.py",
+      "type": "code",
+      "size": 10376,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\__init__.py",
+      "type": "code",
+      "size": 1089,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\backup_legacy\\conversational_core.py",
+      "type": "code",
+      "size": 3550,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\backup_legacy\\layered_memory.py",
+      "type": "code",
+      "size": 4687,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\backup_legacy\\smart_g_p_t__a_p_i__manager.py",
+      "type": "code",
+      "size": 3504,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\modules\\backup_legacy\\token_optimizer.py",
+      "type": "code",
+      "size": 2959,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_core\\tests\\__init__.py",
+      "type": "code",
+      "size": 191,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_ethical_core\\ethics_checker.py",
+      "type": "code",
+      "size": 842,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_ethical_core\\stillme_framework.py",
+      "type": "code",
+      "size": 224,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_ethical_core\\__init__.py",
+      "type": "code",
+      "size": 0,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\desktop\\package-lock.json",
+      "type": "config",
+      "size": 829364,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\desktop\\package.json",
+      "type": "config",
+      "size": 2580,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\desktop\\public\\electron.js",
+      "type": "code",
+      "size": 9220,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\gateway\\cors_config.py",
+      "type": "code",
+      "size": 4670,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\gateway\\dev_gateway.py",
+      "type": "code",
+      "size": 10239,
+      "ref_count": 0
+    },
+    {
+      "id": "stillme_platform\\gateway\\main.py",
+      "type": "code",
+      "size": 9022,
+      "ref_count": 0
+    }
+  ],
+  "edges": [],
+  "metadata": {
+    "generated_at": "2025-09-23T10:34:31.593199",
+    "total_files": 729,
+    "mode": "primary"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "mode": "primary",
+  "total_files": 729,
+  "total_size": 8879081,
+  "by_type": {
+    "doc": 87,
+    "code": 406,
+    "config": 82,
+    "other": 39,
+    "test": 115
+  },
+  "by_size_range": {
+    "small": 160,
+    "medium": 569,
+    "large": 0,
+    "huge": 0
+  },
+  "unreferenced_files": 729,
+  "binary_files": 0
+}

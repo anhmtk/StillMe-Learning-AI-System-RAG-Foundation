@@ -1,0 +1,97 @@
+{
+  "test_suite": "Fuzz & Security",
+  "timestamp": "2025-01-08T15:18:35Z",
+  "overall_pass_rate": 100.0,
+  "detailed_pass_rate": 99.1,
+  "passed_tests": 7,
+  "total_tests": 7,
+  "total_passed": 106,
+  "total_cases": 107,
+  "duration": 3.77,
+  "success": true,
+  "test_results": [
+    {
+      "test": "unicode_fuzzing",
+      "passed": 50,
+      "total": 50,
+      "pass_rate": 100.0,
+      "description": "Unicode fuzzing with various character sets using Hypothesis"
+    },
+    {
+      "test": "emoji_handling",
+      "passed": 7,
+      "total": 7,
+      "pass_rate": 100.0,
+      "description": "Emoji and special character handling"
+    },
+    {
+      "test": "sql_injection_detection",
+      "passed": 11,
+      "total": 12,
+      "pass_rate": 91.7,
+      "description": "SQL injection attack detection"
+    },
+    {
+      "test": "xss_detection",
+      "passed": 18,
+      "total": 18,
+      "pass_rate": 100.0,
+      "description": "XSS attack detection"
+    },
+    {
+      "test": "large_input_handling",
+      "passed": 4,
+      "total": 4,
+      "pass_rate": 100.0,
+      "description": "Large input handling and memory safety"
+    },
+    {
+      "test": "pathological_inputs",
+      "passed": 13,
+      "total": 13,
+      "pass_rate": 100.0,
+      "description": "Pathological input patterns and edge cases"
+    },
+    {
+      "test": "memory_safety",
+      "passed": 3,
+      "total": 3,
+      "pass_rate": 100.0,
+      "description": "Memory safety and leak detection"
+    }
+  ],
+  "features": [
+    "Unicode fuzzing with Hypothesis property-based testing",
+    "Emoji and special character handling",
+    "SQL injection detection with 22 patterns",
+    "XSS detection with comprehensive attack vectors",
+    "Large input handling (up to 1MB)",
+    "Pathological input patterns (nested structures, zero-width chars)",
+    "Memory safety and leak detection",
+    "Performance monitoring (< 1s for large inputs)"
+  ],
+  "security_coverage": [
+    "SQL injection attacks (basic, advanced, blind, time-based)",
+    "XSS attacks (script tags, event handlers, encoded payloads)",
+    "Unicode attacks (bidirectional override, zero-width chars)",
+    "Pathological inputs (deep nesting, repeated patterns)",
+    "Memory exhaustion attacks",
+    "Performance degradation attacks"
+  ],
+  "performance_metrics": {
+    "unicode_fuzzing": "50 tests in < 1s",
+    "emoji_handling": "7 tests in < 0.1s",
+    "sql_injection_detection": "12 tests in < 0.5s",
+    "xss_detection": "18 tests in < 0.5s",
+    "large_input_handling": "1MB input in < 1s",
+    "pathological_inputs": "13 tests in < 0.5s",
+    "memory_safety": "3 tests in < 0.1s"
+  },
+  "detectors_used": [
+    "SQLiDetector",
+    "XSSDetector", 
+    "UnicodeDetector",
+    "JSONDetector",
+    "NestedCodeBlockDetector"
+  ]
+}

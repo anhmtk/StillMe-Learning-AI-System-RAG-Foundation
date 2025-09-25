@@ -1,0 +1,102 @@
+{
+  "test_suite": "Proactive Suggestion Abuse Guard",
+  "timestamp": "2025-01-08T14:10:00Z",
+  "overall_pass_rate": 71.4,
+  "detailed_pass_rate": 71.4,
+  "passed_tests": 5,
+  "total_tests": 7,
+  "total_passed": 5,
+  "total_cases": 7,
+  "duration": 1.23,
+  "success": false,
+  "test_results": [
+    {
+      "test": "keyword_stuffing_detection",
+      "passed": 1,
+      "total": 1,
+      "pass_rate": 100.0,
+      "description": "Keyword stuffing detection with 100% accuracy"
+    },
+    {
+      "test": "emoji_spam_detection",
+      "passed": 1,
+      "total": 1,
+      "pass_rate": 100.0,
+      "description": "Emoji spam detection with 100% accuracy"
+    },
+    {
+      "test": "clear_content_detection",
+      "passed": 1,
+      "total": 1,
+      "pass_rate": 100.0,
+      "description": "Clear content detection with 100% accuracy"
+    },
+    {
+      "test": "rate_limiting",
+      "passed": 1,
+      "total": 1,
+      "pass_rate": 100.0,
+      "description": "Rate limiting with 100% accuracy"
+    },
+    {
+      "test": "performance",
+      "passed": 1,
+      "total": 1,
+      "pass_rate": 100.0,
+      "description": "Performance testing with 0.32ms average latency"
+    },
+    {
+      "test": "slang_detection",
+      "passed": 0,
+      "total": 1,
+      "pass_rate": 70.0,
+      "description": "Slang detection with 70% accuracy - needs improvement"
+    },
+    {
+      "test": "vague_detection",
+      "passed": 0,
+      "total": 1,
+      "pass_rate": 80.0,
+      "description": "Vague detection with 80% accuracy - needs improvement"
+    }
+  ],
+  "features": [
+    "Multi-factor scoring with 6 heuristics",
+    "Rate limiting (2 suggestions/30s per session)",
+    "Performance: 0.32ms average latency",
+    "Production ready for 5/7 test categories",
+    "Keyword stuffing 100% accuracy",
+    "Emoji spam 100% accuracy",
+    "Clear content 100% accuracy"
+  ],
+  "abuse_guard_capabilities": [
+    "N-gram repetition scoring",
+    "Slang lexicon scoring",
+    "Entropy check",
+    "Stop-word density analysis",
+    "Emoji spam detection",
+    "Keyword stuffing detection",
+    "Session-based rate limiting",
+    "Real-time performance monitoring"
+  ],
+  "performance_metrics": {
+    "average_latency": "0.32ms",
+    "target_latency": "< 10ms",
+    "suggestion_threshold": "0.7",
+    "abuse_threshold": "0.3",
+    "rate_limit_window": "30 seconds",
+    "max_suggestions_per_window": "2"
+  },
+  "improvement_areas": [
+    "Slang detection accuracy (70% -> 90%+)",
+    "Vague detection accuracy (80% -> 90%+)",
+    "Overall pass rate (71.4% -> 90%+)"
+  ],
+  "open_source_ready": {
+    "test_reports": "Complete and preserved",
+    "documentation": "Full technical documentation available",
+    "performance_benchmarks": "Comprehensive metrics available",
+    "quality_evidence": "Partial SEAL-GRADE testing standards met",
+    "production_deployment": "Functional but needs refinement"
+  }
+}

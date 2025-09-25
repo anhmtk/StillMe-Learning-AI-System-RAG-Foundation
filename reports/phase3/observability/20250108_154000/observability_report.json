@@ -1,0 +1,116 @@
+{
+  "test_suite": "Observability Export",
+  "timestamp": "2025-01-08T15:40:00Z",
+  "overall_pass_rate": 100.0,
+  "detailed_pass_rate": 100.0,
+  "passed_tests": 6,
+  "total_tests": 6,
+  "total_passed": 9,
+  "total_cases": 9,
+  "duration": 6.23,
+  "success": true,
+  "test_results": [
+    {
+      "test": "metrics_endpoint",
+      "passed": 1,
+      "total": 1,
+      "pass_rate": 100.0,
+      "description": "Prometheus metrics endpoint availability and format validation"
+    },
+    {
+      "test": "health_endpoint",
+      "passed": 1,
+      "total": 1,
+      "pass_rate": 100.0,
+      "description": "Health check endpoint availability and JSON format validation"
+    },
+    {
+      "test": "metrics_collection",
+      "passed": 4,
+      "total": 4,
+      "pass_rate": 100.0,
+      "description": "Metrics collection and aggregation for requests, clarifications, errors, and detectors"
+    },
+    {
+      "test": "grafana_dashboard",
+      "passed": 1,
+      "total": 1,
+      "pass_rate": 100.0,
+      "description": "Grafana dashboard configuration validation with 9 panels"
+    },
+    {
+      "test": "alert_rules",
+      "passed": 1,
+      "total": 1,
+      "pass_rate": 100.0,
+      "description": "Prometheus alert rules configuration with 11 alert rules"
+    },
+    {
+      "test": "metrics_format",
+      "passed": 1,
+      "total": 1,
+      "pass_rate": 100.0,
+      "description": "Prometheus metrics format compliance validation"
+    }
+  ],
+  "features": [
+    "Prometheus metrics server with HTTP endpoints",
+    "Health check endpoint with system status",
+    "Comprehensive metrics collection and aggregation",
+    "Grafana dashboard with 9 monitoring panels",
+    "Alert rules for monitoring and alerting",
+    "System metrics monitoring (CPU, memory, uptime)",
+    "Prometheus format compliance",
+    "Real-time metrics export"
+  ],
+  "observability_capabilities": [
+    "Request metrics (total, duration, buckets)",
+    "Clarification trigger metrics by type",
+    "Error metrics by type",
+    "Detector hits metrics by type",
+    "System metrics (uptime, memory, CPU)",
+    "Health check endpoint",
+    "Prometheus metrics export",
+    "Grafana dashboard integration",
+    "Alert rules for monitoring"
+  ],
+  "monitoring_endpoints": [
+    "GET /metrics - Prometheus metrics export",
+    "GET /health - Health check with system status"
+  ],
+  "grafana_dashboard_panels": [
+    "Request Rate (stat panel)",
+    "Request Duration p95 (stat panel)",
+    "Error Rate (stat panel)",
+    "Clarification Triggers (stat panel)",
+    "Request Duration Over Time (timeseries)",
+    "Clarification Triggers by Type (piechart)",
+    "Detector Hits by Type (bargauge)",
+    "System Resources (timeseries)",
+    "Error Rate Over Time (timeseries)"
+  ],
+  "alert_rules": [
+    "HighErrorRate - Error rate > 2% for 5 minutes",
+    "HighP99Latency - P99 latency > 1.5s for 5 minutes",
+    "HighP95Latency - P95 latency > 1.0s for 5 minutes",
+    "LowRequestRate - Request rate < 1 req/s for 10 minutes",
+    "HighClarificationRate - Clarification rate > 20/sec for 5 minutes",
+    "HighMemoryUsage - Memory usage > 500MB for 5 minutes",
+    "HighCPUUsage - CPU usage > 80% for 5 minutes",
+    "ServiceDown - Service not responding for 1 minute",
+    "DetectorFailure - No detector hits despite active requests",
+    "UnusualDetectorPattern - High security detector hits",
+    "SystemUptime - System recently restarted"
+  ],
+  "metrics_exported": [
+    "requests_total - Total number of requests",
+    "requests_duration_seconds - Total request duration",
+    "requests_duration_bucket - Request duration histogram buckets",
+    "clarify_trigger_total - Total clarification triggers by type",
+    "errors_total - Total errors by type",
+    "detector_hits_total - Total detector hits by type",
+    "system_uptime_seconds - System uptime in seconds",
+    "system_memory_usage_bytes - System memory usage in bytes",
+    "system_cpu_usage_percent - System CPU usage percentage"
+  ]
+}
