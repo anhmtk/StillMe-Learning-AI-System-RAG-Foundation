@@ -1,0 +1,53 @@
+{
+  "total_tests": 7,
+  "passed_tests": 7,
+  "failed_tests": 0,
+  "pass_rate": 100.0,
+  "precision": 1.0,
+  "recall": 1.0,
+  "results": [
+    {
+      "name": "Slang Detection",
+      "passed": true,
+      "execution_time": 0.0062067508697509766
+    },
+    {
+      "name": "Keyword Stuffing Detection",
+      "passed": true,
+      "execution_time": 0.0015938282012939453
+    },
+    {
+      "name": "Emoji Spam Detection",
+      "passed": true,
+      "execution_time": 0.0
+    },
+    {
+      "name": "Vague Detection",
+      "passed": true,
+      "execution_time": 0.001529693603515625
+    },
+    {
+      "name": "Clear Content Detection",
+      "passed": true,
+      "execution_time": 0.002125263214111328
+    },
+    {
+      "name": "Rate Limiting",
+      "passed": true,
+      "execution_time": 0.0
+    },
+    {
+      "name": "Performance",
+      "passed": true,
+      "execution_time": 0.0020160675048828125
+    }
+  ],
+  "guard_stats": {
+    "total_requests": 80,
+    "suggestions_allowed": 30,
+    "suggestions_blocked": 50,
+    "rate_limits_hit": 0,
+    "average_latency_ms": 0.21111071109771729,
+    "suggestion_rate": 0.375
+  }
+}

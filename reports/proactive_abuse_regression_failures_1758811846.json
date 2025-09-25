@@ -1,0 +1,72 @@
+[
+  {
+    "input": "vl thật",
+    "expected": false,
+    "actual": true,
+    "confidence": 0.9975503759006108,
+    "abuse_score": 0.002449624099389147,
+    "reasoning": "Text quality is good (confidence: 1.00, abuse score: 0.00)",
+    "category": "mixed_lang",
+    "latency_ms": 0.0
+  },
+  {
+    "input": "đẹp vl",
+    "expected": false,
+    "actual": true,
+    "confidence": 1.0,
+    "abuse_score": 0.0,
+    "reasoning": "Text quality is good (confidence: 1.00, abuse score: 0.00)",
+    "category": "mixed_lang",
+    "latency_ms": 0.0
+  },
+  {
+    "input": "How can I implement a binary search algorithm in Python?",
+    "expected": true,
+    "actual": false,
+    "confidence": 0.0,
+    "abuse_score": 1.0,
+    "reasoning": "Rate limit exceeded",
+    "category": "clear",
+    "latency_ms": 0.0
+  },
+  {
+    "input": "What are the best practices for error handling in JavaScript?",
+    "expected": true,
+    "actual": false,
+    "confidence": 0.0,
+    "abuse_score": 1.0,
+    "reasoning": "Rate limit exceeded",
+    "category": "clear",
+    "latency_ms": 0.0
+  },
+  {
+    "input": "Can you explain the difference between REST and GraphQL APIs?",
+    "expected": true,
+    "actual": false,
+    "confidence": 0.0,
+    "abuse_score": 1.0,
+    "reasoning": "Rate limit exceeded",
+    "category": "clear",
+    "latency_ms": 0.0
+  },
+  {
+    "input": "How do I optimize database queries for better performance?",
+    "expected": true,
+    "actual": false,
+    "confidence": 0.0,
+    "abuse_score": 1.0,
+    "reasoning": "Rate limit exceeded",
+    "category": "clear",
+    "latency_ms": 0.0
+  },
+  {
+    "input": "What is the most efficient way to sort a large dataset?",
+    "expected": true,
+    "actual": false,
+    "confidence": 0.0,
+    "abuse_score": 1.0,
+    "reasoning": "Rate limit exceeded",
+    "category": "clear",
+    "latency_ms": 0.0
+  }
+]

@@ -1,0 +1,28 @@
+﻿{
+    "metrics":  {
+                    "clarification_success_rate":  {
+                                                       "values":  {
+                                                                      "rate":  0.95
+                                                                  }
+                                                   },
+                    "http_reqs":  {
+                                      "values":  {
+                                                     "count":  10000,
+                                                     "rate":  250
+                                                 }
+                                  },
+                    "http_req_duration":  {
+                                              "values":  {
+                                                             "p50":  200,
+                                                             "p99":  800,
+                                                             "p95":  450,
+                                                             "avg":  250
+                                                         }
+                                          },
+                    "http_req_failed":  {
+                                            "values":  {
+                                                           "rate":  0.005
+                                                       }
+                                        }
+                }
+}

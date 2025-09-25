@@ -1,0 +1,12 @@
+[
+  {
+    "input": "what's wrong with this?",
+    "expected": false,
+    "actual": true,
+    "confidence": 0.9201971177482222,
+    "abuse_score": 0.07980288225177778,
+    "reasoning": "Text quality is good (confidence: 0.92, abuse score: 0.08)",
+    "category": "context_vague",
+    "latency_ms": 0.0
+  }
+]

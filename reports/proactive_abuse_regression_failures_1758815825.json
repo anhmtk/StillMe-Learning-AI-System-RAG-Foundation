@@ -1,0 +1,22 @@
+[
+  {
+    "input": "what's wrong with this?",
+    "expected": false,
+    "actual": true,
+    "confidence": 0.9201971177482222,
+    "abuse_score": 0.07980288225177778,
+    "reasoning": "Text quality is good (confidence: 0.92, abuse score: 0.08)",
+    "category": "context_vague",
+    "latency_ms": 0.0
+  },
+  {
+    "input": "cải thiện nó",
+    "expected": false,
+    "actual": true,
+    "confidence": 0.9973197315178594,
+    "abuse_score": 0.002680268482140691,
+    "reasoning": "Text quality is good (confidence: 1.00, abuse score: 0.00)",
+    "category": "mixed_vague",
+    "latency_ms": 0.9999275207519531
+  }
+]

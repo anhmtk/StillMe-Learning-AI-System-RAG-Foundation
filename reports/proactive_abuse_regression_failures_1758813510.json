@@ -1,0 +1,132 @@
+[
+  {
+    "input": "It's working tbh",
+    "expected": false,
+    "actual": true,
+    "confidence": 0.8979613309799034,
+    "abuse_score": 0.10203866902009659,
+    "reasoning": "Text quality is good (confidence: 0.90, abuse score: 0.10)",
+    "category": "end_slang",
+    "latency_ms": 0.0
+  },
+  {
+    "input": "what's wrong with this?",
+    "expected": false,
+    "actual": true,
+    "confidence": 0.9201971177482222,
+    "abuse_score": 0.07980288225177778,
+    "reasoning": "Text quality is good (confidence: 0.92, abuse score: 0.08)",
+    "category": "context_vague",
+    "latency_ms": 0.0
+  },
+  {
+    "input": "what do you think about this?",
+    "expected": false,
+    "actual": true,
+    "confidence": 0.8600137051625224,
+    "abuse_score": 0.13998629483747763,
+    "reasoning": "Text quality is good (confidence: 0.86, abuse score: 0.14)",
+    "category": "context_vague",
+    "latency_ms": 0.0
+  },
+  {
+    "input": "how should I handle this?",
+    "expected": false,
+    "actual": true,
+    "confidence": 0.8746551152585244,
+    "abuse_score": 0.12534488474147568,
+    "reasoning": "Text quality is good (confidence: 0.87, abuse score: 0.13)",
+    "category": "context_vague",
+    "latency_ms": 0.0
+  },
+  {
+    "input": "optimize the code",
+    "expected": false,
+    "actual": true,
+    "confidence": 0.896466001037408,
+    "abuse_score": 0.10353399896259195,
+    "reasoning": "Text quality is good (confidence: 0.90, abuse score: 0.10)",
+    "category": "borderline_vague",
+    "latency_ms": 15.72418212890625
+  },
+  {
+    "input": "fix the bug",
+    "expected": false,
+    "actual": true,
+    "confidence": 0.8986659958673865,
+    "abuse_score": 0.1013340041326135,
+    "reasoning": "Text quality is good (confidence: 0.90, abuse score: 0.10)",
+    "category": "borderline_vague",
+    "latency_ms": 0.0
+  },
+  {
+    "input": "fix the issue",
+    "expected": false,
+    "actual": true,
+    "confidence": 0.8973226527868255,
+    "abuse_score": 0.10267734721317441,
+    "reasoning": "Text quality is good (confidence: 0.90, abuse score: 0.10)",
+    "category": "borderline_vague",
+    "latency_ms": 0.0
+  },
+  {
+    "input": "làm sao để fix",
+    "expected": false,
+    "actual": true,
+    "confidence": 0.9967296059519989,
+    "abuse_score": 0.00327039404800108,
+    "reasoning": "Text quality is good (confidence: 1.00, abuse score: 0.00)",
+    "category": "mixed_vague",
+    "latency_ms": 0.0
+  },
+  {
+    "input": "giúp tôi với cái này",
+    "expected": false,
+    "actual": true,
+    "confidence": 0.9925032776556595,
+    "abuse_score": 0.007496722344340557,
+    "reasoning": "Text quality is good (confidence: 0.99, abuse score: 0.01)",
+    "category": "mixed_vague",
+    "latency_ms": 0.0
+  },
+  {
+    "input": "sửa cái này đi",
+    "expected": false,
+    "actual": true,
+    "confidence": 0.996110093337444,
+    "abuse_score": 0.0038899066625559644,
+    "reasoning": "Text quality is good (confidence: 1.00, abuse score: 0.00)",
+    "category": "mixed_vague",
+    "latency_ms": 0.0
+  },
+  {
+    "input": "cải thiện nó",
+    "expected": false,
+    "actual": true,
+    "confidence": 0.9973197315178594,
+    "abuse_score": 0.002680268482140691,
+    "reasoning": "Text quality is good (confidence: 1.00, abuse score: 0.00)",
+    "category": "mixed_vague",
+    "latency_ms": 0.0
+  },
+  {
+    "input": "@#$%^&*()",
+    "expected": false,
+    "actual": true,
+    "confidence": 1.0,
+    "abuse_score": 0.0,
+    "reasoning": "Text quality is good (confidence: 1.00, abuse score: 0.00)",
+    "category": "special_chars",
+    "latency_ms": 0.0
+  },
+  {
+    "input": "!@#$%^&*()",
+    "expected": false,
+    "actual": true,
+    "confidence": 1.0,
+    "abuse_score": 0.0,
+    "reasoning": "Text quality is good (confidence: 1.00, abuse score: 0.00)",
+    "category": "special_chars",
+    "latency_ms": 0.0
+  }
+]
