@@ -1,0 +1,196 @@
+{
+  "test_suite": "Proactive Suggestion Abuse Guard",
+  "timestamp": "2025-01-08T21:10:00Z",
+  "overall_pass_rate": 71.4,
+  "failed_tests": 2,
+  "total_tests": 7,
+  "failure_details": {
+    "slang_detection": {
+      "pass_rate": 70.0,
+      "passed": 7,
+      "failed": 3,
+      "total": 10,
+      "failures": [
+        {
+          "input": "lol that's funny af",
+          "expected": {
+            "should_suggest": false,
+            "reasoning": "Block slang content"
+          },
+          "actual": {
+            "should_suggest": true,
+            "confidence": 0.755,
+            "abuse_score": 0.245,
+            "reasoning": "Text quality is good (confidence: 0.76, abuse score: 0.24)"
+          },
+          "analysis": {
+            "ngram_repetition": 0.0,
+            "slang_score": 0.0,
+            "entropy_score": 0.15,
+            "stopword_density": 0.0,
+            "emoji_count": 0,
+            "keyword_stuffing": 0.0,
+            "abuse_score": 0.245
+          },
+          "root_cause": "Slang patterns không match 'lol' và 'af' trong context này. Pattern '\\baf\\b' không match 'funny af' và '\\blol\\b' không match 'lol that's'",
+          "fix_required": "Enhanced regex patterns cho context-aware slang detection"
+        },
+        {
+          "input": "it's giving main character energy",
+          "expected": {
+            "should_suggest": false,
+            "reasoning": "Block slang content"
+          },
+          "actual": {
+            "should_suggest": true,
+            "confidence": 0.820,
+            "abuse_score": 0.180,
+            "reasoning": "Text quality is good (confidence: 0.82, abuse score: 0.18)"
+          },
+          "analysis": {
+            "ngram_repetition": 0.0,
+            "slang_score": 0.0,
+            "entropy_score": 0.12,
+            "stopword_density": 0.0,
+            "emoji_count": 0,
+            "keyword_stuffing": 0.0,
+            "abuse_score": 0.180
+          },
+          "root_cause": "Pattern 'it's giving' và 'main character energy' không được detect như slang. Thiếu patterns cho modern slang phrases",
+          "fix_required": "Add patterns cho 'it's giving X' và 'main character energy'"
+        },
+        {
+          "input": "that's mid",
+          "expected": {
+            "should_suggest": false,
+            "reasoning": "Block slang content"
+          },
+          "actual": {
+            "should_suggest": true,
+            "confidence": 0.800,
+            "abuse_score": 0.200,
+            "reasoning": "Text quality is good (confidence: 0.80, abuse score: 0.20)"
+          },
+          "analysis": {
+            "ngram_repetition": 0.0,
+            "slang_score": 0.0,
+            "entropy_score": 0.10,
+            "stopword_density": 0.0,
+            "emoji_count": 0,
+            "keyword_stuffing": 0.0,
+            "abuse_score": 0.200
+          },
+          "root_cause": "'mid' được detect nhưng score không đủ cao. Threshold 0.2 quá cao cho borderline cases",
+          "fix_required": "Lower abuse threshold hoặc increase slang weight"
+        }
+      ]
+    },
+    "vague_detection": {
+      "pass_rate": 80.0,
+      "passed": 4,
+      "failed": 1,
+      "total": 5,
+      "failures": [
+        {
+          "input": "make it better",
+          "expected": {
+            "should_suggest": false,
+            "reasoning": "Block vague content"
+          },
+          "actual": {
+            "should_suggest": true,
+            "confidence": 0.850,
+            "abuse_score": 0.150,
+            "reasoning": "Text quality is good (confidence: 0.85, abuse score: 0.15)"
+          },
+          "analysis": {
+            "ngram_repetition": 0.0,
+            "slang_score": 0.0,
+            "entropy_score": 0.15,
+            "stopword_density": 0.33,
+            "emoji_count": 0,
+            "keyword_stuffing": 0.0,
+            "abuse_score": 0.150
+          },
+          "root_cause": "Không có dedicated vague detection. 'make it better' có low stopword density (0.33) và low entropy (0.15) nên không được detect như vague",
+          "fix_required": "Implement dedicated vague content detection với specific patterns"
+        }
+      ]
+    }
+  },
+  "technical_analysis": {
+    "slang_detection_issues": [
+      "Regex patterns không cover context-aware slang",
+      "Normalization by word count làm giảm score cho short phrases",
+      "Thiếu patterns cho modern slang như 'it's giving', 'main character energy'",
+      "Không có phrase-level detection"
+    ],
+    "vague_detection_issues": [
+      "Không có dedicated vague detection algorithm",
+      "Chỉ dựa vào stopword density và entropy",
+      "Thiếu semantic understanding cho vague phrases",
+      "Không có specific patterns cho vague content"
+    ],
+    "threshold_issues": [
+      "suggestion_threshold = 0.8 quá cao, cho phép borderline cases",
+      "abuse_threshold = 0.2 quá thấp, không catch moderate abuse",
+      "Không có dynamic thresholds based on content type"
+    ],
+    "weight_distribution_issues": [
+      "Slang weight (0.25) cao nhất nhưng detection không đủ mạnh",
+      "Vague detection không có dedicated weight",
+      "Weights không được tune cho specific abuse types"
+    ]
+  },
+  "risk_assessment": {
+    "high_risk": {
+      "slang_detection_failures": {
+        "impact": "AI có thể sinh output không phù hợp với slang prompts",
+        "example": "'lol that's funny af' → AI có thể respond với casual tone không phù hợp",
+        "business_impact": "User experience degradation, potential inappropriate responses"
+      }
+    },
+    "medium_risk": {
+      "vague_detection_failures": {
+        "impact": "AI có thể provide generic responses cho vague requests",
+        "example": "'make it better' → AI có thể give generic advice thay vì ask for clarification",
+        "business_impact": "Reduced clarification effectiveness, user frustration"
+      }
+    }
+  },
+  "recommended_fixes": {
+    "quick_fixes": [
+      "Enhanced slang patterns cho context-aware detection",
+      "Implement basic vague content detection",
+      "Adjust thresholds: suggestion_threshold = 0.85, abuse_threshold = 0.15",
+      "Rebalance weights: slang = 0.30, add vague = 0.20"
+    ],
+    "medium_term": [
+      "Semantic classifier integration cho slang/vague detection",
+      "Context-aware detection với user history",
+      "Dynamic thresholds based on user context",
+      "Performance optimization"
+    ],
+    "long_term": [
+      "Machine learning models cho abuse detection",
+      "Multi-language support (Vietnamese slang)",
+      "Advanced NLP features (sentiment, intent)",
+      "Continuous learning từ user feedback"
+    ]
+  },
+  "expected_improvements": {
+    "target_metrics": {
+      "slang_detection": "70% → 95% (25% improvement)",
+      "vague_detection": "80% → 90% (10% improvement)",
+      "overall_pass_rate": "71.4% → 95% (23.6% improvement)",
+      "false_positive_rate": "<5%",
+      "false_negative_rate": "<5%"
+    },
+    "performance_targets": {
+      "latency": "<5ms (current: 0.19ms)",
+      "throughput": ">1000 requests/second",
+      "memory_usage": "<50MB",
+      "cpu_usage": "<10%"
+    }
+  }
+}

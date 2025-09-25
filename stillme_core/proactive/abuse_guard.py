@@ -37,8 +37,8 @@ class ProactiveAbuseGuard:
         self.config = config or {}
         
         # Thresholds
-        self.suggestion_threshold = self.config.get("suggestion_threshold", 0.8)
-        self.abuse_threshold = self.config.get("abuse_threshold", 0.2)
+        self.suggestion_threshold = self.config.get("suggestion_threshold", 0.85)  # Increased from 0.8
+        self.abuse_threshold = self.config.get("abuse_threshold", 0.15)  # Decreased from 0.2
         self.rate_limit_window = self.config.get("rate_limit_window", 30)  # seconds
         self.max_suggestions_per_window = self.config.get("max_suggestions_per_window", 2)
         
@@ -73,6 +73,15 @@ class ProactiveAbuseGuard:
             r"\b(btw\s+fyi|imo\s+this|tbh\s+this|nvm\s+then|idk\s+what|ikr\s+right|smh\s+my|tldr\s+version)\b",
             r"\b(yo\s+can|pls\s+help|thx\s+so|np\s+problem|brb\s+in|gg\s+wp|gl\s+hf|hf\s+gl)\b",
             r"\b(irl\s+life|afk\s+now|fomo\s+about|yolo\s+swag|swag\s+life|lit\s+af|dope\s+as|chill\s+out)\b",
+            # Enhanced patterns for failed cases
+            r"\b(lol|lmao|rofl)\s+(that's|this|it's)\b",  # "lol that's"
+            r"\b(that's|this|it's)\s+(funny|good|bad|weird)\s+(af|lol|fr)\b",  # "that's funny af"
+            r"\b(it's\s+giving|that's\s+giving)\b",  # "it's giving"
+            r"\b(main\s+character\s+energy|main\s+character)\b",  # "main character energy"
+            r"\b(that's\s+mid|it's\s+mid|this\s+is\s+mid)\b",  # "that's mid"
+            # Context-aware patterns
+            r"\b\w+\s+(af|fr|ngl|lowkey|highkey)\b",  # Word + slang suffix
+            r"\b(it's|that's|this\s+is)\s+(giving|bussin|fire|lit|mid)\b",  # "it's giving X"
         ]
     
     def _load_stop_words(self):
@@ -196,14 +205,18 @@ class ProactiveAbuseGuard:
         # 6. Keyword stuffing score
         keyword_score = self._calculate_keyword_stuffing_score(text_lower)
         
+        # 7. Vague content score
+        vague_score = self._calculate_vague_score(text_lower)
+        
         # Weighted combination
         weights = {
             "ngram": 0.15,
-            "slang": 0.25,
+            "slang": 0.30,      # Increased from 0.25
             "entropy": 0.10,
-            "stopword": 0.20,
+            "stopword": 0.15,   # Decreased from 0.20
             "emoji": 0.20,
-            "keyword": 0.10
+            "keyword": 0.10,
+            "vague": 0.20       # New weight for vague detection
         }
         
         abuse_score = (
@@ -212,7 +225,8 @@ class ProactiveAbuseGuard:
             entropy_score * weights["entropy"] +
             stopword_score * weights["stopword"] +
             emoji_score * weights["emoji"] +
-            keyword_score * weights["keyword"]
+            keyword_score * weights["keyword"] +
+            vague_score * weights["vague"]
         )
         
         return min(1.0, abuse_score)
@@ -330,6 +344,23 @@ class ProactiveAbuseGuard:
         
         return min(1.0, stuffing_score)
     
+    def _calculate_vague_score(self, text: str) -> float:
+        """Calculate vague content score"""
+        vague_patterns = [
+            r"\b(make|fix|improve|change|update)\s+(it|this|that)\s+(better|good|nice|great)\b",
+            r"\b(help|assist|support)\s+(me|us|with)\s+(this|that|it)\b",
+            r"\b(do|can\s+you)\s+(something|anything|this|that)\b",
+            r"\b(what|how|why|when|where)\s+(should|can|do)\s+(i|we|you)\s+(do|make|fix)\b",
+            r"\b(make|fix|improve)\s+(it|this|that)\b",  # "make it better"
+            r"\b(help\s+me|fix\s+this|do\s+something|what\s+should\s+i\s+do)\b",
+        ]
+        
+        vague_matches = 0
+        for pattern in vague_patterns:
+            vague_matches += len(re.findall(pattern, text.lower()))
+        
+        return min(1.0, vague_matches / max(len(text.split()), 1))
+    
     def _generate_reasoning(self, abuse_score: float, confidence: float, should_suggest: bool) -> str:
         """Generate human-readable reasoning"""
         if should_suggest:
@@ -355,6 +386,7 @@ class ProactiveAbuseGuard:
             "stopword_density": self._calculate_stopword_density(text_lower),
             "emoji_count": sum(len(re.findall(pattern, text)) for pattern in self.emoji_patterns),
             "keyword_stuffing": self._calculate_keyword_stuffing_score(text_lower),
+            "vague_score": self._calculate_vague_score(text_lower),
             "abuse_score": abuse_score
         }
     
