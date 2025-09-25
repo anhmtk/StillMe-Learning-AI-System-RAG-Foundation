@@ -1,7 +1,7 @@
 # StillMe AgentDev - SEAL-GRADE CI/CD Makefile
 # Comprehensive testing and deployment commands
 
-.PHONY: help install test test-quick test-full test-seal clean lint format security-scan
+.PHONY: help install test test-quick test-full test-seal clean lint format security-scan load_phase3
 
 # Default target
 help:
@@ -16,6 +16,7 @@ help:
 	@echo "  make lint             - Run linting"
 	@echo "  make format           - Format code"
 	@echo "  make security-scan    - Run security scans"
+	@echo "  make load_phase3      - Run Phase 3 load tests"
 	@echo "  make clean            - Clean artifacts"
 	@echo ""
 	@echo "CI/CD Commands:"
@@ -246,3 +247,13 @@ help-test:
 	@echo "  make chaos-test       - Chaos engineering"
 	@echo "  make fuzz-test        - Fuzzing tests"
 	@echo "  make integration-test - Integration tests"
+	@echo "  make load_phase3      - Phase 3 load tests"
+
+# Phase 3 Load Testing
+load_phase3:
+	@echo "🚀 Starting Phase 3 Load Testing..."
+	@mkdir -p reports/phase3/load
+	@echo "Running K6 load test with 1000 prompts and 100 concurrent users..."
+	@k6 run --out json=reports/phase3/load/load_test_results.json load_test/k6_phase3.js
+	@echo "✅ Load test completed. Results saved to reports/phase3/load/"
+	@echo "📊 Check load_test_results.json for detailed metrics"
