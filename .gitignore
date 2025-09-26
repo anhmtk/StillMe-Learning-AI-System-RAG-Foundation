@@ -363,3 +363,34 @@ Thumbs.db
 .env.staging
 config/local.yaml
 config/production.yaml
+
+# Security files
+*.key
+*.pem
+*.p12
+*.keystore
+*.jks
+*.p8
+*.p12
+*.pfx
+*.crt
+*.cer
+*.der
+*.p7b
+*.p7c
+*.p7s
+*.p7m
+*.p8
+*.p12
+*.pfx
+*.crt
+*.cer
+*.der
+*.p7b
+*.p7c
+*.p7s
+*.p7m
+
+# Artifacts
+artifacts/
+*.log
