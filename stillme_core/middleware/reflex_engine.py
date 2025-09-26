@@ -129,7 +129,7 @@ class ReflexEngine:
         # Step 1: quick safety (non-blocking in shadow)
         _ = self.safety.quick_check(text)
 
-        # Step 2: pattern match (stubbed)
+        # Step 2: pattern match (real implementation)
         match_result = self.matcher.match(text, context or {})
         scores = {
             "pattern_score": match_result.get("pattern_score"),
@@ -155,6 +155,9 @@ class ReflexEngine:
             "why_reflex": {
                 "scores": scores,
                 "matches": match_result.get("matches", []),
+                "pattern_hits": len(match_result.get("matches", [])),
+                "pattern_score": match_result.get("pattern_score"),
+                "match_time_us": match_result.get("match_time_us"),
                 "policy": self.config.policy,
                 "confidence": confidence,
             },
