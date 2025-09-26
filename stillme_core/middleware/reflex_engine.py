@@ -53,16 +53,22 @@ except Exception:  # pragma: no cover
 
         async def deep_check(self, text: str) -> bool:
             return True
+        
+        def safety_gate(self, text: str, intended_action: Optional[str] = None, 
+                       scores: Optional[Dict[str, float]] = None) -> Dict[str, Any]:
+            return {"safe": True, "reason": "stub_safety"}
 
 try:
     from .action_sandbox import ActionSandbox
 except Exception:  # pragma: no cover
     class ActionSandbox:  # type: ignore
-        def __init__(self, dry_run: bool = True):
-            self.dry_run = dry_run
+        def __init__(self, config: Optional[Dict[str, Any]] = None):
+            self.config = config or {}
+            self.dry_run = self.config.get("dry_run", True)
 
-        def execute(self, action: str, payload: Dict[str, Any]) -> Dict[str, Any]:
-            return {"ok": True, "dry_run": self.dry_run, "action": action, "payload": payload}
+        def execute(self, action: str, params: Dict[str, Any], trace_id: str, 
+                   dry_run: Optional[bool] = None) -> Dict[str, Any]:
+            return {"ok": True, "dry_run": self.dry_run, "action": action, "params": params}
 
 
 logger = logging.getLogger(__name__)
@@ -98,7 +104,7 @@ class ReflexEngine:
         self.matcher = PatternMatcher({})
         self.policy = ReflexPolicy(self.config.policy)
         self.safety = ReflexSafety()
-        self.sandbox = ActionSandbox(dry_run=True)
+        self.sandbox = ActionSandbox({"dry_run": True})
 
     @staticmethod
     def _new_trace_id() -> str:
@@ -126,9 +132,9 @@ class ReflexEngine:
                 "decision": "bypass",
             }
 
-        # Step 1: quick safety (non-blocking in shadow)
-        _ = self.safety.quick_check(text)
-
+        # Step 1: Safety gate (fast + deep checks)
+        safety_result = self.safety.safety_gate(text, intended_action="reflex_decision", scores=None)
+        
         # Step 2: pattern match (real implementation)
         match_result = self.matcher.match(text, context or {})
         scores = {
@@ -140,6 +146,17 @@ class ReflexEngine:
 
         # Step 3: policy decision with context
         decision, confidence = self.policy.decide(scores, context)
+
+        # Step 4: Action sandbox (if policy allows reflex)
+        action_result = None
+        if decision == "allow_reflex" and safety_result.get("safe", False):
+            # In shadow mode, always execute in dry_run
+            action_result = self.sandbox.execute(
+                action="reflex_response",
+                params={"text": text, "scores": scores, "context": context},
+                trace_id=trace_id,
+                dry_run=True  # Always dry_run in shadow mode
+            )
 
         # Shadow mode: enforce fallback, never act
         decision = "fallback"
@@ -161,6 +178,8 @@ class ReflexEngine:
                 "policy": self.config.policy,
                 "confidence": confidence,
                 "breakdown": self.policy.get_breakdown(scores, context),
+                "safety_result": safety_result,
+                "action_result": action_result,
             },
             "action": decision,
         }
