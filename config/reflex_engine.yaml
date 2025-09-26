@@ -1,6 +1,26 @@
 enabled: true
 shadow_mode: true
 policy: balanced
+
+# Multi-score weights
+weights:
+  pattern: 0.4
+  context: 0.3
+  history: 0.2
+  abuse: 0.1
+
+# Policy thresholds
+thresholds:
+  strict:
+    allow_reflex: 0.8
+    confidence_min: 0.7
+  balanced:
+    allow_reflex: 0.6
+    confidence_min: 0.5
+  creative:
+    allow_reflex: 0.4
+    confidence_min: 0.3
+
 logging:
   rationale: true
 

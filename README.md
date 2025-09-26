@@ -501,7 +501,6 @@ Khi open source, StillMe sẽ showcase **công nghệ lõi hiểu prompt mơ h�
 
 ### **🎯 Overview:**
 Advanced AgentDev System là hệ thống AI tự động hóa cao cấp với khả năng tự quản lý, tự ra quyết định, và tự học hỏi như một "Trưởng phòng Kỹ thuật" thực thụ:
-- *Tổng quan*: Hệ thống AI tự động hóa cao cấp với khả năng tự quản lý, tự ra quyết định, và tự học hỏi như một "Trưởng phòng Kỹ thuật" thực thụ
 
 ### **📊 Current Status:**
 - **Success Rate**: 0% → **100%** ✅ (Target: >80% - EXCEEDED!)

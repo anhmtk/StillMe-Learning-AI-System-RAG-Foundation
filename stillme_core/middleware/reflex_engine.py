@@ -138,8 +138,8 @@ class ReflexEngine:
             "abuse_score": None,
         }
 
-        # Step 3: policy decision (stub -> fallback)
-        decision, confidence = self.policy.decide(scores)
+        # Step 3: policy decision with context
+        decision, confidence = self.policy.decide(scores, context)
 
         # Shadow mode: enforce fallback, never act
         decision = "fallback"
@@ -160,6 +160,7 @@ class ReflexEngine:
                 "match_time_us": match_result.get("match_time_us"),
                 "policy": self.config.policy,
                 "confidence": confidence,
+                "breakdown": self.policy.get_breakdown(scores, context),
             },
             "action": decision,
         }
