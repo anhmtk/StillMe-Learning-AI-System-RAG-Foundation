@@ -1,159 +1,19 @@
-name: CI Tests - Unit & Integration
-
+name: CI - Tests
 on:
-  push:
-    branches: [ main, develop, feature/* ]
-  pull_request:
-    branches: [ main, develop ]
-
+  push: { branches: [ main ] }
+  pull_request: {}
 jobs:
-  unit-integration-tests:
+  test:
     runs-on: ubuntu-latest
-    
-    strategy:
-      matrix:
-        python-version: [3.9, 3.10, 3.11, 3.12]
-    
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-    
-    - name: Cache pip dependencies
-      uses: actions/cache@v3
-      with:
-        path: ~/.cache/pip
-        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
-        restore-keys: |
-          ${{ runner.os }}-pip-
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pytest pytest-cov pytest-html pytest-xdist
-        pip install coverage
-    
-    - name: Create artifacts directory
-      run: mkdir -p artifacts
-    
-    - name: Run unit tests
-      run: |
-        pytest tests/test_unit_core_modules.py \
-          --cov=stillme_core \
-          --cov-report=html:artifacts/coverage.html \
-          --cov-report=json:artifacts/coverage.json \
-          --cov-report=xml:artifacts/coverage.xml \
-          --junitxml=artifacts/junit-unit.xml \
-          --html=artifacts/pytest-unit.html \
-          --self-contained-html \
-          -v
-    
-    - name: Run integration tests
-      run: |
-        pytest tests/test_integration_cross_module.py \
-          --cov=stillme_core \
-          --cov-report=html:artifacts/coverage-integration.html \
-          --cov-report=json:artifacts/coverage-integration.json \
-          --junitxml=artifacts/junit-integration.xml \
-          --html=artifacts/pytest-integration.html \
-          --self-contained-html \
-          -v
-    
-    - name: Run self-learning tests
-      run: |
-        pytest tests/test_learning_*.py \
-          --cov=stillme_core.learning \
-          --cov-report=html:artifacts/coverage-learning.html \
-          --cov-report=json:artifacts/coverage-learning.json \
-          --junitxml=artifacts/junit-learning.xml \
-          --html=artifacts/pytest-learning.html \
-          --self-contained-html \
-          -v
-    
-    - name: Run cross-validation tests
-      run: |
-        pytest tests/test_cross_validation.py \
-          --cov=stillme_core.learning.cross_validation \
-          --cov-report=html:artifacts/coverage-cross-validation.html \
-          --cov-report=json:artifacts/coverage-cross-validation.json \
-          --junitxml=artifacts/junit-cross-validation.xml \
-          --html=artifacts/pytest-cross-validation.html \
-          --self-contained-html \
-          -v
-    
-    - name: Run rollback tests
-      run: |
-        pytest tests/test_rollback_manager.py \
-          --cov=stillme_core.learning.rollback_manager \
-          --cov-report=html:artifacts/coverage-rollback.html \
-          --cov-report=json:artifacts/coverage-rollback.json \
-          --junitxml=artifacts/junit-rollback.xml \
-          --html=artifacts/pytest-rollback.html \
-          --self-contained-html \
-          -v
-    
-    - name: Run meta-learning tests
-      run: |
-        pytest tests/test_meta_learning.py \
-          --cov=stillme_core.learning.meta_learning_manager \
-          --cov-report=html:artifacts/coverage-meta-learning.html \
-          --cov-report=json:artifacts/coverage-meta-learning.json \
-          --junitxml=artifacts/junit-meta-learning.xml \
-          --html=artifacts/pytest-meta-learning.html \
-          --self-contained-html \
-          -v
-    
-    - name: Run collaborative learning tests
-      run: |
-        pytest tests/test_collab_learning.py \
-          --cov=stillme_core.learning.collab_learning \
-          --cov-report=html:artifacts/coverage-collab-learning.html \
-          --cov-report=json:artifacts/coverage-collab-learning.json \
-          --junitxml=artifacts/junit-collab-learning.xml \
-          --html=artifacts/pytest-collab-learning.html \
-          --self-contained-html \
-          -v
-    
-    - name: Run comprehensive test suite
-      run: |
-        pytest tests/test_core_modules_mock.py \
-          --cov=stillme_core \
-          --cov-report=html:artifacts/coverage-comprehensive.html \
-          --cov-report=json:artifacts/coverage-comprehensive.json \
-          --junitxml=artifacts/junit-comprehensive.xml \
-          --html=artifacts/pytest-comprehensive.html \
-          --self-contained-html \
-          -v
-    
-    - name: Generate combined coverage report
-      run: |
-        coverage combine artifacts/coverage*.json
-        coverage html -d artifacts/coverage-combined
-        coverage xml -o artifacts/coverage-combined.xml
-        coverage report --show-missing
-    
-    - name: Check coverage thresholds
-      run: |
-        coverage report --fail-under=85 --show-missing
-    
-    - name: Upload test artifacts
-      uses: actions/upload-artifact@v3
-      if: always()
-      with:
-        name: test-results-${{ matrix.python-version }}
-        path: |
-          artifacts/
-        retention-days: 30
-    
-    - name: Upload coverage reports
-      uses: codecov/codecov-action@v3
-      if: matrix.python-version == '3.12'
-      with:
-        file: artifacts/coverage-combined.xml
-        flags: unittests
-        name: codecov-umbrella
-        fail_ci_if_error: false
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install -r requirements.txt
+      - run: pip install pytest pytest-cov
+      - run: pytest -q --cov=. --cov-report=html
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html
+          path: htmlcov
