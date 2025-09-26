@@ -1,0 +1,131 @@
+{
+  "ambiguous_prompts": [
+    {
+      "id": "amb_001",
+      "prompt": "Help me with this",
+      "category": "vague_request",
+      "expected_clarification": "What specific task do you need help with?",
+      "languages": ["en", "vi"]
+    },
+    {
+      "id": "amb_002", 
+      "prompt": "Fix the problem",
+      "category": "vague_request",
+      "expected_clarification": "What problem needs to be fixed? Please provide more details.",
+      "languages": ["en", "vi"]
+    },
+    {
+      "id": "amb_003",
+      "prompt": "Make it better",
+      "category": "vague_improvement",
+      "expected_clarification": "What would you like to improve? Please specify the area or aspect.",
+      "languages": ["en", "vi"]
+    },
+    {
+      "id": "amb_004",
+      "prompt": "Check this code",
+      "category": "vague_code_review",
+      "expected_clarification": "What specific aspects of the code should I check? (syntax, logic, performance, security, etc.)",
+      "languages": ["en", "vi"]
+    },
+    {
+      "id": "amb_005",
+      "prompt": "Optimize the system",
+      "category": "vague_optimization",
+      "expected_clarification": "Which part of the system needs optimization? (performance, memory, database, etc.)",
+      "languages": ["en", "vi"]
+    },
+    {
+      "id": "amb_006",
+      "prompt": "Giúp tôi với cái này",
+      "category": "vague_request_vi",
+      "expected_clarification": "Bạn cần giúp đỡ về vấn đề gì cụ thể?",
+      "languages": ["vi", "en"]
+    },
+    {
+      "id": "amb_007",
+      "prompt": "Sửa lỗi này",
+      "category": "vague_fix_vi", 
+      "expected_clarification": "Lỗi gì cần được sửa? Vui lòng cung cấp thêm chi tiết.",
+      "languages": ["vi", "en"]
+    },
+    {
+      "id": "amb_008",
+      "prompt": "Làm cho nó tốt hơn",
+      "category": "vague_improvement_vi",
+      "expected_clarification": "Bạn muốn cải thiện điều gì? Vui lòng chỉ rõ lĩnh vực hoặc khía cạnh.",
+      "languages": ["vi", "en"]
+    },
+    {
+      "id": "amb_009",
+      "prompt": "What do you think about this?",
+      "category": "vague_opinion",
+      "expected_clarification": "What specific aspect would you like my opinion on?",
+      "languages": ["en", "vi"]
+    },
+    {
+      "id": "amb_010",
+      "prompt": "Can you do something about it?",
+      "category": "vague_action",
+      "expected_clarification": "What specific action would you like me to take?",
+      "languages": ["en", "vi"]
+    },
+    {
+      "id": "amb_011",
+      "prompt": "This is not working properly",
+      "category": "vague_problem",
+      "expected_clarification": "What specifically is not working? Please describe the expected vs actual behavior.",
+      "languages": ["en", "vi"]
+    },
+    {
+      "id": "amb_012",
+      "prompt": "How can I improve this?",
+      "category": "vague_improvement_question",
+      "expected_clarification": "What would you like to improve? Please specify the current state and desired outcome.",
+      "languages": ["en", "vi"]
+    },
+    {
+      "id": "amb_013",
+      "prompt": "Something is wrong here",
+      "category": "vague_error",
+      "expected_clarification": "What specific issue are you experiencing? Please provide error details or symptoms.",
+      "languages": ["en", "vi"]
+    },
+    {
+      "id": "amb_014",
+      "prompt": "Make it faster",
+      "category": "vague_performance",
+      "expected_clarification": "What specific operation or process needs to be faster?",
+      "languages": ["en", "vi"]
+    },
+    {
+      "id": "amb_015",
+      "prompt": "This needs to be changed",
+      "category": "vague_change",
+      "expected_clarification": "What specific changes would you like to make?",
+      "languages": ["en", "vi"]
+    }
+  ],
+  "metadata": {
+    "total_cases": 15,
+    "categories": [
+      "vague_request",
+      "vague_improvement", 
+      "vague_code_review",
+      "vague_optimization",
+      "vague_request_vi",
+      "vague_fix_vi",
+      "vague_improvement_vi",
+      "vague_opinion",
+      "vague_action",
+      "vague_problem",
+      "vague_improvement_question",
+      "vague_error",
+      "vague_performance",
+      "vague_change"
+    ],
+    "languages": ["en", "vi"],
+    "created": "2025-01-15",
+    "version": "1.0"
+  }
+}

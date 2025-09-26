@@ -1,0 +1,251 @@
+{
+  "pii_samples": [
+    {
+      "id": "pii_001",
+      "type": "email",
+      "value": "john.doe@example.com",
+      "redacted_value": "[EMAIL_REDACTED]",
+      "category": "contact_info",
+      "severity": "medium"
+    },
+    {
+      "id": "pii_002",
+      "type": "phone_number",
+      "value": "+1-555-123-4567",
+      "redacted_value": "[PHONE_REDACTED]",
+      "category": "contact_info",
+      "severity": "medium"
+    },
+    {
+      "id": "pii_003",
+      "type": "ssn",
+      "value": "123-45-6789",
+      "redacted_value": "[SSN_REDACTED]",
+      "category": "government_id",
+      "severity": "critical"
+    },
+    {
+      "id": "pii_004",
+      "type": "credit_card",
+      "value": "4532-1234-5678-9012",
+      "redacted_value": "[CARD_REDACTED]",
+      "category": "financial",
+      "severity": "critical"
+    },
+    {
+      "id": "pii_005",
+      "type": "address",
+      "value": "123 Main Street, New York, NY 10001",
+      "redacted_value": "[ADDRESS_REDACTED]",
+      "category": "location",
+      "severity": "medium"
+    },
+    {
+      "id": "pii_006",
+      "type": "full_name",
+      "value": "John Michael Doe",
+      "redacted_value": "[NAME_REDACTED]",
+      "category": "identity",
+      "severity": "medium"
+    },
+    {
+      "id": "pii_007",
+      "type": "date_of_birth",
+      "value": "1990-05-15",
+      "redacted_value": "[DOB_REDACTED]",
+      "category": "identity",
+      "severity": "high"
+    },
+    {
+      "id": "pii_008",
+      "type": "passport",
+      "value": "A1234567",
+      "redacted_value": "[PASSPORT_REDACTED]",
+      "category": "government_id",
+      "severity": "critical"
+    },
+    {
+      "id": "pii_009",
+      "type": "driver_license",
+      "value": "D123456789",
+      "redacted_value": "[DL_REDACTED]",
+      "category": "government_id",
+      "severity": "high"
+    },
+    {
+      "id": "pii_010",
+      "type": "bank_account",
+      "value": "1234567890",
+      "redacted_value": "[ACCOUNT_REDACTED]",
+      "category": "financial",
+      "severity": "critical"
+    },
+    {
+      "id": "pii_011",
+      "type": "ip_address",
+      "value": "192.168.1.100",
+      "redacted_value": "[IP_REDACTED]",
+      "category": "network",
+      "severity": "medium"
+    },
+    {
+      "id": "pii_012",
+      "type": "mac_address",
+      "value": "00:1B:44:11:3A:B7",
+      "redacted_value": "[MAC_REDACTED]",
+      "category": "network",
+      "severity": "medium"
+    },
+    {
+      "id": "pii_013",
+      "type": "api_key",
+      "value": "sk-1234567890abcdef",
+      "redacted_value": "[API_KEY_REDACTED]",
+      "category": "credentials",
+      "severity": "critical"
+    },
+    {
+      "id": "pii_014",
+      "type": "password",
+      "value": "MySecretPassword123!",
+      "redacted_value": "[PASSWORD_REDACTED]",
+      "category": "credentials",
+      "severity": "critical"
+    },
+    {
+      "id": "pii_015",
+      "type": "token",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      "redacted_value": "[TOKEN_REDACTED]",
+      "category": "credentials",
+      "severity": "critical"
+    },
+    {
+      "id": "pii_016",
+      "type": "email_vi",
+      "value": "nguyen.van.a@example.com",
+      "redacted_value": "[EMAIL_REDACTED]",
+      "category": "contact_info",
+      "severity": "medium"
+    },
+    {
+      "id": "pii_017",
+      "type": "phone_vi",
+      "value": "+84-90-123-4567",
+      "redacted_value": "[PHONE_REDACTED]",
+      "category": "contact_info",
+      "severity": "medium"
+    },
+    {
+      "id": "pii_018",
+      "type": "name_vi",
+      "value": "Nguyễn Văn A",
+      "redacted_value": "[NAME_REDACTED]",
+      "category": "identity",
+      "severity": "medium"
+    },
+    {
+      "id": "pii_019",
+      "type": "address_vi",
+      "value": "123 Đường Lê Lợi, Quận 1, TP.HCM",
+      "redacted_value": "[ADDRESS_REDACTED]",
+      "category": "location",
+      "severity": "medium"
+    },
+    {
+      "id": "pii_020",
+      "type": "cmnd",
+      "value": "123456789",
+      "redacted_value": "[CMND_REDACTED]",
+      "category": "government_id",
+      "severity": "critical"
+    },
+    {
+      "id": "pii_021",
+      "type": "mixed_content",
+      "value": "My name is John Doe, email john@example.com, phone +1-555-123-4567",
+      "redacted_value": "My name is [NAME_REDACTED], email [EMAIL_REDACTED], phone [PHONE_REDACTED]",
+      "category": "mixed",
+      "severity": "high"
+    },
+    {
+      "id": "pii_022",
+      "type": "partial_credit_card",
+      "value": "****-****-****-9012",
+      "redacted_value": "[CARD_REDACTED]",
+      "category": "financial",
+      "severity": "medium"
+    },
+    {
+      "id": "pii_023",
+      "type": "social_media_handle",
+      "value": "@johndoe123",
+      "redacted_value": "[HANDLE_REDACTED]",
+      "category": "social",
+      "severity": "low"
+    },
+    {
+      "id": "pii_024",
+      "type": "employee_id",
+      "value": "EMP-12345",
+      "redacted_value": "[EMPLOYEE_ID_REDACTED]",
+      "category": "workplace",
+      "severity": "medium"
+    },
+    {
+      "id": "pii_025",
+      "type": "medical_record",
+      "value": "MR-2025-001234",
+      "redacted_value": "[MEDICAL_RECORD_REDACTED]",
+      "category": "health",
+      "severity": "critical"
+    }
+  ],
+  "metadata": {
+    "total_cases": 25,
+    "pii_types": [
+      "email",
+      "phone_number",
+      "ssn",
+      "credit_card",
+      "address",
+      "full_name",
+      "date_of_birth",
+      "passport",
+      "driver_license",
+      "bank_account",
+      "ip_address",
+      "mac_address",
+      "api_key",
+      "password",
+      "token",
+      "email_vi",
+      "phone_vi",
+      "name_vi",
+      "address_vi",
+      "cmnd",
+      "mixed_content",
+      "partial_credit_card",
+      "social_media_handle",
+      "employee_id",
+      "medical_record"
+    ],
+    "categories": [
+      "contact_info",
+      "government_id",
+      "financial",
+      "location",
+      "identity",
+      "network",
+      "credentials",
+      "mixed",
+      "social",
+      "workplace",
+      "health"
+    ],
+    "severity_levels": ["low", "medium", "high", "critical"],
+    "languages": ["en", "vi"],
+    "created": "2025-01-15",
+    "version": "1.0"
+  }
+}
