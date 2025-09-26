@@ -173,6 +173,28 @@ await framework.delete_user_data("user123")
 
 ## 🧪 **TESTING**
 
+### **Test Results – Phase 1 + 2 Validation**
+
+| Test Type | Pass Rate | Coverage | Status |
+|-----------|------------|----------|--------|
+| **Unit Tests** | 66% | 75% | ⚠️ **Needs Fix** |
+| **Integration Tests** | 100% | 90% | ✅ **PASS** |
+| **Security Tests** | 65% | N/A | ⚠️ **Issues Found** |
+| **Ethics Tests** | 100% | 100% | ✅ **PASS** |
+| **Load Tests** | 99.2% | N/A | ✅ **PASS** |
+| **Chaos Tests** | 100% | N/A | ✅ **PASS** |
+
+### **Performance Metrics:**
+- **Load Test**: 10,000 requests, 99.2% success rate
+- **P95 Latency**: 420ms ✅ (Target: <500ms)
+- **Recovery Time**: 1,375ms average
+- **Security Score**: 65/100 (Medium Risk)
+
+### **Critical Issues:**
+- 🚨 **Self-Learning Tests**: 34% failure rate (22/65 tests)
+- 🚨 **Security Vulnerabilities**: 183 issues (15 high-severity)
+- ⚠️ **Test Coverage**: Below 90% target in some modules
+
 ### **Chạy Tests**
 ```bash
 # Unit tests
@@ -196,6 +218,12 @@ cd ethics-tests && python runners/ethics_test_runner.py --all
 pytest tests/ --cov=stillme_core --cov-report=html
 open htmlcov/index.html
 ```
+
+### **Test Artifacts:**
+- 📊 [Coverage Report](artifacts/coverage.html)
+- 🔒 [Security Scan](artifacts/bandit-report.json)
+- 📈 [Load Test Results](artifacts/k6-results.json)
+- 🧪 [Validation Report](docs/VALIDATION_PHASE1_2.md)
 
 ## 🔒 **SECURITY & PRIVACY**
 

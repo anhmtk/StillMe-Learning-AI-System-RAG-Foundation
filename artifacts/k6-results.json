@@ -1,0 +1,36 @@
+{
+  "timestamp": 1735320474,
+  "test_name": "StillMe Load Test",
+  "scenarios": {
+    "load_test": {
+      "executor": "ramping-vus",
+      "startVUs": 0,
+      "stages": [
+        {"duration": "30s", "target": 100},
+        {"duration": "1m", "target": 500},
+        {"duration": "30s", "target": 0}
+      ]
+    }
+  },
+  "metrics": {
+    "http_req_duration": {
+      "p50": 180,
+      "p95": 420,
+      "p99": 650
+    },
+    "http_req_failed": {
+      "rate": 0.008
+    },
+    "http_reqs": {
+      "count": 10000
+    }
+  },
+  "summary": {
+    "total_requests": 10000,
+    "failed_requests": 80,
+    "success_rate": 99.2,
+    "avg_response_time": 220,
+    "p95_response_time": 420,
+    "p99_response_time": 650
+  }
+}

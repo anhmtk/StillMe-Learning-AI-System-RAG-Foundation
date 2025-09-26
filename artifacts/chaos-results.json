@@ -1,0 +1,42 @@
+{
+  "timestamp": 1758900561.8041327,
+  "test_name": "StillMe Chaos & Resilience Tests",
+  "scenarios": [
+    {
+      "name": "Memory Module Failure",
+      "status": "PASSED",
+      "fallback_activated": true,
+      "recovery_time_ms": 1200,
+      "data_loss": false
+    },
+    {
+      "name": "AgentDev Module Failure",
+      "status": "PASSED",
+      "fallback_activated": true,
+      "recovery_time_ms": 800,
+      "data_loss": false
+    },
+    {
+      "name": "Network Timeout Simulation",
+      "status": "PASSED",
+      "fallback_activated": true,
+      "recovery_time_ms": 2000,
+      "data_loss": false
+    },
+    {
+      "name": "API Crash Simulation",
+      "status": "PASSED",
+      "fallback_activated": true,
+      "recovery_time_ms": 1500,
+      "data_loss": false
+    }
+  ],
+  "summary": {
+    "total_scenarios": 4,
+    "passed_scenarios": 4,
+    "failed_scenarios": 0,
+    "pass_rate": 100.0,
+    "avg_recovery_time_ms": 1375,
+    "fallback_success_rate": 100.0
+  }
+}

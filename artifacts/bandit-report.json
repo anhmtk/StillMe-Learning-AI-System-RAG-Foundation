@@ -101,18 +101,18 @@
       "reason": "syntax error while parsing AST from file"
     }
   ],
-  "generated_at": "2025-09-26T13:34:02Z",
+  "generated_at": "2025-09-26T15:28:35Z",
   "metrics": {
     "_totals": {
-      "CONFIDENCE.HIGH": 167,
+      "CONFIDENCE.HIGH": 170,
       "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 12,
+      "CONFIDENCE.MEDIUM": 13,
       "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 12,
-      "SEVERITY.LOW": 146,
+      "SEVERITY.HIGH": 15,
+      "SEVERITY.LOW": 147,
       "SEVERITY.MEDIUM": 21,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 73784,
+      "loc": 75814,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -347,6 +347,19 @@
       "SEVERITY.MEDIUM": 3,
       "SEVERITY.UNDEFINED": 0,
       "loc": 212,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "stillme_core/control\\learning_rollback.py": {
+      "CONFIDENCE.HIGH": 1,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 1,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 304,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1794,6 +1807,71 @@
       "nosec": 0,
       "skipped_tests": 0
     },
+    "stillme_core/learning\\collab_learning.py": {
+      "CONFIDENCE.HIGH": 2,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 2,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 386,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "stillme_core/learning\\cross_validation.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 225,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "stillme_core/learning\\learning_metrics_collector.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 286,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "stillme_core/learning\\meta_learning_manager.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 445,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "stillme_core/learning\\reward_manager.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 1,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 1,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 384,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
     "stillme_core/middleware\\action_sandbox.py": {
       "CONFIDENCE.HIGH": 0,
       "CONFIDENCE.LOW": 0,
@@ -2829,6 +2907,26 @@
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b108_hardcoded_tmp_directory.html",
       "test_id": "B108",
       "test_name": "hardcoded_tmp_directory"
+    },
+    {
+      "code": "279         timestamp = datetime.now().strftime(\"%Y%m%d_%H%M%S\")\n280         random_suffix = hashlib.md5(str(time.time()).encode()).hexdigest()[:8]\n281         return f\"v{timestamp}_{random_suffix}\"\n",
+      "col_offset": 24,
+      "end_col_offset": 62,
+      "filename": "stillme_core/control\\learning_rollback.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 327,
+        "link": "https://cwe.mitre.org/data/definitions/327.html"
+      },
+      "issue_severity": "HIGH",
+      "issue_text": "Use of weak MD5 hash for security. Consider usedforsecurity=False",
+      "line_number": 280,
+      "line_range": [
+        280
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b324_hashlib.html",
+      "test_id": "B324",
+      "test_name": "hashlib"
     },
     {
       "code": "523             obj_str = str(obj.__dict__) if hasattr(obj, '__dict__') else str(obj)\n524             obj_hash = hashlib.md5(obj_str.encode()).hexdigest()[:12]\n525             timestamp = int(time.time())\n",
@@ -5953,6 +6051,66 @@
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b102_exec_used.html",
       "test_id": "B102",
       "test_name": "exec_used"
+    },
+    {
+      "code": "477         timestamp = datetime.now().strftime(\"%Y%m%d_%H%M%S\")\n478         name_hash = hashlib.md5(name.encode()).hexdigest()[:8]\n479         contributor_hash = hashlib.md5(contributor.encode()).hexdigest()[:8]\n",
+      "col_offset": 20,
+      "end_col_offset": 46,
+      "filename": "stillme_core/learning\\collab_learning.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 327,
+        "link": "https://cwe.mitre.org/data/definitions/327.html"
+      },
+      "issue_severity": "HIGH",
+      "issue_text": "Use of weak MD5 hash for security. Consider usedforsecurity=False",
+      "line_number": 478,
+      "line_range": [
+        478
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b324_hashlib.html",
+      "test_id": "B324",
+      "test_name": "hashlib"
+    },
+    {
+      "code": "478         name_hash = hashlib.md5(name.encode()).hexdigest()[:8]\n479         contributor_hash = hashlib.md5(contributor.encode()).hexdigest()[:8]\n480         \n",
+      "col_offset": 27,
+      "end_col_offset": 60,
+      "filename": "stillme_core/learning\\collab_learning.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 327,
+        "link": "https://cwe.mitre.org/data/definitions/327.html"
+      },
+      "issue_severity": "HIGH",
+      "issue_text": "Use of weak MD5 hash for security. Consider usedforsecurity=False",
+      "line_number": 479,
+      "line_range": [
+        479
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b324_hashlib.html",
+      "test_id": "B324",
+      "test_name": "hashlib"
+    },
+    {
+      "code": "27     FIX_SUCCESS = \"fix_success\"\n28     TEST_PASS = \"test_pass\"\n29     ETHICS_COMPLIANCE = \"ethics_compliance\"\n",
+      "col_offset": 16,
+      "end_col_offset": 27,
+      "filename": "stillme_core/learning\\reward_manager.py",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 259,
+        "link": "https://cwe.mitre.org/data/definitions/259.html"
+      },
+      "issue_severity": "LOW",
+      "issue_text": "Possible hardcoded password: 'test_pass'",
+      "line_number": 28,
+      "line_range": [
+        28
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b105_hardcoded_password_string.html",
+      "test_id": "B105",
+      "test_name": "hardcoded_password_string"
     },
     {
       "code": "507                 self.logger.info(f\"\ud83d\udd04 Loading NLLB model: {self.nllb_model_name}\")\n508                 self._nllb_tokenizer = AutoTokenizer.from_pretrained(self.nllb_model_name)\n509                 self._nllb_model = AutoModelForSeq2SeqLM.from_pretrained(self.nllb_model_name)\n",

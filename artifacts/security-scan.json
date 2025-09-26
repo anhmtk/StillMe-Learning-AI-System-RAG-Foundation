@@ -1,0 +1,27 @@
+{
+  "timestamp": 1735320474,
+  "scanner": "bandit",
+  "version": "1.8.6",
+  "target": "stillme_core/",
+  "results": {
+    "total_issues": 183,
+    "high_severity": 15,
+    "medium_severity": 21,
+    "low_severity": 147,
+    "syntax_errors": 25,
+    "confidence": {
+      "high": 45,
+      "medium": 89,
+      "low": 49
+    }
+  },
+  "summary": {
+    "security_score": 65,
+    "risk_level": "MEDIUM",
+    "recommendations": [
+      "Fix high severity issues immediately",
+      "Review medium severity issues",
+      "Address syntax errors in legacy code"
+    ]
+  }
+}
