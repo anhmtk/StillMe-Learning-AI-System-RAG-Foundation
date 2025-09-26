@@ -341,7 +341,7 @@ class TestRewardManager:
     @pytest.mark.asyncio
     async def test_session_not_found_error(self, reward_manager):
         """Test error handling for non-existent session"""
-        with pytest.raises(ValueError, match="Session not found"):
+        with pytest.raises(ValueError, match="Session nonexistent_session not found"):
             await reward_manager.award_reward(
                 session_id="nonexistent_session",
                 reward_type=RewardType.FIX_SUCCESS,
@@ -352,5 +352,5 @@ class TestRewardManager:
     @pytest.mark.asyncio
     async def test_end_nonexistent_session(self, reward_manager):
         """Test ending non-existent session"""
-        with pytest.raises(ValueError, match="Session not found"):
+        with pytest.raises(ValueError, match="Session nonexistent_session not found"):
             await reward_manager.end_learning_session("nonexistent_session")

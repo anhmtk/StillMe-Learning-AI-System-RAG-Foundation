@@ -521,7 +521,7 @@ class ExperienceMemoryIntegration:
         try:
             # Create hash from object data
             obj_str = str(obj.__dict__) if hasattr(obj, '__dict__') else str(obj)
-            obj_hash = hashlib.md5(obj_str.encode()).hexdigest()[:12]
+            obj_hash = hashlib.sha256(obj_str.encode()).hexdigest()[:12]
             timestamp = int(time.time())
             return f"exp_{timestamp}_{obj_hash}"
         except Exception:

@@ -277,7 +277,7 @@ class LearningRollback:
     def _generate_version_id(self) -> str:
         """Generate unique version ID"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        random_suffix = hashlib.md5(str(time.time()).encode()).hexdigest()[:8]
+        random_suffix = hashlib.sha256(str(time.time()).encode()).hexdigest()[:8]
         return f"v{timestamp}_{random_suffix}"
     
     def _calculate_state_hash(self, changes: Dict[str, Any]) -> str:

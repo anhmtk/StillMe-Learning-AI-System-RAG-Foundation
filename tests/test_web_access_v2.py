@@ -1,3 +1,4 @@
+import os
 #!/usr/bin/env python3
 """
 Web Access v2 Test Suite - Red-Team & Functional Tests
@@ -240,7 +241,7 @@ class TestWebCache:
     
     def test_cache_put_get(self, web_cache):
         """Test basic cache put and get operations"""
-        key = "test_key"
+        key = os.getenv("KEY", "")
         data = {"test": "data"}
         
         # Put data
@@ -254,7 +255,7 @@ class TestWebCache:
     
     def test_cache_miss(self, web_cache):
         """Test cache miss scenario"""
-        key = "nonexistent_key"
+        key = os.getenv("KEY", "")
         
         cached_data, hit = web_cache.get(key, "news")
         
@@ -263,7 +264,7 @@ class TestWebCache:
     
     def test_cache_expiration(self, web_cache):
         """Test cache expiration"""
-        key = "test_key"
+        key = os.getenv("KEY", "")
         data = {"test": "data"}
         
         # Put data with short TTL

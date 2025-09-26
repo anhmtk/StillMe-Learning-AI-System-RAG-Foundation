@@ -253,7 +253,7 @@ class SemanticSearchEngine:
         normalized = re.sub(r'[^\w\s]', ' ', normalized)
         
         # Create hash
-        content_hash = hashlib.md5(normalized.encode()).hexdigest()
+        content_hash = hashlib.sha256(normalized.encode()).hexdigest()
         
         # Convert hash to embedding vector
         embedding = []

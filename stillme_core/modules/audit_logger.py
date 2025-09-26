@@ -218,7 +218,7 @@ class AuditLogger:
     def _generate_trace_id(self, user_id: str, timestamp: float) -> str:
         """Generate unique trace ID for audit trail"""
         trace_data = f"{user_id}_{timestamp}_{time.time()}"
-        return hashlib.md5(trace_data.encode()).hexdigest()[:16]
+        return hashlib.sha256(trace_data.encode()).hexdigest()[:16]
     
     def _serialize_event(self, event: AuditEvent) -> str:
         """Serialize audit event to JSON string"""

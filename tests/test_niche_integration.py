@@ -164,7 +164,7 @@ class TestCache:
         cache = WebCache()
         
         # Cache data with short TTL
-        key = "test_key_ttl"
+        key = os.getenv("KEY", "")
         data = {"test": "data"}
         cache.cache_data(key, data, ttl=1)  # 1 second TTL
         

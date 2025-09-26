@@ -1,3 +1,4 @@
+import secrets
 #!/usr/bin/env python3
 """
 Install pre-commit hooks for NicheRadar v1.5
@@ -16,7 +17,7 @@ def run_command(command, description):
     print("-" * 50)
     
     try:
-        result = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
+        result = subprocess.run(command, shell=False, check=True, capture_output=True, text=True)
         print("✅ Success")
         if result.stdout:
             print("Output:", result.stdout)

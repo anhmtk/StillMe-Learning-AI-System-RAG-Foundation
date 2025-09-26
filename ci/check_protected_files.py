@@ -1,3 +1,4 @@
+import secrets
 #!/usr/bin/env python3
 """
 Protected Files Compliance Check

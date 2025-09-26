@@ -349,7 +349,7 @@ class StillMeGateway:
     def _generate_cache_key(self, message: str, user_id: str) -> str:
         """Generate cache key for request"""
         content = f"{message}:{user_id}"
-        return hashlib.md5(content.encode()).hexdigest()
+        return hashlib.sha256(content.encode()).hexdigest()
     
     async def _get_from_cache(self, key: str) -> Optional[dict]:
         """Get response from cache"""

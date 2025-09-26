@@ -475,8 +475,8 @@ class CollaborativeLearning:
     def _generate_dataset_id(self, name: str, contributor: str) -> str:
         """Generate unique dataset ID"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        name_hash = hashlib.md5(name.encode()).hexdigest()[:8]
-        contributor_hash = hashlib.md5(contributor.encode()).hexdigest()[:8]
+        name_hash = hashlib.sha256(name.encode()).hexdigest()[:8]
+        contributor_hash = hashlib.sha256(contributor.encode()).hexdigest()[:8]
         
         return f"dataset_{timestamp}_{name_hash}_{contributor_hash}"
     

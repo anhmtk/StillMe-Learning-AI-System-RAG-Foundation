@@ -512,12 +512,12 @@ class EthicalGuardrails:
         data_str = json.dumps(decision_data, sort_keys=True)
         context_str = json.dumps(context, sort_keys=True)
         combined = f"{data_str}_{context_str}"
-        return hashlib.md5(combined.encode()).hexdigest()[:16]
+        return hashlib.sha256(combined.encode()).hexdigest()[:16]
 
     def _hash_context(self, context: Dict[str, Any]) -> str:
         """Generate hash of context for caching"""
         context_str = json.dumps(context, sort_keys=True)
-        return hashlib.md5(context_str.encode()).hexdigest()[:8]
+        return hashlib.sha256(context_str.encode()).hexdigest()[:8]
 
     def _log_assessment(self, assessment: EthicalAssessment):
         """Log ethical assessment"""

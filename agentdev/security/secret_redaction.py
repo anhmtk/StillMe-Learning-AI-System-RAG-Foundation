@@ -1,3 +1,4 @@
+import secrets
 #!/usr/bin/env python3
 """
 AgentDev Secret Redaction - SEAL-GRADE

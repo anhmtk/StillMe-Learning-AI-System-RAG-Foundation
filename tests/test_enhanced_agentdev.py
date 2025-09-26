@@ -1,3 +1,4 @@
+import os
 
 # tests/test_enhanced_agentdev.py
 """
@@ -142,7 +143,7 @@ class TestSecurityScanner:
         insecure_file.write_text(
             """
 password = os.getenv("PASSWORD", "default_password")
-api_key = "sk-1234567890abcdef"
+api_key = os.getenv("API_KEY", "")
 """
         )
 
@@ -274,7 +275,7 @@ class TestRiskAssessor:
         risky_file = Path(self.temp_dir) / "risky.py"
         risky_file.write_text(
             """
-password = "secret123"
+password = os.getenv("PASSWORD", "")
 try:
     pass
 except:
@@ -317,7 +318,7 @@ def complex_function():
                 description="Hardcoded password",
                 file_path="test.py",
                 line_number=1,
-                code_snippet="password = 'secret'",
+                code_snippet="password = os.getenv("PASSWORD", "")",
                 impact="Security breach",
                 probability=0.8,
                 mitigation="Use environment variables",

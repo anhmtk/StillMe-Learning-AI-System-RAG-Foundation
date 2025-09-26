@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="1" failures="0" skipped="0" tests="1" time="1.938" timestamp="2025-09-26T23:30:30.283613+07:00" hostname="LAPTOP-HLG8B73I"><testcase classname="" name="tests.test_core_modules_comprehensive" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_core_modules_comprehensive.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_core_modules_comprehensive.py:31: in &lt;module&gt;
+    from stillme_core.security.security_manager import SecurityManager
+E   ModuleNotFoundError: No module named 'stillme_core.security'</error></testcase></testsuite></testsuites>

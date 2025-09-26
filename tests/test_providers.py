@@ -1,3 +1,4 @@
+import os
 """
 Tests for LLM provider abstraction and management.
 """
@@ -24,7 +25,7 @@ class TestProviderConfig:
         """Test creating a ProviderConfig."""
         config = ProviderConfig(
             name="test",
-            api_key="test-key",
+            api_key = os.getenv("API_KEY", ""),
             base_url="https://api.test.com",
             model="test-model"
         )
@@ -168,7 +169,7 @@ class TestProviderFactory:
         """Test creating a provider instance."""
         config = ProviderConfig(
             name="openai",
-            api_key="test-key",
+            api_key = os.getenv("API_KEY", ""),
             base_url="https://api.openai.com",
             model="gpt-3.5-turbo"
         )
@@ -181,7 +182,7 @@ class TestProviderFactory:
         """Test creating a provider with unknown type."""
         config = ProviderConfig(
             name="unknown",
-            api_key="test-key",
+            api_key = os.getenv("API_KEY", ""),
             base_url="https://api.test.com",
             model="test-model"
         )

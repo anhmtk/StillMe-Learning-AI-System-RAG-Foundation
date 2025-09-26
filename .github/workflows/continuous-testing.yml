@@ -1,0 +1,468 @@
+name: Continuous Testing & Monitoring
+
+on:
+  push:
+    branches: [ main, develop, feature/* ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      test_type:
+        description: 'Type of tests to run'
+        required: true
+        default: 'all'
+        type: choice
+        options:
+        - all
+        - unit
+        - integration
+        - security
+        - performance
+        - ethics
+
+env:
+  PYTHON_VERSION: '3.12'
+  NODE_VERSION: '18'
+
+jobs:
+  # Unit and Integration Tests
+  unit-integration-tests:
+    name: Unit & Integration Tests
+    runs-on: ubuntu-latest
+    if: github.event.inputs.test_type == 'all' || github.event.inputs.test_type == 'unit' || github.event.inputs.test_type == 'integration'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+          
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+        
+    - name: Run unit tests
+      run: |
+        python -m pytest tests/test_unit_*.py tests/test_learning_*.py tests/test_reward_*.py tests/test_meta_*.py tests/test_collab_*.py \
+          --cov=stillme_core \
+          --cov-report=xml:artifacts/coverage-unit.xml \
+          --cov-report=html:artifacts/coverage-unit.html \
+          --junitxml=artifacts/junit-unit.xml \
+          --maxfail=5 \
+          -v
+          
+    - name: Run integration tests
+      run: |
+        python -m pytest tests/test_integration_*.py \
+          --cov=stillme_core \
+          --cov-report=xml:artifacts/coverage-integration.xml \
+          --cov-report=html:artifacts/coverage-integration.html \
+          --junitxml=artifacts/junit-integration.xml \
+          --maxfail=3 \
+          -v
+          
+    - name: Upload unit test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: unit-test-results
+        path: |
+          artifacts/coverage-unit.xml
+          artifacts/coverage-unit.html
+          artifacts/junit-unit.xml
+          
+    - name: Upload integration test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: integration-test-results
+        path: |
+          artifacts/coverage-integration.xml
+          artifacts/coverage-integration.html
+          artifacts/junit-integration.xml
+
+  # Security Tests
+  security-tests:
+    name: Security Tests
+    runs-on: ubuntu-latest
+    if: github.event.inputs.test_type == 'all' || github.event.inputs.test_type == 'security'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Install security tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit safety semgrep pip-audit
+        pip install -r requirements.txt
+        
+    - name: Run Bandit security scan
+      run: |
+        bandit -r stillme_core/ -f json -o artifacts/bandit-report.json || true
+        bandit -r stillme_core/ -f txt -o artifacts/bandit-report.txt || true
+        
+    - name: Run Safety dependency scan
+      run: |
+        safety check --json --output artifacts/safety-report.json || true
+        safety check --output artifacts/safety-report.txt || true
+        
+    - name: Run Semgrep security scan
+      run: |
+        semgrep --config=auto stillme_core/ --json --output=artifacts/semgrep-report.json || true
+        semgrep --config=auto stillme_core/ --output=artifacts/semgrep-report.txt || true
+        
+    - name: Run pip-audit
+      run: |
+        pip-audit --format=json --output=artifacts/pip-audit-report.json || true
+        pip-audit --output=artifacts/pip-audit-report.txt || true
+        
+    - name: Run security test suite
+      run: |
+        python -m pytest tests/test_security_*.py \
+          --junitxml=artifacts/junit-security.xml \
+          --maxfail=3 \
+          -v
+          
+    - name: Upload security results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: security-test-results
+        path: |
+          artifacts/bandit-report.json
+          artifacts/bandit-report.txt
+          artifacts/safety-report.json
+          artifacts/safety-report.txt
+          artifacts/semgrep-report.json
+          artifacts/semgrep-report.txt
+          artifacts/pip-audit-report.json
+          artifacts/pip-audit-report.txt
+          artifacts/junit-security.xml
+
+  # Ethics Tests
+  ethics-tests:
+    name: Ethics Tests
+    runs-on: ubuntu-latest
+    if: github.event.inputs.test_type == 'all' || github.event.inputs.test_type == 'ethics'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run ethics test suite
+      run: |
+        python -m pytest tests/test_ethics_*.py \
+          --junitxml=artifacts/junit-ethics.xml \
+          --maxfail=2 \
+          -v
+          
+    - name: Run ethics test cases
+      run: |
+        python ethics-tests/runners/ethics_test_runner.py --all \
+          --output=artifacts/ethics-results.json \
+          --format=json
+          
+    - name: Upload ethics results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: ethics-test-results
+        path: |
+          artifacts/junit-ethics.xml
+          artifacts/ethics-results.json
+
+  # Performance Tests
+  performance-tests:
+    name: Performance Tests
+    runs-on: ubuntu-latest
+    if: github.event.inputs.test_type == 'all' || github.event.inputs.test_type == 'performance'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        
+    - name: Install k6
+      run: |
+        sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+        echo "deb https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+        sudo apt-get update
+        sudo apt-get install k6
+        
+    - name: Run k6 load tests
+      run: |
+        k6 run k6/load_test_seal_grade.js --out json=artifacts/k6-results.json || true
+        k6 run k6/soak_test_seal_grade.js --out json=artifacts/k6-soak-results.json || true
+        
+    - name: Run performance benchmarks
+      run: |
+        python scripts/performance_benchmark.py \
+          --output=artifacts/performance-results.json \
+          --duration=300
+          
+    - name: Upload performance results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: performance-test-results
+        path: |
+          artifacts/k6-results.json
+          artifacts/k6-soak-results.json
+          artifacts/performance-results.json
+
+  # Chaos and Resilience Tests
+  chaos-tests:
+    name: Chaos & Resilience Tests
+    runs-on: ubuntu-latest
+    if: github.event.inputs.test_type == 'all'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run chaos tests
+      run: |
+        python scripts/chaos_testing.py \
+          --scenarios=all \
+          --output=artifacts/chaos-results.json \
+          --duration=600
+          
+    - name: Upload chaos results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: chaos-test-results
+        path: artifacts/chaos-results.json
+
+  # Test Coverage Analysis
+  coverage-analysis:
+    name: Coverage Analysis
+    runs-on: ubuntu-latest
+    needs: [unit-integration-tests]
+    if: always()
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download test results
+      uses: actions/download-artifact@v3
+      with:
+        name: unit-test-results
+        path: artifacts/
+        
+    - name: Download integration results
+      uses: actions/download-artifact@v3
+      with:
+        name: integration-test-results
+        path: artifacts/
+        
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run coverage analysis
+      run: |
+        python scripts/improve_test_coverage.py \
+          --target=85 \
+          --output=artifacts/coverage_improvement_report.md
+          
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-analysis
+        path: artifacts/coverage_improvement_report.md
+
+  # Security Analysis
+  security-analysis:
+    name: Security Analysis
+    runs-on: ubuntu-latest
+    needs: [security-tests]
+    if: always()
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download security results
+      uses: actions/download-artifact@v3
+      with:
+        name: security-test-results
+        path: artifacts/
+        
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run security analysis
+      run: |
+        python scripts/security_hardening.py \
+          --output=artifacts/security_hardening_report.md
+          
+    - name: Upload security analysis
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-analysis
+        path: artifacts/security_hardening_report.md
+
+  # Test Results Summary
+  test-summary:
+    name: Test Results Summary
+    runs-on: ubuntu-latest
+    needs: [unit-integration-tests, security-tests, ethics-tests, performance-tests, chaos-tests, coverage-analysis, security-analysis]
+    if: always()
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+      with:
+        path: artifacts/
+        
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Generate test summary
+      run: |
+        python scripts/generate_test_summary.py \
+          --input=artifacts/ \
+          --output=artifacts/test_summary.md
+          
+    - name: Upload test summary
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-summary
+        path: artifacts/test_summary.md
+        
+    - name: Comment PR with results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const summary = fs.readFileSync('artifacts/test_summary.md', 'utf8');
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `## 🧪 Test Results Summary\n\n${summary}`
+          });
+
+  # Quality Gates
+  quality-gates:
+    name: Quality Gates
+    runs-on: ubuntu-latest
+    needs: [unit-integration-tests, security-tests, ethics-tests, performance-tests]
+    if: always()
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Download test results
+      uses: actions/download-artifact@v3
+      with:
+        path: artifacts/
+        
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        
+    - name: Run quality gates
+      run: |
+        python scripts/quality_gates.py \
+          --coverage-threshold=85 \
+          --security-threshold=75 \
+          --performance-threshold=90 \
+          --ethics-threshold=95 \
+          --input=artifacts/ \
+          --output=artifacts/quality_gates_report.md
+          
+    - name: Upload quality gates report
+      uses: actions/upload-artifact@v3
+      with:
+        name: quality-gates
+        path: artifacts/quality_gates_report.md
+        
+    - name: Fail if quality gates not met
+      run: |
+        if grep -q "❌ QUALITY GATES FAILED" artifacts/quality_gates_report.md; then
+          echo "Quality gates failed!"
+          exit 1
+        else
+          echo "Quality gates passed!"
+        fi

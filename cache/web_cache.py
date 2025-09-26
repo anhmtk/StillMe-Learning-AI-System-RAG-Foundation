@@ -257,7 +257,7 @@ class WebCache:
         
         # Create hash
         key_data = f"{tool_name}:{param_str}"
-        return hashlib.md5(key_data.encode('utf-8')).hexdigest()
+        return hashlib.sha256(key_data.encode('utf-8')).hexdigest()
     
     def get_cache_info(self, key: str) -> Optional[Dict[str, Any]]:
         """Get detailed cache entry information"""

@@ -213,7 +213,7 @@ class SelfImprovementManager:
     def _generate_change_id(self, change_type: str, file_path: str) -> str:
         """Tạo ID duy nhất cho đề xuất thay đổi"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        content_hash = hashlib.md5(
+        content_hash = hashlib.sha256(
             f"{change_type}_{file_path}_{timestamp}".encode()
         ).hexdigest()[:8]
         return f"{change_type}_{timestamp}_{content_hash}"

@@ -314,16 +314,23 @@ class LearningMetricsCollector:
     
     async def _log_validation_to_transparency(self, metrics: LearningValidationMetrics):
         """Log validation results to transparency logger"""
-        await self.transparency_logger.log_decision(
-            decision_type="learning_validation",
-            decision_data={
-                "session_id": metrics.session_id,
+        self.transparency_logger.log_decision(
+            event_type="learning_validation",
+            module="LearningMetricsCollector",
+            input_data={"session_id": metrics.session_id},
+            output_data={
                 "success_rate": metrics.success_rate,
                 "accuracy_delta": metrics.overall_accuracy_delta,
                 "safety_violation_rate": metrics.safety_violation_rate
             },
-            rationale=f"Learning validation completed with {metrics.success_rate:.2%} success rate",
-            confidence=metrics.success_rate
+            decision_factors=[
+                {"factor": "success_rate", "value": metrics.success_rate},
+                {"factor": "accuracy_delta", "value": metrics.overall_accuracy_delta},
+                {"factor": "safety_violation_rate", "value": metrics.safety_violation_rate}
+            ],
+            confidence_scores={"overall": metrics.success_rate},
+            reasoning=f"Learning validation completed with {metrics.success_rate:.2%} success rate",
+            metadata={"session_id": metrics.session_id}
         )
     
     async def _check_safety_thresholds(self, metrics: LearningValidationMetrics):

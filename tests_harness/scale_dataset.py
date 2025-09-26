@@ -1,3 +1,4 @@
+import secrets
 #!/usr/bin/env python3
 """
 Scale Dataset - Tăng dataset từ 50 lên 1000+ mẫu
@@ -283,8 +284,8 @@ class DatasetScaler:
             
             # Add context
             case["context"] = {
-                "session_id": f"session_{random.randint(1000, 9999)}",
-                "user_id": f"user_{random.randint(100, 999)}",
+                "session_id": f"session_{secrets.randbelow(1000, 9999)}",
+                "user_id": f"user_{secrets.randbelow(100, 999)}",
                 "timestamp": datetime.now().isoformat()
             }
         

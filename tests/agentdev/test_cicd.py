@@ -1,3 +1,4 @@
+import secrets
 """
 SEAL-GRADE CI/CD Tests
 Comprehensive testing for CI/CD pipeline components

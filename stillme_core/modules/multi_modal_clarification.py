@@ -78,7 +78,7 @@ class VisualClarifier:
                 "size": image.size,
                 "mode": image.mode,
                 "size_mb": size_mb,
-                "hash": hashlib.md5(image_bytes).hexdigest()[:16]
+                "hash": hashlib.sha256(image_bytes).hexdigest()[:16]
             }
         except Exception as e:
             return {"valid": False, "error": f"Invalid image data: {str(e)}"}

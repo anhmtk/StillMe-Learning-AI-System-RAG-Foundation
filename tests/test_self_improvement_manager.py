@@ -1,3 +1,4 @@
+import subprocess
 """
 Unit tests cho SelfImprovementManager
 

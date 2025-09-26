@@ -675,7 +675,7 @@ class DataValidationFramework:
         sorted_items = sorted(normalized.items())
         hash_string = json.dumps(sorted_items, sort_keys=True)
 
-        return hashlib.md5(hash_string.encode()).hexdigest()
+        return hashlib.sha256(hash_string.encode()).hexdigest()
 
     def _has_logical_inconsistencies(self, record: Dict[str, Any]) -> bool:
         """Check for logical inconsistencies in record"""

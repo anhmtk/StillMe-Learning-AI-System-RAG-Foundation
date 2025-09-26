@@ -1,3 +1,4 @@
+import secrets
 #!/usr/bin/env python3
 """
 AgentDev CLI - Resume Handler
@@ -185,7 +186,7 @@ class ResumeHandler:
         
         # Simulate occasional failures for testing
         import random
-        if random.random() < 0.1:  # 10% failure rate
+        if secrets.randbelow() < 0.1:  # 10% failure rate
             raise Exception("Simulated step failure")
     
     async def list_resumable_jobs(self) -> List[Dict[str, Any]]:

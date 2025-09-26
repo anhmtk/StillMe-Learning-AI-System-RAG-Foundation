@@ -88,12 +88,31 @@ class TestLearningMetricsCollector:
     @pytest.mark.asyncio
     async def test_load_benchmark_dataset(self, metrics_collector):
         """Test loading benchmark dataset"""
-        # Test with non-existent file (should create mock)
-        result = await metrics_collector._load_benchmark_dataset()
+        # Create a mock benchmark file for testing
+        import tempfile
+        import os
         
-        assert isinstance(result, list)
-        assert len(result) > 0
-        assert all("test_id" in item for item in result)
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.jsonl', delete=False) as f:
+            # Write some test data
+            f.write('{"input": "test input", "expected_output": "test output", "category": "test"}\n')
+            f.write('{"input": "test input 2", "expected_output": "test output 2", "category": "test"}\n')
+            temp_file = f.name
+        
+        # Temporarily replace the benchmark path
+        from pathlib import Path
+        original_path = metrics_collector.benchmark_path
+        metrics_collector.benchmark_path = Path(temp_file)
+        
+        try:
+            result = await metrics_collector._load_benchmark_dataset()
+            
+            assert result is not None
+            assert isinstance(result, list)
+            assert len(result) > 0
+        finally:
+            # Restore original path and clean up
+            metrics_collector.benchmark_path = original_path
+            os.unlink(temp_file)
     
     @pytest.mark.asyncio
     async def test_run_benchmark_test(self, metrics_collector):

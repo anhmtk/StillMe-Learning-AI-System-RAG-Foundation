@@ -327,7 +327,7 @@ class ExperienceMemory:
     def _generate_experience_id(self, context: Dict[str, Any], action: str) -> str:
         """Generate unique experience ID"""
         data_str = json.dumps(context, sort_keys=True) + action
-        hash_str = hashlib.md5(data_str.encode()).hexdigest()[:16]
+        hash_str = hashlib.sha256(data_str.encode()).hexdigest()[:16]
         timestamp = int(time.time())
         return f"EXP_{timestamp}_{hash_str}"
 
@@ -617,7 +617,7 @@ class ExperienceMemory:
     def _generate_pattern_id(self, conditions: Dict[str, Any]) -> str:
         """Generate unique pattern ID"""
         conditions_str = json.dumps(conditions, sort_keys=True)
-        hash_str = hashlib.md5(conditions_str.encode()).hexdigest()[:16]
+        hash_str = hashlib.sha256(conditions_str.encode()).hexdigest()[:16]
         timestamp = int(time.time())
         return f"PAT_{timestamp}_{hash_str}"
 

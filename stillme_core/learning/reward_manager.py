@@ -469,3 +469,14 @@ class RewardManager:
             json.dump(data, f, indent=2, ensure_ascii=False)
         
         self.logger.info(f"💾 Learning data saved to {data_file}")
+    
+    def get_development_status(self) -> Dict[str, Any]:
+        """Get development status and statistics"""
+        return {
+            "total_sessions": len(self.sessions),
+            "total_rewards": sum(len(session.rewards) for session in self.sessions.values()),
+            "total_penalties": sum(len(session.penalties) for session in self.sessions.values()),
+            "avg_reward_per_session": self._calculate_avg_reward_per_session() if hasattr(self, '_calculate_avg_reward_per_session') else 0.0,
+            "development_phase": "experimental",
+            "last_updated": datetime.now().isoformat()
+        }

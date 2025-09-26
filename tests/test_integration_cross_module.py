@@ -1,3 +1,4 @@
+import secrets
 """
 SEAL-GRADE SYSTEM TESTS - Integration Tests for Cross-Module Communication
 Kiểm thử tích hợp cho giao tiếp liên module
@@ -316,7 +317,7 @@ class TestChaosEngineering:
         
         for i in range(total_requests):
             # Simulate 10% drop rate
-            if random.random() < (drop_percent / 100):
+            if secrets.randbelow() < (drop_percent / 100):
                 # Network drop - simulate failure
                 mock_api_manager.send_request.side_effect = Exception("Network error")
                 try:

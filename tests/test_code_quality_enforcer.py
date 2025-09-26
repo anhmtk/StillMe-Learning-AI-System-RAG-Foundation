@@ -1,3 +1,4 @@
+import subprocess
 """
 Tests for Code Quality Enforcer
 

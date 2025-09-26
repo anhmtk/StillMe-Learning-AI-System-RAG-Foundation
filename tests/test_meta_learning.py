@@ -160,21 +160,22 @@ class TestMetaLearningManager:
     @pytest.mark.asyncio
     async def test_get_learning_recommendations(self, meta_learning_manager):
         """Test getting learning recommendations"""
-        # Create sessions with various issues
-        await meta_learning_manager.record_learning_session(
-            session_id="test_session_1",
-            user_id="user_123",
-            start_time="2025-01-27T10:00:00Z",
-            end_time="2025-01-27T10:30:00Z",
-            fix_attempts=5,
-            successful_fixes=2,  # Low success rate
-            rollback_count=2,   # High rollback rate
-            reward_score=1.0,
-            penalty_score=-2.0,
-            accuracy_improvement=0.05,
-            error_types={"syntax": 3},
-            safety_violations=1  # Safety violation
-        )
+        # Create multiple sessions with various issues
+        for i in range(5):
+            await meta_learning_manager.record_learning_session(
+                session_id=f"test_session_{i}",
+                user_id="user_123",
+                start_time=f"2025-01-27T{10+i}:00:00Z",
+                end_time=f"2025-01-27T{10+i}:30:00Z",
+                fix_attempts=5,
+                successful_fixes=2,  # Low success rate
+                rollback_count=2,   # High rollback rate
+                reward_score=1.0,
+                penalty_score=-2.0,
+                accuracy_improvement=0.05,
+                error_types={"syntax": 3},
+                safety_violations=1  # Safety violation
+            )
         
         recommendations = await meta_learning_manager.get_learning_recommendations("user_123")
         

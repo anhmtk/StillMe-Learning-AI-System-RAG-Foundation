@@ -1,55 +1,38 @@
 {
   "security": {
-    "authentication": {
-      "jwt_secret": "auto_generated_secure_key",
-      "token_expiry": 3600,
-      "refresh_token_expiry": 86400,
-      "algorithm": "HS256"
-    },
+    "enabled": true,
     "encryption": {
       "algorithm": "AES-256-GCM",
-      "key_rotation_interval": 86400,
-      "salt_length": 32
-    },
-    "rate_limiting": {
-      "enabled": true,
-      "default_limit": 100,
-      "login_limit": 10,
-      "api_limit": 1000,
-      "window_size": 60
-    },
-    "headers": {
-      "x_frame_options": "DENY",
-      "x_content_type_options": "nosniff",
-      "x_xss_protection": "1; mode=block",
-      "strict_transport_security": "max-age=31536000; includeSubDomains",
-      "content_security_policy": "default-src 'self'"
-    },
-    "cors": {
-      "enabled": true,
-      "allowed_origins": ["http://localhost:3000", "http://localhost:8000"],
-      "allowed_methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-      "allowed_headers": ["Content-Type", "Authorization", "X-Requested-With"],
-      "allow_credentials": true
+      "key_rotation_days": 90
     },
     "input_validation": {
-      "enabled": true,
-      "max_string_length": 10000,
-      "max_file_size": 10485760,
-      "allowed_file_types": ["txt", "json", "py", "md"],
-      "sanitize_html": true
+      "max_input_length": 10000,
+      "sanitize_html": true,
+      "validate_file_uploads": true
     },
-    "logging": {
-      "security_events": true,
-      "failed_attempts": true,
-      "sensitive_data_masking": true,
-      "audit_trail": true
+    "authentication": {
+      "session_timeout": 3600,
+      "max_login_attempts": 5,
+      "lockout_duration": 1800
     },
-    "session": {
-      "secure_cookies": true,
-      "http_only": true,
-      "same_site": "strict",
-      "session_timeout": 3600
+    "rate_limiting": {
+      "requests_per_minute": 60,
+      "burst_limit": 10
+    },
+    "cors": {
+      "allowed_origins": [
+        "https://stillme.ai"
+      ],
+      "allowed_methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "allowed_headers": [
+        "Content-Type",
+        "Authorization"
+      ]
     }
   }
 }

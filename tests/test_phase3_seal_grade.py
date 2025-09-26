@@ -1,3 +1,4 @@
+import secrets
 #!/usr/bin/env python3
 """
 🧪 SEAL-GRADE Test Suite - Phase 3 Clarification Core
@@ -442,7 +443,7 @@ def export_data():
     
     def test_pii_redaction_password(self) -> bool:
         """Test: Password in input → must be redacted"""
-        input_with_password = "My password is secret123"
+        input_with_password = os.getenv("PASSWORD", "")
         
         self.audit_logger.log_clarification_request(
             "user123", "session456", input_with_password, "text", "generic", "careful", {}
@@ -458,7 +459,7 @@ def export_data():
     
     def test_pii_redaction_api_key(self) -> bool:
         """Test: API key in input → must be redacted"""
-        input_with_api_key = "My API key is sk-1234567890abcdef"
+        input_with_api_key = os.getenv("API_KEY", "")
         
         self.audit_logger.log_clarification_request(
             "user123", "session456", input_with_api_key, "text", "generic", "careful", {}
@@ -619,7 +620,7 @@ def export_data():
     
     def test_unicode_fuzz_input(self) -> bool:
         """Test: Random Unicode input → no crash, no plaintext injection"""
-        unicode_input = "".join([chr(random.randint(0, 0x10FFFF)) for _ in range(100)])
+        unicode_input = "".join([chr(secrets.randbelow(0, 0x10FFFF)) for _ in range(100)])
         
         result = self.handler.detect_ambiguity(unicode_input)
         assert result is not None  # Should not crash

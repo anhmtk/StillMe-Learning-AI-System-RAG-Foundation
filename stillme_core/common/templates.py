@@ -165,7 +165,7 @@ class SecurityValidator:
             if re.search(pattern, text, re.IGNORECASE | re.DOTALL):
                 logger.warning(
                     f"Dangerous pattern detected: {pattern}",
-                    input_hash=hashlib.md5(text.encode()).hexdigest()[:8],
+                    input_hash=hashlib.sha256(text.encode()).hexdigest()[:8],
                 )
                 raise SecurityError(f"Dangerous content detected: {pattern}")
 
@@ -453,7 +453,7 @@ class TemplateManager:
             if not config or config.audit_logging:
                 self.logger.info(
                     f"Template rendered: {template_name}",
-                    context_hash=hashlib.md5(
+                    context_hash=hashlib.sha256(
                         str(context.variables).encode()
                     ).hexdigest()[:8],
                     output_length=len(rendered),

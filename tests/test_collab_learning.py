@@ -52,11 +52,18 @@ class TestCollaborativeLearning:
         """Create mock dataset file for testing"""
         dataset_file = Path(temp_dir) / "test_dataset.jsonl"
         
-        # Create valid dataset content
+        # Create valid dataset content with enough records
         valid_records = [
             {"input": "def hello():\n    return 'world'", "expected_output": "def hello():\n    return 'world'", "category": "syntax"},
             {"input": "def add(a, b):\n    return a + b", "expected_output": "def add(a, b):\n    return a + b", "category": "logic"},
-            {"input": "What is Python?", "expected_output": "Python is a programming language", "category": "knowledge"}
+            {"input": "What is Python?", "expected_output": "Python is a programming language", "category": "knowledge"},
+            {"input": "def multiply(x, y):\n    return x * y", "expected_output": "def multiply(x, y):\n    return x * y", "category": "logic"},
+            {"input": "How to create a list?", "expected_output": "Use square brackets: []", "category": "knowledge"},
+            {"input": "def divide(a, b):\n    return a / b", "expected_output": "def divide(a, b):\n    return a / b", "category": "logic"},
+            {"input": "What is a function?", "expected_output": "A reusable block of code", "category": "knowledge"},
+            {"input": "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n-1)", "expected_output": "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n-1)", "category": "recursion"},
+            {"input": "How to import modules?", "expected_output": "Use import statement", "category": "knowledge"},
+            {"input": "def fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n-1) + fibonacci(n-2)", "expected_output": "def fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n-1) + fibonacci(n-2)", "category": "recursion"}
         ]
         
         with open(dataset_file, 'w', encoding='utf-8') as f:

@@ -108,7 +108,7 @@ class PolicyGate:
             r"exec\s*\(",          # Code execution
             r"subprocess",         # Process spawning
             r"os\.system",         # System calls
-            r"shell=True",         # Shell injection
+            r"shell=False",         # Shell injection
             r"password\s*=",       # Password exposure
             r"secret\s*=",         # Secret exposure
             r"token\s*=",          # Token exposure

@@ -212,7 +212,7 @@ class SelfImprovementEngine:
         # Common error patterns
         if "import" in content.lower():
             patterns.append(Pattern(
-                pattern_id=f"import_issue_{hashlib.md5(content.encode()).hexdigest()[:8]}",
+                pattern_id=f"import_issue_{hashlib.sha256(content.encode()).hexdigest()[:8]}",
                 pattern_type="import_error",
                 frequency=1,
                 examples=[content],
@@ -222,7 +222,7 @@ class SelfImprovementEngine:
         
         if "async" in content.lower():
             patterns.append(Pattern(
-                pattern_id=f"async_issue_{hashlib.md5(content.encode()).hexdigest()[:8]}",
+                pattern_id=f"async_issue_{hashlib.sha256(content.encode()).hexdigest()[:8]}",
                 pattern_type="async_error",
                 frequency=1,
                 examples=[content],
@@ -232,7 +232,7 @@ class SelfImprovementEngine:
         
         if "test" in content.lower():
             patterns.append(Pattern(
-                pattern_id=f"test_issue_{hashlib.md5(content.encode()).hexdigest()[:8]}",
+                pattern_id=f"test_issue_{hashlib.sha256(content.encode()).hexdigest()[:8]}",
                 pattern_type="test_error",
                 frequency=1,
                 examples=[content],
@@ -245,7 +245,7 @@ class SelfImprovementEngine:
     async def _update_knowledge_base(self, feedback: FeedbackEntry):
         """Update knowledge base with feedback"""
         # Create knowledge entry
-        entry_id = f"feedback_{hashlib.md5(feedback.feedback_content.encode()).hexdigest()[:8]}"
+        entry_id = f"feedback_{hashlib.sha256(feedback.feedback_content.encode()).hexdigest()[:8]}"
         
         knowledge_entry = KnowledgeEntry(
             entry_id=entry_id,

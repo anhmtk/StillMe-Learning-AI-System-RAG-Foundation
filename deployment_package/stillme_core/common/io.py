@@ -103,7 +103,7 @@ class FileManager:
 
     def _calculate_checksum(self, path: Path) -> str:
         """Calculate file checksum - Tính checksum file"""
-        hash_md5 = hashlib.md5()
+        hash_md5 = hashlib.sha256()
         with open(path, "rb") as f:
             for chunk in iter(lambda: f.read(4096), b""):
                 hash_md5.update(chunk)

@@ -270,7 +270,7 @@ class DAGExecutor:
         elif key_strategy == 'task_input_hash':
             # Create hash of inputs
             inputs_str = json.dumps(inputs, sort_keys=True, default=str)
-            inputs_hash = hashlib.md5(inputs_str.encode()).hexdigest()
+            inputs_hash = hashlib.sha256(inputs_str.encode()).hexdigest()
             return f"{node_name}:{inputs_hash}"
         elif key_strategy == 'custom':
             # Use custom key generation
@@ -279,7 +279,7 @@ class DAGExecutor:
             custom_key = custom_key.replace('node_name', node_name)
             if 'parameters_hash' in custom_key:
                 params_str = json.dumps(inputs, sort_keys=True, default=str)
-                params_hash = hashlib.md5(params_str.encode()).hexdigest()
+                params_hash = hashlib.sha256(params_str.encode()).hexdigest()
                 custom_key = custom_key.replace('parameters_hash', params_hash)
             return custom_key
         
