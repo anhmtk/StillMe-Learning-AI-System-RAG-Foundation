@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: StillMe AI Community
+    url: https://github.com/stillme-ai/community
+    about: Join our community discussions and get help from other users
+  - name: StillMe AI Documentation
+    url: https://docs.stillme.ai
+    about: Check our documentation for guides and API references
+  - name: StillMe AI Security
+    url: https://security.stillme.ai
+    about: Report security vulnerabilities through our security program

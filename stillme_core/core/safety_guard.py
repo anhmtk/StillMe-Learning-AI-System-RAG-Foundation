@@ -33,6 +33,7 @@ except ImportError:
         return "Xin lỗi, mình không thể hỗ trợ yêu cầu này."
 
 
+# Security patterns for injection detection (English and Vietnamese)
 INJECTION_PATTERNS = [
     r"\b(ignore|bỏ qua)\b.+\b(instruction|hướng dẫn|previous)\b",
     r"\b(reveal|show|in ra|tiết lộ)\b.+\b(system\s*prompt|bí mật|secret)\b",
@@ -43,16 +44,22 @@ INJECTION_PATTERNS = [
     r"\b(educational purposes|mục đích giáo dục)\b",
     r"\b(testing AI safety|kiểm thử an toàn AI)\b",
 ]
+
+# Extremism detection patterns (English and Vietnamese)
 EXTREMISM_PATTERNS = [
     r"\b(cực đoan|extremis\w+|tán dương nhóm)\b",
     r"\b(terrorist|khủng bố|extremist group)\b",
     r"\b(radical|cực đoan|fanatic)\b",
 ]
+
+# Violence detection patterns (English and Vietnamese)
 VIOLENCE_PATTERNS = [
     r"\b(bạo lực|giết|tấn công|đánh bom)\b",
     r"\b(violence|kill|attack|bomb|murder)\b",
     r"\b(weapon|vũ khí|gun|súng)\b",
 ]
+
+# Illegal activities detection patterns (English and Vietnamese)
 ILLEGAL_PATTERNS = [
     r"\b(cách chế|làm bom|hack|carding|thuốc phiện)\b",
     r"\b(make bomb|how to make bomb|bombs|hack|illegal|phạm pháp)\b",
