@@ -34,15 +34,20 @@ def test_shadow_enforced():
     assert isinstance(result.get("trace_id"), str)
 
 
-def test_log_contains_why_reflex(logger_capture):
+def test_log_contains_why_reflex(capsys):
     engine = ReflexEngine(ReflexConfig(enabled=True, shadow_mode=True, policy="balanced"))
     _ = engine.analyze(text="hi", context={})
-    # Find a log line that contains event reflex_shadow_decision
+    
+    # Check stderr for log output
+    captured = capsys.readouterr()
+    stderr_lines = captured.err.strip().split('\n')
+    
+    # Find a log line that contains event reflex_decision
     found = False
-    for msg in logger_capture.records:
-        if "reflex_shadow_decision" in msg:
-            payload = json.loads(msg)
-            assert payload.get("shadow") is True
+    for line in stderr_lines:
+        if "reflex_decision" in line:
+            payload = json.loads(line)
+            assert payload.get("shadow_mode") is True
             assert payload.get("why_reflex") is not None
             found = True
             break

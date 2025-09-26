@@ -1526,3 +1526,84 @@ StillMe AI Server (FastAPI - Port 1216)
 - **Stable Connection**: Kết nối ổn định, không bị ngắt
 - **Professional UI**: Giao diện đẹp, dễ sử dụng
 - **Reflection Controller**: Hệ thống phản tư có giới hạn để nâng cao chất lượng phản hồi
+
+## 🧠 **REFLEX ENGINE - HABIT + SAFETY REFLEX SYSTEM**
+
+### **🎯 Overview**
+The Reflex Engine is a sophisticated habit learning and safety-aware decision system that enables fast, context-aware responses while maintaining strict safety and privacy controls. It operates in **shadow mode** by default, allowing for safe evaluation and gradual rollout.
+
+### **🛡️ Ethics/Security First**
+- **Privacy by Design**: Opt-in habit learning, cue hashing, TTL/retention
+- **Progressive Safety**: Fast → Deep check escalation with circuit breaker
+- **Shadow Mode**: Safe evaluation without side effects
+- **GDPR Compliance**: Export/delete capabilities, data minimization
+- **Threat Mitigation**: Habit poisoning prevention, injection attack blocking
+
+### **⚡ Reflex Engine (Shadow Mode)**
+- **Pattern Matching**: Aho-Corasick + Unicode normalization + emoji-safe processing
+- **Multi-Score Decision**: Combines pattern, context, history, and abuse scores
+- **Policy Levels**: Strict/Balanced/Creative modes with ENV overrides
+- **Habit Learning**: Opt-in privacy, quorum requirements, decay mechanism
+- **Observability**: Structured logging, metrics, shadow evaluation reports
+
+### **📊 Current Status**
+- ✅ **Phase 1 Complete**: All components implemented and tested
+- ✅ **50+ Tests Passing**: Comprehensive test coverage
+- ✅ **Privacy Controls**: GDPR-compliant with opt-out defaults
+- ✅ **Security Measures**: Progressive safety with circuit breaker
+- 🔄 **Shadow Evaluation**: Ongoing performance monitoring
+- 📋 **Ready for Phase 2**: Gated rollout (5% traffic)
+
+### **🚀 How to Run Tests**
+```bash
+# Run all Reflex Engine tests
+pytest tests/test_reflex_engine_*.py tests/test_pattern_matcher.py tests/test_reflex_policy.py tests/test_reflex_safety.py tests/test_action_sandbox.py tests/test_habit_store.py tests/test_observability.py -v
+
+# Run specific test categories
+pytest -m "unit"           # Unit tests
+pytest -m "integration"    # Integration tests  
+pytest -m "security"       # Security tests
+
+# Generate shadow evaluation report
+python scripts/generate_shadow_report.py --output docs/REFLEX_SHADOW_EVAL.md
+```
+
+### **📚 Documentation**
+- **[Reflex Engine Guide](docs/REFLEX_ENGINE.md)**: Complete technical documentation
+- **[Privacy Mode](docs/PRIVACY_MODE.md)**: Privacy controls and GDPR compliance
+- **[Shadow Evaluation](docs/REFLEX_SHADOW_EVAL.md)**: Performance monitoring reports
+
+### **🔧 Configuration**
+```yaml
+# config/reflex_engine.yaml
+enabled: true
+shadow_mode: true
+policy: "balanced"
+
+privacy:
+  enabled: true
+  habits_opt_in: false  # Default: opt-out for privacy
+  hash_cues: true
+  ttl_days: 90
+
+observability:
+  log_level: "INFO"
+  log_format: "json"
+  enable_metrics: true
+  enable_shadow_evaluation: true
+```
+
+### **🎯 Rollout Plan**
+1. **Phase 1**: Shadow Mode ✅ (Current - All components implemented)
+2. **Phase 2**: Gated Rollout (5% traffic) - Monitor metrics closely
+3. **Phase 3**: Canary Deployment (25% traffic) - A/B testing
+4. **Phase 4**: Full Production (100% traffic) - Complete rollout
+
+### **📈 Production Readiness Criteria**
+To move out of shadow mode:
+- **Precision ≥ 95%**: Reflex decisions are highly accurate
+- **Recall ≥ 80%**: Reflex catches most appropriate cases  
+- **FP Rate ≤ 5%**: Low false positive rate
+- **P95 Processing Time ≤ 10ms**: Fast enough for production
+- **Zero Security Issues**: No secrets or PII leaks
+- **Sufficient Data**: At least 100 evaluation samples
