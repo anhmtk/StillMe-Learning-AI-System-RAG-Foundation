@@ -24,3 +24,46 @@ thresholds:
 logging:
   rationale: true
 
+# Privacy settings
+privacy:
+  enabled: true
+  habits_opt_in: false  # Default: opt-out for privacy
+  hash_cues: true
+  ttl_days: 90
+
+# Quorum settings for habit learning
+quorum:
+  threshold: 3
+  window_days: 7
+
+# Decay settings for habits
+decay:
+  half_life_days: 30
+  min_threshold: 0.1
+
+# Observability settings
+observability:
+  log_level: "INFO"
+  log_format: "json"
+  enable_metrics: true
+  enable_shadow_evaluation: true
+  
+  # Shadow evaluation settings
+  shadow_evaluation:
+    evaluation_window_hours: 24
+    min_samples_for_evaluation: 100
+    precision_threshold: 0.95
+    recall_threshold: 0.80
+    fp_rate_threshold: 0.05
+    max_processing_time_ms: 10.0
+
+# Feature flags
+features:
+  reflex_engine:
+    enabled: true
+    shadow_mode: true
+  habit_learning:
+    enabled: false  # Requires opt-in
+  observability:
+    enabled: true
+

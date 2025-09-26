@@ -70,6 +70,41 @@ except Exception:  # pragma: no cover
                    dry_run: Optional[bool] = None) -> Dict[str, Any]:
             return {"ok": True, "dry_run": self.dry_run, "action": action, "params": params}
 
+try:
+    from .habit_store import HabitStore
+except Exception:  # pragma: no cover
+    class HabitStore:  # type: ignore
+        def __init__(self, config: Optional[Dict[str, Any]] = None):
+            self.config = config or {}
+
+        def is_enabled(self) -> bool:
+            return False
+
+        def get_habit_score(self, cue: str) -> Tuple[float, Optional[str]]:
+            return 0.0, None
+
+        def observe_cue(self, cue: str, action: str, confidence: float = 1.0, 
+                       user_id: Optional[str] = None, tenant_id: Optional[str] = None) -> bool:
+            return False
+
+try:
+    from .observability import ObservabilityManager
+except Exception:  # pragma: no cover
+    class ObservabilityManager:  # type: ignore
+        def __init__(self, config: Optional[Dict[str, Any]] = None):
+            self.config = config or {}
+
+        def log_reflex_decision(self, trace_id: str, decision: str, confidence: float,
+                               processing_time_ms: float, scores: Dict[str, float],
+                               why_reflex: Dict[str, Any], user_id: Optional[str] = None,
+                               tenant_id: Optional[str] = None, shadow_mode: bool = True):
+            pass
+
+        def log_shadow_evaluation(self, trace_id: str, reflex_decision: str, 
+                                 reasoning_decision: str, processing_time_ms: float,
+                                 scores: Dict[str, float]):
+            pass
+
 
 logger = logging.getLogger(__name__)
 
@@ -105,6 +140,8 @@ class ReflexEngine:
         self.policy = ReflexPolicy(self.config.policy)
         self.safety = ReflexSafety()
         self.sandbox = ActionSandbox({"dry_run": True})
+        self.habit_store = HabitStore({})
+        self.observability = ObservabilityManager({})
 
     @staticmethod
     def _new_trace_id() -> str:
@@ -122,6 +159,7 @@ class ReflexEngine:
         Analyze input with shadow reflex logic and ALWAYS fallback.
         Returns a dict containing trace_id and decision metadata.
         """
+        start_time = time.time()
         trace_id = self._new_trace_id()
 
         if not self.config.enabled:
@@ -137,17 +175,21 @@ class ReflexEngine:
         
         # Step 2: pattern match (real implementation)
         match_result = self.matcher.match(text, context or {})
+        
+        # Step 3: Get habit score (if habit store enabled)
+        habit_score, habit_action = self.habit_store.get_habit_score(text)
+        
         scores = {
             "pattern_score": match_result.get("pattern_score"),
             "context_score": None,
-            "history_score": None,
+            "history_score": habit_score,  # Use habit score as history score
             "abuse_score": None,
         }
 
-        # Step 3: policy decision with context
+        # Step 4: policy decision with context
         decision, confidence = self.policy.decide(scores, context)
 
-        # Step 4: Action sandbox (if policy allows reflex)
+        # Step 5: Action sandbox (if policy allows reflex)
         action_result = None
         if decision == "allow_reflex" and safety_result.get("safe", False):
             # In shadow mode, always execute in dry_run
@@ -159,40 +201,72 @@ class ReflexEngine:
             )
 
         # Shadow mode: enforce fallback, never act
+        original_decision = decision
         decision = "fallback"
 
-        log_payload = {
-            "timestamp": int(time.time() * 1000),
-            "trace_id": trace_id,
-            "user_id": user_id,
-            "tenant_id": tenant_id,
-            "event": "reflex_shadow_decision",
-            "mode": "shadow",
-            "shadow": True,
-            "why_reflex": {
-                "scores": scores,
-                "matches": match_result.get("matches", []),
-                "pattern_hits": len(match_result.get("matches", [])),
-                "pattern_score": match_result.get("pattern_score"),
-                "match_time_us": match_result.get("match_time_us"),
-                "policy": self.config.policy,
-                "confidence": confidence,
-                "breakdown": self.policy.get_breakdown(scores, context),
-                "safety_result": safety_result,
-                "action_result": action_result,
-            },
-            "action": decision,
+        # Calculate processing time
+        processing_time_ms = (time.time() - start_time) * 1000
+
+        # Prepare why_reflex payload
+        why_reflex = {
+            "scores": scores,
+            "matches": match_result.get("matches", []),
+            "pattern_hits": len(match_result.get("matches", [])),
+            "pattern_score": match_result.get("pattern_score"),
+            "match_time_us": match_result.get("match_time_us"),
+            "habit_score": habit_score,
+            "habit_action": habit_action,
+            "policy": self.config.policy,
+            "confidence": confidence,
+            "breakdown": self.policy.get_breakdown(scores, context),
+            "safety_result": safety_result,
+            "action_result": action_result,
+            "original_decision": original_decision,
+            "processing_time_ms": processing_time_ms,
         }
-        try:
-            logger.info(json.dumps(log_payload, ensure_ascii=False))
-        except Exception:
-            logger.info(str(log_payload))
+
+        # Log via observability manager
+        self.observability.log_reflex_decision(
+            trace_id=trace_id,
+            decision=decision,
+            confidence=confidence,
+            processing_time_ms=processing_time_ms,
+            scores=scores,
+            why_reflex=why_reflex,
+            user_id=user_id,
+            tenant_id=tenant_id,
+            shadow_mode=True
+        )
+
+        # Log shadow evaluation (compare reflex vs reasoning decision)
+        # In shadow mode, we assume reasoning would have made the same decision
+        reasoning_decision = decision  # For now, assume reasoning agrees
+        self.observability.log_shadow_evaluation(
+            trace_id=trace_id,
+            reflex_decision=original_decision,
+            reasoning_decision=reasoning_decision,
+            processing_time_ms=processing_time_ms,
+            scores=scores
+        )
+
+        # Learn from this interaction (if habit store enabled and decision was good)
+        if (self.habit_store.is_enabled() and 
+            original_decision == "allow_reflex" and 
+            safety_result.get("safe", False) and 
+            confidence > 0.7):
+            self.habit_store.observe_cue(
+                cue=text,
+                action="reflex_response",
+                confidence=confidence,
+                user_id=user_id,
+                tenant_id=tenant_id
+            )
 
         return {
             "trace_id": trace_id,
             "decision": decision,
             "shadow": True,
-            "why_reflex": log_payload["why_reflex"],
+            "why_reflex": why_reflex,
         }
 
 
