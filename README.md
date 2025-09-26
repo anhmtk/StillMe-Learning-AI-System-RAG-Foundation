@@ -11,16 +11,47 @@ Some strategic parts (advanced routing heuristics, private datasets, security pa
 
 > **Language note**: I am not fluent in English. This README is written **with AI translation/assistance**. If anything is unclear, please open an issue—I truly appreciate your help improving the docs.
 
+## Community & Feedback
+
+I'm actively learning and I welcome technical and product-direction feedback.
+
+**Triage priority order for reviews and responses:**
+1) Ethics → 2) Security → 3) User Safety.
+
+Feedback affecting these three areas will be reviewed first and addressed as soon as possible.
+
+**SLA:** First response ≤ 72h; PR review target ≤ 7 days.
+
 ## Architecture (Open-Core with Optional Pro)
+<!-- BEGIN:MERMAID -->
 ```mermaid
 flowchart LR
-  Core[Core Framework] --> Ethics[EthicsGuard — basic rules]
-  Core --> Memory[LayeredMemory — OSS]
-  Core --> RouterIface[Router Interface]
-  RouterIface --> |auto-detect| Pro[Pro Plugin (private, optional)]
-  RouterIface --> |fallback| Stub[Stub Plugin (public)]
-  Core --> Plugins[Plugin System]
+  Core[Core Framework]
+  Ethics[EthicsGuard — 100.0% pass]
+  Security[Security Suite — 100.0% pass]
+  Safety[User Safety — 100.0% pass]
+  RouterIface[Router Interface]
+  Pro[Pro Plugin (private, optional)]
+  Stub[Stub Plugin (public)]
+
+  Core --> Ethics
+  Core --> Security
+  Core --> Safety
+  Core --> RouterIface
+  RouterIface -->|auto-detect| Pro
+  RouterIface -->|fallback| Stub
 ```
+<!-- END:MERMAID -->
+
+### Test Metrics
+<!-- BEGIN:METRICS_TABLE -->
+| Suite | Result |
+|---|---|
+| Ethics | 3/3 (100.0%) |
+| Security | 3/3 (100.0%) |
+| User Safety | 3/3 (100.0%) |
+| Other | 5/5 (100.0%) |
+<!-- END:METRICS_TABLE -->
 
 * **Pro mode (optional)**: If `stillme-private` is installed, the framework automatically uses it.
 * **OSS mode (default)**: If not found, the framework falls back to the **Stub** implementation—no errors, fully runnable.
