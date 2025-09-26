@@ -1,0 +1,35 @@
+{
+  "name": "Accuracy Benchmark",
+  "type": "accuracy",
+  "description": "Standard accuracy evaluation for general AI tasks",
+  "version": "1.0.0",
+  "test_cases": [
+    {
+      "id": "acc_001",
+      "input": "What is the capital of France?",
+      "expected_output": "Paris",
+      "category": "geography",
+      "difficulty": "easy"
+    },
+    {
+      "id": "acc_002", 
+      "input": "Calculate 15 + 27",
+      "expected_output": "42",
+      "category": "math",
+      "difficulty": "easy"
+    },
+    {
+      "id": "acc_003",
+      "input": "Explain photosynthesis",
+      "expected_output": "Photosynthesis is the process by which plants convert light energy into chemical energy",
+      "category": "science",
+      "difficulty": "medium"
+    }
+  ],
+  "evaluation_criteria": {
+    "exact_match": 0.4,
+    "semantic_similarity": 0.4,
+    "completeness": 0.2
+  },
+  "pass_threshold": 0.8
+}

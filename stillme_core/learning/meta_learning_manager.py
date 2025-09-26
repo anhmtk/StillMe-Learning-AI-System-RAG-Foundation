@@ -579,3 +579,261 @@ class MetaLearningManager:
             "current_strategy": self.current_strategy.value,
             "current_learning_rate": self.current_learning_rate
         }
+    
+    async def select_learning_strategy(
+        self,
+        session_id: str,
+        available_strategies: List[str],
+        context: Dict[str, Any]
+    ) -> str:
+        """
+        Select the best learning strategy based on meta-learning analysis
+        
+        Args:
+            session_id: Current session ID
+            available_strategies: List of available learning strategies
+            context: Context information (data_type, complexity, etc.)
+            
+        Returns:
+            Selected strategy name
+        """
+        if not available_strategies:
+            self.logger.warning("No strategies available for selection")
+            return "default"
+        
+        # Analyze context to determine strategy requirements
+        strategy_requirements = await self._analyze_strategy_requirements(context)
+        
+        # Score each available strategy
+        strategy_scores = {}
+        for strategy in available_strategies:
+            score = await self._score_strategy(strategy, strategy_requirements, session_id)
+            strategy_scores[strategy] = score
+        
+        # Select best strategy
+        best_strategy = max(strategy_scores.items(), key=lambda x: x[1])[0]
+        
+        self.logger.info(f"Selected strategy '{best_strategy}' with score {strategy_scores[best_strategy]:.2f}")
+        
+        # Record strategy selection
+        await self._record_strategy_selection(session_id, best_strategy, strategy_scores)
+        
+        return best_strategy
+    
+    async def _analyze_strategy_requirements(self, context: Dict[str, Any]) -> Dict[str, Any]:
+        """Analyze context to determine strategy requirements"""
+        requirements = {
+            "data_size": context.get("data_size", "medium"),
+            "complexity": context.get("complexity", "medium"),
+            "time_constraint": context.get("time_constraint", "normal"),
+            "accuracy_priority": context.get("accuracy_priority", "high"),
+            "safety_priority": context.get("safety_priority", "high"),
+            "exploration_vs_exploitation": context.get("exploration_vs_exploitation", "balanced")
+        }
+        
+        return requirements
+    
+    async def _score_strategy(
+        self, 
+        strategy: str, 
+        requirements: Dict[str, Any], 
+        session_id: str
+    ) -> float:
+        """Score a strategy based on requirements and historical performance"""
+        base_score = 0.5  # Default score
+        
+        # Strategy-specific scoring
+        if strategy == "supervised":
+            base_score = await self._score_supervised_strategy(requirements)
+        elif strategy == "reinforcement":
+            base_score = await self._score_reinforcement_strategy(requirements)
+        elif strategy == "imitation":
+            base_score = await self._score_imitation_strategy(requirements)
+        elif strategy == "self_supervised":
+            base_score = await self._score_self_supervised_strategy(requirements)
+        elif strategy == "meta_learning":
+            base_score = await self._score_meta_learning_strategy(requirements)
+        
+        # Apply historical performance adjustment
+        historical_performance = self.strategy_effectiveness.get(strategy, 0.5)
+        performance_adjustment = historical_performance * 0.3
+        
+        # Apply context-specific adjustments
+        context_adjustment = await self._calculate_context_adjustment(strategy, requirements)
+        
+        final_score = base_score + performance_adjustment + context_adjustment
+        final_score = max(0.0, min(1.0, final_score))  # Clamp to [0, 1]
+        
+        return final_score
+    
+    async def _score_supervised_strategy(self, requirements: Dict[str, Any]) -> float:
+        """Score supervised learning strategy"""
+        score = 0.7  # Base score for supervised learning
+        
+        # Adjust based on data size
+        if requirements["data_size"] == "large":
+            score += 0.2
+        elif requirements["data_size"] == "small":
+            score -= 0.1
+        
+        # Adjust based on accuracy priority
+        if requirements["accuracy_priority"] == "high":
+            score += 0.1
+        
+        return score
+    
+    async def _score_reinforcement_strategy(self, requirements: Dict[str, Any]) -> float:
+        """Score reinforcement learning strategy"""
+        score = 0.6  # Base score for RL
+        
+        # Adjust based on exploration vs exploitation
+        if requirements["exploration_vs_exploitation"] == "exploration":
+            score += 0.2
+        elif requirements["exploration_vs_exploitation"] == "exploitation":
+            score -= 0.1
+        
+        # Adjust based on time constraint
+        if requirements["time_constraint"] == "tight":
+            score -= 0.2
+        
+        return score
+    
+    async def _score_imitation_strategy(self, requirements: Dict[str, Any]) -> float:
+        """Score imitation learning strategy"""
+        score = 0.5  # Base score for imitation learning
+        
+        # Adjust based on data availability
+        if requirements["data_size"] == "large":
+            score += 0.3
+        
+        # Adjust based on complexity
+        if requirements["complexity"] == "low":
+            score += 0.2
+        
+        return score
+    
+    async def _score_self_supervised_strategy(self, requirements: Dict[str, Any]) -> float:
+        """Score self-supervised learning strategy"""
+        score = 0.6  # Base score for self-supervised learning
+        
+        # Adjust based on data size
+        if requirements["data_size"] == "large":
+            score += 0.2
+        
+        # Adjust based on complexity
+        if requirements["complexity"] == "high":
+            score += 0.1
+        
+        return score
+    
+    async def _score_meta_learning_strategy(self, requirements: Dict[str, Any]) -> float:
+        """Score meta-learning strategy"""
+        score = 0.4  # Base score for meta-learning (more complex)
+        
+        # Adjust based on complexity
+        if requirements["complexity"] == "high":
+            score += 0.3
+        
+        # Adjust based on time constraint
+        if requirements["time_constraint"] == "tight":
+            score -= 0.2
+        
+        return score
+    
+    async def _calculate_context_adjustment(
+        self, 
+        strategy: str, 
+        requirements: Dict[str, Any]
+    ) -> float:
+        """Calculate context-specific adjustment for strategy scoring"""
+        adjustment = 0.0
+        
+        # Safety priority adjustment
+        if requirements["safety_priority"] == "high" and strategy in ["supervised", "imitation"]:
+            adjustment += 0.1
+        
+        # Time constraint adjustment
+        if requirements["time_constraint"] == "tight" and strategy in ["supervised", "imitation"]:
+            adjustment += 0.1
+        elif requirements["time_constraint"] == "tight" and strategy in ["reinforcement", "meta_learning"]:
+            adjustment -= 0.1
+        
+        return adjustment
+    
+    async def _record_strategy_selection(
+        self, 
+        session_id: str, 
+        selected_strategy: str, 
+        strategy_scores: Dict[str, float]
+    ):
+        """Record strategy selection for future analysis"""
+        selection_record = {
+            "session_id": session_id,
+            "selected_strategy": selected_strategy,
+            "strategy_scores": strategy_scores,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        # Store in strategy effectiveness tracking
+        if "strategy_selections" not in self.strategy_effectiveness:
+            self.strategy_effectiveness["strategy_selections"] = []
+        
+        self.strategy_effectiveness["strategy_selections"].append(selection_record)
+        
+        self.logger.info(f"Recorded strategy selection: {selected_strategy} for session {session_id}")
+    
+    async def update_strategy_effectiveness(
+        self,
+        session_id: str,
+        selected_strategy: str,
+        performance_metrics: Dict[str, float]
+    ):
+        """Update strategy effectiveness based on actual performance"""
+        if selected_strategy not in self.strategy_effectiveness:
+            self.strategy_effectiveness[selected_strategy] = 0.5  # Default effectiveness
+        
+        # Calculate performance score
+        performance_score = sum(performance_metrics.values()) / len(performance_metrics) if performance_metrics else 0.0
+        
+        # Update effectiveness with exponential moving average
+        alpha = 0.1  # Learning rate for effectiveness update
+        current_effectiveness = self.strategy_effectiveness[selected_strategy]
+        new_effectiveness = (1 - alpha) * current_effectiveness + alpha * performance_score
+        
+        self.strategy_effectiveness[selected_strategy] = new_effectiveness
+        
+        self.logger.info(f"Updated {selected_strategy} effectiveness: {current_effectiveness:.3f} -> {new_effectiveness:.3f}")
+    
+    def get_strategy_recommendations(self) -> Dict[str, Any]:
+        """Get strategy recommendations based on meta-learning analysis"""
+        if not self.strategy_effectiveness:
+            return {
+                "recommendations": [],
+                "best_strategy": "supervised",
+                "confidence": 0.5,
+                "reasoning": "Insufficient data for recommendations"
+            }
+        
+        # Find best performing strategy
+        best_strategy = max(self.strategy_effectiveness.items(), key=lambda x: x[1])
+        
+        # Generate recommendations
+        recommendations = []
+        for strategy, effectiveness in self.strategy_effectiveness.items():
+            if strategy == "strategy_selections":
+                continue
+                
+            if effectiveness > 0.8:
+                recommendations.append(f"{strategy}: Excellent performance ({effectiveness:.2f})")
+            elif effectiveness > 0.6:
+                recommendations.append(f"{strategy}: Good performance ({effectiveness:.2f})")
+            elif effectiveness < 0.4:
+                recommendations.append(f"{strategy}: Poor performance ({effectiveness:.2f}) - consider alternatives")
+        
+        return {
+            "recommendations": recommendations,
+            "best_strategy": best_strategy[0],
+            "confidence": best_strategy[1],
+            "reasoning": f"Based on {len(self.sessions)} learning sessions",
+            "strategy_effectiveness": {k: v for k, v in self.strategy_effectiveness.items() if k != "strategy_selections"}
+        }

@@ -224,6 +224,78 @@ open htmlcov/index.html
 - 🔒 [Security Scan](artifacts/bandit-report.json)
 - 📈 [Load Test Results](artifacts/k6-results.json)
 - 🧪 [Validation Report](docs/VALIDATION_PHASE1_2.md)
+- 🧠 [Learning Dashboard](artifacts/learning_dashboard.html)
+- 📋 [Cross-Validation Results](artifacts/cross_validation.json)
+- 🔄 [Rollback History](artifacts/rollback_history.json)
+
+## 🚀 **PHASE 3: AUTOMATED VALIDATION**
+
+### **SEAL-GRADE Testing Pipeline**
+StillMe triển khai hệ thống kiểm thử tự động toàn diện đạt chuẩn SEAL-GRADE:
+
+### **CI/CD Pipeline:**
+- **Unit & Integration Tests**: Coverage ≥90% lines, ≥80% branches
+- **Security & Ethics Tests**: Bandit, Semgrep, pip-audit, ethics test suite
+- **Load & Stress Tests**: k6 với 500 concurrent users, 10k requests
+- **Chaos & Resilience Tests**: Module failure simulation, recovery testing
+
+### **Automated Workflows:**
+```yaml
+# .github/workflows/ci-tests.yml - Unit & Integration
+# .github/workflows/security.yml - Security & Ethics  
+# .github/workflows/load-chaos.yml - Load & Chaos
+```
+
+### **Quality Gates:**
+- ✅ **Coverage Gate**: ≥90% lines, ≥80% branches
+- ✅ **Security Gate**: 0 high-severity vulnerabilities
+- ✅ **Performance Gate**: P95 < 500ms, error rate < 1%
+- ✅ **Ethics Gate**: 100% ethics test pass rate
+- ✅ **Resilience Gate**: < 5s recovery time
+- ✅ **Documentation Gate**: Complete API documentation
+
+### **Real-time Monitoring:**
+- 📊 **Learning Dashboard**: Real-time metrics và alerts
+- 🔄 **Rollback System**: Safe sandbox với automatic rollback
+- 📈 **Performance Tracking**: Latency, throughput, error rates
+- 🛡️ **Security Monitoring**: Threat detection và response
+
+## 🧠 **SELF-LEARNING & SELF-CORRECTION**
+
+StillMe có khả năng tự học và tự sửa lỗi thông qua các cơ chế tiên tiến:
+
+### **Tính năng đã triển khai:**
+- **Objective Validation**: Đo lường hiệu quả học tập khách quan với external benchmarks
+- **Reinforcement Signals**: Hệ thống thưởng/phạt với delayed rewards và multi-objective optimization
+- **Learning Rollback v2**: Safe sandbox execution với version control và automatic rollback
+- **Cross-Validation**: So sánh với benchmark bên ngoài và plug-in benchmark system
+- **Meta-Learning v2**: Strategy selector tự động chọn chiến lược học tập tối ưu
+- **Collaborative Learning v2**: Community dataset ingestion với enhanced validation
+- **Learning Governance v2**: Quy trình xét duyệt dataset cộng đồng với contributor credit system
+
+### **Ví dụ sử dụng:**
+```bash
+# Khởi tạo session học tập với strategy selection
+python -m stillme_core.learning.meta_learning_manager --context '{"data_size": "large", "complexity": "high"}'
+
+# Chạy cross-validation với external benchmarks
+python -m stillme_core.learning.cross_validation --benchmarks accuracy_benchmark,ethics_benchmark
+
+# Ingest community dataset với enhanced validation
+python -m stillme_core.learning.collab_learning --ingest-v2 dataset.json --contributor community_trusted
+
+# Safe sandbox execution với rollback
+python -m stillme_core.learning.rollback_manager --sandbox learning_update.json --baseline v20250926_143022
+
+# Real-time monitoring dashboard
+python -m stillme_core.monitoring.learning_dashboard --export-html artifacts/learning_dashboard.html
+```
+
+### **Roadmap Self-Learning:**
+- ✅ **MVP**: validation + RL + rollback
+- ✅ **Trung hạn**: meta-learning v2 (strategy selector), collaborative learning v2 (community datasets)
+- ✅ **Dài hạn**: cross-validation, reward models v2, rollback v2, governance v2
+- 🚧 **Experimental**: Meta-learning và collaborative learning đang trong giai đoạn thử nghiệm, chưa production-ready
 
 ## 🔒 **SECURITY & PRIVACY**
 

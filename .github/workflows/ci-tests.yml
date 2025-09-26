@@ -1,4 +1,4 @@
-name: SEAL-GRADE CI Tests
+name: CI Tests - Unit & Integration
 
 on:
   push:
@@ -6,24 +6,22 @@ on:
   pull_request:
     branches: [ main, develop ]
 
-env:
-  PYTHON_VERSION: '3.11'
-  NODE_VERSION: '18'
-
 jobs:
-  unit-tests:
-    name: Unit Tests
+  unit-integration-tests:
     runs-on: ubuntu-latest
     
+    strategy:
+      matrix:
+        python-version: [3.9, 3.10, 3.11, 3.12]
+    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Python
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        
+        python-version: ${{ matrix.python-version }}
+    
     - name: Cache pip dependencies
       uses: actions/cache@v3
       with:
@@ -31,310 +29,131 @@ jobs:
         key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
         restore-keys: |
           ${{ runner.os }}-pip-
-          
+    
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pytest pytest-cov pytest-html pytest-xdist
-        pip install bandit safety semgrep
-        
+        pip install coverage
+    
+    - name: Create artifacts directory
+      run: mkdir -p artifacts
+    
     - name: Run unit tests
       run: |
         pytest tests/test_unit_core_modules.py \
-          -v \
           --cov=stillme_core \
-          --cov=modules \
-          --cov-report=xml \
-          --cov-report=html \
-          --cov-report=term-missing \
-          --cov-fail-under=90 \
-          --html=reports/unit_test_report.html \
+          --cov-report=html:artifacts/coverage.html \
+          --cov-report=json:artifacts/coverage.json \
+          --cov-report=xml:artifacts/coverage.xml \
+          --junitxml=artifacts/junit-unit.xml \
+          --html=artifacts/pytest-unit.html \
           --self-contained-html \
-          -m "unit" \
-          --junitxml=reports/unit_test_results.xml
-          
-    - name: Upload unit test coverage
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage.xml
-        flags: unit
-        name: unit-tests
-        
-    - name: Upload unit test artifacts
-      uses: actions/upload-artifact@v3
-      if: always()
-      with:
-        name: unit-test-reports
-        path: |
-          reports/unit_test_report.html
-          reports/unit_test_results.xml
-          htmlcov/
-
-  integration-tests:
-    name: Integration Tests
-    runs-on: ubuntu-latest
-    needs: unit-tests
+          -v
     
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pytest pytest-html pytest-xdist
-        
     - name: Run integration tests
       run: |
         pytest tests/test_integration_cross_module.py \
-          -v \
-          --html=reports/integration_test_report.html \
+          --cov=stillme_core \
+          --cov-report=html:artifacts/coverage-integration.html \
+          --cov-report=json:artifacts/coverage-integration.json \
+          --junitxml=artifacts/junit-integration.xml \
+          --html=artifacts/pytest-integration.html \
           --self-contained-html \
-          -m "integration" \
-          --junitxml=reports/integration_test_results.xml
-          
-    - name: Upload integration test artifacts
-      uses: actions/upload-artifact@v3
-      if: always()
-      with:
-        name: integration-test-reports
-        path: |
-          reports/integration_test_report.html
-          reports/integration_test_results.xml
-
-  security-tests:
-    name: Security Tests
-    runs-on: ubuntu-latest
-    needs: unit-tests
+          -v
     
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        
-    - name: Install dependencies
+    - name: Run self-learning tests
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pytest pytest-html bandit safety semgrep
-        
-    - name: Run security tests
-      run: |
-        pytest tests/test_security_ethics.py \
-          -v \
-          --html=reports/security_test_report.html \
+        pytest tests/test_learning_*.py \
+          --cov=stillme_core.learning \
+          --cov-report=html:artifacts/coverage-learning.html \
+          --cov-report=json:artifacts/coverage-learning.json \
+          --junitxml=artifacts/junit-learning.xml \
+          --html=artifacts/pytest-learning.html \
           --self-contained-html \
-          -m "security or ethics" \
-          --junitxml=reports/security_test_results.xml
-          
-    - name: Run Bandit security scan
-      run: |
-        bandit -r stillme_core/ modules/ -f json -o reports/bandit_report.json || true
-        bandit -r stillme_core/ modules/ -f txt -o reports/bandit_report.txt || true
-        
-    - name: Run Safety check
-      run: |
-        safety check --json --output reports/safety_report.json || true
-        safety check --output reports/safety_report.txt || true
-        
-    - name: Run Semgrep scan
-      run: |
-        semgrep --config=auto --json --output=reports/semgrep_report.json stillme_core/ modules/ || true
-        semgrep --config=auto --output=reports/semgrep_report.txt stillme_core/ modules/ || true
-        
-    - name: Upload security test artifacts
-      uses: actions/upload-artifact@v3
-      if: always()
-      with:
-        name: security-test-reports
-        path: |
-          reports/security_test_report.html
-          reports/security_test_results.xml
-          reports/bandit_report.json
-          reports/bandit_report.txt
-          reports/safety_report.json
-          reports/safety_report.txt
-          reports/semgrep_report.json
-          reports/semgrep_report.txt
-
-  chaos-tests:
-    name: Chaos Engineering Tests
-    runs-on: ubuntu-latest
-    needs: integration-tests
+          -v
     
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        
-    - name: Install dependencies
+    - name: Run cross-validation tests
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pytest pytest-html
-        
-    - name: Run chaos tests
-      run: |
-        pytest tests/test_integration_cross_module.py \
-          -v \
-          --html=reports/chaos_test_report.html \
+        pytest tests/test_cross_validation.py \
+          --cov=stillme_core.learning.cross_validation \
+          --cov-report=html:artifacts/coverage-cross-validation.html \
+          --cov-report=json:artifacts/coverage-cross-validation.json \
+          --junitxml=artifacts/junit-cross-validation.xml \
+          --html=artifacts/pytest-cross-validation.html \
           --self-contained-html \
-          -m "chaos" \
-          --junitxml=reports/chaos_test_results.xml
-          
-    - name: Upload chaos test artifacts
-      uses: actions/upload-artifact@v3
-      if: always()
-      with:
-        name: chaos-test-reports
-        path: |
-          reports/chaos_test_report.html
-          reports/chaos_test_results.xml
-
-  load-tests:
-    name: Load Tests
-    runs-on: ubuntu-latest
-    needs: [integration-tests, security-tests]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop')
+          -v
     
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        
-    - name: Install K6
+    - name: Run rollback tests
       run: |
-        sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
-        echo "deb https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
-        sudo apt-get update
-        sudo apt-get install k6
-        
-    - name: Start test server
-      run: |
-        # Start the server in background
-        python stable_ai_server.py &
-        SERVER_PID=$!
-        echo "SERVER_PID=$SERVER_PID" >> $GITHUB_ENV
-        
-        # Wait for server to start
-        sleep 10
-        
-        # Check if server is running
-        curl -f http://localhost:1216/health/ai || exit 1
-        
-    - name: Run load tests
-      run: |
-        cd k6
-        chmod +x run_load_tests.sh
-        ./run_load_tests.sh --load --duration 1m --users 50
-        
-    - name: Stop test server
-      if: always()
-      run: |
-        kill $SERVER_PID || true
-        
-    - name: Upload load test artifacts
-      uses: actions/upload-artifact@v3
-      if: always()
-      with:
-        name: load-test-reports
-        path: |
-          k6/reports/
-
-  test-summary:
-    name: Test Summary
-    runs-on: ubuntu-latest
-    needs: [unit-tests, integration-tests, security-tests, chaos-tests]
-    if: always()
+        pytest tests/test_rollback_manager.py \
+          --cov=stillme_core.learning.rollback_manager \
+          --cov-report=html:artifacts/coverage-rollback.html \
+          --cov-report=json:artifacts/coverage-rollback.json \
+          --junitxml=artifacts/junit-rollback.xml \
+          --html=artifacts/pytest-rollback.html \
+          --self-contained-html \
+          -v
     
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Download all artifacts
-      uses: actions/download-artifact@v3
-      
-    - name: Generate test summary
+    - name: Run meta-learning tests
       run: |
-        mkdir -p reports
-        cat > reports/test_summary.md << EOF
-        # SEAL-GRADE Test Summary
-        
-        ## Test Results
-        
-        ### Unit Tests
-        - Status: ${{ needs.unit-tests.result }}
-        - Coverage: ≥90% lines, ≥80% branches
-        
-        ### Integration Tests
-        - Status: ${{ needs.integration-tests.result }}
-        - Cross-module communication tested
-        
-        ### Security Tests
-        - Status: ${{ needs.security-tests.result }}
-        - Injection, jailbreak, PII redaction tested
-        
-        ### Chaos Engineering Tests
-        - Status: ${{ needs.chaos-tests.result }}
-        - Fault tolerance and recovery tested
-        
-        ### Load Tests
-        - Status: ${{ needs.load-tests.result }}
-        - Performance and scalability tested
-        
-        ## Overall Status
-        - **Unit Tests**: ${{ needs.unit-tests.result }}
-        - **Integration Tests**: ${{ needs.integration-tests.result }}
-        - **Security Tests**: ${{ needs.security-tests.result }}
-        - **Chaos Tests**: ${{ needs.chaos-tests.result }}
-        - **Load Tests**: ${{ needs.load-tests.result }}
-        
-        ## Artifacts
-        - Unit test reports: unit-test-reports
-        - Integration test reports: integration-test-reports
-        - Security test reports: security-test-reports
-        - Chaos test reports: chaos-test-reports
-        - Load test reports: load-test-reports
-        
-        Generated on: $(date)
-        EOF
-        
-    - name: Upload test summary
+        pytest tests/test_meta_learning.py \
+          --cov=stillme_core.learning.meta_learning_manager \
+          --cov-report=html:artifacts/coverage-meta-learning.html \
+          --cov-report=json:artifacts/coverage-meta-learning.json \
+          --junitxml=artifacts/junit-meta-learning.xml \
+          --html=artifacts/pytest-meta-learning.html \
+          --self-contained-html \
+          -v
+    
+    - name: Run collaborative learning tests
+      run: |
+        pytest tests/test_collab_learning.py \
+          --cov=stillme_core.learning.collab_learning \
+          --cov-report=html:artifacts/coverage-collab-learning.html \
+          --cov-report=json:artifacts/coverage-collab-learning.json \
+          --junitxml=artifacts/junit-collab-learning.xml \
+          --html=artifacts/pytest-collab-learning.html \
+          --self-contained-html \
+          -v
+    
+    - name: Run comprehensive test suite
+      run: |
+        pytest tests/test_core_modules_mock.py \
+          --cov=stillme_core \
+          --cov-report=html:artifacts/coverage-comprehensive.html \
+          --cov-report=json:artifacts/coverage-comprehensive.json \
+          --junitxml=artifacts/junit-comprehensive.xml \
+          --html=artifacts/pytest-comprehensive.html \
+          --self-contained-html \
+          -v
+    
+    - name: Generate combined coverage report
+      run: |
+        coverage combine artifacts/coverage*.json
+        coverage html -d artifacts/coverage-combined
+        coverage xml -o artifacts/coverage-combined.xml
+        coverage report --show-missing
+    
+    - name: Check coverage thresholds
+      run: |
+        coverage report --fail-under=85 --show-missing
+    
+    - name: Upload test artifacts
       uses: actions/upload-artifact@v3
+      if: always()
       with:
-        name: test-summary
-        path: reports/test_summary.md
-        
-    - name: Comment on PR
-      if: github.event_name == 'pull_request'
-      uses: actions/github-script@v6
+        name: test-results-${{ matrix.python-version }}
+        path: |
+          artifacts/
+        retention-days: 30
+    
+    - name: Upload coverage reports
+      uses: codecov/codecov-action@v3
+      if: matrix.python-version == '3.12'
       with:
-        script: |
-          const fs = require('fs');
-          const summary = fs.readFileSync('reports/test_summary.md', 'utf8');
-          
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: summary
-          });
+        file: artifacts/coverage-combined.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false

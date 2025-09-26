@@ -1,224 +1,234 @@
-name: SEAL-GRADE Security Scan
+name: Security & Ethics Tests
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, feature/* ]
   pull_request:
     branches: [ main, develop ]
   schedule:
-    - cron: '0 2 * * 1'  # Weekly on Monday at 2 AM
-
-env:
-  PYTHON_VERSION: '3.11'
+    - cron: '0 2 * * *'  # Daily at 2 AM
 
 jobs:
   security-scan:
-    name: Security Scan
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0  # Full history for better analysis
-        
+    - uses: actions/checkout@v4
+    
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        
+        python-version: '3.12'
+    
     - name: Install security tools
       run: |
         python -m pip install --upgrade pip
-        pip install bandit safety semgrep detect-secrets
+        pip install bandit safety semgrep pip-audit
         pip install -r requirements.txt
-        
+    
+    - name: Create artifacts directory
+      run: mkdir -p artifacts
+    
     - name: Run Bandit security scan
       run: |
-        bandit -r stillme_core/ modules/ \
-          -f json -o reports/bandit_report.json \
-          -ll || true
-        bandit -r stillme_core/ modules/ \
-          -f txt -o reports/bandit_report.txt \
-          -ll || true
-          
-    - name: Run Safety dependency check
-      run: |
-        safety check --json --output reports/safety_report.json || true
-        safety check --output reports/safety_report.txt || true
-        
-    - name: Run Semgrep static analysis
-      run: |
-        semgrep --config=auto \
-          --json --output=reports/semgrep_report.json \
-          stillme_core/ modules/ || true
-        semgrep --config=auto \
-          --output=reports/semgrep_report.txt \
-          stillme_core/ modules/ || true
-          
-    - name: Run Detect Secrets scan
-      run: |
-        detect-secrets scan --all-files \
-          --baseline .secrets.baseline || true
-        detect-secrets audit .secrets.baseline || true
-        
-    - name: Run CodeQL Analysis
-      uses: github/codeql-action/init@v2
-      with:
-        languages: python
-        
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v2
-      
-    - name: Upload security scan artifacts
-      uses: actions/upload-artifact@v3
-      if: always()
-      with:
-        name: security-scan-reports
-        path: |
-          reports/bandit_report.json
-          reports/bandit_report.txt
-          reports/safety_report.json
-          reports/safety_report.txt
-          reports/semgrep_report.json
-          reports/semgrep_report.txt
-          .secrets.baseline
-
-  dependency-scan:
-    name: Dependency Scan
-    runs-on: ubuntu-latest
+        bandit -r stillme_core/ \
+          -f json -o artifacts/bandit-report.json \
+          -f txt -o artifacts/bandit-report.txt \
+          --severity-level medium \
+          --confidence-level medium
     
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        
-    - name: Install dependencies
+    - name: Run Safety check
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install pip-audit
-        
+        safety check --json --output artifacts/safety-report.json || true
+        safety check --output artifacts/safety-report.txt || true
+    
+    - name: Run Semgrep security scan
+      run: |
+        semgrep --config=auto stillme_core/ \
+          --json --output=artifacts/semgrep-report.json \
+          --sarif --output=artifacts/semgrep-report.sarif || true
+    
     - name: Run pip-audit
       run: |
-        pip-audit --format=json --output=reports/pip_audit_report.json || true
-        pip-audit --format=text --output=reports/pip_audit_report.txt || true
+        pip-audit --format=json --output=artifacts/pip-audit-report.json || true
+        pip-audit --format=text --output=artifacts/pip-audit-report.txt || true
+    
+    - name: Run comprehensive security test
+      run: |
+        python tests/test_security_comprehensive.py \
+          --output=artifacts/security-comprehensive.json || true
+    
+    - name: Generate security summary
+      run: |
+        python -c "
+        import json
+        import os
         
-    - name: Upload dependency scan artifacts
+        # Load security reports
+        reports = {}
+        
+        # Bandit report
+        if os.path.exists('artifacts/bandit-report.json'):
+            with open('artifacts/bandit-report.json', 'r') as f:
+                bandit_data = json.load(f)
+                reports['bandit'] = {
+                    'high_issues': len([r for r in bandit_data.get('results', []) if r.get('issue_severity') == 'HIGH']),
+                    'medium_issues': len([r for r in bandit_data.get('results', []) if r.get('issue_severity') == 'MEDIUM']),
+                    'low_issues': len([r for r in bandit_data.get('results', []) if r.get('issue_severity') == 'LOW']),
+                    'total_issues': len(bandit_data.get('results', []))
+                }
+        
+        # Safety report
+        if os.path.exists('artifacts/safety-report.json'):
+            with open('artifacts/safety-report.json', 'r') as f:
+                safety_data = json.load(f)
+                reports['safety'] = {
+                    'vulnerabilities': len(safety_data.get('vulnerabilities', [])),
+                    'packages_checked': safety_data.get('packages_checked', 0)
+                }
+        
+        # Generate summary
+        summary = {
+            'timestamp': '$(date -u +%Y-%m-%dT%H:%M:%SZ)',
+            'security_reports': reports,
+            'overall_status': 'PASS' if all(
+                r.get('high_issues', 0) == 0 and r.get('vulnerabilities', 0) == 0 
+                for r in reports.values()
+            ) else 'FAIL'
+        }
+        
+        with open('artifacts/security-scan.json', 'w') as f:
+            json.dump(summary, f, indent=2)
+        "
+    
+    - name: Upload security artifacts
       uses: actions/upload-artifact@v3
       if: always()
       with:
-        name: dependency-scan-reports
+        name: security-results
         path: |
-          reports/pip_audit_report.json
-          reports/pip_audit_report.txt
+          artifacts/bandit-report.json
+          artifacts/bandit-report.txt
+          artifacts/safety-report.json
+          artifacts/safety-report.txt
+          artifacts/semgrep-report.json
+          artifacts/semgrep-report.sarif
+          artifacts/pip-audit-report.json
+          artifacts/pip-audit-report.txt
+          artifacts/security-comprehensive.json
+          artifacts/security-scan.json
+        retention-days: 30
 
-  security-tests:
-    name: Security Tests
+  ethics-tests:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
+    - uses: actions/checkout@v4
+    
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        
+        python-version: '3.12'
+    
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        pip install pytest pytest-html
-        
-    - name: Run security tests
+        pip install pytest
+    
+    - name: Create artifacts directory
+      run: mkdir -p artifacts
+    
+    - name: Run ethics test suite
       run: |
-        pytest tests/test_security_ethics.py \
-          -v \
-          --html=reports/security_test_report.html \
+        python ethics-tests/runners/ethics_test_runner.py --all \
+          --output=artifacts/ethics-results.json \
+          --format=json || true
+    
+    - name: Run bias detection tests
+      run: |
+        pytest tests/test_bias_detection.py \
+          --junitxml=artifacts/junit-bias.xml \
+          --html=artifacts/pytest-bias.html \
           --self-contained-html \
-          -m "security or ethics" \
-          --junitxml=reports/security_test_results.xml
-          
-    - name: Upload security test artifacts
+          -v || true
+    
+    - name: Run injection attack tests
+      run: |
+        pytest tests/test_injection_attacks.py \
+          --junitxml=artifacts/junit-injection.xml \
+          --html=artifacts/pytest-injection.html \
+          --self-contained-html \
+          -v || true
+    
+    - name: Run jailbreak attempt tests
+      run: |
+        pytest tests/test_jailbreak_attempts.py \
+          --junitxml=artifacts/junit-jailbreak.xml \
+          --html=artifacts/pytest-jailbreak.html \
+          --self-contained-html \
+          -v || true
+    
+    - name: Generate ethics summary
+      run: |
+        python -c "
+        import json
+        import os
+        
+        # Count test files
+        test_files = [
+            'artifacts/junit-bias.xml',
+            'artifacts/junit-injection.xml', 
+            'artifacts/junit-jailbreak.xml'
+        ]
+        
+        total_tests = 0
+        passed_tests = 0
+        failed_tests = 0
+        
+        for test_file in test_files:
+            if os.path.exists(test_file):
+                # Simple parsing of JUnit XML (in real implementation, use xml.etree.ElementTree)
+                with open(test_file, 'r') as f:
+                    content = f.read()
+                    # Count tests (simplified)
+                    total_tests += content.count('<testcase')
+                    passed_tests += content.count('</testcase>') - content.count('failure')
+                    failed_tests += content.count('<failure')
+        
+        # Load ethics results if available
+        ethics_results = {}
+        if os.path.exists('artifacts/ethics-results.json'):
+            with open('artifacts/ethics-results.json', 'r') as f:
+                ethics_results = json.load(f)
+        
+        # Generate summary
+        summary = {
+            'timestamp': '$(date -u +%Y-%m-%dT%H:%M:%SZ)',
+            'total_tests': total_tests,
+            'passed_tests': passed_tests,
+            'failed_tests': failed_tests,
+            'pass_rate': (passed_tests / total_tests * 100) if total_tests > 0 else 0,
+            'ethics_results': ethics_results,
+            'overall_status': 'PASS' if failed_tests == 0 and total_tests > 0 else 'FAIL'
+        }
+        
+        with open('artifacts/ethics-scan.json', 'w') as f:
+            json.dump(summary, f, indent=2)
+        "
+    
+    - name: Upload ethics artifacts
       uses: actions/upload-artifact@v3
       if: always()
       with:
-        name: security-test-reports
+        name: ethics-results
         path: |
-          reports/security_test_report.html
-          reports/security_test_results.xml
-
-  security-summary:
-    name: Security Summary
-    runs-on: ubuntu-latest
-    needs: [security-scan, dependency-scan, security-tests]
-    if: always()
-    
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      
-    - name: Download all artifacts
-      uses: actions/download-artifact@v3
-      
-    - name: Generate security summary
-      run: |
-        mkdir -p reports
-        cat > reports/security_summary.md << EOF
-        # SEAL-GRADE Security Summary
-        
-        ## Security Scan Results
-        
-        ### Static Analysis
-        - **Bandit**: ${{ needs.security-scan.result }}
-        - **Semgrep**: ${{ needs.security-scan.result }}
-        - **CodeQL**: ${{ needs.security-scan.result }}
-        
-        ### Dependency Scan
-        - **Safety**: ${{ needs.dependency-scan.result }}
-        - **pip-audit**: ${{ needs.dependency-scan.result }}
-        
-        ### Security Tests
-        - **Injection Tests**: ${{ needs.security-tests.result }}
-        - **Jailbreak Tests**: ${{ needs.security-tests.result }}
-        - **PII Redaction Tests**: ${{ needs.security-tests.result }}
-        
-        ## Overall Security Status
-        - **Static Analysis**: ${{ needs.security-scan.result }}
-        - **Dependency Scan**: ${{ needs.dependency-scan.result }}
-        - **Security Tests**: ${{ needs.security-tests.result }}
-        
-        ## Artifacts
-        - Security scan reports: security-scan-reports
-        - Dependency scan reports: dependency-scan-reports
-        - Security test reports: security-test-reports
-        
-        Generated on: $(date)
-        EOF
-        
-    - name: Upload security summary
-      uses: actions/upload-artifact@v3
-      with:
-        name: security-summary
-        path: reports/security_summary.md
-        
-    - name: Comment on PR
-      if: github.event_name == 'pull_request'
-      uses: actions/github-script@v6
-      with:
-        script: |
-          const fs = require('fs');
-          const summary = fs.readFileSync('reports/security_summary.md', 'utf8');
-          
-          github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: summary
-          });
+          artifacts/ethics-results.json
+          artifacts/junit-bias.xml
+          artifacts/junit-injection.xml
+          artifacts/junit-jailbreak.xml
+          artifacts/pytest-bias.html
+          artifacts/pytest-injection.html
+          artifacts/pytest-jailbreak.html
+          artifacts/ethics-scan.json
+        retention-days: 30

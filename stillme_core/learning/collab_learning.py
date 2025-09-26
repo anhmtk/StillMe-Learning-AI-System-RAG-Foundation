@@ -512,3 +512,482 @@ class CollaborativeLearning:
             "avg_quality_score": avg_quality_score,
             "total_merges": len(self.merge_history)
         }
+    
+    async def ingest_community_dataset_v2(
+        self,
+        dataset_path: str,
+        contributor_id: str,
+        dataset_metadata: Dict[str, Any],
+        validation_required: bool = True
+    ) -> Dict[str, Any]:
+        """
+        Ingest a community-contributed dataset with enhanced validation (v2)
+        
+        Args:
+            dataset_path: Path to the dataset file
+            contributor_id: ID of the contributor
+            dataset_metadata: Metadata about the dataset
+            validation_required: Whether to run validation checks
+            
+        Returns:
+            Dictionary with ingestion results
+        """
+        ingestion_id = f"ingest_v2_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        
+        self.logger.info(f"Starting community dataset ingestion v2: {ingestion_id}")
+        
+        try:
+            # Validate contributor with enhanced checks
+            contributor_validation = await self._validate_contributor_v2(contributor_id)
+            if not contributor_validation["valid"]:
+                return {
+                    "success": False,
+                    "ingestion_id": ingestion_id,
+                    "error": f"Contributor validation failed: {contributor_validation['reason']}",
+                    "timestamp": datetime.now().isoformat()
+                }
+            
+            # Load and validate dataset
+            dataset = await self._load_community_dataset_v2(dataset_path)
+            if not dataset:
+                return {
+                    "success": False,
+                    "ingestion_id": ingestion_id,
+                    "error": "Failed to load dataset",
+                    "timestamp": datetime.now().isoformat()
+                }
+            
+            # Run enhanced validation if required
+            if validation_required:
+                validation_result = await self._validate_community_dataset_v2(dataset, dataset_metadata)
+                if not validation_result["valid"]:
+                    return {
+                        "success": False,
+                        "ingestion_id": ingestion_id,
+                        "error": f"Dataset validation failed: {validation_result['reason']}",
+                        "timestamp": datetime.now().isoformat()
+                    }
+            
+            # Enhanced ethics and safety checks
+            ethics_result = await self._run_enhanced_ethics_check(dataset)
+            safety_result = await self._run_enhanced_safety_check(dataset)
+            
+            if not ethics_result["passed"] or not safety_result["passed"]:
+                return {
+                    "success": False,
+                    "ingestion_id": ingestion_id,
+                    "error": f"Enhanced checks failed - Ethics: {ethics_result['score']:.2f}, Safety: {safety_result['score']:.2f}",
+                    "timestamp": datetime.now().isoformat()
+                }
+            
+            # Store dataset with enhanced metadata
+            stored_path = await self._store_community_dataset_v2(dataset, contributor_id, dataset_metadata)
+            
+            # Log ingestion with enhanced tracking
+            await self._log_ingestion_v2(ingestion_id, contributor_id, dataset_metadata, "success")
+            
+            return {
+                "success": True,
+                "ingestion_id": ingestion_id,
+                "stored_path": stored_path,
+                "dataset_size": len(dataset),
+                "ethics_score": ethics_result["score"],
+                "safety_score": safety_result["score"],
+                "quality_score": validation_result.get("quality_score", 0.0),
+                "contributor_reputation": contributor_validation.get("reputation_score", 0.0),
+                "timestamp": datetime.now().isoformat()
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Community dataset ingestion v2 failed: {e}")
+            await self._log_ingestion_v2(ingestion_id, contributor_id, dataset_metadata, "failed", str(e))
+            
+            return {
+                "success": False,
+                "ingestion_id": ingestion_id,
+                "error": str(e),
+                "timestamp": datetime.now().isoformat()
+            }
+    
+    async def _validate_contributor_v2(self, contributor_id: str) -> Dict[str, Any]:
+        """Enhanced contributor validation with reputation scoring"""
+        # Simulate enhanced contributor validation
+        valid_contributors = {
+            "contributor_001": {"reputation": 0.9, "verified": True, "contributions": 15},
+            "contributor_002": {"reputation": 0.7, "verified": True, "contributions": 8},
+            "community_trusted": {"reputation": 0.95, "verified": True, "contributions": 25},
+            "new_contributor": {"reputation": 0.5, "verified": False, "contributions": 1}
+        }
+        
+        if contributor_id not in valid_contributors:
+            return {
+                "valid": False,
+                "reason": "Unknown contributor",
+                "reputation_score": 0.0
+            }
+        
+        contributor_info = valid_contributors[contributor_id]
+        
+        # Check reputation threshold
+        if contributor_info["reputation"] < 0.6:
+            return {
+                "valid": False,
+                "reason": f"Reputation too low: {contributor_info['reputation']:.2f}",
+                "reputation_score": contributor_info["reputation"]
+            }
+        
+        return {
+            "valid": True,
+            "reason": "Contributor validated",
+            "reputation_score": contributor_info["reputation"],
+            "verified": contributor_info["verified"],
+            "contributions": contributor_info["contributions"]
+        }
+    
+    async def _load_community_dataset_v2(self, dataset_path: str) -> Optional[List[Dict[str, Any]]]:
+        """Enhanced dataset loading with format detection"""
+        try:
+            dataset_file = Path(dataset_path)
+            if not dataset_file.exists():
+                self.logger.error(f"Dataset file not found: {dataset_path}")
+                return None
+            
+            # Detect format and load accordingly
+            if dataset_file.suffix == '.json':
+                with open(dataset_file, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+            elif dataset_file.suffix == '.jsonl':
+                data = []
+                with open(dataset_file, 'r', encoding='utf-8') as f:
+                    for line_num, line in enumerate(f, 1):
+                        if line.strip():
+                            try:
+                                data.append(json.loads(line))
+                            except json.JSONDecodeError as e:
+                                self.logger.warning(f"Invalid JSON on line {line_num}: {e}")
+                                continue
+            elif dataset_file.suffix == '.csv':
+                # Basic CSV support
+                import csv
+                data = []
+                with open(dataset_file, 'r', encoding='utf-8') as f:
+                    reader = csv.DictReader(f)
+                    data = list(reader)
+            else:
+                self.logger.error(f"Unsupported dataset format: {dataset_file.suffix}")
+                return None
+            
+            self.logger.info(f"Loaded community dataset v2: {len(data)} records")
+            return data
+            
+        except Exception as e:
+            self.logger.error(f"Failed to load community dataset v2: {e}")
+            return None
+    
+    async def _validate_community_dataset_v2(
+        self, 
+        dataset: List[Dict[str, Any]], 
+        metadata: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Enhanced dataset validation with quality assessment"""
+        try:
+            # Check minimum size
+            if len(dataset) < 10:
+                return {
+                    "valid": False,
+                    "reason": "Dataset too small (minimum 10 records required)"
+                }
+            
+            # Check maximum size
+            if len(dataset) > 10000:
+                return {
+                    "valid": False,
+                    "reason": "Dataset too large (maximum 10,000 records allowed)"
+                }
+            
+            # Check required fields
+            required_fields = metadata.get("required_fields", ["input", "output"])
+            for i, record in enumerate(dataset[:5]):  # Check first 5 records
+                for field in required_fields:
+                    if field not in record:
+                        return {
+                            "valid": False,
+                            "reason": f"Missing required field '{field}' in record {i}"
+                        }
+            
+            # Enhanced data quality assessment
+            quality_result = await self._assess_data_quality_v2(dataset)
+            if quality_result["overall_score"] < 0.7:
+                return {
+                    "valid": False,
+                    "reason": f"Data quality too low (score: {quality_result['overall_score']:.2f}, minimum: 0.7)"
+                }
+            
+            return {
+                "valid": True,
+                "quality_score": quality_result["overall_score"],
+                "quality_details": quality_result,
+                "record_count": len(dataset)
+            }
+            
+        except Exception as e:
+            return {
+                "valid": False,
+                "reason": f"Validation error: {str(e)}"
+            }
+    
+    async def _assess_data_quality_v2(self, dataset: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Enhanced data quality assessment"""
+        if not dataset:
+            return {"overall_score": 0.0}
+        
+        quality_metrics = {}
+        
+        # Completeness check
+        complete_records = sum(1 for record in dataset if all(str(v).strip() for v in record.values()))
+        completeness = complete_records / len(dataset)
+        quality_metrics["completeness"] = completeness
+        
+        # Diversity check
+        unique_inputs = len(set(str(record.get("input", "")) for record in dataset))
+        diversity = min(unique_inputs / len(dataset), 1.0)
+        quality_metrics["diversity"] = diversity
+        
+        # Consistency check
+        consistent_records = sum(1 for record in dataset if len(str(record.get("output", ""))) > 10)
+        consistency = consistent_records / len(dataset)
+        quality_metrics["consistency"] = consistency
+        
+        # Length distribution check
+        input_lengths = [len(str(record.get("input", ""))) for record in dataset]
+        output_lengths = [len(str(record.get("output", ""))) for record in dataset]
+        
+        input_length_std = statistics.stdev(input_lengths) if len(input_lengths) > 1 else 0
+        output_length_std = statistics.stdev(output_lengths) if len(output_lengths) > 1 else 0
+        
+        length_stability = 1.0 - min(input_length_std / 100, 1.0) - min(output_length_std / 100, 1.0)
+        quality_metrics["length_stability"] = max(0.0, length_stability)
+        
+        # Calculate overall quality score
+        overall_score = sum(quality_metrics.values()) / len(quality_metrics)
+        
+        return {
+            "overall_score": overall_score,
+            "metrics": quality_metrics,
+            "record_count": len(dataset)
+        }
+    
+    async def _run_enhanced_ethics_check(self, dataset: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Enhanced ethics check with detailed analysis"""
+        try:
+            ethics_violations = []
+            total_records = len(dataset)
+            
+            # Enhanced ethics checking
+            harmful_keywords = ["harmful", "biased", "inappropriate", "discriminatory", "offensive"]
+            for i, record in enumerate(dataset):
+                text_content = str(record.get("input", "")) + " " + str(record.get("output", ""))
+                text_lower = text_content.lower()
+                
+                for keyword in harmful_keywords:
+                    if keyword in text_lower:
+                        ethics_violations.append({
+                            "record_index": i,
+                            "keyword": keyword,
+                            "context": text_content[:100] + "..." if len(text_content) > 100 else text_content
+                        })
+            
+            ethics_score = 1.0 - (len(ethics_violations) / total_records)
+            
+            return {
+                "passed": ethics_score >= 0.8,
+                "score": ethics_score,
+                "violations": len(ethics_violations),
+                "violation_details": ethics_violations,
+                "total_records": total_records
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Enhanced ethics check failed: {e}")
+            return {
+                "passed": False,
+                "score": 0.0,
+                "violations": len(dataset),
+                "violation_details": [],
+                "total_records": len(dataset)
+            }
+    
+    async def _run_enhanced_safety_check(self, dataset: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Enhanced safety check with detailed analysis"""
+        try:
+            safety_violations = []
+            total_records = len(dataset)
+            
+            # Enhanced safety checking
+            dangerous_keywords = ["dangerous", "unsafe", "risky", "harmful", "toxic", "malicious"]
+            for i, record in enumerate(dataset):
+                text_content = str(record.get("input", "")) + " " + str(record.get("output", ""))
+                text_lower = text_content.lower()
+                
+                for keyword in dangerous_keywords:
+                    if keyword in text_lower:
+                        safety_violations.append({
+                            "record_index": i,
+                            "keyword": keyword,
+                            "context": text_content[:100] + "..." if len(text_content) > 100 else text_content
+                        })
+            
+            safety_score = 1.0 - (len(safety_violations) / total_records)
+            
+            return {
+                "passed": safety_score >= 0.85,
+                "score": safety_score,
+                "violations": len(safety_violations),
+                "violation_details": safety_violations,
+                "total_records": total_records
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Enhanced safety check failed: {e}")
+            return {
+                "passed": False,
+                "score": 0.0,
+                "violations": len(dataset),
+                "violation_details": [],
+                "total_records": len(dataset)
+            }
+    
+    async def _store_community_dataset_v2(
+        self, 
+        dataset: List[Dict[str, Any]], 
+        contributor_id: str, 
+        metadata: Dict[str, Any]
+    ) -> str:
+        """Enhanced dataset storage with comprehensive metadata"""
+        try:
+            # Create storage path with versioning
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            storage_path = self.datasets_dir / f"community_v2_{contributor_id}_{timestamp}.json"
+            
+            # Prepare enhanced dataset with comprehensive metadata
+            dataset_with_metadata = {
+                "metadata": {
+                    **metadata,
+                    "contributor_id": contributor_id,
+                    "ingestion_timestamp": datetime.now().isoformat(),
+                    "record_count": len(dataset),
+                    "version": "2.0",
+                    "validation_status": "passed",
+                    "file_hash": self._calculate_file_hash(str(storage_path))
+                },
+                "data": dataset,
+                "statistics": {
+                    "total_records": len(dataset),
+                    "avg_input_length": sum(len(str(record.get("input", ""))) for record in dataset) / len(dataset),
+                    "avg_output_length": sum(len(str(record.get("output", ""))) for record in dataset) / len(dataset)
+                }
+            }
+            
+            # Store dataset
+            with open(storage_path, 'w', encoding='utf-8') as f:
+                json.dump(dataset_with_metadata, f, indent=2, ensure_ascii=False)
+            
+            self.logger.info(f"Community dataset v2 stored: {storage_path}")
+            return str(storage_path)
+            
+        except Exception as e:
+            self.logger.error(f"Failed to store community dataset v2: {e}")
+            raise
+    
+    async def _log_ingestion_v2(
+        self, 
+        ingestion_id: str, 
+        contributor_id: str, 
+        metadata: Dict[str, Any], 
+        status: str, 
+        error: Optional[str] = None
+    ):
+        """Enhanced ingestion logging"""
+        log_entry = {
+            "timestamp": datetime.now().isoformat(),
+            "action": "community_dataset_ingestion_v2",
+            "ingestion_id": ingestion_id,
+            "contributor_id": contributor_id,
+            "status": status,
+            "dataset_name": metadata.get("name", "unknown"),
+            "dataset_type": metadata.get("type", "unknown"),
+            "version": "2.0",
+            "error": error
+        }
+        
+        self.learning_log.append(log_entry)
+        self.logger.info(f"Logged ingestion v2: {ingestion_id} - {status}")
+    
+    def get_community_datasets_v2(self) -> List[Dict[str, Any]]:
+        """Get list of available community datasets v2"""
+        datasets = []
+        
+        if not self.datasets_dir.exists():
+            return datasets
+        
+        for dataset_file in self.datasets_dir.glob("community_v2_*.json"):
+            try:
+                with open(dataset_file, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                    metadata = data.get("metadata", {})
+                    statistics = data.get("statistics", {})
+                    datasets.append({
+                        "file_path": str(dataset_file),
+                        "contributor_id": metadata.get("contributor_id", "unknown"),
+                        "name": metadata.get("name", "unnamed"),
+                        "record_count": metadata.get("record_count", 0),
+                        "ingestion_timestamp": metadata.get("ingestion_timestamp", "unknown"),
+                        "version": metadata.get("version", "unknown"),
+                        "validation_status": metadata.get("validation_status", "unknown"),
+                        "statistics": statistics
+                    })
+            except Exception as e:
+                self.logger.error(f"Failed to read dataset v2 {dataset_file}: {e}")
+        
+        return sorted(datasets, key=lambda x: x["ingestion_timestamp"], reverse=True)
+    
+    def get_contributor_statistics_v2(self) -> Dict[str, Any]:
+        """Get enhanced statistics about contributors and their datasets"""
+        datasets = self.get_community_datasets_v2()
+        
+        if not datasets:
+            return {
+                "total_contributors": 0,
+                "total_datasets": 0,
+                "total_records": 0,
+                "contributors": {},
+                "version": "2.0"
+            }
+        
+        contributors = {}
+        total_records = 0
+        
+        for dataset in datasets:
+            contributor_id = dataset["contributor_id"]
+            if contributor_id not in contributors:
+                contributors[contributor_id] = {
+                    "dataset_count": 0,
+                    "total_records": 0,
+                    "first_contribution": dataset["ingestion_timestamp"],
+                    "last_contribution": dataset["ingestion_timestamp"],
+                    "validation_success_rate": 0.0,
+                    "total_validation_attempts": 0
+                }
+            
+            contributors[contributor_id]["dataset_count"] += 1
+            contributors[contributor_id]["total_records"] += dataset["record_count"]
+            contributors[contributor_id]["last_contribution"] = dataset["ingestion_timestamp"]
+            total_records += dataset["record_count"]
+        
+        return {
+            "total_contributors": len(contributors),
+            "total_datasets": len(datasets),
+            "total_records": total_records,
+            "contributors": contributors,
+            "version": "2.0"
+        }

@@ -480,3 +480,226 @@ class RewardManager:
             "development_phase": "experimental",
             "last_updated": datetime.now().isoformat()
         }
+    
+    async def calculate_delayed_reward(
+        self, 
+        session_id: str, 
+        reward_type: str,
+        cumulative_success_rate: float,
+        time_decay_factor: float = 0.9
+    ) -> float:
+        """
+        Calculate delayed reward based on cumulative success over multiple sessions
+        
+        Args:
+            session_id: Current session ID
+            reward_type: Type of reward (SUCCESSFUL_FIX, ETHICS_COMPLIANCE, etc.)
+            cumulative_success_rate: Success rate over multiple sessions (0.0-1.0)
+            time_decay_factor: Time decay factor for older sessions (0.0-1.0)
+            
+        Returns:
+            Calculated delayed reward value
+        """
+        if session_id not in self.sessions:
+            logger.warning(f"Session {session_id} not found for delayed reward calculation")
+            return 0.0
+        
+        session = self.sessions[session_id]
+        
+        # Base reward calculation
+        base_reward = self._get_base_reward_value(reward_type)
+        
+        # Apply cumulative success multiplier
+        success_multiplier = 1.0 + (cumulative_success_rate * 0.5)  # Up to 50% bonus
+        
+        # Apply time decay for older sessions
+        session_age = (datetime.now() - session.start_time).total_seconds() / 3600  # Hours
+        time_decay = time_decay_factor ** (session_age / 24)  # Decay per day
+        
+        # Calculate final delayed reward
+        delayed_reward = base_reward * success_multiplier * time_decay
+        
+        logger.info(f"Delayed reward calculated: {delayed_reward:.2f} (base: {base_reward}, success: {cumulative_success_rate:.2f})")
+        
+        return delayed_reward
+    
+    def _get_base_reward_value(self, reward_type: str) -> float:
+        """Get base reward value for different reward types"""
+        reward_values = {
+            "SUCCESSFUL_FIX": 1.0,
+            "ETHICS_COMPLIANCE": 1.5,
+            "SECURITY_PASS": 2.0,
+            "USER_SATISFACTION": 1.2,
+            "PERFORMANCE_IMPROVEMENT": 1.3,
+            "ACCURACY_IMPROVEMENT": 1.1
+        }
+        return reward_values.get(reward_type, 1.0)
+    
+    async def calculate_multi_objective_reward(
+        self,
+        session_id: str,
+        objectives: Dict[str, float]
+    ) -> Dict[str, float]:
+        """
+        Calculate rewards for multiple objectives simultaneously
+        
+        Args:
+            session_id: Session ID
+            objectives: Dictionary of objective names and their weights
+            
+        Returns:
+            Dictionary of calculated rewards for each objective
+        """
+        if session_id not in self.sessions:
+            logger.warning(f"Session {session_id} not found for multi-objective reward")
+            return {}
+        
+        session = self.sessions[session_id]
+        calculated_rewards = {}
+        
+        for objective, weight in objectives.items():
+            # Calculate reward for this objective
+            if objective == "accuracy":
+                reward = await self._calculate_accuracy_reward(session)
+            elif objective == "ethics":
+                reward = await self._calculate_ethics_reward(session)
+            elif objective == "performance":
+                reward = await self._calculate_performance_reward(session)
+            elif objective == "safety":
+                reward = await self._calculate_safety_reward(session)
+            else:
+                reward = 0.0
+            
+            # Apply weight
+            calculated_rewards[objective] = reward * weight
+        
+        logger.info(f"Multi-objective rewards calculated: {calculated_rewards}")
+        return calculated_rewards
+    
+    async def _calculate_accuracy_reward(self, session) -> float:
+        """Calculate accuracy-based reward"""
+        if not session.rewards:
+            return 0.0
+        
+        accuracy_rewards = [r for r in session.rewards if r.reward_type == "ACCURACY_IMPROVEMENT"]
+        return sum(r.value for r in accuracy_rewards)
+    
+    async def _calculate_ethics_reward(self, session) -> float:
+        """Calculate ethics-based reward"""
+        if not session.rewards:
+            return 0.0
+        
+        ethics_rewards = [r for r in session.rewards if r.reward_type == "ETHICS_COMPLIANCE"]
+        return sum(r.value for r in ethics_rewards)
+    
+    async def _calculate_performance_reward(self, session) -> float:
+        """Calculate performance-based reward"""
+        if not session.rewards:
+            return 0.0
+        
+        performance_rewards = [r for r in session.rewards if r.reward_type == "PERFORMANCE_IMPROVEMENT"]
+        return sum(r.value for r in performance_rewards)
+    
+    async def _calculate_safety_reward(self, session) -> float:
+        """Calculate safety-based reward"""
+        if not session.rewards:
+            return 0.0
+        
+        safety_rewards = [r for r in session.rewards if r.reward_type == "SECURITY_PASS"]
+        return sum(r.value for r in safety_rewards)
+    
+    async def export_reward_curve(self, output_path: str = "artifacts/self_learning_rewards.png"):
+        """Export reward curve visualization"""
+        try:
+            import matplotlib.pyplot as plt
+            import numpy as np
+            
+            # Collect all session data
+            session_data = []
+            for session in self.sessions.values():
+                session_data.append({
+                    'timestamp': session.start_time,
+                    'total_rewards': sum(r.value for r in session.rewards),
+                    'total_penalties': sum(p.value for p in session.penalties)
+                })
+            
+            if not session_data:
+                logger.warning("No session data available for reward curve")
+                return
+            
+            # Sort by timestamp
+            session_data.sort(key=lambda x: x['timestamp'])
+            
+            # Extract data for plotting
+            timestamps = [d['timestamp'] for d in session_data]
+            rewards = [d['total_rewards'] for d in session_data]
+            penalties = [abs(d['total_penalties']) for d in session_data]
+            
+            # Create plot
+            plt.figure(figsize=(12, 6))
+            plt.plot(timestamps, rewards, 'g-', label='Rewards', linewidth=2)
+            plt.plot(timestamps, penalties, 'r-', label='Penalties', linewidth=2)
+            plt.xlabel('Time')
+            plt.ylabel('Reward/Penalty Value')
+            plt.title('StillMe Self-Learning Reward Curve')
+            plt.legend()
+            plt.grid(True, alpha=0.3)
+            plt.xticks(rotation=45)
+            plt.tight_layout()
+            
+            # Save plot
+            plt.savefig(output_path, dpi=300, bbox_inches='tight')
+            plt.close()
+            
+            logger.info(f"Reward curve exported to {output_path}")
+            
+        except ImportError:
+            logger.warning("Matplotlib not available, skipping reward curve export")
+        except Exception as e:
+            logger.error(f"Failed to export reward curve: {e}")
+    
+    def get_reward_statistics(self) -> Dict[str, Any]:
+        """Get comprehensive reward statistics"""
+        if not self.sessions:
+            return {
+                "total_sessions": 0,
+                "total_rewards": 0,
+                "total_penalties": 0,
+                "avg_reward_per_session": 0.0,
+                "reward_distribution": {},
+                "penalty_distribution": {},
+                "success_rate": 0.0
+            }
+        
+        # Calculate statistics
+        total_sessions = len(self.sessions)
+        all_rewards = []
+        all_penalties = []
+        reward_types = {}
+        penalty_types = {}
+        
+        for session in self.sessions.values():
+            for reward in session.rewards:
+                all_rewards.append(reward.value)
+                reward_types[reward.reward_type] = reward_types.get(reward.reward_type, 0) + 1
+            
+            for penalty in session.penalties:
+                all_penalties.append(abs(penalty.value))
+                penalty_types[penalty.penalty_type] = penalty_types.get(penalty.penalty_type, 0) + 1
+        
+        # Calculate success rate
+        successful_sessions = sum(1 for session in self.sessions.values() 
+                                if len(session.rewards) > len(session.penalties))
+        success_rate = successful_sessions / total_sessions if total_sessions > 0 else 0.0
+        
+        return {
+            "total_sessions": total_sessions,
+            "total_rewards": len(all_rewards),
+            "total_penalties": len(all_penalties),
+            "avg_reward_per_session": sum(all_rewards) / total_sessions if total_sessions > 0 else 0.0,
+            "reward_distribution": reward_types,
+            "penalty_distribution": penalty_types,
+            "success_rate": success_rate,
+            "avg_reward_value": sum(all_rewards) / len(all_rewards) if all_rewards else 0.0,
+            "avg_penalty_value": sum(all_penalties) / len(all_penalties) if all_penalties else 0.0
+        }
