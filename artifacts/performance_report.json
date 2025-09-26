@@ -1,0 +1,197 @@
+{
+  "performance_report": {
+    "timestamp": "2025-09-27T00:27:36.134339",
+    "duration": 7.818059682846069,
+    "metrics": [
+      {
+        "name": "cpu_usage_percent",
+        "value": 7.3,
+        "unit": "%",
+        "timestamp": "2025-09-27T00:27:29.318621",
+        "category": "cpu"
+      },
+      {
+        "name": "cpu_count",
+        "value": 16,
+        "unit": "cores",
+        "timestamp": "2025-09-27T00:27:29.318621",
+        "category": "cpu"
+      },
+      {
+        "name": "cpu_frequency",
+        "value": 2560.0,
+        "unit": "MHz",
+        "timestamp": "2025-09-27T00:27:29.318621",
+        "category": "cpu"
+      },
+      {
+        "name": "memory_usage_percent",
+        "value": 73.3,
+        "unit": "%",
+        "timestamp": "2025-09-27T00:27:29.991660",
+        "category": "memory"
+      },
+      {
+        "name": "memory_available_gb",
+        "value": 7.285697937011719,
+        "unit": "GB",
+        "timestamp": "2025-09-27T00:27:29.991660",
+        "category": "memory"
+      },
+      {
+        "name": "swap_usage_percent",
+        "value": 13.7,
+        "unit": "%",
+        "timestamp": "2025-09-27T00:27:29.991660",
+        "category": "memory"
+      },
+      {
+        "name": "network_bytes_sent",
+        "value": 743492105,
+        "unit": "bytes",
+        "timestamp": "2025-09-27T00:27:29.996407",
+        "category": "network"
+      },
+      {
+        "name": "network_bytes_recv",
+        "value": 5346862601,
+        "unit": "bytes",
+        "timestamp": "2025-09-27T00:27:29.996407",
+        "category": "network"
+      },
+      {
+        "name": "network_packets_sent",
+        "value": 3239185,
+        "unit": "packets",
+        "timestamp": "2025-09-27T00:27:29.996407",
+        "category": "network"
+      },
+      {
+        "name": "network_packets_recv",
+        "value": 4939592,
+        "unit": "packets",
+        "timestamp": "2025-09-27T00:27:29.996407",
+        "category": "network"
+      },
+      {
+        "name": "api_response_time__health",
+        "value": 2049.107313156128,
+        "unit": "ms",
+        "timestamp": "2025-09-27T00:27:32.045514",
+        "category": "api"
+      },
+      {
+        "name": "api_response_time__api_ai_process",
+        "value": 7.139444351196289,
+        "unit": "ms",
+        "timestamp": "2025-09-27T00:27:32.052654",
+        "category": "api"
+      },
+      {
+        "name": "api_response_time__api_learning_session",
+        "value": 2046.12135887146,
+        "unit": "ms",
+        "timestamp": "2025-09-27T00:27:34.098775",
+        "category": "api"
+      },
+      {
+        "name": "api_response_time__api_security_scan",
+        "value": 0.0,
+        "unit": "ms",
+        "timestamp": "2025-09-27T00:27:34.098775",
+        "category": "api"
+      },
+      {
+        "name": "api_response_time__api_privacy_status",
+        "value": 2034.5511436462402,
+        "unit": "ms",
+        "timestamp": "2025-09-27T00:27:36.133326",
+        "category": "api"
+      },
+      {
+        "name": "learning_session_duration",
+        "value": 45.2,
+        "unit": "seconds",
+        "timestamp": "2025-09-27T00:27:36.133326",
+        "category": "learning"
+      },
+      {
+        "name": "learning_accuracy",
+        "value": 0.94,
+        "unit": "ratio",
+        "timestamp": "2025-09-27T00:27:36.133326",
+        "category": "learning"
+      },
+      {
+        "name": "learning_velocity",
+        "value": 0.8,
+        "unit": "ratio",
+        "timestamp": "2025-09-27T00:27:36.133326",
+        "category": "learning"
+      },
+      {
+        "name": "rollback_frequency",
+        "value": 0.05,
+        "unit": "ratio",
+        "timestamp": "2025-09-27T00:27:36.133326",
+        "category": "learning"
+      },
+      {
+        "name": "ethics_compliance",
+        "value": 1.0,
+        "unit": "ratio",
+        "timestamp": "2025-09-27T00:27:36.133326",
+        "category": "learning"
+      },
+      {
+        "name": "security_scan_duration",
+        "value": 12.5,
+        "unit": "seconds",
+        "timestamp": "2025-09-27T00:27:36.134339",
+        "category": "security"
+      },
+      {
+        "name": "threat_detection_rate",
+        "value": 0.98,
+        "unit": "ratio",
+        "timestamp": "2025-09-27T00:27:36.134339",
+        "category": "security"
+      },
+      {
+        "name": "false_positive_rate",
+        "value": 0.02,
+        "unit": "ratio",
+        "timestamp": "2025-09-27T00:27:36.134339",
+        "category": "security"
+      },
+      {
+        "name": "security_score",
+        "value": 95.0,
+        "unit": "score",
+        "timestamp": "2025-09-27T00:27:36.134339",
+        "category": "security"
+      }
+    ],
+    "recommendations": [
+      "Implement API response caching",
+      "Optimize database queries and connections",
+      "Consider implementing API rate limiting",
+      "Use async/await for I/O operations",
+      "Implement comprehensive performance monitoring",
+      "Set up automated performance alerts",
+      "Regular performance testing and benchmarking",
+      "Consider implementing CDN for static content",
+      "Optimize database indexes and queries",
+      "Implement connection pooling for external services"
+    ],
+    "optimization_score": 55.0
+  },
+  "summary": {
+    "total_metrics": 24,
+    "optimization_score": 55.0,
+    "recommendations_count": 10,
+    "analysis_duration": 7.818059682846069
+  },
+  "categories": {
+    "cpu": [
+      

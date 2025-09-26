@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="55" failures="0" skipped="2" tests="57" time="11.363" timestamp="2025-09-27T00:26:49.121152+07:00" hostname="LAPTOP-HLG8B73I"><testcase classname="" name="tests.agentdev.test_dag_executor" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\agentdev\test_dag_executor.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\agentdev\test_dag_executor.py:14: in &lt;module&gt;
+    from agentdev.dag.dag_executor import (
+E   ModuleNotFoundError: No module named 'agentdev'</error></testcase><testcase classname="" name="tests.agentdev.test_event_bus" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\agentdev\test_event_bus.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\agentdev\test_event_bus.py:13: in &lt;module&gt;
+    from agentdev.event_bus.redis_event_bus import (
+E   ModuleNotFoundError: No module named 'agentdev'</error></testcase><testcase classname="" name="tests.agentdev.test_intelligent_analysis" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\agentdev\test_intelligent_analysis.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\agentdev\test_intelligent_analysis.py:21: in &lt;module&gt;
+    from tools.ast_impact import (
+E   ModuleNotFoundError: No module named 'tools'</error></testcase><testcase classname="" name="tests.agentdev.test_observability" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\agentdev\test_observability.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\agentdev\test_observability.py:16: in &lt;module&gt;
+    from agentdev.observability.structured_logger import (
+E   ModuleNotFoundError: No module named 'agentdev'</error></testcase><testcase classname="" name="tests.agentdev.test_rbac" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\agentdev\test_rbac.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\agentdev\test_rbac.py:23: in &lt;module&gt;
+    from agentdev.authz.rbac import (
+E   ModuleNotFoundError: No module named 'agentdev'</error></testcase><testcase classname="" name="tests.agentdev.test_security" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\agentdev\test_security.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\agentdev\test_security.py:16: in &lt;module&gt;
+    from agentdev.security.policy_gate import (
+E   ModuleNotFoundError: No module named 'agentdev'</error></testcase><testcase classname="" name="tests.agentdev.test_state_basic" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\agentdev\test_state_basic.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\agentdev\test_state_basic.py:17: in &lt;module&gt;
+    from agentdev.state_store import StateStore, JobStatus, StepStatus, CheckpointType
+E   ModuleNotFoundError: No module named 'agentdev'</error></testcase><testcase classname="" name="tests.agentdev.test_state_idempotency" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\agentdev\test_state_idempotency.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\agentdev\test_state_idempotency.py:15: in &lt;module&gt;
+    from agentdev.state_store import StateStore, JobStatus, StepStatus, CheckpointType
+E   ModuleNotFoundError: No module named 'agentdev'</error></testcase><testcase classname="" name="tests.agentdev.test_state_recovery_powerloss" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\agentdev\test_state_recovery_powerloss.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\agentdev\test_state_recovery_powerloss.py:17: in &lt;module&gt;
+    from agentdev.state_store import StateStore, JobStatus, StepStatus, CheckpointType
+E   ModuleNotFoundError: No module named 'agentdev'</error></testcase><testcase classname="" name="tests.seal_grade" time="0.000"><error message="collection failure">Defining 'pytest_plugins' in a non-top-level conftest is no longer supported:
+It affects the entire test suite instead of just below the conftest as expected.
+  D:\stillme_ai\tests\seal_grade\conftest.py
+Please move it to a top level conftest file at the rootdir:
+  D:\stillme_ai
+For more information, visit:
+  https://docs.pytest.org/en/stable/deprecations.html#pytest-plugins-in-non-top-level-conftest-files</error></testcase><testcase classname="" name="tests.test_advanced_agentdev" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_advanced_agentdev.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_advanced_agentdev.py:13: in &lt;module&gt;
+    from stillme_core.advanced_security.safe_attack_simulator import (
+E   ModuleNotFoundError: No module named 'stillme_core.advanced_security'</error></testcase><testcase classname="" name="tests.test_agent_flow" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_agent_flow.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_agent_flow.py:7: in &lt;module&gt;
+    from stillme_core.controller import AgentController, run_agent
+E   ModuleNotFoundError: No module named 'stillme_core.controller'</error></testcase><testcase classname="" name="tests.test_agentdev_loop" time="0.000"><skipped message="collection skipped">('D:\\stillme_ai\\tests\\test_agentdev_loop.py', 23, "Skipped: Thiếu stillme_core.plan_types.PlanItem: No module named 'stillme_core.plan_types'")</skipped></testcase><testcase classname="" name="tests.test_ai_manager_extended" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_ai_manager_extended.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_ai_manager_extended.py:4: in &lt;module&gt;
+    from stillme_core.ai_manager import (
+E   ModuleNotFoundError: No module named 'stillme_core.ai_manager'</error></testcase><testcase classname="" name="tests.test_api_bridge" time="0.000"><error message="collection failure">tests\test_api_bridge.py:9: in &lt;module&gt;
+    from api_server import app
+api_server.py:50: in &lt;module&gt;
+    sm = StillMeFramework()
+         ^^^^^^^^^^^^^^^^^^
+stillme_core\framework.py:303: in __init__
+    self._initialize_core_modules()
+stillme_core\framework.py:365: in _initialize_core_modules
+    self.api_manager = IMPORTED_MODULES["UnifiedAPIManager"](
+E   TypeError: UnifiedAPIManager.__init__() got an unexpected keyword argument 'model_preferences'</error></testcase><testcase classname="" name="tests.test_api_dev_agent" time="0.000"><error message="collection failure">tests\test_api_dev_agent.py:3: in &lt;module&gt;
+    from api_server import app
+api_server.py:50: in &lt;module&gt;
+    sm = StillMeFramework()
+         ^^^^^^^^^^^^^^^^^^
+stillme_core\framework.py:303: in __init__
+    self._initialize_core_modules()
+stillme_core\framework.py:365: in _initialize_core_modules
+    self.api_manager = IMPORTED_MODULES["UnifiedAPIManager"](
+E   TypeError: UnifiedAPIManager.__init__() got an unexpected keyword argument 'model_preferences'</error></testcase><testcase classname="" name="tests.test_api_pr_fullsuite" time="0.000"><skipped message="collection skipped">('D:\\stillme_ai\\tests\\test_api_pr_fullsuite.py', 8, "Skipped: FastAPI TestClient unavailable: UnifiedAPIManager.__init__() got an unexpected keyword argument 'model_preferences'")</skipped></testcase><testcase classname="" name="tests.test_bug_memory" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_bug_memory.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_bug_memory.py:1: in &lt;module&gt;
+    from stillme_core.bug_memory import BugMemory
+E   ModuleNotFoundError: No module named 'stillme_core.bug_memory'</error></testcase><testcase classname="" name="tests.test_bug_memory_record" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_bug_memory_record.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_bug_memory_record.py:7: in &lt;module&gt;
+    from stillme_core.bug_memory import BugMemory
+E   ModuleNotFoundError: No module named 'stillme_core.bug_memory'</error></testcase><testcase classname="" name="tests.test_bugmemory_priority" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_bugmemory_priority.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_bugmemory_priority.py:1: in &lt;module&gt;
+    from stillme_core.bug_memory import BugMemory
+E   ModuleNotFoundError: No module named 'stillme_core.bug_memory'</error></testcase><testcase classname="" name="tests.test_code_quality_enforcer" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_code_quality_enforcer.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_code_quality_enforcer.py:14: in &lt;module&gt;
+    from stillme_core.quality.agentdev_integration import AgentDevQualityIntegration
+E   ModuleNotFoundError: No module named 'stillme_core.quality'</error></testcase><testcase classname="" name="tests.test_compute_ai_manager" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_compute_ai_manager.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_compute_ai_manager.py:2: in &lt;module&gt;
+    from stillme_core.ai_manager import compute_number
+E   ModuleNotFoundError: No module named 'stillme_core.ai_manager'</error></testcase><testcase classname="" name="tests.test_core_modules_comprehensive" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_core_modules_comprehensive.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_core_modules_comprehensive.py:31: in &lt;module&gt;
+    from stillme_core.security.security_manager import SecurityManager
+E   ModuleNotFoundError: No module named 'stillme_core.security'</error></testcase><testcase classname="" name="tests.test_emotionsense_v1" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_emotionsense_v1.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_emotionsense_v1.py:16: in &lt;module&gt;
+    from emotionsense_v1 import ERROR_CODES, EmotionSenseV1
+E   ModuleNotFoundError: No module named 'emotionsense_v1'</error></testcase><testcase classname="" name="tests.test_enhanced_agentdev" time="0.000"><error message="collection failure">C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\python.py:498: in importtestmodule
+    mod = import_path(
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\pathlib.py:587: in import_path
+    importlib.import_module(module_name)
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+&lt;frozen importlib._bootstrap&gt;:1387: in _gcd_import
+    ???
+&lt;frozen importlib._bootstrap&gt;:1360: in _find_and_load
+    ???
+&lt;frozen importlib._bootstrap&gt;:1331: in _find_and_load_unlocked
+    ???
+&lt;frozen importlib._bootstrap&gt;:935: in _load_unlocked
+    ???
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\assertion\rewrite.py:177: in exec_module
+    source_stat, co = _rewrite_test(fn, self.config)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\site-packages\_pytest\assertion\rewrite.py:357: in _rewrite_test
+    tree = ast.parse(source, filename=strfn)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\ast.py:52: in parse
+    return compile(source, filename, mode, flags,
+E     File "D:\stillme_ai\tests\test_enhanced_agentdev.py", line 321
+E       code_snippet="password = os.getenv("PASSWORD", "")",
+E                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E   SyntaxError: invalid syntax. Perhaps you forgot a comma?</error></testcase><testcase classname="" name="tests.test_ethical_core_system_v1" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_ethical_core_system_v1.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_ethical_core_system_v1.py:7: in &lt;module&gt;
+    from modules.ethical_core_system_v1 import (
+stillme_core\modules\ethical_core_system_v1.py:56: in &lt;module&gt;
+    from common import (
+E   ImportError: cannot import name 'AsyncHttpClient' from 'common' (D:\stillme_ai\stillme_core\common\__init__.py)</error></testcase><testcase classname="" name="tests.test_executor" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_executor.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_executor.py:1: in &lt;module&gt;
+    from stillme_core.executor import PatchExecutor
+E   ModuleNotFoundError: No module named 'stillme_core.executor'</error></testcase><testcase classname="" name="tests.test_executor_patch" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_executor_patch.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_executor_patch.py:5: in &lt;module&gt;
+    from stillme_core.executor import PatchExecutor
+E   ModuleNotFoundError: No module named 'stillme_core.executor'</error></testcase><testcase classname="" name="tests.test_generate_patch_stub" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_generate_patch_stub.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_generate_patch_stub.py:1: in &lt;module&gt;
+    from stillme_core.ai_manager import AIManager
+E   ModuleNotFoundError: No module named 'stillme_core.ai_manager'</error></testcase><testcase classname="" name="tests.test_guard" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_guard.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_guard.py:8: in &lt;module&gt;
+    from stillme_core.safety_guard import (
+E   ModuleNotFoundError: No module named 'stillme_core.safety_guard'</error></testcase><testcase classname="" name="tests.test_guard_v3" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_guard_v3.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_guard_v3.py:8: in &lt;module&gt;
+    from stillme_core.safety_guard import (
+E   ModuleNotFoundError: No module named 'stillme_core.safety_guard'</error></testcase><testcase classname="" name="tests.test_guard_v4" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_guard_v4.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_guard_v4.py:8: in &lt;module&gt;
+    from stillme_core.safety_guard import (
+E   ModuleNotFoundError: No module named 'stillme_core.safety_guard'</error></testcase><testcase classname="" name="tests.test_health_ai_manager" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_health_ai_manager.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_health_ai_manager.py:2: in &lt;module&gt;
+    from stillme_core.ai_manager import health, set_mode
+E   ModuleNotFoundError: No module named 'stillme_core.ai_manager'</error></testcase><testcase classname="" name="tests.test_identity_handler" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_identity_handler.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_identity_handler.py:13: in &lt;module&gt;
+    from identity_handler import IdentityHandler
+E   ModuleNotFoundError: No module named 'identity_handler'</error></testcase><testcase classname="" name="tests.test_identity_integration" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_identity_integration.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_identity_integration.py:13: in &lt;module&gt;
+    from conversational_core_v1 import ConversationalCore
+E   ModuleNotFoundError: No module named 'conversational_core_v1'</error></testcase><testcase classname="" name="tests.test_integration_cross_module" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_integration_cross_module.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_integration_cross_module.py:20: in &lt;module&gt;
+    from conftest import (
+E   ModuleNotFoundError: No module named 'conftest'</error></testcase><testcase classname="" name="tests.test_internet_access" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_internet_access.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_internet_access.py:17: in &lt;module&gt;
+    from market_intel import market_intel
+market_intel.py:20: in &lt;module&gt;
+    from common.http import secure_http_client
+E   ImportError: cannot import name 'secure_http_client' from 'common.http' (D:\stillme_ai\stillme_core\common\http.py)</error></testcase><testcase classname="" name="tests.test_layered_memory_v1" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_layered_memory_v1.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_layered_memory_v1.py:16: in &lt;module&gt;
+    from modules.layered_memory_v1 import (
+E   ImportError: cannot import name 'LongTermMemory' from 'modules.layered_memory_v1' (D:\stillme_ai\stillme_core\modules\layered_memory_v1.py)</error></testcase><testcase classname="" name="tests.test_niche_e2e" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_niche_e2e.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_niche_e2e.py:20: in &lt;module&gt;
+    from niche_radar.collectors import collect_all_data, get_all_collectors
+niche_radar\__init__.py:20: in &lt;module&gt;
+    from .collectors import (
+niche_radar\collectors.py:22: in &lt;module&gt;
+    from market_intel import MarketIntelligence
+market_intel.py:20: in &lt;module&gt;
+    from common.http import secure_http_client
+E   ImportError: cannot import name 'secure_http_client' from 'common.http' (D:\stillme_ai\stillme_core\common\http.py)</error></testcase><testcase classname="" name="tests.test_niche_integration" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_niche_integration.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_niche_integration.py:14: in &lt;module&gt;
+    from niche_radar.collectors import collect_all_data
+niche_radar\__init__.py:20: in &lt;module&gt;
+    from .collectors import (
+niche_radar\collectors.py:22: in &lt;module&gt;
+    from market_intel import MarketIntelligence
+market_intel.py:20: in &lt;module&gt;
+    from common.http import secure_http_client
+E   ImportError: cannot import name 'secure_http_client' from 'common.http' (D:\stillme_ai\stillme_core\common\http.py)</error></testcase><testcase classname="" name="tests.test_niche_units" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_niche_units.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_niche_units.py:13: in &lt;module&gt;
+    from niche_radar.collectors import (
+niche_radar\__init__.py:20: in &lt;module&gt;
+    from .collectors import (
+niche_radar\collectors.py:22: in &lt;module&gt;
+    from market_intel import MarketIntelligence
+market_intel.py:20: in &lt;module&gt;
+    from common.http import secure_http_client
+E   ImportError: cannot import name 'secure_http_client' from 'common.http' (D:\stillme_ai\stillme_core\common\http.py)</error></testcase><testcase classname="" name="tests.test_obs_files" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_obs_files.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_obs_files.py:8: in &lt;module&gt;
+    from stillme_core.logging_utils import (
+E   ModuleNotFoundError: No module named 'stillme_core.logging_utils'</error></testcase><testcase classname="" name="tests.test_plan_types" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_plan_types.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_plan_types.py:1: in &lt;module&gt;
+    from stillme_core.plan_types import PlanItem
+E   ModuleNotFoundError: No module named 'stillme_core.plan_types'</error></testcase><testcase classname="" name="tests.test_reflection_controller" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_reflection_controller.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_reflection_controller.py:22: in &lt;module&gt;
+    from stillme_core.reflection_controller import (
+E   ModuleNotFoundError: No module named 'stillme_core.reflection_controller'</error></testcase><testcase classname="" name="tests.test_reflection_integration" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_reflection_integration.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_reflection_integration.py:22: in &lt;module&gt;
+    from stillme_core.reflection_controller import (
+E   ModuleNotFoundError: No module named 'stillme_core.reflection_controller'</error></testcase><testcase classname="" name="tests.test_router_v9" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_router_v9.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_router_v9.py:8: in &lt;module&gt;
+    from stillme_entry import generate
+E   ModuleNotFoundError: No module named 'stillme_entry'</error></testcase><testcase classname="" name="tests.test_safe_runner" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_safe_runner.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_safe_runner.py:9: in &lt;module&gt;
+    from stillme_core.core.safe_runner import SafeRunner
+stillme_core\core\__init__.py:5: in &lt;module&gt;
+    from .controller import AgentController, run_agent
+stillme_core\core\controller.py:12: in &lt;module&gt;
+    from .planner import Planner
+stillme_core\core\planner.py:19: in &lt;module&gt;
+    from stillme_core.ai_manager import AIManager
+E   ModuleNotFoundError: No module named 'stillme_core.ai_manager'</error></testcase><testcase classname="" name="tests.test_sandbox" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_sandbox.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_sandbox.py:1: in &lt;module&gt;
+    from stillme_core.sandbox import prepare_sandbox, run_tests_in_sandbox
+E   ModuleNotFoundError: No module named 'stillme_core.sandbox'</error></testcase><testcase classname="" name="tests.test_security_comprehensive" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_security_comprehensive.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_security_comprehensive.py:27: in &lt;module&gt;
+    from stillme_core.security.security_manager import SecurityManager
+E   ModuleNotFoundError: No module named 'stillme_core.security'</error></testcase><testcase classname="" name="tests.test_security_ethics" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_security_ethics.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_security_ethics.py:15: in &lt;module&gt;
+    from conftest import (
+E   ModuleNotFoundError: No module named 'conftest'</error></testcase><testcase classname="" name="tests.test_security_handler" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_security_handler.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_security_handler.py:13: in &lt;module&gt;
+    from identity_handler import IdentityHandler
+E   ModuleNotFoundError: No module named 'identity_handler'</error></testcase><testcase classname="" name="tests.test_self_improvement_manager" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_self_improvement_manager.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_self_improvement_manager.py:26: in &lt;module&gt;
+    from modules.self_improvement_manager import (
+stillme_core\modules\self_improvement_manager.py:33: in &lt;module&gt;
+    from common import (
+E   ImportError: cannot import name 'AsyncHttpClient' from 'common' (D:\stillme_ai\stillme_core\common\__init__.py)</error></testcase><testcase classname="" name="tests.test_stillme_behavior_matrix" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_stillme_behavior_matrix.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_stillme_behavior_matrix.py:78: in &lt;module&gt;
+    _RAW_FN, _RAW_DESC = _resolve_raw_generator()
+                         ^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_stillme_behavior_matrix.py:62: in _resolve_raw_generator
+    raise ImportError("Kh√¥ng t√¨m th·∫•y h√†m route/respond/answer c·ªßa pipeline.")
+E   ImportError: Kh√¥ng t√¨m th·∫•y h√†m route/respond/answer c·ªßa pipeline.</error></testcase><testcase classname="" name="tests.test_supervisor_flow" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_supervisor_flow.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_supervisor_flow.py:8: in &lt;module&gt;
+    from stillme_core.supervisor import DailySupervisor, LessonProposal
+E   ModuleNotFoundError: No module named 'stillme_core.supervisor'</error></testcase><testcase classname="" name="tests.test_unit_core_modules" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_unit_core_modules.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_unit_core_modules.py:17: in &lt;module&gt;
+    from conftest import (
+E   ModuleNotFoundError: No module named 'conftest'</error></testcase><testcase classname="" name="tests.test_verifier" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_verifier.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_verifier.py:5: in &lt;module&gt;
+    from stillme_core.verifier import Verifier
+E   ModuleNotFoundError: No module named 'stillme_core.verifier'</error></testcase><testcase classname="" name="tests.test_web_access_v2" time="0.000"><error message="collection failure">ImportError while importing test module 'D:\stillme_ai\tests\test_web_access_v2.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+C:\Users\LENOVO\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests\test_web_access_v2.py:19: in &lt;module&gt;
+    from web_tools import WebToolsRegistry, search_news, github_trending, hackernews_top, google_trends
+web_tools.py:14: in &lt;module&gt;
+    from common.http import SecureHttpClient
+E   ImportError: cannot import name 'SecureHttpClient' from 'common.http' (D:\stillme_ai\stillme_core\common\http.py)</error></testcase></testsuite></testsuites>

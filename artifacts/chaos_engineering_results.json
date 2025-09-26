@@ -1,0 +1,59 @@
+{
+  "test_suite": "Chaos Engineering Tests",
+  "execution_time": 9.109384536743164,
+  "total_tests": 6,
+  "passed": 1,
+  "failed": 0,
+  "errors": 5,
+  "pass_rate": 16.666666666666664,
+  "results": [
+    {
+      "test": "memory_failure_recovery",
+      "status": "ERROR",
+      "error": "module 'stillme_core' has no attribute 'memory'",
+      "recovery_time": 8.870923042297363
+    },
+    {
+      "test": "router_failure_recovery",
+      "status": "ERROR",
+      "error": "module 'stillme_core' has no attribute 'routing'",
+      "recovery_time": 0.0
+    },
+    {
+      "test": "agentdev_failure_recovery",
+      "status": "ERROR",
+      "error": "No module named 'agent_dev'",
+      "recovery_time": 0.0
+    },
+    {
+      "test": "security_system_failure_recovery",
+      "status": "ERROR",
+      "error": "module 'stillme_core' has no attribute 'core'",
+      "recovery_time": 0.05032849311828613
+    },
+    {
+      "test": "plugin_system_failure_recovery",
+      "status": "ERROR",
+      "error": "No module named 'plugins'",
+      "recovery_time": 0.012865781784057617
+    },
+    {
+      "test": "learning_system_failure_recovery",
+      "status": "PASS",
+      "recovery_time": 0.12709331512451172,
+      "recovery_success": true,
+      "details": {
+        "failure_simulation": {
+          "failure_type": "learning_corruption",
+          "duration": 6000,
+          "severity": "critical"
+        },
+        "response": {
+          "status": "learning_failure_simulated",
+          "fallback_activated": true,
+          "recovery_initiated": true
+        }
+      }
+    }
+  ]
+}
