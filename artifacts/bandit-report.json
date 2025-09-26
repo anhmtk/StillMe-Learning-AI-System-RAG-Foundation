@@ -101,18 +101,18 @@
       "reason": "syntax error while parsing AST from file"
     }
   ],
-  "generated_at": "2025-09-26T12:51:35Z",
+  "generated_at": "2025-09-26T13:34:02Z",
   "metrics": {
     "_totals": {
       "CONFIDENCE.HIGH": 167,
       "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 9,
+      "CONFIDENCE.MEDIUM": 12,
       "CONFIDENCE.UNDEFINED": 0,
       "SEVERITY.HIGH": 12,
       "SEVERITY.LOW": 146,
-      "SEVERITY.MEDIUM": 18,
+      "SEVERITY.MEDIUM": 21,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 73265,
+      "loc": 73784,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -165,6 +165,19 @@
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
       "loc": 78,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "stillme_core/api\\privacy_endpoints.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 307,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -321,6 +334,19 @@
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
       "loc": 241,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "stillme_core/control\\kill_switch.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 3,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 3,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 212,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -2743,6 +2769,66 @@
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b324_hashlib.html",
       "test_id": "B324",
       "test_name": "hashlib"
+    },
+    {
+      "code": "87         # Check for existing kill state\n88         kill_file = os.getenv(\"STILLME_KILL_FILE\", \"/tmp/stillme_kill_switch\")\n89         if os.path.exists(kill_file):\n",
+      "col_offset": 51,
+      "end_col_offset": 77,
+      "filename": "stillme_core/control\\kill_switch.py",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 377,
+        "link": "https://cwe.mitre.org/data/definitions/377.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Probable insecure usage of temp file/directory.",
+      "line_number": 88,
+      "line_range": [
+        88
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b108_hardcoded_tmp_directory.html",
+      "test_id": "B108",
+      "test_name": "hardcoded_tmp_directory"
+    },
+    {
+      "code": "202         \"\"\"Write kill switch state to file\"\"\"\n203         kill_file = os.getenv(\"STILLME_KILL_FILE\", \"/tmp/stillme_kill_switch\")\n204         try:\n",
+      "col_offset": 51,
+      "end_col_offset": 77,
+      "filename": "stillme_core/control\\kill_switch.py",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 377,
+        "link": "https://cwe.mitre.org/data/definitions/377.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Probable insecure usage of temp file/directory.",
+      "line_number": 203,
+      "line_range": [
+        203
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b108_hardcoded_tmp_directory.html",
+      "test_id": "B108",
+      "test_name": "hardcoded_tmp_directory"
+    },
+    {
+      "code": "213         \"\"\"Remove kill switch file\"\"\"\n214         kill_file = os.getenv(\"STILLME_KILL_FILE\", \"/tmp/stillme_kill_switch\")\n215         try:\n",
+      "col_offset": 51,
+      "end_col_offset": 77,
+      "filename": "stillme_core/control\\kill_switch.py",
+      "issue_confidence": "MEDIUM",
+      "issue_cwe": {
+        "id": 377,
+        "link": "https://cwe.mitre.org/data/definitions/377.html"
+      },
+      "issue_severity": "MEDIUM",
+      "issue_text": "Probable insecure usage of temp file/directory.",
+      "line_number": 214,
+      "line_range": [
+        214
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b108_hardcoded_tmp_directory.html",
+      "test_id": "B108",
+      "test_name": "hardcoded_tmp_directory"
     },
     {
       "code": "523             obj_str = str(obj.__dict__) if hasattr(obj, '__dict__') else str(obj)\n524             obj_hash = hashlib.md5(obj_str.encode()).hexdigest()[:12]\n525             timestamp = int(time.time())\n",
