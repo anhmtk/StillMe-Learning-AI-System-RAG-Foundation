@@ -1,258 +1,190 @@
 # StillMe Learning Policy
-# ======================
-# 
-# This policy defines the rules and guidelines for self-learning
-# and collaborative learning within the StillMe AI Framework.
-#
-# Author: StillMe AI Framework Team
-# Version: 1.0.0
-# Last Updated: 2025-01-27
+# Safe daily smart-learning configuration for MVP
 
-# Learning Governance Rules
-governance:
-  # Dataset Integration Rules
-  dataset_integration:
-    # Minimum test pass rate for community datasets
-    min_test_pass_rate: 0.90  # 90%
-    
-    # Maximum allowed ethics violations
-    max_ethics_violations: 0  # Zero tolerance
-    
-    # Maximum rollback count per learning cycle
-    max_rollbacks_per_cycle: 3
-    
-    # Minimum quality score for datasets
-    min_quality_score: 0.80  # 80%
-    
-    # Minimum ethics score for datasets
-    min_ethics_score: 0.90  # 90%
-    
-    # Maximum file size for community datasets (MB)
-    max_file_size_mb: 100
-    
-    # Minimum record count for datasets
-    min_record_count: 10
+# Domain allowlist - only trusted sources
+allowlist_domains:
+  - "arxiv.org"           # Academic papers
+  - "openai.com"          # OpenAI blog/research
+  - "deepmind.com"        # DeepMind blog/research
 
-  # Learning Rate Control
-  learning_rate_control:
-    # Base learning rate
-    base_learning_rate: 0.1
-    
-    # Maximum learning rate
-    max_learning_rate: 0.5
-    
-    # Minimum learning rate
-    min_learning_rate: 0.01
-    
-    # Rollback penalty factor (multiply by this when rollback occurs)
-    rollback_penalty_factor: 0.8
-    
-    # Reward boost factor (multiply by this when high performance)
-    reward_boost_factor: 1.2
-    
-    # Stability threshold for strategy changes
-    stability_threshold: 0.7
-    
-    # Adaptation frequency (hours)
-    adaptation_frequency_hours: 24
+# Content quotas and limits
+quotas:
+  max_docs_per_scan: 20           # Maximum documents to fetch per scan
+  max_recommendations_per_day: 5  # Maximum recommendations per day
+  max_ingestion_per_day: 3        # Maximum documents to ingest per day
+  max_content_length: 100000      # Maximum content length (characters)
 
-  # Safety and Ethics
-  safety_ethics:
-    # Required safety checks before learning updates
-    required_safety_checks:
-      - ethics_guard_validation
-      - content_integrity_check
-      - privacy_compliance_check
-      - security_vulnerability_scan
-    
-    # Prohibited content types
-    prohibited_content:
-      - harmful_violence
-      - hate_speech
-      - discrimination
-      - explicit_content
-      - misinformation
-      - personal_identifiable_information
-    
-    # Required opt-in flags
-    opt_in_requirements:
-      collaborative_learning: true  # --enable-collab-learning
-      meta_learning: true          # --enable-meta-learning
-      experimental_features: true  # --enable-experimental
+# Quality and risk thresholds
+thresholds:
+  quality_min: 0.72               # Minimum quality score (0.0-1.0)
+  risk_max: 0.25                  # Maximum risk score (0.0-1.0)
+  novelty_min: 0.3                # Minimum novelty score (0.0-1.0)
+  relevance_min: 0.6              # Minimum relevance score (0.0-1.0)
 
-  # Validation and Testing
-  validation_testing:
-    # Required test coverage for learning modules
-    min_test_coverage: 0.90  # 90%
-    
-    # Required test types
-    required_test_types:
-      - unit_tests
-      - integration_tests
-      - ethics_tests
-      - security_tests
-      - performance_tests
-    
-    # Validation timeout (seconds)
-    validation_timeout: 300  # 5 minutes
-    
-    # Maximum validation retries
-    max_validation_retries: 3
+# Safety constraints
+safety:
+  disable_finetune: true          # NO fine-tuning in MVP
+  require_human_approval: true    # All ingestion requires human approval
+  enable_rollback: true           # Enable rollback mechanism
+  max_rollback_days: 7            # Maximum days to keep rollback data
 
-  # Audit and Logging
-  audit_logging:
-    # Required log levels
-    required_log_levels:
-      - INFO
-      - WARNING
-      - ERROR
-      - CRITICAL
-    
-    # Required log events
-    required_log_events:
-      - learning_session_start
-      - learning_session_end
-      - dataset_validation
-      - dataset_merge
-      - rollback_operation
-      - ethics_violation
-      - security_incident
-    
-    # Log retention period (days)
-    log_retention_days: 90
-    
-    # Audit trail requirements
-    audit_trail_required: true
-
-  # Community Guidelines
-  community_guidelines:
-    # Contributor requirements
-    contributor_requirements:
-      - valid_identity_verification
-      - agreement_to_code_of_conduct
-      - understanding_of_ethics_guidelines
-    
-    # Dataset contribution rules
-    dataset_contribution:
-      - must_be_original_or_properly_licensed
-      - must_include_metadata_and_documentation
-      - must_pass_all_validation_checks
-      - must_not_contain_proprietary_or_sensitive_data
-    
-    # Review process
-    review_process:
-      - automated_validation_first
-      - human_review_for_edge_cases
-      - community_feedback_period
-      - final_approval_by_maintainers
-
-# Feature Flags
-feature_flags:
-  # Experimental features (disabled by default)
-  experimental:
-    meta_learning: false
-    collaborative_learning: false
-    advanced_rollback: false
-    cross_validation: false
+# Content filtering
+content_filters:
+  # License requirements
+  allowed_licenses:
+    - "CC-BY"                     # Creative Commons Attribution
+    - "CC-BY-SA"                  # Creative Commons Attribution-ShareAlike
+    - "Apache-2.0"                # Apache License 2.0
+    - "MIT"                       # MIT License
+    - "BSD-3-Clause"              # BSD 3-Clause License
   
-  # Production features (enabled by default)
-  production:
-    basic_learning: true
-    safety_checks: true
-    audit_logging: true
-    rollback_mechanism: true
-
-# Compliance Requirements
-compliance:
-  # GDPR-like requirements
-  privacy:
-    data_minimization: true
-    consent_required: true
-    right_to_erasure: true
-    data_portability: true
+  # Rejected licenses
+  rejected_licenses:
+    - "All Rights Reserved"
+    - "Proprietary"
+    - "Commercial"
   
-  # Security requirements
-  security:
-    encryption_at_rest: true
-    encryption_in_transit: true
-    access_control: true
-    vulnerability_scanning: true
+  # Content type restrictions
+  allowed_content_types:
+    - "research_paper"
+    - "blog_post"
+    - "technical_article"
+    - "documentation"
   
-  # Ethical AI requirements
-  ethical_ai:
-    fairness_monitoring: true
-    bias_detection: true
-    transparency_requirements: true
-    human_oversight: true
+  # Blocked content types
+  blocked_content_types:
+    - "advertisement"
+    - "spam"
+    - "personal_blog"
+    - "social_media"
 
-# Enforcement
-enforcement:
-  # Policy violation responses
-  violation_responses:
-    minor_violation:
-      - log_warning
-      - notify_contributor
-      - require_correction
-    
-    major_violation:
-      - log_error
-      - block_operation
-      - require_manual_review
-      - notify_maintainers
-    
-    critical_violation:
-      - log_critical
-      - immediate_block
-      - security_alert
-      - incident_response
-    
-  # Escalation procedures
-  escalation:
-    - automated_detection
-    - human_review
-    - maintainer_decision
-    - community_consensus
-    - final_authority
+# Risk assessment
+risk_assessment:
+  # Prompt injection patterns
+  injection_patterns:
+    - "ignore previous instructions"
+    - "system prompt"
+    - "jailbreak"
+    - "roleplay as"
+    - "pretend to be"
+    - "act as if"
+  
+  # High-risk keywords
+  high_risk_keywords:
+    - "hack"
+    - "exploit"
+    - "vulnerability"
+    - "bypass"
+    - "circumvent"
+    - "unauthorized"
+  
+  # PII patterns
+  pii_patterns:
+    - "email"
+    - "phone"
+    - "address"
+    - "ssn"
+    - "credit card"
 
-# Monitoring and Metrics
+# Quality scoring weights
+quality_weights:
+  reputation: 0.30                # Source reputation weight
+  relevance: 0.25                 # Relevance to StillMe objectives
+  novelty: 0.15                   # Novelty compared to existing knowledge
+  evidence: 0.15                  # Evidence quality (citations, data)
+  tech_depth: 0.10                # Technical depth
+  recency: 0.05                   # Recency bonus
+
+# Reputation scores by domain
+reputation_scores:
+  "arxiv.org": 0.95               # High reputation - academic
+  "openai.com": 0.90              # High reputation - industry leader
+  "deepmind.com": 0.90            # High reputation - research lab
+  "github.com": 0.80              # Good reputation - code
+  "stackoverflow.com": 0.70       # Medium reputation - Q&A
+  "medium.com": 0.50              # Medium reputation - blog platform
+  "reddit.com": 0.30              # Low reputation - social
+
+# Learning objectives (for relevance scoring)
+learning_objectives:
+  - "artificial_intelligence"
+  - "machine_learning"
+  - "natural_language_processing"
+  - "computer_vision"
+  - "robotics"
+  - "ethics_in_ai"
+  - "ai_safety"
+  - "transparency"
+  - "explainability"
+  - "bias_detection"
+  - "privacy_preservation"
+  - "security"
+
+# Citation requirements
+citations:
+  require_citations: true         # All responses must include citations
+  min_citations: 1                # Minimum citations per response
+  max_citations: 5                # Maximum citations per response
+  citation_format: "markdown"     # Citation format (markdown, apa, etc.)
+
+# Audit and logging
+audit:
+  log_all_decisions: true         # Log all learning decisions
+  log_approvals: true             # Log human approvals
+  log_rejections: true            # Log rejections with reasons
+  retention_days: 90              # Audit log retention (days)
+
+# Rollback configuration
+rollback:
+  enable_automatic: false         # Disable automatic rollback in MVP
+  require_confirmation: true      # Require confirmation for rollbacks
+  max_rollback_size_mb: 100       # Maximum rollback data size
+  rollback_triggers:
+    - "quality_degradation"       # Trigger on quality degradation
+    - "error_rate_increase"       # Trigger on error rate increase
+    - "human_request"             # Trigger on human request
+
+# Monitoring and alerts
 monitoring:
-  # Required metrics
-  required_metrics:
-    - learning_effectiveness
-    - safety_compliance
-    - performance_impact
-    - user_satisfaction
-    - system_stability
+  enable_metrics: true            # Enable metrics collection
+  alert_on_high_risk: true        # Alert on high-risk content
+  alert_on_quota_exceeded: true   # Alert on quota exceeded
+  alert_on_quality_drop: true     # Alert on quality drop
   
   # Alert thresholds
   alert_thresholds:
-    ethics_violation_rate: 0.01  # 1%
-    rollback_rate: 0.20         # 20%
-    performance_degradation: 0.10  # 10%
-    error_rate: 0.05           # 5%
-  
-  # Reporting frequency
-  reporting:
-    real_time_alerts: true
-    daily_summaries: true
-    weekly_reports: true
-    monthly_audits: true
+    risk_score: 0.8               # Alert if risk score > 0.8
+    quality_score: 0.5            # Alert if quality score < 0.5
+    error_rate: 0.1               # Alert if error rate > 10%
 
-# Version Control
-version_control:
-  # Policy version
-  version: "1.0.0"
+# Development and testing
+development:
+  enable_debug_mode: false        # Disable debug mode in production
+  enable_test_mode: false         # Disable test mode in production
+  mock_external_apis: false       # Use real APIs (not mocks)
   
-  # Effective date
-  effective_date: "2025-01-27"
+  # Test configuration
+  test_quotas:
+    max_docs_per_scan: 5          # Reduced for testing
+    max_recommendations_per_day: 2
+    max_ingestion_per_day: 1
+
+# Compliance and governance
+compliance:
+  gdpr_compliant: true            # GDPR compliance
+  ccpa_compliant: true            # CCPA compliance
+  data_retention_days: 30         # Data retention period
+  right_to_deletion: true         # Support right to deletion
   
-  # Review schedule
-  review_schedule: "quarterly"
-  
-  # Change management
-  change_management:
-    - proposal_phase
-    - review_phase
-    - approval_phase
-    - implementation_phase
-    - monitoring_phase
+  # Data handling
+  data_handling:
+    encrypt_at_rest: true         # Encrypt data at rest
+    encrypt_in_transit: true      # Encrypt data in transit
+    anonymize_pii: true           # Anonymize PII
+    audit_data_access: true       # Audit data access
+
+# Version and metadata
+version: "1.0.0"
+last_updated: "2025-09-26"
+created_by: "StillMe AI Framework"
+description: "Safe daily smart-learning policy for MVP deployment"

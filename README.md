@@ -115,12 +115,97 @@ pip install "stillme[pro]" --extra-index-url <YOUR_PRIVATE_INDEX_URL>
 
 On startup the framework auto-detects Pro; otherwise it logs `Using StubRouter (OSS mode)` and continues.
 
+## Daily Smart-Learning (MVP)
+
+StillMe now includes a **safe daily smart-learning pipeline** that allows the AI to discover, evaluate, and learn from high-quality content while maintaining strict safety controls.
+
+### How It Works
+
+1. **Discovery**: Scans trusted sources (arXiv, OpenAI, DeepMind) for new content
+2. **Scoring**: Evaluates content quality, relevance, and novelty using rubric-based scoring
+3. **Approval**: Human-in-the-loop approval system for all content ingestion
+4. **Ingestion**: Stores content in vector store and extracts structured claims
+5. **Reporting**: Generates daily digest reports with metrics and recommendations
+
+### Safety & Policy
+
+- **Read-only learning**: No fine-tuning in MVP - only knowledge base updates
+- **License compliance**: Only CC-BY, Apache, MIT, and other permissive licenses
+- **Risk scanning**: Detects prompt injection, PII, and security risks
+- **Human approval**: All content requires explicit human approval before ingestion
+- **Citations required**: All responses based on ingested content must include citations
+
+### Quick Start
+
+```bash
+# Scan content from all sources
+python -m stillme_core.learning.pipeline --scan
+
+# Check approval queue status
+python -m stillme_core.learning.pipeline --status
+
+# Approve an item for ingestion
+python -m stillme_core.learning.pipeline --approve <item_id>
+
+# Reject an item
+python -m stillme_core.learning.pipeline --reject <item_id> --reason "Low quality"
+```
+
+### Learning Policy
+
+The system follows strict policies defined in `policies/learning_policy.yaml`:
+- **Allowlist domains**: Only arxiv.org, openai.com, deepmind.com
+- **Quality threshold**: Minimum 0.72 quality score
+- **Risk threshold**: Maximum 0.25 risk score
+- **Daily limits**: Max 5 recommendations, 3 ingestions per day
+- **No fine-tuning**: Read-only learning only
+
 ## Roadmap (short)
 
-* Stabilize open-core interfaces
+* ✅ **Phase 0**: Safety hardening (kill switch, rationale logging, secrets sweep)
+* ✅ **Phase 1**: Read-only learning MVP (discovery → scoring → approval → ingest)
+* 🔄 **Phase 2**: Skill template extraction and procedural learning
+* 🔄 **Phase 3**: Self-quiz, consistency checking, and unlearning
+* 🔄 **Phase 4**: Controlled adaptation with LoRA fine-tuning
 * Increase test coverage to ≥85% lines / ≥80% branches
 * Expand open ethics/security runners (keep sensitive patterns private)
 * Iterate on documentation with community help
+
+## Changelog
+
+### 2025-09-26 - Daily Smart-Learning MVP Release
+
+**Phase 0: Safety Hardening (Completed)**
+- ✅ Health check script with comprehensive system validation
+- ✅ Kill switch API/CLI with audit logging
+- ✅ Rationale logging with standardized schema for careful mode
+- ✅ Secrets/PII sweep with security gates
+
+**Phase 1: Read-only Learning MVP (Completed)**
+- ✅ RSS connectors with allowlist (arXiv, OpenAI, DeepMind)
+- ✅ Content parser and normalizer
+- ✅ License gate and risk injection scanning
+- ✅ Quality scoring rubric and novelty detection
+- ✅ Vector store and claims store ingestion
+- ✅ Approval queue with human-in-the-loop
+- ✅ Daily digest and metrics reporting
+- ✅ CLI for scan/approve/ingest operations
+
+**New Files & Modules:**
+- `stillme_core/learning/` - Complete learning pipeline
+- `stillme_core/kill_switch.py` - Emergency stop mechanism
+- `stillme_core/rationale_logging.py` - Decision logging
+- `stillme_core/security/secrets_sweep.py` - Security scanning
+- `scripts/health_check.py` - System health validation
+- `cli/kill_switch.py` - Kill switch CLI
+- `policies/learning_policy.yaml` - Learning safety policies
+
+**CLI Commands:**
+- `python -m stillme_core.learning.pipeline --scan` - Scan content
+- `python -m stillme_core.learning.pipeline --status` - Check queue
+- `python -m stillme_core.learning.pipeline --approve <id>` - Approve item
+- `python cli/kill_switch.py --status` - Check kill switch
+- `python scripts/health_check.py` - System health check
 
 ## License
 

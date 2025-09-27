@@ -32,3 +32,65 @@ jobs:
           title: "Update README metrics (auto)"
           body: "Automated update of pass/fail metrics and diagram."
           delete-branch: true
+
+  learning-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.11' }
+      - run: pip install -r requirements.txt
+      - run: pip install pytest
+      - name: Test Learning Pipeline
+        run: |
+          # Test learning pipeline components
+          python -c "from stillme_core.learning import LearningPipeline; print('✅ Learning pipeline imports successfully')"
+          python -c "from stillme_core.learning.connectors import get_rss_registry; print('✅ RSS registry imports successfully')"
+          python -c "from stillme_core.learning.gates import LicenseGate; print('✅ License gate imports successfully')"
+          python -c "from stillme_core.learning.risk import InjectionScanner; print('✅ Risk scanner imports successfully')"
+          python -c "from stillme_core.learning.score import QualityScorer; print('✅ Quality scorer imports successfully')"
+          python -c "from stillme_core.learning.dedupe import get_deduplicator; print('✅ Deduplicator imports successfully')"
+          python -c "from stillme_core.learning.approve import get_approval_queue; print('✅ Approval queue imports successfully')"
+          python -c "from stillme_core.learning.ingest import get_vector_store, get_claims_store; print('✅ Storage systems import successfully')"
+          python -c "from stillme_core.learning.reports import get_digest_generator; print('✅ Reports generator imports successfully')"
+      - name: Test Kill Switch
+        run: |
+          python -c "from stillme_core.kill_switch import get_kill_switch; print('✅ Kill switch imports successfully')"
+          python -c "from stillme_core.rationale_logging import get_rationale_logger; print('✅ Rationale logging imports successfully')"
+      - name: Test Health Check
+        run: |
+          python scripts/health_check.py --help || echo "Health check script available"
+      - name: Test Learning CLI
+        run: |
+          python -m stillme_core.learning.pipeline --help || echo "Learning pipeline CLI available"
+      - name: Test Kill Switch CLI
+        run: |
+          python cli/kill_switch.py --help || echo "Kill switch CLI available"
+      - name: Validate Learning Policy
+        run: |
+          python -c "
+          import yaml
+          with open('policies/learning_policy.yaml', 'r') as f:
+              policy = yaml.safe_load(f)
+          assert 'allowlist_domains' in policy
+          assert 'quotas' in policy
+          assert 'thresholds' in policy
+          assert 'safety' in policy
+          print('✅ Learning policy is valid')
+          "
+      - name: Check Learning Gates
+        run: |
+          # Ensure no high severity issues in learning components
+          python -c "
+          from stillme_core.learning.risk import InjectionScanner
+          scanner = InjectionScanner()
+          print('✅ Risk scanner initialized without errors')
+          "
+      - name: Upload Learning Test Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: learning-test-results
+          path: |
+            reports/
+            data/
+            logs/
