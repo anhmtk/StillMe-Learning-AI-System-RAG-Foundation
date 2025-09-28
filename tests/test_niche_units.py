@@ -11,11 +11,11 @@ from typing import Dict, Any, List
 
 # Import NicheRadar modules
 from niche_radar.collectors import (
-    github_trending, hackernews_top, news_delta, 
-    google_trends, reddit_engagement
+    github_trending, hackernews_top, 
+    google_trends
 )
 from niche_radar.scoring import NicheScorer
-from security.content_wrap import wrap_content, detect_injection_patterns
+from security.content_wrap import ContentWrap
 
 
 class TestCollectors:

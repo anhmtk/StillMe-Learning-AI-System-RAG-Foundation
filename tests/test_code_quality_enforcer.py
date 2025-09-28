@@ -15,8 +15,7 @@ from stillme_core.quality.agentdev_integration import AgentDevQualityIntegration
 from stillme_core.quality.auto_fixer import AutoFixer
 from stillme_core.quality.code_quality_enforcer import (
     CodeQualityEnforcer,
-    QualityIssue,
-    QualityReport,
+    QualityViolation,
 )
 from stillme_core.quality.quality_metrics import QualityMetrics
 

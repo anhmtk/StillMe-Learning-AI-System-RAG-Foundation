@@ -491,6 +491,32 @@ class FAISSVectorStore:
         
         return features
     
+    def get_statistics(self) -> Dict:
+        """Get FAISS vector store statistics."""
+        if self.faiss is None:
+            return self.fallback_store.get_statistics()
+        
+        if not self.documents:
+            return {
+                'total_documents': 0,
+                'embedding_dimension': self.embedding_dim,
+                'domains': [],
+                'sources': [],
+                'content_types': []
+            }
+        
+        domains = list(set(doc.metadata.get('domain', '') for doc in self.documents))
+        sources = list(set(doc.source for doc in self.documents))
+        content_types = list(set(doc.metadata.get('content_type', '') for doc in self.documents))
+        
+        return {
+            'total_documents': len(self.documents),
+            'embedding_dimension': self.embedding_dim,
+            'domains': domains,
+            'sources': sources,
+            'content_types': content_types
+        }
+    
     def search(self, query: str, top_k: int = 10, min_similarity: float = 0.0) -> List[Dict]:
         """Search for similar documents using FAISS."""
         if self.faiss is None:

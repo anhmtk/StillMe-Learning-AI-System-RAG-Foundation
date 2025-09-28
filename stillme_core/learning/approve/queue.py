@@ -299,6 +299,32 @@ class ApprovalQueue:
                 return item
         return None
     
+    def get_pending_recommendations(self) -> List[Dict[str, Any]]:
+        """Get pending recommendations as a list of dictionaries."""
+        pending_items = self.get_pending_items()
+        recommendations = []
+        
+        for item in pending_items:
+            rec = {
+                'id': item.id,
+                'title': item.content.title,
+                'source': item.content.source,
+                'domain': item.content.domain,
+                'url': item.content.url,
+                'author': item.content.author,
+                'published_date': item.content.published_date,
+                'license': item.content.license,
+                'quality_score': item.quality_score.overall_score,
+                'novelty_score': item.novelty_score,
+                'risk_level': item.risk_assessment.risk_level,
+                'recommendation': item.recommendation,
+                'created_at': item.created_at,
+                'status': item.status
+            }
+            recommendations.append(rec)
+        
+        return recommendations
+    
     def get_statistics(self) -> Dict:
         """Get approval queue statistics."""
         total_items = len(self.queue)

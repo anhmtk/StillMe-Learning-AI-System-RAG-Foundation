@@ -362,10 +362,7 @@ class StillMeFramework:
 
             # 3. Unified API Manager
             if IMPORTED_MODULES.get("UnifiedAPIManager"):
-                self.api_manager = IMPORTED_MODULES["UnifiedAPIManager"](
-                    model_preferences=["gpt-3.5-turbo", "gpt-4o"],
-                    fallback_model="gpt-3.5-turbo",
-                )
+                self.api_manager = IMPORTED_MODULES["UnifiedAPIManager"]()
                 self.logger.info("✅ UnifiedAPIManager initialized")
             else:
                 self.logger.warning("⚠️ UnifiedAPIManager not available")

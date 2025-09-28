@@ -5,13 +5,7 @@ AgentDev-Guardflow Surgeon v3: Tests for upgraded guard
 
 import pytest
 
-from stillme_core.safety_guard import (
-    CANARY,
-    apply_policies,
-    luhn_check,
-    redact_output,
-    safe_reply,
-)
+from stillme_core.safety_guard import SafetyGuard
 
 
 def test_luhn_check():

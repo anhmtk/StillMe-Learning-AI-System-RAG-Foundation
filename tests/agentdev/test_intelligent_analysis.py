@@ -17,13 +17,13 @@ import time
 from pathlib import Path
 import pytest
 import json
+import sys
+import os
 
-from tools.ast_impact import (
-    ASTImpactAnalyzer, ImpactLevel, NodeType, ASTNode, ImpactAnalysis
-)
-from tools.semantic_search import (
-    SemanticSearchEngine, SearchType, MatchType, SearchResult, CodeEmbedding
-)
+# Add current directory to path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
+from tools.ast_impact import ASTImpactAnalyzer
 
 class TestASTImpactAnalyzer:
     """Test AST Impact Analyzer functionality"""

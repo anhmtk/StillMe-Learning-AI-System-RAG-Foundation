@@ -6,8 +6,8 @@ import json
 from pathlib import Path
 
 from stillme_core.logging_utils import (
-    AgentDevLogger,
-    log_step,
+    setup_logger,
+    log_with_context,
 )
 from stillme_core.metrics import AgentDevMetrics, get_summary, record_session
 

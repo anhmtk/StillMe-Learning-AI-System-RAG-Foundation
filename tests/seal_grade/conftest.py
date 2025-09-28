@@ -9,8 +9,7 @@ import tempfile
 import time
 from pathlib import Path
 
-# Test markers
-pytest_plugins = []
+# Test markers - moved to top-level conftest.py
 
 def pytest_configure(config):
     """Configure pytest for SEAL-GRADE tests"""

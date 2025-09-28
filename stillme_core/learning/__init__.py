@@ -9,6 +9,15 @@ __author__ = "StillMe AI Framework"
 # Import main pipeline
 from .pipeline import LearningPipeline
 
+# Import unified learning manager
+from .unified_learning_manager import (
+    UnifiedLearningManager,
+    LearningSystemMode,
+    LearningConfig,
+    get_unified_learning_manager,
+    initialize_learning_systems
+)
+
 # Import convenience functions
 from .fetcher.rss_fetch import fetch_content_from_sources
 from .parser.normalize import normalize_content_batch
@@ -23,6 +32,11 @@ from .reports.digest import get_digest_generator
 
 __all__ = [
     'LearningPipeline',
+    'UnifiedLearningManager',
+    'LearningSystemMode',
+    'LearningConfig',
+    'get_unified_learning_manager',
+    'initialize_learning_systems',
     'fetch_content_from_sources',
     'normalize_content_batch',
     'validate_content_licenses',

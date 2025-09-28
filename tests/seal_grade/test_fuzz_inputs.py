@@ -38,7 +38,7 @@ class TestInputFuzzing:
         asyncio.run(store.close())
         Path(temp_db.name).unlink(missing_ok=True)
     
-    @given(
+    @given()
         job_id=st.text(min_size=0, max_size=1000),
         name=st.text(min_size=0, max_size=1000),
         description=st.text(min_size=0, max_size=1000)
@@ -54,34 +54,34 @@ class TestInputFuzzing:
             # Should handle invalid inputs gracefully
             assert isinstance(e, (ValueError, TypeError, Exception))
     
-    @given(
+    @given()
         unicode_text=st.text(min_size=0, max_size=100, alphabet=st.characters(whitelist_categories=('Lu', 'Ll', 'Nd', 'Pc', 'Pd', 'Ps', 'Pe', 'Pi', 'Pf', 'Po', 'Sm', 'Sc', 'Sk', 'So', 'Zs', 'Zl', 'Zp', 'Cc', 'Cf', 'Cs', 'Co', 'Cn')))
     )
     @settings(max_examples=50, deadline=5000)
     def test_unicode_handling(self, state_store, unicode_text):
         """Test Unicode input handling"""
         try:
-            job = asyncio.run(state_store.create_job(unicode_text, unicode_text, unicode_text)
+            job = asyncio.run(state_store.create_job(unicode_text, unicode_text, unicode_text))
             assert job is not None
         except Exception as e:
             # Should handle Unicode gracefully
             assert isinstance(e, (ValueError, TypeError, UnicodeError))
     
-    @given(
+    @given()
         large_input=st.text(min_size=1000, max_size=10000)
     )
     @settings(max_examples=20, deadline=10000)
     def test_large_input_handling(self, state_store, large_input):
         """Test large input handling"""
         try:
-            job = asyncio.run(state_store.create_job("test_job", large_input, large_input)
+            job = asyncio.run(state_store.create_job("test_job", large_input, large_input))
             assert job is not None
         except Exception as e:
             # Should handle large inputs gracefully
             assert isinstance(e, (ValueError, MemoryError, Exception))
     
     @given(
-        invalid_types=st.one_of(
+        invalid_types=st.one_of()
             st.integers(),
             st.floats(),
             st.booleans(),
@@ -104,7 +104,7 @@ class TestInputFuzzing:
             # Should handle invalid types gracefully
             assert isinstance(e, (ValueError, TypeError, Exception))
     
-    @given(
+    @given()
         malformed_json=st.text(min_size=1, max_size=100)
     )
     @settings(max_examples=50, deadline=5000)
@@ -114,7 +114,7 @@ class TestInputFuzzing:
             # Try to parse as JSON
             data = json.loads(malformed_json)
             job_id = str(data) if isinstance(data, (str, int, float)) else "test_job"
-            job = asyncio.run(state_store.create_job(job_id, "Test Job", "Test Description")
+            job = asyncio.run(state_store.create_job(job_id, "Test Job", "Test Description"))
             assert job is not None
         except (json.JSONDecodeError, TypeError, ValueError):
             # Expected for malformed JSON
@@ -124,7 +124,7 @@ class TestInputFuzzing:
             assert isinstance(e, (ValueError, TypeError, Exception))
     
     @given(
-        boundary_values=st.one_of(
+        boundary_values=st.one_of()
             st.just(""),
             st.just(" "),
             st.just("\n"),
@@ -148,27 +148,27 @@ class TestInputFuzzing:
     def test_boundary_value_handling(self, state_store, boundary_values):
         """Test boundary value handling"""
         try:
-            job = asyncio.run(state_store.create_job(boundary_values, boundary_values, boundary_values)
+            job = asyncio.run(state_store.create_job(boundary_values, boundary_values, boundary_values))
             assert job is not None
         except Exception as e:
             # Should handle boundary values gracefully
             assert isinstance(e, (ValueError, TypeError, Exception))
     
-    @given(
+    @given()
         special_chars=st.text(min_size=1, max_size=50, alphabet=st.characters(whitelist_categories=('P', 'S', 'C')))
     )
     @settings(max_examples=50, deadline=5000)
     def test_special_character_handling(self, state_store, special_chars):
         """Test special character handling"""
         try:
-            job = asyncio.run(state_store.create_job(special_chars, special_chars, special_chars)
+            job = asyncio.run(state_store.create_job(special_chars, special_chars, special_chars))
             assert job is not None
         except Exception as e:
             # Should handle special characters gracefully
             assert isinstance(e, (ValueError, TypeError, Exception))
     
     @given(
-        numeric_inputs=st.one_of(
+        numeric_inputs=st.one_of()
             st.integers(min_value=-1000000, max_value=1000000),
             st.floats(min_value=-1000000, max_value=1000000),
             st.decimals(min_value=-1000000, max_value=1000000, places=2)
@@ -179,13 +179,13 @@ class TestInputFuzzing:
         """Test numeric input handling"""
         try:
             job_id = str(numeric_inputs)
-            job = asyncio.run(state_store.create_job(job_id, "Test Job", "Test Description")
+            job = asyncio.run(state_store.create_job(job_id, "Test Job", "Test Description"))
             assert job is not None
         except Exception as e:
             # Should handle numeric inputs gracefully
             assert isinstance(e, (ValueError, TypeError, Exception))
     
-    @given(
+    @given()
         mixed_inputs=st.text(min_size=1, max_size=100)
     )
     @settings(max_examples=50, deadline=5000)
@@ -203,14 +203,14 @@ class TestInputFuzzing:
             # Should handle mixed inputs gracefully
             assert isinstance(e, (ValueError, TypeError, Exception))
     
-    @given(
+    @given()
         random_strings=st.text(min_size=1, max_size=200)
     )
     @settings(max_examples=100, deadline=5000)
     def test_random_string_handling(self, state_store, random_strings):
         """Test random string handling"""
         try:
-            job = asyncio.run(state_store.create_job(random_strings, random_strings, random_strings)
+            job = asyncio.run(state_store.create_job(random_strings, random_strings, random_strings))
             assert job is not None
         except Exception as e:
             # Should handle random strings gracefully

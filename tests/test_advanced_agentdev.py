@@ -11,10 +11,8 @@ from unittest.mock import Mock
 import pytest
 
 from stillme_core.advanced_security.safe_attack_simulator import (
-    AttackCategory,
-    AttackSeverity,
+    AttackType,
     SafeAttackSimulator,
-    SimulationStatus,
 )
 from stillme_core.decision_making.decision_engine import (
     DecisionEngine,
@@ -24,8 +22,7 @@ from stillme_core.decision_making.decision_engine import (
 )
 from stillme_core.decision_making.ethical_guardrails import (
     EthicalGuardrails,
-    EthicalPrinciple,
-    ViolationSeverity,
+    EthicalViolation,
 )
 from stillme_core.self_learning.experience_memory import (
     ExperienceCategory,

@@ -18,13 +18,7 @@ from pathlib import Path
 
 # Import test fixtures
 from conftest import (
-    test_config, test_datasets, mock_framework, mock_memory_system,
-    mock_secure_memory, mock_ethics_system, mock_content_filter,
-    mock_conversational_core, mock_api_manager, mock_emotion_sense,
-    mock_token_optimizer, mock_self_improvement, mock_scheduler,
-    mock_telemetry, mock_metrics, mock_communication_style,
-    mock_input_sketcher, mock_prediction_engine, mock_market_intel,
-    mock_daily_learning, mock_persona_morph, test_utils
+    sample_config, sample_data, mock_logger, clean_environment
 )
 
 

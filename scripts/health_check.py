@@ -506,7 +506,7 @@ class HealthChecker:
         else:
             report += "- ✅ **System health check passed** - ready for deployment\n"
         
-        with open("docs/SYSTEM_HEALTH.md", "w") as f:
+        with open("docs/SYSTEM_HEALTH.md", "w", encoding="utf-8") as f:
             f.write(report)
     
     def run_all_checks(self):

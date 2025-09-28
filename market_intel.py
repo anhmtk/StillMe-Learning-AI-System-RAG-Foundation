@@ -17,7 +17,7 @@ load_dotenv()
 # Add common to path
 sys.path.append(str(Path(__file__).parent / "common"))
 
-from common.http import secure_http_client
+from common.http import SecureHttpClient
 
 logger = logging.getLogger(__name__)
 
@@ -104,7 +104,7 @@ class MarketIntelligence:
                 "apiKey": self.newsapi_key
             }
             
-            async with secure_http_client as client:
+            async with SecureHttpClient() as client:
                 response = await client.get(self.newsapi_url, headers={
                     "X-API-Key": self.newsapi_key
                 })
@@ -154,7 +154,7 @@ class MarketIntelligence:
             
             url = f"{self.gnews_url}?q={query}&lang={language}&apikey={self.gnews_api_key}"
             
-            async with secure_http_client as client:
+            async with SecureHttpClient() as client:
                 response = await client.get(url)
                 
                 if response["success"]:
@@ -202,7 +202,7 @@ class MarketIntelligence:
             if self.github_token:
                 headers["Authorization"] = f"token {self.github_token}"
             
-            async with secure_http_client as client:
+            async with SecureHttpClient() as client:
                 response = await client.get(url, headers=headers)
                 
                 if response["success"]:
@@ -262,7 +262,7 @@ class MarketIntelligence:
             if self.github_token:
                 headers["Authorization"] = f"token {self.github_token}"
             
-            async with secure_http_client as client:
+            async with SecureHttpClient() as client:
                 response = await client.get(url, headers=headers)
                 
                 if response["success"]:
@@ -359,7 +359,7 @@ class MarketIntelligence:
             # Hacker News API URL
             url = f"{self.hackernews_url}?query=&tags=story&numericFilters=created_at_i>{timestamp}&hitsPerPage=10"
             
-            async with secure_http_client as client:
+            async with SecureHttpClient() as client:
                 response = await client.get(url)
                 
                 if response["success"]:
@@ -431,7 +431,7 @@ class MarketIntelligence:
             
             url = f"{self.hackernews_url}?query=&tags=front_page&hitsPerPage=10"
             
-            async with secure_http_client as client:
+            async with SecureHttpClient() as client:
                 response = await client.get(url)
                 
                 if response["success"]:

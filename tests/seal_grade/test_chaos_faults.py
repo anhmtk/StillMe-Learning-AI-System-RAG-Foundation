@@ -78,7 +78,7 @@ class TestChaosEngineering:
         with patch('builtins.open', side_effect=OSError("No space left on device")):
             try:
                 # Try to create a job (which would write to disk)
-                job = asyncio.run(state_store.create_job("test_job", "Test Job", "Test Description")
+                job = asyncio.run(state_store.create_job("test_job", "Test Job", "Test Description"))
                 assert False, "Should have failed with disk full error"
             except OSError as e:
                 assert "No space left on device" in str(e)
@@ -95,7 +95,7 @@ class TestChaosEngineering:
         
         # Run CPU-intensive task in background
         start_time = time.time()
-        result = asyncio.run(asyncio.get_event_loop().run_in_executor(None, cpu_intensive_task)
+        result = asyncio.run(asyncio.get_event_loop().run_in_executor(None, cpu_intensive_task))
         end_time = time.time()
         
         # Should complete within reasonable time
@@ -114,7 +114,7 @@ class TestChaosEngineering:
                 large_objects.append([0] * 10000)
                 if i % 100 == 0:
                     # Check if we can still create jobs
-                    job = asyncio.run(state_store.create_job(f"job_{i}", f"Job {i}", f"Description {i}")
+                    job = asyncio.run(state_store.create_job(f"job_{i}", f"Job {i}", f"Description {i}"))
                     assert job is not None
         except MemoryError:
             # Expected when memory is exhausted
@@ -135,7 +135,7 @@ class TestChaosEngineering:
         
         # System should handle corruption gracefully
         try:
-            job = asyncio.run(state_store.create_job("test_job", "Test Job", "Test Description")
+            job = asyncio.run(state_store.create_job("test_job", "Test Job", "Test Description"))
             assert False, "Should have failed with corrupted database"
         except Exception as e:
             assert "database" in str(e).lower() or "corrupt" in str(e).lower()
@@ -147,7 +147,7 @@ class TestChaosEngineering:
         with patch('asyncio.create_connection', side_effect=ConnectionError("Network unreachable")):
             try:
                 # Try to connect to external service
-                asyncio.run(asyncio.get_event_loop().run_in_executor(None, lambda: None)
+                asyncio.run(asyncio.get_event_loop().run_in_executor(None, lambda: None))
             except ConnectionError as e:
                 assert "Network unreachable" in str(e)
     
@@ -159,19 +159,19 @@ class TestChaosEngineering:
             try:
                 # Simulate different types of faults
                 if task_id % 3 == 0:
-                    asyncio.run(asyncio.sleep(0.1)  # Network delay
+                    asyncio.run(asyncio.sleep(0.1))  # Network delay
                 elif task_id % 3 == 1:
                     raise Exception(f"Task {task_id} failed")
                 else:
                     # Normal operation
-                    job = asyncio.run(state_store.create_job(f"job_{task_id}", f"Job {task_id}", f"Description {task_id}")
+                    job = asyncio.run(state_store.create_job(f"job_{task_id}", f"Job {task_id}", f"Description {task_id}"))
                     return job
             except Exception as e:
                 return None
         
         # Run multiple fault tasks concurrently
         tasks = [fault_task(i) for i in range(10)]
-        results = asyncio.run(asyncio.gather(*tasks, return_exceptions=True)
+        results = asyncio.run(asyncio.gather(*tasks, return_exceptions=True))
         
         # Some tasks should succeed, some should fail
         success_count = sum(1 for r in results if r is not None and not isinstance(r, Exception))
@@ -184,7 +184,7 @@ class TestChaosEngineering:
         def stress_task():
             try:
                 # Create job under stress
-                job = asyncio.run(state_store.create_job("stress_job", "Stress Job", "Stress Description")
+                job = asyncio.run(state_store.create_job("stress_job", "Stress Job", "Stress Description"))
                 return job
             except Exception as e:
                 return None
@@ -192,7 +192,7 @@ class TestChaosEngineering:
         # Run stress tasks
         tasks = [stress_task() for _ in range(20)]
         results = asyncio.run(asyncio.gather(*tasks, return_exceptions=True)
-        
+        )
         # System should degrade gracefully
         success_count = sum(1 for r in results if r is not None and not isinstance(r, Exception))
         assert success_count >= 0, "System should handle stress gracefully"
@@ -203,7 +203,7 @@ class TestChaosEngineering:
         # Simulate fault
         try:
             # Create job before fault
-            job1 = asyncio.run(state_store.create_job("job1", "Job 1", "Description 1")
+            job1 = asyncio.run(state_store.create_job("job1", "Job 1", "Description 1"))
             assert job1 is not None
             
             # Simulate fault
@@ -211,7 +211,7 @@ class TestChaosEngineering:
             
         except Exception:
             # System should recover
-            job2 = asyncio.run(state_store.create_job("job2", "Job 2", "Description 2")
+            job2 = asyncio.run(state_store.create_job("job2", "Job 2", "Description 2"))
             assert job2 is not None
     
     
@@ -255,16 +255,16 @@ class TestChaosEngineering:
             try:
                 # Create job
                 job = asyncio.run(state_store.create_job(f"resilience_job_{i}", f"Resilience Job {i}", f"Description {i}")
-                
+                )
                 # Update job status
                 asyncio.run(state_store.update_job_status(job.job_id, "completed")
-                
+                )
                 # Create step
                 step = asyncio.run(state_store.create_job_step(job.job_id, f"step_{i}", f"Step {i}", "testing")
-                
+                )
                 # Complete step
                 asyncio.run(state_store.complete_job_step(job.job_id, step.step_id, success=True)
-                
+                )
                 resilience_score += 1
                 
             except Exception as e:

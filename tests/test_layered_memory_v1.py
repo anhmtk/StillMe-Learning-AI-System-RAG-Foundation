@@ -13,11 +13,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from modules.layered_memory_v1 import (
-    LayeredMemoryV1,
-    LongTermMemory,
-    MemoryItem,
-)
+from modules.layered_memory_v1 import LayeredMemoryV1
 
 
 # ---------- FIXTURES ----------

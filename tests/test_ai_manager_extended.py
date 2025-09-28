@@ -1,13 +1,7 @@
 # tests/test_ai_manager_extended.py
 import re
 
-from stillme_core.ai_manager import (
-    controller,
-    dev_agent,
-    health,
-    set_mode,
-    warmup,
-)
+from stillme_core.ai_manager import AIManager
 
 
 def _ok_health():

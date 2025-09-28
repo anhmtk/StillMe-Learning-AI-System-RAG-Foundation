@@ -15,9 +15,9 @@ from niche_radar.collectors import collect_all_data
 from niche_radar.scoring import NicheScorer
 from niche_radar.playbook import PlaybookGenerator
 from policy.tool_gate import validate_tool_request
-from security.content_wrap import wrap_content
+from security.content_wrap import ContentWrap
 from cache.web_cache import WebCache
-from metrics.web_metrics import WebMetrics
+from metrics.web_metrics import web_metrics
 
 
 class TestCollectScoreTop10:

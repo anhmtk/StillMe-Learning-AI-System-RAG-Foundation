@@ -14,8 +14,11 @@ import sys
 import time
 import json
 from typing import Dict, List, Optional, Any, Callable
+
+# Add current directory to path
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+
 from agentdev_validation_system import AgentDevValidator, ValidationResult, ErrorSeverity
-from agentdev_honest import HonestAgentDev
 
 class AgentDevIntegration:
     """Tích hợp hệ thống validation vào AgentDev hiện tại"""

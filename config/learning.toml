@@ -1,0 +1,57 @@
+# StillMe Learning Systems Configuration
+# =====================================
+
+# Learning system selection: "new" | "old" | "both"
+system = "old"
+
+# Migration settings
+[migration]
+# Enable automatic migration from old to new system
+auto_migrate = true
+# Backup old data before migration
+backup_before_migrate = true
+# Migration batch size
+batch_size = 100
+
+# New learning system settings
+[new_system]
+# RSS feed sources
+rss_sources = [
+    "https://arxiv.org/list/cs.AI/rss",
+    "https://openai.com/blog/rss.xml",
+    "https://deepmind.com/blog/rss.xml"
+]
+
+# Quality thresholds
+quality_threshold = 0.72
+risk_threshold = 0.25
+
+# Daily limits
+max_recommendations_per_day = 5
+max_ingestions_per_day = 3
+max_docs_per_scan = 20
+
+# Safety settings
+disable_finetune = true
+html_crawl_enabled = false
+citations_required = true
+
+# Old learning system settings
+[old_system]
+# Experience memory settings
+max_experiences = 10000
+pattern_threshold = 0.6
+similarity_threshold = 0.7
+
+# Database settings
+db_path = ".experience_memory.db"
+cleanup_days = 90
+
+# Compatibility settings
+[compatibility]
+# Enable both systems running in parallel
+parallel_mode = false
+# Sync data between systems
+sync_data = false
+# Conflict resolution strategy: "new_wins" | "old_wins" | "manual"
+conflict_resolution = "new_wins"

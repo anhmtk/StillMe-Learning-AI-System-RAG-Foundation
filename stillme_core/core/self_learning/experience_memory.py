@@ -29,6 +29,7 @@ class ExperienceType(Enum):
     SUCCESS = "success"
     LEARNING = "learning"
     PATTERN = "pattern"
+    TEST = "test"
 
 
 class ExperienceCategory(Enum):

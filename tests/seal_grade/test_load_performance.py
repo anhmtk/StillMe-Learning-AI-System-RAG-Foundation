@@ -57,8 +57,8 @@ class TestLoadPerformance:
         # Create steps for each job
         for job in jobs:
             for j in range(5):
-                step = asyncio.run(state_store.create_job_step(job.job_id, f"step_{j}", f"Step {j}", "testing")
-                asyncio.run(state_store.complete_job_step(job.job_id, step.step_id, success=True)
+                step = asyncio.run(state_store.create_job_step(job.job_id, f"step_{j}", f"Step {j}", "testing"))
+                asyncio.run(state_store.complete_job_step(job.job_id, step.step_id, success=True))
         
         end_time = time.time()
         duration = end_time - start_time
@@ -84,12 +84,12 @@ class TestLoadPerformance:
         # Create jobs with caching
         jobs = []
         for i in range(100):
-            job = asyncio.run(state_store.create_job(f"cached_job_{i}", f"Cached Job {i}", f"Description {i}")
+            job = asyncio.run(state_store.create_job(f"cached_job_{i}", f"Cached Job {i}", f"Description {i}"))
             jobs.append(job)
             
             # Simulate cache hit
             if cache_enabled:
-                asyncio.run(asyncio.sleep(0.001)  # Simulate cache lookup
+                asyncio.run(asyncio.sleep(0.001))  # Simulate cache lookup
         
         end_time = time.time()
         duration = end_time - start_time
@@ -117,9 +117,9 @@ class TestLoadPerformance:
         for i in range(100):
             # Simulate egress guard check
             if egress_guard_enabled:
-                asyncio.run(asyncio.sleep(0.002)  # Simulate guard check
+                asyncio.run(asyncio.sleep(0.002))  # Simulate guard check
             
-            job = asyncio.run(state_store.create_job(f"guarded_job_{i}", f"Guarded Job {i}", f"Description {i}")
+            job = asyncio.run(state_store.create_job(f"guarded_job_{i}", f"Guarded Job {i}", f"Description {i}"))
             jobs.append(job)
         
         end_time = time.time()
@@ -142,7 +142,7 @@ class TestLoadPerformance:
         def create_job_batch(batch_id, count):
             jobs = []
             for i in range(count):
-                job = asyncio.run(state_store.create_job(f"concurrent_job_{batch_id}_{i}", f"Concurrent Job {batch_id}_{i}", f"Description {batch_id}_{i}")
+                job = asyncio.run(state_store.create_job(f"concurrent_job_{batch_id}_{i}", f"Concurrent Job {batch_id}_{i}", f"Description {batch_id}_{i}"))
                 jobs.append(job)
             return jobs
         
@@ -150,7 +150,7 @@ class TestLoadPerformance:
         start_time = time.time()
         
         tasks = [create_job_batch(i, 20) for i in range(5)]
-        results = asyncio.run(asyncio.gather(*tasks)
+        results = asyncio.run(asyncio.gather(*tasks))
         
         end_time = time.time()
         duration = end_time - start_time
@@ -172,7 +172,7 @@ class TestLoadPerformance:
         # Create large number of jobs
         jobs = []
         for i in range(1000):
-            job = asyncio.run(state_store.create_job(f"memory_job_{i}", f"Memory Job {i}", f"Description {i}")
+            job = asyncio.run(state_store.create_job(f"memory_job_{i}", f"Memory Job {i}", f"Description {i}"))
             jobs.append(job)
         
         # Get memory usage after load
@@ -194,7 +194,7 @@ class TestLoadPerformance:
         # Measure response times
         for i in range(100):
             start_time = time.time()
-            job = asyncio.run(state_store.create_job(f"response_job_{i}", f"Response Job {i}", f"Description {i}")
+            job = asyncio.run(state_store.create_job(f"response_job_{i}", f"Response Job {i}", f"Description {i}"))
             end_time = time.time()
             
             response_time = end_time - start_time
@@ -219,7 +219,7 @@ class TestLoadPerformance:
         # Create jobs as fast as possible
         jobs = []
         for i in range(500):
-            job = asyncio.run(state_store.create_job(f"throughput_job_{i}", f"Throughput Job {i}", f"Description {i}")
+            job = asyncio.run(state_store.create_job(f"throughput_job_{i}", f"Throughput Job {i}", f"Description {i}"))
             jobs.append(job)
         
         end_time = time.time()
@@ -244,7 +244,7 @@ class TestLoadPerformance:
         jobs = []
         for i in range(1000):
             try:
-                job = asyncio.run(state_store.create_job(f"stress_job_{i}", f"Stress Job {i}", f"Description {i}")
+                job = asyncio.run(state_store.create_job(f"stress_job_{i}", f"Stress Job {i}", f"Description {i}"))
                 jobs.append(job)
             except Exception as e:
                 # Some failures are expected under stress
@@ -273,7 +273,7 @@ class TestLoadPerformance:
             # Create jobs at this load level
             jobs = []
             for i in range(load):
-                job = asyncio.run(state_store.create_job(f"scale_job_{load}_{i}", f"Scale Job {load}_{i}", f"Description {load}_{i}")
+                job = asyncio.run(state_store.create_job(f"scale_job_{load}_{i}", f"Scale Job {load}_{i}", f"Description {load}_{i}"))
                 jobs.append(job)
             
             end_time = time.time()
@@ -300,7 +300,7 @@ class TestLoadPerformance:
         # Create load
         jobs = []
         for i in range(500):
-            job = asyncio.run(state_store.create_job(f"resource_job_{i}", f"Resource Job {i}", f"Description {i}")
+            job = asyncio.run(state_store.create_job(f"resource_job_{i}", f"Resource Job {i}", f"Description {i}"))
             jobs.append(job)
         
         # Get final resource usage
@@ -322,7 +322,7 @@ class TestLoadPerformance:
         
         for i in range(100):
             job = asyncio.run(state_store.create_job(f"baseline_job_{i}", f"Baseline Job {i}", f"Description {i}")
-        
+        )
         baseline_end = time.time()
         baseline_duration = baseline_end - baseline_start
         
@@ -331,7 +331,7 @@ class TestLoadPerformance:
         
         for i in range(100):
             job = asyncio.run(state_store.create_job(f"current_job_{i}", f"Current Job {i}", f"Description {i}")
-        
+        )
         current_end = time.time()
         current_duration = current_end - current_start
         
@@ -347,17 +347,17 @@ class TestLoadPerformance:
             # Simulate different types of operations
             if operation_id % 3 == 0:
                 # Job creation
-                job = asyncio.run(state_store.create_job(f"balanced_job_{operation_id}", f"Balanced Job {operation_id}", f"Description {operation_id}")
+                job = asyncio.run(state_store.create_job(f"balanced_job_{operation_id}", f"Balanced Job {operation_id}", f"Description {operation_id}"))
                 return job
             elif operation_id % 3 == 1:
                 # Job update
-                job = asyncio.run(state_store.create_job(f"update_job_{operation_id}", f"Update Job {operation_id}", f"Description {operation_id}")
-                asyncio.run(state_store.update_job_status(job.job_id, "completed")
+                job = asyncio.run(state_store.create_job(f"update_job_{operation_id}", f"Update Job {operation_id}", f"Description {operation_id}"))
+                asyncio.run(state_store.update_job_status(job.job_id, "completed"))
                 return job
             else:
                 # Job query
-                job = asyncio.run(state_store.create_job(f"query_job_{operation_id}", f"Query Job {operation_id}", f"Description {operation_id}")
-                retrieved_job = asyncio.run(state_store.get_job(job.job_id)
+                job = asyncio.run(state_store.create_job(f"query_job_{operation_id}", f"Query Job {operation_id}", f"Description {operation_id}"))
+                retrieved_job = asyncio.run(state_store.get_job(job.job_id))
                 return retrieved_job
         
         # Run balanced operations
@@ -365,7 +365,7 @@ class TestLoadPerformance:
         
         tasks = [balanced_operation(i) for i in range(100)]
         results = asyncio.run(asyncio.gather(*tasks)
-        
+        )
         end_time = time.time()
         duration = end_time - start_time
         
