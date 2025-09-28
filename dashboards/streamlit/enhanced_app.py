@@ -177,11 +177,9 @@ class EnhancedLearningDashboard:
                 st.session_state.show_pending_details = True
                 st.rerun()
             
-            # Debug info (simplified)
+            # Show status message
             if st.session_state.get('show_pending_details', False):
-                st.info("✅ Pending details view is active")
-                st.warning("🔍 NEW DEBUG: This should show pending proposals details below!")
-                st.error("🚨 CRITICAL: The main render logic should be called now!")
+                st.info("📋 Reviewing pending proposals")
             else:
                 st.info("ℹ️ Click the button above to view pending proposals")
         
@@ -313,29 +311,63 @@ class EnhancedLearningDashboard:
     def render_pending_proposals_details(self):
         """Render detailed pending proposals view"""
         st.markdown("## 📋 Pending Proposals - Review & Approve")
-        
+
         # Back button
         if st.button("← Back to Dashboard", key="back_to_dashboard"):
             st.session_state.show_pending_details = False
-            st.success("🔄 Returning to dashboard...")
             st.rerun()
-        
+
         st.markdown("---")
-        
+
         # Get pending proposals
         try:
             proposals = self.proposals_manager.get_pending_proposals(limit=10)
-            
+
             if not proposals:
                 st.info("No pending proposals found. Create a sample proposal using the sidebar button.")
                 return
-            
-            st.success(f"✅ Found {len(proposals)} pending proposals to review!")
-            
-            # Display proposals with detailed approval interface
-            for i, proposal in enumerate(proposals):
-                self.render_detailed_proposal_card(proposal, i)
+
+            # Create two columns: List on left, Details on right
+            col1, col2 = st.columns([1, 2])
+
+            with col1:
+                st.markdown("### 📝 Proposals List")
                 
+                # Initialize selected proposal in session state
+                if 'selected_proposal_id' not in st.session_state:
+                    st.session_state.selected_proposal_id = proposals[0].id if proposals else None
+
+                # Display proposal list
+                for i, proposal in enumerate(proposals):
+                    is_selected = st.session_state.get('selected_proposal_id') == proposal.id
+                    
+                    # Create clickable proposal item
+                    if st.button(
+                        f"**{proposal.title}**\n"
+                        f"📅 {proposal.created_at.strftime('%Y-%m-%d %H:%M')}\n"
+                        f"⭐ {proposal.quality_score:.2f} | ⏱️ {proposal.estimated_duration}min",
+                        key=f"proposal_list_{proposal.id}",
+                        help=f"Click to view details of: {proposal.title}",
+                        use_container_width=True
+                    ):
+                        st.session_state.selected_proposal_id = proposal.id
+                        st.rerun()
+
+            with col2:
+                st.markdown("### 📄 Proposal Details")
+                
+                # Find selected proposal
+                selected_proposal = None
+                for proposal in proposals:
+                    if proposal.id == st.session_state.get('selected_proposal_id'):
+                        selected_proposal = proposal
+                        break
+
+                if selected_proposal:
+                    self.render_detailed_proposal_card(selected_proposal, 0)
+                else:
+                    st.info("Select a proposal from the list to view details.")
+
         except Exception as e:
             st.error(f"Error loading proposals: {e}")
             st.info("Please try refreshing the dashboard.")
@@ -457,68 +489,68 @@ class EnhancedLearningDashboard:
     
     def render_detailed_proposal_card(self, proposal: LearningProposal, index: int):
         """Render detailed proposal card for approval workflow"""
-        st.markdown(f"### 📚 Proposal #{index + 1}: {proposal.title}")
-        
-        # Main info columns
-        col1, col2, col3 = st.columns(3)
-        
+        st.markdown(f"### 📚 {proposal.title}")
+
+        # Main info in compact format
+        col1, col2 = st.columns([1, 1])
+
         with col1:
             st.markdown("**📋 Basic Info:**")
-            st.write(f"• **Source:** {proposal.source.value.title()}")
-            st.write(f"• **Priority:** {proposal.priority.value.title()}")
-            st.write(f"• **Duration:** {proposal.estimated_duration} minutes")
-            st.write(f"• **Quality Score:** {proposal.quality_score:.2f}")
-            st.write(f"• **Created:** {proposal.created_at.strftime('%Y-%m-%d %H:%M')}")
-        
+            st.write(f"**Source:** {proposal.source.value.title()}")
+            st.write(f"**Priority:** {proposal.priority.value.title()}")
+            st.write(f"**Duration:** {proposal.estimated_duration} minutes")
+            st.write(f"**Quality Score:** {proposal.quality_score:.2f}")
+            st.write(f"**Created:** {proposal.created_at.strftime('%Y-%m-%d %H:%M')}")
+
         with col2:
-            st.markdown("**🎯 Learning Objectives:**")
-            for obj in proposal.learning_objectives:
-                st.write(f"• {obj}")
-        
-        with col3:
             st.markdown("**📊 Risk Assessment:**")
             for key, value in proposal.risk_assessment.items():
-                st.write(f"• **{key.title()}:** {value}")
-        
+                st.write(f"**{key.title()}:** {value}")
+
         # Description
         st.markdown("**📝 Description:**")
         st.write(proposal.description)
-        
+
+        # Learning Objectives
+        st.markdown("**🎯 Learning Objectives:**")
+        for obj in proposal.learning_objectives:
+            st.write(f"• {obj}")
+
         # Prerequisites and Expected Outcomes
-        col4, col5 = st.columns(2)
-        
-        with col4:
+        col3, col4 = st.columns(2)
+
+        with col3:
             st.markdown("**📚 Prerequisites:**")
             for prereq in proposal.prerequisites:
                 st.write(f"• {prereq}")
-        
-        with col5:
+
+        with col4:
             st.markdown("**🎯 Expected Outcomes:**")
             for outcome in proposal.expected_outcomes:
                 st.write(f"• {outcome}")
-        
+
         # Approval section
         st.markdown("---")
         st.markdown("### 🤔 Decision Required")
-        
+
         # Approval buttons
-        col_approve, col_reject, col_details = st.columns([1, 1, 2])
-        
+        col_approve, col_reject = st.columns([1, 1])
+
         with col_approve:
             if st.button(
-                "✅ **APPROVE**", 
-                key=f"approve_detailed_{proposal.id}", 
+                "✅ **APPROVE**",
+                key=f"approve_detailed_{proposal.id}",
                 type="primary",
                 use_container_width=True
             ):
                 self.proposals_manager.approve_proposal(proposal.id, "user")
                 st.success("✅ Proposal approved! StillMe IPC will start learning this content.")
                 st.rerun()
-        
+
         with col_reject:
             if st.button(
-                "❌ **REJECT**", 
-                key=f"reject_detailed_{proposal.id}", 
+                "❌ **REJECT**",
+                key=f"reject_detailed_{proposal.id}",
                 type="secondary",
                 use_container_width=True
             ):
@@ -529,20 +561,15 @@ class EnhancedLearningDashboard:
                 )
                 if st.button("Confirm Rejection", key=f"confirm_reject_{proposal.id}"):
                     self.proposals_manager.reject_proposal(
-                        proposal.id, 
-                        "user", 
+                        proposal.id,
+                        "user",
                         rejection_reason or "User rejected"
                     )
                     st.success("❌ Proposal rejected!")
                     st.rerun()
-        
-        with col_details:
-            st.markdown("**💡 Your Control:**")
-            st.write("• You decide what StillMe IPC learns")
-            st.write("• Only approved content will be processed")
-            st.write("• All decisions are logged and auditable")
-        
-        st.markdown("---")
+
+        # Control info
+        st.info("💡 **Your Control:** You decide what StillMe IPC learns. Only approved content will be processed. All decisions are logged and auditable.")
     
     def render_proposal_analytics(self):
         """Render proposal analytics"""
@@ -715,9 +742,6 @@ class EnhancedLearningDashboard:
     
     def run(self):
         """Run the enhanced dashboard"""
-        # Debug: Function started
-        st.error("🚨 RUN FUNCTION STARTED!")
-        
         # Header
         self.render_header()
         
@@ -726,30 +750,12 @@ class EnhancedLearningDashboard:
         
         # Auto-refresh logic - DISABLE when pending details view is active
         if st.session_state.auto_refresh and filters['refresh_interval'] and not st.session_state.get('show_pending_details', False):
-            st.error("🚨 AUTO-REFRESH TRIGGERED - THIS MIGHT BE THE ISSUE!")
             time.sleep(filters['refresh_interval'])
             st.rerun()
-        elif st.session_state.auto_refresh and st.session_state.get('show_pending_details', False):
-            st.warning("🚨 AUTO-REFRESH DISABLED - Pending details view is active!")
-        
-        # Debug: Before main render logic
-        st.error("🚨 BEFORE MAIN RENDER LOGIC!")
-        
-        # Check if user clicked on pending proposals
-        st.error(f"🚨 MAIN DEBUG: show_pending_details = {st.session_state.get('show_pending_details', False)}")
         
         if st.session_state.get('show_pending_details', False):
-            # Clear the main content area and show pending details
-            st.markdown("---")
-            st.info("🔍 Debug: About to render pending proposals details...")
-            st.info(f"🔍 Debug: show_pending_details = {st.session_state.get('show_pending_details', False)}")
-            try:
-                self.render_pending_proposals_details()
-                st.success("✅ render_pending_proposals_details completed successfully!")
-            except Exception as e:
-                st.error(f"❌ Error in render_pending_proposals_details: {e}")
-                import traceback
-                st.code(traceback.format_exc())
+            # Show pending proposals details
+            self.render_pending_proposals_details()
         else:
             # Main content
             tab1, tab2, tab3, tab4 = st.tabs([
