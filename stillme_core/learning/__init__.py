@@ -47,6 +47,24 @@ from .automation_service import (
     run_automation_service
 )
 
+# Approval system
+from .approval_system import (
+    ApprovalSystem,
+    ApprovalConfig,
+    ApprovalRequest,
+    ApprovalStatus,
+    ContentType,
+    ApprovalPriority,
+    get_approval_system,
+    initialize_approval_system
+)
+
+from .approval_queue import (
+    ApprovalQueueManager,
+    QueueStats,
+    get_approval_queue_manager
+)
+
 # Alerting integration
 from ..alerting import (
     get_alert_manager,
@@ -86,6 +104,19 @@ __all__ = [
     'ServiceStatus',
     'get_automation_service',
     'run_automation_service',
+    
+    # Approval system
+    'ApprovalSystem',
+    'ApprovalConfig',
+    'ApprovalRequest',
+    'ApprovalStatus',
+    'ContentType',
+    'ApprovalPriority',
+    'get_approval_system',
+    'initialize_approval_system',
+    'ApprovalQueueManager',
+    'QueueStats',
+    'get_approval_queue_manager',
     
     # Alerting integration
     'get_alert_manager',

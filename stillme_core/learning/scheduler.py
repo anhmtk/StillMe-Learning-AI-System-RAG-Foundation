@@ -53,7 +53,7 @@ class SchedulerConfig:
     skip_if_cpu_high: bool = True
     cpu_threshold: float = 70.0
     skip_if_memory_high: bool = True
-    memory_threshold_mb: int = 1024
+    memory_threshold_mb: int = 24576  # 24GB - allow training on 27GB system
     skip_if_tokens_low: bool = True
     min_tokens_required: int = 1000
     enable_graceful_shutdown: bool = True
@@ -355,7 +355,20 @@ class LearningScheduler:
     def _job_executed(self, event):
         """Event handler khi job được thực thi thành công"""
         job_id = event.job_id
-        self.logger.info(f"Job executed successfully: {job_id}")
+        
+        # Check actual job status instead of assuming success
+        if job_id in self.scheduled_jobs:
+            job_status = self.scheduled_jobs[job_id].status
+            if job_status == 'completed':
+                self.logger.info(f"Job executed successfully: {job_id}")
+            elif job_status == 'skipped':
+                self.logger.warning(f"Job skipped due to resource constraints: {job_id}")
+            elif job_status == 'failed':
+                self.logger.error(f"Job failed: {job_id}")
+            else:
+                self.logger.info(f"Job status: {job_status} for {job_id}")
+        else:
+            self.logger.info(f"Job executed: {job_id}")
     
     def _job_error(self, event):
         """Event handler khi job gặp lỗi"""

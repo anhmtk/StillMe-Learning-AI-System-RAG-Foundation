@@ -33,7 +33,7 @@ from .evolutionary_learning_system import EvolutionaryLearningSystem, Evolutiona
 from ..monitoring.resource_monitor import ResourceMonitor, ResourceThresholds, get_resource_monitor
 from ..monitoring.performance_analyzer import PerformanceAnalyzer, PerformanceMetrics, get_performance_analyzer
 from ..resilience.error_handler import ErrorHandler, get_error_handler, with_error_handling
-from ..resilience.resilience_manager import ResilienceManager, ResilienceConfig, get_resilience_manager
+from ..resilience.resilience_manager import ResilienceManager, ResilienceConfig, get_resilience_manager, ResilienceLevel
 from ..alerting.alert_manager import get_alert_manager
 from ..alerting.learning_alerts import get_learning_alert_manager, LearningMetrics
 

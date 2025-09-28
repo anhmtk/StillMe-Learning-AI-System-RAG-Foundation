@@ -37,6 +37,10 @@ try:
 except ImportError as e:
     logging.warning(f"ExperienceMemory not available: {e}")
 
+# Import approval system
+from .approval_system import ApprovalSystem, ApprovalConfig, ContentType, ApprovalPriority, get_approval_system
+from .approval_queue import ApprovalQueueManager, get_approval_queue_manager
+
 logger = logging.getLogger(__name__)
 
 class LearningMode(Enum):
@@ -90,6 +94,11 @@ class EvolutionaryConfig:
     adaptation_speed_target: float = 0.8
     self_correction_enabled: bool = True
     fine_tune_enabled: bool = True
+    
+    # Approval workflow config
+    enable_approval_workflow: bool = True
+    auto_approve_threshold: float = 0.9
+    require_human_approval: bool = True
 
 class EvolutionaryLearningSystem:
     """
@@ -109,6 +118,8 @@ class EvolutionaryLearningSystem:
         
         # Initialize subsystems
         self.experience_memory = None
+        self.approval_system = None
+        self.approval_queue = None
         
         # Learning state
         self.current_stage = EvolutionStage.INFANT
@@ -136,6 +147,22 @@ class EvolutionaryLearningSystem:
             self.logger.info("ExperienceMemory subsystem initialized")
         except Exception as e:
             self.logger.warning(f"ExperienceMemory not available: {e}")
+        
+        # Initialize Approval System if enabled
+        if self.config.enable_approval_workflow:
+            try:
+                approval_config = ApprovalConfig(
+                    enabled=True,
+                    auto_approve_threshold=self.config.auto_approve_threshold,
+                    require_human_approval=self.config.require_human_approval
+                )
+                self.approval_system = get_approval_system(approval_config)
+                self.approval_queue = get_approval_queue_manager(self.approval_system)
+                self.logger.info("Approval system initialized")
+            except Exception as e:
+                self.logger.warning(f"Approval system not available: {e}")
+                self.approval_system = None
+                self.approval_queue = None
     
     def _load_learning_state(self):
         """Load trạng thái học tập từ database"""
