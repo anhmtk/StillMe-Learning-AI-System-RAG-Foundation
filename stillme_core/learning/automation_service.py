@@ -32,6 +32,8 @@ from .scheduler import LearningScheduler, SchedulerConfig, get_learning_schedule
 from .evolutionary_learning_system import EvolutionaryLearningSystem, EvolutionaryConfig
 from ..monitoring.resource_monitor import ResourceMonitor, ResourceThresholds, get_resource_monitor
 from ..monitoring.performance_analyzer import PerformanceAnalyzer, PerformanceMetrics, get_performance_analyzer
+from ..resilience.error_handler import ErrorHandler, get_error_handler, with_error_handling
+from ..resilience.resilience_manager import ResilienceManager, ResilienceConfig, get_resilience_manager
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +54,10 @@ class AutomationServiceConfig:
     enable_performance_analysis: bool = True
     resource_monitoring_interval: int = 10  # seconds
     performance_analysis_interval: int = 300  # 5 minutes
+    enable_resilience: bool = True
+    resilience_level: str = "standard"  # minimal, standard, high, maximum
+    enable_error_recovery: bool = True
+    max_retry_attempts: int = 3
 
 @dataclass
 class ServiceStatus:
@@ -77,6 +83,8 @@ class LearningAutomationService:
         self.learning_system: Optional[EvolutionaryLearningSystem] = None
         self.resource_monitor: Optional[ResourceMonitor] = None
         self.performance_analyzer: Optional[PerformanceAnalyzer] = None
+        self.error_handler: Optional[ErrorHandler] = None
+        self.resilience_manager: Optional[ResilienceManager] = None
         
         # Service state
         self.status = ServiceStatus()
@@ -167,6 +175,18 @@ class LearningAutomationService:
                 )
                 self.logger.info("Performance analysis initialized")
             
+            # Initialize error handling and resilience
+            if self.config.enable_resilience:
+                self.error_handler = get_error_handler()
+                self.logger.info("Error handler initialized")
+                
+                # Initialize resilience manager
+                resilience_config = ResilienceConfig()
+                resilience_config.level = getattr(ResilienceLevel, self.config.resilience_level.upper(), ResilienceLevel.STANDARD)
+                self.resilience_manager = get_resilience_manager(resilience_config)
+                await self.resilience_manager.start_monitoring()
+                self.logger.info("Resilience manager initialized")
+            
             # Schedule daily training if enabled
             if self.config.scheduler_config and self.config.scheduler_config.enabled:
                 success = await self.scheduler.schedule_daily_training(
@@ -251,6 +271,10 @@ class LearningAutomationService:
             if self.performance_analyzer:
                 await self.performance_analyzer.stop_analysis()
             
+            # Stop resilience manager
+            if self.resilience_manager:
+                await self.resilience_manager.stop_monitoring()
+            
             # Update status
             self.status.running = False
             
@@ -274,6 +298,7 @@ class LearningAutomationService:
         
         self.logger.info("Graceful shutdown completed")
     
+    @with_error_handling(get_error_handler(), "default", "learning", {"component": "automation_service", "operation": "training_session"})
     async def _run_training_session(self, **kwargs) -> Dict[str, Any]:
         """
         Chạy training session với error handling và metrics
