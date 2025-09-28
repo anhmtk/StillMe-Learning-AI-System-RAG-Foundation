@@ -175,7 +175,6 @@ class EnhancedLearningDashboard:
                 use_container_width=True
             ):
                 st.session_state.show_pending_details = True
-                st.success("🔄 Loading pending proposals...")
                 st.rerun()
             
             # Debug info (simplified)
@@ -322,17 +321,22 @@ class EnhancedLearningDashboard:
         st.markdown("---")
         
         # Get pending proposals
-        proposals = self.proposals_manager.get_pending_proposals(limit=10)
-        
-        if not proposals:
-            st.info("No pending proposals found. Create a sample proposal using the sidebar button.")
-            return
-        
-        st.success(f"✅ Found {len(proposals)} pending proposals to review!")
-        
-        # Display proposals with detailed approval interface
-        for i, proposal in enumerate(proposals):
-            self.render_detailed_proposal_card(proposal, i)
+        try:
+            proposals = self.proposals_manager.get_pending_proposals(limit=10)
+            
+            if not proposals:
+                st.info("No pending proposals found. Create a sample proposal using the sidebar button.")
+                return
+            
+            st.success(f"✅ Found {len(proposals)} pending proposals to review!")
+            
+            # Display proposals with detailed approval interface
+            for i, proposal in enumerate(proposals):
+                self.render_detailed_proposal_card(proposal, i)
+                
+        except Exception as e:
+            st.error(f"Error loading proposals: {e}")
+            st.info("Please try refreshing the dashboard.")
     
     def render_learning_proposals(self):
         """Render learning proposals section"""
@@ -722,6 +726,9 @@ class EnhancedLearningDashboard:
         
         # Check if user clicked on pending proposals
         if st.session_state.get('show_pending_details', False):
+            # Clear the main content area and show pending details
+            st.markdown("---")
+            st.info("🔍 Debug: About to render pending proposals details...")
             self.render_pending_proposals_details()
         else:
             # Main content
