@@ -729,7 +729,14 @@ class EnhancedLearningDashboard:
             # Clear the main content area and show pending details
             st.markdown("---")
             st.info("🔍 Debug: About to render pending proposals details...")
-            self.render_pending_proposals_details()
+            st.info(f"🔍 Debug: show_pending_details = {st.session_state.get('show_pending_details', False)}")
+            try:
+                self.render_pending_proposals_details()
+                st.success("✅ render_pending_proposals_details completed successfully!")
+            except Exception as e:
+                st.error(f"❌ Error in render_pending_proposals_details: {e}")
+                import traceback
+                st.code(traceback.format_exc())
         else:
             # Main content
             tab1, tab2, tab3, tab4 = st.tabs([
