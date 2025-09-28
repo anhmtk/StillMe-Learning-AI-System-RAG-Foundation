@@ -117,7 +117,7 @@ On startup the framework auto-detects Pro; otherwise it logs `Using StubRouter (
 
 ## 🧠 Unified Evolutionary Learning System
 
-StillMe features a **revolutionary self-evolving learning system** that combines the best of both experience-based and content-based learning, with full self-assessment and daily training capabilities.
+StillMe features a **sophisticated self-evolving learning system** that combines the best of both experience-based and content-based learning, with full self-assessment, daily training capabilities, and built-in safety mechanisms.
 
 ### 🚀 **Core Features**
 
@@ -141,6 +141,12 @@ StillMe features a **revolutionary self-evolving learning system** that combines
 - **Rule-Based Adaptation**: Smart parameter adjustment using heuristics
 - **Memory-Efficient**: Optimized for resource-constrained environments
 
+#### **Human-in-the-Loop Safety**
+- **Approval Workflow**: Human oversight for sensitive content and knowledge updates
+- **Quality Scoring**: Automatic assessment of content quality and risk levels
+- **Auto-Approval**: Intelligent approval for safe, high-quality content
+- **Audit Trail**: Complete tracking of all learning decisions and approvals
+
 ### 🎯 **Learning Capabilities**
 
 #### **Multi-Source Learning**
@@ -161,6 +167,12 @@ StillMe features a **revolutionary self-evolving learning system** that combines
 - **Error Correction**: Learn from mistakes and improve
 - **Creative Problem Solving**: Develop innovative solutions
 
+#### **Safe Learning Environment**
+- **Content Filtering**: Automatic screening of learning materials
+- **Risk Assessment**: Evaluate potential risks before learning
+- **Human Oversight**: Manual approval for critical knowledge updates
+- **Transparency**: Full visibility into learning decisions and sources
+
 ### 🛠️ **How to Use**
 
 #### **Daily Training**
@@ -173,6 +185,18 @@ python -m cli.evolutionary_learning status
 
 # Run self-assessment
 python -m cli.evolutionary_learning assess --type full
+```
+
+#### **Approval Management**
+```bash
+# List pending approval requests
+python -m cli.approval_manager list
+
+# Approve a request
+python -m cli.approval_manager approve <request_id> --approver "human" --notes "Looks good"
+
+# Check approval statistics
+python -m cli.approval_manager stats
 ```
 
 #### **Evolution Management**
@@ -203,6 +227,9 @@ python -m cli.evolutionary_learning export --output learning_data.json
 # config/evolutionary_learning.toml
 [evolutionary_system]
 learning_mode = "evolutionary"
+enable_approval_workflow = true
+auto_approve_threshold = 0.9
+require_human_approval = true
 daily_training_minutes = 30
 assessment_frequency_hours = 6
 evolution_checkpoint_days = 7
@@ -220,10 +247,12 @@ fine_tune_enabled = true
 ```
 
 #### **Safety Measures**
-- **Approval Workflow**: Human review for external content
-- **Risk Assessment**: Content filtering and injection detection
-- **License Validation**: Only open-licensed content
-- **Audit Trail**: Complete learning history and decisions
+- **Human-in-the-Loop**: Approval workflow for sensitive content and knowledge updates
+- **Quality & Risk Scoring**: Automatic assessment of content safety and value
+- **Auto-Approval**: Intelligent approval for safe, high-quality content
+- **Content Filtering**: Injection detection and malicious content screening
+- **License Validation**: Only open-licensed content from trusted sources
+- **Audit Trail**: Complete learning history, decisions, and approval records
 - **Emergency Reset**: Ability to reset learning state if needed
 
 ### 📊 **Learning Metrics**
@@ -239,14 +268,15 @@ The system tracks comprehensive metrics:
 
 ### 🎓 **Educational Philosophy**
 
-StillMe follows a **"learning child"** approach:
-- **Curiosity-Driven**: Actively seeks new knowledge
-- **Self-Correcting**: Identifies and fixes its own mistakes
-- **Growth-Oriented**: Continuously improves and evolves
-- **Transparent**: Shares its learning process and reasoning
+StillMe follows a **"learning child"** approach with built-in safety:
+- **Curiosity-Driven**: Actively seeks new knowledge from trusted sources
+- **Self-Correcting**: Identifies and fixes its own mistakes through assessment
+- **Growth-Oriented**: Continuously improves and evolves with human guidance
+- **Transparent**: Shares its learning process, reasoning, and approval decisions
 - **Ethical**: Maintains high standards of behavior and safety
+- **Human-Guided**: Seeks approval for sensitive learning and knowledge updates
 
-This makes StillMe not just an AI tool, but a **learning companion** that grows and improves alongside its users.
+This makes StillMe not just an AI tool, but a **safe learning companion** that grows and improves alongside its users with appropriate human oversight.
 
 ## Roadmap (short)
 
@@ -263,12 +293,13 @@ This makes StillMe not just an AI tool, but a **learning companion** that grows 
 
 ### 2025-09-27 - Unified Evolutionary Learning System Release
 
-**🧠 Revolutionary Self-Evolving AI System (Completed)**
+**🧠 Sophisticated Self-Evolving Learning System (Completed)**
 - ✅ **Unified Learning System**: Combined experience-based and content-based learning
 - ✅ **4-Stage Evolution**: Infant → Child → Adolescent → Adult progression
 - ✅ **Daily Training Sessions**: Automated self-improvement with 6-step workflow
 - ✅ **Self-Assessment System**: Comprehensive evaluation and gap analysis
 - ✅ **Fine-Tune "Kiểu Nhà Nghèo"**: GPU-free parameter optimization
+- ✅ **Human-in-the-Loop Approval**: Safety workflow with quality/risk scoring
 - ✅ **Learning Migration**: Seamless transition from dual to unified system
 
 **🚀 Core Features:**
@@ -281,6 +312,7 @@ This makes StillMe not just an AI tool, but a **learning companion** that grows 
 
 **🛠️ Tools & CLI:**
 - ✅ **Evolutionary Learning CLI**: Complete management interface
+- ✅ **Approval Management CLI**: Human-in-the-loop workflow management
 - ✅ **Migration Scripts**: Automated data migration and validation
 - ✅ **Assessment System**: Self-evaluation and knowledge validation
 - ✅ **Emergency Controls**: Reset and rollback capabilities
@@ -295,8 +327,13 @@ This makes StillMe not just an AI tool, but a **learning companion** that grows 
 **New Files & Modules:**
 - `stillme_core/learning/evolutionary_learning_system.py` - Core evolutionary system
 - `stillme_core/learning/learning_assessment_system.py` - Self-assessment engine
-- `cli/evolutionary_learning.py` - Management CLI
+- `stillme_core/learning/approval_system.py` - Human-in-the-loop approval system
+- `stillme_core/learning/approval_queue.py` - Approval workflow management
+- `cli/evolutionary_learning.py` - Learning management CLI
+- `cli/approval_manager.py` - Approval workflow CLI
+- `config/approval.toml` - Approval system configuration
 - `tests/test_unified_evolutionary_learning.py` - Comprehensive test suite
+- `tests/test_approval_system.py` - Approval system test suite
 - `docs/UNIFIED_LEARNING_SYSTEM_REPORT.md` - Implementation documentation
 
 ### 2025-09-26 - Daily Smart-Learning MVP Release
