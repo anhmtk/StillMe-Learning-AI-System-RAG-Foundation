@@ -166,15 +166,22 @@ class EnhancedLearningDashboard:
             new_today = stats.get('pending', {}).get('new_today', 0)
             
             # Large clickable pending proposals card
-            if st.button(
+            button_clicked = st.button(
                 f"📋 **{pending_count} Pending Proposals**\n\n"
                 f"🆕 {new_today} new today\n"
                 f"⏰ Click to review & approve",
                 key="pending_proposals_button",
                 help="Click to view and manage pending learning proposals",
                 use_container_width=True
-            ):
+            )
+            
+            # Debug button state
+            st.write(f"🔍 Debug: Button clicked = {button_clicked}")
+            st.write(f"🔍 Debug: Current show_pending_details = {st.session_state.get('show_pending_details', False)}")
+            
+            if button_clicked:
                 st.session_state.show_pending_details = True
+                st.success("🔄 Loading pending proposals...")
                 st.rerun()
         
         with col2:
@@ -195,10 +202,15 @@ class EnhancedLearningDashboard:
             # Learning Status indicator with progress
             st.markdown("⚡ **Learning:** Active")
             
-            # Learning progress bar
-            progress = 0.75  # 75% completion
-            st.progress(progress)
-            st.markdown(f"**Progress:** {progress*100:.0f}% complete")
+            # Learning progress bar - chỉ hiển thị khi có proposal đang học
+            approved_count = stats.get('approved', {}).get('count', 0)
+            if approved_count > 0:
+                progress = 0.75  # 75% completion
+                st.progress(progress)
+                st.markdown(f"**Progress:** {progress*100:.0f}% complete")
+            else:
+                st.markdown("**Status:** Waiting for approval")
+                st.info("No approved proposals to learn from yet")
             
             # Learning details
             with st.expander("📚 Learning Details"):
@@ -301,9 +313,13 @@ class EnhancedLearningDashboard:
         """Render detailed pending proposals view"""
         st.markdown("## 📋 Pending Proposals - Review & Approve")
         
+        # Debug info
+        st.info(f"🔍 Debug: show_pending_details = {st.session_state.get('show_pending_details', False)}")
+        
         # Back button
         if st.button("← Back to Dashboard", key="back_to_dashboard"):
             st.session_state.show_pending_details = False
+            st.success("🔄 Returning to dashboard...")
             st.rerun()
         
         st.markdown("---")
@@ -314,6 +330,8 @@ class EnhancedLearningDashboard:
         if not proposals:
             st.info("No pending proposals found. Create a sample proposal using the sidebar button.")
             return
+        
+        st.success(f"✅ Found {len(proposals)} pending proposals to review!")
         
         # Display proposals with detailed approval interface
         for i, proposal in enumerate(proposals):
@@ -707,6 +725,7 @@ class EnhancedLearningDashboard:
         
         # Check if user clicked on pending proposals
         if st.session_state.get('show_pending_details', False):
+            st.markdown("## 🔄 Loading Pending Proposals...")
             self.render_pending_proposals_details()
         else:
             # Main content
