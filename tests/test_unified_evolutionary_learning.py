@@ -53,23 +53,12 @@ class TestEvolutionaryLearningSystem:
     @pytest.fixture
     def system(self, config):
         """Test system instance"""
-        with patch('stillme_core.learning.evolutionary_learning_system.ExperienceMemory') as mock_exp, \
-             patch('stillme_core.learning.evolutionary_learning_system.LearningPipeline') as mock_pipeline, \
-             patch('stillme_core.learning.evolutionary_learning_system.get_vector_store') as mock_vector, \
-             patch('stillme_core.learning.evolutionary_learning_system.get_claims_store') as mock_claims:
+        with patch('stillme_core.learning.evolutionary_learning_system.ExperienceMemory') as mock_exp:
             
             # Mock experience memory with empty experiences list
             mock_exp_instance = Mock()
             mock_exp_instance.experiences = []
             mock_exp.return_value = mock_exp_instance
-            
-            # Mock pipeline
-            mock_pipeline_instance = Mock()
-            mock_pipeline.return_value = mock_pipeline_instance
-            
-            # Mock stores
-            mock_vector.return_value = Mock()
-            mock_claims.return_value = Mock()
             
             return EvolutionaryLearningSystem(config)
     
@@ -341,23 +330,12 @@ class TestIntegration:
     @pytest.mark.asyncio
     async def test_daily_training_workflow(self):
         """Test complete daily training workflow"""
-        with patch('stillme_core.learning.evolutionary_learning_system.ExperienceMemory') as mock_exp, \
-             patch('stillme_core.learning.evolutionary_learning_system.LearningPipeline') as mock_pipeline, \
-             patch('stillme_core.learning.evolutionary_learning_system.get_vector_store') as mock_vector, \
-             patch('stillme_core.learning.evolutionary_learning_system.get_claims_store') as mock_claims:
+        with patch('stillme_core.learning.evolutionary_learning_system.ExperienceMemory') as mock_exp:
             
             # Mock experience memory with empty experiences list
             mock_exp_instance = Mock()
             mock_exp_instance.experiences = []
             mock_exp.return_value = mock_exp_instance
-            
-            # Mock pipeline
-            mock_pipeline_instance = Mock()
-            mock_pipeline.return_value = mock_pipeline_instance
-            
-            # Mock stores
-            mock_vector.return_value = Mock()
-            mock_claims.return_value = Mock()
             
             # Initialize systems
             config = EvolutionaryConfig()
@@ -399,23 +377,12 @@ class TestIntegration:
     @pytest.mark.asyncio
     async def test_evolution_workflow(self):
         """Test evolution workflow"""
-        with patch('stillme_core.learning.evolutionary_learning_system.ExperienceMemory') as mock_exp, \
-             patch('stillme_core.learning.evolutionary_learning_system.LearningPipeline') as mock_pipeline, \
-             patch('stillme_core.learning.evolutionary_learning_system.get_vector_store') as mock_vector, \
-             patch('stillme_core.learning.evolutionary_learning_system.get_claims_store') as mock_claims:
+        with patch('stillme_core.learning.evolutionary_learning_system.ExperienceMemory') as mock_exp:
             
             # Mock experience memory with empty experiences list
             mock_exp_instance = Mock()
             mock_exp_instance.experiences = []
             mock_exp.return_value = mock_exp_instance
-            
-            # Mock pipeline
-            mock_pipeline_instance = Mock()
-            mock_pipeline.return_value = mock_pipeline_instance
-            
-            # Mock stores
-            mock_vector.return_value = Mock()
-            mock_claims.return_value = Mock()
             
             config = EvolutionaryConfig()
             system = EvolutionaryLearningSystem(config)
@@ -438,23 +405,12 @@ class TestPerformance:
     @pytest.mark.asyncio
     async def test_daily_training_performance(self):
         """Test daily training performance"""
-        with patch('stillme_core.learning.evolutionary_learning_system.ExperienceMemory') as mock_exp, \
-             patch('stillme_core.learning.evolutionary_learning_system.LearningPipeline') as mock_pipeline, \
-             patch('stillme_core.learning.evolutionary_learning_system.get_vector_store') as mock_vector, \
-             patch('stillme_core.learning.evolutionary_learning_system.get_claims_store') as mock_claims:
+        with patch('stillme_core.learning.evolutionary_learning_system.ExperienceMemory') as mock_exp:
             
             # Mock experience memory with empty experiences list
             mock_exp_instance = Mock()
             mock_exp_instance.experiences = []
             mock_exp.return_value = mock_exp_instance
-            
-            # Mock pipeline
-            mock_pipeline_instance = Mock()
-            mock_pipeline.return_value = mock_pipeline_instance
-            
-            # Mock stores
-            mock_vector.return_value = Mock()
-            mock_claims.return_value = Mock()
             
             config = EvolutionaryConfig(daily_training_minutes=5)  # Short training
             system = EvolutionaryLearningSystem(config)

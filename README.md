@@ -187,16 +187,13 @@ python -m cli.evolutionary_learning evolve --force
 python -m cli.evolutionary_learning reset --confirm
 ```
 
-#### **Migration from Old Systems**
+#### **System Status**
 ```bash
-# Backup existing data
-python scripts/migrate_to_unified_learning.py --backup
+# Check current learning system status
+python -m cli.evolutionary_learning status
 
-# Run migration
-python scripts/migrate_to_unified_learning.py --migrate --validate
-
-# Switch to unified system
-python scripts/migrate_to_unified_learning.py --switch
+# Export learning data
+python -m cli.evolutionary_learning export --output learning_data.json
 ```
 
 ### 🔒 **Safety & Governance**
@@ -299,9 +296,8 @@ This makes StillMe not just an AI tool, but a **learning companion** that grows 
 - `stillme_core/learning/evolutionary_learning_system.py` - Core evolutionary system
 - `stillme_core/learning/learning_assessment_system.py` - Self-assessment engine
 - `cli/evolutionary_learning.py` - Management CLI
-- `scripts/migrate_to_unified_learning.py` - Migration tools
 - `tests/test_unified_evolutionary_learning.py` - Comprehensive test suite
-- `docs/LEARNING_SYSTEM_MIGRATION_PLAN.md` - Migration documentation
+- `docs/UNIFIED_LEARNING_SYSTEM_REPORT.md` - Implementation documentation
 
 ### 2025-09-26 - Daily Smart-Learning MVP Release
 
@@ -322,7 +318,6 @@ This makes StillMe not just an AI tool, but a **learning companion** that grows 
 - ✅ CLI for scan/approve/ingest operations
 
 **New Files & Modules:**
-- `stillme_core/learning/` - Complete learning pipeline
 - `stillme_core/kill_switch.py` - Emergency stop mechanism
 - `stillme_core/rationale_logging.py` - Decision logging
 - `stillme_core/security/secrets_sweep.py` - Security scanning
@@ -331,9 +326,8 @@ This makes StillMe not just an AI tool, but a **learning companion** that grows 
 - `policies/learning_policy.yaml` - Learning safety policies
 
 **CLI Commands:**
-- `python -m stillme_core.learning.pipeline --scan` - Scan content
-- `python -m stillme_core.learning.pipeline --status` - Check queue
-- `python -m stillme_core.learning.pipeline --approve <id>` - Approve item
+- `python -m cli.evolutionary_learning status` - Check learning status
+- `python -m cli.evolutionary_learning train` - Run daily training
 - `python cli/kill_switch.py --status` - Check kill switch
 - `python scripts/health_check.py` - System health check
 

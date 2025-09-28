@@ -1,50 +1,53 @@
 """
 StillMe Learning Module
-Safe daily smart-learning pipeline for AI systems.
+Unified Evolutionary Learning System for AI self-improvement.
 """
 
-__version__ = "1.0.0"
+__version__ = "2.0.0"
 __author__ = "StillMe AI Framework"
 
-# Import main pipeline
-from .pipeline import LearningPipeline
-
-# Import unified learning manager
-from .unified_learning_manager import (
-    UnifiedLearningManager,
-    LearningSystemMode,
-    LearningConfig,
-    get_unified_learning_manager,
-    initialize_learning_systems
+# Import unified evolutionary learning system
+from .evolutionary_learning_system import (
+    EvolutionaryLearningSystem,
+    EvolutionaryConfig,
+    EvolutionStage,
+    LearningMode,
+    LearningMetrics,
+    TrainingSession,
+    get_evolutionary_learning_system,
+    initialize_evolutionary_learning
 )
 
-# Import convenience functions
-from .fetcher.rss_fetch import fetch_content_from_sources
-from .parser.normalize import normalize_content_batch
-from .gates.license_gate import validate_content_licenses
-from .risk.injection_scan import assess_content_risks
-from .score.quality import score_content_quality_batch
-from .dedupe.novelty import check_content_novelty
-from .approve.queue import get_approval_queue
-from .ingest.vector_store import get_vector_store
-from .ingest.claims_store import get_claims_store
-from .reports.digest import get_digest_generator
+# Import learning assessment system
+from .learning_assessment_system import (
+    LearningAssessmentSystem,
+    AssessmentType,
+    AssessmentCategory,
+    AssessmentResult,
+    LearningCurve,
+    ParameterOptimization,
+    get_assessment_system,
+    initialize_assessment_system
+)
 
 __all__ = [
-    'LearningPipeline',
-    'UnifiedLearningManager',
-    'LearningSystemMode',
-    'LearningConfig',
-    'get_unified_learning_manager',
-    'initialize_learning_systems',
-    'fetch_content_from_sources',
-    'normalize_content_batch',
-    'validate_content_licenses',
-    'assess_content_risks',
-    'score_content_quality_batch',
-    'check_content_novelty',
-    'get_approval_queue',
-    'get_vector_store',
-    'get_claims_store',
-    'get_digest_generator'
+    # Evolutionary Learning System
+    'EvolutionaryLearningSystem',
+    'EvolutionaryConfig',
+    'EvolutionStage',
+    'LearningMode',
+    'LearningMetrics',
+    'TrainingSession',
+    'get_evolutionary_learning_system',
+    'initialize_evolutionary_learning',
+    
+    # Learning Assessment System
+    'LearningAssessmentSystem',
+    'AssessmentType',
+    'AssessmentCategory',
+    'AssessmentResult',
+    'LearningCurve',
+    'ParameterOptimization',
+    'get_assessment_system',
+    'initialize_assessment_system'
 ]

@@ -34,11 +34,8 @@ from collections import defaultdict, deque
 # Import existing systems
 try:
     from stillme_core.core.self_learning.experience_memory import ExperienceMemory, ExperienceType, ExperienceCategory
-    from stillme_core.learning.pipeline import LearningPipeline
-    from stillme_core.learning.ingest.vector_store import get_vector_store
-    from stillme_core.learning.ingest.claims_store import get_claims_store
 except ImportError as e:
-    logging.warning(f"Some learning modules not available: {e}")
+    logging.warning(f"ExperienceMemory not available: {e}")
 
 logger = logging.getLogger(__name__)
 
@@ -112,9 +109,6 @@ class EvolutionaryLearningSystem:
         
         # Initialize subsystems
         self.experience_memory = None
-        self.content_pipeline = None
-        self.vector_store = None
-        self.claims_store = None
         
         # Learning state
         self.current_stage = EvolutionStage.INFANT
@@ -142,21 +136,6 @@ class EvolutionaryLearningSystem:
             self.logger.info("ExperienceMemory subsystem initialized")
         except Exception as e:
             self.logger.warning(f"ExperienceMemory not available: {e}")
-        
-        try:
-            # Initialize LearningPipeline
-            self.content_pipeline = LearningPipeline()
-            self.logger.info("LearningPipeline subsystem initialized")
-        except Exception as e:
-            self.logger.warning(f"LearningPipeline not available: {e}")
-        
-        try:
-            # Initialize vector and claims stores
-            self.vector_store = get_vector_store()
-            self.claims_store = get_claims_store()
-            self.logger.info("Vector and Claims stores initialized")
-        except Exception as e:
-            self.logger.warning(f"Vector/Claims stores not available: {e}")
     
     def _load_learning_state(self):
         """Load trạng thái học tập từ database"""
@@ -270,29 +249,9 @@ class EvolutionaryLearningSystem:
     
     async def _learn_from_new_content(self) -> List[Dict[str, Any]]:
         """Học từ content mới"""
-        if not self.content_pipeline:
-            return []
-        
-        try:
-            # Scan for new content
-            scan_results = self.content_pipeline.scan_content()
-            
-            # Process approved content
-            approved_content = []
-            if scan_results.get('status') == 'success':
-                # Get approved recommendations
-                queue = self.content_pipeline.approval_queue
-                if queue:
-                    pending = queue.get_pending_recommendations()
-                    for rec in pending[:5]:  # Limit to 5 per day
-                        # Auto-approve high-quality content
-                        if rec.get('quality_score', 0) > 0.8:
-                            approved_content.append(rec)
-            
-            return approved_content
-        except Exception as e:
-            self.logger.error(f"Failed to learn from new content: {e}")
-            return []
+        # For now, return empty list since we removed the old pipeline
+        # This can be extended with new content learning mechanisms
+        return []
     
     async def _perform_self_assessment(self) -> Dict[str, Any]:
         """
