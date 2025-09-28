@@ -166,23 +166,23 @@ class EnhancedLearningDashboard:
             new_today = stats.get('pending', {}).get('new_today', 0)
             
             # Large clickable pending proposals card
-            button_clicked = st.button(
+            if st.button(
                 f"📋 **{pending_count} Pending Proposals**\n\n"
                 f"🆕 {new_today} new today\n"
                 f"⏰ Click to review & approve",
                 key="pending_proposals_button",
                 help="Click to view and manage pending learning proposals",
                 use_container_width=True
-            )
-            
-            # Debug button state
-            st.write(f"🔍 Debug: Button clicked = {button_clicked}")
-            st.write(f"🔍 Debug: Current show_pending_details = {st.session_state.get('show_pending_details', False)}")
-            
-            if button_clicked:
+            ):
                 st.session_state.show_pending_details = True
                 st.success("🔄 Loading pending proposals...")
                 st.rerun()
+            
+            # Debug info (simplified)
+            if st.session_state.get('show_pending_details', False):
+                st.info("✅ Pending details view is active")
+            else:
+                st.info("ℹ️ Click the button above to view pending proposals")
         
         with col2:
             # Status indicators (small)
@@ -312,9 +312,6 @@ class EnhancedLearningDashboard:
     def render_pending_proposals_details(self):
         """Render detailed pending proposals view"""
         st.markdown("## 📋 Pending Proposals - Review & Approve")
-        
-        # Debug info
-        st.info(f"🔍 Debug: show_pending_details = {st.session_state.get('show_pending_details', False)}")
         
         # Back button
         if st.button("← Back to Dashboard", key="back_to_dashboard"):
@@ -725,7 +722,6 @@ class EnhancedLearningDashboard:
         
         # Check if user clicked on pending proposals
         if st.session_state.get('show_pending_details', False):
-            st.markdown("## 🔄 Loading Pending Proposals...")
             self.render_pending_proposals_details()
         else:
             # Main content
