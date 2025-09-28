@@ -212,18 +212,87 @@ class EnhancedLearningDashboard:
                 st.info("No approved proposals to learn from yet")
             
             # Learning details
-            with st.expander("📚 Learning Details"):
-                st.markdown("**Current Session:**")
-                st.markdown("• Processing: Machine Learning basics")
-                st.markdown("• Started: 2 hours ago")
-                st.markdown("• Estimated: 30 minutes remaining")
-                st.markdown("• Quality Score: 0.85")
-                
-                st.markdown("**Recent Learning:**")
-                st.markdown("• Python fundamentals ✅")
-                st.markdown("• Data structures ✅")
-                st.markdown("• ML algorithms 🔄")
-                st.markdown("• Deep learning ⏳")
+                with st.expander("📚 Learning Details"):
+                    st.markdown("**Current Session:**")
+                    st.markdown("• Processing: Machine Learning basics")
+                    st.markdown("• Started: 2 hours ago")
+                    st.markdown("• Estimated: 30 minutes remaining")
+                    st.markdown("• Quality Score: 0.85")
+
+                    st.markdown("**Recent Learning:**")
+                    st.markdown("• Python fundamentals ✅")
+                    st.markdown("• Data structures ✅")
+                    st.markdown("• ML algorithms 🔄")
+                    st.markdown("• Deep learning ⏳")
+
+                # Learning Report Section
+                with st.expander("📊 Learning Report - Kiến thức đã học được"):
+                    st.markdown("### 🎓 Tổng hợp kiến thức đã học")
+                    
+                    # Knowledge gained section
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        st.markdown("**📚 Chủ đề đã hoàn thành:**")
+                        st.markdown("• **Machine Learning cơ bản** ✅")
+                        st.markdown("  - Hiểu các thuật toán ML cơ bản")
+                        st.markdown("  - Thực hành với Python và scikit-learn")
+                        st.markdown("  - Áp dụng vào dự án thực tế")
+                        st.markdown("• **Python Programming** ✅")
+                        st.markdown("  - Cú pháp Python cơ bản")
+                        st.markdown("  - Xử lý dữ liệu với pandas")
+                        st.markdown("  - Visualization với matplotlib")
+                        
+                    with col2:
+                        st.markdown("**📈 Thống kê học tập:**")
+                        st.markdown("• **Tổng thời gian học:** 4.5 giờ")
+                        st.markdown("• **Số chủ đề hoàn thành:** 2")
+                        st.markdown("• **Điểm chất lượng trung bình:** 0.87")
+                        st.markdown("• **Tỷ lệ thành công:** 95%")
+                        
+                    # Skills gained
+                    st.markdown("**🛠️ Kỹ năng đã đạt được:**")
+                    skill_col1, skill_col2, skill_col3 = st.columns(3)
+                    
+                    with skill_col1:
+                        st.markdown("**Machine Learning:**")
+                        st.markdown("• Linear Regression")
+                        st.markdown("• Decision Trees")
+                        st.markdown("• Random Forest")
+                        
+                    with skill_col2:
+                        st.markdown("**Python:**")
+                        st.markdown("• Data Manipulation")
+                        st.markdown("• Statistical Analysis")
+                        st.markdown("• Data Visualization")
+                        
+                    with skill_col3:
+                        st.markdown("**Tools & Libraries:**")
+                        st.markdown("• scikit-learn")
+                        st.markdown("• pandas")
+                        st.markdown("• matplotlib")
+                    
+                    # Progress visualization
+                    st.markdown("**📊 Tiến độ học tập theo chủ đề:**")
+                    progress_data = {
+                        "Machine Learning": 100,
+                        "Python Programming": 100,
+                        "Data Science": 75,
+                        "Deep Learning": 25
+                    }
+                    
+                    for topic, progress in progress_data.items():
+                        st.markdown(f"**{topic}:**")
+                        st.progress(progress / 100)
+                        st.markdown(f"*{progress}% hoàn thành*")
+                        st.markdown("---")
+                    
+                    # Next learning suggestions
+                    st.markdown("**🎯 Đề xuất học tiếp theo:**")
+                    st.markdown("• **Deep Learning với TensorFlow** - Mở rộng kiến thức ML")
+                    st.markdown("• **Natural Language Processing** - Xử lý ngôn ngữ tự nhiên")
+                    st.markdown("• **Computer Vision** - Nhận dạng hình ảnh")
+                    st.markdown("• **Time Series Analysis** - Phân tích chuỗi thời gian")
             
             st.markdown('</div>', unsafe_allow_html=True)
     
