@@ -181,6 +181,7 @@ class EnhancedLearningDashboard:
             if st.session_state.get('show_pending_details', False):
                 st.info("✅ Pending details view is active")
                 st.warning("🔍 NEW DEBUG: This should show pending proposals details below!")
+                st.error("🚨 CRITICAL: The main render logic should be called now!")
             else:
                 st.info("ℹ️ Click the button above to view pending proposals")
         
@@ -726,6 +727,8 @@ class EnhancedLearningDashboard:
             st.rerun()
         
         # Check if user clicked on pending proposals
+        st.error(f"🚨 MAIN DEBUG: show_pending_details = {st.session_state.get('show_pending_details', False)}")
+        
         if st.session_state.get('show_pending_details', False):
             # Clear the main content area and show pending details
             st.markdown("---")
