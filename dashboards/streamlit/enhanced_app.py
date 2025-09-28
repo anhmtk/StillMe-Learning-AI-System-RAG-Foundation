@@ -207,11 +207,8 @@ class EnhancedLearningDashboard:
                 progress = 0.75  # 75% completion
                 st.progress(progress)
                 st.markdown(f"**Progress:** {progress*100:.0f}% complete")
-            else:
-                st.markdown("**Status:** Waiting for approval")
-                st.info("No approved proposals to learn from yet")
-            
-            # Learning details
+                
+                # Learning details - chỉ hiển thị khi có approved proposals
                 with st.expander("📚 Learning Details"):
                     st.markdown("**Current Session:**")
                     st.markdown("• Processing: Machine Learning basics")
@@ -293,6 +290,9 @@ class EnhancedLearningDashboard:
                     st.markdown("• **Natural Language Processing** - Xử lý ngôn ngữ tự nhiên")
                     st.markdown("• **Computer Vision** - Nhận dạng hình ảnh")
                     st.markdown("• **Time Series Analysis** - Phân tích chuỗi thời gian")
+            else:
+                st.markdown("**Status:** Waiting for approval")
+                st.info("No approved proposals to learn from yet")
             
             st.markdown('</div>', unsafe_allow_html=True)
     
