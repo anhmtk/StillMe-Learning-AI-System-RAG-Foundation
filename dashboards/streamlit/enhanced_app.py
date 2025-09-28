@@ -715,6 +715,9 @@ class EnhancedLearningDashboard:
     
     def run(self):
         """Run the enhanced dashboard"""
+        # Debug: Function started
+        st.error("🚨 RUN FUNCTION STARTED!")
+        
         # Header
         self.render_header()
         
@@ -723,6 +726,7 @@ class EnhancedLearningDashboard:
         
         # Auto-refresh logic
         if st.session_state.auto_refresh and filters['refresh_interval']:
+            st.error("🚨 AUTO-REFRESH TRIGGERED - THIS MIGHT BE THE ISSUE!")
             time.sleep(filters['refresh_interval'])
             st.rerun()
         
