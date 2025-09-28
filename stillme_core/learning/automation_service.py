@@ -30,6 +30,8 @@ import json
 
 from .scheduler import LearningScheduler, SchedulerConfig, get_learning_scheduler
 from .evolutionary_learning_system import EvolutionaryLearningSystem, EvolutionaryConfig
+from ..monitoring.resource_monitor import ResourceMonitor, ResourceThresholds, get_resource_monitor
+from ..monitoring.performance_analyzer import PerformanceAnalyzer, PerformanceMetrics, get_performance_analyzer
 
 logger = logging.getLogger(__name__)
 
@@ -39,12 +41,17 @@ class AutomationServiceConfig:
     enabled: bool = True
     scheduler_config: SchedulerConfig = None
     learning_config: EvolutionaryConfig = None
+    resource_thresholds: ResourceThresholds = None
     health_check_interval: int = 60  # seconds
     max_restart_attempts: int = 3
     restart_delay: int = 30  # seconds
     log_level: str = "INFO"
     enable_metrics: bool = True
     metrics_export_interval: int = 3600  # 1 hour
+    enable_resource_monitoring: bool = True
+    enable_performance_analysis: bool = True
+    resource_monitoring_interval: int = 10  # seconds
+    performance_analysis_interval: int = 300  # 5 minutes
 
 @dataclass
 class ServiceStatus:
@@ -68,6 +75,8 @@ class LearningAutomationService:
         # Initialize components
         self.scheduler: Optional[LearningScheduler] = None
         self.learning_system: Optional[EvolutionaryLearningSystem] = None
+        self.resource_monitor: Optional[ResourceMonitor] = None
+        self.performance_analyzer: Optional[PerformanceAnalyzer] = None
         
         # Service state
         self.status = ServiceStatus()
@@ -139,6 +148,24 @@ class LearningAutomationService:
             )
             await self.scheduler.initialize()
             self.logger.info("Scheduler initialized")
+            
+            # Initialize resource monitoring
+            if self.config.enable_resource_monitoring:
+                self.resource_monitor = get_resource_monitor(
+                    self.config.resource_thresholds or ResourceThresholds()
+                )
+                await self.resource_monitor.start_monitoring(
+                    self.config.resource_monitoring_interval
+                )
+                self.logger.info("Resource monitoring initialized")
+            
+            # Initialize performance analysis
+            if self.config.enable_performance_analysis:
+                self.performance_analyzer = get_performance_analyzer()
+                await self.performance_analyzer.start_analysis(
+                    self.config.performance_analysis_interval
+                )
+                self.logger.info("Performance analysis initialized")
             
             # Schedule daily training if enabled
             if self.config.scheduler_config and self.config.scheduler_config.enabled:
@@ -216,6 +243,14 @@ class LearningAutomationService:
             if self.scheduler:
                 await self.scheduler.stop()
             
+            # Stop resource monitoring
+            if self.resource_monitor:
+                await self.resource_monitor.stop_monitoring()
+            
+            # Stop performance analysis
+            if self.performance_analyzer:
+                await self.performance_analyzer.stop_analysis()
+            
             # Update status
             self.status.running = False
             
@@ -252,6 +287,21 @@ class LearningAutomationService:
             if not self.learning_system:
                 raise RuntimeError("Learning system not initialized")
             
+            # Check resource availability
+            if self.resource_monitor:
+                can_start, reason = self.resource_monitor.can_start_learning_session()
+                if not can_start:
+                    self.logger.warning(f"Cannot start training session: {reason}")
+                    return {
+                        'session_id': session_id,
+                        'status': 'skipped',
+                        'reason': reason,
+                        'duration': time.time() - start_time
+                    }
+                
+                # Start tracking session
+                self.resource_monitor.start_learning_session(session_id)
+            
             # Run training session
             session = await self.learning_system.daily_learning_session()
             
@@ -264,6 +314,35 @@ class LearningAutomationService:
                 (self.stats['average_session_duration'] * (self.stats['total_training_sessions'] - 1) + duration) /
                 self.stats['total_training_sessions']
             )
+            
+            # Record performance metrics
+            if self.performance_analyzer:
+                # Get current resource metrics
+                resource_metrics = None
+                if self.resource_monitor:
+                    resource_metrics = self.resource_monitor.get_current_metrics()
+                
+                performance_metrics = PerformanceMetrics(
+                    timestamp=datetime.now(),
+                    session_id=session_id,
+                    learning_stage=getattr(session, 'stage', 'unknown'),
+                    response_time_ms=duration * 1000,
+                    memory_usage_mb=resource_metrics.memory_used_mb if resource_metrics else 0,
+                    cpu_usage_percent=resource_metrics.cpu_percent if resource_metrics else 0,
+                    tokens_consumed=getattr(session, 'tokens_used', 0),
+                    accuracy_score=getattr(session, 'accuracy', 0.8),
+                    learning_rate=getattr(session, 'learning_rate', 0.1),
+                    convergence_rate=getattr(session, 'convergence_rate', 0.5),
+                    error_rate=getattr(session, 'error_rate', 0.1),
+                    throughput_items_per_second=getattr(session, 'throughput', 1.0),
+                    efficiency_score=getattr(session, 'efficiency', 0.7)
+                )
+                
+                self.performance_analyzer.add_performance_metrics(performance_metrics)
+            
+            # End session tracking
+            if self.resource_monitor:
+                self.resource_monitor.end_learning_session(session_id)
             
             self.logger.info(f"Training session completed successfully in {duration:.2f} seconds")
             
@@ -281,6 +360,10 @@ class LearningAutomationService:
             self.stats['total_training_sessions'] += 1
             self.stats['failed_sessions'] += 1
             self.status.last_error = str(e)
+            
+            # End session tracking on failure
+            if self.resource_monitor:
+                self.resource_monitor.end_learning_session(session_id)
             
             return {
                 'session_id': session_id,

@@ -58,7 +58,7 @@ class LearningSchedulerCLI:
             scheduler_config = SchedulerConfig(
                 enabled=True,
                 cron_expression=args.cron or "30 2 * * *",
-                timezone=args.timezone or "Asia/Ho_Chi_Minh",
+                timezone=getattr(args, 'timezone', None) or getattr(args, 'tz', None) or "Asia/Ho_Chi_Minh",
                 jitter_seconds=args.jitter or 300,
                 max_concurrent_sessions=args.max_concurrent or 1,
                 skip_if_cpu_high=not args.no_cpu_check,
