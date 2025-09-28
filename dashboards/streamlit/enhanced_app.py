@@ -209,22 +209,66 @@ class EnhancedLearningDashboard:
                 st.markdown(f"**Progress:** {progress*100:.0f}% complete")
                 
                 # Learning details - chỉ hiển thị khi có approved proposals
-                with st.expander("📚 Learning Details"):
-                    st.markdown("**Current Session:**")
-                    st.markdown("• Processing: Machine Learning basics")
-                    st.markdown("• Started: 2 hours ago")
-                    st.markdown("• Estimated: 30 minutes remaining")
-                    st.markdown("• Quality Score: 0.85")
+                # Tạo 2 cột: List bên trái, Details bên phải (Gmail-like)
+                col_learning_list, col_learning_details = st.columns([1, 2])
+                
+                with col_learning_list:
+                    st.markdown("### 📚 Learning Sessions")
+                    
+                    # Danh sách phiên học
+                    sessions = [
+                        {"name": "Machine Learning Basics", "status": "🔄 Active", "progress": 75},
+                        {"name": "Python Fundamentals", "status": "✅ Completed", "progress": 100},
+                        {"name": "Data Structures", "status": "✅ Completed", "progress": 100},
+                        {"name": "Deep Learning", "status": "⏳ Pending", "progress": 0}
+                    ]
+                    
+                    for i, session in enumerate(sessions):
+                        if st.button(
+                            f"**{session['name']}**\n"
+                            f"{session['status']} - {session['progress']}%",
+                            key=f"session_{i}",
+                            help=f"Click to view details of: {session['name']}",
+                            use_container_width=True
+                        ):
+                            st.session_state.selected_session = session['name']
+                            st.rerun()
+                
+                with col_learning_details:
+                    st.markdown("### 📄 Session Details")
+                    
+                    # Hiển thị chi tiết phiên học được chọn
+                    selected_session = st.session_state.get('selected_session', 'Machine Learning Basics')
+                    
+                    if selected_session == "Machine Learning Basics":
+                        st.markdown("**Current Session:**")
+                        st.markdown("• Processing: Machine Learning basics")
+                        st.markdown("• Started: 2 hours ago")
+                        st.markdown("• Estimated: 30 minutes remaining")
+                        st.markdown("• Quality Score: 0.85")
 
-                    st.markdown("**Recent Learning:**")
-                    st.markdown("• Python fundamentals ✅")
-                    st.markdown("• Data structures ✅")
-                    st.markdown("• ML algorithms 🔄")
-                    st.markdown("• Deep learning ⏳")
+                        st.markdown("**Recent Learning:**")
+                        st.markdown("• Python fundamentals ✅")
+                        st.markdown("• Data structures ✅")
+                        st.markdown("• ML algorithms 🔄")
+                        st.markdown("• Deep learning ⏳")
+                    
+                    elif selected_session == "Python Fundamentals":
+                        st.markdown("**Completed Session:**")
+                        st.markdown("• Topic: Python Programming")
+                        st.markdown("• Duration: 3 hours")
+                        st.markdown("• Completed: 2 days ago")
+                        st.markdown("• Quality Score: 0.92")
 
-                # Learning Report Section
-                with st.expander("📊 Learning Report - Kiến thức đã học được"):
-                    st.markdown("### 🎓 Tổng hợp kiến thức đã học")
+                        st.markdown("**Skills Learned:**")
+                        st.markdown("• Python syntax ✅")
+                        st.markdown("• Data manipulation ✅")
+                        st.markdown("• Functions & classes ✅")
+                        st.markdown("• Error handling ✅")
+                    
+                    # Learning Report Section
+                    with st.expander("📊 Learning Report - Kiến thức đã học được"):
+                        st.markdown("### 🎓 Tổng hợp kiến thức đã học")
                     
                     # Knowledge gained section
                     col1, col2 = st.columns(2)
