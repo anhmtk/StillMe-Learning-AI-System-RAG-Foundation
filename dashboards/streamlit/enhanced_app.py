@@ -730,6 +730,9 @@ class EnhancedLearningDashboard:
             time.sleep(filters['refresh_interval'])
             st.rerun()
         
+        # Debug: Before main render logic
+        st.error("🚨 BEFORE MAIN RENDER LOGIC!")
+        
         # Check if user clicked on pending proposals
         st.error(f"🚨 MAIN DEBUG: show_pending_details = {st.session_state.get('show_pending_details', False)}")
         
