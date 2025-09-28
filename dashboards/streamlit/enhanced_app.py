@@ -724,11 +724,13 @@ class EnhancedLearningDashboard:
         # Sidebar
         filters = self.render_sidebar()
         
-        # Auto-refresh logic
-        if st.session_state.auto_refresh and filters['refresh_interval']:
+        # Auto-refresh logic - DISABLE when pending details view is active
+        if st.session_state.auto_refresh and filters['refresh_interval'] and not st.session_state.get('show_pending_details', False):
             st.error("🚨 AUTO-REFRESH TRIGGERED - THIS MIGHT BE THE ISSUE!")
             time.sleep(filters['refresh_interval'])
             st.rerun()
+        elif st.session_state.auto_refresh and st.session_state.get('show_pending_details', False):
+            st.warning("🚨 AUTO-REFRESH DISABLED - Pending details view is active!")
         
         # Debug: Before main render logic
         st.error("🚨 BEFORE MAIN RENDER LOGIC!")
