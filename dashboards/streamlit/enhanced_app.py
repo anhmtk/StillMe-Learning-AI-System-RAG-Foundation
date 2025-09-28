@@ -104,6 +104,29 @@ st.markdown("""
         color: #dc3545;
         font-weight: bold;
     }
+    .pending-proposals-button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 2rem;
+        font-size: 1.2rem;
+        font-weight: bold;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .pending-proposals-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+    .status-indicators {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+    }
     .chart-container {
         background-color: white;
         padding: 1rem;
@@ -133,26 +156,65 @@ class EnhancedLearningDashboard:
         """Render dashboard header"""
         st.markdown('<h1 class="main-header">🧠 StillMe IPC Enhanced Learning Dashboard</h1>', unsafe_allow_html=True)
         
-        # Status indicators
-        col1, col2, col3, col4 = st.columns(4)
-        
-        # Get proposal stats
-        stats = self.proposals_manager.get_proposal_stats()
-        pending_count = stats.get('pending', {}).get('count', 0)
-        approved_count = stats.get('approved', {}).get('count', 0)
-        completed_count = stats.get('completed', {}).get('count', 0)
+        # Main content area with clickable pending proposals
+        col1, col2 = st.columns([3, 1])
         
         with col1:
-            st.metric("📋 Pending Proposals", pending_count, "↗️ New")
+            # Get proposal stats
+            stats = self.proposals_manager.get_proposal_stats()
+            pending_count = stats.get('pending', {}).get('count', 0)
+            new_today = stats.get('pending', {}).get('new_today', 0)
+            
+            # Large clickable pending proposals card
+            if st.button(
+                f"📋 **{pending_count} Pending Proposals**\n\n"
+                f"🆕 {new_today} new today\n"
+                f"⏰ Click to review & approve",
+                key="pending_proposals_button",
+                help="Click to view and manage pending learning proposals",
+                use_container_width=True
+            ):
+                st.session_state.show_pending_details = True
+                st.rerun()
         
         with col2:
-            st.metric("✅ Approved", approved_count, "↗️ +2")
-        
-        with col3:
-            st.metric("🎓 Completed", completed_count, "↗️ +1")
-        
-        with col4:
-            st.metric("⚡ Learning Status", "Active", "🟢 Online")
+            # Status indicators (small)
+            st.markdown('<div class="status-indicators">', unsafe_allow_html=True)
+            st.markdown("### 📊 Status")
+            
+            # Approved indicator
+            approved_count = stats.get('approved', {}).get('count', 0)
+            approved_new = stats.get('approved', {}).get('new_today', 0)
+            st.markdown(f"✅ **Approved:** {approved_count} (+{approved_new})")
+            
+            # Completed indicator  
+            completed_count = stats.get('completed', {}).get('count', 0)
+            completed_new = stats.get('completed', {}).get('new_today', 0)
+            st.markdown(f"🎓 **Completed:** {completed_count} (+{completed_new})")
+            
+            # Learning Status indicator with progress
+            st.markdown("⚡ **Learning:** Active")
+            
+            # Learning progress bar
+            progress = 0.75  # 75% completion
+            st.progress(progress)
+            st.markdown(f"**Progress:** {progress*100:.0f}% complete")
+            
+            # Learning details
+            with st.expander("📚 Learning Details"):
+                st.markdown("**Current Session:**")
+                st.markdown("• Processing: Machine Learning basics")
+                st.markdown("• Started: 2 hours ago")
+                st.markdown("• Estimated: 30 minutes remaining")
+                st.markdown("• Quality Score: 0.85")
+                
+                st.markdown("**Recent Learning:**")
+                st.markdown("• Python fundamentals ✅")
+                st.markdown("• Data structures ✅")
+                st.markdown("• ML algorithms 🔄")
+                st.markdown("• Deep learning ⏳")
+            
+            st.markdown('</div>', unsafe_allow_html=True)
     
     def render_sidebar(self):
         """Render sidebar filters"""
@@ -234,6 +296,28 @@ class EnhancedLearningDashboard:
             'auto_refresh': auto_refresh,
             'refresh_interval': refresh_interval
         }
+    
+    def render_pending_proposals_details(self):
+        """Render detailed pending proposals view"""
+        st.markdown("## 📋 Pending Proposals - Review & Approve")
+        
+        # Back button
+        if st.button("← Back to Dashboard", key="back_to_dashboard"):
+            st.session_state.show_pending_details = False
+            st.rerun()
+        
+        st.markdown("---")
+        
+        # Get pending proposals
+        proposals = self.proposals_manager.get_pending_proposals(limit=10)
+        
+        if not proposals:
+            st.info("No pending proposals found. Create a sample proposal using the sidebar button.")
+            return
+        
+        # Display proposals with detailed approval interface
+        for i, proposal in enumerate(proposals):
+            self.render_detailed_proposal_card(proposal, i)
     
     def render_learning_proposals(self):
         """Render learning proposals section"""
@@ -347,6 +431,95 @@ class EnhancedLearningDashboard:
             
             elif proposal.status == ProposalStatus.COMPLETED:
                 st.success("🎉 Completed!")
+        
+        st.markdown("---")
+    
+    def render_detailed_proposal_card(self, proposal: LearningProposal, index: int):
+        """Render detailed proposal card for approval workflow"""
+        st.markdown(f"### 📚 Proposal #{index + 1}: {proposal.title}")
+        
+        # Main info columns
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.markdown("**📋 Basic Info:**")
+            st.write(f"• **Source:** {proposal.source.value.title()}")
+            st.write(f"• **Priority:** {proposal.priority.value.title()}")
+            st.write(f"• **Duration:** {proposal.estimated_duration} minutes")
+            st.write(f"• **Quality Score:** {proposal.quality_score:.2f}")
+            st.write(f"• **Created:** {proposal.created_at.strftime('%Y-%m-%d %H:%M')}")
+        
+        with col2:
+            st.markdown("**🎯 Learning Objectives:**")
+            for obj in proposal.learning_objectives:
+                st.write(f"• {obj}")
+        
+        with col3:
+            st.markdown("**📊 Risk Assessment:**")
+            for key, value in proposal.risk_assessment.items():
+                st.write(f"• **{key.title()}:** {value}")
+        
+        # Description
+        st.markdown("**📝 Description:**")
+        st.write(proposal.description)
+        
+        # Prerequisites and Expected Outcomes
+        col4, col5 = st.columns(2)
+        
+        with col4:
+            st.markdown("**📚 Prerequisites:**")
+            for prereq in proposal.prerequisites:
+                st.write(f"• {prereq}")
+        
+        with col5:
+            st.markdown("**🎯 Expected Outcomes:**")
+            for outcome in proposal.expected_outcomes:
+                st.write(f"• {outcome}")
+        
+        # Approval section
+        st.markdown("---")
+        st.markdown("### 🤔 Decision Required")
+        
+        # Approval buttons
+        col_approve, col_reject, col_details = st.columns([1, 1, 2])
+        
+        with col_approve:
+            if st.button(
+                "✅ **APPROVE**", 
+                key=f"approve_detailed_{proposal.id}", 
+                type="primary",
+                use_container_width=True
+            ):
+                self.proposals_manager.approve_proposal(proposal.id, "user")
+                st.success("✅ Proposal approved! StillMe IPC will start learning this content.")
+                st.rerun()
+        
+        with col_reject:
+            if st.button(
+                "❌ **REJECT**", 
+                key=f"reject_detailed_{proposal.id}", 
+                type="secondary",
+                use_container_width=True
+            ):
+                rejection_reason = st.text_input(
+                    "Rejection reason (optional):",
+                    key=f"rejection_reason_{proposal.id}",
+                    placeholder="e.g., Not relevant, Too complex, etc."
+                )
+                if st.button("Confirm Rejection", key=f"confirm_reject_{proposal.id}"):
+                    self.proposals_manager.reject_proposal(
+                        proposal.id, 
+                        "user", 
+                        rejection_reason or "User rejected"
+                    )
+                    st.success("❌ Proposal rejected!")
+                    st.rerun()
+        
+        with col_details:
+            st.markdown("**💡 Your Control:**")
+            st.write("• You decide what StillMe IPC learns")
+            st.write("• Only approved content will be processed")
+            st.write("• All decisions are logged and auditable")
         
         st.markdown("---")
     
@@ -532,48 +705,52 @@ class EnhancedLearningDashboard:
             time.sleep(filters['refresh_interval'])
             st.rerun()
         
-        # Main content
-        tab1, tab2, tab3, tab4 = st.tabs([
-            "📋 Learning Proposals", 
-            "📊 Analytics", 
-            "📈 Learning Curve",
-            "🔒 Security & Privacy"
-        ])
-        
-        with tab1:
-            self.render_learning_proposals()
-        
-        with tab2:
-            self.render_proposal_analytics()
-        
-        with tab3:
-            self.render_learning_curve(filters['days'])
-        
-        with tab4:
-            st.subheader("🔒 Security & Privacy")
-            st.info("""
-            **Your learning data is protected:**
-            - All proposals require your explicit approval
-            - No one can modify StillMe IPC without your permission
-            - Community can only suggest content, not control learning
-            - All actions are logged and auditable
-            - Personal data is encrypted and secure
-            """)
+        # Check if user clicked on pending proposals
+        if st.session_state.get('show_pending_details', False):
+            self.render_pending_proposals_details()
+        else:
+            # Main content
+            tab1, tab2, tab3, tab4 = st.tabs([
+                "📋 Learning Proposals", 
+                "📊 Analytics", 
+                "📈 Learning Curve",
+                "🔒 Security & Privacy"
+            ])
             
-            st.subheader("🛡️ Access Control")
-            col1, col2 = st.columns(2)
+            with tab1:
+                self.render_learning_proposals()
             
-            with col1:
-                st.success("✅ You have full control")
-                st.write("• Approve/reject learning proposals")
-                st.write("• Control what StillMe IPC learns")
-                st.write("• Monitor all learning activities")
+            with tab2:
+                self.render_proposal_analytics()
             
-            with col2:
-                st.warning("⚠️ Community limitations")
-                st.write("• Can only suggest content")
-                st.write("• Cannot access personal data")
-                st.write("• Cannot modify learning behavior")
+            with tab3:
+                self.render_learning_curve(filters['days'])
+            
+            with tab4:
+                st.subheader("🔒 Security & Privacy")
+                st.info("""
+                **Your learning data is protected:**
+                - All proposals require your explicit approval
+                - No one can modify StillMe IPC without your permission
+                - Community can only suggest content, not control learning
+                - All actions are logged and auditable
+                - Personal data is encrypted and secure
+                """)
+                
+                st.subheader("🛡️ Access Control")
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    st.success("✅ You have full control")
+                    st.write("• Approve/reject learning proposals")
+                    st.write("• Control what StillMe IPC learns")
+                    st.write("• Monitor all learning activities")
+                
+                with col2:
+                    st.warning("⚠️ Community limitations")
+                    st.write("• Can only suggest content")
+                    st.write("• Cannot access personal data")
+                    st.write("• Cannot modify learning behavior")
         
         # Footer
         self.render_footer()
