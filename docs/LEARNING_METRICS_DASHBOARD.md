@@ -1,8 +1,8 @@
-# 📊 StillMe Learning Metrics Dashboard
+# 📊 StillMe IPC Learning Metrics Dashboard
 
 ## Tổng quan
 
-StillMe Learning Metrics Dashboard là hệ thống trực quan hóa metrics cho learning system, cung cấp insights về tiến độ học tập, hiệu suất, và chất lượng của AI system.
+StillMe IPC Learning Metrics Dashboard là hệ thống trực quan hóa metrics cho learning system, cung cấp insights về tiến độ học tập, hiệu suất, và chất lượng của AI system.
 
 ## 🎯 Tính năng chính
 

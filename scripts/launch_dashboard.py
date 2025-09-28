@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-🚀 StillMe Dashboard Launcher
-============================
+🚀 StillMe IPC Dashboard Launcher
+=================================
 
 Script khởi chạy dashboard với cấu hình tùy chỉnh.
 Hỗ trợ Streamlit và FastAPI dashboards.
@@ -13,7 +13,7 @@ Tính năng:
 - Error handling
 - Development mode
 
-Author: StillMe AI Framework
+Author: StillMe IPC (Intelligent Personal Companion)
 Version: 1.0.0
 Date: 2025-09-28
 """
@@ -148,7 +148,7 @@ def main():
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
     
-    print("🧠 StillMe Dashboard Launcher")
+    print("🧠 StillMe IPC Dashboard Launcher")
     print("=" * 40)
     
     # Check dependencies

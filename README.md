@@ -1,11 +1,11 @@
-# 🌟 StillMe AI — Safe & Transparent AI Framework (Open-Core)
+# 🌟 StillMe IPC — Intelligent Personal Companion (Open-Core)
 
 [![Tests](https://github.com/OWNER/REPO/actions/workflows/ci-tests.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/ci-tests.yml)
 [![Security](https://github.com/OWNER/REPO/actions/workflows/security-ci.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/security-ci.yml)
 [![Coverage](https://img.shields.io/badge/coverage-target%2085%25-lightgrey)](artifacts/coverage.html)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-**StillMe** focuses on **Ethics · Security · Transparency**.  
+**StillMe IPC (Intelligent Personal Companion)** focuses on **Ethics · Security · Transparency**.  
 This repo ships the **open-source core** (framework, APIs, tests, docs).  
 Some strategic parts (advanced routing heuristics, private datasets, security patterns) are delivered as an **optional Pro plugin**. The open core always runs on its own via a **public stub fallback**.
 

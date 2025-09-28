@@ -1,6 +1,6 @@
 """
-📊 StillMe Dashboards
-====================
+📊 StillMe IPC Dashboards
+=========================
 
 Dashboard system cho learning metrics visualization.
 Hỗ trợ Streamlit và FastAPI dashboards.
@@ -12,10 +12,10 @@ Tính năng:
 - Interactive charts
 - Mobile responsive
 
-Author: StillMe AI Framework
+Author: StillMe IPC (Intelligent Personal Companion)
 Version: 1.0.0
 Date: 2025-09-28
 """
 
 __version__ = "1.0.0"
-__author__ = "StillMe AI Framework"
+__author__ = "StillMe IPC (Intelligent Personal Companion)"

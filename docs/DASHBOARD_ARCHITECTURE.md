@@ -1,4 +1,4 @@
-# 📊 StillMe Dashboard Architecture
+# 📊 StillMe IPC Dashboard Architecture
 
 ## Data Flow Diagram
 

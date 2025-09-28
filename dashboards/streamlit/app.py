@@ -1,6 +1,6 @@
 """
-📊 StillMe Learning Dashboard - Streamlit
-=========================================
+📊 StillMe IPC Learning Dashboard - Streamlit
+=============================================
 
 Dev-friendly dashboard cho learning metrics visualization.
 Real-time updates, interactive charts, và session drill-down.
@@ -12,7 +12,7 @@ Tính năng:
 - Real-time updates: Auto-refresh mỗi 30s
 - Mobile responsive design
 
-Author: StillMe AI Framework
+Author: StillMe IPC (Intelligent Personal Companion)
 Version: 1.0.0
 Date: 2025-09-28
 """
@@ -37,7 +37,7 @@ from stillme_core.metrics.emitter import get_metrics_emitter
 
 # Page config
 st.set_page_config(
-    page_title="StillMe Learning Dashboard",
+    page_title="StillMe IPC Learning Dashboard",
     page_icon="🧠",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -95,7 +95,7 @@ class LearningDashboard:
     
     def render_header(self):
         """Render dashboard header"""
-        st.markdown('<h1 class="main-header">🧠 StillMe Learning Dashboard</h1>', unsafe_allow_html=True)
+        st.markdown('<h1 class="main-header">🧠 StillMe IPC Learning Dashboard</h1>', unsafe_allow_html=True)
         
         # Status indicators
         col1, col2, col3, col4 = st.columns(4)
@@ -550,8 +550,8 @@ class LearningDashboard:
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            st.markdown("**🧠 StillMe AI Framework**")
-            st.markdown("Self-evolving AI learning system")
+            st.markdown("**🧠 StillMe IPC**")
+            st.markdown("Intelligent Personal Companion - Self-evolving AI learning system")
         
         with col2:
             st.markdown("**📊 Dashboard v1.0**")
