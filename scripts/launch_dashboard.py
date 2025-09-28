@@ -101,6 +101,36 @@ def launch_streamlit(port: int = 8501, host: str = "localhost", theme: str = "li
     
     return True
 
+def launch_enhanced(port: int = 8501, host: str = "localhost", theme: str = "light"):
+    """Launch Enhanced Streamlit dashboard"""
+    print(f"🚀 Launching Enhanced Streamlit dashboard on {host}:{port}")
+    
+    # Set environment variables
+    os.environ['STILLME_DASHBOARD_PORT'] = str(port)
+    os.environ['STILLME_DASHBOARD_HOST'] = host
+    os.environ['STILLME_DASHBOARD_THEME'] = theme
+    
+    # Streamlit command for enhanced dashboard
+    cmd = [
+        sys.executable, "-m", "streamlit", "run",
+        "dashboards/streamlit/enhanced_app.py",
+        "--server.port", str(port),
+        "--server.address", host,
+        "--theme.base", theme,
+        "--browser.gatherUsageStats", "false"
+    ]
+    
+    try:
+        subprocess.run(cmd, check=True)
+    except subprocess.CalledProcessError as e:
+        print(f"❌ Failed to launch Enhanced Streamlit: {e}")
+        return False
+    except KeyboardInterrupt:
+        print("\n🛑 Enhanced Dashboard stopped by user")
+        return True
+    
+    return True
+
 def launch_fastapi(port: int = 8000, host: str = "localhost"):
     """Launch FastAPI dashboard"""
     print(f"🚀 Launching FastAPI dashboard on {host}:{port}")
@@ -132,7 +162,7 @@ def launch_fastapi(port: int = 8000, host: str = "localhost"):
 def main():
     """Main function"""
     parser = argparse.ArgumentParser(description="StillMe Dashboard Launcher")
-    parser.add_argument("--type", choices=["streamlit", "fastapi"], default="streamlit", help="Dashboard type")
+    parser.add_argument("--type", choices=["streamlit", "enhanced", "fastapi"], default="streamlit", help="Dashboard type")
     parser.add_argument("--port", type=int, default=8501, help="Port number")
     parser.add_argument("--host", type=str, default="localhost", help="Host address")
     parser.add_argument("--theme", choices=["light", "dark"], default="light", help="Theme (Streamlit only)")
@@ -166,6 +196,8 @@ def main():
     # Launch dashboard
     if args.type == "streamlit":
         success = launch_streamlit(args.port, args.host, args.theme)
+    elif args.type == "enhanced":
+        success = launch_enhanced(args.port, args.host, args.theme)
     elif args.type == "fastapi":
         success = launch_fastapi(args.port, args.host)
     else:
