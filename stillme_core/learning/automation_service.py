@@ -34,6 +34,8 @@ from ..monitoring.resource_monitor import ResourceMonitor, ResourceThresholds, g
 from ..monitoring.performance_analyzer import PerformanceAnalyzer, PerformanceMetrics, get_performance_analyzer
 from ..resilience.error_handler import ErrorHandler, get_error_handler, with_error_handling
 from ..resilience.resilience_manager import ResilienceManager, ResilienceConfig, get_resilience_manager
+from ..alerting.alert_manager import get_alert_manager
+from ..alerting.learning_alerts import get_learning_alert_manager, LearningMetrics
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +60,8 @@ class AutomationServiceConfig:
     resilience_level: str = "standard"  # minimal, standard, high, maximum
     enable_error_recovery: bool = True
     max_retry_attempts: int = 3
+    enable_alerting: bool = True
+    alert_channels: List[str] = None  # email, desktop, telegram, sms, webhook
 
 @dataclass
 class ServiceStatus:
@@ -85,6 +89,8 @@ class LearningAutomationService:
         self.performance_analyzer: Optional[PerformanceAnalyzer] = None
         self.error_handler: Optional[ErrorHandler] = None
         self.resilience_manager: Optional[ResilienceManager] = None
+        self.alert_manager = None
+        self.learning_alert_manager = None
         
         # Service state
         self.status = ServiceStatus()
@@ -187,6 +193,12 @@ class LearningAutomationService:
                 await self.resilience_manager.start_monitoring()
                 self.logger.info("Resilience manager initialized")
             
+            # Initialize alert managers
+            if self.config.enable_alerting:
+                self.alert_manager = get_alert_manager()
+                self.learning_alert_manager = get_learning_alert_manager()
+                self.logger.info("Alert managers initialized")
+            
             # Schedule daily training if enabled
             if self.config.scheduler_config and self.config.scheduler_config.enabled:
                 success = await self.scheduler.schedule_daily_training(
@@ -274,6 +286,10 @@ class LearningAutomationService:
             # Stop resilience manager
             if self.resilience_manager:
                 await self.resilience_manager.stop_monitoring()
+            
+            # Alert managers don't need explicit stopping
+            if self.alert_manager:
+                self.logger.info("Alert managers stopped")
             
             # Update status
             self.status.running = False
@@ -365,6 +381,29 @@ class LearningAutomationService:
                 
                 self.performance_analyzer.add_performance_metrics(performance_metrics)
             
+            # Send learning alerts
+            if self.learning_alert_manager:
+                # Create learning metrics for alerting
+                learning_metrics = LearningMetrics(
+                    session_id=session_id,
+                    timestamp=datetime.now(),
+                    evolution_stage=getattr(session, 'stage', 'unknown'),
+                    learning_accuracy=getattr(session, 'accuracy', 0.8),
+                    training_time=duration,
+                    memory_usage=resource_metrics.memory_used_mb if resource_metrics else 0,
+                    cpu_usage=resource_metrics.cpu_percent if resource_metrics else 0,
+                    token_consumption=getattr(session, 'tokens_used', 0),
+                    error_count=getattr(session, 'error_count', 0),
+                    success_rate=getattr(session, 'success_rate', 0.9),
+                    knowledge_items_processed=getattr(session, 'items_processed', 0),
+                    performance_score=getattr(session, 'efficiency', 0.7)
+                )
+                
+                # Check and send alerts
+                alerts_sent = await self.learning_alert_manager.check_learning_session_alerts(learning_metrics)
+                if alerts_sent:
+                    self.logger.info(f"Sent {len(alerts_sent)} learning alerts")
+            
             # End session tracking
             if self.resource_monitor:
                 self.resource_monitor.end_learning_session(session_id)
@@ -380,6 +419,12 @@ class LearningAutomationService:
             
         except Exception as e:
             self.logger.error(f"Training session failed: {e}")
+            
+            # Send failure alert
+            if self.learning_alert_manager:
+                await self.learning_alert_manager.send_learning_session_failure(
+                    session_id, str(e), 'learning_automation'
+                )
             
             # Update statistics
             self.stats['total_training_sessions'] += 1

@@ -47,6 +47,13 @@ from .automation_service import (
     run_automation_service
 )
 
+# Alerting integration
+from ..alerting import (
+    get_alert_manager,
+    get_learning_alert_manager,
+    LearningMetrics
+)
+
 __all__ = [
     # Evolutionary Learning System
     'EvolutionaryLearningSystem',
@@ -78,5 +85,10 @@ __all__ = [
     'AutomationServiceConfig',
     'ServiceStatus',
     'get_automation_service',
-    'run_automation_service'
+    'run_automation_service',
+    
+    # Alerting integration
+    'get_alert_manager',
+    'get_learning_alert_manager',
+    'LearningMetrics'
 ]
