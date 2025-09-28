@@ -180,6 +180,7 @@ class EnhancedLearningDashboard:
             # Debug info (simplified)
             if st.session_state.get('show_pending_details', False):
                 st.info("✅ Pending details view is active")
+                st.warning("🔍 NEW DEBUG: This should show pending proposals details below!")
             else:
                 st.info("ℹ️ Click the button above to view pending proposals")
         
