@@ -247,6 +247,31 @@ class EvolutionaryLearningSystem:
             'improvements': improvements
         }
     
+    def _identify_improvement_opportunities(self, experiences: List[Any]) -> List[str]:
+        """Identify improvement opportunities from experiences"""
+        improvements = []
+        
+        if not experiences:
+            return improvements
+        
+        # Analyze success/failure patterns
+        success_rate = sum(1 for exp in experiences if getattr(exp, 'success', True)) / len(experiences)
+        
+        if success_rate < 0.7:
+            improvements.append("Improve response accuracy and success rate")
+        
+        # Analyze response time patterns
+        response_times = [getattr(exp, 'response_time', 0) for exp in experiences if hasattr(exp, 'response_time')]
+        if response_times and sum(response_times) / len(response_times) > 5.0:
+            improvements.append("Optimize response time and efficiency")
+        
+        # Analyze user satisfaction
+        satisfaction_scores = [getattr(exp, 'user_satisfaction', 0) for exp in experiences if hasattr(exp, 'user_satisfaction')]
+        if satisfaction_scores and sum(satisfaction_scores) / len(satisfaction_scores) < 0.8:
+            improvements.append("Enhance user satisfaction and experience")
+        
+        return improvements
+    
     async def _learn_from_new_content(self) -> List[Dict[str, Any]]:
         """Học từ content mới"""
         # For now, return empty list since we removed the old pipeline
