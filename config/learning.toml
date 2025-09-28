@@ -1,20 +1,14 @@
-# StillMe Learning Systems Configuration
-# =====================================
-
-# Learning system selection: "unified" (recommended)
 system = "unified"
 
-# Scheduler Configuration
 [scheduler]
-enabled = false
-cron_expression = "30 2 * * *"  # 02:30 hàng ngày
+enabled = true
+cron_expression = "30 2 * * *"
 timezone = "Asia/Ho_Chi_Minh"
-jitter_seconds = 300  # ±5 phút
+jitter_seconds = 300
 max_concurrent_sessions = 1
 skip_if_cpu_high = true
 cpu_threshold = 70
 
-# Resource Limits
 [resource_limits]
 max_cpu_percent = 70
 max_memory_mb = 1024
@@ -22,7 +16,6 @@ max_tokens_per_day = 10000
 max_tokens_per_hour = 1000
 max_content_length = 100000
 
-# Safety Features
 [safety]
 idempotency_enabled = false
 human_approval_required = true
@@ -32,7 +25,6 @@ alerting_enabled = false
 require_citations = true
 disable_finetune = true
 
-# Monitoring
 [monitoring]
 enable_metrics = true
 metrics_export_format = "json"
@@ -44,54 +36,30 @@ email_smtp_server = ""
 email_user = ""
 email_pass = ""
 
-# Migration settings
 [migration]
-# Enable automatic migration from old to new system
 auto_migrate = true
-# Backup old data before migration
 backup_before_migrate = true
-# Migration batch size
 batch_size = 100
 
-# New learning system settings
 [new_system]
-# RSS feed sources
-rss_sources = [
-    "https://arxiv.org/list/cs.AI/rss",
-    "https://openai.com/blog/rss.xml",
-    "https://deepmind.com/blog/rss.xml"
-]
-
-# Quality thresholds
+rss_sources = [ "https://arxiv.org/list/cs.AI/rss", "https://openai.com/blog/rss.xml", "https://deepmind.com/blog/rss.xml",]
 quality_threshold = 0.72
 risk_threshold = 0.25
-
-# Daily limits
 max_recommendations_per_day = 5
 max_ingestions_per_day = 3
 max_docs_per_scan = 20
-
-# Safety settings
 disable_finetune = true
 html_crawl_enabled = false
 citations_required = true
 
-# Old learning system settings
 [old_system]
-# Experience memory settings
 max_experiences = 10000
 pattern_threshold = 0.6
 similarity_threshold = 0.7
-
-# Database settings
 db_path = ".experience_memory.db"
 cleanup_days = 90
 
-# Compatibility settings
 [compatibility]
-# Enable both systems running in parallel
 parallel_mode = false
-# Sync data between systems
 sync_data = false
-# Conflict resolution strategy: "new_wins" | "old_wins" | "manual"
 conflict_resolution = "new_wins"
