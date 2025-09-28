@@ -1,0 +1,107 @@
+# StillMe Metrics Configuration
+# =============================
+
+[collector]
+# Enable metrics collection
+enabled = true
+
+# PII redaction settings
+pii_redact = true
+redaction_method = "hash"  # hash, mask, remove
+
+# Data retention
+rollup_window_days = 90
+compress_after_days = 30
+
+# Performance settings
+batch_size = 100
+flush_interval_seconds = 5.0
+max_buffer_size = 1000
+
+[database]
+# Database settings
+db_path = "data/metrics/metrics.db"
+backup_enabled = true
+backup_interval_hours = 24
+backup_retention_days = 30
+
+# Performance
+connection_pool_size = 10
+query_timeout_seconds = 30
+
+[events]
+# Event logging settings
+events_dir = "data/metrics/events"
+max_file_size_mb = 100
+rotation_daily = true
+compression_enabled = true
+
+# Event filtering
+min_event_level = "INFO"
+exclude_patterns = ["debug", "trace"]
+
+[dashboard]
+# Dashboard settings
+default_range_days = 30
+refresh_interval_seconds = 30
+max_data_points = 1000
+
+# Chart settings
+enable_animations = true
+chart_theme = "light"  # light, dark, auto
+
+[alerts]
+# Alerting settings
+enabled = true
+alert_thresholds = { pass_rate_min = 0.6, error_rate_max = 0.1, latency_p95_max = 5000 }
+
+# Notification channels
+email_enabled = false
+webhook_enabled = false
+desktop_enabled = true
+
+[privacy]
+# Privacy settings
+enable_audit_log = true
+audit_log_path = "logs/privacy_audit.log"
+anonymize_user_data = true
+hash_sensitive_fields = true
+
+# Compliance
+gdpr_compliant = true
+ccpa_compliant = true
+data_retention_days = 365
+
+[performance]
+# Performance monitoring
+enable_profiling = false
+profile_sample_rate = 0.1
+memory_profiling = false
+
+# Optimization
+enable_caching = true
+cache_ttl_seconds = 300
+enable_compression = true
+
+[export]
+# Export settings
+csv_enabled = true
+json_enabled = true
+excel_enabled = false
+
+# Export formats
+date_format = "%Y-%m-%d"
+timezone = "Asia/Ho_Chi_Minh"
+decimal_places = 3
+
+[ci]
+# CI/CD integration
+enable_badges = true
+badge_update_interval_hours = 6
+artifact_upload = true
+coverage_threshold = 0.8
+
+# GitHub integration
+github_token = ""  # Set via environment variable
+repository = "stillme-ai/stillme"
+branch = "main"

@@ -11,7 +11,7 @@ cpu_threshold = 70
 
 [resource_limits]
 max_cpu_percent = 70
-max_memory_mb = 1024
+max_memory_mb = 24576
 max_tokens_per_day = 10000
 max_tokens_per_hour = 1000
 max_content_length = 100000
