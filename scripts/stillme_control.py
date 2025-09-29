@@ -49,12 +49,17 @@ def main():
     # Setup notifications
     notify_parser = subparsers.add_parser("setup-notifications", help="Setup email and Telegram notifications")
     
+    # Windows Service management
+    service_parser = subparsers.add_parser("service", help="Manage Windows Service")
+    service_parser.add_argument("action", choices=["install", "uninstall", "start", "stop", "restart", "status"],
+                               help="Service action")
+    
     # Founder knowledge input
     founder_parser = subparsers.add_parser("founder", help="Add founder knowledge (auto-approved)")
     founder_parser.add_argument("title", help="Knowledge title")
     founder_parser.add_argument("description", help="Knowledge description")
     founder_parser.add_argument("--priority", choices=["low", "medium", "high", "critical"], 
-                               default="high", help="Priority level")
+                                default="high", help="Priority level")
     founder_parser.add_argument("--url", help="Source URL (optional)")
     
     args = parser.parse_args()
@@ -119,6 +124,10 @@ def main():
     elif args.command == "setup-notifications":
         print("📧📱 Setting up notifications...")
         subprocess.run([sys.executable, "scripts/setup_notifications.py"])
+        
+    elif args.command == "service":
+        print(f"🪟 Managing Windows Service: {args.action}")
+        subprocess.run([sys.executable, "scripts/install_windows_service.py", args.action])
 
 if __name__ == "__main__":
     main()
