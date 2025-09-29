@@ -115,6 +115,40 @@ pip install "stillme[pro]" --extra-index-url <YOUR_PRIVATE_INDEX_URL>
 
 On startup the framework auto-detects Pro; otherwise it logs `Using StubRouter (OSS mode)` and continues.
 
+## 🤖 AgentDev Unified - Senior Developer ảo
+
+**AgentDev Unified** là phiên bản thống nhất của hệ thống AgentDev, gộp tất cả tính năng từ 5 AgentDev cũ thành 1 AgentDev duy nhất với tư duy như senior developer thật.
+
+### 🚀 **Tính năng chính**
+
+#### **Senior Thinking (Tư duy Senior)**
+- **Impact Analysis**: Phân tích tác động trước khi code
+- **Business Thinking**: Đánh giá giá trị kinh doanh
+- **Security Thinking**: Tư duy bảo mật và an toàn
+- **Proactive Cleanup**: Tự động dọn dẹp và tối ưu
+- **Conflict Resolution**: Giải quyết xung đột thông minh
+- **Experience Learning**: Học từ kinh nghiệm
+
+#### **Các chế độ hoạt động**
+- `AgentMode.SIMPLE` - Basic task execution
+- `AgentMode.REAL_FIX` - Real file operations  
+- `AgentMode.HONEST` - Validation + evidence
+- `AgentMode.ENHANCED` - Advanced validation
+- `AgentMode.ULTIMATE` - All features + patterns
+- `AgentMode.SENIOR` - Senior dev thinking (NEW)
+
+#### **Sử dụng**
+```python
+from agent_dev.core.agentdev_unified import AgentDevUnified, AgentMode
+
+# Initialize AgentDev in Senior mode
+agentdev = AgentDevUnified(mode=AgentMode.SENIOR)
+
+# Execute task with senior thinking
+result = agentdev.execute_task("Fix errors in codebase")
+print(result)
+```
+
 ## 🧠 Unified Evolutionary Learning System
 
 StillMe features a **sophisticated self-evolving learning system** that combines the best of both experience-based and content-based learning, with full self-assessment, daily training capabilities, and built-in safety mechanisms.
