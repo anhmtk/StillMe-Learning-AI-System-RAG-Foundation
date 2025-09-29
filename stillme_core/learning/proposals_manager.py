@@ -105,6 +105,49 @@ class ProposalsManager:
             created_at=datetime.now()
         )
     
+    def get_all_proposals(self) -> List['LearningProposal']:
+        """Get all proposals"""
+        import sqlite3
+        
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.execute("""
+                SELECT * FROM proposals 
+                ORDER BY created_at DESC
+            """)
+            
+            rows = cursor.fetchall()
+            proposals = []
+            
+            for row in rows:
+                # Handle None values safely
+                learning_objectives = row[7] if row[7] else "[]"
+                prerequisites = row[8] if row[8] else "[]"
+                expected_outcomes = row[9] if row[9] else "[]"
+                risk_assessment = row[10] if row[10] else "{}"
+                
+                try:
+                    proposal = LearningProposal(
+                        id=row[0],
+                        title=row[1],
+                        description=row[2],
+                        learning_objectives=json.loads(learning_objectives),
+                        prerequisites=json.loads(prerequisites),
+                        expected_outcomes=json.loads(expected_outcomes),
+                        estimated_duration=row[6],
+                        quality_score=row[11],
+                        source=row[4],
+                        priority=row[5],
+                        risk_assessment=json.loads(risk_assessment),
+                        status=row[14],
+                        created_at=datetime.fromisoformat(row[12])
+                    )
+                    proposals.append(proposal)
+                except Exception as e:
+                    print(f"Error parsing proposal {row[0]}: {e}")
+                    continue
+            
+            return proposals
+    
     def get_pending_proposals(self, limit: int = 10) -> List['LearningProposal']:
         """Get pending proposals"""
         import sqlite3

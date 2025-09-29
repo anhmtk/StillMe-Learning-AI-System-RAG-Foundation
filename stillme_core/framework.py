@@ -27,16 +27,16 @@ RELATED FILES / FILES LIÊN QUAN:
 - stable_ai_server.py - AI server implementation
 - tests/ - Test suites
 
-⚠️ IMPORTANT: This is a WORLD-CLASS AI Framework with 9 core modules!
-⚠️ QUAN TRỌNG: Đây là Framework AI đẳng cấp thế giới với 9 core modules!
+⚠️ IMPORTANT: This is a AI IPC with 10 core modules!
+⚠️ QUAN TRỌNG: Đây là AI IPC với 10 core modules
 
 📊 PROJECT STATUS: PRODUCTION-READY
 
-- Modules: 9 core modules active
+- Modules: 10 core modules active
 - Tests: 29/29 passed ✅
 - Complexity: 8.5/10 (Enterprise-grade)
 
-🔧 9 CORE MODULES:
+🔧 10 CORE MODULES:
 1. ContentIntegrityFilter - Content filtering
 2. LayeredMemoryV1 ⭐ - 3-layer memory + encryption
 3. UnifiedAPIManager - Unified API management
@@ -46,11 +46,12 @@ RELATED FILES / FILES LIÊN QUAN:
 7. TokenOptimizer - Token optimization
 8. EmotionSenseV1 - Emotion detection
 9. SecureMemoryManager ⭐ - Encryption + backup
+10. AgentDevUnified ⭐ - Senior Developer ảo, Trưởng phòng Kỹ thuật
 
 🚨 CRITICAL INFO:
 - SecureMemoryManager integration 100% COMPLETE
 - Project cleanup (5.3GB → 22.89MB) COMPLETE
-- All 9 modules working and integrated
+- All 10 modules working and integrated
 - Vietnamese language support 100%
 - Comprehensive testing coverage
 
@@ -328,6 +329,23 @@ class StillMeFramework:
         except ImportError as e:
             self.logger.warning(f"SecureMemoryManager not available: {e}")
             self.secure_memory = None
+
+        # Initialize AgentDev Unified - Trưởng phòng Kỹ thuật StillMe IPC
+        try:
+            import sys
+            import os
+            # Add agent-dev path to sys.path
+            agent_dev_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'agent-dev', 'core')
+            if agent_dev_path not in sys.path:
+                sys.path.insert(0, agent_dev_path)
+            
+            from agentdev_unified import AgentDevUnified, execute_agentdev_task_unified, AgentMode
+            
+            self.agentdev = AgentDevUnified(project_root=os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+            self.logger.info("✅ AgentDev Unified - Trưởng phòng Kỹ thuật StillMe IPC initialized")
+        except ImportError as e:
+            self.logger.warning(f"AgentDev Unified not available: {e}")
+            self.agentdev = None
 
         self.ethics = EthicsChecker(level=self.config["security_level"])
         self._api_docs = OpenAPIGenerator()
@@ -1198,6 +1216,20 @@ class FrameworkMetrics:
 
     def record_heartbeat(self) -> None:
         self._metrics["heartbeat"].append(float(time.time()))
+
+    def get_agentdev(self):
+        """Get AgentDev Unified - Trưởng phòng Kỹ thuật StillMe IPC"""
+        return self.agentdev
+
+    def execute_agentdev_task(self, task: str, mode: str = "senior"):
+        """Execute task using AgentDev Unified"""
+        if not self.agentdev:
+            raise RuntimeError("AgentDev Unified not available")
+        
+        from agentdev_unified import AgentMode
+        mode_enum = AgentMode.SENIOR if mode == "senior" else AgentMode.SIMPLE
+        
+        return self.agentdev.execute_task(task, mode_enum)
 
 
 class OpenAPIGenerator:

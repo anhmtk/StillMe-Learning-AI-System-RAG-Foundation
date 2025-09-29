@@ -113,6 +113,29 @@ class StillMeBackgroundService:
         except Exception as e:
             logger.error(f"❌ Knowledge discovery failed: {e}")
     
+    def _export_dashboard_data(self):
+        """Export dashboard data for public viewing"""
+        try:
+            logger.info("📊 Exporting dashboard data...")
+            
+            # Run export script
+            export_script = project_root / "scripts" / "export_dashboard_data.py"
+            if export_script.exists():
+                import subprocess
+                result = subprocess.run([
+                    sys.executable, str(export_script)
+                ], capture_output=True, text=True, cwd=project_root)
+                
+                if result.returncode == 0:
+                    logger.info("✅ Dashboard data exported successfully")
+                else:
+                    logger.error(f"❌ Dashboard export failed: {result.stderr}")
+            else:
+                logger.warning("⚠️ Dashboard export script not found")
+                
+        except Exception as e:
+            logger.error(f"Error exporting dashboard data: {e}")
+    
     def start_service(self):
         """Khởi động background service"""
         logger.info("🧠 StillMe IPC Background Service")
@@ -123,8 +146,12 @@ class StillMeBackgroundService:
         discovery_interval = self.config["discovery_interval_hours"]
         schedule.every(discovery_interval).hours.do(self.discover_knowledge)
         
+        # Schedule dashboard data export (every 6 hours)
+        schedule.every(6).hours.do(self._export_dashboard_data)
+        
         logger.info(f"⏰ Scheduled knowledge discovery every {discovery_interval} hours")
         logger.info(f"📊 Max discoveries per day: {self.config['max_discoveries_per_day']}")
+        logger.info(f"📊 Dashboard data export every 6 hours")
         logger.info(f"🔔 Notifications: {'Enabled' if self.config['notification_enabled'] else 'Disabled'}")
         
         # Run initial discovery

@@ -1,0 +1,13 @@
+{
+  "export_timestamp": "2025-09-29T17:34:10.815441",
+  "proposals_count": 62,
+  "metrics_days": 30,
+  "current_stats": {
+    "total_proposals": 62,
+    "approved_proposals": 44,
+    "completed_learning": 0,
+    "knowledge_sources": 6,
+    "learning_sessions_today": 56,
+    "last_discovery": "2025-09-29T17:34:10.814441"
+  }
+}

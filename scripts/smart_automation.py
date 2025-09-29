@@ -22,13 +22,14 @@ class SmartAutomation:
     
     def __init__(self):
         self.status_file = project_root / "artifacts" / "automation_status.json"
-        self.config_file = project_root / "artifacts" / "automation_config.json"
+        self.config_file = project_root / "data" / "config" / "automation_config.json"
         self.load_config()
     
     def load_config(self):
         """Load automation configuration"""
         default_config = {
-            "enabled": False,
+            "automation_enabled": True,  # Default to True
+            "enabled": True,  # For backward compatibility
             "max_proposals_per_hour": 2,  # Giới hạn 2 proposals/giờ
             "max_proposals_per_day": 10,  # Giới hạn 10 proposals/ngày
             "proposal_interval_minutes": 30,  # Tạo proposal mỗi 30 phút
@@ -73,7 +74,7 @@ class SmartAutomation:
     
     def can_create_proposal(self) -> bool:
         """Check if we can create a new proposal"""
-        if not self.config.get("enabled", False):
+        if not self.config.get("enabled", False) and not self.config.get("automation_enabled", False):
             return False
         
         now = datetime.now()
@@ -200,7 +201,7 @@ def main():
     automation = SmartAutomation()
     
     # Check if automation is enabled
-    if not automation.config.get("enabled", False):
+    if not automation.config.get("enabled", False) and not automation.config.get("automation_enabled", False):
         print("🔴 Automation is disabled.")
         print("Enable it in the dashboard sidebar to start automatic proposal creation.")
         return

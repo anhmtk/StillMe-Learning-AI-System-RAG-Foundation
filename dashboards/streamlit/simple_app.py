@@ -383,9 +383,21 @@ class SimpleDashboard:
         # Automation Control
         st.sidebar.markdown("### 🤖 Automation Control")
         
-        # Initialize automation state
+        # Initialize automation state - DEFAULT TO TRUE and PERSISTENT
         if 'automation_enabled' not in st.session_state:
-            st.session_state.automation_enabled = False
+            # Try to load from config file first
+            try:
+                import json
+                from pathlib import Path
+                config_file = Path("data/config/automation_config.json")
+                if config_file.exists():
+                    with open(config_file, 'r') as f:
+                        config = json.load(f)
+                        st.session_state.automation_enabled = config.get('automation_enabled', True)
+                else:
+                    st.session_state.automation_enabled = True  # Default to True
+            except:
+                st.session_state.automation_enabled = True  # Fallback to True
         
         # Automation toggle
         automation_enabled = st.sidebar.checkbox(
@@ -402,7 +414,7 @@ class SimpleDashboard:
                 import json
                 from pathlib import Path
                 
-                config_file = Path("artifacts/automation_config.json")
+                config_file = Path("data/config/automation_config.json")
                 config_file.parent.mkdir(parents=True, exist_ok=True)
                 
                 # Load existing config or create new
@@ -411,7 +423,8 @@ class SimpleDashboard:
                         config = json.load(f)
                 else:
                     config = {
-                        "enabled": False,
+                        "automation_enabled": True,  # Default to True
+                        "enabled": True,  # For backward compatibility
                         "max_proposals_per_hour": 2,
                         "max_proposals_per_day": 10,
                         "proposal_interval_minutes": 30,
@@ -423,6 +436,7 @@ class SimpleDashboard:
                 
                 # Update enabled status
                 config["enabled"] = automation_enabled
+                config["automation_enabled"] = automation_enabled
                 
                 # Save config
                 with open(config_file, 'w') as f:

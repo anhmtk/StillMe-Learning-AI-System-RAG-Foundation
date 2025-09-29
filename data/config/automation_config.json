@@ -1,0 +1,11 @@
+{
+  "automation_enabled": true,
+  "enabled": true,
+  "max_proposals_per_hour": 2,
+  "max_proposals_per_day": 10,
+  "proposal_interval_minutes": 30,
+  "last_proposal_time": "2025-09-29T18:15:37.922554",
+  "proposals_created_today": 1,
+  "proposals_created_this_hour": 1,
+  "last_reset_date": "2025-09-29"
+}
