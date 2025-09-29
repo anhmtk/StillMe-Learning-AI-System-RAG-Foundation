@@ -73,6 +73,16 @@ class LearningProposal:
     status: ProposalStatus
     approval_required: bool
     metadata: Dict[str, Any]
+    # Optional fields from database
+    approved_at: Optional[str] = None
+    approved_by: Optional[str] = None
+    rejected_at: Optional[str] = None
+    rejected_by: Optional[str] = None
+    rejection_reason: Optional[str] = None
+    learning_started_at: Optional[str] = None
+    learning_completed_at: Optional[str] = None
+    learning_failed_at: Optional[str] = None
+    failure_reason: Optional[str] = None
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""

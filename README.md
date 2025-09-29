@@ -278,11 +278,51 @@ StillMe follows a **"learning child"** approach with built-in safety:
 
 This makes StillMe not just an AI tool, but a **safe learning companion** that grows and improves alongside its users with appropriate human oversight.
 
+## 🎯 **Interactive Dashboard & Automation System**
+
+### **📊 Real-Time Learning Dashboard**
+- **Streamlit Dashboard**: Interactive web interface for monitoring and control
+- **Learning Proposals**: Human-in-the-loop approval workflow for new knowledge
+- **Real-time Metrics**: Pending/Approved/Completed proposals tracking
+- **Founder Mode**: Direct knowledge input with auto-approval
+- **Automation Control**: Enable/disable automatic proposal generation
+
+### **🤖 Background Automation**
+- **24/7 Background Service**: Continuous knowledge discovery and learning
+- **Smart Automation**: Rate-limited proposal generation (8/day, 3h intervals)
+- **Multi-channel Notifications**: Email (Gmail) + Telegram alerts
+- **Knowledge Discovery**: Automated scanning of tech trends, AI/ML news, programming trends
+- **Real Learning System**: Placeholder for actual AI learning engine
+
+### **🎮 Master Control System**
+```bash
+# Start background service (24/7 automation)
+python scripts/stillme_control.py background
+
+# Launch interactive dashboard
+python scripts/stillme_control.py dashboard --port 8507
+
+# Add founder knowledge (auto-approved)
+python scripts/stillme_control.py founder "Title" "Description" "priority"
+
+# Setup notifications (Email/Telegram)
+python scripts/stillme_control.py setup-notifications
+
+# Discover new knowledge manually
+python scripts/stillme_control.py discover
+```
+
+### **🔔 Notification System**
+- **Email Notifications**: Gmail SMTP with App Password authentication
+- **Telegram Notifications**: Bot API integration
+- **Desktop Alerts**: Cross-platform desktop notifications
+- **Real-time Updates**: Instant alerts for new discoveries and learning progress
+
 ## Roadmap (short)
 
 * ✅ **Phase 0**: Safety hardening (kill switch, rationale logging, secrets sweep)
 * ✅ **Phase 1**: Read-only learning MVP (discovery → scoring → approval → ingest)
-* 🔄 **Phase 2**: Skill template extraction and procedural learning
+* ✅ **Phase 2**: Interactive Dashboard & Background Automation System
 * 🔄 **Phase 3**: Self-quiz, consistency checking, and unlearning
 * 🔄 **Phase 4**: Controlled adaptation with LoRA fine-tuning
 * Increase test coverage to ≥85% lines / ≥80% branches
@@ -290,6 +330,61 @@ This makes StillMe not just an AI tool, but a **safe learning companion** that g
 * Iterate on documentation with community help
 
 ## Changelog
+
+### 2025-09-29 - Interactive Dashboard & Automation System Release
+
+**🎯 Complete Dashboard & Automation System (Completed)**
+- ✅ **Interactive Streamlit Dashboard**: Real-time learning proposals management
+- ✅ **Human-in-the-Loop Workflow**: Approve/reject learning proposals with detailed UI
+- ✅ **Founder Mode**: Direct knowledge input with auto-approval bypass
+- ✅ **Background Automation**: 24/7 knowledge discovery and proposal generation
+- ✅ **Multi-channel Notifications**: Email (Gmail) + Telegram real-time alerts
+- ✅ **Master Control System**: Unified CLI for all StillMe IPC operations
+
+**🚀 Core Features:**
+- ✅ **Real-time Dashboard**: Live metrics, proposal management, learning progress
+- ✅ **Smart Automation**: Rate-limited discovery (8/day, 3h intervals)
+- ✅ **Knowledge Discovery**: Automated scanning of tech trends, AI/ML, programming
+- ✅ **Learning Proposals**: Structured learning tasks with quality scoring
+- ✅ **Notification System**: Multi-channel alerts for discoveries and progress
+- ✅ **Database Management**: SQLite-based proposal storage and tracking
+
+**🛠️ Tools & Scripts:**
+- ✅ **Master Control CLI**: `stillme_control.py` - unified command interface
+- ✅ **Background Service**: `stillme_background_service.py` - 24/7 automation
+- ✅ **Knowledge Discovery**: `knowledge_discovery.py` - automated content discovery
+- ✅ **Founder Input**: `founder_knowledge_input.py` - direct knowledge addition
+- ✅ **Notification Setup**: `setup_notifications.py` - Email/Telegram configuration
+- ✅ **Real Learning**: `start_real_learning.py` - learning engine placeholder
+
+**📊 Dashboard Features:**
+- ✅ **Learning Proposals Tab**: View, approve, reject proposals with details
+- ✅ **Founder Mode Tab**: Direct knowledge input with auto-approval
+- ✅ **Analytics Tab**: Learning metrics and performance tracking
+- ✅ **Learning Report Tab**: Comprehensive learning progress and history
+- ✅ **Automation Control**: Enable/disable automatic proposal generation
+- ✅ **Real-time Updates**: Live proposal counts and status changes
+
+**🔔 Notification System:**
+- ✅ **Email Integration**: Gmail SMTP with App Password authentication
+- ✅ **Telegram Integration**: Bot API with HTML formatting
+- ✅ **Desktop Notifications**: Cross-platform system alerts
+- ✅ **Alert Management**: Centralized alerting system with multiple channels
+- ✅ **Configuration**: Environment-based setup with .env file support
+
+**New Files & Modules:**
+- `dashboards/streamlit/simple_app.py` - Main interactive dashboard
+- `scripts/stillme_control.py` - Master control CLI
+- `scripts/stillme_background_service.py` - Background automation service
+- `scripts/knowledge_discovery.py` - Automated knowledge discovery
+- `scripts/founder_knowledge_input.py` - Founder mode knowledge input
+- `scripts/setup_notifications.py` - Notification system setup
+- `scripts/start_real_learning.py` - Real learning system
+- `stillme_core/learning/proposals.py` - Learning proposal dataclass
+- `stillme_core/learning/proposals_manager.py` - Database management
+- `stillme_core/alerting/alerting_system.py` - Centralized alerting
+- `stillme_core/alerting/email_notifier.py` - Email notifications
+- `stillme_core/alerting/telegram_notifier.py` - Telegram notifications
 
 ### 2025-09-27 - Unified Evolutionary Learning System Release
 
