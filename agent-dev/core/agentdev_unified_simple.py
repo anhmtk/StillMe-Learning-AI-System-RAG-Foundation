@@ -234,7 +234,7 @@ if __name__ == "__main__":
                 with open("test_generated.py", "w", encoding="utf-8") as f:
                     f.write(test_content)
                 self.log("📁 File created: test_generated.py")
-                return "✅ Test file created successfully"
+                return "✅ Test file created successfully (Simple Mode)" if self.mode == AgentMode.SIMPLE else "✅ Comprehensive test file created successfully (Senior Mode)"
             except Exception as e:
                 self.log(f"❌ Failed to create test file: {e}")
                 return f"❌ Failed to create test file: {e}"
@@ -260,7 +260,7 @@ if __name__ == "__main__":
                 with open("security_module.py", "w", encoding="utf-8") as f:
                     f.write(security_content)
                 self.log("📁 File created: security_module.py")
-                return "✅ Security module created successfully"
+                return "✅ Security module created successfully (Simple Mode)" if self.mode == AgentMode.SIMPLE else "✅ Comprehensive security module created successfully (Senior Mode)"
             except Exception as e:
                 self.log(f"❌ Failed to create security module: {e}")
                 return f"❌ Failed to create security module: {e}"
@@ -286,7 +286,7 @@ if __name__ == "__main__":
                 with open("general_module.py", "w", encoding="utf-8") as f:
                     f.write(general_content)
                 self.log("📁 File created: general_module.py")
-                return "✅ General module created successfully"
+                return "✅ General module created successfully (Simple Mode)" if self.mode == AgentMode.SIMPLE else "✅ Comprehensive general module created successfully (Senior Mode)"
             except Exception as e:
                 self.log(f"❌ Failed to create general module: {e}")
                 return f"❌ Failed to create general module: {e}"

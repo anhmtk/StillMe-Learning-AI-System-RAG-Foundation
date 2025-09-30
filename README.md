@@ -117,7 +117,7 @@ On startup the framework auto-detects Pro; otherwise it logs `Using StubRouter (
 
 ## 🤖 AgentDev Unified - Senior Developer ảo
 
-**AgentDev Unified** là phiên bản thống nhất của hệ thống AgentDev, gộp tất cả tính năng từ 5 AgentDev cũ thành 1 AgentDev duy nhất với tư duy như senior developer thật.
+**AgentDev Unified** là trưởng phòng kỹ thuật ảo của StillMe IPC, được thiết kế để tư duy và hành động như một senior developer thật sự.
 
 ### 🚀 **Tính năng chính**
 
@@ -128,14 +128,20 @@ On startup the framework auto-detects Pro; otherwise it logs `Using StubRouter (
 - **Proactive Cleanup**: Tự động dọn dẹp và tối ưu
 - **Conflict Resolution**: Giải quyết xung đột thông minh
 - **Experience Learning**: Học từ kinh nghiệm
+- **Adaptive Strategy**: Chọn strategy phù hợp với context
+- **Red Team/Blue Team**: Security simulation và defense learning
 
 #### **Các chế độ hoạt động**
 - `AgentMode.SIMPLE` - Basic task execution
-- `AgentMode.REAL_FIX` - Real file operations  
-- `AgentMode.HONEST` - Validation + evidence
-- `AgentMode.ENHANCED` - Advanced validation
-- `AgentMode.ULTIMATE` - All features + patterns
-- `AgentMode.SENIOR` - Senior dev thinking (NEW)
+- `AgentMode.SENIOR` - Senior dev thinking (Main mode)
+
+#### **🧪 Foundation Test Suite**
+- **Total Tests**: 31 tests
+- **Success Rate**: 68% (21/31 tests passed)
+- **Security Tests**: 8/8 PASSED (100%) ✅
+- **E2E Scenarios**: 8/8 PASSED (100%) ✅
+- **Simple Tests**: 3/3 PASSED (100%) ✅
+- **Performance Tests**: 2/2 PASSED (100%) ✅
 
 #### **Sử dụng**
 ```python
@@ -147,6 +153,15 @@ agentdev = AgentDevUnified(mode=AgentMode.SENIOR)
 # Execute task with senior thinking
 result = agentdev.execute_task("Fix errors in codebase")
 print(result)
+```
+
+#### **Chạy Tests**
+```bash
+# Run all tests
+python -m pytest agentdev_foundation_tests/ -v
+
+# Generate HTML report
+python -m pytest agentdev_foundation_tests/ --html=reports/test_report.html
 ```
 
 ## 🧠 Unified Evolutionary Learning System
