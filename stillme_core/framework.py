@@ -339,7 +339,7 @@ class StillMeFramework:
             if agent_dev_path not in sys.path:
                 sys.path.insert(0, agent_dev_path)
             
-            from agentdev_unified import AgentDevUnified, execute_agentdev_task_unified, AgentMode
+            from agentdev_unified_simple import AgentDevUnified, execute_agentdev_task_unified, AgentMode
             
             self.agentdev = AgentDevUnified(project_root=os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
             self.logger.info("✅ AgentDev Unified - Trưởng phòng Kỹ thuật StillMe IPC initialized")
@@ -1226,7 +1226,7 @@ class FrameworkMetrics:
         if not self.agentdev:
             raise RuntimeError("AgentDev Unified not available")
         
-        from agentdev_unified import AgentMode
+        from agentdev_unified_simple import AgentMode
         mode_enum = AgentMode.SENIOR if mode == "senior" else AgentMode.SIMPLE
         
         return self.agentdev.execute_task(task, mode_enum)

@@ -597,8 +597,20 @@ class BusinessAnalyzer:
         strategic_alignment = self.assess_strategic_alignment(task)
         risk_reward = self.assess_risk_reward(task)
         
-        # Determine priority
-        if risk_reward.recommendation == "proceed" and roi_analysis.estimated_roi > 0.7:
+        # Determine priority - Enhanced security detection
+        task_lower = task.lower()
+        
+        # Security-related tasks get higher priority
+        security_keywords = [
+            'security', 'vulnerability', 'exploit', 'breach', 'hack',
+            'authentication', 'authorization', 'permission', 'access',
+            'password', 'encryption', 'ssl', 'https', 'secure',
+            'fix', 'patch', 'critical', 'urgent'
+        ]
+        
+        if any(keyword in task_lower for keyword in security_keywords):
+            priority = BusinessPriority.CRITICAL
+        elif risk_reward.recommendation == "proceed" and roi_analysis.estimated_roi > 0.7:
             priority = BusinessPriority.CRITICAL
         elif risk_reward.recommendation in ["proceed", "proceed_with_caution"] and roi_analysis.estimated_roi > 0.5:
             priority = BusinessPriority.HIGH

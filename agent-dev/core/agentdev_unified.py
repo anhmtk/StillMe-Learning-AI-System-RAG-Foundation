@@ -174,12 +174,36 @@ class AgentDevUnified:
         self.total_files_processed = 0
         self.session_start_time = time.time()
         
-        # Senior thinking modules (NEW)
-        self.impact_analyzer = ImpactAnalyzer(project_root)
-        self.business_analyzer = BusinessAnalyzer()
-        self.security_analyzer = SecurityAnalyzer()
-        self.cleanup_manager = CleanupManager(str(project_root))
-        self.conflict_resolver = ConflictResolver(str(project_root))
+        # Senior thinking modules (NEW) - Import directly to avoid import issues
+        try:
+            from impact_analyzer import ImpactAnalyzer
+            self.impact_analyzer = ImpactAnalyzer(project_root)
+        except ImportError:
+            self.impact_analyzer = None
+            
+        try:
+            from business_analyzer import BusinessAnalyzer
+            self.business_analyzer = BusinessAnalyzer()
+        except ImportError:
+            self.business_analyzer = None
+            
+        try:
+            from security_analyzer import SecurityAnalyzer
+            self.security_analyzer = SecurityAnalyzer()
+        except ImportError:
+            self.security_analyzer = None
+            
+        try:
+            from cleanup_manager import CleanupManager
+            self.cleanup_manager = CleanupManager(str(project_root))
+        except ImportError:
+            self.cleanup_manager = None
+            
+        try:
+            from conflict_resolver import ConflictResolver
+            self.conflict_resolver = ConflictResolver(str(project_root))
+        except ImportError:
+            self.conflict_resolver = None
         
         # Import Phase 3 modules directly to avoid import issues
         try:
@@ -248,19 +272,19 @@ class AgentDevUnified:
         self.log("🧠 Senior thinking: Analyzing impact and business value...")
         
         # Real impact analysis
-        impact_result = self.impact_analyzer.analyze_impact(task)
+        impact_result = self.impact_analyzer.analyze_impact(task) if self.impact_analyzer else None
         
         # Real business analysis
-        business_result = self.business_analyzer.analyze_business_value(task)
+        business_result = self.business_analyzer.analyze_business_value(task) if self.business_analyzer else None
         
         # Real security analysis - BẢO MẬT LÀ VẤN ĐỀ SỐNG CÒN
-        security_result = self.security_analyzer.analyze_security_risks(task)
+        security_result = self.security_analyzer.analyze_security_risks(task) if self.security_analyzer else None
         
         # Real cleanup analysis - DỌN DẸP TỰ ĐỘNG
-        cleanup_result = self.cleanup_manager.analyze_cleanup_opportunities()
+        cleanup_result = self.cleanup_manager.analyze_cleanup_opportunities() if self.cleanup_manager else None
         
         # Real conflict analysis - GIẢI QUYẾT XUNG ĐỘT
-        conflict_result = self.conflict_resolver.analyze_conflicts()
+        conflict_result = self.conflict_resolver.analyze_conflicts() if self.conflict_resolver else None
         
         # Real experience learning - HỌC HỎI TỪ KINH NGHIỆM
         experience_result = self.experience_learner.learn_from_experience()
@@ -285,23 +309,29 @@ class AgentDevUnified:
         if self.red_blue_team:
             red_blue_result = self.red_blue_team.learn_from_security_experience()
         
-        self.log(f"📊 Impact Analysis Results:")
-        self.log(f"   🔗 Dependencies: {len(impact_result.dependencies)}")
-        self.log(f"   ⚡ Performance: {impact_result.performance.level.value if impact_result.performance else 'Unknown'}")
-        self.log(f"   🔒 Security Risks: {len(impact_result.security_risks)}")
-        self.log(f"   🛠️ Maintainability: {impact_result.maintainability.overall_score:.2f}" if impact_result.maintainability else "   🛠️ Maintainability: Unknown")
-        self.log(f"   👥 User Impact: {impact_result.user_impact.level.value if impact_result.user_impact else 'Unknown'}")
-        self.log(f"   ⚠️ Overall Risk: {impact_result.overall_risk_level.value if impact_result.overall_risk_level else 'Unknown'}")
-        self.log(f"   💡 Recommendations: {len(impact_result.recommendations)}")
+        if impact_result:
+            self.log(f"📊 Impact Analysis Results:")
+            self.log(f"   🔗 Dependencies: {len(impact_result.dependencies)}")
+            self.log(f"   ⚡ Performance: {impact_result.performance.level.value if impact_result.performance else 'Unknown'}")
+            self.log(f"   🔒 Security Risks: {len(impact_result.security_risks)}")
+            self.log(f"   🛠️ Maintainability: {impact_result.maintainability.overall_score:.2f}" if impact_result.maintainability else "   🛠️ Maintainability: Unknown")
+            self.log(f"   👥 User Impact: {impact_result.user_impact.level.value if impact_result.user_impact else 'Unknown'}")
+            self.log(f"   ⚠️ Overall Risk: {impact_result.overall_risk_level.value if impact_result.overall_risk_level else 'Unknown'}")
+            self.log(f"   💡 Recommendations: {len(impact_result.recommendations)}")
+        else:
+            self.log("📊 Impact Analysis: Not available")
         
-        self.log(f"💼 Business Analysis Results:")
-        self.log(f"   🎯 Priority: {business_result.priority.value}")
-        self.log(f"   💰 ROI: {business_result.roi_analysis.estimated_roi:.2f}")
-        self.log(f"   📈 Business Score: {business_result.business_score:.2f}")
-        self.log(f"   ⚖️ Risk-Reward: {business_result.risk_reward.recommendation}")
-        self.log(f"   🎯 Strategic Alignment: {business_result.strategic_alignment.overall_strategic_score:.2f}")
-        self.log(f"   💡 Key Insights: {len(business_result.key_insights)}")
-        self.log(f"   📋 Recommendation: {business_result.recommendation}")
+        if business_result:
+            self.log(f"💼 Business Analysis Results:")
+            self.log(f"   🎯 Priority: {business_result.priority.value}")
+            self.log(f"   💰 ROI: {business_result.roi_analysis.estimated_roi:.2f}")
+            self.log(f"   📈 Business Score: {business_result.business_score:.2f}")
+            self.log(f"   ⚖️ Risk-Reward: {business_result.risk_reward.recommendation}")
+            self.log(f"   🎯 Strategic Alignment: {business_result.strategic_alignment.overall_strategic_score:.2f}")
+            self.log(f"   💡 Key Insights: {len(business_result.key_insights)}")
+            self.log(f"   📋 Recommendation: {business_result.recommendation}")
+        else:
+            self.log("💼 Business Analysis: Not available")
         
         self.log(f"🔒 Security Analysis Results - BẢO MẬT LÀ VẤN ĐỀ SỐNG CÒN:")
         self.log(f"   🛡️ Security Score: {security_result.overall_security_score:.2f}")

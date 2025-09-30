@@ -141,13 +141,15 @@ class SecurityAnalyzer:
         self.compliance_patterns = self._load_compliance_patterns()
         
     def _load_vulnerability_patterns(self) -> Dict[str, Dict]:
-        """Load vulnerability detection patterns"""
+        """Load vulnerability detection patterns - Enhanced"""
         return {
             'sql_injection': {
                 'patterns': [
                     r'execute\(.*\+', r'cursor\.execute\(.*%', r'query.*format\(',
                     r'SELECT.*\+', r'INSERT.*\+', r'UPDATE.*\+', r'DELETE.*\+',
-                    r'f".*SELECT', r'f".*INSERT', r'f".*UPDATE', r'f".*DELETE'
+                    r'f".*SELECT', r'f".*INSERT', r'f".*UPDATE', r'f".*DELETE',
+                    r'sql.*injection', r'database.*vulnerability', r'query.*injection',
+                    r'login.*sql', r'auth.*sql', r'password.*sql'
                 ],
                 'severity': SecurityLevel.CRITICAL,
                 'exploitability': 'easy',

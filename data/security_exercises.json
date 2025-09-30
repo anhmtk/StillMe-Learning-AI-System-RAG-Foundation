@@ -1,0 +1,9 @@
+[
+  {
+    "exercise_id": "web_security_basics",
+    "title": "Web Security Basics",
+    "description": "Basic web security vulnerabilities and defenses",
+    "attack_scenarios": [
+      {
+        "scenario_id": "sql_injection_basic",
+        "attack_type": 
