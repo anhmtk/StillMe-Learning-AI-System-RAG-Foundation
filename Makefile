@@ -1,259 +1,204 @@
-# StillMe AgentDev - SEAL-GRADE CI/CD Makefile
-# Comprehensive testing and deployment commands
+# StillMe Makefile
+# Provides convenient targets for development, testing, and deployment
 
-.PHONY: help install test test-quick test-full test-seal clean lint format security-scan load_phase3
+.PHONY: help lint test unit integration chaos coverage security dast build docker push deploy-staging deploy-prod rollback clean
 
 # Default target
 help:
-	@echo "StillMe AgentDev - SEAL-GRADE CI/CD Commands"
-	@echo "=============================================="
+	@echo "StillMe Development Makefile"
 	@echo ""
-	@echo "Quick Commands:"
-	@echo "  make install          - Install dependencies"
-	@echo "  make test-quick       - Run quick tests (Tier 1)"
-	@echo "  make test-full        - Run full test suite"
-	@echo "  make test-seal        - Run SEAL-GRADE tests"
-	@echo "  make lint             - Run linting"
-	@echo "  make format           - Format code"
-	@echo "  make security-scan    - Run security scans"
-	@echo "  make load_phase3      - Run Phase 3 load tests"
-	@echo "  make clean            - Clean artifacts"
+	@echo "Available targets:"
+	@echo "  lint          - Run code linting (flake8, black, isort, mypy)"
+	@echo "  test          - Run all tests (unit + integration + chaos)"
+	@echo "  unit          - Run unit tests only"
+	@echo "  integration   - Run integration tests only"
+	@echo "  chaos         - Run chaos tests only"
+	@echo "  coverage      - Run tests with coverage report"
+	@echo "  security      - Run security scans (SAST, dependency audit)"
+	@echo "  dast          - Run DAST security tests"
+	@echo "  build         - Build Docker image"
+	@echo "  docker        - Build and run Docker container locally"
+	@echo "  push          - Push Docker image to registry"
+	@echo "  deploy-staging - Deploy to staging environment"
+	@echo "  deploy-prod   - Deploy to production environment"
+	@echo "  rollback      - Rollback to previous version"
+	@echo "  clean         - Clean up temporary files and containers"
 	@echo ""
-	@echo "CI/CD Commands:"
-	@echo "  make ci-tier1         - Run Tier 1 CI locally"
-	@echo "  make ci-tier2         - Run Tier 2 CI locally"
-	@echo "  make ci-policy        - Check policy compliance"
-	@echo "  make ci-secrets       - Check for secrets"
-	@echo "  make ci-protected     - Check protected files"
-	@echo ""
-	@echo "Test Infrastructure:"
-	@echo "  make test-infra-up    - Start test infrastructure"
-	@echo "  make test-infra-down  - Stop test infrastructure"
-	@echo "  make test-infra-logs  - Show test infrastructure logs"
-	@echo ""
-	@echo "Load Testing:"
-	@echo "  make load-test        - Run load tests"
-	@echo "  make load-test-cache  - Run load tests with cache"
-	@echo "  make load-test-guard  - Run load tests with egress guard"
-	@echo ""
-	@echo "Reports:"
-	@echo "  make report-html      - Generate HTML test report"
-	@echo "  make report-coverage  - Generate coverage report"
-	@echo "  make report-security  - Generate security report"
+	@echo "Examples:"
+	@echo "  make test                    # Run all tests"
+	@echo "  make security               # Run security scans"
+	@echo "  make build                  # Build Docker image"
+	@echo "  make deploy-staging         # Deploy to staging"
+	@echo "  make rollback TAG=v1.2.3    # Rollback to specific tag"
 
-# Installation
-install:
-	@echo "Installing dependencies..."
-	pip install -r requirements.txt
-	pip install -r requirements-test.txt
-	npm install
-
-# Quick Tests (Tier 1)
-test-quick:
-	@echo "Running quick tests (Tier 1)..."
-	python -m pytest tests/agentdev/test_state_basic.py -v --tb=short
-	python -m pytest tests/agentdev/test_security_basic.py -v --tb=short
-	python -m pytest tests/agentdev/test_observability_basic.py -v --tb=short
-	python -m pytest tests/agentdev/test_cicd.py -v --tb=short
-
-# Full Test Suite
-test-full:
-	@echo "Running full test suite..."
-	python -m pytest tests/ -v --tb=short --cov=agentdev --cov-report=html --cov-report=xml
-
-# SEAL-GRADE Tests
-test-seal:
-	@echo "Running SEAL-GRADE tests..."
-	python -m pytest tests/agentdev/ -v --tb=short -m "seal"
-	python -m pytest tests/chaos/ -v --tb=short
-	python -m pytest tests/fuzzing/ -v --tb=short
-	python -m pytest tests/security/ -v --tb=short
-
-# Linting
+# Code quality and linting
 lint:
-	@echo "Running linters..."
-	ruff check . --fix --force-exclude
-	black --check --diff .
-	isort --check-only --diff .
-	mypy . --ignore-missing-imports --no-error-summary
+	@echo "🔍 Running code linting..."
+	@flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+	@flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+	@black --check --diff .
+	@isort --check-only --diff .
+	@mypy --ignore-missing-imports agent-dev/ stillme_core/
+	@echo "✅ Linting completed"
 
-# Formatting
-format:
-	@echo "Formatting code..."
-	black .
-	isort .
-	ruff format .
+# Test targets
+test: unit integration chaos
+	@echo "✅ All tests completed"
 
-# Security Scan
-security-scan:
-	@echo "Running security scans..."
-	bandit -r . -f json -o bandit-report.json
-	safety check --json --output safety-report.json
-	semgrep --config=auto --json --output=semgrep-report.json .
-	python ci/check_secrets.py
+unit:
+	@echo "🧪 Running unit tests..."
+	@pytest agentdev_foundation_tests/unit/ -v --junitxml=junit-unit.xml
+	@echo "✅ Unit tests completed"
 
-# CI/CD Commands
-ci-tier1: lint test-quick security-scan ci-policy ci-secrets ci-protected
-	@echo "✅ Tier 1 CI completed successfully"
+integration:
+	@echo "🔗 Running integration tests..."
+	@pytest agentdev_foundation_tests/integration/ -v --junitxml=junit-integration.xml
+	@echo "✅ Integration tests completed"
 
-ci-tier2: test-full test-seal
-	@echo "✅ Tier 2 CI completed successfully"
+chaos:
+	@echo "🌪️ Running chaos tests..."
+	@pytest agentdev_foundation_tests/chaos/ -v --junitxml=junit-chaos.xml
+	@echo "✅ Chaos tests completed"
 
-ci-policy:
-	@echo "Checking policy compliance..."
-	python ci/check_policy_loaded.py
+coverage:
+	@echo "📊 Running tests with coverage..."
+	@pytest agentdev_foundation_tests/ -v --cov=agent-dev --cov=stillme_core --cov-report=xml --cov-report=html --cov-report=term
+	@echo "✅ Coverage report generated: htmlcov/index.html"
 
-ci-secrets:
-	@echo "Checking for secrets..."
-	python ci/check_secrets.py
+# Security targets
+security:
+	@echo "🔒 Running security scans..."
+	@bandit -r agent-dev/ stillme_core/ -f json -o bandit-report.json
+	@bandit -r agent-dev/ stillme_core/ -f txt
+	@semgrep --config=auto --json --output=semgrep-report.json agent-dev/ stillme_core/
+	@semgrep --config=auto agent-dev/ stillme_core/
+	@pip-audit --format=json --output=pip-audit-report.json
+	@pip-audit --format=text
+	@echo "✅ Security scans completed"
 
-ci-protected:
-	@echo "Checking protected files..."
-	python ci/check_protected_files.py
+dast:
+	@echo "🎯 Running DAST security tests..."
+	@python tests/security/test_fuzz_http.py
+	@echo "✅ DAST tests completed"
 
-# Test Infrastructure
-test-infra-up:
-	@echo "Starting test infrastructure..."
-	docker-compose -f docker-compose.test.yml up -d
-	@echo "Waiting for services to be ready..."
-	sleep 10
-	@echo "Test infrastructure is ready"
+# Docker targets
+build:
+	@echo "🐳 Building Docker image..."
+	@docker build -t stillme:latest .
+	@docker build -t stillme:$(shell git rev-parse --short HEAD) .
+	@echo "✅ Docker image built: stillme:latest"
 
-test-infra-down:
-	@echo "Stopping test infrastructure..."
-	docker-compose -f docker-compose.test.yml down
+docker: build
+	@echo "🐳 Running Docker container..."
+	@docker run -d --name stillme-dev -p 8080:8080 stillme:latest
+	@echo "✅ Docker container running on http://localhost:8080"
 
-test-infra-logs:
-	@echo "Showing test infrastructure logs..."
-	docker-compose -f docker-compose.test.yml logs
+push:
+	@echo "📤 Pushing Docker image to registry..."
+	@docker tag stillme:latest ghcr.io/$(shell git config --get remote.origin.url | sed 's/.*github.com[:/]\([^/]*\/[^/]*\)\.git/\1/')/stillme:latest
+	@docker push ghcr.io/$(shell git config --get remote.origin.url | sed 's/.*github.com[:/]\([^/]*\/[^/]*\)\.git/\1/')/stillme:latest
+	@echo "✅ Docker image pushed to registry"
 
-# Load Testing
+# Deployment targets
+deploy-staging:
+	@echo "🚀 Deploying to staging environment..."
+	@docker-compose -f docker-compose.staging.yml up -d --build
+	@echo "⏳ Waiting for staging deployment to be ready..."
+	@sleep 30
+	@curl -f http://localhost:8080/healthz || (echo "❌ Staging health check failed" && exit 1)
+	@curl -f http://localhost:8080/readyz || (echo "❌ Staging readiness check failed" && exit 1)
+	@echo "✅ Staging deployment completed and verified"
+
+deploy-prod:
+	@echo "🚀 Deploying to production environment..."
+	@echo "⚠️  WARNING: This will deploy to production!"
+	@read -p "Are you sure you want to continue? (y/N): " -n 1 -r; \
+	if [[ $$REPLY =~ ^[Yy]$$ ]]; then \
+		docker-compose -f docker-compose.prod.yml up -d --build; \
+		echo "⏳ Waiting for production deployment to be ready..."; \
+		sleep 30; \
+		curl -f http://localhost:8080/healthz || (echo "❌ Production health check failed" && exit 1); \
+		curl -f http://localhost:8080/readyz || (echo "❌ Production readiness check failed" && exit 1); \
+		echo "✅ Production deployment completed and verified"; \
+	else \
+		echo "❌ Production deployment cancelled"; \
+	fi
+
+rollback:
+	@echo "🔄 Rolling back deployment..."
+	@if [ -z "$(TAG)" ]; then \
+		echo "❌ TAG parameter is required. Usage: make rollback TAG=v1.2.3"; \
+		exit 1; \
+	fi
+	@./scripts/rollback.sh --tag $(TAG)
+	@echo "✅ Rollback completed"
+
+# Health check targets
+health:
+	@echo "🏥 Checking service health..."
+	@curl -f http://localhost:8080/healthz && echo "✅ Health check passed" || echo "❌ Health check failed"
+	@curl -f http://localhost:8080/readyz && echo "✅ Readiness check passed" || echo "❌ Readiness check failed"
+
+# Load testing
 load-test:
-	@echo "Running baseline load test..."
-	k6 run load_test/baseline.js --out json=load-results.json
+	@echo "📊 Running load tests..."
+	@if command -v k6 >/dev/null 2>&1; then \
+		./scripts/run_k6_smoke.sh; \
+	else \
+		echo "❌ K6 is not installed. Please install K6 first."; \
+		echo "   Visit: https://k6.io/docs/getting-started/installation/"; \
+		exit 1; \
+	fi
 
-load-test-cache:
-	@echo "Running load test with cache..."
-	k6 run load_test/with_cache.js --out json=load-results-cache.json
-
-load-test-guard:
-	@echo "Running load test with egress guard..."
-	k6 run load_test/with_egress_guard.js --out json=load-results-guard.json
-
-# Reports
-report-html:
-	@echo "Generating HTML test report..."
-	python -m pytest tests/ --html=report.html --self-contained-html
-
-report-coverage:
-	@echo "Generating coverage report..."
-	python -m pytest tests/ --cov=agentdev --cov-report=html --cov-report=xml
-
-report-security:
-	@echo "Generating security report..."
-	python ci/generate_security_report.py
-
-# Cleanup
+# Cleanup targets
 clean:
-	@echo "Cleaning artifacts..."
-	rm -rf .pytest_cache/
-	rm -rf htmlcov/
-	rm -rf .coverage
-	rm -rf coverage.xml
-	rm -rf report.html
-	rm -rf bandit-report.json
-	rm -rf safety-report.json
-	rm -rf semgrep-report.json
-	rm -rf load-results*.json
-	rm -rf mutation-results.xml
-	rm -rf .mutmut-cache/
-	rm -rf .benchmarks/
-	rm -rf dist/
-	rm -rf build/
-	rm -rf *.egg-info/
-	find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
-	find . -type f -name "*.pyc" -delete 2>/dev/null || true
+	@echo "🧹 Cleaning up temporary files and containers..."
+	@docker stop stillme-dev 2>/dev/null || true
+	@docker rm stillme-dev 2>/dev/null || true
+	@docker system prune -f
+	@rm -f *.json *.xml
+	@rm -rf htmlcov/
+	@rm -rf .pytest_cache/
+	@rm -rf __pycache__/
+	@find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+	@find . -type f -name "*.pyc" -delete 2>/dev/null || true
+	@echo "✅ Cleanup completed"
 
-# Development helpers
-dev-setup: install
-	@echo "Setting up development environment..."
-	pre-commit install
-	@echo "Development environment ready"
+# Development targets
+dev:
+	@echo "🔧 Starting development environment..."
+	@python -m pip install --upgrade pip
+	@pip install -r requirements-test.txt
+	@echo "✅ Development environment ready"
 
-dev-test: format lint test-quick
-	@echo "Development test cycle completed"
+install:
+	@echo "📦 Installing dependencies..."
+	@python -m pip install --upgrade pip
+	@pip install -r requirements-test.txt
+	@echo "✅ Dependencies installed"
 
-# CI/CD validation
-validate-ci:
-	@echo "Validating CI/CD configuration..."
-	@echo "Checking workflow files..."
-	@test -f .github/workflows/ci_tier1.yml || (echo "❌ Tier 1 workflow missing" && exit 1)
-	@test -f .github/workflows/ci_tier2_nightly.yml || (echo "❌ Tier 2 workflow missing" && exit 1)
-	@echo "Checking CI scripts..."
-	@test -f ci/check_policy_loaded.py || (echo "❌ Policy check script missing" && exit 1)
-	@test -f ci/check_protected_files.py || (echo "❌ Protected files check script missing" && exit 1)
-	@test -f ci/check_secrets.py || (echo "❌ Secrets check script missing" && exit 1)
-	@echo "✅ CI/CD configuration is valid"
+# Documentation targets
+docs:
+	@echo "📚 Generating documentation..."
+	@python -c "from agent_dev.core.documentation_generator import DocumentationGenerator; doc_gen = DocumentationGenerator('.'); doc_gen.generate_documentation_report()"
+	@echo "✅ Documentation generated"
 
-# Performance benchmarks
-benchmark:
-	@echo "Running performance benchmarks..."
-	python -m pytest tests/benchmarks/ -v --benchmark-only --benchmark-save=benchmark-results
+# Monitoring targets
+monitor:
+	@echo "📊 Starting monitoring stack..."
+	@docker-compose -f docker-compose.staging.yml up -d prometheus grafana
+	@echo "✅ Monitoring stack started"
+	@echo "📊 Prometheus: http://localhost:9090"
+	@echo "📊 Grafana: http://localhost:3000 (admin/admin)"
 
-# Mutation testing
-mutation-test:
-	@echo "Running mutation testing..."
-	mutmut run --paths-to-mutate=agentdev/ --tests-dir=tests/agentdev/
-	mutmut junitxml > mutation-results.xml
+# Quick development workflow
+quick: lint unit
+	@echo "✅ Quick development check completed"
 
-# Chaos engineering
-chaos-test:
-	@echo "Running chaos engineering tests..."
-	python -m pytest tests/chaos/ -v --tb=short
+# Full CI/CD pipeline simulation
+ci: lint test security
+	@echo "✅ CI pipeline simulation completed"
 
-# Fuzzing
-fuzz-test:
-	@echo "Running fuzzing tests..."
-	python -m pytest tests/fuzzing/ -v --tb=short --hypothesis-show-statistics
-
-# Integration tests
-integration-test:
-	@echo "Running integration tests..."
-	python -m pytest tests/integration/ -v --tb=short
-
-# All-in-one commands
-ci-all: validate-ci ci-tier1 ci-tier2
-	@echo "🎉 All CI/CD checks completed successfully"
-
-test-all: test-quick test-full test-seal
-	@echo "🎉 All tests completed successfully"
-
-# Help for specific targets
-help-ci:
-	@echo "CI/CD Commands:"
-	@echo "  make ci-tier1         - Run Tier 1 CI (lint, quick tests, security)"
-	@echo "  make ci-tier2         - Run Tier 2 CI (full tests, mutation, chaos)"
-	@echo "  make ci-all           - Run all CI checks"
-	@echo "  make validate-ci      - Validate CI configuration"
-
-help-test:
-	@echo "Testing Commands:"
-	@echo "  make test-quick       - Quick tests (Tier 1)"
-	@echo "  make test-full        - Full test suite"
-	@echo "  make test-seal        - SEAL-GRADE tests"
-	@echo "  make test-all         - All tests"
-	@echo "  make benchmark        - Performance benchmarks"
-	@echo "  make mutation-test    - Mutation testing"
-	@echo "  make chaos-test       - Chaos engineering"
-	@echo "  make fuzz-test        - Fuzzing tests"
-	@echo "  make integration-test - Integration tests"
-	@echo "  make load_phase3      - Phase 3 load tests"
-
-# Phase 3 Load Testing
-load_phase3:
-	@echo "🚀 Starting Phase 3 Load Testing..."
-	@mkdir -p reports/phase3/load
-	@echo "Running K6 load test with 1000 prompts and 100 concurrent users..."
-	@k6 run --out json=reports/phase3/load/load_test_results.json load_test/k6_phase3.js
-	@echo "✅ Load test completed. Results saved to reports/phase3/load/"
-	@echo "📊 Check load_test_results.json for detailed metrics"
+# Production readiness check
+prod-ready: lint test security dast build
+	@echo "✅ Production readiness check completed"

@@ -1,0 +1,60 @@
+name: CI DAST Security Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  dast-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.12
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-test.txt
+        pip install requests beautifulsoup4
+    
+    - name: Start test server
+      run: |
+        python -m http.server 8080 &
+        sleep 5
+    
+    - name: Run OWASP ZAP Baseline Scan
+      uses: zaproxy/action-baseline@v0.7.0
+      with:
+        target: 'http://localhost:8080'
+        rules_file_name: '.zap/rules.tsv'
+        cmd_options: '-a'
+    
+    - name: Run custom fuzz tests
+      run: |
+        python tests/security/test_fuzz_http.py
+    
+    - name: Upload ZAP results
+      uses: actions/upload-artifact@v3
+      with:
+        name: zap-report
+        path: zap-report.html
+    
+    - name: Upload fuzz results
+      uses: actions/upload-artifact@v3
+      with:
+        name: fuzz-findings
+        path: artifacts/fuzz-findings.json
+    
+    - name: DAST test summary
+      run: |
+        echo "## DAST Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "✅ OWASP ZAP baseline scan completed" >> $GITHUB_STEP_SUMMARY
+        echo "✅ Custom fuzz tests completed" >> $GITHUB_STEP_SUMMARY
+        echo "📊 Reports uploaded as artifacts" >> $GITHUB_STEP_SUMMARY
