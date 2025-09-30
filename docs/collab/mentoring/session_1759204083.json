@@ -1,0 +1,19 @@
+{
+  "session_id": "session_1759204083",
+  "mentor": "Senior Dev",
+  "mentee": "Junior Dev",
+  "topic": "Python Testing",
+  "duration": 60,
+  "feedback": "Good progress on testing concepts",
+  "recommendations": [
+    "H\u1ecdc Python basics: variables, functions, classes",
+    "Th\u1ef1c h\u00e0nh v\u1edbi Python exercises",
+    "\u0110\u1ecdc Python documentation",
+    "Tham gia Python community",
+    "H\u1ecdc v\u1ec1 unit testing v\u1edbi pytest",
+    "Th\u1ef1c h\u00e0nh vi\u1ebft test cases",
+    "T\u00ecm hi\u1ec3u v\u1ec1 test coverage",
+    "H\u1ecdc v\u1ec1 mocking v\u00e0 fixtures"
+  ],
+  "created_at": "2025-09-30 10:48:03.382048"
+}
