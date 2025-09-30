@@ -663,6 +663,12 @@ make security     # Run security scans
 make docker       # Build and run Docker container
 ```
 
+**AgentDev Monitoring:**
+```bash
+python scripts/start_agentdev_monitor.py --config config/agentdev_monitor.json
+python -c "from agent-dev.core.automated_monitor import AutomatedMonitor; monitor = AutomatedMonitor(); monitor.start_monitoring()"
+```
+
 **Staging:**
 ```bash
 make deploy-staging    # Deploy to staging

@@ -48,7 +48,7 @@ class TestRecovery:
     def test_power_loss_recovery(self, state_store):
         """Test recovery from power loss"""
         # Create job before power loss
-            job = asyncio.run(state_store.create_job("power_loss_job", "Power Loss Job", "Test power loss recovery"))
+        job = asyncio.run(state_store.create_job("power_loss_job", "Power Loss Job", "Test power loss recovery"))
         
         # Simulate power loss by corrupting the database
         db_path = state_store.db_path

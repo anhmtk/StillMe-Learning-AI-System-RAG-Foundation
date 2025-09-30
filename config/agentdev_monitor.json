@@ -1,0 +1,40 @@
+{
+  "project_root": ".",
+  "scan_interval_minutes": 15,
+  "deep_scan_interval_hours": 2,
+  "alert_thresholds": {
+    "max_errors_per_file": 10,
+    "max_total_errors": 50,
+    "max_syntax_errors": 5
+  },
+  "auto_fix_enabled": true,
+  "auto_fix_safe_only": true,
+  "notifications": {
+    "console": true,
+    "email": false,
+    "slack": false
+  },
+  "exclude_patterns": [
+    "**/__pycache__/**",
+    "**/node_modules/**",
+    "**/venv/**",
+    "**/.venv/**",
+    "**/site-packages/**",
+    "**/dist-packages/**",
+    "**/backup_legacy/**",
+    "**/tests/fixtures/**",
+    "**/deployment_package/**"
+  ],
+  "monitoring": {
+    "enabled": true,
+    "health_check_interval": 300,
+    "metrics_retention_days": 7,
+    "alerts_retention_days": 3
+  },
+  "agentdev": {
+    "mode": "SENIOR",
+    "auto_fix_enabled": true,
+    "max_auto_fix_attempts": 3,
+    "timeout_seconds": 300
+  }
+}

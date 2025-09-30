@@ -230,7 +230,7 @@ class TestChaosEngineering:
             try:
                 # Simulate fault
                 if fault_type == "network_timeout":
-                    asyncio.run(asyncio.wait_for(asyncio.sleep(1), timeout=0.1)
+                    asyncio.run(asyncio.wait_for(asyncio.sleep(1), timeout=0.1))
                 elif fault_type == "database_error":
                     raise Exception("Database error")
                 elif fault_type == "memory_error":

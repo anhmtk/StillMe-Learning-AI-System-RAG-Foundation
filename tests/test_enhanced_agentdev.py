@@ -318,7 +318,7 @@ def complex_function():
                 description="Hardcoded password",
                 file_path="test.py",
                 line_number=1,
-                code_snippet="password = os.getenv("PASSWORD", "")",
+                code_snippet="password = os.getenv('PASSWORD', '')",
                 impact="Security breach",
                 probability=0.8,
                 mitigation="Use environment variables",

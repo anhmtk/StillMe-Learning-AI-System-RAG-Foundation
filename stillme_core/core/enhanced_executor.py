@@ -6,19 +6,7 @@ Enhanced Executor with multiple testing frameworks support
 """
 
 try:
-try:
-try:
-try:
-try:
-                    from __future__ import annotations
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
+    from __future__ import annotations
 except ImportError:
     pass
 from typing import List, Dict, Any, Optional, Union, Tuple

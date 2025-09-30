@@ -38,7 +38,7 @@ class TestInputFuzzing:
         asyncio.run(store.close())
         Path(temp_db.name).unlink(missing_ok=True)
     
-    @given()
+    @given(
         job_id=st.text(min_size=0, max_size=1000),
         name=st.text(min_size=0, max_size=1000),
         description=st.text(min_size=0, max_size=1000)

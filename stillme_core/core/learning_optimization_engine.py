@@ -29,41 +29,13 @@ import hashlib
 # Import Phase 1 and 2.1 modules
 try:
     from .security_middleware import SecurityMiddleware  # type: ignore
-try:
-try:
-try:
-try:
-try:
-                        from .performance_monitor import PerformanceMonitor
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
+    from .performance_monitor import PerformanceMonitor
     from .integration_bridge import IntegrationBridge  # type: ignore
     from .memory_security_integration import MemorySecurityIntegration  # type: ignore
     from .module_governance_system import ModuleGovernanceSystem  # type: ignore
     from .validation_framework import ComprehensiveValidationFramework  # type: ignore
     from .final_validation_system import FinalValidationSystem  # type: ignore
     from .autonomous_management_system import AutonomousManagementSystem  # type: ignore
-except ImportError:
-    try:
-        from stillme_core.security_middleware import SecurityMiddleware  # type: ignore
-try:
-try:
-try:
-try:
-try:
-                            from stillme_core.performance_monitor import PerformanceMonitor
-except ImportError:
-    pass
-except ImportError:
-    pass
 except ImportError:
     pass
 except ImportError:
