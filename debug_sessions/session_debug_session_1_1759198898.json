@@ -1,0 +1,25 @@
+{
+  "session_id": "debug_session_1_1759198898",
+  "start_time": "2025-09-30 09:21:38.292405",
+  "end_time": "2025-09-30 09:21:38.293405",
+  "status": "DebugSessionStatus.COMPLETED",
+  "error_count": 0,
+  "warnings_count": 0,
+  "logs": [
+    {
+      "timestamp": "2025-09-30 09:21:38.293405",
+      "level": "DebugLevel.INFO",
+      "message": "Test message",
+      "module": "test_module",
+      "function": "test_function",
+      "line_number": 1,
+      "thread_id": 25956,
+      "session_id": "debug_session_1_1759198898",
+      "metadata": {}
+    }
+  ],
+  "error_patterns": [],
+  "root_cause": null,
+  "resolution": "Test completed",
+  "duration": 0.001
+}
