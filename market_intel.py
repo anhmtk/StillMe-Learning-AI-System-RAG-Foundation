@@ -23,35 +23,35 @@ logger = logging.getLogger(__name__)
 
 class MarketIntelligence:
     """Market Intelligence service với bảo mật nghiêm ngặt"""
-    
+
     def __init__(self):
         self.newsapi_key = os.getenv("NEWSAPI_KEY")
         self.gnews_api_key = os.getenv("GNEWS_API_KEY")
         self.github_token = os.getenv("GITHUB_TOKEN")
-        
+
         # API endpoints
         self.newsapi_url = "https://newsapi.org/v2/everything"
         self.gnews_url = "https://gnews.io/api/v4/search"
         self.github_trending_url = "https://api.github.com/search/repositories"
         self.hackernews_url = "https://hn.algolia.com/api/v1/search"
-    
+
     async def search_news(self, query: str, language: str = "vi") -> Dict[str, Any]:
         """Tìm kiếm tin tức"""
         try:
             logger.info(f"🔍 Searching news for: {query}")
-            
+
             # Try NewsAPI first
             if self.newsapi_key:
                 result = await self._search_newsapi(query, language)
                 if result["success"] and result["data"] and result["data"].get("articles"):
                     return result
-            
+
             # Fallback to GNews
             if self.gnews_api_key:
                 result = await self._search_gnews(query, language)
                 if result["success"] and result["data"] and result["data"].get("articles"):
                     return result
-            
+
             # Fallback to mock data if no API keys work
             logger.warning("⚠️ No working news API keys, using mock data")
             return {
@@ -68,7 +68,7 @@ class MarketIntelligence:
                         {
                             "title": "Machine Learning Breakthrough",
                             "description": "New machine learning algorithms demonstrate improved accuracy and efficiency.",
-                            "url": "https://example.com/ai-news-2", 
+                            "url": "https://example.com/ai-news-2",
                             "publishedAt": "2025-09-22T08:30:00Z",
                             "source": "AI Weekly"
                         },
@@ -84,7 +84,7 @@ class MarketIntelligence:
                     "source": "Mock Data"
                 }
             }
-            
+
         except Exception as e:
             logger.error(f"❌ News search error: {e}")
             return {
@@ -92,7 +92,7 @@ class MarketIntelligence:
                 "error": f"News search failed: {str(e)}",
                 "data": None
             }
-    
+
     async def _search_newsapi(self, query: str, language: str) -> Dict[str, Any]:
         """Search using NewsAPI"""
         try:
@@ -103,16 +103,16 @@ class MarketIntelligence:
                 "pageSize": 10,
                 "apiKey": self.newsapi_key
             }
-            
+
             async with SecureHttpClient() as client:
                 response = await client.get(self.newsapi_url, headers={
                     "X-API-Key": self.newsapi_key
                 })
-                
+
                 if response["success"]:
                     articles = response["data"].get("articles", [])
                     formatted_articles = []
-                    
+
                     for article in articles:
                         formatted_articles.append({
                             "title": article.get("title", ""),
@@ -121,7 +121,7 @@ class MarketIntelligence:
                             "publishedAt": article.get("publishedAt", ""),
                             "source": article.get("source", {}).get("name", "")
                         })
-                    
+
                     return {
                         "success": True,
                         "data": {
@@ -132,7 +132,7 @@ class MarketIntelligence:
                     }
                 else:
                     return response
-                    
+
         except Exception as e:
             logger.error(f"❌ NewsAPI search error: {e}")
             return {
@@ -140,7 +140,7 @@ class MarketIntelligence:
                 "error": f"NewsAPI search failed: {str(e)}",
                 "data": None
             }
-    
+
     async def _search_gnews(self, query: str, language: str) -> Dict[str, Any]:
         """Search using GNews API"""
         try:
@@ -151,16 +151,16 @@ class MarketIntelligence:
                 "max": 10,
                 "apikey": self.gnews_api_key
             }
-            
+
             url = f"{self.gnews_url}?q={query}&lang={language}&apikey={self.gnews_api_key}"
-            
+
             async with SecureHttpClient() as client:
                 response = await client.get(url)
-                
+
                 if response["success"]:
                     articles = response["data"].get("articles", [])
                     formatted_articles = []
-                    
+
                     for article in articles:
                         formatted_articles.append({
                             "title": article.get("title", ""),
@@ -169,7 +169,7 @@ class MarketIntelligence:
                             "publishedAt": article.get("publishedAt", ""),
                             "source": article.get("source", {}).get("name", "")
                         })
-                    
+
                     return {
                         "success": True,
                         "data": {
@@ -180,7 +180,7 @@ class MarketIntelligence:
                     }
                 else:
                     return response
-                    
+
         except Exception as e:
             logger.error(f"❌ GNews search error: {e}")
             return {
@@ -188,27 +188,27 @@ class MarketIntelligence:
                 "error": f"GNews search failed: {str(e)}",
                 "data": None
             }
-    
+
     async def get_github_trending(self, language: str = "python") -> Dict[str, Any]:
         """Lấy GitHub trending repositories"""
         try:
             logger.info(f"🔍 Getting GitHub trending for: {language}")
-            
+
             # GitHub API query
             query = f"language:{language} stars:>1000"
             url = f"{self.github_trending_url}?q={query}&sort=stars&order=desc&per_page=10"
-            
+
             headers = {}
             if self.github_token:
                 headers["Authorization"] = f"token {self.github_token}"
-            
+
             async with SecureHttpClient() as client:
                 response = await client.get(url, headers=headers)
-                
+
                 if response["success"]:
                     repos = response["data"].get("items", [])
                     formatted_repos = []
-                    
+
                     for repo in repos:
                         formatted_repos.append({
                             "name": repo.get("name", ""),
@@ -219,7 +219,7 @@ class MarketIntelligence:
                             "language": repo.get("language", ""),
                             "updated_at": repo.get("updated_at", "")
                         })
-                    
+
                     return {
                         "success": True,
                         "data": {
@@ -230,7 +230,7 @@ class MarketIntelligence:
                     }
                 else:
                     return response
-                    
+
         except Exception as e:
             logger.error(f"❌ GitHub trending error: {e}")
             return {
@@ -238,46 +238,46 @@ class MarketIntelligence:
                 "error": f"GitHub trending failed: {str(e)}",
                 "data": None
             }
-    
+
     async def search_github_trending(self, topic: str, since: str = "daily") -> Dict[str, Any]:
         """Search GitHub trending repositories by topic"""
         try:
             logger.info(f"🔍 Searching GitHub trending for topic: {topic}, since: {since}")
-            
+
             # Map since parameter to GitHub API format
             since_map = {
                 "daily": "daily",
-                "weekly": "weekly", 
+                "weekly": "weekly",
                 "monthly": "monthly"
             }
             since_param = since_map.get(since, "daily")
-            
+
             # Build search query
             query = f"{topic} language:{topic} stars:>10"
-            
+
             # GitHub API URL for trending repositories
             url = f"{self.github_trending_url}?q={query}&sort=stars&order=desc&per_page=10"
-            
+
             headers = {}
             if self.github_token:
                 headers["Authorization"] = f"token {self.github_token}"
-            
+
             async with SecureHttpClient() as client:
                 response = await client.get(url, headers=headers)
-                
+
                 if response["success"]:
                     repos = response["data"].get("items", [])
                     formatted_repos = []
-                    
+
                     for repo in repos:
                         # Calculate trending metrics
                         stars = repo.get("stargazers_count", 0)
                         created_at = repo.get("created_at", "")
                         updated_at = repo.get("updated_at", "")
-                        
+
                         # Simple trending score based on stars and recency
                         trending_score = min(stars / 1000.0, 1.0)  # Normalize to 0-1
-                        
+
                         formatted_repos.append({
                             "name": repo.get("name", ""),
                             "full_name": repo.get("full_name", ""),
@@ -290,7 +290,7 @@ class MarketIntelligence:
                             "updated_at": updated_at,
                             "trending_score": trending_score
                         })
-                    
+
                     return {
                         "success": True,
                         "data": {
@@ -337,7 +337,7 @@ class MarketIntelligence:
                             "since": since
                         }
                     }
-                    
+
         except Exception as e:
             logger.error(f"❌ GitHub trending search error: {e}")
             return {
@@ -350,22 +350,22 @@ class MarketIntelligence:
         """Search top Hacker News stories from last N hours"""
         try:
             logger.info(f"🔍 Searching Hacker News top stories from last {hours} hours")
-            
+
             # Calculate timestamp for N hours ago
             from datetime import datetime, timedelta
             cutoff_time = datetime.now() - timedelta(hours=hours)
             timestamp = int(cutoff_time.timestamp())
-            
+
             # Hacker News API URL
             url = f"{self.hackernews_url}?query=&tags=story&numericFilters=created_at_i>{timestamp}&hitsPerPage=10"
-            
+
             async with SecureHttpClient() as client:
                 response = await client.get(url)
-                
+
                 if response["success"]:
                     hits = response["data"].get("hits", [])
                     formatted_stories = []
-                    
+
                     for story in hits:
                         formatted_stories.append({
                             "title": story.get("title", ""),
@@ -376,7 +376,7 @@ class MarketIntelligence:
                             "created_at": story.get("created_at", ""),
                             "objectID": story.get("objectID", "")
                         })
-                    
+
                     return {
                         "success": True,
                         "data": {
@@ -415,7 +415,7 @@ class MarketIntelligence:
                             "hours": hours
                         }
                     }
-                    
+
         except Exception as e:
             logger.error(f"❌ Hacker News top search error: {e}")
             return {
@@ -428,16 +428,16 @@ class MarketIntelligence:
         """Lấy Hacker News trending"""
         try:
             logger.info("🔍 Getting Hacker News trending")
-            
+
             url = f"{self.hackernews_url}?query=&tags=front_page&hitsPerPage=10"
-            
+
             async with SecureHttpClient() as client:
                 response = await client.get(url)
-                
+
                 if response["success"]:
                     hits = response["data"].get("hits", [])
                     formatted_stories = []
-                    
+
                     for story in hits:
                         formatted_stories.append({
                             "title": story.get("title", ""),
@@ -447,7 +447,7 @@ class MarketIntelligence:
                             "author": story.get("author", ""),
                             "created_at": story.get("created_at", "")
                         })
-                    
+
                     return {
                         "success": True,
                         "data": {
@@ -457,7 +457,7 @@ class MarketIntelligence:
                     }
                 else:
                     return response
-                    
+
         except Exception as e:
             logger.error(f"❌ Hacker News trending error: {e}")
             return {
@@ -465,28 +465,28 @@ class MarketIntelligence:
                 "error": f"Hacker News trending failed: {str(e)}",
                 "data": None
             }
-    
+
     async def process_web_request(self, request_type: str, query: str, **kwargs) -> Dict[str, Any]:
         """Xử lý web request dựa trên loại"""
         try:
             if request_type == "news":
                 language = kwargs.get("language", "vi")
                 return await self.search_news(query, language)
-            
+
             elif request_type == "github_trending":
                 language = kwargs.get("language", "python")
                 return await self.get_github_trending(language)
-            
+
             elif request_type == "hackernews":
                 return await self.get_hackernews_trending()
-            
+
             else:
                 return {
                     "success": False,
                     "error": f"Unknown request type: {request_type}",
                     "data": None
                 }
-                
+
         except Exception as e:
             logger.error(f"❌ Web request processing error: {e}")
             return {
@@ -506,26 +506,26 @@ if __name__ == "__main__":
     # Test market intelligence
     async def test_market_intel():
         print("🧪 Testing Market Intelligence...")
-        
+
         # Test news search
         print("\n📰 Testing news search...")
         news_result = await market_intel.search_news("AI technology", "en")
         print(f"News result: {news_result['success']}")
         if news_result['success']:
             print(f"Found {len(news_result['data']['articles'])} articles")
-        
+
         # Test GitHub trending
         print("\n🐙 Testing GitHub trending...")
         github_result = await market_intel.get_github_trending("python")
         print(f"GitHub result: {github_result['success']}")
         if github_result['success']:
             print(f"Found {len(github_result['data']['repositories'])} repositories")
-        
+
         # Test Hacker News
         print("\n🔥 Testing Hacker News...")
         hn_result = await market_intel.get_hackernews_trending()
         print(f"HN result: {hn_result['success']}")
         if hn_result['success']:
             print(f"Found {len(hn_result['data']['stories'])} stories")
-    
+
     asyncio.run(test_market_intel())

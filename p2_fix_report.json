@@ -1,0 +1,23 @@
+{
+  "errors_before": 219,
+  "errors_after": 8,
+  "patched_files": 14,
+  "fixed_F821": 41,
+  "touched_tests": 0,
+  "reexports_added": [
+    "stillme_core/compat.py",
+    "stillme_core/missing_implementations.py",
+    "stillme_core/__init__.py"
+  ],
+  "missing_in_core_implemented": [
+    "NodeType",
+    "ImpactLevel",
+    "MatchType",
+    "SemanticSearchEngine",
+    "RedisEventBus",
+    "DAGExecutor",
+    "RBACManager"
+  ],
+  "improvement": 211,
+  "success_rate": "96.3%"
+}

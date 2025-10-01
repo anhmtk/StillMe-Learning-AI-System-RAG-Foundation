@@ -1,3 +1,5 @@
+from stillme_core import LongTermMemory, MemoryItem
+
 """
 test_layered_memory_v1.py
 =========================
@@ -13,7 +15,7 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from modules.layered_memory_v1 import LayeredMemoryV1
+from stillme_core.modules.layered_memory_v1 import LayeredMemoryV1
 
 
 # ---------- FIXTURES ----------

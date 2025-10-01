@@ -1,6 +1,5 @@
 import os
 import sys
-import types
 
 # Add current directory to Python path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -40,19 +39,19 @@ def test_stub_router_heuristics():
     """Test that StubRouter chooses appropriate models for different prompt types."""
     from plugins.private_stub.plugin import StubRouter
     router = StubRouter()
-    
+
     # Code prompts
     assert "deepseek-coder" in router.choose_model("write a function")
     assert "deepseek-coder" in router.choose_model("```python\nprint('hello')\n```")
-    
+
     # Image prompts
     assert "llava" in router.choose_model("describe this image")
     assert "llava" in router.choose_model("what's in this photo")
-    
+
     # Math prompts
     assert "deepseek-math" in router.choose_model("solve this equation")
     assert "deepseek-math" in router.choose_model("calculate statistics")
-    
+
     # Default prompts
     assert "llama3" in router.choose_model("hello world")
     assert "llama3" in router.choose_model("tell me a story")
@@ -61,6 +60,6 @@ def test_empty_prompt():
     """Test handling of empty or None prompts."""
     from plugins.private_stub.plugin import StubRouter
     router = StubRouter()
-    
+
     assert "llama3" in router.choose_model("")
     assert "llama3" in router.choose_model(None)

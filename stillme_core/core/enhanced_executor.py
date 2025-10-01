@@ -1,28 +1,25 @@
+from __future__ import annotations
+
 import os
 
 # stillme_core/enhanced_executor.py
 """
 Enhanced Executor with multiple testing frameworks support
 """
-
-try:
-    from __future__ import annotations
-except ImportError:
-    pass
-from typing import List, Dict, Any, Optional, Union, Tuple
-import subprocess
 import asyncio
 import concurrent.futures
-import time
 import json
+import logging
 import os
-from pathlib import Path
+import subprocess
+import time
 from dataclasses import dataclass
 from enum import Enum
-import logging
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-from .plan_types import PlanItem
 from .executor import ExecResult, _run
+from .plan_types import PlanItem
 
 logger = logging.getLogger(__name__)
 

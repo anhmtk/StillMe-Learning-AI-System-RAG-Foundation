@@ -31,16 +31,16 @@ class AgentDevScore:
     security_compliance: float  # 0-1: tuân thủ bảo mật
     learning_capability: float  # 0-1: khả năng học hỏi
     overall_agentdev_score: float  # 0-1: điểm AgentDev tổng
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
 
 class AgentDevEval:
     """Evaluator cho AgentDev integration và performance"""
-    
+
     def __init__(self):
         self.logger = logger
-        
+
         # AgentDev integration patterns
         self.integration_patterns = {
             'agentdev_indicators': [
@@ -59,7 +59,7 @@ class AgentDevEval:
                 r'\b(adapt|evolve|progress|advance)\b'
             ]
         }
-        
+
         # Code quality indicators
         self.code_quality_patterns = {
             'structure': [
@@ -78,7 +78,7 @@ class AgentDevEval:
                 r'\b(clean\s+code|readable|maintainable)\b'
             ]
         }
-        
+
         # Security compliance patterns
         self.security_patterns = {
             'input_validation': [
@@ -97,7 +97,7 @@ class AgentDevEval:
                 r'\b(data\s+protection|privacy)\b'
             ]
         }
-        
+
         # Performance thresholds
         self.performance_thresholds = {
             'response_time': {
@@ -113,9 +113,9 @@ class AgentDevEval:
                 'poor': 2000        # > 1GB
             }
         }
-    
-    def evaluate(self, 
-                 response: str, 
+
+    def evaluate(self,
+                 response: str,
                  user_input: str = "",
                  context: Optional[Dict] = None,
                  performance_metrics: Optional[Dict] = None) -> AgentDevScore:
@@ -133,22 +133,22 @@ class AgentDevEval:
         """
         try:
             self.logger.info(f"🔍 Evaluating AgentDev for response: {response[:100]}...")
-            
+
             # 1. Đánh giá integration
             integration_score = self._evaluate_integration(response, user_input)
-            
+
             # 2. Đánh giá performance
             performance_score = self._evaluate_performance(performance_metrics)
-            
+
             # 3. Đánh giá code quality
             code_quality = self._evaluate_code_quality(response, user_input)
-            
+
             # 4. Đánh giá security compliance
             security_compliance = self._evaluate_security_compliance(response, user_input)
-            
+
             # 5. Đánh giá learning capability
             learning_capability = self._evaluate_learning_capability(response, context)
-            
+
             # 6. Tính điểm AgentDev tổng
             overall_score = (
                 integration_score * 0.25 +
@@ -157,7 +157,7 @@ class AgentDevEval:
                 security_compliance * 0.20 +
                 learning_capability * 0.15
             )
-            
+
             result = AgentDevScore(
                 integration_score=integration_score,
                 performance_score=performance_score,
@@ -166,69 +166,69 @@ class AgentDevEval:
                 learning_capability=learning_capability,
                 overall_agentdev_score=overall_score
             )
-            
+
             self.logger.info(f"✅ AgentDev evaluation completed. Overall score: {overall_score:.3f}")
             return result
-            
+
         except Exception as e:
             self.logger.error(f"❌ AgentDev evaluation failed: {e}")
             return AgentDevScore(0, 0, 0, 0, 0, 0)
-    
+
     def _evaluate_integration(self, response: str, user_input: str) -> float:
         """Đánh giá AgentDev integration"""
         try:
             score = 0.0
             total_checks = 0
-            
+
             # Check for AgentDev indicators
-            agentdev_count = sum(len(re.findall(pattern, response, re.IGNORECASE)) 
+            agentdev_count = sum(len(re.findall(pattern, response, re.IGNORECASE))
                                for pattern in self.integration_patterns['agentdev_indicators'])
             if agentdev_count > 0:
                 score += 0.4
             total_checks += 1
-            
+
             # Check for task management capabilities
-            task_count = sum(len(re.findall(pattern, response, re.IGNORECASE)) 
+            task_count = sum(len(re.findall(pattern, response, re.IGNORECASE))
                            for pattern in self.integration_patterns['task_management'])
             if task_count > 0:
                 score += 0.3
             total_checks += 1
-            
+
             # Check for learning indicators
-            learning_count = sum(len(re.findall(pattern, response, re.IGNORECASE)) 
+            learning_count = sum(len(re.findall(pattern, response, re.IGNORECASE))
                                for pattern in self.integration_patterns['learning_indicators'])
             if learning_count > 0:
                 score += 0.3
             total_checks += 1
-            
+
             # Check if response shows autonomous behavior
             autonomous_indicators = [
                 r'\b(I\s+will|I\s+can|I\s+am\s+able|I\s+can\s+help)\b',
                 r'\b(automatically|autonomously|independently)\b',
                 r'\b(self\s+directed|self\s+managed|self\s+governing)\b'
             ]
-            
-            autonomous_count = sum(len(re.findall(pattern, response, re.IGNORECASE)) 
+
+            autonomous_count = sum(len(re.findall(pattern, response, re.IGNORECASE))
                                  for pattern in autonomous_indicators)
             if autonomous_count > 0:
                 score += 0.2
             total_checks += 1
-            
+
             return min(score / max(total_checks, 1), 1.0)
-            
+
         except Exception as e:
             self.logger.error(f"Error evaluating integration: {e}")
             return 0.0
-    
+
     def _evaluate_performance(self, performance_metrics: Optional[Dict]) -> float:
         """Đánh giá performance"""
         try:
             if not performance_metrics:
                 return 0.5  # Default score if no metrics
-            
+
             score = 0.0
             total_checks = 0
-            
+
             # Check response time
             response_time = performance_metrics.get('response_time_ms', 0)
             if response_time <= self.performance_thresholds['response_time']['excellent']:
@@ -240,7 +240,7 @@ class AgentDevEval:
             else:
                 score += 0.1
             total_checks += 1
-            
+
             # Check memory usage
             memory_usage = performance_metrics.get('memory_usage_mb', 0)
             if memory_usage <= self.performance_thresholds['memory_usage']['excellent']:
@@ -252,7 +252,7 @@ class AgentDevEval:
             else:
                 score += 0.1
             total_checks += 1
-            
+
             # Check CPU usage
             cpu_usage = performance_metrics.get('cpu_usage_percent', 0)
             if cpu_usage <= 50:
@@ -264,104 +264,104 @@ class AgentDevEval:
             else:
                 score += 0.1
             total_checks += 1
-            
+
             return min(score / max(total_checks, 1), 1.0)
-            
+
         except Exception as e:
             self.logger.error(f"Error evaluating performance: {e}")
             return 0.0
-    
+
     def _evaluate_code_quality(self, response: str, user_input: str) -> float:
         """Đánh giá chất lượng code"""
         try:
             score = 0.0
             total_checks = 0
-            
+
             # Check for code structure
-            structure_count = sum(len(re.findall(pattern, response, re.IGNORECASE)) 
+            structure_count = sum(len(re.findall(pattern, response, re.IGNORECASE))
                                 for pattern in self.code_quality_patterns['structure'])
             if structure_count > 0:
                 score += 0.4
             total_checks += 1
-            
+
             # Check for documentation
-            doc_count = sum(len(re.findall(pattern, response, re.IGNORECASE)) 
+            doc_count = sum(len(re.findall(pattern, response, re.IGNORECASE))
                           for pattern in self.code_quality_patterns['documentation'])
             if doc_count > 0:
                 score += 0.3
             total_checks += 1
-            
+
             # Check for best practices
-            practices_count = sum(len(re.findall(pattern, response, re.IGNORECASE)) 
+            practices_count = sum(len(re.findall(pattern, response, re.IGNORECASE))
                                 for pattern in self.code_quality_patterns['best_practices'])
             if practices_count > 0:
                 score += 0.3
             total_checks += 1
-            
+
             # Check for code blocks in response
             code_blocks = len(re.findall(r'```[\s\S]*?```', response))
             if code_blocks > 0:
                 score += 0.2
             total_checks += 1
-            
+
             return min(score / max(total_checks, 1), 1.0)
-            
+
         except Exception as e:
             self.logger.error(f"Error evaluating code quality: {e}")
             return 0.0
-    
+
     def _evaluate_security_compliance(self, response: str, user_input: str) -> float:
         """Đánh giá tuân thủ bảo mật"""
         try:
             score = 0.0
             total_checks = 0
-            
+
             # Check for input validation
-            validation_count = sum(len(re.findall(pattern, response, re.IGNORECASE)) 
+            validation_count = sum(len(re.findall(pattern, response, re.IGNORECASE))
                                  for pattern in self.security_patterns['input_validation'])
             if validation_count > 0:
                 score += 0.4
             total_checks += 1
-            
+
             # Check for authentication
-            auth_count = sum(len(re.findall(pattern, response, re.IGNORECASE)) 
+            auth_count = sum(len(re.findall(pattern, response, re.IGNORECASE))
                            for pattern in self.security_patterns['authentication'])
             if auth_count > 0:
                 score += 0.3
             total_checks += 1
-            
+
             # Check for data protection
-            protection_count = sum(len(re.findall(pattern, response, re.IGNORECASE)) 
+            protection_count = sum(len(re.findall(pattern, response, re.IGNORECASE))
                                  for pattern in self.security_patterns['data_protection'])
             if protection_count > 0:
                 score += 0.3
             total_checks += 1
-            
+
             # Check for security warnings
             security_warnings = [
                 r'\b(security\s+warning|security\s+risk|vulnerability)\b',
                 r'\b(unsafe|dangerous|risky|insecure)\b',
                 r'\b(validate\s+input|sanitize\s+data|check\s+permissions)\b'
             ]
-            
-            warning_count = sum(len(re.findall(pattern, response, re.IGNORECASE)) 
+
+            warning_count = sum(len(re.findall(pattern, response, re.IGNORECASE))
                               for pattern in security_warnings)
             if warning_count > 0:
                 score += 0.2
             total_checks += 1
-            
+
             return min(score / max(total_checks, 1), 1.0)
-            
+
         except Exception as e:
             self.logger.error(f"Error evaluating security compliance: {e}")
             return 0.0
-    
+
     def _evaluate_learning_capability(self, response: str, context: Optional[Dict]) -> float:
         """Đánh giá khả năng học hỏi"""
         try:
             score = 0.0
             total_checks = 0
-            
+
             # Check for learning indicators in response
             learning_indicators = [
                 r'\b(learn|improve|optimize|enhance)\b',
@@ -369,78 +369,78 @@ class AgentDevEval:
                 r'\b(adapt|evolve|progress|advance)\b',
                 r'\b(remember|recall|retain|store)\b'
             ]
-            
-            learning_count = sum(len(re.findall(pattern, response, re.IGNORECASE)) 
+
+            learning_count = sum(len(re.findall(pattern, response, re.IGNORECASE))
                                for pattern in learning_indicators)
             if learning_count > 0:
                 score += 0.4
             total_checks += 1
-            
+
             # Check for context awareness
             if context and 'previous_interactions' in context:
                 score += 0.3
             total_checks += 1
-            
+
             # Check for adaptive behavior
             adaptive_indicators = [
                 r'\b(adapt|adjust|modify|change)\b',
                 r'\b(based\s+on|according\s+to|depending\s+on)\b',
                 r'\b(context|situation|circumstance)\b'
             ]
-            
-            adaptive_count = sum(len(re.findall(pattern, response, re.IGNORECASE)) 
+
+            adaptive_count = sum(len(re.findall(pattern, response, re.IGNORECASE))
                                for pattern in adaptive_indicators)
             if adaptive_count > 0:
                 score += 0.3
             total_checks += 1
-            
+
             # Check for self-reflection
             reflection_indicators = [
                 r'\b(reflect|analyze|evaluate|assess)\b',
                 r'\b(think|consider|ponder|contemplate)\b',
                 r'\b(review|examine|study|investigate)\b'
             ]
-            
-            reflection_count = sum(len(re.findall(pattern, response, re.IGNORECASE)) 
+
+            reflection_count = sum(len(re.findall(pattern, response, re.IGNORECASE))
                                  for pattern in reflection_indicators)
             if reflection_count > 0:
                 score += 0.2
             total_checks += 1
-            
+
             return min(score / max(total_checks, 1), 1.0)
-            
+
         except Exception as e:
             self.logger.error(f"Error evaluating learning capability: {e}")
             return 0.0
-    
+
     def batch_evaluate(self, responses: List[Dict[str, Any]]) -> List[AgentDevScore]:
         """Đánh giá hàng loạt responses"""
         results = []
-        
+
         for i, item in enumerate(responses):
             try:
                 response = item.get('response', '')
                 user_input = item.get('user_input', '')
                 context = item.get('context', {})
                 performance_metrics = item.get('performance_metrics', {})
-                
+
                 score = self.evaluate(response, user_input, context, performance_metrics)
                 results.append(score)
-                
+
                 self.logger.info(f"✅ Evaluated response {i+1}/{len(responses)}")
-                
+
             except Exception as e:
                 self.logger.error(f"❌ Failed to evaluate response {i+1}: {e}")
                 results.append(AgentDevScore(0, 0, 0, 0, 0, 0))
-        
+
         return results
-    
+
     def generate_report(self, scores: List[AgentDevScore]) -> Dict[str, Any]:
         """Tạo báo cáo tổng hợp"""
         try:
             if not scores:
                 return {"error": "No scores provided"}
-            
+
             # Calculate statistics
             total_scores = len(scores)
             avg_integration = sum(s.integration_score for s in scores) / total_scores
@@ -449,11 +449,11 @@ class AgentDevEval:
             avg_security = sum(s.security_compliance for s in scores) / total_scores
             avg_learning = sum(s.learning_capability for s in scores) / total_scores
             avg_overall = sum(s.overall_agentdev_score for s in scores) / total_scores
-            
+
             # Find best and worst scores
             best_score = max(scores, key=lambda s: s.overall_agentdev_score)
             worst_score = min(scores, key=lambda s: s.overall_agentdev_score)
-            
+
             report = {
                 "timestamp": datetime.now().isoformat(),
                 "total_responses": total_scores,
@@ -482,9 +482,9 @@ class AgentDevEval:
                     "poor": len([s for s in scores if s.overall_agentdev_score < 0.4])
                 }
             }
-            
+
             return report
-            
+
         except Exception as e:
             self.logger.error(f"Error generating report: {e}")
             return {"error": str(e)}
@@ -493,7 +493,7 @@ class AgentDevEval:
 if __name__ == "__main__":
     # Test AgentDevEval
     evaluator = AgentDevEval()
-    
+
     # Test responses
     test_responses = [
         {
@@ -517,12 +517,12 @@ if __name__ == "__main__":
             }
         }
     ]
-    
+
     # Evaluate
     scores = evaluator.batch_evaluate(test_responses)
-    
+
     # Generate report
     report = evaluator.generate_report(scores)
-    
+
     print("🤖 AgentDevEval Test Results:")
     print(json.dumps(report, indent=2, ensure_ascii=False))

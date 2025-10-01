@@ -69,13 +69,13 @@ class TestReflectionScorer:
         """Test scoring with structured response / Kiểm thử chấm điểm với phản hồi có cấu trúc"""
         response = """
         # Hướng dẫn cài đặt Python
-        
+
         Để cài đặt Python, bạn có thể làm theo các bước sau:
-        
+
         1. Truy cập python.org
         2. Tải xuống phiên bản mới nhất
         3. Chạy installer
-        
+
         Ví dụ:
         ```bash
         python --version
@@ -477,11 +477,11 @@ def sample_responses():
         "basic": "This is a basic response.",
         "structured": """
         # Hướng dẫn cài đặt Python
-        
+
         1. Truy cập python.org
         2. Tải xuống phiên bản mới nhất
         3. Chạy installer
-        
+
         Ví dụ:
         ```bash
         python --version

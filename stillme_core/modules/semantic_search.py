@@ -5,8 +5,8 @@ Provides semantic search functionality for clarification context
 """
 
 import logging
-from typing import List, Dict, Any, Optional
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -26,11 +26,11 @@ class SemanticSearch:
     In a production system, this would integrate with vector databases,
     embeddings, or other semantic search technologies.
     """
-    
+
     def __init__(self):
         self.knowledge_base = self._initialize_knowledge_base()
         self.index = self._build_index()
-    
+
     def _initialize_knowledge_base(self) -> List[Dict[str, Any]]:
         """Initialize a basic knowledge base"""
         return [
@@ -43,7 +43,7 @@ class SemanticSearch:
             {
                 "name": "FastAPI",
                 "content": "FastAPI is a modern Python web framework for building APIs",
-                "category": "web_framework", 
+                "category": "web_framework",
                 "tags": ["python", "web", "api", "modern", "fast"]
             },
             {
@@ -125,7 +125,7 @@ class SemanticSearch:
                 "tags": ["python", "django", "views", "controllers"]
             }
         ]
-    
+
     def _build_index(self) -> Dict[str, List[int]]:
         """Build a simple keyword index"""
         index = {}
@@ -136,22 +136,22 @@ class SemanticSearch:
                 if word not in index:
                     index[word] = []
                 index[word].append(i)
-            
+
             # Index by tags
             for tag in item.get("tags", []):
                 if tag not in index:
                     index[tag] = []
                 index[word].append(i)
-            
+
             # Index by category
             category = item.get("category", "")
             if category:
                 if category not in index:
                     index[category] = []
                 index[category].append(i)
-        
+
         return index
-    
+
     def find_related_items(self, query: str, limit: int = 5) -> List[SearchResult]:
         """
         Find items related to the query
@@ -165,45 +165,45 @@ class SemanticSearch:
         """
         query_lower = query.lower()
         query_words = query_lower.split()
-        
+
         # Score items based on keyword matches
         scored_items = []
         for i, item in enumerate(self.knowledge_base):
             score = 0.0
-            
+
             # Exact name match
             if query_lower in item["name"].lower():
                 score += 1.0
-            
+
             # Word matches in name
             name_words = item["name"].lower().split()
             for word in query_words:
                 if word in name_words:
                     score += 0.8
-            
+
             # Tag matches
             for tag in item.get("tags", []):
                 if any(word in tag.lower() for word in query_words):
                     score += 0.6
-            
+
             # Content matches
             content_lower = item["content"].lower()
             for word in query_words:
                 if word in content_lower:
                     score += 0.3
-            
+
             # Category matches
             category = item.get("category", "").lower()
             for word in query_words:
                 if word in category:
                     score += 0.4
-            
+
             if score > 0:
                 scored_items.append((score, i, item))
-        
+
         # Sort by score and return top results
         scored_items.sort(key=lambda x: x[0], reverse=True)
-        
+
         results = []
         for score, i, item in scored_items[:limit]:
             result = SearchResult(
@@ -216,10 +216,10 @@ class SemanticSearch:
                 }
             )
             results.append(result)
-        
+
         logger.debug(f"Semantic search for '{query}' returned {len(results)} results")
         return results
-    
+
     def find_by_category(self, category: str, limit: int = 5) -> List[SearchResult]:
         """
         Find items by category
@@ -233,7 +233,7 @@ class SemanticSearch:
         """
         results = []
         category_lower = category.lower()
-        
+
         for item in self.knowledge_base:
             if category_lower in item.get("category", "").lower():
                 result = SearchResult(
@@ -246,9 +246,9 @@ class SemanticSearch:
                     }
                 )
                 results.append(result)
-        
+
         return results[:limit]
-    
+
     def find_by_tags(self, tags: List[str], limit: int = 5) -> List[SearchResult]:
         """
         Find items by tags
@@ -262,10 +262,10 @@ class SemanticSearch:
         """
         results = []
         tags_lower = [tag.lower() for tag in tags]
-        
+
         for item in self.knowledge_base:
             item_tags = [tag.lower() for tag in item.get("tags", [])]
-            
+
             # Calculate overlap score
             overlap = len(set(tags_lower).intersection(set(item_tags)))
             if overlap > 0:
@@ -280,11 +280,11 @@ class SemanticSearch:
                     }
                 )
                 results.append(result)
-        
+
         # Sort by relevance score
         results.sort(key=lambda x: x.relevance_score, reverse=True)
         return results[:limit]
-    
+
     def get_suggestions_for_domain(self, domain: str, limit: int = 3) -> List[str]:
         """
         Get suggestions for a specific domain
@@ -303,24 +303,24 @@ class SemanticSearch:
             "devops": ["devops_tool"],
             "programming": ["file_type"]
         }
-        
+
         categories = domain_mapping.get(domain.lower(), [])
         suggestions = []
-        
+
         for category in categories:
             results = self.find_by_category(category, limit)
             for result in results:
                 suggestions.append(result.name)
-        
+
         return suggestions[:limit]
-    
+
     def get_stats(self) -> Dict[str, Any]:
         """Get semantic search statistics"""
         categories = {}
         for item in self.knowledge_base:
             category = item.get("category", "unknown")
             categories[category] = categories.get(category, 0) + 1
-        
+
         return {
             "total_items": len(self.knowledge_base),
             "categories": categories,
@@ -330,26 +330,26 @@ class SemanticSearch:
 # Example usage and testing
 if __name__ == "__main__":
     search = SemanticSearch()
-    
+
     # Test searches
     print("=== Semantic Search Test ===")
-    
+
     # Test general search
     results = search.find_related_items("python web framework")
     print(f"\nSearch for 'python web framework':")
     for result in results:
         print(f"  - {result.name}: {result.content} (score: {result.relevance_score:.2f})")
-    
+
     # Test category search
     results = search.find_by_category("web_framework")
     print(f"\nWeb frameworks:")
     for result in results:
         print(f"  - {result.name}: {result.content}")
-    
+
     # Test domain suggestions
     suggestions = search.get_suggestions_for_domain("web")
     print(f"\nWeb domain suggestions: {suggestions}")
-    
+
     # Test stats
     stats = search.get_stats()
     print(f"\nStats: {stats}")

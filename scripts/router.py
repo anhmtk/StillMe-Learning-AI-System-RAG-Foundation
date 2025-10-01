@@ -36,24 +36,24 @@ class RouterCLI:
             'dashboard': 'router_dashboard.py',
             'tools': 'router_tools.py'
         }
-    
+
     def run_command(self, command: str, args: List[str] = None):
         """Run a command with optional arguments"""
         if command not in self.available_commands:
             print(f"❌ Unknown command: {command}")
             print(f"Available commands: {', '.join(self.available_commands.keys())}")
             return False
-        
+
         script_name = self.available_commands[command]
         script_path = os.path.join(self.script_dir, script_name)
-        
+
         if not os.path.exists(script_path):
             print(f"❌ Script not found: {script_path}")
             return False
-        
+
         # Prepare command
         cmd = [sys.executable, script_path]
-        
+
         # Add command-specific arguments
         if command == 'test':
             cmd.append('--all')
@@ -77,21 +77,21 @@ class RouterCLI:
             cmd.append('--live')
         elif command == 'tools':
             cmd.append('--test')
-        
+
         # Add any additional arguments
         if args and command != 'debug':
             cmd.extend(args)
-        
+
         try:
             print(f"🚀 Running: {' '.join(cmd)}")
             print("=" * 60)
-            
+
             result = subprocess.run(cmd, cwd=os.path.dirname(self.script_dir))
             return result.returncode == 0
         except Exception as e:
             print(f"❌ Error running command: {e}")
             return False
-    
+
     def show_help(self):
         """Show help information"""
         print("🔍 AI Router - Main Entry Point")
@@ -126,31 +126,31 @@ class RouterCLI:
         print("  python scripts/router.py <command> --help")
         print()
         print("For more information, see scripts/README.md")
-    
+
     def show_status(self):
         """Show quick status overview"""
         print("📊 AI Router Quick Status")
         print("=" * 40)
-        
+
         # Check if stillme_core is available
         stillme_core_path = os.path.join(os.path.dirname(self.script_dir), 'stillme_core')
         if os.path.exists(stillme_core_path):
             print("✅ stillme_core: Available")
         else:
             print("❌ stillme_core: Not found")
-        
+
         # Check if scripts are available
         missing_scripts = []
         for command, script_name in self.available_commands.items():
             script_path = os.path.join(self.script_dir, script_name)
             if not os.path.exists(script_path):
                 missing_scripts.append(script_name)
-        
+
         if missing_scripts:
             print(f"⚠️  Missing scripts: {', '.join(missing_scripts)}")
         else:
             print("✅ All scripts: Available")
-        
+
         # Check environment
         env_vars = [
             'COMPLEXITY_WEIGHT_LENGTH',
@@ -163,10 +163,10 @@ class RouterCLI:
             'COMPLEXITY_THRESHOLD_SIMPLE',
             'COMPLEXITY_THRESHOLD_MEDIUM'
         ]
-        
+
         configured_vars = [var for var in env_vars if os.getenv(var)]
         print(f"⚙️  Environment: {len(configured_vars)}/{len(env_vars)} variables configured")
-        
+
         if configured_vars:
             print("  Configured variables:")
             for var in configured_vars:
@@ -174,7 +174,7 @@ class RouterCLI:
                 print(f"    {var}: {value}")
         else:
             print("  Using default configuration")
-        
+
         print()
         print("💡 Quick Commands:")
         print("  python scripts/router.py test        # Run tests")
@@ -200,30 +200,30 @@ For detailed help on a specific command:
 For more information, see scripts/README.md
         """
     )
-    
+
     parser.add_argument('command', nargs='?', help='Command to run')
     parser.add_argument('args', nargs='*', help='Command arguments')
     parser.add_argument('--help-commands', action='store_true', help='Show available commands')
-    
+
     args = parser.parse_args()
-    
+
     cli = RouterCLI()
-    
+
     if args.help_commands or not args.command:
         cli.show_help()
         return
-    
+
     if args.command == 'help':
         cli.show_help()
         return
-    
+
     if args.command == 'status':
         cli.show_status()
         return
-    
+
     # Run the command
     success = cli.run_command(args.command, args.args)
-    
+
     if not success:
         sys.exit(1)
 

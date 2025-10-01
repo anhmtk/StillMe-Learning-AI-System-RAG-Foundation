@@ -25,7 +25,7 @@ SCENARIOS = [
         "category": "bug_fix"
     },
     {
-        "name": "Basic Refactor", 
+        "name": "Basic Refactor",
         "input": "Refactor function with bad naming conventions",
         "expected": "improved naming, functionality preserved",
         "category": "refactor"
@@ -82,125 +82,125 @@ SCENARIOS = [
 
 class TestE2EScenarios:
     """Test end-to-end scenarios"""
-    
+
     @pytest.mark.parametrize("scenario", SCENARIOS)
     def test_e2e_scenario(self, scenario):
         """Test individual E2E scenario"""
         try:
-            from agentdev_unified_simple import AgentDevUnified, AgentMode
-            
+            from agent_dev.core.agentdev import AgentDev
+
             temp_project = TestFixtures.create_temp_project()
-            agentdev = AgentDevUnified(str(temp_project))
-            
+            agentdev = AgentDev(str(temp_project))
+
             # Execute scenario
             start_time = time.time()
             result = agentdev.execute_task(scenario["input"], AgentMode.SENIOR)
             end_time = time.time()
-            
+
             execution_time = end_time - start_time
-            
+
             # Assertions
             assert result is not None, f"Scenario {scenario['name']} returned None"
             assert "✅" in result or "success" in result.lower(), f"Scenario {scenario['name']} failed: {result}"
-            
+
             # Performance check (should complete within 5 seconds)
             assert execution_time <= 5, f"Scenario {scenario['name']} took {execution_time}s, expected ≤ 5s"
-            
+
             # Log scenario result
             print(f"\n✅ E2E Scenario: {scenario['name']}")
             print(f"   Input: {scenario['input']}")
             print(f"   Expected: {scenario['expected']}")
             print(f"   Result: {result[:100]}...")
             print(f"   Time: {execution_time:.2f}s")
-            
+
             TestFixtures.cleanup_temp_project(temp_project)
-            
+
         except ImportError:
             pytest.skip("AgentDevUnified not available")
-    
+
     def test_bug_fix_scenarios(self):
         """Test all bug fix scenarios"""
         bug_scenarios = [s for s in SCENARIOS if s["category"] == "bug_fix"]
-        
+
         try:
-            from agentdev_unified_simple import AgentDevUnified, AgentMode
-            
+            from agent_dev.core.agentdev import AgentDev
+
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDevUnified(str(temp_project))
-            
+
             results = []
             for scenario in bug_scenarios:
                 result = agentdev.execute_task(scenario["input"], AgentMode.SENIOR)
                 results.append(result)
-            
+
             # All bug fix scenarios should succeed
             assert len(results) == len(bug_scenarios)
             for result in results:
                 assert "✅" in result or "success" in result.lower()
-            
+
             TestFixtures.cleanup_temp_project(temp_project)
-            
+
         except ImportError:
             pytest.skip("AgentDevUnified not available")
-    
+
     def test_security_scenarios(self):
         """Test all security scenarios"""
         security_scenarios = [s for s in SCENARIOS if s["category"] == "security"]
-        
+
         try:
-            from agentdev_unified_simple import AgentDevUnified, AgentMode
-            
+            from agent_dev.core.agentdev import AgentDev
+
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDevUnified(str(temp_project))
-            
+
             results = []
             for scenario in security_scenarios:
                 result = agentdev.execute_task(scenario["input"], AgentMode.SENIOR)
                 results.append(result)
-            
+
             # All security scenarios should succeed
             assert len(results) == len(security_scenarios)
             for result in results:
                 assert "✅" in result or "success" in result.lower()
-            
+
             TestFixtures.cleanup_temp_project(temp_project)
-            
+
         except ImportError:
             pytest.skip("AgentDevUnified not available")
-    
+
     def test_feature_development_scenarios(self):
         """Test feature development scenarios"""
         feature_scenarios = [s for s in SCENARIOS if s["category"] in ["feature", "refactor"]]
-        
+
         try:
-            from agentdev_unified_simple import AgentDevUnified, AgentMode
-            
+            from agent_dev.core.agentdev import AgentDev
+
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDevUnified(str(temp_project))
-            
+
             results = []
             for scenario in feature_scenarios:
                 result = agentdev.execute_task(scenario["input"], AgentMode.SENIOR)
                 results.append(result)
-            
+
             # All feature scenarios should succeed
             assert len(results) == len(feature_scenarios)
             for result in results:
                 assert "✅" in result or "success" in result.lower()
-            
+
             TestFixtures.cleanup_temp_project(temp_project)
-            
+
         except ImportError:
             pytest.skip("AgentDevUnified not available")
-    
+
     def test_complex_workflow(self):
         """Test complex multi-step workflow"""
         try:
-            from agentdev_unified_simple import AgentDevUnified, AgentMode
-            
+            from agent_dev.core.agentdev import AgentDev
+
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDevUnified(str(temp_project))
-            
+
             # Complex workflow: Plan → Implement → Test → Review
             workflow_steps = [
                 "Plan implementation of user authentication system",
@@ -208,65 +208,65 @@ class TestE2EScenarios:
                 "Create comprehensive tests for authentication",
                 "Review code quality and security"
             ]
-            
+
             results = []
             for step in workflow_steps:
                 result = agentdev.execute_task(step, AgentMode.SENIOR)
                 results.append(result)
-            
+
             # All workflow steps should succeed
             assert len(results) == 4
             for result in results:
                 assert "✅" in result or "success" in result.lower()
-            
+
             TestFixtures.cleanup_temp_project(temp_project)
-            
+
         except ImportError:
             pytest.skip("AgentDevUnified not available")
-    
+
     def test_error_recovery_scenarios(self):
         """Test error recovery scenarios"""
         try:
-            from agentdev_unified_simple import AgentDevUnified, AgentMode
-            
+            from agent_dev.core.agentdev import AgentDev
+
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDevUnified(str(temp_project))
-            
+
             # Test error recovery
             error_scenarios = [
                 "Fix broken build after failed merge",
                 "Recover from database connection failure",
                 "Handle memory leak in production system"
             ]
-            
+
             results = []
             for scenario in error_scenarios:
                 result = agentdev.execute_task(scenario, AgentMode.SENIOR)
                 results.append(result)
-            
+
             # Should handle errors gracefully
             assert len(results) == 3
             for result in results:
                 assert result is not None
                 # Should either succeed or provide helpful error message
                 assert "✅" in result or "success" in result.lower() or "❌" in result or "error" in result.lower()
-            
+
             TestFixtures.cleanup_temp_project(temp_project)
-            
+
         except ImportError:
             pytest.skip("AgentDevUnified not available")
 
 class TestRealWorldScenarios:
     """Test real-world scenarios"""
-    
+
     def test_production_incident_response(self):
         """Test production incident response scenario"""
         try:
-            from agentdev_unified_simple import AgentDevUnified, AgentMode
-            
+            from agent_dev.core.agentdev import AgentDev
+
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDevUnified(str(temp_project))
-            
+
             # Production incident scenario
             incident_tasks = [
                 "Investigate production system outage",
@@ -274,30 +274,30 @@ class TestRealWorldScenarios:
                 "Implement hotfix for critical bug",
                 "Monitor system recovery"
             ]
-            
+
             results = []
             for task in incident_tasks:
                 result = agentdev.execute_task(task, AgentMode.SENIOR)
                 results.append(result)
-            
+
             # All incident response tasks should complete
             assert len(results) == 4
             for result in results:
                 assert "✅" in result or "success" in result.lower()
-            
+
             TestFixtures.cleanup_temp_project(temp_project)
-            
+
         except ImportError:
             pytest.skip("AgentDevUnified not available")
-    
+
     def test_technical_debt_management(self):
         """Test technical debt management scenario"""
         try:
-            from agentdev_unified_simple import AgentDevUnified, AgentMode
-            
+            from agent_dev.core.agentdev import AgentDev
+
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDevUnified(str(temp_project))
-            
+
             # Technical debt management
             debt_tasks = [
                 "Identify technical debt in codebase",
@@ -305,18 +305,18 @@ class TestRealWorldScenarios:
                 "Refactor legacy code modules",
                 "Update outdated dependencies"
             ]
-            
+
             results = []
             for task in debt_tasks:
                 result = agentdev.execute_task(task, AgentMode.SENIOR)
                 results.append(result)
-            
+
             # All debt management tasks should complete
             assert len(results) == 4
             for result in results:
                 assert "✅" in result or "success" in result.lower()
-            
+
             TestFixtures.cleanup_temp_project(temp_project)
-            
+
         except ImportError:
             pytest.skip("AgentDevUnified not available")

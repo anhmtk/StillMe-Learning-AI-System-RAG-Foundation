@@ -38,37 +38,37 @@ def load_interaction_policy(policy_path: Optional[str] = None) -> Dict[str, Any]
         ValueError: Nếu policy không hợp lệ
     """
     global _policy, _policy_loaded
-    
+
     if _policy_loaded and _policy:
         return _policy
-    
+
     # Default path
     if policy_path is None:
         policy_path = os.path.join(os.getcwd(), 'policies', 'INTERACTION_POLICY.yaml')
-    
+
     try:
         # Check if policy file exists
         if not os.path.exists(policy_path):
             raise FileNotFoundError(f"Interaction Policy file not found: {policy_path}")
-        
+
         # Read and parse YAML
         with open(policy_path, 'r', encoding='utf-8') as file:
             policy = yaml.safe_load(file)
-        
+
         # Validate policy structure
         _validate_policy(policy)
-        
+
         # Cache policy
         _policy = policy
         _policy_loaded = True
-        
+
         logger.info(f"✅ Interaction Policy loaded successfully from: {policy_path}")
         logger.info(f"📋 Policy version: {policy['version']}")
         logger.info(f"📝 Skip semantics: {policy['skip']['semantics']}")
         logger.info(f"🚫 Cancel on skip: {policy['skip']['cancel_on_skip']}")
-        
+
         return policy
-        
+
     except Exception as error:
         error_message = f"Failed to load Interaction Policy from {policy_path}: {error}"
         logger.error(f"❌ {error_message}")
@@ -88,19 +88,19 @@ def _validate_policy(policy: Dict[str, Any]) -> None:
         'version', 'metadata', 'skip', 'cancel', 'abort', 'stop',
         'heartbeat', 'logs', 'pid', 'ui', 'compliance'
     ]
-    
+
     for field in required_fields:
         if field not in policy:
             raise ValueError(f"Missing required field in policy: {field}")
-    
+
     # Validate skip semantics
     if policy['skip']['semantics'] != 'diagnose':
         raise ValueError(f"Invalid skip semantics: {policy['skip']['semantics']}. Must be 'diagnose'")
-    
+
     # Validate cancel_on_skip
     if policy['skip']['cancel_on_skip'] is not False:
         raise ValueError(f"Invalid cancel_on_skip: {policy['skip']['cancel_on_skip']}. Must be false")
-    
+
     # Validate required outputs
     required_outputs = ['COMPLETED', 'RUNNING', 'STALLED', 'UNKNOWN']
     for output in required_outputs:
@@ -150,7 +150,7 @@ def get_skip_button_config(language: str = 'en') -> Dict[str, Any]:
     """
     policy = get_interaction_policy()
     button = policy['ui']['skip_button']
-    
+
     return {
         'text': button[f'text_{language}'],
         'tooltip': button[f'tooltip_{language}'],
@@ -171,7 +171,7 @@ def get_cancel_button_config(language: str = 'en') -> Dict[str, Any]:
     """
     policy = get_interaction_policy()
     button = policy['ui']['cancel_button']
-    
+
     return {
         'text': button[f'text_{language}'],
         'tooltip': button[f'tooltip_{language}'],
@@ -259,7 +259,7 @@ except Exception as e:
 # Export for easy import
 __all__ = [
     'load_interaction_policy',
-    'get_interaction_policy', 
+    'get_interaction_policy',
     'is_policy_loaded',
     'reset_policy_cache',
     'get_skip_button_config',

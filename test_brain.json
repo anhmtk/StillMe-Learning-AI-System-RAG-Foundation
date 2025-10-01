@@ -1,0 +1,175 @@
+{
+  "error_patterns": [
+    {
+      "error_type": "type_conflict",
+      "keywords": [
+        "Type",
+        "not assignable",
+        "declared type"
+      ],
+      "fix_strategy": "add_type_ignore",
+      "confidence": 0.9,
+      "description": "Type conflict between imports"
+    },
+    {
+      "error_type": "import_error",
+      "keywords": [
+        "Import",
+        "could not be resolved"
+      ],
+      "fix_strategy": "add_try_except",
+      "confidence": 0.8,
+      "description": "Import cannot be resolved"
+    },
+    {
+      "error_type": "missing_attribute",
+      "keywords": [
+        "Attribute",
+        "is unknown",
+        "not a known attribute"
+      ],
+      "fix_strategy": "fix_class_definition",
+      "confidence": 0.7,
+      "description": "Missing attribute in class"
+    },
+    {
+      "error_type": "duplicate_class",
+      "keywords": [
+        "Class declaration",
+        "obscured",
+        "duplicate"
+      ],
+      "fix_strategy": "remove_duplicate",
+      "confidence": 0.95,
+      "description": "Duplicate class definition"
+    },
+    {
+      "error_type": "missing_import",
+      "keywords": [
+        "is not defined",
+        "NameError"
+      ],
+      "fix_strategy": "add_missing_import",
+      "confidence": 0.8,
+      "description": "Missing import statement"
+    }
+  ],
+  "codebase_knowledge": {
+    "project_structure": {
+      "stillme_core": {
+        "router": [
+          "intelligent_router.py",
+          "task_decomposer.py",
+          "agent_coordinator.py"
+        ],
+        "quality": [
+          "auto_fixer.py",
+          "code_quality_enforcer.py"
+        ],
+        "observability": [
+          "logger.py",
+          "metrics.py",
+          "tracer.py"
+        ],
+        "security": [
+          "security_middleware.py",
+          "security_compliance_system.py"
+        ]
+      },
+      "modules": [
+        "framework.py",
+        "identity_handler.py",
+        "emotionsense_v1.py"
+      ],
+      "api": [
+        "stable_ai_server.py",
+        "app.py"
+      ]
+    },
+    "common_imports": {
+      "typing": [
+        "List",
+        "Dict",
+        "Optional",
+        "Any",
+        "Set",
+        "Tuple"
+      ],
+      "pathlib": [
+        "Path"
+      ],
+      "dataclasses": [
+        "dataclass"
+      ],
+      "enum": [
+        "Enum"
+      ],
+      "asyncio": [
+        "asyncio"
+      ],
+      "json": [
+        "json"
+      ],
+      "logging": [
+        "logging"
+      ],
+      "time": [
+        "time"
+      ],
+      "os": [
+        "os"
+      ],
+      "sys": [
+        "sys"
+      ]
+    },
+    "common_classes": {
+      "stillme_core.router.intelligent_router": [
+        "AgentType",
+        "TaskComplexity",
+        "TaskType"
+      ],
+      "stillme_core.router.task_decomposer": [
+        "Subtask",
+        "SubtaskStatus",
+        "TaskDecomposition"
+      ],
+      "stillme_core.observability.logger": [
+        "get_logger"
+      ],
+      "stillme_core.observability.metrics": [
+        "get_metrics_collector",
+        "MetricType"
+      ],
+      "stillme_core.observability.tracer": [
+        "get_tracer"
+      ]
+    },
+    "file_patterns": {
+      "router_files": [
+        "*router*.py",
+        "*coordinator*.py",
+        "*decomposer*.py"
+      ],
+      "quality_files": [
+        "*quality*.py",
+        "*fixer*.py",
+        "*enforcer*.py"
+      ],
+      "security_files": [
+        "*security*.py",
+        "*compliance*.py",
+        "*middleware*.py"
+      ]
+    }
+  },
+  "fix_history": [],
+  "success_rate": {},
+  "learning_insights": {
+    "total_fixes": 0,
+    "success_rate_by_type": {},
+    "most_common_errors": [],
+    "best_strategies": [],
+    "learning_progress": 0.0
+  }
+}

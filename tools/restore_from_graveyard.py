@@ -17,15 +17,15 @@ def main():
     """Main function để restore files"""
     print("🔄 Restore From Graveyard Tool")
     print("=" * 50)
-    
+
     mover = QuarantineMover()
-    
+
     # List current quarantined files
     print("📋 Current quarantined files:")
     mover.list_quarantined_files()
-    
+
     print("\n" + "=" * 50)
-    
+
     # Restore files
     mover.restore_from_graveyard()
 

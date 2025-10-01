@@ -13,20 +13,20 @@ logger = logging.getLogger(__name__)
 
 class ContentIntegrityFilter:
     """Filter để đảm bảo tính toàn vẹn nội dung"""
-    
+
     def __init__(self):
         # Dangerous patterns
         self.dangerous_patterns = [
             # Script tags
             r'<script[^>]*>.*?</script>',
             r'<script[^>]*/>',
-            
+
             # JavaScript protocols
             r'javascript:',
             r'vbscript:',
             r'data:text/html',
             r'data:application/javascript',
-            
+
             # Event handlers
             r'onload\s*=',
             r'onerror\s*=',
@@ -41,14 +41,14 @@ class ContentIntegrityFilter:
             r'onkeydown\s*=',
             r'onkeyup\s*=',
             r'onkeypress\s*=',
-            
+
             # Dangerous functions
             r'eval\s*\(',
             r'expression\s*\(',
             r'url\s*\(',
             r'@import',
             r'@charset',
-            
+
             # Dangerous HTML elements
             r'<iframe[^>]*>',
             r'<object[^>]*>',
@@ -59,32 +59,32 @@ class ContentIntegrityFilter:
             r'<button[^>]*>',
             r'<select[^>]*>',
             r'<textarea[^>]*>',
-            
+
             # Meta tags that could be dangerous
             r'<meta[^>]*http-equiv[^>]*>',
             r'<meta[^>]*content[^>]*>',
-            
+
             # Link tags
             r'<link[^>]*>',
-            
+
             # Style tags with expressions
             r'<style[^>]*>.*?expression\s*\(.*?</style>',
-            
+
             # Base64 encoded content
             r'data:image/[^;]+;base64,',
             r'data:application/[^;]+;base64,',
-            
+
             # File protocols
             r'file://',
             r'ftp://',
-            
+
             # SQL injection patterns
             r'union\s+select',
             r'drop\s+table',
             r'delete\s+from',
             r'insert\s+into',
             r'update\s+set',
-            
+
             # Command injection
             r';\s*rm\s+',
             r';\s*cat\s+',
@@ -93,21 +93,21 @@ class ContentIntegrityFilter:
             r';\s*id\s+',
             r';\s*ps\s+',
             r';\s*kill\s+',
-            
+
             # Path traversal
             r'\.\./',
             r'\.\.\\',
             r'%2e%2e%2f',
             r'%2e%2e%5c',
         ]
-        
+
         # Compile patterns for better performance
         self.compiled_patterns = [re.compile(pattern, re.IGNORECASE | re.DOTALL) for pattern in self.dangerous_patterns]
-        
+
         # Log file
         self.log_file = Path("logs/content_filter.log")
         self.log_file.parent.mkdir(exist_ok=True)
-        
+
         # Statistics
         self.stats = {
             "total_processed": 0,
@@ -115,12 +115,12 @@ class ContentIntegrityFilter:
             "sanitized_content": 0,
             "clean_content": 0
         }
-    
+
     def filter_content(self, content: str, source: str = "unknown") -> Dict[str, Any]:
         """Filter và sanitize content"""
         try:
             self.stats["total_processed"] += 1
-            
+
             # Check if content is empty
             if not content or not content.strip():
                 return {
@@ -129,11 +129,11 @@ class ContentIntegrityFilter:
                     "content": content,
                     "warnings": []
                 }
-            
+
             # Detect dangerous patterns
             warnings = []
             blocked_patterns = []
-            
+
             for i, pattern in enumerate(self.compiled_patterns):
                 matches = pattern.findall(content)
                 if matches:
@@ -143,15 +143,15 @@ class ContentIntegrityFilter:
                         "matches": len(matches)
                     })
                     warnings.append(f"Blocked dangerous pattern: {self.dangerous_patterns[i]}")
-            
+
             # If dangerous patterns found, sanitize content
             if blocked_patterns:
                 self.stats["blocked_content"] += 1
                 sanitized_content = self._sanitize_content(content)
-                
+
                 # Log the filtering
                 self._log_filtering(source, blocked_patterns, content[:200], sanitized_content[:200])
-                
+
                 return {
                     "success": True,
                     "filtered": True,
@@ -167,7 +167,7 @@ class ContentIntegrityFilter:
                     "content": content,
                     "warnings": []
                 }
-                
+
         except Exception as e:
             logger.error(f"❌ Content filtering error: {e}")
             return {
@@ -176,38 +176,38 @@ class ContentIntegrityFilter:
                 "content": content,
                 "filtered": False
             }
-    
+
     def _sanitize_content(self, content: str) -> str:
         """Sanitize content bằng cách loại bỏ dangerous patterns"""
         try:
             sanitized = content
-            
+
             # Remove dangerous patterns
             for pattern in self.compiled_patterns:
                 sanitized = pattern.sub('', sanitized)
-            
+
             # Additional cleaning
             # Remove excessive whitespace
             sanitized = re.sub(r'\s+', ' ', sanitized)
-            
+
             # Remove empty tags
             sanitized = re.sub(r'<[^>]*>\s*</[^>]*>', '', sanitized)
-            
+
             # Remove suspicious attributes
             sanitized = re.sub(r'\s+on\w+\s*=\s*["\'][^"\']*["\']', '', sanitized, flags=re.IGNORECASE)
-            
+
             # Remove javascript: and data: URLs
             sanitized = re.sub(r'href\s*=\s*["\']javascript:[^"\']*["\']', 'href="#"', sanitized, flags=re.IGNORECASE)
             sanitized = re.sub(r'src\s*=\s*["\']data:[^"\']*["\']', 'src=""', sanitized, flags=re.IGNORECASE)
-            
+
             self.stats["sanitized_content"] += 1
-            
+
             return sanitized.strip()
-            
+
         except Exception as e:
             logger.error(f"❌ Content sanitization error: {e}")
             return content  # Return original if sanitization fails
-    
+
     def _log_filtering(self, source: str, blocked_patterns: List[Dict], original_preview: str, sanitized_preview: str):
         """Log filtering activity"""
         try:
@@ -218,27 +218,27 @@ class ContentIntegrityFilter:
                 "original_preview": original_preview,
                 "sanitized_preview": sanitized_preview
             }
-            
+
             with open(self.log_file, "a", encoding="utf-8") as f:
                 f.write(json.dumps(log_entry) + "\n")
-                
+
         except Exception as e:
             logger.error(f"❌ Failed to log filtering: {e}")
-    
+
     def _get_timestamp(self) -> str:
         """Get current timestamp"""
         from datetime import datetime
         return datetime.now().isoformat()
-    
+
     def filter_json_response(self, response_data: Dict[str, Any], source: str = "unknown") -> Dict[str, Any]:
         """Filter JSON response data"""
         try:
             if not isinstance(response_data, dict):
                 return self.filter_content(str(response_data), source)
-            
+
             filtered_data = {}
             warnings = []
-            
+
             for key, value in response_data.items():
                 if isinstance(value, str):
                     # Filter string values
@@ -246,7 +246,7 @@ class ContentIntegrityFilter:
                     filtered_data[key] = result["content"]
                     if result["warnings"]:
                         warnings.extend(result["warnings"])
-                
+
                 elif isinstance(value, list):
                     # Filter list items
                     filtered_list = []
@@ -264,25 +264,25 @@ class ContentIntegrityFilter:
                         else:
                             filtered_list.append(item)
                     filtered_data[key] = filtered_list
-                
+
                 elif isinstance(value, dict):
                     # Recursively filter nested objects
                     result = self.filter_json_response(value, f"{source}.{key}")
                     filtered_data[key] = result["content"]
                     if result["warnings"]:
                         warnings.extend(result["warnings"])
-                
+
                 else:
                     # Keep non-string values as-is
                     filtered_data[key] = value
-            
+
             return {
                 "success": True,
                 "content": filtered_data,
                 "warnings": warnings,
                 "filtered": len(warnings) > 0
             }
-            
+
         except Exception as e:
             logger.error(f"❌ JSON filtering error: {e}")
             return {
@@ -291,7 +291,7 @@ class ContentIntegrityFilter:
                 "content": response_data,
                 "filtered": False
             }
-    
+
     def get_stats(self) -> Dict[str, Any]:
         """Lấy thống kê filtering"""
         return {
@@ -301,7 +301,7 @@ class ContentIntegrityFilter:
             "clean_content": self.stats["clean_content"],
             "block_rate": (self.stats["blocked_content"] / max(self.stats["total_processed"], 1)) * 100
         }
-    
+
     def reset_stats(self):
         """Reset thống kê"""
         self.stats = {
@@ -325,12 +325,12 @@ def filter_web_json(data: Dict[str, Any], source: str = "unknown") -> Dict[str, 
 if __name__ == "__main__":
     # Test content filtering
     print("🧪 Testing Content Integrity Filter...")
-    
+
     # Test clean content
     clean_content = "This is a clean article about AI technology."
     result = content_filter.filter_content(clean_content, "test")
     print(f"Clean content: {result['success']}, filtered: {result['filtered']}")
-    
+
     # Test dangerous content
     dangerous_content = """
     <script>alert('XSS')</script>
@@ -341,7 +341,7 @@ if __name__ == "__main__":
     result = content_filter.filter_content(dangerous_content, "test")
     print(f"Dangerous content: {result['success']}, filtered: {result['filtered']}")
     print(f"Warnings: {len(result['warnings'])}")
-    
+
     # Test JSON filtering
     json_data = {
         "title": "AI News",
@@ -355,7 +355,7 @@ if __name__ == "__main__":
     result = content_filter.filter_json_response(json_data, "test")
     print(f"JSON filtering: {result['success']}, filtered: {result['filtered']}")
     print(f"Warnings: {len(result['warnings'])}")
-    
+
     # Show stats
     stats = content_filter.get_stats()
     print(f"\n📊 Filtering Stats:")

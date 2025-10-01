@@ -29,22 +29,22 @@ class KillSwitchAction(Enum):
 
 class KillSwitchManager:
     """Manages kill switch state and audit logging."""
-    
-    def __init__(self, state_file: str = "logs/kill_switch_state.json", 
+
+    def __init__(self, state_file: str = "logs/kill_switch_state.json",
                  audit_file: str = "logs/audit/kill_switch.log"):
         self.state_file = Path(state_file)
         self.audit_file = Path(audit_file)
-        
+
         # Ensure directories exist
         self.state_file.parent.mkdir(parents=True, exist_ok=True)
         self.audit_file.parent.mkdir(parents=True, exist_ok=True)
-        
+
         # Load current state
         self._state = self._load_state()
-        
+
         # Initialize audit logger
         self._setup_audit_logger()
-    
+
     def _load_state(self) -> Dict:
         """Load kill switch state from file."""
         if self.state_file.exists():
@@ -53,7 +53,7 @@ class KillSwitchManager:
                     return json.load(f)
             except Exception as e:
                 log.error(f"Failed to load kill switch state: {e}")
-        
+
         # Default state
         return {
             "state": KillSwitchState.DISARMED.value,
@@ -65,7 +65,7 @@ class KillSwitchManager:
             "created_at": datetime.now().isoformat(),
             "last_updated": datetime.now().isoformat()
         }
-    
+
     def _save_state(self):
         """Save kill switch state to file."""
         try:
@@ -74,16 +74,16 @@ class KillSwitchManager:
                 json.dump(self._state, f, indent=2)
         except Exception as e:
             log.error(f"Failed to save kill switch state: {e}")
-    
+
     def _setup_audit_logger(self):
         """Setup audit logger for kill switch actions."""
         audit_logger = logging.getLogger("kill_switch_audit")
         audit_logger.setLevel(logging.INFO)
-        
+
         # Remove existing handlers
         for handler in audit_logger.handlers[:]:
             audit_logger.removeHandler(handler)
-        
+
         # Add file handler
         handler = logging.FileHandler(self.audit_file)
         formatter = logging.Formatter(
@@ -91,13 +91,13 @@ class KillSwitchManager:
         )
         handler.setFormatter(formatter)
         audit_logger.addHandler(handler)
-        
+
         # Prevent propagation to root logger
         audit_logger.propagate = False
-        
+
         self.audit_logger = audit_logger
-    
-    def _log_action(self, action: KillSwitchAction, actor: str, 
+
+    def _log_action(self, action: KillSwitchAction, actor: str,
                    reason: Optional[str] = None, result: str = "SUCCESS"):
         """Log kill switch action to audit log."""
         log_entry = {
@@ -109,14 +109,14 @@ class KillSwitchManager:
             "state_before": self._state["state"],
             "state_after": self._state["state"]
         }
-        
+
         self.audit_logger.info(json.dumps(log_entry))
         log.info(f"Kill switch {action.value} by {actor}: {result}")
-    
+
     def arm(self, actor: str, reason: Optional[str] = None) -> Dict:
         """Arm the kill switch."""
         current_state = KillSwitchState(self._state["state"])
-        
+
         if current_state == KillSwitchState.FIRED:
             self._log_action(KillSwitchAction.ARM, actor, reason, "FAILED - Already fired")
             return {
@@ -124,17 +124,17 @@ class KillSwitchManager:
                 "message": "Cannot arm kill switch - already fired",
                 "current_state": current_state.value
             }
-        
+
         self._state.update({
             "state": KillSwitchState.ARMED.value,
             "armed_at": datetime.now().isoformat(),
             "armed_by": actor,
             "reason": reason
         })
-        
+
         self._save_state()
         self._log_action(KillSwitchAction.ARM, actor, reason, "SUCCESS")
-        
+
         return {
             "success": True,
             "message": "Kill switch armed successfully",
@@ -143,11 +143,11 @@ class KillSwitchManager:
             "armed_by": actor,
             "reason": reason
         }
-    
+
     def fire(self, actor: str, reason: Optional[str] = None) -> Dict:
         """Fire the kill switch (emergency stop)."""
         current_state = KillSwitchState(self._state["state"])
-        
+
         if current_state == KillSwitchState.FIRED:
             self._log_action(KillSwitchAction.FIRE, actor, reason, "FAILED - Already fired")
             return {
@@ -155,20 +155,20 @@ class KillSwitchManager:
                 "message": "Kill switch already fired",
                 "current_state": current_state.value
             }
-        
+
         self._state.update({
             "state": KillSwitchState.FIRED.value,
             "fired_at": datetime.now().isoformat(),
             "fired_by": actor,
             "reason": reason
         })
-        
+
         self._save_state()
         self._log_action(KillSwitchAction.FIRE, actor, reason, "SUCCESS")
-        
+
         # Log critical alert
         log.critical(f"🚨 KILL SWITCH FIRED by {actor}: {reason or 'No reason provided'}")
-        
+
         return {
             "success": True,
             "message": "Kill switch fired - system stopped",
@@ -177,11 +177,11 @@ class KillSwitchManager:
             "fired_by": actor,
             "reason": reason
         }
-    
+
     def disarm(self, actor: str, reason: Optional[str] = None) -> Dict:
         """Disarm the kill switch."""
         current_state = KillSwitchState(self._state["state"])
-        
+
         if current_state == KillSwitchState.FIRED:
             self._log_action(KillSwitchAction.DISARM, actor, reason, "FAILED - Cannot disarm fired switch")
             return {
@@ -189,17 +189,17 @@ class KillSwitchManager:
                 "message": "Cannot disarm fired kill switch - manual intervention required",
                 "current_state": current_state.value
             }
-        
+
         self._state.update({
             "state": KillSwitchState.DISARMED.value,
             "armed_at": None,
             "armed_by": None,
             "reason": None
         })
-        
+
         self._save_state()
         self._log_action(KillSwitchAction.DISARM, actor, reason, "SUCCESS")
-        
+
         return {
             "success": True,
             "message": "Kill switch disarmed successfully",
@@ -208,11 +208,11 @@ class KillSwitchManager:
             "disarmed_by": actor,
             "reason": reason
         }
-    
+
     def status(self) -> Dict:
         """Get kill switch status."""
         current_state = KillSwitchState(self._state["state"])
-        
+
         return {
             "state": current_state.value,
             "armed_at": self._state.get("armed_at"),
@@ -226,29 +226,29 @@ class KillSwitchManager:
             "is_fired": current_state == KillSwitchState.FIRED,
             "is_safe": current_state == KillSwitchState.DISARMED
         }
-    
+
     def is_safe(self) -> bool:
         """Check if system is safe to operate."""
         return KillSwitchState(self._state["state"]) == KillSwitchState.DISARMED
-    
+
     def is_armed(self) -> bool:
         """Check if kill switch is armed."""
         return KillSwitchState(self._state["state"]) == KillSwitchState.ARMED
-    
+
     def is_fired(self) -> bool:
         """Check if kill switch is fired."""
         return KillSwitchState(self._state["state"]) == KillSwitchState.FIRED
-    
+
     def get_audit_log(self, limit: int = 100) -> List[Dict]:
         """Get recent audit log entries."""
         if not self.audit_file.exists():
             return []
-        
+
         try:
             entries = []
             with open(self.audit_file, 'r') as f:
                 lines = f.readlines()
-                
+
             # Get last N lines
             for line in lines[-limit:]:
                 try:
@@ -258,7 +258,7 @@ class KillSwitchManager:
                         timestamp = parts[0]
                         level = parts[1]
                         message = ' | '.join(parts[2:])
-                        
+
                         # Try to parse JSON message
                         try:
                             data = json.loads(message)
@@ -275,7 +275,7 @@ class KillSwitchManager:
                             })
                 except:
                     continue
-            
+
             return entries
         except Exception as e:
             log.error(f"Failed to read audit log: {e}")

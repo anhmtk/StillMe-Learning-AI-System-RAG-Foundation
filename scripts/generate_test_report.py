@@ -28,18 +28,18 @@ def load_artifacts() -> Dict[str, Any]:
     """Load test artifacts from various sources."""
     artifacts = {}
     artifacts_dir = project_root / "artifacts"
-    
+
     if not artifacts_dir.exists():
         artifacts_dir.mkdir(parents=True, exist_ok=True)
-    
+
     # Load pytest results
     pytest_files = [
         "pytest-unit.html",
-        "pytest-integration.html", 
+        "pytest-integration.html",
         "pytest-security.html",
         "pytest-ethics.html"
     ]
-    
+
     for file in pytest_files:
         file_path = artifacts_dir / file
         if file_path.exists():
@@ -48,7 +48,7 @@ def load_artifacts() -> Dict[str, Any]:
                 'path': str(file_path),
                 'exists': True
             }
-    
+
     # Load k6 results
     k6_files = [
         "k6-load-test-results.json",
@@ -56,7 +56,7 @@ def load_artifacts() -> Dict[str, Any]:
         "k6-chaos-test-results.json",
         "k6-smoke-test-results.json"
     ]
-    
+
     for file in k6_files:
         file_path = artifacts_dir / file
         if file_path.exists():
@@ -74,7 +74,7 @@ def load_artifacts() -> Dict[str, Any]:
                     'data': None,
                     'exists': False
                 }
-    
+
     # Load security reports
     security_files = [
         "bandit-report.json",
@@ -82,7 +82,7 @@ def load_artifacts() -> Dict[str, Any]:
         "pip-audit-report.json",
         "gitleaks-report.json"
     ]
-    
+
     for file in security_files:
         file_path = artifacts_dir / file
         if file_path.exists():
@@ -100,7 +100,7 @@ def load_artifacts() -> Dict[str, Any]:
                     'data': None,
                     'exists': False
                 }
-    
+
     return artifacts
 
 def calculate_test_metrics(artifacts: Dict[str, Any]) -> Dict[str, Any]:
@@ -118,7 +118,7 @@ def calculate_test_metrics(artifacts: Dict[str, Any]) -> Dict[str, Any]:
         'response_time_p99': 0,
         'throughput': 0
     }
-    
+
     # Extract pytest metrics (simplified - would need actual parsing)
     for key, artifact in artifacts.items():
         if artifact['type'] == 'pytest_html' and artifact['exists']:
@@ -126,59 +126,59 @@ def calculate_test_metrics(artifacts: Dict[str, Any]) -> Dict[str, Any]:
             metrics['total_tests'] += 100  # Placeholder
             metrics['passed_tests'] += 95   # Placeholder
             metrics['failed_tests'] += 5    # Placeholder
-    
+
     # Extract k6 metrics
     for key, artifact in artifacts.items():
         if artifact['type'] == 'k6_results' and artifact['exists'] and artifact['data']:
             data = artifact['data']
             if 'metrics' in data:
                 metrics_data = data['metrics']
-                
+
                 if 'http_req_duration' in metrics_data:
                     duration = metrics_data['http_req_duration']['values']
                     metrics['response_time_p95'] = duration.get('p(95)', 0)
                     metrics['response_time_p99'] = duration.get('p(99)', 0)
-                
+
                 if 'http_req_failed' in metrics_data:
                     metrics['error_rate'] = metrics_data['http_req_failed']['values'].get('rate', 0)
-                
+
                 if 'http_reqs' in metrics_data:
                     metrics['throughput'] = metrics_data['http_reqs']['values'].get('rate', 0)
-    
+
     # Calculate pass rate
     if metrics['total_tests'] > 0:
         metrics['pass_rate'] = (metrics['passed_tests'] / metrics['total_tests']) * 100
     else:
         metrics['pass_rate'] = 0
-    
+
     return metrics
 
 def generate_executive_summary(metrics: Dict[str, Any], config: Dict[str, Any]) -> str:
     """Generate executive summary."""
     summary = []
-    
+
     summary.append("# Executive Summary")
     summary.append("")
     summary.append(f"**Generated On**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}")
     summary.append(f"**Test Framework**: SEAL-GRADE SYSTEM TESTS")
     summary.append(f"**Repository**: StillMe AI Framework")
     summary.append("")
-    
+
     # Overall status
     pass_rate = metrics.get('pass_rate', 0)
     error_rate = metrics.get('error_rate', 0)
     p95_response = metrics.get('response_time_p95', 0)
-    
+
     if pass_rate >= 95 and error_rate <= 0.01 and p95_response <= 500:
         status = "✅ **PASSED** - All systems operational"
     elif pass_rate >= 80 and error_rate <= 0.05 and p95_response <= 1000:
         status = "⚠️ **PASSED WITH RISKS** - Minor issues detected"
     else:
         status = "❌ **FAILED** - Critical issues require attention"
-    
+
     summary.append(f"**Overall Status**: {status}")
     summary.append("")
-    
+
     # Key metrics
     summary.append("## Key Performance Indicators")
     summary.append("")
@@ -187,50 +187,50 @@ def generate_executive_summary(metrics: Dict[str, Any], config: Dict[str, Any]) 
     summary.append(f"- **P95 Response Time**: {p95_response:.0f}ms")
     summary.append(f"- **Throughput**: {metrics.get('throughput', 0):.1f} req/s")
     summary.append("")
-    
+
     # Thresholds comparison
     thresholds = config.get('environment', {}).get('performance', {})
     summary.append("## Threshold Compliance")
     summary.append("")
-    
+
     gateway_threshold = thresholds.get('gateway_p95_threshold', 500)
     error_threshold = thresholds.get('error_rate_threshold', 0.01)
-    
+
     summary.append(f"- **P95 Response Time**: {p95_response:.0f}ms / {gateway_threshold}ms {'✅' if p95_response <= gateway_threshold else '❌'}")
     summary.append(f"- **Error Rate**: {error_rate:.2%} / {error_threshold:.2%} {'✅' if error_rate <= error_threshold else '❌'}")
     summary.append("")
-    
+
     return "\n".join(summary)
 
 def generate_kpi_table(metrics: Dict[str, Any]) -> str:
     """Generate KPI summary table."""
     table = []
-    
+
     table.append("## KPI Summary Table")
     table.append("")
     table.append("| Metric | Value | Threshold | Status |")
     table.append("|--------|-------|-----------|--------|")
-    
+
     # Test metrics
     table.append(f"| Test Pass Rate | {metrics.get('pass_rate', 0):.1f}% | ≥95% | {'✅' if metrics.get('pass_rate', 0) >= 95 else '❌'} |")
     table.append(f"| Error Rate | {metrics.get('error_rate', 0):.2%} | ≤1% | {'✅' if metrics.get('error_rate', 0) <= 0.01 else '❌'} |")
     table.append(f"| P95 Response Time | {metrics.get('response_time_p95', 0):.0f}ms | ≤500ms | {'✅' if metrics.get('response_time_p95', 0) <= 500 else '❌'} |")
     table.append(f"| P99 Response Time | {metrics.get('response_time_p99', 0):.0f}ms | ≤1000ms | {'✅' if metrics.get('response_time_p99', 0) <= 1000 else '❌'} |")
     table.append(f"| Throughput | {metrics.get('throughput', 0):.1f} req/s | ≥10 req/s | {'✅' if metrics.get('throughput', 0) >= 10 else '❌'} |")
-    
+
     table.append("")
-    
+
     return "\n".join(table)
 
 def generate_test_matrix() -> str:
     """Generate test matrix."""
     matrix = []
-    
+
     matrix.append("## Test Matrix")
     matrix.append("")
     matrix.append("| Module | Unit | Integration | Security | Ethics | Load | Chaos | Soak | UX |")
     matrix.append("|--------|------|-------------|----------|--------|------|-------|------|----|")
-    
+
     modules = [
         ("Router", "✅", "✅", "✅", "✅", "✅", "✅", "✅", "✅"),
         ("Memory", "✅", "✅", "✅", "✅", "✅", "✅", "✅", "✅"),
@@ -240,24 +240,24 @@ def generate_test_matrix() -> str:
         ("Agent Dev", "✅", "✅", "✅", "✅", "✅", "✅", "✅", "✅"),
         ("API Gateway", "✅", "✅", "✅", "✅", "✅", "✅", "✅", "✅")
     ]
-    
+
     for module, unit, integration, security, ethics, load, chaos, soak, ux in modules:
         matrix.append(f"| {module} | {unit} | {integration} | {security} | {ethics} | {load} | {chaos} | {soak} | {ux} |")
-    
+
     matrix.append("")
-    
+
     return "\n".join(matrix)
 
 def generate_risk_analysis(metrics: Dict[str, Any]) -> str:
     """Generate risk analysis."""
     risks = []
-    
+
     risks.append("## Top 5 Risks & Mitigation Actions")
     risks.append("")
-    
+
     # Analyze risks based on metrics
     risk_items = []
-    
+
     if metrics.get('pass_rate', 0) < 95:
         risk_items.append({
             'risk': 'Low test pass rate',
@@ -265,7 +265,7 @@ def generate_risk_analysis(metrics: Dict[str, Any]) -> str:
             'effort': 'Medium',
             'mitigation': 'Investigate failing tests and fix root causes'
         })
-    
+
     if metrics.get('error_rate', 0) > 0.01:
         risk_items.append({
             'risk': 'High error rate under load',
@@ -273,7 +273,7 @@ def generate_risk_analysis(metrics: Dict[str, Any]) -> str:
             'effort': 'High',
             'mitigation': 'Implement better error handling and circuit breakers'
         })
-    
+
     if metrics.get('response_time_p95', 0) > 500:
         risk_items.append({
             'risk': 'Slow response times',
@@ -281,7 +281,7 @@ def generate_risk_analysis(metrics: Dict[str, Any]) -> str:
             'effort': 'Medium',
             'mitigation': 'Optimize performance bottlenecks and caching'
         })
-    
+
     if metrics.get('throughput', 0) < 10:
         risk_items.append({
             'risk': 'Low throughput capacity',
@@ -289,7 +289,7 @@ def generate_risk_analysis(metrics: Dict[str, Any]) -> str:
             'effort': 'High',
             'mitigation': 'Scale infrastructure and optimize resource usage'
         })
-    
+
     # Add placeholder risks if none identified
     if not risk_items:
         risk_items = [
@@ -300,7 +300,7 @@ def generate_risk_analysis(metrics: Dict[str, Any]) -> str:
                 'mitigation': 'Continue monitoring'
             }
         ]
-    
+
     for i, risk in enumerate(risk_items[:5], 1):
         risks.append(f"### {i}. {risk['risk']}")
         risks.append("")
@@ -308,35 +308,35 @@ def generate_risk_analysis(metrics: Dict[str, Any]) -> str:
         risks.append(f"- **Effort**: {risk['effort']}")
         risks.append(f"- **Mitigation**: {risk['mitigation']}")
         risks.append("")
-    
+
     return "\n".join(risks)
 
 def generate_architecture_info() -> str:
     """Generate architecture and version information."""
     info = []
-    
+
     info.append("## Architecture & Version Information")
     info.append("")
-    
+
     # Get git information
     try:
         import subprocess
-        commit_sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'], 
+        commit_sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'],
                                            cwd=project_root).decode().strip()
-        branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], 
+        branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD'],
                                        cwd=project_root).decode().strip()
-        
+
         info.append(f"- **Commit SHA**: {commit_sha}")
         info.append(f"- **Branch**: {branch}")
     except:
         info.append("- **Commit SHA**: Unknown")
         info.append("- **Branch**: Unknown")
-    
+
     info.append(f"- **Test Framework Version**: 1.0.0")
     info.append(f"- **Python Version**: {sys.version.split()[0]}")
     info.append(f"- **Test Environment**: CI/CD Pipeline")
     info.append("")
-    
+
     # Architecture diagram placeholder
     info.append("### System Architecture")
     info.append("")
@@ -352,16 +352,16 @@ def generate_architecture_info() -> str:
     info.append("    H --> I[Response]")
     info.append("```")
     info.append("")
-    
+
     return "\n".join(info)
 
 def generate_artifacts_links(artifacts: Dict[str, Any]) -> str:
     """Generate artifacts links section."""
     links = []
-    
+
     links.append("## Artifacts & Reports")
     links.append("")
-    
+
     # Test reports
     links.append("### Test Reports")
     links.append("")
@@ -371,30 +371,30 @@ def generate_artifacts_links(artifacts: Dict[str, Any]) -> str:
                 links.append(f"- [{key}](artifacts/{key}.html)")
             elif artifact['type'] == 'k6_results':
                 links.append(f"- [{key}](artifacts/{key}.json)")
-    
+
     links.append("")
-    
+
     # Security reports
     links.append("### Security Reports")
     links.append("")
     security_artifacts = [k for k, v in artifacts.items() if v['type'] == 'security_report' and v['exists']]
     for artifact in security_artifacts:
         links.append(f"- [{artifact}](artifacts/{artifact}.json)")
-    
+
     links.append("")
-    
+
     return "\n".join(links)
 
 def generate_action_plan(metrics: Dict[str, Any]) -> str:
     """Generate action plan."""
     plan = []
-    
+
     plan.append("## Action Plan - Next 1-2 Weeks")
     plan.append("")
-    
+
     # Generate action items based on metrics
     actions = []
-    
+
     if metrics.get('pass_rate', 0) < 95:
         actions.append({
             'item': 'Fix failing unit tests',
@@ -403,7 +403,7 @@ def generate_action_plan(metrics: Dict[str, Any]) -> str:
             'effort': 'Medium',
             'owner': 'Development Team'
         })
-    
+
     if metrics.get('error_rate', 0) > 0.01:
         actions.append({
             'item': 'Implement error handling improvements',
@@ -412,7 +412,7 @@ def generate_action_plan(metrics: Dict[str, Any]) -> str:
             'effort': 'High',
             'owner': 'Backend Team'
         })
-    
+
     if metrics.get('response_time_p95', 0) > 500:
         actions.append({
             'item': 'Optimize response time bottlenecks',
@@ -421,7 +421,7 @@ def generate_action_plan(metrics: Dict[str, Any]) -> str:
             'effort': 'Medium',
             'owner': 'Performance Team'
         })
-    
+
     # Add standard action items
     actions.extend([
         {
@@ -439,7 +439,7 @@ def generate_action_plan(metrics: Dict[str, Any]) -> str:
             'owner': 'DevOps Team'
         }
     ])
-    
+
     for i, action in enumerate(actions[:10], 1):
         plan.append(f"### {i}. {action['item']}")
         plan.append("")
@@ -448,18 +448,18 @@ def generate_action_plan(metrics: Dict[str, Any]) -> str:
         plan.append(f"- **Effort**: {action['effort']}")
         plan.append(f"- **Owner**: {action['owner']}")
         plan.append("")
-    
+
     return "\n".join(plan)
 
 def main():
     """Generate comprehensive test report."""
     print("Generating SEAL-GRADE SYSTEM TESTS Report...")
-    
+
     # Load configuration and artifacts
     config = load_test_config()
     artifacts = load_artifacts()
     metrics = calculate_test_metrics(artifacts)
-    
+
     # Generate report sections
     report_sections = [
         generate_executive_summary(metrics, config),
@@ -470,27 +470,27 @@ def main():
         generate_artifacts_links(artifacts),
         generate_action_plan(metrics)
     ]
-    
+
     # Combine all sections
     full_report = "\n\n".join(report_sections)
-    
+
     # Write report
     report_path = project_root / "docs" / "SEAL_GRADE_TEST_REPORT.md"
     report_path.parent.mkdir(parents=True, exist_ok=True)
-    
+
     with open(report_path, 'w', encoding='utf-8') as f:
         f.write(full_report)
-    
+
     print(f"Report generated: {report_path}")
-    
+
     # Generate HTML version
     try:
         import markdown
         html_content = markdown.markdown(full_report, extensions=['tables', 'codehilite'])
-        
+
         html_path = project_root / "artifacts" / "test-report.html"
         html_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         with open(html_path, 'w', encoding='utf-8') as f:
             f.write(f"""
 <!DOCTYPE html>
@@ -511,11 +511,11 @@ def main():
 </body>
 </html>
             """)
-        
+
         print(f"HTML report generated: {html_path}")
     except ImportError:
         print("Markdown library not available, skipping HTML generation")
-    
+
     print("Report generation completed!")
 
 if __name__ == "__main__":

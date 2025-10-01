@@ -20,31 +20,30 @@ Date: 2025-09-28
 """
 
 from .alert_manager import (
-    AlertManager,
     Alert,
     AlertChannel,
+    AlertManager,
     AlertTemplate,
-    EmailNotifier,
     DesktopNotifier,
-    TelegramNotifier,
+    EmailNotifier,
     SMSNotifier,
+    TelegramNotifier,
     WebhookNotifier,
     get_alert_manager,
-    send_alert
+    send_alert,
 )
-
 from .learning_alerts import (
     LearningAlertManager,
     LearningMetrics,
+    check_learning_alerts,
     get_learning_alert_manager,
-    check_learning_alerts
 )
 
 __all__ = [
     # Alert Manager
     'AlertManager',
     'Alert',
-    'AlertChannel', 
+    'AlertChannel',
     'AlertTemplate',
     'EmailNotifier',
     'DesktopNotifier',
@@ -53,7 +52,7 @@ __all__ = [
     'WebhookNotifier',
     'get_alert_manager',
     'send_alert',
-    
+
     # Learning Alerts
     'LearningAlertManager',
     'LearningMetrics',

@@ -59,9 +59,9 @@ database_session = None
 async def lifespan(app: FastAPI):
     """Enhanced application lifespan manager"""
     global redis_pool, redis_client, database_engine, database_session
-    
+
     print("🚀 Starting Enhanced StillMe Gateway...")
-    
+
     # Initialize Redis connection pool
     redis_pool = redis.ConnectionPool.from_url(
         settings.REDIS_URL,
@@ -69,11 +69,11 @@ async def lifespan(app: FastAPI):
         retry_on_timeout=True
     )
     redis_client = redis.Redis(connection_pool=redis_pool)
-    
+
     # Test Redis connection
     await redis_client.ping()
     print("✅ Redis connection pool initialized")
-    
+
     # Initialize database connection pool
     database_engine = create_async_engine(
         settings.DATABASE_URL,
@@ -86,37 +86,37 @@ async def lifespan(app: FastAPI):
         database_engine, class_=AsyncSession, expire_on_commit=False
     )
     print("✅ Database connection pool initialized")
-    
+
     # Initialize monitoring
     await metrics_collector.initialize()
     await health_checker.initialize()
     print("✅ Monitoring initialized")
-    
+
     # Initialize security
     await auth_manager.initialize()
     await request_validator.initialize()
     print("✅ Security initialized")
-    
+
     print("🎉 Enhanced StillMe Gateway started successfully!")
-    
+
     yield
-    
+
     # Cleanup
     print("🔄 Shutting down Enhanced StillMe Gateway...")
-    
+
     if redis_client:
         await redis_client.close()
     if redis_pool:
         await redis_pool.disconnect()
-    
+
     if database_engine:
         await database_engine.dispose()
-    
+
     await metrics_collector.cleanup()
     await health_checker.cleanup()
     await auth_manager.cleanup()
     await request_validator.cleanup()
-    
+
     print("✅ Enhanced StillMe Gateway shutdown complete")
 
 
@@ -153,7 +153,7 @@ async def add_request_id(request: Request, call_next):
     """Add unique request ID to each request"""
     request_id = f"req_{int(time.time() * 1000)}_{id(request)}"
     request.state.request_id = request_id
-    
+
     response = await call_next(request)
     response.headers["X-Request-ID"] = request_id
     return response
@@ -185,22 +185,22 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
     if not request_validator.validate_client_id(client_id):
         await websocket.close(code=4004, reason="Invalid client ID")
         return
-    
+
     # Authenticate WebSocket connection
     if not await auth_manager.authenticate_websocket(websocket, client_id):
         await websocket.close(code=4001, reason="Unauthorized")
         return
-    
+
     # Connect with monitoring
     await websocket_manager.connect(websocket, client_id)
     metrics_collector.increment_websocket_connections()
-    
+
     try:
         while True:
             # Receive message with timeout
             try:
                 data = await asyncio.wait_for(
-                    websocket.receive_json(), 
+                    websocket.receive_json(),
                     timeout=settings.WS_MESSAGE_TIMEOUT
                 )
             except asyncio.TimeoutError:
@@ -209,7 +209,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
                     "message": "Message timeout"
                 })
                 continue
-            
+
             # Validate message
             if not request_validator.validate_websocket_message(data):
                 await websocket.send_json({
@@ -217,27 +217,27 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
                     "message": "Invalid message format"
                 })
                 continue
-            
+
             # Process message
             message = MessageProtocol.parse(data)
             metrics_collector.increment_websocket_messages()
-            
+
             # Route message based on type
             if message.type == MessageType.COMMAND:
                 result = await process_command_with_monitoring(message, client_id)
                 await websocket_manager.send_to_client(client_id, result)
-                
+
             elif message.type == MessageType.STATUS:
                 await process_status_with_monitoring(message, client_id)
-                
+
             elif message.type == MessageType.HEARTBEAT:
                 await process_heartbeat_with_monitoring(message, client_id)
-    
+
     except WebSocketDisconnect:
         await websocket_manager.disconnect(client_id)
         metrics_collector.decrement_websocket_connections()
         print(f"Client {client_id} disconnected")
-        
+
     except Exception as e:
         await websocket_manager.disconnect(client_id)
         metrics_collector.decrement_websocket_connections()
@@ -248,7 +248,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
 async def process_command_with_monitoring(message: MessageProtocol, client_id: str) -> Dict[str, Any]:
     """Process command with monitoring and error handling"""
     start_time = time.time()
-    
+
     try:
         # Add to Redis for persistence
         await redis_client.setex(
@@ -256,7 +256,7 @@ async def process_command_with_monitoring(message: MessageProtocol, client_id: s
             3600,  # 1 hour TTL
             message.to_json()
         )
-        
+
         # Process command (simplified for POC)
         result = {
             "id": message.id,
@@ -265,14 +265,14 @@ async def process_command_with_monitoring(message: MessageProtocol, client_id: s
             "timestamp": time.time(),
             "client_id": client_id
         }
-        
+
         # Record metrics
         processing_time = time.time() - start_time
         metrics_collector.record_command_processing_time(processing_time)
         metrics_collector.increment_commands_processed()
-        
+
         return result
-        
+
     except Exception as e:
         metrics_collector.increment_command_errors()
         return {
@@ -292,7 +292,7 @@ async def process_status_with_monitoring(message: MessageProtocol, client_id: st
             300,  # 5 minutes TTL
             message.to_json()
         )
-        
+
         # Broadcast status
         status_dict = {
             "id": message.id,
@@ -303,9 +303,9 @@ async def process_status_with_monitoring(message: MessageProtocol, client_id: st
             "client_id": client_id
         }
         await websocket_manager.broadcast_status(status_dict)
-        
+
         metrics_collector.increment_status_updates()
-        
+
     except Exception as e:
         metrics_collector.increment_status_errors()
         print(f"Status processing error: {e}")
@@ -320,19 +320,19 @@ async def process_heartbeat_with_monitoring(message: MessageProtocol, client_id:
             60,  # 1 minute TTL
             str(time.time())
         )
-        
+
         # Send heartbeat acknowledgment
         await websocket_manager.send_to_client(
-            client_id, 
+            client_id,
             {
-                "type": "heartbeat_ack", 
+                "type": "heartbeat_ack",
                 "timestamp": message.timestamp,
                 "server_time": time.time()
             }
         )
-        
+
         metrics_collector.increment_heartbeats()
-        
+
     except Exception as e:
         metrics_collector.increment_heartbeat_errors()
         print(f"Heartbeat processing error: {e}")
@@ -380,7 +380,7 @@ async def metrics():
 async def health_check():
     """Enhanced health check with detailed status"""
     health_status = await health_checker.get_comprehensive_health()
-    
+
     if health_status["status"] == "healthy":
         return JSONResponse(content=health_status, status_code=200)
     else:

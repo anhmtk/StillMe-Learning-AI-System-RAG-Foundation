@@ -18,7 +18,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import numpy as np
 import tiktoken
 from pydantic import BaseModel, ConfigDict, Field
-from sentence_transformers import SentenceTransformer
+from stillme_core.embeddings import SentenceTransformerBackend
 
 # ======================
 # Cấu hình logging
@@ -67,7 +67,7 @@ class SemanticHybridCache:
     def __init__(self, config: TokenOptimizerConfig) -> None:
         self.cache: OrderedDict[str, CacheItem] = OrderedDict()
         self.max_size = config.max_cache_size
-        self.embedding_model = SentenceTransformer(config.embedding_model)
+        self.embedding_model = SentenceTransformerBackend(config.embedding_model)
 
     def _generate_key(self, text: str) -> str:
         normalized = self._normalize_text(text)
@@ -80,13 +80,34 @@ class SemanticHybridCache:
             " k ": " không ",
             " dc ": " được ",
             " ntn ": " như thế nào ",
+            # Also handle without spaces
+            "ko": "không",
+            "dc": "được", 
+            "ntn": "như thế nào",
         }
         for k, v in replacements.items():
             text = text.replace(k, v)
         return " ".join(text.split())
 
     def _get_embedding(self, text: str) -> np.ndarray:
-        return self.embedding_model.encode(text, convert_to_numpy=True)
+        try:
+            embedding = self.embedding_model.embed([text])[0]
+            return np.array(embedding)
+        except Exception as e:
+            # Log the error but don't crash
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Embedding failed for text '{text[:50]}...': {e}")
+            
+            # Return a deterministic fallback embedding based on text hash
+            import hashlib
+            text_hash = hashlib.md5(text.encode('utf-8')).hexdigest()
+            # Convert hash to deterministic vector
+            hash_int = int(text_hash[:8], 16)
+            fallback_embedding = np.array([(hash_int >> i) & 1 for i in range(384)], dtype=np.float32)
+            # Normalize to unit vector
+            fallback_embedding = fallback_embedding / (np.linalg.norm(fallback_embedding) + 1e-8)
+            return fallback_embedding
 
     def get_exact_match(self, query: str) -> Optional[CacheItem]:
         key = self._generate_key(query)

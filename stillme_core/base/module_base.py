@@ -8,11 +8,11 @@ Author: StillMe AI Team
 Version: 1.0.0
 """
 
+import logging
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional, List
 from dataclasses import dataclass
 from enum import Enum
-import logging
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ class ModuleBase(ABC):
     This abstract base class defines the interface that all modules must implement.
     It provides common functionality and ensures consistency across the framework.
     """
-    
+
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         """
         Initialize the module
@@ -56,7 +56,7 @@ class ModuleBase(ABC):
         self.config = config or {}
         self._status = ModuleStatus.INITIALIZED
         self._logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
-        
+
     @property
     @abstractmethod
     def module_info(self) -> ModuleInfo:
@@ -67,7 +67,7 @@ class ModuleBase(ABC):
             ModuleInfo: Module information container
         """
         pass
-    
+
     @abstractmethod
     async def initialize(self) -> bool:
         """
@@ -77,7 +77,7 @@ class ModuleBase(ABC):
             bool: True if initialization successful, False otherwise
         """
         pass
-    
+
     @abstractmethod
     async def process(self, input_data: Any) -> Any:
         """
@@ -93,24 +93,24 @@ class ModuleBase(ABC):
             NotImplementedError: If the module is a stub/placeholder
         """
         pass
-    
+
     @abstractmethod
     async def cleanup(self) -> None:
         """
         Cleanup module resources
         """
         pass
-    
+
     @property
     def status(self) -> ModuleStatus:
         """Get current module status"""
         return self._status
-    
+
     def _set_status(self, status: ModuleStatus) -> None:
         """Set module status"""
         self._status = status
         self._logger.info(f"Module status changed to: {status.value}")
-    
+
     def is_implemented(self) -> bool:
         """
         Check if module is fully implemented (not a stub)
@@ -119,7 +119,7 @@ class ModuleBase(ABC):
             bool: True if implemented, False if stub
         """
         return self._status != ModuleStatus.NOT_IMPLEMENTED
-    
+
     def get_config(self, key: str, default: Any = None) -> Any:
         """
         Get configuration value
@@ -132,7 +132,7 @@ class ModuleBase(ABC):
             Configuration value or default
         """
         return self.config.get(key, default)
-    
+
     def set_config(self, key: str, value: Any) -> None:
         """
         Set configuration value
@@ -151,7 +151,7 @@ class StubModule(ModuleBase):
     This class provides a standard implementation for modules that are not yet
     fully implemented. It raises NotImplementedError with clear messages.
     """
-    
+
     def __init__(self, name: str, description: str = "Not implemented yet", config: Optional[Dict[str, Any]] = None):
         """
         Initialize stub module
@@ -165,7 +165,7 @@ class StubModule(ModuleBase):
         self._name = name
         self._description = description
         self._status = ModuleStatus.NOT_IMPLEMENTED
-    
+
     @property
     def module_info(self) -> ModuleInfo:
         """Get module information"""
@@ -178,13 +178,13 @@ class StubModule(ModuleBase):
             dependencies=[],
             config_schema=None
         )
-    
+
     async def initialize(self) -> bool:
         """Initialize stub module"""
         self._logger.warning(f"Stub module '{self._name}' initialized - functionality not available")
         self._set_status(ModuleStatus.INITIALIZED)
         return True
-    
+
     async def process(self, input_data: Any) -> Any:
         """
         Process input data (stub implementation)
@@ -195,7 +195,7 @@ class StubModule(ModuleBase):
         error_msg = f"Module '{self._name}' is not implemented yet. {self._description}"
         self._logger.error(error_msg)
         raise NotImplementedError(error_msg)
-    
+
     async def cleanup(self) -> None:
         """Cleanup stub module"""
         self._logger.info(f"Stub module '{self._name}' cleaned up")

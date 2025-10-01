@@ -5,13 +5,13 @@ This module provides a common interface for different LLM providers,
 enabling easy switching between providers and graceful fallback handling.
 """
 
-from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from enum import Enum
-from typing import Any, Dict, List, Optional, Union
 import asyncio
 import logging
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from datetime import datetime, timedelta
+from enum import Enum
+from typing import Any, Dict, List, Optional, Union
 
 logger = logging.getLogger(__name__)
 
@@ -88,45 +88,45 @@ class ProviderHealth:
 
 class CircuitBreaker:
     """Circuit breaker for provider health monitoring."""
-    
+
     def __init__(self, threshold: int = 5, timeout: int = 60):
         self.threshold = threshold
         self.timeout = timeout
         self.failure_count = 0
         self.last_failure_time: Optional[datetime] = None
         self.state = "closed"  # closed, open, half-open
-    
+
     def record_success(self):
         """Record a successful request."""
         self.failure_count = 0
         self.state = "closed"
         self.last_failure_time = None
-    
+
     def record_failure(self):
         """Record a failed request."""
         self.failure_count += 1
         self.last_failure_time = datetime.now()
-        
+
         if self.failure_count >= self.threshold:
             self.state = "open"
-    
+
     def can_attempt(self) -> bool:
         """Check if we can attempt a request."""
         if self.state == "closed":
             return True
-        
+
         if self.state == "open":
             if self.last_failure_time and \
                datetime.now() - self.last_failure_time > timedelta(seconds=self.timeout):
                 self.state = "half-open"
                 return True
             return False
-        
+
         if self.state == "half-open":
             return True
-        
+
         return False
-    
+
     def is_open(self) -> bool:
         """Check if circuit breaker is open."""
         return self.state == "open"
@@ -134,7 +134,7 @@ class CircuitBreaker:
 
 class LLMProviderBase(ABC):
     """Base class for LLM providers."""
-    
+
     def __init__(self, config: ProviderConfig):
         self.config = config
         self.health = ProviderHealth(
@@ -150,22 +150,22 @@ class LLMProviderBase(ABC):
             config.circuit_breaker_timeout
         )
         self._client: Optional[Any] = None
-    
+
     @abstractmethod
     async def initialize(self) -> bool:
         """Initialize the provider client."""
         pass
-    
+
     @abstractmethod
     async def generate(self, request: LLMRequest) -> LLMResponse:
         """Generate a response from the LLM."""
         pass
-    
+
     @abstractmethod
     async def health_check(self) -> bool:
         """Check if the provider is healthy."""
         pass
-    
+
     async def cleanup(self):
         """Cleanup provider resources."""
         if self._client:
@@ -176,24 +176,24 @@ class LLMProviderBase(ABC):
                     await self._client.aclose()
             except Exception as e:
                 logger.warning(f"Error closing {self.config.name} client: {e}")
-    
+
     def update_health(self, success: bool, response_time: float):
         """Update provider health metrics."""
         self.health.total_requests += 1
         self.health.last_check = datetime.now()
         self.health.response_time = response_time
-        
+
         if success:
             self.health.failed_requests = max(0, self.health.failed_requests - 1)
             self.circuit_breaker.record_success()
         else:
             self.health.failed_requests += 1
             self.circuit_breaker.record_failure()
-        
+
         # Update error rate
         if self.health.total_requests > 0:
             self.health.error_rate = self.health.failed_requests / self.health.total_requests
-        
+
         # Update status based on error rate and circuit breaker
         if self.circuit_breaker.is_open():
             self.health.status = ProviderStatus.UNHEALTHY
@@ -209,13 +209,13 @@ class LLMProviderBase(ABC):
 
 class LLMProviderManager:
     """Manager for multiple LLM providers with fallback support."""
-    
+
     def __init__(self, providers: List[LLMProviderBase], fallback_strategy: FallbackStrategy = FallbackStrategy.ROUND_ROBIN):
         self.providers = {p.config.name: p for p in providers}
         self.fallback_strategy = fallback_strategy
         self._current_provider_index = 0
         self._provider_order = sorted(providers, key=lambda p: p.config.priority)
-    
+
     async def initialize_all(self) -> bool:
         """Initialize all providers."""
         success_count = 0
@@ -228,9 +228,9 @@ class LLMProviderManager:
                     logger.warning(f"Failed to initialize provider: {provider.config.name}")
             except Exception as e:
                 logger.error(f"Error initializing provider {provider.config.name}: {e}")
-        
+
         return success_count > 0
-    
+
     async def generate(self, request: LLMRequest, preferred_provider: Optional[str] = None) -> LLMResponse:
         """Generate a response using the best available provider."""
         if preferred_provider and preferred_provider in self.providers:
@@ -240,7 +240,7 @@ class LLMProviderManager:
                     return await self._try_provider(provider, request)
                 except Exception as e:
                     logger.warning(f"Preferred provider {preferred_provider} failed: {e}")
-        
+
         # Try providers in order based on fallback strategy
         if self.fallback_strategy == FallbackStrategy.FIRST_AVAILABLE:
             for provider in self._provider_order:
@@ -250,26 +250,26 @@ class LLMProviderManager:
                     except Exception as e:
                         logger.warning(f"Provider {provider.config.name} failed: {e}")
                         continue
-        
+
         elif self.fallback_strategy == FallbackStrategy.ROUND_ROBIN:
             for _ in range(len(self._provider_order)):
                 provider = self._provider_order[self._current_provider_index]
                 self._current_provider_index = (self._current_provider_index + 1) % len(self._provider_order)
-                
+
                 if provider.config.enabled and not provider.circuit_breaker.is_open():
                     try:
                         return await self._try_provider(provider, request)
                     except Exception as e:
                         logger.warning(f"Provider {provider.config.name} failed: {e}")
                         continue
-        
+
         # If all providers failed, raise an exception
         raise Exception("All LLM providers are unavailable")
-    
+
     async def _try_provider(self, provider: LLMProviderBase, request: LLMRequest) -> LLMResponse:
         """Try to generate a response using a specific provider."""
         start_time = datetime.now()
-        
+
         try:
             response = await provider.generate(request)
             response_time = (datetime.now() - start_time).total_seconds()
@@ -279,11 +279,11 @@ class LLMProviderManager:
             response_time = (datetime.now() - start_time).total_seconds()
             provider.update_health(False, response_time)
             raise e
-    
+
     async def health_check_all(self) -> Dict[str, ProviderHealth]:
         """Check health of all providers."""
         health_status = {}
-        
+
         for name, provider in self.providers.items():
             try:
                 is_healthy = await provider.health_check()
@@ -293,14 +293,14 @@ class LLMProviderManager:
                 logger.error(f"Health check failed for {name}: {e}")
                 provider.update_health(False, 0.0)
                 health_status[name] = provider.health
-        
+
         return health_status
-    
+
     async def cleanup_all(self):
         """Cleanup all providers."""
         for provider in self.providers.values():
             await provider.cleanup()
-    
+
     def get_provider_status(self) -> Dict[str, Dict[str, Any]]:
         """Get status of all providers."""
         status = {}

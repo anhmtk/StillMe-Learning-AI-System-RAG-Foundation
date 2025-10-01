@@ -1,5 +1,6 @@
 from typing import Protocol, runtime_checkable
 
+
 @runtime_checkable
 class Router(Protocol):
     """Interface for model routing implementations.

@@ -19,7 +19,7 @@ Phase: NicheRadar Core
 
 from .collectors import (
     GitHubTrendingCollector,
-    HackerNewsCollector, 
+    HackerNewsCollector,
     NewsDeltaCollector,
     GoogleTrendsCollector,
     RedditEngagementCollector
@@ -50,7 +50,7 @@ __author__ = "StillMe Framework Team"
 # Export main classes
 __all__ = [
     "GitHubTrendingCollector",
-    "HackerNewsCollector", 
+    "HackerNewsCollector",
     "NewsDeltaCollector",
     "GoogleTrendsCollector",
     "RedditEngagementCollector",
@@ -58,7 +58,7 @@ __all__ = [
     "NicheScore",
     "PlaybookGenerator",
     "ProductBrief",
-    "MVPSpec", 
+    "MVPSpec",
     "PricingSuggestion",
     "ExecutionPack",
     # "FeedbackTracker",

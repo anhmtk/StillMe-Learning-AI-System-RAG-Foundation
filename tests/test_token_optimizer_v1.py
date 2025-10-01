@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 import numpy as np
 import pytest
 
-from modules.token_optimizer_v1 import (
+from stillme_core.modules.token_optimizer_v1 import (
     QualityMonitor,
     TokenLimitExceededError,
     TokenOptimizer,

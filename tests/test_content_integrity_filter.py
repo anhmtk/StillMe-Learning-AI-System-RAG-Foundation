@@ -7,7 +7,7 @@ import pytest
 import pytest_asyncio
 
 # Import các thành phần từ module chính
-from modules.content_integrity_filter import (
+from stillme_core.modules.content_integrity_filter import (
     CONTENT_RULES_PATH,
     CONTENT_VIOLATIONS_LOG,
     ContentIntegrityFilter,

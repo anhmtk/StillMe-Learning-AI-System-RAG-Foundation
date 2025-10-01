@@ -31,25 +31,25 @@ class EmotionResult:
     confidence: float
     timestamp: datetime
     metadata: Dict[str, Any] = None
-    
+
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
 
 class EmotionSenseV1:
     """EmotionSense V1 - Basic emotion detection"""
-    
+
     def __init__(self):
         self.logger = logger
         self.detection_history: List[EmotionResult] = []
         self.logger.info("✅ EmotionSenseV1 initialized")
-    
+
     def detect_emotion(self, text: str) -> EmotionResult:
         """Detect emotion from text"""
         try:
             # Simple emotion detection based on keywords
             text_lower = text.lower()
-            
+
             # Happy keywords
             happy_keywords = ["happy", "joy", "excited", "great", "wonderful", "amazing"]
             if any(keyword in text_lower for keyword in happy_keywords):
@@ -78,17 +78,17 @@ class EmotionSenseV1:
             else:
                 emotion = EmotionType.NEUTRAL
                 confidence = 0.5
-            
+
             result = EmotionResult(
                 emotion=emotion,
                 confidence=confidence,
                 timestamp=datetime.now()
             )
-            
+
             self.detection_history.append(result)
             self.logger.info(f"😊 Emotion detected: {emotion.value} (confidence: {confidence})")
             return result
-            
+
         except Exception as e:
             self.logger.error(f"❌ Emotion detection failed: {e}")
             return EmotionResult(
@@ -96,27 +96,27 @@ class EmotionSenseV1:
                 confidence=0.0,
                 timestamp=datetime.now()
             )
-    
+
     def get_emotion_summary(self) -> Dict[str, Any]:
         """Get emotion detection summary"""
         try:
             total_detections = len(self.detection_history)
             emotions_by_type = {}
-            
+
             for result in self.detection_history:
                 emotion_key = result.emotion.value
                 emotions_by_type[emotion_key] = emotions_by_type.get(emotion_key, 0) + 1
-            
+
             return {
                 "total_detections": total_detections,
                 "emotions_by_type": emotions_by_type,
                 "timestamp": datetime.now().isoformat()
             }
-            
+
         except Exception as e:
             self.logger.error(f"❌ Failed to get emotion summary: {e}")
             return {"error": str(e)}
-    
+
     def clear_history(self):
         """Clear detection history"""
         self.detection_history.clear()

@@ -21,14 +21,14 @@ Date: 2025-09-28
 """
 
 import asyncio
-import logging
 import json
-import time
-from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, List
-from dataclasses import asdict
-from pathlib import Path
+import logging
 import threading
+import time
+from dataclasses import asdict
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 try:
     from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -39,8 +39,8 @@ except ImportError:
     FASTAPI_AVAILABLE = False
     logging.warning("FastAPI not available. Install with: pip install fastapi uvicorn")
 
-from .resource_monitor import ResourceMonitor, ResourceMetrics, get_resource_monitor
 from .performance_analyzer import PerformanceAnalyzer, get_performance_analyzer
+from .resource_monitor import ResourceMetrics, ResourceMonitor, get_resource_monitor
 
 logger = logging.getLogger(__name__)
 
@@ -48,25 +48,25 @@ class MonitoringDashboard:
     """
     Real-time monitoring dashboard for AGI learning automation
     """
-    
+
     def __init__(self, port: int = 8080, host: str = "localhost"):
         self.port = port
         self.host = host
         self.logger = logging.getLogger(__name__)
-        
+
         # Components
         self.resource_monitor: Optional[ResourceMonitor] = None
         self.performance_analyzer: Optional[PerformanceAnalyzer] = None
-        
+
         # WebSocket connections
         self.active_connections: List[WebSocket] = []
         self.connection_lock = threading.Lock()
-        
+
         # Dashboard state
         self.is_running = False
         self.app: Optional[FastAPI] = None
         self.broadcast_task: Optional[asyncio.Task] = None
-        
+
         # Dashboard data
         self.dashboard_data = {
             'last_update': None,
@@ -77,80 +77,80 @@ class MonitoringDashboard:
             'evolution_milestones': [],
             'system_status': 'unknown'
         }
-        
+
         if not FASTAPI_AVAILABLE:
             raise ImportError("FastAPI is required for dashboard. Install with: pip install fastapi uvicorn")
-    
+
     async def initialize(self):
         """Initialize dashboard components"""
         try:
             # Get monitor instances
             self.resource_monitor = get_resource_monitor()
             self.performance_analyzer = get_performance_analyzer()
-            
+
             # Create FastAPI app
             self.app = FastAPI(
                 title="StillMe AGI Monitoring Dashboard",
                 description="Real-time monitoring for AGI learning automation",
                 version="2.0.0"
             )
-            
+
             # Setup routes
             self._setup_routes()
-            
+
             self.logger.info("Monitoring dashboard initialized")
             return True
-            
+
         except Exception as e:
             self.logger.error(f"Failed to initialize dashboard: {e}")
             return False
-    
+
     def _setup_routes(self):
         """Setup FastAPI routes"""
-        
+
         @self.app.get("/")
         async def dashboard_home():
             """Dashboard home page"""
             return HTMLResponse(self._get_dashboard_html())
-        
+
         @self.app.get("/api/status")
         async def get_status():
             """Get system status"""
             return JSONResponse(self._get_system_status())
-        
+
         @self.app.get("/api/metrics")
         async def get_metrics():
             """Get current metrics"""
             return JSONResponse(self._get_current_metrics())
-        
+
         @self.app.get("/api/analysis")
         async def get_analysis():
             """Get performance analysis"""
             return JSONResponse(self._get_performance_analysis())
-        
+
         @self.app.get("/api/alerts")
         async def get_alerts():
             """Get active alerts"""
             return JSONResponse(self._get_active_alerts())
-        
+
         @self.app.get("/api/learning-sessions")
         async def get_learning_sessions():
             """Get learning sessions"""
             return JSONResponse(self._get_learning_sessions())
-        
+
         @self.app.get("/api/evolution-milestones")
         async def get_evolution_milestones():
             """Get evolution milestones"""
             return JSONResponse(self._get_evolution_milestones())
-        
+
         @self.app.websocket("/ws")
         async def websocket_endpoint(websocket: WebSocket):
             """WebSocket endpoint for real-time updates"""
             await websocket.accept()
-            
+
             with self.connection_lock:
                 self.active_connections.append(websocket)
-            
+
             try:
                 while True:
                     # Keep connection alive
@@ -159,18 +159,18 @@ class MonitoringDashboard:
                 with self.connection_lock:
                     if websocket in self.active_connections:
                         self.active_connections.remove(websocket)
-    
+
     async def start(self):
         """Start dashboard server"""
         if not await self.initialize():
             return False
-        
+
         try:
             import uvicorn
-            
+
             # Start broadcast task
             self.broadcast_task = asyncio.create_task(self._broadcast_updates())
-            
+
             # Start server
             config = uvicorn.Config(
                 self.app,
@@ -179,27 +179,27 @@ class MonitoringDashboard:
                 log_level="info"
             )
             server = uvicorn.Server(config)
-            
+
             self.is_running = True
             self.logger.info(f"Dashboard started at http://{self.host}:{self.port}")
-            
+
             await server.serve()
-            
+
         except Exception as e:
             self.logger.error(f"Failed to start dashboard: {e}")
             return False
-    
+
     async def stop(self):
         """Stop dashboard server"""
         self.is_running = False
-        
+
         if self.broadcast_task:
             self.broadcast_task.cancel()
             try:
                 await self.broadcast_task
             except asyncio.CancelledError:
                 pass
-        
+
         # Close all WebSocket connections
         with self.connection_lock:
             for connection in self.active_connections:
@@ -208,20 +208,20 @@ class MonitoringDashboard:
                 except:
                     pass
             self.active_connections.clear()
-        
+
         self.logger.info("Dashboard stopped")
-    
+
     async def _broadcast_updates(self):
         """Broadcast updates to connected clients"""
         while self.is_running:
             try:
                 # Update dashboard data
                 await self._update_dashboard_data()
-                
+
                 # Broadcast to all connected clients
                 if self.active_connections:
                     message = json.dumps(self.dashboard_data, default=str)
-                    
+
                     with self.connection_lock:
                         disconnected = []
                         for connection in self.active_connections:
@@ -229,20 +229,20 @@ class MonitoringDashboard:
                                 await connection.send_text(message)
                             except:
                                 disconnected.append(connection)
-                        
+
                         # Remove disconnected connections
                         for conn in disconnected:
                             if conn in self.active_connections:
                                 self.active_connections.remove(conn)
-                
+
                 await asyncio.sleep(5)  # Update every 5 seconds
-                
+
             except asyncio.CancelledError:
                 break
             except Exception as e:
                 self.logger.error(f"Error in broadcast loop: {e}")
                 await asyncio.sleep(5)
-    
+
     async def _update_dashboard_data(self):
         """Update dashboard data"""
         try:
@@ -251,17 +251,17 @@ class MonitoringDashboard:
                 metrics = self.resource_monitor.get_current_metrics()
                 if metrics:
                     self.dashboard_data['resource_metrics'] = asdict(metrics)
-            
+
             # Performance analysis
             if self.performance_analyzer:
                 analysis = self.performance_analyzer.get_analysis_report()
                 self.dashboard_data['performance_analysis'] = analysis
-            
+
             # Alerts
             if self.resource_monitor:
                 alerts = [a for a in self.resource_monitor.alerts if not a.resolved]
                 self.dashboard_data['alerts'] = [asdict(a) for a in alerts[-10:]]  # Last 10
-            
+
             # Learning sessions
             if self.resource_monitor:
                 sessions = list(self.resource_monitor.learning_processes)
@@ -273,52 +273,52 @@ class MonitoringDashboard:
                     }
                     for session_id in sessions
                 ]
-            
+
             # Evolution milestones
             if self.performance_analyzer:
                 milestones = self.performance_analyzer.evolution_milestones[-5:]  # Last 5
                 self.dashboard_data['evolution_milestones'] = milestones
-            
+
             # System status
             self.dashboard_data['system_status'] = self._determine_system_status()
             self.dashboard_data['last_update'] = datetime.now().isoformat()
-            
+
         except Exception as e:
             self.logger.error(f"Error updating dashboard data: {e}")
-    
+
     def _determine_system_status(self) -> str:
         """Determine overall system status"""
         if not self.resource_monitor or not self.performance_analyzer:
             return "initializing"
-        
+
         # Check for critical alerts
         critical_alerts = [
-            a for a in self.resource_monitor.alerts 
+            a for a in self.resource_monitor.alerts
             if not a.resolved and a.severity == "critical"
         ]
-        
+
         if critical_alerts:
             return "critical"
-        
+
         # Check for high severity alerts
         high_alerts = [
-            a for a in self.resource_monitor.alerts 
+            a for a in self.resource_monitor.alerts
             if not a.resolved and a.severity == "high"
         ]
-        
+
         if high_alerts:
             return "warning"
-        
+
         # Check resource usage
         metrics = self.resource_monitor.get_current_metrics()
         if metrics:
-            if (metrics.cpu_percent > 80 or 
-                metrics.memory_percent > 80 or 
+            if (metrics.cpu_percent > 80 or
+                metrics.memory_percent > 80 or
                 metrics.disk_percent > 90):
                 return "warning"
-        
+
         return "healthy"
-    
+
     def _get_system_status(self) -> Dict[str, Any]:
         """Get system status"""
         return {
@@ -330,26 +330,26 @@ class MonitoringDashboard:
                 'dashboard': self.is_running
             }
         }
-    
+
     def _get_current_metrics(self) -> Dict[str, Any]:
         """Get current metrics"""
         if self.resource_monitor:
             return self.resource_monitor.get_metrics_summary()
         return {"error": "Resource monitor not available"}
-    
+
     def _get_performance_analysis(self) -> Dict[str, Any]:
         """Get performance analysis"""
         if self.performance_analyzer:
             return self.performance_analyzer.get_analysis_report()
         return {"error": "Performance analyzer not available"}
-    
+
     def _get_active_alerts(self) -> List[Dict[str, Any]]:
         """Get active alerts"""
         if self.resource_monitor:
             alerts = [a for a in self.resource_monitor.alerts if not a.resolved]
             return [asdict(a) for a in alerts]
         return []
-    
+
     def _get_learning_sessions(self) -> List[Dict[str, Any]]:
         """Get learning sessions"""
         if self.resource_monitor:
@@ -363,13 +363,13 @@ class MonitoringDashboard:
                 for session_id in sessions
             ]
         return []
-    
+
     def _get_evolution_milestones(self) -> List[Dict[str, Any]]:
         """Get evolution milestones"""
         if self.performance_analyzer:
             return self.performance_analyzer.evolution_milestones[-10:]  # Last 10
         return []
-    
+
     def _get_dashboard_html(self) -> str:
         """Get dashboard HTML"""
         return """

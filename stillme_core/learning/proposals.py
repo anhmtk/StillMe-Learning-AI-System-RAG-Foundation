@@ -18,14 +18,14 @@ Date: 2025-09-28
 """
 
 import json
-import uuid
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, asdict
-from enum import Enum
-import sqlite3
-from pathlib import Path
 import logging
+import sqlite3
+import uuid
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
+from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -83,7 +83,7 @@ class LearningProposal:
     learning_completed_at: Optional[str] = None
     learning_failed_at: Optional[str] = None
     failure_reason: Optional[str] = None
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         data = asdict(self)
@@ -92,7 +92,7 @@ class LearningProposal:
         data['priority'] = self.priority.value
         data['status'] = self.status.value
         return data
-    
+
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> 'LearningProposal':
         """Create from dictionary"""
@@ -104,12 +104,12 @@ class LearningProposal:
 
 class LearningProposalsManager:
     """Quản lý đề xuất học tập"""
-    
+
     def __init__(self, db_path: str = "data/learning/proposals.db"):
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_database()
-    
+
     def _init_database(self):
         """Khởi tạo database"""
         with sqlite3.connect(self.db_path) as conn:
@@ -143,7 +143,7 @@ class LearningProposalsManager:
                     failure_reason TEXT
                 )
             """)
-            
+
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS proposal_approvals (
                     id TEXT PRIMARY KEY,
@@ -155,7 +155,7 @@ class LearningProposalsManager:
                     FOREIGN KEY (proposal_id) REFERENCES proposals (id)
                 )
             """)
-            
+
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS proposal_learning_sessions (
                     id TEXT PRIMARY KEY,
@@ -168,7 +168,7 @@ class LearningProposalsManager:
                     FOREIGN KEY (proposal_id) REFERENCES proposals (id)
                 )
             """)
-    
+
     def create_proposal(self, proposal: LearningProposal) -> str:
         """Tạo đề xuất học tập mới"""
         try:
@@ -190,14 +190,14 @@ class LearningProposalsManager:
                     proposal.status.value, proposal.approval_required,
                     json.dumps(proposal.metadata)
                 ))
-                
+
             logger.info(f"Created learning proposal: {proposal.id}")
             return proposal.id
-            
+
         except Exception as e:
             logger.error(f"Failed to create proposal: {e}")
             raise
-    
+
     def get_proposal(self, proposal_id: str) -> Optional[LearningProposal]:
         """Lấy đề xuất theo ID"""
         try:
@@ -205,28 +205,28 @@ class LearningProposalsManager:
                 cursor = conn.execute("""
                     SELECT * FROM proposals WHERE id = ?
                 """, (proposal_id,))
-                
+
                 row = cursor.fetchone()
                 if not row:
                     return None
-                
+
                 # Convert row to dict
                 columns = [desc[0] for desc in cursor.description]
                 data = dict(zip(columns, row))
-                
+
                 # Parse JSON fields
                 data['learning_objectives'] = json.loads(data['learning_objectives'])
                 data['prerequisites'] = json.loads(data['prerequisites'])
                 data['expected_outcomes'] = json.loads(data['expected_outcomes'])
                 data['risk_assessment'] = json.loads(data['risk_assessment'])
                 data['metadata'] = json.loads(data['metadata'])
-                
+
                 return LearningProposal.from_dict(data)
-                
+
         except Exception as e:
             logger.error(f"Failed to get proposal {proposal_id}: {e}")
             return None
-    
+
     def get_pending_proposals(self, limit: int = 20) -> List[LearningProposal]:
         """Lấy danh sách đề xuất chờ phê duyệt"""
         try:
@@ -237,27 +237,27 @@ class LearningProposalsManager:
                     ORDER BY created_at DESC 
                     LIMIT ?
                 """, (limit,))
-                
+
                 proposals = []
                 for row in cursor.fetchall():
                     columns = [desc[0] for desc in cursor.description]
                     data = dict(zip(columns, row))
-                    
+
                     # Parse JSON fields
                     data['learning_objectives'] = json.loads(data['learning_objectives'])
                     data['prerequisites'] = json.loads(data['prerequisites'])
                     data['expected_outcomes'] = json.loads(data['expected_outcomes'])
                     data['risk_assessment'] = json.loads(data['risk_assessment'])
                     data['metadata'] = json.loads(data['metadata'])
-                    
+
                     proposals.append(LearningProposal.from_dict(data))
-                
+
                 return proposals
-                
+
         except Exception as e:
             logger.error(f"Failed to get pending proposals: {e}")
             return []
-    
+
     def approve_proposal(self, proposal_id: str, approver_id: str, reason: str = "") -> bool:
         """Phê duyệt đề xuất"""
         try:
@@ -268,7 +268,7 @@ class LearningProposalsManager:
                     SET status = 'approved', approved_at = ?, approved_by = ?
                     WHERE id = ?
                 """, (datetime.now().isoformat(), approver_id, proposal_id))
-                
+
                 # Add approval record
                 approval_id = str(uuid.uuid4())
                 conn.execute("""
@@ -276,14 +276,14 @@ class LearningProposalsManager:
                         id, proposal_id, approver_id, decision, reason, approved_at
                     ) VALUES (?, ?, ?, 'approved', ?, ?)
                 """, (approval_id, proposal_id, approver_id, reason, datetime.now().isoformat()))
-                
+
                 logger.info(f"Approved proposal: {proposal_id}")
                 return True
-                
+
         except Exception as e:
             logger.error(f"Failed to approve proposal {proposal_id}: {e}")
             return False
-    
+
     def reject_proposal(self, proposal_id: str, approver_id: str, reason: str) -> bool:
         """Từ chối đề xuất"""
         try:
@@ -294,7 +294,7 @@ class LearningProposalsManager:
                     SET status = 'rejected', rejected_at = ?, rejected_by = ?, rejection_reason = ?
                     WHERE id = ?
                 """, (datetime.now().isoformat(), approver_id, reason, proposal_id))
-                
+
                 # Add approval record
                 approval_id = str(uuid.uuid4())
                 conn.execute("""
@@ -302,14 +302,14 @@ class LearningProposalsManager:
                         id, proposal_id, approver_id, decision, reason, approved_at
                     ) VALUES (?, ?, ?, 'rejected', ?, ?)
                 """, (approval_id, proposal_id, approver_id, reason, datetime.now().isoformat()))
-                
+
                 logger.info(f"Rejected proposal: {proposal_id}")
                 return True
-                
+
         except Exception as e:
             logger.error(f"Failed to reject proposal {proposal_id}: {e}")
             return False
-    
+
     def start_learning(self, proposal_id: str, session_id: str) -> bool:
         """Bắt đầu học tập"""
         try:
@@ -320,7 +320,7 @@ class LearningProposalsManager:
                     SET status = 'learning', learning_started_at = ?
                     WHERE id = ?
                 """, (datetime.now().isoformat(), proposal_id))
-                
+
                 # Add learning session record
                 learning_id = str(uuid.uuid4())
                 conn.execute("""
@@ -328,14 +328,14 @@ class LearningProposalsManager:
                         id, proposal_id, session_id, started_at, status
                     ) VALUES (?, ?, ?, ?, 'learning')
                 """, (learning_id, proposal_id, session_id, datetime.now().isoformat()))
-                
+
                 logger.info(f"Started learning for proposal: {proposal_id}")
                 return True
-                
+
         except Exception as e:
             logger.error(f"Failed to start learning for proposal {proposal_id}: {e}")
             return False
-    
+
     def complete_learning(self, proposal_id: str, session_id: str, metrics: Dict[str, Any]) -> bool:
         """Hoàn thành học tập"""
         try:
@@ -346,21 +346,21 @@ class LearningProposalsManager:
                     SET status = 'completed', learning_completed_at = ?
                     WHERE id = ?
                 """, (datetime.now().isoformat(), proposal_id))
-                
+
                 # Update learning session
                 conn.execute("""
                     UPDATE proposal_learning_sessions 
                     SET status = 'completed', completed_at = ?, metrics = ?
                     WHERE proposal_id = ? AND session_id = ?
                 """, (datetime.now().isoformat(), json.dumps(metrics), proposal_id, session_id))
-                
+
                 logger.info(f"Completed learning for proposal: {proposal_id}")
                 return True
-                
+
         except Exception as e:
             logger.error(f"Failed to complete learning for proposal {proposal_id}: {e}")
             return False
-    
+
     def get_proposal_stats(self) -> Dict[str, Any]:
         """Lấy thống kê đề xuất"""
         try:
@@ -374,7 +374,7 @@ class LearningProposalsManager:
                     FROM proposals 
                     GROUP BY status
                 """)
-                
+
                 stats = {}
                 for row in cursor.fetchall():
                     status, count, avg_quality, avg_duration = row
@@ -383,9 +383,9 @@ class LearningProposalsManager:
                         'avg_quality': avg_quality or 0,
                         'avg_duration': avg_duration or 0
                     }
-                
+
                 return stats
-                
+
         except Exception as e:
             logger.error(f"Failed to get proposal stats: {e}")
             return {}

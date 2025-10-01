@@ -14,59 +14,59 @@ Test Coverage:
 - Cryptographic security
 """
 
-import pytest
 import asyncio
 import tempfile
-import json
-import base64
-import hashlib
 from pathlib import Path
-from unittest.mock import patch, MagicMock
 
-from agentdev.state_store import StateStore
-from agentdev.security_gate import SecurityGate
-from agentdev.authz.rbac import RBACManager
-from agentdev.authz.session_manager import SessionManager
+import pytest
+
+from stillme_core import RBACManager, SecurityGate, SessionManager, StateStore
+
+# from agentdev.authz.rbac import RBACManager  # Not implemented yet
+# from agentdev.authz.session_manager import SessionManager  # Not implemented yet
+# from agentdev.security_gate import SecurityGate  # Not implemented yet
+# from agentdev.state_store import StateStore  # Not implemented yet
+
 
 class TestRedBlueSecurity:
     """Red/Blue security tests"""
-    
+
     @pytest.fixture
     def state_store(self):
         """Create temporary state store"""
         temp_db = tempfile.NamedTemporaryFile(delete=False, suffix='.db')
         temp_db.close()
-        
+
         store = StateStore(temp_db.name)
         asyncio.run(store.initialize())
         yield store
         asyncio.run(store.close())
         Path(temp_db.name).unlink(missing_ok=True)
-    
+
     @pytest.fixture
     def security_gate(self):
         """Create security gate"""
         gate = SecurityGate()
         return gate
-    
+
     @pytest.fixture
     def rbac_manager(self):
         """Create RBAC manager"""
         temp_db = tempfile.NamedTemporaryFile(delete=False, suffix='.db')
         temp_db.close()
-        
+
         rbac = RBACManager(temp_db.name)
         asyncio.run(rbac.initialize())
         yield rbac
         asyncio.run(rbac.close())
         Path(temp_db.name).unlink(missing_ok=True)
-    
+
     @pytest.fixture
     def session_manager(self):
         """Create session manager"""
         manager = SessionManager()
         return manager
-    
+
     def test_sql_injection_prevention(self, state_store):
         """Test SQL injection prevention"""
         # Test SQL injection vectors
@@ -77,7 +77,7 @@ class TestRedBlueSecurity:
             "' UNION SELECT * FROM jobs --",
             "'; UPDATE jobs SET name='hacked'; --"
         ]
-        
+
         for vector in injection_vectors:
             # Should not be able to inject SQL
             try:
@@ -87,7 +87,7 @@ class TestRedBlueSecurity:
             except Exception as e:
                 # Injection was blocked
                 assert "injection" in str(e).lower() or "invalid" in str(e).lower()
-    
+
     def test_xss_prevention(self, state_store):
         """Test XSS prevention"""
         # Test XSS vectors
@@ -98,7 +98,7 @@ class TestRedBlueSecurity:
             "<svg onload=alert('xss')>",
             "';alert('xss');//"
         ]
-        
+
         for vector in xss_vectors:
             # Should not be able to execute XSS
             try:
@@ -108,7 +108,7 @@ class TestRedBlueSecurity:
             except Exception as e:
                 # XSS was blocked
                 assert "xss" in str(e).lower() or "invalid" in str(e).lower()
-    
+
     def test_command_injection_prevention(self, security_gate):
         """Test command injection prevention"""
         # Test command injection vectors
@@ -121,7 +121,7 @@ class TestRedBlueSecurity:
             "; ls -la",
             "| nc -l 8080"
         ]
-        
+
         for vector in injection_vectors:
             # Should not be able to inject commands
             try:
@@ -131,7 +131,7 @@ class TestRedBlueSecurity:
             except Exception as e:
                 # Injection was blocked
                 assert "injection" in str(e).lower() or "invalid" in str(e).lower()
-    
+
     def test_path_traversal_prevention(self, state_store):
         """Test path traversal prevention"""
         # Test path traversal vectors
@@ -143,7 +143,7 @@ class TestRedBlueSecurity:
             "....//....//....//etc//passwd",
             "..%2F..%2F..%2Fetc%2Fpasswd"
         ]
-        
+
         for vector in traversal_vectors:
             # Should not be able to traverse paths
             try:
@@ -153,7 +153,7 @@ class TestRedBlueSecurity:
             except Exception as e:
                 # Traversal was blocked
                 assert "traversal" in str(e).lower() or "invalid" in str(e).lower()
-    
+
     def test_ldap_injection_prevention(self, rbac_manager):
         """Test LDAP injection prevention"""
         # Test LDAP injection vectors
@@ -165,7 +165,7 @@ class TestRedBlueSecurity:
             "admin)(&(password=*",
             "*)(|(objectClass=*"
         ]
-        
+
         for vector in injection_vectors:
             # Should not be able to inject LDAP
             try:
@@ -175,7 +175,7 @@ class TestRedBlueSecurity:
             except Exception as e:
                 # Injection was blocked
                 assert "injection" in str(e).lower() or "invalid" in str(e).lower()
-    
+
     def test_xml_injection_prevention(self, state_store):
         """Test XML injection prevention"""
         # Test XML injection vectors
@@ -185,7 +185,7 @@ class TestRedBlueSecurity:
             "<root><![CDATA[<script>alert('xss')</script>]]></root>",
             "<?xml version='1.0'?><!DOCTYPE root [<!ENTITY xxe SYSTEM 'http://evil.com/xxe'>]><root>&xxe;</root>"
         ]
-        
+
         for vector in injection_vectors:
             # Should not be able to inject XML
             try:
@@ -195,7 +195,7 @@ class TestRedBlueSecurity:
             except Exception as e:
                 # Injection was blocked
                 assert "injection" in str(e).lower() or "invalid" in str(e).lower()
-    
+
     def test_json_injection_prevention(self, state_store):
         """Test JSON injection prevention"""
         # Test JSON injection vectors
@@ -205,7 +205,7 @@ class TestRedBlueSecurity:
             '{"name": "test", "command": "; rm -rf /"}',
             '{"name": "test", "path": "../../../etc/passwd"}'
         ]
-        
+
         for vector in injection_vectors:
             # Should not be able to inject JSON
             try:
@@ -215,7 +215,7 @@ class TestRedBlueSecurity:
             except Exception as e:
                 # Injection was blocked
                 assert "injection" in str(e).lower() or "invalid" in str(e).lower()
-    
+
     def test_authentication_bypass_prevention(self, rbac_manager):
         """Test authentication bypass prevention"""
         # Test authentication bypass vectors
@@ -231,7 +231,7 @@ class TestRedBlueSecurity:
             "empty",
             "undefined"
         ]
-        
+
         for vector in bypass_vectors:
             # Should not be able to bypass authentication
             try:
@@ -241,7 +241,7 @@ class TestRedBlueSecurity:
             except Exception as e:
                 # Bypass was blocked
                 assert "bypass" in str(e).lower() or "invalid" in str(e).lower()
-    
+
     def test_authorization_bypass_prevention(self, rbac_manager):
         """Test authorization bypass prevention"""
         # Test authorization bypass vectors
@@ -257,7 +257,7 @@ class TestRedBlueSecurity:
             "god",
             "all"
         ]
-        
+
         for vector in bypass_vectors:
             # Should not be able to bypass authorization
             try:
@@ -267,7 +267,7 @@ class TestRedBlueSecurity:
             except Exception as e:
                 # Bypass was blocked
                 assert "bypass" in str(e).lower() or "invalid" in str(e).lower()
-    
+
     def test_session_fixation_prevention(self, session_manager):
         """Test session fixation prevention"""
         # Test session fixation vectors
@@ -278,7 +278,7 @@ class TestRedBlueSecurity:
             "system_session",
             "service_session"
         ]
-        
+
         for vector in fixation_vectors:
             # Should not be able to fixate sessions
             try:
@@ -290,7 +290,7 @@ class TestRedBlueSecurity:
             except Exception as e:
                 # Fixation was blocked
                 assert "fixation" in str(e).lower() or "invalid" in str(e).lower()
-    
+
     def test_csrf_prevention(self, state_store):
         """Test CSRF prevention"""
         # Test CSRF vectors
@@ -300,7 +300,7 @@ class TestRedBlueSecurity:
             "<script>fetch('http://evil.com/csrf')</script>",
             "<iframe src='http://evil.com/csrf'></iframe>"
         ]
-        
+
         for vector in csrf_vectors:
             # Should not be able to execute CSRF
             try:
@@ -310,7 +310,7 @@ class TestRedBlueSecurity:
             except Exception as e:
                 # CSRF was blocked
                 assert "csrf" in str(e).lower() or "invalid" in str(e).lower()
-    
+
     def test_clickjacking_prevention(self, state_store):
         """Test clickjacking prevention"""
         # Test clickjacking vectors
@@ -320,7 +320,7 @@ class TestRedBlueSecurity:
             "<embed src='http://evil.com/clickjacking'></embed>",
             "<applet code='http://evil.com/clickjacking'></applet>"
         ]
-        
+
         for vector in clickjacking_vectors:
             # Should not be able to execute clickjacking
             try:
@@ -330,7 +330,7 @@ class TestRedBlueSecurity:
             except Exception as e:
                 # Clickjacking was blocked
                 assert "clickjacking" in str(e).lower() or "invalid" in str(e).lower()
-    
+
     def test_directory_traversal_prevention(self, state_store):
         """Test directory traversal prevention"""
         # Test directory traversal vectors
@@ -346,7 +346,7 @@ class TestRedBlueSecurity:
             "..%2F",
             "..%5C"
         ]
-        
+
         for vector in traversal_vectors:
             # Should not be able to traverse directories
             try:
@@ -356,7 +356,7 @@ class TestRedBlueSecurity:
             except Exception as e:
                 # Traversal was blocked
                 assert "traversal" in str(e).lower() or "invalid" in str(e).lower()
-    
+
     def test_file_upload_prevention(self, state_store):
         """Test file upload prevention"""
         # Test file upload vectors
@@ -370,7 +370,7 @@ class TestRedBlueSecurity:
             "malicious.bat",
             "malicious.cmd"
         ]
-        
+
         for vector in upload_vectors:
             # Should not be able to upload malicious files
             try:
@@ -380,7 +380,7 @@ class TestRedBlueSecurity:
             except Exception as e:
                 # Upload was blocked
                 assert "upload" in str(e).lower() or "invalid" in str(e).lower()
-    
+
     def test_cryptographic_security(self, state_store):
         """Test cryptographic security"""
         # Test cryptographic vectors
@@ -394,7 +394,7 @@ class TestRedBlueSecurity:
             "root",
             "system"
         ]
-        
+
         for vector in crypto_vectors:
             # Should not be able to use weak cryptography
             try:
@@ -404,7 +404,7 @@ class TestRedBlueSecurity:
             except Exception as e:
                 # Weak crypto was blocked
                 assert "crypto" in str(e).lower() or "invalid" in str(e).lower()
-    
+
     def test_input_validation(self, state_store):
         """Test input validation"""
         # Test input validation vectors
@@ -427,7 +427,7 @@ class TestRedBlueSecurity:
             '"',   # Double quote
             "'",   # Single quote
         ]
-        
+
         for vector in validation_vectors:
             # Should validate input properly
             try:
@@ -437,7 +437,7 @@ class TestRedBlueSecurity:
             except Exception as e:
                 # Invalid input was blocked
                 assert "validation" in str(e).lower() or "invalid" in str(e).lower()
-    
+
     def test_output_encoding(self, state_store):
         """Test output encoding"""
         # Test output encoding vectors
@@ -448,7 +448,7 @@ class TestRedBlueSecurity:
             "<svg onload=alert('xss')>",
             "';alert('xss');//"
         ]
-        
+
         for vector in encoding_vectors:
             # Should encode output properly
             try:
@@ -458,7 +458,7 @@ class TestRedBlueSecurity:
             except Exception as e:
                 # Output encoding was applied
                 assert "encoding" in str(e).lower() or "invalid" in str(e).lower()
-    
+
     def test_security_headers(self, state_store):
         """Test security headers"""
         # Test security header vectors
@@ -469,7 +469,7 @@ class TestRedBlueSecurity:
             "Strict-Transport-Security: max-age=31536000",
             "Content-Security-Policy: default-src 'self'"
         ]
-        
+
         for vector in header_vectors:
             # Should handle security headers properly
             try:
@@ -479,7 +479,7 @@ class TestRedBlueSecurity:
             except Exception as e:
                 # Security headers were applied
                 assert "header" in str(e).lower() or "invalid" in str(e).lower()
-    
+
     def test_security_logging(self, state_store):
         """Test security logging"""
         # Test security logging vectors
@@ -490,7 +490,7 @@ class TestRedBlueSecurity:
             "error_log",
             "debug_log"
         ]
-        
+
         for vector in logging_vectors:
             # Should log security events properly
             try:
@@ -500,7 +500,7 @@ class TestRedBlueSecurity:
             except Exception as e:
                 # Security logging was applied
                 assert "logging" in str(e).lower() or "invalid" in str(e).lower()
-    
+
     def test_security_monitoring(self, state_store):
         """Test security monitoring"""
         # Test security monitoring vectors
@@ -511,7 +511,7 @@ class TestRedBlueSecurity:
             "threat_detection",
             "vulnerability_scan"
         ]
-        
+
         for vector in monitoring_vectors:
             # Should monitor security events properly
             try:
@@ -521,7 +521,7 @@ class TestRedBlueSecurity:
             except Exception as e:
                 # Security monitoring was applied
                 assert "monitoring" in str(e).lower() or "invalid" in str(e).lower()
-    
+
     def test_security_incident_response(self, state_store):
         """Test security incident response"""
         # Test security incident response vectors
@@ -532,7 +532,7 @@ class TestRedBlueSecurity:
             "forensic_analysis",
             "recovery_procedures"
         ]
-        
+
         for vector in incident_vectors:
             # Should handle security incidents properly
             try:

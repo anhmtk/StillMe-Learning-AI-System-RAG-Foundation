@@ -7,9 +7,9 @@ StillMe Safety Guard - Stub Implementation
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Union
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, Dict, List, Optional, Union
 
 logger = logging.getLogger(__name__)
 
@@ -36,12 +36,12 @@ class SafetyGuard:
     
     # TODO[stabilize]: Implement full safety checking functionality
     """
-    
+
     def __init__(self, config: Optional[SafetyConfig] = None):
         """Initialize Safety Guard"""
         self.config = config or SafetyConfig()
         logger.warning("SafetyGuard: Using stub implementation - not for production")
-    
+
     def check_content(self, content: str) -> Dict[str, Any]:
         """Check content for safety issues"""
         logger.warning("SafetyGuard.check_content(): Stub implementation")
@@ -51,17 +51,17 @@ class SafetyGuard:
             "issues": [],
             "message": "Stub implementation - no real checks performed"
         }
-    
+
     def validate_input(self, input_data: Any) -> bool:
         """Validate input data"""
         logger.warning("SafetyGuard.validate_input(): Stub implementation")
         return True
-    
+
     def sanitize_output(self, output: str) -> str:
         """Sanitize output"""
         logger.warning("SafetyGuard.sanitize_output(): Stub implementation")
         return output
-    
+
     def get_safety_report(self) -> Dict[str, Any]:
         """Get safety report"""
         return {

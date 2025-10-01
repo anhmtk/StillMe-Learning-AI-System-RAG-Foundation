@@ -16,7 +16,7 @@ def run_command(command, description):
     print(f"\n🚀 {description}")
     print(f"Command: {command}")
     print("-" * 50)
-    
+
     try:
         result = subprocess.run(command, shell=False, check=True, capture_output=True, text=True)
         print("✅ Success")
@@ -31,22 +31,22 @@ def run_command(command, description):
 def check_prerequisites():
     """Check if prerequisites are met"""
     print("🔍 Checking prerequisites...")
-    
+
     # Check if Python is available
     if not run_command("python --version", "Checking Python version"):
         return False
-    
+
     # Check if pytest is installed
     if not run_command("pytest --version", "Checking pytest installation"):
         return False
-    
+
     # Check if required directories exist
     required_dirs = ["tests", "reports", "logs", "config", "policies"]
     for dir_path in required_dirs:
         if not Path(dir_path).exists():
             print(f"❌ Required directory not found: {dir_path}")
             return False
-    
+
     # Check if required files exist
     required_files = [
         "config/staging.yaml",
@@ -58,7 +58,7 @@ def check_prerequisites():
         if not Path(file_path).exists():
             print(f"❌ Required file not found: {file_path}")
             return False
-    
+
     print("✅ All prerequisites met")
     return True
 
@@ -93,7 +93,7 @@ def run_e2e_tests():
 def generate_test_summary():
     """Generate test summary report"""
     print("\n📊 Generating test summary...")
-    
+
     # Check if reports were generated
     report_files = [
         "reports/test_report.html",
@@ -101,13 +101,13 @@ def generate_test_summary():
         "reports/junit.xml",
         "reports/coverage.xml"
     ]
-    
+
     summary = {
         "timestamp": datetime.now().isoformat(),
         "reports_generated": [],
         "reports_missing": []
     }
-    
+
     for report_file in report_files:
         if Path(report_file).exists():
             summary["reports_generated"].append(report_file)
@@ -115,13 +115,13 @@ def generate_test_summary():
         else:
             summary["reports_missing"].append(report_file)
             print(f"❌ {report_file}")
-    
+
     # Save summary
     summary_path = "reports/test_summary.json"
     with open(summary_path, 'w') as f:
         import json
         json.dump(summary, f, indent=2)
-    
+
     print(f"📋 Test summary saved to {summary_path}")
     return summary
 
@@ -134,23 +134,23 @@ def main():
     parser.add_argument("--all", action="store_true", help="Run all tests with reports")
     parser.add_argument("--quick", action="store_true", help="Run quick tests (unit + integration)")
     parser.add_argument("--skip-prereq", action="store_true", help="Skip prerequisite checks")
-    
+
     args = parser.parse_args()
-    
+
     print("🧪 NicheRadar v1.5 Test Runner")
     print("=" * 50)
-    
+
     # Check prerequisites unless skipped
     if not args.skip_prereq:
         if not check_prerequisites():
             print("❌ Prerequisites not met. Exiting.")
             sys.exit(1)
-    
+
     # Create reports directory
     os.makedirs("reports", exist_ok=True)
-    
+
     success = True
-    
+
     if args.unit:
         success &= run_unit_tests()
     elif args.integration:
@@ -165,10 +165,10 @@ def main():
     else:
         # Default: run all tests with reports
         success &= run_all_tests_with_reports()
-    
+
     # Generate summary
     summary = generate_test_summary()
-    
+
     # Print final results
     print("\n" + "=" * 50)
     if success:

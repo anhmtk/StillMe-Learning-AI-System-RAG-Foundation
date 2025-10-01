@@ -137,15 +137,15 @@ class ExecutionPack:
 
 class PlaybookGenerator:
     """Generate execution playbooks for niche opportunities"""
-    
+
     def __init__(self):
         self.logger = logging.getLogger("niche_radar.playbook")
-        
+
     def generate_playbook(self, niche_score: NicheScore) -> ExecutionPack:
         """Generate complete execution pack for niche opportunity"""
         try:
             self.logger.info(f"📋 Generating playbook for niche: {niche_score.topic}")
-            
+
             # Generate each component
             product_brief = self._generate_product_brief(niche_score)
             mvp_spec = self._generate_mvp_spec(niche_score, product_brief)
@@ -157,7 +157,7 @@ class PlaybookGenerator:
             compliance_notes = self._generate_compliance_notes(niche_score)
             kpis = self._generate_kpis(niche_score)
             timeline = self._generate_timeline(niche_score, mvp_spec)
-            
+
             return ExecutionPack(
                 niche_score=niche_score,
                 product_brief=product_brief,
@@ -171,27 +171,27 @@ class PlaybookGenerator:
                 kpis=kpis,
                 timeline=timeline
             )
-            
+
         except Exception as e:
             self.logger.error(f"❌ Playbook generation failed: {e}")
             raise
-    
+
     def _generate_product_brief(self, niche_score: NicheScore) -> ProductBrief:
         """Generate product brief"""
         topic = niche_score.topic
-        
+
         # Generate personas based on topic
         personas = self._generate_personas(topic)
-        
+
         # Generate pain points
         pain_points = self._generate_pain_points(topic, niche_score)
-        
+
         # Generate jobs to be done
         jobs_to_be_done = self._generate_jobs_to_be_done(topic, pain_points)
-        
+
         # Generate USP
         usp = self._generate_usp(topic, niche_score)
-        
+
         return ProductBrief(
             title=f"{topic.title()} Assistant",
             description=f"AI-powered {topic} assistant built with StillMe framework",
@@ -202,11 +202,11 @@ class PlaybookGenerator:
             target_market=self._determine_target_market(topic),
             competitive_advantage=f"Built on StillMe's proven AI framework with {niche_score.feasibility_fit:.0%} capability fit"
         )
-    
+
     def _generate_personas(self, topic: str) -> List[Persona]:
         """Generate target personas"""
         personas = []
-        
+
         if "ai" in topic.lower() or "assistant" in topic.lower():
             personas.append(Persona(
                 name="Sarah Chen",
@@ -225,7 +225,7 @@ class PlaybookGenerator:
                 tech_stack=["Python", "SQL", "Jupyter", "Slack"],
                 budget_range="$100-500/month"
             ))
-        
+
         if "translation" in topic.lower():
             personas.append(Persona(
                 name="Marco Rodriguez",
@@ -244,7 +244,7 @@ class PlaybookGenerator:
                 tech_stack=["WordPress", "CMS", "API"],
                 budget_range="$50-200/month"
             ))
-        
+
         # Default persona if no specific match
         if not personas:
             personas.append(Persona(
@@ -264,13 +264,13 @@ class PlaybookGenerator:
                 tech_stack=["Python", "JavaScript", "API"],
                 budget_range="$25-100/month"
             ))
-        
+
         return personas
-    
+
     def _generate_pain_points(self, topic: str, niche_score: NicheScore) -> List[str]:
         """Generate pain points based on topic and signals"""
         pain_points = []
-        
+
         # Base pain points by topic
         if "ai" in topic.lower():
             pain_points.extend([
@@ -278,33 +278,33 @@ class PlaybookGenerator:
                 "Need intelligent automation",
                 "Lack of AI expertise in team"
             ])
-        
+
         if "translation" in topic.lower():
             pain_points.extend([
                 "Expensive human translation",
                 "Slow turnaround times",
                 "Quality inconsistencies"
             ])
-        
+
         if "automation" in topic.lower():
             pain_points.extend([
                 "Repetitive tasks waste time",
                 "Manual processes are error-prone",
                 "Need reliable automation"
             ])
-        
+
         # Add pain points based on competition proxy
         if niche_score.competition_proxy > 0.7:
             pain_points.append("Existing solutions are too complex or expensive")
         elif niche_score.competition_proxy < 0.3:
             pain_points.append("No good solutions exist in the market")
-        
+
         return pain_points[:5]  # Limit to 5 pain points
-    
+
     def _generate_jobs_to_be_done(self, topic: str, pain_points: List[str]) -> List[str]:
         """Generate jobs to be done"""
         jobs = []
-        
+
         for pain_point in pain_points:
             if "time" in pain_point.lower():
                 jobs.append("Save time on repetitive tasks")
@@ -316,16 +316,16 @@ class PlaybookGenerator:
                 jobs.append("Simplify complex processes")
             elif "manual" in pain_point.lower():
                 jobs.append("Automate manual processes")
-        
+
         # Add default jobs
         jobs.extend([
             "Get work done faster and more efficiently",
             "Focus on high-value activities",
             "Reduce errors and improve reliability"
         ])
-        
+
         return list(set(jobs))[:5]  # Remove duplicates and limit to 5
-    
+
     def _generate_usp(self, topic: str, niche_score: NicheScore) -> str:
         """Generate unique selling proposition"""
         if niche_score.feasibility_fit > 0.8:
@@ -334,7 +334,7 @@ class PlaybookGenerator:
             return f"First-to-market {topic} solution with StillMe's enterprise-grade AI capabilities"
         else:
             return f"StillMe-powered {topic} assistant - faster, smarter, more reliable than existing solutions"
-    
+
     def _determine_target_market(self, topic: str) -> str:
         """Determine target market"""
         if "enterprise" in topic.lower() or "b2b" in topic.lower():
@@ -343,14 +343,14 @@ class PlaybookGenerator:
             return "B2B SMB (10-100 employees)"
         else:
             return "B2B SMB to Mid-market (10-500 employees)"
-    
+
     def _generate_mvp_spec(self, niche_score: NicheScore, product_brief: ProductBrief) -> MVPSpec:
         """Generate MVP specification"""
         topic = niche_score.topic
-        
+
         # Generate features based on feasibility fit
         features = []
-        
+
         if niche_score.feasibility_fit > 0.8:
             # High fit - can implement advanced features
             features.extend([
@@ -407,10 +407,10 @@ class PlaybookGenerator:
                     stillme_capability="api_integration"
                 )
             ])
-        
+
         # Calculate total development days
         total_days = sum(f.effort_days for f in features if f.priority == "must_have")
-        
+
         return MVPSpec(
             name=f"{topic.title()} Assistant MVP",
             description=f"Minimum viable product for {topic} automation",
@@ -426,22 +426,22 @@ class PlaybookGenerator:
             dependencies=["StillMe Framework", "OpenRouter API"],
             deployment_requirements=["Docker", "Domain", "SSL Certificate"]
         )
-    
+
     def _generate_pricing_suggestion(self, niche_score: NicheScore, mvp_spec: MVPSpec) -> PricingSuggestion:
         """Generate pricing suggestion"""
         # Base pricing on feasibility fit and competition
         base_price = 29.0
-        
+
         if niche_score.feasibility_fit > 0.8:
             base_price = 49.0
         elif niche_score.feasibility_fit < 0.5:
             base_price = 19.0
-        
+
         if niche_score.competition_proxy > 0.7:
             base_price *= 0.8  # Price lower due to competition
         elif niche_score.competition_proxy < 0.3:
             base_price *= 1.2  # Price higher due to uniqueness
-        
+
         tiers = [
             PricingTier(
                 name="Starter",
@@ -482,7 +482,7 @@ class PlaybookGenerator:
                 rationale="Premium tier for enterprise features"
             )
         ]
-        
+
         return PricingSuggestion(
             tiers=tiers,
             pricing_model="subscription",
@@ -496,7 +496,7 @@ class PlaybookGenerator:
                 "month_12": base_price * 200
             }
         )
-    
+
     def _generate_landing_page_spec(self, niche_score: NicheScore, product_brief: ProductBrief) -> LandingPageSpec:
         """Generate landing page specification"""
         return LandingPageSpec(
@@ -510,7 +510,7 @@ class PlaybookGenerator:
             ],
             features=[
                 "Intelligent processing",
-                "Easy API integration", 
+                "Easy API integration",
                 "Real-time results",
                 "Scalable architecture"
             ],
@@ -528,12 +528,12 @@ class PlaybookGenerator:
                 "background_color": "#ffffff"
             }
         )
-    
+
     def _generate_repo_scaffold(self, niche_score: NicheScore, mvp_spec: MVPSpec) -> RepoScaffold:
         """Generate repository scaffold"""
         topic = niche_score.topic
         repo_name = f"{topic.replace(' ', '-')}-assistant"
-        
+
         return RepoScaffold(
             name=repo_name,
             description=f"AI-powered {topic} assistant built with StillMe framework",
@@ -583,11 +583,11 @@ MIT License - see [LICENSE](LICENSE) file.
                 "Add deployment configuration"
             ]
         )
-    
+
     def _generate_outreach_templates(self, niche_score: NicheScore, product_brief: ProductBrief) -> List[OutreachTemplate]:
         """Generate outreach templates"""
         templates = []
-        
+
         # English template
         templates.append(OutreachTemplate(
             subject=f"Quick question about {niche_score.topic} automation",
@@ -607,7 +607,7 @@ P.S. Here's a quick preview: {{demo_link}}""",
             personalization_placeholders=["name", "company", "sender_name", "demo_link"],
             call_to_action="Schedule a 15-minute demo"
         ))
-        
+
         # Vietnamese template
         templates.append(OutreachTemplate(
             subject=f"Câu hỏi nhanh về tự động hóa {niche_score.topic}",
@@ -627,13 +627,13 @@ P.S. Đây là bản xem trước nhanh: {{demo_link}}""",
             personalization_placeholders=["name", "company", "sender_name", "demo_link"],
             call_to_action="Đặt lịch demo 15 phút"
         ))
-        
+
         return templates
-    
+
     def _generate_risk_assessment(self, niche_score: NicheScore) -> Dict[str, Any]:
         """Generate risk assessment"""
         risks = []
-        
+
         if niche_score.competition_proxy > 0.7:
             risks.append({
                 "risk": "High competition",
@@ -641,7 +641,7 @@ P.S. Đây là bản xem trước nhanh: {{demo_link}}""",
                 "probability": "High",
                 "mitigation": "Focus on unique StillMe capabilities and faster implementation"
             })
-        
+
         if niche_score.confidence < 0.6:
             risks.append({
                 "risk": "Low data confidence",
@@ -649,7 +649,7 @@ P.S. Đây là bản xem trước nhanh: {{demo_link}}""",
                 "probability": "Medium",
                 "mitigation": "Validate with additional market research before full commitment"
             })
-        
+
         if niche_score.feasibility_fit < 0.5:
             risks.append({
                 "risk": "Low feasibility fit",
@@ -657,7 +657,7 @@ P.S. Đây là bản xem trước nhanh: {{demo_link}}""",
                 "probability": "Medium",
                 "mitigation": "Consider simpler implementation or pivot to higher-fit features"
             })
-        
+
         return {
             "overall_risk_level": "Medium" if len(risks) <= 2 else "High",
             "risks": risks,
@@ -668,7 +668,7 @@ P.S. Đây là bản xem trước nhanh: {{demo_link}}""",
                 "Build strong user feedback loop"
             ]
         }
-    
+
     def _generate_compliance_notes(self, niche_score: NicheScore) -> List[str]:
         """Generate compliance notes"""
         notes = [
@@ -679,16 +679,16 @@ P.S. Đây là bản xem trước nhanh: {{demo_link}}""",
             "Implement proper API rate limiting and abuse prevention",
             "Ensure all third-party integrations have proper agreements"
         ]
-        
+
         if "translation" in niche_score.topic.lower():
             notes.extend([
                 "Consider translation quality guarantees",
                 "Implement content moderation for translated text",
                 "Ensure compliance with language-specific regulations"
             ])
-        
+
         return notes
-    
+
     def _generate_kpis(self, niche_score: NicheScore) -> List[str]:
         """Generate KPIs for tracking"""
         return [
@@ -701,11 +701,11 @@ P.S. Đây là bản xem trước nhanh: {{demo_link}}""",
             "User engagement score (target: >70%)",
             "Support ticket volume (target: <5% of users)"
         ]
-    
+
     def _generate_timeline(self, niche_score: NicheScore, mvp_spec: MVPSpec) -> Dict[str, str]:
         """Generate development timeline"""
         start_date = datetime.now()
-        
+
         return {
             "Week 1": "Core development and API setup",
             "Week 2": "Frontend development and testing",
@@ -718,7 +718,7 @@ P.S. Đây là bản xem trước nhanh: {{demo_link}}""",
 if __name__ == "__main__":
     # Test playbook generation
     from .scoring import NicheScore
-    
+
     # Create test niche score
     test_score = NicheScore(
         topic="ai_translation",
@@ -733,10 +733,10 @@ if __name__ == "__main__":
         key_signals=["High feasibility fit", "Low competition"],
         recommendations=["High feasibility for StillMe implementation"]
     )
-    
+
     generator = PlaybookGenerator()
     playbook = generator.generate_playbook(test_score)
-    
+
     print(f"📋 Generated playbook for: {playbook.niche_score.topic}")
     print(f"  MVP Development Days: {playbook.mvp_spec.estimated_development_days}")
     print(f"  Pricing Tiers: {len(playbook.pricing_suggestion.tiers)}")

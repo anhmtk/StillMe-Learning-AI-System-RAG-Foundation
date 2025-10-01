@@ -19,12 +19,12 @@ def main():
     parser = argparse.ArgumentParser(description="Quick add knowledge for StillMe IPC")
     parser.add_argument("title", help="Knowledge title")
     parser.add_argument("description", help="Knowledge description")
-    parser.add_argument("--priority", choices=["low", "medium", "high", "critical"], 
+    parser.add_argument("--priority", choices=["low", "medium", "high", "critical"],
                        default="medium", help="Priority level")
     parser.add_argument("--url", help="Source URL (optional)")
-    
+
     args = parser.parse_args()
-    
+
     # Add knowledge
     knowledge_input = ManualKnowledgeInput()
     proposal = knowledge_input.add_knowledge(
@@ -33,7 +33,7 @@ def main():
         source_url=args.url,
         priority=args.priority
     )
-    
+
     if proposal:
         print(f"✅ Knowledge added successfully!")
         print(f"🆔 Proposal ID: {proposal.id}")

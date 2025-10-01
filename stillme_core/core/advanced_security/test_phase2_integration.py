@@ -13,27 +13,42 @@ Author: StillMe AI Security Team
 Version: 2.0.0
 """
 
+import asyncio
+import json
 import os
 import sys
-import json
-import time
-import asyncio
-import unittest
 import tempfile
+import time
+import unittest
 from datetime import datetime, timedelta
-from typing import Dict, List, Any
-from unittest.mock import Mock, patch, AsyncMock
+from typing import Any, Dict, List
+from unittest.mock import AsyncMock, Mock, patch
 
 # Add project root to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../..'))
 
 # Import modules to test
 try:
-    from stillme_core.core.advanced_security.red_team_engine import RedTeamEngine, AttackType, AttackResult
-    from stillme_core.core.advanced_security.blue_team_engine import BlueTeamEngine, AnomalyType, DefenseAction
-    from stillme_core.core.advanced_security.security_orchestrator import SecurityOrchestrator, ExerciseType, SecurityExercise
-    from stillme_core.core.advanced_security.experience_memory_integration import ExperienceMemoryIntegration, ExperienceType
+    from stillme_core.core.advanced_security.blue_team_engine import (
+        AnomalyType,
+        BlueTeamEngine,
+        DefenseAction,
+    )
+    from stillme_core.core.advanced_security.experience_memory_integration import (
+        ExperienceMemoryIntegration,
+        ExperienceType,
+    )
+    from stillme_core.core.advanced_security.red_team_engine import (
+        AttackResult,
+        AttackType,
+        RedTeamEngine,
+    )
     from stillme_core.core.advanced_security.sandbox_controller import SandboxController
+    from stillme_core.core.advanced_security.security_orchestrator import (
+        ExerciseType,
+        SecurityExercise,
+        SecurityOrchestrator,
+    )
 except ImportError as e:
     print(f"Warning: Could not import security modules: {e}")
     # Create mock classes for testing
@@ -51,7 +66,7 @@ except ImportError as e:
 
 class TestRedTeamEngine(unittest.TestCase):
     """Test Red Team Engine functionality"""
-    
+
     def setUp(self):
         """Set up test fixtures"""
         self.config = {
@@ -63,13 +78,13 @@ class TestRedTeamEngine(unittest.TestCase):
             self.red_team = RedTeamEngine(self.config)
         except:
             self.red_team = RedTeamEngine()
-    
+
     def test_red_team_initialization(self):
         """Test Red Team Engine initialization"""
         self.assertIsNotNone(self.red_team)
         if hasattr(self.red_team, 'config'):
             self.assertEqual(self.red_team.config, self.config)
-    
+
     @unittest.skipIf(not hasattr(RedTeamEngine, 'execute_pattern_attacks'), "Red Team Engine not available")
     async def test_pattern_attacks(self):
         """Test pattern-based attacks"""
@@ -78,7 +93,7 @@ class TestRedTeamEngine(unittest.TestCase):
             self.assertIsInstance(results, list)
         except Exception as e:
             self.skipTest(f"Pattern attacks not available: {e}")
-    
+
     @unittest.skipIf(not hasattr(RedTeamEngine, 'execute_ai_powered_attacks'), "Red Team Engine not available")
     async def test_ai_powered_attacks(self):
         """Test AI-powered attacks"""
@@ -87,7 +102,7 @@ class TestRedTeamEngine(unittest.TestCase):
             self.assertIsInstance(results, list)
         except Exception as e:
             self.skipTest(f"AI-powered attacks not available: {e}")
-    
+
     def test_attack_result_structure(self):
         """Test attack result data structure"""
         # Mock attack result
@@ -98,7 +113,7 @@ class TestRedTeamEngine(unittest.TestCase):
             'effectiveness_score': 0.8,
             'timestamp': datetime.now()
         }
-        
+
         self.assertIn('id', result)
         self.assertIn('attack_type', result)
         self.assertIn('status', result)
@@ -108,7 +123,7 @@ class TestRedTeamEngine(unittest.TestCase):
 
 class TestBlueTeamEngine(unittest.TestCase):
     """Test Blue Team Engine functionality"""
-    
+
     def setUp(self):
         """Set up test fixtures"""
         self.config = {
@@ -120,13 +135,13 @@ class TestBlueTeamEngine(unittest.TestCase):
             self.blue_team = BlueTeamEngine(self.config)
         except:
             self.blue_team = BlueTeamEngine()
-    
+
     def test_blue_team_initialization(self):
         """Test Blue Team Engine initialization"""
         self.assertIsNotNone(self.blue_team)
         if hasattr(self.blue_team, 'config'):
             self.assertEqual(self.blue_team.config, self.config)
-    
+
     @unittest.skipIf(not hasattr(BlueTeamEngine, 'analyze_system_state'), "Blue Team Engine not available")
     async def test_anomaly_detection(self):
         """Test anomaly detection"""
@@ -135,12 +150,12 @@ class TestBlueTeamEngine(unittest.TestCase):
             logs = [{"timestamp": datetime.now(), "level": "ERROR", "message": "Test error"}]
             metrics = {"cpu_usage": 0.9, "memory_usage": 0.8}
             security_events = [{"type": "failed_login", "source_ip": "192.168.1.100"}]
-            
+
             anomalies = await self.blue_team.analyze_system_state(logs, metrics, security_events)
             self.assertIsInstance(anomalies, list)
         except Exception as e:
             self.skipTest(f"Anomaly detection not available: {e}")
-    
+
     @unittest.skipIf(not hasattr(BlueTeamEngine, 'execute_defense_strategy'), "Blue Team Engine not available")
     async def test_defense_execution(self):
         """Test defense strategy execution"""
@@ -152,12 +167,12 @@ class TestBlueTeamEngine(unittest.TestCase):
                 'threat_level': 'high',
                 'confidence': 0.9
             }]
-            
+
             results = await self.blue_team.execute_defense_strategy(anomalies)
             self.assertIsInstance(results, list)
         except Exception as e:
             self.skipTest(f"Defense execution not available: {e}")
-    
+
     def test_defense_result_structure(self):
         """Test defense result data structure"""
         # Mock defense result
@@ -168,7 +183,7 @@ class TestBlueTeamEngine(unittest.TestCase):
             'effectiveness_score': 0.9,
             'timestamp': datetime.now()
         }
-        
+
         self.assertIn('id', result)
         self.assertIn('action', result)
         self.assertIn('status', result)
@@ -178,7 +193,7 @@ class TestBlueTeamEngine(unittest.TestCase):
 
 class TestSecurityOrchestrator(unittest.TestCase):
     """Test Security Orchestrator functionality"""
-    
+
     def setUp(self):
         """Set up test fixtures"""
         self.config = {
@@ -190,13 +205,13 @@ class TestSecurityOrchestrator(unittest.TestCase):
             self.orchestrator = SecurityOrchestrator(self.config)
         except:
             self.orchestrator = SecurityOrchestrator()
-    
+
     def test_orchestrator_initialization(self):
         """Test Security Orchestrator initialization"""
         self.assertIsNotNone(self.orchestrator)
         if hasattr(self.orchestrator, 'config'):
             self.assertEqual(self.orchestrator.config, self.config)
-    
+
     def test_exercise_creation(self):
         """Test security exercise creation"""
         exercise = {
@@ -211,13 +226,13 @@ class TestSecurityOrchestrator(unittest.TestCase):
             'blue_team_config': {'anomaly_detection': True},
             'sandbox_config': {'resources': {'cpu': '1'}}
         }
-        
+
         self.assertIn('id', exercise)
         self.assertIn('name', exercise)
         self.assertIn('exercise_type', exercise)
         self.assertIn('scheduled_time', exercise)
         self.assertIn('duration_minutes', exercise)
-    
+
     @unittest.skipIf(not hasattr(SecurityOrchestrator, 'schedule_exercise'), "Security Orchestrator not available")
     async def test_exercise_scheduling(self):
         """Test exercise scheduling"""
@@ -229,12 +244,12 @@ class TestSecurityOrchestrator(unittest.TestCase):
             exercise.scheduled_time = datetime.now() + timedelta(minutes=5)
             exercise.duration_minutes = 10
             exercise.status = 'scheduled'
-            
+
             success = await self.orchestrator.schedule_exercise(exercise)
             self.assertIsInstance(success, bool)
         except Exception as e:
             self.skipTest(f"Exercise scheduling not available: {e}")
-    
+
     def test_exercise_result_structure(self):
         """Test exercise result data structure"""
         # Mock exercise result
@@ -247,7 +262,7 @@ class TestSecurityOrchestrator(unittest.TestCase):
             'recommendations': ['Improve defense mechanisms'],
             'metadata': {'sandbox_id': 'sandbox_001'}
         }
-        
+
         self.assertIn('exercise_id', result)
         self.assertIn('start_time', result)
         self.assertIn('end_time', result)
@@ -258,7 +273,7 @@ class TestSecurityOrchestrator(unittest.TestCase):
 
 class TestExperienceMemoryIntegration(unittest.TestCase):
     """Test Experience Memory Integration functionality"""
-    
+
     def setUp(self):
         """Set up test fixtures"""
         self.config = {
@@ -270,13 +285,13 @@ class TestExperienceMemoryIntegration(unittest.TestCase):
             self.memory_integration = ExperienceMemoryIntegration(self.config)
         except:
             self.memory_integration = ExperienceMemoryIntegration()
-    
+
     def test_memory_integration_initialization(self):
         """Test Experience Memory Integration initialization"""
         self.assertIsNotNone(self.memory_integration)
         if hasattr(self.memory_integration, 'config'):
             self.assertEqual(self.memory_integration.config, self.config)
-    
+
     def test_experience_structure(self):
         """Test experience data structure"""
         # Mock experience
@@ -294,7 +309,7 @@ class TestExperienceMemoryIntegration(unittest.TestCase):
             'created_at': datetime.now(),
             'updated_at': datetime.now()
         }
-        
+
         self.assertIn('id', experience)
         self.assertIn('experience_type', experience)
         self.assertIn('category', experience)
@@ -303,7 +318,7 @@ class TestExperienceMemoryIntegration(unittest.TestCase):
         self.assertIn('effectiveness_score', experience)
         self.assertIn('confidence_level', experience)
         self.assertIn('tags', experience)
-    
+
     @unittest.skipIf(not hasattr(ExperienceMemoryIntegration, 'store_attack_experience'), "Memory Integration not available")
     async def test_experience_storage(self):
         """Test experience storage"""
@@ -321,12 +336,12 @@ class TestExperienceMemoryIntegration(unittest.TestCase):
             attack_result.target = 'web_app'
             attack_result.timestamp = datetime.now()
             attack_result.environment = 'sandbox'
-            
+
             success = await self.memory_integration.store_attack_experience(attack_result)
             self.assertIsInstance(success, bool)
         except Exception as e:
             self.skipTest(f"Experience storage not available: {e}")
-    
+
     @unittest.skipIf(not hasattr(ExperienceMemoryIntegration, 'retrieve_experiences'), "Memory Integration not available")
     async def test_experience_retrieval(self):
         """Test experience retrieval"""
@@ -339,7 +354,7 @@ class TestExperienceMemoryIntegration(unittest.TestCase):
 
 class TestIntegration(unittest.TestCase):
     """Test end-to-end integration"""
-    
+
     def setUp(self):
         """Set up test fixtures"""
         self.config = {
@@ -348,14 +363,14 @@ class TestIntegration(unittest.TestCase):
             'orchestrator': {'max_concurrent_exercises': 3},
             'memory': {'cache_size': 1000}
         }
-    
+
     def test_configuration_validation(self):
         """Test configuration validation"""
         # Test required configuration keys
         required_keys = ['red_team', 'blue_team', 'orchestrator', 'memory']
         for key in required_keys:
             self.assertIn(key, self.config)
-    
+
     def test_data_flow_structure(self):
         """Test data flow structure"""
         # Test attack flow
@@ -365,12 +380,12 @@ class TestIntegration(unittest.TestCase):
             'output': 'attack_result',
             'storage': 'experience_memory'
         }
-        
+
         self.assertIn('input', attack_flow)
         self.assertIn('processing', attack_flow)
         self.assertIn('output', attack_flow)
         self.assertIn('storage', attack_flow)
-        
+
         # Test defense flow
         defense_flow = {
             'input': 'system_metrics',
@@ -378,28 +393,28 @@ class TestIntegration(unittest.TestCase):
             'output': 'defense_result',
             'storage': 'experience_memory'
         }
-        
+
         self.assertIn('input', defense_flow)
         self.assertIn('processing', defense_flow)
         self.assertIn('output', defense_flow)
         self.assertIn('storage', defense_flow)
-    
+
     def test_error_handling(self):
         """Test error handling mechanisms"""
         # Test configuration errors
         invalid_config = {'invalid_key': 'invalid_value'}
-        
+
         # Test data validation
         invalid_data = {'missing_required_field': 'value'}
-        
+
         # Test timeout handling
         timeout_config = {'timeout': 0}  # Invalid timeout
-        
+
         # These should not raise exceptions during validation
         self.assertIsInstance(invalid_config, dict)
         self.assertIsInstance(invalid_data, dict)
         self.assertIsInstance(timeout_config, dict)
-    
+
     def test_performance_metrics(self):
         """Test performance metrics structure"""
         metrics = {
@@ -409,13 +424,13 @@ class TestIntegration(unittest.TestCase):
             'cpu_usage': 0.75,
             'memory_usage': 0.60
         }
-        
+
         self.assertIn('response_time', metrics)
         self.assertIn('throughput', metrics)
         self.assertIn('error_rate', metrics)
         self.assertIn('cpu_usage', metrics)
         self.assertIn('memory_usage', metrics)
-        
+
         # Validate metric ranges
         self.assertGreaterEqual(metrics['response_time'], 0)
         self.assertGreaterEqual(metrics['throughput'], 0)
@@ -429,7 +444,7 @@ class TestIntegration(unittest.TestCase):
 
 class TestSecurityValidation(unittest.TestCase):
     """Test security validation and safety measures"""
-    
+
     def test_sandbox_isolation(self):
         """Test sandbox isolation requirements"""
         isolation_requirements = {
@@ -439,10 +454,10 @@ class TestSecurityValidation(unittest.TestCase):
             'process_isolation': True,
             'data_protection': True
         }
-        
+
         for requirement, value in isolation_requirements.items():
             self.assertTrue(value, f"Security requirement {requirement} must be enabled")
-    
+
     def test_attack_safety_measures(self):
         """Test attack safety measures"""
         safety_measures = {
@@ -452,10 +467,10 @@ class TestSecurityValidation(unittest.TestCase):
             'resource_limits': True,
             'audit_logging': True
         }
-        
+
         for measure, value in safety_measures.items():
             self.assertTrue(value, f"Safety measure {measure} must be enabled")
-    
+
     def test_data_protection(self):
         """Test data protection measures"""
         protection_measures = {
@@ -465,7 +480,7 @@ class TestSecurityValidation(unittest.TestCase):
             'audit_trail': True,
             'data_retention_policy': True
         }
-        
+
         for measure, value in protection_measures.items():
             self.assertTrue(value, f"Data protection measure {measure} must be enabled")
 
@@ -473,26 +488,26 @@ class TestSecurityValidation(unittest.TestCase):
 def run_performance_tests():
     """Run performance tests"""
     print("🚀 Running Performance Tests...")
-    
+
     # Test response time
     start_time = time.time()
     # Simulate some processing
     time.sleep(0.1)
     end_time = time.time()
-    
+
     response_time = end_time - start_time
     print(f"⏱️ Response time: {response_time:.3f}s")
-    
+
     # Test memory usage
     import psutil
     process = psutil.Process()
     memory_usage = process.memory_info().rss / 1024 / 1024  # MB
     print(f"💾 Memory usage: {memory_usage:.2f} MB")
-    
+
     # Test CPU usage
     cpu_usage = process.cpu_percent()
     print(f"🖥️ CPU usage: {cpu_usage:.2f}%")
-    
+
     return {
         'response_time': response_time,
         'memory_usage': memory_usage,
@@ -503,10 +518,10 @@ def run_performance_tests():
 def run_integration_tests():
     """Run integration tests"""
     print("🔗 Running Integration Tests...")
-    
+
     # Create test suite
     test_suite = unittest.TestSuite()
-    
+
     # Add test cases
     test_classes = [
         TestRedTeamEngine,
@@ -516,15 +531,15 @@ def run_integration_tests():
         TestIntegration,
         TestSecurityValidation
     ]
-    
+
     for test_class in test_classes:
         tests = unittest.TestLoader().loadTestsFromTestCase(test_class)
         test_suite.addTests(tests)
-    
+
     # Run tests
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(test_suite)
-    
+
     return result
 
 
@@ -547,20 +562,20 @@ def generate_test_report(test_result, performance_metrics):
         },
         'recommendations': []
     }
-    
+
     # Add recommendations based on results
     if test_result.failures:
         report['recommendations'].append("Review and fix failing tests")
-    
+
     if test_result.errors:
         report['recommendations'].append("Address test errors and exceptions")
-    
+
     if performance_metrics['response_time'] > 1.0:
         report['recommendations'].append("Optimize response time performance")
-    
+
     if performance_metrics['memory_usage'] > 500:
         report['recommendations'].append("Optimize memory usage")
-    
+
     return report
 
 
@@ -568,34 +583,34 @@ def main():
     """Main test runner"""
     print("🧪 Phase 2 Red/Blue Team System - Comprehensive Test Suite")
     print("=" * 60)
-    
+
     # Run performance tests
     performance_metrics = run_performance_tests()
     print()
-    
+
     # Run integration tests
     test_result = run_integration_tests()
     print()
-    
+
     # Generate test report
     report = generate_test_report(test_result, performance_metrics)
-    
+
     # Save report
     report_file = f"phase2_test_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
     with open(report_file, 'w', encoding='utf-8') as f:
         json.dump(report, f, indent=2, ensure_ascii=False, default=str)
-    
+
     print(f"📊 Test Report Generated: {report_file}")
     print(f"✅ Tests Run: {report['test_summary']['tests_run']}")
     print(f"❌ Failures: {report['test_summary']['failures']}")
     print(f"⚠️ Errors: {report['test_summary']['errors']}")
     print(f"📈 Success Rate: {report['test_summary']['success_rate']:.2%}")
-    
+
     if report['recommendations']:
         print("\n💡 Recommendations:")
         for rec in report['recommendations']:
             print(f"  - {rec}")
-    
+
     return report
 
 

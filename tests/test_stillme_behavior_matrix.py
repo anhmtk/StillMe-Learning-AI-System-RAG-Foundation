@@ -704,7 +704,7 @@ def test_behavior_sample(prompt, expected):
     # Reset telemetry at start of first test
     if not _METRICS:  # Only reset on first test
         try:
-            from modules.telemetry import reset_log
+            from stillme_core.modules.telemetry import reset_log
 
             reset_log()
         except:
@@ -973,7 +973,7 @@ def _analyze_telemetry():
     try:
         import statistics as st
 
-        from modules.telemetry import get_log_path, read_events
+        from stillme_core.modules.telemetry import get_log_path, read_events
 
         log_path = get_log_path()
         if not log_path.exists():

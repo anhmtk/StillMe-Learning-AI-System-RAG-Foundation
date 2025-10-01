@@ -29,12 +29,12 @@ class ClarificationHandler:
     Detects ambiguous prompts and generates clarification questions
     to improve user interaction quality and reduce token waste.
     """
-    
+
     def __init__(self):
         self.ambiguity_patterns = self._load_ambiguity_patterns()
         self.clarification_templates = self._load_clarification_templates()
         self.confidence_threshold = 0.7
-        
+
     def _load_ambiguity_patterns(self) -> Dict[str, List[str]]:
         """Load ambiguity detection patterns"""
         return {
@@ -67,7 +67,7 @@ class ClarificationHandler:
                 r"\b(analyze|process|handle|manage|control|monitor|track|measure|calculate|compute|solve|resolve|address|tackle|approach|deal\s+with|work\s+on|focus\s+on|concentrate\s+on|emphasize|highlight|spotlight|feature|showcase|present)\s+(this|it|that)\b"
             ]
         }
-    
+
     def _load_clarification_templates(self) -> Dict[str, List[str]]:
         """Load clarification question templates"""
         return {
@@ -120,7 +120,7 @@ class ClarificationHandler:
                 "What are you trying to {action}?"
             ]
         }
-    
+
     def detect_ambiguity(self, prompt: str, context: Dict[str, Any] = None) -> ClarificationResult:
         """
         Detect if a prompt is ambiguous and needs clarification
@@ -140,12 +140,12 @@ class ClarificationHandler:
                 category="empty_prompt",
                 reasoning="Empty or whitespace-only prompt"
             )
-        
+
         prompt_lower = prompt.lower().strip()
         max_confidence = 0.0
         best_category = None
         best_reasoning = ""
-        
+
         # Check each category of ambiguity
         for category, patterns in self.ambiguity_patterns.items():
             for pattern in patterns:
@@ -155,15 +155,15 @@ class ClarificationHandler:
                         max_confidence = confidence
                         best_category = category
                         best_reasoning = f"Matched pattern '{pattern}' for category '{category}'"
-        
+
         # Determine if clarification is needed
         needs_clarification = max_confidence >= self.confidence_threshold
-        
+
         if needs_clarification:
             question = self._generate_clarification_question(prompt, best_category, context)
         else:
             question = None
-        
+
         return ClarificationResult(
             needs_clarification=needs_clarification,
             confidence=max_confidence,
@@ -171,14 +171,14 @@ class ClarificationHandler:
             category=best_category,
             reasoning=best_reasoning
         )
-    
+
     def _calculate_confidence(self, prompt: str, pattern: str, category: str) -> float:
         """Calculate confidence score for ambiguity detection"""
         base_confidence = 0.5
-        
+
         # Adjust based on prompt length (shorter = more ambiguous)
         length_factor = max(0.1, 1.0 - (len(prompt) / 100))
-        
+
         # Adjust based on category
         category_weights = {
             "vague_instruction": 0.9,
@@ -190,31 +190,31 @@ class ClarificationHandler:
             "contextual_dependency": 0.9,
             "cross_domain": 0.75
         }
-        
+
         category_weight = category_weights.get(category, 0.5)
-        
+
         return min(1.0, base_confidence * length_factor * category_weight)
-    
+
     def _generate_clarification_question(self, prompt: str, category: str, context: Dict[str, Any] = None) -> str:
         """Generate appropriate clarification question"""
         if not category or category not in self.clarification_templates:
             return "Could you please clarify what you need help with?"
-        
+
         templates = self.clarification_templates[category]
-        
+
         # Select appropriate template based on category
         if category == "vague_instruction":
             # Extract action from prompt
             action_match = re.search(r"\b(write|make|create|build|do|fix|help|improve|optimize|enhance|upgrade|set|configure|adjust|tune|refactor|change|modify|update|restructure)\b", prompt.lower())
             action = action_match.group(1) if action_match else "do"
             template = templates[0].format(action=action)
-        
+
         elif category == "missing_context":
             # Extract item from prompt
             item_match = re.search(r"\b(app|website|program|system|tool|database|report|script|api|dashboard|form|chatbot|game|plugin|widget|component|module|service|library|framework|platform|toolchain|function|class|method|query|filter|view|trigger|constraint|index|relationship|join|union|subquery|procedure|transaction|backup|restore|migration|rollback|deployment|release|build)\b", prompt.lower())
             item = item_match.group(1) if item_match else "item"
             template = templates[0].format(item=item)
-        
+
         elif category == "ambiguous_reference":
             # Extract reference from prompt
             reference_match = re.search(r"\b(it|this|that)\b", prompt.lower())
@@ -222,30 +222,30 @@ class ClarificationHandler:
             action_match = re.search(r"\b(do|fix|change|update|delete|move|copy|paste|save|load|run|stop|start|restart|close|open|hide|show|enable|disable|activate|deactivate|turn\s+on|turn\s+off|switch)\b", prompt.lower())
             action = action_match.group(1) if action_match else "do"
             template = templates[0].format(reference=reference, action=action)
-        
+
         elif category == "fuzzy_goal":
             # Extract goal from prompt
             goal_match = re.search(r"\b(faster|slower|smaller|bigger|cleaner|simpler|more\s+complex|better|worse|easier|harder|cheaper|more\s+expensive|more\s+secure|more\s+reliable|more\s+scalable|more\s+maintainable|more\s+testable|more\s+readable|more\s+efficient|more\s+flexible|more\s+robust|more\s+portable|more\s+compatible|more\s+accessible|more\s+user-friendly)\b", prompt.lower())
             goal = goal_match.group(1) if goal_match else "better"
             template = templates[0].format(goal=goal)
-        
+
         elif category == "missing_parameter":
             # Extract item from prompt
             item_match = re.search(r"\b(function|class|variable|method|schema|table|query|filter|view|trigger|constraint|index|relationship|join|union|subquery|procedure|transaction|backup|restore|migration|rollback|deployment|release|build)\b", prompt.lower())
             item = item_match.group(1) if item_match else "item"
             template = templates[0].format(item=item)
-        
+
         elif category == "cross_domain":
             # Extract action from prompt
             action_match = re.search(r"\b(analyze|process|handle|manage|control|monitor|track|measure|calculate|compute|solve|resolve|address|tackle|approach|deal\s+with|work\s+on|focus\s+on|concentrate\s+on|emphasize|highlight|spotlight|feature|showcase|present)\b", prompt.lower())
             action = action_match.group(1) if action_match else "help with"
             template = templates[0].format(action=action)
-        
+
         else:
             template = templates[0]
-        
+
         return template
-    
+
     def generate_clarification(self, prompt: str, context: Dict[str, Any] = None) -> Optional[str]:
         """
         Generate clarification question for ambiguous prompt
@@ -259,7 +259,7 @@ class ClarificationHandler:
         """
         result = self.detect_ambiguity(prompt, context)
         return result.question if result.needs_clarification else None
-    
+
     def get_clarification_stats(self) -> Dict[str, Any]:
         """Get clarification handler statistics"""
         return {
@@ -272,11 +272,11 @@ class ClarificationHandler:
 # Example usage and testing
 if __name__ == "__main__":
     handler = ClarificationHandler()
-    
+
     # Test cases
     test_prompts = [
         "Write code for this",
-        "Build an app", 
+        "Build an app",
         "Do it now",
         "Make it better",
         "Create a function",
@@ -284,10 +284,10 @@ if __name__ == "__main__":
         "do the same thing",
         "analyze this"
     ]
-    
+
     print("Clarification Handler Test Results:")
     print("=" * 50)
-    
+
     for prompt in test_prompts:
         result = handler.detect_ambiguity(prompt)
         print(f"Prompt: '{prompt}'")

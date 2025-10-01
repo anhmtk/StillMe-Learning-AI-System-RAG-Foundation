@@ -218,7 +218,7 @@ class OpenRouterClient:
         try:
             if not HTTPX_AVAILABLE or not self.client:
                 return "Error: OpenRouter API not available (httpx not installed)"
-            
+
             response = await self.client.post(self.base_url, json=payload)
             response.raise_for_status()
             data = response.json()

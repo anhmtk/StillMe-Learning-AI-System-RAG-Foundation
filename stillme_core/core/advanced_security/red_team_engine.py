@@ -20,19 +20,31 @@ import logging
 import re
 import time
 import uuid
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
 # Import existing modules for integration
+from stillme_core.decision_making.decision_engine import RiskLevel
+from stillme_core.core.security.attack_simulator import AttackType
+
 try:
-    from stillme_core.modules.layered_memory_v1 import LayeredMemoryV1, MemoryItem
-    from stillme_core.core.decision_making.decision_engine import DecisionEngine, DecisionType, RiskLevel
-    from stillme_core.core.advanced_security.sandbox_controller import SandboxController, SandboxType
     from stillme_core.core.advanced_security.safe_attack_simulator import (
-        SafeAttackSimulator, AttackCategory, AttackSeverity, AttackScenario
+        AttackCategory,
+        AttackScenario,
+        AttackSeverity,
+        SafeAttackSimulator,
     )
+    from stillme_core.core.advanced_security.sandbox_controller import (
+        SandboxController,
+        SandboxType,
+    )
+    from stillme_core.decision_making.decision_engine import (
+        DecisionEngine,
+        DecisionType,
+    )
+    from stillme_core.modules.layered_memory_v1 import LayeredMemoryV1, MemoryItem
 except ImportError as e:
     logging.warning(f"Some modules not available: {e}")
 
@@ -138,27 +150,31 @@ class RedTeamEngine:
     🎯 Động cơ Red Team nâng cao với khả năng AI
     """
 
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config: Optional[Dict[str, Any]] = None, config_path: Optional[str] = None):
         """
         Initialize Red Team Engine
         
         Args:
+            config: Configuration dictionary
             config_path: Path to configuration file
         """
         self.config_path = config_path or ".red_team_config.json"
-        self.config = self._load_configuration()
-        
+        if config is not None:
+            self.config = config
+        else:
+            self.config = self._load_configuration()
+
         # Initialize components
         self.memory_manager = None
         self.decision_engine = None
         self.sandbox_controller = None
         self.attack_simulator = None
-        
+
         # Attack patterns database
         self.attack_patterns: Dict[str, AttackPattern] = {}
         self.attack_history: List[AttackResult] = []
         self.learning_insights: List[Dict[str, Any]] = []
-        
+
         # Performance metrics
         self.metrics = {
             "total_attacks": 0,
@@ -167,13 +183,13 @@ class RedTeamEngine:
             "adaptations_made": 0,
             "vulnerabilities_found": 0
         }
-        
+
         # Initialize attack patterns
         self._initialize_attack_patterns()
-        
+
         # Initialize components safely
         self._initialize_components()
-        
+
         logger.info("🎯 RedTeamEngine initialized successfully")
 
     def _load_configuration(self) -> Dict[str, Any]:
@@ -185,7 +201,7 @@ class RedTeamEngine:
                     return json.load(f)
             except Exception as e:
                 logger.warning(f"Failed to load config: {e}")
-        
+
         # Default configuration
         return {
             "ai_attack_generation": {
@@ -223,7 +239,7 @@ class RedTeamEngine:
                 logger.info("✅ Experience Memory integrated")
         except Exception as e:
             logger.warning(f"Memory manager not available: {e}")
-        
+
         try:
             # Initialize Decision Engine
             if self.config["integration"]["decision_engine"]:
@@ -231,7 +247,7 @@ class RedTeamEngine:
                 logger.info("✅ Decision Engine integrated")
         except Exception as e:
             logger.warning(f"Decision engine not available: {e}")
-        
+
         try:
             # Initialize Sandbox Controller
             if self.config["integration"]["sandbox_controller"]:
@@ -239,7 +255,7 @@ class RedTeamEngine:
                 logger.info("✅ Sandbox Controller integrated")
         except Exception as e:
             logger.warning(f"Sandbox controller not available: {e}")
-        
+
         try:
             # Initialize Attack Simulator
             if self.config["integration"]["attack_simulator"]:
@@ -285,7 +301,7 @@ class RedTeamEngine:
                 "mitigation_techniques": ["parameterized_queries", "timeout_limits", "input_validation"]
             }
         ]
-        
+
         # XSS Patterns
         xss_patterns = [
             {
@@ -305,18 +321,110 @@ class RedTeamEngine:
                 "mitigation_techniques": ["output_encoding", "csp_headers", "input_validation"]
             }
         ]
-        
+
         # Combine all patterns
         all_patterns = sql_patterns + xss_patterns
-        
+
         for pattern_data in all_patterns:
             pattern = AttackPattern(**pattern_data)
             self.attack_patterns[pattern.pattern_id] = pattern
-        
+
         logger.info(f"✅ Initialized {len(self.attack_patterns)} attack patterns")
+    
+    def run_light_security_check(self, repo_root: str = ".") -> Dict[str, Any]:
+        """
+        Chạy security scan nhẹ, trả về dict chuẩn hoá:
+        {
+          "findings": [ { "id": str, "type": "secret|injection|dangerous_api", "path": str, "line": int, "severity": "LOW|MEDIUM|HIGH" } ],
+          "score": float  # 0.0 ~ 1.0
+        }
+        """
+        from stillme_core.utils.io_safe import safe_read_text
+        
+        results = {"findings": [], "score": 0.0}
+        
+        # Security patterns to check
+        security_patterns = [
+            (r"password\s*=\s*['\"][^'\"]+['\"]", "secret", "HIGH", "Hardcoded password"),
+            (r"api_key\s*=\s*['\"][^'\"]+['\"]", "secret", "HIGH", "Hardcoded API key"),
+            (r"secret\s*=\s*['\"][^'\"]+['\"]", "secret", "HIGH", "Hardcoded secret"),
+            (r"token\s*=\s*['\"][^'\"]+['\"]", "secret", "MEDIUM", "Hardcoded token"),
+            (r"eval\s*\(", "dangerous_api", "MEDIUM", "Use of eval()"),
+            (r"exec\s*\(", "dangerous_api", "MEDIUM", "Use of exec()"),
+            (r"subprocess\.call\s*\(", "dangerous_api", "LOW", "Unsafe subprocess call"),
+            (r"os\.system\s*\(", "dangerous_api", "MEDIUM", "Unsafe system call"),
+            (r"BEGIN PRIVATE KEY", "secret", "HIGH", "Private key in code"),
+            (r"AWS_SECRET_ACCESS_KEY", "secret", "HIGH", "AWS secret key"),
+            (r"sk-[a-zA-Z0-9]{48}", "secret", "HIGH", "OpenAI API key"),
+            (r"ghp_[a-zA-Z0-9]{36}", "secret", "HIGH", "GitHub token")
+        ]
+        
+        try:
+            # Scan Python files in repo
+            project_root = Path(repo_root)
+            python_files = list(project_root.glob("**/*.py"))
+            
+            # Limit to first 100 files to avoid performance issues
+            for file_path in python_files[:100]:
+                try:
+                    # Skip if not a text file
+                    if not file_path.is_file():
+                        continue
+                    
+                    # Read file safely
+                    content = safe_read_text(file_path)
+                    if not content:
+                        continue
+                    
+                    # Check each pattern
+                    for pattern, finding_type, severity, description in security_patterns:
+                        matches = re.findall(pattern, content, re.IGNORECASE)
+                        if matches:
+                            # Find line number for first match
+                            lines = content.split('\n')
+                            line_num = 1
+                            for i, line in enumerate(lines):
+                                if re.search(pattern, line, re.IGNORECASE):
+                                    line_num = i + 1
+                                    break
+                            
+                            results["findings"].append({
+                                "id": f"SEC-{len(results['findings']) + 1}",
+                                "type": finding_type,
+                                "path": str(file_path.relative_to(project_root)),
+                                "line": line_num,
+                                "severity": severity,
+                                "description": description,
+                                "matches": len(matches)
+                            })
+                            
+                except Exception as e:
+                    # Skip files that can't be processed
+                    continue
+            
+            # Calculate risk score based on findings
+            high_count = sum(1 for f in results["findings"] if f["severity"] == "HIGH")
+            medium_count = sum(1 for f in results["findings"] if f["severity"] == "MEDIUM")
+            low_count = sum(1 for f in results["findings"] if f["severity"] == "LOW")
+            
+            # Weighted score: HIGH=1.0, MEDIUM=0.5, LOW=0.2
+            results["score"] = min(
+                (high_count * 1.0 + medium_count * 0.5 + low_count * 0.2) / 10.0,
+                1.0
+            )
+            
+            return results
+            
+        except Exception as e:
+            logger.error(f"Light security check failed: {e}")
+            return {
+                "findings": [],
+                "score": 0.0,
+                "error": str(e)
+            }
 
     async def generate_adaptive_attacks(
-        self, 
+        self,
         target_analysis: Dict[str, Any],
         context: AttackContext
     ) -> List[GeneratedAttack]:
@@ -331,13 +439,13 @@ class RedTeamEngine:
             List of generated attacks
         """
         logger.info("🎯 Generating adaptive attacks...")
-        
+
         generated_attacks = []
-        
+
         try:
             # Analyze target for vulnerability patterns
             detected_patterns = await self._analyze_target_patterns(target_analysis, context)
-            
+
             # Generate attacks for each detected pattern
             for pattern_id, confidence in detected_patterns.items():
                 if confidence >= self.config["pattern_detection"]["min_confidence"]:
@@ -345,96 +453,96 @@ class RedTeamEngine:
                     if pattern:
                         attacks = await self._generate_attacks_for_pattern(pattern, context)
                         generated_attacks.extend(attacks)
-            
+
             # Apply AI-powered adaptation
             if self.config["ai_attack_generation"]["adaptation_enabled"]:
                 adapted_attacks = await self._apply_ai_adaptation(generated_attacks, context)
                 generated_attacks.extend(adapted_attacks)
-            
+
             # Store in experience memory
             if self.memory_manager:
                 await self._store_attack_generation_experience(generated_attacks, context)
-            
+
             logger.info(f"✅ Generated {len(generated_attacks)} adaptive attacks")
-            
+
         except Exception as e:
             logger.error(f"❌ Attack generation failed: {e}")
-        
+
         return generated_attacks
 
     async def _analyze_target_patterns(
-        self, 
-        target_analysis: Dict[str, Any], 
+        self,
+        target_analysis: Dict[str, Any],
         context: AttackContext
     ) -> Dict[str, float]:
         """Analyze target for vulnerability patterns"""
         detected_patterns = {}
-        
+
         try:
             # Get target code/configuration
             target_code = target_analysis.get("code", "")
             target_config = target_analysis.get("configuration", {})
             target_headers = target_analysis.get("headers", {})
-            
+
             # Analyze each attack pattern
             for pattern_id, pattern in self.attack_patterns.items():
                 confidence = 0.0
-                
+
                 # Check code patterns
                 if target_code:
                     matches = re.findall(pattern.pattern_regex, target_code)
                     if matches:
                         confidence += 0.4 * min(len(matches) / 5, 1.0)  # Max 0.4 for code matches
-                
+
                 # Check configuration patterns
                 if target_config:
                     config_text = json.dumps(target_config)
                     matches = re.findall(pattern.pattern_regex, config_text)
                     if matches:
                         confidence += 0.3 * min(len(matches) / 3, 1.0)  # Max 0.3 for config matches
-                
+
                 # Check header patterns
                 if target_headers:
                     headers_text = json.dumps(target_headers)
                     matches = re.findall(pattern.pattern_regex, headers_text)
                     if matches:
                         confidence += 0.2 * min(len(matches) / 2, 1.0)  # Max 0.2 for header matches
-                
+
                 # Apply pattern-specific confidence adjustments
                 confidence *= pattern.confidence_score
-                
+
                 if confidence >= self.config["pattern_detection"]["min_confidence"]:
                     detected_patterns[pattern_id] = confidence
-            
+
             logger.info(f"🔍 Detected {len(detected_patterns)} vulnerability patterns")
-            
+
         except Exception as e:
             logger.error(f"❌ Pattern analysis failed: {e}")
-        
+
         return detected_patterns
 
     async def _generate_attacks_for_pattern(
-        self, 
-        pattern: AttackPattern, 
+        self,
+        pattern: AttackPattern,
         context: AttackContext
     ) -> List[GeneratedAttack]:
         """Generate attacks for a specific pattern"""
         attacks = []
-        
+
         try:
             # Limit number of payloads per pattern
             max_payloads = self.config["ai_attack_generation"]["max_payloads_per_pattern"]
             payloads_to_use = pattern.payload_templates[:max_payloads]
-            
+
             for i, payload_template in enumerate(payloads_to_use):
                 attack_id = f"{pattern.pattern_id}_{i}_{int(time.time())}"
-                
+
                 # Generate attack payload
                 payload = self._customize_payload(payload_template, context)
-                
+
                 # Determine attack vector
                 attack_vector = self._determine_attack_vector(pattern, context)
-                
+
                 # Generate attack
                 attack = GeneratedAttack(
                     attack_id=attack_id,
@@ -448,20 +556,20 @@ class RedTeamEngine:
                     risk_level=self._assess_attack_risk(pattern, payload),
                     confidence=pattern.confidence_score * context.success_rate
                 )
-                
+
                 attacks.append(attack)
-            
+
             logger.info(f"✅ Generated {len(attacks)} attacks for pattern {pattern.pattern_id}")
-            
+
         except Exception as e:
             logger.error(f"❌ Attack generation for pattern {pattern.pattern_id} failed: {e}")
-        
+
         return attacks
 
     def _customize_payload(self, payload_template: Dict[str, Any], context: AttackContext) -> str:
         """Customize payload based on context"""
         base_payload = payload_template["payload"]
-        
+
         # Apply technology-specific customization
         if context.target_technology.lower() == "python":
             # Python-specific payload modifications
@@ -471,7 +579,7 @@ class RedTeamEngine:
             # Node.js-specific payload modifications
             if "sleep" in base_payload.lower():
                 base_payload = base_payload.replace("SLEEP", "setTimeout")
-        
+
         # Apply framework-specific customization
         if context.target_framework.lower() == "django":
             # Django-specific modifications
@@ -479,7 +587,7 @@ class RedTeamEngine:
         elif context.target_framework.lower() == "flask":
             # Flask-specific modifications
             base_payload = base_payload.replace("'", "\\'")
-        
+
         return base_payload
 
     def _determine_attack_vector(self, pattern: AttackPattern, context: AttackContext) -> str:
@@ -550,26 +658,26 @@ class RedTeamEngine:
             return RiskLevel.LOW
 
     async def _apply_ai_adaptation(
-        self, 
-        attacks: List[GeneratedAttack], 
+        self,
+        attacks: List[GeneratedAttack],
         context: AttackContext
     ) -> List[GeneratedAttack]:
         """Apply AI-powered adaptation to attacks"""
         adapted_attacks = []
-        
+
         try:
             # Simple adaptation based on previous attack results
             for attack in attacks:
                 if context.previous_attacks:
                     # Analyze previous attack results
                     similar_attacks = [
-                        a for a in context.previous_attacks 
+                        a for a in context.previous_attacks
                         if a.get("pattern_id") == attack.pattern_id
                     ]
-                    
+
                     if similar_attacks:
                         success_rate = sum(1 for a in similar_attacks if a.get("success", False)) / len(similar_attacks)
-                        
+
                         if success_rate < 0.3:  # Low success rate, need adaptation
                             # Create adapted version
                             adapted_attack = GeneratedAttack(
@@ -586,45 +694,45 @@ class RedTeamEngine:
                                 adaptation_strategy="payload_modification"
                             )
                             adapted_attacks.append(adapted_attack)
-            
+
             logger.info(f"✅ Applied AI adaptation to {len(adapted_attacks)} attacks")
-            
+
         except Exception as e:
             logger.error(f"❌ AI adaptation failed: {e}")
-        
+
         return adapted_attacks
 
     def _adapt_payload(self, original_payload: str, previous_results: List[Dict[str, Any]]) -> str:
         """Adapt payload based on previous results"""
         # Simple payload adaptation logic
         adapted_payload = original_payload
-        
+
         # Check what defenses were triggered
         triggered_defenses = []
         for result in previous_results:
             triggered_defenses.extend(result.get("defenses_triggered", []))
-        
+
         # Adapt based on common defenses
         if "input_validation" in triggered_defenses:
             # Try to bypass input validation
             adapted_payload = adapted_payload.replace("'", "\\'")
             adapted_payload = adapted_payload.replace('"', '\\"')
-        
+
         if "sql_escaping" in triggered_defenses:
             # Try different SQL injection techniques
             adapted_payload = adapted_payload.replace("'", "''")
-        
+
         return adapted_payload
 
     async def _store_attack_generation_experience(
-        self, 
-        attacks: List[GeneratedAttack], 
+        self,
+        attacks: List[GeneratedAttack],
         context: AttackContext
     ):
         """Store attack generation experience in memory"""
         if not self.memory_manager:
             return
-        
+
         try:
             # Create experience content
             experience_content = {
@@ -634,25 +742,25 @@ class RedTeamEngine:
                 "attacks_generated": len(attacks),
                 "patterns_used": list(set(attack.pattern_id for attack in attacks)),
                 "success_indicators": list(set(
-                    indicator for attack in attacks 
+                    indicator for attack in attacks
                     for indicator in attack.success_indicators
                 ))
             }
-            
+
             # Store in memory
             memory_id = self.memory_manager.store(
                 content=json.dumps(experience_content),
                 importance=0.7,  # High importance for security learning
                 tags=["red_team", "attack_generation", "security", "learning"]
             )
-            
+
             logger.info(f"✅ Stored attack generation experience: {memory_id}")
-            
+
         except Exception as e:
             logger.error(f"❌ Failed to store attack generation experience: {e}")
 
     async def execute_attack_campaign(
-        self, 
+        self,
         attacks: List[GeneratedAttack],
         target_config: Dict[str, Any]
     ) -> List[AttackResult]:
@@ -667,15 +775,15 @@ class RedTeamEngine:
             List of attack results
         """
         logger.info(f"🎯 Executing attack campaign with {len(attacks)} attacks...")
-        
+
         results = []
-        
+
         try:
             # Safety checks
             if not self._validate_attack_campaign_safety(attacks, target_config):
                 logger.error("❌ Attack campaign failed safety validation")
                 return results
-            
+
             # Execute attacks in sandbox if available
             if self.sandbox_controller:
                 results = await self._execute_attacks_in_sandbox(attacks, target_config)
@@ -684,24 +792,24 @@ class RedTeamEngine:
             else:
                 logger.warning("⚠️ No execution environment available, using mock execution")
                 results = await self._execute_attacks_mock(attacks, target_config)
-            
+
             # Store results in experience memory
             if self.memory_manager:
                 await self._store_attack_results(results)
-            
+
             # Update metrics
             self._update_metrics(results)
-            
+
             logger.info(f"✅ Attack campaign completed: {len(results)} results")
-            
+
         except Exception as e:
             logger.error(f"❌ Attack campaign execution failed: {e}")
-        
+
         return results
 
     def _validate_attack_campaign_safety(
-        self, 
-        attacks: List[GeneratedAttack], 
+        self,
+        attacks: List[GeneratedAttack],
         target_config: Dict[str, Any]
     ) -> bool:
         """Validate attack campaign safety"""
@@ -711,39 +819,39 @@ class RedTeamEngine:
                 if not target_config.get("use_sandbox", True):
                     logger.error("❌ Sandbox-only mode enforced but target not in sandbox")
                     return False
-            
+
             # Check for real targets
             if self.config["safety"]["no_real_targets"]:
                 if target_config.get("use_real_data", False):
                     logger.error("❌ Real targets not allowed in safety mode")
                     return False
-            
+
             # Check attack count
             if len(attacks) > self.config["safety"]["max_concurrent_attacks"]:
                 logger.error(f"❌ Too many attacks: {len(attacks)} > {self.config['safety']['max_concurrent_attacks']}")
                 return False
-            
+
             # Check attack duration
             max_duration = self.config["safety"]["max_attack_duration"]
             estimated_duration = len(attacks) * 10  # 10 seconds per attack estimate
             if estimated_duration > max_duration:
                 logger.error(f"❌ Estimated duration too long: {estimated_duration}s > {max_duration}s")
                 return False
-            
+
             return True
-            
+
         except Exception as e:
             logger.error(f"❌ Safety validation failed: {e}")
             return False
 
     async def _execute_attacks_in_sandbox(
-        self, 
-        attacks: List[GeneratedAttack], 
+        self,
+        attacks: List[GeneratedAttack],
         target_config: Dict[str, Any]
     ) -> List[AttackResult]:
         """Execute attacks in sandbox environment"""
         results = []
-        
+
         try:
             # Create sandbox for attack execution
             sandbox = await self.sandbox_controller.create_sandbox(
@@ -751,42 +859,42 @@ class RedTeamEngine:
                 sandbox_type=SandboxType.SECURITY_TEST,
                 image="python:3.9-slim"
             )
-            
+
             # Execute each attack
             for attack in attacks:
                 result = await self._execute_single_attack_in_sandbox(attack, sandbox, target_config)
                 results.append(result)
-            
+
             # Clean up sandbox
             await self.sandbox_controller.destroy_sandbox(sandbox.config.sandbox_id)
-            
+
         except Exception as e:
             logger.error(f"❌ Sandbox attack execution failed: {e}")
-        
+
         return results
 
     async def _execute_single_attack_in_sandbox(
-        self, 
-        attack: GeneratedAttack, 
-        sandbox, 
+        self,
+        attack: GeneratedAttack,
+        sandbox,
         target_config: Dict[str, Any]
     ) -> AttackResult:
         """Execute a single attack in sandbox"""
         start_time = time.time()
-        
+
         try:
             # Create attack script
             attack_script = self._create_attack_script(attack, target_config)
-            
+
             # Execute in sandbox
             result = await self.sandbox_controller.execute_in_sandbox(
                 sandbox.config.sandbox_id,
                 ["python", "-c", attack_script]
             )
-            
+
             # Analyze result
             success = self._analyze_attack_result(attack, result)
-            
+
             # Create attack result
             attack_result = AttackResult(
                 attack_id=attack.attack_id,
@@ -800,9 +908,9 @@ class RedTeamEngine:
                 learning_insights=self._extract_learning_insights(attack, result),
                 risk_assessment=self._assess_attack_risk_result(attack, result)
             )
-            
+
             return attack_result
-            
+
         except Exception as e:
             logger.error(f"❌ Single attack execution failed: {e}")
             return AttackResult(
@@ -848,55 +956,55 @@ except Exception as e:
         """Analyze if attack was successful"""
         if result["exit_code"] != 0:
             return False
-        
+
         response_body = result["stdout"].lower()
-        
+
         # Check for success indicators
         for indicator in attack.success_indicators:
             if indicator.lower() in response_body:
                 return True
-        
+
         # Check for failure indicators
         for indicator in attack.failure_indicators:
             if indicator.lower() in response_body:
                 return False
-        
+
         return False
 
     def _extract_vulnerabilities(self, attack: GeneratedAttack, result: Dict[str, Any]) -> List[str]:
         """Extract detected vulnerabilities from attack result"""
         vulnerabilities = []
         response_body = result["stdout"].lower()
-        
+
         for indicator in attack.success_indicators:
             if indicator.lower() in response_body:
                 vulnerabilities.append(indicator)
-        
+
         return vulnerabilities
 
     def _extract_defenses(self, attack: GeneratedAttack, result: Dict[str, Any]) -> List[str]:
         """Extract triggered defenses from attack result"""
         defenses = []
         response_body = result["stdout"].lower()
-        
+
         for indicator in attack.failure_indicators:
             if indicator.lower() in response_body:
                 defenses.append(indicator)
-        
+
         return defenses
 
     def _extract_learning_insights(self, attack: GeneratedAttack, result: Dict[str, Any]) -> List[str]:
         """Extract learning insights from attack result"""
         insights = []
-        
+
         if result["exit_code"] == 0:
             insights.append("Attack executed successfully")
         else:
             insights.append("Attack execution failed")
-        
+
         if attack.adaptation_strategy:
             insights.append(f"Adaptation strategy applied: {attack.adaptation_strategy}")
-        
+
         return insights
 
     def _assess_attack_risk_result(self, attack: GeneratedAttack, result: Dict[str, Any]) -> Dict[str, Any]:
@@ -909,24 +1017,24 @@ except Exception as e:
         }
 
     async def _execute_attacks_with_simulator(
-        self, 
-        attacks: List[GeneratedAttack], 
+        self,
+        attacks: List[GeneratedAttack],
         target_config: Dict[str, Any]
     ) -> List[AttackResult]:
         """Execute attacks using attack simulator"""
         results = []
-        
+
         try:
             for attack in attacks:
                 # Convert to simulator format
                 scenario_id = self._map_attack_to_scenario(attack)
-                
+
                 # Run simulation
                 simulation_result = self.attack_simulator.run_simulation(
                     scenario_id=scenario_id,
                     target_config=target_config
                 )
-                
+
                 # Convert to attack result
                 attack_result = AttackResult(
                     attack_id=attack.attack_id,
@@ -940,12 +1048,12 @@ except Exception as e:
                     learning_insights=simulation_result.recommendations,
                     risk_assessment={"risk_score": simulation_result.risk_score}
                 )
-                
+
                 results.append(attack_result)
-            
+
         except Exception as e:
             logger.error(f"❌ Simulator attack execution failed: {e}")
-        
+
         return results
 
     def _map_attack_to_scenario(self, attack: GeneratedAttack) -> str:
@@ -953,7 +1061,7 @@ except Exception as e:
         pattern = self.attack_patterns.get(attack.pattern_id)
         if not pattern:
             return "OWASP_SQL_INJECTION"  # Default
-        
+
         if pattern.vulnerability_type == VulnerabilityType.SQL_INJECTION:
             return "OWASP_SQL_INJECTION"
         elif pattern.vulnerability_type == VulnerabilityType.XSS:
@@ -964,13 +1072,13 @@ except Exception as e:
             return "OWASP_SQL_INJECTION"  # Default
 
     async def _execute_attacks_mock(
-        self, 
-        attacks: List[GeneratedAttack], 
+        self,
+        attacks: List[GeneratedAttack],
         target_config: Dict[str, Any]
     ) -> List[AttackResult]:
         """Execute attacks in mock mode for testing"""
         results = []
-        
+
         for attack in attacks:
             # Mock execution
             mock_result = AttackResult(
@@ -986,14 +1094,14 @@ except Exception as e:
                 risk_assessment={"mock": True}
             )
             results.append(mock_result)
-        
+
         return results
 
     async def _store_attack_results(self, results: List[AttackResult]):
         """Store attack results in experience memory"""
         if not self.memory_manager:
             return
-        
+
         try:
             for result in results:
                 experience_content = {
@@ -1006,15 +1114,15 @@ except Exception as e:
                     "learning_insights": result.learning_insights,
                     "risk_assessment": result.risk_assessment
                 }
-                
+
                 self.memory_manager.store(
                     content=json.dumps(experience_content),
                     importance=0.8 if result.success else 0.6,
                     tags=["red_team", "attack_result", "security", "learning"]
                 )
-            
+
             logger.info(f"✅ Stored {len(results)} attack results in memory")
-            
+
         except Exception as e:
             logger.error(f"❌ Failed to store attack results: {e}")
 
@@ -1033,7 +1141,7 @@ except Exception as e:
             "attack_history_count": len(self.attack_history),
             "learning_insights_count": len(self.learning_insights),
             "success_rate": (
-                self.metrics["successful_attacks"] / self.metrics["total_attacks"] 
+                self.metrics["successful_attacks"] / self.metrics["total_attacks"]
                 if self.metrics["total_attacks"] > 0 else 0
             )
         }

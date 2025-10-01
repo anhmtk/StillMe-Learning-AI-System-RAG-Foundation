@@ -4,10 +4,12 @@ FastAPI endpoints for kill switch operations.
 """
 
 from typing import Dict, List, Optional
-from fastapi import APIRouter, HTTPException, Depends
+
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from stillme_core.kill_switch import KillSwitchManager, get_kill_switch
+
 
 # Request/Response models
 class KillSwitchRequest(BaseModel):
@@ -67,10 +69,10 @@ async def arm_kill_switch(
     """Arm the kill switch."""
     try:
         result = manager.arm(request.actor, request.reason)
-        
+
         if not result["success"]:
             raise HTTPException(status_code=400, detail=result["message"])
-        
+
         return KillSwitchResponse(**result)
     except HTTPException:
         raise
@@ -85,10 +87,10 @@ async def fire_kill_switch(
     """Fire the kill switch (emergency stop)."""
     try:
         result = manager.fire(request.actor, request.reason)
-        
+
         if not result["success"]:
             raise HTTPException(status_code=400, detail=result["message"])
-        
+
         return KillSwitchResponse(**result)
     except HTTPException:
         raise
@@ -103,10 +105,10 @@ async def disarm_kill_switch(
     """Disarm the kill switch."""
     try:
         result = manager.disarm(request.actor, request.reason)
-        
+
         if not result["success"]:
             raise HTTPException(status_code=400, detail=result["message"])
-        
+
         return KillSwitchResponse(**result)
     except HTTPException:
         raise
@@ -145,7 +147,7 @@ async def kill_switch_middleware(request, call_next):
     if request.url.path.startswith("/kill-switch"):
         response = await call_next(request)
         return response
-    
+
     # Check if system is safe
     try:
         manager = get_kill_switch()
@@ -164,6 +166,6 @@ async def kill_switch_middleware(request, call_next):
         # If we can't check kill switch, allow request to proceed
         # (fail-open for availability)
         pass
-    
+
     response = await call_next(request)
     return response

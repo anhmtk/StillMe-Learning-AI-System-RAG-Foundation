@@ -7,8 +7,8 @@ StillMe AI Manager - Stub Implementation
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Union
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Union
 
 logger = logging.getLogger(__name__)
 
@@ -27,12 +27,12 @@ class AIManager:
     
     # TODO[stabilize]: Implement full AI management functionality
     """
-    
+
     def __init__(self, config: Optional[AIManagerConfig] = None):
         """Initialize AI Manager"""
         self.config = config or AIManagerConfig()
         logger.warning("AIManager: Using stub implementation - not for production")
-    
+
     def health(self) -> Dict[str, Any]:
         """Health check"""
         return {
@@ -40,12 +40,12 @@ class AIManager:
             "message": "AIManager stub implementation",
             "config": self.config.__dict__
         }
-    
+
     def set_mode(self, mode: str) -> bool:
         """Set AI mode"""
         logger.warning(f"AIManager.set_mode({mode}): Stub implementation")
         return True
-    
+
     def compute_number(self, expression: str) -> Union[int, float]:
         """Compute mathematical expression"""
         logger.warning(f"AIManager.compute_number({expression}): Stub implementation")

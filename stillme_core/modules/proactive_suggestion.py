@@ -11,9 +11,9 @@ Version: 3.0.0
 import logging
 import re
 import time
+from collections import Counter, defaultdict
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Any, Set
-from collections import defaultdict, Counter
+from typing import Any, Dict, List, Optional, Set
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ class ProactiveSuggestion:
     Generates proactive suggestions based on user input patterns,
     context analysis, and learned preferences.
     """
-    
+
     def __init__(self, config: Dict[str, Any]):
         self.config = config
         self.enabled = config.get("enabled", True)
@@ -40,12 +40,12 @@ class ProactiveSuggestion:
         self.categories = config.get("categories", ["performance", "security", "ux", "scalability", "maintainability"])
         self.confidence_threshold = config.get("confidence_threshold", 0.6)
         self.learning_enabled = config.get("learning_enabled", True)
-        
+
         # Learning storage
         self.user_preferences = defaultdict(Counter)  # user_id -> category -> count
         self.suggestion_history = []  # Track suggestion usage
         self.pattern_learning = defaultdict(int)  # pattern -> success_count
-        
+
         # Suggestion templates by category
         self.suggestion_templates = {
             "performance": {
@@ -129,7 +129,7 @@ class ProactiveSuggestion:
                 ]
             }
         }
-        
+
         # Pattern matching for suggestion triggers
         self.trigger_patterns = {
             "performance": [
@@ -158,32 +158,32 @@ class ProactiveSuggestion:
                 r"\b(debug|fix|error|exception|log)\b"
             ]
         }
-    
+
     def _analyze_input_patterns(self, text: str) -> Dict[str, float]:
         """Analyze input text to detect suggestion categories"""
         text_lower = text.lower()
         category_scores = {}
-        
+
         for category, patterns in self.trigger_patterns.items():
             score = 0
             for pattern in patterns:
                 matches = len(re.findall(pattern, text_lower))
                 score += matches * 0.1  # Weight each match
-            
+
             # Normalize score
             category_scores[category] = min(score, 1.0)
-        
+
         return category_scores
-    
+
     def _get_context_suggestions(self, context: Dict[str, Any]) -> List[str]:
         """Generate suggestions based on context information"""
         suggestions = []
-        
+
         # Project context analysis
         project_context = context.get("project_context", {})
         files = project_context.get("files", [])
         extensions = project_context.get("extensions", [])
-        
+
         # File-based suggestions
         if any(ext in [".js", ".ts", ".jsx", ".tsx"] for ext in extensions):
             suggestions.extend([
@@ -191,21 +191,21 @@ class ProactiveSuggestion:
                 "Implement error boundaries",
                 "Add performance monitoring"
             ])
-        
+
         if any(ext in [".py"] for ext in extensions):
             suggestions.extend([
                 "Add type hints",
                 "Implement logging",
                 "Add unit tests"
             ])
-        
+
         if any(ext in [".sql"] for ext in extensions):
             suggestions.extend([
                 "Add database indexes",
                 "Implement query optimization",
                 "Add data validation"
             ])
-        
+
         # Conversation history analysis
         conversation_history = context.get("conversation_history", [])
         if conversation_history:
@@ -218,36 +218,36 @@ class ProactiveSuggestion:
                     recent_topics.append("optimization")
                 elif "test" in content:
                     recent_topics.append("testing")
-            
+
             if "debugging" in recent_topics:
                 suggestions.extend([
                     "Add comprehensive error handling",
                     "Implement logging strategy",
                     "Add debugging tools"
                 ])
-            
+
             if "optimization" in recent_topics:
                 suggestions.extend([
                     "Profile performance bottlenecks",
                     "Implement caching layer",
                     "Optimize database queries"
                 ])
-        
+
         return suggestions[:3]  # Limit to 3 context suggestions
-    
+
     def _get_learned_suggestions(self, user_id: str, category: str) -> List[str]:
         """Get suggestions based on user's historical preferences"""
         if not self.learning_enabled or not user_id:
             return []
-        
+
         user_prefs = self.user_preferences.get(user_id, Counter())
         if not user_prefs:
             return []
-        
+
         # Get user's preferred categories
         top_categories = user_prefs.most_common(3)
         suggestions = []
-        
+
         for cat, count in top_categories:
             if cat in self.suggestion_templates:
                 # Get random suggestions from preferred category
@@ -255,9 +255,9 @@ class ProactiveSuggestion:
                 for subcategory, template_list in templates.items():
                     if template_list:
                         suggestions.extend(template_list[:1])  # Take 1 from each subcategory
-        
+
         return suggestions[:2]  # Limit learned suggestions
-    
+
     def _generate_suggestions(self, text: str, context: Dict[str, Any] = None) -> SuggestionResult:
         """Generate proactive suggestions based on input analysis"""
         if not self.enabled:
@@ -268,11 +268,11 @@ class ProactiveSuggestion:
                 category="none",
                 metadata={"disabled": True}
             )
-        
+
         try:
             # Analyze input patterns
             category_scores = self._analyze_input_patterns(text)
-            
+
             # Find top category
             if not category_scores or max(category_scores.values()) < self.confidence_threshold:
                 return SuggestionResult(
@@ -282,35 +282,35 @@ class ProactiveSuggestion:
                     category="none",
                     metadata={"category_scores": category_scores}
                 )
-            
+
             top_category = max(category_scores, key=category_scores.get)
             confidence = category_scores[top_category]
-            
+
             # Generate suggestions
             suggestions = []
-            
+
             # 1. Category-based suggestions
             if top_category in self.suggestion_templates:
                 templates = self.suggestion_templates[top_category]
                 for subcategory, template_list in templates.items():
                     if template_list:
                         suggestions.extend(template_list[:1])  # Take 1 from each subcategory
-            
+
             # 2. Context-based suggestions
             if context:
                 context_suggestions = self._get_context_suggestions(context)
                 suggestions.extend(context_suggestions)
-            
+
             # 3. Learned suggestions
             user_id = context.get("user_id") if context else None
             if user_id:
                 learned_suggestions = self._get_learned_suggestions(user_id, top_category)
                 suggestions.extend(learned_suggestions)
-            
+
             # Remove duplicates and limit
             unique_suggestions = list(dict.fromkeys(suggestions))  # Preserve order, remove duplicates
             final_suggestions = unique_suggestions[:self.max_suggestions]
-            
+
             return SuggestionResult(
                 suggestions=final_suggestions,
                 confidence=confidence,
@@ -323,7 +323,7 @@ class ProactiveSuggestion:
                 },
                 learning_enabled=self.learning_enabled
             )
-            
+
         except Exception as e:
             logger.error(f"ProactiveSuggestion generation failed: {e}")
             return SuggestionResult(
@@ -333,17 +333,17 @@ class ProactiveSuggestion:
                 category="error",
                 metadata={"error": str(e)}
             )
-    
+
     def record_suggestion_usage(self, user_id: str, suggestion: str, category: str, success: bool = True):
         """Record suggestion usage for learning"""
         if not self.learning_enabled or not user_id:
             return
-        
+
         try:
             # Record in user preferences
             if success:
                 self.user_preferences[user_id][category] += 1
-            
+
             # Record in suggestion history
             self.suggestion_history.append({
                 "timestamp": time.time(),
@@ -352,32 +352,32 @@ class ProactiveSuggestion:
                 "category": category,
                 "success": success
             })
-            
+
             # Keep only recent history (last 1000 entries)
             if len(self.suggestion_history) > 1000:
                 self.suggestion_history = self.suggestion_history[-1000:]
-            
+
             logger.debug(f"Recorded suggestion usage: {suggestion} for user {user_id}, success={success}")
-            
+
         except Exception as e:
             logger.error(f"Failed to record suggestion usage: {e}")
-    
+
     def get_suggestion_stats(self) -> Dict[str, Any]:
         """Get statistics about suggestion usage"""
         try:
             total_suggestions = len(self.suggestion_history)
             successful_suggestions = sum(1 for s in self.suggestion_history if s.get("success", False))
-            
+
             # Category distribution
             category_counts = Counter()
             for suggestion in self.suggestion_history:
                 category_counts[suggestion.get("category", "unknown")] += 1
-            
+
             # User activity
             user_counts = Counter()
             for suggestion in self.suggestion_history:
                 user_counts[suggestion.get("user_id", "unknown")] += 1
-            
+
             return {
                 "total_suggestions": total_suggestions,
                 "successful_suggestions": successful_suggestions,
@@ -387,11 +387,11 @@ class ProactiveSuggestion:
                 "learning_enabled": self.learning_enabled,
                 "categories_available": len(self.categories)
             }
-            
+
         except Exception as e:
             logger.error(f"Failed to get suggestion stats: {e}")
             return {"error": str(e)}
-    
+
     def clear_learning_data(self):
         """Clear all learning data"""
         try:
@@ -401,7 +401,7 @@ class ProactiveSuggestion:
             logger.info("Proactive suggestion learning data cleared")
         except Exception as e:
             logger.error(f"Failed to clear learning data: {e}")
-    
+
     def suggest(self, text: str, context: Dict[str, Any] = None) -> SuggestionResult:
         """
         Main method to generate proactive suggestions

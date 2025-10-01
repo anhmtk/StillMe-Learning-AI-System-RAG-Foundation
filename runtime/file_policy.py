@@ -41,37 +41,37 @@ def load_file_policy(policy_path: Optional[str] = None) -> Dict[str, Any]:
         ValueError: Nếu policy không hợp lệ
     """
     global _policy, _policy_loaded
-    
+
     if _policy_loaded and _policy:
         return _policy
-    
+
     # Default path
     if policy_path is None:
         policy_path = os.path.join(os.getcwd(), 'policies', 'FILE_PROTECTION.yaml')
-    
+
     try:
         # Check if policy file exists
         if not os.path.exists(policy_path):
             raise FileNotFoundError(f"File Protection Policy file not found: {policy_path}")
-        
+
         # Read and parse YAML
         with open(policy_path, 'r', encoding='utf-8') as file:
             policy = yaml.safe_load(file)
-        
+
         # Validate policy structure
         _validate_policy(policy)
-        
+
         # Cache policy
         _policy = policy
         _policy_loaded = True
-        
+
         logger.info(f"✅ File Protection Policy loaded successfully from: {policy_path}")
         logger.info(f"📋 Policy version: {policy['version']}")
         logger.info(f"🔒 Protected files: {len(policy['protected_files'])}")
         logger.info(f"🛡️ Protection enabled: {policy['enforcement']['runtime']['enabled']}")
-        
+
         return policy
-        
+
     except Exception as error:
         error_message = f"Failed to load File Protection Policy from {policy_path}: {error}"
         logger.error(f"❌ {error_message}")
@@ -91,15 +91,15 @@ def _validate_policy(policy: Dict[str, Any]) -> None:
         'version', 'metadata', 'protected_files', 'rules', 'commit',
         'messages', 'validation', 'backup', 'monitoring', 'compliance'
     ]
-    
+
     for field in required_fields:
         if field not in policy:
             raise ValueError(f"Missing required field in policy: {field}")
-    
+
     # Validate protected files
     if not policy['protected_files']:
         raise ValueError("No protected files defined in policy")
-    
+
     # Validate rules
     required_operations = ['delete', 'rename', 'move', 'modify', 'copy', 'read']
     for operation in required_operations:
@@ -149,7 +149,7 @@ def is_protected_file(file_path: str) -> bool:
     """
     policy = get_file_policy()
     file_name = os.path.basename(file_path)
-    
+
     return file_name in policy['protected_files']
 
 def assert_protected_files(action: str, file_paths: List[str]) -> None:
@@ -164,16 +164,16 @@ def assert_protected_files(action: str, file_paths: List[str]) -> None:
         ValueError: Nếu vi phạm policy
     """
     policy = get_file_policy()
-    
+
     for file_path in file_paths:
         if is_protected_file(file_path):
             rule = policy['rules'].get(action, {})
-            
+
             if rule.get('action') == 'deny':
-                message = policy['messages'].get(f'{action}_violation_vi', 
+                message = policy['messages'].get(f'{action}_violation_vi',
                                                f'Cannot {action} protected file: {file_path}')
                 raise ValueError(message)
-            
+
             elif rule.get('action') == 'require_approval':
                 if not rule.get('require_approval', False):
                     message = policy['messages'].get(f'{action}_violation_vi',
@@ -193,26 +193,26 @@ def validate_env_file(file_path: str) -> Tuple[bool, List[str]]:
     policy = get_file_policy()
     validation = policy['validation']
     errors = []
-    
+
     try:
         # Check file size
         file_size = os.path.getsize(file_path)
         if file_size > validation['file_size_limit']:
             errors.append(f"File size {file_size} exceeds limit {validation['file_size_limit']}")
-        
+
         # Read and validate content
         with open(file_path, 'r', encoding='utf-8') as f:
             lines = f.readlines()
-            
+
             if len(lines) > validation['line_limit']:
                 errors.append(f"Line count {len(lines)} exceeds limit {validation['line_limit']}")
-            
+
             # Check required keys
             content = ''.join(lines)
             for required_key in validation['required_keys']:
                 if required_key not in content:
                     errors.append(f"Missing required key: {required_key}")
-            
+
             # Validate key patterns
             for line in lines:
                 line = line.strip()
@@ -220,14 +220,14 @@ def validate_env_file(file_path: str) -> Tuple[bool, List[str]]:
                     key, value = line.split('=', 1)
                     key = key.strip()
                     value = value.strip()
-                    
+
                     if key in validation['key_patterns']:
                         pattern = validation['key_patterns'][key]
                         if not re.match(pattern, value):
                             errors.append(f"Invalid pattern for {key}: {value}")
-        
+
         return len(errors) == 0, errors
-        
+
     except Exception as e:
         return False, [f"Validation error: {e}"]
 
@@ -244,14 +244,14 @@ def create_backup(file_path: str, operation: str = 'manual') -> str:
     """
     policy = get_file_policy()
     backup_config = policy['backup']
-    
+
     if not backup_config['enabled']:
         return None
-    
+
     # Create backup directory
     backup_dir = backup_config['directory']
     os.makedirs(backup_dir, exist_ok=True)
-    
+
     # Generate backup filename
     timestamp = datetime.now().strftime(backup_config['naming_pattern'].split('.')[-2])
     backup_filename = backup_config['naming_pattern'].format(
@@ -259,11 +259,11 @@ def create_backup(file_path: str, operation: str = 'manual') -> str:
         operation=operation
     )
     backup_path = os.path.join(backup_dir, backup_filename)
-    
+
     try:
         # Copy file to backup
         shutil.copy2(file_path, backup_path)
-        
+
         # Compress if enabled
         if backup_config['compression']:
             import gzip
@@ -272,13 +272,13 @@ def create_backup(file_path: str, operation: str = 'manual') -> str:
                     shutil.copyfileobj(f_in, f_out)
             os.remove(backup_path)
             backup_path = f"{backup_path}.gz"
-        
+
         # Cleanup old backups
         _cleanup_old_backups(backup_dir, backup_config['max_backups'])
-        
+
         logger.info(f"✅ Created backup: {backup_path}")
         return backup_path
-        
+
     except Exception as e:
         logger.error(f"❌ Failed to create backup: {e}")
         raise
@@ -297,15 +297,15 @@ def _cleanup_old_backups(backup_dir: str, max_backups: int) -> None:
             if filename.startswith('.env.backup.'):
                 file_path = os.path.join(backup_dir, filename)
                 backup_files.append((file_path, os.path.getmtime(file_path)))
-        
+
         # Sort by modification time (newest first)
         backup_files.sort(key=lambda x: x[1], reverse=True)
-        
+
         # Remove old backups
         for file_path, _ in backup_files[max_backups:]:
             os.remove(file_path)
             logger.info(f"🗑️ Removed old backup: {file_path}")
-            
+
     except Exception as e:
         logger.error(f"❌ Failed to cleanup old backups: {e}")
 

@@ -22,21 +22,21 @@ def main():
     if len(sys.argv) < 2:
         print("Usage: python check_crlf_precommit.py <file1> [file2] ...")
         return 1
-    
+
     failed_files = []
-    
+
     for file_path in sys.argv[1:]:
         has_crlf, message = check_file_for_crlf(file_path)
         if has_crlf:
             failed_files.append((file_path, message))
-    
+
     if failed_files:
         print("❌ Files with CRLF line endings detected:")
         for file_path, message in failed_files:
             print(f"  - {file_path}: {message}")
         print("\n💡 Run 'python tools/normalize_encoding.py' to fix line endings")
         return 1
-    
+
     print("✅ No CRLF line endings found in test files")
     return 0
 

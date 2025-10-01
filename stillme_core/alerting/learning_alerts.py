@@ -22,11 +22,11 @@ Date: 2025-09-28
 
 import asyncio
 import logging
-from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional
 
-from .alert_manager import get_alert_manager, AlertManager
+from .alert_manager import AlertManager, get_alert_manager
 
 logger = logging.getLogger(__name__)
 
@@ -50,11 +50,11 @@ class LearningAlertManager:
     """
     Specialized alert manager for learning system
     """
-    
+
     def __init__(self, alert_manager: AlertManager = None):
         self.alert_manager = alert_manager or get_alert_manager()
         self.logger = logging.getLogger(__name__)
-        
+
         # Learning-specific thresholds
         self.thresholds = {
             'memory_usage_mb': 2048,  # 2GB
@@ -65,7 +65,7 @@ class LearningAlertManager:
             'token_budget_daily': 10000,
             'performance_score_min': 0.6
         }
-        
+
         # Evolution milestone tracking
         self.evolution_milestones = {
             'infant': ['first_learning_session', 'first_knowledge_item', 'first_assessment'],
@@ -73,18 +73,18 @@ class LearningAlertManager:
             'adolescent': ['10000_sessions', '100000_knowledge_items', 'accuracy_90_percent'],
             'adult': ['100000_sessions', '1000000_knowledge_items', 'accuracy_95_percent']
         }
-        
+
         # Tracked milestones
         self.achieved_milestones = set()
-        
+
         # Performance tracking
         self.performance_history = []
         self.degradation_threshold = 0.1  # 10% degradation
-    
+
     async def check_learning_session_alerts(self, metrics: LearningMetrics) -> List[str]:
         """Check and send alerts for learning session"""
         alerts_sent = []
-        
+
         # Check resource usage
         if metrics.memory_usage > self.thresholds['memory_usage_mb']:
             alert_id = await self.alert_manager.send_alert(
@@ -108,7 +108,7 @@ class LearningAlertManager:
                 channels=['email', 'desktop', 'telegram']
             )
             alerts_sent.append(alert_id)
-        
+
         if metrics.cpu_usage > self.thresholds['cpu_usage_percent']:
             alert_id = await self.alert_manager.send_alert(
                 alert_type='resource_high',
@@ -131,7 +131,7 @@ class LearningAlertManager:
                 channels=['email', 'desktop', 'telegram']
             )
             alerts_sent.append(alert_id)
-        
+
         # Check learning accuracy
         if metrics.learning_accuracy < self.thresholds['learning_accuracy_min']:
             alert_id = await self.alert_manager.send_alert(
@@ -156,7 +156,7 @@ class LearningAlertManager:
                 channels=['email', 'desktop', 'telegram']
             )
             alerts_sent.append(alert_id)
-        
+
         # Check error rate
         error_rate = metrics.error_count / max(metrics.knowledge_items_processed, 1)
         if error_rate > self.thresholds['error_rate_max']:
@@ -183,7 +183,7 @@ class LearningAlertManager:
                 channels=['email', 'desktop', 'telegram']
             )
             alerts_sent.append(alert_id)
-        
+
         # Check training time
         if metrics.training_time > self.thresholds['training_time_max']:
             alert_id = await self.alert_manager.send_alert(
@@ -207,7 +207,7 @@ class LearningAlertManager:
                 channels=['email', 'desktop', 'telegram']
             )
             alerts_sent.append(alert_id)
-        
+
         # Check performance score
         if metrics.performance_score < self.thresholds['performance_score_min']:
             alert_id = await self.alert_manager.send_alert(
@@ -231,25 +231,25 @@ class LearningAlertManager:
                 channels=['email', 'desktop', 'telegram']
             )
             alerts_sent.append(alert_id)
-        
+
         return alerts_sent
-    
+
     async def check_evolution_milestones(self, metrics: LearningMetrics) -> List[str]:
         """Check and send alerts for evolution milestones"""
         alerts_sent = []
-        
+
         # Check for new milestones
         current_stage = metrics.evolution_stage.lower()
         stage_milestones = self.evolution_milestones.get(current_stage, [])
-        
+
         for milestone in stage_milestones:
             milestone_key = f"{current_stage}_{milestone}"
-            
+
             if milestone_key not in self.achieved_milestones:
                 # Check if milestone is achieved
                 if self._check_milestone_achieved(milestone, metrics):
                     self.achieved_milestones.add(milestone_key)
-                    
+
                     alert_id = await self.alert_manager.send_alert(
                         alert_type='evolution_milestone',
                         severity='medium',
@@ -272,68 +272,68 @@ class LearningAlertManager:
                         channels=['email', 'telegram']
                     )
                     alerts_sent.append(alert_id)
-        
+
         return alerts_sent
-    
+
     def _check_milestone_achieved(self, milestone: str, metrics: LearningMetrics) -> bool:
         """Check if a specific milestone is achieved"""
         if milestone == 'first_learning_session':
             return True  # This is the first session
-        
+
         elif milestone == 'first_knowledge_item':
             return metrics.knowledge_items_processed >= 1
-        
+
         elif milestone == 'first_assessment':
             return metrics.learning_accuracy > 0
-        
+
         elif milestone == '100_sessions':
             # This would need to be tracked across sessions
             return False  # Placeholder
-        
+
         elif milestone == '1000_knowledge_items':
             return metrics.knowledge_items_processed >= 1000
-        
+
         elif milestone == 'accuracy_80_percent':
             return metrics.learning_accuracy >= 0.8
-        
+
         elif milestone == '10000_sessions':
             return False  # Placeholder
-        
+
         elif milestone == '100000_knowledge_items':
             return metrics.knowledge_items_processed >= 100000
-        
+
         elif milestone == 'accuracy_90_percent':
             return metrics.learning_accuracy >= 0.9
-        
+
         elif milestone == '100000_sessions':
             return False  # Placeholder
-        
+
         elif milestone == '1000000_knowledge_items':
             return metrics.knowledge_items_processed >= 1000000
-        
+
         elif milestone == 'accuracy_95_percent':
             return metrics.learning_accuracy >= 0.95
-        
+
         return False
-    
+
     async def check_performance_degradation(self, metrics: LearningMetrics) -> List[str]:
         """Check for performance degradation"""
         alerts_sent = []
-        
+
         # Add current metrics to history
         self.performance_history.append(metrics)
-        
+
         # Keep only last 10 sessions for comparison
         if len(self.performance_history) > 10:
             self.performance_history.pop(0)
-        
+
         # Need at least 2 sessions to compare
         if len(self.performance_history) < 2:
             return alerts_sent
-        
+
         # Compare with previous session
         previous_metrics = self.performance_history[-2]
-        
+
         # Check accuracy degradation
         accuracy_change = metrics.learning_accuracy - previous_metrics.learning_accuracy
         if accuracy_change < -self.degradation_threshold:
@@ -359,7 +359,7 @@ class LearningAlertManager:
                 channels=['email', 'desktop', 'telegram']
             )
             alerts_sent.append(alert_id)
-        
+
         # Check performance score degradation
         performance_change = metrics.performance_score - previous_metrics.performance_score
         if performance_change < -self.degradation_threshold:
@@ -385,10 +385,10 @@ class LearningAlertManager:
                 channels=['email', 'desktop', 'telegram']
             )
             alerts_sent.append(alert_id)
-        
+
         return alerts_sent
-    
-    async def send_learning_session_failure(self, session_id: str, error_message: str, 
+
+    async def send_learning_session_failure(self, session_id: str, error_message: str,
                                           component: str = 'learning_system') -> str:
         """Send alert for learning session failure"""
         return await self.alert_manager.send_alert(
@@ -410,7 +410,7 @@ class LearningAlertManager:
             },
             channels=['email', 'desktop', 'telegram', 'sms']
         )
-    
+
     async def send_system_critical_error(self, error_message: str, component: str = 'system') -> str:
         """Send alert for critical system error"""
         return await self.alert_manager.send_alert(
@@ -432,12 +432,12 @@ class LearningAlertManager:
             },
             channels=['email', 'desktop', 'telegram', 'sms']
         )
-    
-    async def send_resource_exhaustion_warning(self, resource_type: str, current_usage: float, 
+
+    async def send_resource_exhaustion_warning(self, resource_type: str, current_usage: float,
                                              limit: float, component: str = 'resource_monitor') -> str:
         """Send alert for resource exhaustion warning"""
         severity = 'critical' if current_usage >= limit * 0.95 else 'high'
-        
+
         return await self.alert_manager.send_alert(
             alert_type='resource_high',
             severity=severity,
@@ -460,7 +460,7 @@ class LearningAlertManager:
             },
             channels=['email', 'desktop', 'telegram', 'sms'] if severity == 'critical' else ['email', 'desktop', 'telegram']
         )
-    
+
     def get_learning_alert_statistics(self) -> Dict[str, Any]:
         """Get learning-specific alert statistics"""
         return {
@@ -485,19 +485,19 @@ def get_learning_alert_manager() -> LearningAlertManager:
 async def check_learning_alerts(metrics: LearningMetrics) -> List[str]:
     """Convenience function to check all learning alerts"""
     manager = get_learning_alert_manager()
-    
+
     alerts_sent = []
-    
+
     # Check session alerts
     session_alerts = await manager.check_learning_session_alerts(metrics)
     alerts_sent.extend(session_alerts)
-    
+
     # Check evolution milestones
     milestone_alerts = await manager.check_evolution_milestones(metrics)
     alerts_sent.extend(milestone_alerts)
-    
+
     # Check performance degradation
     degradation_alerts = await manager.check_performance_degradation(metrics)
     alerts_sent.extend(degradation_alerts)
-    
+
     return alerts_sent

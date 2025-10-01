@@ -22,7 +22,7 @@ from stillme_core.alerting.alerting_system import AlertingSystem
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO, 
+    level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler('artifacts/stillme_service.log'),
@@ -37,7 +37,7 @@ class StillMeBackgroundService:
         self.alerting_system = AlertingSystem()
         self.config_file = project_root / "artifacts" / "background_service_config.json"
         self.load_config()
-        
+
     def load_config(self):
         """Load background service configuration"""
         default_config = {
@@ -50,7 +50,7 @@ class StillMeBackgroundService:
             "discovery_count_today": 0,
             "max_discoveries_per_day": 8  # Tối đa 8 lần quét/ngày
         }
-        
+
         if self.config_file.exists():
             try:
                 with open(self.config_file, 'r') as f:
@@ -63,41 +63,41 @@ class StillMeBackgroundService:
                 self.config = default_config
         else:
             self.config = default_config
-            
+
         self.save_config()
-    
+
     def save_config(self):
         """Save background service configuration"""
         self.config_file.parent.mkdir(parents=True, exist_ok=True)
         with open(self.config_file, 'w') as f:
             json.dump(self.config, f, indent=2)
-    
+
     def discover_knowledge(self):
         """Khám phá kiến thức mới"""
         if not self.config["enabled"]:
             logger.info("🔴 Background service is disabled")
             return
-            
+
         if self.config["discovery_count_today"] >= self.config["max_discoveries_per_day"]:
             logger.info(f"📊 Daily discovery limit reached: {self.config['discovery_count_today']}/{self.config['max_discoveries_per_day']}")
             return
-            
+
         logger.info("🔍 Starting knowledge discovery...")
-        
+
         try:
             # Import discovery function
             from scripts.knowledge_discovery import KnowledgeDiscovery
-            
+
             discovery = KnowledgeDiscovery()
             discovered_count = discovery.discover_knowledge()
-            
+
             if discovered_count > 0:
                 self.config["discovery_count_today"] += 1
                 self.config["last_discovery_time"] = datetime.now().isoformat()
                 self.save_config()
-                
+
                 logger.info(f"✅ Discovery completed: {discovered_count} new proposals")
-                
+
                 if self.config["notification_enabled"]:
                     self.alerting_system.send_alert(
                         "Knowledge Discovery Completed",
@@ -109,15 +109,15 @@ class StillMeBackgroundService:
                     )
             else:
                 logger.info("ℹ️ No new knowledge discovered this time")
-                
+
         except Exception as e:
             logger.error(f"❌ Knowledge discovery failed: {e}")
-    
+
     def _export_dashboard_data(self):
         """Export dashboard data for public viewing"""
         try:
             logger.info("📊 Exporting dashboard data...")
-            
+
             # Run export script
             export_script = project_root / "scripts" / "export_dashboard_data.py"
             if export_script.exists():
@@ -125,43 +125,43 @@ class StillMeBackgroundService:
                 result = subprocess.run([
                     sys.executable, str(export_script)
                 ], capture_output=True, text=True, cwd=project_root)
-                
+
                 if result.returncode == 0:
                     logger.info("✅ Dashboard data exported successfully")
                 else:
                     logger.error(f"❌ Dashboard export failed: {result.stderr}")
             else:
                 logger.warning("⚠️ Dashboard export script not found")
-                
+
         except Exception as e:
             logger.error(f"Error exporting dashboard data: {e}")
-    
+
     def start_service(self):
         """Khởi động background service"""
         logger.info("🧠 StillMe IPC Background Service")
         logger.info("==========================================")
         logger.info("🚀 Starting background service...")
-        
+
         # Schedule discovery every X hours
         discovery_interval = self.config["discovery_interval_hours"]
         schedule.every(discovery_interval).hours.do(self.discover_knowledge)
-        
+
         # Schedule dashboard data export (every 6 hours)
         schedule.every(6).hours.do(self._export_dashboard_data)
-        
+
         logger.info(f"⏰ Scheduled knowledge discovery every {discovery_interval} hours")
         logger.info(f"📊 Max discoveries per day: {self.config['max_discoveries_per_day']}")
         logger.info(f"📊 Dashboard data export every 6 hours")
         logger.info(f"🔔 Notifications: {'Enabled' if self.config['notification_enabled'] else 'Disabled'}")
-        
+
         # Run initial discovery
         logger.info("🔍 Running initial knowledge discovery...")
         self.discover_knowledge()
-        
+
         logger.info("✅ Background service started successfully!")
         logger.info("💡 The service will run continuously in the background.")
         logger.info("   Press Ctrl+C to stop the service.")
-        
+
         try:
             while True:
                 schedule.run_pending()
@@ -169,7 +169,7 @@ class StillMeBackgroundService:
         except (KeyboardInterrupt, SystemExit):
             logger.info("🛑 Stopping background service...")
             logger.info("👋 StillMe IPC Background Service stopped.")
-    
+
     def stop_service(self):
         """Dừng background service"""
         self.config["enabled"] = False
@@ -179,7 +179,7 @@ class StillMeBackgroundService:
 def main():
     """Main function"""
     service = StillMeBackgroundService()
-    
+
     try:
         service.start_service()
     except Exception as e:

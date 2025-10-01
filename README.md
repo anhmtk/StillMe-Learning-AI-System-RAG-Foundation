@@ -171,10 +171,10 @@ On startup the framework auto-detects Pro; otherwise it logs `Using StubRouter (
 
 #### **Sử dụng**
 ```python
-from agent_dev.core.agentdev_unified import AgentDevUnified, AgentMode
+from agent_dev.core.agentdev import AgentDev
 
 # Initialize AgentDev in Senior mode
-agentdev = AgentDevUnified(mode=AgentMode.SENIOR)
+agentdev = AgentDev(mode="senior")
 
 # Execute task with senior thinking
 result = agentdev.execute_task("Fix errors in codebase")
@@ -489,7 +489,7 @@ python scripts/stillme_control.py discover
 - ✅ **24/7 Operations**: Continuous monitoring và maintenance
 
 **New Files & Modules:**
-- `agent-dev/core/agentdev_unified.py` - Core AgentDev Unified system
+- `agent_dev/core/agentdev.py` - Core AgentDev system
 - `agent-dev/core/impact_analyzer.py` - Impact analysis module
 - `agent-dev/core/business_analyzer.py` - Business thinking module
 - `agent-dev/core/security_analyzer.py` - Security thinking module
@@ -498,7 +498,7 @@ python scripts/stillme_control.py discover
 - `agent-dev/core/experience_learner.py` - Experience learning module
 - `agent-dev/core/adaptive_strategy.py` - Adaptive strategy module
 - `agent-dev/core/red_blue_team_integration.py` - Red Team/Blue Team integration
-- `agent-dev/AGENTDEV_UNIFIED_REPORT.md` - Comprehensive technical report
+- `agent_dev/README.md` - AgentDev documentation
 
 ### 2025-09-27 - Unified Evolutionary Learning System Release
 

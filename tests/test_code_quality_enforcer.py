@@ -1,4 +1,6 @@
-import subprocess
+
+from stillme_core import QualityIssue, QualityReport
+
 """
 Tests for Code Quality Enforcer
 
@@ -15,7 +17,6 @@ from stillme_core.quality.agentdev_integration import AgentDevQualityIntegration
 from stillme_core.quality.auto_fixer import AutoFixer
 from stillme_core.quality.code_quality_enforcer import (
     CodeQualityEnforcer,
-    QualityViolation,
 )
 from stillme_core.quality.quality_metrics import QualityMetrics
 
@@ -44,7 +45,7 @@ def hello_world():
 class TestClass:
     def __init__(self):
         self.value = 42
-        
+
     def method_with_long_name_that_exceeds_line_length_limit_and_should_be_refactored(self):
         return self.value
 

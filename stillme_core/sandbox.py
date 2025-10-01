@@ -7,11 +7,11 @@ StillMe Sandbox - Stub Implementation
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Union
-from dataclasses import dataclass
-import tempfile
 import os
 import shutil
+import tempfile
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Union
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ class SandboxConfig:
     max_disk: int = 100  # MB
     allowed_commands: List[str] = None
     isolated_network: bool = True
-    
+
     def __post_init__(self):
         if self.allowed_commands is None:
             self.allowed_commands = ["python", "echo", "ls"]
@@ -36,30 +36,30 @@ class Sandbox:
     
     # TODO[stabilize]: Implement full sandbox functionality
     """
-    
+
     def __init__(self, config: Optional[SandboxConfig] = None):
         """Initialize Sandbox"""
         self.config = config or SandboxConfig()
         self.sandbox_id = f"stub_sandbox_{id(self)}"
         self.is_active = False
         logger.warning("Sandbox: Using stub implementation - not for production")
-    
+
     def create(self) -> bool:
         """Create sandbox environment"""
         logger.warning("Sandbox.create(): Stub implementation")
         self.is_active = True
         return True
-    
+
     def destroy(self) -> bool:
         """Destroy sandbox environment"""
         logger.warning("Sandbox.destroy(): Stub implementation")
         self.is_active = False
         return True
-    
+
     def execute(self, command: str, timeout: Optional[float] = None) -> Dict[str, Any]:
         """Execute command in sandbox"""
         logger.warning(f"Sandbox.execute({command}): Stub implementation")
-        
+
         if not self.is_active:
             return {
                 "success": False,
@@ -67,7 +67,7 @@ class Sandbox:
                 "output": "",
                 "exit_code": -1
             }
-        
+
         return {
             "success": True,
             "output": f"Stub execution: {command}",
@@ -75,7 +75,7 @@ class Sandbox:
             "execution_time": 0.1,
             "warnings": ["Stub implementation - no real execution"]
         }
-    
+
     def get_status(self) -> Dict[str, Any]:
         """Get sandbox status"""
         return {
@@ -104,7 +104,7 @@ def run_tests_in_sandbox(tests: List[str], config: Optional[SandboxConfig] = Non
     # TODO[stabilize]: Implement full test execution in sandbox
     """
     logger.warning("run_tests_in_sandbox(): Stub implementation")
-    
+
     sandbox = prepare_sandbox(config)
     try:
         results = []
@@ -114,7 +114,7 @@ def run_tests_in_sandbox(tests: List[str], config: Optional[SandboxConfig] = Non
                 "test": test,
                 "result": result
             })
-        
+
         return {
             "success": True,
             "results": results,

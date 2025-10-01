@@ -18,32 +18,32 @@ def main():
     parser.add_argument("--hours", type=int, default=24, help="Evaluation window in hours (default: 24)")
     parser.add_argument("--output", type=str, default="docs/REFLEX_SHADOW_EVAL.md", help="Output file path")
     parser.add_argument("--config", type=str, help="Config file path (optional)")
-    
+
     args = parser.parse_args()
-    
+
     # Load config if provided
     config = {}
     if args.config and os.path.exists(args.config):
         import yaml
         with open(args.config, 'r') as f:
             config = yaml.safe_load(f)
-    
+
     # Initialize observability manager
     obs_manager = ObservabilityManager(config)
-    
+
     # Generate report
     report = obs_manager.generate_shadow_report(args.hours)
-    
+
     # Write to file
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    
+
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write(report)
-    
+
     print(f"Shadow evaluation report generated: {output_path}")
     print(f"Evaluation window: {args.hours} hours")
-    
+
     # Print summary to console
     evaluation = obs_manager.get_shadow_evaluation(args.hours)
     if evaluation["evaluation_ready"]:

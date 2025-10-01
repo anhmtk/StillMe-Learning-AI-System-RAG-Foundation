@@ -4,8 +4,9 @@ Test suite for SafeRunner module
 Tests the safe code execution functionality with various scenarios.
 """
 
+
 import pytest
-import asyncio
+
 from stillme_core.core.safe_runner import SafeRunner
 
 
@@ -29,7 +30,7 @@ result = 2 + 2
 print(f"Result: {result}")
 """
         result = await safe_runner.run_safe(code)
-        
+
         assert result["ok"] is True
         assert "Hello, World!" in result["output"]
         assert "Result: 4" in result["output"]
@@ -43,7 +44,7 @@ import subprocess
 print("This should not execute")
 """
         result = await safe_runner.run_safe(code)
-        
+
         assert result["ok"] is False
         assert "Code validation failed" in result["error"]
 
@@ -55,7 +56,7 @@ with open("test.txt", "w") as f:
     f.write("This should not execute")
 """
         result = await safe_runner.run_safe(code)
-        
+
         assert result["ok"] is False
         assert "File system operation detected" in result["error"]
 
@@ -67,7 +68,7 @@ print("Hello"
 # Missing closing parenthesis
 """
         result = await safe_runner.run_safe(code)
-        
+
         assert result["ok"] is False
         assert "error" in result
 
@@ -78,7 +79,7 @@ print("Hello"
 x = 1 / 0  # Division by zero
 """
         result = await safe_runner.run_safe(code)
-        
+
         assert result["ok"] is False
         assert "error" in result
 
@@ -86,7 +87,7 @@ x = 1 / 0  # Division by zero
     async def test_module_info(self, safe_runner):
         """Test module information"""
         info = safe_runner.module_info
-        
+
         assert info.name == "SafeRunner"
         assert info.version == "1.0.0"
         assert "sandboxing" in info.description
@@ -100,14 +101,14 @@ x = 1 / 0  # Division by zero
             "max_memory_mb": 256,
             "allowed_imports": ["math", "json"]
         }
-        
+
         runner = SafeRunner(config)
         await runner.initialize()
-        
+
         assert runner.timeout == 10
         assert runner.max_memory_mb == 256
         assert "math" in runner.allowed_imports
-        
+
         await runner.cleanup()
 
     @pytest.mark.asyncio
@@ -116,11 +117,11 @@ x = 1 / 0  # Division by zero
         # Test with string input
         result1 = await safe_runner.process("print('Hello from process')")
         assert result1["ok"] is True
-        
+
         # Test with dict input
         result2 = await safe_runner.process({"code": "print('Hello from dict')"})
         assert result2["ok"] is True
-        
+
         # Test with invalid input
         with pytest.raises(ValueError):
             await safe_runner.process({"invalid": "input"})
@@ -140,9 +141,9 @@ x = 1 / 0  # Division by zero
         """Test cleanup functionality"""
         # Ensure runner is initialized
         assert safe_runner._temp_dir is not None
-        
+
         # Cleanup should not raise exceptions
         await safe_runner.cleanup()
-        
+
         # Status should be stopped
         assert safe_runner.status.value == "stopped"

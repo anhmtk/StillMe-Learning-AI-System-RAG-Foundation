@@ -10,28 +10,28 @@ Author: StillMe Framework Team
 Version: 1.0.0
 """
 
-from abc import ABC, abstractmethod
-from typing import Dict, Any, Optional
-import time
 import json
 import logging
+import time
+from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
 class BaseDetector(ABC):
     """Base class for all specialized detectors"""
-    
+
     def __init__(self, name: str):
         self.name = name
         self.telemetry_file = Path("logs/clarification_torture.jsonl")
         self.telemetry_file.parent.mkdir(exist_ok=True)
-        
+
         # Loop guard
         self.failure_count = 0
         self.max_failures = 3
         self.last_failure_time = None
-    
+
     @abstractmethod
     def detect(self, text: str) -> Dict[str, Any]:
         """
@@ -45,32 +45,32 @@ class BaseDetector(ABC):
             - features: dict (additional metadata)
         """
         pass
-    
+
     def analyze(self, text: str) -> Dict[str, Any]:
         """
         Analyze text with telemetry and loop guard
         """
         start_time = time.time()
-        
+
         try:
             result = self.detect(text)
             latency = (time.time() - start_time) * 1000  # Convert to ms
-            
+
             # Log telemetry
             self._log_telemetry(result, latency, success=True)
-            
+
             # Reset failure count on success
             self.failure_count = 0
-            
+
             return result
-            
+
         except Exception as e:
             latency = (time.time() - start_time) * 1000
             self.failure_count += 1
             self.last_failure_time = time.time()
-            
+
             logger.error(f"Detector {self.name} failed: {e}")
-            
+
             # Log failure telemetry
             self._log_telemetry({
                 "needs_clarification": False,
@@ -78,11 +78,11 @@ class BaseDetector(ABC):
                 "category": "error",
                 "features": {"error": str(e)}
             }, latency, success=False)
-            
+
             # Check loop guard
             if self.failure_count >= self.max_failures:
                 self._generate_rca_report()
-            
+
             # Return safe fallback
             return {
                 "needs_clarification": False,
@@ -90,7 +90,7 @@ class BaseDetector(ABC):
                 "category": "error",
                 "features": {"error": str(e), "fallback": True}
             }
-    
+
     def _log_telemetry(self, result: Dict[str, Any], latency: float, success: bool):
         """Log telemetry data"""
         try:
@@ -103,18 +103,18 @@ class BaseDetector(ABC):
                 "success": success,
                 "features": result.get("features", {})
             }
-            
+
             with open(self.telemetry_file, "a", encoding="utf-8") as f:
                 f.write(json.dumps(telemetry_entry) + "\n")
-                
+
         except Exception as e:
             logger.warning(f"Failed to log telemetry: {e}")
-    
+
     def _generate_rca_report(self):
         """Generate Root Cause Analysis report for repeated failures"""
         try:
             rca_file = Path("logs/clarification_torture_rca.md")
-            
+
             with open(rca_file, "w", encoding="utf-8") as f:
                 f.write(f"# RCA Report: {self.name} Detector\n\n")
                 f.write(f"**Date**: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
@@ -128,12 +128,12 @@ class BaseDetector(ABC):
                 f.write("2. Check input validation\n")
                 f.write("3. Verify pattern matching\n")
                 f.write("4. Test with edge cases\n")
-            
+
             logger.error(f"RCA report generated: {rca_file}")
-            
+
         except Exception as e:
             logger.error(f"Failed to generate RCA report: {e}")
-    
+
     def get_stats(self) -> Dict[str, Any]:
         """Get detector statistics"""
         return {

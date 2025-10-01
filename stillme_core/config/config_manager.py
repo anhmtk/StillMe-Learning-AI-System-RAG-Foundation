@@ -12,13 +12,14 @@ Author: StillMe AI Team
 Version: 1.0.0
 """
 
-import os
-import yaml
-from pathlib import Path
-from typing import Any, Dict, Optional, Union, List
-from dataclasses import dataclass, field
-from pydantic import BaseModel, Field, validator
 import logging
+import os
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
+
+import yaml
+from pydantic import BaseModel, Field, validator
 
 logger = logging.getLogger(__name__)
 
@@ -79,20 +80,20 @@ class StillMeConfig(BaseModel):
     security: SecurityConfig = Field(default_factory=SecurityConfig)
     providers: ProviderConfig = Field(default_factory=ProviderConfig)
     features: FeaturesConfig = Field(default_factory=FeaturesConfig)
-    
+
     # Logging configuration
     logging: Dict[str, Any] = Field(default_factory=lambda: {
         "level": "INFO",
         "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         "rationale": False
     })
-    
+
     # Policy configuration
     policy: Dict[str, Any] = Field(default_factory=lambda: {
         "level": "balanced",  # strict | balanced | creative
         "dry_run": False
     })
-    
+
     # Privacy configuration
     privacy: Dict[str, Any] = Field(default_factory=lambda: {
         "mode": "standard",  # standard | strict
@@ -108,7 +109,7 @@ class ConfigManager:
     Handles loading, validation, and access to configuration values
     with support for environment variable overrides.
     """
-    
+
     def __init__(self, config_path: Optional[Union[str, Path]] = None):
         """
         Initialize configuration manager
@@ -119,7 +120,7 @@ class ConfigManager:
         self.config_path = Path(config_path) if config_path else Path("config/default.yaml")
         self._config: Optional[StillMeConfig] = None
         self._env_prefix = "STILLME__"
-        
+
     def load_config(self) -> StillMeConfig:
         """
         Load configuration from file and environment variables
@@ -129,25 +130,25 @@ class ConfigManager:
         """
         # Load base configuration from file
         base_config = self._load_file_config()
-        
+
         # Override with environment variables
         env_config = self._load_env_config()
-        
+
         # Merge configurations
         merged_config = self._merge_configs(base_config, env_config)
-        
+
         # Validate configuration
         self._config = StillMeConfig(**merged_config)
-        
+
         logger.info("Configuration loaded successfully")
         return self._config
-    
+
     def _load_file_config(self) -> Dict[str, Any]:
         """Load configuration from YAML file"""
         if not self.config_path.exists():
             logger.warning(f"Configuration file not found: {self.config_path}")
             return {}
-        
+
         try:
             with open(self.config_path, 'r', encoding='utf-8') as f:
                 config = yaml.safe_load(f)
@@ -156,28 +157,28 @@ class ConfigManager:
         except Exception as e:
             logger.error(f"Error loading configuration file: {e}")
             return {}
-    
+
     def _load_env_config(self) -> Dict[str, Any]:
         """Load configuration from environment variables"""
         env_config = {}
-        
+
         for key, value in os.environ.items():
             if key.startswith(self._env_prefix):
                 # Remove prefix and convert to nested dict
                 config_key = key[len(self._env_prefix):].lower()
                 env_config[config_key] = self._parse_env_value(value)
-        
+
         if env_config:
             logger.info(f"Loaded {len(env_config)} environment variable overrides")
-        
+
         return env_config
-    
+
     def _parse_env_value(self, value: str) -> Any:
         """Parse environment variable value to appropriate type"""
         # Try to parse as boolean
         if value.lower() in ('true', 'false'):
             return value.lower() == 'true'
-        
+
         # Try to parse as number
         try:
             if '.' in value:
@@ -186,26 +187,26 @@ class ConfigManager:
                 return int(value)
         except ValueError:
             pass
-        
+
         # Try to parse as list (comma-separated)
         if ',' in value:
             return [item.strip() for item in value.split(',')]
-        
+
         # Return as string
         return value
-    
+
     def _merge_configs(self, base: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, Any]:
         """Merge base configuration with overrides"""
         merged = base.copy()
-        
+
         for key, value in override.items():
             if key in merged and isinstance(merged[key], dict) and isinstance(value, dict):
                 merged[key] = self._merge_configs(merged[key], value)
             else:
                 merged[key] = value
-        
+
         return merged
-    
+
     def get_config(self) -> StillMeConfig:
         """
         Get current configuration
@@ -216,7 +217,7 @@ class ConfigManager:
         if self._config is None:
             return self.load_config()
         return self._config
-    
+
     def get_threshold(self, category: str, threshold: str, default: float = 0.0) -> float:
         """
         Get threshold value
@@ -230,16 +231,16 @@ class ConfigManager:
             float: Threshold value
         """
         config = self.get_config()
-        
+
         if category == "abuse_guard":
             return config.thresholds.abuse_guard.get(threshold, default)
         elif category == "latency":
             return config.thresholds.latency.get(threshold, default)
         elif category == "quality":
             return config.thresholds.quality.get(threshold, default)
-        
+
         return default
-    
+
     def get_feature_flag(self, feature: str, default: bool = False) -> bool:
         """
         Get feature flag value
@@ -253,17 +254,17 @@ class ConfigManager:
         """
         config = self.get_config()
         return getattr(config.features, feature, default)
-    
+
     def is_dry_run(self) -> bool:
         """Check if dry run mode is enabled"""
         config = self.get_config()
         return config.policy.get("dry_run", False)
-    
+
     def get_policy_level(self) -> str:
         """Get current policy level"""
         config = self.get_config()
         return config.policy.get("level", "balanced")
-    
+
     def get_privacy_mode(self) -> str:
         """Get current privacy mode"""
         config = self.get_config()

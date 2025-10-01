@@ -98,28 +98,29 @@ from functools import wraps
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
-import psutil
-import yaml
-from RestrictedPython import compile_restricted
+# import psutil
+# import yaml
+# from RestrictedPython import compile_restricted
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
-from common import (
-    ConfigManager,
-    FileManager,
-    get_logger,
-)
+# from common import (
+#     ConfigManager,
+#     FileManager,
+#     get_logger,
+# )
 
 # Version constant
 __version__ = "2.1.1"
 
 # Initialize common utilities
-config_manager = ConfigManager("config/framework_config.json", {})
-logger = get_logger(
-    "StillMe.Framework", log_file="logs/framework.log", json_format=True
-)
+# config_manager = ConfigManager("config/framework_config.json", {})
+logger = logging.getLogger("StillMe.Framework")
+# logger = get_logger(
+#     "StillMe.Framework", log_file="logs/framework.log", json_format=True
+# )
 # http_client = AsyncHttpClient()  # Commented out - not available
-file_manager = FileManager()
+# file_manager = FileManager()
 
 # Import tất cả modules đã sửa với graceful handling
 MODULES_IMPORTED = True
@@ -332,16 +333,18 @@ class StillMeFramework:
 
         # Initialize AgentDev Unified - Trưởng phòng Kỹ thuật StillMe IPC
         try:
-            import sys
             import os
+            import sys
             # Add agent-dev path to sys.path
             agent_dev_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'agent-dev', 'core')
             if agent_dev_path not in sys.path:
                 sys.path.insert(0, agent_dev_path)
-            
-            from agentdev_unified_simple import AgentDevUnified, execute_agentdev_task_unified, AgentMode
-            
-            self.agentdev = AgentDevUnified(project_root=os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+            from agent_dev.core.agentdev import (
+                AgentDev,
+            )
+
+            self.agentdev = AgentDev(project_root=os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
             self.logger.info("✅ AgentDev Unified - Trưởng phòng Kỹ thuật StillMe IPC initialized")
         except ImportError as e:
             self.logger.warning(f"AgentDev Unified not available: {e}")
@@ -580,6 +583,15 @@ class StillMeFramework:
 
         except Exception as e:
             self.logger.error(f"❌ Lỗi setup module dependencies: {e}")
+
+    def get_agentdev(self):
+        """Get AgentDev instance"""
+        try:
+            from agent_dev.core.agentdev import AgentDev
+            return AgentDev()
+        except ImportError:
+            self.logger.warning("AgentDev not available")
+            return None
 
     async def get_market_intelligence(
         self, keywords: Optional[List[str]] = None
@@ -1134,6 +1146,13 @@ class StillMeFramework:
                 self.logger.error(f"Cleanup error: {e!s}")
                 await asyncio.sleep(3600)
 
+    def execute_agentdev_task(self, task: str, mode=None) -> str:
+        """Execute task using AgentDev Unified"""
+        if not self.agentdev:
+            raise RuntimeError("AgentDev Unified not available")
+        
+        return self.agentdev.execute_task(task, mode)
+
 
 # ------------------- SECURITY CLASSES -------------------
 class SecurityViolation(Exception):
@@ -1221,15 +1240,6 @@ class FrameworkMetrics:
         """Get AgentDev Unified - Trưởng phòng Kỹ thuật StillMe IPC"""
         return self.agentdev
 
-    def execute_agentdev_task(self, task: str, mode: str = "senior"):
-        """Execute task using AgentDev Unified"""
-        if not self.agentdev:
-            raise RuntimeError("AgentDev Unified not available")
-        
-        from agentdev_unified_simple import AgentMode
-        mode_enum = AgentMode.SENIOR if mode == "senior" else AgentMode.SIMPLE
-        
-        return self.agentdev.execute_task(task, mode_enum)
 
 
 class OpenAPIGenerator:

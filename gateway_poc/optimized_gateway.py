@@ -31,33 +31,33 @@ async def chat_proxy(request: Request):
     try:
         body = await request.json()
         user_message = body.get("message", "")
-        
+
         # Simple cache key
         cache_key = f"chat:{hash(user_message)}"
-        
+
         # Check cache first
         if cache_key in cache:
             cached_data, timestamp = cache[cache_key]
             if time.time() - timestamp < CACHE_TTL:
                 print(f"Cache hit for: {user_message[:50]}...")
                 return JSONResponse(cached_data, status_code=200)
-        
+
         print(f"Gateway processing: {user_message[:50]}...")
-        
+
         # Forward to StillMe backend
         start_time = time.monotonic()
         stillme_response = await http_client.post("http://localhost:1216/chat", json=body)
         stillme_response.raise_for_status()
         response_data = stillme_response.json()
-        
+
         latency = (time.monotonic() - start_time) * 1000
         print(f"Gateway response: {latency:.1f}ms")
-        
+
         # Cache the response
         cache[cache_key] = (response_data, time.time())
-        
+
         return JSONResponse(response_data, status_code=200)
-        
+
     except httpx.RequestError as e:
         print(f"StillMe backend request failed: {e}")
         return JSONResponse(

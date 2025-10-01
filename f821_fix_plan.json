@@ -1,0 +1,256 @@
+{
+  "stdlib_fixes": [
+    {
+      "symbol": "asdict",
+      "import": "from dataclasses import asdict",
+      "occurrences": 1,
+      "files": 1
+    }
+  ],
+  "core_reexports": [
+    {
+      "symbol": "SearchResult",
+      "core_module": "stillme_core/modules/semantic_search.py",
+      "import": "from stillme_core.modules.semantic_search import SearchResult",
+      "occurrences": 4,
+      "files": 1
+    },
+    {
+      "symbol": "EthicalPrinciple",
+      "core_module": "stillme_core/decision_making/ethical_guardrails.py",
+      "import": "from stillme_core.decision_making.ethical_guardrails import EthicalPrinciple",
+      "occurrences": 1,
+      "files": 1
+    },
+    {
+      "symbol": "ViolationSeverity",
+      "core_module": "stillme_core/decision_making/ethical_guardrails.py",
+      "import": "from stillme_core.decision_making.ethical_guardrails import ViolationSeverity",
+      "occurrences": 1,
+      "files": 1
+    },
+    {
+      "symbol": "SimulationStatus",
+      "core_module": "stillme_core/core/advanced_security/safe_attack_simulator.py",
+      "import": "from stillme_core.core.advanced_security.safe_attack_simulator import SimulationStatus",
+      "occurrences": 7,
+      "files": 1
+    },
+    {
+      "symbol": "AttackCategory",
+      "core_module": "stillme_core/core/advanced_security/safe_attack_simulator.py",
+      "import": "from stillme_core.core.advanced_security.safe_attack_simulator import AttackCategory",
+      "occurrences": 2,
+      "files": 1
+    },
+    {
+      "symbol": "AttackSeverity",
+      "core_module": "stillme_core/advanced_security/safe_attack_simulator.py",
+      "import": "from stillme_core.advanced_security.safe_attack_simulator import AttackSeverity",
+      "occurrences": 2,
+      "files": 1
+    },
+    {
+      "symbol": "health",
+      "core_module": "stillme_core/ai_manager.py",
+      "import": "from stillme_core.ai_manager import health",
+      "occurrences": 1,
+      "files": 1
+    },
+    {
+      "symbol": "set_mode",
+      "core_module": "stillme_core/ai_manager.py",
+      "import": "from stillme_core.ai_manager import set_mode",
+      "occurrences": 6,
+      "files": 1
+    },
+    {
+      "symbol": "warmup",
+      "core_module": "stillme_core/core/ai_manager.py",
+      "import": "from stillme_core.core.ai_manager import warmup",
+      "occurrences": 6,
+      "files": 1
+    },
+    {
+      "symbol": "dev_agent",
+      "core_module": "stillme_core/core/ai_manager.py",
+      "import": "from stillme_core.core.ai_manager import dev_agent",
+      "occurrences": 2,
+      "files": 1
+    },
+    {
+      "symbol": "controller",
+      "core_module": "stillme_core/controller.py",
+      "import": "from stillme_core.controller import controller",
+      "occurrences": 1,
+      "files": 1
+    },
+    {
+      "symbol": "QualityIssue",
+      "core_module": "stillme_core/core/quality/code_quality_enforcer.py",
+      "import": "from stillme_core.core.quality.code_quality_enforcer import QualityIssue",
+      "occurrences": 9,
+      "files": 1
+    },
+    {
+      "symbol": "QualityReport",
+      "core_module": "stillme_core/core/quality/code_quality_enforcer.py",
+      "import": "from stillme_core.core.quality.code_quality_enforcer import QualityReport",
+      "occurrences": 7,
+      "files": 1
+    },
+    {
+      "symbol": "sanitize",
+      "core_module": "stillme_core/core/safety_guard.py",
+      "import": "from stillme_core.core.safety_guard import sanitize",
+      "occurrences": 3,
+      "files": 1
+    },
+    {
+      "symbol": "classify",
+      "core_module": "stillme_core/core/safety_guard.py",
+      "import": "from stillme_core.core.safety_guard import classify",
+      "occurrences": 25,
+      "files": 1
+    },
+    {
+      "symbol": "CANARY",
+      "core_module": "stillme_core/core/deployment_production_system.py",
+      "import": "from stillme_core.core.deployment_production_system import CANARY",
+      "occurrences": 14,
+      "files": 3
+    },
+    {
+      "symbol": "apply_policies",
+      "core_module": "stillme_core/core/safety_guard.py",
+      "import": "from stillme_core.core.safety_guard import apply_policies",
+      "occurrences": 31,
+      "files": 3
+    },
+    {
+      "symbol": "safe_reply",
+      "core_module": "stillme_core/core/safety_guard.py",
+      "import": "from stillme_core.core.safety_guard import safe_reply",
+      "occurrences": 22,
+      "files": 3
+    },
+    {
+      "symbol": "redact_output",
+      "core_module": "stillme_core/core/safety_guard.py",
+      "import": "from stillme_core.core.safety_guard import redact_output",
+      "occurrences": 3,
+      "files": 3
+    },
+    {
+      "symbol": "luhn_check",
+      "core_module": "stillme_core/core/safety_guard.py",
+      "import": "from stillme_core.core.safety_guard import luhn_check",
+      "occurrences": 6,
+      "files": 1
+    },
+    {
+      "symbol": "MemoryItem",
+      "core_module": "stillme_core/modules/layered_memory_v1.py",
+      "import": "from stillme_core.modules.layered_memory_v1 import MemoryItem",
+      "occurrences": 6,
+      "files": 1
+    },
+    {
+      "symbol": "LongTermMemory",
+      "core_module": "stillme_core/modules/layered_memory_v1_old.py",
+      "import": "from stillme_core.modules.layered_memory_v1_old import LongTermMemory",
+      "occurrences": 2,
+      "files": 1
+    },
+    {
+      "symbol": "AgentDevLogger",
+      "core_module": "stillme_core/core/logging_utils.py",
+      "import": "from stillme_core.core.logging_utils import AgentDevLogger",
+      "occurrences": 3,
+      "files": 1
+    },
+    {
+      "symbol": "log_step",
+      "core_module": "stillme_core/core/logging_utils.py",
+      "import": "from stillme_core.core.logging_utils import log_step",
+      "occurrences": 1,
+      "files": 1
+    },
+    {
+      "symbol": "ReflectionResult",
+      "core_module": "stillme_core/reflection_controller.py",
+      "import": "from stillme_core.reflection_controller import ReflectionResult",
+      "occurrences": 14,
+      "files": 1
+    }
+  ],
+  "missing_implementations": [
+    {
+      "symbol": "NodeType",
+      "occurrences": 3,
+      "files": 1,
+      "usage_context": "Need to analyze usage in tests"
+    },
+    {
+      "symbol": "ImpactLevel",
+      "occurrences": 4,
+      "files": 1,
+      "usage_context": "Need to analyze usage in tests"
+    },
+    {
+      "symbol": "SemanticSearchEngine",
+      "occurrences": 15,
+      "files": 1,
+      "usage_context": "Need to analyze usage in tests"
+    },
+    {
+      "symbol": "MatchType",
+      "occurrences": 3,
+      "files": 1,
+      "usage_context": "Need to analyze usage in tests"
+    },
+    {
+      "symbol": "RedisEventBus",
+      "occurrences": 3,
+      "files": 2,
+      "usage_context": "Need to analyze usage in tests"
+    },
+    {
+      "symbol": "DAGExecutor",
+      "occurrences": 2,
+      "files": 1,
+      "usage_context": "Need to analyze usage in tests"
+    },
+    {
+      "symbol": "RBACManager",
+      "occurrences": 2,
+      "files": 1,
+      "usage_context": "Need to analyze usage in tests"
+    },
+    {
+      "symbol": "news_delta",
+      "occurrences": 1,
+      "files": 1,
+      "usage_context": "Need to analyze usage in tests"
+    },
+    {
+      "symbol": "reddit_engagement",
+      "occurrences": 1,
+      "files": 1,
+      "usage_context": "Need to analyze usage in tests"
+    },
+    {
+      "symbol": "wrap_content",
+      "occurrences": 5,
+      "files": 1,
+      "usage_context": "Need to analyze usage in tests"
+    }
+  ],
+  "test_imports": [],
+  "estimated_impact": {
+    "stdlib_fixes": 1,
+    "core_reexports": 179,
+    "missing_implementations": 39,
+    "test_imports": 0
+  }
+}

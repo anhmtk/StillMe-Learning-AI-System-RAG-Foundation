@@ -9,50 +9,61 @@ Version: 2.0.0
 Phase: 2.2 - Internal Learning & Optimization Engine
 """
 
-import os
+import asyncio
+import hashlib
 import json
 import logging
-import asyncio
-import time
+import os
+import pickle
+import sqlite3
 import threading
-from pathlib import Path
-from typing import Dict, List, Set, Tuple, Optional, Any, Union
-from dataclasses import dataclass, asdict
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
+
 import numpy as np
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import sqlite3
-import pickle
-import hashlib
 
 # Import Phase 1 and 2.1 modules
 try:
-    from .security_middleware import SecurityMiddleware  # type: ignore
-    from .performance_monitor import PerformanceMonitor
+    from .autonomous_management_system import AutonomousManagementSystem  # type: ignore
+    from .final_validation_system import FinalValidationSystem  # type: ignore
     from .integration_bridge import IntegrationBridge  # type: ignore
     from .memory_security_integration import MemorySecurityIntegration  # type: ignore
     from .module_governance_system import ModuleGovernanceSystem  # type: ignore
+    from .performance_monitor import PerformanceMonitor
+    from .security_middleware import SecurityMiddleware  # type: ignore
     from .validation_framework import ComprehensiveValidationFramework  # type: ignore
-    from .final_validation_system import FinalValidationSystem  # type: ignore
-    from .autonomous_management_system import AutonomousManagementSystem  # type: ignore
 except ImportError:
     pass
 except ImportError:
     pass
 except ImportError:
     pass
-        from stillme_core.integration_bridge import IntegrationBridge  # type: ignore
-        from stillme_core.memory_security_integration import MemorySecurityIntegration  # type: ignore
-        from stillme_core.module_governance_system import ModuleGovernanceSystem  # type: ignore
-        from stillme_core.validation_framework import ComprehensiveValidationFramework  # type: ignore
-        from stillme_core.final_validation_system import FinalValidationSystem  # type: ignore
-        from stillme_core.autonomous_management_system import AutonomousManagementSystem  # type: ignore
-    except ImportError:
-        # Create mock classes for testing
-        class SecurityMiddleware:
-            def __init__(self):
-                pass
+    from stillme_core.autonomous_management_system import (
+        AutonomousManagementSystem,  # type: ignore
+    )
+    from stillme_core.final_validation_system import (
+        FinalValidationSystem,  # type: ignore
+    )
+    from stillme_core.integration_bridge import IntegrationBridge  # type: ignore
+    from stillme_core.memory_security_integration import (
+        MemorySecurityIntegration,  # type: ignore
+    )
+    from stillme_core.module_governance_system import (
+        ModuleGovernanceSystem,  # type: ignore
+    )
+    from stillme_core.validation_framework import (
+        ComprehensiveValidationFramework,  # type: ignore
+    )
+except ImportError:
+    # Create mock classes for testing
+    class SecurityMiddleware:
+        def __init__(self):
+            pass
 
             def get_security_report(self):
                 return {"security_score": 100}

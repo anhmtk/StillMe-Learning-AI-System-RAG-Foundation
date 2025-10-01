@@ -2,11 +2,11 @@
 import logging
 import os
 import re
-import time
-from typing import Any, Dict, List, Optional, Set, Tuple
 
 # Import common utilities
 import sys
+import time
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 try:
     from openai import OpenAI
@@ -42,16 +42,16 @@ class TokenOptimizer:
 
 class ComplexityAnalyzer:
     """Optimized complexity analyzer with weighted scoring and fallback mechanism."""
-    
+
     def __init__(self):
         # Pre-compile keyword sets for O(1) lookup performance
         self.complex_indicators: Set[str] = {
-            "tại sao", "như thế nào", "phân tích", "so sánh", "đánh giá", 
+            "tại sao", "như thế nào", "phân tích", "so sánh", "đánh giá",
             "giải thích", "mối quan hệ", "tác động", "ảnh hưởng", "nguyên nhân",
             "hậu quả", "xu hướng", "phát triển", "tiến hóa", "biến đổi",
             "tối ưu", "tối ưu hóa", "performance", "efficiency", "algorithm"
         }
-        
+
         self.academic_terms: Set[str] = {
             "định lý", "định luật", "nguyên lý", "khái niệm", "lý thuyết",
             "phương pháp", "kỹ thuật", "công nghệ", "hệ thống", "mô hình",
@@ -60,23 +60,23 @@ class ComplexityAnalyzer:
             "hypothesis", "theorem", "proof", "axiom", "paradigm",
             "giai thừa", "factorial", "recursion", "iteration", "loop"
         }
-        
+
         self.abstract_concepts: Set[str] = {
-            "ý nghĩa", "bản chất", "triết lý", "tư tưởng", "quan điểm", 
+            "ý nghĩa", "bản chất", "triết lý", "tư tưởng", "quan điểm",
             "góc độ", "khía cạnh", "chiều sâu", "tầm nhìn", "viễn cảnh",
             "tương lai", "quá khứ", "hiện tại", "bối cảnh", "môi trường"
         }
-        
+
         self.conditional_words: Set[str] = {
             "nếu", "giả sử", "trường hợp", "khi nào", "trong trường hợp"
         }
-        
+
         self.domain_terms: Set[str] = {
             "toán học", "triết học", "khoa học", "vật lý", "hóa học", "sinh học",
-            "lịch sử", "văn học", "nghệ thuật", "âm nhạc", "kiến trúc", 
+            "lịch sử", "văn học", "nghệ thuật", "âm nhạc", "kiến trúc",
             "tâm lý học", "xã hội học", "kinh tế học", "chính trị", "luật pháp"
         }
-        
+
         # Weighted scoring system (configurable via environment)
         self.weights = {
             'length': float(os.getenv('COMPLEXITY_WEIGHT_LENGTH', '0.15')),
@@ -87,17 +87,17 @@ class ComplexityAnalyzer:
             'conditional': float(os.getenv('COMPLEXITY_WEIGHT_CONDITIONAL', '0.2')),
             'domain_specific': float(os.getenv('COMPLEXITY_WEIGHT_DOMAIN', '0.4'))
         }
-        
+
         # Thresholds for model selection (configurable)
         self.thresholds = {
             'simple': float(os.getenv('COMPLEXITY_THRESHOLD_SIMPLE', '0.4')),
             'medium': float(os.getenv('COMPLEXITY_THRESHOLD_MEDIUM', '0.7'))
         }
-        
+
         # Fallback tracking
         self.fallback_log: List[Dict] = []
         self.max_fallback_log = 1000
-        
+
         # Performance tracking
         self.analysis_times: List[float] = []
         self.max_performance_log = 100
@@ -114,10 +114,10 @@ class ComplexityAnalyzer:
             Tuple of (complexity_score, detailed_scores)
         """
         start_time = time.time()
-        
+
         prompt_lower = prompt.lower()
         detailed_scores = {}
-        
+
         # Heuristic 1: Length analysis (weighted)
         word_count = len(prompt.split())
         if word_count > 50:
@@ -129,37 +129,37 @@ class ComplexityAnalyzer:
         else:
             length_score = 0.0
         detailed_scores['length'] = length_score
-        
+
         # Heuristic 2: Complex indicators (weighted)
         indicator_count = sum(1 for indicator in self.complex_indicators if indicator in prompt_lower)
         indicator_score = min(indicator_count * 0.3, 1.0)
         detailed_scores['complex_indicators'] = indicator_score
-        
+
         # Heuristic 3: Academic terms (weighted)
         academic_count = sum(1 for term in self.academic_terms if term in prompt_lower)
         academic_score = min(academic_count * 0.4, 1.0)
         detailed_scores['academic_terms'] = academic_score
-        
+
         # Heuristic 4: Abstract concepts (weighted)
         abstract_count = sum(1 for concept in self.abstract_concepts if concept in prompt_lower)
         abstract_score = min(abstract_count * 0.5, 1.0)
         detailed_scores['abstract_concepts'] = abstract_score
-        
+
         # Heuristic 5: Multi-part questions (weighted)
         question_count = prompt.count("?")
         multipart_score = 0.8 if question_count > 1 else 0.0
         detailed_scores['multi_part'] = multipart_score
-        
+
         # Heuristic 6: Conditional questions (weighted)
         conditional_count = sum(1 for word in self.conditional_words if word in prompt_lower)
         conditional_score = min(conditional_count * 0.4, 1.0)
         detailed_scores['conditional'] = conditional_score
-        
+
         # Heuristic 7: Domain-specific terms (weighted)
         domain_count = sum(1 for domain in self.domain_terms if domain in prompt_lower)
         domain_score = min(domain_count * 0.5, 1.0)
         detailed_scores['domain_specific'] = domain_score
-        
+
         # Calculate weighted final score
         final_score = (
             self.weights['length'] * length_score +
@@ -170,19 +170,19 @@ class ComplexityAnalyzer:
             self.weights['conditional'] * conditional_score +
             self.weights['domain_specific'] * domain_score
         )
-        
+
         # Cap the score at 1.0
         final_score = min(final_score, 1.0)
-        
+
         # Track performance
         elapsed_time = time.time() - start_time
         self.analysis_times.append(elapsed_time)
         if len(self.analysis_times) > self.max_performance_log:
             self.analysis_times.pop(0)
-        
+
         return final_score, detailed_scores
 
-    def should_trigger_fallback(self, user_feedback: str, original_prompt: str, 
+    def should_trigger_fallback(self, user_feedback: str, original_prompt: str,
                               selected_model: str, response_quality: str = "unknown") -> bool:
         """
         Determine if fallback should be triggered based on user feedback.
@@ -198,29 +198,29 @@ class ComplexityAnalyzer:
         """
         if not user_feedback:
             return False
-            
+
         feedback_lower = user_feedback.lower()
-        
+
         # Negative feedback indicators
         negative_indicators = {
             "sai", "không đúng", "không chính xác", "không hiểu", "???", "??",
             "không phải", "không đúng rồi", "sai rồi", "không đúng ý",
             "chưa đúng", "chưa chính xác", "thiếu", "không đầy đủ"
         }
-        
+
         # Check for negative feedback
         has_negative = any(indicator in feedback_lower for indicator in negative_indicators)
-        
+
         # Check for question marks (confusion)
         has_confusion = feedback_lower.count("?") >= 2
-        
+
         # Check for very short responses (likely dissatisfaction)
         is_very_short = len(user_feedback.strip()) < 10 and any(
             word in feedback_lower for word in ["không", "sai"]
         ) and not any(word in feedback_lower for word in ["đúng", "ok", "cảm ơn", "tốt"])
-        
+
         should_fallback = has_negative or has_confusion or is_very_short
-        
+
         # Log fallback decision
         if should_fallback:
             fallback_entry = {
@@ -232,18 +232,18 @@ class ComplexityAnalyzer:
                 'trigger_reason': 'negative' if has_negative else 'confusion' if has_confusion else 'short_response'
             }
             self.fallback_log.append(fallback_entry)
-            
+
             # Keep log size manageable
             if len(self.fallback_log) > self.max_fallback_log:
                 self.fallback_log.pop(0)
-        
+
         return should_fallback
 
     def get_performance_stats(self) -> Dict[str, Any]:
         """Get performance statistics for the analyzer."""
         if not self.analysis_times:
             return {'avg_time_ms': 0, 'max_time_ms': 0, 'min_time_ms': 0}
-            
+
         avg_time = sum(self.analysis_times) / len(self.analysis_times)
         return {
             'avg_time_ms': round(avg_time * 1000, 2),
@@ -256,13 +256,13 @@ class ComplexityAnalyzer:
         """Get fallback statistics."""
         if not self.fallback_log:
             return {'total_fallbacks': 0, 'recent_fallbacks': []}
-            
+
         # Group by model
         model_fallbacks = {}
         for entry in self.fallback_log:
             model = entry['selected_model']
             model_fallbacks[model] = model_fallbacks.get(model, 0) + 1
-            
+
         return {
             'total_fallbacks': len(self.fallback_log),
             'model_fallbacks': model_fallbacks,
@@ -301,7 +301,7 @@ class UnifiedAPIManager:
         """
         self.model_preferences = model_preferences or [
             "gemma2:2b",           # Local model for simple questions
-            "deepseek-coder:6.7b", # Local model for coding questions  
+            "deepseek-coder:6.7b", # Local model for coding questions
             "deepseek-chat"        # Cloud model for complex questions
         ]  # Default to local models first
         self.fallback_model = fallback_model or "gemma2:2b"
@@ -344,7 +344,7 @@ class UnifiedAPIManager:
         self.translation_core_lang = os.getenv("TRANSLATION_CORE_LANG", "en")
         self.translator_priority = os.getenv("TRANSLATOR_PRIORITY", "gemma,nllb").split(",")
         self.nllb_model_name = os.getenv("NLLB_MODEL_NAME", "facebook/nllb-200-distilled-600M")
-        
+
         # Translation models (lazy loaded)
         self._nllb_model = None
         self._nllb_tokenizer = None
@@ -411,26 +411,26 @@ class UnifiedAPIManager:
 
         # Rule 4: AI-Powered Complexity Analysis (OPTIMIZED)
         complexity_score, detailed_scores = self.complexity_analyzer.analyze_complexity(prompt, debug)
-        
+
         if debug:
             self.logger.info(f"🧠 Complexity Analysis (DEBUG): {complexity_score:.3f}")
             for heuristic, score in detailed_scores.items():
                 self.logger.info(f"   {heuristic}: {score:.3f}")
         else:
             self.logger.info(f"🧠 Complexity Analysis: {complexity_score:.3f} for prompt: {prompt[:50]}...")
-        
+
         # High complexity (score >= 0.7) → use cloud model
         if complexity_score >= self.complexity_analyzer.thresholds['medium']:
             if "deepseek-chat" in self.model_preferences:
                 self.logger.info(f"🎯 Selected deepseek-chat (high complexity: {complexity_score:.3f})")
                 return "deepseek-chat"
-        
+
         # Medium complexity (score >= 0.4) → use local coder model
         elif complexity_score >= self.complexity_analyzer.thresholds['simple']:
             if "deepseek-coder:6.7b" in self.model_preferences:
                 self.logger.info(f"🎯 Selected deepseek-coder:6.7b (medium complexity: {complexity_score:.3f})")
                 return "deepseek-coder:6.7b"
-        
+
         # Low complexity → use simple local model
         else:
             if "gemma2:2b" in self.model_preferences:
@@ -452,7 +452,7 @@ class UnifiedAPIManager:
         complexity_score, _ = self.complexity_analyzer.analyze_complexity(prompt)
         return complexity_score
 
-    def handle_fallback(self, original_prompt: str, user_feedback: str, 
+    def handle_fallback(self, original_prompt: str, user_feedback: str,
                        selected_model: str, response_quality: str = "unknown") -> Optional[str]:
         """
         Handle fallback when user feedback indicates poor response quality.
@@ -470,24 +470,24 @@ class UnifiedAPIManager:
             user_feedback, original_prompt, selected_model, response_quality
         ):
             return None
-            
+
         self.logger.warning(f"🔄 Triggering fallback for model {selected_model}")
-        
+
         # Use cloud model as fallback for better quality
         if "deepseek-chat" in self.model_preferences and selected_model != "deepseek-chat":
             self.logger.info("🔄 Fallback: Using deepseek-chat for better quality")
             return self.call_deepseek_api(original_prompt)
-        
+
         # If already using cloud model, try local coder model
         elif "deepseek-coder:6.7b" in self.model_preferences and selected_model != "deepseek-coder:6.7b":
             self.logger.info("🔄 Fallback: Using deepseek-coder:6.7b")
             return self.call_ollama_api(original_prompt, model="deepseek-coder:6.7b")
-        
+
         # Final fallback to simple model
         elif "gemma2:2b" in self.model_preferences and selected_model != "gemma2:2b":
             self.logger.info("🔄 Fallback: Using gemma2:2b")
             return self.call_ollama_api(original_prompt, model="gemma2:2b")
-        
+
         return None
 
     def get_analyzer_stats(self) -> Dict[str, Any]:
@@ -503,7 +503,7 @@ class UnifiedAPIManager:
         """Lazy load NLLB model and tokenizer"""
         if getattr(self, "_nllb_model", None) is None:
             try:
-                from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
+                from transformers import AutoModelForSeq2SeqLM, AutoTokenizer
                 self.logger.info(f"🔄 Loading NLLB model: {self.nllb_model_name}")
                 self._nllb_tokenizer = AutoTokenizer.from_pretrained(self.nllb_model_name)
                 self._nllb_model = AutoModelForSeq2SeqLM.from_pretrained(self.nllb_model_name)
@@ -521,47 +521,47 @@ class UnifiedAPIManager:
     def _mask_code_and_urls(self, text: str) -> tuple:
         """Mask code blocks and URLs before translation"""
         import re
-        
+
         # Mask code blocks
         code_pattern = r'```[\s\S]*?```'
         code_blocks = re.findall(code_pattern, text)
         masked_text = re.sub(code_pattern, 'CODE_BLOCK_PLACEHOLDER', text)
-        
+
         # Mask URLs
         url_pattern = r'https?://[^\s]+'
         urls = re.findall(url_pattern, masked_text)
         masked_text = re.sub(url_pattern, 'URL_PLACEHOLDER', masked_text)
-        
+
         return masked_text, code_blocks, urls
 
     def _unmask_code_and_urls(self, text: str, code_blocks: list, urls: list) -> str:
         """Restore code blocks and URLs after translation"""
         import re
-        
+
         # Restore URLs first
         for url in urls:
             text = text.replace('URL_PLACEHOLDER', url, 1)
-        
+
         # Restore code blocks
         for code_block in code_blocks:
             text = text.replace('CODE_BLOCK_PLACEHOLDER', code_block, 1)
-        
+
         return text
 
     def _evaluate_translation_confidence(self, original: str, translated: str, src_lang: str, tgt_lang: str) -> float:
         """Evaluate translation confidence using heuristics"""
         if not translated or not original:
             return 0.0
-        
+
         # Length ratio check
         length_ratio = len(translated) / len(original)
         if length_ratio < 0.5 or length_ratio > 1.8:
             return 0.3
-        
+
         # Same text check (for different languages)
         if src_lang != tgt_lang and original.strip() == translated.strip():
             return 0.2
-        
+
         # Basic confidence based on length ratio
         if 0.7 <= length_ratio <= 1.3:
             return 0.8
@@ -577,79 +577,79 @@ class UnifiedAPIManager:
         """
         if not text or src_lang == tgt_lang:
             return {"text": text, "engine": "none", "confidence": 1.0}
-        
+
         # Mask code and URLs
         masked_text, code_blocks, urls = self._mask_code_and_urls(text)
-        
+
         # Try Gemma first if in priority
         if "gemma" in self.translator_priority:
             try:
                 # Use existing Gemma model for translation
                 gemma_prompt = f"Translate the following {src_lang} text to {tgt_lang}: {masked_text}"
                 gemma_response = self.call_ollama_api(gemma_prompt, model="gemma2:2b")
-                
+
                 if gemma_response and not gemma_response.startswith("Error:"):
                     # Unmask and evaluate
                     gemma_translated = self._unmask_code_and_urls(gemma_response, code_blocks, urls)
                     confidence = self._evaluate_translation_confidence(masked_text, gemma_response, src_lang, tgt_lang)
-                    
+
                     if confidence >= 0.5:  # Acceptable confidence
                         return {"text": gemma_translated, "engine": "gemma", "confidence": confidence}
             except Exception as e:
                 self.logger.warning(f"Gemma translation failed: {e}")
-        
+
         # Fallback to NLLB
         if "nllb" in self.translator_priority:
             try:
                 model, tokenizer = self._ensure_nllb()
                 if model and tokenizer:
                     self.logger.info(f"🔄 NLLB: Translating from {src_lang} to {tgt_lang}")
-                    
+
                     # NLLB language codes mapping
                     lang_codes = {
-                        "en": "eng_Latn", "vi": "vie_Latn", "ja": "jpn_Jpan", 
+                        "en": "eng_Latn", "vi": "vie_Latn", "ja": "jpn_Jpan",
                         "zh": "zho_Hans", "ko": "kor_Hang", "fr": "fra_Latn",
                         "de": "deu_Latn", "es": "spa_Latn", "ru": "rus_Cyrl"
                     }
-                    
+
                     src_code = lang_codes.get(src_lang, "eng_Latn")
                     tgt_code = lang_codes.get(tgt_lang, "eng_Latn")
-                    
+
                     self.logger.info(f"🔄 NLLB: Using codes {src_code} -> {tgt_code}")
-                    
+
                     # Set source language
                     tokenizer.src_lang = src_code
-                    
+
                     # Tokenize input
                     inputs = tokenizer(masked_text, return_tensors="pt")
                     self.logger.info(f"🔄 NLLB: Tokenized input, shape: {inputs['input_ids'].shape}")
-                    
+
                     # Generate translation - simplified approach
                     generated_tokens = model.generate(
-                        **inputs, 
-                        max_length=512, 
-                        num_beams=4, 
+                        **inputs,
+                        max_length=512,
+                        num_beams=4,
                         early_stopping=True,
                         do_sample=False
                     )
-                    
+
                     self.logger.info(f"🔄 NLLB: Generated tokens, shape: {generated_tokens.shape}")
-                    
+
                     # Decode translation
                     nllb_translated = tokenizer.batch_decode(generated_tokens, skip_special_tokens=True)[0]
                     self.logger.info(f"🔄 NLLB: Raw translation: {nllb_translated[:100]}...")
-                    
+
                     # Unmask and evaluate
                     final_translated = self._unmask_code_and_urls(nllb_translated, code_blocks, urls)
                     confidence = self._evaluate_translation_confidence(masked_text, nllb_translated, src_lang, tgt_lang)
-                    
+
                     self.logger.info(f"✅ NLLB: Final translation: {final_translated[:100]}... (confidence: {confidence:.2f})")
                     return {"text": final_translated, "engine": "nllb", "confidence": confidence}
             except Exception as e:
                 self.logger.error(f"NLLB translation failed: {e}")
                 import traceback
                 self.logger.error(f"NLLB traceback: {traceback.format_exc()}")
-        
+
         # Fallback: return original text
         return {"text": text, "engine": "none", "confidence": 0.0}
 
@@ -668,13 +668,13 @@ class UnifiedAPIManager:
             "tối ưu": "optimize",
             "thuật toán": "algorithm"
         }
-        
+
         # Check for exact matches first
         prompt_lower = prompt.lower()
         for vi, en in translations.items():
             if vi in prompt_lower:
                 return prompt.replace(vi, en)
-        
+
         # If no exact match, add English instruction
         return f"Please write code for: {prompt}. Respond in English with code examples."
 
@@ -817,12 +817,12 @@ class UnifiedAPIManager:
         try:
             # Determine model to use
             selected_model = model if model is not None else self.choose_model(prompt)
-            
+
             # For coding models, translate Vietnamese prompts to English
             processed_prompt = prompt
             if selected_model == "deepseek-coder:6.7b":
                 processed_prompt = self._translate_coding_prompt(prompt)
-            
+
             # Use modern /api/chat endpoint with proper payload
             payload = {
                 "model": selected_model,
@@ -842,8 +842,8 @@ class UnifiedAPIManager:
                 return "Error: requests library not available"
 
             response = requests.post(
-                "http://localhost:11434/api/chat", 
-                json=payload, 
+                "http://localhost:11434/api/chat",
+                json=payload,
                 timeout=60
             )
 

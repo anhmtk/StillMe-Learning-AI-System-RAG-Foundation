@@ -1,4 +1,4 @@
-import subprocess
+
 """
 Unit tests cho SelfImprovementManager
 
@@ -23,7 +23,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from modules.self_improvement_manager import (
+from stillme_core.modules.self_improvement_manager import (
     ProposedChange,
     SafetyReport,
     SelfImprovementManager,
@@ -632,6 +632,7 @@ class TestProposedChange:
             test_results={"test": True},
         )
 
+        from dataclasses import asdict
         change_dict = asdict(change)
 
         assert isinstance(change_dict, dict)

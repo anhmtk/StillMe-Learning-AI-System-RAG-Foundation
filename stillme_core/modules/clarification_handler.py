@@ -9,23 +9,24 @@ This module provides the core functionality for detecting ambiguous prompts
 and generating clarification questions to improve user interaction quality.
 """
 
-import re
 import json
-import time
 import logging
-import yaml
-from typing import Dict, List, Optional, Tuple, Any
+import re
+import time
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+import yaml
 
 logger = logging.getLogger(__name__)
 
 # Phase 3 imports
 try:
-    from .multi_modal_clarification import MultiModalClarifier, MultiModalResult
-    from .proactive_suggestion import ProactiveSuggestion, SuggestionResult
     from .audit_logger import AuditLogger
     from .clarification_engine import ClarificationEngine
+    from .multi_modal_clarification import MultiModalClarifier, MultiModalResult
+    from .proactive_suggestion import ProactiveSuggestion, SuggestionResult
     PHASE3_AVAILABLE = True
 except ImportError as e:
     logger.warning(f"Phase 3 modules not available: {e}")
@@ -33,14 +34,14 @@ except ImportError as e:
 
 class CircuitBreaker:
     """Circuit breaker for clarification safety"""
-    
+
     def __init__(self, max_failures: int = 5, reset_seconds: int = 60):
         self.max_failures = max_failures
         self.reset_seconds = reset_seconds
         self.failure_count = 0
         self.last_failure_time = 0
         self.state = "closed"  # closed, open, half-open
-    
+
     def call(self, func, *args, **kwargs):
         """Execute function with circuit breaker protection"""
         if self.state == "open":
@@ -48,7 +49,7 @@ class CircuitBreaker:
                 self.state = "half-open"
             else:
                 raise Exception("Circuit breaker is open")
-        
+
         try:
             result = func(*args, **kwargs)
             if self.state == "half-open":
@@ -58,13 +59,13 @@ class CircuitBreaker:
         except Exception as e:
             self.failure_count += 1
             self.last_failure_time = time.time()
-            
+
             if self.failure_count >= self.max_failures:
                 self.state = "open"
                 logger.warning(f"Circuit breaker opened after {self.failure_count} failures")
-            
+
             raise e
-    
+
     def is_open(self) -> bool:
         """Check if circuit breaker is open"""
         if self.state == "open":
@@ -111,35 +112,35 @@ class ClarificationHandler:
     - Enterprise audit logging
     - Advanced observability
     """
-    
+
     def __init__(self, config_path: Optional[str] = None):
         self.config = self._load_config(config_path)
         self.ambiguity_patterns = self._load_ambiguity_patterns()
         self.clarification_templates = self._load_clarification_templates()
-        
+
         # Phase 2 components
         self.context_aware_clarifier = None
         self.learner = None
         self.circuit_breaker = CircuitBreaker()
-        
+
         # Phase 3 components
         self.multi_modal_clarifier = None
         self.proactive_suggestion = None
         self.audit_logger = None
         self.clarification_engine = None
-        
+
         # Initialize Phase 2 components if available
         self._initialize_phase2_components()
-        
+
         # Initialize Phase 3 components if available
         self._initialize_phase3_components()
-        
+
         # Configuration
         self.confidence_threshold = self.config.get("confidence_thresholds", {}).get("ask_clarify", 0.25)  # Keep Phase 1 threshold
         self.proceed_threshold = self.config.get("confidence_thresholds", {}).get("proceed", 0.80)
         self.max_rounds = self.config.get("max_rounds", 2)
         self.default_mode = self.config.get("default_mode", "careful")
-        
+
         # Statistics
         self.stats = {
             "total_requests": 0,
@@ -152,7 +153,7 @@ class ClarificationHandler:
             "proactive_suggestions_used": 0,
             "audit_events_logged": 0
         }
-    
+
     def _load_config(self, config_path: Optional[str] = None) -> Dict[str, Any]:
         """Load configuration from YAML file"""
         default_config = {
@@ -184,10 +185,10 @@ class ClarificationHandler:
                 }
             }
         }
-        
+
         if not config_path:
             config_path = "config/clarification.yaml"
-        
+
         try:
             config_file = Path(config_path)
             if config_file.exists():
@@ -201,71 +202,74 @@ class ClarificationHandler:
                 logger.warning(f"Config file {config_path} not found, using defaults")
         except Exception as e:
             logger.warning(f"Failed to load config from {config_path}: {e}")
-        
+
         return default_config
-    
+
     def _initialize_phase2_components(self):
         """Initialize Phase 2 components if available"""
         try:
             # Import Phase 2 components
-            from .clarification_learning import ClarificationLearner, ClarificationPatternStore
+            from .clarification_learning import (
+                ClarificationLearner,
+                ClarificationPatternStore,
+            )
             from .contextual_clarification import ContextAwareClarifier
-            
+
             # Initialize pattern store and learner
             pattern_store = ClarificationPatternStore(
                 decay=self.config.get("learning", {}).get("decay", 0.90)
             )
             self.learner = ClarificationLearner(pattern_store)
-            
+
             # Initialize context-aware clarifier
             self.context_aware_clarifier = ContextAwareClarifier(
                 context_analyzer=None,  # Will be injected later
                 semantic_search=None,   # Will be injected later
                 learner=self.learner
             )
-            
+
             logger.info("Phase 2 components initialized successfully")
         except ImportError as e:
             logger.warning(f"Phase 2 components not available: {e}")
         except Exception as e:
             logger.warning(f"Failed to initialize Phase 2 components: {e}")
-    
+
     def _initialize_phase3_components(self):
         """Initialize Phase 3 components if available"""
         if not PHASE3_AVAILABLE:
             logger.info("Phase 3 modules not available, skipping initialization")
             return
-        
+
         try:
             # Initialize multi-modal clarifier
             multi_modal_config = self.config.get("multi_modal", {})
             if multi_modal_config.get("enabled", False):
                 self.multi_modal_clarifier = MultiModalClarifier(
-                    multi_modal_config, 
+                    multi_modal_config,
                     self.context_aware_clarifier
                 )
                 logger.info("Multi-modal clarifier initialized")
-            
+
             # Initialize proactive suggestion
             proactive_config = self.config.get("proactive", {})
             if proactive_config.get("enabled", False):
                 self.proactive_suggestion = ProactiveSuggestion(proactive_config)
                 logger.info("Proactive suggestion initialized")
-            
+
             # Initialize audit logger
             audit_config = self.config.get("enterprise_audit", {})
             if audit_config.get("enabled", False):
                 self.audit_logger = AuditLogger(audit_config)
                 logger.info("Audit logger initialized")
-            
+
             # Initialize clarification engine (always enabled for torture tests)
             self.clarification_engine = ClarificationEngine()
             logger.info("Clarification engine initialized")
-            
+
             logger.info("Phase 3 components initialized successfully")
         except Exception as e:
             logger.warning(f"Phase 3 components initialization failed: {e}")
-    
+
     def _load_ambiguity_patterns(self) -> Dict[str, List[str]]:
         """Load ambiguity detection patterns"""
         return {
@@ -435,7 +439,7 @@ class ClarificationHandler:
                 r"<div>.*user_input.*</div>"  # XSS pattern
             ]
         }
-    
+
     def _load_clarification_templates(self) -> Dict[str, List[str]]:
         """Load clarification question templates"""
         return {
@@ -590,8 +594,8 @@ class ClarificationHandler:
                 "The code contains security-sensitive operations. What should I help you with?"
             ]
         }
-    
-    def detect_ambiguity(self, prompt: str, context: Optional[Dict[str, Any]] = None, 
+
+    def detect_ambiguity(self, prompt: str, context: Optional[Dict[str, Any]] = None,
                         mode: Optional[str] = None, round_number: int = 1, trace_id: Optional[str] = None) -> ClarificationResult:
         """
         Detect if a prompt is ambiguous and needs clarification
@@ -608,7 +612,7 @@ class ClarificationHandler:
         """
         # Update statistics
         self.stats["total_requests"] += 1
-        
+
         # Check circuit breaker
         if self.circuit_breaker.is_open():
             self.stats["circuit_breaker_trips"] += 1
@@ -623,11 +627,11 @@ class ClarificationHandler:
                 max_rounds=self.max_rounds,
                 trace_id=trace_id
             )
-        
+
         # Use provided mode or default
         if mode is None:
             mode = self.default_mode
-        
+
         # Check if we've exceeded max rounds
         if round_number > self.max_rounds:
             logger.warning(f"Exceeded max rounds ({self.max_rounds}), proceeding with best effort")
@@ -641,13 +645,13 @@ class ClarificationHandler:
                 max_rounds=self.max_rounds,
                 trace_id=trace_id
             )
-        
+
         # Phase 3: Log audit event for clarification request
         if self.audit_logger and trace_id:
             user_id = context.get("user_id", "unknown") if context else "unknown"
             session_id = context.get("session_id") if context else None
             input_type = "text"  # Default, will be updated by multi-modal analysis
-            
+
             audit_trace_id = self.audit_logger.log_clarification_request(
                 user_id=user_id,
                 session_id=session_id,
@@ -657,10 +661,10 @@ class ClarificationHandler:
                 mode=mode or "careful",
                 context=context or {}
             )
-            
+
             if audit_trace_id and audit_trace_id != "audit_disabled":
                 trace_id = audit_trace_id
-        
+
         if not prompt or not prompt.strip():
             return ClarificationResult(
                 needs_clarification=True,
@@ -672,10 +676,10 @@ class ClarificationHandler:
                 max_rounds=self.max_rounds,
                 trace_id=trace_id
             )
-        
+
         # Phase 1: Basic ambiguity detection
         basic_result = self._detect_basic_ambiguity(prompt)
-        
+
         # Phase 2: Context-aware clarification if available
         if self.context_aware_clarifier and context:
             try:
@@ -686,7 +690,7 @@ class ClarificationHandler:
             except Exception as e:
                 logger.warning(f"Context-aware clarification failed: {e}")
                 # Fall back to basic result
-        
+
         # Use basic result with Phase 2 enhancements
         return ClarificationResult(
             needs_clarification=basic_result.needs_clarification,
@@ -698,14 +702,14 @@ class ClarificationHandler:
             max_rounds=self.max_rounds,
             trace_id=trace_id
         )
-    
+
     def _detect_basic_ambiguity(self, prompt: str) -> ClarificationResult:
         """Phase 1 basic ambiguity detection with enhanced detectors"""
         prompt_lower = prompt.lower().strip()
         max_confidence = 0.0
         best_category = None
         best_reasoning = ""
-        
+
         # Phase 3: Try ClarificationEngine first for torture test cases
         if self.clarification_engine:
             try:
@@ -717,7 +721,7 @@ class ClarificationHandler:
                     logger.debug(f"ClarificationEngine result: {engine_result}")
             except Exception as e:
                 logger.warning(f"ClarificationEngine failed: {e}")
-        
+
         # Fallback to original pattern matching
         for category, patterns in self.ambiguity_patterns.items():
             for pattern in patterns:
@@ -730,20 +734,20 @@ class ClarificationHandler:
                         best_reasoning = f"Matched pattern '{pattern}' for category '{category}'"
                 else:
                     logger.debug(f"Pattern '{pattern}' did not match for category '{category}'")
-        
-        
+
+
         logger.debug(f"Final result: max_confidence={max_confidence}, best_category={best_category}, needs_clarification={max_confidence >= self.confidence_threshold}")
         logger.debug(f"Prompt: {repr(prompt)}")
         logger.debug(f"Prompt lower: {repr(prompt_lower)}")
-        
+
         # Determine if clarification is needed
         needs_clarification = max_confidence >= self.confidence_threshold
-        
+
         if needs_clarification:
             question = self._generate_clarification_question(prompt, best_category or "unknown", {})
         else:
             question = None
-        
+
         return ClarificationResult(
             needs_clarification=needs_clarification,
             confidence=max_confidence,
@@ -751,15 +755,15 @@ class ClarificationHandler:
             category=best_category,
             reasoning=best_reasoning
         )
-    
-    def _detect_context_aware_ambiguity(self, prompt: str, context: Dict[str, Any], 
-                                      basic_result: ClarificationResult, mode: str, 
+
+    def _detect_context_aware_ambiguity(self, prompt: str, context: Dict[str, Any],
+                                      basic_result: ClarificationResult, mode: str,
                                       round_number: int, trace_id: Optional[str]) -> ClarificationResult:
         """Phase 2 context-aware ambiguity detection"""
         # Extract context information
         conversation_history = context.get("conversation_history", [])
         project_context = context.get("project_context", {})
-        
+
         # Get context-aware clarification question
         if self.context_aware_clarifier:
             clarification_question = self.context_aware_clarifier.make_question(
@@ -767,7 +771,7 @@ class ClarificationHandler:
             )
         else:
             clarification_question = {"question": "Could you provide more details?", "options": [], "confidence": 0.5}
-        
+
         # Adjust confidence based on mode
         if mode == "quick":
             # Only ask if very confident
@@ -775,11 +779,11 @@ class ClarificationHandler:
         else:  # careful mode
             # Ask if not completely confident
             needs_clarification = basic_result.confidence < self.proceed_threshold
-        
+
         # Update statistics
         if needs_clarification:
             self.stats["clarifications_asked"] += 1
-        
+
         # Handle both dict and object types
         if isinstance(clarification_question, dict):
             confidence = clarification_question.get("confidence", 0.5)
@@ -793,7 +797,7 @@ class ClarificationHandler:
             options = getattr(clarification_question, "options", [])
             reasoning = getattr(clarification_question, "reasoning", "Context-aware analysis")
             domain = getattr(clarification_question, "domain", None)
-        
+
         return ClarificationResult(
             needs_clarification=needs_clarification,
             confidence=basic_result.confidence,  # Use basic result confidence, not context-aware confidence
@@ -806,18 +810,18 @@ class ClarificationHandler:
             max_rounds=self.max_rounds,
             trace_id=trace_id
         )
-    
+
     def _calculate_confidence(self, prompt: str, pattern: str, category: str) -> float:
         """Calculate confidence score for ambiguity detection"""
         base_confidence = 0.5
-        
+
         # Adjust based on prompt length (shorter = more ambiguous, but don't penalize too much)
         # Special handling for nested vague - don't penalize long text
         if category == "nested_vague":
             length_factor = 1.0  # No penalty for nested vague
         else:
             length_factor = max(0.3, 1.0 - (len(prompt) / 200))  # Reduced penalty for long text
-        
+
         # Adjust based on category
         category_weights = {
                     "vague_instruction": 2.0,  # Increased from 0.9 to 2.0 for better detection
@@ -846,31 +850,31 @@ class ClarificationHandler:
                     "malformed_data": 1.8,        # High weight for malformed data
                     "security_risks": 2.0         # Very high weight for security risks
                 }
-        
+
         category_weight = category_weights.get(category, 0.5)
-        
+
         return min(1.0, base_confidence * length_factor * category_weight)
-    
+
     def _generate_clarification_question(self, prompt: str, category: str, context: Optional[Dict[str, Any]] = None) -> str:
         """Generate appropriate clarification question"""
         if not category or category not in self.clarification_templates:
             return "Could you please clarify what you need help with?"
-        
+
         templates = self.clarification_templates[category]
-        
+
         # Select appropriate template based on category
         if category == "vague_instruction":
             # Extract action from prompt
             action_match = re.search(r"\b(write|make|create|build|do|fix|help|improve|optimize|enhance|upgrade|set|configure|adjust|tune|refactor|change|modify|update|restructure)\b", prompt.lower())
             action = action_match.group(1) if action_match else "do"
             template = templates[0].format(action=action)
-        
+
         elif category == "missing_context":
             # Extract item from prompt
             item_match = re.search(r"\b(app|website|program|system|tool|database|report|script|api|dashboard|form|chatbot|game|plugin|widget|component|module|service|library|framework|platform|toolchain|function|class|method|query|filter|view|trigger|constraint|index|relationship|join|union|subquery|procedure|transaction|backup|restore|migration|rollback|deployment|release|build)\b", prompt.lower())
             item = item_match.group(1) if item_match else "item"
             template = templates[0].format(item=item)
-        
+
         elif category == "ambiguous_reference":
             # Extract reference from prompt
             reference_match = re.search(r"\b(it|this|that)\b", prompt.lower())
@@ -878,100 +882,100 @@ class ClarificationHandler:
             action_match = re.search(r"\b(do|fix|change|update|delete|move|copy|paste|save|load|run|stop|start|restart|close|open|hide|show|enable|disable|activate|deactivate|turn\s+on|turn\s+off|switch)\b", prompt.lower())
             action = action_match.group(1) if action_match else "do"
             template = templates[0].format(reference=reference, action=action)
-        
+
         elif category == "single_word_vague":
             # Extract action from prompt (single word)
             action = prompt.lower().strip()
             template = templates[0].format(action=action)
-        
+
         elif category == "code_ambiguity":
             # Use first template for code ambiguity
             template = templates[0]
-        
+
         elif category == "nested_vague":
             # Use first template for nested vague
             template = templates[0]
-        
+
         elif category == "ambiguous_pronouns":
             # Use first template for ambiguous pronouns
             template = templates[0]
-        
+
         elif category == "context_switching":
             # Use first template for context switching
             template = templates[0]
-        
+
         elif category == "mixed_languages":
             # Use first template for mixed languages
             template = templates[0]
-        
+
         elif category == "slang_informal":
             # Use first template for slang/informal language
             template = templates[0]
-        
+
         elif category == "fuzzy_goal":
             # Extract goal from prompt
             goal_match = re.search(r"\b(faster|slower|smaller|bigger|cleaner|simpler|more\s+complex|better|worse|easier|harder|cheaper|more\s+expensive|more\s+secure|more\s+reliable|more\s+scalable|more\s+maintainable|more\s+testable|more\s+readable|more\s+efficient|more\s+flexible|more\s+robust|more\s+portable|more\s+compatible|more\s+accessible|more\s+user-friendly)\b", prompt.lower())
             goal = goal_match.group(1) if goal_match else "better"
             template = templates[0].format(goal=goal)
-        
+
         elif category == "missing_parameter":
             # Extract item from prompt
             item_match = re.search(r"\b(function|class|variable|method|schema|table|query|filter|view|trigger|constraint|index|relationship|join|union|subquery|procedure|transaction|backup|restore|migration|rollback|deployment|release|build)\b", prompt.lower())
             item = item_match.group(1) if item_match else "item"
             template = templates[0].format(item=item)
-        
+
         elif category == "cross_domain":
             # Extract action from prompt
             action_match = re.search(r"\b(analyze|process|handle|manage|control|monitor|track|measure|calculate|compute|solve|resolve|address|tackle|approach|deal\s+with|work\s+on|focus\s+on|concentrate\s+on|emphasize|highlight|spotlight|feature|showcase|present)\b", prompt.lower())
             action = action_match.group(1) if action_match else "help with"
             template = templates[0].format(action=action)
-        
+
         elif category == "philosophical_vague":
             # Use first template for philosophical vague
             template = templates[0]
-        
+
         elif category == "technical_jargon_vague":
             # Use first template for technical jargon vague
             template = templates[0]
-        
+
         elif category == "emotional_vague":
             # Use first template for emotional vague
             template = templates[0]
-        
+
         elif category == "time_based_vague":
             # Use first template for time-based vague
             template = templates[0]
-        
+
         elif category == "location_vague":
             # Use first template for location vague
             template = templates[0]
-        
+
         elif category == "quantity_vague":
             # Use first template for quantity vague
             template = templates[0]
-        
+
         elif category == "code_complexity":
             # Use first template for code complexity
             template = templates[0]
-        
+
         elif category == "unicode_in_code":
             # Use first template for unicode in code
             template = templates[0]
-        
+
         elif category == "malformed_data":
             # Use first template for malformed data
             template = templates[0]
-        
+
         elif category == "security_risks":
             # Use first template for security risks
             template = templates[0]
-        
+
         else:
             template = templates[0]
-        
+
         return template or "Could you please clarify what you need help with?"
-    
-    def generate_clarification(self, prompt: str, context: Optional[Dict[str, Any]] = None, 
+
+    def generate_clarification(self, prompt: str, context: Optional[Dict[str, Any]] = None,
                              mode: Optional[str] = None, round_number: int = 1, trace_id: Optional[str] = None) -> Optional[str]:
         """
         Generate clarification question for ambiguous prompt
@@ -988,9 +992,9 @@ class ClarificationHandler:
         """
         result = self.detect_ambiguity(prompt, context, mode, round_number, trace_id)
         return result.question if result.needs_clarification else None
-    
-    async def record_clarification_feedback(self, prompt: str, question: str, user_reply: Optional[str], 
-                                          success: bool, context: Optional[Dict[str, Any]] = None, 
+
+    async def record_clarification_feedback(self, prompt: str, question: str, user_reply: Optional[str],
+                                          success: bool, context: Optional[Dict[str, Any]] = None,
                                           trace_id: Optional[str] = None):
         """
         Record feedback from clarification attempt
@@ -1006,7 +1010,7 @@ class ClarificationHandler:
         if not self.learner:
             logger.warning("Learner not available, cannot record feedback")
             return
-        
+
         try:
             await self.learner.record_attempt(
                 prompt=prompt,
@@ -1016,17 +1020,17 @@ class ClarificationHandler:
                 context=context or {},
                 trace_id=trace_id
             )
-            
+
             # Update statistics
             if success:
                 self.stats["successful_clarifications"] += 1
             else:
                 self.stats["failed_clarifications"] += 1
-                
+
             logger.info(f"Recorded clarification feedback: success={success}, trace_id={trace_id}")
         except Exception as e:
             logger.error(f"Failed to record clarification feedback: {e}")
-    
+
     def get_clarification_stats(self) -> Dict[str, Any]:
         """Get clarification handler statistics"""
         base_stats = {
@@ -1039,10 +1043,10 @@ class ClarificationHandler:
             "default_mode": self.default_mode,
             "phase2_enabled": self.context_aware_clarifier is not None and self.learner is not None
         }
-        
+
         # Add Phase 2 statistics
         base_stats.update(self.stats)
-        
+
         # Add learning statistics if available
         if self.learner:
             try:
@@ -1050,16 +1054,16 @@ class ClarificationHandler:
                 base_stats["learning"] = learning_stats
             except Exception as e:
                 logger.warning(f"Failed to get learning stats: {e}")
-        
+
         # Add circuit breaker status
         base_stats["circuit_breaker"] = {
             "is_open": self.circuit_breaker.is_open(),
             "failure_count": self.circuit_breaker.failure_count,
             "state": self.circuit_breaker.state
         }
-        
+
         return base_stats
-    
+
     def set_mode(self, mode: str):
         """Set clarification mode"""
         if mode in ["quick", "careful"]:
@@ -1067,14 +1071,14 @@ class ClarificationHandler:
             logger.info(f"Clarification mode set to: {mode}")
         else:
             logger.warning(f"Invalid mode: {mode}, must be 'quick' or 'careful'")
-    
+
     def reset_circuit_breaker(self):
         """Reset circuit breaker"""
         self.circuit_breaker.failure_count = 0
         self.circuit_breaker.state = "closed"
         self.circuit_breaker.last_failure_time = 0
         logger.info("Circuit breaker reset")
-    
+
     def clear_learning_data(self):
         """Clear all learning data (for testing)"""
         if self.learner:
@@ -1084,11 +1088,11 @@ class ClarificationHandler:
 # Example usage and testing
 if __name__ == "__main__":
     handler = ClarificationHandler()
-    
+
     # Test cases
     test_prompts = [
         "Write code for this",
-        "Build an app", 
+        "Build an app",
         "Do it now",
         "Make it better",
         "Create a function",
@@ -1096,10 +1100,10 @@ if __name__ == "__main__":
         "do the same thing",
         "analyze this"
     ]
-    
+
     print("Clarification Handler Test Results:")
     print("=" * 50)
-    
+
     for prompt in test_prompts:
         result = handler.detect_ambiguity(prompt)
         print(f"Prompt: '{prompt}'")

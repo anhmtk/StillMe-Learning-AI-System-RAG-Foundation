@@ -27,7 +27,7 @@ def get_protected_files() -> Set[str]:
         "secrets/",
         "certificates/"
     }
-    
+
     # Add files from .gitignore that should be protected
     gitignore_path = Path(".gitignore")
     if gitignore_path.exists():
@@ -36,13 +36,13 @@ def get_protected_files() -> Set[str]:
                 line = line.strip()
                 if line and not line.startswith('#'):
                     protected.add(line)
-    
+
     return protected
 
 def check_file_protection(file_path: Path, protected_patterns: Set[str]) -> bool:
     """Check if file matches protected patterns"""
     file_str = str(file_path)
-    
+
     for pattern in protected_patterns:
         if pattern.endswith('/'):
             # Directory pattern
@@ -57,13 +57,13 @@ def check_file_protection(file_path: Path, protected_patterns: Set[str]) -> bool
             # Exact match
             if file_path.name == pattern or file_str.endswith(pattern):
                 return True
-    
+
     return False
 
 def check_git_status() -> List[str]:
     """Check git status for modified files"""
     import subprocess
-    
+
     try:
         result = subprocess.run(
             ['git', 'status', '--porcelain'],
@@ -71,18 +71,18 @@ def check_git_status() -> List[str]:
             text=True,
             check=True
         )
-        
+
         modified_files = []
         for line in result.stdout.split('\n'):
             if line.strip():
                 status = line[:2]
                 file_path = line[3:]
-                
+
                 if status[0] in ['M', 'A', 'D']:  # Modified, Added, Deleted
                     modified_files.append((status, file_path))
-        
+
         return modified_files
-    
+
     except subprocess.CalledProcessError as e:
         print(f"Error running git status: {e}")
         return []
@@ -90,29 +90,29 @@ def check_git_status() -> List[str]:
 def main():
     """Main protection check"""
     print("🔒 Checking protected files compliance...")
-    
+
     protected_patterns = get_protected_files()
     print(f"Protected patterns: {len(protected_patterns)}")
-    
+
     violations = []
-    
+
     # Check git status
     modified_files = check_git_status()
-    
+
     for status, file_path in modified_files:
         if check_file_protection(Path(file_path), protected_patterns):
             if status[0] == 'D':
                 violations.append(f"DELETED: {file_path} (protected file)")
             elif status[0] in ['M', 'A']:
                 violations.append(f"MODIFIED: {file_path} (protected file)")
-    
+
     # Check for protected files in working directory
     for pattern in protected_patterns:
         if not pattern.endswith('/') and '*' not in pattern:
             file_path = Path(pattern)
             if file_path.exists():
                 violations.append(f"EXISTS: {pattern} (should be in .gitignore)")
-    
+
     if violations:
         print("\n❌ Protected file violations found:")
         for violation in violations:

@@ -6,9 +6,10 @@ Supports Ollama and other local LLM servers.
 import asyncio
 import json
 import logging
-from typing import Any, Dict, List, Optional
-import httpx
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
+import httpx
 
 from .llm_base import LLMProviderBase, LLMRequest, LLMResponse, ProviderConfig
 
@@ -17,11 +18,11 @@ logger = logging.getLogger(__name__)
 
 class LocalLLMProvider(LLMProviderBase):
     """Local LLM provider implementation (Ollama, etc.)."""
-    
+
     def __init__(self, config: ProviderConfig):
         super().__init__(config)
         self._client: Optional[httpx.AsyncClient] = None
-    
+
     async def initialize(self) -> bool:
         """Initialize the local LLM client."""
         try:
@@ -29,19 +30,19 @@ class LocalLLMProvider(LLMProviderBase):
                 base_url=self.config.base_url,
                 timeout=self.config.timeout
             )
-            
+
             # Test the connection
             await self.health_check()
             return True
         except Exception as e:
             logger.error(f"Failed to initialize local LLM provider: {e}")
             return False
-    
+
     async def generate(self, request: LLMRequest) -> LLMResponse:
         """Generate a response using local LLM API."""
         if not self._client:
             raise RuntimeError("Local LLM provider not initialized")
-        
+
         # Prepare the request payload (Ollama format)
         payload = {
             "model": self.config.model,
@@ -54,13 +55,13 @@ class LocalLLMProvider(LLMProviderBase):
                 "presence_penalty": request.presence_penalty
             }
         }
-        
+
         if request.max_tokens:
             payload["options"]["num_predict"] = request.max_tokens
-        
+
         if request.stop:
             payload["options"]["stop"] = request.stop
-        
+
         # Make the request with retries
         for attempt in range(self.config.max_retries):
             try:
@@ -69,9 +70,9 @@ class LocalLLMProvider(LLMProviderBase):
                     json=payload
                 )
                 response.raise_for_status()
-                
+
                 data = response.json()
-                
+
                 return LLMResponse(
                     content=data["response"],
                     model=data["model"],
@@ -90,7 +91,7 @@ class LocalLLMProvider(LLMProviderBase):
                         "local_llm_eval_duration": data.get("eval_duration", 0)
                     }
                 )
-                
+
             except httpx.HTTPStatusError as e:
                 if e.response.status_code == 429:  # Rate limit
                     if attempt < self.config.max_retries - 1:
@@ -106,14 +107,14 @@ class LocalLLMProvider(LLMProviderBase):
                     await asyncio.sleep(wait_time)
                     continue
                 raise e
-        
+
         raise Exception(f"Failed to generate response after {self.config.max_retries} attempts")
-    
+
     async def health_check(self) -> bool:
         """Check if the local LLM server is healthy."""
         if not self._client:
             return False
-        
+
         try:
             # Simple health check using models endpoint
             response = await self._client.get("/api/tags")
@@ -121,7 +122,7 @@ class LocalLLMProvider(LLMProviderBase):
         except Exception as e:
             logger.warning(f"Local LLM health check failed: {e}")
             return False
-    
+
     async def cleanup(self):
         """Cleanup the local LLM client."""
         await super().cleanup()

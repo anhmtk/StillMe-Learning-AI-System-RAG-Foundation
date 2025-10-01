@@ -16,8 +16,26 @@ __author__ = "StillMe AI Team"
 __description__ = "Core AI Framework for StillMe AI"
 
 # Import main framework
+# Import compatibility layer
+from .compat import *
 from .framework import StillMeFramework
+from .health import HealthChecker
 
 __all__ = [
-    "StillMeFramework"
+    "StillMeFramework",
+    "HealthChecker",
+    # Re-exported from compat
+    "SearchResult",
+    "EthicalPrinciple", "ViolationSeverity",
+    "SimulationStatus", "AttackCategory", "AttackSeverity",
+    "MemoryItem", "LongTermMemory",
+    "QualityIssue", "QualityReport",
+    "RedisEventBus", "DAGExecutor", "RBACManager", "SessionManager",
+    "apply_policies", "safe_reply", "classify", "sanitize", "redact_output", "CANARY",
+    "AgentDevLogger", "log_step",
+    "health", "set_mode", "warmup", "dev_agent", "controller",
+
+    # Missing implementations
+    "NodeType", "ImpactLevel", "MatchType",
+    "SemanticSearchEngine", "RedisEventBus", "DAGExecutor", "RBACManager", "SessionManager"
 ]

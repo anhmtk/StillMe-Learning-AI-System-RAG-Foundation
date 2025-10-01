@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-from modules.ethical_core_system_v1 import (
+from stillme_core.modules.ethical_core_system_v1 import (
     ConscienceCore,
     EthicsGuard,
     SelfCritic,

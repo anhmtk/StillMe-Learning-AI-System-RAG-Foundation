@@ -4,23 +4,25 @@ Test Suite for AI Router - Comprehensive testing of complexity analysis and mode
 
 This test suite validates the AI routing system with various prompt types:
 - Simple greetings and basic questions
-- Programming and coding requests  
+- Programming and coding requests
 - Academic and scientific questions
 - Complex philosophical and abstract concepts
 - Multi-part and conditional questions
 """
 
-import sys
 import os
+import sys
 import time
 import unittest
-from typing import Dict, List, Tuple, Any
 
 # Add project root to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 try:
-    from stillme_core.modules.api_provider_manager import UnifiedAPIManager, ComplexityAnalyzer
+    from stillme_core.modules.api_provider_manager import (
+        ComplexityAnalyzer,
+        UnifiedAPIManager,
+    )
 except ImportError:
     print("‚ö†Ô∏è Could not import UnifiedAPIManager. Make sure you're in the project root.")
     sys.exit(1)
@@ -28,11 +30,11 @@ except ImportError:
 
 class TestComplexityAnalyzer(unittest.TestCase):
     """Test the ComplexityAnalyzer class."""
-    
+
     def setUp(self):
         """Set up test fixtures."""
         self.analyzer = ComplexityAnalyzer()
-    
+
     def test_simple_prompts(self):
         """Test simple prompts should get low complexity scores."""
         simple_prompts = [
@@ -44,12 +46,12 @@ class TestComplexityAnalyzer(unittest.TestCase):
             "how are you?",
             "what time is it?"
         ]
-        
+
         for prompt in simple_prompts:
             with self.subTest(prompt=prompt):
                 score, _ = self.analyzer.analyze_complexity(prompt)
                 self.assertLess(score, 0.4, f"Simple prompt '{prompt}' got high complexity: {score}")
-    
+
     def test_complex_prompts(self):
         """Test complex prompts should get high complexity scores."""
         complex_prompts = [
@@ -58,12 +60,12 @@ class TestComplexityAnalyzer(unittest.TestCase):
             "So s√°nh v√† ƒë√°nh gi√° c√°c ph∆∞∆°ng ph√°p h·ªçc m√°y kh√°c nhau trong vi·ªác x·ª≠ l√Ω ng√¥n ng·ªØ t·ª± nhi√™n",
             "T·∫°i sao c√°c h·ªá th·ªëng ph·ª©c t·∫°p l·∫°i c√≥ xu h∆∞·ªõng t·ª± t·ªï ch·ª©c v√† ph√°t tri·ªÉn theo quy lu·∫≠t n√†o?"
         ]
-        
+
         for prompt in complex_prompts:
             with self.subTest(prompt=prompt):
                 score, _ = self.analyzer.analyze_complexity(prompt)
                 self.assertGreater(score, 0.7, f"Complex prompt '{prompt}' got low complexity: {score}")
-    
+
     def test_coding_prompts(self):
         """Test coding prompts should get medium complexity scores."""
         coding_prompts = [
@@ -72,17 +74,17 @@ class TestComplexityAnalyzer(unittest.TestCase):
             "debug l·ªói trong thu·∫≠t to√°n s·∫Øp x·∫øp",
             "t·ªëi ∆∞u h√≥a performance c·ªßa database query"
         ]
-        
+
         for prompt in coding_prompts:
             with self.subTest(prompt=prompt):
                 score, _ = self.analyzer.analyze_complexity(prompt)
                 self.assertGreaterEqual(score, 0.3, f"Coding prompt '{prompt}' got too low complexity: {score}")
                 self.assertLessEqual(score, 0.8, f"Coding prompt '{prompt}' got too high complexity: {score}")
-    
+
     def test_performance(self):
         """Test that complexity analysis is fast (< 5ms)."""
         test_prompt = "Gi·∫£i th√≠ch ƒë·ªãnh l√Ω b·∫•t to√†n c·ªßa G√∂del v√† t√°c ƒë·ªông c·ªßa n√≥ ƒë·∫øn to√°n h·ªçc hi·ªán ƒë·∫°i"
-        
+
         # Run multiple times to get average
         times = []
         for _ in range(10):
@@ -90,10 +92,10 @@ class TestComplexityAnalyzer(unittest.TestCase):
             self.analyzer.analyze_complexity(test_prompt)
             elapsed = (time.time() - start_time) * 1000  # Convert to ms
             times.append(elapsed)
-        
+
         avg_time = sum(times) / len(times)
         self.assertLess(avg_time, 5.0, f"Complexity analysis too slow: {avg_time:.2f}ms")
-    
+
     def test_fallback_detection(self):
         """Test fallback trigger detection."""
         # Negative feedback should trigger fallback
@@ -105,14 +107,14 @@ class TestComplexityAnalyzer(unittest.TestCase):
             "kh√¥ng ph·∫£i",
             "ch∆∞a ƒë√∫ng"
         ]
-        
+
         for feedback in negative_feedback:
             with self.subTest(feedback=feedback):
                 should_fallback = self.analyzer.should_trigger_fallback(
                     feedback, "test prompt", "gemma2:2b"
                 )
                 self.assertTrue(should_fallback, f"Negative feedback '{feedback}' should trigger fallback")
-        
+
         # Positive feedback should not trigger fallback
         positive_feedback = [
             "ƒë√∫ng r·ªìi",
@@ -121,7 +123,7 @@ class TestComplexityAnalyzer(unittest.TestCase):
             "hi·ªÉu r·ªìi",
             "ok"
         ]
-        
+
         for feedback in positive_feedback:
             with self.subTest(feedback=feedback):
                 should_fallback = self.analyzer.should_trigger_fallback(
@@ -132,11 +134,11 @@ class TestComplexityAnalyzer(unittest.TestCase):
 
 class TestUnifiedAPIManager(unittest.TestCase):
     """Test the UnifiedAPIManager routing logic."""
-    
+
     def setUp(self):
         """Set up test fixtures."""
         self.api_manager = UnifiedAPIManager()
-    
+
     def test_simple_routing(self):
         """Test routing for simple prompts."""
         test_cases = [
@@ -147,13 +149,13 @@ class TestUnifiedAPIManager(unittest.TestCase):
             ("hello", "gemma2:2b"),
             ("how are you?", "gemma2:2b")
         ]
-        
+
         for prompt, expected_model in test_cases:
             with self.subTest(prompt=prompt):
                 selected_model = self.api_manager.choose_model(prompt)
-                self.assertEqual(selected_model, expected_model, 
+                self.assertEqual(selected_model, expected_model,
                                f"Prompt '{prompt}' should route to {expected_model}, got {selected_model}")
-    
+
     def test_coding_routing(self):
         """Test routing for coding prompts."""
         test_cases = [
@@ -163,13 +165,13 @@ class TestUnifiedAPIManager(unittest.TestCase):
             ("t·∫°o function", "deepseek-coder:6.7b"),
             ("vi·∫øt code", "deepseek-coder:6.7b")
         ]
-        
+
         for prompt, expected_model in test_cases:
             with self.subTest(prompt=prompt):
                 selected_model = self.api_manager.choose_model(prompt)
                 self.assertEqual(selected_model, expected_model,
                                f"Prompt '{prompt}' should route to {expected_model}, got {selected_model}")
-    
+
     def test_complex_routing(self):
         """Test routing for complex prompts."""
         test_cases = [
@@ -178,44 +180,44 @@ class TestUnifiedAPIManager(unittest.TestCase):
             ("So s√°nh c√°c ph∆∞∆°ng ph√°p h·ªçc m√°y", "deepseek-chat"),
             ("T·∫°i sao c√°c h·ªá th·ªëng ph·ª©c t·∫°p l·∫°i t·ª± t·ªï ch·ª©c?", "deepseek-chat")
         ]
-        
+
         for prompt, expected_model in test_cases:
             with self.subTest(prompt=prompt):
                 selected_model = self.api_manager.choose_model(prompt)
                 self.assertEqual(selected_model, expected_model,
                                f"Prompt '{prompt}' should route to {expected_model}, got {selected_model}")
-    
+
     def test_long_prompt_routing(self):
         """Test routing for very long prompts."""
         long_prompt = "A" * 4000  # Very long prompt
-        
+
         selected_model = self.api_manager.choose_model(long_prompt)
         self.assertIn(selected_model, ["deepseek-coder:6.7b", "gemma2:2b"],
                      f"Long prompt should route to local model, got {selected_model}")
-    
+
     def test_debug_mode(self):
         """Test debug mode provides detailed information."""
         prompt = "Gi·∫£i th√≠ch ƒë·ªãnh l√Ω b·∫•t to√†n c·ªßa G√∂del"
-        
+
         # This should not raise an exception and should provide detailed logging
         selected_model = self.api_manager.choose_model(prompt, debug=True)
         self.assertIsInstance(selected_model, str)
         self.assertGreater(len(selected_model), 0)
-    
+
     def test_fallback_handling(self):
         """Test fallback handling mechanism."""
         original_prompt = "test prompt"
         user_feedback = "sai r·ªìi"
         selected_model = "gemma2:2b"
-        
+
         # Test fallback detection
         fallback_response = self.api_manager.handle_fallback(
             original_prompt, user_feedback, selected_model
         )
-        
+
         # Should either return a new response or None (depending on model availability)
         self.assertIsInstance(fallback_response, (str, type(None)))
-    
+
     def test_analyzer_stats(self):
         """Test analyzer statistics collection."""
         # Run some analyses to generate stats
@@ -224,19 +226,19 @@ class TestUnifiedAPIManager(unittest.TestCase):
             "vi·∫øt code Python",
             "Gi·∫£i th√≠ch ƒë·ªãnh l√Ω b·∫•t to√†n c·ªßa G√∂del"
         ]
-        
+
         for prompt in test_prompts:
             self.api_manager.choose_model(prompt)
-        
+
         # Get stats
         stats = self.api_manager.get_analyzer_stats()
-        
+
         # Verify stats structure
         self.assertIn('performance', stats)
         self.assertIn('fallback', stats)
         self.assertIn('weights', stats)
         self.assertIn('thresholds', stats)
-        
+
         # Verify performance stats
         perf_stats = stats['performance']
         self.assertIn('avg_time_ms', perf_stats)
@@ -246,11 +248,11 @@ class TestUnifiedAPIManager(unittest.TestCase):
 
 class TestRouterIntegration(unittest.TestCase):
     """Integration tests for the complete routing system."""
-    
+
     def setUp(self):
         """Set up test fixtures."""
         self.api_manager = UnifiedAPIManager()
-    
+
     def test_end_to_end_routing(self):
         """Test complete routing flow from prompt to model selection."""
         test_cases = [
@@ -262,21 +264,21 @@ class TestRouterIntegration(unittest.TestCase):
             ("Ph√¢n t√≠ch t√°c ƒë·ªông c·ªßa AI ƒë·∫øn x√£ h·ªôi", "complex", (0.7, 1.0)),
             ("t·∫°o function t√≠nh t·ªïng", "coding", (0.3, 0.8))
         ]
-        
+
         for prompt, category, complexity_range in test_cases:
             with self.subTest(prompt=prompt):
                 # Test model selection
                 selected_model = self.api_manager.choose_model(prompt)
-                
+
                 # Test complexity analysis
                 complexity_score, detailed_scores = self.api_manager.complexity_analyzer.analyze_complexity(prompt)
-                
+
                 # Verify complexity score is in expected range
                 self.assertGreaterEqual(complexity_score, complexity_range[0],
                                       f"Prompt '{prompt}' complexity too low: {complexity_score}")
                 self.assertLessEqual(complexity_score, complexity_range[1],
                                    f"Prompt '{prompt}' complexity too high: {complexity_score}")
-                
+
                 # Verify model selection makes sense
                 if category == "simple":
                     self.assertIn(selected_model, ["gemma2:2b"])
@@ -284,7 +286,7 @@ class TestRouterIntegration(unittest.TestCase):
                     self.assertIn(selected_model, ["deepseek-coder:6.7b"])
                 elif category == "complex":
                     self.assertIn(selected_model, ["deepseek-chat"])
-    
+
     def test_weight_calibration(self):
         """Test weight calibration functionality."""
         # Create test results
@@ -304,16 +306,16 @@ class TestRouterIntegration(unittest.TestCase):
                 'actual_model': 'deepseek-chat'
             }
         ]
-        
+
         # Test calibration
         new_weights = self.api_manager.complexity_analyzer.calibrate_weights(test_results)
-        
+
         # Verify weights structure
         expected_weight_keys = [
             'length', 'complex_indicators', 'academic_terms', 'abstract_concepts',
             'multi_part', 'conditional', 'domain_specific'
         ]
-        
+
         for key in expected_weight_keys:
             self.assertIn(key, new_weights)
             self.assertIsInstance(new_weights[key], float)
@@ -324,9 +326,9 @@ class TestRouterIntegration(unittest.TestCase):
 def run_performance_benchmark():
     """Run performance benchmark for the routing system."""
     print("\nüöÄ Running Performance Benchmark...")
-    
+
     api_manager = UnifiedAPIManager()
-    
+
     # Test prompts of varying complexity
     test_prompts = [
         "ch√†o b·∫°n",
@@ -335,48 +337,48 @@ def run_performance_benchmark():
         "Ph√¢n t√≠ch m·ªëi quan h·ªá gi·ªØa tri·∫øt h·ªçc v√† khoa h·ªçc trong vi·ªác hi·ªÉu b·∫£n ch·∫•t c·ªßa th·ª±c t·∫°i",
         "So s√°nh v√† ƒë√°nh gi√° c√°c ph∆∞∆°ng ph√°p h·ªçc m√°y kh√°c nhau trong vi·ªác x·ª≠ l√Ω ng√¥n ng·ªØ t·ª± nhi√™n"
     ]
-    
+
     total_time = 0
     total_analyses = 0
-    
+
     for prompt in test_prompts:
         start_time = time.time()
-        
+
         # Test model selection
         selected_model = api_manager.choose_model(prompt)
-        
+
         # Test complexity analysis
         complexity_score, detailed_scores = api_manager.complexity_analyzer.analyze_complexity(prompt)
-        
+
         elapsed = (time.time() - start_time) * 1000  # Convert to ms
         total_time += elapsed
         total_analyses += 1
-        
+
         print(f"  üìù '{prompt[:50]}...'")
         print(f"     Model: {selected_model}")
         print(f"     Complexity: {complexity_score:.3f}")
         print(f"     Time: {elapsed:.2f}ms")
         print()
-    
+
     avg_time = total_time / total_analyses
-    print(f"üìä Performance Summary:")
+    print("üìä Performance Summary:")
     print(f"   Total analyses: {total_analyses}")
     print(f"   Average time: {avg_time:.2f}ms")
     print(f"   Total time: {total_time:.2f}ms")
-    
+
     # Get detailed stats
     stats = api_manager.get_analyzer_stats()
     print(f"   Analyzer stats: {stats['performance']}")
-    
+
     return avg_time < 5.0  # Should be under 5ms
 
 
 def run_accuracy_test():
     """Run accuracy test with predefined test cases."""
     print("\nüéØ Running Accuracy Test...")
-    
+
     api_manager = UnifiedAPIManager()
-    
+
     # Comprehensive test cases
     test_cases = [
         # Simple prompts (should go to gemma2:2b)
@@ -388,7 +390,7 @@ def run_accuracy_test():
         ("how are you?", "gemma2:2b", "simple"),
         ("GDP l√† g√¨?", "gemma2:2b", "simple"),
         ("n∆∞·ªõc n√†o l·ªõn nh·∫•t th·∫ø gi·ªõi?", "gemma2:2b", "simple"),
-        
+
         # Coding prompts (should go to deepseek-coder:6.7b)
         ("vi·∫øt code Python", "deepseek-coder:6.7b", "coding"),
         ("l·∫≠p tr√¨nh JavaScript", "deepseek-coder:6.7b", "coding"),
@@ -398,7 +400,7 @@ def run_accuracy_test():
         ("t·ªëi ∆∞u thu·∫≠t to√°n", "deepseek-coder:6.7b", "coding"),
         ("s·ª≠a l·ªói code", "deepseek-coder:6.7b", "coding"),
         ("t·∫°o class Python", "deepseek-coder:6.7b", "coding"),
-        
+
         # Complex prompts (should go to deepseek-chat)
         ("Gi·∫£i th√≠ch ƒë·ªãnh l√Ω b·∫•t to√†n c·ªßa G√∂del", "deepseek-chat", "complex"),
         ("Ph√¢n t√≠ch m·ªëi quan h·ªá gi·ªØa tri·∫øt h·ªçc v√† khoa h·ªçc", "deepseek-chat", "complex"),
@@ -408,35 +410,35 @@ def run_accuracy_test():
         ("B·∫£n ch·∫•t c·ªßa th·ª±c t·∫°i l√† g√¨?", "deepseek-chat", "complex"),
         ("T√°c ƒë·ªông c·ªßa AI ƒë·∫øn x√£ h·ªôi", "deepseek-chat", "complex"),
         ("Ph√¢n t√≠ch xu h∆∞·ªõng ph√°t tri·ªÉn c√¥ng ngh·ªá", "deepseek-chat", "complex"),
-        
+
         # Edge cases
         ("n·∫øu t√¥i mu·ªën h·ªçc l·∫≠p tr√¨nh th√¨ n√™n b·∫Øt ƒë·∫ßu t·ª´ ƒë√¢u?", "deepseek-coder:6.7b", "coding"),
         ("gi·∫£ s·ª≠ t√¥i c√≥ m·ªôt b√†i to√°n ph·ª©c t·∫°p, l√†m th·∫ø n√†o ƒë·ªÉ gi·∫£i quy·∫øt?", "deepseek-chat", "complex"),
         ("trong tr∆∞·ªùng h·ª£p n√†o th√¨ n√™n s·ª≠ d·ª•ng AI?", "deepseek-chat", "complex"),
     ]
-    
+
     correct_predictions = 0
     total_predictions = len(test_cases)
-    
+
     for prompt, expected_model, category in test_cases:
         selected_model = api_manager.choose_model(prompt)
-        
+
         if selected_model == expected_model:
             correct_predictions += 1
             status = "‚úÖ"
         else:
             status = "‚ùå"
-        
+
         print(f"  {status} '{prompt[:50]}...'")
         print(f"     Expected: {expected_model} ({category})")
         print(f"     Got: {selected_model}")
         print()
-    
+
     accuracy = (correct_predictions / total_predictions) * 100
-    print(f"üìä Accuracy Summary:")
+    print("üìä Accuracy Summary:")
     print(f"   Correct predictions: {correct_predictions}/{total_predictions}")
     print(f"   Accuracy: {accuracy:.1f}%")
-    
+
     return accuracy >= 80.0  # Should be at least 80% accurate
 
 
@@ -444,22 +446,22 @@ def main():
     """Main test runner."""
     print("üß™ AI Router Test Suite")
     print("=" * 50)
-    
+
     # Run unit tests
     print("\nüìã Running Unit Tests...")
     unittest.main(argv=[''], exit=False, verbosity=2)
-    
+
     # Run performance benchmark
     performance_ok = run_performance_benchmark()
-    
+
     # Run accuracy test
     accuracy_ok = run_accuracy_test()
-    
+
     # Summary
     print("\nüìä Test Summary:")
     print(f"   Performance: {'‚úÖ PASS' if performance_ok else '‚ùå FAIL'}")
     print(f"   Accuracy: {'‚úÖ PASS' if accuracy_ok else '‚ùå FAIL'}")
-    
+
     if performance_ok and accuracy_ok:
         print("\nüéâ All tests passed! AI Router is ready for production.")
         return 0

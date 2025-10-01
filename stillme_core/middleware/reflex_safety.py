@@ -22,21 +22,21 @@ DANGEROUS_PATTERNS = [
     r"(?i)(ignore|forget|disregard).*(previous|instructions|rules|guidelines)",
     r"(?i)(act as|pretend to be|roleplay as).*(jailbreak|hack|exploit)",
     r"(?i)(system|admin|root).*(access|privilege|escalation)",
-    
+
     # Base64 encoded content (potential obfuscation)
     r"(?i)(base64|b64).*[A-Za-z0-9+/]{20,}={0,2}",
-    
+
     # Homoglyph attacks (basic detection)
     r"[а-яё].*[a-z]|[a-z].*[а-яё]",  # Cyrillic mixed with Latin
-    
+
     # Command injection patterns
     r"(?i)(rm\s+-rf|del\s+/s|format\s+c:|shutdown|reboot)",
     r"(?i)(eval|exec|system|shell_exec|passthru)",
     r"(?i)(delete\s+all\s+files|remove\s+everything)",
-    
+
     # SQL injection patterns
     r"(?i)(union\s+select|drop\s+table|delete\s+from|insert\s+into)",
-    
+
     # XSS patterns
     r"<script[^>]*>.*</script>",
     r"javascript:",
@@ -51,15 +51,15 @@ DEEP_CHECK_TIMEOUT = 5.0       # seconds for deep check timeout
 
 class CircuitBreaker:
     """Simple circuit breaker for deep safety checks."""
-    
-    def __init__(self, failure_threshold: int = CIRCUIT_BREAKER_THRESHOLD, 
+
+    def __init__(self, failure_threshold: int = CIRCUIT_BREAKER_THRESHOLD,
                  timeout: int = CIRCUIT_BREAKER_TIMEOUT):
         self.failure_threshold = failure_threshold
         self.timeout = timeout
         self.failure_count = 0
         self.last_failure_time = 0
         self.state = "closed"  # closed, open, half-open
-    
+
     def can_execute(self) -> bool:
         """Check if circuit breaker allows execution."""
         if self.state == "closed":
@@ -71,12 +71,12 @@ class CircuitBreaker:
             return False
         else:  # half-open
             return True
-    
+
     def on_success(self):
         """Record successful execution."""
         self.failure_count = 0
         self.state = "closed"
-    
+
     def on_failure(self):
         """Record failed execution."""
         self.failure_count += 1
@@ -87,19 +87,19 @@ class CircuitBreaker:
 
 class ReflexSafety:
     """Progressive safety checking with fast and deep validation."""
-    
+
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         self.config = config or {}
         self.circuit_breaker = CircuitBreaker()
         self.fast_check_enabled = self.config.get("fast_check_enabled", True)
         self.deep_check_enabled = self.config.get("deep_check_enabled", True)
-        
+
         # Compile regex patterns for performance
         self.dangerous_patterns = [
-            re.compile(pattern, re.IGNORECASE | re.UNICODE) 
+            re.compile(pattern, re.IGNORECASE | re.UNICODE)
             for pattern in DANGEROUS_PATTERNS
         ]
-        
+
         # Statistics
         self.stats = {
             "fast_checks": 0,
@@ -109,7 +109,7 @@ class ReflexSafety:
             "circuit_breaker_opens": 0,
             "timeouts": 0,
         }
-    
+
     def fast_check(self, text: str) -> Tuple[bool, str]:
         """
         Fast, lightweight safety screening using pattern matching.
@@ -119,25 +119,25 @@ class ReflexSafety:
         """
         if not self.fast_check_enabled:
             return True, "fast_check_disabled"
-        
+
         self.stats["fast_checks"] += 1
-        
+
         # Normalize text for checking
         normalized_text = self._normalize_for_safety(text)
-        
+
         # Check against dangerous patterns
         for pattern in self.dangerous_patterns:
             if pattern.search(normalized_text):
                 self.stats["fast_blocks"] += 1
                 return False, f"dangerous_pattern_detected: {pattern.pattern[:50]}..."
-        
+
         # Check for suspicious entropy (potential obfuscation)
         if self._has_high_entropy(normalized_text):
             self.stats["fast_blocks"] += 1
             return False, "high_entropy_detected"
-        
+
         return True, "safe"
-    
+
     async def deep_check(self, text: str, intended_action: Optional[str] = None) -> Tuple[bool, str]:
         """
         Deeper, asynchronous safety check with timeout and circuit breaker.
@@ -151,29 +151,29 @@ class ReflexSafety:
         """
         if not self.deep_check_enabled:
             return True, "deep_check_disabled"
-        
+
         # Check circuit breaker
         if not self.circuit_breaker.can_execute():
             return False, "circuit_breaker_open"
-        
+
         self.stats["deep_checks"] += 1
-        
+
         try:
             # Simulate deep check with timeout
             result = await asyncio.wait_for(
                 self._perform_deep_check(text, intended_action),
                 timeout=DEEP_CHECK_TIMEOUT
             )
-            
+
             if result[0]:  # is_safe
                 self.circuit_breaker.on_success()
             else:
                 self.circuit_breaker.on_failure()
                 if self.circuit_breaker.state == "open":
                     self.stats["circuit_breaker_opens"] += 1
-            
+
             return result
-            
+
         except asyncio.TimeoutError:
             self.stats["timeouts"] += 1
             self.circuit_breaker.on_failure()
@@ -182,7 +182,7 @@ class ReflexSafety:
             logger.error(f"Deep check error: {e}")
             self.circuit_breaker.on_failure()
             return False, f"deep_check_error: {str(e)}"
-    
+
     async def _perform_deep_check(self, text: str, intended_action: Optional[str] = None) -> Tuple[bool, str]:
         """
         Simulate deep safety check (placeholder for EthicsGuard integration).
@@ -195,19 +195,19 @@ class ReflexSafety:
         """
         # Simulate processing time
         await asyncio.sleep(0.1)
-        
+
         # Placeholder logic: block if text contains certain keywords
         dangerous_keywords = ["harmful", "dangerous", "illegal", "exploit", "attack"]
         text_lower = text.lower()
-        
+
         for keyword in dangerous_keywords:
             if keyword in text_lower:
                 self.stats["deep_blocks"] += 1
                 return False, f"harmful_content_detected: {keyword}"
-        
+
         return True, "deep_check_passed"
-    
-    def safety_gate(self, text: str, intended_action: Optional[str] = None, 
+
+    def safety_gate(self, text: str, intended_action: Optional[str] = None,
                    scores: Optional[Dict[str, float]] = None) -> Dict[str, Any]:
         """
         Main safety gate that combines fast and deep checks.
@@ -221,10 +221,10 @@ class ReflexSafety:
             Dict with safety decision and details
         """
         start_time = time.time()
-        
+
         # Fast check (synchronous)
         fast_safe, fast_reason = self.fast_check(text)
-        
+
         if not fast_safe:
             return {
                 "safe": False,
@@ -233,14 +233,14 @@ class ReflexSafety:
                 "processing_time_ms": (time.time() - start_time) * 1000,
                 "stats": self.stats.copy()
             }
-        
+
         # Deep check (asynchronous) - in real implementation, this would be awaited
         # For now, we'll simulate the result
         deep_safe, deep_reason = True, "deep_check_simulated"
-        
+
         # Simulate some processing time for realistic timing
         time.sleep(0.001)  # 1ms
-        
+
         return {
             "safe": fast_safe and deep_safe,
             "reason": deep_reason if not deep_safe else fast_reason,
@@ -250,15 +250,15 @@ class ReflexSafety:
             "deep_check": {"safe": deep_safe, "reason": deep_reason},
             "stats": self.stats.copy()
         }
-    
+
     def _normalize_for_safety(self, text: str) -> str:
         """Normalize text for safety pattern matching."""
         # Remove extra whitespace
         text = re.sub(r'\s+', ' ', text.strip())
-        
+
         # Convert to lowercase for case-insensitive matching
         text = text.lower()
-        
+
         # Basic homoglyph normalization
         homoglyph_map = {
             'а': 'a', 'е': 'e', 'о': 'o', 'р': 'p', 'с': 'c', 'х': 'x',
@@ -266,22 +266,22 @@ class ReflexSafety:
         }
         for cyrillic, latin in homoglyph_map.items():
             text = text.replace(cyrillic, latin)
-        
+
         return text
-    
+
     def _has_high_entropy(self, text: str, threshold: Optional[float] = None) -> bool:
         """Check if text has suspiciously high entropy (potential obfuscation)."""
         if threshold is None:
             threshold = self.config.get("entropy_threshold", 0.9)
-        
+
         if len(text) < 20:
             return False
-        
+
         # Calculate character frequency
         char_counts = {}
         for char in text:
             char_counts[char] = char_counts.get(char, 0) + 1
-        
+
         # Calculate entropy using Shannon entropy formula
         import math
         entropy = 0
@@ -290,13 +290,13 @@ class ReflexSafety:
             probability = count / text_len
             if probability > 0:
                 entropy -= probability * math.log2(probability)
-        
+
         # Normalize entropy (0-1 scale)
         max_entropy = math.log2(len(char_counts)) if len(char_counts) > 1 else 1
         normalized_entropy = entropy / max_entropy if max_entropy > 0 else 0
-        
+
         return normalized_entropy > threshold
-    
+
     def get_stats(self) -> Dict[str, Any]:
         """Get safety statistics."""
         return {
@@ -311,7 +311,7 @@ class ReflexSafety:
                 "deep_check_enabled": self.deep_check_enabled
             }
         }
-    
+
     def reset_stats(self):
         """Reset safety statistics."""
         self.stats = {key: 0 for key in self.stats}

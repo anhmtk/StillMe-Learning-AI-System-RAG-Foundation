@@ -2,10 +2,10 @@
 
 import logging
 import re
-from typing import Dict, Any, List, Optional, Tuple
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ class SecrecyRule:
     description: str
     enabled: bool = True
     metadata: Dict[str, Any] = None
-    
+
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
@@ -54,22 +54,22 @@ class FilterResult:
     action_taken: FilterAction
     timestamp: datetime
     metadata: Dict[str, Any] = None
-    
+
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
 
 class SecrecyFilter:
     """Secrecy filter for StillMe Framework"""
-    
+
     def __init__(self):
         self.logger = logger
         self.rules: List[SecrecyRule] = []
         self.filter_results: List[FilterResult] = []
         self.default_secrecy_level = SecrecyLevel.PUBLIC
         self.logger.info("✅ SecrecyFilter initialized")
-    
-    def add_rule(self, 
+
+    def add_rule(self,
                  pattern: str,
                  secrecy_level: SecrecyLevel,
                  action: FilterAction,
@@ -78,7 +78,7 @@ class SecrecyFilter:
         """Add a secrecy rule"""
         try:
             rule_id = f"rule_{len(self.rules) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-            
+
             rule = SecrecyRule(
                 rule_id=rule_id,
                 pattern=pattern,
@@ -87,16 +87,16 @@ class SecrecyFilter:
                 description=description,
                 enabled=enabled
             )
-            
+
             self.rules.append(rule)
             self.logger.info(f"📝 Secrecy rule added: {description} (ID: {rule_id})")
             return rule
-            
+
         except Exception as e:
             self.logger.error(f"❌ Failed to add secrecy rule: {e}")
             raise
-    
-    def filter_content(self, 
+
+    def filter_content(self,
                       content: str,
                       target_secrecy_level: SecrecyLevel = None,
                       context: Dict[str, Any] = None) -> FilterResult:
@@ -104,27 +104,27 @@ class SecrecyFilter:
         try:
             if target_secrecy_level is None:
                 target_secrecy_level = self.default_secrecy_level
-            
+
             result_id = f"filter_{len(self.filter_results) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-            
+
             filtered_content = content
             applied_rules = []
             highest_secrecy_level = SecrecyLevel.PUBLIC
             action_taken = FilterAction.ALLOW
-            
+
             # Apply rules
             for rule in self.rules:
                 if not rule.enabled:
                     continue
-                
+
                 # Check if rule pattern matches
                 if re.search(rule.pattern, content, re.IGNORECASE):
                     applied_rules.append(rule)
-                    
+
                     # Update highest secrecy level
                     if self._is_higher_secrecy_level(rule.secrecy_level, highest_secrecy_level):
                         highest_secrecy_level = rule.secrecy_level
-                    
+
                     # Apply action
                     if rule.action == FilterAction.REDACT:
                         filtered_content = self._redact_content(filtered_content, rule.pattern)
@@ -136,13 +136,13 @@ class SecrecyFilter:
                     elif rule.action == FilterAction.ENCRYPT:
                         filtered_content = self._encrypt_content(filtered_content, rule.pattern)
                         action_taken = FilterAction.ENCRYPT
-            
+
             # Check if content meets target secrecy level
             if self._is_higher_secrecy_level(highest_secrecy_level, target_secrecy_level):
                 if action_taken == FilterAction.ALLOW:
                     action_taken = FilterAction.REDACT
                     filtered_content = self._redact_sensitive_content(filtered_content)
-            
+
             result = FilterResult(
                 result_id=result_id,
                 original_content=content,
@@ -156,15 +156,15 @@ class SecrecyFilter:
                     "context": context or {}
                 }
             )
-            
+
             self.filter_results.append(result)
             self.logger.info(f"🔒 Content filtered: {action_taken.value} (secrecy: {highest_secrecy_level.value})")
             return result
-            
+
         except Exception as e:
             self.logger.error(f"❌ Failed to filter content: {e}")
             raise
-    
+
     def _is_higher_secrecy_level(self, level1: SecrecyLevel, level2: SecrecyLevel) -> bool:
         """Check if level1 is higher than level2"""
         secrecy_order = {
@@ -175,29 +175,29 @@ class SecrecyFilter:
             SecrecyLevel.TOP_SECRET: 4
         }
         return secrecy_order[level1] > secrecy_order[level2]
-    
+
     def _redact_content(self, content: str, pattern: str) -> str:
         """Redact content matching pattern"""
         try:
             # Replace matches with [REDACTED]
             redacted_content = re.sub(pattern, "[REDACTED]", content, flags=re.IGNORECASE)
             return redacted_content
-            
+
         except Exception as e:
             self.logger.error(f"❌ Failed to redact content: {e}")
             return content
-    
+
     def _encrypt_content(self, content: str, pattern: str) -> str:
         """Encrypt content matching pattern"""
         try:
             # Simple encryption (in real implementation, use proper encryption)
             encrypted_content = re.sub(pattern, "[ENCRYPTED]", content, flags=re.IGNORECASE)
             return encrypted_content
-            
+
         except Exception as e:
             self.logger.error(f"❌ Failed to encrypt content: {e}")
             return content
-    
+
     def _redact_sensitive_content(self, content: str) -> str:
         """Redact sensitive content based on common patterns"""
         try:
@@ -212,53 +212,53 @@ class SecrecyFilter:
                 r'\bkey\s*[:=]\s*\w+\b',  # Key
                 r'\btoken\s*[:=]\s*\w+\b'  # Token
             ]
-            
+
             redacted_content = content
             for pattern in sensitive_patterns:
                 redacted_content = re.sub(pattern, "[REDACTED]", redacted_content, flags=re.IGNORECASE)
-            
+
             return redacted_content
-            
+
         except Exception as e:
             self.logger.error(f"❌ Failed to redact sensitive content: {e}")
             return content
-    
+
     def get_rules_by_secrecy_level(self, secrecy_level: SecrecyLevel) -> List[SecrecyRule]:
         """Get rules by secrecy level"""
         return [r for r in self.rules if r.secrecy_level == secrecy_level]
-    
+
     def get_rules_by_action(self, action: FilterAction) -> List[SecrecyRule]:
         """Get rules by action"""
         return [r for r in self.rules if r.action == action]
-    
+
     def get_enabled_rules(self) -> List[SecrecyRule]:
         """Get enabled rules"""
         return [r for r in self.rules if r.enabled]
-    
+
     def get_filter_summary(self) -> Dict[str, Any]:
         """Get filter summary"""
         try:
             total_rules = len(self.rules)
             enabled_rules = len(self.get_enabled_rules())
             total_filters = len(self.filter_results)
-            
+
             rules_by_secrecy_level = {}
             rules_by_action = {}
             filters_by_action = {}
-            
+
             for rule in self.rules:
                 # By secrecy level
                 level_key = rule.secrecy_level.value
                 rules_by_secrecy_level[level_key] = rules_by_secrecy_level.get(level_key, 0) + 1
-                
+
                 # By action
                 action_key = rule.action.value
                 rules_by_action[action_key] = rules_by_action.get(action_key, 0) + 1
-            
+
             for result in self.filter_results:
                 action_key = result.action_taken.value
                 filters_by_action[action_key] = filters_by_action.get(action_key, 0) + 1
-            
+
             return {
                 "total_rules": total_rules,
                 "enabled_rules": enabled_rules,
@@ -269,16 +269,16 @@ class SecrecyFilter:
                 "default_secrecy_level": self.default_secrecy_level.value,
                 "timestamp": datetime.now().isoformat()
             }
-            
+
         except Exception as e:
             self.logger.error(f"❌ Failed to get filter summary: {e}")
             return {"error": str(e)}
-    
+
     def clear_rules(self):
         """Clear all rules"""
         self.rules.clear()
         self.logger.info("🧹 All secrecy rules cleared")
-    
+
     def clear_filter_results(self):
         """Clear all filter results"""
         self.filter_results.clear()

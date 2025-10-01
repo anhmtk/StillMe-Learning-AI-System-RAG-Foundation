@@ -45,11 +45,11 @@ class ParaphraseResult:
 
 class Paraphraser:
     """Paraphraser sử dụng local AI models"""
-    
+
     def __init__(self, config: ParaphraseConfig = None):
         self.config = config or ParaphraseConfig()
         self.logger = logging.getLogger(__name__)
-        
+
         # Initialize API manager
         if UnifiedAPIManager:
             try:
@@ -59,11 +59,11 @@ class Paraphraser:
                 self.api_manager = None
         else:
             self.api_manager = None
-    
+
     def _create_paraphrase_prompt(self, text: str) -> str:
         """Tạo prompt cho paraphrase"""
         language = "tiếng Việt" if any(ord(char) > 127 for char in text) else "English"
-        
+
         prompt = f"""Hãy viết lại câu sau thành {self.config.num_variants} biến thể khác nhau trong {language}:
 
 Câu gốc: "{text}"
@@ -76,9 +76,9 @@ Yêu cầu:
 - Không thêm thông tin mới
 
 Biến thể:"""
-        
+
         return prompt
-    
+
     def paraphrase_text(self, text: str) -> ParaphraseResult:
         """Paraphrase một câu thành nhiều biến thể"""
         try:
@@ -98,19 +98,19 @@ Biến thể:"""
                     success=True,
                     metadata={"method": "mock"}
                 )
-            
+
             # Create prompt
             prompt = self._create_paraphrase_prompt(text)
-            
+
             # Call local model
             response = self.api_manager.get_response(
                 prompt=prompt,
                 model=self.config.model
             )
-            
+
             # Parse response
             variants = self._parse_paraphrase_response(response)
-            
+
             return ParaphraseResult(
                 original=text,
                 variants=variants,
@@ -122,7 +122,7 @@ Biến thể:"""
                     "num_variants": len(variants)
                 }
             )
-            
+
         except Exception as e:
             self.logger.error(f"Paraphrase failed: {e}")
             return ParaphraseResult(
@@ -132,12 +132,12 @@ Biến thể:"""
                 success=False,
                 error=str(e)
             )
-    
+
     def _parse_paraphrase_response(self, response: str) -> List[str]:
         """Parse response từ model thành list variants"""
         lines = response.strip().split('\n')
         variants = []
-        
+
         for line in lines:
             line = line.strip()
             if line and not line.startswith('#'):
@@ -145,18 +145,18 @@ Biến thể:"""
                 if line.startswith(('1.', '2.', '3.', '4.', '5.', '-', '*')):
                     line = line.split('.', 1)[-1].strip()
                     line = line.lstrip('-* ').strip()
-                
+
                 if line:
                     variants.append(line)
-        
+
         # Ensure we have the right number of variants
         if len(variants) < self.config.num_variants:
             # Pad with simple variations
             for i in range(len(variants), self.config.num_variants):
                 variants.append(f"{variants[0]} (biến thể {i+1})")
-        
+
         return variants[:self.config.num_variants]
-    
+
     def paraphrase_batch(self, texts: List[str]) -> List[ParaphraseResult]:
         """Paraphrase nhiều câu cùng lúc"""
         results = []
@@ -172,24 +172,24 @@ Biến thể:"""
                     success=False,
                     error=str(e)
                 ))
-        
+
         return results
 
 class ParaphraseAugmentor:
     """Augmentor chính cho paraphrase"""
-    
+
     def __init__(self, config: ParaphraseConfig = None):
         self.paraphraser = Paraphraser(config)
         self.logger = logging.getLogger(__name__)
-    
+
     def augment_dataset(self, input_file: str, output_file: str) -> Dict[str, Any]:
         """Augment dataset từ file input"""
         input_path = Path(input_file)
         output_path = Path(output_file)
-        
+
         if not input_path.exists():
             raise FileNotFoundError(f"Input file not found: {input_file}")
-        
+
         # Load input data
         texts = []
         with open(input_path, 'r', encoding='utf-8') as f:
@@ -206,23 +206,23 @@ class ParaphraseAugmentor:
                             texts.append(str(data))
                     except json.JSONDecodeError:
                         texts.append(line)
-        
+
         self.logger.info(f"Loaded {len(texts)} texts for paraphrasing")
-        
+
         # Paraphrase in batches
         batch_size = 10
         all_results = []
-        
+
         for i in range(0, len(texts), batch_size):
             batch = texts[i:i+batch_size]
             self.logger.info(f"Processing batch {i//batch_size + 1}/{(len(texts)-1)//batch_size + 1}")
-            
+
             results = self.paraphraser.paraphrase_batch(batch)
             all_results.extend(results)
-        
+
         # Save results
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         with open(output_path, 'w', encoding='utf-8') as f:
             for result in all_results:
                 if result.success:
@@ -235,7 +235,7 @@ class ParaphraseAugmentor:
                             "metadata": result.metadata
                         }
                         f.write(json.dumps(output_data, ensure_ascii=False) + '\n')
-        
+
         # Generate statistics
         stats = {
             "total_inputs": len(texts),
@@ -247,7 +247,7 @@ class ParaphraseAugmentor:
                 "temperature": self.paraphraser.config.temperature
             }
         }
-        
+
         self.logger.info(f"Paraphrase augmentation completed: {stats}")
         return stats
 
@@ -258,9 +258,9 @@ async def main():
         num_variants=3,
         temperature=0.7
     )
-    
+
     augmentor = ParaphraseAugmentor(config)
-    
+
     # Test single text
     result = await augmentor.paraphraser.paraphrase_text("Xin chào, hôm nay thế nào?")
     print(f"Original: {result.original}")

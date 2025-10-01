@@ -10,16 +10,17 @@ Version: 1.0.0
 Date: 2025-09-29
 """
 
-import smtplib
-import logging
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from email.mime.base import MIMEBase
-from email import encoders
-from datetime import datetime
 import json
+import logging
 import os
+import smtplib
+from datetime import datetime
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -29,11 +30,11 @@ logger = logging.getLogger(__name__)
 
 class EmailNotifier:
     """Real email notifier for StillMe IPC"""
-    
+
     def __init__(self):
         self.config_file = Path("artifacts/email_config.json")
         self.load_config()
-        
+
     def load_config(self):
         """Load email configuration from .env first, then config file"""
         # Load from .env first
@@ -46,7 +47,7 @@ class EmailNotifier:
             "recipient_email": os.getenv("ALERT_EMAIL", ""),
             "use_app_password": True
         }
-        
+
         # Load from config file if exists
         if self.config_file.exists():
             try:
@@ -56,16 +57,16 @@ class EmailNotifier:
                 env_config.update(file_config)
             except:
                 pass
-        
+
         self.config = env_config
         self.save_config()
-    
+
     def save_config(self):
         """Save email configuration"""
         self.config_file.parent.mkdir(parents=True, exist_ok=True)
         with open(self.config_file, 'w') as f:
             json.dump(self.config, f, indent=2)
-    
+
     def setup_email(self, sender_email: str, sender_password: str, recipient_email: str):
         """Setup email configuration"""
         self.config.update({
@@ -76,20 +77,20 @@ class EmailNotifier:
         })
         self.save_config()
         logger.info("📧 Email configuration saved")
-    
+
     def send_alert(self, title: str, message: str, level: str = "info"):
         """Send real email alert"""
         if not self.config["enabled"]:
             logger.warning("📧 Email notifications disabled")
             return False
-            
+
         try:
             # Create message
             msg = MIMEMultipart()
             msg['From'] = self.config["sender_email"]
             msg['To'] = self.config["recipient_email"]
             msg['Subject'] = f"🧠 StillMe IPC Alert: {title}"
-            
+
             # Create HTML body
             html_body = f"""
             <html>
@@ -128,30 +129,30 @@ class EmailNotifier:
             </body>
             </html>
             """
-            
+
             msg.attach(MIMEText(html_body, 'html'))
-            
+
             # Send email
             server = smtplib.SMTP(self.config["smtp_server"], self.config["smtp_port"])
             server.starttls()
             server.login(self.config["sender_email"], self.config["sender_password"])
-            
+
             text = msg.as_string()
             server.sendmail(self.config["sender_email"], self.config["recipient_email"], text)
             server.quit()
-            
+
             logger.info(f"📧 Email sent successfully: {title}")
             return True
-            
+
         except Exception as e:
             logger.error(f"📧 Failed to send email: {e}")
             return False
-    
+
     def test_email(self):
         """Test email configuration"""
         if not self.config["enabled"]:
             return False
-            
+
         return self.send_alert(
             "Test Email",
             "This is a test email from StillMe IPC Learning System.\n\nIf you receive this, email notifications are working correctly!",

@@ -77,7 +77,7 @@ FEATURES = {
 # Color Scheme
 COLORS = {
     "primary": "#1a1a2e",
-    "secondary": "#0f0f23", 
+    "secondary": "#0f0f23",
     "accent": "#ffb74d",
     "success": "#4caf50",
     "warning": "#ff9800",

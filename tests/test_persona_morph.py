@@ -3,7 +3,7 @@ import os
 
 import pytest
 
-from modules.persona_morph import (
+from stillme_core.modules.persona_morph import (
     PersonaMorph,
     Sentiment,
     StyleFeatures,

@@ -7,7 +7,7 @@ from typing import Dict, List, Any
 
 class DesignTokens:
     """FlutterFlow-style design tokens for StillMe IPC"""
-    
+
     # Color Palette
     COLORS = {
         # Background gradients
@@ -15,31 +15,31 @@ class DesignTokens:
         "backgroundPrimary": "#0F0C29",
         "backgroundSecondary": "#1a1a2e",
         "backgroundTertiary": "#16213e",
-        
+
         # Accent colors
         "accentViolet": "#6D28D9",
         "accentCyan": "#06B6D4",
         "accentPurple": "#8B5CF6",
         "accentBlue": "#3B82F6",
-        
+
         # Text colors
         "textPrimary": "#FFFFFF",
         "textSecondary": "#D1D5DB",
         "textMuted": "#9CA3AF",
         "textAccent": "#06B6D4",
-        
+
         # Status colors
         "success": "#10B981",
         "warning": "#F59E0B",
         "error": "#EF4444",
         "info": "#3B82F6",
-        
+
         # Interactive colors
         "buttonPrimary": "#6D28D9",
         "buttonSecondary": "#1a1a2e",
         "buttonHover": "#7C3AED",
         "buttonActive": "#5B21B6",
-        
+
         # Border and shadow
         "border": "#374151",
         "borderLight": "#4B5563",
@@ -47,18 +47,18 @@ class DesignTokens:
         "shadowLight": "0 2px 15px rgba(0,0,0,0.2)",
         "shadowHeavy": "0 8px 40px rgba(0,0,0,0.4)"
     }
-    
+
     # Typography
     TYPOGRAPHY = {
         "fontFamily": "Manrope, Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
         "fontFamilyMono": "'JetBrains Mono', 'Fira Code', 'Consolas', monospace",
-        
+
         # Font weights
         "headingWeight": 700,
         "subheadingWeight": 600,
         "bodyWeight": 400,
         "captionWeight": 500,
-        
+
         # Font sizes
         "fontSizeXs": "0.75rem",    # 12px
         "fontSizeSm": "0.875rem",   # 14px
@@ -68,13 +68,13 @@ class DesignTokens:
         "fontSize2xl": "1.5rem",    # 24px
         "fontSize3xl": "1.875rem",  # 30px
         "fontSize4xl": "2.25rem",   # 36px
-        
+
         # Line heights
         "lineHeightTight": 1.25,
         "lineHeightNormal": 1.5,
         "lineHeightRelaxed": 1.75
     }
-    
+
     # Layout
     LAYOUT = {
         "containerMaxWidth": "1200px",
@@ -82,7 +82,7 @@ class DesignTokens:
         "cardRadius": "1.25rem",      # 20px
         "buttonRadius": "0.75rem",    # 12px
         "inputRadius": "0.5rem",      # 8px
-        
+
         # Spacing
         "spacingXs": "0.25rem",       # 4px
         "spacingSm": "0.5rem",        # 8px
@@ -91,12 +91,12 @@ class DesignTokens:
         "spacingXl": "2rem",          # 32px
         "spacing2xl": "3rem",         # 48px
         "spacing3xl": "4rem",         # 64px
-        
+
         # Grid
         "gridGap": "1.5rem",
         "gridColumns": 12
     }
-    
+
     # Motion and Animation
     MOTION = {
         "hoverScale": 1.02,
@@ -104,17 +104,17 @@ class DesignTokens:
         "transitionFast": "all 0.15s ease-in-out",
         "transitionNormal": "all 0.3s ease-in-out",
         "transitionSlow": "all 0.5s ease-in-out",
-        
+
         # Easing functions
         "easeInOut": "cubic-bezier(0.4, 0, 0.2, 1)",
         "easeOut": "cubic-bezier(0, 0, 0.2, 1)",
         "easeIn": "cubic-bezier(0.4, 0, 1, 1)",
-        
+
         # Animation durations
         "durationFast": "150ms",
         "durationNormal": "300ms",
         "durationSlow": "500ms",
-        
+
         # Fade and slide animations
         "fadeInSlide": {
             "from": {"opacity": 0, "transform": "translateY(20px)"},
@@ -125,7 +125,7 @@ class DesignTokens:
             "to": {"opacity": 0, "transform": "translateY(-20px)"}
         }
     }
-    
+
     # Component-specific tokens
     COMPONENTS = {
         "chatBubble": {
@@ -145,7 +145,7 @@ class DesignTokens:
                 "borderRadius": "0.75rem"
             }
         },
-        
+
         "button": {
             "primary": {
                 "background": "#6D28D9",
@@ -166,7 +166,7 @@ class DesignTokens:
                 "fontWeight": 500
             }
         },
-        
+
         "input": {
             "background": "#1a1a2e",
             "backgroundFocus": "#374151",
@@ -178,7 +178,7 @@ class DesignTokens:
             "padding": "0.75rem 1rem"
         }
     }
-    
+
     @classmethod
     def get_gradient_css(cls, gradient_name: str) -> str:
         """Get CSS gradient string"""
@@ -188,7 +188,7 @@ class DesignTokens:
         elif gradient_name == "accent":
             return f"linear-gradient(135deg, {cls.COLORS['accentViolet']} 0%, {cls.COLORS['accentCyan']} 100%)"
         return ""
-    
+
     @classmethod
     def get_component_style(cls, component: str, variant: str = "default") -> Dict[str, Any]:
         """Get component style configuration"""
@@ -198,7 +198,7 @@ class DesignTokens:
             elif "default" in cls.COMPONENTS[component]:
                 return cls.COMPONENTS[component]["default"]
         return {}
-    
+
     @classmethod
     def get_tkinter_color(cls, color_name: str) -> str:
         """Convert color name to Tkinter-compatible format"""

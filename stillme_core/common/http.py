@@ -527,22 +527,22 @@ class SecureHttpClient(AsyncHttpClient):
     Secure HTTP Client with additional security features
     HTTP Client bảo mật với các tính năng bảo mật bổ sung
     """
-    
+
     def __init__(self, config: Optional[HTTPClientConfig] = None):
         """Initialize secure HTTP client"""
         if config is None:
             config = HTTPClientConfig()
-        
+
         # Add security headers
         if config.default_headers is None:
             config.default_headers = {}
-        
+
         config.default_headers.update({
             "X-Content-Type-Options": "nosniff",
             "X-Frame-Options": "DENY",
             "X-XSS-Protection": "1; mode=block",
             "Strict-Transport-Security": "max-age=31536000; includeSubDomains"
         })
-        
+
         super().__init__(config)
         logger.info("Secure HTTP client initialized with security headers")

@@ -22,27 +22,27 @@ __version__ = "1.0.0"
 __author__ = "StillMe AI Framework"
 
 # Import core metrics components
-from .emitter import MetricsEmitter, Metric, get_metrics_emitter
-from .registry import MetricsRegistry, MetricDefinition, get_metrics_registry
-from .privacy import PrivacyManager, PIIRedactor, get_privacy_manager
+from .emitter import Metric, MetricsEmitter, get_metrics_emitter
+from .privacy import PIIRedactor, PrivacyManager, get_privacy_manager
 from .queries import MetricsQueries, get_metrics_queries
+from .registry import MetricDefinition, MetricsRegistry, get_metrics_registry
 
 __all__ = [
     # Core components
     'MetricsEmitter',
     'Metric',
     'get_metrics_emitter',
-    
+
     # Registry
     'MetricsRegistry',
     'MetricDefinition',
     'get_metrics_registry',
-    
+
     # Privacy
     'PrivacyManager',
     'PIIRedactor',
     'get_privacy_manager',
-    
+
     # Queries
     'MetricsQueries',
     'get_metrics_queries',

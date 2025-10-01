@@ -2,7 +2,7 @@
 
 import pytest
 
-from modules.conversational_core_v1 import ConversationalCore
+from stillme_core.modules.conversational_core_v1 import ConversationalCore
 
 
 class TestPersonaEngine:

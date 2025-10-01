@@ -22,13 +22,13 @@ class EnhancedSettings(BaseSettings):
 
     # Security
     SECRET_KEY: str = Field(
-        default="your-secret-key-here-change-in-production", 
+        default="your-secret-key-here-change-in-production",
         env="SECRET_KEY"
     )
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
-    
+
     # Enhanced security settings
     PASSWORD_MIN_LENGTH: int = 12
     PASSWORD_REQUIRE_UPPERCASE: bool = True
@@ -64,13 +64,13 @@ class EnhancedSettings(BaseSettings):
         env="ALLOWED_ORIGINS",
     )
     ALLOWED_HOSTS: List[str] = Field(
-        default=["localhost", "127.0.0.1"], 
+        default=["localhost", "127.0.0.1"],
         env="ALLOWED_HOSTS"
     )
 
     # StillMe Integration
     STILLME_CORE_URL: str = Field(
-        default="http://localhost:8000", 
+        default="http://localhost:8000",
         env="STILLME_CORE_URL"
     )
     STILLME_API_KEY: Optional[str] = Field(default=None, env="STILLME_API_KEY")
@@ -144,7 +144,7 @@ class EnhancedSettings(BaseSettings):
     FIREBASE_PROJECT_ID: Optional[str] = Field(default=None, env="FIREBASE_PROJECT_ID")
     FIREBASE_PRIVATE_KEY: Optional[str] = Field(default=None, env="FIREBASE_PRIVATE_KEY")
     FIREBASE_CLIENT_EMAIL: Optional[str] = Field(default=None, env="FIREBASE_CLIENT_EMAIL")
-    
+
     # Email notifications
     SMTP_HOST: Optional[str] = Field(default=None, env="SMTP_HOST")
     SMTP_PORT: int = Field(default=587, env="SMTP_PORT")

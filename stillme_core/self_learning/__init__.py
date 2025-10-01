@@ -1,10 +1,15 @@
 """Self Learning module for StillMe Framework"""
 
-from .experience_memory import ExperienceMemory, ExperienceCategory, ExperienceType, ExperienceQuery
+from .experience_memory import (
+    ExperienceCategory,
+    ExperienceMemory,
+    ExperienceQuery,
+    ExperienceType,
+)
 
 __all__ = [
     'ExperienceMemory',
     'ExperienceCategory',
-    'ExperienceType', 
+    'ExperienceType',
     'ExperienceQuery'
 ]

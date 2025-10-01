@@ -6,29 +6,29 @@ Manager for learning proposals with database operations.
 """
 
 import json
+import logging
 import uuid
 from datetime import datetime
-from typing import List, Optional, Dict, Any
 from pathlib import Path
-import logging
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
 class ProposalsManager:
     """Manager for learning proposals"""
-    
+
     def __init__(self, db_path: str = "data/learning/proposals.db"):
         """Initialize proposals manager"""
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         # Initialize database
         self._init_database()
-    
+
     def _init_database(self):
         """Initialize database schema"""
         import sqlite3
-        
+
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS proposals (
@@ -53,11 +53,11 @@ class ProposalsManager:
                     rejection_reason TEXT
                 )
             """)
-    
+
     def create_proposal(self, **kwargs) -> 'LearningProposal':
         """Create a new learning proposal"""
         proposal_id = str(uuid.uuid4())
-        
+
         # Create proposal data
         proposal_data = {
             "id": proposal_id,
@@ -74,7 +74,7 @@ class ProposalsManager:
             "status": "pending",
             "created_at": datetime.now().isoformat()
         }
-        
+
         # Save to database
         import sqlite3
         with sqlite3.connect(self.db_path) as conn:
@@ -85,9 +85,9 @@ class ProposalsManager:
                     priority, risk_assessment, status, created_at, created_by
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """, tuple(proposal_data.values()) + ("system",))
-        
+
         logger.info(f"Created learning proposal: {proposal_id}")
-        
+
         # Create LearningProposal object
         return LearningProposal(
             id=proposal_id,
@@ -104,27 +104,27 @@ class ProposalsManager:
             status="pending",
             created_at=datetime.now()
         )
-    
+
     def get_all_proposals(self) -> List['LearningProposal']:
         """Get all proposals"""
         import sqlite3
-        
+
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.execute("""
                 SELECT * FROM proposals 
                 ORDER BY created_at DESC
             """)
-            
+
             rows = cursor.fetchall()
             proposals = []
-            
+
             for row in rows:
                 # Handle None values safely
                 learning_objectives = row[7] if row[7] else "[]"
                 prerequisites = row[8] if row[8] else "[]"
                 expected_outcomes = row[9] if row[9] else "[]"
                 risk_assessment = row[10] if row[10] else "{}"
-                
+
                 try:
                     proposal = LearningProposal(
                         id=row[0],
@@ -145,13 +145,13 @@ class ProposalsManager:
                 except Exception as e:
                     print(f"Error parsing proposal {row[0]}: {e}")
                     continue
-            
+
             return proposals
-    
+
     def get_pending_proposals(self, limit: int = 10) -> List['LearningProposal']:
         """Get pending proposals"""
         import sqlite3
-        
+
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.execute("""
                 SELECT * FROM proposals 
@@ -159,17 +159,17 @@ class ProposalsManager:
                 ORDER BY created_at DESC 
                 LIMIT ?
             """, (limit,))
-            
+
             rows = cursor.fetchall()
             proposals = []
-            
+
             for row in rows:
                 # Handle None values safely
                 learning_objectives = row[7] if row[7] else "[]"  # Fixed: learning_objectives is at index 7
                 prerequisites = row[8] if row[8] else "[]"  # Fixed: prerequisites is at index 8
                 expected_outcomes = row[9] if row[9] else "[]"  # Fixed: expected_outcomes is at index 9
                 risk_assessment = row[10] if row[10] else "{}"  # risk_assessment is at index 10
-                
+
                 try:
                     proposal = LearningProposal(
                         id=row[0],
@@ -210,40 +210,40 @@ class ProposalsManager:
                     except Exception as e2:
                         print(f"Error creating simple proposal {row[0]}: {e2}")
                         continue
-            
+
             return proposals
-    
+
     def approve_proposal(self, proposal_id: str, approved_by: str) -> bool:
         """Approve a proposal"""
         import sqlite3
-        
+
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("""
                 UPDATE proposals 
                 SET status = 'approved', approved_at = ?, approved_by = ?
                 WHERE id = ?
             """, (datetime.now().isoformat(), approved_by, proposal_id))
-        
+
         logger.info(f"Approved proposal: {proposal_id}")
         return True
-    
+
     def reject_proposal(self, proposal_id: str, rejected_by: str, reason: str = "") -> bool:
         """Reject a proposal"""
         import sqlite3
-        
+
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("""
                 UPDATE proposals 
                 SET status = 'rejected', rejected_at = ?, rejected_by = ?, rejection_reason = ?
                 WHERE id = ?
             """, (datetime.now().isoformat(), rejected_by, reason, proposal_id))
-        
+
         logger.info(f"Rejected proposal: {proposal_id}")
         return True
 
 class LearningProposal:
     """Learning proposal data class"""
-    
+
     def __init__(self, **kwargs):
         self.id = kwargs.get("id", "")
         self.title = kwargs.get("title", "")

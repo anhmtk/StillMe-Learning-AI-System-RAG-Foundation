@@ -7,11 +7,11 @@ StillMe Code Executor - Stub Implementation
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Union
-from dataclasses import dataclass
+import os
 import subprocess
 import tempfile
-import os
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Union
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class ExecutionConfig:
     max_memory: int = 512  # MB
     allowed_languages: List[str] = None
     sandbox_mode: bool = True
-    
+
     def __post_init__(self):
         if self.allowed_languages is None:
             self.allowed_languages = ["python", "bash"]
@@ -35,16 +35,16 @@ class PatchExecutor:
     
     # TODO[stabilize]: Implement full code execution functionality
     """
-    
+
     def __init__(self, config: Optional[ExecutionConfig] = None):
         """Initialize Patch Executor"""
         self.config = config or ExecutionConfig()
         logger.warning("PatchExecutor: Using stub implementation - not for production")
-    
+
     def execute_code(self, code: str, language: str = "python") -> Dict[str, Any]:
         """Execute code safely"""
         logger.warning(f"PatchExecutor.execute_code({language}): Stub implementation")
-        
+
         if language not in self.config.allowed_languages:
             return {
                 "success": False,
@@ -52,7 +52,7 @@ class PatchExecutor:
                 "output": "",
                 "execution_time": 0
             }
-        
+
         # Basic stub execution
         return {
             "success": True,
@@ -61,7 +61,7 @@ class PatchExecutor:
             "memory_used": 0,
             "warnings": ["Stub implementation - no real execution"]
         }
-    
+
     def execute_patch(self, patch: str) -> Dict[str, Any]:
         """Execute a patch"""
         logger.warning("PatchExecutor.execute_patch(): Stub implementation")
@@ -71,7 +71,7 @@ class PatchExecutor:
             "changes": [],
             "warnings": ["Stub implementation - no real patch execution"]
         }
-    
+
     def validate_code(self, code: str, language: str = "python") -> Dict[str, Any]:
         """Validate code syntax"""
         logger.warning(f"PatchExecutor.validate_code({language}): Stub implementation")
@@ -80,7 +80,7 @@ class PatchExecutor:
             "errors": [],
             "warnings": ["Stub implementation - no real validation"]
         }
-    
+
     def get_execution_stats(self) -> Dict[str, Any]:
         """Get execution statistics"""
         return {
@@ -97,12 +97,12 @@ class SafeExecutor:
     
     # TODO[stabilize]: Implement full safe execution functionality
     """
-    
+
     def __init__(self, config: Optional[ExecutionConfig] = None):
         """Initialize Safe Executor"""
         self.config = config or ExecutionConfig()
         logger.warning("SafeExecutor: Using stub implementation - not for production")
-    
+
     def run_in_sandbox(self, code: str, language: str = "python") -> Dict[str, Any]:
         """Run code in sandbox"""
         logger.warning(f"SafeExecutor.run_in_sandbox({language}): Stub implementation")
@@ -112,7 +112,7 @@ class SafeExecutor:
             "sandbox_id": "stub_sandbox",
             "execution_time": 0.1
         }
-    
+
     def cleanup_sandbox(self, sandbox_id: str) -> bool:
         """Cleanup sandbox"""
         logger.warning(f"SafeExecutor.cleanup_sandbox({sandbox_id}): Stub implementation")

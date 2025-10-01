@@ -16,7 +16,7 @@ def run_command(command, description):
     print(f"\n🚀 {description}")
     print(f"Command: {command}")
     print("-" * 50)
-    
+
     try:
         result = subprocess.run(command, shell=False, check=True, capture_output=True, text=True)
         print("✅ Success")
@@ -31,26 +31,26 @@ def run_command(command, description):
 def check_prerequisites():
     """Check if prerequisites are met"""
     print("🔍 Checking prerequisites...")
-    
+
     # Check if Python is available
     if not run_command("python --version", "Checking Python version"):
         return False
-    
+
     # Check if pytest is installed
     if not run_command("pytest --version", "Checking pytest installation"):
         return False
-    
+
     # Check if Node.js is available
     if not run_command("node --version", "Checking Node.js version"):
         return False
-    
+
     # Check if required directories exist
     required_dirs = ["tests", "reports", "logs", "config", "policies"]
     for dir_path in required_dirs:
         if not Path(dir_path).exists():
             print(f"❌ Required directory not found: {dir_path}")
             return False
-    
+
     # Check if required files exist
     required_files = [
         "config/staging.yaml",
@@ -62,7 +62,7 @@ def check_prerequisites():
         if not Path(file_path).exists():
             print(f"❌ Required file not found: {file_path}")
             return False
-    
+
     print("✅ All prerequisites met")
     return True
 
@@ -160,7 +160,7 @@ def run_coverage_check():
 def generate_qa_report():
     """Generate comprehensive QA report"""
     print("\n📊 Generating QA report...")
-    
+
     # Check if reports were generated
     report_files = [
         "reports/test_report.html",
@@ -170,7 +170,7 @@ def generate_qa_report():
         "reports/bandit-report.json",
         "reports/safety-report.json"
     ]
-    
+
     qa_report = {
         "timestamp": datetime.now().isoformat(),
         "reports_generated": [],
@@ -190,7 +190,7 @@ def generate_qa_report():
             "e2e_tests": "✅ Passed"
         }
     }
-    
+
     for report_file in report_files:
         if Path(report_file).exists():
             qa_report["reports_generated"].append(report_file)
@@ -198,13 +198,13 @@ def generate_qa_report():
         else:
             qa_report["reports_missing"].append(report_file)
             print(f"❌ {report_file}")
-    
+
     # Save QA report
     qa_report_path = "reports/qa_report.json"
     with open(qa_report_path, 'w') as f:
         import json
         json.dump(qa_report, f, indent=2)
-    
+
     print(f"📋 QA report saved to {qa_report_path}")
     return qa_report
 
@@ -215,23 +215,23 @@ def main():
     parser.add_argument("--full", action="store_true", help="Run full QA suite")
     parser.add_argument("--skip-prereq", action="store_true", help="Skip prerequisite checks")
     parser.add_argument("--skip-e2e", action="store_true", help="Skip E2E tests")
-    
+
     args = parser.parse_args()
-    
+
     print("🧪 NicheRadar v1.5 QA Suite Runner")
     print("=" * 50)
-    
+
     # Check prerequisites unless skipped
     if not args.skip_prereq:
         if not check_prerequisites():
             print("❌ Prerequisites not met. Exiting.")
             sys.exit(1)
-    
+
     # Create reports directory
     os.makedirs("reports", exist_ok=True)
-    
+
     success = True
-    
+
     if args.quick:
         # Quick QA checks
         checks = [
@@ -257,20 +257,20 @@ def main():
             ("All Tests with Coverage", run_all_tests_with_coverage),
             ("Coverage Check", run_coverage_check)
         ]
-        
+
         # Add E2E tests unless skipped
         if not args.skip_e2e:
             checks.append(("E2E Tests", run_e2e_tests))
-    
+
     # Run all checks
     for check_name, check_func in checks:
         print(f"\n📋 {check_name}:")
         if not check_func():
             success = False
-    
+
     # Generate QA report
     qa_report = generate_qa_report()
-    
+
     # Print final results
     print("\n" + "=" * 50)
     if success:

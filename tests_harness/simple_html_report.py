@@ -17,51 +17,51 @@ logger = logging.getLogger(__name__)
 
 class SimpleHTMLReportBuilder:
     """Simple HTML Report Builder"""
-    
+
     def __init__(self, output_dir: str = "tests_harness/reports"):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.logger = logger
-    
-    def build_simple_report(self, 
+
+    def build_simple_report(self,
                           persona_scores: List[Dict],
-                          safety_scores: List[Dict], 
+                          safety_scores: List[Dict],
                           translation_scores: List[Dict],
                           efficiency_scores: List[Dict],
                           metadata: Dict[str, Any]) -> str:
         """Tạo báo cáo HTML đơn giản"""
         try:
             self.logger.info("🏗️ Building simple HTML report...")
-            
+
             # Generate timestamp
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             report_file = self.output_dir / f"stillme_simple_report_{timestamp}.html"
-            
+
             # Calculate overall metrics
             overall_metrics = self._calculate_overall_metrics(
                 persona_scores, safety_scores, translation_scores, efficiency_scores
             )
-            
+
             # Generate HTML content
             html_content = self._generate_simple_html(
-                persona_scores, safety_scores, translation_scores, 
+                persona_scores, safety_scores, translation_scores,
                 efficiency_scores, overall_metrics, metadata
             )
-            
+
             # Write to file
             with open(report_file, 'w', encoding='utf-8') as f:
                 f.write(html_content)
-            
+
             self.logger.info(f"✅ Simple HTML report generated: {report_file}")
             return str(report_file)
-            
+
         except Exception as e:
             self.logger.error(f"❌ Failed to build simple HTML report: {e}")
             return ""
-    
-    def _calculate_overall_metrics(self, 
+
+    def _calculate_overall_metrics(self,
                                  persona_scores: List[Dict],
-                                 safety_scores: List[Dict], 
+                                 safety_scores: List[Dict],
                                  translation_scores: List[Dict],
                                  efficiency_scores: List[Dict]) -> Dict[str, Any]:
         """Tính toán metrics tổng thể"""
@@ -71,13 +71,13 @@ class SimpleHTMLReportBuilder:
             avg_safety = sum(score.get('overall_safety_score', 0) for score in safety_scores) / max(len(safety_scores), 1)
             avg_translation = sum(score.get('overall_translation_score', 0) for score in translation_scores) / max(len(translation_scores), 1)
             avg_efficiency = sum(score.get('overall_efficiency_score', 0) for score in efficiency_scores) / max(len(efficiency_scores), 1)
-            
+
             # Overall score
             overall_score = (avg_persona + avg_safety + avg_translation + avg_efficiency) / 4
-            
+
             # Score distribution
             total_responses = max(len(persona_scores), len(safety_scores), len(translation_scores), len(efficiency_scores))
-            
+
             return {
                 "overall_score": round(overall_score, 3),
                 "average_scores": {
@@ -94,39 +94,39 @@ class SimpleHTMLReportBuilder:
                     "poor": len([s for s in persona_scores if s.get('overall_score', 0) < 0.4])
                 }
             }
-            
+
         except Exception as e:
             self.logger.error(f"Error calculating overall metrics: {e}")
             return {"overall_score": 0, "average_scores": {}, "total_responses": 0, "score_distribution": {}}
-    
-    def _generate_simple_html(self, 
+
+    def _generate_simple_html(self,
                              persona_scores: List[Dict],
-                             safety_scores: List[Dict], 
+                             safety_scores: List[Dict],
                              translation_scores: List[Dict],
                              efficiency_scores: List[Dict],
                              overall_metrics: Dict[str, Any],
                              metadata: Dict[str, Any]) -> str:
         """Tạo HTML đơn giản"""
-        
+
         # Get values
         overall_score = overall_metrics.get('overall_score', 0)
         total_responses = overall_metrics.get('total_responses', 0)
         avg_scores = overall_metrics.get('average_scores', {})
         score_dist = overall_metrics.get('score_distribution', {})
-        
+
         persona_score = avg_scores.get('persona', 0)
         safety_score = avg_scores.get('safety', 0)
         translation_score = avg_scores.get('translation', 0)
         efficiency_score = avg_scores.get('efficiency', 0)
-        
+
         excellent_count = score_dist.get('excellent', 0)
         good_count = score_dist.get('good', 0)
         fair_count = score_dist.get('fair', 0)
         poor_count = score_dist.get('poor', 0)
-        
+
         # Generate recommendations
         recommendations = self._generate_recommendations(overall_metrics)
-        
+
         # Get metadata
         test_date = metadata.get('test_date', datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         dataset_size = metadata.get('dataset_size', 'N/A')
@@ -134,7 +134,7 @@ class SimpleHTMLReportBuilder:
         environment = metadata.get('environment', 'Local')
         stillme_version = metadata.get('stillme_version', '1.0.0')
         timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-        
+
         # HTML content
         html_content = f"""
 <!DOCTYPE html>
@@ -398,9 +398,9 @@ class SimpleHTMLReportBuilder:
 </body>
 </html>
         """
-        
+
         return html_content
-    
+
     def _get_score_class(self, score: float) -> str:
         """Lấy CSS class cho score"""
         if score >= 0.8:
@@ -411,33 +411,33 @@ class SimpleHTMLReportBuilder:
             return "fair"
         else:
             return "poor"
-    
+
     def _generate_recommendations(self, overall_metrics: Dict[str, Any]) -> str:
         """Tạo recommendations dựa trên kết quả"""
         recommendations = []
-        
+
         avg_scores = overall_metrics.get('average_scores', {})
-        
+
         # Persona recommendations
         persona_score = avg_scores.get('persona', 0)
         if persona_score < 0.6:
             recommendations.append("🔧 <strong>Persona:</strong> Cải thiện dynamic communication style và consistency")
-        
+
         # Safety recommendations
         safety_score = avg_scores.get('safety', 0)
         if safety_score < 0.7:
             recommendations.append("🛡️ <strong>Safety:</strong> Tăng cường ethical filtering và jailbreak resistance")
-        
+
         # Translation recommendations
         translation_score = avg_scores.get('translation', 0)
         if translation_score < 0.6:
             recommendations.append("🌐 <strong>Translation:</strong> Cải thiện language detection và translation accuracy")
-        
+
         # Efficiency recommendations
         efficiency_score = avg_scores.get('efficiency', 0)
         if efficiency_score < 0.7:
             recommendations.append("⚡ <strong>Efficiency:</strong> Tối ưu hóa latency và token cost")
-        
+
         # Overall recommendations
         overall_score = overall_metrics.get('overall_score', 0)
         if overall_score >= 0.8:
@@ -446,35 +446,35 @@ class SimpleHTMLReportBuilder:
             recommendations.append("👍 <strong>Good!</strong> StillMe AI hoạt động tốt, có thể cải thiện thêm")
         else:
             recommendations.append("⚠️ <strong>Needs Improvement:</strong> Cần cải thiện đáng kể để đạt hiệu suất tốt")
-        
+
         return "<br>".join(recommendations) if recommendations else "No specific recommendations at this time."
 
 # Example usage
 if __name__ == "__main__":
     # Test Simple HTML Report Builder
     builder = SimpleHTMLReportBuilder()
-    
+
     # Mock data
     mock_persona_scores = [
         {"overall_score": 0.8, "addressing_style": 0.7, "communication_tone": 0.9, "consistency": 0.8},
         {"overall_score": 0.6, "addressing_style": 0.5, "communication_tone": 0.7, "consistency": 0.6}
     ]
-    
+
     mock_safety_scores = [
         {"overall_safety_score": 0.9, "ethical_filtering": 0.8, "jailbreak_resistance": 0.9, "pii_protection": 0.9},
         {"overall_safety_score": 0.7, "ethical_filtering": 0.6, "jailbreak_resistance": 0.8, "pii_protection": 0.7}
     ]
-    
+
     mock_translation_scores = [
         {"overall_translation_score": 0.7, "language_detection": 0.8, "translation_accuracy": 0.6, "context_preservation": 0.7},
         {"overall_translation_score": 0.5, "language_detection": 0.6, "translation_accuracy": 0.4, "context_preservation": 0.5}
     ]
-    
+
     mock_efficiency_scores = [
         {"overall_efficiency_score": 0.8, "latency": 0.9, "token_cost": 0.7, "response_quality": 0.8},
         {"overall_efficiency_score": 0.6, "latency": 0.7, "token_cost": 0.5, "response_quality": 0.6}
     ]
-    
+
     mock_metadata = {
         "test_date": "2025-01-16 14:30:00",
         "dataset_size": "100 test cases",
@@ -482,13 +482,13 @@ if __name__ == "__main__":
         "environment": "Local Development",
         "stillme_version": "1.0.0"
     }
-    
+
     # Build report
     html_file = builder.build_simple_report(
-        mock_persona_scores, mock_safety_scores, 
-        mock_translation_scores, mock_efficiency_scores, 
+        mock_persona_scores, mock_safety_scores,
+        mock_translation_scores, mock_efficiency_scores,
         mock_metadata
     )
-    
+
     print(f"🏗️ Simple HTML Report Builder Test Results:")
     print(f"✅ HTML report generated: {html_file}")

@@ -31,16 +31,16 @@ class EfficiencyScore:
     throughput_score: float  # 0-1: điểm throughput
     resource_efficiency: float  # 0-1: hiệu quả sử dụng tài nguyên
     overall_efficiency_score: float  # 0-1: điểm hiệu suất tổng
-    
+
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
 
 class EfficiencyEval:
     """Evaluator cho hiệu suất và chi phí"""
-    
+
     def __init__(self):
         self.logger = logger
-        
+
         # Latency thresholds (milliseconds)
         self.latency_thresholds = {
             'excellent': 500,  # < 500ms
@@ -48,7 +48,7 @@ class EfficiencyEval:
             'fair': 2000,      # 1000-2000ms
             'poor': 5000       # > 2000ms
         }
-        
+
         # Token efficiency thresholds
         self.token_thresholds = {
             'excellent': 0.8,  # > 80% efficiency
@@ -56,7 +56,7 @@ class EfficiencyEval:
             'fair': 0.4,       # 40-60%
             'poor': 0.2        # < 40%
         }
-        
+
         # Response quality indicators
         self.quality_indicators = {
             'length_appropriate': {
@@ -80,7 +80,7 @@ class EfficiencyEval:
                 r'\b(liên quan|phù hợp|thích hợp|áp dụng)\b'
             ]
         }
-        
+
         # Throughput thresholds (requests per second)
         self.throughput_thresholds = {
             'excellent': 10,   # > 10 RPS
@@ -88,9 +88,9 @@ class EfficiencyEval:
             'fair': 2,         # 2-5 RPS
             'poor': 1          # < 2 RPS
         }
-    
-    def evaluate(self, 
-                 response: str, 
+
+    def evaluate(self,
+                 response: str,
                  latency_ms: float,
                  token_count: int,
                  cost_estimate: float,
@@ -112,24 +112,24 @@ class EfficiencyEval:
         """
         try:
             self.logger.info(f"🔍 Evaluating efficiency for response: {response[:100]}...")
-            
+
             # 1. Đánh giá latency
             latency_score = self._evaluate_latency(latency_ms)
-            
+
             # 2. Đánh giá token efficiency
             token_efficiency = self._evaluate_token_efficiency(token_count, response, user_input)
-            
+
             # 3. Đánh giá response quality
             response_quality = self._evaluate_response_quality(response, user_input)
-            
+
             # 4. Đánh giá throughput (cần context với multiple requests)
             throughput_score = self._evaluate_throughput(context)
-            
+
             # 5. Đánh giá resource efficiency
             resource_efficiency = self._evaluate_resource_efficiency(
                 token_count, cost_estimate, latency_ms, response
             )
-            
+
             # 6. Tính điểm hiệu suất tổng
             overall_score = (
                 latency_score * 0.25 +
@@ -138,7 +138,7 @@ class EfficiencyEval:
                 throughput_score * 0.15 +
                 resource_efficiency * 0.10
             )
-            
+
             result = EfficiencyScore(
                 latency_score=latency_score,
                 token_efficiency=token_efficiency,
@@ -147,14 +147,14 @@ class EfficiencyEval:
                 resource_efficiency=resource_efficiency,
                 overall_efficiency_score=overall_score
             )
-            
+
             self.logger.info(f"✅ Efficiency evaluation completed. Overall score: {overall_score:.3f}")
             return result
-            
+
         except Exception as e:
             self.logger.error(f"❌ Efficiency evaluation failed: {e}")
             return EfficiencyScore(0, 0, 0, 0, 0, 0)
-    
+
     def _evaluate_latency(self, latency_ms: float) -> float:
         """Đánh giá latency"""
         try:
@@ -168,27 +168,27 @@ class EfficiencyEval:
                 return 0.4
             else:
                 return 0.2
-                
+
         except Exception as e:
             self.logger.error(f"Error evaluating latency: {e}")
             return 0.0
-    
+
     def _evaluate_token_efficiency(self, token_count: int, response: str, user_input: str) -> float:
         """Đánh giá hiệu quả sử dụng token"""
         try:
             if token_count == 0:
                 return 0.0
-            
+
             # Calculate response length
             response_length = len(response)
             input_length = len(user_input)
-            
+
             # Calculate token efficiency ratio
             if input_length > 0:
                 efficiency_ratio = response_length / (input_length + token_count)
             else:
                 efficiency_ratio = response_length / token_count
-            
+
             # Normalize to 0-1 scale
             if efficiency_ratio >= 0.8:
                 return 1.0
@@ -200,22 +200,22 @@ class EfficiencyEval:
                 return 0.4
             else:
                 return 0.2
-                
+
         except Exception as e:
             self.logger.error(f"Error evaluating token efficiency: {e}")
             return 0.0
-    
+
     def _evaluate_response_quality(self, response: str, user_input: str) -> float:
         """Đánh giá chất lượng phản hồi"""
         try:
             score = 0.0
             total_checks = 0
-            
+
             # Check length appropriateness
             response_length = len(response)
             min_length = self.quality_indicators['length_appropriate']['min_length']
             max_length = self.quality_indicators['length_appropriate']['max_length']
-            
+
             if min_length <= response_length <= max_length:
                 score += 0.2
             elif response_length < min_length:
@@ -223,49 +223,49 @@ class EfficiencyEval:
             else:
                 score += 0.15  # Too long but acceptable
             total_checks += 1
-            
+
             # Check completeness
-            completeness_count = sum(len(re.findall(pattern, response, re.IGNORECASE)) 
+            completeness_count = sum(len(re.findall(pattern, response, re.IGNORECASE))
                                    for pattern in self.quality_indicators['completeness'])
             if completeness_count > 0:
                 score += 0.2
             total_checks += 1
-            
+
             # Check clarity
-            clarity_count = sum(len(re.findall(pattern, response, re.IGNORECASE)) 
+            clarity_count = sum(len(re.findall(pattern, response, re.IGNORECASE))
                               for pattern in self.quality_indicators['clarity'])
             if clarity_count > 0:
                 score += 0.2
             total_checks += 1
-            
+
             # Check helpfulness
-            helpfulness_count = sum(len(re.findall(pattern, response, re.IGNORECASE)) 
+            helpfulness_count = sum(len(re.findall(pattern, response, re.IGNORECASE))
                                   for pattern in self.quality_indicators['helpfulness'])
             if helpfulness_count > 0:
                 score += 0.2
             total_checks += 1
-            
+
             # Check relevance
-            relevance_count = sum(len(re.findall(pattern, response, re.IGNORECASE)) 
+            relevance_count = sum(len(re.findall(pattern, response, re.IGNORECASE))
                                 for pattern in self.quality_indicators['relevance'])
             if relevance_count > 0:
                 score += 0.2
             total_checks += 1
-            
+
             return min(score / max(total_checks, 1), 1.0)
-            
+
         except Exception as e:
             self.logger.error(f"Error evaluating response quality: {e}")
             return 0.0
-    
+
     def _evaluate_throughput(self, context: Optional[Dict]) -> float:
         """Đánh giá throughput"""
         try:
             if not context or 'throughput_rps' not in context:
                 return 0.5  # Default score if no throughput data
-            
+
             throughput_rps = context['throughput_rps']
-            
+
             if throughput_rps >= self.throughput_thresholds['excellent']:
                 return 1.0
             elif throughput_rps >= self.throughput_thresholds['good']:
@@ -276,21 +276,21 @@ class EfficiencyEval:
                 return 0.4
             else:
                 return 0.2
-                
+
         except Exception as e:
             self.logger.error(f"Error evaluating throughput: {e}")
             return 0.0
-    
-    def _evaluate_resource_efficiency(self, 
-                                    token_count: int, 
-                                    cost_estimate: float, 
-                                    latency_ms: float, 
+
+    def _evaluate_resource_efficiency(self,
+                                    token_count: int,
+                                    cost_estimate: float,
+                                    latency_ms: float,
                                     response: str) -> float:
         """Đánh giá hiệu quả sử dụng tài nguyên"""
         try:
             score = 0.0
             total_checks = 0
-            
+
             # Check cost per token
             if token_count > 0:
                 cost_per_token = cost_estimate / token_count
@@ -303,7 +303,7 @@ class EfficiencyEval:
                 else:  # Poor
                     score += 0.1
             total_checks += 1
-            
+
             # Check latency per token
             if token_count > 0:
                 latency_per_token = latency_ms / token_count
@@ -316,7 +316,7 @@ class EfficiencyEval:
                 else:  # Poor
                     score += 0.1
             total_checks += 1
-            
+
             # Check response value per token
             response_length = len(response)
             if token_count > 0:
@@ -330,17 +330,17 @@ class EfficiencyEval:
                 else:  # Low value
                     score += 0.1
             total_checks += 1
-            
+
             return min(score / max(total_checks, 1), 1.0)
-            
+
         except Exception as e:
             self.logger.error(f"Error evaluating resource efficiency: {e}")
             return 0.0
-    
+
     def batch_evaluate(self, responses: List[Dict[str, Any]]) -> List[EfficiencyScore]:
         """Đánh giá hàng loạt responses"""
         results = []
-        
+
         for i, item in enumerate(responses):
             try:
                 response = item.get('response', '')
@@ -349,24 +349,24 @@ class EfficiencyEval:
                 cost_estimate = item.get('cost_estimate', 0)
                 user_input = item.get('user_input', '')
                 context = item.get('context', {})
-                
+
                 score = self.evaluate(response, latency_ms, token_count, cost_estimate, user_input, context)
                 results.append(score)
-                
+
                 self.logger.info(f"✅ Evaluated response {i+1}/{len(responses)}")
-                
+
             except Exception as e:
                 self.logger.error(f"❌ Failed to evaluate response {i+1}: {e}")
                 results.append(EfficiencyScore(0, 0, 0, 0, 0, 0))
-        
+
         return results
-    
+
     def generate_report(self, scores: List[EfficiencyScore]) -> Dict[str, Any]:
         """Tạo báo cáo tổng hợp"""
         try:
             if not scores:
                 return {"error": "No scores provided"}
-            
+
             # Calculate statistics
             total_scores = len(scores)
             avg_latency = sum(s.latency_score for s in scores) / total_scores
@@ -375,11 +375,11 @@ class EfficiencyEval:
             avg_throughput = sum(s.throughput_score for s in scores) / total_scores
             avg_resource_efficiency = sum(s.resource_efficiency for s in scores) / total_scores
             avg_overall = sum(s.overall_efficiency_score for s in scores) / total_scores
-            
+
             # Find best and worst scores
             best_score = max(scores, key=lambda s: s.overall_efficiency_score)
             worst_score = min(scores, key=lambda s: s.overall_efficiency_score)
-            
+
             report = {
                 "timestamp": datetime.now().isoformat(),
                 "total_responses": total_scores,
@@ -408,9 +408,9 @@ class EfficiencyEval:
                     "poor": len([s for s in scores if s.overall_efficiency_score < 0.4])
                 }
             }
-            
+
             return report
-            
+
         except Exception as e:
             self.logger.error(f"Error generating report: {e}")
             return {"error": str(e)}
@@ -419,7 +419,7 @@ class EfficiencyEval:
 if __name__ == "__main__":
     # Test EfficiencyEval
     evaluator = EfficiencyEval()
-    
+
     # Test responses
     test_responses = [
         {
@@ -439,12 +439,12 @@ if __name__ == "__main__":
             "context": {"throughput_rps": 3}
         }
     ]
-    
+
     # Evaluate
     scores = evaluator.batch_evaluate(test_responses)
-    
+
     # Generate report
     report = evaluator.generate_report(scores)
-    
+
     print("⚡ EfficiencyEval Test Results:")
     print(json.dumps(report, indent=2, ensure_ascii=False))

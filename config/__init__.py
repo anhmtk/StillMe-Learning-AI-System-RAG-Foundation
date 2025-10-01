@@ -21,7 +21,7 @@ from .platform.config import PlatformConfig
 
 __all__ = [
     "SharedConfig",
-    "CoreConfig", 
+    "CoreConfig",
     "AgentDevConfig",
     "PlatformConfig"
 ]

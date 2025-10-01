@@ -16,27 +16,28 @@ import asyncio
 import json
 import logging
 import os
-import pytest
+
+# Add parent directory to path for imports
+import sys
 import tempfile
 import time
 import unittest
 from pathlib import Path
 from typing import Dict, List
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
 
 import docker
+import pytest
 
-# Add parent directory to path for imports
-import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from stillme_core.core.advanced_security.sandbox_controller import (
-    SandboxController,
+    SECURITY_METRICS,
     SandboxConfig,
+    SandboxController,
     SandboxInstance,
-    SandboxType,
     SandboxStatus,
-    SECURITY_METRICS
+    SandboxType,
 )
 from stillme_core.core.advanced_security.sandbox_deploy import SandboxDeployer
 
@@ -50,7 +51,7 @@ class TestSandboxController(unittest.TestCase):
         """Set up test fixtures"""
         self.mock_docker_client = Mock()
         self.sandbox_controller = SandboxController(self.mock_docker_client)
-        
+
     def tearDown(self):
         """Clean up test fixtures"""
         # Clean up any test sandboxes
@@ -63,7 +64,7 @@ class TestSandboxController(unittest.TestCase):
             name="Test Sandbox",
             sandbox_type=SandboxType.SECURITY_TEST
         )
-        
+
         self.assertEqual(config.sandbox_id, "test_sandbox")
         self.assertEqual(config.name, "Test Sandbox")
         self.assertEqual(config.sandbox_type, SandboxType.SECURITY_TEST)
@@ -82,9 +83,9 @@ class TestSandboxController(unittest.TestCase):
         """Test sandbox controller initialization"""
         mock_client = Mock()
         mock_docker.return_value = mock_client
-        
+
         controller = SandboxController()
-        
+
         self.assertEqual(controller.docker_client, mock_client)
         self.assertEqual(len(controller.active_sandboxes), 0)
         self.assertEqual(len(controller.sandbox_history), 0)
@@ -97,9 +98,9 @@ class TestSandboxController(unittest.TestCase):
             name="Test Instance",
             sandbox_type=SandboxType.CODE_EXECUTION
         )
-        
+
         instance = SandboxInstance(config=config)
-        
+
         self.assertEqual(instance.config, config)
         self.assertEqual(instance.status, SandboxStatus.CREATING)
         self.assertIsNotNone(instance.created_at)
@@ -112,9 +113,9 @@ class TestSandboxController(unittest.TestCase):
         """Test successful resource check"""
         mock_cpu.return_value = 50.0  # 50% CPU usage
         mock_memory.return_value = Mock(percent=60.0)  # 60% memory usage
-        
+
         result = await self.sandbox_controller._check_system_resources()
-        
+
         self.assertTrue(result)
 
     @patch('psutil.cpu_percent')
@@ -123,9 +124,9 @@ class TestSandboxController(unittest.TestCase):
         """Test resource check failure due to high CPU"""
         mock_cpu.return_value = 80.0  # 80% CPU usage (exceeds limit)
         mock_memory.return_value = Mock(percent=60.0)
-        
+
         result = await self.sandbox_controller._check_system_resources()
-        
+
         self.assertFalse(result)
 
     @patch('psutil.cpu_percent')
@@ -134,26 +135,26 @@ class TestSandboxController(unittest.TestCase):
         """Test resource check failure due to high memory"""
         mock_cpu.return_value = 50.0
         mock_memory.return_value = Mock(percent=85.0)  # 85% memory usage (exceeds limit)
-        
+
         result = await self.sandbox_controller._check_system_resources()
-        
+
         self.assertFalse(result)
 
     def test_docker_availability_check_success(self):
         """Test successful Docker availability check"""
         self.mock_docker_client.ping.return_value = True
-        
+
         result = asyncio.run(self.sandbox_controller._check_docker_availability())
-        
+
         self.assertTrue(result)
         self.mock_docker_client.ping.assert_called_once()
 
     def test_docker_availability_check_failure(self):
         """Test Docker availability check failure"""
         self.mock_docker_client.ping.side_effect = Exception("Docker not available")
-        
+
         result = asyncio.run(self.sandbox_controller._check_docker_availability())
-        
+
         self.assertFalse(result)
 
     async def test_security_policy_check_success(self):
@@ -165,11 +166,11 @@ class TestSandboxController(unittest.TestCase):
             memory_limit=256,  # Within limits
             timeout=600  # Within limits
         )
-        
+
         instance = SandboxInstance(config=config)
-        
+
         result = await self.sandbox_controller._check_security_policies(instance)
-        
+
         self.assertTrue(result)
 
     async def test_security_policy_check_failure_memory(self):
@@ -181,12 +182,12 @@ class TestSandboxController(unittest.TestCase):
             memory_limit=1024,  # Exceeds limit (512MB)
             timeout=600
         )
-        
+
         instance = SandboxInstance(config=config)
-        
+
         with self.assertRaises(ValueError) as context:
             await self.sandbox_controller._check_security_policies(instance)
-        
+
         self.assertIn("Memory limit", str(context.exception))
 
     async def test_security_policy_check_failure_timeout(self):
@@ -198,12 +199,12 @@ class TestSandboxController(unittest.TestCase):
             memory_limit=256,
             timeout=1200  # Exceeds limit (900s)
         )
-        
+
         instance = SandboxInstance(config=config)
-        
+
         with self.assertRaises(ValueError) as context:
             await self.sandbox_controller._check_security_policies(instance)
-        
+
         self.assertIn("Timeout", str(context.exception))
 
     def test_get_sandbox_status_active(self):
@@ -213,15 +214,15 @@ class TestSandboxController(unittest.TestCase):
             name="Test Status",
             sandbox_type=SandboxType.SECURITY_TEST
         )
-        
+
         instance = SandboxInstance(config=config)
         instance.status = SandboxStatus.RUNNING
         instance.started_at = time.time()
-        
+
         self.sandbox_controller.active_sandboxes["test_status"] = instance
-        
+
         status = self.sandbox_controller.get_sandbox_status("test_status")
-        
+
         self.assertIsNotNone(status)
         self.assertEqual(status["sandbox_id"], "test_status")
         self.assertEqual(status["status"], "running")
@@ -229,7 +230,7 @@ class TestSandboxController(unittest.TestCase):
     def test_get_sandbox_status_not_found(self):
         """Test getting status of non-existent sandbox"""
         status = self.sandbox_controller.get_sandbox_status("non_existent")
-        
+
         self.assertIsNone(status)
 
 
@@ -251,7 +252,7 @@ class TestSandboxDeployer(unittest.TestCase):
     def test_log_deployment(self):
         """Test deployment logging"""
         self.deployer._log_deployment("INFO", "Test message")
-        
+
         self.assertEqual(len(self.deployer.deployment_logs), 1)
         self.assertEqual(self.deployer.deployment_logs[0]["level"], "INFO")
         self.assertEqual(self.deployer.deployment_logs[0]["message"], "Test message")
@@ -261,9 +262,9 @@ class TestSandboxDeployer(unittest.TestCase):
         # Add some test logs
         self.deployer._log_deployment("SUCCESS", "Test success")
         self.deployer._log_deployment("ERROR", "Test error")
-        
+
         report = self.deployer.get_deployment_report()
-        
+
         self.assertEqual(report["total_deployments"], 2)
         self.assertEqual(report["successful_deployments"], 1)
         self.assertEqual(report["failed_deployments"], 1)
@@ -283,37 +284,37 @@ class TestIntegration(unittest.TestCase):
             docker_client.ping()
         except Exception:
             self.skipTest("Docker not available for integration test")
-        
+
         controller = SandboxController(docker_client)
-        
+
         try:
             # Create sandbox
             sandbox = await controller.create_sandbox(
                 name="integration_test",
                 sandbox_type=SandboxType.SECURITY_TEST
             )
-            
+
             self.assertIsNotNone(sandbox)
             self.assertEqual(sandbox.status, SandboxStatus.RUNNING)
-            
+
             # Execute command
             result = await controller.execute_in_sandbox(
                 sandbox.config.sandbox_id,
                 ["echo", "Hello from sandbox"]
             )
-            
+
             self.assertEqual(result["exit_code"], 0)
             self.assertIn("Hello from sandbox", result["stdout"])
-            
+
             # Check status
             status = controller.get_sandbox_status(sandbox.config.sandbox_id)
             self.assertIsNotNone(status)
             self.assertEqual(status["status"], "running")
-            
+
             # Destroy sandbox
             success = await controller.destroy_sandbox(sandbox.config.sandbox_id)
             self.assertTrue(success)
-            
+
         finally:
             await controller.cleanup_all()
 
@@ -325,27 +326,27 @@ class TestIntegration(unittest.TestCase):
             docker_client.ping()
         except Exception:
             self.skipTest("Docker not available for integration test")
-        
+
         controller = SandboxController(docker_client)
-        
+
         try:
             # Create sandbox
             sandbox = await controller.create_sandbox(
                 name="resource_test",
                 sandbox_type=SandboxType.SECURITY_TEST
             )
-            
+
             # Wait for monitoring to collect data
             await asyncio.sleep(10)
-            
+
             # Check resource usage
             status = controller.get_sandbox_status(sandbox.config.sandbox_id)
             self.assertIsNotNone(status)
             self.assertIn("resource_usage", status)
-            
+
             # Clean up
             await controller.destroy_sandbox(sandbox.config.sandbox_id)
-            
+
         finally:
             await controller.cleanup_all()
 
@@ -357,28 +358,28 @@ class TestIntegration(unittest.TestCase):
             docker_client.ping()
         except Exception:
             self.skipTest("Docker not available for integration test")
-        
+
         controller = SandboxController(docker_client)
-        
+
         try:
             # Create sandbox with network isolation
             sandbox = await controller.create_sandbox(
                 name="network_test",
                 sandbox_type=SandboxType.SECURITY_TEST
             )
-            
+
             # Try to access external network (should fail)
             result = await controller.execute_in_sandbox(
                 sandbox.config.sandbox_id,
                 ["python", "-c", "import requests; requests.get('http://google.com', timeout=5)"]
             )
-            
+
             # Should fail due to network isolation
             self.assertNotEqual(result["exit_code"], 0)
-            
+
             # Clean up
             await controller.destroy_sandbox(sandbox.config.sandbox_id)
-            
+
         finally:
             await controller.cleanup_all()
 
@@ -390,13 +391,13 @@ class TestSecurityValidation(unittest.TestCase):
         """Test that security metrics are properly enforced"""
         # Test CPU limit
         self.assertLessEqual(SECURITY_METRICS["max_cpu_usage"], 70)
-        
+
         # Test memory limit
         self.assertLessEqual(SECURITY_METRICS["max_memory_usage"], 512)
-        
+
         # Test execution time limit
         self.assertLessEqual(SECURITY_METRICS["max_execution_time"], 900)
-        
+
         # Test network isolation
         self.assertEqual(SECURITY_METRICS["network_egress_limit"], 0)
 
@@ -407,7 +408,7 @@ class TestSecurityValidation(unittest.TestCase):
             name="Security Test",
             sandbox_type=SandboxType.SECURITY_TEST
         )
-        
+
         # Check secure defaults
         self.assertEqual(config.network_mode, "none")  # No network access
         self.assertLessEqual(config.memory_limit, 512)  # Memory limit
@@ -417,10 +418,10 @@ class TestSecurityValidation(unittest.TestCase):
     def test_isolation_requirements(self):
         """Test isolation requirements"""
         controller = SandboxController()
-        
+
         # Check isolation base exists
         self.assertTrue(controller.isolation_base.exists())
-        
+
         # Check security policies are initialized
         self.assertIn("network_isolation", controller.security_policies)
         self.assertIn("resource_limits", controller.security_policies)
@@ -431,10 +432,10 @@ class TestSecurityValidation(unittest.TestCase):
 def run_performance_tests():
     """Run performance tests"""
     print("🚀 Running performance tests...")
-    
+
     # Test sandbox creation performance
     start_time = time.time()
-    
+
     # Simulate multiple sandbox creations
     for i in range(10):
         config = SandboxConfig(
@@ -443,13 +444,13 @@ def run_performance_tests():
             sandbox_type=SandboxType.SECURITY_TEST
         )
         instance = SandboxInstance(config=config)
-    
+
     end_time = time.time()
     creation_time = end_time - start_time
-    
+
     print(f"✅ Created 10 sandbox instances in {creation_time:.2f} seconds")
     print(f"📊 Average creation time: {creation_time/10:.3f} seconds per instance")
-    
+
     # Performance assertions
     assert creation_time < 1.0, "Sandbox creation is too slow"
     assert creation_time/10 < 0.1, "Individual sandbox creation is too slow"
@@ -458,23 +459,23 @@ def run_performance_tests():
 def run_security_tests():
     """Run security validation tests"""
     print("🔒 Running security validation tests...")
-    
+
     # Test 1: Security metrics validation
     assert SECURITY_METRICS["max_cpu_usage"] <= 70, "CPU limit too high"
     assert SECURITY_METRICS["max_memory_usage"] <= 512, "Memory limit too high"
     assert SECURITY_METRICS["max_execution_time"] <= 900, "Execution time limit too high"
     assert SECURITY_METRICS["network_egress_limit"] == 0, "Network access should be blocked"
-    
+
     print("✅ Security metrics validation passed")
-    
+
     # Test 2: Default security policies
     controller = SandboxController()
     policies = controller.security_policies
-    
+
     assert policies["network_isolation"]["enabled"], "Network isolation should be enabled"
     assert policies["resource_limits"]["enforcement"], "Resource limits should be enforced"
     assert policies["data_protection"]["no_real_data"], "Real data should be prohibited"
-    
+
     print("✅ Default security policies validation passed")
 
 
@@ -482,22 +483,22 @@ def main():
     """Main test runner"""
     print("🧪 Starting Sandbox System Test Suite")
     print("=" * 50)
-    
+
     # Configure logging
     logging.basicConfig(level=logging.INFO)
-    
+
     # Run unit tests
     print("\n🔬 Running Unit Tests...")
     unittest.main(argv=[''], exit=False, verbosity=2)
-    
+
     # Run performance tests
     print("\n⚡ Running Performance Tests...")
     run_performance_tests()
-    
+
     # Run security tests
     print("\n🔒 Running Security Tests...")
     run_security_tests()
-    
+
     print("\n🎉 All tests completed successfully!")
     print("=" * 50)
 

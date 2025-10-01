@@ -40,13 +40,13 @@ class Attribution:
 
 class WebToolsRegistry:
     """Registry of controlled web access tools"""
-    
+
     def __init__(self):
         self.http_client = SecureHttpClient()
         self.market_intel = MarketIntelligence()
         self.content_filter = ContentIntegrityFilter()
         self.sandbox = SandboxController()
-        
+
         # Tool registry
         self.tools = {
             'web.search_news': self._search_news,
@@ -54,9 +54,9 @@ class WebToolsRegistry:
             'web.hackernews_top': self._hackernews_top,
             'web.google_trends': self._google_trends
         }
-        
+
         logger.info("🔧 Web Tools Registry initialized")
-    
+
     async def call_tool(self, tool_name: str, **kwargs) -> WebResult:
         """Call a specific web tool"""
         if tool_name not in self.tools:
@@ -64,9 +64,9 @@ class WebToolsRegistry:
                 success=False,
                 error=f"Unknown tool: {tool_name}"
             )
-        
+
         start_time = datetime.now()
-        
+
         try:
             # Check sandbox permission
             if not self.sandbox.is_sandbox_enabled():
@@ -74,17 +74,17 @@ class WebToolsRegistry:
                     success=False,
                     error="Sandbox is disabled - web access blocked"
                 )
-            
+
             # Call the tool
             result = await self.tools[tool_name](**kwargs)
-            
+
             # Calculate latency
             latency_ms = (datetime.now() - start_time).total_seconds() * 1000
             result.latency_ms = latency_ms
-            
+
             logger.info(f"🔧 Tool {tool_name} completed in {latency_ms:.1f}ms")
             return result
-            
+
         except Exception as e:
             logger.error(f"❌ Tool {tool_name} failed: {e}")
             return WebResult(
@@ -92,33 +92,33 @@ class WebToolsRegistry:
                 error=f"Tool execution failed: {str(e)}",
                 latency_ms=(datetime.now() - start_time).total_seconds() * 1000
             )
-    
+
     async def _search_news(self, query: str, window: str = '24h') -> WebResult:
         """Search news with attribution"""
         try:
             # Parse window parameter
             hours = self._parse_time_window(window)
-            
+
             # Search news
             result = await self.market_intel.search_news(query, "vi")
-            
+
             if not result["success"]:
                 return WebResult(
                     success=False,
                     error=result.get("error", "News search failed")
                 )
-            
+
             # Filter content
             filtered = self.content_filter.filter_json_response(
                 result["data"], "news_search"
             )
-            
+
             if not filtered["success"]:
                 return WebResult(
                     success=False,
                     error="Content filtering failed"
                 )
-            
+
             # Create attribution
             attribution = Attribution(
                 source_name="News API / GNews",
@@ -127,43 +127,43 @@ class WebToolsRegistry:
                 snippet=f"News search for '{query}' in last {window}",
                 domain="newsapi.org"
             )
-            
+
             return WebResult(
                 success=True,
                 data=filtered["content"],
                 attribution=attribution.__dict__
             )
-            
+
         except Exception as e:
             logger.error(f"❌ News search failed: {e}")
             return WebResult(
                 success=False,
                 error=f"News search failed: {str(e)}"
             )
-    
+
     async def _github_trending(self, topic: str, since: str = 'daily') -> WebResult:
         """Get GitHub trending repositories"""
         try:
             # Search GitHub trending
             result = await self.market_intel.search_github_trending(topic, since)
-            
+
             if not result["success"]:
                 return WebResult(
                     success=False,
                     error=result.get("error", "GitHub trending search failed")
                 )
-            
+
             # Filter content
             filtered = self.content_filter.filter_json_response(
                 result["data"], "github_trending"
             )
-            
+
             if not filtered["success"]:
                 return WebResult(
                     success=False,
                     error="Content filtering failed"
                 )
-            
+
             # Create attribution
             attribution = Attribution(
                 source_name="GitHub Trending",
@@ -172,43 +172,43 @@ class WebToolsRegistry:
                 snippet=f"GitHub trending repositories for '{topic}' since {since}",
                 domain="github.com"
             )
-            
+
             return WebResult(
                 success=True,
                 data=filtered["content"],
                 attribution=attribution.__dict__
             )
-            
+
         except Exception as e:
             logger.error(f"❌ GitHub trending failed: {e}")
             return WebResult(
                 success=False,
                 error=f"GitHub trending failed: {str(e)}"
             )
-    
+
     async def _hackernews_top(self, hours: int = 12) -> WebResult:
         """Get top Hacker News stories"""
         try:
             # Search Hacker News
             result = await self.market_intel.search_hackernews_top(hours)
-            
+
             if not result["success"]:
                 return WebResult(
                     success=False,
                     error=result.get("error", "Hacker News search failed")
                 )
-            
+
             # Filter content
             filtered = self.content_filter.filter_json_response(
                 result["data"], "hackernews"
             )
-            
+
             if not filtered["success"]:
                 return WebResult(
                     success=False,
                     error="Content filtering failed"
                 )
-            
+
             # Create attribution
             attribution = Attribution(
                 source_name="Hacker News",
@@ -217,20 +217,20 @@ class WebToolsRegistry:
                 snippet=f"Top Hacker News stories from last {hours} hours",
                 domain="hn.algolia.com"
             )
-            
+
             return WebResult(
                 success=True,
                 data=filtered["content"],
                 attribution=attribution.__dict__
             )
-            
+
         except Exception as e:
             logger.error(f"❌ Hacker News search failed: {e}")
             return WebResult(
                 success=False,
                 error=f"Hacker News search failed: {str(e)}"
             )
-    
+
     async def _google_trends(self, terms: List[str], region: str = 'VN', days: int = 7) -> WebResult:
         """Get Google Trends data (mock implementation)"""
         try:
@@ -249,7 +249,7 @@ class WebToolsRegistry:
                 ],
                 "retrieved_at": datetime.now().isoformat()
             }
-            
+
             # Create attribution
             attribution = Attribution(
                 source_name="Google Trends",
@@ -258,20 +258,20 @@ class WebToolsRegistry:
                 snippet=f"Google Trends for {', '.join(terms)} in {region} over {days} days",
                 domain="trends.google.com"
             )
-            
+
             return WebResult(
                 success=True,
                 data=trends_data,
                 attribution=attribution.__dict__
             )
-            
+
         except Exception as e:
             logger.error(f"❌ Google Trends failed: {e}")
             return WebResult(
                 success=False,
                 error=f"Google Trends failed: {str(e)}"
             )
-    
+
     def _parse_time_window(self, window: str) -> int:
         """Parse time window string to hours"""
         window = window.lower()
@@ -283,16 +283,16 @@ class WebToolsRegistry:
             return int(window[:-1]) * 24 * 7
         else:
             return 24  # Default to 24 hours
-    
+
     def get_available_tools(self) -> List[str]:
         """Get list of available tools"""
         return list(self.tools.keys())
-    
+
     def get_tool_info(self, tool_name: str) -> Dict[str, Any]:
         """Get information about a specific tool"""
         if tool_name not in self.tools:
             return {"error": "Tool not found"}
-        
+
         # Tool metadata
         tool_info = {
             "name": tool_name,
@@ -300,9 +300,9 @@ class WebToolsRegistry:
             "parameters": self._get_tool_parameters(tool_name),
             "estimated_cost": self._estimate_tool_cost(tool_name)
         }
-        
+
         return tool_info
-    
+
     def _get_tool_description(self, tool_name: str) -> str:
         """Get tool description"""
         descriptions = {
@@ -312,7 +312,7 @@ class WebToolsRegistry:
             'web.google_trends': 'Get Google Trends data for specified terms'
         }
         return descriptions.get(tool_name, "Unknown tool")
-    
+
     def _get_tool_parameters(self, tool_name: str) -> Dict[str, Any]:
         """Get tool parameters schema"""
         schemas = {
@@ -334,7 +334,7 @@ class WebToolsRegistry:
             }
         }
         return schemas.get(tool_name, {})
-    
+
     def _estimate_tool_cost(self, tool_name: str) -> Dict[str, Any]:
         """Estimate tool execution cost"""
         costs = {
@@ -369,25 +369,25 @@ if __name__ == "__main__":
     # Test the registry
     async def test_tools():
         print("🔧 Testing Web Tools Registry...")
-        
+
         # Test news search
         result = await search_news("AI technology", "24h")
         print(f"News search: {result.success}")
         if result.success:
             print(f"Attribution: {result.attribution}")
-        
+
         # Test GitHub trending
         result = await github_trending("python", "daily")
         print(f"GitHub trending: {result.success}")
-        
+
         # Test Hacker News
         result = await hackernews_top(12)
         print(f"Hacker News: {result.success}")
-        
+
         # Test Google Trends
         result = await google_trends(["AI", "machine learning"], "VN", 7)
         print(f"Google Trends: {result.success}")
-        
+
         print("✅ Web Tools Registry test completed")
-    
+
     asyncio.run(test_tools())

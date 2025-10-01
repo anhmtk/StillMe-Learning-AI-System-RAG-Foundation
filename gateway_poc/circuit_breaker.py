@@ -34,8 +34,8 @@ class CircuitBreakerConfig:
 
 class CircuitBreaker:
     """Circuit Breaker pattern implementation for fault tolerance"""
-    
-    def __init__(self, 
+
+    def __init__(self,
                  failure_threshold: int = 5,
                  recovery_timeout: int = 60,
                  expected_exception: type = Exception,
@@ -46,33 +46,33 @@ class CircuitBreaker:
             expected_exception=expected_exception,
             name=name
         )
-        
+
         self.state = CircuitState.CLOSED
         self.failure_count = 0
         self.last_failure_time = None
         self.success_count = 0
-        
+
     async def call(self, func: Callable, *args, **kwargs) -> Any:
         """Execute function with circuit breaker protection"""
-        
+
         if self.state == CircuitState.OPEN:
             if self._should_attempt_reset():
                 self.state = CircuitState.HALF_OPEN
                 logger.info(f"Circuit breaker {self.config.name} entering HALF_OPEN state")
             else:
                 raise Exception(f"Circuit breaker {self.config.name} is OPEN")
-        
+
         try:
             # Execute the function
             if asyncio.iscoroutinefunction(func):
                 result = await func(*args, **kwargs)
             else:
                 result = func(*args, **kwargs)
-            
+
             # Success - reset failure count
             self._on_success()
             return result
-            
+
         except self.config.expected_exception as e:
             self._on_failure()
             raise e
@@ -80,14 +80,14 @@ class CircuitBreaker:
             # Unexpected exception - still count as failure
             self._on_failure()
             raise e
-    
+
     def _should_attempt_reset(self) -> bool:
         """Check if enough time has passed to attempt reset"""
         if self.last_failure_time is None:
             return True
-        
+
         return time.time() - self.last_failure_time >= self.config.recovery_timeout
-    
+
     def _on_success(self):
         """Handle successful execution"""
         if self.state == CircuitState.HALF_OPEN:
@@ -101,23 +101,23 @@ class CircuitBreaker:
         else:
             # In CLOSED state, reset failure count on success
             self.failure_count = 0
-    
+
     def _on_failure(self):
         """Handle failed execution"""
         self.failure_count += 1
         self.last_failure_time = time.time()
-        
+
         if self.state == CircuitState.HALF_OPEN:
             # Failure in half-open state - go back to open
             self.state = CircuitState.OPEN
             self.success_count = 0
             logger.warning(f"Circuit breaker {self.config.name} OPENED again after failure in HALF_OPEN")
-        
+
         elif self.failure_count >= self.config.failure_threshold:
             # Too many failures - open the circuit
             self.state = CircuitState.OPEN
             logger.warning(f"Circuit breaker {self.config.name} OPENED after {self.failure_count} failures")
-    
+
     def get_state(self) -> dict:
         """Get current circuit breaker state"""
         return {
@@ -131,7 +131,7 @@ class CircuitBreaker:
                 "name": self.config.name
             }
         }
-    
+
     def reset(self):
         """Manually reset the circuit breaker"""
         self.state = CircuitState.CLOSED

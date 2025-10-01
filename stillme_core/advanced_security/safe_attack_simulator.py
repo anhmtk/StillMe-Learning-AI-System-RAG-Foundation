@@ -1,10 +1,10 @@
 """Safe Attack Simulator for StillMe Framework"""
 
 import logging
-from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -37,20 +37,20 @@ class AttackSimulation:
     success: bool
     timestamp: datetime
     metadata: Dict[str, Any] = None
-    
+
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
 
 class SafeAttackSimulator:
     """Safe attack simulator for StillMe Framework"""
-    
+
     def __init__(self):
         self.logger = logger
         self.simulations: List[AttackSimulation] = []
         self.attack_payloads = self._initialize_attack_payloads()
         self.logger.info("✅ SafeAttackSimulator initialized")
-    
+
     def _initialize_attack_payloads(self) -> Dict[AttackType, List[str]]:
         """Initialize attack payloads for testing"""
         return {
@@ -111,15 +111,15 @@ class SafeAttackSimulator:
                 "new Array(1000000).fill(0).map(() => new Array(1000000))"
             ]
         }
-    
-    def simulate_attack(self, 
+
+    def simulate_attack(self,
                        attack_type: AttackType,
                        target_system: str = "test",
                        severity: AttackSeverity = AttackSeverity.MEDIUM) -> AttackSimulation:
         """Simulate an attack"""
         try:
             simulation_id = f"attack_{len(self.simulations) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-            
+
             # Get a random payload for the attack type
             payloads = self.attack_payloads.get(attack_type, [])
             if not payloads:
@@ -127,10 +127,10 @@ class SafeAttackSimulator:
             else:
                 import random
                 payload = random.choice(payloads)
-            
+
             # Simulate the attack (in a real implementation, this would test the actual system)
             success = self._execute_attack_simulation(attack_type, payload, target_system)
-            
+
             simulation = AttackSimulation(
                 simulation_id=simulation_id,
                 attack_type=attack_type,
@@ -146,17 +146,17 @@ class SafeAttackSimulator:
                     "simulation_mode": "safe"
                 }
             )
-            
+
             self.simulations.append(simulation)
             status_icon = "✅" if success else "❌"
             self.logger.info(f"{status_icon} Attack simulation: {attack_type.value} - {simulation_id}")
-            
+
             return simulation
-            
+
         except Exception as e:
             self.logger.error(f"❌ Failed to simulate attack: {e}")
             raise
-    
+
     def _execute_attack_simulation(self, attack_type: AttackType, payload: str, target_system: str) -> bool:
         """Execute the attack simulation safely"""
         try:
@@ -165,7 +165,7 @@ class SafeAttackSimulator:
             # 2. Monitor the system's response
             # 3. Check if the attack was successful
             # 4. Return True if the system was vulnerable, False if it was protected
-            
+
             # For now, we'll simulate different outcomes based on attack type
             if attack_type == AttackType.PROMPT_INJECTION:
                 # Simulate prompt injection detection
@@ -193,64 +193,64 @@ class SafeAttackSimulator:
                 return "while(true)" in payload or "Infinity" in payload
             else:
                 return False
-                
+
         except Exception as e:
             self.logger.error(f"❌ Failed to execute attack simulation: {e}")
             return False
-    
+
     def run_security_test_suite(self, target_system: str = "test") -> List[AttackSimulation]:
         """Run a comprehensive security test suite"""
         try:
             results = []
-            
+
             # Test all attack types
             for attack_type in AttackType:
                 # Test with different severity levels
                 for severity in AttackSeverity:
                     simulation = self.simulate_attack(attack_type, target_system, severity)
                     results.append(simulation)
-            
+
             self.logger.info(f"🔒 Security test suite completed: {len(results)} simulations")
             return results
-            
+
         except Exception as e:
             self.logger.error(f"❌ Failed to run security test suite: {e}")
             return []
-    
+
     def get_simulations_by_type(self, attack_type: AttackType) -> List[AttackSimulation]:
         """Get simulations by attack type"""
         return [s for s in self.simulations if s.attack_type == attack_type]
-    
+
     def get_simulations_by_severity(self, severity: AttackSeverity) -> List[AttackSimulation]:
         """Get simulations by severity"""
         return [s for s in self.simulations if s.severity == severity]
-    
+
     def get_successful_attacks(self) -> List[AttackSimulation]:
         """Get successful attack simulations"""
         return [s for s in self.simulations if s.success]
-    
+
     def get_security_summary(self) -> Dict[str, Any]:
         """Get security simulation summary"""
         try:
             total_simulations = len(self.simulations)
             successful_attacks = len(self.get_successful_attacks())
             failed_attacks = total_simulations - successful_attacks
-            
+
             simulations_by_type = {}
             simulations_by_severity = {}
-            
+
             for simulation in self.simulations:
                 # By type
                 type_key = simulation.attack_type.value
                 simulations_by_type[type_key] = simulations_by_type.get(type_key, 0) + 1
-                
+
                 # By severity
                 severity_key = simulation.severity.value
                 simulations_by_severity[severity_key] = simulations_by_severity.get(severity_key, 0) + 1
-            
+
             # Calculate security score
             security_score = (failed_attacks / max(1, total_simulations)) * 100
-            
+
             return {
                 "total_simulations": total_simulations,
                 "successful_attacks": successful_attacks,
@@ -260,11 +260,11 @@ class SafeAttackSimulator:
                 "simulations_by_severity": simulations_by_severity,
                 "timestamp": datetime.now().isoformat()
             }
-            
+
         except Exception as e:
             self.logger.error(f"❌ Failed to get security summary: {e}")
             return {"error": str(e)}
-    
+
     def clear_simulations(self):
         """Clear all simulations"""
         self.simulations.clear()

@@ -12,20 +12,20 @@ logger = logging.getLogger(__name__)
 
 class EnvironmentValidator:
     """Validator cho environment variables"""
-    
+
     def __init__(self):
         # Load .env file
         load_dotenv()
-        
+
         # Required API keys cho internet access
         self.required_keys = {
             "NEWSAPI_KEY": "News API cho tin tức",
-            "GNEWS_API_KEY": "GNews API cho tin tức thay thế", 
+            "GNEWS_API_KEY": "GNews API cho tin tức thay thế",
             "OPENROUTER_API_KEY": "OpenRouter API cho LLM",
             "DEEPSEEK_API_KEY": "DeepSeek Cloud API",
             "OPENAI_API_KEY": "OpenAI API (optional)"
         }
-        
+
         # Optional keys
         self.optional_keys = {
             "OLLAMA_URL": "Ollama local server URL",
@@ -33,18 +33,18 @@ class EnvironmentValidator:
             "REDDIT_CLIENT_SECRET": "Reddit API client secret",
             "GITHUB_TOKEN": "GitHub API token"
         }
-        
+
         # Validation results
         self.validation_results: Dict[str, bool] = {}
         self.missing_keys: List[str] = []
         self.warnings: List[str] = []
-    
+
     def validate_all(self) -> Tuple[bool, List[str]]:
         """Validate tất cả environment variables"""
         logger.info("🔍 Validating environment variables...")
-        
+
         all_valid = True
-        
+
         # Check required keys
         for key, description in self.required_keys.items():
             if self._validate_key(key, description, required=True):
@@ -53,7 +53,7 @@ class EnvironmentValidator:
                 self.validation_results[key] = False
                 self.missing_keys.append(key)
                 all_valid = False
-        
+
         # Check optional keys
         for key, description in self.optional_keys.items():
             if self._validate_key(key, description, required=False):
@@ -61,23 +61,23 @@ class EnvironmentValidator:
             else:
                 self.validation_results[key] = False
                 self.warnings.append(f"Optional key missing: {key} ({description})")
-        
+
         # Log results
         self._log_validation_results()
-        
+
         return all_valid, self.missing_keys
-    
+
     def _validate_key(self, key: str, description: str, required: bool = True) -> bool:
         """Validate một key cụ thể"""
         value = os.getenv(key)
-        
+
         if not value:
             if required:
                 logger.warning(f"❌ Missing required key: {key} ({description})")
             else:
                 logger.info(f"ℹ️  Optional key not set: {key} ({description})")
             return False
-        
+
         # Check if value is not just placeholder
         if value.lower() in ["your_api_key_here", "placeholder", "xxx", "sk-xxx"]:
             if required:
@@ -85,53 +85,53 @@ class EnvironmentValidator:
             else:
                 logger.info(f"ℹ️  Key {key} contains placeholder value: {value}")
             return False
-        
+
         # Check minimum length for API keys
         if "API_KEY" in key and len(value) < 10:
             logger.warning(f"❌ Key {key} seems too short: {len(value)} characters")
             return False
-        
+
         logger.info(f"✅ Key validated: {key}")
         return True
-    
+
     def _log_validation_results(self):
         """Log kết quả validation"""
         logger.info("=" * 60)
         logger.info("📋 ENVIRONMENT VALIDATION RESULTS")
         logger.info("=" * 60)
-        
+
         # Required keys status
         logger.info("🔑 Required API Keys:")
         for key, description in self.required_keys.items():
             status = "✅" if self.validation_results.get(key, False) else "❌"
             logger.info(f"  {status} {key}: {description}")
-        
+
         # Optional keys status
         logger.info("\n🔧 Optional Configuration:")
         for key, description in self.optional_keys.items():
             status = "✅" if self.validation_results.get(key, False) else "ℹ️ "
             logger.info(f"  {status} {key}: {description}")
-        
+
         # Summary
         total_required = len(self.required_keys)
         valid_required = sum(1 for k in self.required_keys.keys() if self.validation_results.get(k, False))
-        
+
         logger.info(f"\n📊 Summary:")
         logger.info(f"  Required keys: {valid_required}/{total_required}")
         logger.info(f"  Missing keys: {len(self.missing_keys)}")
         logger.info(f"  Warnings: {len(self.warnings)}")
-        
+
         if self.missing_keys:
             logger.warning(f"\n⚠️  Missing required keys: {', '.join(self.missing_keys)}")
             logger.warning("   Internet access features may be limited.")
-        
+
         if self.warnings:
             logger.info(f"\nℹ️  Warnings: {len(self.warnings)}")
             for warning in self.warnings:
                 logger.info(f"   - {warning}")
-        
+
         logger.info("=" * 60)
-    
+
     def get_validation_summary(self) -> Dict:
         """Lấy tóm tắt validation results"""
         return {
@@ -142,7 +142,7 @@ class EnvironmentValidator:
             "total_required": len(self.required_keys),
             "valid_required": sum(1 for k in self.required_keys.keys() if self.validation_results.get(k, False))
         }
-    
+
     def check_internet_access_ready(self) -> bool:
         """Kiểm tra xem có đủ keys để truy cập internet không"""
         internet_keys = ["NEWSAPI_KEY", "GNEWS_API_KEY", "OPENROUTER_API_KEY"]
@@ -163,14 +163,14 @@ if __name__ == "__main__":
     # Test validation
     print("🔍 Testing Environment Validation...")
     is_valid, missing = validate_environment()
-    
+
     if is_valid:
         print("✅ All required environment variables are set!")
     else:
         print(f"❌ Missing {len(missing)} required keys: {', '.join(missing)}")
-    
+
     print(f"\n🌐 Internet access ready: {is_internet_access_ready()}")
-    
+
     # Show summary
     summary = env_validator.get_validation_summary()
     print(f"\n📊 Validation Summary:")

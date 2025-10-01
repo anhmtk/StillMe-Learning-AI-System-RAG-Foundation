@@ -14,9 +14,9 @@ __version__ = "2.0.0"
 __author__ = "StillMe AI Team"
 
 # Import core validation components
-from .validation_framework import ValidationFramework
-from .final_validation_system import FinalValidationSystem
 from .enhanced_validation import EnhancedValidation
+from .final_validation_system import FinalValidationSystem
+from .validation_framework import ValidationFramework
 
 __all__ = [
     "ValidationFramework",

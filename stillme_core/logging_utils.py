@@ -2,11 +2,12 @@
 
 import logging
 import sys
-from typing import Dict, Any, Optional
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Dict, Optional
 
-def setup_logger(name: str = "stillme", 
+
+def setup_logger(name: str = "stillme",
                 level: int = logging.INFO,
                 log_file: Optional[str] = None,
                 format_string: Optional[str] = None) -> logging.Logger:
@@ -15,45 +16,45 @@ def setup_logger(name: str = "stillme",
         # Create logger
         logger = logging.getLogger(name)
         logger.setLevel(level)
-        
+
         # Clear existing handlers
         logger.handlers.clear()
-        
+
         # Create formatter
         if format_string is None:
             format_string = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        
+
         formatter = logging.Formatter(format_string)
-        
+
         # Console handler
         console_handler = logging.StreamHandler(sys.stdout)
         console_handler.setLevel(level)
         console_handler.setFormatter(formatter)
         logger.addHandler(console_handler)
-        
+
         # File handler (if specified)
         if log_file:
             log_path = Path(log_file)
             log_path.parent.mkdir(parents=True, exist_ok=True)
-            
+
             file_handler = logging.FileHandler(log_file)
             file_handler.setLevel(level)
             file_handler.setFormatter(formatter)
             logger.addHandler(file_handler)
-        
+
         # Prevent duplicate logs
         logger.propagate = False
-        
+
         logger.info(f"✅ Logger '{name}' initialized (level: {logging.getLevelName(level)})")
         return logger
-        
+
     except Exception as e:
         print(f"❌ Failed to setup logger: {e}")
         return logging.getLogger(name)
 
-def log_with_context(logger: logging.Logger, 
-                    level: int, 
-                    message: str, 
+def log_with_context(logger: logging.Logger,
+                    level: int,
+                    message: str,
                     context: Dict[str, Any] = None):
     """Log message with additional context"""
     try:
@@ -62,9 +63,9 @@ def log_with_context(logger: logging.Logger,
             full_message = f"{message} | Context: {context_str}"
         else:
             full_message = message
-        
+
         logger.log(level, full_message)
-        
+
     except Exception as e:
         logger.error(f"❌ Failed to log with context: {e}")
 
@@ -72,9 +73,9 @@ def get_logger(name: str = "stillme") -> logging.Logger:
     """Get logger instance"""
     return logging.getLogger(name)
 
-def log_function_call(logger: logging.Logger, 
-                     function_name: str, 
-                     args: tuple = None, 
+def log_function_call(logger: logging.Logger,
+                     function_name: str,
+                     args: tuple = None,
                      kwargs: dict = None,
                      result: Any = None,
                      duration: float = None):
@@ -84,7 +85,7 @@ def log_function_call(logger: logging.Logger,
             "function": function_name,
             "timestamp": datetime.now().isoformat()
         }
-        
+
         if args:
             context["args"] = str(args)
         if kwargs:
@@ -93,14 +94,14 @@ def log_function_call(logger: logging.Logger,
             context["result"] = str(result)
         if duration is not None:
             context["duration"] = f"{duration:.3f}s"
-        
+
         log_with_context(logger, logging.INFO, f"Function call: {function_name}", context)
-        
+
     except Exception as e:
         logger.error(f"❌ Failed to log function call: {e}")
 
-def log_error(logger: logging.Logger, 
-              error: Exception, 
+def log_error(logger: logging.Logger,
+              error: Exception,
               context: Dict[str, Any] = None):
     """Log error with context"""
     try:
@@ -109,18 +110,18 @@ def log_error(logger: logging.Logger,
             "error_message": str(error),
             "timestamp": datetime.now().isoformat()
         }
-        
+
         if context:
             error_context.update(context)
-        
+
         log_with_context(logger, logging.ERROR, f"Error occurred: {error}", error_context)
-        
+
     except Exception as e:
         logger.error(f"❌ Failed to log error: {e}")
 
-def log_performance(logger: logging.Logger, 
-                   operation: str, 
-                   duration: float, 
+def log_performance(logger: logging.Logger,
+                   operation: str,
+                   duration: float,
                    metrics: Dict[str, Any] = None):
     """Log performance metrics"""
     try:
@@ -129,17 +130,17 @@ def log_performance(logger: logging.Logger,
             "duration": f"{duration:.3f}s",
             "timestamp": datetime.now().isoformat()
         }
-        
+
         if metrics:
             context.update(metrics)
-        
+
         log_with_context(logger, logging.INFO, f"Performance: {operation}", context)
-        
+
     except Exception as e:
         logger.error(f"❌ Failed to log performance: {e}")
 
-def log_security_event(logger: logging.Logger, 
-                      event: str, 
+def log_security_event(logger: logging.Logger,
+                      event: str,
                       severity: str = "medium",
                       details: Dict[str, Any] = None):
     """Log security event"""
@@ -149,10 +150,10 @@ def log_security_event(logger: logging.Logger,
             "severity": severity,
             "timestamp": datetime.now().isoformat()
         }
-        
+
         if details:
             context.update(details)
-        
+
         # Use appropriate log level based on severity
         if severity.lower() == "critical":
             log_level = logging.CRITICAL
@@ -162,15 +163,15 @@ def log_security_event(logger: logging.Logger,
             log_level = logging.WARNING
         else:
             log_level = logging.INFO
-        
+
         log_with_context(logger, log_level, f"Security event: {event}", context)
-        
+
     except Exception as e:
         logger.error(f"❌ Failed to log security event: {e}")
 
-def log_audit(logger: logging.Logger, 
-              action: str, 
-              user: str = None, 
+def log_audit(logger: logging.Logger,
+              action: str,
+              user: str = None,
               resource: str = None,
               details: Dict[str, Any] = None):
     """Log audit trail"""
@@ -179,16 +180,16 @@ def log_audit(logger: logging.Logger,
             "action": action,
             "timestamp": datetime.now().isoformat()
         }
-        
+
         if user:
             context["user"] = user
         if resource:
             context["resource"] = resource
         if details:
             context.update(details)
-        
+
         log_with_context(logger, logging.INFO, f"Audit: {action}", context)
-        
+
     except Exception as e:
         logger.error(f"❌ Failed to log audit: {e}")
 

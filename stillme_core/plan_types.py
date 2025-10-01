@@ -1,8 +1,9 @@
 """Plan Types for StillMe Framework"""
 
-from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, Dict, List, Optional
+
 
 class PlanStatus(Enum):
     PENDING = "pending"
@@ -26,7 +27,7 @@ class PlanStep:
     expected_output: Optional[str] = None
     dependencies: List[str] = None
     status: PlanStatus = PlanStatus.PENDING
-    
+
     def __post_init__(self):
         if self.dependencies is None:
             self.dependencies = []
@@ -43,7 +44,7 @@ class PlanItem:
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
     metadata: Dict[str, Any] = None
-    
+
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
@@ -58,7 +59,7 @@ class ExecutionResult:
     error: Optional[str] = None
     execution_time: Optional[float] = None
     metadata: Dict[str, Any] = None
-    
+
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}

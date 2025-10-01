@@ -10,15 +10,17 @@ Version: 1.0.0
 """
 
 import re
-from typing import Dict, Any
+from typing import Any, Dict
+
 from .detector_base import BaseDetector
+
 
 class XSSDetector(BaseDetector):
     """Detects XSS patterns and security risks"""
-    
+
     def __init__(self):
         super().__init__("xss_detector")
-        
+
         # XSS patterns
         self.xss_patterns = [
             r"(?i)<script[^>]*>",  # Script tags
@@ -88,7 +90,7 @@ class XSSDetector(BaseDetector):
             r"(?i)document\.write",  # document.write
             r"(?i)document\.writeln",  # document.writeln
         ]
-        
+
         # Test-specific XSS patterns
         self.test_xss_patterns = [
             "<script>alert('XSS')</script>",
@@ -104,55 +106,55 @@ class XSSDetector(BaseDetector):
             "innerHTML",
             "outerHTML",
         ]
-    
+
     def detect(self, text: str) -> Dict[str, Any]:
         """Detect XSS patterns"""
-        
+
         # Check for XSS patterns
         xss_matches = []
         for pattern in self.xss_patterns:
             matches = re.findall(pattern, text)
             if matches:
                 xss_matches.extend(matches)
-        
+
         # Check for test-specific patterns
         test_xss_found = []
         for test_pattern in self.test_xss_patterns:
             if test_pattern in text:
                 test_xss_found.append(test_pattern)
-        
+
         # Check for HTML-like structures
         html_like_indicators = [
             r"<[^>]*>",  # HTML tags
             r"</[^>]*>",  # Closing HTML tags
             r"<[^>]*/>",  # Self-closing HTML tags
         ]
-        
+
         html_like_count = 0
         for pattern in html_like_indicators:
             html_like_count += len(re.findall(pattern, text))
-        
+
         # Check for suspicious string concatenation
         suspicious_concatenation = bool(re.search(r"f\".*\{.*\}.*\"", text))
-        
+
         # Calculate confidence score
         confidence = 0.0
-        
+
         if xss_matches:
             confidence += 0.4
-        
+
         if test_xss_found:
             confidence += 0.3
-        
+
         if html_like_count > 0:
             confidence += 0.2
-        
+
         if suspicious_concatenation:
             confidence += 0.1
-        
+
         # Determine if clarification is needed
         needs_clarification = confidence >= 0.5
-        
+
         return {
             "needs_clarification": needs_clarification,
             "confidence": min(1.0, confidence),

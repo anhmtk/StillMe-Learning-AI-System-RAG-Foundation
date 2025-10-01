@@ -64,11 +64,11 @@ class TemplateResult:
 
 class TemplateFiller:
     """Template filler sử dụng predefined slots và AI generation"""
-    
+
     def __init__(self, config: TemplateConfig = None):
         self.config = config or TemplateConfig()
         self.logger = logging.getLogger(__name__)
-        
+
         # Initialize API manager
         if UnifiedAPIManager:
             try:
@@ -78,13 +78,13 @@ class TemplateFiller:
                 self.api_manager = None
         else:
             self.api_manager = None
-        
+
         # Predefined slots
         self.predefined_slots = self._create_predefined_slots()
-        
+
         # Common templates
         self.common_templates = self._create_common_templates()
-    
+
     def _create_predefined_slots(self) -> Dict[str, List[str]]:
         """Tạo các slots có sẵn"""
         return {
@@ -129,7 +129,7 @@ class TemplateFiller:
                 "có muốn gì không", "có thích gì không", "có ghét gì không"
             ]
         }
-    
+
     def _create_common_templates(self) -> List[Template]:
         """Tạo các template phổ biến"""
         return [
@@ -191,16 +191,16 @@ class TemplateFiller:
                 category="opinion"
             )
         ]
-    
+
     def _extract_slots_from_template(self, template: str) -> List[str]:
         """Trích xuất các slot từ template string"""
         pattern = r'\[([A-Z_]+)\]'
         return re.findall(pattern, template)
-    
+
     def _generate_slot_combinations(self, template: Template, num_combinations: int) -> List[Dict[str, str]]:
         """Tạo các combination của slots"""
         combinations = []
-        
+
         for _ in range(num_combinations):
             combination = {}
             for slot in template.slots:
@@ -209,7 +209,7 @@ class TemplateFiller:
                 else:
                     combination[slot.name] = random.choice(slot.values)
             combinations.append(combination)
-        
+
         # Remove duplicates
         unique_combinations = []
         seen = set()
@@ -218,14 +218,14 @@ class TemplateFiller:
             if combo_str not in seen:
                 seen.add(combo_str)
                 unique_combinations.append(combo)
-        
+
         return unique_combinations
-    
+
     async def _generate_ai_variants(self, template: Template, num_variants: int) -> List[str]:
         """Sử dụng AI để tạo variants"""
         if not self.api_manager or not self.config.use_ai_generation:
             return []
-        
+
         try:
             prompt = f"""Tạo {num_variants} biến thể khác nhau cho template sau:
 
@@ -241,12 +241,12 @@ Yêu cầu:
 - Mỗi biến thể trên một dòng riêng
 
 Biến thể:"""
-            
+
             response = self.api_manager.get_response(
                 prompt=prompt,
                 model=self.config.model
             )
-            
+
             # Parse response
             variants = []
             for line in response.strip().split('\n'):
@@ -256,62 +256,62 @@ Biến thể:"""
                     if line.startswith(('1.', '2.', '3.', '4.', '5.', '-', '*')):
                         line = line.split('.', 1)[-1].strip()
                         line = line.lstrip('-* ').strip()
-                    
+
                     if line:
                         variants.append(line)
-            
+
             return variants[:num_variants]
-            
+
         except Exception as e:
             self.logger.warning(f"AI variant generation failed: {e}")
             return []
-    
+
     def _fill_template(self, template: str, combination: Dict[str, str]) -> str:
         """Điền template với combination"""
         result = template
         for slot_name, value in combination.items():
             result = result.replace(f"[{slot_name}]", value)
         return result
-    
+
     async def fill_template(self, template: Template) -> TemplateResult:
         """Điền template và tạo variants"""
         try:
             variants = []
             slot_combinations = []
-            
+
             # Generate slot combinations
             combinations = self._generate_slot_combinations(
-                template, 
+                template,
                 self.config.num_variants_per_template
             )
-            
+
             # Fill template with combinations
             for combination in combinations:
                 variant = self._fill_template(template.template, combination)
                 variants.append(variant)
                 slot_combinations.append(combination)
-            
+
             # Generate AI variants if enabled
             if self.config.use_ai_generation:
                 ai_variants = await self._generate_ai_variants(
-                    template, 
+                    template,
                     self.config.num_variants_per_template // 2
                 )
                 variants.extend(ai_variants)
                 # Add empty combinations for AI variants
                 slot_combinations.extend([{}] * len(ai_variants))
-            
+
             # Remove duplicates
             unique_variants = []
             unique_combinations = []
             seen = set()
-            
+
             for variant, combo in zip(variants, slot_combinations):
                 if variant not in seen:
                     seen.add(variant)
                     unique_variants.append(variant)
                     unique_combinations.append(combo)
-            
+
             return TemplateResult(
                 template_name=template.name,
                 original_template=template.template,
@@ -324,7 +324,7 @@ Biến thể:"""
                     "ai_generated": self.config.use_ai_generation
                 }
             )
-            
+
         except Exception as e:
             self.logger.error(f"Template filling failed: {e}")
             return TemplateResult(
@@ -335,12 +335,12 @@ Biến thể:"""
                 success=False,
                 error=str(e)
             )
-    
+
     async def fill_templates_batch(self, templates: List[Template]) -> List[TemplateResult]:
         """Điền nhiều templates cùng lúc"""
         tasks = [self.fill_template(template) for template in templates]
         results = await asyncio.gather(*tasks, return_exceptions=True)
-        
+
         # Handle exceptions
         processed_results = []
         for i, result in enumerate(results):
@@ -355,30 +355,30 @@ Biến thể:"""
                 ))
             else:
                 processed_results.append(result)
-        
+
         return processed_results
 
 class TemplateFillerAugmentor:
     """Augmentor chính cho template filling"""
-    
+
     def __init__(self, config: TemplateConfig = None):
         self.template_filler = TemplateFiller(config)
         self.logger = logging.getLogger(__name__)
-    
+
     async def augment_from_templates(self, output_file: str, templates: List[Template] = None) -> Dict[str, Any]:
         """Augment từ templates"""
         if templates is None:
             templates = self.template_filler.common_templates
-        
+
         self.logger.info(f"Filling {len(templates)} templates")
-        
+
         # Fill templates
         results = await self.template_filler.fill_templates_batch(templates)
-        
+
         # Save results
         output_path = Path(output_file)
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         with open(output_path, 'w', encoding='utf-8') as f:
             for result in results:
                 if result.success:
@@ -391,7 +391,7 @@ class TemplateFillerAugmentor:
                             "metadata": result.metadata
                         }
                         f.write(json.dumps(output_data, ensure_ascii=False) + '\n')
-        
+
         # Generate statistics
         stats = {
             "total_templates": len(templates),
@@ -403,22 +403,22 @@ class TemplateFillerAugmentor:
                 "use_ai_generation": self.template_filler.config.use_ai_generation
             }
         }
-        
+
         # Count by category
         for result in results:
             if result.success and result.metadata:
                 category = result.metadata.get("template_category", "unknown")
                 stats["templates_by_category"][category] = stats["templates_by_category"].get(category, 0) + 1
-        
+
         self.logger.info(f"Template filling completed: {stats}")
         return stats
-    
+
     async def augment_from_custom_templates(self, template_file: str, output_file: str) -> Dict[str, Any]:
         """Augment từ custom template file"""
         template_path = Path(template_file)
         if not template_path.exists():
             raise FileNotFoundError(f"Template file not found: {template_file}")
-        
+
         # Load custom templates
         templates = []
         with open(template_path, 'r', encoding='utf-8') as f:
@@ -433,7 +433,7 @@ class TemplateFillerAugmentor:
                         description=slot_data.get("description", "")
                     )
                     slots.append(slot)
-                
+
                 template = Template(
                     name=template_data["name"],
                     template=template_data["template"],
@@ -442,7 +442,7 @@ class TemplateFillerAugmentor:
                     category=template_data.get("category", "general")
                 )
                 templates.append(template)
-        
+
         return await self.augment_from_templates(output_file, templates)
 
 async def main():
@@ -451,12 +451,12 @@ async def main():
         num_variants_per_template=5,
         use_ai_generation=True
     )
-    
+
     augmentor = TemplateFillerAugmentor(config)
-    
+
     # Test with common templates
     results = await augmentor.augment_from_templates("demo_template_output.jsonl")
-    
+
     print(f"Generated {results['total_outputs']} variants from {results['total_templates']} templates")
     print(f"Success rate: {results['success_rate']:.2%}")
     print("Templates by category:", results['templates_by_category'])

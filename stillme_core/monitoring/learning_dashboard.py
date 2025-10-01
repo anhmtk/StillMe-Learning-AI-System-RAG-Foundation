@@ -3,14 +3,14 @@ Learning Dashboard - Real-time monitoring and visualization
 Provides comprehensive monitoring of self-learning processes, metrics, and system health.
 """
 
+import asyncio
 import json
 import logging
-import asyncio
-from pathlib import Path
-from typing import Dict, List, Any, Optional
-from datetime import datetime, timedelta
-from dataclasses import dataclass, asdict
 import statistics
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -45,20 +45,20 @@ class LearningDashboard:
     """
     Real-time learning dashboard for monitoring self-learning processes
     """
-    
+
     def __init__(self, artifacts_dir: str = "artifacts", logs_dir: str = "logs"):
         self.artifacts_dir = Path(artifacts_dir)
         self.logs_dir = Path(logs_dir)
         self.artifacts_dir.mkdir(exist_ok=True)
         self.logs_dir.mkdir(exist_ok=True)
-        
+
         # Dashboard state
         self.sessions: List[LearningSession] = []
         self.metrics_history: List[DashboardMetrics] = []
         self.alerts: List[Dict[str, Any]] = []
-        
+
         logger.info("Learning Dashboard initialized")
-    
+
     async def update_dashboard(
         self,
         session_id: str,
@@ -88,7 +88,7 @@ class LearningDashboard:
         system_health = await self._calculate_system_health(
             success_rate, rollback_count, ethics_violations, performance_metrics
         )
-        
+
         # Create metrics object
         metrics = DashboardMetrics(
             timestamp=datetime.now().isoformat(),
@@ -101,20 +101,20 @@ class LearningDashboard:
             learning_progress=learning_progress,
             system_health=system_health
         )
-        
+
         # Store metrics
         self.metrics_history.append(metrics)
-        
+
         # Check for alerts
         await self._check_alerts(metrics)
-        
+
         # Update session data
         await self._update_session_data(session_id, metrics)
-        
+
         logger.info(f"Dashboard updated for session {session_id}: success_rate={success_rate:.2f}")
-        
+
         return metrics
-    
+
     async def _calculate_system_health(
         self,
         success_rate: float,
@@ -124,29 +124,29 @@ class LearningDashboard:
     ) -> Dict[str, Any]:
         """Calculate overall system health"""
         health_score = 100.0
-        
+
         # Success rate impact
         if success_rate < 0.7:
             health_score -= 20
         elif success_rate < 0.8:
             health_score -= 10
-        
+
         # Rollback impact
         if rollback_count > 5:
             health_score -= 15
         elif rollback_count > 2:
             health_score -= 5
-        
+
         # Ethics violations impact
         if ethics_violations > 0:
             health_score -= ethics_violations * 10
-        
+
         # Performance impact
         if performance_metrics.get("latency", 0) > 1000:  # ms
             health_score -= 10
         if performance_metrics.get("error_rate", 0) > 0.05:  # 5%
             health_score -= 15
-        
+
         # Determine health status
         if health_score >= 90:
             status = "excellent"
@@ -156,7 +156,7 @@ class LearningDashboard:
             status = "warning"
         else:
             status = "critical"
-        
+
         return {
             "overall_score": max(0.0, min(100.0, health_score)),
             "status": status,
@@ -165,11 +165,11 @@ class LearningDashboard:
             "ethics_violations": ethics_violations,
             "performance_impact": performance_metrics.get("latency", 0) > 1000 or performance_metrics.get("error_rate", 0) > 0.05
         }
-    
+
     async def _check_alerts(self, metrics: DashboardMetrics):
         """Check for alert conditions"""
         alerts = []
-        
+
         # Success rate alerts
         if metrics.success_rate < 0.5:
             alerts.append({
@@ -178,7 +178,7 @@ class LearningDashboard:
                 "timestamp": metrics.timestamp,
                 "session_id": metrics.session_id
             })
-        
+
         # Rollback alerts
         if metrics.rollback_count > 3:
             alerts.append({
@@ -187,7 +187,7 @@ class LearningDashboard:
                 "timestamp": metrics.timestamp,
                 "session_id": metrics.session_id
             })
-        
+
         # Ethics violation alerts
         if metrics.ethics_violations > 0:
             alerts.append({
@@ -196,7 +196,7 @@ class LearningDashboard:
                 "timestamp": metrics.timestamp,
                 "session_id": metrics.session_id
             })
-        
+
         # Performance alerts
         if metrics.performance_metrics.get("latency", 0) > 2000:  # 2 seconds
             alerts.append({
@@ -205,15 +205,15 @@ class LearningDashboard:
                 "timestamp": metrics.timestamp,
                 "session_id": metrics.session_id
             })
-        
+
         # Add alerts to history
         self.alerts.extend(alerts)
-        
+
         # Log critical alerts
         for alert in alerts:
             if alert["type"] == "critical":
                 logger.critical(f"CRITICAL ALERT: {alert['message']}")
-    
+
     async def _update_session_data(self, session_id: str, metrics: DashboardMetrics):
         """Update session data"""
         # Find existing session or create new one
@@ -222,7 +222,7 @@ class LearningDashboard:
             if s.session_id == session_id:
                 session = s
                 break
-        
+
         if not session:
             session = LearningSession(
                 session_id=session_id,
@@ -244,27 +244,27 @@ class LearningDashboard:
             session.rollback_count = metrics.rollback_count
             session.ethics_violations = metrics.ethics_violations
             session.performance_delta = metrics.performance_metrics.get("improvement", 0.0)
-    
+
     async def generate_dashboard_html(self, output_path: str = "artifacts/learning_dashboard.html") -> str:
         """Generate HTML dashboard"""
         try:
             # Calculate dashboard statistics
             stats = await self._calculate_dashboard_statistics()
-            
+
             # Generate HTML content
             html_content = self._generate_html_content(stats)
-            
+
             # Write to file
             with open(output_path, 'w', encoding='utf-8') as f:
                 f.write(html_content)
-            
+
             logger.info(f"Dashboard HTML generated: {output_path}")
             return output_path
-            
+
         except Exception as e:
             logger.error(f"Failed to generate dashboard HTML: {e}")
             raise
-    
+
     async def _calculate_dashboard_statistics(self) -> Dict[str, Any]:
         """Calculate comprehensive dashboard statistics"""
         if not self.metrics_history:
@@ -277,17 +277,17 @@ class LearningDashboard:
                 "recent_trends": {},
                 "alerts_summary": {}
             }
-        
+
         # Basic statistics
         total_sessions = len(self.sessions)
         avg_success_rate = statistics.mean([m.success_rate for m in self.metrics_history])
         total_rollbacks = sum(m.rollback_count for m in self.metrics_history)
         total_ethics_violations = sum(m.ethics_violations for m in self.metrics_history)
-        
+
         # System health
         recent_health_scores = [m.system_health["overall_score"] for m in self.metrics_history[-10:]]
         avg_health_score = statistics.mean(recent_health_scores) if recent_health_scores else 0.0
-        
+
         if avg_health_score >= 90:
             system_health = "excellent"
         elif avg_health_score >= 75:
@@ -296,20 +296,20 @@ class LearningDashboard:
             system_health = "warning"
         else:
             system_health = "critical"
-        
+
         # Recent trends
         recent_trends = {
             "success_rate_trend": self._calculate_trend([m.success_rate for m in self.metrics_history[-10:]]),
             "rollback_trend": self._calculate_trend([m.rollback_count for m in self.metrics_history[-10:]]),
             "ethics_trend": self._calculate_trend([m.ethics_violations for m in self.metrics_history[-10:]])
         }
-        
+
         # Alerts summary
         alert_counts = {}
         for alert in self.alerts:
             alert_type = alert["type"]
             alert_counts[alert_type] = alert_counts.get(alert_type, 0) + 1
-        
+
         return {
             "total_sessions": total_sessions,
             "avg_success_rate": avg_success_rate,
@@ -321,23 +321,23 @@ class LearningDashboard:
             "alerts_summary": alert_counts,
             "last_updated": datetime.now().isoformat()
         }
-    
+
     def _calculate_trend(self, values: List[float]) -> str:
         """Calculate trend direction"""
         if len(values) < 2:
             return "stable"
-        
+
         # Simple trend calculation
         first_half = statistics.mean(values[:len(values)//2])
         second_half = statistics.mean(values[len(values)//2:])
-        
+
         if second_half > first_half * 1.1:
             return "improving"
         elif second_half < first_half * 0.9:
             return "declining"
         else:
             return "stable"
-    
+
     def _generate_html_content(self, stats: Dict[str, Any]) -> str:
         """Generate HTML dashboard content"""
         return f"""
@@ -467,15 +467,15 @@ class LearningDashboard:
 </body>
 </html>
         """
-    
+
     def _generate_alerts_html(self) -> str:
         """Generate HTML for alerts section"""
         if not self.alerts:
             return "<p>No recent alerts</p>"
-        
+
         # Get recent alerts (last 10)
         recent_alerts = self.alerts[-10:]
-        
+
         alerts_html = ""
         for alert in recent_alerts:
             alert_class = f"alert-{alert['type']}"
@@ -485,9 +485,9 @@ class LearningDashboard:
                 <br><small>Session: {alert['session_id']} | {alert['timestamp']}</small>
             </div>
             """
-        
+
         return alerts_html
-    
+
     def get_dashboard_data(self) -> Dict[str, Any]:
         """Get current dashboard data"""
         return {
@@ -506,42 +506,42 @@ class LearningDashboard:
                 system_health={}
             ))
         }
-    
+
     async def export_metrics_json(self, output_path: str = "artifacts/learning_dashboard.json") -> str:
         """Export dashboard metrics to JSON"""
         try:
             dashboard_data = self.get_dashboard_data()
-            
+
             with open(output_path, 'w', encoding='utf-8') as f:
                 json.dump(dashboard_data, f, indent=2, ensure_ascii=False)
-            
+
             logger.info(f"Dashboard metrics exported: {output_path}")
             return output_path
-            
+
         except Exception as e:
             logger.error(f"Failed to export dashboard metrics: {e}")
             raise
-    
+
     def clear_old_data(self, days_to_keep: int = 30):
         """Clear old dashboard data"""
         cutoff_date = datetime.now() - timedelta(days=days_to_keep)
-        
+
         # Clear old metrics
         self.metrics_history = [
-            m for m in self.metrics_history 
+            m for m in self.metrics_history
             if datetime.fromisoformat(m.timestamp) > cutoff_date
         ]
-        
+
         # Clear old alerts
         self.alerts = [
-            a for a in self.alerts 
+            a for a in self.alerts
             if datetime.fromisoformat(a['timestamp']) > cutoff_date
         ]
-        
+
         # Clear old sessions
         self.sessions = [
-            s for s in self.sessions 
+            s for s in self.sessions
             if datetime.fromisoformat(s.start_time) > cutoff_date
         ]
-        
+
         logger.info(f"Cleared dashboard data older than {days_to_keep} days")

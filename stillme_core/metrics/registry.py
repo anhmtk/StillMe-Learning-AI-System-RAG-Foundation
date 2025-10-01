@@ -17,12 +17,12 @@ Version: 1.0.0
 Date: 2025-09-28
 """
 
+import json
 import logging
-from typing import Dict, Any, Optional, List, Set, Union
 from dataclasses import dataclass, field
 from enum import Enum
-import json
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Set, Union
 
 logger = logging.getLogger(__name__)
 
@@ -40,22 +40,22 @@ class MetricUnit(Enum):
     MILLISECONDS = "ms"
     MICROSECONDS = "us"
     NANOSECONDS = "ns"
-    
+
     # Memory
     BYTES = "bytes"
     KILOBYTES = "KB"
     MEGABYTES = "MB"
     GIGABYTES = "GB"
-    
+
     # Count
     COUNT = "count"
     PERCENT = "%"
     RATIO = "ratio"
-    
+
     # Tokens
     TOKENS = "tokens"
     TOKENS_PER_SECOND = "tokens/s"
-    
+
     # Custom
     CUSTOM = "custom"
 
@@ -79,18 +79,18 @@ class MetricsRegistry:
     Đảm bảo consistency, validation, và type safety
     cho toàn bộ metrics system.
     """
-    
+
     def __init__(self, config_path: Optional[str] = None):
         self.config_path = config_path or "config/metrics_registry.yaml"
         self.definitions: Dict[str, MetricDefinition] = {}
         self._load_default_definitions()
-        
+
         # Load from config if exists
         if Path(self.config_path).exists():
             self._load_from_config()
-        
+
         logger.info(f"MetricsRegistry initialized with {len(self.definitions)} definitions")
-    
+
     def _load_default_definitions(self):
         """Load default metric definitions"""
         default_metrics = [
@@ -220,17 +220,17 @@ class MetricsRegistry:
                 min_value=0.0
             )
         ]
-        
+
         for metric in default_metrics:
             self.definitions[metric.name] = metric
-    
+
     def _load_from_config(self):
         """Load metric definitions from config file"""
         try:
             import yaml
             with open(self.config_path, 'r', encoding='utf-8') as f:
                 config = yaml.safe_load(f)
-            
+
             for metric_config in config.get('metrics', []):
                 metric = MetricDefinition(
                     name=metric_config['name'],
@@ -244,36 +244,36 @@ class MetricsRegistry:
                     default_value=metric_config.get('default_value')
                 )
                 self.definitions[metric.name] = metric
-            
+
             logger.info(f"Loaded {len(config.get('metrics', []))} metrics from config")
         except Exception as e:
             logger.warning(f"Failed to load metrics config: {e}")
-    
+
     def register_metric(self, definition: MetricDefinition):
         """Register a new metric definition"""
         self.definitions[definition.name] = definition
         logger.info(f"Registered metric: {definition.name}")
-    
+
     def get_definition(self, name: str) -> Optional[MetricDefinition]:
         """Get metric definition by name"""
         return self.definitions.get(name)
-    
+
     def validate_metric(self, name: str, value: float, tags: Optional[Dict[str, str]] = None) -> bool:
         """Validate metric value and tags"""
         definition = self.get_definition(name)
         if not definition:
             logger.warning(f"Unknown metric: {name}")
             return False
-        
+
         # Validate value range
         if definition.min_value is not None and value < definition.min_value:
             logger.warning(f"Metric {name} value {value} below minimum {definition.min_value}")
             return False
-        
+
         if definition.max_value is not None and value > definition.max_value:
             logger.warning(f"Metric {name} value {value} above maximum {definition.max_value}")
             return False
-        
+
         # Validate tags
         if tags:
             required_tags = set(definition.tags)
@@ -282,21 +282,21 @@ class MetricsRegistry:
             if missing_tags:
                 logger.warning(f"Metric {name} missing required tags: {missing_tags}")
                 return False
-        
+
         return True
-    
+
     def get_all_metrics(self) -> List[MetricDefinition]:
         """Get all registered metric definitions"""
         return list(self.definitions.values())
-    
+
     def get_metrics_by_type(self, metric_type: MetricType) -> List[MetricDefinition]:
         """Get metrics by type"""
         return [m for m in self.definitions.values() if m.metric_type == metric_type]
-    
+
     def get_metrics_by_tag(self, tag: str) -> List[MetricDefinition]:
         """Get metrics that use a specific tag"""
         return [m for m in self.definitions.values() if tag in m.tags]
-    
+
     def export_definitions(self, output_path: str):
         """Export metric definitions to file"""
         export_data = {
@@ -315,12 +315,12 @@ class MetricsRegistry:
                 for m in self.definitions.values()
             ]
         }
-        
+
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(export_data, f, indent=2, ensure_ascii=False)
-        
+
         logger.info(f"Exported {len(self.definitions)} metric definitions to {output_path}")
-    
+
     def get_metric_summary(self) -> Dict[str, Any]:
         """Get summary of all metrics"""
         summary = {
@@ -329,22 +329,22 @@ class MetricsRegistry:
             'by_unit': {},
             'by_tag': {}
         }
-        
+
         # Count by type
         for metric in self.definitions.values():
             metric_type = metric.metric_type.value
             summary['by_type'][metric_type] = summary['by_type'].get(metric_type, 0) + 1
-        
+
         # Count by unit
         for metric in self.definitions.values():
             unit = metric.unit.value
             summary['by_unit'][unit] = summary['by_unit'].get(unit, 0) + 1
-        
+
         # Count by tag
         for metric in self.definitions.values():
             for tag in metric.tags:
                 summary['by_tag'][tag] = summary['by_tag'].get(tag, 0) + 1
-        
+
         return summary
 
 # Global instance

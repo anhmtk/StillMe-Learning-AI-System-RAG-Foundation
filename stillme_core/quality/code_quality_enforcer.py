@@ -1,10 +1,10 @@
 """Code Quality Enforcer for StillMe Framework"""
 
 import logging
-from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -35,20 +35,20 @@ class QualityViolation:
     suggested_fix: str
     timestamp: datetime
     metadata: Dict[str, Any] = None
-    
+
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
 
 class CodeQualityEnforcer:
     """Code quality enforcer for StillMe Framework"""
-    
+
     def __init__(self):
         self.logger = logger
         self.violations: List[QualityViolation] = []
         self.quality_rules = self._initialize_quality_rules()
         self.logger.info("✅ CodeQualityEnforcer initialized")
-    
+
     def _initialize_quality_rules(self) -> Dict[QualityCategory, List[str]]:
         """Initialize quality rules"""
         return {
@@ -89,55 +89,55 @@ class CodeQualityEnforcer:
                 "side_effects"
             ]
         }
-    
-    def analyze_code_quality(self, 
-                           file_path: str, 
+
+    def analyze_code_quality(self,
+                           file_path: str,
                            code_content: str,
                            metadata: Dict[str, Any] = None) -> List[QualityViolation]:
         """Analyze code quality and return violations"""
         try:
             violations = []
-            
+
             # Check style violations
             style_violations = self._check_style_violations(file_path, code_content)
             violations.extend(style_violations)
-            
+
             # Check complexity violations
             complexity_violations = self._check_complexity_violations(file_path, code_content)
             violations.extend(complexity_violations)
-            
+
             # Check security violations
             security_violations = self._check_security_violations(file_path, code_content)
             violations.extend(security_violations)
-            
+
             # Check performance violations
             performance_violations = self._check_performance_violations(file_path, code_content)
             violations.extend(performance_violations)
-            
+
             # Check maintainability violations
             maintainability_violations = self._check_maintainability_violations(file_path, code_content)
             violations.extend(maintainability_violations)
-            
+
             # Check testability violations
             testability_violations = self._check_testability_violations(file_path, code_content)
             violations.extend(testability_violations)
-            
+
             # Record violations
             for violation in violations:
                 self.violations.append(violation)
                 self.logger.warning(f"⚠️ Quality violation: {violation.category.value} - {violation.description}")
-            
+
             return violations
-            
+
         except Exception as e:
             self.logger.error(f"❌ Failed to analyze code quality: {e}")
             return []
-    
+
     def _check_style_violations(self, file_path: str, code_content: str) -> List[QualityViolation]:
         """Check for style violations"""
         violations = []
         lines = code_content.split('\n')
-        
+
         for i, line in enumerate(lines, 1):
             # Check line length
             if len(line) > 120:
@@ -152,7 +152,7 @@ class CodeQualityEnforcer:
                     timestamp=datetime.now()
                 )
                 violations.append(violation)
-            
+
             # Check trailing whitespace
             if line.rstrip() != line:
                 violation = QualityViolation(
@@ -166,18 +166,18 @@ class CodeQualityEnforcer:
                     timestamp=datetime.now()
                 )
                 violations.append(violation)
-        
+
         return violations
-    
+
     def _check_complexity_violations(self, file_path: str, code_content: str) -> List[QualityViolation]:
         """Check for complexity violations"""
         violations = []
-        
+
         # Simple complexity check - count nested structures
         lines = code_content.split('\n')
         max_nesting = 0
         current_nesting = 0
-        
+
         for i, line in enumerate(lines, 1):
             stripped = line.strip()
             if stripped.startswith(('if ', 'for ', 'while ', 'try:', 'with ', 'class ', 'def ')):
@@ -190,7 +190,7 @@ class CodeQualityEnforcer:
                 # Check if we're decreasing nesting
                 if current_nesting > 0 and not stripped.startswith((' ', '\t')):
                     current_nesting -= 1
-        
+
         if max_nesting > 4:
             violation = QualityViolation(
                 violation_id=f"complexity_{len(self.violations) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
@@ -203,13 +203,13 @@ class CodeQualityEnforcer:
                 timestamp=datetime.now()
             )
             violations.append(violation)
-        
+
         return violations
-    
+
     def _check_security_violations(self, file_path: str, code_content: str) -> List[QualityViolation]:
         """Check for security violations"""
         violations = []
-        
+
         # Check for hardcoded secrets
         if any(keyword in code_content.lower() for keyword in ['password', 'secret', 'key', 'token']):
             violation = QualityViolation(
@@ -223,13 +223,13 @@ class CodeQualityEnforcer:
                 timestamp=datetime.now()
             )
             violations.append(violation)
-        
+
         return violations
-    
+
     def _check_performance_violations(self, file_path: str, code_content: str) -> List[QualityViolation]:
         """Check for performance violations"""
         violations = []
-        
+
         # Check for inefficient patterns
         if 'for i in range(len(' in code_content:
             violation = QualityViolation(
@@ -243,13 +243,13 @@ class CodeQualityEnforcer:
                 timestamp=datetime.now()
             )
             violations.append(violation)
-        
+
         return violations
-    
+
     def _check_maintainability_violations(self, file_path: str, code_content: str) -> List[QualityViolation]:
         """Check for maintainability violations"""
         violations = []
-        
+
         # Check for magic numbers
         import re
         magic_numbers = re.findall(r'\b\d{3,}\b', code_content)
@@ -265,18 +265,18 @@ class CodeQualityEnforcer:
                 timestamp=datetime.now()
             )
             violations.append(violation)
-        
+
         return violations
-    
+
     def _check_testability_violations(self, file_path: str, code_content: str) -> List[QualityViolation]:
         """Check for testability violations"""
         violations = []
-        
+
         # Check for missing docstrings in functions
         lines = code_content.split('\n')
         in_function = False
         function_line = 0
-        
+
         for i, line in enumerate(lines, 1):
             stripped = line.strip()
             if stripped.startswith('def '):
@@ -297,45 +297,45 @@ class CodeQualityEnforcer:
                         )
                         violations.append(violation)
                     in_function = False
-        
+
         return violations
-    
+
     def get_violations_by_category(self, category: QualityCategory) -> List[QualityViolation]:
         """Get violations by category"""
         return [v for v in self.violations if v.category == category]
-    
+
     def get_violations_by_level(self, level: QualityLevel) -> List[QualityViolation]:
         """Get violations by level"""
         return [v for v in self.violations if v.level == level]
-    
+
     def get_quality_summary(self) -> Dict[str, Any]:
         """Get quality summary"""
         try:
             total_violations = len(self.violations)
-            
+
             violations_by_category = {}
             violations_by_level = {}
-            
+
             for violation in self.violations:
                 # By category
                 category_key = violation.category.value
                 violations_by_category[category_key] = violations_by_category.get(category_key, 0) + 1
-                
+
                 # By level
                 level_key = violation.level.value
                 violations_by_level[level_key] = violations_by_level.get(level_key, 0) + 1
-            
+
             return {
                 "total_violations": total_violations,
                 "violations_by_category": violations_by_category,
                 "violations_by_level": violations_by_level,
                 "timestamp": datetime.now().isoformat()
             }
-            
+
         except Exception as e:
             self.logger.error(f"❌ Failed to get quality summary: {e}")
             return {"error": str(e)}
-    
+
     def clear_violations(self):
         """Clear all violations"""
         self.violations.clear()

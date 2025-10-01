@@ -3,55 +3,25 @@
 Advanced Security Framework for AgentDev
 """
 
-from .safe_attack_simulator import SafeAttackSimulator, AttackScenario, SimulationResult
+from .safe_attack_simulator import AttackScenario, SafeAttackSimulator, SimulationResult
+
 try:
+    from .vulnerability_detector import VulnerabilityDetector, VulnerabilityReport
+except ImportError:
+    VulnerabilityDetector = None
+    VulnerabilityReport = None
+
 try:
+    from .defense_tester import DefenseTester, DefenseTestResult
+except ImportError:
+    DefenseTester = None
+    DefenseTestResult = None
+
 try:
-try:
-try:
-                    from .vulnerability_detector import VulnerabilityDetector, VulnerabilityReport
+    from .security_reporter import SecurityAssessment, SecurityReporter
 except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-try:
-try:
-try:
-try:
-try:
-                    from .defense_tester import DefenseTester, DefenseTestResult
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-try:
-try:
-try:
-try:
-try:
-                    from .security_reporter import SecurityReporter, SecurityAssessment
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
+    SecurityReporter = None
+    SecurityAssessment = None
 
 __all__ = [
     "SafeAttackSimulator",

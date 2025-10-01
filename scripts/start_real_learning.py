@@ -30,41 +30,41 @@ class RealLearningSystem:
         self.proposals_manager = ProposalsManager()
         self.alerting_system = AlertingSystem()
         self.automation_service = AutomationService(
-            self.scheduler, 
-            self.proposals_manager, 
+            self.scheduler,
+            self.proposals_manager,
             self.alerting_system
         )
-        
+
     def start(self):
         """Khởi động hệ thống học tập thực sự"""
         logger.info("🧠 StillMe IPC Real Learning System")
         logger.info("==========================================")
         logger.info("🚀 Starting Real Learning System...")
-        
+
         try:
             # 1. Start Learning Scheduler
             logger.info("📅 Starting Learning Scheduler...")
             self.scheduler.start()
             logger.info("✅ Scheduler started successfully.")
-            
+
             # 2. Start Automation Service
             logger.info("🤖 Starting Automation Service...")
             self.automation_service.start()
             logger.info("✅ Automation Service started successfully.")
-            
+
             # 3. Test Alerting System
             logger.info("🔔 Testing Alerting System...")
             self.alerting_system.send_alert(
-                "Real Learning System Activated", 
-                "StillMe IPC is now ready to learn new knowledge automatically! 🧠✨", 
+                "Real Learning System Activated",
+                "StillMe IPC is now ready to learn new knowledge automatically! 🧠✨",
                 "info"
             )
             logger.info("✅ Alerting system tested successfully.")
-            
+
             # 4. Create initial learning proposal
             logger.info("📝 Creating initial learning proposal...")
             self._create_initial_proposal()
-            
+
             logger.info("🎉 StillMe IPC Real Learning System is now ACTIVE!")
             logger.info("💡 The system will:")
             logger.info("   • Automatically discover new knowledge")
@@ -72,14 +72,14 @@ class RealLearningSystem:
             logger.info("   • Send notifications via Email/Telegram")
             logger.info("   • Wait for your approval before learning")
             logger.info("   • Track learning progress in real-time")
-            
+
             return True
-            
+
         except Exception as e:
             logger.error(f"❌ Failed to start Real Learning System: {e}")
             self.shutdown()
             return False
-    
+
     def _create_initial_proposal(self):
         """Tạo proposal học tập ban đầu"""
         try:
@@ -105,9 +105,9 @@ class RealLearningSystem:
                 risk_assessment={"complexity": "high", "time_commitment": "high", "prerequisites": "medium", "practical_value": "very_high"},
                 created_by="real_learning_system"
             )
-            
+
             logger.info(f"✅ Initial proposal created: {proposal.title}")
-            
+
             # Send notification
             self.alerting_system.send_alert(
                 "New Learning Proposal Generated",
@@ -118,10 +118,10 @@ class RealLearningSystem:
                 f"Please review and approve in the dashboard!",
                 "info"
             )
-            
+
         except Exception as e:
             logger.error(f"❌ Failed to create initial proposal: {e}")
-    
+
     def shutdown(self):
         """Tắt hệ thống"""
         logger.info("🛑 Shutting down Real Learning System...")
@@ -135,20 +135,20 @@ class RealLearningSystem:
 def main():
     """Main function"""
     learning_system = RealLearningSystem()
-    
+
     try:
         if learning_system.start():
             logger.info("💡 Real Learning System is running in the background.")
             logger.info("   Keep this terminal open to maintain the system.")
             logger.info("   Press Ctrl+C to stop the system.")
-            
+
             # Keep the system running
             while True:
                 time.sleep(1)
         else:
             logger.error("❌ Failed to start Real Learning System.")
             sys.exit(1)
-            
+
     except (KeyboardInterrupt, SystemExit):
         logger.info("🛑 Received shutdown signal...")
         learning_system.shutdown()

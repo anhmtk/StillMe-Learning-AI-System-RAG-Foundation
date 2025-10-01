@@ -1,5 +1,7 @@
 import os
+
 import pytest
+
 from stillme_core.middleware.reflex_policy import ReflexPolicy
 
 
@@ -41,7 +43,7 @@ def test_decision_high_pattern_score(policy_balanced):
         "history_score": 0.5,
         "abuse_score": 0.0
     }
-    
+
     decision, confidence = policy_balanced.decide(scores)
     assert decision == "allow_reflex"
     assert confidence > 0.5
@@ -56,7 +58,7 @@ def test_decision_low_scores(policy_balanced):
         "history_score": 0.1,
         "abuse_score": 0.0
     }
-    
+
     decision, confidence = policy_balanced.decide(scores)
     assert decision == "fallback"
     assert confidence > 0.0
@@ -71,7 +73,7 @@ def test_abuse_penalty(policy_balanced):
         "history_score": 0.7,
         "abuse_score": 0.5  # High abuse score
     }
-    
+
     decision, confidence = policy_balanced.decide(scores)
     # Should still allow reflex but with lower confidence
     assert decision == "allow_reflex" or decision == "fallback"
@@ -83,7 +85,7 @@ def test_policy_levels_comparison():
     strict_policy = ReflexPolicy("strict")
     balanced_policy = ReflexPolicy("balanced")
     creative_policy = ReflexPolicy("creative")
-    
+
     # Same scores should produce different decisions
     scores = {
         "pattern_score": 0.7,
@@ -91,11 +93,11 @@ def test_policy_levels_comparison():
         "history_score": 0.5,
         "abuse_score": 0.0
     }
-    
+
     strict_decision, _ = strict_policy.decide(scores)
     balanced_decision, _ = balanced_policy.decide(scores)
     creative_decision, _ = creative_policy.decide(scores)
-    
+
     # Creative should be most permissive, strict least
     assert creative_decision == "allow_reflex"
     # Balanced might be fallback with 0.7 pattern score
@@ -108,13 +110,13 @@ def test_context_score_calculation(policy_balanced):
     # Test with different contexts
     context1 = {"mode": "strict", "text": "hello world", "session_active": True}
     context2 = {"mode": "creative", "text": "hi", "session_active": False}
-    
+
     scores1 = {"pattern_score": 0.8}
     scores2 = {"pattern_score": 0.8}
-    
+
     decision1, conf1 = policy_balanced.decide(scores1, context1)
     decision2, conf2 = policy_balanced.decide(scores2, context2)
-    
+
     # Both should have reasonable confidence
     assert conf1 > 0.0
     assert conf2 > 0.0
@@ -131,12 +133,12 @@ def test_history_score_calculation(policy_balanced):
         "cue_frequency": 2,
         "cue_recency_hours": 200
     }
-    
+
     scores = {"pattern_score": 0.7}
-    
+
     decision1, conf1 = policy_balanced.decide(scores, context_high_freq)
     decision2, conf2 = policy_balanced.decide(scores, context_low_freq)
-    
+
     # High frequency should have higher confidence
     assert conf1 >= conf2
 
@@ -150,9 +152,9 @@ def test_breakdown_analysis(policy_balanced):
         "history_score": 0.4,
         "abuse_score": 0.1
     }
-    
+
     breakdown = policy_balanced.get_breakdown(scores)
-    
+
     assert "scores" in breakdown
     assert "weights" in breakdown
     assert "contributions" in breakdown
@@ -162,7 +164,7 @@ def test_breakdown_analysis(policy_balanced):
     assert "confidence" in breakdown
     assert "policy_level" in breakdown
     assert "thresholds" in breakdown
-    
+
     # Check contributions structure
     contributions = breakdown["contributions"]
     for score_type in ["pattern", "context", "history", "abuse"]:
@@ -179,16 +181,16 @@ def test_env_override():
     # Set ENV variables
     os.environ["STILLME__REFLEX__WEIGHT_PATTERN"] = "0.6"
     os.environ["STILLME__REFLEX__THRESHOLD_BALANCED"] = "0.7"
-    
+
     try:
         policy = ReflexPolicy("balanced")
-        
+
         # Check weight override
         assert policy.weights["pattern"] == 0.6
-        
+
         # Check threshold override
         assert policy.thresholds["balanced"]["allow_reflex"] == 0.7
-        
+
     finally:
         # Clean up ENV variables
         if "STILLME__REFLEX__WEIGHT_PATTERN" in os.environ:
@@ -207,9 +209,9 @@ def test_matrix_policy_scores():
         (0.7, 0.6, 0.5, 0.3, "fallback"),  # High abuse
         (0.8, 0.9, 0.8, 0.1, "allow_reflex"),
     ]
-    
+
     policy = ReflexPolicy("balanced")
-    
+
     for pattern, context, history, abuse, expected_hint in test_cases:
         scores = {
             "pattern_score": pattern,
@@ -217,13 +219,13 @@ def test_matrix_policy_scores():
             "history_score": history,
             "abuse_score": abuse
         }
-        
+
         decision, confidence = policy.decide(scores)
-        
+
         # Basic validation
         assert decision in ["allow_reflex", "fallback"]
         assert 0.0 <= confidence <= 1.0
-        
+
         # High scores should generally allow reflex
         if pattern > 0.8 and context > 0.7 and abuse < 0.2:
             assert decision == "allow_reflex"
@@ -233,7 +235,7 @@ def test_matrix_policy_scores():
 def test_confidence_calculation():
     """Test confidence calculation logic"""
     policy = ReflexPolicy("balanced")
-    
+
     # High scores should have high confidence
     high_scores = {
         "pattern_score": 0.9,
@@ -241,10 +243,10 @@ def test_confidence_calculation():
         "history_score": 0.7,
         "abuse_score": 0.0
     }
-    
+
     decision, confidence = policy.decide(high_scores)
     assert confidence > 0.7
-    
+
     # Low scores should have lower confidence
     low_scores = {
         "pattern_score": 0.3,
@@ -252,7 +254,7 @@ def test_confidence_calculation():
         "history_score": 0.1,
         "abuse_score": 0.0
     }
-    
+
     decision, confidence = policy.decide(low_scores)
     # Low scores should result in fallback with reasonable confidence
     assert decision == "fallback"
@@ -265,10 +267,10 @@ def test_missing_scores_handling(policy_balanced):
     # Test with only pattern score
     scores = {"pattern_score": 0.8}
     decision, confidence = policy_balanced.decide(scores)
-    
+
     assert decision in ["allow_reflex", "fallback"]
     assert 0.0 <= confidence <= 1.0
-    
+
     # Test with None values
     scores_with_none = {
         "pattern_score": 0.8,
@@ -276,7 +278,7 @@ def test_missing_scores_handling(policy_balanced):
         "history_score": None,
         "abuse_score": None
     }
-    
+
     decision, confidence = policy_balanced.decide(scores_with_none)
     assert decision in ["allow_reflex", "fallback"]
     assert 0.0 <= confidence <= 1.0

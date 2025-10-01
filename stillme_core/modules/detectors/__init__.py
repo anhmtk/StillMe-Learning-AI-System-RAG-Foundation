@@ -10,18 +10,18 @@ Version: 1.0.0
 """
 
 from .detector_base import BaseDetector
-from .nested_detector import NestedCodeBlockDetector
-from .unicode_detector import UnicodeDetector
-from .json_detector import JSONDetector
-from .sqli_detector import SQLiDetector
-from .xss_detector import XSSDetector
-from .syntax_detector import SyntaxDetector
-from .multiple_functions_detector import MultipleFunctionsDetector
 from .image_detector import ImageDetector
+from .json_detector import JSONDetector
+from .multiple_functions_detector import MultipleFunctionsDetector
+from .nested_detector import NestedCodeBlockDetector
+from .sqli_detector import SQLiDetector
+from .syntax_detector import SyntaxDetector
+from .unicode_detector import UnicodeDetector
+from .xss_detector import XSSDetector
 
 __all__ = [
     "BaseDetector",
-    "NestedCodeBlockDetector", 
+    "NestedCodeBlockDetector",
     "UnicodeDetector",
     "JSONDetector",
     "SQLiDetector",

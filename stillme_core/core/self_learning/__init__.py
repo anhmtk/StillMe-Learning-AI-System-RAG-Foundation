@@ -3,7 +3,7 @@
 Self-Learning Mechanism for AgentDev
 """
 
-from .experience_memory import ExperienceMemory, Experience, LearningPattern
+from .experience_memory import Experience, ExperienceMemory, LearningPattern
 
 try:
     from .optimization_engine import OptimizationEngine, OptimizationResult
@@ -11,7 +11,7 @@ except ImportError:
     pass
 
 try:
-    from .knowledge_sharing import KnowledgeSharing, KnowledgeArticle
+    from .knowledge_sharing import KnowledgeArticle, KnowledgeSharing
 except ImportError:
     pass
 

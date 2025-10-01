@@ -21,16 +21,16 @@ Date: 2025-09-28
 """
 
 import asyncio
-import logging
-import time
 import json
+import logging
 import statistics
-from datetime import datetime, timedelta
-from typing import Dict, Any, Optional, List, Tuple, Callable
-from dataclasses import dataclass, asdict
-from pathlib import Path
-from collections import deque, defaultdict
 import threading
+import time
+from collections import defaultdict, deque
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -94,22 +94,22 @@ class PerformanceAnalyzer:
     """
     Advanced performance analyzer for AGI learning optimization
     """
-    
+
     def __init__(self, analysis_window_hours: int = 24):
         self.analysis_window_hours = analysis_window_hours
         self.logger = logging.getLogger(__name__)
-        
+
         # Data storage
         self.performance_history = deque(maxlen=10000)
         self.identified_patterns: List[PerformancePattern] = []
         self.bottlenecks: List[BottleneckAnalysis] = []
         self.agi_recommendations: List[AGIRecommendation] = []
-        
+
         # Analysis state
         self.is_analyzing = False
         self.analysis_task: Optional[asyncio.Task] = None
         self.last_analysis_time = None
-        
+
         # Performance baselines
         self.baselines = {
             'response_time': 1000.0,  # 1 second
@@ -118,7 +118,7 @@ class PerformanceAnalyzer:
             'accuracy': 0.8,          # 80%
             'efficiency': 0.7         # 70%
         }
-        
+
         # Pattern detection thresholds
         self.pattern_thresholds = {
             'improvement_threshold': 0.1,      # 10% improvement
@@ -126,27 +126,27 @@ class PerformanceAnalyzer:
             'oscillation_threshold': 0.2,      # 20% variation
             'stability_threshold': 0.05        # 5% variation
         }
-        
+
         # AGI evolution tracking
         self.evolution_milestones = []
         self.learning_curves = defaultdict(list)
         self.optimization_history = []
-    
+
     async def start_analysis(self, interval: int = 300):  # 5 minutes
         """Start performance analysis"""
         if self.is_analyzing:
             self.logger.warning("Performance analysis already started")
             return
-        
+
         self.is_analyzing = True
         self.analysis_task = asyncio.create_task(self._analysis_loop(interval))
         self.logger.info(f"Performance analysis started with {interval}s interval")
-    
+
     async def stop_analysis(self):
         """Stop performance analysis"""
         if not self.is_analyzing:
             return
-        
+
         self.is_analyzing = False
         if self.analysis_task:
             self.analysis_task.cancel()
@@ -154,9 +154,9 @@ class PerformanceAnalyzer:
                 await self.analysis_task
             except asyncio.CancelledError:
                 pass
-        
+
         self.logger.info("Performance analysis stopped")
-    
+
     async def _analysis_loop(self, interval: int):
         """Main analysis loop"""
         while self.is_analyzing:
@@ -166,85 +166,85 @@ class PerformanceAnalyzer:
                 await self._identify_bottlenecks()
                 await self._generate_agi_recommendations()
                 await self._update_learning_curves()
-                
+
                 self.last_analysis_time = datetime.now()
                 await asyncio.sleep(interval)
-                
+
             except asyncio.CancelledError:
                 break
             except Exception as e:
                 self.logger.error(f"Error in analysis loop: {e}")
                 await asyncio.sleep(interval)
-    
+
     def add_performance_metrics(self, metrics: PerformanceMetrics):
         """Add performance metrics for analysis"""
         self.performance_history.append(metrics)
-        
+
         # Update learning curves
         self.learning_curves[metrics.learning_stage].append(metrics)
-        
+
         # Keep only recent data
         cutoff_time = datetime.now() - timedelta(hours=self.analysis_window_hours)
         for stage in self.learning_curves:
             self.learning_curves[stage] = [
-                m for m in self.learning_curves[stage] 
+                m for m in self.learning_curves[stage]
                 if m.timestamp > cutoff_time
             ]
-    
+
     async def _analyze_performance_patterns(self):
         """Analyze performance patterns"""
         if len(self.performance_history) < 10:
             return
-        
+
         recent_metrics = list(self.performance_history)[-100:]  # Last 100 measurements
-        
+
         # Analyze trends for each metric
         patterns = []
-        
+
         # Response time pattern
         response_times = [m.response_time_ms for m in recent_metrics]
         response_pattern = self._detect_trend(response_times, "response_time")
         if response_pattern:
             patterns.append(response_pattern)
-        
+
         # Memory usage pattern
         memory_usage = [m.memory_usage_mb for m in recent_metrics]
         memory_pattern = self._detect_trend(memory_usage, "memory_usage")
         if memory_pattern:
             patterns.append(memory_pattern)
-        
+
         # Accuracy pattern
         accuracy_scores = [m.accuracy_score for m in recent_metrics]
         accuracy_pattern = self._detect_trend(accuracy_scores, "accuracy")
         if accuracy_pattern:
             patterns.append(accuracy_pattern)
-        
+
         # Efficiency pattern
         efficiency_scores = [m.efficiency_score for m in recent_metrics]
         efficiency_pattern = self._detect_trend(efficiency_scores, "efficiency")
         if efficiency_pattern:
             patterns.append(efficiency_pattern)
-        
+
         # Add new patterns
         for pattern in patterns:
             if not any(p.pattern_id == pattern.pattern_id for p in self.identified_patterns):
                 self.identified_patterns.append(pattern)
                 self.logger.info(f"Identified performance pattern: {pattern.pattern_type} - {pattern.description}")
-    
+
     def _detect_trend(self, values: List[float], metric_name: str) -> Optional[PerformancePattern]:
         """Detect trend in metric values"""
         if len(values) < 5:
             return None
-        
+
         # Calculate trend
         first_half = values[:len(values)//2]
         second_half = values[len(values)//2:]
-        
+
         first_avg = statistics.mean(first_half)
         second_avg = statistics.mean(second_half)
-        
+
         change_percent = (second_avg - first_avg) / first_avg if first_avg > 0 else 0
-        
+
         # Determine pattern type
         if change_percent > self.pattern_thresholds['improvement_threshold']:
             pattern_type = "improvement"
@@ -263,17 +263,17 @@ class PerformanceAnalyzer:
             variance = statistics.variance(values)
             mean_val = statistics.mean(values)
             cv = variance / mean_val if mean_val > 0 else 0
-            
+
             if cv > self.pattern_thresholds['oscillation_threshold']:
                 pattern_type = "oscillation"
                 trend = "oscillating"
                 description = f"{metric_name} showing oscillating behavior"
             else:
                 return None
-        
+
         # Generate recommendations
         recommendations = self._generate_pattern_recommendations(pattern_type, metric_name, change_percent)
-        
+
         return PerformancePattern(
             pattern_id=f"{metric_name}_{pattern_type}_{int(time.time())}",
             pattern_type=pattern_type,
@@ -285,11 +285,11 @@ class PerformanceAnalyzer:
             description=description,
             recommendations=recommendations
         )
-    
+
     def _generate_pattern_recommendations(self, pattern_type: str, metric_name: str, change_percent: float) -> List[str]:
         """Generate recommendations based on pattern"""
         recommendations = []
-        
+
         if pattern_type == "improvement":
             recommendations.extend([
                 f"Continue current approach for {metric_name}",
@@ -314,17 +314,17 @@ class PerformanceAnalyzer:
                 "Look for optimization opportunities",
                 "Consider pushing performance boundaries"
             ])
-        
+
         return recommendations
-    
+
     async def _identify_bottlenecks(self):
         """Identify performance bottlenecks"""
         if len(self.performance_history) < 20:
             return
-        
+
         recent_metrics = list(self.performance_history)[-50:]
         bottlenecks = []
-        
+
         # CPU bottleneck
         cpu_usage = [m.cpu_usage_percent for m in recent_metrics]
         avg_cpu = statistics.mean(cpu_usage)
@@ -343,7 +343,7 @@ class PerformanceAnalyzer:
                 ],
                 estimated_fix_time="2-4 weeks"
             ))
-        
+
         # Memory bottleneck
         memory_usage = [m.memory_usage_mb for m in recent_metrics]
         avg_memory = statistics.mean(memory_usage)
@@ -362,7 +362,7 @@ class PerformanceAnalyzer:
                 ],
                 estimated_fix_time="1-3 weeks"
             ))
-        
+
         # Response time bottleneck
         response_times = [m.response_time_ms for m in recent_metrics]
         avg_response = statistics.mean(response_times)
@@ -381,23 +381,23 @@ class PerformanceAnalyzer:
                 ],
                 estimated_fix_time="2-6 weeks"
             ))
-        
+
         # Add new bottlenecks
         for bottleneck in bottlenecks:
             if not any(b.bottleneck_id == bottleneck.bottleneck_id for b in self.bottlenecks):
                 self.bottlenecks.append(bottleneck)
                 self.logger.warning(f"Identified bottleneck: {bottleneck.bottleneck_type} - {bottleneck.severity}")
-    
+
     async def _generate_agi_recommendations(self):
         """Generate AGI evolution recommendations"""
         recommendations = []
-        
+
         # Analyze current performance
         if len(self.performance_history) < 10:
             return
-        
+
         recent_metrics = list(self.performance_history)[-20:]
-        
+
         # Architecture recommendations
         avg_efficiency = statistics.mean([m.efficiency_score for m in recent_metrics])
         if avg_efficiency < 0.6:
@@ -413,7 +413,7 @@ class PerformanceAnalyzer:
                 dependencies=["performance_analysis", "architecture_review"],
                 metrics_to_track=["efficiency_score", "response_time", "memory_usage"]
             ))
-        
+
         # Algorithm recommendations
         avg_accuracy = statistics.mean([m.accuracy_score for m in recent_metrics])
         if avg_accuracy < 0.8:
@@ -429,7 +429,7 @@ class PerformanceAnalyzer:
                 dependencies=["data_quality_analysis", "algorithm_research"],
                 metrics_to_track=["accuracy_score", "learning_rate", "convergence_rate"]
             ))
-        
+
         # Resource recommendations
         avg_memory = statistics.mean([m.memory_usage_mb for m in recent_metrics])
         if avg_memory > 1024:
@@ -445,7 +445,7 @@ class PerformanceAnalyzer:
                 dependencies=["resource_analysis", "infrastructure_planning"],
                 metrics_to_track=["memory_usage", "cpu_usage", "response_time"]
             ))
-        
+
         # Learning recommendations
         avg_learning_rate = statistics.mean([m.learning_rate for m in recent_metrics])
         if avg_learning_rate < 0.1:
@@ -461,23 +461,23 @@ class PerformanceAnalyzer:
                 dependencies=["learning_analysis", "adaptive_algorithms"],
                 metrics_to_track=["learning_rate", "convergence_rate", "accuracy_score"]
             ))
-        
+
         # Add new recommendations
         for rec in recommendations:
             if not any(r.recommendation_id == rec.recommendation_id for r in self.agi_recommendations):
                 self.agi_recommendations.append(rec)
                 self.logger.info(f"Generated AGI recommendation: {rec.title}")
-    
+
     async def _update_learning_curves(self):
         """Update learning curves for AGI evolution tracking"""
         for stage, metrics in self.learning_curves.items():
             if len(metrics) < 5:
                 continue
-            
+
             # Calculate learning curve metrics
             accuracy_curve = [m.accuracy_score for m in metrics]
             efficiency_curve = [m.efficiency_score for m in metrics]
-            
+
             # Store curve data
             curve_data = {
                 'stage': stage,
@@ -488,7 +488,7 @@ class PerformanceAnalyzer:
                 'latest_accuracy': accuracy_curve[-1],
                 'latest_efficiency': efficiency_curve[-1]
             }
-            
+
             # Check for evolution milestones
             if self._is_evolution_milestone(curve_data):
                 self.evolution_milestones.append({
@@ -499,33 +499,33 @@ class PerformanceAnalyzer:
                     'metrics': curve_data
                 })
                 self.logger.info(f"AGI evolution milestone reached: {stage}")
-    
+
     def _calculate_trend(self, values: List[float]) -> str:
         """Calculate trend direction"""
         if len(values) < 2:
             return "insufficient_data"
-        
+
         first_half = values[:len(values)//2]
         second_half = values[len(values)//2:]
-        
+
         first_avg = statistics.mean(first_half)
         second_avg = statistics.mean(second_half)
-        
+
         change_percent = (second_avg - first_avg) / first_avg if first_avg > 0 else 0
-        
+
         if change_percent > 0.1:
             return "improving"
         elif change_percent < -0.1:
             return "declining"
         else:
             return "stable"
-    
+
     def _is_evolution_milestone(self, curve_data: Dict[str, Any]) -> bool:
         """Check if this represents an evolution milestone"""
         # Simple milestone detection - can be enhanced
-        return (curve_data['accuracy_trend'] == 'improving' and 
+        return (curve_data['accuracy_trend'] == 'improving' and
                 curve_data['latest_accuracy'] > 0.9)
-    
+
     def get_analysis_report(self) -> Dict[str, Any]:
         """Get comprehensive analysis report"""
         return {
@@ -553,17 +553,17 @@ class PerformanceAnalyzer:
             'baselines': self.baselines,
             'thresholds': self.pattern_thresholds
         }
-    
+
     def export_analysis(self, file_path: str):
         """Export analysis to JSON file"""
         try:
             export_data = self.get_analysis_report()
-            
+
             with open(file_path, 'w', encoding='utf-8') as f:
                 json.dump(export_data, f, indent=2, ensure_ascii=False, default=str)
-            
+
             self.logger.info(f"Performance analysis exported to {file_path}")
-            
+
         except Exception as e:
             self.logger.error(f"Failed to export analysis: {e}")
 

@@ -3,7 +3,7 @@ import sys
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
-from modules.api_provider_manager import UnifiedAPIManager
+from stillme_core.modules.api_provider_manager import UnifiedAPIManager
 
 # Danh sách API key giả định để test (thay bằng thật nếu cần)
 TEST_API_KEYS = [

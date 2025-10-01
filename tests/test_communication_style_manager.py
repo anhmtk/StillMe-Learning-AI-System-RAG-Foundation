@@ -6,7 +6,7 @@ Tests the communication optimization functionality.
 
 import pytest
 
-from modules.communication_style_manager import CommunicationStyleManager
+from stillme_core.modules.communication_style_manager import CommunicationStyleManager
 
 
 class TestCommunicationStyleManager:
@@ -69,7 +69,7 @@ class TestCommunicationStyleManager:
     def test_empty_response(self):
         """Test handling of empty or None responses."""
         assert self.manager.optimize_response("") == ""
-        assert self.manager.optimize_response(None) == None
+        assert self.manager.optimize_response(None) is None
         assert self.manager.optimize_response("   ") == "   "
 
     def test_optimization_stats(self):
@@ -88,9 +88,9 @@ class TestCommunicationStyleManager:
 
     def test_complex_verbose_response(self):
         """Test optimization of complex verbose response."""
-        raw_response = """Tất nhiên rồi, tôi rất sẵn lòng giúp đỡ bạn. Cảm ơn bạn đã hỏi câu hỏi này. 
-        Để trả lời câu hỏi của bạn một cách chính xác và đầy đủ, tôi sẽ cần bạn cung cấp một số thông tin. 
-        Đầu tiên là tên file bạn đang gặp vấn đề. Thứ hai là mô tả chi tiết về lỗi. 
+        raw_response = """Tất nhiên rồi, tôi rất sẵn lòng giúp đỡ bạn. Cảm ơn bạn đã hỏi câu hỏi này.
+        Để trả lời câu hỏi của bạn một cách chính xác và đầy đủ, tôi sẽ cần bạn cung cấp một số thông tin.
+        Đầu tiên là tên file bạn đang gặp vấn đề. Thứ hai là mô tả chi tiết về lỗi.
         Và cuối cùng là thông tin về môi trường bạn đang sử dụng."""
 
         result = self.manager.optimize_response(raw_response)

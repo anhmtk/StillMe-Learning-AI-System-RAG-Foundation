@@ -29,37 +29,37 @@ class KnowledgeDiscovery:
         self.proposals_manager = ProposalsManager()
         self.alerting_system = AlertingSystem()
         self.discovered_topics = set()
-        
+
     def discover_knowledge(self):
         """Khám phá kiến thức mới từ nhiều nguồn"""
         logger.info("🔍 StillMe IPC Knowledge Discovery")
         logger.info("==========================================")
         logger.info("🌐 Discovering new knowledge from various sources...")
-        
+
         discovered_count = 0
-        
+
         try:
             # 1. Discover from trending tech topics
             tech_topics = self._discover_tech_trends()
             for topic in tech_topics:
                 if self._create_proposal_from_topic(topic):
                     discovered_count += 1
-            
+
             # 2. Discover from AI/ML news
             ai_topics = self._discover_ai_news()
             for topic in ai_topics:
                 if self._create_proposal_from_topic(topic):
                     discovered_count += 1
-            
+
             # 3. Discover from programming trends
             prog_topics = self._discover_programming_trends()
             for topic in prog_topics:
                 if self._create_proposal_from_topic(topic):
                     discovered_count += 1
-            
+
             logger.info(f"🎉 Knowledge discovery completed!")
             logger.info(f"📊 Total new proposals created: {discovered_count}")
-            
+
             if discovered_count > 0:
                 self.alerting_system.send_alert(
                     "New Knowledge Discovered",
@@ -71,17 +71,17 @@ class KnowledgeDiscovery:
                     f"Please review the new proposals in the dashboard!",
                     "info"
                 )
-            
+
             return discovered_count
-            
+
         except Exception as e:
             logger.error(f"❌ Knowledge discovery failed: {e}")
             return 0
-    
+
     def _discover_tech_trends(self) -> List[Dict[str, Any]]:
         """Khám phá xu hướng công nghệ"""
         logger.info("📱 Discovering tech trends...")
-        
+
         # Mock data - trong thực tế sẽ crawl từ GitHub, Stack Overflow, etc.
         tech_trends = [
             {
@@ -94,7 +94,7 @@ class KnowledgeDiscovery:
             {
                 "title": "Edge Computing and IoT",
                 "description": "Understanding edge computing architectures, IoT protocols, and real-time data processing",
-                "source": "tech_trends", 
+                "source": "tech_trends",
                 "priority": "medium",
                 "quality_score": 0.88
             },
@@ -102,17 +102,17 @@ class KnowledgeDiscovery:
                 "title": "Blockchain Development",
                 "description": "Learn blockchain fundamentals, smart contracts, and decentralized applications (DApps)",
                 "source": "tech_trends",
-                "priority": "high", 
+                "priority": "high",
                 "quality_score": 0.90
             }
         ]
-        
+
         return tech_trends
-    
+
     def _discover_ai_news(self) -> List[Dict[str, Any]]:
         """Khám phá tin tức AI/ML"""
         logger.info("🤖 Discovering AI/ML news...")
-        
+
         # Mock data - trong thực tế sẽ crawl từ AI news sites
         ai_topics = [
             {
@@ -137,13 +137,13 @@ class KnowledgeDiscovery:
                 "quality_score": 0.87
             }
         ]
-        
+
         return ai_topics
-    
+
     def _discover_programming_trends(self) -> List[Dict[str, Any]]:
         """Khám phá xu hướng lập trình"""
         logger.info("💻 Discovering programming trends...")
-        
+
         # Mock data - trong thực tế sẽ crawl từ GitHub, Stack Overflow trends
         prog_topics = [
             {
@@ -168,38 +168,38 @@ class KnowledgeDiscovery:
                 "quality_score": 0.90
             }
         ]
-        
+
         return prog_topics
-    
+
     def _create_proposal_from_topic(self, topic: Dict[str, Any]) -> bool:
         """Tạo proposal từ topic được khám phá"""
         try:
             # Kiểm tra xem topic đã được tạo chưa
             if topic["title"] in self.discovered_topics:
                 return False
-            
+
             self.discovered_topics.add(topic["title"])
-            
+
             # Tạo learning objectives dựa trên title
             learning_objectives = [
                 f"Understand {topic['title']} concepts and principles",
                 "Apply knowledge in practical scenarios",
                 "Build real-world projects using the technology"
             ]
-            
+
             # Tạo prerequisites
             prerequisites = [
                 "Basic programming knowledge",
                 "Understanding of computer science fundamentals"
             ]
-            
+
             # Tạo expected outcomes
             expected_outcomes = [
                 f"Mastery of {topic['title']}",
                 "Ability to implement practical solutions",
                 "Enhanced technical skills and knowledge"
             ]
-            
+
             # Tạo risk assessment
             risk_assessment = {
                 "complexity": "high" if topic["priority"] in ["high", "critical"] else "medium",
@@ -207,7 +207,7 @@ class KnowledgeDiscovery:
                 "prerequisites": "medium",
                 "practical_value": "high"
             }
-            
+
             # Tạo proposal
             proposal = self.proposals_manager.create_proposal(
                 title=topic["title"],
@@ -222,10 +222,10 @@ class KnowledgeDiscovery:
                 risk_assessment=risk_assessment,
                 created_by="knowledge_discovery"
             )
-            
+
             logger.info(f"✅ Created proposal: {proposal.title}")
             return True
-            
+
         except Exception as e:
             logger.error(f"❌ Failed to create proposal for {topic['title']}: {e}")
             return False
@@ -233,10 +233,10 @@ class KnowledgeDiscovery:
 def main():
     """Main function"""
     discovery = KnowledgeDiscovery()
-    
+
     try:
         discovered_count = discovery.discover_knowledge()
-        
+
         if discovered_count > 0:
             print(f"\n🎉 Knowledge discovery completed!")
             print(f"📊 Found {discovered_count} new learning opportunities")
@@ -244,7 +244,7 @@ def main():
         else:
             print(f"\nℹ️ No new knowledge discovered at this time.")
             print(f"💡 Try running again later or add manual knowledge.")
-            
+
     except Exception as e:
         logger.error(f"❌ Knowledge discovery failed: {e}")
         print(f"\n❌ Knowledge discovery failed: {e}")

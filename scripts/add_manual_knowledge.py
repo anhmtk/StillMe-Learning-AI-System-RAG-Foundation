@@ -26,13 +26,13 @@ class ManualKnowledgeInput:
     def __init__(self):
         self.proposals_manager = ProposalsManager()
         self.alerting_system = AlertingSystem()
-    
+
     def add_knowledge(self, title, description, source_url=None, priority="medium"):
         """Thêm kiến thức mới cho StillMe học"""
         logger.info("📚 StillMe IPC Manual Knowledge Input")
         logger.info("==========================================")
         logger.info(f"📝 Adding new knowledge: {title}")
-        
+
         try:
             # Tạo learning proposal từ kiến thức manual
             proposal = self.proposals_manager.create_proposal(
@@ -55,17 +55,17 @@ class ManualKnowledgeInput:
                 priority=priority,
                 risk_assessment={
                     "complexity": "medium",
-                    "time_commitment": "medium", 
+                    "time_commitment": "medium",
                     "prerequisites": "low",
                     "practical_value": "high"
                 },
                 created_by="manual_input"
             )
-            
+
             logger.info(f"✅ Knowledge proposal created: {proposal.title}")
             logger.info(f"📋 Proposal ID: {proposal.id}")
             logger.info(f"📊 Quality Score: {proposal.quality_score}")
-            
+
             # Gửi thông báo
             self.alerting_system.send_alert(
                 "New Manual Knowledge Added",
@@ -78,10 +78,10 @@ class ManualKnowledgeInput:
                 f"Please review and approve in the dashboard!",
                 "info"
             )
-            
+
             # Lưu thông tin vào file
             self._save_knowledge_info(proposal, source_url)
-            
+
             print(f"\n🎉 Knowledge added successfully!")
             print(f"📚 Title: {title}")
             print(f"📝 Description: {description}")
@@ -91,14 +91,14 @@ class ManualKnowledgeInput:
             print(f"• Check dashboard to see the new proposal")
             print(f"• Review and approve the proposal")
             print(f"• StillMe IPC will start learning if approved")
-            
+
             return proposal
-            
+
         except Exception as e:
             logger.error(f"❌ Failed to add knowledge: {e}")
             print(f"\n❌ Failed to add knowledge: {e}")
             return None
-    
+
     def _save_knowledge_info(self, proposal, source_url=None):
         """Lưu thông tin kiến thức vào file"""
         try:
@@ -110,19 +110,19 @@ class ManualKnowledgeInput:
                 "created_at": datetime.now().isoformat(),
                 "created_by": "manual_input"
             }
-            
+
             # Lưu vào artifacts
             artifacts_dir = project_root / "artifacts" / "manual_knowledge"
             artifacts_dir.mkdir(parents=True, exist_ok=True)
-            
+
             filename = f"knowledge_{proposal.id[:8]}.json"
             filepath = artifacts_dir / filename
-            
+
             with open(filepath, 'w', encoding='utf-8') as f:
                 json.dump(knowledge_info, f, indent=4, ensure_ascii=False)
-            
+
             logger.info(f"📄 Knowledge info saved to: {filepath}")
-            
+
         except Exception as e:
             logger.error(f"❌ Failed to save knowledge info: {e}")
 
@@ -132,13 +132,13 @@ def main():
     print("==========================================")
     print("📚 Add new knowledge for StillMe to learn")
     print()
-    
+
     # Get input from user
     title = input("📝 Enter knowledge title: ").strip()
     if not title:
         print("❌ Title cannot be empty!")
         return
-    
+
     print("\n📖 Enter knowledge description (press Enter twice to finish):")
     description_lines = []
     while True:
@@ -146,28 +146,28 @@ def main():
         if line == "" and description_lines and description_lines[-1] == "":
             break
         description_lines.append(line)
-    
+
     description = "\n".join(description_lines).strip()
     if not description:
         print("❌ Description cannot be empty!")
         return
-    
+
     source_url = input("\n🔗 Enter source URL (optional): ").strip() or None
-    
+
     print("\n⚡ Select priority:")
     print("1. Low")
     print("2. Medium (default)")
     print("3. High")
     print("4. Critical")
-    
+
     priority_choice = input("Enter choice (1-4): ").strip()
     priority_map = {"1": "low", "2": "medium", "3": "high", "4": "critical"}
     priority = priority_map.get(priority_choice, "medium")
-    
+
     # Add knowledge
     knowledge_input = ManualKnowledgeInput()
     proposal = knowledge_input.add_knowledge(title, description, source_url, priority)
-    
+
     if proposal:
         print(f"\n✅ Knowledge added successfully!")
         print(f"🆔 Proposal ID: {proposal.id}")

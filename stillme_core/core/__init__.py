@@ -1,6 +1,6 @@
 """Core module for StillMe Framework"""
 
-from .safe_runner import SafeRunner, SafeRun, RunStatus, SafetyLevel
+from .safe_runner import RunStatus, SafeRun, SafeRunner, SafetyLevel
 
 __all__ = [
     'SafeRunner',

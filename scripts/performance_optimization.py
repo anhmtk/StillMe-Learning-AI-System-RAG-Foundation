@@ -40,28 +40,28 @@ class PerformanceOptimizer:
     """
     Comprehensive performance optimization for StillMe AI Framework
     """
-    
+
     def __init__(self, base_url: str = "http://localhost:8000"):
         self.base_url = base_url
         self.session = None
         self.metrics = []
         self.recommendations = []
-        
+
     async def __aenter__(self):
         self.session = aiohttp.ClientSession()
         return self
-        
+
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         if self.session:
             await self.session.close()
-    
+
     async def analyze_system_performance(self) -> PerformanceReport:
         """
         Analyze overall system performance
         """
         logger.info("🔍 Analyzing system performance...")
         start_time = time.time()
-        
+
         # Collect various performance metrics
         await self._collect_cpu_metrics()
         await self._collect_memory_metrics()
@@ -69,18 +69,18 @@ class PerformanceOptimizer:
         await self._collect_api_metrics()
         await self._collect_learning_metrics()
         await self._collect_security_metrics()
-        
+
         # Analyze performance bottlenecks
         bottlenecks = await self._identify_bottlenecks()
-        
+
         # Generate optimization recommendations
         recommendations = await self._generate_recommendations(bottlenecks)
-        
+
         # Calculate optimization score
         optimization_score = await self._calculate_optimization_score()
-        
+
         duration = time.time() - start_time
-        
+
         report = PerformanceReport(
             timestamp=datetime.now().isoformat(),
             duration=duration,
@@ -88,19 +88,19 @@ class PerformanceOptimizer:
             recommendations=recommendations,
             optimization_score=optimization_score
         )
-        
+
         logger.info(f"✅ Performance analysis completed in {duration:.2f}s")
         logger.info(f"📊 Optimization Score: {optimization_score:.1f}/100")
-        
+
         return report
-    
+
     async def _collect_cpu_metrics(self):
         """Collect CPU performance metrics"""
         try:
             cpu_percent = psutil.cpu_percent(interval=1)
             cpu_count = psutil.cpu_count()
             cpu_freq = psutil.cpu_freq()
-            
+
             self.metrics.extend([
                 PerformanceMetric(
                     name="cpu_usage_percent",
@@ -124,18 +124,18 @@ class PerformanceOptimizer:
                     category="cpu"
                 )
             ])
-            
+
             logger.info(f"📊 CPU Usage: {cpu_percent}% ({cpu_count} cores)")
-            
+
         except Exception as e:
             logger.error(f"❌ Failed to collect CPU metrics: {e}")
-    
+
     async def _collect_memory_metrics(self):
         """Collect memory performance metrics"""
         try:
             memory = psutil.virtual_memory()
             swap = psutil.swap_memory()
-            
+
             self.metrics.extend([
                 PerformanceMetric(
                     name="memory_usage_percent",
@@ -159,17 +159,17 @@ class PerformanceOptimizer:
                     category="memory"
                 )
             ])
-            
+
             logger.info(f"📊 Memory Usage: {memory.percent}% (Available: {memory.available / (1024**3):.1f}GB)")
-            
+
         except Exception as e:
             logger.error(f"❌ Failed to collect memory metrics: {e}")
-    
+
     async def _collect_network_metrics(self):
         """Collect network performance metrics"""
         try:
             network = psutil.net_io_counters()
-            
+
             self.metrics.extend([
                 PerformanceMetric(
                     name="network_bytes_sent",
@@ -200,12 +200,12 @@ class PerformanceOptimizer:
                     category="network"
                 )
             ])
-            
+
             logger.info(f"📊 Network: {network.bytes_sent / (1024**2):.1f}MB sent, {network.bytes_recv / (1024**2):.1f}MB received")
-            
+
         except Exception as e:
             logger.error(f"❌ Failed to collect network metrics: {e}")
-    
+
     async def _collect_api_metrics(self):
         """Collect API performance metrics"""
         try:
@@ -217,14 +217,14 @@ class PerformanceOptimizer:
                 "/api/security/scan",
                 "/api/privacy/status"
             ]
-            
+
             for endpoint in endpoints:
                 start_time = time.time()
-                
+
                 try:
                     async with self.session.get(f"{self.base_url}{endpoint}") as response:
                         response_time = time.time() - start_time
-                        
+
                         self.metrics.append(PerformanceMetric(
                             name=f"api_response_time_{endpoint.replace('/', '_')}",
                             value=response_time * 1000,  # Convert to milliseconds
@@ -232,15 +232,15 @@ class PerformanceOptimizer:
                             timestamp=datetime.now().isoformat(),
                             category="api"
                         ))
-                        
+
                         logger.info(f"📊 API {endpoint}: {response_time * 1000:.1f}ms")
-                        
+
                 except Exception as e:
                     logger.warning(f"⚠️ API {endpoint}: Failed to test - {e}")
-                    
+
         except Exception as e:
             logger.error(f"❌ Failed to collect API metrics: {e}")
-    
+
     async def _collect_learning_metrics(self):
         """Collect learning system performance metrics"""
         try:
@@ -252,7 +252,7 @@ class PerformanceOptimizer:
                 "rollback_frequency": 0.05,
                 "ethics_compliance": 1.0
             }
-            
+
             for name, value in learning_metrics.items():
                 self.metrics.append(PerformanceMetric(
                     name=name,
@@ -261,12 +261,12 @@ class PerformanceOptimizer:
                     timestamp=datetime.now().isoformat(),
                     category="learning"
                 ))
-            
+
             logger.info(f"📊 Learning Performance: {learning_metrics['learning_accuracy']:.1%} accuracy, {learning_metrics['learning_velocity']:.1f} velocity")
-            
+
         except Exception as e:
             logger.error(f"❌ Failed to collect learning metrics: {e}")
-    
+
     async def _collect_security_metrics(self):
         """Collect security system performance metrics"""
         try:
@@ -277,7 +277,7 @@ class PerformanceOptimizer:
                 "false_positive_rate": 0.02,
                 "security_score": 95.0
             }
-            
+
             for name, value in security_metrics.items():
                 self.metrics.append(PerformanceMetric(
                     name=name,
@@ -286,16 +286,16 @@ class PerformanceOptimizer:
                     timestamp=datetime.now().isoformat(),
                     category="security"
                 ))
-            
+
             logger.info(f"📊 Security Performance: {security_metrics['security_score']:.0f} score, {security_metrics['threat_detection_rate']:.1%} detection rate")
-            
+
         except Exception as e:
             logger.error(f"❌ Failed to collect security metrics: {e}")
-    
+
     async def _identify_bottlenecks(self) -> List[Dict[str, Any]]:
         """Identify performance bottlenecks"""
         bottlenecks = []
-        
+
         # Analyze CPU usage
         cpu_metrics = [m for m in self.metrics if m.category == "cpu"]
         if cpu_metrics:
@@ -307,7 +307,7 @@ class PerformanceOptimizer:
                     "description": f"High CPU usage: {cpu_usage}%",
                     "recommendation": "Consider CPU optimization or scaling"
                 })
-        
+
         # Analyze memory usage
         memory_metrics = [m for m in self.metrics if m.category == "memory"]
         if memory_metrics:
@@ -319,7 +319,7 @@ class PerformanceOptimizer:
                     "description": f"High memory usage: {memory_usage}%",
                     "recommendation": "Consider memory optimization or scaling"
                 })
-        
+
         # Analyze API response times
         api_metrics = [m for m in self.metrics if m.category == "api"]
         for metric in api_metrics:
@@ -330,13 +330,13 @@ class PerformanceOptimizer:
                     "description": f"Slow API response: {metric.name} ({metric.value:.1f}ms)",
                     "recommendation": "Optimize API endpoint performance"
                 })
-        
+
         return bottlenecks
-    
+
     async def _generate_recommendations(self, bottlenecks: List[Dict[str, Any]]) -> List[str]:
         """Generate optimization recommendations"""
         recommendations = []
-        
+
         # CPU optimization recommendations
         cpu_bottlenecks = [b for b in bottlenecks if b["type"] == "cpu"]
         if cpu_bottlenecks:
@@ -346,7 +346,7 @@ class PerformanceOptimizer:
                 "Implement CPU usage monitoring and alerts",
                 "Consider horizontal scaling for CPU-bound tasks"
             ])
-        
+
         # Memory optimization recommendations
         memory_bottlenecks = [b for b in bottlenecks if b["type"] == "memory"]
         if memory_bottlenecks:
@@ -356,7 +356,7 @@ class PerformanceOptimizer:
                 "Consider implementing garbage collection tuning",
                 "Monitor memory leaks and optimize cleanup"
             ])
-        
+
         # API optimization recommendations
         api_bottlenecks = [b for b in bottlenecks if b["type"] == "api"]
         if api_bottlenecks:
@@ -366,7 +366,7 @@ class PerformanceOptimizer:
                 "Consider implementing API rate limiting",
                 "Use async/await for I/O operations"
             ])
-        
+
         # General optimization recommendations
         recommendations.extend([
             "Implement comprehensive performance monitoring",
@@ -376,13 +376,13 @@ class PerformanceOptimizer:
             "Optimize database indexes and queries",
             "Implement connection pooling for external services"
         ])
-        
+
         return recommendations
-    
+
     async def _calculate_optimization_score(self) -> float:
         """Calculate overall optimization score"""
         score = 100.0
-        
+
         # Deduct points for bottlenecks
         for metric in self.metrics:
             if metric.category == "cpu" and metric.name == "cpu_usage_percent":
@@ -392,7 +392,7 @@ class PerformanceOptimizer:
                     score -= 10
                 elif metric.value > 70:
                     score -= 5
-            
+
             elif metric.category == "memory" and metric.name == "memory_usage_percent":
                 if metric.value > 95:
                     score -= 20
@@ -400,7 +400,7 @@ class PerformanceOptimizer:
                     score -= 10
                 elif metric.value > 75:
                     score -= 5
-            
+
             elif metric.category == "api" and "response_time" in metric.name:
                 if metric.value > 2000:
                     score -= 15
@@ -408,15 +408,15 @@ class PerformanceOptimizer:
                     score -= 10
                 elif metric.value > 500:
                     score -= 5
-        
+
         return max(0.0, score)
-    
+
     async def apply_optimizations(self) -> Dict[str, Any]:
         """Apply performance optimizations"""
         logger.info("🚀 Applying performance optimizations...")
-        
+
         optimizations_applied = []
-        
+
         # Memory optimization
         try:
             gc.collect()  # Force garbage collection
@@ -424,7 +424,7 @@ class PerformanceOptimizer:
             logger.info("✅ Memory optimization applied")
         except Exception as e:
             logger.error(f"❌ Memory optimization failed: {e}")
-        
+
         # CPU optimization
         try:
             # Mock CPU optimization
@@ -433,7 +433,7 @@ class PerformanceOptimizer:
             logger.info("✅ CPU optimization applied")
         except Exception as e:
             logger.error(f"❌ CPU optimization failed: {e}")
-        
+
         # API optimization
         try:
             # Mock API optimization
@@ -442,12 +442,12 @@ class PerformanceOptimizer:
             logger.info("✅ API optimization applied")
         except Exception as e:
             logger.error(f"❌ API optimization failed: {e}")
-        
+
         return {
             "optimizations_applied": optimizations_applied,
             "timestamp": datetime.now().isoformat()
         }
-    
+
     async def generate_performance_report(self, report: PerformanceReport, output_file: str = "artifacts/performance_report.json"):
         """Generate comprehensive performance report"""
         report_data = {
@@ -467,13 +467,13 @@ class PerformanceOptimizer:
                 "security": [m for m in report.metrics if m.category == "security"]
             }
         }
-        
+
         # Create artifacts directory if it doesn't exist
         Path(output_file).parent.mkdir(parents=True, exist_ok=True)
-        
+
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(report_data, f, indent=2, ensure_ascii=False)
-        
+
         logger.info(f"📋 Performance report generated: {output_file}")
         return report_data
 
@@ -482,13 +482,13 @@ async def main():
     async with PerformanceOptimizer() as optimizer:
         # Analyze system performance
         report = await optimizer.analyze_system_performance()
-        
+
         # Apply optimizations
         optimizations = await optimizer.apply_optimizations()
-        
+
         # Generate report
         await optimizer.generate_performance_report(report)
-        
+
         # Print summary
         print(f"\n🎯 PERFORMANCE OPTIMIZATION SUMMARY")
         print(f"Optimization Score: {report.optimization_score:.1f}/100")
@@ -496,7 +496,7 @@ async def main():
         print(f"Recommendations: {len(report.recommendations)}")
         print(f"Optimizations Applied: {len(optimizations['optimizations_applied'])}")
         print(f"Analysis Duration: {report.duration:.2f}s")
-        
+
         # Print top recommendations
         print(f"\n💡 TOP RECOMMENDATIONS:")
         for i, rec in enumerate(report.recommendations[:5], 1):

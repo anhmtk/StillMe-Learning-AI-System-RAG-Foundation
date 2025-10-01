@@ -15,7 +15,7 @@ def run_command(command, description):
     print(f"🚀 {description}")
     print(f"Command: {command}")
     print("-" * 50)
-    
+
     try:
         result = subprocess.run(command, shell=False, check=True, capture_output=True, text=True)
         print("✅ Success")
@@ -31,20 +31,20 @@ def install_pre_commit():
     """Install pre-commit"""
     if not run_command("pip install pre-commit", "Installing pre-commit"):
         return False
-    
+
     if not run_command("pre-commit --version", "Verifying pre-commit installation"):
         return False
-    
+
     return True
 
 def install_hooks():
     """Install pre-commit hooks"""
     if not run_command("pre-commit install", "Installing pre-commit hooks"):
         return False
-    
+
     if not run_command("pre-commit install --hook-type pre-push", "Installing pre-push hooks"):
         return False
-    
+
     return True
 
 def install_hook_dependencies():
@@ -58,11 +58,11 @@ def install_hook_dependencies():
         "safety",
         "detect-secrets"
     ]
-    
+
     for dep in dependencies:
         if not run_command(f"pip install {dep}", f"Installing {dep}"):
             return False
-    
+
     return True
 
 def create_secrets_baseline():
@@ -70,14 +70,14 @@ def create_secrets_baseline():
     if not Path(".secrets.baseline").exists():
         if not run_command("detect-secrets scan --baseline .secrets.baseline", "Creating secrets baseline"):
             return False
-    
+
     return True
 
 def test_hooks():
     """Test pre-commit hooks"""
     if not run_command("pre-commit run --all-files", "Testing pre-commit hooks"):
         return False
-    
+
     return True
 
 def setup_git_attributes():
@@ -99,10 +99,10 @@ def setup_git_attributes():
 tests/** diff=python
 e2e/** diff=typescript
 """
-    
+
     with open(".gitattributes", "w") as f:
         f.write(gitattributes_content)
-    
+
     print("✅ Created .gitattributes")
     return True
 
@@ -181,12 +181,12 @@ Thumbs.db
 config/local.yaml
 config/production.yaml
 """
-    
+
     gitignore_path = Path(".gitignore")
     if gitignore_path.exists():
         with open(gitignore_path, "r") as f:
             existing_content = f.read()
-        
+
         if "Test artifacts" not in existing_content:
             with open(gitignore_path, "a") as f:
                 f.write(gitignore_additions)
@@ -195,7 +195,7 @@ config/production.yaml
         with open(gitignore_path, "w") as f:
             f.write(gitignore_additions)
         print("✅ Created .gitignore")
-    
+
     return True
 
 def create_hooks_readme():
@@ -262,10 +262,10 @@ If hooks fail:
 
 For persistent issues, check the hook documentation or project maintainers.
 """
-    
+
     with open("HOOKS.md", "w") as f:
         f.write(readme_content)
-    
+
     print("✅ Created HOOKS.md")
     return True
 
@@ -273,7 +273,7 @@ def main():
     """Main installation function"""
     print("🔧 Installing pre-commit hooks for NicheRadar v1.5")
     print("=" * 60)
-    
+
     steps = [
         ("Install pre-commit", install_pre_commit),
         ("Install hook dependencies", install_hook_dependencies),
@@ -284,13 +284,13 @@ def main():
         ("Create hooks README", create_hooks_readme),
         ("Test hooks", test_hooks)
     ]
-    
+
     all_passed = True
     for step_name, step_func in steps:
         print(f"\n📋 {step_name}:")
         if not step_func():
             all_passed = False
-    
+
     if all_passed:
         print("\n✅ All hooks installed successfully!")
         print("📋 Hooks are now active for commits and pushes")

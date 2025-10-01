@@ -6,10 +6,10 @@ Provides detailed logging of AI decision-making processes.
 import json
 import logging
 import uuid
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Union
-from dataclasses import dataclass, asdict
 from enum import Enum
+from typing import Any, Dict, List, Optional, Union
 
 logger = logging.getLogger(__name__)
 
@@ -42,7 +42,7 @@ class TransparencyEvent:
 
 class TransparencyLogger:
     """Logger for AI decision transparency."""
-    
+
     def __init__(self, config: Optional[Dict[str, Any]] = None):
         self.config = config or {}
         self.enabled = self.config.get("enabled", True)
@@ -50,7 +50,7 @@ class TransparencyLogger:
         self.log_rationale = self.config.get("log_rationale", False)
         self.trace_id_header = self.config.get("trace_id_header", "X-StillMe-Trace-ID")
         self._logger = logging.getLogger("stillme.transparency")
-        
+
         # Configure transparency logger
         if self.enabled:
             handler = logging.StreamHandler()
@@ -60,7 +60,7 @@ class TransparencyLogger:
             handler.setFormatter(formatter)
             self._logger.addHandler(handler)
             self._logger.setLevel(logging.INFO)
-    
+
     def log_decision(
         self,
         event_type: str,
@@ -78,7 +78,7 @@ class TransparencyLogger:
         """Log a decision event with full transparency."""
         if not self.enabled:
             return ""
-        
+
         event_id = str(uuid.uuid4())
         event = TransparencyEvent(
             event_id=event_id,
@@ -95,7 +95,7 @@ class TransparencyLogger:
             user_id=user_id,
             session_id=session_id
         )
-        
+
         # Log based on transparency level
         if self.level == TransparencyLevel.BASIC:
             self._log_basic(event)
@@ -103,9 +103,9 @@ class TransparencyLogger:
             self._log_detailed(event)
         elif self.level == TransparencyLevel.FULL:
             self._log_full(event)
-        
+
         return event_id
-    
+
     def _log_basic(self, event: TransparencyEvent):
         """Log basic transparency information."""
         log_data = {
@@ -116,12 +116,12 @@ class TransparencyLogger:
             "confidence_scores": event.confidence_scores,
             "reasoning": event.reasoning
         }
-        
+
         if event.trace_id:
             log_data["trace_id"] = event.trace_id
-        
+
         self._logger.info(f"TRANSPARENCY: {json.dumps(log_data)}")
-    
+
     def _log_detailed(self, event: TransparencyEvent):
         """Log detailed transparency information."""
         log_data = {
@@ -136,27 +136,27 @@ class TransparencyLogger:
             "reasoning": event.reasoning,
             "metadata": event.metadata
         }
-        
+
         if event.trace_id:
             log_data["trace_id"] = event.trace_id
         if event.user_id:
             log_data["user_id"] = event.user_id
         if event.session_id:
             log_data["session_id"] = event.session_id
-        
+
         self._logger.info(f"TRANSPARENCY: {json.dumps(log_data)}")
-    
+
     def _log_full(self, event: TransparencyEvent):
         """Log full transparency information."""
         log_data = asdict(event)
         log_data["timestamp"] = event.timestamp.isoformat()
-        
+
         # Sanitize sensitive data
         log_data["input_data"] = self._sanitize_data(event.input_data)
         log_data["output_data"] = self._sanitize_data(event.output_data)
-        
+
         self._logger.info(f"TRANSPARENCY: {json.dumps(log_data)}")
-    
+
     def _sanitize_data(self, data: Any) -> Any:
         """Sanitize data for logging (remove sensitive information)."""
         if isinstance(data, str):
@@ -176,29 +176,29 @@ class TransparencyLogger:
             return [self._sanitize_data(item) for item in data]
         else:
             return data
-    
+
     def get_trace_id(self, headers: Dict[str, str]) -> Optional[str]:
         """Extract trace ID from request headers."""
         return headers.get(self.trace_id_header)
-    
+
     def create_trace_id(self) -> str:
         """Create a new trace ID."""
         return str(uuid.uuid4())
-    
+
     def log_rationale(self, rationale: str, trace_id: Optional[str] = None):
         """Log AI decision rationale."""
         if not self.enabled or not self.log_rationale:
             return
-        
+
         log_data = {
             "timestamp": datetime.now().isoformat(),
             "type": "rationale",
             "rationale": rationale
         }
-        
+
         if trace_id:
             log_data["trace_id"] = trace_id
-        
+
         self._logger.info(f"RATIONALE: {json.dumps(log_data)}")
 
 
@@ -209,10 +209,10 @@ _transparency_logger: Optional[TransparencyLogger] = None
 def get_transparency_logger() -> TransparencyLogger:
     """Get the global transparency logger instance."""
     global _transparency_logger
-    
+
     if _transparency_logger is None:
         _transparency_logger = TransparencyLogger()
-    
+
     return _transparency_logger
 
 

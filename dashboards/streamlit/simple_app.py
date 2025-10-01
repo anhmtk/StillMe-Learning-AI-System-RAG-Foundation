@@ -10,6 +10,8 @@ import pandas as pd
 import plotly.express as px
 from datetime import datetime, timedelta
 import time
+import json
+from pathlib import Path
 
 # Page config
 st.set_page_config(
@@ -102,7 +104,7 @@ class SimpleDashboard:
         with col1:
             # Get pending proposals from session state and database
             sample_proposals = st.session_state.get('sample_proposals', [])
-            
+
             # Also get proposals from database
             try:
                 from stillme_core.learning.proposals_manager import ProposalsManager
@@ -121,7 +123,7 @@ class SimpleDashboard:
                         pending_count = len(sample_proposals) + db_count
                 except:
                     pending_count = len(sample_proposals)
-            
+
             new_today = len([p for p in sample_proposals if p.get('created_today', False)])
 
             if st.button(
@@ -134,7 +136,7 @@ class SimpleDashboard:
             ):
                 st.session_state.show_pending_details = True
                 st.rerun()
-            
+
             # Show status message
             if st.session_state.get('show_pending_details', False):
                 st.info("📋 Reviewing pending proposals")
@@ -161,30 +163,30 @@ class SimpleDashboard:
             else:
                 st.markdown("**Status:** Waiting for approval")
                 st.info("No approved proposals to learn from yet")
-            
+
             st.markdown('</div>', unsafe_allow_html=True)
 
     def render_learning_section(self):
         """Render the main learning section with 3 columns"""
         st.markdown("---")
         st.markdown("## 📚 Learning Management")
-        
+
         # Create 3 columns
         col_learning_list, col_learning_details, col_learning_report = st.columns([1, 2, 1])
-        
+
         with col_learning_list:
             st.markdown("### 📚 Learning Sessions")
-            
+
             # Learning sessions data - include approved proposals
             approved_proposals = st.session_state.get('approved_proposals', [])
-            
+
             # Base sessions
             sessions = [
                 {"name": "Python Fundamentals", "status": "✅ Completed", "progress": 100},
                 {"name": "Data Structures", "status": "✅ Completed", "progress": 100},
                 {"name": "Deep Learning", "status": "⏳ Pending", "progress": 0}
             ]
-            
+
             # Add approved proposals as active learning sessions
             for proposal in approved_proposals:
                 if proposal.get('status') == 'learning':
@@ -194,13 +196,13 @@ class SimpleDashboard:
                         "progress": 25,  # Start at 25% when approved
                         "proposal_id": proposal['id']
                     })
-            
+
             for i, session in enumerate(sessions):
                 is_selected = st.session_state.get('selected_session') == session['name']
-                
+
                 # Create session card with better styling
                 button_style = "background-color: #e3f2fd;" if is_selected else ""
-                
+
                 if st.button(
                     f"**{session['name']}**\n"
                     f"{session['status']} - {session['progress']}%",
@@ -210,29 +212,29 @@ class SimpleDashboard:
                 ):
                     st.session_state.selected_session = session['name']
                     st.rerun()
-                
+
                 # Show selection indicator
                 if is_selected:
                     st.markdown("👈 **Selected** - Click to view details")
-        
+
         with col_learning_details:
             st.markdown("### 📄 Session Details")
-            
+
             # Get selected session - default to first approved proposal if available
             approved_proposals = st.session_state.get('approved_proposals', [])
             if approved_proposals and not st.session_state.get('selected_session'):
                 # Auto-select first approved proposal
                 st.session_state.selected_session = approved_proposals[0]['title']
-            
+
             selected_session = st.session_state.get('selected_session', 'Python Fundamentals')
-            
+
             # Check if selected session is an approved proposal
             selected_proposal = None
             for proposal in approved_proposals:
                 if proposal['title'] == selected_session:
                     selected_proposal = proposal
                     break
-            
+
             if selected_proposal:
                 st.markdown("**🔄 Active Learning Session:**")
                 st.markdown(f"• **Topic:** {selected_proposal['title']}")
@@ -243,16 +245,16 @@ class SimpleDashboard:
 
                 st.markdown("**📚 Learning Content:**")
                 st.markdown(f"• {selected_proposal['description']}")
-                
+
                 st.markdown("**🎯 Learning Objectives:**")
                 st.markdown("• Understanding core concepts")
                 st.markdown("• Practical application")
                 st.markdown("• Skill development")
-                
+
                 # Progress bar for this session
                 st.progress(0.25)
                 st.markdown("*StillMe IPC is actively learning this content...*")
-            
+
             elif selected_session == "Python Fundamentals":
                 st.markdown("**✅ Completed Session:**")
                 st.markdown("• Topic: Python Programming")
@@ -265,7 +267,7 @@ class SimpleDashboard:
                 st.markdown("• Data manipulation ✅")
                 st.markdown("• Functions & classes ✅")
                 st.markdown("• Error handling ✅")
-            
+
             elif selected_session == "Data Structures":
                 st.markdown("**✅ Completed Session:**")
                 st.markdown("• Topic: Data Structures")
@@ -278,7 +280,7 @@ class SimpleDashboard:
                 st.markdown("• Stacks & Queues ✅")
                 st.markdown("• Trees & Graphs ✅")
                 st.markdown("• Algorithm complexity ✅")
-            
+
             else:
                 # Check if this is a pending session (Deep Learning)
                 if selected_session == "Deep Learning":
@@ -292,21 +294,21 @@ class SimpleDashboard:
                     st.markdown("• **Status:** No proposals approved yet")
                     st.markdown("• **Action:** Go to 'Learning Proposals' tab to approve proposals")
                     st.markdown("• **Next:** Approved proposals will appear here as learning sessions")
-        
+
         with col_learning_report:
             st.markdown("### 📊 Quick Report")
-            
+
             # Quick report data
             st.markdown("**📈 Today's Progress:**")
             st.markdown("• Sessions: 2/4")
             st.markdown("• Time: 3.5h")
             st.markdown("• Quality: 0.89")
-            
+
             st.markdown("**🎯 Next Steps:**")
             st.markdown("• Complete ML basics")
             st.markdown("• Start Deep Learning")
             st.markdown("• Review Python")
-            
+
             # Quick link to Full Learning Report
             if st.button("📊 View Full Learning Report", key="quick_report_button"):
                 st.info("💡 Click on the '📊 Learning Report' tab above to view the complete learning report!")
@@ -314,7 +316,7 @@ class SimpleDashboard:
     def render_sidebar(self):
         """Render sidebar filters"""
         st.sidebar.markdown("## 🔧 Filters & Controls")
-        
+
         # Date range
         st.sidebar.markdown("### 📅 Date Range")
         days = st.sidebar.selectbox(
@@ -323,7 +325,7 @@ class SimpleDashboard:
             index=1,
             help="Select the time period for data analysis"
         )
-        
+
         # Proposal status
         st.sidebar.markdown("### 📄 Proposal Status")
         statuses = st.sidebar.multiselect(
@@ -332,7 +334,7 @@ class SimpleDashboard:
             default=["pending", "approved"],
             help="Filter proposals by status"
         )
-        
+
         # Priority
         st.sidebar.markdown("### ⚡ Priority")
         priorities = st.sidebar.multiselect(
@@ -341,7 +343,7 @@ class SimpleDashboard:
             default=["high", "critical"],
             help="Filter proposals by priority"
         )
-        
+
         # Sources
         st.sidebar.markdown("### 📚 Sources")
         sources = st.sidebar.multiselect(
@@ -354,7 +356,7 @@ class SimpleDashboard:
             • **Manual**: Bạn tự tạo đề xuất
             • **Imported**: Import từ file/tài liệu bên ngoài"""
         )
-        
+
         # Auto-refresh
         st.sidebar.markdown("### 🔄 Auto-Refresh")
         auto_refresh = st.sidebar.checkbox(
@@ -363,7 +365,7 @@ class SimpleDashboard:
             help="Automatically refresh data every 30 seconds"
         )
         st.session_state.auto_refresh = auto_refresh
-        
+
         if auto_refresh:
             refresh_interval = st.sidebar.slider(
                 "Refresh interval (seconds):",
@@ -374,15 +376,15 @@ class SimpleDashboard:
             )
         else:
             refresh_interval = None
-        
+
         # Manual refresh button
         if st.sidebar.button("🔄 Refresh Now", type="primary"):
             st.session_state.last_refresh = datetime.now()
             st.rerun()
-        
+
         # Automation Control
         st.sidebar.markdown("### 🤖 Automation Control")
-        
+
         # Initialize automation state - DEFAULT TO TRUE and PERSISTENT
         if 'automation_enabled' not in st.session_state:
             # Try to load from config file first
@@ -398,25 +400,25 @@ class SimpleDashboard:
                     st.session_state.automation_enabled = True  # Default to True
             except:
                 st.session_state.automation_enabled = True  # Fallback to True
-        
+
         # Automation toggle
         automation_enabled = st.sidebar.checkbox(
             "Enable Auto-Proposals",
             value=st.session_state.automation_enabled,
             help="When enabled, StillMe IPC will automatically create learning proposals every 30 minutes"
         )
-        
+
         if automation_enabled != st.session_state.automation_enabled:
             st.session_state.automation_enabled = automation_enabled
-            
+
             # Update smart automation config
             try:
                 import json
                 from pathlib import Path
-                
+
                 config_file = Path("data/config/automation_config.json")
                 config_file.parent.mkdir(parents=True, exist_ok=True)
-                
+
                 # Load existing config or create new
                 if config_file.exists():
                     with open(config_file, 'r') as f:
@@ -433,43 +435,43 @@ class SimpleDashboard:
                         "proposals_created_this_hour": 0,
                         "last_reset_date": datetime.now().strftime("%Y-%m-%d")
                     }
-                
+
                 # Update enabled status
                 config["enabled"] = automation_enabled
                 config["automation_enabled"] = automation_enabled
-                
+
                 # Save config
                 with open(config_file, 'w') as f:
                     json.dump(config, f, indent=2)
-                
+
                 # Also save to session file for smart automation
                 session_file = Path("artifacts/dashboard_session.json")
                 session_file.parent.mkdir(parents=True, exist_ok=True)
                 with open(session_file, 'w') as f:
                     json.dump({"automation_enabled": automation_enabled}, f, indent=2)
-                
+
                 if automation_enabled:
                     st.sidebar.success("🤖 Automation enabled! StillMe IPC will create proposals automatically.")
                 else:
                     st.sidebar.warning("⏸️ Automation disabled. No new auto-proposals will be created.")
-                    
+
             except Exception as e:
                 st.sidebar.error(f"❌ Failed to update automation config: {e}")
-            
+
             st.rerun()
-        
+
         # Automation status
         if st.session_state.automation_enabled:
             st.sidebar.info("🟢 **Automation Active**\n\nStillMe IPC is creating proposals automatically.")
         else:
             st.sidebar.info("🔴 **Automation Inactive**\n\nStillMe IPC will not create proposals automatically.")
-        
+
         # Create sample proposal button
         if st.sidebar.button("📝 Create Sample Proposal", type="secondary"):
             # Add to session state
             if 'sample_proposals' not in st.session_state:
                 st.session_state.sample_proposals = []
-            
+
             # Create new sample proposal
             new_proposal = {
                 "id": f"sample_{len(st.session_state.sample_proposals) + 1}",
@@ -479,17 +481,17 @@ class SimpleDashboard:
                 "estimated_duration": 60 + (len(st.session_state.sample_proposals) * 30),
                 "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             }
-            
+
             st.session_state.sample_proposals.append(new_proposal)
             st.success(f"Sample proposal created! Total: {len(st.session_state.sample_proposals)}")
             st.rerun()
-        
+
         # Create auto proposal button
         if st.sidebar.button("🤖 Create Auto Proposal", type="primary"):
             try:
                 from stillme_core.learning.proposals_manager import ProposalsManager
                 manager = ProposalsManager()
-                
+
                 # Create an automatic proposal
                 proposal_data = {
                     "title": "Advanced Python Programming",
@@ -519,14 +521,14 @@ class SimpleDashboard:
                         "practical_value": "high"
                     }
                 }
-                
+
                 proposal = manager.create_proposal(**proposal_data)
                 st.success(f"✅ Auto proposal created: {proposal.title}")
                 st.rerun()
-                
+
             except Exception as e:
                 st.error(f"❌ Failed to create auto proposal: {e}")
-        
+
         return {
             'days': days,
             'statuses': statuses,
@@ -549,13 +551,13 @@ class SimpleDashboard:
 
         # Get proposals from session state and database
         sample_proposals = st.session_state.get('sample_proposals', [])
-        
+
         # Also get proposals from database
         try:
             from stillme_core.learning.proposals_manager import ProposalsManager
             manager = ProposalsManager()
             db_proposals = manager.get_pending_proposals(limit=10)
-            
+
             # Convert database proposals to session state format
             for db_proposal in db_proposals:
                 # Handle None values safely
@@ -564,7 +566,7 @@ class SimpleDashboard:
                     created_at_str = created_at.strftime("%Y-%m-%d %H:%M:%S")
                 else:
                     created_at_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                
+
                 proposal_data = {
                     "id": db_proposal.id or f"db_{len(sample_proposals) + 1}",
                     "title": db_proposal.title or "Untitled Proposal",
@@ -580,11 +582,11 @@ class SimpleDashboard:
                 import sqlite3
                 from stillme_core.learning.proposals_manager import ProposalsManager
                 manager = ProposalsManager()
-                
+
                 with sqlite3.connect(manager.db_path) as conn:
                     cursor = conn.execute("SELECT id, title, description, quality_score, estimated_duration, created_at FROM proposals WHERE status = 'pending' LIMIT 10")
                     rows = cursor.fetchall()
-                    
+
                     for row in rows:
                         proposal_data = {
                             "id": row[0] or f"db_{len(sample_proposals) + 1}",
@@ -595,7 +597,7 @@ class SimpleDashboard:
                             "created_at": row[5] or datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                         }
                         sample_proposals.append(proposal_data)
-                        
+
             except Exception as e2:
                 st.warning(f"Could not load database proposals: {e}")
                 # Try to get basic count from database
@@ -608,10 +610,10 @@ class SimpleDashboard:
                             st.info(f"Found {count} pending proposals in database, but couldn't load details.")
                 except:
                     pass
-        
+
         # Use sample_proposals as proposals
         proposals = sample_proposals
-        
+
         if not proposals:
             st.info("No pending proposals found. Create a sample proposal using the sidebar button.")
             return
@@ -621,7 +623,7 @@ class SimpleDashboard:
 
         with col1:
             st.markdown("### 📝 Proposals List")
-            
+
             # Add explanation of icons and metrics
             with st.expander("ℹ️ What do these numbers mean?"):
                 st.markdown("""
@@ -645,7 +647,7 @@ class SimpleDashboard:
                 - Format: YYYY-MM-DDTHH:MM:SS
                 - Helps track proposal freshness
                 """)
-            
+
             # Initialize selected proposal in session state
             if 'selected_proposal_id' not in st.session_state:
                 st.session_state.selected_proposal_id = proposals[0]['id'] if proposals else None
@@ -653,11 +655,11 @@ class SimpleDashboard:
             # Display proposal list with individual approve/reject buttons
             for i, proposal in enumerate(proposals):
                 is_selected = st.session_state.get('selected_proposal_id') == proposal['id']
-                
+
                 # Create proposal card with approve/reject buttons
                 is_selected = st.session_state.get('selected_proposal_id') == proposal['id']
                 container_style = "border: 2px solid #00ff00; background-color: #1a1a1a;" if is_selected else ""
-                
+
                 with st.container():
                     if is_selected:
                         st.markdown(f"**🟢 {proposal['title']}** *(Đang xem)*")
@@ -665,10 +667,10 @@ class SimpleDashboard:
                         st.markdown(f"**{proposal['title']}**")
                     st.write(f"📅 {proposal['created_at']}")
                     st.write(f"⭐ Quality: {proposal['quality_score']:.2f} | ⏱️ Duration: {proposal['estimated_duration']}min")
-                    
+
                     # Approve/Reject buttons for each proposal
                     col_approve, col_reject, col_view = st.columns([1, 1, 1])
-                    
+
                     with col_approve:
                         if st.button("✅ Approve", key=f"approve_{proposal['id']}", type="primary"):
                             try:
@@ -676,27 +678,27 @@ class SimpleDashboard:
                                 from stillme_core.learning.proposals_manager import ProposalsManager
                                 manager = ProposalsManager()
                                 manager.approve_proposal(proposal['id'], "user")
-                                
+
                                 # Remove from session state
                                 if 'sample_proposals' in st.session_state:
                                     st.session_state.sample_proposals = [p for p in st.session_state.sample_proposals if p['id'] != proposal['id']]
-                                
+
                                 # Add to approved proposals
                                 if 'approved_proposals' not in st.session_state:
                                     st.session_state.approved_proposals = []
-                                
+
                                 approved_proposal = {
                                     **proposal,
                                     'status': 'learning',
                                     'approved_at': datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                 }
                                 st.session_state.approved_proposals.append(approved_proposal)
-                                
+
                                 st.success(f"✅ Approved: {proposal['title']}")
                                 st.rerun()
                             except Exception as e:
                                 st.error(f"❌ Failed to approve: {e}")
-                    
+
                     with col_reject:
                         if st.button("❌ Reject", key=f"reject_{proposal['id']}", type="secondary"):
                             try:
@@ -704,16 +706,16 @@ class SimpleDashboard:
                                 from stillme_core.learning.proposals_manager import ProposalsManager
                                 manager = ProposalsManager()
                                 manager.reject_proposal(proposal['id'], "user", "User rejected")
-                                
+
                                 # Remove from session state
                                 if 'sample_proposals' in st.session_state:
                                     st.session_state.sample_proposals = [p for p in st.session_state.sample_proposals if p['id'] != proposal['id']]
-                                
+
                                 st.warning(f"❌ Rejected: {proposal['title']}")
                                 st.rerun()
                             except Exception as e:
                                 st.error(f"❌ Failed to reject: {e}")
-                    
+
                     with col_view:
                         if is_selected:
                             if st.button("👁️ Đang xem", key=f"view_{proposal['id']}", disabled=True):
@@ -724,12 +726,12 @@ class SimpleDashboard:
                                 st.session_state.show_proposal_details = True
                                 st.success(f"✅ Đang xem: {proposal['title']}")
                                 st.rerun()
-                    
+
                     st.markdown("---")
 
         with col2:
             st.markdown("### 📄 Proposal Details")
-            
+
             # Check if we should show proposal details
             if st.session_state.get('show_proposal_details', False):
                 # Find selected proposal
@@ -790,10 +792,10 @@ class SimpleDashboard:
     def render_analytics(self):
         """Render analytics tab"""
         st.markdown("### 📊 Analytics")
-        
+
         # Create metrics
         col1, col2, col3, col4 = st.columns(4)
-        
+
         with col1:
             st.metric("Total Proposals", 12)
         with col2:
@@ -802,13 +804,13 @@ class SimpleDashboard:
             st.metric("Approved", 3)
         with col4:
             st.metric("Completed", 0)
-        
+
         # Status distribution
         status_data = {
             'Status': ['Pending', 'Approved', 'Rejected', 'Completed'],
             'Count': [3, 3, 1, 0]
         }
-        
+
         df = pd.DataFrame(status_data)
         fig = px.pie(df, values='Count', names='Status', title='Proposal Status Distribution')
         st.plotly_chart(fig, use_container_width=True)
@@ -816,7 +818,7 @@ class SimpleDashboard:
     def render_learning_curve(self, days):
         """Render learning curve tab"""
         st.markdown("### 📈 Learning Curve")
-        
+
         # Generate sample learning data
         dates = pd.date_range(start=datetime.now() - timedelta(days=days), end=datetime.now(), freq='D')
         learning_data = {
@@ -825,13 +827,13 @@ class SimpleDashboard:
             'Skills_Learned': [2 + i % 5 for i in range(len(dates))],
             'Time_Spent': [30 + i * 2 for i in range(len(dates))]
         }
-        
+
         df = pd.DataFrame(learning_data)
-        
+
         # Knowledge score over time
         fig1 = px.line(df, x='Date', y='Knowledge_Score', title='Knowledge Score Over Time')
         st.plotly_chart(fig1, use_container_width=True)
-        
+
         # Skills learned
         fig2 = px.bar(df, x='Date', y='Skills_Learned', title='Skills Learned Per Day')
         st.plotly_chart(fig2, use_container_width=True)
@@ -839,64 +841,64 @@ class SimpleDashboard:
     def render_full_learning_report(self):
         """Render full learning report tab"""
         st.markdown("### 📊 Full Learning Report")
-        
+
         # Top row: Knowledge and Skills side by side
         top_row1, top_row2 = st.columns([3, 2])
-        
+
         with top_row1:
             st.markdown("**📚 Completed Topics:**")
             st.markdown("• **Machine Learning Fundamentals** ✅ - Understanding basic ML algorithms, practicing with Python and scikit-learn")
             st.markdown("• **Python Programming** ✅ - Basic Python syntax, data processing with pandas, visualization with matplotlib")
-            
+
             st.markdown("**📈 Learning Statistics:**")
             st.markdown("• **Total Learning Time:** 4.5 hours | **Completed Topics:** 2 | **Average Quality Score:** 0.87 | **Success Rate:** 95%")
-        
+
         with top_row2:
             st.markdown("**🛠️ Skills Acquired:**")
             st.markdown("**Machine Learning:** Linear Regression • Decision Trees • Random Forest")
             st.markdown("**Python:** Data Manipulation • Statistical Analysis • Data Visualization")
             st.markdown("**Tools:** scikit-learn • pandas • matplotlib")
-        
+
         # Progress bars in horizontal layout
         st.markdown("**📊 Learning Progress by Topic:**")
         progress_row1, progress_row2, progress_row3, progress_row4 = st.columns(4)
-        
+
         with progress_row1:
             st.markdown("**Machine Learning:**")
             st.progress(1.0)
             st.markdown("*100% completed*")
-        
+
         with progress_row2:
             st.markdown("**Python Programming:**")
             st.progress(1.0)
             st.markdown("*100% completed*")
-        
+
         with progress_row3:
             st.markdown("**Data Science:**")
             st.progress(0.75)
             st.markdown("*75% completed*")
-        
+
         with progress_row4:
             st.markdown("**Deep Learning:**")
             st.progress(0.25)
             st.markdown("*25% completed*")
-        
+
         # Next learning suggestions in horizontal layout
         st.markdown("**🎯 Suggested Next Learning:**")
         next_row1, next_row2, next_row3, next_row4 = st.columns(4)
-        
+
         with next_row1:
             st.markdown("**Deep Learning with TensorFlow**")
             st.markdown("*Expand ML knowledge*")
-        
+
         with next_row2:
             st.markdown("**Natural Language Processing**")
             st.markdown("*Process natural language*")
-        
+
         with next_row3:
             st.markdown("**Computer Vision**")
             st.markdown("*Image recognition*")
-        
+
         with next_row4:
             st.markdown("**Time Series Analysis**")
             st.markdown("*Analyze time series data*")
@@ -904,7 +906,7 @@ class SimpleDashboard:
     def render_security_privacy(self):
         """Render security and privacy tab"""
         st.markdown("### 🔒 Security & Privacy")
-        
+
         st.info("""
         **Your learning data is protected:**
         - All proposals require your explicit approval
@@ -913,16 +915,16 @@ class SimpleDashboard:
         - All actions are logged and auditable
         - Personal data is encrypted and secure
         """)
-        
+
         st.markdown("### 🛡️ Access Control")
         col1, col2 = st.columns(2)
-        
+
         with col1:
             st.success("✅ You have full control")
             st.write("• Approve/reject learning proposals")
             st.write("• Control what StillMe IPC learns")
             st.write("• Monitor all learning activities")
-        
+
         with col2:
             st.warning("⚠️ Community limitations")
             st.write("• Can only suggest content")
@@ -933,63 +935,63 @@ class SimpleDashboard:
         """Run the simple dashboard"""
         # Render header
         self.render_header()
-        
+
         # Render sidebar
         filters = self.render_sidebar()
-        
+
         # Auto-refresh logic
         if st.session_state.auto_refresh and filters['refresh_interval']:
             time.sleep(filters['refresh_interval'])
             st.rerun()
-        
+
         # Check if we should show pending details
         if st.session_state.get('show_pending_details', False):
             self.render_pending_proposals_details()
         else:
             # Render main learning section
             self.render_learning_section()
-            
+
             # Render tabs
             tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
                 "📋 Learning Proposals",
                 "👑 Founder Mode",
-                "📊 Analytics", 
+                "📊 Analytics",
                 "📈 Learning Curve",
                 "📊 Learning Report",
                 "🔒 Security & Privacy"
             ])
-            
+
             with tab1:
                 st.markdown("### 📋 Learning Proposals")
                 st.info("This is a demo dashboard. In the real system, this would show actual learning proposals.")
-            
+
             with tab2:
                 self.render_founder_mode()
-            
+
             with tab3:
                 self.render_analytics()
-            
+
             with tab4:
                 self.render_learning_curve(filters['days'])
-            
+
             with tab5:
                 self.render_full_learning_report()
-            
+
             with tab6:
                 self.render_security_privacy()
-        
+
         # Footer
         st.markdown("---")
         col1, col2, col3 = st.columns(3)
-        
+
         with col1:
             st.markdown("**🧠 StillMe IPC**")
             st.markdown("Intelligent Personal Companion - Self-evolving AI learning system")
-        
+
         with col2:
             st.markdown("**📊 Dashboard v2.0**")
             st.markdown("Enhanced Learning Management System")
-        
+
         with col3:
             st.markdown("**🔒 Your Control**")
             st.markdown("You decide what StillMe IPC learns")
@@ -998,27 +1000,27 @@ class SimpleDashboard:
         """Render founder mode section"""
         st.markdown("### 👑 Founder Mode")
         st.info("👑 **Founder Mode**: Add knowledge directly - AUTO-APPROVED (no need to approve/reject)")
-        
+
         # Founder knowledge input form
         with st.form("founder_knowledge_form"):
             st.markdown("#### 📚 Add New Knowledge")
-            
+
             col1, col2 = st.columns(2)
-            
+
             with col1:
                 title = st.text_input("📝 Knowledge Title", placeholder="e.g., Advanced AI Ethics")
                 priority = st.selectbox("⚡ Priority", ["high", "critical", "medium", "low"], index=0)
-                
+
             with col2:
                 source_url = st.text_input("🔗 Source URL (optional)", placeholder="https://example.com/article")
                 content_type = st.selectbox("📄 Content Type", ["text", "url", "image"], index=0)
-            
-            description = st.text_area("📖 Knowledge Description", 
+
+            description = st.text_area("📖 Knowledge Description",
                                      placeholder="Describe what StillMe should learn from this knowledge...",
                                      height=100)
-            
+
             submitted = st.form_submit_button("👑 Add Founder Knowledge (AUTO-APPROVED)")
-            
+
             if submitted:
                 if title and description:
                     try:
@@ -1026,9 +1028,9 @@ class SimpleDashboard:
                         import sys
                         import os
                         sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-                        
+
                         from scripts.founder_knowledge_input import FounderKnowledgeInput
-                        
+
                         founder_input = FounderKnowledgeInput()
                         proposal = founder_input.add_founder_knowledge(
                             title=title,
@@ -1037,7 +1039,7 @@ class SimpleDashboard:
                             content_type=content_type,
                             priority=priority
                         )
-                        
+
                         if proposal:
                             st.success(f"✅ Founder knowledge added and AUTO-APPROVED: {title}")
                             st.info(f"🆔 Proposal ID: {proposal.id}")
@@ -1045,12 +1047,12 @@ class SimpleDashboard:
                             st.rerun()
                         else:
                             st.error("❌ Failed to add founder knowledge")
-                            
+
                     except Exception as e:
                         st.error(f"❌ Error: {e}")
                 else:
                     st.error("❌ Please fill in title and description")
-        
+
         # Show recent founder knowledge
         st.markdown("#### 📋 Recent Founder Knowledge")
         try:
@@ -1061,12 +1063,12 @@ class SimpleDashboard:
                 if founder_files:
                     # Sort by modification time (newest first)
                     founder_files.sort(key=lambda x: x.stat().st_mtime, reverse=True)
-                    
+
                     for i, file_path in enumerate(founder_files[:5]):  # Show last 5
                         try:
                             with open(file_path, 'r', encoding='utf-8') as f:
                                 founder_data = json.load(f)
-                            
+
                             with st.expander(f"👑 {founder_data.get('title', 'Untitled')} - {founder_data.get('created_at', 'Unknown date')[:10]}"):
                                 st.markdown(f"**📝 Description:** {founder_data.get('description', 'No description')[:200]}...")
                                 if founder_data.get('source_url'):

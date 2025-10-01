@@ -1,5 +1,5 @@
 # tests/test_smart_gpt_api_manager_v1.py
-from modules.api_provider_manager import UnifiedAPIManager
+from stillme_core.modules.api_provider_manager import UnifiedAPIManager
 
 
 def test_class_exists():

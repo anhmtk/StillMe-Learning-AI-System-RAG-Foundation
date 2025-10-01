@@ -21,7 +21,6 @@ import uuid
 from dataclasses import dataclass
 from typing import Any, Dict, Optional, Tuple
 
-
 # Local imports (stubs for Phase 1)
 try:
     from .pattern_matcher import PatternMatcher
@@ -53,8 +52,8 @@ except Exception:  # pragma: no cover
 
         async def deep_check(self, text: str) -> bool:
             return True
-        
-        def safety_gate(self, text: str, intended_action: Optional[str] = None, 
+
+        def safety_gate(self, text: str, intended_action: Optional[str] = None,
                        scores: Optional[Dict[str, float]] = None) -> Dict[str, Any]:
             return {"safe": True, "reason": "stub_safety"}
 
@@ -66,7 +65,7 @@ except Exception:  # pragma: no cover
             self.config = config or {}
             self.dry_run = self.config.get("dry_run", True)
 
-        def execute(self, action: str, params: Dict[str, Any], trace_id: str, 
+        def execute(self, action: str, params: Dict[str, Any], trace_id: str,
                    dry_run: Optional[bool] = None) -> Dict[str, Any]:
             return {"ok": True, "dry_run": self.dry_run, "action": action, "params": params}
 
@@ -83,7 +82,7 @@ except Exception:  # pragma: no cover
         def get_habit_score(self, cue: str) -> Tuple[float, Optional[str]]:
             return 0.0, None
 
-        def observe_cue(self, cue: str, action: str, confidence: float = 1.0, 
+        def observe_cue(self, cue: str, action: str, confidence: float = 1.0,
                        user_id: Optional[str] = None, tenant_id: Optional[str] = None) -> bool:
             return False
 
@@ -100,7 +99,7 @@ except Exception:  # pragma: no cover
                                tenant_id: Optional[str] = None, shadow_mode: bool = True):
             pass
 
-        def log_shadow_evaluation(self, trace_id: str, reflex_decision: str, 
+        def log_shadow_evaluation(self, trace_id: str, reflex_decision: str,
                                  reasoning_decision: str, processing_time_ms: float,
                                  scores: Dict[str, float]):
             pass
@@ -172,13 +171,13 @@ class ReflexEngine:
 
         # Step 1: Safety gate (fast + deep checks)
         safety_result = self.safety.safety_gate(text, intended_action="reflex_decision", scores=None)
-        
+
         # Step 2: pattern match (real implementation)
         match_result = self.matcher.match(text, context or {})
-        
+
         # Step 3: Get habit score (if habit store enabled)
         habit_score, habit_action = self.habit_store.get_habit_score(text)
-        
+
         scores = {
             "pattern_score": match_result.get("pattern_score"),
             "context_score": None,
@@ -250,9 +249,9 @@ class ReflexEngine:
         )
 
         # Learn from this interaction (if habit store enabled and decision was good)
-        if (self.habit_store.is_enabled() and 
-            original_decision == "allow_reflex" and 
-            safety_result.get("safe", False) and 
+        if (self.habit_store.is_enabled() and
+            original_decision == "allow_reflex" and
+            safety_result.get("safe", False) and
             confidence > 0.7):
             self.habit_store.observe_cue(
                 cue=text,

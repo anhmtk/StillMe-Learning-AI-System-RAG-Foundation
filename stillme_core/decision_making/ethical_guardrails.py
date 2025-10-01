@@ -1,10 +1,10 @@
 """Ethical Guardrails for StillMe Framework"""
 
 import logging
-from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -33,28 +33,28 @@ class EthicalViolation:
     timestamp: datetime
     suggested_action: str
     metadata: Dict[str, Any] = None
-    
+
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
 
 class EthicalGuardrails:
     """Ethical guardrails for StillMe Framework"""
-    
+
     def __init__(self):
         self.logger = logger
         self.violations: List[EthicalViolation] = []
         self.principles = list(EthicalPrinciple)
         self.logger.info("✅ EthicalGuardrails initialized")
-    
-    def check_ethical_compliance(self, 
-                               content: str, 
+
+    def check_ethical_compliance(self,
+                               content: str,
                                context: str = "",
                                metadata: Dict[str, Any] = None) -> List[EthicalViolation]:
         """Check ethical compliance of content"""
         try:
             violations = []
-            
+
             # Check for harmful content
             if self._contains_harmful_content(content):
                 violation = EthicalViolation(
@@ -68,7 +68,7 @@ class EthicalGuardrails:
                     metadata=metadata or {}
                 )
                 violations.append(violation)
-            
+
             # Check for bias
             if self._contains_bias(content):
                 violation = EthicalViolation(
@@ -82,7 +82,7 @@ class EthicalGuardrails:
                     metadata=metadata or {}
                 )
                 violations.append(violation)
-            
+
             # Check for privacy violations
             if self._contains_pii(content):
                 violation = EthicalViolation(
@@ -96,95 +96,95 @@ class EthicalGuardrails:
                     metadata=metadata or {}
                 )
                 violations.append(violation)
-            
+
             # Record violations
             for violation in violations:
                 self.violations.append(violation)
                 self.logger.warning(f"⚠️ Ethical violation detected: {violation.principle.value} - {violation.description}")
-            
+
             return violations
-            
+
         except Exception as e:
             self.logger.error(f"❌ Failed to check ethical compliance: {e}")
             return []
-    
+
     def _contains_harmful_content(self, content: str) -> bool:
         """Check if content contains harmful material"""
         harmful_keywords = [
             "violence", "harm", "danger", "threat", "attack",
             "illegal", "criminal", "fraud", "scam", "deception"
         ]
-        
+
         content_lower = content.lower()
         return any(keyword in content_lower for keyword in harmful_keywords)
-    
+
     def _contains_bias(self, content: str) -> bool:
         """Check if content contains biased language"""
         bias_keywords = [
             "always", "never", "all", "none", "everyone", "nobody",
             "typical", "normal", "abnormal", "weird", "strange"
         ]
-        
+
         content_lower = content.lower()
         return any(keyword in content_lower for keyword in bias_keywords)
-    
+
     def _contains_pii(self, content: str) -> bool:
         """Check if content contains personally identifiable information"""
         import re
-        
+
         # Email pattern
         email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
         if re.search(email_pattern, content):
             return True
-        
+
         # Phone pattern
         phone_pattern = r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b'
         if re.search(phone_pattern, content):
             return True
-        
+
         # SSN pattern
         ssn_pattern = r'\b\d{3}-\d{2}-\d{4}\b'
         if re.search(ssn_pattern, content):
             return True
-        
+
         return False
-    
+
     def get_violations_by_principle(self, principle: EthicalPrinciple) -> List[EthicalViolation]:
         """Get violations by ethical principle"""
         return [v for v in self.violations if v.principle == principle]
-    
+
     def get_violations_by_severity(self, severity: ViolationSeverity) -> List[EthicalViolation]:
         """Get violations by severity"""
         return [v for v in self.violations if v.severity == severity]
-    
+
     def get_ethical_summary(self) -> Dict[str, Any]:
         """Get ethical compliance summary"""
         try:
             total_violations = len(self.violations)
-            
+
             violations_by_principle = {}
             violations_by_severity = {}
-            
+
             for violation in self.violations:
                 # By principle
                 principle_key = violation.principle.value
                 violations_by_principle[principle_key] = violations_by_principle.get(principle_key, 0) + 1
-                
+
                 # By severity
                 severity_key = violation.severity.value
                 violations_by_severity[severity_key] = violations_by_severity.get(severity_key, 0) + 1
-            
+
             return {
                 "total_violations": total_violations,
                 "violations_by_principle": violations_by_principle,
                 "violations_by_severity": violations_by_severity,
                 "timestamp": datetime.now().isoformat()
             }
-            
+
         except Exception as e:
             self.logger.error(f"❌ Failed to get ethical summary: {e}")
             return {"error": str(e)}
-    
+
     def clear_violations(self):
         """Clear all violations"""
         self.violations.clear()

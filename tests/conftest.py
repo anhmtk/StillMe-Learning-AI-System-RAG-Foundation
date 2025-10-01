@@ -1,3 +1,6 @@
+from typing import Any, Dict
+from unittest.mock import Mock
+
 """
 SEAL-GRADE SYSTEM TESTS - Test Configuration
 Cấu hình kiểm thử cho hệ thống SEAL-GRADE
@@ -9,34 +12,35 @@ Module này cung cấp fixtures và cấu hình chung cho tất cả test module
 import asyncio
 import json
 import os
-import pytest
 import tempfile
-import yaml
 from pathlib import Path
-from typing import Dict, Any, List
-from unittest.mock import Mock, patch
+
+import pytest
+import yaml
 
 # Import StillMe modules
 try:
     from stillme_core.framework import StillMeFramework
-    from modules.layered_memory_v1 import LayeredMemoryV1
-    from modules.secure_memory_manager import SecureMemoryManager
-    from modules.ethical_core_system_v1 import EthicalCoreSystem
-    from modules.content_integrity_filter import ContentIntegrityFilter
-    from modules.conversational_core_v1 import ConversationalCore
-    from modules.persona_morph import PersonaMorph
-    from modules.emotionsense_v1 import EmotionSenseV1
-    from modules.token_optimizer_v1 import TokenOptimizer
-    from modules.self_improvement_manager import SelfImprovementManager
-    from modules.daily_learning_manager import DailyLearningManager
-    from modules.automated_scheduler import AutomatedScheduler
-    from modules.api_provider_manager import UnifiedAPIManager
-    from modules.prediction_engine import PredictionEngine
-    from modules.market_intel import MarketIntelligence
-    from modules.telemetry import Telemetry
-    from modules.framework_metrics import FrameworkMetrics
-    from modules.communication_style_manager import CommunicationStyleManager
-    from modules.input_sketcher import InputSketcher
+    from stillme_core.modules.api_provider_manager import UnifiedAPIManager
+    from stillme_core.modules.automated_scheduler import AutomatedScheduler
+    from stillme_core.modules.communication_style_manager import (
+        CommunicationStyleManager,
+    )
+    from stillme_core.modules.content_integrity_filter import ContentIntegrityFilter
+    from stillme_core.modules.conversational_core_v1 import ConversationalCore
+    from stillme_core.modules.daily_learning_manager import DailyLearningManager
+    from stillme_core.modules.emotionsense_v1 import EmotionSenseV1
+    from stillme_core.modules.ethical_core_system_v1 import EthicalCoreSystem
+    from stillme_core.modules.framework_metrics import FrameworkMetrics
+    from stillme_core.modules.input_sketcher import InputSketcher
+    from stillme_core.modules.layered_memory_v1 import LayeredMemoryV1
+    from stillme_core.modules.market_intel import MarketIntelligence
+    from stillme_core.modules.persona_morph import PersonaMorph
+    from stillme_core.modules.prediction_engine import PredictionEngine
+    from stillme_core.modules.secure_memory_manager import SecureMemoryManager
+    from stillme_core.modules.self_improvement_manager import SelfImprovementManager
+    from stillme_core.modules.telemetry import Telemetry
+    from stillme_core.modules.token_optimizer_v1 import TokenOptimizer
 except ImportError as e:
     print(f"Warning: Could not import StillMe modules: {e}")
     # Create mock modules for testing
@@ -66,7 +70,7 @@ def test_config():
     """Load test configuration from YAML file."""
     config_path = Path("config/test_defaults.yaml")
     if config_path.exists():
-        with open(config_path, 'r', encoding='utf-8') as f:
+        with open(config_path, encoding='utf-8') as f:
             return yaml.safe_load(f)
     else:
         # Default configuration if file doesn't exist
@@ -105,25 +109,25 @@ def test_config():
 def test_datasets():
     """Load test datasets."""
     datasets = {}
-    
+
     # Load ambiguous prompts
     ambiguous_path = Path("datasets/ambiguous_prompts.json")
     if ambiguous_path.exists():
-        with open(ambiguous_path, 'r', encoding='utf-8') as f:
+        with open(ambiguous_path, encoding='utf-8') as f:
             datasets['ambiguous_prompts'] = json.load(f)
-    
+
     # Load red team prompts
     redteam_path = Path("datasets/redteam_prompts.json")
     if redteam_path.exists():
-        with open(redteam_path, 'r', encoding='utf-8') as f:
+        with open(redteam_path, encoding='utf-8') as f:
             datasets['redteam_prompts'] = json.load(f)
-    
+
     # Load PII samples
     pii_path = Path("datasets/pii_samples.json")
     if pii_path.exists():
-        with open(pii_path, 'r', encoding='utf-8') as f:
+        with open(pii_path, encoding='utf-8') as f:
             datasets['pii_samples'] = json.load(f)
-    
+
     return datasets
 
 
@@ -368,7 +372,7 @@ def pytest_collection_modifyitems(config, items):
             item.add_marker(pytest.mark.soak)
         elif "test_ux_" in item.nodeid:
             item.add_marker(pytest.mark.ux)
-        
+
         # Add slow marker for tests that take more than 5 seconds
         if "slow" in item.name or "load" in item.name or "soak" in item.name:
             item.add_marker(pytest.mark.slow)
@@ -377,19 +381,19 @@ def pytest_collection_modifyitems(config, items):
 # Test utilities
 class TestUtils:
     """Utility functions for tests."""
-    
+
     @staticmethod
     def load_json_fixture(file_path: str) -> Dict[str, Any]:
         """Load JSON fixture file."""
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding='utf-8') as f:
             return json.load(f)
-    
+
     @staticmethod
     def save_json_fixture(data: Dict[str, Any], file_path: str) -> None:
         """Save data as JSON fixture."""
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
-    
+
     @staticmethod
     def create_mock_response(status_code: int = 200, data: Dict[str, Any] = None) -> Mock:
         """Create mock HTTP response."""
@@ -398,12 +402,12 @@ class TestUtils:
         response.json.return_value = data or {}
         response.text = json.dumps(data or {})
         return response
-    
+
     @staticmethod
     def assert_response_time(response_time: float, threshold: float) -> None:
         """Assert response time is within threshold."""
         assert response_time <= threshold, f"Response time {response_time}ms exceeds threshold {threshold}ms"
-    
+
     @staticmethod
     def assert_error_rate(errors: int, total: int, threshold: float) -> None:
         """Assert error rate is within threshold."""
@@ -425,14 +429,14 @@ def setup_test_environment():
     os.environ["STILLME_TEST_MODE"] = "true"
     os.environ["STILLME_LOG_LEVEL"] = "DEBUG"
     os.environ["STILLME_DISABLE_TELEMETRY"] = "true"
-    
+
     # Create test directories
     test_dirs = ["logs", "reports", "artifacts", "temp"]
     for dir_name in test_dirs:
         Path(dir_name).mkdir(exist_ok=True)
-    
+
     yield
-    
+
     # Cleanup
     os.environ.pop("STILLME_TEST_MODE", None)
     os.environ.pop("STILLME_LOG_LEVEL", None)

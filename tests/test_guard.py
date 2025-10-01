@@ -1,11 +1,18 @@
+from stillme_core import (
+    CANARY,
+    apply_policies,
+    classify,
+    redact_output,
+    safe_reply,
+    sanitize,
+)
+
 #!/usr/bin/env python3
 """
 Unit tests for safety guard
 """
 
 import pytest
-
-from stillme_core.safety_guard import SafetyGuard
 
 
 def test_sanitize_unicode():

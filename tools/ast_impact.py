@@ -16,24 +16,24 @@ class ASTImpact:
     description: str
     line_number: int
     metadata: Dict[str, Any] = None
-    
+
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
 
 class ASTImpactAnalyzer:
     """AST impact analyzer"""
-    
+
     def __init__(self):
         self.logger = logger
         self.logger.info("✅ ASTImpactAnalyzer initialized")
-    
+
     def analyze_code_impact(self, code: str) -> List[ASTImpact]:
         """Analyze code impact using AST"""
         try:
             tree = ast.parse(code)
             impacts = []
-            
+
             for node in ast.walk(tree):
                 if isinstance(node, ast.FunctionDef):
                     impacts.append(ASTImpact(
@@ -56,17 +56,17 @@ class ASTImpactAnalyzer:
                         description="Import statement",
                         line_number=node.lineno
                     ))
-            
+
             self.logger.info(f"🔍 AST analysis completed: {len(impacts)} impacts found")
             return impacts
-            
+
         except SyntaxError as e:
             self.logger.error(f"❌ AST analysis failed - syntax error: {e}")
             return []
         except Exception as e:
             self.logger.error(f"❌ AST analysis failed: {e}")
             return []
-    
+
     def get_impact_summary(self, impacts: List[ASTImpact]) -> Dict[str, Any]:
         """Get impact summary"""
         try:
@@ -74,13 +74,13 @@ class ASTImpactAnalyzer:
             for impact in impacts:
                 level = impact.impact_level
                 impact_counts[level] = impact_counts.get(level, 0) + 1
-            
+
             return {
                 "total_impacts": len(impacts),
                 "impact_by_level": impact_counts,
                 "timestamp": datetime.now().isoformat()
             }
-            
+
         except Exception as e:
             self.logger.error(f"❌ Failed to get impact summary: {e}")
             return {"error": str(e)}

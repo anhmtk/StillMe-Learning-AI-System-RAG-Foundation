@@ -5,7 +5,7 @@ from .ethical_guardrails import EthicalGuardrails, EthicalViolation
 
 __all__ = [
     'DecisionEngine',
-    'DecisionStatus', 
+    'DecisionStatus',
     'DecisionType',
     'RiskLevel',
     'EthicalGuardrails',

@@ -47,12 +47,12 @@ class QualityReport:
 
 class QualityGates:
     """Quality gates implementation for StillMe AI Framework"""
-    
+
     def __init__(self, project_root: str = "."):
         self.project_root = Path(project_root)
         self.artifacts_dir = self.project_root / "artifacts"
         self.gates = self._initialize_gates()
-    
+
     def _initialize_gates(self) -> List[QualityGate]:
         """Initialize quality gates with default thresholds"""
         return [
@@ -105,26 +105,26 @@ class QualityGates:
                 weight=0.15
             )
         ]
-    
+
     def evaluate_gates(self, input_dir: str = "artifacts") -> QualityReport:
         """Evaluate all quality gates"""
         print("🚪 Evaluating quality gates...")
-        
+
         # Load metrics from artifacts
         metrics = self._load_metrics_from_artifacts(input_dir)
-        
+
         # Update gate values
         for gate in self.gates:
             gate.current_value = metrics.get(gate.name, 0.0)
             gate.status = self._evaluate_gate_status(gate)
-        
+
         # Calculate overall status
         overall_status = self._calculate_overall_status()
         quality_score = self._calculate_quality_score()
-        
+
         # Generate recommendations
         recommendations = self._generate_recommendations()
-        
+
         return QualityReport(
             overall_status=overall_status,
             total_gates=len(self.gates),
@@ -135,16 +135,16 @@ class QualityGates:
             gates=self.gates,
             recommendations=recommendations
         )
-    
+
     def _load_metrics_from_artifacts(self, input_dir: str) -> Dict[str, float]:
         """Load metrics from artifact files"""
         metrics = {}
         artifacts_path = self.project_root / input_dir
-        
+
         if not artifacts_path.exists():
             print(f"⚠️ Artifacts directory not found: {artifacts_path}")
             return metrics
-        
+
         # Load test coverage
         coverage_files = list(artifacts_path.glob("*coverage*.json"))
         for coverage_file in coverage_files:
@@ -156,7 +156,7 @@ class QualityGates:
                 break
             except Exception as e:
                 print(f"⚠️ Error reading coverage file {coverage_file}: {e}")
-        
+
         # Load test results
         test_files = list(artifacts_path.glob("*test*.json"))
         for test_file in test_files:
@@ -171,7 +171,7 @@ class QualityGates:
                 break
             except Exception as e:
                 print(f"⚠️ Error reading test file {test_file}: {e}")
-        
+
         # Load security metrics
         security_files = list(artifacts_path.glob("*security*.json"))
         for security_file in security_files:
@@ -187,14 +187,14 @@ class QualityGates:
                     high = vulns.get('high', 0)
                     medium = vulns.get('medium', 0)
                     low = vulns.get('low', 0)
-                    
+
                     # Simple scoring: start at 100, subtract based on severity
                     score = 100 - (critical * 20) - (high * 10) - (medium * 5) - (low * 1)
                     metrics['security_score'] = max(0, score)
                 break
             except Exception as e:
                 print(f"⚠️ Error reading security file {security_file}: {e}")
-        
+
         # Load performance metrics
         perf_files = list(artifacts_path.glob("*performance*.json"))
         for perf_file in perf_files:
@@ -208,7 +208,7 @@ class QualityGates:
                 break
             except Exception as e:
                 print(f"⚠️ Error reading performance file {perf_file}: {e}")
-        
+
         # Load ethics metrics
         ethics_files = list(artifacts_path.glob("*ethics*.json"))
         for ethics_file in ethics_files:
@@ -223,9 +223,9 @@ class QualityGates:
                 break
             except Exception as e:
                 print(f"⚠️ Error reading ethics file {ethics_file}: {e}")
-        
+
         return metrics
-    
+
     def _evaluate_gate_status(self, gate: QualityGate) -> str:
         """Evaluate individual gate status"""
         if gate.name in ["performance_p95", "error_rate"]:
@@ -244,24 +244,24 @@ class QualityGates:
                 return "WARNING"
             else:
                 return "FAIL"
-    
+
     def _calculate_overall_status(self) -> str:
         """Calculate overall quality status"""
         failed_gates = [g for g in self.gates if g.status == "FAIL"]
         warning_gates = [g for g in self.gates if g.status == "WARNING"]
-        
+
         if failed_gates:
             return "FAIL"
         elif warning_gates:
             return "WARNING"
         else:
             return "PASS"
-    
+
     def _calculate_quality_score(self) -> float:
         """Calculate weighted quality score"""
         total_weight = sum(gate.weight for gate in self.gates)
         weighted_score = 0.0
-        
+
         for gate in self.gates:
             if gate.status == "PASS":
                 gate_score = 100.0
@@ -269,18 +269,18 @@ class QualityGates:
                 gate_score = 70.0
             else:
                 gate_score = 0.0
-            
+
             weighted_score += gate_score * gate.weight
-        
+
         return weighted_score / total_weight if total_weight > 0 else 0.0
-    
+
     def _generate_recommendations(self) -> List[str]:
         """Generate improvement recommendations"""
         recommendations = []
-        
+
         failed_gates = [g for g in self.gates if g.status == "FAIL"]
         warning_gates = [g for g in self.gates if g.status == "WARNING"]
-        
+
         # Critical issues (failed gates)
         if failed_gates:
             recommendations.append("🔴 CRITICAL: Address failed quality gates immediately")
@@ -297,13 +297,13 @@ class QualityGates:
                     recommendations.append(f"   - Reduce error rate from {gate.current_value:.1f}% to {gate.threshold}%")
                 elif gate.name == "ethics_compliance":
                     recommendations.append(f"   - Fix ethics test failures (current: {gate.current_value:.1f}%)")
-        
+
         # Warning issues
         if warning_gates:
             recommendations.append("🟡 WARNING: Monitor and improve warning quality gates")
             for gate in warning_gates:
                 recommendations.append(f"   - {gate.description}: {gate.current_value:.1f} (target: {gate.threshold})")
-        
+
         # General recommendations
         if not failed_gates and not warning_gates:
             recommendations.append("✅ All quality gates passed! Maintain current standards.")
@@ -311,9 +311,9 @@ class QualityGates:
             recommendations.append("📊 Implement continuous monitoring to prevent regression")
             recommendations.append("🔄 Add automated quality checks to CI/CD pipeline")
             recommendations.append("📚 Provide team training on quality standards")
-        
+
         return recommendations
-    
+
     def generate_report(self, report: QualityReport) -> str:
         """Generate quality gates report"""
         report_content = f"""
@@ -330,7 +330,7 @@ Generated: {self._get_current_timestamp()}
 
 ## Quality Gates Status
 """
-        
+
         for gate in report.gates:
             status_icon = "✅" if gate.status == "PASS" else "⚠️" if gate.status == "WARNING" else "❌"
             report_content += f"### {status_icon} {gate.name.replace('_', ' ').title()}\n"
@@ -339,12 +339,12 @@ Generated: {self._get_current_timestamp()}
             report_content += f"- **Threshold**: {gate.threshold:.1f}\n"
             report_content += f"- **Status**: {gate.status}\n"
             report_content += f"- **Weight**: {gate.weight:.1f}\n\n"
-        
+
         # Recommendations
         report_content += "## Recommendations\n\n"
         for i, rec in enumerate(report.recommendations, 1):
             report_content += f"{i}. {rec}\n"
-        
+
         # Action plan
         report_content += "\n## Action Plan\n\n"
         if report.overall_status == "FAIL":
@@ -364,65 +364,65 @@ Generated: {self._get_current_timestamp()}
             report_content += "- Continue monitoring quality metrics\n"
             report_content += "- Maintain current quality standards\n"
             report_content += "- Implement preventive measures\n\n"
-        
+
         # Quality trends
         report_content += "## Quality Trends\n\n"
         report_content += "### Improvement Areas\n"
         for gate in sorted(report.gates, key=lambda x: x.weight, reverse=True):
             if gate.status != "PASS":
                 report_content += f"- **{gate.name.replace('_', ' ').title()}**: {gate.current_value:.1f} → {gate.threshold:.1f}\n"
-        
+
         report_content += "\n### Success Metrics\n"
         for gate in report.gates:
             if gate.status == "PASS":
                 report_content += f"- **{gate.name.replace('_', ' ').title()}**: {gate.current_value:.1f} ✅\n"
-        
+
         return report_content
-    
+
     def _get_current_timestamp(self) -> str:
         """Get current timestamp"""
         from datetime import datetime
         return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
+
     def save_report(self, report_content: str, output_file: str = "artifacts/quality_gates_report.md"):
         """Save quality gates report to file"""
         output_path = self.project_root / output_file
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(report_content)
-        
+
         print(f"📄 Quality gates report saved to: {output_path}")
-    
+
     def run_quality_checks(self) -> bool:
         """Run quality checks and return pass/fail status"""
         print("🚪 Running quality gates...")
-        
+
         # Evaluate gates
         report = self.evaluate_gates()
-        
+
         # Generate and save report
         report_content = self.generate_report(report)
         self.save_report(report_content)
-        
+
         # Print summary
         print(f"\n🚪 Quality Gates Summary:")
         print(f"   Overall Status: {report.overall_status}")
         print(f"   Quality Score: {report.quality_score:.1f}/100")
         print(f"   Passed: {report.passed_gates}/{report.total_gates}")
-        
+
         if report.failed_gates > 0:
             print(f"   Failed Gates: {report.failed_gates}")
             for gate in report.gates:
                 if gate.status == "FAIL":
                     print(f"     - {gate.name}: {gate.current_value:.1f} (target: {gate.threshold:.1f})")
-        
+
         if report.warning_gates > 0:
             print(f"   Warning Gates: {report.warning_gates}")
             for gate in report.gates:
                 if gate.status == "WARNING":
                     print(f"     - {gate.name}: {gate.current_value:.1f} (target: {gate.threshold:.1f})")
-        
+
         # Return pass/fail status
         return report.overall_status == "PASS"
 
@@ -437,16 +437,16 @@ def main():
     parser.add_argument("--input", type=str, default="artifacts", help="Input directory for metrics")
     parser.add_argument("--output", type=str, default="artifacts/quality_gates_report.md", help="Output report file")
     parser.add_argument("--project-root", type=str, default=".", help="Project root directory")
-    
+
     args = parser.parse_args()
-    
+
     print("🚪 Starting quality gates evaluation...")
     print(f"📁 Project root: {args.project_root}")
     print(f"📊 Input directory: {args.input}")
-    
+
     # Initialize quality gates
     quality_gates = QualityGates(args.project_root)
-    
+
     # Update thresholds
     for gate in quality_gates.gates:
         if gate.name == "test_coverage":
@@ -457,10 +457,10 @@ def main():
             gate.threshold = args.performance_threshold
         elif gate.name == "ethics_compliance":
             gate.threshold = args.ethics_threshold
-    
+
     # Run quality checks
     passed = quality_gates.run_quality_checks()
-    
+
     if passed:
         print("✅ Quality gates PASSED!")
         sys.exit(0)

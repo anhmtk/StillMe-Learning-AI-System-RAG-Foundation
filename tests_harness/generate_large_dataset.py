@@ -27,25 +27,25 @@ def main():
     """Main function để generate large dataset"""
     try:
         logger.info("🚀 Starting Large Dataset Generation...")
-        
+
         # Create scaler
         scaler = DatasetScaler()
-        
+
         # Generate large dataset
         logger.info("📊 Generating 1000+ test cases...")
         dataset = scaler.generate_large_dataset(1000)
-        
+
         # Save dataset
         file_path = scaler.save_dataset(dataset, "large_dataset_1000.json")
-        
+
         # Generate statistics
         stats = scaler.generate_statistics(dataset)
-        
+
         # Save statistics
         stats_file = scaler.output_dir / "dataset_statistics.json"
         with open(stats_file, 'w', encoding='utf-8') as f:
             json.dump(stats, f, indent=2, ensure_ascii=False)
-        
+
         # Print results
         print("\n" + "="*80)
         print("🎉 LARGE DATASET GENERATION COMPLETED")
@@ -58,16 +58,16 @@ def main():
         print(f"   • Languages: {list(stats['language_distribution'].keys())}")
         print(f"   • Difficulties: {list(stats['difficulty_distribution'].keys())}")
         print(f"   • Scenarios: {list(stats['scenario_distribution'].keys())}")
-        
+
         print("\n🎯 Ready for:")
         print("   • Real StillMe AI testing")
         print("   • Comprehensive evaluation")
         print("   • Performance benchmarking")
         print("   • CI/CD integration")
         print("="*80)
-        
+
         return True
-        
+
     except Exception as e:
         logger.error(f"❌ Large dataset generation failed: {e}")
         return False

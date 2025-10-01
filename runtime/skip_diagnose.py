@@ -17,9 +17,9 @@ from dataclasses import dataclass
 import logging
 
 from .interaction_policy import (
-    get_interaction_policy, 
-    get_log_tailing_config, 
-    get_heartbeat_config, 
+    get_interaction_policy,
+    get_log_tailing_config,
+    get_heartbeat_config,
     get_pid_config
 )
 
@@ -60,27 +60,27 @@ def diagnose_on_skip(opts: SkipDiagnoseOptions = None) -> SkipDiagnosisResult:
     """
     if opts is None:
         opts = SkipDiagnoseOptions()
-    
+
     policy = get_interaction_policy()
     log_config = get_log_tailing_config()
     heartbeat_config = get_heartbeat_config()
     pid_config = get_pid_config()
-    
+
     # Set defaults
     if opts.diagnose_ms is None:
         opts.diagnose_ms = policy['skip']['timeouts']['diagnose_ms']
     if opts.working_directory is None:
         opts.working_directory = os.getcwd()
-    
+
     logger.info("🔍 Diagnosing task status (Skip pressed)...")
     logger.info(f"⏱️ Diagnose timeout: {opts.diagnose_ms}ms")
-    
+
     try:
         # Parallel diagnosis tasks
         log_analysis = _analyze_logs(opts.log_path, log_config, opts.working_directory)
         heartbeat_status = _check_heartbeat(opts.heartbeat_path, heartbeat_config, opts.working_directory)
         pid_status = _check_pid(opts.pid, pid_config, opts.working_directory)
-        
+
         # Combine results
         result = _combine_diagnosis_results(
             log_analysis,
@@ -88,13 +88,13 @@ def diagnose_on_skip(opts: SkipDiagnoseOptions = None) -> SkipDiagnosisResult:
             pid_status,
             opts.diagnose_ms
         )
-        
+
         logger.info(f"📊 Diagnosis result: {result.state}")
         logger.info(f"📝 Details: {result.details}")
         logger.info(f"🎯 Confidence: {result.confidence * 100:.1f}%")
-        
+
         return result
-        
+
     except Exception as error:
         logger.error(f"❌ Diagnosis failed: {error}")
         return SkipDiagnosisResult(
@@ -111,14 +111,14 @@ def _analyze_logs(
 ) -> Dict[str, Any]:
     """Analyze log files for task status"""
     log_files = [log_path] if log_path else _find_log_files(working_directory)
-    
+
     if not log_files:
         return {'state': 'UNKNOWN', 'snippet': 'No log files found', 'confidence': 0}
-    
+
     # Find the most recent log file
     latest_log = ''
     latest_size = 0
-    
+
     for log_file in log_files:
         try:
             stats = os.stat(log_file)
@@ -128,21 +128,21 @@ def _analyze_logs(
         except OSError:
             # Skip inaccessible files
             continue
-    
+
     if not latest_log:
         return {'state': 'UNKNOWN', 'snippet': 'No accessible log files', 'confidence': 0}
-    
+
     try:
         # Read last N lines
         lines = _tail_file(latest_log, log_config['default_lines'])
         snippet = '\n'.join(lines)
-        
+
         # Analyze patterns
         state = _analyze_log_patterns(lines, log_config['patterns'])
         confidence = _calculate_log_confidence(lines, log_config['patterns'])
-        
+
         return {'state': state, 'snippet': snippet, 'confidence': confidence}
-        
+
     except Exception as error:
         return {'state': 'UNKNOWN', 'snippet': f'Log analysis failed: {error}', 'confidence': 0}
 
@@ -153,22 +153,22 @@ def _check_heartbeat(
 ) -> bool:
     """Check heartbeat status"""
     heartbeat_files = [heartbeat_path] if heartbeat_path else heartbeat_config['files']
-    
+
     for heartbeat_file in heartbeat_files:
         full_path = os.path.join(working_directory, heartbeat_file)
-        
+
         try:
             if os.path.exists(full_path):
                 stats = os.stat(full_path)
                 age = time.time() - stats.st_mtime
-                
+
                 # Check if heartbeat is recent
                 if age < (heartbeat_config['timeout_ms'] / 1000):
                     return True
         except OSError:
             # Continue to next file
             continue
-    
+
     return False
 
 def _check_pid(
@@ -179,23 +179,23 @@ def _check_pid(
     """Check PID status"""
     if pid is not None:
         return _is_process_running(pid)
-    
+
     # Check PID files
     for pid_file in pid_config['files']:
         full_path = os.path.join(working_directory, pid_file)
-        
+
         try:
             if os.path.exists(full_path):
                 with open(full_path, 'r') as f:
                     pid_content = f.read().strip()
                     pid_num = int(pid_content)
-                    
+
                     if _is_process_running(pid_num):
                         return True
         except (OSError, ValueError):
             # Continue to next file
             continue
-    
+
     return False
 
 def _find_log_files(working_directory: str) -> List[str]:
@@ -210,12 +210,12 @@ def _find_log_files(working_directory: str) -> List[str]:
         'error.log',
         'debug.log'
     ]
-    
+
     for log_path in common_log_paths:
         full_path = os.path.join(working_directory, log_path)
         if os.path.exists(full_path):
             log_files.append(full_path)
-    
+
     return log_files
 
 def _tail_file(file_path: str, lines: int) -> List[str]:
@@ -232,7 +232,7 @@ def _tail_file(file_path: str, lines: int) -> List[str]:
             return result.stdout.strip().split('\n')
     except (subprocess.TimeoutExpired, FileNotFoundError):
         pass
-    
+
     # Fallback: read file and get last N lines
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -244,43 +244,43 @@ def _tail_file(file_path: str, lines: int) -> List[str]:
 def _analyze_log_patterns(lines: List[str], patterns: Dict[str, List[str]]) -> str:
     """Analyze log patterns to determine state"""
     text = '\n'.join(lines).lower()
-    
+
     # Check for completion patterns
     for pattern in patterns['completed']:
         if pattern.lower() in text:
             return 'COMPLETED'
-    
+
     # Check for error patterns
     for pattern in patterns['error']:
         if pattern.lower() in text:
             return 'STALLED'
-    
+
     # Check for running patterns
     for pattern in patterns['running']:
         if pattern.lower() in text:
             return 'RUNNING'
-    
+
     return 'UNKNOWN'
 
 def _calculate_log_confidence(lines: List[str], patterns: Dict[str, List[str]]) -> float:
     """Calculate confidence based on log analysis"""
     confidence = 0.0
     text = '\n'.join(lines).lower()
-    
+
     # Higher confidence for multiple matching patterns
     completed_matches = sum(1 for p in patterns['completed'] if p.lower() in text)
     error_matches = sum(1 for p in patterns['error'] if p.lower() in text)
     running_matches = sum(1 for p in patterns['running'] if p.lower() in text)
-    
+
     # Calculate confidence based on pattern matches
     total_matches = completed_matches + error_matches + running_matches
     if total_matches > 0:
         confidence = min(0.9, total_matches * 0.3)
-    
+
     # Boost confidence for recent activity
     if lines:
         confidence += 0.1
-    
+
     return min(1.0, confidence)
 
 def _is_process_running(pid: int) -> bool:
@@ -301,7 +301,7 @@ def _combine_diagnosis_results(
     confidence = log_analysis.get('confidence', 0.0)
     details = f"Log analysis: {state}"
     recommendations = []
-    
+
     # Adjust based on heartbeat and PID
     if heartbeat_status and pid_status:
         if state == 'UNKNOWN':
@@ -318,7 +318,7 @@ def _combine_diagnosis_results(
             state = 'COMPLETED'
             confidence = max(confidence, 0.6)
         details += ", Heartbeat: ❌, PID: ❌"
-    
+
     # Generate recommendations
     if state == 'COMPLETED':
         recommendations = ['Task completed successfully']
@@ -328,7 +328,7 @@ def _combine_diagnosis_results(
         recommendations = ['Resume task', 'Retry task', 'Kill and restart']
     else:  # UNKNOWN
         recommendations = ['Check logs manually', 'Restart task', 'Contact support']
-    
+
     return SkipDiagnosisResult(
         state=state,
         details=details,
@@ -348,22 +348,22 @@ def format_diagnosis_result(result: SkipDiagnosisResult, language: str = 'en') -
     """Format diagnosis result for display"""
     prompt = get_diagnosis_prompt(result, language)
     confidence = f"{result.confidence * 100:.1f}"
-    
+
     output = f"{prompt}\n\n"
     output += "📊 **Diagnosis Details:**\n"
     output += f"• State: {result.state}\n"
     output += f"• Confidence: {confidence}%\n"
     output += f"• Details: {result.details}\n\n"
-    
+
     if result.recommendations:
         output += "💡 **Recommendations:**\n"
         for i, rec in enumerate(result.recommendations, 1):
             output += f"{i}. {rec}\n"
-    
+
     if result.log_snippet:
         output += "\n📝 **Recent Log Snippet:**\n"
         output += f"```\n{result.log_snippet}\n```"
-    
+
     return output
 
 # Export for easy import

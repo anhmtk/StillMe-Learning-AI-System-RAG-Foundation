@@ -7,42 +7,42 @@ logger = logging.getLogger(__name__)
 
 class ContentWrapSecurity:
     """Content wrap security handler"""
-    
+
     def __init__(self):
         self.logger = logger
         self.blocked_content = []
         self.filtered_content = []
-    
+
     def wrap_content(self, content: str, security_level: str = "medium") -> str:
         """Wrap content with security measures"""
         if not content:
             return ""
-        
+
         # Simple content wrapping
         wrapped = f"[SECURE:{security_level.upper()}]{content}[/SECURE]"
         self.filtered_content.append(content)
         return wrapped
-    
+
     def unwrap_content(self, wrapped_content: str) -> str:
         """Unwrap secured content"""
         if not wrapped_content:
             return ""
-        
+
         # Simple unwrapping
         if wrapped_content.startswith("[SECURE:") and wrapped_content.endswith("[/SECURE]"):
             start_idx = wrapped_content.find("]") + 1
             end_idx = wrapped_content.rfind("[/SECURE]")
             return wrapped_content[start_idx:end_idx]
-        
+
         return wrapped_content
-    
+
     def validate_content(self, content: str) -> Dict[str, Any]:
         """Validate content security"""
         if not content:
             return {"valid": True, "issues": []}
-        
+
         issues = []
-        
+
         # Check for common security issues
         if "<script>" in content.lower():
             issues.append("Potential script injection")
@@ -50,22 +50,22 @@ class ContentWrapSecurity:
             issues.append("Potential javascript injection")
         if "eval(" in content.lower():
             issues.append("Potential eval injection")
-        
+
         is_valid = len(issues) == 0
-        
+
         if not is_valid:
             self.blocked_content.append(content)
-        
+
         return {
             "valid": is_valid,
             "issues": issues,
             "risk_level": "high" if len(issues) > 2 else "medium" if issues else "low"
         }
-    
+
     def scan_for_vulnerabilities(self, content: str) -> List[Dict[str, Any]]:
         """Scan content for security vulnerabilities"""
         vulnerabilities = []
-        
+
         # Simple vulnerability patterns
         patterns = {
             "<script>": "XSS - Script injection",
@@ -79,7 +79,7 @@ class ContentWrapSecurity:
             "SELECT * FROM": "SQL injection pattern",
             "DROP TABLE": "SQL injection - dangerous operation",
         }
-        
+
         for pattern, description in patterns.items():
             if pattern.lower() in content.lower():
                 vulnerabilities.append({
@@ -88,9 +88,9 @@ class ContentWrapSecurity:
                     "severity": "high" if any(x in pattern.lower() for x in ["drop", "system", "exec"]) else "medium",
                     "position": content.lower().find(pattern.lower())
                 })
-        
+
         return vulnerabilities
-    
+
     def get_statistics(self) -> Dict[str, Any]:
         """Get security statistics"""
         return {
@@ -98,7 +98,7 @@ class ContentWrapSecurity:
             "total_blocked": len(self.blocked_content),
             "block_rate": len(self.blocked_content) / max(1, len(self.filtered_content) + len(self.blocked_content))
         }
-    
+
     def reset_statistics(self):
         """Reset security statistics"""
         self.blocked_content.clear()

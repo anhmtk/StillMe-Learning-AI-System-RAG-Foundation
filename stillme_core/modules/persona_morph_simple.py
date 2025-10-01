@@ -28,7 +28,7 @@ import time
 from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Dict, List, Optional, Any
+from typing import Any, Dict, List, Optional
 
 # Import với fallback để tránh lỗi
 try:
@@ -109,7 +109,7 @@ class UserProfile:
 
 class OpenRouterClient:
     """Client để gọi OpenRouter API (GIỮ NGUYÊN CHỨC NĂNG)"""
-    
+
     def __init__(
         self,
         api_key: str = None,
@@ -121,7 +121,7 @@ class OpenRouterClient:
             raise ValueError(
                 "OPENROUTER_API_KEY không được tìm thấy. Vui lòng thiết lập biến môi trường."
             )
-        
+
         if HTTPX_AVAILABLE:
             self.client = httpx.AsyncClient(
                 headers={
@@ -134,7 +134,7 @@ class OpenRouterClient:
         else:
             self.client = None
             print("⚠️ httpx not available, OpenRouter API calls will be disabled")
-        
+
         self.base_url = base_url
         self.model = model
         logging.info(f"OpenRouterClient: Khởi tạo với base URL {base_url} và model {model.value}")
@@ -148,7 +148,7 @@ class OpenRouterClient:
         """Tạo phản hồi từ OpenRouter API (GIỮ NGUYÊN CHỨC NĂNG)"""
         if not HTTPX_AVAILABLE or not self.client:
             return "Error: OpenRouter API not available (httpx not installed)"
-        
+
         try:
             response = await self.client.post(
                 f"{self.base_url}/chat/completions",
@@ -173,14 +173,14 @@ class OpenRouterClient:
 
 class PersonaMorph:
     """Hệ thống thay đổi nhân cách AI (GIỮ NGUYÊN BẢN CHẤT)"""
-    
+
     def __init__(self, config_path: str = CONFIG_PATH):
         self.config_path = config_path
         self.profiles: Dict[str, UserProfile] = {}
         self.openrouter_client = None
         self._load_profiles()
         self._initialize_openrouter()
-        
+
         logging.info("PersonaMorph: Khởi tạo thành công")
 
     def _initialize_openrouter(self):
@@ -243,7 +243,7 @@ class PersonaMorph:
                     "last_updated": profile.last_updated,
                     "preferences": profile.preferences,
                 }
-            
+
             with open(USER_PROFILES_DB_PATH, 'w', encoding='utf-8') as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
             logging.info("Đã lưu hồ sơ người dùng")
@@ -260,56 +260,56 @@ class PersonaMorph:
         """Phân tích phong cách từ văn bản (GIỮ NGUYÊN LOGIC)"""
         # Simple heuristic analysis (GIỮ NGUYÊN LOGIC CƠ BẢN)
         text_lower = text.lower()
-        
+
         # Formality analysis
         formal_words = ["xin chào", "cảm ơn", "vui lòng", "kính thưa", "trân trọng"]
         casual_words = ["hi", "hello", "ok", "được rồi", "tốt", "hay"]
-        
+
         formality_score = 0.5
         if any(word in text_lower for word in formal_words):
             formality_score = 0.8
         elif any(word in text_lower for word in casual_words):
             formality_score = 0.2
-        
+
         # Humor analysis
         humor_indicators = ["haha", "hehe", "😄", "😊", "vui", "hài hước"]
         humor_score = 0.3
         if any(indicator in text_lower for indicator in humor_indicators):
             humor_score = 0.7
-        
+
         # Conciseness analysis
         conciseness_score = 0.7
         if len(text) > 100:
             conciseness_score = 0.3
         elif len(text) < 20:
             conciseness_score = 0.9
-        
+
         # Sentiment analysis
         positive_words = ["tốt", "hay", "tuyệt", "vui", "hạnh phúc", "thích"]
         negative_words = ["xấu", "tệ", "buồn", "không thích", "ghét"]
-        
+
         sentiment = Sentiment.NEUTRAL
         if any(word in text_lower for word in positive_words):
             sentiment = Sentiment.POSITIVE
         elif any(word in text_lower for word in negative_words):
             sentiment = Sentiment.NEGATIVE
-        
+
         # Tone analysis
         tone = Tone.FRIENDLY
         if formality_score > 0.7:
             tone = Tone.FORMAL
         elif "chuyên nghiệp" in text_lower or "professional" in text_lower:
             tone = Tone.PROFESSIONAL
-        
+
         # Language detection
         preferred_language = "vi"
         if any(word in text_lower for word in ["hello", "hi", "thank you", "please"]):
             preferred_language = "en"
-        
+
         # Emoji usage
         emoji_count = sum(1 for char in text if ord(char) > 127 and len(char.encode('utf-8')) > 1)
         emoji_usage = min(emoji_count / len(text) * 10, 1.0) if text else 0.0
-        
+
         return StyleFeatures(
             formality=formality_score,
             humor_level=humor_score,
@@ -325,7 +325,7 @@ class PersonaMorph:
         """Cập nhật phong cách người dùng (GIỮ NGUYÊN LOGIC)"""
         profile = self.get_user_profile(user_id)
         analyzed_style = self.analyze_style_from_text(text)
-        
+
         profile.interaction_count += 1
         profile.last_updated = time.time()
         profile.style_history.append(analyzed_style)
@@ -361,7 +361,7 @@ class PersonaMorph:
             humor_values = [s.humor_level for s in recent_styles]
             conciseness_values = [s.conciseness for s in recent_styles]
             vocab_values = [s.vocabulary_complexity for s in recent_styles]
-            
+
             new_formality = sum(f * w for f, w in zip(formality_values, weights))
             new_humor_level = sum(h * w for h, w in zip(humor_values, weights))
             new_conciseness = sum(c * w for c, w in zip(conciseness_values, weights))
@@ -386,53 +386,53 @@ class PersonaMorph:
         """Tạo prompt với nhân cách phù hợp (GIỮ NGUYÊN CHỨC NĂNG CHÍNH)"""
         profile = self.get_user_profile(user_id)
         style = profile.current_style
-        
+
         # Tạo persona description (GIỮ NGUYÊN LOGIC)
         persona_parts = []
-        
+
         # Formality
         if style.formality > 0.7:
             persona_parts.append("trả lời một cách trang trọng và lịch sự")
         elif style.formality < 0.3:
             persona_parts.append("trả lời một cách thân thiện và gần gũi")
-        
+
         # Humor
         if style.humor_level > 0.6:
             persona_parts.append("có thể sử dụng chút hài hước khi phù hợp")
-        
+
         # Conciseness
         if style.conciseness > 0.7:
             persona_parts.append("trả lời ngắn gọn và súc tích")
         elif style.conciseness < 0.3:
             persona_parts.append("trả lời chi tiết và đầy đủ")
-        
+
         # Language
         if style.preferred_language == "en":
             persona_parts.append("trả lời bằng tiếng Anh")
         else:
             persona_parts.append("trả lời bằng tiếng Việt")
-        
+
         # Emoji
         if style.emoji_usage > 0.5:
             persona_parts.append("có thể sử dụng emoji khi phù hợp")
-        
+
         persona_description = ", ".join(persona_parts)
-        
+
         # Tạo prompt cuối cùng
         enhanced_prompt = f"""Bạn là StillMe AI. {persona_description}.
 
 Câu hỏi: {base_prompt}"""
-        
+
         return enhanced_prompt
 
     async def get_adaptive_response(self, user_id: str, message: str) -> str:
         """Lấy phản hồi thích ứng (GIỮ NGUYÊN CHỨC NĂNG CHÍNH)"""
         # Cập nhật phong cách người dùng
         self.update_user_style(user_id, message)
-        
+
         # Tạo prompt với nhân cách phù hợp
         persona_prompt = self.generate_persona_prompt(user_id, message)
-        
+
         # Gọi OpenRouter API nếu có
         if self.openrouter_client:
             messages = [{"role": "user", "content": persona_prompt}]
@@ -442,7 +442,7 @@ Câu hỏi: {base_prompt}"""
             # Fallback response
             profile = self.get_user_profile(user_id)
             style = profile.current_style
-            
+
             if style.preferred_language == "en":
                 return f"I understand your message: '{message}'. I'm adapting my personality based on your communication style."
             else:
@@ -452,7 +452,7 @@ Câu hỏi: {base_prompt}"""
         """Lấy tóm tắt phong cách người dùng (GIỮ NGUYÊN)"""
         profile = self.get_user_profile(user_id)
         style = profile.current_style
-        
+
         return {
             "user_id": user_id,
             "interaction_count": profile.interaction_count,

@@ -1,11 +1,11 @@
+from stillme_core import CANARY, apply_policies, redact_output, safe_reply
+
 #!/usr/bin/env python3
 """
 AgentDev-Guardflow Surgeon v4: Tests for enhanced templates with must_include tokens
 """
 
 import pytest
-
-from stillme_core.safety_guard import SafetyGuard
 
 
 def test_jailbreak_contains_tokens():

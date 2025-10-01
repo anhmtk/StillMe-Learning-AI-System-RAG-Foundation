@@ -41,12 +41,12 @@ class NicheScore:
 
 class NicheScorer:
     """Main scoring engine for niche opportunities"""
-    
+
     def __init__(self, weights_file: str = "policies/niche_weights.yaml"):
         self.logger = logging.getLogger("niche_radar.scoring")
         self.weights_file = weights_file
         self.weights = self._load_weights()
-        
+
     def _load_weights(self) -> Dict[str, Any]:
         """Load scoring weights from YAML file"""
         try:
@@ -54,17 +54,17 @@ class NicheScorer:
             if not weights_path.exists():
                 self.logger.warning(f"⚠️ Weights file not found: {self.weights_file}, using defaults")
                 return self._get_default_weights()
-                
+
             with open(weights_path, 'r', encoding='utf-8') as f:
                 weights = yaml.safe_load(f)
-                
+
             self.logger.info(f"✅ Loaded scoring weights from {self.weights_file}")
             return weights
-            
+
         except Exception as e:
             self.logger.error(f"❌ Failed to load weights: {e}, using defaults")
             return self._get_default_weights()
-    
+
     def _get_default_weights(self) -> Dict[str, Any]:
         """Get default weights if file loading fails"""
         return {
@@ -90,7 +90,7 @@ class NicheScorer:
                 "low_fit": ["mobile_app", "game_development", "graphics_design", "video_editing"]
             }
         }
-    
+
     def normalize_signal(self, value: float, signal_type: str, method: str = "z_score") -> float:
         """Normalize signal to [0,1] range"""
         try:
@@ -99,29 +99,29 @@ class NicheScorer:
                 mean = norm_params.get("mean", 0.0)
                 std = norm_params.get("std", 1.0)
                 max_cap = norm_params.get("max_cap", 100.0)
-                
+
                 # Cap the value
                 capped_value = min(value, max_cap)
-                
+
                 # Calculate z-score
                 z_score = (capped_value - mean) / std if std > 0 else 0.0
-                
+
                 # Convert to [0,1] using sigmoid
                 normalized = 1 / (1 + math.exp(-z_score))
-                
+
                 return max(0.0, min(1.0, normalized))
-                
+
             elif method == "min_max":
                 # Simple min-max normalization (assumes value is already in reasonable range)
                 return max(0.0, min(1.0, value / 100.0))
-                
+
             else:
                 return max(0.0, min(1.0, value))
-                
+
         except Exception as e:
             self.logger.error(f"❌ Signal normalization failed for {signal_type}: {e}")
             return 0.0
-    
+
     def calculate_feasibility_fit(self, topic: str, records: List[NicheRecord]) -> float:
         """Calculate how well the niche fits StillMe capabilities"""
         try:
@@ -130,20 +130,20 @@ class NicheScorer:
             for record in records:
                 title_words = record.title.lower().split()
                 keywords.extend(title_words[:5])  # First 5 words
-            
+
             # Get capability mappings
             capabilities = self.weights.get("stillme_capabilities", {})
             high_fit = capabilities.get("high_fit", [])
             medium_fit = capabilities.get("medium_fit", [])
             low_fit = capabilities.get("low_fit", [])
-            
+
             # Calculate fit score
             fit_score = 0.0
             total_matches = 0
-            
+
             for keyword in keywords:
                 keyword = keyword.strip(".,!?")
-                
+
                 # Check high fit
                 if any(cap in keyword for cap in high_fit):
                     fit_score += 0.9
@@ -156,18 +156,18 @@ class NicheScorer:
                 elif any(cap in keyword for cap in low_fit):
                     fit_score += 0.3
                     total_matches += 1
-            
+
             # Average fit score
             if total_matches > 0:
                 return fit_score / total_matches
             else:
                 # Default to medium fit if no matches
                 return 0.5
-                
+
         except Exception as e:
             self.logger.error(f"❌ Feasibility calculation failed: {e}")
             return 0.5
-    
+
     def calculate_competition_proxy(self, topic: str, records: List[NicheRecord]) -> float:
         """Calculate competition proxy (higher = more competition)"""
         try:
@@ -176,20 +176,20 @@ class NicheScorer:
             for record in records:
                 title_words = record.title.lower().split()
                 keywords.extend(title_words[:3])
-            
+
             # Get competition mappings
             competition = self.weights.get("competition_analysis", {})
             high_comp = competition.get("high_competition_keywords", [])
             medium_comp = competition.get("medium_competition_keywords", [])
             low_comp = competition.get("low_competition_keywords", [])
-            
+
             # Calculate competition score
             comp_score = 0.0
             total_matches = 0
-            
+
             for keyword in keywords:
                 keyword = keyword.strip(".,!?")
-                
+
                 if any(comp in keyword for comp in high_comp):
                     comp_score += 0.9
                     total_matches += 1
@@ -199,27 +199,27 @@ class NicheScorer:
                 elif any(comp in keyword for comp in low_comp):
                     comp_score += 0.3
                     total_matches += 1
-            
+
             if total_matches > 0:
                 return comp_score / total_matches
             else:
                 return 0.5  # Default medium competition
-                
+
         except Exception as e:
             self.logger.error(f"❌ Competition calculation failed: {e}")
             return 0.5
-    
+
     def calculate_confidence(self, records: List[NicheRecord]) -> float:
         """Calculate confidence based on source coverage and consistency"""
         try:
             if not records:
                 return 0.0
-            
+
             # Source coverage (0.4 weight)
             unique_sources = len(set(record.source for record in records))
             max_sources = 5  # We have 5 collectors
             source_coverage = min(unique_sources / max_sources, 1.0)
-            
+
             # Signal consistency (0.3 weight)
             if len(records) > 1:
                 scores = [record.confidence for record in records]
@@ -228,7 +228,7 @@ class NicheScorer:
                 consistency = max(0.0, 1.0 - variance)
             else:
                 consistency = records[0].confidence if records else 0.0
-            
+
             # Data freshness (0.2 weight)
             now = datetime.now()
             freshness_scores = []
@@ -237,7 +237,7 @@ class NicheScorer:
                 freshness = max(0.0, 1.0 - (age_hours / 72.0))  # 72 hours max
                 freshness_scores.append(freshness)
             data_freshness = sum(freshness_scores) / len(freshness_scores) if freshness_scores else 0.0
-            
+
             # Source credibility (0.1 weight)
             credibility_scores = []
             for record in records:
@@ -250,7 +250,7 @@ class NicheScorer:
                 }
                 credibility_scores.append(cred_map.get(record.source, 0.5))
             source_credibility = sum(credibility_scores) / len(credibility_scores) if credibility_scores else 0.5
-            
+
             # Weighted confidence
             confidence = (
                 0.4 * source_coverage +
@@ -258,18 +258,18 @@ class NicheScorer:
                 0.2 * data_freshness +
                 0.1 * source_credibility
             )
-            
+
             return max(0.0, min(1.0, confidence))
-            
+
         except Exception as e:
             self.logger.error(f"❌ Confidence calculation failed: {e}")
             return 0.5
-    
+
     def score_niche(self, topic: str, records: List[NicheRecord]) -> NicheScore:
         """Calculate comprehensive niche score"""
         try:
             self.logger.info(f"🎯 Scoring niche: {topic} with {len(records)} records")
-            
+
             if not records:
                 return NicheScore(
                     topic=topic,
@@ -284,38 +284,38 @@ class NicheScorer:
                     key_signals=[],
                     recommendations=[]
                 )
-            
+
             # Group records by source
             source_groups = {}
             for record in records:
                 if record.source not in source_groups:
                     source_groups[record.source] = []
                 source_groups[record.source].append(record)
-            
+
             # Calculate individual signal scores
             scoring_weights = self.weights.get("scoring_weights", {})
-            
+
             # Trend momentum (Google Trends)
             trend_momentum = 0.0
             if "Google Trends" in source_groups:
                 trend_records = source_groups["Google Trends"]
                 momentum_scores = [r.metrics.get("momentum_score", 0.0) for r in trend_records]
                 trend_momentum = sum(momentum_scores) / len(momentum_scores) if momentum_scores else 0.0
-            
+
             # GitHub velocity
             github_velocity = 0.0
             if "GitHub" in source_groups:
                 github_records = source_groups["GitHub"]
                 velocity_scores = [r.metrics.get("trending_score", 0.0) for r in github_records]
                 github_velocity = sum(velocity_scores) / len(velocity_scores) if velocity_scores else 0.0
-            
+
             # Hacker News heat
             hackernews_heat = 0.0
             if "Hacker News" in source_groups:
                 hn_records = source_groups["Hacker News"]
                 heat_scores = [r.metrics.get("heat_score", 0.0) for r in hn_records]
                 hackernews_heat = sum(heat_scores) / len(heat_scores) if heat_scores else 0.0
-            
+
             # News delta
             news_delta = 0.0
             if "News" in source_groups or any("News" in source for source in source_groups.keys()):
@@ -326,18 +326,18 @@ class NicheScorer:
                 if news_records:
                     delta_scores = [r.metrics.get("delta_score", 0.0) for r in news_records]
                     news_delta = sum(delta_scores) / len(delta_scores) if delta_scores else 0.0
-            
+
             # Reddit engagement
             reddit_engagement = 0.0
             if "Reddit" in source_groups:
                 reddit_records = source_groups["Reddit"]
                 engagement_scores = [r.metrics.get("engagement_score", 0.0) for r in reddit_records]
                 reddit_engagement = sum(engagement_scores) / len(engagement_scores) if engagement_scores else 0.0
-            
+
             # Calculate feasibility fit and competition proxy
             feasibility_fit = self.calculate_feasibility_fit(topic, records)
             competition_proxy = self.calculate_competition_proxy(topic, records)
-            
+
             # Calculate total score using weighted formula
             total_score = (
                 scoring_weights.get("trend_momentum", 0.20) * trend_momentum +
@@ -348,13 +348,13 @@ class NicheScorer:
                 scoring_weights.get("feasibility_fit", 0.25) * feasibility_fit -
                 scoring_weights.get("competition_proxy", 0.15) * competition_proxy
             )
-            
+
             # Ensure score is in [0,1] range
             total_score = max(0.0, min(1.0, total_score))
-            
+
             # Calculate confidence
             confidence = self.calculate_confidence(records)
-            
+
             # Create breakdown
             breakdown = {
                 "trend_momentum": trend_momentum,
@@ -365,7 +365,7 @@ class NicheScorer:
                 "feasibility_fit": feasibility_fit,
                 "competition_proxy": competition_proxy
             }
-            
+
             # Identify key signals
             key_signals = []
             if trend_momentum > 0.7:
@@ -378,7 +378,7 @@ class NicheScorer:
                 key_signals.append("Excellent StillMe fit")
             if competition_proxy < 0.3:
                 key_signals.append("Low competition")
-            
+
             # Generate recommendations
             recommendations = []
             if feasibility_fit > 0.7:
@@ -389,7 +389,7 @@ class NicheScorer:
                 recommendations.append("Strong overall signal - prioritize")
             if confidence > 0.8:
                 recommendations.append("High confidence data - reliable signals")
-            
+
             # Determine category
             category = "general"
             if feasibility_fit > 0.8:
@@ -398,7 +398,7 @@ class NicheScorer:
                 category = "medium_fit"
             else:
                 category = "low_fit"
-            
+
             return NicheScore(
                 topic=topic,
                 total_score=total_score,
@@ -412,7 +412,7 @@ class NicheScorer:
                 key_signals=key_signals,
                 recommendations=recommendations
             )
-            
+
         except Exception as e:
             self.logger.error(f"❌ Niche scoring failed for {topic}: {e}")
             return NicheScore(
@@ -437,7 +437,7 @@ def calculate_confidence(records: List[NicheRecord]) -> float:
 if __name__ == "__main__":
     # Test scoring
     from .collectors import NicheRecord
-    
+
     # Create test records
     test_records = [
         NicheRecord(
@@ -463,10 +463,10 @@ if __name__ == "__main__":
             confidence=0.8
         )
     ]
-    
+
     scorer = NicheScorer()
     score = scorer.score_niche("ai_assistant", test_records)
-    
+
     print(f"🎯 Niche Score for 'ai_assistant':")
     print(f"  Total Score: {score.total_score:.3f}")
     print(f"  Confidence: {score.confidence:.3f}")

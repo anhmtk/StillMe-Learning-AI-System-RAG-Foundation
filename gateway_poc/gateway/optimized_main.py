@@ -68,10 +68,10 @@ async def chat(request: Request):
         # Parse request body
         body = await request.json()
         prompt = body.get('prompt', 'No prompt provided')
-        
+
         # Simulate clarification processing (replace with actual logic)
         await asyncio.sleep(0.001)  # Minimal processing time
-        
+
         # Generate response
         response = {
             "response": f"Hello! You said: {prompt}. This is StillMe AI responding.",
@@ -82,9 +82,9 @@ async def chat(request: Request):
             "timestamp": time.time(),
             "processing_time_ms": 1.0
         }
-        
+
         return response
-        
+
     except Exception as e:
         logger.error(f"Error processing request: {e}")
         return ORJSONResponse(

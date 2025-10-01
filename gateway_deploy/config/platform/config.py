@@ -17,29 +17,29 @@ from dataclasses import dataclass
 @dataclass
 class PlatformConfig:
     """Platform configuration"""
-    
+
     # Gateway settings
     gateway_host: str = os.getenv("GATEWAY_HOST", "localhost")
     gateway_port: int = int(os.getenv("GATEWAY_PORT", "8000"))
     gateway_workers: int = int(os.getenv("GATEWAY_WORKERS", "4"))
-    
+
     # Desktop app settings
     desktop_app_port: int = int(os.getenv("DESKTOP_APP_PORT", "3000"))
     desktop_app_host: str = os.getenv("DESKTOP_APP_HOST", "localhost")
-    
+
     # Mobile app settings
     mobile_app_debug: bool = os.getenv("MOBILE_APP_DEBUG", "false").lower() == "true"
     mobile_app_api_url: str = os.getenv("MOBILE_APP_API_URL", "http://localhost:8000")
-    
+
     # WebSocket settings
     websocket_enabled: bool = os.getenv("WEBSOCKET_ENABLED", "true").lower() == "true"
     websocket_port: int = int(os.getenv("WEBSOCKET_PORT", "8001"))
-    
+
     @classmethod
     def from_env(cls) -> "PlatformConfig":
         """Create PlatformConfig from environment variables"""
         return cls()
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary"""
         return {
