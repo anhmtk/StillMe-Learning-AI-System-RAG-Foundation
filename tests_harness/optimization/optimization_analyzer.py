@@ -14,20 +14,21 @@ from typing import Any
 
 # Try to import optional dependencies
 try:
-    import pandas as pd
-
-    HAS_PANDAS = True
+    import pandas as pd  # type: ignore
+    has_pandas = True
 except ImportError:
-    HAS_PANDAS = False
+    pd = None  # type: ignore
+    has_pandas = False
 
 try:
     # Import plotly components only if needed
-    import plotly.graph_objects as go
-    from plotly.subplots import make_subplots
-
-    HAS_PLOTLY = True
+    import plotly.graph_objects as go  # type: ignore
+    from plotly.subplots import make_subplots  # type: ignore
+    has_plotly = True
 except ImportError:
-    HAS_PLOTLY = False
+    go = None  # type: ignore
+    make_subplots = None  # type: ignore
+    has_plotly = False
 
 # Import our new modules
 from .data_loader import DataLoader
@@ -172,7 +173,7 @@ class OptimizationAnalyzer:
         latest_report = reports[0]
         evaluations = latest_report.get("evaluations", {})
 
-        scores = []
+        scores: list[float] = []
         for category in ["persona", "safety", "translation", "efficiency", "agentdev"]:
             if category in evaluations and "average_score" in evaluations[category]:
                 scores.append(evaluations[category]["average_score"])
@@ -254,7 +255,7 @@ class OptimizationAnalyzer:
                         "modules": action_config.get("modules", []),
                         "effort": action_config.get("effort", "M"),
                         "suggestion": self._get_suggestion_for_failure(
-                            category, failure_type
+                            category, failure_type or "unknown"
                         ),
                     }
                     action_items.append(action_item)
@@ -263,8 +264,8 @@ class OptimizationAnalyzer:
             logger.warning(f"Could not load action map: {e}")
 
         # Remove duplicates based on category
-        seen_categories = set()
-        unique_action_items = []
+        seen_categories: set[str] = set()
+        unique_action_items: list[dict[str, Any]] = []
         for item in action_items:
             if item["category"] not in seen_categories:
                 unique_action_items.append(item)
@@ -331,7 +332,7 @@ class OptimizationAnalyzer:
             "dedup_ratio": 0.95 if total_samples > 0 else 0.0,
         }
 
-    def _alert_to_dict(self, alert) -> dict[str, Any]:
+    def _alert_to_dict(self, alert: Any) -> dict[str, Any]:
         """Convert SLOAlert to dictionary"""
         return {
             "level": alert.level.value,
@@ -388,7 +389,7 @@ class OptimizationAnalyzer:
             }
 
         # Extract trend data
-        trend_data = []
+        trend_data: list[dict[str, Any]] = []
         for report in reports:
             evaluations = report.get("evaluations", {})
             trend_data.append(
@@ -423,11 +424,10 @@ class OptimizationAnalyzer:
             )
 
         # Calculate trends
+        trends: dict[str, Any] = {}
         if len(trend_data) >= 2:
-            latest = trend_data[0]
-            previous = trend_data[1]
-
-            trends = {}
+            latest: dict[str, Any] = trend_data[0]
+            previous: dict[str, Any] = trend_data[1]
             for key in [
                 "overall_score",
                 "persona_score",
@@ -437,7 +437,7 @@ class OptimizationAnalyzer:
                 "agentdev_score",
             ]:
                 if key in latest and key in previous:
-                    change = latest[key] - previous[key]
+                    change: float = latest[key] - previous[key]
                     trends[key] = {
                         "change": change,
                         "direction": "improving"
@@ -459,7 +459,7 @@ class OptimizationAnalyzer:
 
     def _analyze_model_selection(self, reports: list[dict[str, Any]]) -> dict[str, Any]:
         """Analyze model selection performance"""
-        confusion_matrix = []
+        confusion_matrix: list[Any] = []
 
         for report in reports:
             model_selection = report.get("model_selection", {})
@@ -500,8 +500,8 @@ class OptimizationAnalyzer:
 
             attacks = security.get("attacks", {})
             for attack_type, attack_data in attacks.items():
-                blocked = attack_data.get("blocked", 0)
-                total = attack_data.get("total", 0)
+                blocked: int = attack_data.get("blocked", 0)
+                total: int = attack_data.get("total", 0)
 
                 if attack_type not in attack_block_rates:
                     attack_block_rates[attack_type] = {"blocked": 0, "total": 0}
@@ -547,7 +547,7 @@ class OptimizationAnalyzer:
         }
 
     def _generate_enhanced_recommendations(
-        self, reports: list[dict[str, Any]], slo_alerts: list
+        self, reports: list[dict[str, Any]], slo_alerts: list[Any]
     ) -> list[dict[str, Any]]:
         """Generate enhanced recommendations based on SLO alerts and analysis"""
         recommendations = []
@@ -556,8 +556,8 @@ class OptimizationAnalyzer:
         # Convert SLO alerts to recommendations
         for alert in slo_alerts:
             if alert.level in [AlertLevel.CRITICAL, AlertLevel.HIGH]:
-                category = alert.metric.split("_")[0]  # Extract category from metric
-                action_info = action_map.get(category, {})
+                category: str = alert.metric.split("_")[0]  # Extract category from metric
+                action_info: dict[str, Any] = action_map.get(category, {})
 
                 recommendations.append(
                     {
@@ -577,8 +577,8 @@ class OptimizationAnalyzer:
                 )
 
         # Sort by priority
-        priority_order = {"critical": 0, "high": 1, "medium": 2, "low": 3}
-        recommendations.sort(key=lambda x: priority_order.get(x["priority"], 4))
+        priority_order: dict[str, int] = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+        recommendations.sort(key=lambda x: priority_order.get(x.get("priority", "low"), 4))
 
         return recommendations
 
@@ -1122,7 +1122,7 @@ class OptimizationAnalyzer:
         self, reports: list[dict[str, Any]]
     ) -> dict[str, Any]:
         """Phân tích hiệu suất tổng thể"""
-        overall_scores = []
+        overall_scores: list[float] = []
 
         for report_data in reports:
             if "overall_score" in report_data:
@@ -1146,7 +1146,7 @@ class OptimizationAnalyzer:
         self, reports: list[dict[str, Any]]
     ) -> dict[str, Any]:
         """Phân tích hiệu suất persona"""
-        persona_scores = []
+        persona_scores: list[float] = []
 
         for report_data in reports:
             if "evaluations" in report_data and "persona" in report_data["evaluations"]:
@@ -1160,7 +1160,7 @@ class OptimizationAnalyzer:
         avg_score = sum(persona_scores) / len(persona_scores)
 
         # Phân tích các vấn đề thường gặp
-        issues = []
+        issues: list[str] = []
         if avg_score < 0.7:
             issues.append("Persona không nhất quán")
         if avg_score < 0.8:
@@ -1176,7 +1176,7 @@ class OptimizationAnalyzer:
         self, reports: list[dict[str, Any]]
     ) -> dict[str, Any]:
         """Phân tích hiệu suất safety"""
-        safety_scores = []
+        safety_scores: list[float] = []
 
         for report_data in reports:
             if "evaluations" in report_data and "safety" in report_data["evaluations"]:
@@ -1190,7 +1190,7 @@ class OptimizationAnalyzer:
         avg_score = sum(safety_scores) / len(safety_scores)
 
         # Phân tích các vấn đề bảo mật
-        critical_issues = []
+        critical_issues: list[str] = []
         if avg_score < 0.9:
             critical_issues.append("Cần tăng cường EthicalCore")
         if avg_score < 0.95:
@@ -1206,7 +1206,7 @@ class OptimizationAnalyzer:
         self, reports: list[dict[str, Any]]
     ) -> dict[str, Any]:
         """Phân tích hiệu suất translation"""
-        translation_scores = []
+        translation_scores: list[float] = []
 
         for report_data in reports:
             if (
@@ -1223,7 +1223,7 @@ class OptimizationAnalyzer:
         avg_score = sum(translation_scores) / len(translation_scores)
 
         # Phân tích các vấn đề ngôn ngữ
-        language_issues = []
+        language_issues: list[str] = []
         if avg_score < 0.8:
             language_issues.append("Cần cải thiện NLLB model")
         if avg_score < 0.9:
@@ -1239,9 +1239,9 @@ class OptimizationAnalyzer:
         self, reports: list[dict[str, Any]]
     ) -> dict[str, Any]:
         """Phân tích hiệu suất efficiency"""
-        efficiency_scores = []
-        latencies = []
-        token_costs = []
+        efficiency_scores: list[float] = []
+        latencies: list[float] = []
+        token_costs: list[float] = []
 
         for report_data in reports:
             if (
@@ -1261,7 +1261,7 @@ class OptimizationAnalyzer:
         avg_token_cost = sum(token_costs) / len(token_costs) if token_costs else 0
 
         # Phân tích các vấn đề hiệu suất
-        performance_issues = []
+        performance_issues: list[str] = []
         if avg_latency > 5.0:
             performance_issues.append("Latency quá cao")
         if avg_token_cost > 1000:
@@ -1281,7 +1281,7 @@ class OptimizationAnalyzer:
         self, reports: list[dict[str, Any]]
     ) -> dict[str, Any]:
         """Phân tích hiệu suất AgentDev"""
-        agentdev_scores = []
+        agentdev_scores: list[float] = []
 
         for report_data in reports:
             if (
@@ -1298,7 +1298,7 @@ class OptimizationAnalyzer:
         avg_score = sum(agentdev_scores) / len(agentdev_scores)
 
         # Phân tích các vấn đề tích hợp
-        integration_issues = []
+        integration_issues: list[str] = []
         if avg_score < 0.7:
             integration_issues.append("AgentDev integration không ổn định")
         if avg_score < 0.8:
@@ -1314,7 +1314,7 @@ class OptimizationAnalyzer:
         self, reports: list[dict[str, Any]]
     ) -> list[OptimizationRecommendation]:
         """Tạo gợi ý tối ưu hóa"""
-        recommendations = []
+        recommendations: list[OptimizationRecommendation] = []
 
         # Phân tích từng loại và tạo gợi ý
         self._analyze_overall_performance(reports)
@@ -1431,7 +1431,7 @@ class OptimizationAnalyzer:
         report_path = self.reports_dir / "optimization_report.json"
 
         # Convert recommendations to dict
-        recommendations_dict = []
+        recommendations_dict: list[dict[str, Any]] = []
         for rec in analysis["recommendations"]:
             recommendations_dict.append(
                 {
@@ -1448,10 +1448,10 @@ class OptimizationAnalyzer:
             )
 
         # Tạo báo cáo chi tiết
-        timestamp = (
-            pd.Timestamp.now().isoformat() if HAS_PANDAS else datetime.now().isoformat()
+        timestamp: str = (
+            pd.Timestamp.now().isoformat() if has_pandas and pd is not None else datetime.now().isoformat()
         )
-        report = {
+        report: dict[str, Any] = {
             "timestamp": timestamp,
             "analysis": {
                 "overall_performance": analysis["overall_performance"],
