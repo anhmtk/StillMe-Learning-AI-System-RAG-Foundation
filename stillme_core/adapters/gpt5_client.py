@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Dict, Literal, Optional
+from typing import Any, Literal
 
 import httpx
 
@@ -15,8 +15,8 @@ class GPT5Client:
 
     def __init__(
         self,
-        api_base: Optional[str] = None,
-        api_key: Optional[str] = None,
+        api_base: str | None = None,
+        api_key: str | None = None,
         timeout: float = 30.0,
     ):
         self.api_base = (api_base or os.getenv("GPT5_API_BASE", "")).rstrip("/")
@@ -32,9 +32,9 @@ class GPT5Client:
         self,
         prompt: str,
         mode: Literal["fast", "safe"] = "fast",
-        system: Optional[str] = None,
+        system: str | None = None,
         temperature: float = 0.2,
-        extra: Optional[Dict[str, Any]] = None,
+        extra: dict[str, Any] | None = None,
     ) -> str:
         model = (
             os.getenv("GPT5_MODEL_FAST")

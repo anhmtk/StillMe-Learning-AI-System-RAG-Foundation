@@ -25,10 +25,9 @@ import json
 import logging
 import os
 import time
-from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Import với fallback để tránh lỗi
 try:
@@ -102,10 +101,10 @@ class UserProfile:
     user_id: str
     name: str = ""
     current_style: StyleFeatures = field(default_factory=StyleFeatures)
-    style_history: List[StyleFeatures] = field(default_factory=list)
+    style_history: list[StyleFeatures] = field(default_factory=list)
     interaction_count: int = 0
     last_updated: float = field(default_factory=time.time)
-    preferences: Dict[str, Any] = field(default_factory=dict)
+    preferences: dict[str, Any] = field(default_factory=dict)
 
 class OpenRouterClient:
     """Client để gọi OpenRouter API (GIỮ NGUYÊN CHỨC NĂNG)"""
@@ -141,7 +140,7 @@ class OpenRouterClient:
 
     async def generate_response(
         self,
-        messages: List[Dict[str, str]],
+        messages: list[dict[str, str]],
         temperature: float = 0.7,
         max_tokens: int = 500,
     ) -> str:
@@ -176,7 +175,7 @@ class PersonaMorph:
 
     def __init__(self, config_path: str = CONFIG_PATH):
         self.config_path = config_path
-        self.profiles: Dict[str, UserProfile] = {}
+        self.profiles: dict[str, UserProfile] = {}
         self.openrouter_client = None
         self._load_profiles()
         self._initialize_openrouter()
@@ -448,7 +447,7 @@ Câu hỏi: {base_prompt}"""
             else:
                 return f"Tôi hiểu tin nhắn của bạn: '{message}'. Tôi đang thích ứng nhân cách dựa trên phong cách giao tiếp của bạn."
 
-    def get_style_summary(self, user_id: str) -> Dict[str, Any]:
+    def get_style_summary(self, user_id: str) -> dict[str, Any]:
         """Lấy tóm tắt phong cách người dùng (GIỮ NGUYÊN)"""
         profile = self.get_user_profile(user_id)
         style = profile.current_style

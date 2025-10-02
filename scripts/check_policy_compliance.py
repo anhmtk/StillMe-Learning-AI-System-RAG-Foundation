@@ -4,7 +4,6 @@ Policy compliance check script for NicheRadar v1.5
 Ensures all required policies are loaded and enforced
 """
 
-import os
 import sys
 from pathlib import Path
 

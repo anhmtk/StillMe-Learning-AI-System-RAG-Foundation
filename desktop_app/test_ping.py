@@ -4,7 +4,6 @@ Test script to ping StillMe VPS server
 Usage: python test_ping.py [base_url]
 """
 
-import json
 import sys
 import time
 from datetime import datetime

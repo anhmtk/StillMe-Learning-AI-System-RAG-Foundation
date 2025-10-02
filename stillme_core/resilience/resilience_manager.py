@@ -23,19 +23,13 @@ Date: 2025-09-28
 import asyncio
 import json
 import logging
-import time
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Optional
 
 from .error_handler import (
-    CircuitBreakerConfig,
-    ErrorCategory,
-    ErrorHandler,
     ErrorSeverity,
-    RetryPolicy,
     get_error_handler,
 )
 
@@ -75,12 +69,12 @@ class HealthMetrics:
     """System health metrics"""
     timestamp: datetime
     overall_health: SystemHealth
-    component_health: Dict[str, SystemHealth]
+    component_health: dict[str, SystemHealth]
     error_rate: float
     recovery_rate: float
     uptime_percentage: float
     performance_degradation: float
-    resource_utilization: Dict[str, float]
+    resource_utilization: dict[str, float]
     resilience_score: float
 
 @dataclass
@@ -104,17 +98,17 @@ class ResilienceManager:
 
         # Core components
         self.error_handler = get_error_handler()
-        self.health_metrics_history: List[HealthMetrics] = []
-        self.failure_predictions: List[FailurePrediction] = []
+        self.health_metrics_history: list[HealthMetrics] = []
+        self.failure_predictions: list[FailurePrediction] = []
 
         # System state
         self.current_health = SystemHealth.HEALTHY
-        self.component_states: Dict[str, SystemHealth] = {}
-        self.active_recoveries: Dict[str, asyncio.Task] = {}
-        self.degradation_modes: Dict[str, bool] = {}
+        self.component_states: dict[str, SystemHealth] = {}
+        self.active_recoveries: dict[str, asyncio.Task] = {}
+        self.degradation_modes: dict[str, bool] = {}
 
         # Resilience strategies
-        self.resilience_strategies: Dict[ResilienceLevel, List[Callable]] = {}
+        self.resilience_strategies: dict[ResilienceLevel, list[Callable]] = {}
         self._setup_resilience_strategies()
 
         # Monitoring
@@ -341,7 +335,7 @@ class ResilienceManager:
         total_degradation = sum(m.performance_degradation for m in recent_metrics)
         return total_degradation / len(recent_metrics)
 
-    async def _get_resource_utilization(self) -> Dict[str, float]:
+    async def _get_resource_utilization(self) -> dict[str, float]:
         """Get current resource utilization"""
         # This would integrate with the resource monitor
         return {
@@ -402,7 +396,7 @@ class ResilienceManager:
 
         # Analyze trends in health metrics
         if len(self.health_metrics_history) >= 5:
-            recent_metrics = self.health_metrics_history[-5:]
+            self.health_metrics_history[-5:]
 
             # Check for degrading trends
             for component, health in health_metrics.component_health.items():
@@ -557,7 +551,7 @@ class ResilienceManager:
         self.logger.info("Setting up adaptive resilience")
         # Adaptive resilience based on system conditions
 
-    async def handle_component_failure(self, component: str, error: Exception, context: Dict[str, Any] = None):
+    async def handle_component_failure(self, component: str, error: Exception, context: dict[str, Any] = None):
         """Handle component failure"""
         self.logger.error(f"Component failure detected: {component} - {error}")
 
@@ -575,7 +569,7 @@ class ResilienceManager:
             self.logger.error(f"Recovery failed for {component}: {recovery_error}")
             self.stats['failed_recoveries'] += 1
 
-    def get_resilience_status(self) -> Dict[str, Any]:
+    def get_resilience_status(self) -> dict[str, Any]:
         """Get resilience system status"""
         return {
             'config': asdict(self.config),

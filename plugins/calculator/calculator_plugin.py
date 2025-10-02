@@ -7,7 +7,7 @@ A simple calculator plugin demonstrating the plugin architecture.
 
 import logging
 import re
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from stillme_core.base.module_base import ModuleBase, ModuleInfo, ModuleStatus
 
@@ -17,14 +17,14 @@ logger = logging.getLogger(__name__)
 class CalculatorPlugin(ModuleBase):
     """
     Calculator plugin for basic mathematical operations
-    
+
     Supports:
     - Basic arithmetic (+, -, *, /)
     - Parentheses
     - Simple expressions
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         super().__init__(config)
         self.supported_operations = ['+', '-', '*', '/', '(', ')']
         self.max_expression_length = self.config.get("max_expression_length", 100)
@@ -99,7 +99,7 @@ class CalculatorPlugin(ModuleBase):
         logger.info("Cleaning up Calculator Plugin")
         self._set_status(ModuleStatus.STOPPED)
 
-    def _validate_expression(self, expression: str) -> Dict[str, Any]:
+    def _validate_expression(self, expression: str) -> dict[str, Any]:
         """Validate mathematical expression"""
         errors = []
 
@@ -204,7 +204,7 @@ Usage:
 
 
 # Plugin factory function
-def create_plugin(config: Optional[Dict[str, Any]] = None) -> CalculatorPlugin:
+def create_plugin(config: Optional[dict[str, Any]] = None) -> CalculatorPlugin:
     """Create calculator plugin instance"""
     return CalculatorPlugin(config)
 

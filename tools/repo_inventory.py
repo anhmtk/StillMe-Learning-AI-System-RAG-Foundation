@@ -17,10 +17,10 @@ import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 
-def process_file_batch(file_paths: List[Path], repo_root: Path, with_hash: bool = False) -> List[Dict[str, Any]]:
+def process_file_batch(file_paths: list[Path], repo_root: Path, with_hash: bool = False) -> list[dict[str, Any]]:
     """Process a batch of files in parallel"""
     results = []
 
@@ -89,7 +89,7 @@ def get_file_type(file_path: Path) -> str:
     else:
         return "other"
 
-def get_git_info(file_path: Path, repo_root: Path) -> Dict[str, Any]:
+def get_git_info(file_path: Path, repo_root: Path) -> dict[str, Any]:
     """Lấy thông tin Git cho file"""
     try:
         # Get last commit info
@@ -133,7 +133,7 @@ def is_binary_file(file_path: Path) -> bool:
 
 class RepoInventory:
     def __init__(self, repo_root: str = ".", mode: str = "primary",
-                 exclude_dirs: Set[str] = None, include_exts: Set[str] = None,
+                 exclude_dirs: set[str] = None, include_exts: set[str] = None,
                  workers: int = None, with_hash: bool = False):
         self.repo_root = Path(repo_root).resolve()
         self.reports_dir = self.repo_root / "reports"
@@ -202,7 +202,7 @@ class RepoInventory:
 
         return False
 
-    def collect_files(self) -> List[Path]:
+    def collect_files(self) -> list[Path]:
         """Collect files based on mode"""
         files = []
 
@@ -235,7 +235,7 @@ class RepoInventory:
         print(f"📄 Found {len(files)} files to process")
         return files
 
-    def scan_repository(self) -> List[Dict[str, Any]]:
+    def scan_repository(self) -> list[dict[str, Any]]:
         """Quét repository với multiprocessing"""
         files = self.collect_files()
 
@@ -281,7 +281,7 @@ class RepoInventory:
 
         return inventory
 
-    def generate_large_files_report(self, inventory: List[Dict[str, Any]]) -> None:
+    def generate_large_files_report(self, inventory: list[dict[str, Any]]) -> None:
         """Tạo báo cáo file lớn"""
         large_files = sorted(inventory, key=lambda x: x["size"], reverse=True)[:1000]
 
@@ -301,7 +301,7 @@ class RepoInventory:
 
         print(f"📊 Large files report: {csv_path}")
 
-    def generate_dependency_graph(self, inventory: List[Dict[str, Any]]) -> None:
+    def generate_dependency_graph(self, inventory: list[dict[str, Any]]) -> None:
         """Tạo đồ thị dependencies (chỉ cho primary mode)"""
         if self.mode != "primary":
             return
@@ -332,7 +332,7 @@ class RepoInventory:
 
         print(f"🕸️  Dependency graph: {json_path}")
 
-    def generate_inventory_csv(self, inventory: List[Dict[str, Any]]) -> None:
+    def generate_inventory_csv(self, inventory: list[dict[str, Any]]) -> None:
         """Tạo CSV inventory chính"""
         csv_path = self.reports_dir / f"{self.mode}_inventory.csv"
 
@@ -354,7 +354,7 @@ class RepoInventory:
 
         print(f"📋 Main inventory: {csv_path}")
 
-    def generate_summary_report(self, inventory: List[Dict[str, Any]]) -> None:
+    def generate_summary_report(self, inventory: list[dict[str, Any]]) -> None:
         """Tạo báo cáo tóm tắt"""
         summary = {
             "mode": self.mode,

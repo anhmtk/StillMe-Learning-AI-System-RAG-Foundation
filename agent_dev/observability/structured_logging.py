@@ -12,10 +12,9 @@ import threading
 import time
 import uuid
 from dataclasses import asdict, dataclass
-from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional
 
 import aiofiles
 
@@ -55,17 +54,17 @@ class LogEntry:
     trace_id: Optional[str]
     user_id: Optional[str]
     session_id: Optional[str]
-    attributes: Dict[str, Any]
+    attributes: dict[str, Any]
     stack_trace: Optional[str]
-    tags: List[str]
+    tags: list[str]
 
 class StructuredLogger:
     """Enterprise structured logging system"""
 
     def __init__(self, config_path: Optional[str] = None):
         self.config = self._load_config(config_path)
-        self.log_entries: List[LogEntry] = []
-        self.log_handlers: List[Any] = []
+        self.log_entries: list[LogEntry] = []
+        self.log_handlers: list[Any] = []
         self.correlation_id: Optional[str] = None
         self.session_id: Optional[str] = None
         self.user_id: Optional[str] = None
@@ -76,7 +75,7 @@ class StructuredLogger:
         # Setup standard logging
         self._setup_standard_logging()
 
-    def _load_config(self, config_path: Optional[str] = None) -> Dict[str, Any]:
+    def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
         """Load logging configuration"""
         if config_path:
             config_file = Path(config_path)
@@ -187,8 +186,8 @@ class StructuredLogger:
 
     def _create_log_entry(self, level: LogLevel, category: LogCategory,
                          message: str, source: str,
-                         attributes: Optional[Dict[str, Any]] = None,
-                         tags: Optional[List[str]] = None,
+                         attributes: Optional[dict[str, Any]] = None,
+                         tags: Optional[list[str]] = None,
                          exception: Optional[Exception] = None) -> LogEntry:
         """Create structured log entry"""
         # Import trace context if available
@@ -225,8 +224,8 @@ class StructuredLogger:
         )
 
     def _log(self, level: LogLevel, category: LogCategory, message: str,
-             source: str, attributes: Optional[Dict[str, Any]] = None,
-             tags: Optional[List[str]] = None, exception: Optional[Exception] = None):
+             source: str, attributes: Optional[dict[str, Any]] = None,
+             tags: Optional[list[str]] = None, exception: Optional[Exception] = None):
         """Internal logging method"""
         if not self.enabled:
             return
@@ -260,75 +259,75 @@ class StructuredLogger:
         logger.handle(record)
 
     def trace(self, message: str, source: str = "agentdev",
-             attributes: Optional[Dict[str, Any]] = None,
-             tags: Optional[List[str]] = None):
+             attributes: Optional[dict[str, Any]] = None,
+             tags: Optional[list[str]] = None):
         """Log trace message"""
         self._log(LogLevel.TRACE, LogCategory.SYSTEM, message, source, attributes, tags)
 
     def debug(self, message: str, source: str = "agentdev",
-             attributes: Optional[Dict[str, Any]] = None,
-             tags: Optional[List[str]] = None):
+             attributes: Optional[dict[str, Any]] = None,
+             tags: Optional[list[str]] = None):
         """Log debug message"""
         self._log(LogLevel.DEBUG, LogCategory.SYSTEM, message, source, attributes, tags)
 
     def info(self, message: str, source: str = "agentdev",
-            attributes: Optional[Dict[str, Any]] = None,
-            tags: Optional[List[str]] = None):
+            attributes: Optional[dict[str, Any]] = None,
+            tags: Optional[list[str]] = None):
         """Log info message"""
         self._log(LogLevel.INFO, LogCategory.SYSTEM, message, source, attributes, tags)
 
     def warn(self, message: str, source: str = "agentdev",
-            attributes: Optional[Dict[str, Any]] = None,
-            tags: Optional[List[str]] = None):
+            attributes: Optional[dict[str, Any]] = None,
+            tags: Optional[list[str]] = None):
         """Log warning message"""
         self._log(LogLevel.WARN, LogCategory.SYSTEM, message, source, attributes, tags)
 
     def error(self, message: str, source: str = "agentdev",
-             attributes: Optional[Dict[str, Any]] = None,
-             tags: Optional[List[str]] = None,
+             attributes: Optional[dict[str, Any]] = None,
+             tags: Optional[list[str]] = None,
              exception: Optional[Exception] = None):
         """Log error message"""
         self._log(LogLevel.ERROR, LogCategory.SYSTEM, message, source, attributes, tags, exception)
 
     def fatal(self, message: str, source: str = "agentdev",
-             attributes: Optional[Dict[str, Any]] = None,
-             tags: Optional[List[str]] = None,
+             attributes: Optional[dict[str, Any]] = None,
+             tags: Optional[list[str]] = None,
              exception: Optional[Exception] = None):
         """Log fatal message"""
         self._log(LogLevel.FATAL, LogCategory.SYSTEM, message, source, attributes, tags, exception)
 
     # Category-specific logging methods
     def log_task(self, level: LogLevel, message: str, task_id: str,
-                attributes: Optional[Dict[str, Any]] = None,
-                tags: Optional[List[str]] = None):
+                attributes: Optional[dict[str, Any]] = None,
+                tags: Optional[list[str]] = None):
         """Log task-related message"""
         attrs = attributes or {}
         attrs['task_id'] = task_id
         self._log(level, LogCategory.TASK, message, "agentdev.task", attrs, tags)
 
     def log_security(self, level: LogLevel, message: str,
-                    attributes: Optional[Dict[str, Any]] = None,
-                    tags: Optional[List[str]] = None):
+                    attributes: Optional[dict[str, Any]] = None,
+                    tags: Optional[list[str]] = None):
         """Log security-related message"""
         self._log(level, LogCategory.SECURITY, message, "agentdev.security", attributes, tags)
 
     def log_performance(self, level: LogLevel, message: str,
-                       attributes: Optional[Dict[str, Any]] = None,
-                       tags: Optional[List[str]] = None):
+                       attributes: Optional[dict[str, Any]] = None,
+                       tags: Optional[list[str]] = None):
         """Log performance-related message"""
         self._log(level, LogCategory.PERFORMANCE, message, "agentdev.performance", attributes, tags)
 
     def log_audit(self, level: LogLevel, message: str, user_id: str,
-                 attributes: Optional[Dict[str, Any]] = None,
-                 tags: Optional[List[str]] = None):
+                 attributes: Optional[dict[str, Any]] = None,
+                 tags: Optional[list[str]] = None):
         """Log audit message"""
         attrs = attributes or {}
         attrs['user_id'] = user_id
         self._log(level, LogCategory.AUDIT, message, "agentdev.audit", attrs, tags)
 
     def log_api(self, level: LogLevel, message: str, endpoint: str,
-               attributes: Optional[Dict[str, Any]] = None,
-               tags: Optional[List[str]] = None):
+               attributes: Optional[dict[str, Any]] = None,
+               tags: Optional[list[str]] = None):
         """Log API-related message"""
         attrs = attributes or {}
         attrs['endpoint'] = endpoint
@@ -338,7 +337,7 @@ class StructuredLogger:
                 category: Optional[LogCategory] = None,
                 source: Optional[str] = None,
                 correlation_id: Optional[str] = None,
-                limit: int = 100) -> List[LogEntry]:
+                limit: int = 100) -> list[LogEntry]:
         """Get filtered log entries"""
         with self.lock:
             filtered_logs = self.log_entries.copy()
@@ -361,7 +360,7 @@ class StructuredLogger:
 
         return filtered_logs[:limit]
 
-    def get_log_statistics(self) -> Dict[str, Any]:
+    def get_log_statistics(self) -> dict[str, Any]:
         """Get logging statistics"""
         with self.lock:
             total_logs = len(self.log_entries)
@@ -458,7 +457,7 @@ def set_user_id(user_id: str):
     """Set user ID for current context"""
     logger.set_user_id(user_id)
 
-def log_task_start(task_id: str, task_type: str, attributes: Optional[Dict[str, Any]] = None):
+def log_task_start(task_id: str, task_type: str, attributes: Optional[dict[str, Any]] = None):
     """Log task start"""
     attrs = attributes or {}
     attrs.update({
@@ -467,7 +466,7 @@ def log_task_start(task_id: str, task_type: str, attributes: Optional[Dict[str, 
     })
     logger.log_task(LogLevel.INFO, f"Task started: {task_type}", task_id, attrs)
 
-def log_task_complete(task_id: str, duration: float, attributes: Optional[Dict[str, Any]] = None):
+def log_task_complete(task_id: str, duration: float, attributes: Optional[dict[str, Any]] = None):
     """Log task completion"""
     attrs = attributes or {}
     attrs.update({
@@ -476,12 +475,12 @@ def log_task_complete(task_id: str, duration: float, attributes: Optional[Dict[s
     })
     logger.log_task(LogLevel.INFO, f"Task completed in {duration:.2f}s", task_id, attrs)
 
-def log_security_event(event_type: str, severity: str, details: Dict[str, Any]):
+def log_security_event(event_type: str, severity: str, details: dict[str, Any]):
     """Log security event"""
     level = LogLevel.ERROR if severity == 'HIGH' else LogLevel.WARN
     logger.log_security(level, f"Security event: {event_type}", details)
 
-def log_performance_metric(metric_name: str, value: float, unit: str, attributes: Optional[Dict[str, Any]] = None):
+def log_performance_metric(metric_name: str, value: float, unit: str, attributes: Optional[dict[str, Any]] = None):
     """Log performance metric"""
     attrs = attributes or {}
     attrs.update({

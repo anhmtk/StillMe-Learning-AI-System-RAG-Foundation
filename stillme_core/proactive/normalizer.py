@@ -11,13 +11,13 @@ Version: 1.0.0
 
 import re
 import unicodedata
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 
 class TextNormalizer:
     """Text normalizer cho abuse detection"""
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         self.config = config or {}
 
         # Normalization options
@@ -49,10 +49,10 @@ class TextNormalizer:
     def normalize(self, text: str) -> str:
         """
         Normalize text for abuse detection
-        
+
         Args:
             text: Input text to normalize
-            
+
         Returns:
             Normalized text
         """
@@ -95,13 +95,13 @@ class TextNormalizer:
 
         return normalized
 
-    def extract_features(self, text: str) -> Dict[str, Any]:
+    def extract_features(self, text: str) -> dict[str, Any]:
         """
         Extract normalization features for analysis
-        
+
         Args:
             text: Input text
-            
+
         Returns:
             Dictionary of normalization features
         """
@@ -131,10 +131,10 @@ class TextNormalizer:
     def is_likely_abuse_pattern(self, text: str) -> bool:
         """
         Quick check if text contains likely abuse patterns
-        
+
         Args:
             text: Input text
-            
+
         Returns:
             True if likely abuse pattern detected
         """
@@ -157,6 +157,6 @@ class TextNormalizer:
         return False
 
 # Factory function for easy integration
-def create_normalizer(config: Optional[Dict[str, Any]] = None) -> TextNormalizer:
+def create_normalizer(config: Optional[dict[str, Any]] = None) -> TextNormalizer:
     """Create a text normalizer instance"""
     return TextNormalizer(config)

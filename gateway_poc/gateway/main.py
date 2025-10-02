@@ -5,11 +5,9 @@ Enhanced FastAPI Gateway with improved performance, security, and monitoring
 """
 
 import asyncio
-import os
-import sys
 import time
 from contextlib import asynccontextmanager
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 import redis.asyncio as redis
 import uvicorn
@@ -21,7 +19,7 @@ from fastapi.responses import JSONResponse
 from middleware.circuit_breaker import CircuitBreakerMiddleware
 from middleware.rate_limiter import RateLimiterMiddleware
 from middleware.request_logger import RequestLoggerMiddleware
-from prometheus_client import Counter, Gauge, Histogram, generate_latest
+from prometheus_client import generate_latest
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -246,7 +244,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
         print(f"WebSocket error for client {client_id}: {e}")
 
 
-async def process_command_with_monitoring(message: MessageProtocol, client_id: str) -> Dict[str, Any]:
+async def process_command_with_monitoring(message: MessageProtocol, client_id: str) -> dict[str, Any]:
     """Process command with monitoring and error handling"""
     start_time = time.time()
 

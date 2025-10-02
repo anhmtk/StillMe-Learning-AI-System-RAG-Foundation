@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 from unittest.mock import patch
 
 """
@@ -22,7 +22,7 @@ try:
 except ImportError:
     # Mock classes for testing if not implemented
     class Router:
-        def route(self, request: Dict[str, Any]) -> Dict[str, Any]:
+        def route(self, request: dict[str, Any]) -> dict[str, Any]:
             return {'provider': 'mock', 'model': 'mock-model', 'confidence': 0.9}
 
     class MemoryManager:
@@ -32,23 +32,23 @@ except ImportError:
             return None
 
     class EthicsGuard:
-        def check(self, text: str) -> Dict[str, Any]:
+        def check(self, text: str) -> dict[str, Any]:
             return {'safe': True, 'confidence': 0.95}
 
     class SecurityGuard:
-        def check(self, text: str) -> Dict[str, Any]:
+        def check(self, text: str) -> dict[str, Any]:
             return {'safe': True, 'pii_detected': False}
 
     class ClarificationCore:
-        def clarify(self, prompt: str) -> Dict[str, Any]:
+        def clarify(self, prompt: str) -> dict[str, Any]:
             return {'needs_clarification': False, 'confidence': 0.9}
 
     class AgentDev:
-        def execute(self, task: Dict[str, Any]) -> Dict[str, Any]:
+        def execute(self, task: dict[str, Any]) -> dict[str, Any]:
             return {'success': True, 'result': 'Mock result'}
 
     class APIGateway:
-        def process_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
+        def process_request(self, request: dict[str, Any]) -> dict[str, Any]:
             return {'status': 200, 'response': 'Mock response'}
 
 @pytest.mark.integration
@@ -85,7 +85,7 @@ class TestSystemIntegration:
         }
 
         # Route request
-        router_result = router.route(request)
+        router.route(request)
 
         # Store in memory
         memory_key = f"request_{int(time.time())}"
@@ -219,10 +219,10 @@ class TestEndToEndWorkflow:
         }
 
         # Execute workflow
-        gateway_result = gateway.process_request(user_request)
-        security_result = security.check(user_request['prompt'])
-        ethics_result = ethics.check(user_request['prompt'])
-        clarification_result = clarification.clarify(user_request['prompt'])
+        gateway.process_request(user_request)
+        security.check(user_request['prompt'])
+        ethics.check(user_request['prompt'])
+        clarification.clarify(user_request['prompt'])
         router_result = router.route(user_request)
 
         # Store in memory
@@ -243,8 +243,8 @@ class TestEndToEndWorkflow:
 
     def test_error_handling_workflow(self):
         """Test error handling in workflow."""
-        gateway = APIGateway({})
-        router = Router({})
+        APIGateway({})
+        Router({})
         security = SecurityGuard({})
         ethics = EthicsGuard({})
 

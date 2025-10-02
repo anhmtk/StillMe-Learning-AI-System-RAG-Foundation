@@ -10,7 +10,7 @@ import json
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from stillme_core.quality.auto_fixer import AutoFixer
 from stillme_core.quality.code_quality_enforcer import (
@@ -44,9 +44,9 @@ class AgentDevQualityIntegration:
         self,
         target_path: str,
         auto_fix: bool = True,
-        tools: Optional[List[str]] = None,
+        tools: Optional[list[str]] = None,
         save_metrics: bool = True,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Analyze code quality and optionally apply fixes.
 
@@ -111,7 +111,7 @@ class AgentDevQualityIntegration:
         target_path: str,
         min_quality_score: float = 80.0,
         max_issues_per_file: float = 2.0,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Run pre-commit quality check with configurable thresholds.
 
@@ -185,7 +185,7 @@ class AgentDevQualityIntegration:
 
     async def continuous_quality_monitoring(
         self, target_path: str, check_interval: int = 3600
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Set up continuous quality monitoring (placeholder for future implementation).
 
@@ -209,7 +209,7 @@ class AgentDevQualityIntegration:
 
     async def run_quality_workflow(
         self, target_path: str, workflow_type: str = "full"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Run a complete quality workflow.
 
@@ -265,7 +265,7 @@ class AgentDevQualityIntegration:
                 "timestamp": datetime.now().isoformat(),
             }
 
-    def get_quality_dashboard(self, target_path: str) -> Dict[str, Any]:
+    def get_quality_dashboard(self, target_path: str) -> dict[str, Any]:
         """
         Get quality dashboard data for a target path.
 
@@ -310,7 +310,7 @@ class AgentDevQualityIntegration:
 
     def export_quality_report(
         self, target_path: str, output_path: str, days: int = 30
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Export quality report to file.
 
@@ -390,7 +390,7 @@ class AgentDevQualityIntegration:
         else:
             return "critical"
 
-    def _generate_quality_recommendations(self, report: QualityReport) -> List[str]:
+    def _generate_quality_recommendations(self, report: QualityReport) -> list[str]:
         """Generate quality recommendations based on report."""
         recommendations = []
 
@@ -413,7 +413,7 @@ class AgentDevQualityIntegration:
 
         return recommendations
 
-    def _get_quality_benchmarks(self) -> Dict[str, Any]:
+    def _get_quality_benchmarks(self) -> dict[str, Any]:
         """Get quality benchmarks (placeholder implementation)."""
         return {
             "industry_standard": {
@@ -432,7 +432,7 @@ class AgentDevQualityIntegration:
 # Convenience functions for direct use
 async def run_agentdev_quality_check(
     target_path: str, workflow_type: str = "full"
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Convenience function to run AgentDev quality check.
 
@@ -449,7 +449,7 @@ async def run_agentdev_quality_check(
 
 async def run_pre_commit_check(
     target_path: str, min_quality_score: float = 80.0
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Convenience function to run pre-commit quality check.
 

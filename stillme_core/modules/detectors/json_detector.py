@@ -11,7 +11,7 @@ Version: 1.0.0
 
 import json
 import re
-from typing import Any, Dict
+from typing import Any
 
 from .detector_base import BaseDetector
 
@@ -39,7 +39,7 @@ class JSONDetector(BaseDetector):
             '{"nested": {"incomplete": "object"}',
         ]
 
-    def detect(self, text: str) -> Dict[str, Any]:
+    def detect(self, text: str) -> dict[str, Any]:
         """Detect malformed JSON and data structures"""
 
         # Try to parse as JSON first

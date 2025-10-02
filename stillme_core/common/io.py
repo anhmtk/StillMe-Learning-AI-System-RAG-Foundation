@@ -15,7 +15,7 @@ import shutil
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 import aiofiles
 import yaml
@@ -553,7 +553,7 @@ class FileManager:
 
     def list_files(
         self, directory: Union[str, Path], pattern: str = "*", recursive: bool = False
-    ) -> List[FileInfo]:
+    ) -> list[FileInfo]:
         """
         List files in directory - Liệt kê files trong thư mục
 
@@ -587,7 +587,7 @@ class FileManager:
 # Convenience functions - Các hàm tiện ích
 
 
-def read_json(path: Union[str, Path]) -> Dict[str, Any]:
+def read_json(path: Union[str, Path]) -> dict[str, Any]:
     """
     Read JSON file - Đọc file JSON
 
@@ -603,7 +603,7 @@ def read_json(path: Union[str, Path]) -> Dict[str, Any]:
 
 def write_json(
     path: Union[str, Path],
-    data: Dict[str, Any],
+    data: dict[str, Any],
     backup: bool = False,
     overwrite: bool = True,
 ) -> None:
@@ -627,7 +627,7 @@ def write_json(
     manager.safe_write(path, data, operation)
 
 
-def read_yaml(path: Union[str, Path]) -> Dict[str, Any]:
+def read_yaml(path: Union[str, Path]) -> dict[str, Any]:
     """
     Read YAML file - Đọc file YAML
 
@@ -643,7 +643,7 @@ def read_yaml(path: Union[str, Path]) -> Dict[str, Any]:
 
 def write_yaml(
     path: Union[str, Path],
-    data: Dict[str, Any],
+    data: dict[str, Any],
     backup: bool = False,
     overwrite: bool = True,
 ) -> None:
@@ -667,7 +667,7 @@ def write_yaml(
     manager.safe_write(path, data, operation)
 
 
-async def async_read_json(path: Union[str, Path]) -> Dict[str, Any]:
+async def async_read_json(path: Union[str, Path]) -> dict[str, Any]:
     """
     Async read JSON file - Đọc file JSON bất đồng bộ
 
@@ -683,7 +683,7 @@ async def async_read_json(path: Union[str, Path]) -> Dict[str, Any]:
 
 async def async_write_json(
     path: Union[str, Path],
-    data: Dict[str, Any],
+    data: dict[str, Any],
     backup: bool = False,
     overwrite: bool = True,
 ) -> None:

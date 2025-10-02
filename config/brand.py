@@ -8,9 +8,9 @@ Cấu hình thương hiệu StillMe
 BRAND_NAME = "StillMe"
 BRAND_TAGLINE = "Intelligent Personal Companion (IPC)"
 BRAND_DESCRIPTION = """
-Intelligent Personal Companion (IPC): Nâng cấp từ "assistant" thành "companion" – 
-đồng hành thông minh, khiêm tốn, học từ bạn; kết hợp multi-agent (MAS) + 
-cá nhân hoá (Adaptive) + đạo đức (Ethical). Tránh vòng lặp phản tư vô tận, 
+Intelligent Personal Companion (IPC): Nâng cấp từ "assistant" thành "companion" –
+đồng hành thông minh, khiêm tốn, học từ bạn; kết hợp multi-agent (MAS) +
+cá nhân hoá (Adaptive) + đạo đức (Ethical). Tránh vòng lặp phản tư vô tận,
 khuyến khích tương tác tôn trọng.
 """
 

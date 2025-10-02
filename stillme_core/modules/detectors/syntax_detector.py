@@ -11,7 +11,7 @@ Version: 1.0.0
 
 import ast
 import re
-from typing import Any, Dict
+from typing import Any
 
 from .detector_base import BaseDetector
 
@@ -44,7 +44,7 @@ class SyntaxDetector(BaseDetector):
             "def baz():\nreturn 789",  # Indentation error
         ]
 
-    def detect(self, text: str) -> Dict[str, Any]:
+    def detect(self, text: str) -> dict[str, Any]:
         """Detect syntax errors in code"""
 
         # Try to parse as Python AST

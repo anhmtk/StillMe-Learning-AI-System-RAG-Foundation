@@ -20,11 +20,10 @@ Version: 2.0.0
 Date: 2025-09-28
 """
 
-import asyncio
 import logging
 from dataclasses import dataclass
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from datetime import datetime
+from typing import Any, Optional
 
 from .alert_manager import AlertManager, get_alert_manager
 
@@ -81,7 +80,7 @@ class LearningAlertManager:
         self.performance_history = []
         self.degradation_threshold = 0.1  # 10% degradation
 
-    async def check_learning_session_alerts(self, metrics: LearningMetrics) -> List[str]:
+    async def check_learning_session_alerts(self, metrics: LearningMetrics) -> list[str]:
         """Check and send alerts for learning session"""
         alerts_sent = []
 
@@ -234,7 +233,7 @@ class LearningAlertManager:
 
         return alerts_sent
 
-    async def check_evolution_milestones(self, metrics: LearningMetrics) -> List[str]:
+    async def check_evolution_milestones(self, metrics: LearningMetrics) -> list[str]:
         """Check and send alerts for evolution milestones"""
         alerts_sent = []
 
@@ -316,7 +315,7 @@ class LearningAlertManager:
 
         return False
 
-    async def check_performance_degradation(self, metrics: LearningMetrics) -> List[str]:
+    async def check_performance_degradation(self, metrics: LearningMetrics) -> list[str]:
         """Check for performance degradation"""
         alerts_sent = []
 
@@ -461,7 +460,7 @@ class LearningAlertManager:
             channels=['email', 'desktop', 'telegram', 'sms'] if severity == 'critical' else ['email', 'desktop', 'telegram']
         )
 
-    def get_learning_alert_statistics(self) -> Dict[str, Any]:
+    def get_learning_alert_statistics(self) -> dict[str, Any]:
         """Get learning-specific alert statistics"""
         return {
             'achieved_milestones': list(self.achieved_milestones),
@@ -482,7 +481,7 @@ def get_learning_alert_manager() -> LearningAlertManager:
         _learning_alert_manager_instance = LearningAlertManager()
     return _learning_alert_manager_instance
 
-async def check_learning_alerts(metrics: LearningMetrics) -> List[str]:
+async def check_learning_alerts(metrics: LearningMetrics) -> list[str]:
     """Convenience function to check all learning alerts"""
     manager = get_learning_alert_manager()
 

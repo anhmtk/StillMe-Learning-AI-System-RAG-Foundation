@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ class Identity:
     status: IdentityStatus
     created_at: datetime
     last_accessed: datetime
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -40,13 +40,13 @@ class IdentityHandler:
 
     def __init__(self):
         self.logger = logger
-        self.identities: List[Identity] = []
+        self.identities: list[Identity] = []
         self.logger.info("✅ IdentityHandler initialized")
 
     def create_identity(self,
                        name: str,
                        identity_type: IdentityType,
-                       metadata: Dict[str, Any] = None) -> str:
+                       metadata: dict[str, Any] = None) -> str:
         """Create a new identity"""
         try:
             identity_id = f"id_{len(self.identities) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -86,15 +86,15 @@ class IdentityHandler:
                 return True
         return False
 
-    def get_identities_by_type(self, identity_type: IdentityType) -> List[Identity]:
+    def get_identities_by_type(self, identity_type: IdentityType) -> list[Identity]:
         """Get identities by type"""
         return [i for i in self.identities if i.identity_type == identity_type]
 
-    def get_identities_by_status(self, status: IdentityStatus) -> List[Identity]:
+    def get_identities_by_status(self, status: IdentityStatus) -> list[Identity]:
         """Get identities by status"""
         return [i for i in self.identities if i.status == status]
 
-    def get_identity_summary(self) -> Dict[str, Any]:
+    def get_identity_summary(self) -> dict[str, Any]:
         """Get identity summary"""
         try:
             total_identities = len(self.identities)

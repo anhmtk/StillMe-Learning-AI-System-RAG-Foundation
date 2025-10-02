@@ -14,7 +14,6 @@ import logging
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List
 
 import networkx as nx
 
@@ -39,7 +38,7 @@ class DependencyInfo:
 class CircularDependency:
     """Circular dependency definition"""
 
-    cycle: List[str]
+    cycle: list[str]
     severity: str
     impact: str
     suggested_fix: str
@@ -54,7 +53,7 @@ class DependencyResolution:
     resolved_dependencies: int
     remaining_issues: int
     resolution_score: float
-    recommendations: List[str]
+    recommendations: list[str]
 
 
 class DependencyResolver:
@@ -65,11 +64,11 @@ class DependencyResolver:
     def __init__(self, root_path: str = "."):
         self.root_path = Path(root_path)
         self.dependency_graph = nx.DiGraph()
-        self.dependencies: List[DependencyInfo] = []
-        self.circular_dependencies: List[CircularDependency] = []
-        self.module_files: Dict[str, Path] = {}
+        self.dependencies: list[DependencyInfo] = []
+        self.circular_dependencies: list[CircularDependency] = []
+        self.module_files: dict[str, Path] = {}
 
-    def analyze_dependencies(self) -> List[DependencyInfo]:
+    def analyze_dependencies(self) -> list[DependencyInfo]:
         """
         Analyze all dependencies in the codebase
         """
@@ -208,7 +207,7 @@ class DependencyResolver:
         except Exception as e:
             logger.error(f"Error detecting circular dependencies: {e}")
 
-    def _calculate_cycle_severity(self, cycle: List[str]) -> str:
+    def _calculate_cycle_severity(self, cycle: list[str]) -> str:
         """Calculate severity of circular dependency"""
         cycle_length = len(cycle)
 
@@ -219,7 +218,7 @@ class DependencyResolver:
         else:
             return "low"
 
-    def _assess_cycle_impact(self, cycle: List[str]) -> str:
+    def _assess_cycle_impact(self, cycle: list[str]) -> str:
         """Assess impact of circular dependency"""
         # Check if any modules in cycle are core modules
         core_modules = [
@@ -237,7 +236,7 @@ class DependencyResolver:
         else:
             return "Medium - affects specific features"
 
-    def _suggest_cycle_fix(self, cycle: List[str]) -> str:
+    def _suggest_cycle_fix(self, cycle: list[str]) -> str:
         """Suggest fix for circular dependency"""
         if len(cycle) == 2:
             return f"Use dependency injection or interface abstraction between {cycle[0]} and {cycle[1]}"
@@ -303,7 +302,7 @@ class DependencyResolver:
             logger.error(f"Error resolving circular dependency: {e}")
             return False
 
-    def _resolve_two_module_cycle(self, cycle: List[str]) -> bool:
+    def _resolve_two_module_cycle(self, cycle: list[str]) -> bool:
         """Resolve 2-module circular dependency"""
         module1, module2 = cycle
 
@@ -380,13 +379,13 @@ class DependencyResolver:
             logger.error(f"Error converting to lazy import: {e}")
             return False
 
-    def _resolve_complex_cycle(self, cycle: List[str]) -> bool:
+    def _resolve_complex_cycle(self, cycle: list[str]) -> bool:
         """Resolve complex circular dependency"""
         # For complex cycles, we need more sophisticated analysis
         # This would involve creating intermediate modules or refactoring
         return False
 
-    def _generate_recommendations(self) -> List[str]:
+    def _generate_recommendations(self) -> list[str]:
         """Generate dependency management recommendations"""
         recommendations = [
             "Implement dependency injection pattern for loose coupling",
@@ -414,27 +413,27 @@ from abc import ABC, abstractmethod
 
 class ServiceContainer:
     """Service container for dependency injection"""
-    
+
     def __init__(self):
         self._services: Dict[Type, Any] = {}
         self._factories: Dict[Type, Callable] = {}
-    
+
     def register_singleton(self, interface: Type, implementation: Any):
         """Register singleton service"""
         self._services[interface] = implementation
-    
+
     def register_factory(self, interface: Type, factory: Callable):
         """Register factory for service creation"""
         self._factories[interface] = factory
-    
+
     def get(self, interface: Type) -> Any:
         """Get service instance"""
         if interface in self._services:
             return self._services[interface]
-        
+
         if interface in self._factories:
             return self._factories[interface]()
-        
+
         raise ValueError(f"Service {interface} not registered")
 
 # Global service container
@@ -489,7 +488,7 @@ def main():
     resolver = DependencyResolver()
 
     # Analyze dependencies
-    dependencies = resolver.analyze_dependencies()
+    resolver.analyze_dependencies()
 
     # Resolve circular dependencies
     resolution = resolver.resolve_circular_dependencies()

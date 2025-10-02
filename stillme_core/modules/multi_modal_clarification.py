@@ -17,8 +17,7 @@ import io
 import logging
 import re
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 from PIL import Image
 
@@ -30,11 +29,11 @@ class MultiModalResult:
     needs_clarification: bool
     input_type: str  # "text", "code", "image", "mixed"
     question: Optional[str]
-    options: Optional[List[str]]
+    options: Optional[list[str]]
     confidence: float
     reasoning: str
-    metadata: Dict[str, Any]
-    suggestions: Optional[List[str]] = None
+    metadata: dict[str, Any]
+    suggestions: Optional[list[str]] = None
     domain: Optional[str] = None
     round_number: int = 1
     max_rounds: int = 2
@@ -46,13 +45,13 @@ class VisualClarifier:
     Currently uses stub implementation, ready for integration with real CV models.
     """
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.config = config
         self.max_size_mb = config.get("max_image_size_mb", 10)
         self.supported_formats = config.get("supported_image_formats", ["jpg", "jpeg", "png", "gif", "webp"])
         self.analysis_mode = config.get("image_analysis", "stub")
 
-    def _validate_image(self, image_data: Union[bytes, str]) -> Dict[str, Any]:
+    def _validate_image(self, image_data: Union[bytes, str]) -> dict[str, Any]:
         """Validate image data and extract metadata"""
         try:
             if isinstance(image_data, str):
@@ -84,7 +83,7 @@ class VisualClarifier:
         except Exception as e:
             return {"valid": False, "error": f"Invalid image data: {str(e)}"}
 
-    def _stub_analysis(self, image_metadata: Dict[str, Any]) -> Dict[str, Any]:
+    def _stub_analysis(self, image_metadata: dict[str, Any]) -> dict[str, Any]:
         """Stub implementation for image analysis"""
         # Simulate different types of images based on size and format
         width, height = image_metadata["size"]
@@ -118,14 +117,14 @@ class VisualClarifier:
                 "suggestions": ["Review UI/UX", "Analyze content", "Check accessibility"]
             }
 
-    def analyze(self, image_data: Union[bytes, str], context: Dict[str, Any] = None) -> MultiModalResult:
+    def analyze(self, image_data: Union[bytes, str], context: dict[str, Any] = None) -> MultiModalResult:
         """
         Analyze image and generate clarification questions
-        
+
         Args:
             image_data: Image bytes or base64 string
             context: Additional context for analysis
-            
+
         Returns:
             MultiModalResult with clarification information
         """
@@ -183,7 +182,7 @@ class CodeClarifier:
     Handles code analysis and clarification using AST parsing and language detection.
     """
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.config = config
         self.analysis_mode = config.get("code_analysis", "ast")
         self.supported_languages = config.get("code_languages", ["python", "javascript", "typescript", "java", "cpp", "go", "rust"])
@@ -220,7 +219,7 @@ class CodeClarifier:
 
         return "unknown"
 
-    def _analyze_python_ast(self, code: str) -> Dict[str, Any]:
+    def _analyze_python_ast(self, code: str) -> dict[str, Any]:
         """Analyze Python code using AST"""
         try:
             tree = ast.parse(code)
@@ -271,7 +270,7 @@ class CodeClarifier:
                 "error": f"Analysis error: {str(e)}"
             }
 
-    def _generate_code_question(self, analysis: Dict[str, Any], language: str) -> Dict[str, Any]:
+    def _generate_code_question(self, analysis: dict[str, Any], language: str) -> dict[str, Any]:
         """Generate clarification question based on code analysis"""
         if not analysis.get("valid", False):
             return {
@@ -283,7 +282,7 @@ class CodeClarifier:
 
         functions = analysis.get("functions", [])
         classes = analysis.get("classes", [])
-        imports = analysis.get("imports", [])
+        analysis.get("imports", [])
 
         if functions and classes:
             return {
@@ -323,14 +322,14 @@ class CodeClarifier:
                 "suggestions": ["General code review", "Add features", "Performance optimization"]
             }
 
-    def analyze(self, code: str, context: Dict[str, Any] = None) -> MultiModalResult:
+    def analyze(self, code: str, context: dict[str, Any] = None) -> MultiModalResult:
         """
         Analyze code and generate clarification questions
-        
+
         Args:
             code: Code string to analyze
             context: Additional context for analysis
-            
+
         Returns:
             MultiModalResult with clarification information
         """
@@ -387,12 +386,12 @@ class TextClarifier:
     Integrates with existing contextual clarification.
     """
 
-    def __init__(self, config: Dict[str, Any], context_aware_clarifier=None):
+    def __init__(self, config: dict[str, Any], context_aware_clarifier=None):
         self.config = config
         self.analysis_mode = config.get("text_analysis", "enhanced")
         self.context_aware_clarifier = context_aware_clarifier
 
-    def _enhanced_text_analysis(self, text: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
+    def _enhanced_text_analysis(self, text: str, context: dict[str, Any] = None) -> dict[str, Any]:
         """Enhanced text analysis with domain detection and intent classification"""
         text_lower = text.lower()
 
@@ -433,14 +432,14 @@ class TextClarifier:
             "has_technical_terms": any(term in text_lower for term in ["api", "database", "algorithm", "framework", "library"])
         }
 
-    def analyze(self, text: str, context: Dict[str, Any] = None) -> MultiModalResult:
+    def analyze(self, text: str, context: dict[str, Any] = None) -> MultiModalResult:
         """
         Analyze text and generate clarification questions
-        
+
         Args:
             text: Text to analyze
             context: Additional context for analysis
-            
+
         Returns:
             MultiModalResult with clarification information
         """
@@ -524,7 +523,7 @@ class MultiModalClarifier:
     Routes inputs to appropriate clarifiers based on content type.
     """
 
-    def __init__(self, config: Dict[str, Any], context_aware_clarifier=None):
+    def __init__(self, config: dict[str, Any], context_aware_clarifier=None):
         self.config = config
         self.enabled = config.get("enabled", True)
 
@@ -572,7 +571,7 @@ class MultiModalClarifier:
         else:
             return "text"
 
-    def _extract_code_blocks(self, content: str) -> List[str]:
+    def _extract_code_blocks(self, content: str) -> list[str]:
         """Extract code blocks from mixed content"""
         code_blocks = []
         # Extract ```code``` blocks
@@ -587,7 +586,7 @@ class MultiModalClarifier:
 
         return code_blocks
 
-    def _extract_image_data(self, content: str) -> List[str]:
+    def _extract_image_data(self, content: str) -> list[str]:
         """Extract image data from mixed content"""
         images = []
         # Extract base64 images
@@ -602,14 +601,14 @@ class MultiModalClarifier:
 
         return images
 
-    def analyze(self, content: str, context: Dict[str, Any] = None) -> MultiModalResult:
+    def analyze(self, content: str, context: dict[str, Any] = None) -> MultiModalResult:
         """
         Analyze multi-modal content and generate appropriate clarification
-        
+
         Args:
             content: Input content (text, code, image, or mixed)
             context: Additional context for analysis
-            
+
         Returns:
             MultiModalResult with clarification information
         """

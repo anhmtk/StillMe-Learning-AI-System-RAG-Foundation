@@ -10,8 +10,7 @@ Version: 1.0.0
 """
 
 import re
-import unicodedata
-from typing import Any, Dict
+from typing import Any
 
 from .detector_base import BaseDetector
 
@@ -39,7 +38,7 @@ class UnicodeDetector(BaseDetector):
             "中文", "日本語", "한국어"    # Return values
         ]
 
-    def detect(self, text: str) -> Dict[str, Any]:
+    def detect(self, text: str) -> dict[str, Any]:
         """Detect Unicode characters and patterns"""
 
         # Check for Unicode characters

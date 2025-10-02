@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ class AutoFix:
     description: str
     confidence: float
     timestamp: datetime
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -46,11 +46,11 @@ class AutoFixer:
 
     def __init__(self):
         self.logger = logger
-        self.fixes: List[AutoFix] = []
+        self.fixes: list[AutoFix] = []
         self.fix_rules = self._initialize_fix_rules()
         self.logger.info("✅ AutoFixer initialized")
 
-    def _initialize_fix_rules(self) -> Dict[FixType, List[str]]:
+    def _initialize_fix_rules(self) -> dict[FixType, list[str]]:
         """Initialize auto fix rules"""
         return {
             FixType.STYLE: [
@@ -89,7 +89,7 @@ class AutoFixer:
     def suggest_fixes(self,
                      file_path: str,
                      code_content: str,
-                     quality_violations: List[Any] = None) -> List[AutoFix]:
+                     quality_violations: list[Any] = None) -> list[AutoFix]:
         """Suggest auto fixes for code"""
         try:
             fixes = []
@@ -129,7 +129,7 @@ class AutoFixer:
             self.logger.error(f"❌ Failed to suggest fixes: {e}")
             return []
 
-    def _suggest_style_fixes(self, file_path: str, code_content: str) -> List[AutoFix]:
+    def _suggest_style_fixes(self, file_path: str, code_content: str) -> list[AutoFix]:
         """Suggest style fixes"""
         fixes = []
         lines = code_content.split('\n')
@@ -191,7 +191,7 @@ class AutoFixer:
 
         return fixes
 
-    def _suggest_complexity_fixes(self, file_path: str, code_content: str) -> List[AutoFix]:
+    def _suggest_complexity_fixes(self, file_path: str, code_content: str) -> list[AutoFix]:
         """Suggest complexity fixes"""
         fixes = []
 
@@ -200,7 +200,7 @@ class AutoFixer:
         max_nesting = 0
         current_nesting = 0
 
-        for i, line in enumerate(lines, 1):
+        for _i, line in enumerate(lines, 1):
             stripped = line.strip()
             if stripped.startswith(('if ', 'for ', 'while ', 'try:', 'with ')):
                 current_nesting += 1
@@ -226,7 +226,7 @@ class AutoFixer:
 
         return fixes
 
-    def _suggest_security_fixes(self, file_path: str, code_content: str) -> List[AutoFix]:
+    def _suggest_security_fixes(self, file_path: str, code_content: str) -> list[AutoFix]:
         """Suggest security fixes"""
         fixes = []
 
@@ -248,7 +248,7 @@ class AutoFixer:
 
         return fixes
 
-    def _suggest_performance_fixes(self, file_path: str, code_content: str) -> List[AutoFix]:
+    def _suggest_performance_fixes(self, file_path: str, code_content: str) -> list[AutoFix]:
         """Suggest performance fixes"""
         fixes = []
 
@@ -270,7 +270,7 @@ class AutoFixer:
 
         return fixes
 
-    def _suggest_maintainability_fixes(self, file_path: str, code_content: str) -> List[AutoFix]:
+    def _suggest_maintainability_fixes(self, file_path: str, code_content: str) -> list[AutoFix]:
         """Suggest maintainability fixes"""
         fixes = []
 
@@ -294,7 +294,7 @@ class AutoFixer:
 
         return fixes
 
-    def _suggest_testability_fixes(self, file_path: str, code_content: str) -> List[AutoFix]:
+    def _suggest_testability_fixes(self, file_path: str, code_content: str) -> list[AutoFix]:
         """Suggest testability fixes"""
         fixes = []
 
@@ -345,15 +345,15 @@ class AutoFixer:
             self.logger.error(f"❌ Failed to apply fix: {e}")
             return False
 
-    def get_fixes_by_type(self, fix_type: FixType) -> List[AutoFix]:
+    def get_fixes_by_type(self, fix_type: FixType) -> list[AutoFix]:
         """Get fixes by type"""
         return [f for f in self.fixes if f.fix_type == fix_type]
 
-    def get_fixes_by_status(self, status: FixStatus) -> List[AutoFix]:
+    def get_fixes_by_status(self, status: FixStatus) -> list[AutoFix]:
         """Get fixes by status"""
         return [f for f in self.fixes if f.status == status]
 
-    def get_fix_summary(self) -> Dict[str, Any]:
+    def get_fix_summary(self) -> dict[str, Any]:
         """Get auto fix summary"""
         try:
             total_fixes = len(self.fixes)

@@ -32,7 +32,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -45,8 +45,8 @@ class ValidationResult:
 
     is_valid: bool
     accuracy_score: float
-    errors_found: List[str]
-    warnings: List[str]
+    errors_found: list[str]
+    warnings: list[str]
     data_completeness: float
     consistency_score: float
     integrity_score: float
@@ -58,11 +58,11 @@ class ValidationResult:
 class AnomalyDetectionResult:
     """Result of anomaly detection"""
 
-    anomalies_found: List[Dict[str, Any]]
+    anomalies_found: list[dict[str, Any]]
     anomaly_score: float
     severity_level: str  # "low", "medium", "high", "critical"
     detection_confidence: float
-    recommended_actions: List[str]
+    recommended_actions: list[str]
     timestamp: datetime
 
 
@@ -77,7 +77,7 @@ class AuditTrailEntry:
     resource_accessed: str
     action_performed: str
     result_status: str
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
     data_hash: str
     integrity_verified: bool
 
@@ -93,7 +93,7 @@ class DataIntegrityReport:
     duplicate_records: int
     consistency_violations: int
     integrity_score: float
-    recommendations: List[str]
+    recommendations: list[str]
     timestamp: datetime
 
 
@@ -102,7 +102,7 @@ class DataValidationFramework:
     Enterprise-grade data validation framework với focus vào accuracy và security
     """
 
-    def __init__(self, db_path: str, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, db_path: str, config: Optional[dict[str, Any]] = None):
         self.db_path = Path(db_path)
         self.config = config or self._get_default_config()
 
@@ -132,7 +132,7 @@ class DataValidationFramework:
             "✅ DataValidationFramework initialized với enterprise-grade configuration"
         )
 
-    def _get_default_config(self) -> Dict[str, Any]:
+    def _get_default_config(self) -> dict[str, Any]:
         """Default configuration với security và performance focus"""
         return {
             "accuracy_threshold": 0.999,  # 99.9% accuracy requirement
@@ -148,7 +148,7 @@ class DataValidationFramework:
             "encryption_enabled": True,
         }
 
-    def _load_validation_rules(self) -> Dict[str, Any]:
+    def _load_validation_rules(self) -> dict[str, Any]:
         """Load validation rules từ configuration"""
         return {
             "required_fields": ["event_id", "timestamp", "module_name", "feature_name"],
@@ -173,7 +173,7 @@ class DataValidationFramework:
             },
         }
 
-    def _load_anomaly_thresholds(self) -> Dict[str, Any]:
+    def _load_anomaly_thresholds(self) -> dict[str, Any]:
         """Load anomaly detection thresholds"""
         return {
             "response_time": {
@@ -327,7 +327,7 @@ class DataValidationFramework:
 
     def validate_data(
         self,
-        data: Union[Dict[str, Any], List[Dict[str, Any]]],
+        data: Union[dict[str, Any], list[dict[str, Any]]],
         validation_type: str = "usage_event",
     ) -> ValidationResult:
         """
@@ -444,8 +444,8 @@ class DataValidationFramework:
             )
 
     def _validate_single_record(
-        self, record: Dict[str, Any], validation_type: str
-    ) -> Tuple[List[str], List[str]]:
+        self, record: dict[str, Any], validation_type: str
+    ) -> tuple[list[str], list[str]]:
         """Validate single record"""
         errors = []
         warnings = []
@@ -506,8 +506,8 @@ class DataValidationFramework:
         return True  # Unknown type, assume valid
 
     def _validate_field_constraints(
-        self, value: Any, constraints: Dict[str, Any]
-    ) -> Tuple[List[str], List[str]]:
+        self, value: Any, constraints: dict[str, Any]
+    ) -> tuple[list[str], list[str]]:
         """Validate field constraints"""
         errors = []
         warnings = []
@@ -541,8 +541,8 @@ class DataValidationFramework:
         return errors, warnings
 
     def _validate_usage_event_quality(
-        self, record: Dict[str, Any]
-    ) -> Tuple[List[str], List[str]]:
+        self, record: dict[str, Any]
+    ) -> tuple[list[str], list[str]]:
         """Validate usage event quality"""
         errors = []
         warnings = []
@@ -593,7 +593,7 @@ class DataValidationFramework:
 
         return errors, warnings
 
-    def _calculate_completeness(self, data_list: List[Dict[str, Any]]) -> float:
+    def _calculate_completeness(self, data_list: list[dict[str, Any]]) -> float:
         """Calculate data completeness score"""
         if not data_list:
             return 0.0
@@ -613,7 +613,7 @@ class DataValidationFramework:
 
         return complete_records / total_records
 
-    def _calculate_consistency(self, data_list: List[Dict[str, Any]]) -> float:
+    def _calculate_consistency(self, data_list: list[dict[str, Any]]) -> float:
         """Calculate data consistency score"""
         if not data_list:
             return 0.0
@@ -637,7 +637,7 @@ class DataValidationFramework:
 
         return 1.0 - (consistency_violations / max(1, total_checks))
 
-    def _calculate_integrity(self, data_list: List[Dict[str, Any]]) -> float:
+    def _calculate_integrity(self, data_list: list[dict[str, Any]]) -> float:
         """Calculate data integrity score"""
         if not data_list:
             return 0.0
@@ -661,7 +661,7 @@ class DataValidationFramework:
 
         return 1.0 - (integrity_violations / total_records)
 
-    def _calculate_record_hash(self, record: Dict[str, Any]) -> str:
+    def _calculate_record_hash(self, record: dict[str, Any]) -> str:
         """Calculate hash for record deduplication"""
         # Create a normalized version of the record for hashing
         normalized = {}
@@ -677,7 +677,7 @@ class DataValidationFramework:
 
         return hashlib.sha256(hash_string.encode()).hexdigest()
 
-    def _has_logical_inconsistencies(self, record: Dict[str, Any]) -> bool:
+    def _has_logical_inconsistencies(self, record: dict[str, Any]) -> bool:
         """Check for logical inconsistencies in record"""
         try:
             # Check success vs error_code consistency
@@ -698,7 +698,7 @@ class DataValidationFramework:
             return True  # Assume inconsistent if we can't check
 
     def detect_anomalies(
-        self, data: List[Dict[str, Any]], detection_type: str = "performance"
+        self, data: list[dict[str, Any]], detection_type: str = "performance"
     ) -> AnomalyDetectionResult:
         """
         Detect anomalies in data
@@ -773,8 +773,8 @@ class DataValidationFramework:
             )
 
     def _detect_performance_anomalies(
-        self, data: List[Dict[str, Any]]
-    ) -> Tuple[List[Dict[str, Any]], float, str, float]:
+        self, data: list[dict[str, Any]]
+    ) -> tuple[list[dict[str, Any]], float, str, float]:
         """Detect performance anomalies"""
         anomalies = []
         anomaly_score = 0.0
@@ -834,8 +834,8 @@ class DataValidationFramework:
         return anomalies, anomaly_score, severity_level, confidence
 
     def _detect_usage_anomalies(
-        self, data: List[Dict[str, Any]]
-    ) -> Tuple[List[Dict[str, Any]], float, str, float]:
+        self, data: list[dict[str, Any]]
+    ) -> tuple[list[dict[str, Any]], float, str, float]:
         """Detect usage pattern anomalies"""
         anomalies = []
         anomaly_score = 0.0
@@ -882,8 +882,8 @@ class DataValidationFramework:
         return anomalies, anomaly_score, severity_level, confidence
 
     def _detect_resource_anomalies(
-        self, data: List[Dict[str, Any]]
-    ) -> Tuple[List[Dict[str, Any]], float, str, float]:
+        self, data: list[dict[str, Any]]
+    ) -> tuple[list[dict[str, Any]], float, str, float]:
         """Detect resource usage anomalies"""
         anomalies = []
         anomaly_score = 0.0
@@ -981,8 +981,8 @@ class DataValidationFramework:
         return anomalies, anomaly_score, severity_level, confidence
 
     def _generate_anomaly_recommendations(
-        self, anomalies: List[Dict[str, Any]], severity_level: str
-    ) -> List[str]:
+        self, anomalies: list[dict[str, Any]], severity_level: str
+    ) -> list[str]:
         """Generate recommendations based on anomalies"""
         recommendations = []
 
@@ -1017,7 +1017,7 @@ class DataValidationFramework:
         action_performed: str,
         result_status: str,
         user_id: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: Optional[dict[str, Any]] = None,
     ):
         """Log audit trail entry"""
         try:
@@ -1066,7 +1066,7 @@ class DataValidationFramework:
             with sqlite3.connect(self.db_path) as conn:
                 conn.execute(
                     """
-                    INSERT INTO validation_results 
+                    INSERT INTO validation_results
                     (validation_id, timestamp, is_valid, accuracy_score, errors_found, warnings,
                      data_completeness, consistency_score, integrity_score, validation_duration_ms)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -1094,7 +1094,7 @@ class DataValidationFramework:
             with sqlite3.connect(self.db_path) as conn:
                 conn.execute(
                     """
-                    INSERT INTO anomaly_results 
+                    INSERT INTO anomaly_results
                     (anomaly_id, timestamp, anomalies_found, anomaly_score, severity_level,
                      detection_confidence, recommended_actions)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -1119,7 +1119,7 @@ class DataValidationFramework:
             with sqlite3.connect(self.db_path) as conn:
                 conn.execute(
                     """
-                    INSERT INTO audit_trail 
+                    INSERT INTO audit_trail
                     (entry_id, timestamp, operation_type, user_id, resource_accessed,
                      action_performed, result_status, metadata, data_hash, integrity_verified)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -1181,7 +1181,7 @@ class DataValidationFramework:
         except Exception as e:
             logger.error(f"❌ Anomaly detection failed: {e}")
 
-    def get_validation_summary(self, time_range_hours: int = 24) -> Dict[str, Any]:
+    def get_validation_summary(self, time_range_hours: int = 24) -> dict[str, Any]:
         """Get validation summary for time period"""
         try:
             with sqlite3.connect(self.db_path) as conn:
@@ -1190,7 +1190,7 @@ class DataValidationFramework:
                 # Get validation statistics
                 cursor = conn.execute(
                     """
-                    SELECT 
+                    SELECT
                         COUNT(*) as total_validations,
                         AVG(accuracy_score) as avg_accuracy,
                         AVG(data_completeness) as avg_completeness,
@@ -1208,7 +1208,7 @@ class DataValidationFramework:
                 # Get anomaly statistics
                 cursor = conn.execute(
                     """
-                    SELECT 
+                    SELECT
                         COUNT(*) as total_anomaly_checks,
                         AVG(anomaly_score) as avg_anomaly_score,
                         COUNT(CASE WHEN severity_level = 'critical' THEN 1 END) as critical_anomalies,
@@ -1259,7 +1259,7 @@ class DataValidationFramework:
 
 # Factory function
 def create_validation_framework(
-    db_path: str, config: Optional[Dict[str, Any]] = None
+    db_path: str, config: Optional[dict[str, Any]] = None
 ) -> DataValidationFramework:
     """Factory function để create validation framework"""
     return DataValidationFramework(db_path, config)

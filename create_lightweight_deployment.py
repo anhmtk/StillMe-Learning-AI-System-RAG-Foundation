@@ -131,7 +131,7 @@ echo "🤖 AI Server: http://160.191.89.99:1216"
         os.remove(zip_path)
 
     with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-        for root, dirs, files in os.walk(temp_dir):
+        for root, _dirs, files in os.walk(temp_dir):
             for file in files:
                 file_path = os.path.join(root, file)
                 arcname = os.path.relpath(file_path, temp_dir)

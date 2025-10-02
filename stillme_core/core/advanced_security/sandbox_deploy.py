@@ -16,15 +16,10 @@ import asyncio
 import json
 import logging
 import os
-import subprocess
 import sys
-import tempfile
 import time
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
-
-import docker
-import requests
+from typing import Optional
 
 from ...compat_docker import get_sandbox_deployer
 
@@ -33,8 +28,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from stillme_core.core.advanced_security.sandbox_controller import (
     SandboxController,
-    SandboxStatus,
-    SandboxType,
 )
 
 logger = logging.getLogger(__name__)
@@ -55,7 +48,7 @@ class SandboxDeployer:
     def __init__(self, project_root: Optional[str] = None):
         """
         Initialize Sandbox Deployer
-        
+
         Args:
             project_root: Root directory of the project
         """
@@ -77,7 +70,7 @@ class SandboxDeployer:
             self.sandbox_controller.create_sandbox = Mock()
             self.sandbox_controller.get_status = Mock(return_value={"status": "fake"})
 
-        self.deployment_logs: List[Dict] = []
+        self.deployment_logs: list[dict] = []
 
         logger.info(f"🚀 SandboxDeployer initialized for project: {self.project_root}")
 
@@ -86,15 +79,15 @@ class SandboxDeployer:
         name: str = "security-test",
         image: str = DEFAULT_IMAGE,
         custom_dockerfile: Optional[str] = None
-    ) -> Tuple[bool, str, Dict]:
+    ) -> tuple[bool, str, dict]:
         """
         Deploy a security testing sandbox
-        
+
         Args:
             name: Sandbox name
             image: Base Docker image
             custom_dockerfile: Path to custom Dockerfile
-            
+
         Returns:
             Tuple of (success, sandbox_id, deployment_info)
         """
@@ -104,10 +97,10 @@ class SandboxDeployer:
     async def cleanup_deployment(self, sandbox_id: str) -> bool:
         """
         Clean up deployment
-        
+
         Args:
             sandbox_id: ID of the sandbox to clean up
-            
+
         Returns:
             True if cleanup successful, False otherwise
         """
@@ -115,10 +108,10 @@ class SandboxDeployer:
         success, message = await self._deployer.cleanup(sandbox_id)
         return success
 
-    def get_logs(self) -> List[Dict]:
+    def get_logs(self) -> list[dict]:
         """
         Get deployment logs
-        
+
         Returns:
             List of deployment log entries
         """
@@ -127,7 +120,7 @@ class SandboxDeployer:
     def _log_deployment(self, level: str, message: str):
         """
         Log deployment event (for backward compatibility)
-        
+
         Args:
             level: Log level (INFO, SUCCESS, ERROR, etc.)
             message: Log message
@@ -140,10 +133,10 @@ class SandboxDeployer:
         self.deployment_logs.append(log_entry)
         logger.info(f"[{level}] {message}")
 
-    def get_deployment_report(self) -> Dict:
+    def get_deployment_report(self) -> dict:
         """
         Get deployment report (for backward compatibility)
-        
+
         Returns:
             Dictionary containing deployment report
         """

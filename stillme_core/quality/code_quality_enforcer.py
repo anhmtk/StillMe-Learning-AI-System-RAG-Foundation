@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ class QualityViolation:
     description: str
     suggested_fix: str
     timestamp: datetime
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -45,11 +45,11 @@ class CodeQualityEnforcer:
 
     def __init__(self):
         self.logger = logger
-        self.violations: List[QualityViolation] = []
+        self.violations: list[QualityViolation] = []
         self.quality_rules = self._initialize_quality_rules()
         self.logger.info("✅ CodeQualityEnforcer initialized")
 
-    def _initialize_quality_rules(self) -> Dict[QualityCategory, List[str]]:
+    def _initialize_quality_rules(self) -> dict[QualityCategory, list[str]]:
         """Initialize quality rules"""
         return {
             QualityCategory.STYLE: [
@@ -93,7 +93,7 @@ class CodeQualityEnforcer:
     def analyze_code_quality(self,
                            file_path: str,
                            code_content: str,
-                           metadata: Dict[str, Any] = None) -> List[QualityViolation]:
+                           metadata: dict[str, Any] = None) -> list[QualityViolation]:
         """Analyze code quality and return violations"""
         try:
             violations = []
@@ -133,7 +133,7 @@ class CodeQualityEnforcer:
             self.logger.error(f"❌ Failed to analyze code quality: {e}")
             return []
 
-    def _check_style_violations(self, file_path: str, code_content: str) -> List[QualityViolation]:
+    def _check_style_violations(self, file_path: str, code_content: str) -> list[QualityViolation]:
         """Check for style violations"""
         violations = []
         lines = code_content.split('\n')
@@ -169,7 +169,7 @@ class CodeQualityEnforcer:
 
         return violations
 
-    def _check_complexity_violations(self, file_path: str, code_content: str) -> List[QualityViolation]:
+    def _check_complexity_violations(self, file_path: str, code_content: str) -> list[QualityViolation]:
         """Check for complexity violations"""
         violations = []
 
@@ -178,7 +178,7 @@ class CodeQualityEnforcer:
         max_nesting = 0
         current_nesting = 0
 
-        for i, line in enumerate(lines, 1):
+        for _i, line in enumerate(lines, 1):
             stripped = line.strip()
             if stripped.startswith(('if ', 'for ', 'while ', 'try:', 'with ', 'class ', 'def ')):
                 current_nesting += 1
@@ -206,7 +206,7 @@ class CodeQualityEnforcer:
 
         return violations
 
-    def _check_security_violations(self, file_path: str, code_content: str) -> List[QualityViolation]:
+    def _check_security_violations(self, file_path: str, code_content: str) -> list[QualityViolation]:
         """Check for security violations"""
         violations = []
 
@@ -226,7 +226,7 @@ class CodeQualityEnforcer:
 
         return violations
 
-    def _check_performance_violations(self, file_path: str, code_content: str) -> List[QualityViolation]:
+    def _check_performance_violations(self, file_path: str, code_content: str) -> list[QualityViolation]:
         """Check for performance violations"""
         violations = []
 
@@ -246,7 +246,7 @@ class CodeQualityEnforcer:
 
         return violations
 
-    def _check_maintainability_violations(self, file_path: str, code_content: str) -> List[QualityViolation]:
+    def _check_maintainability_violations(self, file_path: str, code_content: str) -> list[QualityViolation]:
         """Check for maintainability violations"""
         violations = []
 
@@ -268,7 +268,7 @@ class CodeQualityEnforcer:
 
         return violations
 
-    def _check_testability_violations(self, file_path: str, code_content: str) -> List[QualityViolation]:
+    def _check_testability_violations(self, file_path: str, code_content: str) -> list[QualityViolation]:
         """Check for testability violations"""
         violations = []
 
@@ -300,15 +300,15 @@ class CodeQualityEnforcer:
 
         return violations
 
-    def get_violations_by_category(self, category: QualityCategory) -> List[QualityViolation]:
+    def get_violations_by_category(self, category: QualityCategory) -> list[QualityViolation]:
         """Get violations by category"""
         return [v for v in self.violations if v.category == category]
 
-    def get_violations_by_level(self, level: QualityLevel) -> List[QualityViolation]:
+    def get_violations_by_level(self, level: QualityLevel) -> list[QualityViolation]:
         """Get violations by level"""
         return [v for v in self.violations if v.level == level]
 
-    def get_quality_summary(self) -> Dict[str, Any]:
+    def get_quality_summary(self) -> dict[str, Any]:
         """Get quality summary"""
         try:
             total_violations = len(self.violations)

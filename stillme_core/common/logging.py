@@ -43,7 +43,7 @@ import time
 from contextvars import ContextVar
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 # Context variable for correlation ID
 correlation_id: ContextVar[Optional[str]] = ContextVar("correlation_id", default=None)
@@ -134,7 +134,7 @@ class StructuredLogger:
     Logger có cấu trúc với hỗ trợ context
     """
 
-    _loggers: Dict[str, "StructuredLogger"] = {}
+    _loggers: dict[str, "StructuredLogger"] = {}
     _lock = threading.Lock()
 
     def __init__(

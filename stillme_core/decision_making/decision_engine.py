@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ class Decision:
     risk_level: RiskLevel
     description: str
     timestamp: datetime
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -48,14 +48,14 @@ class DecisionEngine:
 
     def __init__(self):
         self.logger = logger
-        self.decisions: List[Decision] = []
+        self.decisions: list[Decision] = []
         self.logger.info("✅ DecisionEngine initialized")
 
     def make_decision(self,
                      decision_type: DecisionType,
                      description: str,
                      risk_level: RiskLevel = RiskLevel.LOW,
-                     metadata: Dict[str, Any] = None) -> Decision:
+                     metadata: dict[str, Any] = None) -> Decision:
         """Make a decision"""
         try:
             decision_id = f"decision_{len(self.decisions) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -94,15 +94,15 @@ class DecisionEngine:
             self.logger.error(f"❌ Failed to update decision status: {e}")
             return False
 
-    def get_decisions_by_type(self, decision_type: DecisionType) -> List[Decision]:
+    def get_decisions_by_type(self, decision_type: DecisionType) -> list[Decision]:
         """Get decisions by type"""
         return [d for d in self.decisions if d.decision_type == decision_type]
 
-    def get_decisions_by_status(self, status: DecisionStatus) -> List[Decision]:
+    def get_decisions_by_status(self, status: DecisionStatus) -> list[Decision]:
         """Get decisions by status"""
         return [d for d in self.decisions if d.status == status]
 
-    def get_decision_summary(self) -> Dict[str, Any]:
+    def get_decision_summary(self) -> dict[str, Any]:
         """Get decision summary"""
         try:
             total_decisions = len(self.decisions)

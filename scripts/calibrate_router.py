@@ -15,12 +15,11 @@ import argparse
 import os
 import sys
 import time
-from typing import Dict, List, Tuple
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))
 
-from modules.api_provider_manager import ComplexityAnalyzer, UnifiedAPIManager
+from modules.api_provider_manager import ComplexityAnalyzer
 
 
 class RouterCalibrator:
@@ -28,7 +27,7 @@ class RouterCalibrator:
         self.analyzer = ComplexityAnalyzer()
         self.test_cases = self._load_test_cases()
 
-    def _load_test_cases(self) -> Dict[str, List[Tuple[str, str, float]]]:
+    def _load_test_cases(self) -> dict[str, list[tuple[str, str, float]]]:
         """Load test cases with expected routing"""
         return {
             'simple': [
@@ -69,7 +68,7 @@ class RouterCalibrator:
             ]
         }
 
-    def test_current_config(self) -> Dict[str, float]:
+    def test_current_config(self) -> dict[str, float]:
         """Test current configuration and return accuracy scores"""
         results = {}
 
@@ -79,7 +78,7 @@ class RouterCalibrator:
 
             print(f"\n🧪 Testing {category} prompts:")
 
-            for prompt, expected_model, expected_score in test_cases:
+            for prompt, expected_model, _expected_score in test_cases:
                 # Get actual complexity score
                 actual_score, breakdown = self.analyzer.analyze_complexity(prompt)
 
@@ -117,7 +116,7 @@ class RouterCalibrator:
 
         return results
 
-    def _test_single_case(self, test_case: Tuple[str, str, float]) -> bool:
+    def _test_single_case(self, test_case: tuple[str, str, float]) -> bool:
         """Test a single case and return if correct"""
         prompt, expected_model, expected_score = test_case
         actual_score, _ = self.analyzer.analyze_complexity(prompt)
@@ -326,7 +325,7 @@ COMPLEXITY_THRESHOLD_MEDIUM={stats['thresholds']['medium']}
         self._export_best_config(best_config)
         return best_config
 
-    def _export_best_config(self, config: Dict):
+    def _export_best_config(self, config: dict):
         """Export the best configuration found"""
         if not config:
             return

@@ -7,7 +7,7 @@ Classifies issues by severity and type for appropriate handling.
 
 import logging
 from enum import Enum
-from typing import Any, Dict, List
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -27,13 +27,13 @@ class IssueClassifier:
         self.major_patterns = ["F821", "E999", "ImportError", "SyntaxError"]
         self.security_patterns = ["REDTEAM_RISK>=", "SECURITY_VIOLATION", "PII_LEAK"]
 
-    def classify(self, issue: Dict[str, Any]) -> Dict[str, Any]:
+    def classify(self, issue: dict[str, Any]) -> dict[str, Any]:
         """
         Classify an issue by severity and type
-        
+
         Args:
             issue: Issue dictionary with keys like 'rule', 'message', 'file', 'line'
-            
+
         Returns:
             Classification result with severity, reason, and handling instructions
         """
@@ -112,13 +112,13 @@ class IssueClassifier:
         """Check if issue is minor"""
         return rule in self.minor_patterns
 
-    def batch_classify(self, issues: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
+    def batch_classify(self, issues: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
         """
         Classify a batch of issues
-        
+
         Args:
             issues: List of issue dictionaries
-            
+
         Returns:
             Dictionary with issues grouped by severity
         """

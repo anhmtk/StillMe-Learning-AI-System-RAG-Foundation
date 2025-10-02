@@ -14,14 +14,13 @@ Tính năng:
 
 import ast
 import json
-import os
 import re
 import time
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Optional
 
 
 class DocType(Enum):
@@ -49,9 +48,9 @@ class DocMetadata:
     line_number: int
     name: str
     description: str
-    parameters: List[Dict[str, str]]
+    parameters: list[dict[str, str]]
     return_type: str
-    examples: List[str]
+    examples: list[str]
     quality_score: float
     last_updated: datetime
 
@@ -61,10 +60,10 @@ class DocumentationReport:
     total_files: int
     documented_files: int
     documentation_coverage: float
-    quality_scores: Dict[str, float]
-    missing_docs: List[str]
-    recommendations: List[str]
-    generated_docs: List[DocMetadata]
+    quality_scores: dict[str, float]
+    missing_docs: list[str]
+    recommendations: list[str]
+    generated_docs: list[DocMetadata]
     analysis_time: float
 
 class DocumentationGenerator:
@@ -89,7 +88,7 @@ class DocumentationGenerator:
         for dir_path in [self.docs_dir, self.knowledge_base_dir, self.troubleshooting_dir, self.best_practices_dir]:
             dir_path.mkdir(parents=True, exist_ok=True)
 
-    def _load_doc_templates(self) -> Dict[str, str]:
+    def _load_doc_templates(self) -> dict[str, str]:
         """Load documentation templates"""
         return {
             "module": '''"""
@@ -111,16 +110,16 @@ Generated: {timestamp}
             "function": '''def {function_name}({parameters}):
     """
     {description}
-    
+
     Args:
 {args_doc}
-    
+
     Returns:
         {return_type}: {return_description}
-    
+
     Raises:
         {raises_doc}
-    
+
     Examples:
 {examples_doc}
     """
@@ -128,13 +127,13 @@ Generated: {timestamp}
             "class": '''class {class_name}:
     """
     {description}
-    
+
     Attributes:
 {attributes_doc}
-    
+
     Methods:
 {methods_doc}
-    
+
     Examples:
 {examples_doc}
     """
@@ -160,7 +159,7 @@ Status Codes:
 '''
         }
 
-    def _load_best_practices(self) -> Dict[str, List[str]]:
+    def _load_best_practices(self) -> dict[str, list[str]]:
         """Load best practices library"""
         return {
             "python": [
@@ -366,7 +365,7 @@ Status Codes:
                 content = f.read()
 
             # Parse AST
-            tree = ast.parse(content)
+            ast.parse(content)
 
             # Add comments to functions without docstrings
             lines = content.split('\n')
@@ -404,8 +403,8 @@ Status Codes:
 
         entry_content = f"""# {topic}
 
-**Category**: {category}  
-**Created**: {timestamp}  
+**Category**: {category}
+**Created**: {timestamp}
 **Source**: AgentDev Unified Documentation Generator
 
 ## Overview
@@ -442,7 +441,7 @@ Status Codes:
 
         content = f"""# {language.title()} Best Practices
 
-**Generated**: {timestamp}  
+**Generated**: {timestamp}
 **Source**: AgentDev Unified Documentation Generator
 
 ## Overview
@@ -595,7 +594,7 @@ This guide contains best practices for {language} development, automatically gen
         <h1>Documentation Report</h1>
         <p>Generated: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
     </div>
-    
+
     <h2>Summary</h2>
     <div class="metric {'good' if report.documentation_coverage >= 70 else 'warning' if report.documentation_coverage >= 50 else 'error'}">
         <strong>Coverage:</strong> {report.documentation_coverage:.1f}%
@@ -606,7 +605,7 @@ This guide contains best practices for {language} development, automatically gen
     <div class="metric">
         <strong>Analysis Time:</strong> {report.analysis_time:.2f}s
     </div>
-    
+
     <h2>Quality Scores</h2>
     <div class="metric {'good' if report.quality_scores.get('modules', 0) >= 0.7 else 'warning' if report.quality_scores.get('modules', 0) >= 0.5 else 'error'}">
         <strong>Modules:</strong> {report.quality_scores.get('modules', 0):.2f}
@@ -617,14 +616,14 @@ This guide contains best practices for {language} development, automatically gen
     <div class="metric {'good' if report.quality_scores.get('classes', 0) >= 0.7 else 'warning' if report.quality_scores.get('classes', 0) >= 0.5 else 'error'}">
         <strong>Classes:</strong> {report.quality_scores.get('classes', 0):.2f}
     </div>
-    
+
     <h2>Recommendations</h2>
     <div class="recommendations">
         <ul>
             {''.join([f'<li>{rec}</li>' for rec in report.recommendations])}
         </ul>
     </div>
-    
+
     <h2>Missing Documentation</h2>
     <ul>
         {''.join([f'<li>{doc}</li>' for doc in report.missing_docs[:10]])}

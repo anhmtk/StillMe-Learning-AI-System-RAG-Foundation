@@ -13,12 +13,10 @@ Author: StillMe Framework Team
 Version: 1.5.0
 """
 
-import json
 import logging
-from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Any, Dict, List, Optional
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any
 
 from .scoring import NicheScore
 
@@ -30,9 +28,9 @@ class Persona:
     name: str
     role: str
     company_size: str
-    pain_points: List[str]
-    goals: List[str]
-    tech_stack: List[str]
+    pain_points: list[str]
+    goals: list[str]
+    tech_stack: list[str]
     budget_range: str
 
 @dataclass
@@ -40,9 +38,9 @@ class ProductBrief:
     """Product brief for niche opportunity"""
     title: str
     description: str
-    personas: List[Persona]
-    pain_points: List[str]
-    jobs_to_be_done: List[str]
+    personas: list[Persona]
+    pain_points: list[str]
+    jobs_to_be_done: list[str]
     unique_selling_proposition: str
     target_market: str
     competitive_advantage: str
@@ -54,7 +52,7 @@ class Feature:
     description: str
     priority: str  # "must_have", "should_have", "nice_to_have"
     effort_days: int
-    dependencies: List[str]
+    dependencies: list[str]
     stillme_capability: str
 
 @dataclass
@@ -62,12 +60,12 @@ class MVPSpec:
     """MVP specification"""
     name: str
     description: str
-    features: List[Feature]
-    architecture: Dict[str, Any]
-    tech_stack: List[str]
+    features: list[Feature]
+    architecture: dict[str, Any]
+    tech_stack: list[str]
     estimated_development_days: int
-    dependencies: List[str]
-    deployment_requirements: List[str]
+    dependencies: list[str]
+    deployment_requirements: list[str]
 
 @dataclass
 class PricingTier:
@@ -75,41 +73,41 @@ class PricingTier:
     name: str
     price: float
     currency: str
-    features: List[str]
+    features: list[str]
     target_users: str
     rationale: str
 
 @dataclass
 class PricingSuggestion:
     """Pricing strategy suggestion"""
-    tiers: List[PricingTier]
+    tiers: list[PricingTier]
     pricing_model: str  # "subscription", "usage", "one_time"
     free_tier: bool
     trial_period_days: int
     rationale: str
-    revenue_projections: Dict[str, float]
+    revenue_projections: dict[str, float]
 
 @dataclass
 class LandingPageSpec:
     """Landing page specification"""
     headline: str
     subheadline: str
-    value_propositions: List[str]
-    features: List[str]
-    testimonials: List[str]
+    value_propositions: list[str]
+    features: list[str]
+    testimonials: list[str]
     cta_text: str
-    design_tokens: Dict[str, str]
+    design_tokens: dict[str, str]
 
 @dataclass
 class RepoScaffold:
     """Repository scaffold specification"""
     name: str
     description: str
-    tech_stack: List[str]
-    structure: Dict[str, List[str]]
+    tech_stack: list[str]
+    structure: dict[str, list[str]]
     readme_template: str
     license: str
-    initial_commits: List[str]
+    initial_commits: list[str]
 
 @dataclass
 class OutreachTemplate:
@@ -117,7 +115,7 @@ class OutreachTemplate:
     subject: str
     body: str
     language: str  # "en" or "vi"
-    personalization_placeholders: List[str]
+    personalization_placeholders: list[str]
     call_to_action: str
 
 @dataclass
@@ -129,11 +127,11 @@ class ExecutionPack:
     pricing_suggestion: PricingSuggestion
     landing_page_spec: LandingPageSpec
     repo_scaffold: RepoScaffold
-    outreach_templates: List[OutreachTemplate]
-    risk_assessment: Dict[str, Any]
-    compliance_notes: List[str]
-    kpis: List[str]
-    timeline: Dict[str, str]
+    outreach_templates: list[OutreachTemplate]
+    risk_assessment: dict[str, Any]
+    compliance_notes: list[str]
+    kpis: list[str]
+    timeline: dict[str, str]
 
 class PlaybookGenerator:
     """Generate execution playbooks for niche opportunities"""
@@ -203,7 +201,7 @@ class PlaybookGenerator:
             competitive_advantage=f"Built on StillMe's proven AI framework with {niche_score.feasibility_fit:.0%} capability fit"
         )
 
-    def _generate_personas(self, topic: str) -> List[Persona]:
+    def _generate_personas(self, topic: str) -> list[Persona]:
         """Generate target personas"""
         personas = []
 
@@ -267,7 +265,7 @@ class PlaybookGenerator:
 
         return personas
 
-    def _generate_pain_points(self, topic: str, niche_score: NicheScore) -> List[str]:
+    def _generate_pain_points(self, topic: str, niche_score: NicheScore) -> list[str]:
         """Generate pain points based on topic and signals"""
         pain_points = []
 
@@ -301,7 +299,7 @@ class PlaybookGenerator:
 
         return pain_points[:5]  # Limit to 5 pain points
 
-    def _generate_jobs_to_be_done(self, topic: str, pain_points: List[str]) -> List[str]:
+    def _generate_jobs_to_be_done(self, topic: str, pain_points: list[str]) -> list[str]:
         """Generate jobs to be done"""
         jobs = []
 
@@ -584,7 +582,7 @@ MIT License - see [LICENSE](LICENSE) file.
             ]
         )
 
-    def _generate_outreach_templates(self, niche_score: NicheScore, product_brief: ProductBrief) -> List[OutreachTemplate]:
+    def _generate_outreach_templates(self, niche_score: NicheScore, product_brief: ProductBrief) -> list[OutreachTemplate]:
         """Generate outreach templates"""
         templates = []
 
@@ -630,7 +628,7 @@ P.S. Đây là bản xem trước nhanh: {{demo_link}}""",
 
         return templates
 
-    def _generate_risk_assessment(self, niche_score: NicheScore) -> Dict[str, Any]:
+    def _generate_risk_assessment(self, niche_score: NicheScore) -> dict[str, Any]:
         """Generate risk assessment"""
         risks = []
 
@@ -669,7 +667,7 @@ P.S. Đây là bản xem trước nhanh: {{demo_link}}""",
             ]
         }
 
-    def _generate_compliance_notes(self, niche_score: NicheScore) -> List[str]:
+    def _generate_compliance_notes(self, niche_score: NicheScore) -> list[str]:
         """Generate compliance notes"""
         notes = [
             "Ensure all data processing complies with GDPR/CCPA",
@@ -689,7 +687,7 @@ P.S. Đây là bản xem trước nhanh: {{demo_link}}""",
 
         return notes
 
-    def _generate_kpis(self, niche_score: NicheScore) -> List[str]:
+    def _generate_kpis(self, niche_score: NicheScore) -> list[str]:
         """Generate KPIs for tracking"""
         return [
             "Leads per day (target: 5-10)",
@@ -702,9 +700,9 @@ P.S. Đây là bản xem trước nhanh: {{demo_link}}""",
             "Support ticket volume (target: <5% of users)"
         ]
 
-    def _generate_timeline(self, niche_score: NicheScore, mvp_spec: MVPSpec) -> Dict[str, str]:
+    def _generate_timeline(self, niche_score: NicheScore, mvp_spec: MVPSpec) -> dict[str, str]:
         """Generate development timeline"""
-        start_date = datetime.now()
+        datetime.now()
 
         return {
             "Week 1": "Core development and API setup",

@@ -22,10 +22,10 @@ import logging
 import sqlite3
 import uuid
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -63,16 +63,16 @@ class LearningProposal:
     source: ContentSource
     priority: LearningPriority
     estimated_duration: int  # minutes
-    learning_objectives: List[str]
-    prerequisites: List[str]
-    expected_outcomes: List[str]
-    risk_assessment: Dict[str, Any]
+    learning_objectives: list[str]
+    prerequisites: list[str]
+    expected_outcomes: list[str]
+    risk_assessment: dict[str, Any]
     quality_score: float  # 0.0 - 1.0
     created_at: datetime
     created_by: str  # "system" hoặc user_id
     status: ProposalStatus
     approval_required: bool
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
     # Optional fields from database
     approved_at: Optional[str] = None
     approved_by: Optional[str] = None
@@ -84,7 +84,7 @@ class LearningProposal:
     learning_failed_at: Optional[str] = None
     failure_reason: Optional[str] = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary"""
         data = asdict(self)
         data['created_at'] = self.created_at.isoformat()
@@ -94,7 +94,7 @@ class LearningProposal:
         return data
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'LearningProposal':
+    def from_dict(cls, data: dict[str, Any]) -> 'LearningProposal':
         """Create from dictionary"""
         data['created_at'] = datetime.fromisoformat(data['created_at'])
         data['source'] = ContentSource(data['source'])
@@ -227,14 +227,14 @@ class LearningProposalsManager:
             logger.error(f"Failed to get proposal {proposal_id}: {e}")
             return None
 
-    def get_pending_proposals(self, limit: int = 20) -> List[LearningProposal]:
+    def get_pending_proposals(self, limit: int = 20) -> list[LearningProposal]:
         """Lấy danh sách đề xuất chờ phê duyệt"""
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.execute("""
-                    SELECT * FROM proposals 
-                    WHERE status = 'pending' 
-                    ORDER BY created_at DESC 
+                    SELECT * FROM proposals
+                    WHERE status = 'pending'
+                    ORDER BY created_at DESC
                     LIMIT ?
                 """, (limit,))
 
@@ -264,7 +264,7 @@ class LearningProposalsManager:
             with sqlite3.connect(self.db_path) as conn:
                 # Update proposal status
                 conn.execute("""
-                    UPDATE proposals 
+                    UPDATE proposals
                     SET status = 'approved', approved_at = ?, approved_by = ?
                     WHERE id = ?
                 """, (datetime.now().isoformat(), approver_id, proposal_id))
@@ -290,7 +290,7 @@ class LearningProposalsManager:
             with sqlite3.connect(self.db_path) as conn:
                 # Update proposal status
                 conn.execute("""
-                    UPDATE proposals 
+                    UPDATE proposals
                     SET status = 'rejected', rejected_at = ?, rejected_by = ?, rejection_reason = ?
                     WHERE id = ?
                 """, (datetime.now().isoformat(), approver_id, reason, proposal_id))
@@ -316,7 +316,7 @@ class LearningProposalsManager:
             with sqlite3.connect(self.db_path) as conn:
                 # Update proposal status
                 conn.execute("""
-                    UPDATE proposals 
+                    UPDATE proposals
                     SET status = 'learning', learning_started_at = ?
                     WHERE id = ?
                 """, (datetime.now().isoformat(), proposal_id))
@@ -336,20 +336,20 @@ class LearningProposalsManager:
             logger.error(f"Failed to start learning for proposal {proposal_id}: {e}")
             return False
 
-    def complete_learning(self, proposal_id: str, session_id: str, metrics: Dict[str, Any]) -> bool:
+    def complete_learning(self, proposal_id: str, session_id: str, metrics: dict[str, Any]) -> bool:
         """Hoàn thành học tập"""
         try:
             with sqlite3.connect(self.db_path) as conn:
                 # Update proposal status
                 conn.execute("""
-                    UPDATE proposals 
+                    UPDATE proposals
                     SET status = 'completed', learning_completed_at = ?
                     WHERE id = ?
                 """, (datetime.now().isoformat(), proposal_id))
 
                 # Update learning session
                 conn.execute("""
-                    UPDATE proposal_learning_sessions 
+                    UPDATE proposal_learning_sessions
                     SET status = 'completed', completed_at = ?, metrics = ?
                     WHERE proposal_id = ? AND session_id = ?
                 """, (datetime.now().isoformat(), json.dumps(metrics), proposal_id, session_id))
@@ -361,17 +361,17 @@ class LearningProposalsManager:
             logger.error(f"Failed to complete learning for proposal {proposal_id}: {e}")
             return False
 
-    def get_proposal_stats(self) -> Dict[str, Any]:
+    def get_proposal_stats(self) -> dict[str, Any]:
         """Lấy thống kê đề xuất"""
         try:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.execute("""
-                    SELECT 
+                    SELECT
                         status,
                         COUNT(*) as count,
                         AVG(quality_score) as avg_quality,
                         AVG(estimated_duration) as avg_duration
-                    FROM proposals 
+                    FROM proposals
                     GROUP BY status
                 """)
 

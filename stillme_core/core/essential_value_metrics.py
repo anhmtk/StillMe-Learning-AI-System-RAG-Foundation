@@ -25,7 +25,7 @@ import sqlite3
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -38,8 +38,8 @@ class TimeSavingMetrics:
 
     total_time_saved_hours: float
     average_time_saved_per_task_hours: float
-    time_saved_by_module: Dict[str, float]
-    time_saved_by_feature: Dict[str, float]
+    time_saved_by_module: dict[str, float]
+    time_saved_by_feature: dict[str, float]
     efficiency_improvement_percentage: float
     developer_hours_saved: float
     cost_savings_usd: float
@@ -50,7 +50,7 @@ class ErrorReductionMetrics:
     """Error reduction tracking results"""
 
     total_errors_prevented: int
-    errors_prevented_by_type: Dict[str, int]
+    errors_prevented_by_type: dict[str, int]
     error_reduction_percentage: float
     quality_improvement_score: float
     bug_fix_time_saved_hours: float
@@ -100,7 +100,7 @@ class EssentialValueMetrics:
     Enterprise-grade value metrics calculator với focus vào accuracy
     """
 
-    def __init__(self, db_path: str, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, db_path: str, config: Optional[dict[str, Any]] = None):
         self.db_path = Path(db_path)
         self.config = config or self._get_default_config()
 
@@ -112,7 +112,7 @@ class EssentialValueMetrics:
 
         logger.info("✅ EssentialValueMetrics initialized với business constants")
 
-    def _get_default_config(self) -> Dict[str, Any]:
+    def _get_default_config(self) -> dict[str, Any]:
         """Default configuration với business parameters"""
         return {
             "developer_hourly_rate": 50.0,  # USD per hour
@@ -148,7 +148,7 @@ class EssentialValueMetrics:
                 # Calculate time saved by module
                 cursor = conn.execute(
                     """
-                    SELECT module_name, 
+                    SELECT module_name,
                            COUNT(*) as task_count,
                            AVG(duration_ms) as avg_duration_ms,
                            SUM(duration_ms) as total_duration_ms
@@ -164,7 +164,7 @@ class EssentialValueMetrics:
                 # Calculate time saved by feature
                 cursor = conn.execute(
                     """
-                    SELECT feature_name, 
+                    SELECT feature_name,
                            COUNT(*) as task_count,
                            AVG(duration_ms) as avg_duration_ms,
                            SUM(duration_ms) as total_duration_ms
@@ -188,7 +188,7 @@ class EssentialValueMetrics:
                 for (
                     module_name,
                     task_count,
-                    avg_duration_ms,
+                    _avg_duration_ms,
                     total_duration_ms,
                 ) in module_data:
                     # Manual time would be baseline * task_count
@@ -203,7 +203,7 @@ class EssentialValueMetrics:
                 for (
                     feature_name,
                     task_count,
-                    avg_duration_ms,
+                    _avg_duration_ms,
                     total_duration_ms,
                 ) in feature_data:
                     manual_time_hours = baseline_time_per_task * task_count
@@ -288,9 +288,7 @@ class EssentialValueMetrics:
 
                 # Calculate metrics
                 total_errors_prevented = sum(count for _, count in error_data)
-                errors_prevented_by_type = {
-                    error_code: count for error_code, count in error_data
-                }
+                errors_prevented_by_type = dict(error_data)
 
                 # Error reduction percentage (compared to baseline)
                 baseline_error_rate = self._get_baseline_error_rate()
@@ -350,7 +348,7 @@ class EssentialValueMetrics:
                 # Get success rate data
                 cursor = conn.execute(
                     """
-                    SELECT 
+                    SELECT
                         AVG(CASE WHEN success = 1 THEN 1.0 ELSE 0.0 END) as success_rate,
                         AVG(duration_ms) as avg_duration_ms,
                         COUNT(*) as total_events
@@ -363,13 +361,13 @@ class EssentialValueMetrics:
                 current_data = cursor.fetchone()
                 current_success_rate = current_data[0] or 0.0
                 current_avg_duration = current_data[1] or 0.0
-                current_total_events = current_data[2] or 0
+                current_data[2] or 0
 
                 # Get baseline data
                 baseline_start = current_start - timedelta(hours=time_range_hours)
                 cursor = conn.execute(
                     """
-                    SELECT 
+                    SELECT
                         AVG(CASE WHEN success = 1 THEN 1.0 ELSE 0.0 END) as success_rate,
                         AVG(duration_ms) as avg_duration_ms
                     FROM usage_events
@@ -380,7 +378,7 @@ class EssentialValueMetrics:
 
                 baseline_data = cursor.fetchone()
                 baseline_success_rate = baseline_data[0] or 0.0
-                baseline_avg_duration = baseline_data[1] or 0.0
+                baseline_data[1] or 0.0
 
                 # Calculate quality metrics
                 overall_quality_score = current_success_rate * 100.0
@@ -533,7 +531,7 @@ class EssentialValueMetrics:
         try:
             # Get all component metrics
             time_metrics = self.calculate_time_saving_metrics(time_range_hours)
-            error_metrics = self.calculate_error_reduction_metrics(time_range_hours)
+            self.calculate_error_reduction_metrics(time_range_hours)
             quality_metrics = self.calculate_quality_improvement_metrics(
                 time_range_hours
             )
@@ -600,7 +598,7 @@ class EssentialValueMetrics:
 
     def generate_comprehensive_report(
         self, time_range_hours: int = 24
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Generate comprehensive value metrics report
 
@@ -701,7 +699,7 @@ class EssentialValueMetrics:
 
 # Factory function
 def create_value_metrics_calculator(
-    db_path: str, config: Optional[Dict[str, Any]] = None
+    db_path: str, config: Optional[dict[str, Any]] = None
 ) -> EssentialValueMetrics:
     """Factory function để create value metrics calculator"""
     return EssentialValueMetrics(db_path, config)

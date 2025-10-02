@@ -7,7 +7,7 @@ import ast
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger("SUL")
 
@@ -18,11 +18,11 @@ class ModuleInfo:
 
     name: str
     file_path: str
-    imports: List[str]
-    exports: List[str]
-    functions: List[str]
-    classes: List[str]
-    test_files: List[str]
+    imports: list[str]
+    exports: list[str]
+    functions: list[str]
+    classes: list[str]
+    test_files: list[str]
     risk_score: float
 
 
@@ -37,7 +37,7 @@ class SystemUnderstandingLayer:
         self.stillme_core_path = self.repo_root / "stillme_core"
         self.modules_path = self.repo_root / "modules"
         self.tests_path = self.repo_root / "tests"
-        self.modules: Dict[str, ModuleInfo] = {}
+        self.modules: dict[str, ModuleInfo] = {}
 
     def analyze_module(self, module_name: str) -> ModuleInfo:
         """Analyze a single module and return its information"""
@@ -122,11 +122,11 @@ class SystemUnderstandingLayer:
 
     def _calculate_risk_score(
         self,
-        imports: List[str],
-        exports: List[str],
-        functions: List[str],
-        classes: List[str],
-        test_files: List[str],
+        imports: list[str],
+        exports: list[str],
+        functions: list[str],
+        classes: list[str],
+        test_files: list[str],
     ) -> float:
         """Calculate risk score for a module"""
         score = 0.0
@@ -149,7 +149,7 @@ class SystemUnderstandingLayer:
 
         return max(0.0, min(1.0, score))
 
-    def get_dependencies(self, module_name: str) -> Dict[str, Any]:
+    def get_dependencies(self, module_name: str) -> dict[str, Any]:
         """Get dependencies and risk score for a module"""
         module_info = self.analyze_module(module_name)
 
@@ -194,7 +194,7 @@ class SystemUnderstandingLayer:
             "imports": module_info.imports,
         }
 
-    def find_symbol(self, symbol_name: str) -> Dict[str, Any]:
+    def find_symbol(self, symbol_name: str) -> dict[str, Any]:
         """Find where a symbol is defined and used"""
         results = {"symbol": symbol_name, "definitions": [], "usages": []}
 

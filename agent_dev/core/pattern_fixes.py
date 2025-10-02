@@ -8,7 +8,7 @@ Tập trung fix các lỗi phổ biến theo pattern thay vì fix từng lỗi r
 
 import re
 from dataclasses import dataclass
-from typing import Dict, List, Optional, Tuple
+from typing import Optional
 
 
 @dataclass
@@ -26,7 +26,7 @@ class PatternBasedFixer:
     def __init__(self):
         self.patterns = self._load_patterns()
 
-    def _load_patterns(self) -> List[FixPattern]:
+    def _load_patterns(self) -> list[FixPattern]:
         """Load các pattern fix"""
         return [
             # Pattern 1: ReflectionResult, NodeType, ImpactLevel
@@ -144,7 +144,7 @@ class PatternBasedFixer:
         pattern = self.find_matching_pattern(error_message)
         return pattern.priority if pattern else 999
 
-    def get_all_patterns(self) -> List[FixPattern]:
+    def get_all_patterns(self) -> list[FixPattern]:
         """Get tất cả patterns"""
         return self.patterns
 

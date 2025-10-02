@@ -546,11 +546,11 @@ class SecureHttpClient(AsyncHttpClient):
 
         super().__init__(config)
         logger.info("Secure HTTP client initialized with security headers")
-    
+
     async def __aenter__(self):
         """Async context manager entry"""
         return self
-    
+
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Async context manager exit"""
         # Clean up resources if needed

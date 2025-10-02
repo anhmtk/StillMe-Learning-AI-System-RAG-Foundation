@@ -11,7 +11,7 @@ import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -25,7 +25,7 @@ except ImportError:
 @dataclass
 class BacktranslateConfig:
     """Cấu hình cho backtranslate"""
-    intermediate_languages: List[str] = None  # Ngôn ngữ trung gian
+    intermediate_languages: list[str] = None  # Ngôn ngữ trung gian
     nllb_model: str = "facebook/nllb-200-distilled-600M"
     max_rounds: int = 2  # Số vòng dịch tối đa
     temperature: float = 0.3  # Độ sáng tạo cho translation
@@ -39,11 +39,11 @@ class BacktranslateConfig:
 class BacktranslateResult:
     """Kết quả backtranslate"""
     original: str
-    variants: List[str]
-    translation_paths: List[List[str]]  # Đường đi dịch
+    variants: list[str]
+    translation_paths: list[list[str]]  # Đường đi dịch
     success: bool
     error: Optional[str] = None
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
 class Backtranslator:
     """Backtranslator sử dụng NLLB và local models"""
@@ -240,7 +240,7 @@ Chỉ trả về bản dịch, không giải thích:"""
 
         return similarity >= self.config.preserve_meaning_threshold
 
-    async def backtranslate_batch(self, texts: List[str]) -> List[BacktranslateResult]:
+    async def backtranslate_batch(self, texts: list[str]) -> list[BacktranslateResult]:
         """Backtranslate nhiều câu cùng lúc"""
         tasks = [self.backtranslate_text(text) for text in texts]
         results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -268,7 +268,7 @@ class BacktranslateAugmentor:
         self.backtranslator = Backtranslator(config)
         self.logger = logging.getLogger(__name__)
 
-    async def augment_dataset(self, input_file: str, output_file: str) -> Dict[str, Any]:
+    async def augment_dataset(self, input_file: str, output_file: str) -> dict[str, Any]:
         """Augment dataset từ file input"""
         input_path = Path(input_file)
         output_path = Path(output_file)

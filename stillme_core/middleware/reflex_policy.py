@@ -11,7 +11,6 @@ Features:
 from __future__ import annotations
 
 import os
-from typing import Dict, Optional, Tuple
 
 
 class ReflexPolicy:
@@ -20,7 +19,7 @@ class ReflexPolicy:
         self.weights = self._load_weights()
         self.thresholds = self._load_thresholds()
 
-    def _load_weights(self) -> Dict[str, float]:
+    def _load_weights(self) -> dict[str, float]:
         """Load scoring weights with ENV override support"""
         default_weights = {
             "pattern": 0.4,
@@ -40,7 +39,7 @@ class ReflexPolicy:
 
         return default_weights
 
-    def _load_thresholds(self) -> Dict[str, Dict[str, float]]:
+    def _load_thresholds(self) -> dict[str, dict[str, float]]:
         """Load policy thresholds for different modes"""
         thresholds = {
             "strict": {
@@ -67,7 +66,7 @@ class ReflexPolicy:
 
         return thresholds
 
-    def _calculate_context_score(self, context: Optional[Dict[str, any]] = None) -> float:
+    def _calculate_context_score(self, context: dict[str, any] | None = None) -> float:
         """Calculate context score based on app state and input clarity"""
         if not context:
             return 0.5  # Neutral context
@@ -93,7 +92,7 @@ class ReflexPolicy:
 
         return max(0.0, min(1.0, score))
 
-    def _calculate_history_score(self, context: Optional[Dict[str, any]] = None) -> float:
+    def _calculate_history_score(self, context: dict[str, any] | None = None) -> float:
         """Calculate history score based on frequency and recency"""
         # Placeholder implementation - would integrate with habit store
         if not context:
@@ -111,19 +110,19 @@ class ReflexPolicy:
 
         return (freq_score * 0.6 + recency_score * 0.4)
 
-    def _calculate_abuse_score(self, context: Optional[Dict[str, any]] = None) -> float:
+    def _calculate_abuse_score(self, context: dict[str, any] | None = None) -> float:
         """Calculate abuse score - placeholder for SafetyGuard integration"""
         # Placeholder - would integrate with abuse detection
         return 0.0
 
-    def decide(self, scores: Dict[str, Optional[float]], context: Optional[Dict[str, any]] = None) -> Tuple[str, float]:
+    def decide(self, scores: dict[str, float | None], context: dict[str, any] | None = None) -> tuple[str, float]:
         """
         Make decision based on multi-score analysis.
-        
+
         Args:
             scores: Dict with pattern_score, context_score, history_score, abuse_score
             context: Additional context for scoring
-            
+
         Returns:
             decision: str - "allow_reflex" or "fallback"
             confidence: float - confidence of decision (0-1)
@@ -169,7 +168,7 @@ class ReflexPolicy:
 
         return decision, round(confidence, 3)
 
-    def get_breakdown(self, scores: Dict[str, Optional[float]], context: Optional[Dict[str, any]] = None) -> Dict[str, any]:
+    def get_breakdown(self, scores: dict[str, float | None], context: dict[str, any] | None = None) -> dict[str, any]:
         """Get detailed breakdown of decision making process"""
         # Create a copy to avoid modifying original scores
         scores_copy = scores.copy()

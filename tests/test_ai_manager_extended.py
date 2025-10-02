@@ -1,8 +1,12 @@
 # tests/test_ai_manager_extended.py
 import re
 
-from stillme_core import controller, dev_agent, set_mode, warmup
+# Import controller function directly from __init__.py
+import stillme_core
+from stillme_core import dev_agent, set_mode, warmup
 from stillme_core.ai_manager import health
+
+controller_func = stillme_core.controller
 
 
 def _ok_health():
@@ -52,6 +56,6 @@ def test_think_pipeline_ok():
     set_mode("think")
     warmup()
     # kiểm tra OI stream + fallback hoạt động (không treo, có text)
-    res = controller().run_prompt_debug("In one short bullet, say hi.")
+    res = controller_func().run_prompt_debug("In one short bullet, say hi.")
     assert res["status"] == "ok"
     assert isinstance(res.get("text"), str) and len(res["text"].strip()) > 0

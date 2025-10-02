@@ -114,7 +114,7 @@ async def test_pre_filter_content_safe(content_filter_instance):
     is_safe, reason, severity = await content_filter_instance.pre_filter_content(
         content_text, source_url
     )
-    assert is_safe == True
+    assert is_safe
     assert "Vượt qua kiểm tra tiền lọc" in reason
     assert severity == Severity.LOW
 
@@ -126,7 +126,7 @@ async def test_pre_filter_content_forbidden_keyword(content_filter_instance):
     is_safe, reason, severity = await content_filter_instance.pre_filter_content(
         content_text
     )
-    assert is_safe == False
+    assert not is_safe
     assert "chứa từ khóa cấm" in reason.lower()
     assert severity == Severity.CRITICAL
 
@@ -139,7 +139,7 @@ async def test_pre_filter_content_unreliable_source(content_filter_instance):
     is_safe, reason, severity = await content_filter_instance.pre_filter_content(
         content_text, source_url
     )
-    assert is_safe == False
+    assert not is_safe
     assert "không đáng tin cậy" in reason.lower()
     assert severity == Severity.HIGH
 
@@ -151,7 +151,7 @@ async def test_pre_filter_content_too_short(content_filter_instance):
     is_safe, reason, severity = await content_filter_instance.pre_filter_content(
         content_text
     )
-    assert is_safe == False
+    assert not is_safe
     assert "quá ngắn" in reason.lower()
     assert severity == Severity.LOW
 
@@ -249,7 +249,7 @@ async def test_fact_check_content_factual(
         await content_filter_instance.fact_check_content(content_text)
     )
 
-    assert is_factual == True
+    assert is_factual
     assert confidence > 0.9
     assert "chính xác" in reason
     assert misinformation_detected == []
@@ -277,7 +277,7 @@ async def test_fact_check_content_misinformation(
         await content_filter_instance.fact_check_content(content_text)
     )
 
-    assert is_factual == False
+    assert not is_factual
     assert confidence < 0.3
     assert "Trái đất không phải là phẳng" in reason
     assert "Trái đất phẳng" in misinformation_detected
@@ -300,7 +300,7 @@ async def test_fact_check_content_llm_error_fallback(
         await content_filter_instance.fact_check_content(content_text)
     )
 
-    assert is_factual == False  # Giá trị mặc định an toàn
+    assert not is_factual  # Giá trị mặc định an toàn
     assert confidence == 0.0  # Giá trị mặc định an toàn
     assert "Lỗi phân tích LLM" in reason
     assert misinformation_detected == []
@@ -345,11 +345,11 @@ async def test_filter_content_fully_safe(
         content_id, content_text, source_url
     )
 
-    assert is_safe == True
+    assert is_safe
     assert reason == "Nội dung an toàn."
     assert severity == Severity.LOW
     assert analysis["quality_analysis"]["toxicity_score"] < 0.1
-    assert analysis["fact_check"]["is_factual"] == True
+    assert analysis["fact_check"]["is_factual"]
     mock_violation_logger.warning.assert_not_called()
     assert mock_openrouter_client_fixture.chat_completion.call_count == 2
     mock_openrouter_client_fixture.chat_completion.reset_mock()
@@ -369,7 +369,7 @@ async def test_filter_content_pre_filter_blocked_critical(
         content_id, content_text, source_url
     )
 
-    assert is_safe == False
+    assert not is_safe
     assert "từ khóa cấm" in reason.lower()
     assert severity == Severity.CRITICAL
     mock_violation_logger.warning.assert_called_once()
@@ -423,7 +423,7 @@ async def test_filter_content_quality_violation_and_fact_check(
         content_id, content_text
     )
 
-    assert is_safe == False
+    assert not is_safe
     assert "độc hại" in reason.lower()
     assert "thông tin sai lệch" in reason.lower()
     assert severity == Severity.HIGH  # Toxicity HIGH, Misinformation HIGH, max là HIGH

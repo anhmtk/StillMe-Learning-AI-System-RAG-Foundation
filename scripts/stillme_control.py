@@ -7,7 +7,6 @@ Script điều khiển chính cho tất cả chức năng của StillMe
 import argparse
 import subprocess
 import sys
-from pathlib import Path
 
 
 def main():
@@ -16,13 +15,13 @@ def main():
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
 
     # Start real learning system
-    start_parser = subparsers.add_parser("start", help="Start real learning system")
+    subparsers.add_parser("start", help="Start real learning system")
 
     # Start background service
-    background_parser = subparsers.add_parser("background", help="Start background service (auto-discovery)")
+    subparsers.add_parser("background", help="Start background service (auto-discovery)")
 
     # Discover knowledge
-    discover_parser = subparsers.add_parser("discover", help="Discover new knowledge")
+    subparsers.add_parser("discover", help="Discover new knowledge")
 
     # Add manual knowledge
     add_parser = subparsers.add_parser("add", help="Add manual knowledge")
@@ -41,14 +40,14 @@ def main():
     quick_parser.add_argument("--url", help="Source URL (optional)")
 
     # Start automation
-    auto_parser = subparsers.add_parser("automation", help="Start smart automation")
+    subparsers.add_parser("automation", help="Start smart automation")
 
     # Launch dashboard
     dashboard_parser = subparsers.add_parser("dashboard", help="Launch dashboard")
     dashboard_parser.add_argument("--port", type=int, default=8506, help="Dashboard port")
 
     # Setup notifications
-    notify_parser = subparsers.add_parser("setup-notifications", help="Setup email and Telegram notifications")
+    subparsers.add_parser("setup-notifications", help="Setup email and Telegram notifications")
 
     # Windows Service management
     service_parser = subparsers.add_parser("service", help="Manage Windows Service")

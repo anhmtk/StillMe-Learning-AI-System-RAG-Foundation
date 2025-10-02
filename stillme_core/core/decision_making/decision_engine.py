@@ -13,7 +13,7 @@ import uuid
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -72,9 +72,9 @@ class DecisionContext:
     urgency: str
     business_impact: str
     technical_complexity: str
-    resource_requirements: Dict[str, Any]
-    constraints: List[str]
-    stakeholders: List[str]
+    resource_requirements: dict[str, Any]
+    constraints: list[str]
+    stakeholders: list[str]
 
 
 @dataclass
@@ -84,11 +84,11 @@ class DecisionOption:
     option_id: str
     name: str
     description: str
-    criteria_scores: Dict[str, float]
+    criteria_scores: dict[str, float]
     overall_score: float
     risk_assessment: RiskLevel
-    implementation_plan: Dict[str, Any]
-    rollback_plan: Dict[str, Any]
+    implementation_plan: dict[str, Any]
+    rollback_plan: dict[str, Any]
     estimated_effort: float
     estimated_impact: float
 
@@ -100,14 +100,14 @@ class DecisionOutcome:
     decision_id: str
     context: DecisionContext
     selected_option: DecisionOption
-    alternatives: List[DecisionOption]
+    alternatives: list[DecisionOption]
     decision_rationale: str
     confidence_score: float
-    risk_mitigation: List[str]
+    risk_mitigation: list[str]
     implementation_status: DecisionStatus
-    validation_results: Optional[Dict[str, Any]] = None
+    validation_results: dict[str, Any] | None = None
     ethical_approval: bool = True
-    audit_trail: Optional[List[Dict[str, Any]]] = None
+    audit_trail: list[dict[str, Any]] | None = None
 
 
 class DecisionEngine:
@@ -115,12 +115,12 @@ class DecisionEngine:
     Advanced Decision Making Engine with Multi-Criteria Analysis
     """
 
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config_path: str | None = None):
         self.config_path = config_path or ".decision_config.json"
-        self.decision_history: List[DecisionOutcome] = []
-        self.criteria_weights: Dict[str, float] = {}
-        self.ethical_boundaries: List[str] = []
-        self.performance_metrics: Dict[str, List[float]] = {}
+        self.decision_history: list[DecisionOutcome] = []
+        self.criteria_weights: dict[str, float] = {}
+        self.ethical_boundaries: list[str] = []
+        self.performance_metrics: dict[str, list[float]] = {}
 
         # Load configuration
         self._load_configuration()
@@ -200,8 +200,8 @@ class DecisionEngine:
     def make_decision(
         self,
         decision_type: DecisionType,
-        options: List[Dict[str, Any]],
-        context: Dict[str, Any],
+        options: list[dict[str, Any]],
+        context: dict[str, Any],
     ) -> DecisionOutcome:
         """
         Make a decision using multi-criteria analysis
@@ -313,8 +313,8 @@ class DecisionEngine:
             )
 
     def _evaluate_options(
-        self, options: List[Dict[str, Any]], context: DecisionContext
-    ) -> List[DecisionOption]:
+        self, options: list[dict[str, Any]], context: DecisionContext
+    ) -> list[DecisionOption]:
         """Evaluate options using multi-criteria analysis"""
         evaluated_options = []
 
@@ -358,8 +358,8 @@ class DecisionEngine:
         return evaluated_options
 
     def _calculate_criteria_scores(
-        self, option_data: Dict[str, Any], context: DecisionContext
-    ) -> Dict[str, float]:
+        self, option_data: dict[str, Any], context: DecisionContext
+    ) -> dict[str, float]:
         """Calculate scores for each criteria"""
         scores = {}
 
@@ -392,7 +392,7 @@ class DecisionEngine:
         return scores
 
     def _calculate_security_score(
-        self, option_data: Dict[str, Any], context: DecisionContext
+        self, option_data: dict[str, Any], context: DecisionContext
     ) -> float:
         """Calculate security score for an option"""
         base_score = 0.5  # Neutral score
@@ -416,7 +416,7 @@ class DecisionEngine:
         return max(0.0, min(1.0, base_score))
 
     def _calculate_performance_score(
-        self, option_data: Dict[str, Any], context: DecisionContext
+        self, option_data: dict[str, Any], context: DecisionContext
     ) -> float:
         """Calculate performance score for an option"""
         base_score = 0.5
@@ -442,7 +442,7 @@ class DecisionEngine:
         return max(0.0, min(1.0, base_score))
 
     def _calculate_maintainability_score(
-        self, option_data: Dict[str, Any], context: DecisionContext
+        self, option_data: dict[str, Any], context: DecisionContext
     ) -> float:
         """Calculate maintainability score for an option"""
         base_score = 0.5
@@ -468,7 +468,7 @@ class DecisionEngine:
         return max(0.0, min(1.0, base_score))
 
     def _calculate_business_value_score(
-        self, option_data: Dict[str, Any], context: DecisionContext
+        self, option_data: dict[str, Any], context: DecisionContext
     ) -> float:
         """Calculate business value score for an option"""
         base_score = 0.5
@@ -497,7 +497,7 @@ class DecisionEngine:
         return max(0.0, min(1.0, base_score))
 
     def _calculate_resource_efficiency_score(
-        self, option_data: Dict[str, Any], context: DecisionContext
+        self, option_data: dict[str, Any], context: DecisionContext
     ) -> float:
         """Calculate resource efficiency score for an option"""
         base_score = 0.5
@@ -521,7 +521,7 @@ class DecisionEngine:
         return max(0.0, min(1.0, base_score))
 
     def _calculate_user_experience_score(
-        self, option_data: Dict[str, Any], context: DecisionContext
+        self, option_data: dict[str, Any], context: DecisionContext
     ) -> float:
         """Calculate user experience score for an option"""
         base_score = 0.5
@@ -543,7 +543,7 @@ class DecisionEngine:
 
         return max(0.0, min(1.0, base_score))
 
-    def _calculate_overall_score(self, criteria_scores: Dict[str, float]) -> float:
+    def _calculate_overall_score(self, criteria_scores: dict[str, float]) -> float:
         """Calculate overall weighted score"""
         total_score = 0.0
         total_weight = 0.0
@@ -556,7 +556,7 @@ class DecisionEngine:
         return total_score / total_weight if total_weight > 0 else 0.0
 
     def _assess_risk_level(
-        self, option_data: Dict[str, Any], criteria_scores: Dict[str, float]
+        self, option_data: dict[str, Any], criteria_scores: dict[str, float]
     ) -> RiskLevel:
         """Assess risk level for an option"""
         risk_factors = 0
@@ -584,8 +584,8 @@ class DecisionEngine:
             return RiskLevel.LOW
 
     def _create_implementation_plan(
-        self, option_data: Dict[str, Any], context: DecisionContext
-    ) -> Dict[str, Any]:
+        self, option_data: dict[str, Any], context: DecisionContext
+    ) -> dict[str, Any]:
         """Create implementation plan for an option"""
         return {
             "steps": option_data.get("implementation_steps", []),
@@ -597,8 +597,8 @@ class DecisionEngine:
         }
 
     def _create_rollback_plan(
-        self, option_data: Dict[str, Any], context: DecisionContext
-    ) -> Dict[str, Any]:
+        self, option_data: dict[str, Any], context: DecisionContext
+    ) -> dict[str, Any]:
         """Create rollback plan for an option"""
         return {
             "rollback_triggers": option_data.get("rollback_triggers", []),
@@ -609,7 +609,7 @@ class DecisionEngine:
         }
 
     def _estimate_effort(
-        self, option_data: Dict[str, Any], context: DecisionContext
+        self, option_data: dict[str, Any], context: DecisionContext
     ) -> float:
         """Estimate effort required for an option"""
         base_effort = 1.0  # Base effort in person-days
@@ -631,7 +631,7 @@ class DecisionEngine:
         return base_effort
 
     def _estimate_impact(
-        self, option_data: Dict[str, Any], context: DecisionContext
+        self, option_data: dict[str, Any], context: DecisionContext
     ) -> float:
         """Estimate impact of an option"""
         base_impact = 0.5  # Neutral impact
@@ -653,8 +653,8 @@ class DecisionEngine:
         return max(0.0, min(1.0, base_impact))
 
     def _apply_ethical_filter(
-        self, options: List[DecisionOption], context: DecisionContext
-    ) -> List[DecisionOption]:
+        self, options: list[DecisionOption], context: DecisionContext
+    ) -> list[DecisionOption]:
         """Apply ethical guardrails to filter options"""
         ethical_options = []
 
@@ -695,7 +695,7 @@ class DecisionEngine:
         return True  # Default to allowing if no specific check
 
     def _select_best_option(
-        self, options: List[DecisionOption], context: DecisionContext
+        self, options: list[DecisionOption], context: DecisionContext
     ) -> DecisionOption:
         """Select the best option based on scores and risk assessment"""
         if not options:
@@ -722,7 +722,7 @@ class DecisionEngine:
 
     def _validate_decision(
         self, option: DecisionOption, context: DecisionContext
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Validate the selected decision"""
         validation_result = {"valid": True, "checks": [], "warnings": [], "errors": []}
 
@@ -749,7 +749,7 @@ class DecisionEngine:
         return validation_result
 
     def _generate_rationale(
-        self, selected_option: DecisionOption, alternatives: List[DecisionOption]
+        self, selected_option: DecisionOption, alternatives: list[DecisionOption]
     ) -> str:
         """Generate decision rationale"""
         rationale = f"Selected '{selected_option.name}' with overall score {selected_option.overall_score:.2f} "
@@ -766,7 +766,7 @@ class DecisionEngine:
         return rationale
 
     def _calculate_confidence(
-        self, selected_option: DecisionOption, alternatives: List[DecisionOption]
+        self, selected_option: DecisionOption, alternatives: list[DecisionOption]
     ) -> float:
         """Calculate confidence in the decision"""
         if not alternatives:
@@ -791,7 +791,7 @@ class DecisionEngine:
         )
         return max(0.1, min(0.95, confidence))
 
-    def _generate_risk_mitigation(self, option: DecisionOption) -> List[str]:
+    def _generate_risk_mitigation(self, option: DecisionOption) -> list[str]:
         """Generate risk mitigation strategies"""
         mitigations = []
 
@@ -845,7 +845,7 @@ class DecisionEngine:
         )
 
     def _log_decision_event(
-        self, decision_id: str, event_type: str, data: Dict[str, Any]
+        self, decision_id: str, event_type: str, data: dict[str, Any]
     ):
         """Log decision events for audit trail"""
         event = {
@@ -858,7 +858,7 @@ class DecisionEngine:
         # In a real implementation, you'd log to a proper audit system
         logger.info(f"Decision Event: {event}")
 
-    def _get_audit_trail(self, decision_id: str) -> List[Dict[str, Any]]:
+    def _get_audit_trail(self, decision_id: str) -> list[dict[str, Any]]:
         """Get audit trail for a decision"""
         # This would typically query an audit log system
         return [
@@ -886,11 +886,11 @@ class DecisionEngine:
                 self.performance_metrics["decision_success_rate"][-100:]
             )
 
-    def get_decision_history(self, limit: int = 50) -> List[DecisionOutcome]:
+    def get_decision_history(self, limit: int = 50) -> list[DecisionOutcome]:
         """Get recent decision history"""
         return self.decision_history[-limit:]
 
-    def get_performance_metrics(self) -> Dict[str, Any]:
+    def get_performance_metrics(self) -> dict[str, Any]:
         """Get performance metrics"""
         metrics = {}
 
@@ -908,7 +908,7 @@ class DecisionEngine:
 
         return metrics
 
-    def update_criteria_weights(self, new_weights: Dict[str, float]):
+    def update_criteria_weights(self, new_weights: dict[str, float]):
         """Update criteria weights"""
         self.criteria_weights.update(new_weights)
         self._save_configuration()

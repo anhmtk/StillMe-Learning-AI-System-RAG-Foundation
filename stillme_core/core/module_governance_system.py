@@ -9,65 +9,34 @@ Version: 1.0.0
 Phase: 1.2 - Module Governance System
 """
 
-import os
+import asyncio
 import json
 import logging
-import asyncio
+import os
 import threading
 import time
-from pathlib import Path
-from typing import Dict, List, Set, Tuple, Optional, Any, Union
-from dataclasses import dataclass, asdict
-from datetime import datetime, timedelta
+from dataclasses import asdict, dataclass
+from datetime import datetime
 from enum import Enum
-import importlib
-import inspect
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
 import psutil
-import subprocess
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 # Import Phase 0 security modules
 try:
-    from .security_middleware import SecurityMiddleware  # type: ignore
-try:
-try:
-try:
-try:
-try:
-                        from .performance_monitor import PerformanceMonitor
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
     from .integration_bridge import IntegrationBridge  # type: ignore
     from .memory_security_integration import MemorySecurityIntegration  # type: ignore
+    from .performance_monitor import PerformanceMonitor
+    from .security_middleware import SecurityMiddleware  # type: ignore
 except ImportError:
     try:
-        from stillme_core.security_middleware import SecurityMiddleware  # type: ignore
-try:
-try:
-try:
-try:
-try:
-                            from stillme_core.performance_monitor import PerformanceMonitor
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
         from stillme_core.integration_bridge import IntegrationBridge  # type: ignore
-        from stillme_core.memory_security_integration import MemorySecurityIntegration  # type: ignore
+        from stillme_core.memory_security_integration import (
+            MemorySecurityIntegration,  # type: ignore
+        )
+        from stillme_core.performance_monitor import PerformanceMonitor
+        from stillme_core.security_middleware import SecurityMiddleware  # type: ignore
     except ImportError:
         # Create mock classes for testing
         class SecurityMiddleware:
@@ -338,7 +307,7 @@ class ModuleGovernanceSystem:
             config_file = Path("config/module_governance_config.json")
 
             if config_file.exists():
-                with open(config_file, "r") as f:
+                with open(config_file) as f:
                     config_data = json.load(f)
 
                 for module_name, config in config_data.items():

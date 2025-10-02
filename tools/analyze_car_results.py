@@ -5,10 +5,8 @@ Phân tích kết quả K6 CAR test để tạo báo cáo throughput tuning
 """
 
 import json
-import os
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List
 
 
 @dataclass
@@ -44,7 +42,7 @@ class CARResultsAnalyzer:
             with open(self.results_path) as f:
                 self.results_data = [json.loads(line) for line in f if line.strip()]
 
-    def extract_metrics(self) -> List[TestMetrics]:
+    def extract_metrics(self) -> list[TestMetrics]:
         """Extract metrics for each RPS level"""
         metrics = []
 
@@ -87,15 +85,15 @@ class CARResultsAnalyzer:
 
     def generate_report(self) -> str:
         """Generate throughput tuning report"""
-        metrics = self.extract_metrics()
+        self.extract_metrics()
 
         report = f"""# 📊 Throughput Tuning Report - K6 CAR Test Results
 
 ## 🎯 Test Overview
 
-**Test Type**: K6 Constant Arrival Rate (CAR) Test  
-**Target RPS**: 200 → 300 → 400 RPS  
-**Test Duration**: 10 minutes total  
+**Test Type**: K6 Constant Arrival Rate (CAR) Test
+**Target RPS**: 200 → 300 → 400 RPS
+**Test Duration**: 10 minutes total
 **Date**: {self.summary_data.get('root_group', {}).get('startTime', 'N/A')}
 
 ## 📈 Performance Results

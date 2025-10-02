@@ -17,7 +17,7 @@ import time
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import networkx as nx
 import psutil
@@ -39,12 +39,12 @@ class ModuleInfo:
     function_count: int
     class_count: int
     import_count: int
-    dependencies: List[str]
-    dependents: List[str]
+    dependencies: list[str]
+    dependents: list[str]
     last_modified: datetime
     health_score: float
-    performance_metrics: Dict[str, Any]
-    security_issues: List[str]
+    performance_metrics: dict[str, Any]
+    security_issues: list[str]
     documentation_quality: float
 
 
@@ -64,12 +64,12 @@ class EcosystemHealth:
     """Tổng quan health của ecosystem"""
 
     overall_score: float
-    critical_issues: List[str]
-    performance_bottlenecks: List[str]
-    security_vulnerabilities: List[str]
-    circular_dependencies: List[List[str]]
-    unused_modules: List[str]
-    recommendations: List[str]
+    critical_issues: list[str]
+    performance_bottlenecks: list[str]
+    security_vulnerabilities: list[str]
+    circular_dependencies: list[list[str]]
+    unused_modules: list[str]
+    recommendations: list[str]
 
 
 class StillMeEcosystemDiscovery:
@@ -79,7 +79,7 @@ class StillMeEcosystemDiscovery:
 
     def __init__(self, root_path: str = "."):
         self.root_path = Path(root_path)
-        self.modules: Dict[str, ModuleInfo] = {}
+        self.modules: dict[str, ModuleInfo] = {}
         self.dependency_graph = nx.DiGraph()
         self.health_metrics = {}
         self.monitoring_active = False
@@ -114,7 +114,7 @@ class StillMeEcosystemDiscovery:
             "error_rate": 5.0,  # percentage
         }
 
-    def discover_all_modules(self) -> Dict[str, ModuleInfo]:
+    def discover_all_modules(self) -> dict[str, ModuleInfo]:
         """
         Systematic scan toàn bộ codebase để identify modules
         """
@@ -149,7 +149,7 @@ class StillMeEcosystemDiscovery:
 
     def _scan_directory(
         self, directory: Path, module_type: str
-    ) -> Dict[str, ModuleInfo]:
+    ) -> dict[str, ModuleInfo]:
         """Scan một directory để tìm modules"""
         modules = {}
 
@@ -263,11 +263,10 @@ class StillMeEcosystemDiscovery:
 
         return max(0.0, min(100.0, score))
 
-    def _get_performance_metrics(self, file_path: Path) -> Dict[str, Any]:
+    def _get_performance_metrics(self, file_path: Path) -> dict[str, Any]:
         """Lấy performance metrics cho module"""
         try:
             # Try to import and measure
-            module_name = file_path.stem
             start_time = time.time()
 
             # This is a simplified version - in real implementation,
@@ -288,7 +287,7 @@ class StillMeEcosystemDiscovery:
                 "last_accessed": datetime.now().isoformat(),
             }
 
-    def _analyze_security(self, content: str) -> List[str]:
+    def _analyze_security(self, content: str) -> list[str]:
         """Phân tích security issues trong code"""
         issues = []
 
@@ -378,7 +377,7 @@ class StillMeEcosystemDiscovery:
 
         return None
 
-    def analyze_circular_dependencies(self) -> List[List[str]]:
+    def analyze_circular_dependencies(self) -> list[list[str]]:
         """Phát hiện circular dependencies"""
         try:
             cycles = list(nx.simple_cycles(self.dependency_graph))
@@ -388,7 +387,7 @@ class StillMeEcosystemDiscovery:
             logger.error(f"❌ Error analyzing circular dependencies: {e}")
             return []
 
-    def calculate_complexity_metrics(self) -> Dict[str, Any]:
+    def calculate_complexity_metrics(self) -> dict[str, Any]:
         """Tính toán complexity metrics"""
         metrics = {
             "total_modules": len(self.modules),
@@ -492,7 +491,7 @@ class StillMeEcosystemDiscovery:
         if alerts:
             logger.warning(f"🚨 ALERTS: {'; '.join(alerts)}")
 
-    def generate_ecosystem_report(self) -> Dict[str, Any]:
+    def generate_ecosystem_report(self) -> dict[str, Any]:
         """Tạo comprehensive ecosystem report"""
         logger.info("📊 Generating ecosystem report...")
 
@@ -547,7 +546,7 @@ class StillMeEcosystemDiscovery:
         logger.info("✅ Ecosystem report generated")
         return report
 
-    def _generate_recommendations(self) -> List[str]:
+    def _generate_recommendations(self) -> list[str]:
         """Tạo recommendations dựa trên analysis"""
         recommendations = []
 
@@ -589,7 +588,7 @@ class StillMeEcosystemDiscovery:
 
         return recommendations
 
-    def save_report(self, report: Dict[str, Any], filename: Optional[str] = None):
+    def save_report(self, report: dict[str, Any], filename: Optional[str] = None):
         """Lưu report ra file"""
         if filename is None:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -610,10 +609,10 @@ def main():
     discovery = StillMeEcosystemDiscovery()
 
     # Discover modules
-    modules = discovery.discover_all_modules()
+    discovery.discover_all_modules()
 
     # Build dependency graph
-    graph = discovery.build_dependency_graph()
+    discovery.build_dependency_graph()
 
     # Generate report
     report = discovery.generate_ecosystem_report()

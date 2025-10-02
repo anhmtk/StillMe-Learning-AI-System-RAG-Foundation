@@ -9,39 +9,39 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any, Optional
 
-from dotenv import load_dotenv  # type: ignore
-from jsonschema import validate  # type: ignore
+from dotenv import load_dotenv
+from jsonschema import validate
 import datetime as _dt
 from pathlib import Path as _Path
-from stillme_core.ai_manager import AIManager as _AIManager  # type: ignore
-from stillme_core.bug_memory import BugMemory as _BugMemory  # type: ignore
-from stillme_core.executor import PatchExecutor as _PatchExecutor  # type: ignore
-from stillme_core.plan_types import PlanItem as _PlanItem  # type: ignore
-from stillme_core.planner import Planner as _Planner  # type: ignore
+from stillme_core.ai_manager import AIManager as _AIManager
+from stillme_core.bug_memory import BugMemory as _BugMemory
+from stillme_core.executor import PatchExecutor as _PatchExecutor
+from stillme_core.plan_types import PlanItem as _PlanItem
+from stillme_core.core.planner import Planner as _Planner
 
 # Ensure local modules path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "modules")))
 
-from stillme_core.git_manager import GitManager  # type: ignore
-from stillme_core.planner import Planner  # type: ignore
-from stillme_core.sandbox_manager import DockerSandboxManager  # type: ignore
+from stillme_core.core.git_manager import GitManager
+from stillme_core.core.planner import Planner
+from stillme_core.core.sandbox_manager import DockerSandboxManager
 
 # Core components
-from stillme_ethical_core.ethics_checker import EthicsChecker  # type: ignore
+from stillme_ethical_core.ethics_checker import EthicsChecker
 
 # --- Bridge: AgentDev -> API server (/dev-agent/bridge)
 try:
-    from stillme_core.agent_dev_bridge import (  # type: ignore
-        DevAgentBridge as _RealDevAgentBridge,  # type: ignore
+    from stillme_core.core.agent_dev_bridge import (
+        DevAgentBridge as _RealDevAgentBridge,
     )
-    DevAgentBridge = _RealDevAgentBridge  # type: ignore[assignment]
+    DevAgentBridge = _RealDevAgentBridge
 except Exception:
     class _DevAgentBridgeStub:
         def __init__(self, *args, **kwargs):
             pass
         async def ask(self, *args, **kwargs):
             raise RuntimeError("DevAgentBridge unavailable. Ensure stillme_core/agent_dev_bridge.py exists.")
-    DevAgentBridge = _DevAgentBridgeStub  # type: ignore[assignment]
+    DevAgentBridge = _DevAgentBridgeStub
 
 
 # Backup framework.py before run
@@ -105,7 +105,7 @@ if not hasattr(EthicsChecker, "assess_framework_safety"):
         # very light safeguard example; customize later
         danger = ("subprocess.run(  # SECURITY: Replaced with safe alternative" in new_code) or ("subprocess.Popen(" in new_code)
         return not danger
-    # EthicsChecker.assess_framework_safety = _assess_framework_safety_stub  # type: ignore
+    # EthicsChecker.assess_framework_safety = _assess_framework_safety_stub
 
 class AgentDev:
     def __init__(self, problem_description: str, problem_file: str):
@@ -129,8 +129,9 @@ class AgentDev:
     # ---------- File helpers (work with/without sandbox methods) ----------
     def _read_file(self, path: str) -> str:
         try:
-            if hasattr(self.sandbox, "read_file_content"):
-                return self.sandbox.read_file_content(path)  # type: ignore[attr-defined]
+            if hasattr(self.sandbox, "get_file_content"):
+                content = self.sandbox.get_file_content(path)
+                return content or ""
         except Exception:
             pass
         p = Path(path)
@@ -139,7 +140,7 @@ class AgentDev:
     def _write_file(self, path: str, content: str) -> bool:
         try:
             if hasattr(self.sandbox, "write_file_content"):
-                ok = self.sandbox.write_file_content(path, content)  # type: ignore[attr-defined]
+                ok = self.sandbox.write_file_content(path, content)
                 return bool(ok)
         except Exception:
             pass
@@ -228,7 +229,7 @@ JSON_SCHEMA:
             ok = True
             if hasattr(self.ethics_checker, "assess_framework_safety"):
                 try:
-                    ok = bool(self.ethics_checker.assess_framework_safety(old_code, code_to_apply))  # type: ignore[misc]
+                    ok = bool(self.ethics_checker.assess_framework_safety(old_code, code_to_apply))
                 except Exception:
                     ok = True
             if not ok:
@@ -501,26 +502,31 @@ def agentdev_run_once(
     Returns: True on success; False/None on fail.
     """
     # Defaults for real run, tests may inject fakes
-    planner = planner or _Planner()
+    actual_planner: _Planner = planner if isinstance(planner, _Planner) else _Planner()
     actual_executor: _PatchExecutor = executor or _PatchExecutor()
     actual_bug_memory: _BugMemory = bug_memory or _BugMemory()
 
     # Build plan items
     items = None
-    if hasattr(planner, "build_plan"):
+    if hasattr(actual_planner, "build_plan"):
         try:
-            items = planner.build_plan()  # type: ignore
+            items = actual_planner.build_plan()
         except Exception:
             items = None
     if items is None:
         # Fallback: derive a trivial PlanItem from normalized plan
-        plan = getattr(planner, "create_plan", None)
+        plan = getattr(actual_planner, "create_plan", None)
         if callable(plan):
-            raw = planner.create_plan("Dry-run: analyze and propose a tiny fix")  # type: ignore
+            raw = actual_planner.create_plan("Dry-run: analyze and propose a tiny fix")
             steps = (raw or {}).get("steps", [])
             if steps:
                 items = [
-                    _PlanItem(id=str(steps[0].get("step_id", "1")), title="auto-step")  # type: ignore
+                    _PlanItem(
+                        id=str(steps[0].get("step_id", "1")), 
+                        title="auto-step",
+                        description="Auto-generated step",
+                        steps=[]
+                    )
                 ]
             else:
                 items = []

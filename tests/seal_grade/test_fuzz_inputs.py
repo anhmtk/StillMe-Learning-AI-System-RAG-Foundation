@@ -8,7 +8,7 @@ import asyncio
 import json
 
 import pytest
-from hypothesis import given, settings, HealthCheck
+from hypothesis import HealthCheck, given, settings
 from hypothesis import strategies as st
 
 from stillme_core.modules.layered_memory_v1 import LayeredMemoryV1

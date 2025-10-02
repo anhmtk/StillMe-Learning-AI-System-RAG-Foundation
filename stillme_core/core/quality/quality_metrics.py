@@ -11,7 +11,7 @@ import statistics
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from stillme_core.quality.code_quality_enforcer import QualityIssue, QualityReport
 
@@ -24,8 +24,8 @@ class QualityTrend:
     period_end: datetime
     quality_score: float
     total_issues: int
-    issues_by_severity: Dict[str, int]
-    issues_by_tool: Dict[str, int]
+    issues_by_severity: dict[str, int]
+    issues_by_tool: dict[str, int]
     files_analyzed: int
     auto_fixes_applied: int
 
@@ -163,7 +163,7 @@ class QualityMetrics:
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
         limit: Optional[int] = None,
-    ) -> List[QualityReport]:
+    ) -> list[QualityReport]:
         """Get quality reports from database"""
         query = "SELECT report_data FROM quality_reports WHERE 1=1"
         params = []
@@ -207,7 +207,7 @@ class QualityMetrics:
 
     def get_quality_trends(
         self, target_path: str, days: int = 30, group_by: str = "day"
-    ) -> List[QualityTrend]:
+    ) -> list[QualityTrend]:
         """Get quality trends over time"""
         end_date = datetime.now()
         start_date = end_date - timedelta(days=days)
@@ -219,11 +219,14 @@ class QualityMetrics:
 
         # Group reports by time period
         if group_by == "day":
-            group_key = lambda r: r.timestamp.date()
+            def group_key(r):
+                return r.timestamp.date()
         elif group_by == "week":
-            group_key = lambda r: r.timestamp.isocalendar()[:2]  # (year, week)
+            def group_key(r):
+                return r.timestamp.isocalendar()[:2]  # (year, week)
         elif group_by == "month":
-            group_key = lambda r: (r.timestamp.year, r.timestamp.month)
+            def group_key(r):
+                return (r.timestamp.year, r.timestamp.month)
         else:
             raise ValueError(f"Invalid group_by: {group_by}")
 
@@ -274,7 +277,7 @@ class QualityMetrics:
 
         return sorted(trends, key=lambda t: t.period_start)
 
-    def get_quality_summary(self, target_path: str, days: int = 7) -> Dict[str, Any]:
+    def get_quality_summary(self, target_path: str, days: int = 7) -> dict[str, Any]:
         """Get quality summary for recent period"""
         end_date = datetime.now()
         start_date = end_date - timedelta(days=days)
@@ -377,7 +380,7 @@ class QualityMetrics:
 
     def get_comparison_report(
         self, target_path: str, baseline_days: int = 30, current_days: int = 7
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Compare current quality with baseline"""
         end_date = datetime.now()
         current_start = end_date - timedelta(days=current_days)
@@ -496,7 +499,7 @@ class QualityMetrics:
         with open(output_path, "w", encoding="utf-8") as f:
             json.dump(export_data, f, indent=2, ensure_ascii=False)
 
-    def get_quality_dashboard_data(self, target_path: str) -> Dict[str, Any]:
+    def get_quality_dashboard_data(self, target_path: str) -> dict[str, Any]:
         """Get data for quality dashboard"""
         # Get recent trends
         trends = self.get_quality_trends(target_path, days=30, group_by="day")

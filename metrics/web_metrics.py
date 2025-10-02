@@ -4,7 +4,7 @@ import logging
 import time
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class WebMetricsCollector:
 
     def __init__(self):
         self.logger = logger
-        self.requests: List[WebRequest] = []
+        self.requests: list[WebRequest] = []
         self.metrics_cache: Optional[WebMetrics] = None
         self.cache_timestamp = 0
         self.cache_duration = 60  # Cache for 1 minute
@@ -105,27 +105,27 @@ class WebMetricsCollector:
         self.cache_timestamp = current_time
         return self.metrics_cache
 
-    def get_requests_by_status(self, status_code: int) -> List[WebRequest]:
+    def get_requests_by_status(self, status_code: int) -> list[WebRequest]:
         """Get requests filtered by status code"""
         return [r for r in self.requests if r.status_code == status_code]
 
-    def get_requests_by_method(self, method: str) -> List[WebRequest]:
+    def get_requests_by_method(self, method: str) -> list[WebRequest]:
         """Get requests filtered by HTTP method"""
         return [r for r in self.requests if r.method == method.upper()]
 
-    def get_requests_by_url_pattern(self, pattern: str) -> List[WebRequest]:
+    def get_requests_by_url_pattern(self, pattern: str) -> list[WebRequest]:
         """Get requests filtered by URL pattern"""
         return [r for r in self.requests if pattern.lower() in r.url.lower()]
 
-    def get_slow_requests(self, threshold: float = 1.0) -> List[WebRequest]:
+    def get_slow_requests(self, threshold: float = 1.0) -> list[WebRequest]:
         """Get requests that took longer than threshold seconds"""
         return [r for r in self.requests if r.response_time > threshold]
 
-    def get_error_requests(self) -> List[WebRequest]:
+    def get_error_requests(self) -> list[WebRequest]:
         """Get requests that resulted in errors (4xx, 5xx)"""
         return [r for r in self.requests if r.status_code >= 400]
 
-    def get_popular_endpoints(self, limit: int = 10) -> List[Dict[str, Any]]:
+    def get_popular_endpoints(self, limit: int = 10) -> list[dict[str, Any]]:
         """Get most popular endpoints"""
         url_counts = {}
         for request in self.requests:
@@ -136,7 +136,7 @@ class WebMetricsCollector:
 
         return [{"url": url, "count": count} for url, count in sorted_urls[:limit]]
 
-    def get_user_agent_stats(self) -> Dict[str, int]:
+    def get_user_agent_stats(self) -> dict[str, int]:
         """Get user agent statistics"""
         ua_counts = {}
         for request in self.requests:
@@ -145,7 +145,7 @@ class WebMetricsCollector:
 
         return ua_counts
 
-    def export_metrics(self, format: str = "dict") -> Dict[str, Any]:
+    def export_metrics(self, format: str = "dict") -> dict[str, Any]:
         """Export metrics in various formats"""
         metrics = self.get_metrics()
 
@@ -207,6 +207,6 @@ def reset_web_metrics() -> None:
     """Reset global web metrics"""
     _global_collector.reset_metrics()
 
-def export_web_metrics(format: str = "dict") -> Dict[str, Any]:
+def export_web_metrics(format: str = "dict") -> dict[str, Any]:
     """Export global web metrics"""
     return _global_collector.export_metrics(format)

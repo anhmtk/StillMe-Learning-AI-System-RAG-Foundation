@@ -5,7 +5,6 @@ Phát hiện ngôn ngữ theo câu người dùng
 """
 
 import re
-from typing import Dict, List, Optional
 
 
 class LanguageDetector:

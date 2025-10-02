@@ -69,7 +69,7 @@ import logging
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -100,10 +100,10 @@ class AuditEvent:
     message: str
     user_id: Optional[str] = None
     session_id: Optional[str] = None
-    details: Dict[str, Any] = None
-    metadata: Dict[str, Any] = None
+    details: dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary"""
         return asdict(self)
 
@@ -116,7 +116,7 @@ class AuditConfig:
     max_file_size: int = 10 * 1024 * 1024  # 10MB
     backup_count: int = 5
     log_level: AuditLevel = AuditLevel.INFO
-    categories: List[AuditCategory] = None
+    categories: list[AuditCategory] = None
 
     def __post_init__(self):
         if self.categories is None:
@@ -126,7 +126,7 @@ class AuditConfig:
 class AuditLogger:
     """
     Audit Logger - Structured audit logging for compliance and security
-    
+
     This is a stub implementation to resolve F821 errors.
     TODO: Implement full audit features.
     """
@@ -134,7 +134,7 @@ class AuditLogger:
     def __init__(self, config: Optional[AuditConfig] = None):
         """Initialize AuditLogger"""
         self.config = config or AuditConfig()
-        self.events: List[AuditEvent] = []
+        self.events: list[AuditEvent] = []
         self.logger = logging.getLogger(__name__)
         self.logger.info("📋 AuditLogger initialized")
 
@@ -144,11 +144,11 @@ class AuditLogger:
                   message: str,
                   user_id: Optional[str] = None,
                   session_id: Optional[str] = None,
-                  details: Optional[Dict[str, Any]] = None,
-                  metadata: Optional[Dict[str, Any]] = None) -> str:
+                  details: Optional[dict[str, Any]] = None,
+                  metadata: Optional[dict[str, Any]] = None) -> str:
         """
         Log an audit event
-        
+
         Args:
             level: Audit level
             category: Audit category
@@ -157,7 +157,7 @@ class AuditLogger:
             session_id: Session identifier
             details: Event details
             metadata: Additional metadata
-            
+
         Returns:
             Event ID
         """
@@ -202,16 +202,16 @@ class AuditLogger:
                           message: str,
                           level: AuditLevel = AuditLevel.WARNING,
                           user_id: Optional[str] = None,
-                          details: Optional[Dict[str, Any]] = None) -> str:
+                          details: Optional[dict[str, Any]] = None) -> str:
         """
         Log a security-related audit event
-        
+
         Args:
             message: Event message
             level: Audit level
             user_id: User identifier
             details: Event details
-            
+
         Returns:
             Event ID
         """
@@ -227,16 +227,16 @@ class AuditLogger:
                            message: str,
                            level: AuditLevel = AuditLevel.INFO,
                            user_id: Optional[str] = None,
-                           details: Optional[Dict[str, Any]] = None) -> str:
+                           details: Optional[dict[str, Any]] = None) -> str:
         """
         Log a compliance-related audit event
-        
+
         Args:
             message: Event message
             level: Audit level
             user_id: User identifier
             details: Event details
-            
+
         Returns:
             Event ID
         """
@@ -252,16 +252,16 @@ class AuditLogger:
                   category: Optional[AuditCategory] = None,
                   level: Optional[AuditLevel] = None,
                   user_id: Optional[str] = None,
-                  limit: int = 100) -> List[AuditEvent]:
+                  limit: int = 100) -> list[AuditEvent]:
         """
         Get audit events with optional filtering
-        
+
         Args:
             category: Filter by category
             level: Filter by level
             user_id: Filter by user ID
             limit: Maximum number of events to return
-            
+
         Returns:
             List of audit events
         """
@@ -283,10 +283,10 @@ class AuditLogger:
             self.logger.error(f"❌ Error getting audit events: {e}")
             return []
 
-    def get_statistics(self) -> Dict[str, Any]:
+    def get_statistics(self) -> dict[str, Any]:
         """
         Get audit statistics
-        
+
         Returns:
             Statistics dictionary
         """
@@ -332,12 +332,12 @@ class AuditLogger:
                      level: Optional[AuditLevel] = None) -> str:
         """
         Export audit events
-        
+
         Args:
             format_type: Export format (json, csv)
             category: Filter by category
             level: Filter by level
-            
+
         Returns:
             Exported data as string
         """
@@ -378,10 +378,10 @@ class AuditLogger:
     def update_config(self, new_config: AuditConfig) -> bool:
         """
         Update audit configuration
-        
+
         Args:
             new_config: New configuration
-            
+
         Returns:
             True if update successful, False otherwise
         """
@@ -402,11 +402,11 @@ class ComplianceManager:
         self.logger = logging.getLogger(__name__)
         self.logger.info("📋 ComplianceManager initialized (stub)")
 
-    def check_compliance(self, event_data: Dict[str, Any]) -> bool:
+    def check_compliance(self, event_data: dict[str, Any]) -> bool:
         """Check compliance for event data"""
         return True
 
-    def generate_report(self) -> Dict[str, Any]:
+    def generate_report(self) -> dict[str, Any]:
         """Generate compliance report"""
         return {"status": "compliant", "checks": 0}
 
@@ -417,7 +417,7 @@ class PrivacyFilter:
         self.logger = logging.getLogger(__name__)
         self.logger.info("🔒 PrivacyFilter initialized (stub)")
 
-    def filter_sensitive_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def filter_sensitive_data(self, data: dict[str, Any]) -> dict[str, Any]:
         """Filter sensitive data"""
         return data
 

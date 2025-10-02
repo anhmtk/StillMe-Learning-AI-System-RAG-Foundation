@@ -11,12 +11,12 @@ import os
 import re
 import sys
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 import yaml
 
 
-def load_interaction_policy() -> Dict[str, Any]:
+def load_interaction_policy() -> dict[str, Any]:
     """Load INTERACTION_POLICY.yaml policy"""
     policy_path = Path("policies/INTERACTION_POLICY.yaml")
 
@@ -31,7 +31,7 @@ def load_interaction_policy() -> Dict[str, Any]:
         print(f"❌ Failed to load policy: {e}")
         sys.exit(1)
 
-def find_skip_handlers() -> List[Tuple[str, int, str]]:
+def find_skip_handlers() -> list[tuple[str, int, str]]:
     """Find all Skip button handlers in code"""
     skip_handlers = []
 
@@ -50,7 +50,7 @@ def find_skip_handlers() -> List[Tuple[str, int, str]]:
     # File extensions to search
     extensions = ['.py', '.ts', '.tsx', '.js', '.jsx', '.dart']
 
-    for root, dirs, files in os.walk('.'):
+    for root, _dirs, files in os.walk('.'):
         # Skip certain directories
         if any(skip_dir in root for skip_dir in ['.git', '__pycache__', 'node_modules', '.venv']):
             continue
@@ -72,7 +72,7 @@ def find_skip_handlers() -> List[Tuple[str, int, str]]:
 
     return skip_handlers
 
-def find_cancel_calls() -> List[Tuple[str, int, str]]:
+def find_cancel_calls() -> list[tuple[str, int, str]]:
     """Find all cancel() calls in code"""
     cancel_calls = []
 
@@ -89,7 +89,7 @@ def find_cancel_calls() -> List[Tuple[str, int, str]]:
     # File extensions to search
     extensions = ['.py', '.ts', '.tsx', '.js', '.jsx', '.dart']
 
-    for root, dirs, files in os.walk('.'):
+    for root, _dirs, files in os.walk('.'):
         # Skip certain directories
         if any(skip_dir in root for skip_dir in ['.git', '__pycache__', 'node_modules', '.venv']):
             continue
@@ -131,7 +131,7 @@ def check_skip_diagnose_implementation() -> bool:
     print(f"✅ Skip diagnose functions found: {', '.join(found_files)}")
     return True
 
-def check_policy_compliance(policy: Dict[str, Any]) -> bool:
+def check_policy_compliance(policy: dict[str, Any]) -> bool:
     """Check if policy is compliant"""
     skip_config = policy.get('skip', {})
 
@@ -158,7 +158,7 @@ def check_policy_compliance(policy: Dict[str, Any]) -> bool:
     print("✅ Policy is compliant")
     return True
 
-def analyze_skip_handlers(skip_handlers: List[Tuple[str, int, str]]) -> bool:
+def analyze_skip_handlers(skip_handlers: list[tuple[str, int, str]]) -> bool:
     """Analyze Skip handlers for compliance"""
     if not skip_handlers:
         print("⚠️ No Skip handlers found")
@@ -184,7 +184,7 @@ def analyze_skip_handlers(skip_handlers: List[Tuple[str, int, str]]) -> bool:
     print("✅ Skip handlers are compliant")
     return True
 
-def analyze_cancel_calls(cancel_calls: List[Tuple[str, int, str]]) -> bool:
+def analyze_cancel_calls(cancel_calls: list[tuple[str, int, str]]) -> bool:
     """Analyze cancel calls for context"""
     if not cancel_calls:
         print("✅ No cancel calls found")

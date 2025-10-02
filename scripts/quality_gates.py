@@ -13,12 +13,9 @@ Last Updated: 2025-09-26
 
 import argparse
 import json
-import os
-import subprocess
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
 
 
 @dataclass
@@ -41,8 +38,8 @@ class QualityReport:
     failed_gates: int
     warning_gates: int
     quality_score: float
-    gates: List[QualityGate]
-    recommendations: List[str]
+    gates: list[QualityGate]
+    recommendations: list[str]
 
 
 class QualityGates:
@@ -53,7 +50,7 @@ class QualityGates:
         self.artifacts_dir = self.project_root / "artifacts"
         self.gates = self._initialize_gates()
 
-    def _initialize_gates(self) -> List[QualityGate]:
+    def _initialize_gates(self) -> list[QualityGate]:
         """Initialize quality gates with default thresholds"""
         return [
             QualityGate(
@@ -136,7 +133,7 @@ class QualityGates:
             recommendations=recommendations
         )
 
-    def _load_metrics_from_artifacts(self, input_dir: str) -> Dict[str, float]:
+    def _load_metrics_from_artifacts(self, input_dir: str) -> dict[str, float]:
         """Load metrics from artifact files"""
         metrics = {}
         artifacts_path = self.project_root / input_dir
@@ -274,7 +271,7 @@ class QualityGates:
 
         return weighted_score / total_weight if total_weight > 0 else 0.0
 
-    def _generate_recommendations(self) -> List[str]:
+    def _generate_recommendations(self) -> list[str]:
         """Generate improvement recommendations"""
         recommendations = []
 

@@ -25,7 +25,7 @@ class TestFixtures:
             shutil.rmtree(path)
 
     @staticmethod
-    def get_sample_tasks() -> Dict[str, str]:
+    def get_sample_tasks() -> dict[str, str]:
         """Get sample tasks for testing"""
         return {
             "simple_bug_fix": "Fix NullPointerException in user authentication",
@@ -50,7 +50,7 @@ class TestFixtures:
         ]
 
     @staticmethod
-    def get_sample_code_files() -> Dict[str, str]:
+    def get_sample_code_files() -> dict[str, str]:
         """Get sample code files for testing"""
         return {
             "buggy_code.py": '''

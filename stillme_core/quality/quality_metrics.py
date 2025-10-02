@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class QualityMetric:
     threshold: float
     status: str
     timestamp: datetime
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -37,11 +37,11 @@ class QualityMetrics:
 
     def __init__(self):
         self.logger = logger
-        self.metrics: List[QualityMetric] = []
+        self.metrics: list[QualityMetric] = []
         self.thresholds = self._initialize_thresholds()
         self.logger.info("✅ QualityMetrics initialized")
 
-    def _initialize_thresholds(self) -> Dict[MetricType, float]:
+    def _initialize_thresholds(self) -> dict[MetricType, float]:
         """Initialize quality thresholds"""
         return {
             MetricType.COVERAGE: 80.0,  # 80% coverage
@@ -56,7 +56,7 @@ class QualityMetrics:
                      metric_type: MetricType,
                      value: float,
                      unit: str = "percentage",
-                     metadata: Dict[str, Any] = None) -> QualityMetric:
+                     metadata: dict[str, Any] = None) -> QualityMetric:
         """Record a quality metric"""
         try:
             metric_id = f"metric_{len(self.metrics) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -89,11 +89,11 @@ class QualityMetrics:
             self.logger.error(f"❌ Failed to record quality metric: {e}")
             raise
 
-    def get_metrics_by_type(self, metric_type: MetricType) -> List[QualityMetric]:
+    def get_metrics_by_type(self, metric_type: MetricType) -> list[QualityMetric]:
         """Get metrics by type"""
         return [m for m in self.metrics if m.metric_type == metric_type]
 
-    def get_metrics_by_status(self, status: str) -> List[QualityMetric]:
+    def get_metrics_by_status(self, status: str) -> list[QualityMetric]:
         """Get metrics by status"""
         return [m for m in self.metrics if m.status == status]
 
@@ -104,7 +104,7 @@ class QualityMetrics:
             return max(metrics, key=lambda m: m.timestamp)
         return None
 
-    def get_quality_summary(self) -> Dict[str, Any]:
+    def get_quality_summary(self) -> dict[str, Any]:
         """Get quality metrics summary"""
         try:
             total_metrics = len(self.metrics)
@@ -147,7 +147,7 @@ class QualityMetrics:
             self.logger.error(f"❌ Failed to get quality summary: {e}")
             return {"error": str(e)}
 
-    def _calculate_overall_score(self, latest_metrics: Dict[str, QualityMetric]) -> float:
+    def _calculate_overall_score(self, latest_metrics: dict[str, QualityMetric]) -> float:
         """Calculate overall quality score"""
         try:
             if not latest_metrics:

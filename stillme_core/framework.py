@@ -96,7 +96,7 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Optional
 
 import psutil
 import yaml
@@ -291,12 +291,12 @@ class JsonFormatter(logging.Formatter):
 
 # ------------------- CORE FRAMEWORK -------------------
 class StillMeFramework:
-    def __init__(self, config: Optional[Dict[str, Any]] = None) -> None:
-        self._modules: Dict[str, Any] = {}
+    def __init__(self, config: Optional[dict[str, Any]] = None) -> None:
+        self._modules: dict[str, Any] = {}
         self._dependency_graph = defaultdict(list)
-        self._api_endpoints: Dict[str, Callable] = {}
-        self._middlewares: List[Any] = []
-        self._security_policies: Dict[str, Any] = {}
+        self._api_endpoints: dict[str, Callable] = {}
+        self._middlewares: list[Any] = []
+        self._security_policies: dict[str, Any] = {}
         self._heartbeat_task: Optional[asyncio.Task] = None
         self._setup_framework(config or {})
         self._metrics = FrameworkMetrics()
@@ -306,7 +306,7 @@ class StillMeFramework:
 
         self._register_graceful_shutdown()
 
-    def _setup_framework(self, config: Dict[str, Any]) -> None:
+    def _setup_framework(self, config: dict[str, Any]) -> None:
         self.config = {**DEFAULT_CONFIG, **config}
         self.logger = self._init_logger()
 
@@ -594,7 +594,7 @@ class StillMeFramework:
             return None
 
     async def get_market_intelligence(
-        self, keywords: Optional[List[str]] = None
+        self, keywords: Optional[list[str]] = None
     ) -> str:
         """
         Lấy thông tin thị trường và xu hướng với dự báo
@@ -641,7 +641,7 @@ class StillMeFramework:
 
         return formatted_report.strip()
 
-    def _format_predictive_report(self, analysis: Dict[str, Any]) -> str:
+    def _format_predictive_report(self, analysis: dict[str, Any]) -> str:
         """Format predictive analysis report with actionable recommendations"""
         market_report = analysis["market_report"]
         predictions = analysis["predictions"]
@@ -962,7 +962,7 @@ class StillMeFramework:
         return async_wrapped
 
     # ------------ UTILITIES ------------
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         status = {
             "status": "OPERATIONAL",
             "version": __version__,
@@ -977,7 +977,7 @@ class StillMeFramework:
         }
         return status
 
-    def _get_core_modules_status(self) -> Dict[str, Any]:
+    def _get_core_modules_status(self) -> dict[str, Any]:
         """Lấy trạng thái của tất cả core modules"""
         status = {}
 
@@ -1002,7 +1002,7 @@ class StillMeFramework:
 
         return status
 
-    async def test_module_integration(self) -> Dict[str, bool]:
+    async def test_module_integration(self) -> dict[str, bool]:
         """Test integration giữa các modules"""
         results = {}
 
@@ -1014,7 +1014,7 @@ class StillMeFramework:
 
                 # Test content filter
                 if hasattr(self, "content_filter") and self.content_filter:
-                    filter_result = await self.content_filter.pre_filter_content(
+                    await self.content_filter.pre_filter_content(
                         test_content, test_url
                     )
                     results["content_filter"] = True
@@ -1178,7 +1178,7 @@ class RestrictedLoader:  # type: ignore
     def exec_module(self, module: Any):
         with open(self.path, encoding="utf-8") as f:
             code = f.read()
-        restricted_globals: Dict[str, Any] = {"__builtins__": {}}
+        restricted_globals: dict[str, Any] = {"__builtins__": {}}
         exec(compile_restricted(code, self.path, "exec"), restricted_globals)
         module.__dict__.update(restricted_globals)
 
@@ -1192,7 +1192,7 @@ class EthicsChecker:
         self.level = level
         self.rules = self._load_rules(rules_path)
 
-    def _load_rules(self, rules_path: str) -> Dict[str, Any]:
+    def _load_rules(self, rules_path: str) -> dict[str, Any]:
         if Path(rules_path).exists():
             with open(rules_path, encoding="utf-8") as f:
                 return json.load(f)
@@ -1203,7 +1203,7 @@ class EthicsChecker:
         result = self.validate(source)
         return result["valid"]
 
-    def validate(self, content: str) -> Dict[str, Any]:
+    def validate(self, content: str) -> dict[str, Any]:
         violations = [
             kw for kw in self.rules.get("banned", []) if kw.lower() in content.lower()
         ]
@@ -1213,7 +1213,7 @@ class EthicsChecker:
 class FrameworkMetrics:
     def __init__(self):
         self._start_time = time.time()
-        self._metrics: Dict[str, List[float]] = defaultdict(list)
+        self._metrics: dict[str, list[float]] = defaultdict(list)
 
     def track(self, metric_name: str):
         metrics_ref = self._metrics  # Capture reference to self._metrics
@@ -1244,7 +1244,7 @@ class FrameworkMetrics:
 
 class OpenAPIGenerator:
     def __init__(self):
-        self.spec: Dict[str, Any] = {
+        self.spec: dict[str, Any] = {
             "openapi": "3.0.0",
             "info": {"title": "StillMe API", "version": "1.0.0"},
             "paths": {},

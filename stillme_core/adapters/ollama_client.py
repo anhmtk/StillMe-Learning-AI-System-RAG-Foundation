@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import httpx
 from dotenv import load_dotenv
@@ -25,11 +25,11 @@ class OllamaClient:
         prompt: str,
         mode: str = "fast",
         *,
-        max_tokens: Optional[int] = None,  # map -> options.num_predict
-        temperature: Optional[float] = None,  # map -> options.temperature
-        top_p: Optional[float] = None,  # map -> options.top_p
-        stop: Optional[List[str]] = None,  # map -> options.stop
-        system_prompt: Optional[str] = None,  # map -> system
+        max_tokens: int | None = None,  # map -> options.num_predict
+        temperature: float | None = None,  # map -> options.temperature
+        top_p: float | None = None,  # map -> options.top_p
+        stop: list[str] | None = None,  # map -> options.stop
+        system_prompt: str | None = None,  # map -> system
     ) -> str:
         model = (
             os.getenv("OLLAMA_MODEL_FAST")
@@ -40,14 +40,14 @@ class OllamaClient:
             raise ValueError(f"Missing OLLAMA model for mode={mode}")
 
         url = f"{self.base_url}/api/generate"
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "model": model,
             "prompt": prompt,
             "stream": False,
         }
 
         # map tham số -> options
-        options: Dict[str, Any] = {}
+        options: dict[str, Any] = {}
         if max_tokens is not None:
             options["num_predict"] = int(max_tokens)
         if temperature is not None:

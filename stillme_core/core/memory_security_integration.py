@@ -9,18 +9,12 @@ Version: 1.0.0
 Phase: 1.1 - Memory Security Integration
 """
 
-import os
-import json
-import logging
-import hashlib
-import secrets
-from pathlib import Path
-from typing import Dict, List, Set, Tuple, Optional, Any, Union
-from dataclasses import dataclass, asdict
-from datetime import datetime, timedelta
 import asyncio
-import threading
-from cryptography.fernet import Fernet
+import hashlib
+import logging
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Set
 
 # Import Phase 0 security modules
 try:
@@ -87,30 +81,16 @@ class IntegrationBridge:
 # Import memory modules
 try:
     from modules.layered_memory_v1 import LayeredMemoryV1
-    from modules.secure_memory_manager import SecureMemoryManager, SecureMemoryConfig
+    from modules.secure_memory_manager import SecureMemoryConfig, SecureMemoryManager
 except ImportError:
-try:
-    from layered_memory_v1 import LayeredMemoryV1
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-try:
-try:
-try:
-try:
-try:
-                        from secure_memory_manager import SecureMemoryManager, SecureMemoryConfig
-except ImportError:
-    pass
-except ImportError:
-    pass
+    try:
+        from layered_memory_v1 import LayeredMemoryV1
+    except ImportError:
+        pass
+    try:
+        from secure_memory_manager import SecureMemoryConfig, SecureMemoryManager
+    except ImportError:
+        pass
 except ImportError:
     pass
 except ImportError:

@@ -65,11 +65,10 @@ RELATED FILES / FILES LIÊN QUAN:
 """
 
 import logging
-import time
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import psutil
 
@@ -101,8 +100,8 @@ class HealthCheck:
     status: HealthStatus
     message: str
     timestamp: str
-    details: Dict[str, Any] = None
-    metrics: Dict[str, float] = None
+    details: dict[str, Any] = None
+    metrics: dict[str, float] = None
 
     def __post_init__(self):
         if self.details is None:
@@ -116,8 +115,8 @@ class HealthConfig:
     """Configuration for HealthChecker"""
     enabled: bool = True
     check_interval: int = 60  # seconds
-    warning_thresholds: Dict[str, float] = None
-    critical_thresholds: Dict[str, float] = None
+    warning_thresholds: dict[str, float] = None
+    critical_thresholds: dict[str, float] = None
     auto_recovery: bool = False
 
     def __post_init__(self):
@@ -138,7 +137,7 @@ class HealthConfig:
 class HealthChecker:
     """
     Health Checker - System health monitoring and diagnostics
-    
+
     This is a stub implementation to resolve F821 errors.
     TODO: Implement full health monitoring features.
     """
@@ -146,14 +145,14 @@ class HealthChecker:
     def __init__(self, config: Optional[HealthConfig] = None):
         """Initialize HealthChecker"""
         self.config = config or HealthConfig()
-        self.checks: List[HealthCheck] = []
+        self.checks: list[HealthCheck] = []
         self.logger = logging.getLogger(__name__)
         self.logger.info("🏥 HealthChecker initialized")
 
     def check_system_health(self) -> HealthStatus:
         """
         Perform comprehensive system health check
-        
+
         Returns:
             Overall health status
         """
@@ -304,10 +303,10 @@ class HealthChecker:
             self.logger.error(f"❌ Error checking network health: {e}")
             return None
 
-    def get_health_report(self) -> Dict[str, Any]:
+    def get_health_report(self) -> dict[str, Any]:
         """
         Get comprehensive health report
-        
+
         Returns:
             Health report dictionary
         """
@@ -370,7 +369,7 @@ class HealthChecker:
     def start_monitoring(self) -> bool:
         """
         Start continuous health monitoring
-        
+
         Returns:
             True if monitoring started successfully, False otherwise
         """
@@ -390,7 +389,7 @@ class HealthChecker:
     def stop_monitoring(self) -> bool:
         """
         Stop continuous health monitoring
-        
+
         Returns:
             True if monitoring stopped successfully, False otherwise
         """
@@ -406,10 +405,10 @@ class HealthChecker:
     def update_config(self, new_config: HealthConfig) -> bool:
         """
         Update health checker configuration
-        
+
         Args:
             new_config: New configuration
-            
+
         Returns:
             True if update successful, False otherwise
         """

@@ -3,14 +3,12 @@
 StillMe AI Backend - Using Core Framework
 Backend sử dụng Core Framework để enforce StillMe persona
 """
-import asyncio
 import json
 import logging
-import os
 import time
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Any, Dict, Optional
+from typing import Any
 
 # Import Core Framework
 try:
@@ -43,7 +41,7 @@ class StillMeBackendHandler(BaseHTTPRequestHandler):
 
         super().__init__(*args, **kwargs)
 
-    def _send_json_response(self, status_code: int, data: Dict[str, Any]):
+    def _send_json_response(self, status_code: int, data: dict[str, Any]):
         """Send JSON response"""
         self.send_response(status_code)
         self.send_header("Content-Type", "application/json")
@@ -127,7 +125,7 @@ class StillMeBackendHandler(BaseHTTPRequestHandler):
             data = json.loads(post_data.decode('utf-8'))
 
             message = data.get('message', '')
-            session_id = data.get('session_id', 'default')
+            data.get('session_id', 'default')
             user_id = data.get('user_id', 'anonymous')
 
             if not message:

@@ -14,9 +14,9 @@ import asyncio
 import json
 import logging
 import time
-from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any, Optional
 
 # Import existing StillMe modules
 from market_intel import MarketIntelligence
@@ -31,8 +31,8 @@ class NicheRecord:
     url: str
     title: str
     timestamp: datetime
-    metrics: Dict[str, Any]
-    raw: Dict[str, Any]
+    metrics: dict[str, Any]
+    raw: dict[str, Any]
     topic: str
     category: str = "general"
     confidence: float = 0.0
@@ -44,12 +44,12 @@ class BaseCollector:
         self.name = name
         self.logger = logging.getLogger(f"niche_radar.collectors.{name}")
 
-    async def collect(self, **kwargs) -> List[NicheRecord]:
+    async def collect(self, **kwargs) -> list[NicheRecord]:
         """Collect data and return standardized records"""
         raise NotImplementedError
 
     def _create_record(self, source: str, url: str, title: str,
-                      metrics: Dict[str, Any], raw: Dict[str, Any],
+                      metrics: dict[str, Any], raw: dict[str, Any],
                       topic: str, category: str = "general",
                       confidence: float = 0.0) -> NicheRecord:
         """Create standardized NicheRecord"""
@@ -72,7 +72,7 @@ class GitHubTrendingCollector(BaseCollector):
         super().__init__("github_trending")
         self.market_intel = MarketIntelligence()
 
-    async def collect(self, topic: str = "python", since: str = "daily") -> List[NicheRecord]:
+    async def collect(self, topic: str = "python", since: str = "daily") -> list[NicheRecord]:
         """Collect GitHub trending repositories"""
         try:
             self.logger.info(f"🔍 Collecting GitHub trending for topic: {topic}, since: {since}")
@@ -138,7 +138,7 @@ class HackerNewsCollector(BaseCollector):
     def __init__(self):
         super().__init__("hackernews")
 
-    async def collect(self, hours: int = 12) -> List[NicheRecord]:
+    async def collect(self, hours: int = 12) -> list[NicheRecord]:
         """Collect Hacker News top stories"""
         try:
             self.logger.info(f"🔍 Collecting Hacker News top stories for {hours} hours")
@@ -214,7 +214,7 @@ class NewsDeltaCollector(BaseCollector):
     def __init__(self):
         super().__init__("news_delta")
 
-    async def collect(self, query: str, window: str = "24h") -> List[NicheRecord]:
+    async def collect(self, query: str, window: str = "24h") -> list[NicheRecord]:
         """Collect news with delta analysis"""
         try:
             self.logger.info(f"🔍 Collecting news delta for query: {query}, window: {window}")
@@ -319,7 +319,7 @@ class GoogleTrendsCollector(BaseCollector):
     def __init__(self):
         super().__init__("google_trends")
 
-    async def collect(self, terms: List[str], region: str = "VN", days: int = 7) -> List[NicheRecord]:
+    async def collect(self, terms: list[str], region: str = "VN", days: int = 7) -> list[NicheRecord]:
         """Collect Google Trends data"""
         try:
             self.logger.info(f"🔍 Collecting Google Trends for terms: {terms}, region: {region}, days: {days}")
@@ -337,7 +337,7 @@ class GoogleTrendsCollector(BaseCollector):
             for trend in trends:
                 term = trend.get("term", "")
                 value = trend.get("value", 0)
-                date = trend.get("date", "")
+                trend.get("date", "")
 
                 # Calculate trend momentum
                 momentum_score = min(value / 100.0, 1.0)  # Normalize to 0-1
@@ -375,7 +375,7 @@ class RedditEngagementCollector(BaseCollector):
     def __init__(self):
         super().__init__("reddit_engagement")
 
-    async def collect(self, query: str, window: str = "24h") -> List[NicheRecord]:
+    async def collect(self, query: str, window: str = "24h") -> list[NicheRecord]:
         """Collect Reddit engagement data"""
         try:
             self.logger.info(f"🔍 Collecting Reddit engagement for query: {query}, window: {window}")
@@ -438,7 +438,7 @@ class RedditEngagementCollector(BaseCollector):
             return []
 
 # Factory function to get all collectors
-def get_all_collectors() -> Dict[str, BaseCollector]:
+def get_all_collectors() -> dict[str, BaseCollector]:
     """Get all available collectors"""
     return {
         "github_trending": GitHubTrendingCollector(),
@@ -448,7 +448,7 @@ def get_all_collectors() -> Dict[str, BaseCollector]:
         "reddit_engagement": RedditEngagementCollector()
     }
 
-async def collect_all_data(topics: Optional[List[str]] = None) -> Dict[str, List[NicheRecord]]:
+async def collect_all_data(topics: Optional[list[str]] = None) -> dict[str, list[NicheRecord]]:
     """Collect data from all sources"""
     if topics is None:
         topics = ["python", "ai", "startup", "saas", "crypto"]

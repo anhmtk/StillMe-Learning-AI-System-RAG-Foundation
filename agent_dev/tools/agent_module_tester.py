@@ -5,10 +5,8 @@ Agent Module Tester - Test và sửa lỗi các modules trong StillMe framework
 
 import importlib.util
 import logging
-import os
-import sys
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Setup logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -19,9 +17,9 @@ class AgentModuleTester:
 
     def __init__(self, modules_dir: str = "modules"):
         self.modules_dir = Path(modules_dir)
-        self.test_results: Dict[str, Any] = {}
+        self.test_results: dict[str, Any] = {}
 
-    def test_module(self, module_name: str) -> Dict[str, Any]:
+    def test_module(self, module_name: str) -> dict[str, Any]:
         """Test một module cụ thể"""
         try:
             logger.info(f"🧪 Đang test module: {module_name}")
@@ -72,11 +70,11 @@ class AgentModuleTester:
             logger.info(f"✅ AI đã sửa file {module_name}.py")
             return True
 
-        except Exception as e:
+        except Exception:
             logger.error(f"❌ Sửa lỗi không thành công cho: {module_name}.py")
             return False
 
-    def test_all_modules(self) -> Dict[str, Any]:
+    def test_all_modules(self) -> dict[str, Any]:
         """Test tất cả modules trong thư mục"""
         results = {
             "total": 0,
@@ -121,7 +119,7 @@ class AgentModuleTester:
 
         return results
 
-    def generate_report(self, results: Dict[str, Any]) -> str:
+    def generate_report(self, results: dict[str, Any]) -> str:
         """Tạo báo cáo kết quả test"""
         report = f"""
 📊 AGENT MODULE TESTER REPORT

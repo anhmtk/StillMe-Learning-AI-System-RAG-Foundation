@@ -7,7 +7,7 @@ import json
 import logging
 import re
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -116,7 +116,7 @@ class ContentIntegrityFilter:
             "clean_content": 0
         }
 
-    def filter_content(self, content: str, source: str = "unknown") -> Dict[str, Any]:
+    def filter_content(self, content: str, source: str = "unknown") -> dict[str, Any]:
         """Filter và sanitize content"""
         try:
             self.stats["total_processed"] += 1
@@ -208,7 +208,7 @@ class ContentIntegrityFilter:
             logger.error(f"❌ Content sanitization error: {e}")
             return content  # Return original if sanitization fails
 
-    def _log_filtering(self, source: str, blocked_patterns: List[Dict], original_preview: str, sanitized_preview: str):
+    def _log_filtering(self, source: str, blocked_patterns: list[dict], original_preview: str, sanitized_preview: str):
         """Log filtering activity"""
         try:
             log_entry = {
@@ -230,7 +230,7 @@ class ContentIntegrityFilter:
         from datetime import datetime
         return datetime.now().isoformat()
 
-    def filter_json_response(self, response_data: Dict[str, Any], source: str = "unknown") -> Dict[str, Any]:
+    def filter_json_response(self, response_data: dict[str, Any], source: str = "unknown") -> dict[str, Any]:
         """Filter JSON response data"""
         try:
             if not isinstance(response_data, dict):
@@ -292,7 +292,7 @@ class ContentIntegrityFilter:
                 "filtered": False
             }
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Lấy thống kê filtering"""
         return {
             "total_processed": self.stats["total_processed"],
@@ -314,11 +314,11 @@ class ContentIntegrityFilter:
 # Global instance
 content_filter = ContentIntegrityFilter()
 
-def filter_web_content(content: str, source: str = "unknown") -> Dict[str, Any]:
+def filter_web_content(content: str, source: str = "unknown") -> dict[str, Any]:
     """Convenience function để filter content"""
     return content_filter.filter_content(content, source)
 
-def filter_web_json(data: Dict[str, Any], source: str = "unknown") -> Dict[str, Any]:
+def filter_web_json(data: dict[str, Any], source: str = "unknown") -> dict[str, Any]:
     """Convenience function để filter JSON data"""
     return content_filter.filter_json_response(data, source)
 

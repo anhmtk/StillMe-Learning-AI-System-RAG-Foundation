@@ -16,7 +16,7 @@ import time
 from collections import defaultdict, deque
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import httpx
 
@@ -146,7 +146,7 @@ class LearningManager:
         self.success_rates: dict[str, float] = {}
 
     def add_learning_entry(
-        self, bug_type: str, solution: str, success: bool, context: Dict[str, Any]
+        self, bug_type: str, solution: str, success: bool, context: dict[str, Any]
     ):
         """Add a new learning entry"""
         entry = LearningEntry(
@@ -169,8 +169,8 @@ class LearningManager:
             self.success_rates[bug_type] = 1.0 if success else 0.0
 
     def get_similar_solutions(
-        self, bug_type: str, context: Dict[str, Any]
-    ) -> List[LearningEntry]:
+        self, bug_type: str, context: dict[str, Any]
+    ) -> list[LearningEntry]:
         """Get similar solutions for a bug type"""
         if bug_type not in self.bug_patterns:
             return []
@@ -207,8 +207,8 @@ class FallbackStrategy:
             "code",  # Then code mode
             "cached",  # Finally use cached response
         ]
-        self.cache: Dict[str, str] = {}
-        self.failure_counts: Dict[str, int] = defaultdict(int)
+        self.cache: dict[str, str] = {}
+        self.failure_counts: dict[str, int] = defaultdict(int)
 
     def get_fallback_mode(self, original_mode: str, failure_reason: str) -> str:
         """Get next fallback mode based on failure"""
@@ -222,7 +222,7 @@ class FallbackStrategy:
 
         return original_mode
 
-    def get_cached_response(self, prompt_hash: str) -> Optional[str]:
+    def get_cached_response(self, prompt_hash: str) -> str | None:
         """Get cached response if available"""
         return self.cache.get(prompt_hash)
 
@@ -234,7 +234,7 @@ class FallbackStrategy:
 # =======================
 # Singleton controller cho nhánh "code"
 # =======================
-_CTL: Optional[C] = None
+_CTL: C | None = None
 
 
 def controller() -> C:
@@ -273,7 +273,7 @@ def set_mode(mode: str) -> str:
     return "[AIManager] text-mode uses Dev Agent Bridge; no local set_model needed."
 
 
-def warmup(model: Optional[str] = None) -> Dict[str, Any]:
+def warmup(model: str | None = None) -> dict[str, Any]:
     """Warmup cho nhánh code (tuỳ controller)."""
     try:
         return controller().warmup(model=model)
@@ -281,7 +281,7 @@ def warmup(model: Optional[str] = None) -> Dict[str, Any]:
         return {"ok": False, "msg": "warmup not supported for controller or failed"}
 
 
-def health(model: Optional[str] = None) -> Dict[str, Any]:
+def health(model: str | None = None) -> dict[str, Any]:
     """Health-check nhanh cho nhánh code (controller)."""
     try:
         return controller().health(model=model)
@@ -292,7 +292,7 @@ def health(model: Optional[str] = None) -> Dict[str, Any]:
 # --- add to stillme_core/ai_manager.py ---
 
 
-def _gpt5_ping() -> Dict[str, Any]:
+def _gpt5_ping() -> dict[str, Any]:
     """
     Ping thật GPT-5 bằng một chat mini 'ping' → 'pong'.
     Trả: {"enabled": bool, "ok": bool, "error": "...?"}
@@ -301,7 +301,7 @@ def _gpt5_ping() -> Dict[str, Any]:
     base_url = os.getenv("GPT5_BASE_URL", "https://api.openai.com/v1")
     api_key = os.getenv("OPENAI_API_KEY", "")
     model = os.getenv("GPT5_MODEL_FAST", "gpt-5-mini")
-    out: Dict[str, Any] = {"enabled": enabled, "ok": False}
+    out: dict[str, Any] = {"enabled": enabled, "ok": False}
 
     if not enabled:
         return out
@@ -326,7 +326,7 @@ def _gpt5_ping() -> Dict[str, Any]:
         return out
 
 
-def _ollama_ping() -> Dict[str, Any]:
+def _ollama_ping() -> dict[str, Any]:
     """
     Ping nhanh Ollama bằng /api/tags.
     Trả: {"ok": bool, "error": "...?"}
@@ -446,12 +446,12 @@ class AIManager:
         self.bugmem = BugMemory()
 
         # Performance tracking
-        self.request_times: Dict[str, List[float]] = defaultdict(list)
-        self.success_rates: Dict[str, float] = defaultdict(lambda: 1.0)
+        self.request_times: dict[str, list[float]] = defaultdict(list)
+        self.success_rates: dict[str, float] = defaultdict(lambda: 1.0)
 
     # ====== Enhanced Planning Methods ======
 
-    def get_context_aware_plan(self, goal: str, max_items: int = 5) -> List[PlanItem]:
+    def get_context_aware_plan(self, goal: str, max_items: int = 5) -> list[PlanItem]:
         """Generate context-aware plan using AI with enhanced context"""
         try:
             # Analyze current repository state
@@ -477,7 +477,7 @@ class AIManager:
             # Fallback to basic planning
             return self._get_fallback_plan(goal, max_items)
 
-    def _analyze_repository_context(self) -> Dict[str, Any]:
+    def _analyze_repository_context(self) -> dict[str, Any]:
         """Analyze current repository context"""
         context = {
             "git_status": self._get_git_status(),
@@ -487,7 +487,7 @@ class AIManager:
         }
         return context
 
-    def _get_git_status(self) -> List[str]:
+    def _get_git_status(self) -> list[str]:
         """Get git status information with enhanced timeout handling"""
         try:
             import os
@@ -515,7 +515,7 @@ class AIManager:
         except Exception as e:
             return [f"Git status error: {e!s}"]
 
-    def _get_recent_files(self) -> List[str]:
+    def _get_recent_files(self) -> list[str]:
         """Get recently modified files"""
         try:
             import subprocess
@@ -536,7 +536,7 @@ class AIManager:
             pass
         return []
 
-    def _get_test_status(self) -> Dict[str, Any]:
+    def _get_test_status(self) -> dict[str, Any]:
         """Get current test status"""
         try:
             import subprocess
@@ -555,7 +555,7 @@ class AIManager:
         except Exception:
             return {"status": "unknown", "output": "", "error": ""}
 
-    def _get_dependency_info(self) -> Dict[str, Any]:
+    def _get_dependency_info(self) -> dict[str, Any]:
         """Get dependency information"""
         try:
             requirements_file = Path(self.repo_root) / "requirements.txt"
@@ -571,7 +571,7 @@ class AIManager:
             pass
         return {"requirements": [], "count": 0}
 
-    def _get_learning_insights(self, goal: str) -> Dict[str, Any]:
+    def _get_learning_insights(self, goal: str) -> dict[str, Any]:
         """Get learning insights from previous similar goals"""
         # Simple keyword matching for now
         keywords = goal.lower().split()
@@ -588,7 +588,7 @@ class AIManager:
         self,
         goal: str,
         context: dict[str, Any],
-        learning: Dict[str, Any],
+        learning: dict[str, Any],
         max_items: int,
     ) -> str:
         """Build enhanced prompt with context and learning"""
@@ -625,8 +625,8 @@ FORMAT: Return as JSON array of plan items with fields:
         return prompt
 
     def _parse_enhanced_plan(
-        self, response: str, context: Dict[str, Any]
-    ) -> List[PlanItem]:
+        self, response: str, context: dict[str, Any]
+    ) -> list[PlanItem]:
         """Parse AI response into PlanItem objects"""
         try:
             # Try to parse as JSON first
@@ -654,7 +654,7 @@ FORMAT: Return as JSON array of plan items with fields:
         # Fallback: parse as text
         return self._parse_text_plan(response)
 
-    def _parse_text_plan(self, response: str) -> List[PlanItem]:
+    def _parse_text_plan(self, response: str) -> list[PlanItem]:
         """Parse text response into PlanItem objects"""
         items = []
         lines = response.split("\n")
@@ -690,7 +690,7 @@ FORMAT: Return as JSON array of plan items with fields:
 
         return items
 
-    def _get_fallback_plan(self, goal: str, max_items: int) -> List[PlanItem]:
+    def _get_fallback_plan(self, goal: str, max_items: int) -> list[PlanItem]:
         """Generate fallback plan when AI fails"""
         return [
             PlanItem(
@@ -780,7 +780,7 @@ FORMAT: Return as JSON array of plan items with fields:
     # ====== Learning and Feedback Methods ======
 
     def record_success(
-        self, plan_item: PlanItem, success: bool, context: Dict[str, Any]
+        self, plan_item: PlanItem, success: bool, context: dict[str, Any]
     ):
         """Record success/failure for learning"""
         bug_type = self._classify_bug_type(plan_item, context)
@@ -790,7 +790,7 @@ FORMAT: Return as JSON array of plan items with fields:
             bug_type=bug_type, solution=solution, success=success, context=context
         )
 
-    def _classify_bug_type(self, plan_item: PlanItem, context: Dict[str, Any]) -> str:
+    def _classify_bug_type(self, plan_item: PlanItem, context: dict[str, Any]) -> str:
         """Classify the type of bug/issue"""
         title = plan_item.title.lower()
         action = plan_item.action.lower()
@@ -811,10 +811,10 @@ FORMAT: Return as JSON array of plan items with fields:
     def set_mode(self, mode: str) -> str:
         return set_mode(mode)
 
-    def warmup(self, model: Optional[str] = None) -> Dict[str, Any]:
+    def warmup(self, model: str | None = None) -> dict[str, Any]:
         return warmup(model)
 
-    def health(self, model: Optional[str] = None) -> Dict[str, Any]:
+    def health(self, model: str | None = None) -> dict[str, Any]:
         return health(model)
 
     def dev_agent(self, task: str, mode: str = "fast", **params: Any) -> str:
@@ -863,7 +863,7 @@ FORMAT: Return as JSON array of plan items with fields:
             except Exception:
                 return ""
 
-    def get_ai_response_json(self, prompt: str, mode: str = "fast") -> Dict[str, Any]:
+    def get_ai_response_json(self, prompt: str, mode: str = "fast") -> dict[str, Any]:
         """Một số chỗ cần JSON; parse mềm."""
         txt = self.get_ai_response(prompt, mode)
         try:
@@ -871,7 +871,7 @@ FORMAT: Return as JSON array of plan items with fields:
         except Exception:
             return {}
 
-    def health_providers(self) -> Dict[str, Any]:
+    def health_providers(self) -> dict[str, Any]:
         """
         Trả health chi tiết cho các provider dùng ở dự án.
         """

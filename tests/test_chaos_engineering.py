@@ -1,6 +1,3 @@
-from typing import Any
-from unittest.mock import patch
-
 #!/usr/bin/env python3
 """
 Chaos Engineering Tests for StillMe AI Framework
@@ -11,6 +8,8 @@ import asyncio
 import json
 import logging
 import time
+from typing import Any
+from unittest.mock import patch
 
 import pytest
 
@@ -543,7 +542,7 @@ class ChaosEngineeringTests:
         failed = len([r for r in self.test_results if r['status'] == 'FAIL'])
         errors = len([r for r in self.test_results if r['status'] == 'ERROR'])
         skipped = len([r for r in self.test_results if r['status'] == 'SKIP'])
-        
+
         # Calculate pass rate excluding skipped tests
         executed_tests = total_tests - skipped
         pass_rate = (passed / executed_tests) * 100 if executed_tests > 0 else 100

@@ -11,8 +11,7 @@ Version: 1.0.0
 
 import logging
 import time
-from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .detectors.image_detector import ImageDetector
 from .detectors.json_detector import JSONDetector
@@ -58,14 +57,14 @@ class ClarificationEngine:
                 "failures": 0
             }
 
-    def analyze(self, text: str, mode: str = "quick") -> Dict[str, Any]:
+    def analyze(self, text: str, mode: str = "quick") -> dict[str, Any]:
         """
         Analyze text using all detectors
-        
+
         Args:
             text: Input text to analyze
             mode: "quick" (≤50ms) or "careful" (≤200ms)
-        
+
         Returns:
             Dict with analysis results
         """
@@ -135,7 +134,7 @@ class ClarificationEngine:
 
         return final_result
 
-    def get_performance_stats(self) -> Dict[str, Any]:
+    def get_performance_stats(self) -> dict[str, Any]:
         """Get performance statistics"""
         total_requests = self.performance_stats["total_requests"]
         avg_latency = (
@@ -165,7 +164,7 @@ class ClarificationEngine:
                 "failures": 0
             }
 
-    def get_detector_status(self) -> Dict[str, Any]:
+    def get_detector_status(self) -> dict[str, Any]:
         """Get status of all detectors"""
         status = {}
         for detector in self.detectors:

@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 import logging
 import os
-from typing import Any, Dict, Literal, Optional
+from typing import Any, Literal
 
 import httpx
 
@@ -14,7 +14,7 @@ BRIDGE_BASE = os.getenv("BRIDGE_BASE", "http://127.0.0.1:8000")
 ALLOWED_MODES: tuple[Literal["fast", "safe"], ...] = ("fast", "safe")
 
 
-def _norm_mode(mode: Optional[str]) -> Literal["fast", "safe"]:
+def _norm_mode(mode: str | None) -> Literal["fast", "safe"]:
     m = (mode or "fast").lower().strip()
     if m not in ALLOWED_MODES:
         logger.warning("provider_router: invalid mode '%s' → dùng 'safe'", m)
@@ -28,7 +28,7 @@ class ProviderRouter:
     Truyền đầy đủ system_prompt/hints xuống Bridge, để server build [{system},{user}] khi gọi model.
     """
 
-    def __init__(self, base_url: Optional[str] = None, timeout_s: float = 30.0):
+    def __init__(self, base_url: str | None = None, timeout_s: float = 30.0):
         self.base_url = (base_url or BRIDGE_BASE).rstrip("/")
         self.timeout = httpx.Timeout(connect=5.0, read=timeout_s, write=20.0, pool=20.0)
 
@@ -37,17 +37,17 @@ class ProviderRouter:
         prompt: str,
         mode: str = "fast",
         *,
-        system_prompt: Optional[str] = None,
-        response_format: Optional[str] = "json",
-        force_json: Optional[bool] = True,
-        schema_hint: Optional[Dict[str, Any]] = None,
-        max_tokens: Optional[int] = 512,
-        temperature: Optional[float] = 0.3,
-        top_p: Optional[float] = 0.95,
-        stop: Optional[list[str]] = None,
+        system_prompt: str | None = None,
+        response_format: str | None = "json",
+        force_json: bool | None = True,
+        schema_hint: dict[str, Any] | None = None,
+        max_tokens: int | None = 512,
+        temperature: float | None = 0.3,
+        top_p: float | None = 0.95,
+        stop: list[str] | None = None,
         **extra: Any,
     ) -> str:
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "prompt": prompt,
             "mode": _norm_mode(mode),
             "system_prompt": system_prompt,
@@ -100,17 +100,17 @@ class ProviderRouter:
         prompt: str,
         mode: str = "fast",
         *,
-        system_prompt: Optional[str] = None,
-        response_format: Optional[str] = "json",
-        force_json: Optional[bool] = True,
-        schema_hint: Optional[Dict[str, Any]] = None,
-        max_tokens: Optional[int] = 512,
-        temperature: Optional[float] = 0.3,
-        top_p: Optional[float] = 0.95,
-        stop: Optional[list[str]] = None,
+        system_prompt: str | None = None,
+        response_format: str | None = "json",
+        force_json: bool | None = True,
+        schema_hint: dict[str, Any] | None = None,
+        max_tokens: int | None = 512,
+        temperature: float | None = 0.3,
+        top_p: float | None = 0.95,
+        stop: list[str] | None = None,
         **extra: Any,
     ) -> str:
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "prompt": prompt,
             "mode": _norm_mode(mode),
             "system_prompt": system_prompt,

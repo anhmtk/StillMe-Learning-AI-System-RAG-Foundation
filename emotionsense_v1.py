@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ class EmotionResult:
     emotion: EmotionType
     confidence: float
     timestamp: datetime
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -41,7 +41,7 @@ class EmotionSenseV1:
 
     def __init__(self):
         self.logger = logger
-        self.detection_history: List[EmotionResult] = []
+        self.detection_history: list[EmotionResult] = []
         self.logger.info("✅ EmotionSenseV1 initialized")
 
     def detect_emotion(self, text: str) -> EmotionResult:
@@ -97,7 +97,7 @@ class EmotionSenseV1:
                 timestamp=datetime.now()
             )
 
-    def get_emotion_summary(self) -> Dict[str, Any]:
+    def get_emotion_summary(self) -> dict[str, Any]:
         """Get emotion detection summary"""
         try:
             total_detections = len(self.detection_history)

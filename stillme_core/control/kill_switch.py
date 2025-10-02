@@ -10,7 +10,7 @@ import os
 import time
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -35,14 +35,14 @@ class KillSwitchConfig:
 class KillSwitch:
     """
     Emergency kill switch for StillMe AI Framework
-    
+
     Provides multiple levels of system shutdown:
     - Soft kill: Disable new requests, allow current to complete
     - Hard kill: Immediate shutdown of all operations
     - Emergency kill: Critical system protection
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         self.config = KillSwitchConfig(**(config or {}))
         self.state = KillSwitchState.ACTIVE
         self.error_count = 0
@@ -229,7 +229,7 @@ class KillSwitch:
         # - PagerDuty alerts
         # - Custom monitoring systems
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """Get current kill switch status"""
         return {
             "enabled": self.config.enabled,

@@ -41,7 +41,7 @@ import json
 import logging
 import random
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Optional
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -164,7 +164,7 @@ class IdentityHandler:
 
         logger.info("✅ IdentityHandler initialized")
 
-    def _load_identity_config(self) -> Dict:
+    def _load_identity_config(self) -> dict:
         """Load identity config từ framework_config.json"""
         try:
             config_file = Path(self.config_path)
@@ -179,7 +179,7 @@ class IdentityHandler:
             logger.error(f"Error loading identity config: {e}")
             return self._get_default_config()
 
-    def _get_default_config(self) -> Dict:
+    def _get_default_config(self) -> dict:
         """Default config nếu không load được"""
         return {
             "core": {
@@ -198,7 +198,7 @@ class IdentityHandler:
             },
         }
 
-    def detect_identity_intent(self, message: str) -> Tuple[bool, str]:
+    def detect_identity_intent(self, message: str) -> tuple[bool, str]:
         """
         Phát hiện intent về identity/origin
 
@@ -219,7 +219,7 @@ class IdentityHandler:
 
         return False, "vi"
 
-    def detect_architecture_intent(self, message: str) -> Tuple[bool, str]:
+    def detect_architecture_intent(self, message: str) -> tuple[bool, str]:
         """
         Phát hiện intent về architecture/internal structure (SECURITY SENSITIVE)
 
@@ -332,7 +332,7 @@ class IdentityHandler:
 
         return None
 
-    def _select_template(self, templates: List[str], locale: str) -> str:
+    def _select_template(self, templates: list[str], locale: str) -> str:
         """Chọn template thông minh, tránh lặp lại gần đây"""
         if len(templates) == 1:
             return templates[0]
@@ -372,11 +372,11 @@ class IdentityHandler:
         else:
             return f"Em là StillMe AI, được tạo ra bởi {creator} ({nationality}) với sự hỗ trợ từ {orgs}."
 
-    def get_identity_facts(self) -> Dict:
+    def get_identity_facts(self) -> dict:
         """Lấy thông tin identity facts từ config"""
         return self.identity_config.get("core", {})
 
-    def update_config(self, new_config: Dict):
+    def update_config(self, new_config: dict):
         """Cập nhật config (cho phép runtime update)"""
         self.identity_config = new_config
         logger.info("Identity config updated")

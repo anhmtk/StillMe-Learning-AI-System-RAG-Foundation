@@ -41,7 +41,7 @@ import threading
 import time
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Callable, Dict, Optional, Tuple, Type
+from typing import Any, Callable, Optional
 
 from .errors import CircuitBreakerError
 from .logging import get_logger
@@ -65,7 +65,7 @@ class RetryConfig:
     exponential_base: float = 2.0
     jitter: bool = True
     jitter_range: float = 0.1
-    exceptions: Tuple[Type[Exception], ...] = (Exception,)
+    exceptions: tuple[type[Exception], ...] = (Exception,)
     retry_condition: Optional[Callable[[Exception], bool]] = None
 
 
@@ -75,7 +75,7 @@ class CircuitBreakerConfig:
 
     failure_threshold: int = 5
     recovery_timeout: float = 60.0
-    expected_exception: Type[Exception] = Exception
+    expected_exception: type[Exception] = Exception
     success_threshold: int = 2  # For half-open state
 
 
@@ -362,7 +362,7 @@ class CircuitBreaker:
             self._on_failure(e)
             raise e
 
-    def get_state(self) -> Dict[str, Any]:
+    def get_state(self) -> dict[str, Any]:
         """Get circuit breaker state information"""
         return {
             "state": self.state.value,
@@ -380,7 +380,7 @@ def retry_with_backoff(
     max_attempts: int = 3,
     base_delay: float = 1.0,
     max_delay: float = 60.0,
-    exceptions: Tuple[Type[Exception], ...] = (Exception,),
+    exceptions: tuple[type[Exception], ...] = (Exception,),
     jitter: bool = True,
     retry_condition: Optional[Callable[[Exception], bool]] = None,
 ):
@@ -423,7 +423,7 @@ def retry_with_backoff(
 def circuit_breaker(
     failure_threshold: int = 5,
     recovery_timeout: float = 60.0,
-    expected_exception: Type[Exception] = Exception,
+    expected_exception: type[Exception] = Exception,
 ):
     """
     Decorator for circuit breaker pattern

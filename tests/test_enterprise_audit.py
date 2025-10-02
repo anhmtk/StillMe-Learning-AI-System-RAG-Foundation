@@ -509,7 +509,7 @@ class TestAuditLogger:
         user_id = "test_user"
         input_text = "Contact me at john@example.com with password secret123"
 
-        trace_id = audit_logger.log_clarification_request(
+        audit_logger.log_clarification_request(
             user_id=user_id,
             session_id="test_session",
             input_text=input_text,
@@ -558,11 +558,11 @@ class TestAuditLogger:
     def test_export_audit_logs(self, audit_logger):
         """Test exporting audit logs"""
         # Log some events
-        trace_id1 = audit_logger.log_clarification_request(
+        audit_logger.log_clarification_request(
             user_id="user1", session_id="session1", input_text="test1",
             input_type="text", domain="web", mode="careful"
         )
-        trace_id2 = audit_logger.log_clarification_request(
+        audit_logger.log_clarification_request(
             user_id="user2", session_id="session2", input_text="test2",
             input_type="text", domain="data", mode="quick"
         )
@@ -728,7 +728,7 @@ class TestAuditIntegration:
         user_id = "test_user"
         input_text = "My email is john@example.com and my API key is sk-1234567890abcdef"
 
-        trace_id = full_audit_system.log_clarification_request(
+        full_audit_system.log_clarification_request(
             user_id=user_id,
             session_id="test_session",
             input_text=input_text,

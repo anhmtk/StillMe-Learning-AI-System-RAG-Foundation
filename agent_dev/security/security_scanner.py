@@ -1,4 +1,3 @@
-import secrets
 
 #!/usr/bin/env python3
 """
@@ -6,16 +5,14 @@ StillMe AgentDev Security Scanner
 Enterprise-grade security scanning and vulnerability assessment
 """
 
-import hashlib
 import json
 import re
 import subprocess
 import sys
-import tempfile
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 import yaml
 
@@ -49,7 +46,7 @@ class SecurityScanner:
         self.secret_patterns = self._load_secret_patterns()
         self.vulnerability_db = self._load_vulnerability_db()
 
-    def scan_all(self) -> List[SecurityIssue]:
+    def scan_all(self) -> list[SecurityIssue]:
         """Run comprehensive security scan"""
         print("🔒 Starting comprehensive security scan...")
 
@@ -72,7 +69,7 @@ class SecurityScanner:
 
         return self.issues
 
-    def scan_secrets(self) -> List[SecurityIssue]:
+    def scan_secrets(self) -> list[SecurityIssue]:
         """Scan for hardcoded secrets and credentials"""
         print("🔍 Scanning for secrets...")
         issues = []
@@ -109,7 +106,7 @@ class SecurityScanner:
 
         return issues
 
-    def scan_dependencies(self) -> List[SecurityIssue]:
+    def scan_dependencies(self) -> list[SecurityIssue]:
         """Scan for vulnerable dependencies"""
         print("📦 Scanning dependencies...")
         issues = []
@@ -125,7 +122,7 @@ class SecurityScanner:
 
         return issues
 
-    def scan_code_issues(self) -> List[SecurityIssue]:
+    def scan_code_issues(self) -> list[SecurityIssue]:
         """Scan for code security issues"""
         print("🔍 Scanning code for security issues...")
         issues = []
@@ -158,7 +155,7 @@ class SecurityScanner:
 
         return issues
 
-    def scan_configuration(self) -> List[SecurityIssue]:
+    def scan_configuration(self) -> list[SecurityIssue]:
         """Scan configuration files for security issues"""
         print("⚙️  Scanning configuration...")
         issues = []
@@ -174,7 +171,7 @@ class SecurityScanner:
 
         return issues
 
-    def scan_infrastructure(self) -> List[SecurityIssue]:
+    def scan_infrastructure(self) -> list[SecurityIssue]:
         """Scan infrastructure configurations"""
         print("🏗️  Scanning infrastructure...")
         issues = []
@@ -187,17 +184,17 @@ class SecurityScanner:
 
         return issues
 
-    def _load_secret_patterns(self) -> Dict[str, Any]:
+    def _load_secret_patterns(self) -> dict[str, Any]:
         """Load secret detection patterns"""
         # This would load from a comprehensive pattern database
         return {}
 
-    def _load_vulnerability_db(self) -> Dict[str, Any]:
+    def _load_vulnerability_db(self) -> dict[str, Any]:
         """Load vulnerability database"""
         # This would load from CVE database or similar
         return {}
 
-    def _get_scan_files(self) -> List[Path]:
+    def _get_scan_files(self) -> list[Path]:
         """Get list of files to scan"""
         files = []
 
@@ -217,7 +214,7 @@ class SecurityScanner:
 
         return filtered_files
 
-    def _scan_file_for_secrets(self, file_path: Path, patterns: List[Tuple[str, str, SecuritySeverity]]) -> List[SecurityIssue]:
+    def _scan_file_for_secrets(self, file_path: Path, patterns: list[tuple[str, str, SecuritySeverity]]) -> list[SecurityIssue]:
         """Scan file for secret patterns"""
         issues = []
 
@@ -229,7 +226,7 @@ class SecurityScanner:
             for line_num, line in enumerate(lines, 1):
                 for pattern, secret_type, severity in patterns:
                     matches = re.finditer(pattern, line, re.IGNORECASE)
-                    for match in matches:
+                    for _match in matches:
                         # Skip if it's in a comment or test
                         if self._is_comment_or_test(line, file_path):
                             continue
@@ -256,7 +253,7 @@ class SecurityScanner:
 
         return issues
 
-    def _scan_file_for_patterns(self, file_path: Path, patterns: List[Tuple[str, str, SecuritySeverity]]) -> List[SecurityIssue]:
+    def _scan_file_for_patterns(self, file_path: Path, patterns: list[tuple[str, str, SecuritySeverity]]) -> list[SecurityIssue]:
         """Scan file for security patterns"""
         issues = []
 
@@ -306,7 +303,7 @@ class SecurityScanner:
 
         return False
 
-    def _scan_python_dependencies(self) -> List[SecurityIssue]:
+    def _scan_python_dependencies(self) -> list[SecurityIssue]:
         """Scan Python dependencies for vulnerabilities"""
         issues = []
 
@@ -344,7 +341,7 @@ class SecurityScanner:
 
         return issues
 
-    def _scan_node_dependencies(self) -> List[SecurityIssue]:
+    def _scan_node_dependencies(self) -> list[SecurityIssue]:
         """Scan Node.js dependencies for vulnerabilities"""
         issues = []
 
@@ -376,7 +373,7 @@ class SecurityScanner:
 
         return issues
 
-    def _scan_docker_images(self) -> List[SecurityIssue]:
+    def _scan_docker_images(self) -> list[SecurityIssue]:
         """Scan Docker images for vulnerabilities"""
         issues = []
 
@@ -413,7 +410,7 @@ class SecurityScanner:
 
         return issues
 
-    def _scan_docker_configs(self) -> List[SecurityIssue]:
+    def _scan_docker_configs(self) -> list[SecurityIssue]:
         """Scan Docker configurations for security issues"""
         issues = []
 
@@ -453,7 +450,7 @@ class SecurityScanner:
 
         return issues
 
-    def _scan_env_files(self) -> List[SecurityIssue]:
+    def _scan_env_files(self) -> list[SecurityIssue]:
         """Scan environment files for security issues"""
         issues = []
 
@@ -484,7 +481,7 @@ class SecurityScanner:
 
         return issues
 
-    def _scan_cicd_configs(self) -> List[SecurityIssue]:
+    def _scan_cicd_configs(self) -> list[SecurityIssue]:
         """Scan CI/CD configurations for security issues"""
         issues = []
 
@@ -496,7 +493,7 @@ class SecurityScanner:
 
         return issues
 
-    def _scan_github_workflow(self, workflow_file: Path) -> List[SecurityIssue]:
+    def _scan_github_workflow(self, workflow_file: Path) -> list[SecurityIssue]:
         """Scan GitHub workflow for security issues"""
         issues = []
 
@@ -521,7 +518,7 @@ class SecurityScanner:
 
         return issues
 
-    def _scan_k8s_configs(self) -> List[SecurityIssue]:
+    def _scan_k8s_configs(self) -> list[SecurityIssue]:
         """Scan Kubernetes configurations for security issues"""
         issues = []
 
@@ -556,7 +553,7 @@ class SecurityScanner:
 
         return issues
 
-    def _scan_terraform_configs(self) -> List[SecurityIssue]:
+    def _scan_terraform_configs(self) -> list[SecurityIssue]:
         """Scan Terraform configurations for security issues"""
         issues = []
 
@@ -583,7 +580,7 @@ class SecurityScanner:
 
         return issues
 
-    def generate_report(self, issues: List[SecurityIssue]) -> str:
+    def generate_report(self, issues: list[SecurityIssue]) -> str:
         """Generate security scan report"""
         if not issues:
             return "✅ No security issues found"

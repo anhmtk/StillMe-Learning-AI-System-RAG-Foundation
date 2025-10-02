@@ -74,7 +74,7 @@ class TestRewardManager:
     async def test_end_learning_session(self, reward_manager):
         """Test ending a learning session"""
         # Start session
-        session = await reward_manager.start_learning_session(
+        await reward_manager.start_learning_session(
             session_id="test_session",
             user_id="user_123"
         )
@@ -297,7 +297,7 @@ class TestRewardManager:
 
         # Generate chart
         with patch('matplotlib.pyplot.savefig') as mock_savefig:
-            chart_path = await reward_manager.generate_rewards_chart("user_123")
+            await reward_manager.generate_rewards_chart("user_123")
 
             # Should attempt to save chart
             mock_savefig.assert_called_once()

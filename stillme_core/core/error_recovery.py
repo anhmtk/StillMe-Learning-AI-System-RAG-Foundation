@@ -12,7 +12,7 @@ import time
 from dataclasses import dataclass
 from enum import Enum
 from functools import wraps
-from typing import Any, Callable, Dict, List, Optional, TypeVar
+from typing import Any, Callable, TypeVar
 
 logger = logging.getLogger(__name__)
 
@@ -64,10 +64,10 @@ class OperationResult:
 
     success: bool
     result: Any = None
-    error: Optional[Exception] = None
+    error: Exception | None = None
     attempts: int = 1
     duration: float = 0.0
-    circuit_state: Optional[CircuitState] = None
+    circuit_state: CircuitState | None = None
 
 
 class CircuitBreaker:
@@ -245,9 +245,9 @@ class ErrorRecoveryManager:
     """
 
     def __init__(self):
-        self.circuit_breakers: Dict[str, CircuitBreaker] = {}
-        self.retry_configs: Dict[str, RetryConfig] = {}
-        self.operation_history: List[OperationResult] = []
+        self.circuit_breakers: dict[str, CircuitBreaker] = {}
+        self.retry_configs: dict[str, RetryConfig] = {}
+        self.operation_history: list[OperationResult] = []
 
         # Default configurations
         self._setup_default_configs()
@@ -342,7 +342,7 @@ class ErrorRecoveryManager:
 
         return result
 
-    def get_operation_stats(self) -> Dict[str, Any]:
+    def get_operation_stats(self) -> dict[str, Any]:
         """Get operation statistics"""
         if not self.operation_history:
             return {"total_operations": 0}

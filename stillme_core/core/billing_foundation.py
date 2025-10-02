@@ -6,7 +6,7 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 # --- Cấu hình và Logging ---
 logging.basicConfig(
@@ -30,7 +30,7 @@ class Invoice:
 
     invoice_id: str
     customer_id: str
-    items: List[Dict[str, Any]]
+    items: list[dict[str, Any]]
     subtotal: float
     taxes: float
     total: float
@@ -105,7 +105,7 @@ class BillingFoundation:
     """
 
     def __init__(
-        self, db_path: str = "billing_data.db", config: Dict[str, Any] = DEFAULT_CONFIG
+        self, db_path: str = "billing_data.db", config: dict[str, Any] = DEFAULT_CONFIG
     ):
         self.db_path = db_path
         self.config = config
@@ -203,7 +203,7 @@ class BillingFoundation:
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(self.executor, func, *args)
 
-    async def generate_invoice(self, data: Dict[str, Any]) -> Invoice:
+    async def generate_invoice(self, data: dict[str, Any]) -> Invoice:
         """Tạo một hóa đơn mới từ dữ liệu sử dụng."""
         try:
             logger.info(f"Đang tạo hóa đơn cho khách hàng: {data['customer_id']}")
@@ -251,7 +251,7 @@ class BillingFoundation:
             logger.error(f"Lỗi khi tạo hóa đơn: {e}")
             raise
 
-    async def process_payment(self, data: Dict[str, Any]) -> Payment:
+    async def process_payment(self, data: dict[str, Any]) -> Payment:
         """Xử lý thanh toán cho một hóa đơn."""
         try:
             logger.info(f"Đang xử lý thanh toán cho hóa đơn: {data['invoice_id']}")
@@ -309,7 +309,7 @@ class BillingFoundation:
             logger.error(f"Lỗi khi xử lý thanh toán: {e}")
             raise
 
-    async def track_billing(self, data: Dict[str, Any]) -> BillingRecord:
+    async def track_billing(self, data: dict[str, Any]) -> BillingRecord:
         """Ghi lại một bản ghi billing mới."""
         try:
             logger.info(
@@ -388,7 +388,7 @@ class BillingFoundation:
             logger.error(f"Lỗi khi tính thuế: {e}")
             raise
 
-    async def recognize_revenue(self, data: Dict[str, Any]) -> RevenueRecognition:
+    async def recognize_revenue(self, data: dict[str, Any]) -> RevenueRecognition:
         """Nhận diện doanh thu tuân thủ GAAP."""
         try:
             logger.info(

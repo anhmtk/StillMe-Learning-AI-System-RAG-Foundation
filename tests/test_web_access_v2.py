@@ -379,7 +379,7 @@ class TestWebMetrics:
     def test_performance_alerts(self, metrics):
         """Test performance alerts"""
         # Record requests with low success rate
-        for i in range(5):
+        for _i in range(5):
             metrics.record_request("web.search_news", False, 10000.0, False, "newsapi.org", "timeout", 0)
 
         alerts = metrics.get_performance_alerts()

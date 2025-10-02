@@ -137,7 +137,7 @@ class TestRateLimiting:
         client_id = "test_client_2"
 
         # Exceed the rate limit
-        for i in range(11):  # 11 requests with limit of 10
+        for _i in range(11):  # 11 requests with limit of 10
             result = rate_limiter.check_rate_limit(client_id, limit=10, window=60)
 
         # Last request should be denied
@@ -150,7 +150,7 @@ class TestRateLimiting:
         client_id = "test_client_3"
 
         # Exceed the rate limit
-        for i in range(11):
+        for _i in range(11):
             rate_limiter.check_rate_limit(client_id, limit=10, window=1)  # 1 second window
 
         # Wait for window to reset
@@ -304,7 +304,7 @@ class TestSecurityCompliance:
         assert result["allowed"] is True
 
         # Test burst protection
-        for i in range(15):  # Exceed limit
+        for _i in range(15):  # Exceed limit
             result = rate_limiter.check_rate_limit("test", limit=10, window=60)
 
         assert result["allowed"] is False  # Should be blocked

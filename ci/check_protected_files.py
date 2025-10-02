@@ -1,4 +1,3 @@
-import secrets
 
 #!/usr/bin/env python3
 """
@@ -6,13 +5,11 @@ Protected Files Compliance Check
 Ensures protected files are not modified or deleted
 """
 
-import os
 import sys
 from pathlib import Path
-from typing import List, Set
 
 
-def get_protected_files() -> Set[str]:
+def get_protected_files() -> set[str]:
     """Get list of protected files"""
     protected = {
         ".env",
@@ -41,7 +38,7 @@ def get_protected_files() -> Set[str]:
 
     return protected
 
-def check_file_protection(file_path: Path, protected_patterns: Set[str]) -> bool:
+def check_file_protection(file_path: Path, protected_patterns: set[str]) -> bool:
     """Check if file matches protected patterns"""
     file_str = str(file_path)
 
@@ -62,7 +59,7 @@ def check_file_protection(file_path: Path, protected_patterns: Set[str]) -> bool
 
     return False
 
-def check_git_status() -> List[str]:
+def check_git_status() -> list[str]:
     """Check git status for modified files"""
     import subprocess
 

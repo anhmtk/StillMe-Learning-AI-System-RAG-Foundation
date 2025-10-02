@@ -1,7 +1,7 @@
 """AI Plan Schema for StillMe Framework"""
 
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 
 @dataclass
@@ -9,9 +9,9 @@ class PlanStep:
     """Single step in an AI plan"""
     id: str
     action: str
-    parameters: Dict[str, Any]
+    parameters: dict[str, Any]
     expected_output: Optional[str] = None
-    dependencies: List[str] = None
+    dependencies: list[str] = None
 
     def __post_init__(self):
         if self.dependencies is None:
@@ -23,7 +23,7 @@ class PlanItem:
     id: str
     title: str
     description: str
-    steps: List[PlanStep]
+    steps: list[PlanStep]
     priority: int = 1
     status: str = "pending"
     created_at: Optional[str] = None

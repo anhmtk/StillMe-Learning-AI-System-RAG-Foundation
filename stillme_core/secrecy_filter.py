@@ -5,7 +5,7 @@ import re
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ class SecrecyRule:
     action: FilterAction
     description: str
     enabled: bool = True
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -49,11 +49,11 @@ class FilterResult:
     result_id: str
     original_content: str
     filtered_content: str
-    applied_rules: List[SecrecyRule]
+    applied_rules: list[SecrecyRule]
     secrecy_level: SecrecyLevel
     action_taken: FilterAction
     timestamp: datetime
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -64,8 +64,8 @@ class SecrecyFilter:
 
     def __init__(self):
         self.logger = logger
-        self.rules: List[SecrecyRule] = []
-        self.filter_results: List[FilterResult] = []
+        self.rules: list[SecrecyRule] = []
+        self.filter_results: list[FilterResult] = []
         self.default_secrecy_level = SecrecyLevel.PUBLIC
         self.logger.info("✅ SecrecyFilter initialized")
 
@@ -99,7 +99,7 @@ class SecrecyFilter:
     def filter_content(self,
                       content: str,
                       target_secrecy_level: SecrecyLevel = None,
-                      context: Dict[str, Any] = None) -> FilterResult:
+                      context: dict[str, Any] = None) -> FilterResult:
         """Filter content based on secrecy rules"""
         try:
             if target_secrecy_level is None:
@@ -223,19 +223,19 @@ class SecrecyFilter:
             self.logger.error(f"❌ Failed to redact sensitive content: {e}")
             return content
 
-    def get_rules_by_secrecy_level(self, secrecy_level: SecrecyLevel) -> List[SecrecyRule]:
+    def get_rules_by_secrecy_level(self, secrecy_level: SecrecyLevel) -> list[SecrecyRule]:
         """Get rules by secrecy level"""
         return [r for r in self.rules if r.secrecy_level == secrecy_level]
 
-    def get_rules_by_action(self, action: FilterAction) -> List[SecrecyRule]:
+    def get_rules_by_action(self, action: FilterAction) -> list[SecrecyRule]:
         """Get rules by action"""
         return [r for r in self.rules if r.action == action]
 
-    def get_enabled_rules(self) -> List[SecrecyRule]:
+    def get_enabled_rules(self) -> list[SecrecyRule]:
         """Get enabled rules"""
         return [r for r in self.rules if r.enabled]
 
-    def get_filter_summary(self) -> Dict[str, Any]:
+    def get_filter_summary(self) -> dict[str, Any]:
         """Get filter summary"""
         try:
             total_rules = len(self.rules)

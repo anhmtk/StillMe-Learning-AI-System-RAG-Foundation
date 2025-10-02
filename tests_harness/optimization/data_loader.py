@@ -6,10 +6,9 @@ Loads and validates report data with safe defaults
 
 import json
 import logging
-import os
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import yaml
 
@@ -23,7 +22,7 @@ class DataLoader:
         self.slo_policy_path = Path(slo_policy_path)
         self.slo_policy = self._load_slo_policy()
 
-    def _load_slo_policy(self) -> Dict[str, Any]:
+    def _load_slo_policy(self) -> dict[str, Any]:
         """Load SLO policy with fallback defaults"""
         try:
             if self.slo_policy_path.exists():
@@ -36,7 +35,7 @@ class DataLoader:
             logger.error(f"Error loading SLO policy: {e}, using defaults")
             return self._get_default_slo_policy()
 
-    def _get_default_slo_policy(self) -> Dict[str, Any]:
+    def _get_default_slo_policy(self) -> dict[str, Any]:
         """Default SLO policy if file not found"""
         return {
             "performance": {
@@ -54,7 +53,7 @@ class DataLoader:
             "cost": {"token_saving_min": 0.20, "cost_per_request_max": 1000}
         }
 
-    def load_all_reports(self) -> List[Dict[str, Any]]:
+    def load_all_reports(self) -> list[dict[str, Any]]:
         """Load all JSON reports with validation and defaults"""
         reports = []
 
@@ -75,7 +74,7 @@ class DataLoader:
         reports.sort(key=lambda x: x.get('run_id', ''), reverse=True)
         return reports
 
-    def _validate_and_fill_defaults(self, data: Dict[str, Any], filename: str) -> Dict[str, Any]:
+    def _validate_and_fill_defaults(self, data: dict[str, Any], filename: str) -> dict[str, Any]:
         """Validate and fill missing fields with safe defaults"""
 
         # Generate run_id if missing
@@ -215,19 +214,19 @@ class DataLoader:
 
         return data
 
-    def get_slo_policy(self) -> Dict[str, Any]:
+    def get_slo_policy(self) -> dict[str, Any]:
         """Get SLO policy"""
         return self.slo_policy
 
-    def get_action_map(self) -> Dict[str, Any]:
+    def get_action_map(self) -> dict[str, Any]:
         """Get action map for failure to module mapping"""
         return self.slo_policy.get('action_map', {})
 
-    def get_model_expectations(self) -> Dict[str, Any]:
+    def get_model_expectations(self) -> dict[str, Any]:
         """Get model performance expectations"""
         return self.slo_policy.get('model_expectations', {})
 
-    def get_scenario_weights(self) -> Dict[str, float]:
+    def get_scenario_weights(self) -> dict[str, float]:
         """Get scenario weights for overall scoring"""
         return self.slo_policy.get('scenario_weights', {
             "persona": 0.20,

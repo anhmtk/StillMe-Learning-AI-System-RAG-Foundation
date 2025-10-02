@@ -5,7 +5,7 @@ Tests for OWASP ZAP baseline scan and custom fuzz testing
 
 import json
 import time
-from typing import Any, Dict, List
+from typing import Any
 
 import requests
 
@@ -22,7 +22,7 @@ class HTTPFuzzTester:
         self.audit_logger = SecurityAuditLogger()
         self.findings = []
 
-    def test_sql_injection(self) -> List[Dict[str, Any]]:
+    def test_sql_injection(self) -> list[dict[str, Any]]:
         """Test for SQL injection vulnerabilities"""
         findings = []
         sql_payloads = [
@@ -85,7 +85,7 @@ class HTTPFuzzTester:
 
         return findings
 
-    def test_xss_injection(self) -> List[Dict[str, Any]]:
+    def test_xss_injection(self) -> list[dict[str, Any]]:
         """Test for XSS vulnerabilities"""
         findings = []
         xss_payloads = [
@@ -130,7 +130,7 @@ class HTTPFuzzTester:
 
         return findings
 
-    def test_path_traversal(self) -> List[Dict[str, Any]]:
+    def test_path_traversal(self) -> list[dict[str, Any]]:
         """Test for path traversal vulnerabilities"""
         findings = []
         path_payloads = [
@@ -173,7 +173,7 @@ class HTTPFuzzTester:
 
         return findings
 
-    def test_command_injection(self) -> List[Dict[str, Any]]:
+    def test_command_injection(self) -> list[dict[str, Any]]:
         """Test for command injection vulnerabilities"""
         findings = []
         command_payloads = [
@@ -217,7 +217,7 @@ class HTTPFuzzTester:
 
         return findings
 
-    def test_header_anomalies(self) -> List[Dict[str, Any]]:
+    def test_header_anomalies(self) -> list[dict[str, Any]]:
         """Test for header-based vulnerabilities"""
         findings = []
 
@@ -264,7 +264,7 @@ class HTTPFuzzTester:
 
         return findings
 
-    def test_rate_limiting(self) -> List[Dict[str, Any]]:
+    def test_rate_limiting(self) -> list[dict[str, Any]]:
         """Test rate limiting implementation"""
         findings = []
 
@@ -291,7 +291,7 @@ class HTTPFuzzTester:
 
         return findings
 
-    def run_all_tests(self) -> Dict[str, Any]:
+    def run_all_tests(self) -> dict[str, Any]:
         """Run all fuzz tests"""
         print("🔍 Starting HTTP fuzz testing...")
 
@@ -381,7 +381,7 @@ class HTTPFuzzTester:
 
         return False
 
-    def _check_missing_security_headers(self, response: requests.Response) -> List[str]:
+    def _check_missing_security_headers(self, response: requests.Response) -> list[str]:
         """Check for missing security headers"""
         required_headers = [
             "Content-Security-Policy",
@@ -398,7 +398,7 @@ class HTTPFuzzTester:
 
         return missing_headers
 
-    def _generate_summary(self, findings: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _generate_summary(self, findings: list[dict[str, Any]]) -> dict[str, Any]:
         """Generate test summary"""
         severity_counts = {"LOW": 0, "MEDIUM": 0, "HIGH": 0, "CRITICAL": 0}
         type_counts = {}

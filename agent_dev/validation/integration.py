@@ -9,18 +9,16 @@ Cách sử dụng:
 3. Báo cáo trung thực với bằng chứng cụ thể
 """
 
-import json
 import os
 import sys
 import time
-from typing import Any, Callable, Dict, List, Optional
+from typing import Callable
 
 # Add current directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from agentdev_validation_system import (
     AgentDevValidator,
-    ErrorSeverity,
     ValidationResult,
 )
 
@@ -84,7 +82,7 @@ class AgentDevIntegration:
             return wrapper
         return validation_decorator
 
-    def _display_validation_result(self, function_name: str, before_data: Dict, result: ValidationResult):
+    def _display_validation_result(self, function_name: str, before_data: dict, result: ValidationResult):
         """Hiển thị kết quả validation"""
         print(f"\n📊 KẾT QUẢ VALIDATION CHO {function_name.upper()}")
         print("-" * 50)

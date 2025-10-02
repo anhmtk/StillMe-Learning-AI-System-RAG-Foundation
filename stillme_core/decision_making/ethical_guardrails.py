@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ class EthicalViolation:
     context: str
     timestamp: datetime
     suggested_action: str
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -43,14 +43,14 @@ class EthicalGuardrails:
 
     def __init__(self):
         self.logger = logger
-        self.violations: List[EthicalViolation] = []
+        self.violations: list[EthicalViolation] = []
         self.principles = list(EthicalPrinciple)
         self.logger.info("✅ EthicalGuardrails initialized")
 
     def check_ethical_compliance(self,
                                content: str,
                                context: str = "",
-                               metadata: Dict[str, Any] = None) -> List[EthicalViolation]:
+                               metadata: dict[str, Any] = None) -> list[EthicalViolation]:
         """Check ethical compliance of content"""
         try:
             violations = []
@@ -149,15 +149,15 @@ class EthicalGuardrails:
 
         return False
 
-    def get_violations_by_principle(self, principle: EthicalPrinciple) -> List[EthicalViolation]:
+    def get_violations_by_principle(self, principle: EthicalPrinciple) -> list[EthicalViolation]:
         """Get violations by ethical principle"""
         return [v for v in self.violations if v.principle == principle]
 
-    def get_violations_by_severity(self, severity: ViolationSeverity) -> List[EthicalViolation]:
+    def get_violations_by_severity(self, severity: ViolationSeverity) -> list[EthicalViolation]:
         """Get violations by severity"""
         return [v for v in self.violations if v.severity == severity]
 
-    def get_ethical_summary(self) -> Dict[str, Any]:
+    def get_ethical_summary(self) -> dict[str, Any]:
         """Get ethical compliance summary"""
         try:
             total_violations = len(self.violations)

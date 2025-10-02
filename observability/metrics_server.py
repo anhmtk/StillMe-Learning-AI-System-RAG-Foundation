@@ -13,7 +13,6 @@ import json
 import threading
 import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Any, Dict
 
 
 class MetricsCollector:

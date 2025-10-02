@@ -3,15 +3,24 @@ import logging
 import sys
 import time
 
-from fastapi import FastAPI, HTTPException  # type: ignore
-from framework import StillMeFramework  # type: ignore
-from pydantic import BaseModel  # type: ignore
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+
+# Import StillMeFramework from correct path
+try:
+    from stillme_core.framework import StillMeFramework as _StillMeFramework
+    StillMeFramework = _StillMeFramework
+except ImportError:
+    # Fallback if framework not available
+    class StillMeFramework:
+        def __init__(self):
+            pass
 
 try:
-    from stillme_core.safety_guard import (  # type: ignore
-        apply_policies,  # type: ignore
-        redact_output,  # type: ignore
-        safe_reply,  # type: ignore
+    from stillme_core.safety_guard import (
+        apply_policies,
+        redact_output,
+        safe_reply,
     )
 except ImportError:
     # Fallback for environments without safety_guard
@@ -22,14 +31,14 @@ except ImportError:
             self.reason = "no_guard"
             self.redactions = []
 
-    def apply_policies(prompt):
+    def apply_policies(content: str, policies=None):
         return Decision()
 
-    def safe_reply(category, locale, context=None):
-        return "Safe response generated"
+    def redact_output(output: str, sensitive_patterns=None):
+        return output
 
-    def redact_output(text):
-        return text
+    def safe_reply(content: str, context=None):
+        return "Safe response generated"
 
 
 app = FastAPI()

@@ -13,10 +13,9 @@ Kiểm tra:
 import json
 import logging
 import re
-import time
 from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -32,7 +31,7 @@ class AgentDevScore:
     learning_capability: float  # 0-1: khả năng học hỏi
     overall_agentdev_score: float  # 0-1: điểm AgentDev tổng
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 class AgentDevEval:
@@ -117,17 +116,17 @@ class AgentDevEval:
     def evaluate(self,
                  response: str,
                  user_input: str = "",
-                 context: Optional[Dict] = None,
-                 performance_metrics: Optional[Dict] = None) -> AgentDevScore:
+                 context: Optional[dict] = None,
+                 performance_metrics: Optional[dict] = None) -> AgentDevScore:
         """
         Đánh giá AgentDev integration và performance
-        
+
         Args:
             response: AI response cần đánh giá
             user_input: User input gốc (optional)
             context: Context bổ sung (optional)
             performance_metrics: Performance metrics (optional)
-            
+
         Returns:
             AgentDevScore: Kết quả đánh giá AgentDev
         """
@@ -220,7 +219,7 @@ class AgentDevEval:
             self.logger.error(f"Error evaluating integration: {e}")
             return 0.0
 
-    def _evaluate_performance(self, performance_metrics: Optional[Dict]) -> float:
+    def _evaluate_performance(self, performance_metrics: Optional[dict]) -> float:
         """Đánh giá performance"""
         try:
             if not performance_metrics:
@@ -356,7 +355,7 @@ class AgentDevEval:
             self.logger.error(f"Error evaluating security compliance: {e}")
             return 0.0
 
-    def _evaluate_learning_capability(self, response: str, context: Optional[Dict]) -> float:
+    def _evaluate_learning_capability(self, response: str, context: Optional[dict]) -> float:
         """Đánh giá khả năng học hỏi"""
         try:
             score = 0.0
@@ -413,7 +412,7 @@ class AgentDevEval:
             self.logger.error(f"Error evaluating learning capability: {e}")
             return 0.0
 
-    def batch_evaluate(self, responses: List[Dict[str, Any]]) -> List[AgentDevScore]:
+    def batch_evaluate(self, responses: list[dict[str, Any]]) -> list[AgentDevScore]:
         """Đánh giá hàng loạt responses"""
         results = []
 
@@ -435,7 +434,7 @@ class AgentDevEval:
 
         return results
 
-    def generate_report(self, scores: List[AgentDevScore]) -> Dict[str, Any]:
+    def generate_report(self, scores: list[AgentDevScore]) -> dict[str, Any]:
         """Tạo báo cáo tổng hợp"""
         try:
             if not scores:

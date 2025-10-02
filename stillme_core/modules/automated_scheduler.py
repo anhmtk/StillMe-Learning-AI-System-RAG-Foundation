@@ -12,7 +12,7 @@ import signal
 import sys
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_EXECUTED, EVENT_JOB_MISSED
 from apscheduler.executors.asyncio import AsyncIOExecutor
@@ -338,7 +338,7 @@ class AutomatedScheduler:
             analysis = self.learning_manager.analyze_learning_performance()
 
             # Generate weekly report
-            report = self.learning_manager.generate_learning_report()
+            self.learning_manager.generate_learning_report()
 
             self.logger.info("✅ Weekly analysis completed")
             self.logger.info(f"📊 Total cases: {stats.get('total_cases', 0)}")
@@ -366,7 +366,7 @@ class AutomatedScheduler:
             improvement_result = self.learning_manager.run_learning_improvement_cycle()
 
             # Get detailed analysis
-            analysis = improvement_result.get("analysis", {})
+            improvement_result.get("analysis", {})
             suggestions = improvement_result.get("improvement_suggestions", [])
 
             self.logger.info("✅ Monthly improvement analysis completed")
@@ -415,7 +415,7 @@ class AutomatedScheduler:
             self.is_running = False
             self.logger.info("🛑 AutomatedScheduler stopped")
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """Get scheduler status"""
         if not self.scheduler:
             return {"status": "not_initialized"}
@@ -447,7 +447,7 @@ class AutomatedScheduler:
             },
         }
 
-    async def run_manual_job(self, job_id: str) -> Dict[str, Any]:
+    async def run_manual_job(self, job_id: str) -> dict[str, Any]:
         """Run a job manually"""
         try:
             if not self.scheduler:

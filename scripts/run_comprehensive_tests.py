@@ -12,9 +12,7 @@ import time
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-
-import aiohttp
+from typing import Any, Optional
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -30,16 +28,16 @@ class TestResult:
     tests_failed: int
     tests_errors: int
     coverage_percent: float
-    details: Optional[Dict[str, Any]] = None
+    details: Optional[dict[str, Any]] = None
 
 @dataclass
 class ComprehensiveTestReport:
     timestamp: str
     total_duration: float
-    test_results: List[TestResult]
+    test_results: list[TestResult]
     overall_status: str
-    coverage_summary: Dict[str, float]
-    recommendations: List[str]
+    coverage_summary: dict[str, float]
+    recommendations: list[str]
 
 class ComprehensiveTestRunner:
     """
@@ -440,7 +438,7 @@ class ComprehensiveTestRunner:
                 details={"error": str(e)}
             )
 
-    def _parse_pytest_output(self, output: str) -> Dict[str, int]:
+    def _parse_pytest_output(self, output: str) -> dict[str, int]:
         """Parse pytest output to extract test counts"""
         # Mock parsing - in real implementation, parse actual output
         return {
@@ -476,7 +474,7 @@ class ComprehensiveTestRunner:
         else:
             return "PASS"
 
-    def _calculate_coverage_summary(self) -> Dict[str, float]:
+    def _calculate_coverage_summary(self) -> dict[str, float]:
         """Calculate coverage summary"""
         coverage_data = {}
         for result in self.test_results:
@@ -488,7 +486,7 @@ class ComprehensiveTestRunner:
 
         return coverage_data
 
-    def _generate_recommendations(self) -> List[str]:
+    def _generate_recommendations(self) -> list[str]:
         """Generate test recommendations"""
         recommendations = []
 

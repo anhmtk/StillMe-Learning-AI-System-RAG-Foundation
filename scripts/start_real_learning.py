@@ -5,10 +5,8 @@ Kích hoạt hệ thống học tập thực sự với automation và alerting
 """
 
 import logging
-import os
 import sys
 import time
-from datetime import datetime, timedelta
 from pathlib import Path
 
 # Add project root to path

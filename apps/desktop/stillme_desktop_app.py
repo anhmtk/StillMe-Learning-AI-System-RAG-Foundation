@@ -2,15 +2,13 @@
 """
 StillMe Desktop Chat App - Beautiful UI like FlutterFlow
 """
-import json
 import os
 import re
 import sys
 import threading
 import tkinter as tk
-import webbrowser
 from datetime import datetime
-from tkinter import messagebox, scrolledtext, ttk
+from tkinter import messagebox, scrolledtext
 
 import requests
 
@@ -18,7 +16,7 @@ import requests
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../libs'))
 from design_tokens import design_tokens
 from lang.detect import detect_language, get_language_name
-from performance_tracker import PerformanceMetrics, performance_tracker
+from performance_tracker import performance_tracker
 from system_prompt import system_prompt_manager
 
 # Add config to path for branding
@@ -388,7 +386,7 @@ class StillMeDesktopApp:
         """Send message in background thread"""
         try:
             # Start performance tracking
-            start_time = performance_tracker.start_timing()
+            performance_tracker.start_timing()
 
             # Detect language from user message
             detected_locale = detect_language(message)
@@ -489,7 +487,7 @@ class StillMeDesktopApp:
         """Add attribution message for web content"""
         try:
             source_name = attribution.get('source_name', 'Unknown Source')
-            url = attribution.get('url', '')
+            attribution.get('url', '')
             retrieved_at = attribution.get('retrieved_at', '')
             domain = attribution.get('domain', '')
 
@@ -852,7 +850,7 @@ class StillMeDesktopApp:
 
 def main():
     root = tk.Tk()
-    app = StillMeDesktopApp(root)
+    StillMeDesktopApp(root)
     root.mainloop()
 
 if __name__ == "__main__":

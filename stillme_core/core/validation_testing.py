@@ -31,7 +31,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import psutil
 
@@ -53,7 +53,7 @@ class TestResult:
     performance_score: float
     memory_usage_mb: float
     error_message: Optional[str]
-    details: Dict[str, Any]
+    details: dict[str, Any]
     timestamp: datetime
 
 
@@ -63,7 +63,7 @@ class TestSuite:
 
     suite_id: str
     suite_name: str
-    tests: List[TestResult]
+    tests: list[TestResult]
     total_tests: int
     passed_tests: int
     failed_tests: int
@@ -95,7 +95,7 @@ class ValidationTesting:
         self,
         metrics_db_path: str,
         validation_db_path: str,
-        config: Optional[Dict[str, Any]] = None,
+        config: Optional[dict[str, Any]] = None,
     ):
         self.metrics_db_path = Path(metrics_db_path)
         self.validation_db_path = Path(validation_db_path)
@@ -120,7 +120,7 @@ class ValidationTesting:
             "✅ ValidationTesting initialized với enterprise-grade configuration"
         )
 
-    def _get_default_config(self) -> Dict[str, Any]:
+    def _get_default_config(self) -> dict[str, Any]:
         """Default configuration với testing focus"""
         return {
             "accuracy_threshold": 0.999,  # 99.9% accuracy requirement
@@ -225,7 +225,7 @@ class ValidationTesting:
                 timestamp=datetime.now(),
             )
 
-    def _run_data_accuracy_tests(self) -> List[TestResult]:
+    def _run_data_accuracy_tests(self) -> list[TestResult]:
         """Run data accuracy tests"""
         test_results = []
 
@@ -255,7 +255,7 @@ class ValidationTesting:
 
         return test_results
 
-    def _run_performance_tests(self) -> List[TestResult]:
+    def _run_performance_tests(self) -> list[TestResult]:
         """Run performance tests"""
         test_results = []
 
@@ -281,7 +281,7 @@ class ValidationTesting:
 
         return test_results
 
-    def _run_memory_optimization_tests(self) -> List[TestResult]:
+    def _run_memory_optimization_tests(self) -> list[TestResult]:
         """Run memory optimization tests"""
         test_results = []
 
@@ -307,7 +307,7 @@ class ValidationTesting:
 
         return test_results
 
-    def _run_integration_tests(self) -> List[TestResult]:
+    def _run_integration_tests(self) -> list[TestResult]:
         """Run integration tests"""
         test_results = []
 
@@ -329,7 +329,7 @@ class ValidationTesting:
 
         return test_results
 
-    def _run_load_tests(self) -> List[TestResult]:
+    def _run_load_tests(self) -> list[TestResult]:
         """Run load tests"""
         test_results = []
 
@@ -351,7 +351,7 @@ class ValidationTesting:
 
         return test_results
 
-    def _run_stress_tests(self) -> List[TestResult]:
+    def _run_stress_tests(self) -> list[TestResult]:
         """Run stress tests"""
         test_results = []
 
@@ -468,7 +468,7 @@ class ValidationTesting:
                 # Check for data type consistency
                 cursor = conn.execute(
                     """
-                    SELECT 
+                    SELECT
                         COUNT(*) as total_records,
                         COUNT(CASE WHEN duration_ms < 0 THEN 1 END) as negative_duration,
                         COUNT(CASE WHEN duration_ms > 3600000 THEN 1 END) as excessive_duration,
@@ -723,7 +723,7 @@ class ValidationTesting:
                 # Check for reasonable data ranges
                 cursor = conn.execute(
                     """
-                    SELECT 
+                    SELECT
                         COUNT(*) as total_records,
                         COUNT(CASE WHEN duration_ms BETWEEN 0 AND 3600000 THEN 1 END) as reasonable_duration,
                         COUNT(CASE WHEN timestamp >= '2020-01-01' AND timestamp <= datetime('now', '+1 day') THEN 1 END) as reasonable_timestamp,
@@ -1032,7 +1032,7 @@ class ValidationTesting:
                 timestamp=datetime.now(),
             )
 
-    def _generate_test_data(self, count: int) -> List[Dict[str, Any]]:
+    def _generate_test_data(self, count: int) -> list[dict[str, Any]]:
         """Generate test data for validation"""
         test_data = []
 
@@ -1132,7 +1132,7 @@ class ValidationTesting:
             timestamp=datetime.now(),
         )
 
-    def get_test_summary(self) -> Dict[str, Any]:
+    def get_test_summary(self) -> dict[str, Any]:
         """Get test summary"""
         try:
             if not self._test_suites:
@@ -1190,7 +1190,7 @@ class ValidationTesting:
 def create_validation_testing(
     metrics_db_path: str,
     validation_db_path: str,
-    config: Optional[Dict[str, Any]] = None,
+    config: Optional[dict[str, Any]] = None,
 ) -> ValidationTesting:
     """Factory function để create validation testing"""
     return ValidationTesting(metrics_db_path, validation_db_path, config)

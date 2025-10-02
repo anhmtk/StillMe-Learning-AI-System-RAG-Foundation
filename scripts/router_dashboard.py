@@ -15,10 +15,8 @@ import argparse
 import json
 import os
 import sys
-import threading
 import time
 from datetime import datetime
-from typing import Dict, List, Optional
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))

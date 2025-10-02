@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ class SecurityIncident:
     timestamp: datetime = None
     resolved: bool = False
     resolution: Optional[str] = None
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.timestamp is None:
@@ -46,11 +46,11 @@ class SecurityManager:
 
     def __init__(self):
         self.logger = logger
-        self.incidents: List[SecurityIncident] = []
+        self.incidents: list[SecurityIncident] = []
         self.security_policies = self._initialize_security_policies()
         self.logger.info("✅ SecurityManager initialized")
 
-    def _initialize_security_policies(self) -> Dict[str, Any]:
+    def _initialize_security_policies(self) -> dict[str, Any]:
         """Initialize security policies"""
         return {
             "max_login_attempts": 5,
@@ -69,7 +69,7 @@ class SecurityManager:
                           security_level: SecurityLevel = SecurityLevel.MEDIUM,
                           source_ip: Optional[str] = None,
                           user_id: Optional[str] = None,
-                          metadata: Dict[str, Any] = None) -> SecurityIncident:
+                          metadata: dict[str, Any] = None) -> SecurityIncident:
         """Log a security event"""
         try:
             incident_id = f"incident_{len(self.incidents) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -158,15 +158,15 @@ class SecurityManager:
             self.logger.error(f"❌ Failed to update security policy: {e}")
             raise
 
-    def get_incidents_by_type(self, event_type: SecurityEvent) -> List[SecurityIncident]:
+    def get_incidents_by_type(self, event_type: SecurityEvent) -> list[SecurityIncident]:
         """Get incidents by event type"""
         return [i for i in self.incidents if i.event_type == event_type]
 
-    def get_incidents_by_level(self, security_level: SecurityLevel) -> List[SecurityIncident]:
+    def get_incidents_by_level(self, security_level: SecurityLevel) -> list[SecurityIncident]:
         """Get incidents by security level"""
         return [i for i in self.incidents if i.security_level == security_level]
 
-    def get_unresolved_incidents(self) -> List[SecurityIncident]:
+    def get_unresolved_incidents(self) -> list[SecurityIncident]:
         """Get unresolved incidents"""
         return [i for i in self.incidents if not i.resolved]
 
@@ -187,7 +187,7 @@ class SecurityManager:
             self.logger.error(f"❌ Failed to resolve incident: {e}")
             return False
 
-    def get_security_summary(self) -> Dict[str, Any]:
+    def get_security_summary(self) -> dict[str, Any]:
         """Get security summary"""
         try:
             total_incidents = len(self.incidents)

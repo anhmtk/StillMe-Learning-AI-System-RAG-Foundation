@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ class SafeRun:
     duration: Optional[float] = None
     result: Any = None
     error: Optional[str] = None
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -45,11 +45,11 @@ class SafeRunner:
 
     def __init__(self):
         self.logger = logger
-        self.runs: List[SafeRun] = []
+        self.runs: list[SafeRun] = []
         self.safety_checks = self._initialize_safety_checks()
         self.logger.info("✅ SafeRunner initialized")
 
-    def _initialize_safety_checks(self) -> Dict[SafetyLevel, List[str]]:
+    def _initialize_safety_checks(self) -> dict[SafetyLevel, list[str]]:
         """Initialize safety checks for different levels"""
         return {
             SafetyLevel.LOW: [
@@ -199,7 +199,7 @@ class SafeRunner:
                         self.logger.warning("⚠️ Dangerous input pattern detected in args")
                         return False
 
-            for key, value in kwargs.items():
+            for _key, value in kwargs.items():
                 if isinstance(value, str):
                     if any(pattern in value.lower() for pattern in dangerous_patterns):
                         self.logger.warning("⚠️ Dangerous input pattern detected in kwargs")
@@ -306,15 +306,15 @@ class SafeRunner:
             self.logger.error(f"❌ Function execution error: {e}")
             raise
 
-    def get_runs_by_status(self, status: RunStatus) -> List[SafeRun]:
+    def get_runs_by_status(self, status: RunStatus) -> list[SafeRun]:
         """Get runs by status"""
         return [r for r in self.runs if r.status == status]
 
-    def get_runs_by_safety_level(self, safety_level: SafetyLevel) -> List[SafeRun]:
+    def get_runs_by_safety_level(self, safety_level: SafetyLevel) -> list[SafeRun]:
         """Get runs by safety level"""
         return [r for r in self.runs if r.safety_level == safety_level]
 
-    def get_run_summary(self) -> Dict[str, Any]:
+    def get_run_summary(self) -> dict[str, Any]:
         """Get run summary"""
         try:
             total_runs = len(self.runs)

@@ -3,9 +3,8 @@ Provider factory for creating LLM provider instances.
 """
 
 import logging
-from typing import Dict, List, Optional, Type
 
-from .llm_base import FallbackStrategy, LLMProviderBase, ProviderConfig
+from .llm_base import LLMProviderBase, ProviderConfig
 from .local_llm import LocalLLMProvider
 from .openai import OpenAIProvider
 
@@ -15,13 +14,13 @@ logger = logging.getLogger(__name__)
 class ProviderFactory:
     """Factory for creating LLM provider instances."""
 
-    _providers: Dict[str, Type[LLMProviderBase]] = {
+    _providers: dict[str, type[LLMProviderBase]] = {
         "openai": OpenAIProvider,
         "local_llm": LocalLLMProvider,
     }
 
     @classmethod
-    def register_provider(cls, name: str, provider_class: Type[LLMProviderBase]):
+    def register_provider(cls, name: str, provider_class: type[LLMProviderBase]):
         """Register a new provider type."""
         cls._providers[name] = provider_class
         logger.info(f"Registered provider: {name}")
@@ -36,7 +35,7 @@ class ProviderFactory:
         return provider_class(config)
 
     @classmethod
-    def create_providers_from_config(cls, configs: List[Dict]) -> List[LLMProviderBase]:
+    def create_providers_from_config(cls, configs: list[dict]) -> list[LLMProviderBase]:
         """Create multiple provider instances from configuration list."""
         providers = []
 
@@ -52,6 +51,6 @@ class ProviderFactory:
         return providers
 
     @classmethod
-    def get_available_providers(cls) -> List[str]:
+    def get_available_providers(cls) -> list[str]:
         """Get list of available provider types."""
         return list(cls._providers.keys())

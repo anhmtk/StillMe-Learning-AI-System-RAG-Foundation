@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 from hypothesis import given, settings
 
@@ -123,17 +123,6 @@ class FuzzSecurityTestSuite:
         total = 0
 
         # Unicode ranges to test
-        unicode_ranges = [
-            (0x0000, 0x007F),  # Basic Latin
-            (0x0080, 0x00FF),  # Latin-1 Supplement
-            (0x0100, 0x017F),  # Latin Extended-A
-            (0x4E00, 0x9FFF),  # CJK Unified Ideographs
-            (0x0400, 0x04FF),  # Cyrillic
-            (0x1F600, 0x1F64F),  # Emoticons
-            (0x1F300, 0x1F5FF),  # Miscellaneous Symbols
-            (0x2000, 0x206F),  # General Punctuation
-            (0xFEFF, 0xFEFF),  # Zero Width No-Break Space
-        ]
 
         @given(st.text(min_size=1, max_size=100))
         @settings(max_examples=50)
@@ -577,7 +566,7 @@ class FuzzSecurityTestSuite:
         except Exception:
             return False
 
-    def run_all_tests(self) -> Dict[str, Any]:
+    def run_all_tests(self) -> dict[str, Any]:
         """Run all fuzz and security tests"""
         print("🧪 Starting Fuzz & Security Test Suite")
         print("=" * 60)

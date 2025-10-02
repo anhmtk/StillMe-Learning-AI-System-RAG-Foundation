@@ -4,7 +4,7 @@ Enhanced configuration management with improved security and performance setting
 """
 
 import os
-from typing import Any, Dict, List, Optional
+from typing import Optional
 
 from pydantic import Field, validator
 from pydantic_settings import BaseSettings
@@ -53,18 +53,18 @@ class EnhancedSettings(BaseSettings):
     REDIS_MAX_CONNECTIONS: int = 50
     REDIS_RETRY_ON_TIMEOUT: bool = True
     REDIS_SOCKET_KEEPALIVE: bool = True
-    REDIS_SOCKET_KEEPALIVE_OPTIONS: Dict[str, int] = {
+    REDIS_SOCKET_KEEPALIVE_OPTIONS: dict[str, int] = {
         1: 1,  # TCP_KEEPIDLE
         2: 3,  # TCP_KEEPINTVL
         3: 5,  # TCP_KEEPCNT
     }
 
     # CORS
-    ALLOWED_ORIGINS: List[str] = Field(
+    ALLOWED_ORIGINS: list[str] = Field(
         default=["http://localhost:3000", "http://localhost:8080"],
         env="ALLOWED_ORIGINS",
     )
-    ALLOWED_HOSTS: List[str] = Field(
+    ALLOWED_HOSTS: list[str] = Field(
         default=["localhost", "127.0.0.1"],
         env="ALLOWED_HOSTS"
     )
@@ -95,7 +95,7 @@ class EnhancedSettings(BaseSettings):
     # Circuit Breaker
     CIRCUIT_BREAKER_FAILURE_THRESHOLD: int = 5
     CIRCUIT_BREAKER_RECOVERY_TIMEOUT: int = 60
-    CIRCUIT_BREAKER_EXPECTED_EXCEPTION: List[str] = [
+    CIRCUIT_BREAKER_EXPECTED_EXCEPTION: list[str] = [
         "ConnectionError",
         "TimeoutError",
         "HTTPException"
@@ -119,7 +119,7 @@ class EnhancedSettings(BaseSettings):
     # File Storage
     UPLOAD_DIR: str = Field(default="uploads", env="UPLOAD_DIR")
     MAX_FILE_SIZE: int = 10 * 1024 * 1024  # 10MB
-    ALLOWED_FILE_TYPES: List[str] = [
+    ALLOWED_FILE_TYPES: list[str] = [
         "image/jpeg",
         "image/png",
         "image/gif",
@@ -155,9 +155,9 @@ class EnhancedSettings(BaseSettings):
 
     # Alerting
     ENABLE_ALERTS: bool = True
-    ALERT_EMAIL_RECIPIENTS: List[str] = Field(default=[], env="ALERT_EMAIL_RECIPIENTS")
+    ALERT_EMAIL_RECIPIENTS: list[str] = Field(default=[], env="ALERT_EMAIL_RECIPIENTS")
     ALERT_WEBHOOK_URL: Optional[str] = Field(default=None, env="ALERT_WEBHOOK_URL")
-    ALERT_THRESHOLDS: Dict[str, int] = {
+    ALERT_THRESHOLDS: dict[str, int] = {
         "error_rate": 5,  # 5% error rate
         "response_time": 1000,  # 1 second
         "memory_usage": 80,  # 80% memory usage

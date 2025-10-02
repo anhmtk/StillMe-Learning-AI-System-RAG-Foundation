@@ -2,13 +2,11 @@
 Habit Store - Opt-in habit learning with privacy and decay
 """
 import hashlib
-import json
 import logging
 import threading
 import time
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +20,7 @@ class HabitEntry:
     first_seen: float  # Unix timestamp
     last_seen: float  # Unix timestamp
     decay_factor: float = 1.0  # Current decay (0.0-1.0)
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -43,7 +41,7 @@ class HabitStore:
     Habit Store with opt-in privacy, quorum requirements, and decay
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         self.config = config or {}
 
         # Privacy settings
@@ -61,8 +59,8 @@ class HabitStore:
         self.decay_min_threshold = self.config.get("decay", {}).get("min_threshold", 0.1)  # Remove below 0.1
 
         # Storage
-        self.habits: Dict[str, HabitEntry] = {}  # cue_hash -> HabitEntry
-        self.observations: Dict[str, List[float]] = {}  # cue_hash -> [timestamps]
+        self.habits: dict[str, HabitEntry] = {}  # cue_hash -> HabitEntry
+        self.observations: dict[str, list[float]] = {}  # cue_hash -> [timestamps]
         self.lock = threading.RLock()
 
         # Statistics
@@ -211,7 +209,7 @@ class HabitStore:
         logger.info(f"Habit {'updated' if cue_hash in self.habits else 'created'}: {cue_hash[:8]}... -> {action} (conf={confidence:.2f}, freq={habit.frequency})")
         return True
 
-    def get_habit_score(self, cue: str) -> Tuple[float, Optional[str]]:
+    def get_habit_score(self, cue: str) -> tuple[float, Optional[str]]:
         """
         Get habit score for a cue. Returns (score, action) or (0.0, None).
         """
@@ -243,7 +241,7 @@ class HabitStore:
 
             return score, habit.action
 
-    def get_all_habits(self, user_id: Optional[str] = None, tenant_id: Optional[str] = None) -> List[Dict[str, Any]]:
+    def get_all_habits(self, user_id: Optional[str] = None, tenant_id: Optional[str] = None) -> list[dict[str, Any]]:
         """Get all habits (for export/debugging)"""
         if not self.is_enabled():
             return []
@@ -290,7 +288,7 @@ class HabitStore:
             logger.info(f"Deleted {deleted_count} habits for user={user_id}, tenant={tenant_id}")
             return deleted_count
 
-    def export_habits(self, user_id: Optional[str] = None, tenant_id: Optional[str] = None) -> Dict[str, Any]:
+    def export_habits(self, user_id: Optional[str] = None, tenant_id: Optional[str] = None) -> dict[str, Any]:
         """Export habits data (for GDPR compliance)"""
         if not self.is_enabled():
             return {"habits": [], "metadata": {"export_time": time.time(), "opt_in": False}}
@@ -335,7 +333,7 @@ class HabitStore:
             self.stats.oldest_habit_days = 0.0
             self.stats.newest_habit_days = 0.0
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get current statistics"""
         with self.lock:
             self._update_stats()

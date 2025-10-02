@@ -2,8 +2,6 @@
 """
 Optimized Gateway for StillMe - Without Redis (for testing)
 """
-import asyncio
-import json
 import time
 
 import httpx

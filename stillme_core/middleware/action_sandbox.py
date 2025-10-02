@@ -14,7 +14,7 @@ import hashlib
 import json
 import logging
 import time
-from typing import Any, Dict, List, Optional, Set
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -40,11 +40,11 @@ class IdempotencyStore:
     """Simple in-memory store for idempotency tracking."""
 
     def __init__(self, max_size: int = 10000):
-        self.store: Dict[str, Dict[str, Any]] = {}
+        self.store: dict[str, dict[str, Any]] = {}
         self.max_size = max_size
-        self.access_times: Dict[str, float] = {}
+        self.access_times: dict[str, float] = {}
 
-    def get(self, key: str) -> Optional[Dict[str, Any]]:
+    def get(self, key: str) -> dict[str, Any] | None:
         """Get stored result for idempotency key."""
         if key in self.store:
             # Check if expired
@@ -59,7 +59,7 @@ class IdempotencyStore:
             return data
         return None
 
-    def set(self, key: str, result: Dict[str, Any], ttl_seconds: int = 3600):
+    def set(self, key: str, result: dict[str, Any], ttl_seconds: int = 3600):
         """Store result with TTL."""
         # Clean up old entries if store is full
         if len(self.store) >= self.max_size:
@@ -96,7 +96,7 @@ class IdempotencyStore:
 class ActionSandbox:
     """Safe action execution with idempotency and side-effect guarding."""
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self.dry_run = self.config.get("dry_run", True)
         self.idempotency_enabled = self.config.get("idempotency_enabled", True)
@@ -108,7 +108,7 @@ class ActionSandbox:
         )
 
         # Execution history for auditing
-        self.execution_history: List[Dict[str, Any]] = []
+        self.execution_history: list[dict[str, Any]] = []
         self.max_history_size = self.config.get("max_history_size", 1000)
 
         # Statistics
@@ -121,17 +121,17 @@ class ActionSandbox:
             "restricted_executions": 0,
         }
 
-    def execute(self, action: str, params: Dict[str, Any], trace_id: str,
-                dry_run: Optional[bool] = None) -> Dict[str, Any]:
+    def execute(self, action: str, params: dict[str, Any], trace_id: str,
+                dry_run: bool | None = None) -> dict[str, Any]:
         """
         Execute an action safely with idempotency and side-effect guarding.
-        
+
         Args:
             action: Action name to execute
             params: Action parameters
             trace_id: Unique trace identifier for idempotency
             dry_run: Override global dry_run setting
-            
+
         Returns:
             Dict with execution result and metadata
         """
@@ -211,7 +211,7 @@ class ActionSandbox:
                 "processing_time_ms": (time.time() - start_time) * 1000
             }
 
-    def _generate_idempotency_key(self, action: str, params: Dict[str, Any], trace_id: str) -> str:
+    def _generate_idempotency_key(self, action: str, params: dict[str, Any], trace_id: str) -> str:
         """Generate idempotency key from action, params, and trace_id."""
         # Sort params for consistent key generation
         sorted_params = json.dumps(params, sort_keys=True, default=str)
@@ -220,7 +220,7 @@ class ActionSandbox:
         key_data = f"{trace_id}:{action}:{sorted_params}"
         return hashlib.sha256(key_data.encode()).hexdigest()[:16]
 
-    def _validate_action_safety(self, action: str, params: Dict[str, Any], is_dry_run: bool) -> Dict[str, Any]:
+    def _validate_action_safety(self, action: str, params: dict[str, Any], is_dry_run: bool) -> dict[str, Any]:
         """Validate if action is safe to execute."""
 
         # Check for dangerous actions
@@ -249,14 +249,14 @@ class ActionSandbox:
 
         return {"safe": True, "reason": "validated"}
 
-    def _validate_params(self, action: str, params: Dict[str, Any]) -> bool:
+    def _validate_params(self, action: str, params: dict[str, Any]) -> bool:
         """Validate action parameters."""
         # Basic parameter validation
         if not isinstance(params, dict):
             return False
 
         # Check for suspicious parameter values
-        for key, value in params.items():
+        for _key, value in params.items():
             if isinstance(value, str):
                 # Check for potential injection attempts
                 if any(pattern in value.lower() for pattern in ["<script", "javascript:", "eval("]):
@@ -264,7 +264,7 @@ class ActionSandbox:
 
         return True
 
-    def _execute_dry_run(self, action: str, params: Dict[str, Any], trace_id: str) -> Dict[str, Any]:
+    def _execute_dry_run(self, action: str, params: dict[str, Any], trace_id: str) -> dict[str, Any]:
         """Execute action in dry-run mode (no side effects)."""
         return {
             "ok": True,
@@ -275,7 +275,7 @@ class ActionSandbox:
             "side_effects_blocked": True
         }
 
-    def _execute_real(self, action: str, params: Dict[str, Any], trace_id: str) -> Dict[str, Any]:
+    def _execute_real(self, action: str, params: dict[str, Any], trace_id: str) -> dict[str, Any]:
         """Execute action for real (with side effects)."""
         # In a real implementation, this would dispatch to appropriate handlers
         # For now, we'll simulate safe execution
@@ -302,8 +302,8 @@ class ActionSandbox:
                 "side_effects_blocked": True
             }
 
-    def _record_execution(self, action: str, params: Dict[str, Any], trace_id: str,
-                         result: Dict[str, Any], is_dry_run: bool):
+    def _record_execution(self, action: str, params: dict[str, Any], trace_id: str,
+                         result: dict[str, Any], is_dry_run: bool):
         """Record execution in history for auditing."""
         execution_record = {
             "timestamp": time.time(),
@@ -321,11 +321,11 @@ class ActionSandbox:
         if len(self.execution_history) > self.max_history_size:
             self.execution_history = self.execution_history[-self.max_history_size:]
 
-    def get_execution_history(self, limit: int = 100) -> List[Dict[str, Any]]:
+    def get_execution_history(self, limit: int = 100) -> list[dict[str, Any]]:
         """Get recent execution history."""
         return self.execution_history[-limit:]
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get sandbox statistics."""
         return {
             "stats": self.stats.copy(),

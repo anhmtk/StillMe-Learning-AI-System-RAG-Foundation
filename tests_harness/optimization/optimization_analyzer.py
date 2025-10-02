@@ -7,11 +7,10 @@ import json
 import logging
 import os
 import subprocess
-import sys
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 # Try to import optional dependencies
 try:
@@ -46,7 +45,7 @@ class OptimizationRecommendation:
     current_score: float
     target_score: float
     improvement_potential: float
-    action_items: List[str]
+    action_items: list[str]
     expected_impact: str
 
 class OptimizationAnalyzer:
@@ -57,11 +56,11 @@ class OptimizationAnalyzer:
         self.slo_policy_path = Path(slo_policy_path)
         self.data_loader = DataLoader(str(self.reports_dir), str(self.slo_policy_path))
         self.slo_manager = SLOPolicyManager(self.data_loader.get_slo_policy())
-        self.recommendations: List[OptimizationRecommendation] = []
-        self.trend_data: List[Dict[str, Any]] = []
+        self.recommendations: list[OptimizationRecommendation] = []
+        self.trend_data: list[dict[str, Any]] = []
         self.current_run_id = datetime.now().strftime("%Y-%m-%dT%H-%M-%SZ")
 
-    def analyze_reports(self, since_days: int = 7) -> Dict[str, Any]:
+    def analyze_reports(self, since_days: int = 7) -> dict[str, Any]:
         """Enhanced analysis with SLO monitoring, trends, and comprehensive reporting"""
         logger.info("🔍 Starting enhanced analysis with SLO monitoring...")
 
@@ -144,7 +143,7 @@ class OptimizationAnalyzer:
         except:
             return "unknown"
 
-    def _calculate_overall_score(self, reports: List[Dict[str, Any]]) -> float:
+    def _calculate_overall_score(self, reports: list[dict[str, Any]]) -> float:
         """Tính overall score từ các reports"""
         if not reports:
             return 0.0
@@ -159,7 +158,7 @@ class OptimizationAnalyzer:
 
         return sum(scores) / len(scores) if scores else 0.0
 
-    def _get_evaluations_dict(self, reports: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _get_evaluations_dict(self, reports: list[dict[str, Any]]) -> dict[str, Any]:
         """Lấy evaluations dict từ latest report"""
         if not reports:
             return {}
@@ -167,7 +166,7 @@ class OptimizationAnalyzer:
         latest_report = reports[0]
         return latest_report.get('evaluations', {})
 
-    def _get_security_dict(self, reports: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _get_security_dict(self, reports: list[dict[str, Any]]) -> dict[str, Any]:
         """Lấy security dict từ latest report"""
         if not reports:
             return {"sandbox_egress_blocked": False, "attack_block_rates": {}}
@@ -175,7 +174,7 @@ class OptimizationAnalyzer:
         latest_report = reports[0]
         return latest_report.get('security', {"sandbox_egress_blocked": False, "attack_block_rates": {}})
 
-    def _get_model_selection_dict(self, reports: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _get_model_selection_dict(self, reports: list[dict[str, Any]]) -> dict[str, Any]:
         """Lấy model selection dict từ latest report"""
         if not reports:
             return {"confusion_matrix": [], "overall_accuracy": 0.0}
@@ -183,7 +182,7 @@ class OptimizationAnalyzer:
         latest_report = reports[0]
         return latest_report.get('model_selection', {"confusion_matrix": [], "overall_accuracy": 0.0})
 
-    def _get_action_items(self, failed_slos: List[str]) -> List[Dict[str, Any]]:
+    def _get_action_items(self, failed_slos: list[str]) -> list[dict[str, Any]]:
         """Lấy action items dựa trên failed SLOs với mapping chi tiết"""
         action_items = []
 
@@ -281,13 +280,13 @@ class OptimizationAnalyzer:
 
         return suggestions.get(category, {}).get(failure_type, f"review and improve {category} system")
 
-    def _get_dataset_info(self, reports: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _get_dataset_info(self, reports: list[dict[str, Any]]) -> dict[str, Any]:
         """Get dataset information from reports"""
         total_samples = 0
         seed_samples = 0
         augmented_samples = 0
 
-        for report in reports:
+        for _report in reports:
             # This would be extracted from actual report data
             # For now, use mock data
             total_samples += 100
@@ -301,7 +300,7 @@ class OptimizationAnalyzer:
             "dedup_ratio": 0.95 if total_samples > 0 else 0.0
         }
 
-    def _alert_to_dict(self, alert) -> Dict[str, Any]:
+    def _alert_to_dict(self, alert) -> dict[str, Any]:
         """Convert SLOAlert to dictionary"""
         return {
             "level": alert.level.value,
@@ -312,7 +311,7 @@ class OptimizationAnalyzer:
             "recommendation": alert.recommendation
         }
 
-    def _create_empty_analysis(self) -> Dict[str, Any]:
+    def _create_empty_analysis(self) -> dict[str, Any]:
         """Create empty analysis when no reports found"""
         return {
             "run_id": self.current_run_id,
@@ -338,7 +337,7 @@ class OptimizationAnalyzer:
             "recommendations": []
         }
 
-    def _analyze_trends(self, reports: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _analyze_trends(self, reports: list[dict[str, Any]]) -> dict[str, Any]:
         """Analyze trends across multiple reports"""
         if len(reports) < 2:
             return {"trend_available": False, "message": "Need at least 2 reports for trend analysis"}
@@ -382,10 +381,9 @@ class OptimizationAnalyzer:
             "raw_data": trend_data
         }
 
-    def _analyze_model_selection(self, reports: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _analyze_model_selection(self, reports: list[dict[str, Any]]) -> dict[str, Any]:
         """Analyze model selection performance"""
         confusion_matrix = []
-        model_accuracy = {}
 
         for report in reports:
             model_selection = report.get('model_selection', {})
@@ -409,7 +407,7 @@ class OptimizationAnalyzer:
             "correct_selections": correct_selections
         }
 
-    def _analyze_security_performance(self, reports: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _analyze_security_performance(self, reports: list[dict[str, Any]]) -> dict[str, Any]:
         """Analyze security performance"""
         sandbox_breaches = 0
         attack_block_rates = {}
@@ -445,7 +443,7 @@ class OptimizationAnalyzer:
             "security_score": 1.0 - (sandbox_breaches / len(reports)) if reports else 0.0
         }
 
-    def _analyze_failures(self, reports: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _analyze_failures(self, reports: list[dict[str, Any]]) -> dict[str, Any]:
         """Analyze failure patterns"""
         total_failures = 0
         by_category = {}
@@ -466,7 +464,7 @@ class OptimizationAnalyzer:
             "failure_rate": total_failures / len(reports) if reports else 0.0
         }
 
-    def _generate_enhanced_recommendations(self, reports: List[Dict[str, Any]], slo_alerts: List) -> List[Dict[str, Any]]:
+    def _generate_enhanced_recommendations(self, reports: list[dict[str, Any]], slo_alerts: list) -> list[dict[str, Any]]:
         """Generate enhanced recommendations based on SLO alerts and analysis"""
         recommendations = []
         action_map = self.data_loader.get_action_map()
@@ -496,7 +494,7 @@ class OptimizationAnalyzer:
 
         return recommendations
 
-    def _create_enhanced_optimization_report(self, analysis: Dict[str, Any]) -> None:
+    def _create_enhanced_optimization_report(self, analysis: dict[str, Any]) -> None:
         """Create enhanced optimization report with interactive charts"""
         # Create JSON report
         json_path = self.reports_dir / "optimization_report.json"
@@ -511,7 +509,7 @@ class OptimizationAnalyzer:
 
         logger.info(f"✅ Enhanced HTML report saved: {html_path}")
 
-    def _create_interactive_html_report(self, analysis: Dict[str, Any], html_path: Path) -> None:
+    def _create_interactive_html_report(self, analysis: dict[str, Any], html_path: Path) -> None:
         """Create interactive HTML report with Plotly charts"""
         if HAS_PLOTLY:
             html_content = self._generate_plotly_html(analysis)
@@ -521,7 +519,7 @@ class OptimizationAnalyzer:
         with open(html_path, 'w', encoding='utf-8') as f:
             f.write(html_content)
 
-    def _generate_plotly_html(self, analysis: Dict[str, Any]) -> str:
+    def _generate_plotly_html(self, analysis: dict[str, Any]) -> str:
         """Generate HTML with Plotly interactive charts"""
         # Create trend charts
         trend_charts = self._create_trend_charts(analysis)
@@ -577,7 +575,7 @@ class OptimizationAnalyzer:
             <p>Run ID: {analysis.get('run_id', 'unknown')} | Git SHA: {analysis.get('git_sha', 'unknown')}</p>
             <p>Model Matrix: {', '.join([f"{k}: {v}" for k, v in analysis.get('model_matrix', {}).items()])}</p>
         </div>
-        
+
         <div class="slo-status {'slo-pass' if analysis.get('slo_status', False) else 'slo-fail'}">
             <h2>SLO Status: {analysis.get('slo_message', 'Unknown')}</h2>
             <div class="metric-grid">
@@ -599,27 +597,27 @@ class OptimizationAnalyzer:
                 </div>
             </div>
         </div>
-        
+
         <div class="section">
             <h2>📊 Performance Trends</h2>
             <div class="chart-container" id="trend-chart"></div>
         </div>
-        
+
         <div class="section">
             <h2>🎯 Performance Breakdown</h2>
             <div class="chart-container" id="performance-chart"></div>
         </div>
-        
+
         <div class="section">
             <h2>🛡️ SLO Status Overview</h2>
             <div class="chart-container" id="slo-chart"></div>
         </div>
-        
+
         <div class="section">
             <h2>🤖 Model Selection Confusion Matrix</h2>
             <div class="chart-container" id="confusion-chart"></div>
         </div>
-        
+
         <div class="section">
             <h2>🚨 SLO Alerts</h2>
         """
@@ -638,7 +636,7 @@ class OptimizationAnalyzer:
 
         html_content += """
         </div>
-        
+
         <div class="section">
             <h2>🎯 Optimization Recommendations</h2>
         """
@@ -666,7 +664,7 @@ class OptimizationAnalyzer:
 
         html_content += """
         </div>
-        
+
         <div class="section">
             <h2>📋 SLO Checklist</h2>
             <table class="table">
@@ -710,17 +708,17 @@ class OptimizationAnalyzer:
             </table>
         </div>
     </div>
-    
+
     <script>
         // Trend Chart
         {trend_charts}
-        
+
         // Performance Chart
         {performance_charts}
-        
+
         // SLO Status Chart
         {slo_chart}
-        
+
         // Confusion Matrix Chart
         {confusion_chart}
     </script>
@@ -730,7 +728,7 @@ class OptimizationAnalyzer:
 
         return html_content
 
-    def _create_trend_charts(self, analysis: Dict[str, Any]) -> str:
+    def _create_trend_charts(self, analysis: dict[str, Any]) -> str:
         """Create trend charts JavaScript"""
         trend_data = analysis.get('trend_analysis', {})
         if not trend_data.get('trend_available', False):
@@ -767,20 +765,20 @@ class OptimizationAnalyzer:
 
         js_code += """
         ];
-        
+
         var trendLayout = {
             title: 'Performance Trends Over Time',
             xaxis: { title: 'Run ID' },
             yaxis: { title: 'Score', range: [0, 1] },
             hovermode: 'closest'
         };
-        
+
         Plotly.newPlot('trend-chart', trendData, trendLayout);
         """
 
         return js_code
 
-    def _create_performance_charts(self, analysis: Dict[str, Any]) -> str:
+    def _create_performance_charts(self, analysis: dict[str, Any]) -> str:
         """Create performance breakdown charts"""
         categories = ['Persona', 'Safety', 'Translation', 'Efficiency', 'AgentDev']
         scores = [
@@ -803,19 +801,19 @@ class OptimizationAnalyzer:
                 cmax: 1
             }}
         }}];
-        
+
         var performanceLayout = {{
             title: 'Performance Breakdown by Category',
             xaxis: {{ title: 'Category' }},
             yaxis: {{ title: 'Score', range: [0, 1] }}
         }};
-        
+
         Plotly.newPlot('performance-chart', performanceData, performanceLayout);
         """
 
         return js_code
 
-    def _create_slo_status_chart(self, analysis: Dict[str, Any]) -> str:
+    def _create_slo_status_chart(self, analysis: dict[str, Any]) -> str:
         """Create SLO status chart"""
         alert_summary = analysis.get('alert_summary', {})
 
@@ -828,17 +826,17 @@ class OptimizationAnalyzer:
                 colors: ['#dc3545', '#ffc107', '#17a2b8', '#6c757d', '#28a745']
             }}
         }}];
-        
+
         var sloLayout = {{
             title: 'SLO Alert Distribution'
         }};
-        
+
         Plotly.newPlot('slo-chart', sloData, sloLayout);
         """
 
         return js_code
 
-    def _create_confusion_matrix_chart(self, analysis: Dict[str, Any]) -> str:
+    def _create_confusion_matrix_chart(self, analysis: dict[str, Any]) -> str:
         """Create confusion matrix chart"""
         model_analysis = analysis.get('model_selection_analysis', {})
         accuracy = model_analysis.get('overall_accuracy', 0)
@@ -854,17 +852,17 @@ class OptimizationAnalyzer:
                 colors: ['#28a745', '#dc3545']
             }}
         }}];
-        
+
         var confusionLayout = {{
             title: `Model Selection Accuracy: ${{(100 * {accuracy}).toFixed(1)}}%`
         }};
-        
+
         Plotly.newPlot('confusion-chart', confusionData, confusionLayout);
         """
 
         return js_code
 
-    def _generate_static_html(self, analysis: Dict[str, Any]) -> str:
+    def _generate_static_html(self, analysis: dict[str, Any]) -> str:
         """Generate static HTML without Plotly (fallback)"""
         # Build HTML content step by step
         html_content = f"""
@@ -900,7 +898,7 @@ class OptimizationAnalyzer:
             <p>Run ID: {analysis.get('run_id', 'unknown')} | Git SHA: {analysis.get('git_sha', 'unknown')}</p>
             <p><strong>Note:</strong> Interactive charts require Plotly. Install with: pip install plotly</p>
         </div>
-        
+
         <div class="slo-status {'slo-pass' if analysis.get('slo_status', False) else 'slo-fail'}">
             <h2>SLO Status: {analysis.get('slo_message', 'Unknown')}</h2>
             <div class="metric-grid">
@@ -922,7 +920,7 @@ class OptimizationAnalyzer:
                 </div>
             </div>
         </div>
-        
+
         <div class="section">
             <h2>📊 Performance Summary</h2>
             <div class="metric-grid">
@@ -948,7 +946,7 @@ class OptimizationAnalyzer:
                 </div>
             </div>
         </div>
-        
+
         <div class="section">
             <h2>🚨 SLO Alerts</h2>
         """
@@ -974,7 +972,7 @@ class OptimizationAnalyzer:
 
         return html_content
 
-    def _load_all_reports(self) -> Dict[str, Any]:
+    def _load_all_reports(self) -> dict[str, Any]:
         """Load tất cả báo cáo từ thư mục reports"""
         reports = {}
 
@@ -990,7 +988,7 @@ class OptimizationAnalyzer:
 
         return reports
 
-    def _analyze_overall_performance(self, reports: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _analyze_overall_performance(self, reports: list[dict[str, Any]]) -> dict[str, Any]:
         """Phân tích hiệu suất tổng thể"""
         overall_scores = []
 
@@ -1010,7 +1008,7 @@ class OptimizationAnalyzer:
             "trend": "improving" if len(overall_scores) > 1 and overall_scores[-1] > overall_scores[0] else "stable"
         }
 
-    def _analyze_persona_performance(self, reports: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _analyze_persona_performance(self, reports: list[dict[str, Any]]) -> dict[str, Any]:
         """Phân tích hiệu suất persona"""
         persona_scores = []
 
@@ -1036,7 +1034,7 @@ class OptimizationAnalyzer:
             "recommendation": "Cần cải thiện PersonaMorph module"
         }
 
-    def _analyze_safety_performance(self, reports: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _analyze_safety_performance(self, reports: list[dict[str, Any]]) -> dict[str, Any]:
         """Phân tích hiệu suất safety"""
         safety_scores = []
 
@@ -1062,7 +1060,7 @@ class OptimizationAnalyzer:
             "recommendation": "Ưu tiên cao: Cải thiện hệ thống bảo mật"
         }
 
-    def _analyze_translation_performance(self, reports: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _analyze_translation_performance(self, reports: list[dict[str, Any]]) -> dict[str, Any]:
         """Phân tích hiệu suất translation"""
         translation_scores = []
 
@@ -1088,7 +1086,7 @@ class OptimizationAnalyzer:
             "recommendation": "Cần cải thiện hệ thống translation"
         }
 
-    def _analyze_efficiency_performance(self, reports: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _analyze_efficiency_performance(self, reports: list[dict[str, Any]]) -> dict[str, Any]:
         """Phân tích hiệu suất efficiency"""
         efficiency_scores = []
         latencies = []
@@ -1125,7 +1123,7 @@ class OptimizationAnalyzer:
             "recommendation": "Cần tối ưu hiệu suất và chi phí"
         }
 
-    def _analyze_agentdev_performance(self, reports: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _analyze_agentdev_performance(self, reports: list[dict[str, Any]]) -> dict[str, Any]:
         """Phân tích hiệu suất AgentDev"""
         agentdev_scores = []
 
@@ -1151,12 +1149,12 @@ class OptimizationAnalyzer:
             "recommendation": "Cần cải thiện AgentDev integration"
         }
 
-    def _generate_recommendations(self, reports: List[Dict[str, Any]]) -> List[OptimizationRecommendation]:
+    def _generate_recommendations(self, reports: list[dict[str, Any]]) -> list[OptimizationRecommendation]:
         """Tạo gợi ý tối ưu hóa"""
         recommendations = []
 
         # Phân tích từng loại và tạo gợi ý
-        overall_analysis = self._analyze_overall_performance(reports)
+        self._analyze_overall_performance(reports)
         persona_analysis = self._analyze_persona_performance(reports)
         safety_analysis = self._analyze_safety_performance(reports)
         translation_analysis = self._analyze_translation_performance(reports)
@@ -1255,7 +1253,7 @@ class OptimizationAnalyzer:
 
         return recommendations
 
-    def _create_optimization_report(self, analysis: Dict[str, Any]) -> None:
+    def _create_optimization_report(self, analysis: dict[str, Any]) -> None:
         """Tạo báo cáo tối ưu hóa"""
         report_path = self.reports_dir / "optimization_report.json"
 
@@ -1304,7 +1302,7 @@ class OptimizationAnalyzer:
         # Tạo HTML report
         self._create_html_optimization_report(analysis)
 
-    def _create_html_optimization_report(self, analysis: Dict[str, Any]) -> None:
+    def _create_html_optimization_report(self, analysis: dict[str, Any]) -> None:
         """Tạo báo cáo HTML tối ưu hóa"""
         html_path = self.reports_dir / "optimization_report.html"
 
@@ -1340,7 +1338,7 @@ class OptimizationAnalyzer:
                     <h1>🚀 StillMe AI - Optimization Report</h1>
                     <p>Phân tích hiệu suất và gợi ý cải thiện</p>
                 </div>
-                
+
                 <div class="summary">
                     <div class="metric">
                         <div class="metric-value">{analysis['overall_performance']['average_score']:.2f}</div>
@@ -1355,7 +1353,7 @@ class OptimizationAnalyzer:
                         <div class="metric-label">Critical Issues</div>
                     </div>
                 </div>
-                
+
                 <div class="section">
                     <h2>📊 Performance Analysis</h2>
                     <p><strong>Persona Score:</strong> <span class="score">{analysis['persona_analysis']['average_score']:.2f}</span></p>
@@ -1364,7 +1362,7 @@ class OptimizationAnalyzer:
                     <p><strong>Efficiency Score:</strong> <span class="score">{analysis['efficiency_analysis']['average_score']:.2f}</span></p>
                     <p><strong>AgentDev Score:</strong> <span class="score">{analysis['agentdev_analysis']['average_score']:.2f}</span></p>
                 </div>
-                
+
                 <div class="section">
                     <h2>🎯 Optimization Recommendations</h2>
         """
@@ -1392,7 +1390,7 @@ class OptimizationAnalyzer:
 
         html_content += """
                 </div>
-                
+
                 <div class="section">
                     <h2>📈 Next Steps</h2>
                     <ol>

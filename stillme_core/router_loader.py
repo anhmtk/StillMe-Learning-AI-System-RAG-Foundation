@@ -6,12 +6,12 @@ log = logging.getLogger(__name__)
 
 def load_router():
     """Load the appropriate router implementation.
-    
+
     Priority order:
     1. STILLME_ROUTER_MODE=stub -> StubRouter
     2. STILLME_ROUTER_MODE=pro -> ProRouter (if available)
     3. Auto-detect: ProRouter if available, else StubRouter
-    
+
     Returns:
         Router implementation (ProRouter or StubRouter)
     """

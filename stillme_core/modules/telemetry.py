@@ -7,7 +7,7 @@ import json
 import threading
 import time
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 # Thread-safe logging
 _lock = threading.Lock()
@@ -19,7 +19,7 @@ def _ensure_log_dir():
     _log_file.parent.mkdir(parents=True, exist_ok=True)
 
 
-def log_event(event: Dict[str, Any]) -> None:
+def log_event(event: dict[str, Any]) -> None:
     """
     Log an event to telemetry.jsonl
 
@@ -51,7 +51,7 @@ def get_log_path() -> Path:
     return _log_file
 
 
-def read_events() -> list[Dict[str, Any]]:
+def read_events() -> list[dict[str, Any]]:
     """
     Read all events from telemetry log
 
@@ -74,7 +74,7 @@ def read_events() -> list[Dict[str, Any]]:
     return events
 
 
-def get_stats() -> Dict[str, Any]:
+def get_stats() -> dict[str, Any]:
     """
     Get basic statistics from telemetry log
 

@@ -18,7 +18,6 @@ import argparse
 import os
 import subprocess
 import sys
-from typing import List, Optional
 
 
 class RouterCLI:
@@ -38,7 +37,7 @@ class RouterCLI:
             'tools': 'router_tools.py'
         }
 
-    def run_command(self, command: str, args: List[str] = None):
+    def run_command(self, command: str, args: list[str] = None):
         """Run a command with optional arguments"""
         if command not in self.available_commands:
             print(f"❌ Unknown command: {command}")
@@ -142,7 +141,7 @@ class RouterCLI:
 
         # Check if scripts are available
         missing_scripts = []
-        for command, script_name in self.available_commands.items():
+        for _command, script_name in self.available_commands.items():
             script_path = os.path.join(self.script_dir, script_name)
             if not os.path.exists(script_path):
                 missing_scripts.append(script_name)

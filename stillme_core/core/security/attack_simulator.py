@@ -10,7 +10,6 @@ import logging
 import time
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional
 
 import aiohttp
 
@@ -54,7 +53,7 @@ class AttackResult:
     response_body: str
     vulnerability_detected: bool
     severity: str
-    recommendations: List[str]
+    recommendations: list[str]
 
 
 @dataclass
@@ -64,9 +63,9 @@ class AttackReport:
     total_attacks: int
     successful_attacks: int
     vulnerabilities_found: int
-    attack_results: List[AttackResult]
+    attack_results: list[AttackResult]
     security_score: float
-    recommendations: List[str]
+    recommendations: list[str]
     test_duration: float
 
 
@@ -80,7 +79,7 @@ class AttackSimulator:
         self.payloads = self._load_attack_payloads()
         self.session = None
 
-    def _load_attack_payloads(self) -> Dict[AttackType, List[AttackPayload]]:
+    def _load_attack_payloads(self) -> dict[AttackType, list[AttackPayload]]:
         """Load attack payloads for different attack types"""
         payloads = {}
 
@@ -244,8 +243,8 @@ class AttackSimulator:
 
     async def simulate_attacks(
         self,
-        attack_types: Optional[List[AttackType]] = None,
-        endpoints: Optional[List[str]] = None,
+        attack_types: list[AttackType] | None = None,
+        endpoints: list[str] | None = None,
     ) -> AttackReport:
         """Simulate attacks against target endpoints"""
         if attack_types is None:
@@ -489,7 +488,7 @@ class AttackSimulator:
         payload: AttackPayload,
         response,
         vulnerability_detected: bool,
-    ) -> List[str]:
+    ) -> list[str]:
         """Generate recommendations based on attack results"""
         recommendations = []
 
@@ -524,7 +523,7 @@ class AttackSimulator:
         return recommendations
 
     def _generate_attack_report(
-        self, results: List[AttackResult], duration: float
+        self, results: list[AttackResult], duration: float
     ) -> AttackReport:
         """Generate comprehensive attack report"""
         total_attacks = len(results)
@@ -554,8 +553,8 @@ class AttackSimulator:
         )
 
     def _generate_overall_recommendations(
-        self, results: List[AttackResult], security_score: float
-    ) -> List[str]:
+        self, results: list[AttackResult], security_score: float
+    ) -> list[str]:
         """Generate overall security recommendations"""
         recommendations = []
 

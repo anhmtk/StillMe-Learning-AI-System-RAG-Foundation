@@ -12,11 +12,8 @@ Last Updated: 2025-09-26
 
 import argparse
 import json
-import os
 import re
-import sys
 from pathlib import Path
-from typing import Any, Dict, List
 
 
 class SecurityFixer:

@@ -12,7 +12,7 @@ import time
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -41,12 +41,12 @@ class QualityReport:
     target_path: str
     total_files: int
     total_issues: int
-    issues_by_tool: Dict[str, int]
-    issues_by_severity: Dict[str, int]
-    issues_by_category: Dict[str, int]
-    issues: List[QualityIssue]
+    issues_by_tool: dict[str, int]
+    issues_by_severity: dict[str, int]
+    issues_by_category: dict[str, int]
+    issues: list[QualityIssue]
     quality_score: float  # 0-100
-    recommendations: List[str]
+    recommendations: list[str]
     auto_fixes_applied: int = 0
     execution_time: float = 0.0
 
@@ -79,10 +79,10 @@ class CodeQualityEnforcer:
     async def analyze_directory(
         self,
         target_path: str,
-        tools: Optional[List[str]] = None,
+        tools: Optional[list[str]] = None,
         auto_fix: bool = False,
-        include_patterns: Optional[List[str]] = None,
-        exclude_patterns: Optional[List[str]] = None,
+        include_patterns: Optional[list[str]] = None,
+        exclude_patterns: Optional[list[str]] = None,
     ) -> QualityReport:
         """
         Analyze a directory for code quality issues.
@@ -148,9 +148,9 @@ class CodeQualityEnforcer:
     def _get_python_files(
         self,
         target_path: Path,
-        include_patterns: Optional[List[str]] = None,
-        exclude_patterns: Optional[List[str]] = None,
-    ) -> List[Path]:
+        include_patterns: Optional[list[str]] = None,
+        exclude_patterns: Optional[list[str]] = None,
+    ) -> list[Path]:
         """Get list of Python files to analyze"""
         include_patterns = include_patterns or ["*.py"]
         exclude_patterns = exclude_patterns or [
@@ -179,7 +179,7 @@ class CodeQualityEnforcer:
 
         return python_files
 
-    async def _run_ruff(self, files: List[Path]) -> List[QualityIssue]:
+    async def _run_ruff(self, files: list[Path]) -> list[QualityIssue]:
         """Run ruff static analysis"""
         issues = []
 
@@ -229,7 +229,7 @@ class CodeQualityEnforcer:
 
         return issues
 
-    async def _run_pylint(self, files: List[Path]) -> List[QualityIssue]:
+    async def _run_pylint(self, files: list[Path]) -> list[QualityIssue]:
         """Run pylint analysis"""
         issues = []
 
@@ -264,7 +264,7 @@ class CodeQualityEnforcer:
 
         return issues
 
-    async def _run_mypy(self, files: List[Path]) -> List[QualityIssue]:
+    async def _run_mypy(self, files: list[Path]) -> list[QualityIssue]:
         """Run mypy type checking"""
         issues = []
 
@@ -307,7 +307,7 @@ class CodeQualityEnforcer:
 
         return issues
 
-    async def _run_black(self, files: List[Path]) -> List[QualityIssue]:
+    async def _run_black(self, files: list[Path]) -> list[QualityIssue]:
         """Run black formatting check"""
         issues = []
 
@@ -339,7 +339,7 @@ class CodeQualityEnforcer:
 
         return issues
 
-    async def _run_isort(self, files: List[Path]) -> List[QualityIssue]:
+    async def _run_isort(self, files: list[Path]) -> list[QualityIssue]:
         """Run isort import sorting check"""
         issues = []
 
@@ -371,7 +371,7 @@ class CodeQualityEnforcer:
 
         return issues
 
-    async def _apply_auto_fixes(self, issues: List[QualityIssue]) -> int:
+    async def _apply_auto_fixes(self, issues: list[QualityIssue]) -> int:
         """Apply auto-fixes for fixable issues"""
         fixes_applied = 0
 
@@ -418,8 +418,8 @@ class CodeQualityEnforcer:
     def _generate_report(
         self,
         target_path: Path,
-        files: List[Path],
-        issues: List[QualityIssue],
+        files: list[Path],
+        issues: list[QualityIssue],
         auto_fixes_applied: int,
         execution_time: float,
     ) -> QualityReport:
@@ -466,7 +466,7 @@ class CodeQualityEnforcer:
         )
 
     def _calculate_quality_score(
-        self, issues: List[QualityIssue], total_files: int
+        self, issues: list[QualityIssue], total_files: int
     ) -> float:
         """Calculate quality score (0-100)"""
         if total_files == 0:
@@ -485,8 +485,8 @@ class CodeQualityEnforcer:
         return round(score, 1)
 
     def _generate_recommendations(
-        self, issues: List[QualityIssue], issues_by_tool: Dict[str, int]
-    ) -> List[str]:
+        self, issues: list[QualityIssue], issues_by_tool: dict[str, int]
+    ) -> list[str]:
         """Generate actionable recommendations"""
         recommendations = []
 

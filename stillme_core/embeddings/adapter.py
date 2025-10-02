@@ -5,13 +5,8 @@ Embedding Backend Adapter
 Provides Windows-safe embedding backends with fallback mechanisms.
 """
 
-import json
-import os
 import platform
-import subprocess
-import sys
-from pathlib import Path
-from typing import List, Protocol, Union
+from typing import Protocol
 
 from .worker import EmbeddingRuntimeError, EmbeddingWorker
 
@@ -19,7 +14,7 @@ from .worker import EmbeddingRuntimeError, EmbeddingWorker
 class EmbeddingBackend(Protocol):
     """Protocol for embedding backends"""
 
-    def embed(self, texts: List[str]) -> List[List[float]]:
+    def embed(self, texts: list[str]) -> list[list[float]]:
         """Generate embeddings for texts"""
         ...
 
@@ -30,7 +25,7 @@ class FakeBackend:
     def __init__(self, dimension: int = 384):
         self.dimension = dimension
 
-    def embed(self, texts: List[str]) -> List[List[float]]:
+    def embed(self, texts: list[str]) -> list[list[float]]:
         """Generate fake embeddings based on text length"""
         embeddings = []
         for text in texts:
@@ -69,7 +64,7 @@ class SentenceTransformerBackend:
         from sentence_transformers import SentenceTransformer
         self._model = SentenceTransformer(self.model_name)
 
-    def embed(self, texts: List[str]) -> List[List[float]]:
+    def embed(self, texts: list[str]) -> list[list[float]]:
         """Generate embeddings with fallback mechanism"""
         if not self._use_subprocess and self._model:
             # Direct model (Linux/macOS)

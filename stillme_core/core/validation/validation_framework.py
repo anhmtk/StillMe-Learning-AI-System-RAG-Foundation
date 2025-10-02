@@ -8,13 +8,12 @@ Version: 1.0.0
 Phase: 0.1 - Security Remediation
 """
 
-import os
 import json
 import logging
-from typing import Dict, List, Optional, Any, Callable
+import os
 from dataclasses import dataclass
 from datetime import datetime
-from pathlib import Path
+from typing import Any, Callable, Optional
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -36,7 +35,7 @@ class ValidationResult:
     rule_name: str
     passed: bool
     message: str
-    details: Dict[str, Any]
+    details: dict[str, Any]
     timestamp: datetime
 
 
@@ -47,15 +46,15 @@ class ValidationFramework:
 
     def __init__(self, config_path: str = "config/validation_config.json"):
         self.config = self._load_config(config_path)
-        self.rules: Dict[str, ValidationRule] = {}
-        self.results: List[ValidationResult] = []
+        self.rules: dict[str, ValidationRule] = {}
+        self.results: list[ValidationResult] = []
         self.security_middleware = None
         self.performance_monitor = None
         self.integration_bridge = None
         self.memory_security_integration = None
         self.module_governance_system = None
 
-    def _load_config(self, config_path: str) -> Dict[str, Any]:
+    def _load_config(self, config_path: str) -> dict[str, Any]:
         """Load validation configuration"""
         default_config = {
             "validation": {
@@ -67,7 +66,7 @@ class ValidationFramework:
 
         try:
             if os.path.exists(config_path):
-                with open(config_path, 'r', encoding='utf-8') as f:
+                with open(config_path, encoding='utf-8') as f:
                     config = json.load(f)
                     # Merge with defaults
                     for key, value in default_config.items():
@@ -90,10 +89,10 @@ class ValidationFramework:
             del self.rules[rule_name]
             logger.info(f"Removed validation rule: {rule_name}")
 
-    def validate(self, data: Any, rule_name: Optional[str] = None) -> List[ValidationResult]:
+    def validate(self, data: Any, rule_name: Optional[str] = None) -> list[ValidationResult]:
         """Validate data against rules"""
         results = []
-        
+
         if not self.config["validation"]["enabled"]:
             return results
 
@@ -118,12 +117,12 @@ class ValidationFramework:
                     timestamp=datetime.now()
                 )
                 results.append(result)
-                
+
                 if not passed:
                     logger.warning(f"Validation failed: {rule.name} - {rule.error_message}")
                 else:
                     logger.debug(f"Validation passed: {rule.name}")
-                    
+
             except Exception as e:
                 result = ValidationResult(
                     rule_name=rule.name,
@@ -185,36 +184,36 @@ class ValidationFramework:
         except Exception as e:
             logger.error(f"Error initializing components: {e}")
 
-    def run_component_validation(self) -> Dict[str, Any]:
+    def run_component_validation(self) -> dict[str, Any]:
         """Run validation on all components"""
         logger.info("🔍 Starting component validation...")
-        
+
         # Initialize components
         self.initialize_components()
-        
+
         # Run validation
         all_results = []
-        
+
         # Validate security middleware
         if self.security_middleware:
             security_results = self._validate_security_middleware()
             all_results.extend(security_results)
-        
+
         # Validate performance monitor
         if self.performance_monitor:
             performance_results = self._validate_performance_monitor()
             all_results.extend(performance_results)
-        
+
         # Validate integration bridge
         if self.integration_bridge:
             integration_results = self._validate_integration_bridge()
             all_results.extend(integration_results)
-        
+
         # Calculate summary
         total_checks = len(all_results)
         passed_checks = sum(1 for r in all_results if r.passed)
         failed_checks = total_checks - passed_checks
-        
+
         summary = {
             "total_checks": total_checks,
             "passed_checks": passed_checks,
@@ -232,19 +231,19 @@ class ValidationFramework:
                 for r in all_results
             ]
         }
-        
+
         logger.info(f"✅ Component validation complete: {passed_checks}/{total_checks} checks passed")
-        
+
         return summary
 
-    def _validate_security_middleware(self) -> List[ValidationResult]:
+    def _validate_security_middleware(self) -> list[ValidationResult]:
         """Validate security middleware"""
         results = []
-        
+
         # Test input validation
         test_input = "<script>alert('xss')</script>"
         validation_result = self.security_middleware.validate_input(test_input)
-        
+
         results.append(ValidationResult(
             rule_name="security_input_validation",
             passed=not validation_result["is_valid"],
@@ -256,13 +255,13 @@ class ValidationFramework:
             },
             timestamp=datetime.now()
         ))
-        
+
         return results
 
-    def _validate_performance_monitor(self) -> List[ValidationResult]:
+    def _validate_performance_monitor(self) -> list[ValidationResult]:
         """Validate performance monitor"""
         results = []
-        
+
         try:
             summary = self.performance_monitor.get_performance_summary()
             results.append(ValidationResult(
@@ -280,13 +279,13 @@ class ValidationFramework:
                 details={"error": str(e)},
                 timestamp=datetime.now()
             ))
-        
+
         return results
 
-    def _validate_integration_bridge(self) -> List[ValidationResult]:
+    def _validate_integration_bridge(self) -> list[ValidationResult]:
         """Validate integration bridge"""
         results = []
-        
+
         results.append(ValidationResult(
             rule_name="integration_bridge_availability",
             passed=self.integration_bridge is not None,
@@ -294,18 +293,18 @@ class ValidationFramework:
             details={"available": self.integration_bridge is not None},
             timestamp=datetime.now()
         ))
-        
+
         return results
 
-    def get_validation_summary(self) -> Dict[str, Any]:
+    def get_validation_summary(self) -> dict[str, Any]:
         """Get validation summary"""
         if not self.results:
             return {"message": "No validation results available"}
-        
+
         total_results = len(self.results)
         passed_results = sum(1 for r in self.results if r.passed)
         failed_results = total_results - passed_results
-        
+
         return {
             "total_validations": total_results,
             "passed_validations": passed_results,
@@ -327,7 +326,7 @@ class ValidationFramework:
 def main():
     """Test the validation framework"""
     framework = ValidationFramework()
-    
+
     # Add some test rules
     framework.add_rule(ValidationRule(
         name="not_empty",
@@ -335,26 +334,26 @@ def main():
         validator=lambda x: bool(x),
         error_message="Data cannot be empty"
     ))
-    
+
     framework.add_rule(ValidationRule(
         name="is_string",
         description="Check if data is a string",
         validator=lambda x: isinstance(x, str),
         error_message="Data must be a string"
     ))
-    
+
     # Test validation
     test_data = "Hello world"
     results = framework.validate(test_data)
-    
+
     print("🔍 Validation Results:")
     for result in results:
         status = "✅" if result.passed else "❌"
         print(f"{status} {result.rule_name}: {result.message}")
-    
+
     # Run component validation
     component_results = framework.run_component_validation()
-    print(f"\n📊 Component Validation:")
+    print("\n📊 Component Validation:")
     print(f"Total checks: {component_results['total_checks']}")
     print(f"Passed: {component_results['passed_checks']}")
     print(f"Failed: {component_results['failed_checks']}")

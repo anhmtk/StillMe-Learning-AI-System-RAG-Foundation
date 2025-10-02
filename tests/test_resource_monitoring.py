@@ -71,7 +71,7 @@ class TestTokenBudgetManager:
 
         result = manager.consume_tokens(50)
 
-        assert result == True
+        assert result
         assert manager.daily_usage == 50
         assert manager.hourly_usage == 50
 
@@ -81,7 +81,7 @@ class TestTokenBudgetManager:
 
         result = manager.consume_tokens(150)
 
-        assert result == False
+        assert not result
         assert manager.daily_usage == 0
         assert manager.hourly_usage == 0
 
@@ -91,7 +91,7 @@ class TestTokenBudgetManager:
 
         result = manager.consume_tokens(150)
 
-        assert result == False
+        assert not result
         assert manager.daily_usage == 0
         assert manager.hourly_usage == 0
 
@@ -143,22 +143,22 @@ class TestResourceMonitor:
     @pytest.mark.asyncio
     async def test_start_monitoring(self, monitor):
         """Test starting resource monitoring"""
-        result = await monitor.start_monitoring(interval=1)
+        await monitor.start_monitoring(interval=1)
 
-        assert monitor.is_monitoring == True
+        assert monitor.is_monitoring
         assert monitor.monitoring_task is not None
 
         # Stop monitoring
         await monitor.stop_monitoring()
-        assert monitor.is_monitoring == False
+        assert not monitor.is_monitoring
 
     @pytest.mark.asyncio
     async def test_stop_monitoring(self, monitor):
         """Test stopping resource monitoring"""
         await monitor.start_monitoring(interval=1)
-        result = await monitor.stop_monitoring()
+        await monitor.stop_monitoring()
 
-        assert monitor.is_monitoring == False
+        assert not monitor.is_monitoring
         # Note: monitoring_task may still exist but be cancelled
 
     @pytest.mark.asyncio
@@ -308,7 +308,7 @@ class TestResourceMonitor:
 
         can_start, reason = monitor.can_start_learning_session()
 
-        assert can_start == True
+        assert can_start
         assert reason == "All checks passed"
 
     def test_can_start_learning_session_high_cpu(self, monitor):
@@ -338,7 +338,7 @@ class TestResourceMonitor:
 
         can_start, reason = monitor.can_start_learning_session()
 
-        assert can_start == False
+        assert not can_start
         assert "CPU usage too high" in reason
 
     def test_start_learning_session(self, monitor):
@@ -347,7 +347,7 @@ class TestResourceMonitor:
 
         result = monitor.start_learning_session(session_id)
 
-        assert result == True
+        assert result
         assert session_id in monitor.learning_processes
         assert session_id in monitor.process_start_times
 
@@ -358,7 +358,7 @@ class TestResourceMonitor:
 
         result = monitor.end_learning_session(session_id)
 
-        assert result == True
+        assert result
         assert session_id not in monitor.learning_processes
         assert session_id not in monitor.process_start_times
 
@@ -407,22 +407,22 @@ class TestPerformanceAnalyzer:
     @pytest.mark.asyncio
     async def test_start_analysis(self, analyzer):
         """Test starting performance analysis"""
-        result = await analyzer.start_analysis(interval=1)
+        await analyzer.start_analysis(interval=1)
 
-        assert analyzer.is_analyzing == True
+        assert analyzer.is_analyzing
         assert analyzer.analysis_task is not None
 
         # Stop analysis
         await analyzer.stop_analysis()
-        assert analyzer.is_analyzing == False
+        assert not analyzer.is_analyzing
 
     @pytest.mark.asyncio
     async def test_stop_analysis(self, analyzer):
         """Test stopping performance analysis"""
         await analyzer.start_analysis(interval=1)
-        result = await analyzer.stop_analysis()
+        await analyzer.stop_analysis()
 
-        assert analyzer.is_analyzing == False
+        assert not analyzer.is_analyzing
         # Note: analysis_task may still exist but be cancelled
 
     def test_add_performance_metrics(self, analyzer):
@@ -549,12 +549,12 @@ class TestIntegration:
         analyzer.add_performance_metrics(metrics)
 
         # Check that both are working
-        assert monitor.is_monitoring == True
-        assert analyzer.is_analyzing == True
+        assert monitor.is_monitoring
+        assert analyzer.is_analyzing
 
         # Stop both
         await monitor.stop_monitoring()
         await analyzer.stop_analysis()
 
-        assert monitor.is_monitoring == False
-        assert analyzer.is_analyzing == False
+        assert not monitor.is_monitoring
+        assert not analyzer.is_analyzing

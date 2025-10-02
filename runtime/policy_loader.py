@@ -5,9 +5,8 @@ Tải và validate các policy files
 """
 
 import logging
-import os
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 import yaml
 
@@ -20,7 +19,7 @@ class PolicyLoader:
         self.policies = {}
         self.logger = logging.getLogger(__name__)
 
-    def load_all_policies(self) -> Dict[str, Any]:
+    def load_all_policies(self) -> dict[str, Any]:
         """Load all policy files"""
         policy_files = [
             "policies/FILE_PROTECTION.yaml",
@@ -64,7 +63,7 @@ class PolicyLoader:
         self.logger.info("✅ All policies validated successfully")
         return True
 
-    def get_policy(self, policy_name: str) -> Optional[Dict[str, Any]]:
+    def get_policy(self, policy_name: str) -> Optional[dict[str, Any]]:
         """Get specific policy"""
         return self.policies.get(policy_name)
 
@@ -77,7 +76,7 @@ class PolicyLoader:
         protected_files = file_protection.get("protected_files", [])
         return file_path in protected_files
 
-    def check_security_policy(self, action: str, context: Dict[str, Any]) -> bool:
+    def check_security_policy(self, action: str, context: dict[str, Any]) -> bool:
         """Check security policy compliance"""
         security_policy = self.get_policy("SECURITY_POLICY")
         if not security_policy:
@@ -87,7 +86,7 @@ class PolicyLoader:
         # This is a simplified version
         return True
 
-    def get_code_quality_rules(self) -> Dict[str, Any]:
+    def get_code_quality_rules(self) -> dict[str, Any]:
         """Get code quality rules"""
         return self.get_policy("CODE_QUALITY") or {}
 
@@ -104,7 +103,7 @@ def load_policies() -> PolicyLoader:
             raise RuntimeError("Policy validation failed")
     return _policy_loader
 
-def get_policy(policy_name: str) -> Optional[Dict[str, Any]]:
+def get_policy(policy_name: str) -> Optional[dict[str, Any]]:
     """Get specific policy"""
     loader = load_policies()
     return loader.get_policy(policy_name)
@@ -114,7 +113,7 @@ def check_file_protection(file_path: str) -> bool:
     loader = load_policies()
     return loader.check_file_protection(file_path)
 
-def check_security_policy(action: str, context: Dict[str, Any]) -> bool:
+def check_security_policy(action: str, context: dict[str, Any]) -> bool:
     """Check security policy compliance"""
     loader = load_policies()
     return loader.check_security_policy(action, context)

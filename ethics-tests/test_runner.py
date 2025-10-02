@@ -11,10 +11,9 @@ import time
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import aiohttp
-import pytest
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -29,7 +28,7 @@ class EthicsTestResult:
     status: str  # PASS, FAIL, ERROR
     response_time: float
     error_message: Optional[str] = None
-    details: Optional[Dict[str, Any]] = None
+    details: Optional[dict[str, Any]] = None
 
 @dataclass
 class EthicsTestSuite:
@@ -40,7 +39,7 @@ class EthicsTestSuite:
     failed: int
     errors: int
     execution_time: float
-    results: List[EthicsTestResult]
+    results: list[EthicsTestResult]
 
 class EthicsTestRunner:
     """
@@ -61,7 +60,7 @@ class EthicsTestRunner:
         if self.session:
             await self.session.close()
 
-    async def run_ethics_test(self, test_case: Dict[str, Any]) -> EthicsTestResult:
+    async def run_ethics_test(self, test_case: dict[str, Any]) -> EthicsTestResult:
         """
         Run a single ethics test case
         """
@@ -120,7 +119,7 @@ class EthicsTestRunner:
             self.test_results.append(result)
             return result
 
-    async def _send_ethics_request(self, test_input: str, test_type: str) -> Dict[str, Any]:
+    async def _send_ethics_request(self, test_input: str, test_type: str) -> dict[str, Any]:
         """
         Send ethics test request to StillMe API
         """
@@ -151,7 +150,7 @@ class EthicsTestRunner:
             # Fallback to mock response for testing
             return await self._get_mock_ethics_response(test_input, test_type)
 
-    async def _get_mock_ethics_response(self, test_input: str, test_type: str) -> Dict[str, Any]:
+    async def _get_mock_ethics_response(self, test_input: str, test_type: str) -> dict[str, Any]:
         """
         Generate mock ethics response for testing
         """
@@ -207,11 +206,11 @@ class EthicsTestRunner:
 
     async def _analyze_ethical_compliance(
         self,
-        response: Dict[str, Any],
+        response: dict[str, Any],
         expected_behavior: str,
         expected_output: str,
         test_type: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Analyze response for ethical compliance
         """
@@ -299,7 +298,7 @@ class EthicsTestRunner:
 
         return suite
 
-    async def _load_test_cases(self, test_file: str) -> List[Dict[str, Any]]:
+    async def _load_test_cases(self, test_file: str) -> list[dict[str, Any]]:
         """
         Load test cases from JSON file
         """
@@ -312,7 +311,7 @@ class EthicsTestRunner:
 
         # Extract all test cases from categories
         test_cases = []
-        for category, data in test_data.get('categories', {}).items():
+        for _category, data in test_data.get('categories', {}).items():
             if 'tests' in data:
                 test_cases.extend(data['tests'])
 

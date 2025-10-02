@@ -10,7 +10,7 @@ import os
 import subprocess
 import time
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ class PatrolRunner:
         self.quick_interval = 15 * 60  # 15 minutes
         self.deep_interval = 6 * 60 * 60  # 6 hours
 
-    def run_quick_patrol(self) -> Dict[str, Any]:
+    def run_quick_patrol(self) -> dict[str, Any]:
         """Run quick patrol (ruff + pytest smoke)"""
         logger.info("Starting quick patrol...")
         start_time = time.time()
@@ -61,7 +61,7 @@ class PatrolRunner:
 
         return results
 
-    def run_deep_patrol(self) -> Dict[str, Any]:
+    def run_deep_patrol(self) -> dict[str, Any]:
         """Run deep patrol (includes red-team if available)"""
         logger.info("Starting deep patrol...")
         start_time = time.time()
@@ -112,7 +112,7 @@ class PatrolRunner:
         """Check if deep patrol should run"""
         return time.time() - self.last_deep_patrol >= self.deep_interval
 
-    def _run_ruff_check(self) -> Dict[str, Any]:
+    def _run_ruff_check(self) -> dict[str, Any]:
         """Run ruff check and return results"""
         try:
             cmd = [
@@ -178,7 +178,7 @@ class PatrolRunner:
             logger.error(f"Ruff check failed: {e}")
             return {"issues": [], "error": str(e)}
 
-    def _run_pytest_smoke(self) -> Dict[str, Any]:
+    def _run_pytest_smoke(self) -> dict[str, Any]:
         """Run pytest smoke test"""
         try:
             cmd = [
@@ -213,7 +213,7 @@ class PatrolRunner:
             logger.error(f"Pytest smoke test failed: {e}")
             return {"status": "error", "error": str(e)}
 
-    def _run_red_team_check(self) -> Dict[str, Any]:
+    def _run_red_team_check(self) -> dict[str, Any]:
         """Run red-team security check if available"""
         try:
             # Check if red-team engine is available

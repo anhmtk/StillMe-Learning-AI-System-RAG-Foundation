@@ -7,14 +7,12 @@ Fixer với validation và rollback capability.
 """
 
 import logging
-import os
 import re
 import subprocess
-import tempfile
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 from symbol_index import SymbolIndex
 
@@ -44,8 +42,8 @@ logger = logging.getLogger(__name__)
 @dataclass
 class FixBatch:
     """Batch của các fixes"""
-    files: List[str]
-    fixes: List[Any]  # Will be FixResult at runtime
+    files: list[str]
+    fixes: list[Any]  # Will be FixResult at runtime
     timestamp: datetime
 
 class AdvancedFixer:
@@ -160,10 +158,9 @@ class AdvancedFixer:
                 timestamp=datetime.now()
             )
 
-    def fix_batch(self, errors: List[ErrorInfo], max_files: int = 20) -> Tuple[List[FixResult], Dict]:
+    def fix_batch(self, errors: list[ErrorInfo], max_files: int = 20) -> tuple[list[FixResult], dict]:
         """Fix a batch of errors với validation"""
         results = []
-        batch_files = set()
 
         # Group errors by file
         file_errors = {}
@@ -274,7 +271,7 @@ class AdvancedFixer:
             logger.error("Error adding import to %s: %s", file_path, e)
             return False
 
-    def _validate_fix(self, file_path: str, symbol_name: str) -> Dict:
+    def _validate_fix(self, file_path: str, symbol_name: str) -> dict:
         """Validate that fix actually works"""
         try:
             # Run syntax check
@@ -298,7 +295,7 @@ class AdvancedFixer:
         except Exception as e:
             return {"valid": False, "reason": f"Validation error: {str(e)}"}
 
-    def _validate_batch(self, file_paths: List[str]) -> Dict:
+    def _validate_batch(self, file_paths: list[str]) -> dict:
         """Validate entire batch of fixes"""
         try:
             # Run flake8 on fixed files

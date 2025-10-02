@@ -10,7 +10,7 @@ import time
 from collections import defaultdict
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ class ClarificationAttempt:
     question: str
     user_reply: Optional[str]
     success: bool
-    context: Dict[str, Any]
+    context: dict[str, Any]
     timestamp: float = time.time()
     trace_id: Optional[str] = None
 
@@ -57,7 +57,7 @@ class ClarificationPatternStore:
 
     def __init__(self, decay: float = 0.9, persistence_file: Optional[str] = None):
         self.decay = decay
-        self.store: Dict[str, PatternStat] = defaultdict(PatternStat)
+        self.store: dict[str, PatternStat] = defaultdict(PatternStat)
         self.persistence_file = persistence_file or "data/clarification_patterns.json"
         self._load_from_file()
 
@@ -110,7 +110,7 @@ class ClarificationPatternStore:
         if stat.total_attempts % 10 == 0:
             self._save_to_file()
 
-    def top_templates(self, domain: str, k: int = 3) -> List[Dict[str, Any]]:
+    def top_templates(self, domain: str, k: int = 3) -> list[dict[str, Any]]:
         """Get top performing templates for a domain"""
         # Filter keys by domain prefix "domain:template"
         domain_key = f"{domain}:"
@@ -134,7 +134,7 @@ class ClarificationPatternStore:
         """Get statistics for a specific pattern"""
         return self.store.get(key)
 
-    def get_all_stats(self) -> Dict[str, Dict[str, Any]]:
+    def get_all_stats(self) -> dict[str, dict[str, Any]]:
         """Get all pattern statistics"""
         return {
             key: {
@@ -156,13 +156,13 @@ class ClarificationLearner:
     def __init__(self, store: ClarificationPatternStore, memory=None):
         self.store = store
         self.memory = memory
-        self.attempts: List[ClarificationAttempt] = []
+        self.attempts: list[ClarificationAttempt] = []
 
     async def record_attempt(self, *, prompt: str, question: str, user_reply: Optional[str],
-                           success: bool, context: Dict[str, Any], trace_id: Optional[str] = None):
+                           success: bool, context: dict[str, Any], trace_id: Optional[str] = None):
         """
         Record a clarification attempt and update patterns
-        
+
         Args:
             prompt: Original user prompt
             question: Clarification question asked
@@ -201,14 +201,14 @@ class ClarificationLearner:
         # Log the attempt
         logger.info(f"Recorded clarification attempt: {template_key}, success={success}, trace_id={trace_id}")
 
-    async def suggest_patterns(self, prompt: str, context: Dict[str, Any]) -> Dict[str, Any]:
+    async def suggest_patterns(self, prompt: str, context: dict[str, Any]) -> dict[str, Any]:
         """
         Suggest clarification patterns based on learning
-        
+
         Args:
             prompt: User prompt to clarify
             context: Context including domain_hint, history, etc.
-            
+
         Returns:
             Dict with suggested template, confidence, and slots
         """
@@ -235,7 +235,7 @@ class ClarificationLearner:
             "source": "fallback"
         }
 
-    def get_learning_stats(self) -> Dict[str, Any]:
+    def get_learning_stats(self) -> dict[str, Any]:
         """Get learning statistics"""
         total_attempts = len(self.attempts)
         successful_attempts = sum(1 for a in self.attempts if a.success)

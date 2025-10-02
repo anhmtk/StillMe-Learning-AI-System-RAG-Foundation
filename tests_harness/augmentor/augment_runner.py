@@ -13,7 +13,7 @@ import sys
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Add current directory to path
 sys.path.insert(0, os.path.dirname(__file__))
@@ -62,11 +62,11 @@ class AugmentStats:
     """Thống kê augmentation"""
     total_seeds: int
     total_outputs: int
-    methods_used: List[str]
-    success_rates: Dict[str, float]
+    methods_used: list[str]
+    success_rates: dict[str, float]
     processing_time: float
-    output_files: List[str]
-    metadata: Dict[str, Any]
+    output_files: list[str]
+    metadata: dict[str, Any]
 
 class AugmentRunner:
     """Runner chính cho augmentation pipeline"""
@@ -87,7 +87,7 @@ class AugmentRunner:
         if config.use_template_fill:
             self.augmentors['template_fill'] = TemplateFillerAugmentor(config.template_config)
 
-    def _load_seed_data(self) -> List[Dict[str, Any]]:
+    def _load_seed_data(self) -> list[dict[str, Any]]:
         """Load seed data từ file"""
         seed_path = Path(self.config.seed_file)
         if not seed_path.exists():
@@ -113,7 +113,7 @@ class AugmentRunner:
         self.logger.info(f"Loaded {len(seeds)} seeds")
         return seeds
 
-    def _prepare_seed_file(self, seeds: List[Dict[str, Any]], method: str) -> str:
+    def _prepare_seed_file(self, seeds: list[dict[str, Any]], method: str) -> str:
         """Chuẩn bị file seed cho method cụ thể"""
         temp_file = Path(self.config.output_dir) / f"temp_seed_{method}.jsonl"
         temp_file.parent.mkdir(parents=True, exist_ok=True)
@@ -126,7 +126,7 @@ class AugmentRunner:
 
         return str(temp_file)
 
-    async def _run_paraphrase(self, seeds: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def _run_paraphrase(self, seeds: list[dict[str, Any]]) -> dict[str, Any]:
         """Chạy paraphrase augmentation"""
         if 'paraphrase' not in self.augmentors:
             return {"error": "Paraphrase augmentor not available"}
@@ -150,7 +150,7 @@ class AugmentRunner:
             # Clean up temp file
             Path(seed_file).unlink(missing_ok=True)
 
-    async def _run_backtranslate(self, seeds: List[Dict[str, Any]]) -> Dict[str, Any]:
+    async def _run_backtranslate(self, seeds: list[dict[str, Any]]) -> dict[str, Any]:
         """Chạy backtranslate augmentation"""
         if 'backtranslate' not in self.augmentors:
             return {"error": "Backtranslate augmentor not available"}
@@ -174,7 +174,7 @@ class AugmentRunner:
             # Clean up temp file
             Path(seed_file).unlink(missing_ok=True)
 
-    async def _run_template_fill(self) -> Dict[str, Any]:
+    async def _run_template_fill(self) -> dict[str, Any]:
         """Chạy template fill augmentation"""
         if 'template_fill' not in self.augmentors:
             return {"error": "Template fill augmentor not available"}
@@ -271,7 +271,7 @@ class AugmentRunner:
             metadata=metadata
         )
 
-    async def _create_combined_output(self, output_files: List[str], combined_file: str):
+    async def _create_combined_output(self, output_files: list[str], combined_file: str):
         """Tạo file output kết hợp từ tất cả methods"""
         combined_path = Path(combined_file)
         combined_path.parent.mkdir(parents=True, exist_ok=True)

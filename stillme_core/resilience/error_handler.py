@@ -28,10 +28,10 @@ import random
 import time
 import traceback
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -70,8 +70,8 @@ class RetryPolicy:
     strategy: RetryStrategy = RetryStrategy.EXPONENTIAL
     jitter: bool = True
     backoff_multiplier: float = 2.0
-    retryable_errors: List[Type[Exception]] = None
-    non_retryable_errors: List[Type[Exception]] = None
+    retryable_errors: list[type[Exception]] = None
+    non_retryable_errors: list[type[Exception]] = None
 
     def __post_init__(self):
         if self.retryable_errors is None:
@@ -90,7 +90,7 @@ class CircuitBreakerConfig:
     """Circuit breaker configuration"""
     failure_threshold: int = 5
     recovery_timeout: float = 60.0  # seconds
-    expected_exception: Type[Exception] = Exception
+    expected_exception: type[Exception] = Exception
     half_open_max_calls: int = 3
 
 class CircuitBreakerState(Enum):
@@ -111,7 +111,7 @@ class ErrorContext:
     component: str
     operation: str
     retry_count: int = 0
-    context_data: Dict[str, Any] = None
+    context_data: dict[str, Any] = None
     stack_trace: str = None
     recovery_attempted: bool = False
     recovery_successful: bool = False
@@ -182,7 +182,7 @@ class CircuitBreaker:
             self.state = CircuitBreakerState.OPEN
             self.logger.error(f"Circuit breaker opened after {self.failure_count} failures")
 
-    def get_state(self) -> Dict[str, Any]:
+    def get_state(self) -> dict[str, Any]:
         """Get circuit breaker state"""
         return {
             'state': self.state.value,
@@ -202,12 +202,12 @@ class ErrorHandler:
         self.error_log_file.parent.mkdir(parents=True, exist_ok=True)
 
         # Error tracking
-        self.error_history: List[ErrorContext] = []
-        self.circuit_breakers: Dict[str, CircuitBreaker] = {}
-        self.retry_policies: Dict[str, RetryPolicy] = {}
+        self.error_history: list[ErrorContext] = []
+        self.circuit_breakers: dict[str, CircuitBreaker] = {}
+        self.retry_policies: dict[str, RetryPolicy] = {}
 
         # Recovery strategies
-        self.recovery_strategies: Dict[ErrorCategory, List[Callable]] = {}
+        self.recovery_strategies: dict[ErrorCategory, list[Callable]] = {}
         self._setup_default_recovery_strategies()
 
         # Statistics
@@ -267,7 +267,7 @@ class ErrorHandler:
         self.recovery_strategies[category].append(strategy)
         self.logger.info(f"Added recovery strategy for {category.value}")
 
-    def classify_error(self, error: Exception, context: Dict[str, Any] = None) -> ErrorContext:
+    def classify_error(self, error: Exception, context: dict[str, Any] = None) -> ErrorContext:
         """Classify error and create error context"""
         error_id = f"error_{int(time.time() * 1000)}_{random.randint(1000, 9999)}"
 
@@ -293,9 +293,9 @@ class ErrorHandler:
 
         return error_context
 
-    def _determine_error_category(self, error: Exception, context: Dict[str, Any] = None) -> ErrorCategory:
+    def _determine_error_category(self, error: Exception, context: dict[str, Any] = None) -> ErrorCategory:
         """Determine error category"""
-        error_type = type(error).__name__.lower()
+        type(error).__name__.lower()
         error_message = str(error).lower()
 
         # Resource errors
@@ -328,7 +328,7 @@ class ErrorHandler:
 
         return ErrorCategory.LOGIC
 
-    def _determine_error_severity(self, error: Exception, category: ErrorCategory, context: Dict[str, Any] = None) -> ErrorSeverity:
+    def _determine_error_severity(self, error: Exception, category: ErrorCategory, context: dict[str, Any] = None) -> ErrorSeverity:
         """Determine error severity"""
         error_message = str(error).lower()
 
@@ -347,7 +347,7 @@ class ErrorHandler:
         # Low severity
         return ErrorSeverity.LOW
 
-    async def handle_error(self, error: Exception, context: Dict[str, Any] = None,
+    async def handle_error(self, error: Exception, context: dict[str, Any] = None,
                           retry_policy: str = "default", circuit_breaker: str = None) -> Any:
         """Handle error with retry and recovery"""
         error_context = self.classify_error(error, context)
@@ -568,7 +568,7 @@ class ErrorHandler:
         # Implement safe mode logic
         return True
 
-    def get_error_statistics(self) -> Dict[str, Any]:
+    def get_error_statistics(self) -> dict[str, Any]:
         """Get error statistics"""
         return {
             'statistics': self.stats,
@@ -579,7 +579,7 @@ class ErrorHandler:
 
 # Decorators for easy error handling
 def with_error_handling(error_handler: ErrorHandler, retry_policy: str = "default",
-                       circuit_breaker: str = None, context: Dict[str, Any] = None):
+                       circuit_breaker: str = None, context: dict[str, Any] = None):
     """Decorator for error handling"""
     def decorator(func):
         @functools.wraps(func)

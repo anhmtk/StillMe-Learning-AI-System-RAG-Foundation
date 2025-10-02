@@ -3,10 +3,9 @@
 StillMe Performance Tracker
 Tracks model performance metrics including tokens, latency, and model info
 """
-import json
 import time
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 
 class PerformanceMetrics:
@@ -26,7 +25,7 @@ class PerformanceMetrics:
         self.latency_ms = latency_ms
         self.timestamp = timestamp or datetime.now()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON serialization"""
         return {
             "model": self.model,
@@ -56,8 +55,8 @@ class PerformanceTracker:
     """Tracks and manages performance metrics"""
 
     def __init__(self):
-        self.metrics_history: List[PerformanceMetrics] = []
-        self.session_metrics: Dict[str, List[PerformanceMetrics]] = {}
+        self.metrics_history: list[PerformanceMetrics] = []
+        self.session_metrics: dict[str, list[PerformanceMetrics]] = {}
 
     def start_timing(self) -> float:
         """Start timing a request"""
@@ -104,7 +103,7 @@ class PerformanceTracker:
 
         return metrics
 
-    def get_session_summary(self, session_id: str = "default") -> Dict[str, Any]:
+    def get_session_summary(self, session_id: str = "default") -> dict[str, Any]:
         """Get performance summary for a session"""
         if session_id not in self.session_metrics:
             return {
@@ -120,7 +119,7 @@ class PerformanceTracker:
         total_tokens = sum(m.tokens_in + m.tokens_out for m in metrics)
         total_latency = sum(m.latency_ms for m in metrics)
         average_latency = total_latency / total_requests if total_requests > 0 else 0
-        models_used = list(set(m.model for m in metrics))
+        models_used = list({m.model for m in metrics})
 
         return {
             "total_requests": total_requests,
@@ -130,7 +129,7 @@ class PerformanceTracker:
             "models_used": models_used
         }
 
-    def get_recent_metrics(self, count: int = 10) -> List[PerformanceMetrics]:
+    def get_recent_metrics(self, count: int = 10) -> list[PerformanceMetrics]:
         """Get recent performance metrics"""
         return self.metrics_history[-count:] if self.metrics_history else []
 

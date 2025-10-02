@@ -7,11 +7,8 @@ StillMe Sandbox - Stub Implementation
 """
 
 import logging
-import os
-import shutil
-import tempfile
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +19,7 @@ class SandboxConfig:
     timeout: float = 30.0
     max_memory: int = 512  # MB
     max_disk: int = 100  # MB
-    allowed_commands: List[str] = None
+    allowed_commands: list[str] = None
     isolated_network: bool = True
 
     def __post_init__(self):
@@ -33,7 +30,7 @@ class SandboxConfig:
 class Sandbox:
     """
     Sandbox - Stub Implementation
-    
+
     # TODO[stabilize]: Implement full sandbox functionality
     """
 
@@ -56,7 +53,7 @@ class Sandbox:
         self.is_active = False
         return True
 
-    def execute(self, command: str, timeout: Optional[float] = None) -> Dict[str, Any]:
+    def execute(self, command: str, timeout: Optional[float] = None) -> dict[str, Any]:
         """Execute command in sandbox"""
         logger.warning(f"Sandbox.execute({command}): Stub implementation")
 
@@ -76,7 +73,7 @@ class Sandbox:
             "warnings": ["Stub implementation - no real execution"]
         }
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """Get sandbox status"""
         return {
             "sandbox_id": self.sandbox_id,
@@ -89,7 +86,7 @@ class Sandbox:
 def prepare_sandbox(config: Optional[SandboxConfig] = None) -> Sandbox:
     """
     Prepare sandbox environment
-    
+
     # TODO[stabilize]: Implement full sandbox preparation
     """
     sandbox = Sandbox(config)
@@ -97,10 +94,10 @@ def prepare_sandbox(config: Optional[SandboxConfig] = None) -> Sandbox:
     return sandbox
 
 
-def run_tests_in_sandbox(tests: List[str], config: Optional[SandboxConfig] = None) -> Dict[str, Any]:
+def run_tests_in_sandbox(tests: list[str], config: Optional[SandboxConfig] = None) -> dict[str, Any]:
     """
     Run tests in sandbox
-    
+
     # TODO[stabilize]: Implement full test execution in sandbox
     """
     logger.warning("run_tests_in_sandbox(): Stub implementation")

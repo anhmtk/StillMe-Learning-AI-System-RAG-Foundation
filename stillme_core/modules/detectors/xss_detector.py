@@ -10,7 +10,7 @@ Version: 1.0.0
 """
 
 import re
-from typing import Any, Dict
+from typing import Any
 
 from .detector_base import BaseDetector
 
@@ -107,7 +107,7 @@ class XSSDetector(BaseDetector):
             "outerHTML",
         ]
 
-    def detect(self, text: str) -> Dict[str, Any]:
+    def detect(self, text: str) -> dict[str, Any]:
         """Detect XSS patterns"""
 
         # Check for XSS patterns

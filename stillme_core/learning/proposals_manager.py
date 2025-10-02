@@ -10,7 +10,6 @@ import logging
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -105,13 +104,13 @@ class ProposalsManager:
             created_at=datetime.now()
         )
 
-    def get_all_proposals(self) -> List['LearningProposal']:
+    def get_all_proposals(self) -> list['LearningProposal']:
         """Get all proposals"""
         import sqlite3
 
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.execute("""
-                SELECT * FROM proposals 
+                SELECT * FROM proposals
                 ORDER BY created_at DESC
             """)
 
@@ -148,15 +147,15 @@ class ProposalsManager:
 
             return proposals
 
-    def get_pending_proposals(self, limit: int = 10) -> List['LearningProposal']:
+    def get_pending_proposals(self, limit: int = 10) -> list['LearningProposal']:
         """Get pending proposals"""
         import sqlite3
 
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.execute("""
-                SELECT * FROM proposals 
-                WHERE status = 'pending' 
-                ORDER BY created_at DESC 
+                SELECT * FROM proposals
+                WHERE status = 'pending'
+                ORDER BY created_at DESC
                 LIMIT ?
             """, (limit,))
 
@@ -219,7 +218,7 @@ class ProposalsManager:
 
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("""
-                UPDATE proposals 
+                UPDATE proposals
                 SET status = 'approved', approved_at = ?, approved_by = ?
                 WHERE id = ?
             """, (datetime.now().isoformat(), approved_by, proposal_id))
@@ -233,7 +232,7 @@ class ProposalsManager:
 
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("""
-                UPDATE proposals 
+                UPDATE proposals
                 SET status = 'rejected', rejected_at = ?, rejected_by = ?, rejection_reason = ?
                 WHERE id = ?
             """, (datetime.now().isoformat(), rejected_by, reason, proposal_id))

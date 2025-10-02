@@ -30,7 +30,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -44,10 +44,10 @@ class ChartData:
     chart_id: str
     chart_type: str
     title: str
-    data: List[Dict[str, Any]]
+    data: list[dict[str, Any]]
     x_axis: str
     y_axis: str
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
     timestamp: datetime
 
 
@@ -58,9 +58,9 @@ class Dashboard:
     dashboard_id: str
     title: str
     description: str
-    charts: List[ChartData]
-    layout: Dict[str, Any]
-    filters: Dict[str, Any]
+    charts: list[ChartData]
+    layout: dict[str, Any]
+    filters: dict[str, Any]
     refresh_interval: int
     timestamp: datetime
 
@@ -72,9 +72,9 @@ class CustomReport:
     report_id: str
     title: str
     report_type: str
-    data: Dict[str, Any]
-    insights: List[str]
-    recommendations: List[str]
+    data: dict[str, Any]
+    insights: list[str]
+    recommendations: list[str]
     generated_at: datetime
     expires_at: datetime
 
@@ -88,8 +88,8 @@ class VisualizationInsight:
     title: str
     description: str
     confidence_score: float
-    data_points: List[Dict[str, Any]]
-    recommendations: List[str]
+    data_points: list[dict[str, Any]]
+    recommendations: list[str]
     timestamp: datetime
 
 
@@ -98,7 +98,7 @@ class AdvancedVisualization:
     Enterprise-grade visualization system
     """
 
-    def __init__(self, metrics_db_path: str, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, metrics_db_path: str, config: Optional[dict[str, Any]] = None):
         self.metrics_db_path = Path(metrics_db_path)
         self.config = config or self._get_default_config()
 
@@ -118,7 +118,7 @@ class AdvancedVisualization:
             "✅ AdvancedVisualization initialized với enterprise-grade configuration"
         )
 
-    def _get_default_config(self) -> Dict[str, Any]:
+    def _get_default_config(self) -> dict[str, Any]:
         """Default configuration với visualization focus"""
         return {
             "accuracy_threshold": 0.9995,  # 99.95% accuracy requirement
@@ -133,7 +133,7 @@ class AdvancedVisualization:
         }
 
     def create_interactive_dashboard(
-        self, dashboard_config: Dict[str, Any]
+        self, dashboard_config: dict[str, Any]
     ) -> Dashboard:
         """
         Create interactive dashboard with multiple charts
@@ -204,8 +204,8 @@ class AdvancedVisualization:
             )
 
     def create_drill_down_analysis(
-        self, base_chart_id: str, drill_down_config: Dict[str, Any]
-    ) -> List[ChartData]:
+        self, base_chart_id: str, drill_down_config: dict[str, Any]
+    ) -> list[ChartData]:
         """
         Create drill-down analysis from base chart
 
@@ -262,7 +262,7 @@ class AdvancedVisualization:
             logger.error(f"❌ Drill-down analysis creation failed: {e}")
             return []
 
-    def generate_custom_report(self, report_config: Dict[str, Any]) -> CustomReport:
+    def generate_custom_report(self, report_config: dict[str, Any]) -> CustomReport:
         """
         Generate custom report with insights and recommendations
 
@@ -331,7 +331,7 @@ class AdvancedVisualization:
 
     def generate_automated_insights(
         self, time_range_hours: int = 24
-    ) -> List[VisualizationInsight]:
+    ) -> list[VisualizationInsight]:
         """
         Generate automated insights from data
 
@@ -380,7 +380,7 @@ class AdvancedVisualization:
             logger.error(f"❌ Automated insights generation failed: {e}")
             return []
 
-    def _create_chart(self, chart_config: Dict[str, Any]) -> Optional[ChartData]:
+    def _create_chart(self, chart_config: dict[str, Any]) -> Optional[ChartData]:
         """Create chart from configuration"""
         try:
             chart_id = f"chart_{int(time.time() * 1000)}"
@@ -418,8 +418,8 @@ class AdvancedVisualization:
             return None
 
     def _get_chart_data(
-        self, data_source: Dict[str, Any], time_range_hours: int
-    ) -> List[Dict[str, Any]]:
+        self, data_source: dict[str, Any], time_range_hours: int
+    ) -> list[dict[str, Any]]:
         """Get chart data from data source"""
         try:
             with sqlite3.connect(self.metrics_db_path) as conn:
@@ -446,8 +446,8 @@ class AdvancedVisualization:
         self,
         conn: sqlite3.Connection,
         since_time: datetime,
-        data_source: Dict[str, Any],
-    ) -> List[Dict[str, Any]]:
+        data_source: dict[str, Any],
+    ) -> list[dict[str, Any]]:
         """Get usage events data for chart"""
         try:
             metric = data_source.get("metric", "count")
@@ -516,8 +516,8 @@ class AdvancedVisualization:
         self,
         conn: sqlite3.Connection,
         since_time: datetime,
-        data_source: Dict[str, Any],
-    ) -> List[Dict[str, Any]]:
+        data_source: dict[str, Any],
+    ) -> list[dict[str, Any]]:
         """Get performance metrics data for chart"""
         try:
             # This would get data from performance_metrics table
@@ -532,8 +532,8 @@ class AdvancedVisualization:
         self,
         conn: sqlite3.Connection,
         since_time: datetime,
-        data_source: Dict[str, Any],
-    ) -> List[Dict[str, Any]]:
+        data_source: dict[str, Any],
+    ) -> list[dict[str, Any]]:
         """Get user behavior data for chart"""
         try:
             # This would get data from user behavior analysis
@@ -544,7 +544,7 @@ class AdvancedVisualization:
             logger.error(f"❌ User behavior data retrieval failed: {e}")
             return []
 
-    def _create_dashboard_layout(self, charts: List[ChartData]) -> Dict[str, Any]:
+    def _create_dashboard_layout(self, charts: list[ChartData]) -> dict[str, Any]:
         """Create dashboard layout"""
         try:
             layout = {
@@ -571,8 +571,8 @@ class AdvancedVisualization:
             return {}
 
     def _create_dashboard_filters(
-        self, dashboard_config: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, dashboard_config: dict[str, Any]
+    ) -> dict[str, Any]:
         """Create dashboard filters"""
         try:
             filters = {
@@ -599,7 +599,7 @@ class AdvancedVisualization:
             logger.error(f"❌ Dashboard filters creation failed: {e}")
             return {}
 
-    def _get_available_modules(self) -> List[str]:
+    def _get_available_modules(self) -> list[str]:
         """Get available modules for filtering"""
         try:
             with sqlite3.connect(self.metrics_db_path) as conn:
@@ -618,7 +618,7 @@ class AdvancedVisualization:
             logger.error(f"❌ Error getting available modules: {e}")
             return []
 
-    def _get_available_features(self) -> List[str]:
+    def _get_available_features(self) -> list[str]:
         """Get available features for filtering"""
         try:
             with sqlite3.connect(self.metrics_db_path) as conn:
@@ -652,8 +652,8 @@ class AdvancedVisualization:
             return None
 
     def _create_time_drill_down_charts(
-        self, base_chart: ChartData, config: Dict[str, Any]
-    ) -> List[ChartData]:
+        self, base_chart: ChartData, config: dict[str, Any]
+    ) -> list[ChartData]:
         """Create time-based drill-down charts"""
         try:
             # This would create more granular time-based charts
@@ -665,8 +665,8 @@ class AdvancedVisualization:
             return []
 
     def _create_dimension_drill_down_charts(
-        self, base_chart: ChartData, config: Dict[str, Any]
-    ) -> List[ChartData]:
+        self, base_chart: ChartData, config: dict[str, Any]
+    ) -> list[ChartData]:
         """Create dimension-based drill-down charts"""
         try:
             # This would create charts broken down by dimensions
@@ -678,8 +678,8 @@ class AdvancedVisualization:
             return []
 
     def _create_category_drill_down_charts(
-        self, base_chart: ChartData, config: Dict[str, Any]
-    ) -> List[ChartData]:
+        self, base_chart: ChartData, config: dict[str, Any]
+    ) -> list[ChartData]:
         """Create category-based drill-down charts"""
         try:
             # This would create charts broken down by categories
@@ -691,8 +691,8 @@ class AdvancedVisualization:
             return []
 
     def _generate_report_data(
-        self, report_config: Dict[str, Any], time_range_hours: int
-    ) -> Dict[str, Any]:
+        self, report_config: dict[str, Any], time_range_hours: int
+    ) -> dict[str, Any]:
         """Generate report data"""
         try:
             # This would generate comprehensive report data
@@ -708,8 +708,8 @@ class AdvancedVisualization:
             return {}
 
     def _generate_report_insights(
-        self, report_data: Dict[str, Any], report_config: Dict[str, Any]
-    ) -> List[str]:
+        self, report_data: dict[str, Any], report_config: dict[str, Any]
+    ) -> list[str]:
         """Generate report insights"""
         try:
             insights = [
@@ -725,8 +725,8 @@ class AdvancedVisualization:
             return [f"Error generating insights: {e!s}"]
 
     def _generate_report_recommendations(
-        self, report_data: Dict[str, Any], insights: List[str]
-    ) -> List[str]:
+        self, report_data: dict[str, Any], insights: list[str]
+    ) -> list[str]:
         """Generate report recommendations"""
         try:
             recommendations = [
@@ -741,7 +741,7 @@ class AdvancedVisualization:
             logger.error(f"❌ Report recommendations generation failed: {e}")
             return [f"Error generating recommendations: {e!s}"]
 
-    def _get_system_data(self, time_range_hours: int) -> Dict[str, Any]:
+    def _get_system_data(self, time_range_hours: int) -> dict[str, Any]:
         """Get system data for insights"""
         try:
             with sqlite3.connect(self.metrics_db_path) as conn:
@@ -776,8 +776,8 @@ class AdvancedVisualization:
             return {}
 
     def _generate_performance_insights(
-        self, system_data: Dict[str, Any]
-    ) -> List[VisualizationInsight]:
+        self, system_data: dict[str, Any]
+    ) -> list[VisualizationInsight]:
         """Generate performance insights"""
         try:
             insights = []
@@ -826,8 +826,8 @@ class AdvancedVisualization:
             return []
 
     def _generate_usage_insights(
-        self, system_data: Dict[str, Any]
-    ) -> List[VisualizationInsight]:
+        self, system_data: dict[str, Any]
+    ) -> list[VisualizationInsight]:
         """Generate usage insights"""
         try:
             insights = []
@@ -862,8 +862,8 @@ class AdvancedVisualization:
             return []
 
     def _generate_trend_insights(
-        self, system_data: Dict[str, Any]
-    ) -> List[VisualizationInsight]:
+        self, system_data: dict[str, Any]
+    ) -> list[VisualizationInsight]:
         """Generate trend insights"""
         try:
             # This would analyze trends over time
@@ -875,8 +875,8 @@ class AdvancedVisualization:
             return []
 
     def _generate_anomaly_insights(
-        self, system_data: Dict[str, Any]
-    ) -> List[VisualizationInsight]:
+        self, system_data: dict[str, Any]
+    ) -> list[VisualizationInsight]:
         """Generate anomaly insights"""
         try:
             # This would detect anomalies in the data
@@ -887,7 +887,7 @@ class AdvancedVisualization:
             logger.error(f"❌ Anomaly insights generation failed: {e}")
             return []
 
-    def get_visualization_summary(self) -> Dict[str, Any]:
+    def get_visualization_summary(self) -> dict[str, Any]:
         """Get visualization summary"""
         try:
             return {
@@ -920,7 +920,7 @@ class AdvancedVisualization:
 
 # Factory function
 def create_advanced_visualization(
-    metrics_db_path: str, config: Optional[Dict[str, Any]] = None
+    metrics_db_path: str, config: Optional[dict[str, Any]] = None
 ) -> AdvancedVisualization:
     """Factory function để create advanced visualization"""
     return AdvancedVisualization(metrics_db_path, config)

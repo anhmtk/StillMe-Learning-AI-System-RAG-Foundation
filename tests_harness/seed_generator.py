@@ -12,7 +12,7 @@ import sys
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
@@ -28,9 +28,9 @@ class SeedConfig:
     """Cấu hình cho seed generation"""
     output_file: str
     num_seeds: int = 1000
-    categories: List[str] = None
-    languages: List[str] = None
-    models: List[str] = None
+    categories: list[str] = None
+    languages: list[str] = None
+    models: list[str] = None
 
     def __post_init__(self):
         if self.categories is None:
@@ -53,7 +53,7 @@ class SeedItem:
     language: str
     category: str
     type: str
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
 class SeedGenerator:
     """Generator để tạo seed data từ AI public APIs"""
@@ -124,7 +124,7 @@ Bắt đầu:"""
 
         return prompt
 
-    async def _generate_seeds_for_category(self, category: str, language: str, count: int) -> List[SeedItem]:
+    async def _generate_seeds_for_category(self, category: str, language: str, count: int) -> list[SeedItem]:
         """Sinh seeds cho một category và language cụ thể"""
 
         if not self.api_manager:
@@ -204,7 +204,7 @@ Bắt đầu:"""
                 )
             ]
 
-    async def generate_seeds(self) -> List[SeedItem]:
+    async def generate_seeds(self) -> list[SeedItem]:
         """Sinh tất cả seed data"""
 
         all_seeds = []
@@ -233,7 +233,7 @@ Bắt đầu:"""
         self.logger.info(f"Generated {len(all_seeds)} total seeds")
         return all_seeds
 
-    def save_seeds(self, seeds: List[SeedItem]):
+    def save_seeds(self, seeds: list[SeedItem]):
         """Lưu seeds vào file"""
 
         output_path = Path(self.config.output_file)

@@ -37,7 +37,7 @@ TECHNICAL DETAILS / CHI TIẾT KỸ THUẬT:
 import traceback
 import uuid
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any
 
 
 class StillMeException(Exception):
@@ -50,7 +50,7 @@ class StillMeException(Exception):
         self,
         message: str,
         error_code: str = None,
-        context: Dict[str, Any] = None,
+        context: dict[str, Any] = None,
         recoverable: bool = True,
         suggested_action: str = None,
     ):
@@ -74,7 +74,7 @@ class StillMeException(Exception):
         self.error_id = str(uuid.uuid4())
         self.traceback = traceback.format_exc()
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert exception to dictionary for serialization"""
         return {
             "error_id": self.error_id,
@@ -273,8 +273,8 @@ class ErrorHandler:
         self.recovery_strategies = {}
 
     def handle_error(
-        self, error: Exception, context: Dict[str, Any] = None
-    ) -> Dict[str, Any]:
+        self, error: Exception, context: dict[str, Any] = None
+    ) -> dict[str, Any]:
         """
         Handle error and return structured response
 
@@ -326,7 +326,7 @@ class ErrorHandler:
 
         return response
 
-    def get_error_stats(self) -> Dict[str, Any]:
+    def get_error_stats(self) -> dict[str, Any]:
         """Get error statistics"""
         return {
             "error_counts": self.error_counts.copy(),
@@ -376,7 +376,7 @@ class ErrorRecovery:
     @staticmethod
     def fallback_response(
         error: StillMeException, fallback_data: Any = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Generate fallback response for API errors
 
@@ -425,8 +425,8 @@ class ErrorRecovery:
 
 # Convenience functions
 def handle_error(
-    error: Exception, logger=None, context: Dict[str, Any] = None
-) -> Dict[str, Any]:
+    error: Exception, logger=None, context: dict[str, Any] = None
+) -> dict[str, Any]:
     """Handle error with default error handler"""
     handler = ErrorHandler(logger)
     return handler.handle_error(error, context)
@@ -434,7 +434,7 @@ def handle_error(
 
 def create_error_response(
     error: Exception, fallback_data: Any = None
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Create standardized error response"""
     if isinstance(error, StillMeException):
         return ErrorRecovery.fallback_response(error, fallback_data)

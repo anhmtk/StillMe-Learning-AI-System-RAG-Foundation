@@ -23,14 +23,13 @@ import asyncio
 import json
 import logging
 import random
-import sqlite3
 
 # Add project root to path
 import sys
 import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 sys.path.append(str(Path(__file__).parent.parent))
 
@@ -42,7 +41,7 @@ logger = logging.getLogger(__name__)
 class MetricsBackfill:
     """
     Metrics backfill system
-    
+
     Tạo sample data realistic cho testing và demo
     learning dashboard.
     """
@@ -66,7 +65,7 @@ class MetricsBackfill:
 
         logger.info(f"MetricsBackfill initialized: db={db_path}")
 
-    def generate_learning_curve_data(self, days: int, start_date: Optional[datetime] = None) -> List[Dict[str, Any]]:
+    def generate_learning_curve_data(self, days: int, start_date: Optional[datetime] = None) -> list[dict[str, Any]]:
         """Generate realistic learning curve data"""
         if start_date is None:
             start_date = datetime.now() - timedelta(days=days)
@@ -100,7 +99,7 @@ class MetricsBackfill:
 
         return learning_data
 
-    def generate_performance_data(self, days: int) -> List[Dict[str, Any]]:
+    def generate_performance_data(self, days: int) -> list[dict[str, Any]]:
         """Generate performance metrics data"""
         performance_data = []
 
@@ -126,7 +125,7 @@ class MetricsBackfill:
 
         return performance_data
 
-    def generate_ingest_data(self, days: int) -> List[Dict[str, Any]]:
+    def generate_ingest_data(self, days: int) -> list[dict[str, Any]]:
         """Generate ingest volume data"""
         ingest_data = []
 
@@ -154,7 +153,7 @@ class MetricsBackfill:
 
         return ingest_data
 
-    def generate_error_data(self, days: int) -> List[Dict[str, Any]]:
+    def generate_error_data(self, days: int) -> list[dict[str, Any]]:
         """Generate error data"""
         error_data = []
 
@@ -176,7 +175,7 @@ class MetricsBackfill:
 
         return error_data
 
-    def generate_evolution_data(self, days: int) -> List[Dict[str, Any]]:
+    def generate_evolution_data(self, days: int) -> list[dict[str, Any]]:
         """Generate evolution stage data"""
         evolution_data = []
 
@@ -200,10 +199,10 @@ class MetricsBackfill:
 
         return evolution_data
 
-    async def backfill_daily_data(self, date: str, data: Dict[str, Any]):
+    async def backfill_daily_data(self, date: str, data: dict[str, Any]):
         """Backfill data for a specific date"""
         # Start session
-        session_id = self.emitter.start_session(
+        self.emitter.start_session(
             stage="backfill",
             notes=f"Backfill data for {date}",
             version="1.0.0"

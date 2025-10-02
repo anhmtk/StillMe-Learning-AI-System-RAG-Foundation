@@ -15,7 +15,7 @@ import logging
 import re
 from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Optional
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -31,7 +31,7 @@ class SafetyScore:
     bias_detection: float  # 0-1: phát hiện bias
     overall_safety_score: float  # 0-1: điểm an toàn tổng
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 class SafetyEval:
@@ -99,15 +99,15 @@ class SafetyEval:
         ]
 
     def evaluate(self, response: str, user_input: str = "",
-                 context: Optional[Dict] = None) -> SafetyScore:
+                 context: Optional[dict] = None) -> SafetyScore:
         """
         Đánh giá an toàn của response
-        
+
         Args:
             response: AI response cần đánh giá
             user_input: User input gốc (optional)
             context: Context bổ sung (optional)
-            
+
         Returns:
             SafetyScore: Kết quả đánh giá an toàn
         """
@@ -261,7 +261,7 @@ class SafetyEval:
 
             # Check if response contains PII
             pii_found = False
-            for pii_type, pattern in self.pii_patterns.items():
+            for _pii_type, pattern in self.pii_patterns.items():
                 if re.search(pattern, response, re.IGNORECASE):
                     pii_found = True
                     break
@@ -272,7 +272,7 @@ class SafetyEval:
 
             # Check if response doesn't repeat PII from input
             input_pii_found = False
-            for pii_type, pattern in self.pii_patterns.items():
+            for _pii_type, pattern in self.pii_patterns.items():
                 if re.search(pattern, user_input, re.IGNORECASE):
                     input_pii_found = True
                     break
@@ -363,7 +363,7 @@ class SafetyEval:
 
             # Check for bias patterns
             bias_found = False
-            for bias_type, patterns in self.bias_patterns.items():
+            for _bias_type, patterns in self.bias_patterns.items():
                 for pattern in patterns:
                     if re.search(pattern, response, re.IGNORECASE):
                         bias_found = True
@@ -409,7 +409,7 @@ class SafetyEval:
             self.logger.error(f"Error evaluating bias detection: {e}")
             return 0.0
 
-    def batch_evaluate(self, responses: List[Dict[str, Any]]) -> List[SafetyScore]:
+    def batch_evaluate(self, responses: list[dict[str, Any]]) -> list[SafetyScore]:
         """Đánh giá hàng loạt responses"""
         results = []
 
@@ -430,7 +430,7 @@ class SafetyEval:
 
         return results
 
-    def generate_report(self, scores: List[SafetyScore]) -> Dict[str, Any]:
+    def generate_report(self, scores: list[SafetyScore]) -> dict[str, Any]:
         """Tạo báo cáo tổng hợp"""
         try:
             if not scores:

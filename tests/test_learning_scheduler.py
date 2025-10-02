@@ -26,16 +26,16 @@ class TestSchedulerConfig:
         """Test default configuration"""
         config = SchedulerConfig()
 
-        assert config.enabled == False
+        assert not config.enabled
         assert config.cron_expression == "30 2 * * *"
         assert config.timezone == "Asia/Ho_Chi_Minh"
         assert config.jitter_seconds == 300
         assert config.max_concurrent_sessions == 1
-        assert config.skip_if_cpu_high == True
+        assert config.skip_if_cpu_high
         assert config.cpu_threshold == 70.0
-        assert config.skip_if_memory_high == True
+        assert config.skip_if_memory_high
         assert config.memory_threshold_mb == 1024
-        assert config.skip_if_tokens_low == True
+        assert config.skip_if_tokens_low
         assert config.min_tokens_required == 1000
 
     def test_custom_config(self):
@@ -50,7 +50,7 @@ class TestSchedulerConfig:
             memory_threshold_mb=2048
         )
 
-        assert config.enabled == True
+        assert config.enabled
         assert config.cron_expression == "0 3 * * *"
         assert config.timezone == "UTC"
         assert config.jitter_seconds == 600
@@ -86,7 +86,7 @@ class TestLearningScheduler:
 
             result = await scheduler.initialize()
 
-            assert result == True
+            assert result
             assert scheduler.scheduler == mock_scheduler
             mock_scheduler.add_listener.assert_called()
 
@@ -100,8 +100,8 @@ class TestLearningScheduler:
             await scheduler.initialize()
             result = await scheduler.start()
 
-            assert result == True
-            assert scheduler.is_running == True
+            assert result
+            assert scheduler.is_running
             mock_scheduler.start.assert_called_once()
 
     @pytest.mark.asyncio
@@ -115,8 +115,8 @@ class TestLearningScheduler:
             await scheduler.start()
             result = await scheduler.stop()
 
-            assert result == True
-            assert scheduler.is_running == False
+            assert result
+            assert not scheduler.is_running
             mock_scheduler.shutdown.assert_called_once_with(wait=True)
 
     @pytest.mark.asyncio
@@ -136,7 +136,7 @@ class TestLearningScheduler:
 
             result = await scheduler.schedule_daily_training(test_training)
 
-            assert result == True
+            assert result
             assert 'daily_training' in scheduler.scheduled_jobs
             assert scheduler.stats['total_jobs'] == 1
             mock_scheduler.add_job.assert_called_once()
@@ -161,7 +161,7 @@ class TestLearningScheduler:
 
             result = await scheduler._check_resources()
 
-            assert result == True
+            assert result
             mock_psutil.cpu_percent.assert_called_once_with(interval=1)
             mock_psutil.virtual_memory.assert_called_once()
 
@@ -185,7 +185,7 @@ class TestLearningScheduler:
 
             result = await scheduler._check_resources()
 
-            assert result == False  # Should fail due to high CPU
+            assert not result  # Should fail due to high CPU
 
     def test_get_status(self, scheduler):
         """Test getting scheduler status"""
@@ -229,7 +229,7 @@ class TestAutomationService:
 
             result = await service.initialize()
 
-            assert result == True
+            assert result
             assert service.learning_system is not None
             assert service.scheduler == mock_scheduler
 
@@ -245,15 +245,15 @@ class TestAutomationService:
 
             result = await service.start()
 
-            assert result == True
-            assert service.status.running == True
+            assert result
+            assert service.status.running
             assert service.status.start_time is not None
             mock_scheduler.start.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_stop(self, service):
         """Test service stop"""
-        with patch('stillme_core.learning.automation_service.get_learning_scheduler') as mock_get_scheduler:
+        with patch('stillme_core.learning.automation_service.get_learning_scheduler'):
             mock_scheduler = Mock()
             mock_scheduler.stop = AsyncMock(return_value=True)
             service.scheduler = mock_scheduler
@@ -261,8 +261,8 @@ class TestAutomationService:
 
             result = await service.stop()
 
-            assert result == True
-            assert service.status.running == False
+            assert result
+            assert not service.status.running
             mock_scheduler.stop.assert_called_once()
 
     @pytest.mark.asyncio
@@ -340,7 +340,7 @@ class TestIntegration:
 
             # Initialize and start
             result = await service.initialize()
-            assert result == True
+            assert result
 
             # Test training session
             training_result = await service._run_training_session()
@@ -373,4 +373,4 @@ class TestIntegration:
 
             # Verify shutdown was called
             mock_scheduler.shutdown.assert_called()
-            assert service.status.running == False
+            assert not service.status.running

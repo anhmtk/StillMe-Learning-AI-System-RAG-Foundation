@@ -3,7 +3,7 @@
 StillMe Design Tokens
 FlutterFlow-style design system with colors, typography, and layout tokens
 """
-from typing import Any, Dict, List
+from typing import Any
 
 
 class DesignTokens:
@@ -191,7 +191,7 @@ class DesignTokens:
         return ""
 
     @classmethod
-    def get_component_style(cls, component: str, variant: str = "default") -> Dict[str, Any]:
+    def get_component_style(cls, component: str, variant: str = "default") -> dict[str, Any]:
         """Get component style configuration"""
         if component in cls.COMPONENTS:
             if variant in cls.COMPONENTS[component]:

@@ -96,7 +96,7 @@ class TestProactiveSuggestion:
         scores = proactive_suggestion._analyze_input_patterns(text)
 
         # All scores should be low or zero
-        for category, score in scores.items():
+        for _category, score in scores.items():
             assert score < 0.3
 
     def test_get_context_suggestions_web_files(self, proactive_suggestion):

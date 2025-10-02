@@ -5,7 +5,7 @@ Approval Queue - Stub implementation
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 
 class ApprovalStatus(Enum):
@@ -19,15 +19,15 @@ class ApprovalRequest:
     id: str
     content: str
     status: ApprovalStatus = ApprovalStatus.PENDING
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
 class ApprovalQueue:
     """Approval queue stub implementation"""
 
     def __init__(self):
-        self.requests: List[ApprovalRequest] = []
+        self.requests: list[ApprovalRequest] = []
 
-    def add_request(self, content: str, metadata: Dict[str, Any] = None) -> str:
+    def add_request(self, content: str, metadata: dict[str, Any] = None) -> str:
         """Add approval request"""
         request_id = f"req_{len(self.requests)}"
         request = ApprovalRequest(
@@ -38,7 +38,7 @@ class ApprovalQueue:
         self.requests.append(request)
         return request_id
 
-    def get_pending_requests(self) -> List[ApprovalRequest]:
+    def get_pending_requests(self) -> list[ApprovalRequest]:
         """Get pending requests"""
         return [req for req in self.requests if req.status == ApprovalStatus.PENDING]
 
@@ -71,11 +71,11 @@ class ApprovalQueueManager:
     def __init__(self):
         self.queue = ApprovalQueue()
 
-    async def add_approval_request(self, content: str, metadata: Dict[str, Any] = None) -> str:
+    async def add_approval_request(self, content: str, metadata: dict[str, Any] = None) -> str:
         """Add approval request"""
         return self.queue.add_request(content, metadata)
 
-    async def get_pending_requests(self) -> List[ApprovalRequest]:
+    async def get_pending_requests(self) -> list[ApprovalRequest]:
         """Get pending requests"""
         return self.queue.get_pending_requests()
 

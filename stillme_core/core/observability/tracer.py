@@ -13,7 +13,7 @@ from contextvars import ContextVar
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 # Context variables for tracing
 trace_id_var: ContextVar[Optional[str]] = ContextVar("trace_id", default=None)
@@ -31,8 +31,8 @@ class TraceSpan:
     start_time: str
     end_time: Optional[str]
     duration_ms: Optional[float]
-    tags: Optional[Dict[str, Any]]
-    logs: Optional[List[Dict[str, Any]]]
+    tags: Optional[dict[str, Any]]
+    logs: Optional[list[dict[str, Any]]]
     status: str  # "started", "completed", "error"
     error_message: Optional[str] = None
 
@@ -44,7 +44,7 @@ class TraceContext:
     trace_id: str
     span_id: str
     parent_span_id: Optional[str] = None
-    baggage: Optional[Dict[str, str]] = None
+    baggage: Optional[dict[str, str]] = None
 
 
 class RequestTracer:
@@ -58,7 +58,7 @@ class RequestTracer:
         self._lock = threading.Lock()
 
         # In-memory cache for active spans
-        self._active_spans: Dict[str, TraceSpan] = {}
+        self._active_spans: dict[str, TraceSpan] = {}
         self._cache_lock = threading.Lock()
 
         # Initialize database
@@ -93,21 +93,21 @@ class RequestTracer:
             # Create indexes for faster queries
             cursor.execute(
                 """
-                CREATE INDEX IF NOT EXISTS idx_traces_trace_id 
+                CREATE INDEX IF NOT EXISTS idx_traces_trace_id
                 ON traces(trace_id)
             """
             )
 
             cursor.execute(
                 """
-                CREATE INDEX IF NOT EXISTS idx_traces_span_id 
+                CREATE INDEX IF NOT EXISTS idx_traces_span_id
                 ON traces(span_id)
             """
             )
 
             cursor.execute(
                 """
-                CREATE INDEX IF NOT EXISTS idx_traces_start_time 
+                CREATE INDEX IF NOT EXISTS idx_traces_start_time
                 ON traces(start_time)
             """
             )
@@ -120,7 +120,7 @@ class RequestTracer:
         operation_name: str,
         trace_id: Optional[str] = None,
         parent_span_id: Optional[str] = None,
-        tags: Optional[Dict[str, Any]] = None,
+        tags: Optional[dict[str, Any]] = None,
     ) -> TraceSpan:
         """Start a new trace span"""
         # Generate IDs if not provided
@@ -199,7 +199,7 @@ class RequestTracer:
                     span.tags = {}
                 span.tags[key] = value
 
-    def get_trace(self, trace_id: str) -> List[TraceSpan]:
+    def get_trace(self, trace_id: str) -> list[TraceSpan]:
         """Get all spans for a trace"""
         with self._lock:
             conn = sqlite3.connect(self.db_path)
@@ -269,7 +269,7 @@ class RequestTracer:
 
             return None
 
-    def get_traces_overview(self, limit: int = 100) -> List[Dict[str, Any]]:
+    def get_traces_overview(self, limit: int = 100) -> list[dict[str, Any]]:
         """Get overview of recent traces"""
         with self._lock:
             conn = sqlite3.connect(self.db_path)
@@ -278,16 +278,16 @@ class RequestTracer:
             # Get unique traces with summary info
             cursor.execute(
                 """
-                SELECT trace_id, 
+                SELECT trace_id,
                        MIN(start_time) as start_time,
                        MAX(end_time) as end_time,
                        COUNT(*) as span_count,
                        SUM(duration_ms) as total_duration,
                        MAX(CASE WHEN status = 'error' THEN 1 ELSE 0 END) as has_error
-                FROM traces 
+                FROM traces
                 WHERE end_time IS NOT NULL
-                GROUP BY trace_id 
-                ORDER BY start_time DESC 
+                GROUP BY trace_id
+                ORDER BY start_time DESC
                 LIMIT ?
             """,
                 (limit,),
@@ -313,7 +313,7 @@ class RequestTracer:
         self,
         operation_name: Optional[str] = None,
         time_range: Optional[timedelta] = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Get performance statistics for operations"""
         with self._lock:
             conn = sqlite3.connect(self.db_path)
@@ -322,7 +322,7 @@ class RequestTracer:
             # Build query
             query = """
                 SELECT operation_name, duration_ms, status
-                FROM traces 
+                FROM traces
                 WHERE end_time IS NOT NULL AND duration_ms IS NOT NULL
             """
             params = []
@@ -385,7 +385,7 @@ class RequestTracer:
     def export_traces(
         self,
         output_file: str,
-        trace_ids: Optional[List[str]] = None,
+        trace_ids: Optional[list[str]] = None,
         time_range: Optional[timedelta] = None,
     ) -> bool:
         """Export traces to JSON file"""
@@ -494,7 +494,7 @@ class RequestTracer:
 
             cursor.execute(
                 """
-                UPDATE traces 
+                UPDATE traces
                 SET end_time = ?, duration_ms = ?, tags = ?, logs = ?, status = ?, error_message = ?
                 WHERE span_id = ?
             """,
@@ -542,7 +542,7 @@ def setup_tracing(db_path: str = "traces.db") -> RequestTracer:
 class TraceContext:
     """Context manager for tracing operations"""
 
-    def __init__(self, operation_name: str, tags: Optional[Dict[str, Any]] = None):
+    def __init__(self, operation_name: str, tags: Optional[dict[str, Any]] = None):
         self.operation_name = operation_name
         self.tags = tags or {}
         self.tracer = get_tracer()

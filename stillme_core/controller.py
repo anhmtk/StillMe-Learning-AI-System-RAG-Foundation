@@ -6,10 +6,9 @@ StillMe Agent Controller - Stub Implementation
 # Full implementation needed for production use.
 """
 
-import asyncio
 import logging
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +24,7 @@ class AgentConfig:
 class AgentController:
     """
     Agent Controller - Stub Implementation
-    
+
     # TODO[stabilize]: Implement full agent control functionality
     """
 
@@ -47,10 +46,10 @@ class AgentController:
         self.is_running = False
         return True
 
-    async def execute_task(self, task: str) -> Dict[str, Any]:
+    async def execute_task(self, task: str) -> dict[str, Any]:
         """Execute a task"""
         logger.warning(f"AgentController.execute_task({task}): Stub implementation")
-        
+
         # Check if task is about error
         if "error" in task.lower():
             return {
@@ -145,7 +144,7 @@ class AgentController:
                 "goal": task
             }
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """Get agent status"""
         return {
             "is_running": self.is_running,
@@ -154,10 +153,10 @@ class AgentController:
         }
 
 
-async def run_agent(task: str, config: Optional[AgentConfig] = None) -> Dict[str, Any]:
+async def run_agent(task: str, config: Optional[AgentConfig] = None) -> dict[str, Any]:
     """
     Run agent with given task
-    
+
     # TODO[stabilize]: Implement full agent execution
     """
     controller = AgentController(config)
@@ -168,7 +167,7 @@ async def run_agent(task: str, config: Optional[AgentConfig] = None) -> Dict[str
     finally:
         await controller.stop()
 
-def respond(request: str, context: Optional[Dict[str, Any]] = None) -> str:
+def respond(request: str, context: Optional[dict[str, Any]] = None) -> str:
     """Global respond function for backward compatibility"""
     if not request:
         return "Empty request provided"
@@ -178,7 +177,7 @@ def respond(request: str, context: Optional[Dict[str, Any]] = None) -> str:
     logger.info(f"Generated response for request: {request[:30]}...")
     return response
 
-def answer(question: str, context: Optional[Dict[str, Any]] = None) -> str:
+def answer(question: str, context: Optional[dict[str, Any]] = None) -> str:
     """Global answer function for backward compatibility"""
     if not question:
         return "No question provided"

@@ -17,7 +17,6 @@ import os
 import sys
 import time
 import unittest
-from typing import Dict, List, Optional, Tuple
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))
@@ -339,7 +338,7 @@ class RouterTestSuite:
     def __init__(self):
         self.test_results = {}
 
-    def run_unit_tests(self) -> Dict:
+    def run_unit_tests(self) -> dict:
         """Run unit tests"""
         print("🧪 Running Unit Tests")
         print("=" * 40)
@@ -376,7 +375,7 @@ class RouterTestSuite:
 
         return test_results
 
-    def run_integration_tests(self) -> Dict:
+    def run_integration_tests(self) -> dict:
         """Run integration tests"""
         print("\n🔗 Running Integration Tests")
         print("=" * 40)
@@ -412,7 +411,7 @@ class RouterTestSuite:
 
         return test_results
 
-    def run_performance_tests(self) -> Dict:
+    def run_performance_tests(self) -> dict:
         """Run performance tests"""
         print("\n⚡ Running Performance Tests")
         print("=" * 40)
@@ -476,7 +475,7 @@ class RouterTestSuite:
         else:
             return "D (Needs Improvement)"
 
-    def run_all_tests(self) -> Dict:
+    def run_all_tests(self) -> dict:
         """Run all tests"""
         print("🔍 AI Router Full Test Suite")
         print("=" * 60)

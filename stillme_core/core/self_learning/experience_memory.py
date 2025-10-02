@@ -14,7 +14,7 @@ import time
 from collections import defaultdict, deque
 from dataclasses import asdict, dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -52,15 +52,15 @@ class Experience:
     timestamp: float
     experience_type: ExperienceType
     category: ExperienceCategory
-    context: Dict[str, Any]
+    context: dict[str, Any]
     action: str
-    outcome: Dict[str, Any]
+    outcome: dict[str, Any]
     success: bool
-    lessons_learned: List[str]
-    tags: List[str]
+    lessons_learned: list[str]
+    tags: list[str]
     confidence: float
     impact_score: float
-    related_experiences: Optional[List[str]] = None
+    related_experiences: list[str] | None = None
 
 
 @dataclass
@@ -70,23 +70,23 @@ class LearningPattern:
     pattern_id: str
     pattern_type: str
     description: str
-    conditions: Dict[str, Any]
-    expected_outcome: Dict[str, Any]
+    conditions: dict[str, Any]
+    expected_outcome: dict[str, Any]
     confidence: float
     frequency: int
     success_rate: float
     last_updated: float
-    examples: Optional[List[str]] = None
+    examples: list[str] | None = None
 
 
 @dataclass
 class ExperienceQuery:
     """Query for searching experiences"""
 
-    categories: Optional[List[ExperienceCategory]] = None
-    types: Optional[List[ExperienceType]] = None
-    tags: Optional[List[str]] = None
-    time_range: Optional[Tuple[float, float]] = None
+    categories: list[ExperienceCategory] | None = None
+    types: list[ExperienceType] | None = None
+    tags: list[str] | None = None
+    time_range: tuple[float, float] | None = None
     success_only: bool = False
     min_confidence: float = 0.0
     min_impact: float = 0.0
@@ -100,10 +100,10 @@ class ExperienceMemory:
 
     def __init__(self, db_path: str = ".experience_memory.db"):
         self.db_path = db_path
-        self.experiences: List[Experience] = []
-        self.patterns: List[LearningPattern] = []
-        self.pattern_cache: Dict[str, List[LearningPattern]] = {}
-        self.learning_stats: Dict[str, Any] = {}
+        self.experiences: list[Experience] = []
+        self.patterns: list[LearningPattern] = []
+        self.pattern_cache: dict[str, list[LearningPattern]] = {}
+        self.learning_stats: dict[str, Any] = {}
 
         # Initialize database
         self._initialize_database()
@@ -271,12 +271,12 @@ class ExperienceMemory:
         self,
         experience_type: ExperienceType,
         category: ExperienceCategory,
-        context: Dict[str, Any],
+        context: dict[str, Any],
         action: str,
-        outcome: Dict[str, Any],
+        outcome: dict[str, Any],
         success: bool,
-        lessons_learned: List[str],
-        tags: List[str],
+        lessons_learned: list[str],
+        tags: list[str],
         confidence: float = 0.5,
         impact_score: float = 0.5,
     ) -> str:
@@ -325,7 +325,7 @@ class ExperienceMemory:
 
         return experience_id
 
-    def _generate_experience_id(self, context: Dict[str, Any], action: str) -> str:
+    def _generate_experience_id(self, context: dict[str, Any], action: str) -> str:
         """Generate unique experience ID"""
         data_str = json.dumps(context, sort_keys=True) + action
         hash_str = hashlib.sha256(data_str.encode()).hexdigest()[:16]
@@ -333,8 +333,8 @@ class ExperienceMemory:
         return f"EXP_{timestamp}_{hash_str}"
 
     def _find_related_experiences(
-        self, context: Dict[str, Any], action: str, tags: List[str]
-    ) -> List[str]:
+        self, context: dict[str, Any], action: str, tags: list[str]
+    ) -> list[str]:
         """Find related experiences based on context and tags"""
         related = []
 
@@ -346,7 +346,7 @@ class ExperienceMemory:
         return related[:5]  # Limit to 5 related experiences
 
     def _calculate_similarity(
-        self, context1: Dict[str, Any], action1: str, tags1: List[str], exp2: Experience
+        self, context1: dict[str, Any], action1: str, tags1: list[str], exp2: Experience
     ) -> float:
         """Calculate similarity between two experiences"""
         similarity = 0.0
@@ -366,7 +366,7 @@ class ExperienceMemory:
         return similarity
 
     def _calculate_context_similarity(
-        self, context1: Dict[str, Any], context2: Dict[str, Any]
+        self, context1: dict[str, Any], context2: dict[str, Any]
     ) -> float:
         """Calculate similarity between contexts"""
         if not context1 or not context2:
@@ -401,7 +401,7 @@ class ExperienceMemory:
 
         return intersection / union if union > 0 else 0.0
 
-    def _calculate_tag_similarity(self, tags1: List[str], tags2: List[str]) -> float:
+    def _calculate_tag_similarity(self, tags1: list[str], tags2: list[str]) -> float:
         """Calculate similarity between tag lists"""
         if not tags1 and not tags2:
             return 1.0
@@ -492,7 +492,7 @@ class ExperienceMemory:
             if pattern:
                 self._update_or_create_pattern(pattern)
 
-    def _find_similar_experiences(self, experience: Experience) -> List[Experience]:
+    def _find_similar_experiences(self, experience: Experience) -> list[Experience]:
         """Find experiences similar to the given one"""
         similar = []
 
@@ -510,8 +510,8 @@ class ExperienceMemory:
         return similar
 
     def _extract_pattern(
-        self, experience: Experience, similar_experiences: List[Experience]
-    ) -> Optional[LearningPattern]:
+        self, experience: Experience, similar_experiences: list[Experience]
+    ) -> LearningPattern | None:
         """Extract a learning pattern from similar experiences"""
         if not similar_experiences:
             return None
@@ -552,8 +552,8 @@ class ExperienceMemory:
         return None
 
     def _find_common_conditions(
-        self, experience: Experience, similar_experiences: List[Experience]
-    ) -> Dict[str, Any]:
+        self, experience: Experience, similar_experiences: list[Experience]
+    ) -> dict[str, Any]:
         """Find common conditions across similar experiences"""
         all_contexts = [exp.context for exp in similar_experiences + [experience]]
 
@@ -582,7 +582,7 @@ class ExperienceMemory:
 
         return common_conditions
 
-    def _analyze_outcomes(self, outcomes: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _analyze_outcomes(self, outcomes: list[dict[str, Any]]) -> dict[str, Any]:
         """Analyze outcomes to find common patterns"""
         if not outcomes:
             return {}
@@ -615,7 +615,7 @@ class ExperienceMemory:
 
         return expected_outcome
 
-    def _generate_pattern_id(self, conditions: Dict[str, Any]) -> str:
+    def _generate_pattern_id(self, conditions: dict[str, Any]) -> str:
         """Generate unique pattern ID"""
         conditions_str = json.dumps(conditions, sort_keys=True)
         hash_str = hashlib.sha256(conditions_str.encode()).hexdigest()[:16]
@@ -725,7 +725,7 @@ class ExperienceMemory:
 
         logger.info(f"Experience stored: {log_data}")
 
-    def query_experiences(self, query: ExperienceQuery) -> List[Experience]:
+    def query_experiences(self, query: ExperienceQuery) -> list[Experience]:
         """Query experiences based on criteria"""
         results = []
 
@@ -763,8 +763,8 @@ class ExperienceMemory:
         return results
 
     def get_recommendations(
-        self, context: Dict[str, Any], action: str, tags: List[str]
-    ) -> List[Dict[str, Any]]:
+        self, context: dict[str, Any], action: str, tags: list[str]
+    ) -> list[dict[str, Any]]:
         """Get recommendations based on similar experiences"""
         recommendations = []
 
@@ -817,7 +817,7 @@ class ExperienceMemory:
         return recommendations
 
     def _pattern_matches_context(
-        self, pattern: LearningPattern, context: Dict[str, Any]
+        self, pattern: LearningPattern, context: dict[str, Any]
     ) -> bool:
         """Check if a pattern matches the given context"""
         for key, expected_value in pattern.conditions.items():
@@ -830,7 +830,7 @@ class ExperienceMemory:
 
         return True
 
-    def get_learning_stats(self) -> Dict[str, Any]:
+    def get_learning_stats(self) -> dict[str, Any]:
         """Get comprehensive learning statistics"""
         stats = dict(self.learning_stats)
 

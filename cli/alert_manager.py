@@ -20,19 +20,16 @@ Date: 2025-09-28
 
 import argparse
 import asyncio
-import json
 import logging
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from stillme_core.alerting.alert_manager import AlertManager, get_alert_manager
+from stillme_core.alerting.alert_manager import get_alert_manager
 from stillme_core.alerting.learning_alerts import (
-    LearningAlertManager,
     LearningMetrics,
     get_learning_alert_manager,
 )
@@ -271,7 +268,7 @@ class AlertCLI:
         print(f"🧪 Testing {channel} channel...")
 
         # Create test alert
-        test_alert = {
+        {
             'alert_id': f'test_{int(datetime.now().timestamp())}',
             'timestamp': datetime.now(),
             'alert_type': 'channel_test',
@@ -381,22 +378,22 @@ def main():
 Examples:
   # Send test alert to all channels
   python -m cli.alert_manager test --channels email,desktop,telegram
-  
+
   # Send test learning alert
   python -m cli.alert_manager test-learning
-  
+
   # Send test resource alert
   python -m cli.alert_manager test-resource --resource memory --usage 2500 --limit 2048
-  
+
   # Show alert statistics
   python -m cli.alert_manager stats
-  
+
   # Test specific channel
   python -m cli.alert_manager test-channel --channel email
-  
+
   # Show configuration
   python -m cli.alert_manager config
-  
+
   # Show alert history
   python -m cli.alert_manager history --limit 20
         """
@@ -410,10 +407,10 @@ Examples:
     test_parser.add_argument('--severity', choices=['low', 'medium', 'high', 'critical'], help='Alert severity')
 
     # Test learning alert command
-    test_learning_parser = subparsers.add_parser('test-learning', help='Send test learning alert')
+    subparsers.add_parser('test-learning', help='Send test learning alert')
 
     # Test evolution milestone command
-    test_milestone_parser = subparsers.add_parser('test-milestone', help='Send test evolution milestone alert')
+    subparsers.add_parser('test-milestone', help='Send test evolution milestone alert')
 
     # Test resource alert command
     test_resource_parser = subparsers.add_parser('test-resource', help='Send test resource alert')
@@ -422,20 +419,20 @@ Examples:
     test_resource_parser.add_argument('--limit', type=float, help='Limit value')
 
     # Test critical alert command
-    test_critical_parser = subparsers.add_parser('test-critical', help='Send test critical alert')
+    subparsers.add_parser('test-critical', help='Send test critical alert')
 
     # Statistics command
-    stats_parser = subparsers.add_parser('stats', help='Show alert statistics')
+    subparsers.add_parser('stats', help='Show alert statistics')
 
     # Learning statistics command
-    learning_stats_parser = subparsers.add_parser('learning-stats', help='Show learning alert statistics')
+    subparsers.add_parser('learning-stats', help='Show learning alert statistics')
 
     # Test channel command
     test_channel_parser = subparsers.add_parser('test-channel', help='Test individual notification channel')
     test_channel_parser.add_argument('--channel', choices=['email', 'desktop', 'telegram', 'sms', 'webhook'], required=True, help='Channel to test')
 
     # Configuration command
-    config_parser = subparsers.add_parser('config', help='Show alert configuration')
+    subparsers.add_parser('config', help='Show alert configuration')
 
     # History command
     history_parser = subparsers.add_parser('history', help='Show alert history')

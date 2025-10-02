@@ -93,7 +93,6 @@ def main():
 
     start = time.perf_counter()
     exp_metrics = []
-    fails = []
     leaks = 0
 
     for i, sc in enumerate(scenarios, 1):
@@ -101,7 +100,7 @@ def main():
 
         pid = os.getpid()
         proc = psutil.Process(pid)
-        mem_before = proc.memory_info().rss
+        proc.memory_info().rss
         t0 = time.perf_counter()
 
         try:

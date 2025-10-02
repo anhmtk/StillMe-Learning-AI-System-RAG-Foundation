@@ -73,7 +73,7 @@ class TestSecurityComprehensive:
 
         for malicious_input in malicious_inputs:
             result = security_manager.validate_input(malicious_input)
-            assert result["safe"] == False
+            assert not result["safe"]
             assert "sql_injection" in result["threats"]
 
     def test_input_validation_xss_prevention(self, security_manager):
@@ -87,7 +87,7 @@ class TestSecurityComprehensive:
 
         for malicious_input in malicious_inputs:
             result = security_manager.validate_input(malicious_input)
-            assert result["safe"] == False
+            assert not result["safe"]
             assert "xss" in result["threats"]
 
     def test_input_validation_command_injection(self, security_manager):
@@ -102,7 +102,7 @@ class TestSecurityComprehensive:
 
         for malicious_input in malicious_inputs:
             result = security_manager.validate_input(malicious_input)
-            assert result["safe"] == False
+            assert not result["safe"]
             assert "command_injection" in result["threats"]
 
     def test_input_validation_path_traversal(self, security_manager):
@@ -116,7 +116,7 @@ class TestSecurityComprehensive:
 
         for malicious_input in malicious_inputs:
             result = security_manager.validate_input(malicious_input)
-            assert result["safe"] == False
+            assert not result["safe"]
             assert "path_traversal" in result["threats"]
 
     def test_input_validation_file_size_limit(self, security_manager):
@@ -124,43 +124,43 @@ class TestSecurityComprehensive:
         large_content = "x" * 20000000  # 20MB
 
         result = security_manager.validate_input(large_content)
-        assert result["safe"] == False
+        assert not result["safe"]
         assert "file_too_large" in result["threats"]
 
     # Authentication & Authorization Tests
     def test_authentication_brute_force_protection(self, security_manager):
         """Test brute force attack protection"""
         # Simulate multiple failed login attempts
-        for i in range(10):
+        for _i in range(10):
             result = security_manager.authenticate_user("testuser", "wrongpassword")
-            assert result["success"] == False
+            assert not result["success"]
 
         # Should be locked out after 5 attempts
         result = security_manager.authenticate_user("testuser", "correctpassword")
-        assert result["success"] == False
-        assert result["locked_out"] == True
+        assert not result["success"]
+        assert result["locked_out"]
 
     def test_authorization_role_based_access(self, security_manager):
         """Test role-based access control"""
         # Test admin access
         admin_result = security_manager.check_permission("admin", "delete_user")
-        assert admin_result["allowed"] == True
+        assert admin_result["allowed"]
 
         # Test user access
         user_result = security_manager.check_permission("user", "delete_user")
-        assert user_result["allowed"] == False
+        assert not user_result["allowed"]
 
     def test_session_timeout(self, security_manager):
         """Test session timeout enforcement"""
         # Create session
         session = security_manager.create_session("user123")
-        assert session["active"] == True
+        assert session["active"]
 
         # Simulate timeout
         with patch('time.time', return_value=time.time() + 3700):  # 1 hour + 100 seconds
             result = security_manager.validate_session(session["session_id"])
-            assert result["valid"] == False
-            assert result["expired"] == True
+            assert not result["valid"]
+            assert result["expired"]
 
     # Data Protection Tests
     def test_pii_detection_email(self, pii_redactor):
@@ -222,10 +222,10 @@ class TestSecurityComprehensive:
         for i in range(70):  # Exceed rate limit
             result = security_manager.check_rate_limit(mock_request)
             if i < 60:
-                assert result["allowed"] == True
+                assert result["allowed"]
             else:
-                assert result["allowed"] == False
-                assert result["rate_limited"] == True
+                assert not result["allowed"]
+                assert result["rate_limited"]
 
     def test_cors_validation(self, security_manager):
         """Test CORS policy enforcement"""
@@ -234,32 +234,32 @@ class TestSecurityComprehensive:
             origin="https://stillme.ai",
             method="GET"
         )
-        assert allowed_result["allowed"] == True
+        assert allowed_result["allowed"]
 
         # Test disallowed origin
         disallowed_result = security_manager.validate_cors(
             origin="https://malicious-site.com",
             method="GET"
         )
-        assert disallowed_result["allowed"] == False
+        assert not disallowed_result["allowed"]
 
     def test_request_size_limit(self, security_manager):
         """Test request size limit enforcement"""
         large_request = {"data": "x" * 2000000}  # 2MB
 
         result = security_manager.validate_request_size(large_request)
-        assert result["valid"] == False
-        assert result["too_large"] == True
+        assert not result["valid"]
+        assert result["too_large"]
 
     def test_https_enforcement(self, security_manager):
         """Test HTTPS enforcement"""
         # Test HTTP request (should be rejected)
         http_result = security_manager.validate_https("http://api.stillme.ai/chat")
-        assert http_result["secure"] == False
+        assert not http_result["secure"]
 
         # Test HTTPS request (should be allowed)
         https_result = security_manager.validate_https("https://api.stillme.ai/chat")
-        assert https_result["secure"] == True
+        assert https_result["secure"]
 
     # Vulnerability Scanning Tests
     def test_dependency_vulnerability_scan(self, security_manager):
@@ -320,24 +320,18 @@ DATABASE_URL = "postgresql://user:password@localhost/db"
         """Test GDPR compliance - data export"""
         # This would test the actual API endpoint
         # For now, we'll test the logic
-        user_data = {
-            "user_id": "12345",
-            "email": "user@example.com",
-            "conversations": ["Hello", "How are you?"],
-            "preferences": {"language": "en", "theme": "dark"}
-        }
 
         # Test data export functionality
         export_result = privacy_router.export_user_data("12345")
-        assert export_result["success"] == True
+        assert export_result["success"]
         assert "data" in export_result
 
     def test_gdpr_compliance_data_deletion(self, privacy_router):
         """Test GDPR compliance - data deletion"""
         # Test data deletion functionality
         delete_result = privacy_router.delete_user_data("12345")
-        assert delete_result["success"] == True
-        assert delete_result["deleted"] == True
+        assert delete_result["success"]
+        assert delete_result["deleted"]
 
     def test_audit_logging(self, security_manager):
         """Test audit logging functionality"""
@@ -350,18 +344,18 @@ DATABASE_URL = "postgresql://user:password@localhost/db"
         }
 
         result = security_manager.log_security_event(event)
-        assert result["logged"] == True
+        assert result["logged"]
         assert result["event_id"] is not None
 
     # Kill Switch Tests
     def test_kill_switch_activation(self):
         """Test kill switch activation"""
         # Test normal operation
-        assert KillSwitch.is_active() == False
+        assert not KillSwitch.is_active()
 
         # Activate kill switch
         KillSwitch.activate("Security incident detected")
-        assert KillSwitch.is_active() == True
+        assert KillSwitch.is_active()
         assert "Security incident detected" in KillSwitch.get_reason()
 
         # Test kill switch check
@@ -372,11 +366,11 @@ DATABASE_URL = "postgresql://user:password@localhost/db"
         """Test kill switch deactivation"""
         # Activate first
         KillSwitch.activate("Test activation")
-        assert KillSwitch.is_active() == True
+        assert KillSwitch.is_active()
 
         # Deactivate
         KillSwitch.deactivate("Test deactivation")
-        assert KillSwitch.is_active() == False
+        assert not KillSwitch.is_active()
         assert "Test deactivation" in KillSwitch.get_reason()
 
     # Integration Security Tests
@@ -387,7 +381,7 @@ DATABASE_URL = "postgresql://user:password@localhost/db"
         # 1. Input validation
         user_input = "Hello, my email is john@example.com"
         validation_result = security_manager.validate_input(user_input)
-        assert validation_result["safe"] == True
+        assert validation_result["safe"]
 
         # 2. PII detection and redaction
         pii_result = pii_redactor.detect_pii(user_input)
@@ -408,7 +402,7 @@ DATABASE_URL = "postgresql://user:password@localhost/db"
             "timestamp": "2025-09-26T10:00:00Z"
         }
         audit_result = security_manager.log_security_event(audit_event)
-        assert audit_result["logged"] == True
+        assert audit_result["logged"]
 
     def test_security_incident_response(self, security_manager):
         """Test security incident response"""
@@ -422,11 +416,11 @@ DATABASE_URL = "postgresql://user:password@localhost/db"
 
         # Test incident detection
         detection_result = security_manager.detect_security_incident(incident)
-        assert detection_result["incident_detected"] == True
+        assert detection_result["incident_detected"]
 
         # Test automated response
         response_result = security_manager.respond_to_incident(incident)
-        assert response_result["response_triggered"] == True
+        assert response_result["response_triggered"]
         assert "block_ip" in response_result["actions_taken"]
         assert "notify_security_team" in response_result["actions_taken"]
 
@@ -492,7 +486,7 @@ class TestSecurityPerformance:
 
         scan_duration = end_time - start_time
         assert scan_duration < 30  # Should complete within 30 seconds
-        assert result["scan_completed"] == True
+        assert result["scan_completed"]
 
     def test_encryption_performance(self, security_manager):
         """Test encryption performance"""

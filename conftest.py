@@ -3,8 +3,9 @@
 import os
 import tempfile
 import time
+from collections.abc import Generator
 from pathlib import Path
-from typing import Any, Dict, Generator, List
+from typing import Any
 
 import pytest
 
@@ -16,7 +17,7 @@ def temp_dir() -> Generator[Path, None, None]:
         yield Path(tmp_dir)
 
 @pytest.fixture
-def test_config() -> Dict[str, Any]:
+def test_config() -> dict[str, Any]:
     """Test configuration for testing"""
     return {
         "id": "test_config",
@@ -28,7 +29,7 @@ def test_config() -> Dict[str, Any]:
     }
 
 @pytest.fixture
-def sample_config() -> Dict[str, Any]:
+def sample_config() -> dict[str, Any]:
     """Sample configuration for testing"""
     return {
         "id": "sample_config",
@@ -50,7 +51,7 @@ def test_datasets():
     }
 
 @pytest.fixture
-def sample_data() -> Dict[str, Any]:
+def sample_data() -> dict[str, Any]:
     """Sample data for testing"""
     return {
         "text": "This is a test message",
@@ -151,7 +152,7 @@ def mock_conversational_core():
             self.conversations = []
             self.responses = []
 
-        def process_message(self, message: str, context: Dict[str, Any] = None) -> str:
+        def process_message(self, message: str, context: dict[str, Any] = None) -> str:
             """Mock message processing"""
             self.conversations.append(message)
             response = f"Mock response to: {message}"
@@ -179,7 +180,7 @@ def mock_api_manager():
             self.responses = []
             self.errors = []
 
-        def make_request(self, endpoint: str, data: Dict[str, Any] = None) -> Dict[str, Any]:
+        def make_request(self, endpoint: str, data: dict[str, Any] = None) -> dict[str, Any]:
             """Mock API request"""
             self.requests.append({"endpoint": endpoint, "data": data})
             response = {"status": "success", "data": f"Mock response for {endpoint}"}
@@ -207,12 +208,12 @@ def test_utils():
     """Test utilities for testing"""
     class TestUtils:
         @staticmethod
-        def create_test_data(size: int = 10) -> List[Dict[str, Any]]:
+        def create_test_data(size: int = 10) -> list[dict[str, Any]]:
             """Create test data"""
             return [{"id": i, "value": f"test_{i}"} for i in range(size)]
 
         @staticmethod
-        def assert_response_format(response: Dict[str, Any]) -> bool:
+        def assert_response_format(response: dict[str, Any]) -> bool:
             """Assert response format"""
             required_keys = ["status", "data"]
             return all(key in response for key in required_keys)
@@ -301,7 +302,7 @@ def mock_emotion_sense():
             self.emotions_detected = []
             self.confidence_scores = []
 
-        def detect_emotion(self, text: str) -> Dict[str, Any]:
+        def detect_emotion(self, text: str) -> dict[str, Any]:
             """Mock emotion detection"""
             emotion = "neutral"
             confidence = 0.5
@@ -349,7 +350,7 @@ def mock_token_optimizer():
             self.optimizations = []
             self.token_counts = []
 
-        def optimize_tokens(self, text: str) -> Dict[str, Any]:
+        def optimize_tokens(self, text: str) -> dict[str, Any]:
             """Mock token optimization"""
             original_tokens = len(text.split())
             optimized_tokens = max(1, original_tokens - 2)  # Mock reduction
@@ -389,7 +390,7 @@ def mock_self_improvement():
             self.improvements = []
             self.performance_scores = []
 
-        def analyze_performance(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        def analyze_performance(self, data: dict[str, Any]) -> dict[str, Any]:
             """Mock performance analysis"""
             score = 0.7  # Mock score
             improvements = ["Optimize memory usage", "Improve response time"]
@@ -495,7 +496,7 @@ def mock_telemetry():
             self.events = []
             self.alerts = []
 
-        def record_metric(self, name: str, value: float, tags: Dict[str, str] = None) -> bool:
+        def record_metric(self, name: str, value: float, tags: dict[str, str] = None) -> bool:
             """Mock metric recording"""
             metric = {
                 "name": name,
@@ -506,7 +507,7 @@ def mock_telemetry():
             self.metrics.append(metric)
             return True
 
-        def record_event(self, event_name: str, data: Dict[str, Any] = None) -> bool:
+        def record_event(self, event_name: str, data: dict[str, Any] = None) -> bool:
             """Mock event recording"""
             event = {
                 "name": event_name,
@@ -563,23 +564,23 @@ def mock_metrics():
             self.timers = {}
             self.histograms = {}
 
-        def increment(self, metric_name: str, value: int = 1, tags: Dict[str, str] = None) -> None:
+        def increment(self, metric_name: str, value: int = 1, tags: dict[str, str] = None) -> None:
             """Mock counter increment"""
             if metric_name not in self.counters:
                 self.counters[metric_name] = 0
             self.counters[metric_name] += value
 
-        def gauge(self, metric_name: str, value: float, tags: Dict[str, str] = None) -> None:
+        def gauge(self, metric_name: str, value: float, tags: dict[str, str] = None) -> None:
             """Mock gauge recording"""
             self.gauges[metric_name] = value
 
-        def timer(self, metric_name: str, value: float, tags: Dict[str, str] = None) -> None:
+        def timer(self, metric_name: str, value: float, tags: dict[str, str] = None) -> None:
             """Mock timer recording"""
             if metric_name not in self.timers:
                 self.timers[metric_name] = []
             self.timers[metric_name].append(value)
 
-        def histogram(self, metric_name: str, value: float, tags: Dict[str, str] = None) -> None:
+        def histogram(self, metric_name: str, value: float, tags: dict[str, str] = None) -> None:
             """Mock histogram recording"""
             if metric_name not in self.histograms:
                 self.histograms[metric_name] = []
@@ -593,11 +594,11 @@ def mock_metrics():
             """Get gauge value"""
             return self.gauges.get(metric_name, 0.0)
 
-        def get_timer_values(self, metric_name: str) -> List[float]:
+        def get_timer_values(self, metric_name: str) -> list[float]:
             """Get timer values"""
             return self.timers.get(metric_name, [])
 
-        def get_histogram_values(self, metric_name: str) -> List[float]:
+        def get_histogram_values(self, metric_name: str) -> list[float]:
             """Get histogram values"""
             return self.histograms.get(metric_name, [])
 
@@ -666,7 +667,7 @@ def mock_communication_style():
 
             return styled_text
 
-        def get_current_style(self) -> Dict[str, str]:
+        def get_current_style(self) -> dict[str, str]:
             """Get current style settings"""
             return {
                 "style": self.style,
@@ -674,7 +675,7 @@ def mock_communication_style():
                 "formality": self.formality
             }
 
-        def get_style_history(self) -> List[str]:
+        def get_style_history(self) -> list[str]:
             """Get history of applied styles"""
             return self.styles_applied.copy()
 
@@ -696,7 +697,7 @@ def mock_input_sketcher():
             self.analysis_history = []
             self.patterns = {}
 
-        def sketch_input(self, input_data: Any) -> Dict[str, Any]:
+        def sketch_input(self, input_data: Any) -> dict[str, Any]:
             """Create a sketch/summary of input data"""
             if input_data is None:
                 return {"type": "none", "size": 0, "content": ""}
@@ -711,7 +712,7 @@ def mock_input_sketcher():
             self.sketches.append(sketch)
             return sketch
 
-        def analyze_structure(self, input_data: Any) -> Dict[str, Any]:
+        def analyze_structure(self, input_data: Any) -> dict[str, Any]:
             """Analyze the structure of input data"""
             analysis = {
                 "data_type": type(input_data).__name__,
@@ -736,7 +737,7 @@ def mock_input_sketcher():
             self.analysis_history.append(analysis)
             return analysis
 
-        def find_patterns(self, input_data: Any) -> List[Dict[str, Any]]:
+        def find_patterns(self, input_data: Any) -> list[dict[str, Any]]:
             """Find patterns in input data"""
             patterns = []
 
@@ -775,15 +776,15 @@ def mock_input_sketcher():
 
             return patterns
 
-        def get_sketch_history(self) -> List[Dict[str, Any]]:
+        def get_sketch_history(self) -> list[dict[str, Any]]:
             """Get history of all sketches"""
             return self.sketches.copy()
 
-        def get_analysis_history(self) -> List[Dict[str, Any]]:
+        def get_analysis_history(self) -> list[dict[str, Any]]:
             """Get history of all structural analyses"""
             return self.analysis_history.copy()
 
-        def get_pattern_summary(self) -> Dict[str, List[Dict[str, Any]]]:
+        def get_pattern_summary(self) -> dict[str, list[dict[str, Any]]]:
             """Get summary of all detected patterns by type"""
             return self.patterns.copy()
 
@@ -805,7 +806,7 @@ def mock_prediction_engine():
             self.training_data = {}
             self.metrics = {}
 
-        def train_model(self, model_name: str, training_data: List[Dict[str, Any]]) -> bool:
+        def train_model(self, model_name: str, training_data: list[dict[str, Any]]) -> bool:
             """Train a prediction model"""
             if not training_data:
                 return False
@@ -819,7 +820,7 @@ def mock_prediction_engine():
             }
             return True
 
-        def predict(self, model_name: str, input_data: Dict[str, Any]) -> Dict[str, Any]:
+        def predict(self, model_name: str, input_data: dict[str, Any]) -> dict[str, Any]:
             """Make a prediction using the specified model"""
             if model_name not in self.models:
                 return {"error": f"Model {model_name} not found"}
@@ -839,7 +840,7 @@ def mock_prediction_engine():
             self.predictions.append(prediction)
             return prediction
 
-        def evaluate_model(self, model_name: str, test_data: List[Dict[str, Any]]) -> Dict[str, Any]:
+        def evaluate_model(self, model_name: str, test_data: list[dict[str, Any]]) -> dict[str, Any]:
             """Evaluate model performance"""
             if model_name not in self.models:
                 return {"error": f"Model {model_name} not found"}
@@ -858,24 +859,24 @@ def mock_prediction_engine():
             self.metrics[model_name] = evaluation
             return evaluation
 
-        def get_model_info(self, model_name: str) -> Dict[str, Any]:
+        def get_model_info(self, model_name: str) -> dict[str, Any]:
             """Get information about a specific model"""
             if model_name not in self.models:
                 return {"error": f"Model {model_name} not found"}
 
             return self.models[model_name].copy()
 
-        def get_all_models(self) -> Dict[str, Dict[str, Any]]:
+        def get_all_models(self) -> dict[str, dict[str, Any]]:
             """Get information about all models"""
             return self.models.copy()
 
-        def get_prediction_history(self, model_name: str = None) -> List[Dict[str, Any]]:
+        def get_prediction_history(self, model_name: str = None) -> list[dict[str, Any]]:
             """Get prediction history"""
             if model_name:
                 return [p for p in self.predictions if p["model"] == model_name]
             return self.predictions.copy()
 
-        def get_model_metrics(self, model_name: str = None) -> Dict[str, Any]:
+        def get_model_metrics(self, model_name: str = None) -> dict[str, Any]:
             """Get model performance metrics"""
             if model_name:
                 return self.metrics.get(model_name, {})
@@ -926,7 +927,7 @@ def mock_market_intel():
             self.data_sources.append(source)
             return True
 
-        def collect_market_data(self, keywords: List[str] = None) -> Dict[str, Any]:
+        def collect_market_data(self, keywords: list[str] = None) -> dict[str, Any]:
             """Collect market data from sources"""
             # Mock data collection
             market_data = {
@@ -944,7 +945,7 @@ def mock_market_intel():
             self.last_update = market_data["collected_at"]
             return market_data
 
-        def analyze_trends(self, timeframe: str = "30d") -> Dict[str, Any]:
+        def analyze_trends(self, timeframe: str = "30d") -> dict[str, Any]:
             """Analyze market trends"""
             # Mock trend analysis
             trends = {
@@ -968,7 +969,7 @@ def mock_market_intel():
             self.trends[timeframe] = trends
             return trends
 
-        def generate_insights(self, category: str = "general") -> List[Dict[str, Any]]:
+        def generate_insights(self, category: str = "general") -> list[dict[str, Any]]:
             """Generate market insights"""
             # Mock insights generation
             insights = [
@@ -991,7 +992,7 @@ def mock_market_intel():
             self.insights.extend(insights)
             return insights
 
-        def track_competitors(self, competitor_names: List[str]) -> Dict[str, Any]:
+        def track_competitors(self, competitor_names: list[str]) -> dict[str, Any]:
             """Track competitor information"""
             competitor_data = {}
 
@@ -1007,7 +1008,7 @@ def mock_market_intel():
             self.competitors.update(competitor_data)
             return competitor_data
 
-        def get_market_summary(self) -> Dict[str, Any]:
+        def get_market_summary(self) -> dict[str, Any]:
             """Get overall market summary"""
             return {
                 "total_sources": len(self.data_sources),
@@ -1018,7 +1019,7 @@ def mock_market_intel():
                 "status": "active" if self.data_sources else "inactive"
             }
 
-        def export_report(self, format: str = "summary") -> Dict[str, Any]:
+        def export_report(self, format: str = "summary") -> dict[str, Any]:
             """Export market intelligence report"""
             if format == "summary":
                 return {
@@ -1075,7 +1076,7 @@ def mock_daily_learning():
             self.current_session = session
             return session_id
 
-        def end_session(self, session_id: str = None) -> Dict[str, Any]:
+        def end_session(self, session_id: str = None) -> dict[str, Any]:
             """End a learning session"""
             if session_id:
                 session = next((s for s in self.sessions if s["id"] == session_id), None)
@@ -1094,7 +1095,7 @@ def mock_daily_learning():
 
             return session
 
-        def learn_from_interaction(self, interaction: Dict[str, Any]) -> Dict[str, Any]:
+        def learn_from_interaction(self, interaction: dict[str, Any]) -> dict[str, Any]:
             """Learn from a user interaction"""
             if not self.learning_enabled:
                 return {"status": "disabled", "learned": False}
@@ -1119,7 +1120,7 @@ def mock_daily_learning():
 
             return {"status": "learned", "lesson_id": lesson_id}
 
-        def learn_from_feedback(self, feedback: Dict[str, Any]) -> Dict[str, Any]:
+        def learn_from_feedback(self, feedback: dict[str, Any]) -> dict[str, Any]:
             """Learn from user feedback"""
             if not self.learning_enabled:
                 return {"status": "disabled", "learned": False}
@@ -1144,7 +1145,7 @@ def mock_daily_learning():
 
             return {"status": "learned", "lesson_id": lesson_id}
 
-        def get_daily_insights(self, date: str = None) -> List[Dict[str, Any]]:
+        def get_daily_insights(self, date: str = None) -> list[dict[str, Any]]:
             """Get insights for a specific day"""
             target_date = date or "2025-09-27"
 
@@ -1157,7 +1158,7 @@ def mock_daily_learning():
 
             return [{"insight": insight, "confidence": 0.8} for insight in insights]
 
-        def get_learning_progress(self) -> Dict[str, Any]:
+        def get_learning_progress(self) -> dict[str, Any]:
             """Get overall learning progress"""
             total_lessons = len(self.lessons)
             interaction_lessons = len([l for l in self.lessons if l["type"] == "interaction"])
@@ -1173,7 +1174,7 @@ def mock_daily_learning():
                 "avg_confidence": 0.8 if self.lessons else 0.0
             }
 
-        def get_session_history(self) -> List[Dict[str, Any]]:
+        def get_session_history(self) -> list[dict[str, Any]]:
             """Get history of all learning sessions"""
             return self.sessions.copy()
 
@@ -1182,7 +1183,7 @@ def mock_daily_learning():
             self.learning_enabled = enabled
             return self.learning_enabled
 
-        def export_lessons(self, format: str = "summary") -> Dict[str, Any]:
+        def export_lessons(self, format: str = "summary") -> dict[str, Any]:
             """Export learned lessons"""
             if format == "summary":
                 return {
@@ -1219,7 +1220,7 @@ def mock_persona_morph():
             self.traits = {}
             self.contexts = {}
 
-        def create_persona(self, persona_id: str, traits: Dict[str, Any]) -> bool:
+        def create_persona(self, persona_id: str, traits: dict[str, Any]) -> bool:
             """Create a new persona"""
             if persona_id in self.personas:
                 return False
@@ -1233,7 +1234,7 @@ def mock_persona_morph():
             }
             return True
 
-        def morph_to_persona(self, persona_id: str, context: Dict[str, Any] = None) -> Dict[str, Any]:
+        def morph_to_persona(self, persona_id: str, context: dict[str, Any] = None) -> dict[str, Any]:
             """Morph to a specific persona"""
             if persona_id not in self.personas:
                 return {"error": f"Persona {persona_id} not found"}
@@ -1261,7 +1262,7 @@ def mock_persona_morph():
                 "morph_successful": True
             }
 
-        def adapt_traits(self, trait_adjustments: Dict[str, Any]) -> Dict[str, Any]:
+        def adapt_traits(self, trait_adjustments: dict[str, Any]) -> dict[str, Any]:
             """Adapt current persona traits"""
             if self.current_persona not in self.personas:
                 return {"error": "No active persona"}
@@ -1283,14 +1284,14 @@ def mock_persona_morph():
 
             return adaptation
 
-        def get_current_persona(self) -> Dict[str, Any]:
+        def get_current_persona(self) -> dict[str, Any]:
             """Get current active persona"""
             if self.current_persona not in self.personas:
                 return {"error": "No active persona"}
 
             return self.personas[self.current_persona].copy()
 
-        def get_persona_suggestions(self, context: Dict[str, Any]) -> List[Dict[str, Any]]:
+        def get_persona_suggestions(self, context: dict[str, Any]) -> list[dict[str, Any]]:
             """Get persona suggestions based on context"""
             suggestions = []
 
@@ -1328,7 +1329,7 @@ def mock_persona_morph():
             suggestions.sort(key=lambda x: x["compatibility_score"], reverse=True)
             return suggestions[:3]  # Top 3 suggestions
 
-        def analyze_morph_patterns(self) -> Dict[str, Any]:
+        def analyze_morph_patterns(self) -> dict[str, Any]:
             """Analyze morphing patterns"""
             if not self.morph_history:
                 return {"error": "No morph history available"}
@@ -1355,7 +1356,7 @@ def mock_persona_morph():
                 "avg_morphs_per_hour": len(self.morph_history) / 24  # Mock calculation
             }
 
-        def get_all_personas(self) -> Dict[str, Dict[str, Any]]:
+        def get_all_personas(self) -> dict[str, dict[str, Any]]:
             """Get all available personas"""
             return self.personas.copy()
 
@@ -1373,7 +1374,7 @@ def mock_persona_morph():
                 return True
             return False
 
-        def export_persona_data(self, format: str = "summary") -> Dict[str, Any]:
+        def export_persona_data(self, format: str = "summary") -> dict[str, Any]:
             """Export persona data"""
             if format == "summary":
                 return {

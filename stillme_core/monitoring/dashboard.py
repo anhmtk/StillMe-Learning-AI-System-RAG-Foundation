@@ -24,11 +24,9 @@ import asyncio
 import json
 import logging
 import threading
-import time
 from dataclasses import asdict
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Any, Dict, List, Optional
+from datetime import datetime
+from typing import Any, Optional
 
 try:
     from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -40,7 +38,7 @@ except ImportError:
     logging.warning("FastAPI not available. Install with: pip install fastapi uvicorn")
 
 from .performance_analyzer import PerformanceAnalyzer, get_performance_analyzer
-from .resource_monitor import ResourceMetrics, ResourceMonitor, get_resource_monitor
+from .resource_monitor import ResourceMonitor, get_resource_monitor
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +57,7 @@ class MonitoringDashboard:
         self.performance_analyzer: Optional[PerformanceAnalyzer] = None
 
         # WebSocket connections
-        self.active_connections: List[WebSocket] = []
+        self.active_connections: list[WebSocket] = []
         self.connection_lock = threading.Lock()
 
         # Dashboard state
@@ -319,7 +317,7 @@ class MonitoringDashboard:
 
         return "healthy"
 
-    def _get_system_status(self) -> Dict[str, Any]:
+    def _get_system_status(self) -> dict[str, Any]:
         """Get system status"""
         return {
             'status': self.dashboard_data['system_status'],
@@ -331,26 +329,26 @@ class MonitoringDashboard:
             }
         }
 
-    def _get_current_metrics(self) -> Dict[str, Any]:
+    def _get_current_metrics(self) -> dict[str, Any]:
         """Get current metrics"""
         if self.resource_monitor:
             return self.resource_monitor.get_metrics_summary()
         return {"error": "Resource monitor not available"}
 
-    def _get_performance_analysis(self) -> Dict[str, Any]:
+    def _get_performance_analysis(self) -> dict[str, Any]:
         """Get performance analysis"""
         if self.performance_analyzer:
             return self.performance_analyzer.get_analysis_report()
         return {"error": "Performance analyzer not available"}
 
-    def _get_active_alerts(self) -> List[Dict[str, Any]]:
+    def _get_active_alerts(self) -> list[dict[str, Any]]:
         """Get active alerts"""
         if self.resource_monitor:
             alerts = [a for a in self.resource_monitor.alerts if not a.resolved]
             return [asdict(a) for a in alerts]
         return []
 
-    def _get_learning_sessions(self) -> List[Dict[str, Any]]:
+    def _get_learning_sessions(self) -> list[dict[str, Any]]:
         """Get learning sessions"""
         if self.resource_monitor:
             sessions = list(self.resource_monitor.learning_processes)
@@ -364,7 +362,7 @@ class MonitoringDashboard:
             ]
         return []
 
-    def _get_evolution_milestones(self) -> List[Dict[str, Any]]:
+    def _get_evolution_milestones(self) -> list[dict[str, Any]]:
         """Get evolution milestones"""
         if self.performance_analyzer:
             return self.performance_analyzer.evolution_milestones[-10:]  # Last 10
@@ -468,7 +466,7 @@ class MonitoringDashboard:
 </head>
 <body>
     <div class="connection-status" id="connectionStatus">Connecting...</div>
-    
+
     <div class="header">
         <h1>🧠 StillMe AGI Monitoring Dashboard</h1>
         <p>Real-time monitoring for AGI learning automation</p>
@@ -558,25 +556,25 @@ class MonitoringDashboard:
         function connectWebSocket() {
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             const wsUrl = `${protocol}//${window.location.host}/ws`;
-            
+
             ws = new WebSocket(wsUrl);
-            
+
             ws.onopen = function() {
                 document.getElementById('connectionStatus').textContent = 'Connected';
                 document.getElementById('connectionStatus').className = 'connection-status connected';
             };
-            
+
             ws.onmessage = function(event) {
                 const data = JSON.parse(event.data);
                 updateDashboard(data);
             };
-            
+
             ws.onclose = function() {
                 document.getElementById('connectionStatus').textContent = 'Disconnected';
                 document.getElementById('connectionStatus').className = 'connection-status disconnected';
                 setTimeout(connectWebSocket, 5000);
             };
-            
+
             ws.onerror = function(error) {
                 console.error('WebSocket error:', error);
             };
@@ -615,7 +613,7 @@ class MonitoringDashboard:
 
         function updatePerformanceChart(metrics) {
             const now = new Date().toLocaleTimeString();
-            
+
             performanceData.labels.push(now);
             performanceData.datasets[0].data.push(metrics.cpu_percent);
             performanceData.datasets[1].data.push(metrics.memory_percent);
@@ -632,7 +630,7 @@ class MonitoringDashboard:
 
         function updateAlerts(alerts) {
             const alertsContainer = document.getElementById('alertsList');
-            
+
             if (alerts.length === 0) {
                 alertsContainer.innerHTML = '<p>No active alerts</p>';
                 return;
@@ -649,7 +647,7 @@ class MonitoringDashboard:
 
         function updateMilestones(milestones) {
             const milestonesContainer = document.getElementById('milestonesList');
-            
+
             if (milestones.length === 0) {
                 milestonesContainer.innerHTML = '<p>No recent milestones</p>';
                 return;

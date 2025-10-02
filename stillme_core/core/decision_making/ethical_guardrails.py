@@ -13,7 +13,7 @@ import time
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -48,8 +48,8 @@ class EthicalBoundary:
     rule_id: str
     description: str
     severity: ViolationSeverity
-    conditions: List[str]  # Conditions that trigger this boundary
-    exceptions: List[str]  # Exceptions to this boundary
+    conditions: list[str]  # Conditions that trigger this boundary
+    exceptions: list[str]  # Exceptions to this boundary
     enforcement_action: str  # Action to take when violated
 
 
@@ -62,7 +62,7 @@ class EthicalViolation:
     principle: EthicalPrinciple
     severity: ViolationSeverity
     description: str
-    context: Dict[str, Any]
+    context: dict[str, Any]
     action_taken: str
     resolved: bool = False
 
@@ -72,11 +72,11 @@ class EthicalAssessment:
     """Result of ethical assessment"""
 
     is_ethical: bool
-    violations: List[EthicalViolation]
-    warnings: List[str]
-    recommendations: List[str]
+    violations: list[EthicalViolation]
+    warnings: list[str]
+    recommendations: list[str]
     confidence_score: float
-    assessment_details: Dict[str, Any]
+    assessment_details: dict[str, Any]
 
 
 class EthicalGuardrails:
@@ -84,11 +84,11 @@ class EthicalGuardrails:
     Comprehensive Ethical Guardrails System
     """
 
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config_path: str | None = None):
         self.config_path = config_path or ".ethical_config.json"
-        self.boundaries: List[EthicalBoundary] = []
-        self.violation_history: List[EthicalViolation] = []
-        self.assessment_cache: Dict[str, EthicalAssessment] = {}
+        self.boundaries: list[EthicalBoundary] = []
+        self.violation_history: list[EthicalViolation] = []
+        self.assessment_cache: dict[str, EthicalAssessment] = {}
 
         # Load configuration
         self._load_configuration()
@@ -110,7 +110,7 @@ class EthicalGuardrails:
         else:
             self._create_default_configuration()
 
-    def _load_boundaries_from_config(self, config: Dict[str, Any]):
+    def _load_boundaries_from_config(self, config: dict[str, Any]):
         """Load boundaries from configuration"""
         for boundary_data in config.get("boundaries", []):
             boundary = EthicalBoundary(
@@ -228,7 +228,7 @@ class EthicalGuardrails:
             self._load_configuration()
 
     def assess_decision(
-        self, decision_data: Dict[str, Any], context: Dict[str, Any]
+        self, decision_data: dict[str, Any], context: dict[str, Any]
     ) -> EthicalAssessment:
         """
         Assess a decision for ethical compliance
@@ -319,9 +319,9 @@ class EthicalGuardrails:
     def _check_boundary(
         self,
         boundary: EthicalBoundary,
-        decision_data: Dict[str, Any],
-        context: Dict[str, Any],
-    ) -> Dict[str, Any]:
+        decision_data: dict[str, Any],
+        context: dict[str, Any],
+    ) -> dict[str, Any]:
         """Check if a decision violates an ethical boundary"""
         result = {
             "violated": False,
@@ -379,7 +379,7 @@ class EthicalGuardrails:
         return result
 
     def _evaluate_condition(
-        self, condition: str, decision_data: Dict[str, Any], context: Dict[str, Any]
+        self, condition: str, decision_data: dict[str, Any], context: dict[str, Any]
     ) -> bool:
         """Evaluate a condition against decision data and context"""
         try:
@@ -482,7 +482,7 @@ class EthicalGuardrails:
             return False
 
     def _calculate_confidence_score(
-        self, violations: List[EthicalViolation], warnings: List[str]
+        self, violations: list[EthicalViolation], warnings: list[str]
     ) -> float:
         """Calculate confidence score for the assessment"""
         if not violations and not warnings:
@@ -506,7 +506,7 @@ class EthicalGuardrails:
         return max(0.0, min(1.0, confidence))
 
     def _generate_assessment_id(
-        self, decision_data: Dict[str, Any], context: Dict[str, Any]
+        self, decision_data: dict[str, Any], context: dict[str, Any]
     ) -> str:
         """Generate unique assessment ID"""
         data_str = json.dumps(decision_data, sort_keys=True)
@@ -514,7 +514,7 @@ class EthicalGuardrails:
         combined = f"{data_str}_{context_str}"
         return hashlib.sha256(combined.encode()).hexdigest()[:16]
 
-    def _hash_context(self, context: Dict[str, Any]) -> str:
+    def _hash_context(self, context: dict[str, Any]) -> str:
         """Generate hash of context for caching"""
         context_str = json.dumps(context, sort_keys=True)
         return hashlib.sha256(context_str.encode()).hexdigest()[:8]
@@ -541,11 +541,11 @@ class EthicalGuardrails:
         self.boundaries = [b for b in self.boundaries if b.rule_id != rule_id]
         self._save_configuration()
 
-    def get_violation_history(self, limit: int = 100) -> List[EthicalViolation]:
+    def get_violation_history(self, limit: int = 100) -> list[EthicalViolation]:
         """Get recent violation history"""
         return self.violation_history[-limit:]
 
-    def get_violation_stats(self) -> Dict[str, Any]:
+    def get_violation_stats(self) -> dict[str, Any]:
         """Get violation statistics"""
         if not self.violation_history:
             return {"total_violations": 0}
@@ -597,7 +597,7 @@ class EthicalGuardrails:
         except Exception as e:
             logger.error(f"Failed to save ethical configuration: {e}")
 
-    def get_ethical_report(self) -> Dict[str, Any]:
+    def get_ethical_report(self) -> dict[str, Any]:
         """Generate comprehensive ethical report"""
         stats = self.get_violation_stats()
 
@@ -622,7 +622,7 @@ class EthicalGuardrails:
             "recommendations": self._generate_ethical_recommendations(stats),
         }
 
-    def _generate_ethical_recommendations(self, stats: Dict[str, Any]) -> List[str]:
+    def _generate_ethical_recommendations(self, stats: dict[str, Any]) -> list[str]:
         """Generate ethical recommendations based on statistics"""
         recommendations = []
 

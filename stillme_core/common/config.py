@@ -37,7 +37,7 @@ TECHNICAL DETAILS / CHI TIẾT KỸ THUẬT:
 import json
 import os
 from pathlib import Path
-from typing import Any, Dict, TypeVar
+from typing import Any, TypeVar
 
 T = TypeVar("T")
 
@@ -49,7 +49,7 @@ class ConfigManager:
     """
 
     def __init__(
-        self, config_path: str, default_config: Dict[str, Any], env_prefix: str = ""
+        self, config_path: str, default_config: dict[str, Any], env_prefix: str = ""
     ):
         """
         Initialize configuration manager
@@ -65,7 +65,7 @@ class ConfigManager:
         self._config = self._load_config()
         self._last_modified = self._get_file_mtime()
 
-    def _load_config(self) -> Dict[str, Any]:
+    def _load_config(self) -> dict[str, Any]:
         """Load configuration with fallback to defaults"""
         config = self.default_config.copy()
 
@@ -87,8 +87,8 @@ class ConfigManager:
         return config
 
     def _deep_merge(
-        self, base: Dict[str, Any], override: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        self, base: dict[str, Any], override: dict[str, Any]
+    ) -> dict[str, Any]:
         """Deep merge two dictionaries"""
         result = base.copy()
 
@@ -104,7 +104,7 @@ class ConfigManager:
 
         return result
 
-    def _apply_env_overrides(self, config: Dict[str, Any]) -> Dict[str, Any]:
+    def _apply_env_overrides(self, config: dict[str, Any]) -> dict[str, Any]:
         """Apply environment variable overrides"""
         result = config.copy()
 
@@ -198,7 +198,7 @@ class ConfigManager:
         with open(self.config_path, "w", encoding="utf-8") as f:
             json.dump(self._config, f, indent=2, ensure_ascii=False)
 
-    def get_section(self, section: str) -> Dict[str, Any]:
+    def get_section(self, section: str) -> dict[str, Any]:
         """
         Get entire configuration section
 
@@ -210,7 +210,7 @@ class ConfigManager:
         """
         return self.get(section, {})
 
-    def update_section(self, section: str, values: Dict[str, Any]) -> None:
+    def update_section(self, section: str, values: dict[str, Any]) -> None:
         """
         Update entire configuration section
 
@@ -220,7 +220,7 @@ class ConfigManager:
         """
         self.set(section, values)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Get complete configuration as dictionary"""
         return self._config.copy()
 
@@ -274,7 +274,7 @@ class StillMeConfig:
     """
 
     @staticmethod
-    def get_framework_defaults() -> Dict[str, Any]:
+    def get_framework_defaults() -> dict[str, Any]:
         """Get default framework configuration"""
         return {
             "version": "2.1.1",
@@ -303,7 +303,7 @@ class StillMeConfig:
         }
 
     @staticmethod
-    def get_module_defaults(module_name: str) -> Dict[str, Any]:
+    def get_module_defaults(module_name: str) -> dict[str, Any]:
         """Get default configuration for specific module"""
         return {
             "enabled": True,

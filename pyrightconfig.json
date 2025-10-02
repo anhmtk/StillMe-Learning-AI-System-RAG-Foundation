@@ -1,6 +1,9 @@
 {
-    "typeCheckingMode": "basic",
+    "typeCheckingMode": "strict",
     "pythonVersion": "3.12",
+    "reportUnusedIgnore": true,
+    "reportUnknownMemberType": true,
+    "reportUnknownVariableType": true,
   
     // CHỈ phân tích đúng code dự án:
     "include": [
@@ -25,7 +28,7 @@
       "**/Tests/**"
     ],
   
-    // tránh “đọc mã nguồn thư viện” khi suy luận type
+    // tránh "đọc mã nguồn thư viện" khi suy luận type
     "useLibraryCodeForTypes": false,
   
     // giúp Pyright tìm venv đúng

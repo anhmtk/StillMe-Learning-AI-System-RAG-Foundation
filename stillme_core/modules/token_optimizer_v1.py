@@ -13,7 +13,7 @@ import logging
 import time
 from collections import OrderedDict
 from datetime import datetime, timedelta
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Optional
 
 import numpy as np
 import tiktoken
@@ -122,12 +122,12 @@ class SemanticHybridCache:
 
     def get_semantic_match(
         self, query: str, threshold: float
-    ) -> Optional[Tuple[CacheItem, float]]:
+    ) -> Optional[tuple[CacheItem, float]]:
         query_embedding = self._get_embedding(self._normalize_text(query))
         best_match = None
         best_score = 0.0
 
-        for key, item in self.cache.items():
+        for _key, item in self.cache.items():
             if item.ttl and (datetime.now() - item.created_at) > item.ttl:
                 continue
 
@@ -187,8 +187,8 @@ class TokenOptimizer:
         self.quality_monitor = QualityMonitor()
 
     def process_request(
-        self, query: str, context: List[str], api_callback: Callable[[str], str]
-    ) -> Tuple[str, bool]:
+        self, query: str, context: list[str], api_callback: Callable[[str], str]
+    ) -> tuple[str, bool]:
         self.total_requests += 1
 
         try:
@@ -229,7 +229,7 @@ class TokenOptimizer:
             logger.error(f"Optimization failed, using fallback: {e!s}")
             return api_callback(query), False
 
-    def _optimize_prompt(self, query: str, context: List[str]) -> str:
+    def _optimize_prompt(self, query: str, context: list[str]) -> str:
         optimized = self._normalize_query(query)
 
         if context:
@@ -249,7 +249,7 @@ class TokenOptimizer:
     def _normalize_query(self, query: str) -> str:
         return self.cache._normalize_text(query)
 
-    def _compress_context(self, context: List[str]) -> str:
+    def _compress_context(self, context: list[str]) -> str:
         important_messages = context[-3:] if len(context) > 3 else context
         return "\n".join(important_messages)
 
@@ -266,7 +266,7 @@ class TokenOptimizer:
     def _count_tokens(self, text: str) -> int:
         return len(self.tokenizer.encode(text))
 
-    def warmup_cache(self, qa_pairs: List[Dict[str, str]]) -> None:
+    def warmup_cache(self, qa_pairs: list[dict[str, str]]) -> None:
         for pair in qa_pairs:
             self.cache.add_item(
                 query=pair["question"],
@@ -302,7 +302,7 @@ class TokenRateLimiter:
 
 class QualityMonitor:
     def __init__(self) -> None:
-        self.comparisons: List[Dict[str, Any]] = []
+        self.comparisons: list[dict[str, Any]] = []
 
     def log_quality(self, original_query: str, optimized_response: str) -> None:
         diff = len(original_query) - len(optimized_response)

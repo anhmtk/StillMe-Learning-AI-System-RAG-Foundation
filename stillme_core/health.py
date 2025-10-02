@@ -7,9 +7,9 @@ import logging
 import sqlite3
 import time
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 import psutil
 
@@ -29,7 +29,7 @@ class HealthCheck:
     message: str
     duration_ms: float
     timestamp: datetime
-    details: Optional[Dict[str, Any]] = None
+    details: Optional[dict[str, Any]] = None
 
 @dataclass
 class HealthResponse:
@@ -39,13 +39,13 @@ class HealthResponse:
     version: str
     environment: str
     uptime_seconds: float
-    checks: Dict[str, HealthCheck]
-    metrics: Dict[str, Any]
+    checks: dict[str, HealthCheck]
+    metrics: dict[str, Any]
 
 class HealthChecker:
     """Main health check orchestrator"""
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         self.config = config or {}
         self.start_time = time.time()
         self._version = self.config.get('version', '1.0.0')
@@ -61,7 +61,7 @@ class HealthChecker:
         except Exception:
             return self._version or "0.1.0"
 
-    def check_health(self) -> Dict[str, Any]:
+    def check_health(self) -> dict[str, Any]:
         """Check overall system health - lightweight, no external calls"""
         try:
             # Basic system checks without external dependencies
@@ -85,7 +85,7 @@ class HealthChecker:
                 "timestamp": time.time()
             }
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """Get simplified status - calls check_health and extracts key info"""
         health = self.check_health()
         return {
@@ -97,7 +97,6 @@ class HealthChecker:
     def _check_basic_storage(self) -> bool:
         """Basic storage check without external dependencies"""
         try:
-            import os
             import tempfile
             # Try to create a temp file to check basic storage
             with tempfile.NamedTemporaryFile(delete=True) as f:
@@ -118,7 +117,7 @@ class HealthChecker:
 
             # Simple query to test connectivity
             cursor.execute("SELECT 1")
-            result = cursor.fetchone()
+            cursor.fetchone()
 
             # Check database size and performance
             cursor.execute("PRAGMA database_list")
@@ -347,7 +346,7 @@ class HealthChecker:
             metrics=metrics
         )
 
-def create_health_endpoints(app, config: Dict[str, Any]):
+def create_health_endpoints(app, config: dict[str, Any]):
     """Create health check endpoints for the application"""
     from .health_integration import (
         register_health_endpoint,

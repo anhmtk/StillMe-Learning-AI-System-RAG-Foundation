@@ -9,7 +9,7 @@ StillMe Safety Guard - Stub Implementation
 import logging
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ class SafetyConfig:
 class SafetyGuard:
     """
     Safety Guard - Stub Implementation
-    
+
     # TODO[stabilize]: Implement full safety checking functionality
     """
 
@@ -42,7 +42,7 @@ class SafetyGuard:
         self.config = config or SafetyConfig()
         logger.warning("SafetyGuard: Using stub implementation - not for production")
 
-    def check_content(self, content: str) -> Dict[str, Any]:
+    def check_content(self, content: str) -> dict[str, Any]:
         """Check content for safety issues"""
         logger.warning("SafetyGuard.check_content(): Stub implementation")
         return {
@@ -62,7 +62,7 @@ class SafetyGuard:
         logger.warning("SafetyGuard.sanitize_output(): Stub implementation")
         return output
 
-    def get_safety_report(self) -> Dict[str, Any]:
+    def get_safety_report(self) -> dict[str, Any]:
         """Get safety report"""
         return {
             "config": self.config.__dict__,
@@ -73,7 +73,7 @@ class SafetyGuard:
 
 
 # Convenience functions for backward compatibility
-def check_content_safety(content: str) -> Dict[str, Any]:
+def check_content_safety(content: str) -> dict[str, Any]:
     """Check content safety"""
     guard = SafetyGuard()
     return guard.check_content(content)
@@ -89,3 +89,42 @@ def sanitize_ai_output(output: str) -> str:
     """Sanitize AI output"""
     guard = SafetyGuard()
     return guard.sanitize_output(output)
+
+
+def apply_policies(content: str, policies: Optional[dict] = None) -> dict:
+    """Apply safety policies to content"""
+    guard = SafetyGuard()
+    return {
+        "safe": guard.validate_input(content),
+        "sanitized": guard.sanitize_output(content),
+        "level": guard.config.level.value
+    }
+
+
+def redact_output(output: str, sensitive_patterns: Optional[list] = None) -> str:
+    """Redact sensitive information from output"""
+    if sensitive_patterns is None:
+        sensitive_patterns = ["password", "token", "key", "secret"]
+    
+    redacted = output
+    for pattern in sensitive_patterns:
+        redacted = redacted.replace(pattern, "***REDACTED***")
+    
+    return redacted
+
+
+def safe_reply(content: str, context: Optional[dict] = None) -> str:
+    """Generate safe reply with content filtering"""
+    guard = SafetyGuard()
+    
+    # Validate input
+    if not guard.validate_input(content):
+        return "Content blocked by safety guard"
+    
+    # Sanitize output
+    sanitized = guard.sanitize_output(content)
+    
+    # Apply redaction
+    redacted = redact_output(sanitized)
+    
+    return redacted

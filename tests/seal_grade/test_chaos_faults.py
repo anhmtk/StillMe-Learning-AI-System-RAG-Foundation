@@ -67,8 +67,8 @@ class TestChaosEngineering:
 
         # Test timeout handling
         try:
-            result = asyncio.run(asyncio.wait_for(delayed_operation(), timeout=0.05))
-            assert False, "Should have timed out"
+            asyncio.run(asyncio.wait_for(delayed_operation(), timeout=0.05))
+            raise AssertionError("Should have timed out")
         except asyncio.TimeoutError:
             assert True, "Correctly handled timeout"
 
@@ -79,8 +79,8 @@ class TestChaosEngineering:
         with patch('builtins.open', side_effect=OSError("No space left on device")):
             try:
                 # Try to create a job (which would write to disk)
-                job = asyncio.run(state_store.create_job("test_job", "Test Job", "Test Description"))
-                assert False, "Should have failed with disk full error"
+                asyncio.run(state_store.create_job("test_job", "Test Job", "Test Description"))
+                raise AssertionError("Should have failed with disk full error")
             except OSError as e:
                 assert "No space left on device" in str(e)
 
@@ -136,8 +136,8 @@ class TestChaosEngineering:
 
         # System should handle corruption gracefully
         try:
-            job = asyncio.run(state_store.create_job("test_job", "Test Job", "Test Description"))
-            assert False, "Should have failed with corrupted database"
+            asyncio.run(state_store.create_job("test_job", "Test Job", "Test Description"))
+            raise AssertionError("Should have failed with corrupted database")
         except Exception as e:
             assert "database" in str(e).lower() or "corrupt" in str(e).lower()
 

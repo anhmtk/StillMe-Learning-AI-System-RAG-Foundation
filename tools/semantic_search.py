@@ -18,10 +18,10 @@ import os
 import re
 import time
 from collections import defaultdict
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any
 
 import numpy as np
 
@@ -50,7 +50,7 @@ class SearchResult:
     match_type: MatchType
     similarity_score: float
     context: str
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -61,10 +61,10 @@ class CodeEmbedding:
     """Code embedding representation"""
     file_path: str
     function_name: str
-    embedding: List[float]
+    embedding: list[float]
     content: str
     line_number: int
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -76,14 +76,14 @@ class SemanticSearchEngine:
     def __init__(self, project_root: str = ".", embedding_dim: int = 128):
         self.project_root = Path(project_root).resolve()
         self.embedding_dim = embedding_dim
-        self.embeddings: Dict[str, CodeEmbedding] = {}
-        self.file_contents: Dict[str, str] = {}
-        self.function_index: Dict[str, List[str]] = defaultdict(list)
-        self.pattern_cache: Dict[str, List[SearchResult]] = {}
-        self._similarity_cache: Dict[Tuple[str, str], float] = {}
+        self.embeddings: dict[str, CodeEmbedding] = {}
+        self.file_contents: dict[str, str] = {}
+        self.function_index: dict[str, list[str]] = defaultdict(list)
+        self.pattern_cache: dict[str, list[SearchResult]] = {}
+        self._similarity_cache: dict[tuple[str, str], float] = {}
 
-    def build_index(self, include_patterns: List[str] = None,
-                   exclude_patterns: List[str] = None) -> Dict[str, Any]:
+    def build_index(self, include_patterns: list[str] = None,
+                   exclude_patterns: list[str] = None) -> dict[str, Any]:
         """Build semantic search index"""
         if include_patterns is None:
             include_patterns = ["*.py"]
@@ -117,7 +117,7 @@ class SemanticSearchEngine:
             "index_size_mb": self._calculate_index_size()
         }
 
-    def _find_python_files(self, include_patterns: List[str], exclude_patterns: List[str]) -> List[Path]:
+    def _find_python_files(self, include_patterns: list[str], exclude_patterns: list[str]) -> list[Path]:
         """Find Python files matching patterns"""
         python_files = []
 
@@ -167,7 +167,7 @@ class SemanticSearchEngine:
         except Exception as e:
             logger.error(f"Error processing {file_path}: {e}")
 
-    def _extract_functions(self, content: str, file_path: Path) -> List[Dict[str, Any]]:
+    def _extract_functions(self, content: str, file_path: Path) -> list[dict[str, Any]]:
         """Extract function definitions from content"""
         import ast
 
@@ -244,7 +244,7 @@ class SemanticSearchEngine:
                     }
                 )
 
-    def _create_embedding(self, content: str) -> List[float]:
+    def _create_embedding(self, content: str) -> list[float]:
         """Create embedding from code content"""
         # Simple hash-based embedding (in production, use proper embeddings)
         # This is a placeholder for a real embedding model
@@ -294,7 +294,7 @@ class SemanticSearchEngine:
 
         return total_size / (1024 * 1024)  # Convert to MB
 
-    def search_similar(self, query: str, limit: int = 10, threshold: float = 0.5) -> List[SearchResult]:
+    def search_similar(self, query: str, limit: int = 10, threshold: float = 0.5) -> list[SearchResult]:
         """Search for similar code"""
         # Create embedding for query
         query_embedding = self._create_embedding(query)
@@ -329,7 +329,7 @@ class SemanticSearchEngine:
 
         return results
 
-    def search_pattern(self, pattern: str, limit: int = 10) -> List[SearchResult]:
+    def search_pattern(self, pattern: str, limit: int = 10) -> list[SearchResult]:
         """Search for code patterns"""
         if pattern in self.pattern_cache:
             return self.pattern_cache[pattern][:limit]
@@ -362,7 +362,7 @@ class SemanticSearchEngine:
 
         return results[:limit]
 
-    def search_function(self, function_name: str, limit: int = 10) -> List[SearchResult]:
+    def search_function(self, function_name: str, limit: int = 10) -> list[SearchResult]:
         """Search for specific function"""
         results = []
 
@@ -385,11 +385,11 @@ class SemanticSearchEngine:
 
         return results[:limit]
 
-    def search_contextual(self, file_path: str, line_number: int, limit: int = 10) -> List[SearchResult]:
+    def search_contextual(self, file_path: str, line_number: int, limit: int = 10) -> list[SearchResult]:
         """Search for contextually related code"""
         # Get the function at the given location
         target_func = None
-        for func_id, embedding in self.embeddings.items():
+        for _func_id, embedding in self.embeddings.items():
             if embedding.file_path == file_path:
                 if embedding.line_number <= line_number <= embedding.metadata.get('end_line', embedding.line_number):
                     target_func = embedding
@@ -406,7 +406,7 @@ class SemanticSearchEngine:
 
         return similar_results[:limit]
 
-    def _cosine_similarity(self, vec1: List[float], vec2: List[float]) -> float:
+    def _cosine_similarity(self, vec1: list[float], vec2: list[float]) -> float:
         """Calculate cosine similarity between two vectors"""
         if len(vec1) != len(vec2):
             return 0.0
@@ -441,11 +441,11 @@ class SemanticSearchEngine:
 
         return '\n'.join(numbered_context)
 
-    def find_related_files(self, file_path: str, limit: int = 5) -> List[Tuple[str, float]]:
+    def find_related_files(self, file_path: str, limit: int = 5) -> list[tuple[str, float]]:
         """Find files related to the given file"""
         # Get all functions in the file
         file_functions = []
-        for func_id, embedding in self.embeddings.items():
+        for _func_id, embedding in self.embeddings.items():
             if embedding.file_path == file_path:
                 file_functions.append(embedding)
 
@@ -475,7 +475,7 @@ class SemanticSearchEngine:
 
         return file_avg_similarities[:limit]
 
-    def get_code_suggestions(self, query: str, limit: int = 5) -> List[Dict[str, Any]]:
+    def get_code_suggestions(self, query: str, limit: int = 5) -> list[dict[str, Any]]:
         """Get code suggestions based on query"""
         # Search for similar code
         similar_results = self.search_similar(query, limit=limit)
@@ -522,7 +522,7 @@ class SemanticSearchEngine:
 
         logger.info(f"Semantic index exported to {output_file}")
 
-    def get_metrics(self) -> Dict[str, Any]:
+    def get_metrics(self) -> dict[str, Any]:
         """Get search engine metrics"""
         return {
             "total_embeddings": len(self.embeddings),

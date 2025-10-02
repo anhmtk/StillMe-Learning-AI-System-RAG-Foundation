@@ -84,7 +84,7 @@ class TestCommunicationStyleManager:
         assert stats["original_length"] == len(original)
         assert stats["optimized_length"] == len(optimized)
         assert stats["reduction_percentage"] > 0
-        assert stats["was_optimized"] == True
+        assert stats["was_optimized"]
 
     def test_complex_verbose_response(self):
         """Test optimization of complex verbose response."""

@@ -5,7 +5,6 @@ Fix syntax errors in test files
 
 import os
 import re
-from pathlib import Path
 
 
 def fix_syntax_errors():

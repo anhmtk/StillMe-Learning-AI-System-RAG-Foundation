@@ -4,12 +4,11 @@ Comprehensive scanning for secrets, API keys, and PII in codebase.
 """
 
 import json
-import os
 import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Optional
 
 
 class SecretPattern:
@@ -38,7 +37,7 @@ class SecretFinding:
         self.confidence = confidence
         self.context = context
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "file_path": self.file_path,
             "line_number": self.line_number,
@@ -54,9 +53,9 @@ class SecretsSweeper:
 
     def __init__(self, project_root: str = "."):
         self.project_root = Path(project_root)
-        self.findings: List[SecretFinding] = []
-        self.ignored_files: Set[str] = set()
-        self.ignored_patterns: Set[str] = set()
+        self.findings: list[SecretFinding] = []
+        self.ignored_files: set[str] = set()
+        self.ignored_patterns: set[str] = set()
 
         # Load ignore patterns
         self._load_ignore_patterns()
@@ -242,7 +241,7 @@ class SecretsSweeper:
 
         return False
 
-    def _scan_file(self, file_path: Path) -> List[SecretFinding]:
+    def _scan_file(self, file_path: Path) -> list[SecretFinding]:
         """Scan a single file for secrets."""
         findings = []
 
@@ -276,7 +275,7 @@ class SecretsSweeper:
 
         return findings
 
-    def scan_directory(self, directory: Optional[str] = None) -> List[SecretFinding]:
+    def scan_directory(self, directory: Optional[str] = None) -> list[SecretFinding]:
         """Scan directory for secrets."""
         if directory is None:
             directory = self.project_root
@@ -300,7 +299,7 @@ class SecretsSweeper:
 
         return self.findings
 
-    def run_external_tools(self) -> Dict:
+    def run_external_tools(self) -> dict:
         """Run external security tools."""
         results = {}
 
@@ -370,7 +369,7 @@ class SecretsSweeper:
                 "high_severity": high_count,
                 "medium_severity": medium_count,
                 "low_severity": low_count,
-                "files_scanned": len(set(f.file_path for f in self.findings))
+                "files_scanned": len({f.file_path for f in self.findings})
             },
             "findings": [f.to_dict() for f in self.findings],
             "external_tools": external_results,
@@ -383,7 +382,7 @@ class SecretsSweeper:
 
         return report
 
-    def _generate_recommendations(self) -> List[str]:
+    def _generate_recommendations(self) -> list[str]:
         """Generate security recommendations."""
         recommendations = []
 
@@ -430,7 +429,7 @@ def main():
 
     # Run sweep
     sweeper = SecretsSweeper(args.directory)
-    findings = sweeper.scan_directory()
+    sweeper.scan_directory()
 
     # Generate report
     report = sweeper.generate_report(args.output)

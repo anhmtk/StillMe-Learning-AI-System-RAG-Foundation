@@ -12,12 +12,11 @@ Tính năng:
 
 import json
 import logging
-import os
 import sys
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import requests
 
@@ -59,17 +58,17 @@ class RealTestRunner:
         self.performance_metrics = []
 
     def run_comprehensive_test(self,
-                             test_cases: List[Dict[str, Any]],
+                             test_cases: list[dict[str, Any]],
                              max_concurrent: int = 5,
-                             timeout: int = 30) -> Dict[str, Any]:
+                             timeout: int = 30) -> dict[str, Any]:
         """
         Chạy test toàn diện với StillMe AI
-        
+
         Args:
             test_cases: Danh sách test cases
             max_concurrent: Số request đồng thời tối đa
             timeout: Timeout cho mỗi request (seconds)
-            
+
         Returns:
             Dict: Kết quả test tổng hợp
         """
@@ -126,9 +125,9 @@ class RealTestRunner:
             return False
 
     def _run_test_batch(self,
-                       test_cases: List[Dict[str, Any]],
+                       test_cases: list[dict[str, Any]],
                        max_concurrent: int,
-                       timeout: int) -> List[Dict[str, Any]]:
+                       timeout: int) -> list[dict[str, Any]]:
         """Chạy batch test cases"""
         results = []
 
@@ -175,7 +174,7 @@ class RealTestRunner:
 
         return results
 
-    def _send_request(self, test_case: Dict[str, Any], timeout: int) -> Dict[str, Any]:
+    def _send_request(self, test_case: dict[str, Any], timeout: int) -> dict[str, Any]:
         """Gửi request đến StillMe AI"""
         try:
             start_time = time.time()
@@ -241,8 +240,8 @@ class RealTestRunner:
             }
 
     def _calculate_performance_metrics(self,
-                                     results: List[Dict[str, Any]],
-                                     total_duration: float) -> Dict[str, Any]:
+                                     results: list[dict[str, Any]],
+                                     total_duration: float) -> dict[str, Any]:
         """Tính toán performance metrics"""
         try:
             if not results:
@@ -298,7 +297,7 @@ class RealTestRunner:
             self.logger.error(f"Error calculating performance metrics: {e}")
             return {}
 
-    def _evaluate_results(self, results: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _evaluate_results(self, results: list[dict[str, Any]]) -> dict[str, Any]:
         """Đánh giá kết quả test"""
         try:
             self.logger.info("🔍 Evaluating test results...")
@@ -362,9 +361,9 @@ class RealTestRunner:
             return {}
 
     def _generate_comprehensive_report(self,
-                                     results: List[Dict[str, Any]],
-                                     evaluation_results: Dict[str, Any],
-                                     performance_metrics: Dict[str, Any]) -> Dict[str, Any]:
+                                     results: list[dict[str, Any]],
+                                     evaluation_results: dict[str, Any],
+                                     performance_metrics: dict[str, Any]) -> dict[str, Any]:
         """Tạo báo cáo toàn diện"""
         try:
             self.logger.info("📊 Generating comprehensive report...")
@@ -442,7 +441,7 @@ class RealTestRunner:
             self.logger.error(f"Error generating comprehensive report: {e}")
             return {"error": str(e)}
 
-    def load_test_cases_from_file(self, file_path: str) -> List[Dict[str, Any]]:
+    def load_test_cases_from_file(self, file_path: str) -> list[dict[str, Any]]:
         """Load test cases từ file"""
         try:
             with open(file_path, encoding='utf-8') as f:
@@ -458,7 +457,7 @@ class RealTestRunner:
             self.logger.error(f"Error loading test cases: {e}")
             return []
 
-    def generate_test_cases(self, count: int = 100) -> List[Dict[str, Any]]:
+    def generate_test_cases(self, count: int = 100) -> list[dict[str, Any]]:
         """Tạo test cases mẫu"""
         test_cases = []
 

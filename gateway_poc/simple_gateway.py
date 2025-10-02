@@ -2,8 +2,6 @@
 """
 Simple Gateway for StillMe - Quick Performance Test
 """
-import asyncio
-import json
 import time
 
 import httpx

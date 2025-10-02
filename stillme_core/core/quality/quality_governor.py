@@ -12,7 +12,7 @@ import time
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -60,10 +60,10 @@ class QualityReport:
     """Comprehensive quality report"""
 
     overall_score: float
-    metrics_summary: Dict[QualityMetric, Dict[str, Any]]
-    violations: List[QualityViolation]
-    recommendations: List[str]
-    quality_trends: Dict[str, float]
+    metrics_summary: dict[QualityMetric, dict[str, Any]]
+    violations: list[QualityViolation]
+    recommendations: list[str]
+    quality_trends: dict[str, float]
     report_duration: float
 
 
@@ -78,7 +78,7 @@ class QualityGovernor:
         self.coding_standards = self._load_coding_standards()
         self.quality_history = self._load_quality_history()
 
-    def _load_quality_thresholds(self) -> Dict[QualityMetric, Dict[str, float]]:
+    def _load_quality_thresholds(self) -> dict[QualityMetric, dict[str, float]]:
         """Load quality thresholds for different metrics"""
         return {
             QualityMetric.CYCLOMATIC_COMPLEXITY: {
@@ -125,7 +125,7 @@ class QualityGovernor:
             },
         }
 
-    def _load_coding_standards(self) -> Dict[str, List[Dict[str, Any]]]:
+    def _load_coding_standards(self) -> dict[str, list[dict[str, Any]]]:
         """Load coding standards and rules"""
         return {
             "naming_conventions": [
@@ -183,7 +183,7 @@ class QualityGovernor:
             ],
         }
 
-    def _load_quality_history(self) -> Dict[str, List[float]]:
+    def _load_quality_history(self) -> dict[str, list[float]]:
         """Load quality history for trend analysis"""
         history_file = self.repo_root / ".quality_history.json"
         if history_file.exists():
@@ -275,7 +275,7 @@ class QualityGovernor:
         file_str = str(file_path)
         return not any(pattern in file_str for pattern in skip_patterns)
 
-    def _calculate_file_metrics(self, file_path: Path) -> Dict[QualityMetric, float]:
+    def _calculate_file_metrics(self, file_path: Path) -> dict[QualityMetric, float]:
         """Calculate quality metrics for a single file"""
         metrics = {}
 
@@ -366,13 +366,11 @@ class QualityGovernor:
         documented_functions = 0
 
         # Simple heuristic: count functions and docstrings
-        in_function = False
         for i, line in enumerate(lines):
             stripped = line.strip()
 
             if stripped.startswith("def ") and ":" in stripped:
                 total_functions += 1
-                in_function = True
                 # Check next few lines for docstring
                 for j in range(i + 1, min(i + 5, len(lines))):
                     next_line = lines[j].strip()
@@ -386,7 +384,7 @@ class QualityGovernor:
                 and not stripped.startswith("#")
                 and not stripped.startswith('"""')
             ):
-                in_function = False
+                pass
 
         return documented_functions / total_functions if total_functions > 0 else 1.0
 
@@ -478,8 +476,8 @@ class QualityGovernor:
         return intersection / union if union > 0 else 0.0
 
     def _aggregate_metric(
-        self, metric: QualityMetric, file_metrics: List[Dict[QualityMetric, float]]
-    ) -> Dict[str, Any]:
+        self, metric: QualityMetric, file_metrics: list[dict[QualityMetric, float]]
+    ) -> dict[str, Any]:
         """Aggregate metric across all files"""
         values = [fm.get(metric, 0.0) for fm in file_metrics if metric in fm]
 
@@ -500,9 +498,9 @@ class QualityGovernor:
     def _check_metric_violations(
         self,
         metric: QualityMetric,
-        metric_data: Dict[str, Any],
-        file_metrics: List[Dict[QualityMetric, float]],
-    ) -> List[QualityViolation]:
+        metric_data: dict[str, Any],
+        file_metrics: list[dict[QualityMetric, float]],
+    ) -> list[QualityViolation]:
         """Check for metric violations"""
         violations = []
 
@@ -535,7 +533,7 @@ class QualityGovernor:
         return violations
 
     def _determine_standard(
-        self, value: float, thresholds: Dict[str, float]
+        self, value: float, thresholds: dict[str, float]
     ) -> QualityStandard:
         """Determine quality standard based on value and thresholds"""
         if value <= thresholds.get("excellent", float("inf")):
@@ -565,8 +563,8 @@ class QualityGovernor:
 
     def _calculate_overall_quality_score(
         self,
-        metrics_summary: Dict[QualityMetric, Dict[str, Any]],
-        violations: List[QualityViolation],
+        metrics_summary: dict[QualityMetric, dict[str, Any]],
+        violations: list[QualityViolation],
     ) -> float:
         """Calculate overall quality score (0-100)"""
         if not metrics_summary:
@@ -641,9 +639,9 @@ class QualityGovernor:
 
     def _generate_quality_recommendations(
         self,
-        metrics_summary: Dict[QualityMetric, Dict[str, Any]],
-        violations: List[QualityViolation],
-    ) -> List[str]:
+        metrics_summary: dict[QualityMetric, dict[str, Any]],
+        violations: list[QualityViolation],
+    ) -> list[str]:
         """Generate quality improvement recommendations"""
         recommendations = []
 
@@ -691,10 +689,10 @@ class QualityGovernor:
         return recommendations
 
     def _update_quality_trends(
-        self, metrics_summary: Dict[QualityMetric, Dict[str, Any]], overall_score: float
+        self, metrics_summary: dict[QualityMetric, dict[str, Any]], overall_score: float
     ):
         """Update quality trends for historical analysis"""
-        timestamp = time.time()
+        time.time()
 
         # Update overall score trend
         if "overall_score" not in self.quality_history:

@@ -12,13 +12,11 @@ Tính năng chính:
 
 import json
 import logging
-import os
 import re
 import subprocess
 import time
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional, Tuple
 
 # Thiết lập logging
 logging.basicConfig(
@@ -48,8 +46,8 @@ class ValidationResult:
     style_suggestions: int
     execution_time: float
     success: bool
-    evidence_files: List[str]
-    error_details: List[Dict]
+    evidence_files: list[str]
+    error_details: list[dict]
 
 class AgentDevValidator:
     """Hệ thống validation cho AgentDev"""
@@ -58,7 +56,7 @@ class AgentDevValidator:
         self.project_root = project_root
         self.validation_log = []
 
-    def run_pyright_check(self) -> Tuple[int, List[Dict]]:
+    def run_pyright_check(self) -> tuple[int, list[dict]]:
         """Chạy pyright và trả về số lỗi + chi tiết"""
         try:
             logger.info("🔍 Chạy pyright check...")
@@ -95,7 +93,7 @@ class AgentDevValidator:
             logger.error(f"❌ Lỗi chạy pyright: {e}")
             return -1, []
 
-    def run_ruff_check(self) -> Tuple[int, List[Dict]]:
+    def run_ruff_check(self) -> tuple[int, list[dict]]:
         """Chạy ruff và trả về số lỗi + chi tiết"""
         try:
             logger.info("🔍 Chạy ruff check...")
@@ -128,7 +126,7 @@ class AgentDevValidator:
             logger.error(f"❌ Lỗi chạy ruff: {e}")
             return -1, []
 
-    def _classify_pyright_errors(self, output: str) -> List[Dict]:
+    def _classify_pyright_errors(self, output: str) -> list[dict]:
         """Phân loại lỗi pyright theo mức độ nghiêm trọng"""
         errors = []
         lines = output.split('\n')
@@ -151,7 +149,7 @@ class AgentDevValidator:
 
         return errors
 
-    def _classify_ruff_errors(self, output: str) -> List[Dict]:
+    def _classify_ruff_errors(self, output: str) -> list[dict]:
         """Phân loại lỗi ruff theo mức độ nghiêm trọng"""
         errors = []
         lines = output.split('\n')
@@ -207,7 +205,7 @@ class AgentDevValidator:
             logger.error(f"❌ Lỗi chạy quick test: {e}")
             return False
 
-    def validate_before_fix(self) -> Dict:
+    def validate_before_fix(self) -> dict:
         """Kiểm tra trạng thái trước khi sửa"""
         logger.info("📋 BẮT ĐẦU VALIDATION - TRẠNG THÁI TRƯỚC KHI SỬA")
 
@@ -244,7 +242,7 @@ class AgentDevValidator:
             'execution_time': time.time() - start_time
         }
 
-    def validate_after_fix(self, before_data: Dict) -> ValidationResult:
+    def validate_after_fix(self, before_data: dict) -> ValidationResult:
         """Kiểm tra trạng thái sau khi sửa"""
         logger.info("📋 VALIDATION - TRẠNG THÁI SAU KHI SỬA")
 
@@ -364,7 +362,7 @@ class AgentDevValidator:
 
 ## 📈 Thống kê lỗi
 - **Trước khi sửa**: {result.before_errors} lỗi
-- **Sau khi sửa**: {result.after_errors} lỗi  
+- **Sau khi sửa**: {result.after_errors} lỗi
 - **Đã sửa**: {result.errors_fixed} lỗi
 
 ## 🚨 Phân loại lỗi

@@ -24,13 +24,11 @@ import asyncio
 import json
 import logging
 import statistics
-import threading
 import time
 from collections import defaultdict, deque
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -58,11 +56,11 @@ class PerformancePattern:
     pattern_type: str  # improvement, degradation, oscillation, stable
     start_time: datetime
     end_time: Optional[datetime]
-    metrics: List[PerformanceMetrics]
+    metrics: list[PerformanceMetrics]
     trend: str  # increasing, decreasing, stable, oscillating
     confidence: float
     description: str
-    recommendations: List[str]
+    recommendations: list[str]
 
 @dataclass
 class BottleneckAnalysis:
@@ -70,10 +68,10 @@ class BottleneckAnalysis:
     bottleneck_id: str
     bottleneck_type: str  # cpu, memory, disk, network, algorithm, data
     severity: str  # low, medium, high, critical
-    affected_metrics: List[str]
+    affected_metrics: list[str]
     impact_percentage: float
     root_cause: str
-    recommendations: List[str]
+    recommendations: list[str]
     estimated_fix_time: str
 
 @dataclass
@@ -87,8 +85,8 @@ class AGIRecommendation:
     expected_improvement: str
     implementation_effort: str
     risk_level: str
-    dependencies: List[str]
-    metrics_to_track: List[str]
+    dependencies: list[str]
+    metrics_to_track: list[str]
 
 class PerformanceAnalyzer:
     """
@@ -101,9 +99,9 @@ class PerformanceAnalyzer:
 
         # Data storage
         self.performance_history = deque(maxlen=10000)
-        self.identified_patterns: List[PerformancePattern] = []
-        self.bottlenecks: List[BottleneckAnalysis] = []
-        self.agi_recommendations: List[AGIRecommendation] = []
+        self.identified_patterns: list[PerformancePattern] = []
+        self.bottlenecks: list[BottleneckAnalysis] = []
+        self.agi_recommendations: list[AGIRecommendation] = []
 
         # Analysis state
         self.is_analyzing = False
@@ -231,7 +229,7 @@ class PerformanceAnalyzer:
                 self.identified_patterns.append(pattern)
                 self.logger.info(f"Identified performance pattern: {pattern.pattern_type} - {pattern.description}")
 
-    def _detect_trend(self, values: List[float], metric_name: str) -> Optional[PerformancePattern]:
+    def _detect_trend(self, values: list[float], metric_name: str) -> Optional[PerformancePattern]:
         """Detect trend in metric values"""
         if len(values) < 5:
             return None
@@ -286,7 +284,7 @@ class PerformanceAnalyzer:
             recommendations=recommendations
         )
 
-    def _generate_pattern_recommendations(self, pattern_type: str, metric_name: str, change_percent: float) -> List[str]:
+    def _generate_pattern_recommendations(self, pattern_type: str, metric_name: str, change_percent: float) -> list[str]:
         """Generate recommendations based on pattern"""
         recommendations = []
 
@@ -500,7 +498,7 @@ class PerformanceAnalyzer:
                 })
                 self.logger.info(f"AGI evolution milestone reached: {stage}")
 
-    def _calculate_trend(self, values: List[float]) -> str:
+    def _calculate_trend(self, values: list[float]) -> str:
         """Calculate trend direction"""
         if len(values) < 2:
             return "insufficient_data"
@@ -520,13 +518,13 @@ class PerformanceAnalyzer:
         else:
             return "stable"
 
-    def _is_evolution_milestone(self, curve_data: Dict[str, Any]) -> bool:
+    def _is_evolution_milestone(self, curve_data: dict[str, Any]) -> bool:
         """Check if this represents an evolution milestone"""
         # Simple milestone detection - can be enhanced
         return (curve_data['accuracy_trend'] == 'improving' and
                 curve_data['latest_accuracy'] > 0.9)
 
-    def get_analysis_report(self) -> Dict[str, Any]:
+    def get_analysis_report(self) -> dict[str, Any]:
         """Get comprehensive analysis report"""
         return {
             'analysis_timestamp': datetime.now().isoformat(),

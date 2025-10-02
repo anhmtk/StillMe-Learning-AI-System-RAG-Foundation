@@ -6,7 +6,7 @@ import sqlite3
 import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
-from typing import Any, Dict, List
+from typing import Any
 
 # --- Cấu hình và Logging ---
 logging.basicConfig(
@@ -73,7 +73,7 @@ class AuditTrail:
     action: str
     user: str
     timestamp: float
-    details: Dict[str, Any]
+    details: dict[str, Any]
     hash: str = ""
 
 
@@ -82,8 +82,8 @@ class ValidationResult:
     """Kết quả xác thực tổng hợp."""
 
     is_valid: bool
-    errors: List[str] = field(default_factory=list)
-    warnings: List[str] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
+    warnings: list[str] = field(default_factory=list)
     confidence_score: float = 0.0
 
 
@@ -93,7 +93,7 @@ class RegulatoryReport:
 
     report_type: str
     period: str
-    data: Dict[str, Any]
+    data: dict[str, Any]
     compliance_status: str
 
 
@@ -109,7 +109,7 @@ class FinancialValidationEngine:
     def __init__(
         self,
         db_path: str = "financial_data.db",
-        config: Dict[str, Any] = DEFAULT_CONFIG,
+        config: dict[str, Any] = DEFAULT_CONFIG,
     ):
         self.db_path = db_path
         self.config = config
@@ -193,7 +193,7 @@ class FinancialValidationEngine:
         return await loop.run_in_executor(self.executor, func, *args)
 
     async def validate_financial_calculation(
-        self, calc_data: Dict[str, Any]
+        self, calc_data: dict[str, Any]
     ) -> ValidationResult:
         """
         Xác thực tính toán tài chính.
@@ -248,7 +248,7 @@ class FinancialValidationEngine:
             raise
 
     async def check_compliance(
-        self, compliance_data: Dict[str, Any]
+        self, compliance_data: dict[str, Any]
     ) -> ComplianceCheck:
         """
         Kiểm tra tuân thủ quy định.
@@ -290,7 +290,7 @@ class FinancialValidationEngine:
             raise
 
     async def generate_audit_trail(
-        self, action: str, user: str, details: Dict[str, Any]
+        self, action: str, user: str, details: dict[str, Any]
     ) -> AuditTrail:
         """Tạo dấu vết kiểm toán với hashing mật mã."""
         try:
@@ -329,7 +329,7 @@ class FinancialValidationEngine:
             raise
 
     async def create_regulatory_report(
-        self, report_type: str, period: str, data: Dict[str, Any]
+        self, report_type: str, period: str, data: dict[str, Any]
     ) -> RegulatoryReport:
         """Tạo báo cáo tuân thủ theo mẫu."""
         try:

@@ -11,11 +11,8 @@ PURPOSE / MỤC ĐÍCH:
 """
 
 import logging
-import os
-import sys
 import time
 from datetime import datetime
-from typing import Optional
 
 # Initialize logging
 logging.basicConfig(level=logging.INFO)

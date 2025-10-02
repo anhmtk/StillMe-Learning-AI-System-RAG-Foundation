@@ -15,7 +15,7 @@ import logging
 import time
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -33,10 +33,10 @@ class BaseDetector(ABC):
         self.last_failure_time = None
 
     @abstractmethod
-    def detect(self, text: str) -> Dict[str, Any]:
+    def detect(self, text: str) -> dict[str, Any]:
         """
         Detect specific patterns in text
-        
+
         Returns:
             Dict with keys:
             - needs_clarification: bool
@@ -46,7 +46,7 @@ class BaseDetector(ABC):
         """
         pass
 
-    def analyze(self, text: str) -> Dict[str, Any]:
+    def analyze(self, text: str) -> dict[str, Any]:
         """
         Analyze text with telemetry and loop guard
         """
@@ -91,7 +91,7 @@ class BaseDetector(ABC):
                 "features": {"error": str(e), "fallback": True}
             }
 
-    def _log_telemetry(self, result: Dict[str, Any], latency: float, success: bool):
+    def _log_telemetry(self, result: dict[str, Any], latency: float, success: bool):
         """Log telemetry data"""
         try:
             telemetry_entry = {
@@ -134,7 +134,7 @@ class BaseDetector(ABC):
         except Exception as e:
             logger.error(f"Failed to generate RCA report: {e}")
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get detector statistics"""
         return {
             "name": self.name,

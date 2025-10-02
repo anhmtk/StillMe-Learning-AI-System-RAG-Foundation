@@ -6,7 +6,7 @@ Cấu hình server cho Desktop App
 
 import json
 import os
-from typing import Any, Dict
+from typing import Any
 
 
 class DesktopAppServerConfig:
@@ -16,7 +16,7 @@ class DesktopAppServerConfig:
         self.config_file = config_file
         self.config = self._load_config()
 
-    def _load_config(self) -> Dict[str, Any]:
+    def _load_config(self) -> dict[str, Any]:
         """Load configuration from file"""
         if os.path.exists(self.config_file):
             try:
@@ -68,7 +68,7 @@ class DesktopAppServerConfig:
         endpoint = self.config.get("endpoints", {}).get(name, f"/{name}")
         return f"{base_url.rstrip('/')}{endpoint}"
 
-    def test_connection(self) -> Dict[str, Any]:
+    def test_connection(self) -> dict[str, Any]:
         """Test connection to server"""
         import requests
 

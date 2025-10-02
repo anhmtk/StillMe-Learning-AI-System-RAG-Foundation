@@ -11,7 +11,7 @@ import time
 from dataclasses import asdict
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import requests
 
@@ -33,7 +33,6 @@ try:
     from metrics.web_metrics import record_request
     from policy.tool_gate import validate_tool_request
     from sandbox_controller import sandbox_controller
-    from security.content_wrap import wrap_content
 
     # Web Access v2 imports
     from web_tools import web_tools
@@ -89,7 +88,7 @@ class SmartRouter:
         self.ollama_url = OLLAMA_BASE_URL
         logger.info("🧠 Smart Router initialized")
 
-    def route_message(self, message: str, session_id: str = "default", system_prompt: Optional[str] = None, web_search_enabled: bool = True) -> Dict[str, Any]:
+    def route_message(self, message: str, session_id: str = "default", system_prompt: Optional[str] = None, web_search_enabled: bool = True) -> dict[str, Any]:
         """Route message to appropriate AI model with StillMe persona enforcement"""
         try:
             # Check if this is a web request and web search is enabled
@@ -144,7 +143,7 @@ class SmartRouter:
         complex_keywords = ["analyze", "explain", "compare", "research", "strategy", "plan", "design", "architecture", "complex", "detailed", "comprehensive", "thorough"]
         return any(keyword in message.lower() for keyword in complex_keywords) or len(message) > 200
 
-    def _check_web_request(self, message: str) -> Dict[str, Any]:
+    def _check_web_request(self, message: str) -> dict[str, Any]:
         """Check if message is a web request and handle it"""
         try:
             message_lower = message.lower()
@@ -173,7 +172,7 @@ class SmartRouter:
             logger.error(f"❌ Web request check error: {e}")
             return {"is_web_request": False}
 
-    def _handle_web_request_v2(self, request_type: str, message: str) -> Dict[str, Any]:
+    def _handle_web_request_v2(self, request_type: str, message: str) -> dict[str, Any]:
         """Handle web request with Web Access v2 security and tool gate"""
         try:
             # Check sandbox permission
@@ -306,7 +305,7 @@ class SmartRouter:
                 "status": "error"
             }
 
-    def _handle_niche_radar_request(self, message: str) -> Dict[str, Any]:
+    def _handle_niche_radar_request(self, message: str) -> dict[str, Any]:
         """Handle NicheRadar request for niche opportunity analysis"""
         try:
             logger.info(f"🎯 NicheRadar request: {message}")
@@ -330,7 +329,7 @@ class SmartRouter:
                 scorer = NicheScorer()
                 scored_niches = []
 
-                for source, records in all_data.items():
+                for _source, records in all_data.items():
                     if records:
                         # Group records by topic
                         topic_groups = {}
@@ -399,7 +398,7 @@ class SmartRouter:
                 "status": "error"
             }
 
-    def _extract_topics_from_message(self, message: str) -> List[str]:
+    def _extract_topics_from_message(self, message: str) -> list[str]:
         """Extract topics from user message"""
         message_lower = message.lower()
 
@@ -420,7 +419,7 @@ class SmartRouter:
 
         return topics[:5]  # Limit to 5 topics
 
-    def _format_niche_radar_response(self, top_niches: List) -> str:
+    def _format_niche_radar_response(self, top_niches: list) -> str:
         """Format NicheRadar response"""
         response = "🎯 **NICHE RADAR - TOP 10 CƠ HỘI NICH**\n\n"
 
@@ -443,7 +442,7 @@ class SmartRouter:
 
         return response
 
-    def _handle_web_request(self, request_type: str, message: str) -> Dict[str, Any]:
+    def _handle_web_request(self, request_type: str, message: str) -> dict[str, Any]:
         """Handle web request with sandbox and content filtering"""
         try:
             # Check sandbox permission
@@ -515,7 +514,7 @@ class SmartRouter:
                 "status": "error"
             }
 
-    def _format_web_response(self, request_type: str, data: Dict[str, Any]) -> str:
+    def _format_web_response(self, request_type: str, data: dict[str, Any]) -> str:
         """Format web response data into readable text"""
         try:
             if request_type == "news":
@@ -541,7 +540,7 @@ class SmartRouter:
 
                 response = "🐙 GitHub Trending Repositories:\n\n"
                 for i, repo in enumerate(repos[:5], 1):
-                    name = repo.get("name", "Unknown")
+                    repo.get("name", "Unknown")
                     full_name = repo.get("full_name", "Unknown")
                     description = repo.get("description", "Không có mô tả")
                     stars = repo.get("stars", 0)
@@ -575,7 +574,7 @@ class SmartRouter:
             logger.error(f"❌ Web response formatting error: {e}")
             return "Lỗi khi định dạng dữ liệu web."
 
-    def _call_ollama(self, model: str, message: str, system_prompt: Optional[str] = None) -> Dict[str, Any]:
+    def _call_ollama(self, model: str, message: str, system_prompt: Optional[str] = None) -> dict[str, Any]:
         """Call Ollama API with system prompt"""
         try:
             # Use simple prompt format for better compatibility
@@ -635,7 +634,7 @@ class SmartRouter:
                 "status": "error"
             }
 
-    def _call_deepseek_cloud(self, message: str, system_prompt: Optional[str] = None) -> Dict[str, Any]:
+    def _call_deepseek_cloud(self, message: str, system_prompt: Optional[str] = None) -> dict[str, Any]:
         """Call DeepSeek Cloud API"""
         try:
             headers = {
@@ -673,7 +672,7 @@ class SmartRouter:
             logger.error(f"DeepSeek Cloud call error: {e}")
             return self._call_ollama("deepseek-coder:6.7b", message, system_prompt)  # Fallback
 
-    def _call_openrouter(self, model: str, message: str, system_prompt: Optional[str] = None) -> Dict[str, Any]:
+    def _call_openrouter(self, model: str, message: str, system_prompt: Optional[str] = None) -> dict[str, Any]:
         """Call OpenRouter API (GPT-5, Claude, etc.)"""
         try:
             headers = {
@@ -774,7 +773,7 @@ class StillMeHandler(BaseHTTPRequestHandler):
             message = data.get('message', '')
             session_id = data.get('session_id', 'default')
             user_id = data.get('user_id', 'anonymous')
-            language = data.get('language', 'vi')
+            data.get('language', 'vi')
             system_prompt = data.get('system_prompt', None)  # Get system prompt from request
             web_search_enabled = data.get('web_search', True)  # Get web search toggle from request
 
@@ -858,7 +857,7 @@ class StillMeHandler(BaseHTTPRequestHandler):
                 "status": "error"
             })
 
-    def _send_json_response(self, status_code: int, data: Dict[str, Any]):
+    def _send_json_response(self, status_code: int, data: dict[str, Any]):
         """Send JSON response"""
         self.send_response(status_code)
         self.send_header('Content-Type', 'application/json')

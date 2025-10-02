@@ -6,7 +6,7 @@ Provides semantic search functionality for clarification context
 
 import logging
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -16,12 +16,12 @@ class SearchResult:
     name: str
     content: str
     relevance_score: float
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 class SemanticSearch:
     """
     Semantic search implementation for clarification context
-    
+
     This is a stub implementation that provides basic functionality.
     In a production system, this would integrate with vector databases,
     embeddings, or other semantic search technologies.
@@ -31,7 +31,7 @@ class SemanticSearch:
         self.knowledge_base = self._initialize_knowledge_base()
         self.index = self._build_index()
 
-    def _initialize_knowledge_base(self) -> List[Dict[str, Any]]:
+    def _initialize_knowledge_base(self) -> list[dict[str, Any]]:
         """Initialize a basic knowledge base"""
         return [
             {
@@ -126,7 +126,7 @@ class SemanticSearch:
             }
         ]
 
-    def _build_index(self) -> Dict[str, List[int]]:
+    def _build_index(self) -> dict[str, list[int]]:
         """Build a simple keyword index"""
         index = {}
         for i, item in enumerate(self.knowledge_base):
@@ -152,14 +152,14 @@ class SemanticSearch:
 
         return index
 
-    def find_related_items(self, query: str, limit: int = 5) -> List[SearchResult]:
+    def find_related_items(self, query: str, limit: int = 5) -> list[SearchResult]:
         """
         Find items related to the query
-        
+
         Args:
             query: Search query
             limit: Maximum number of results
-            
+
         Returns:
             List of SearchResult objects
         """
@@ -220,14 +220,14 @@ class SemanticSearch:
         logger.debug(f"Semantic search for '{query}' returned {len(results)} results")
         return results
 
-    def find_by_category(self, category: str, limit: int = 5) -> List[SearchResult]:
+    def find_by_category(self, category: str, limit: int = 5) -> list[SearchResult]:
         """
         Find items by category
-        
+
         Args:
             category: Category to search for
             limit: Maximum number of results
-            
+
         Returns:
             List of SearchResult objects
         """
@@ -249,14 +249,14 @@ class SemanticSearch:
 
         return results[:limit]
 
-    def find_by_tags(self, tags: List[str], limit: int = 5) -> List[SearchResult]:
+    def find_by_tags(self, tags: list[str], limit: int = 5) -> list[SearchResult]:
         """
         Find items by tags
-        
+
         Args:
             tags: List of tags to search for
             limit: Maximum number of results
-            
+
         Returns:
             List of SearchResult objects
         """
@@ -285,14 +285,14 @@ class SemanticSearch:
         results.sort(key=lambda x: x.relevance_score, reverse=True)
         return results[:limit]
 
-    def get_suggestions_for_domain(self, domain: str, limit: int = 3) -> List[str]:
+    def get_suggestions_for_domain(self, domain: str, limit: int = 3) -> list[str]:
         """
         Get suggestions for a specific domain
-        
+
         Args:
             domain: Domain (web, data, ml, devops, etc.)
             limit: Maximum number of suggestions
-            
+
         Returns:
             List of suggestion strings
         """
@@ -314,7 +314,7 @@ class SemanticSearch:
 
         return suggestions[:limit]
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get semantic search statistics"""
         categories = {}
         for item in self.knowledge_base:

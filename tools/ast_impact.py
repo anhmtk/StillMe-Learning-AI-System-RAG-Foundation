@@ -4,7 +4,7 @@ import ast
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ class ASTImpact:
     impact_level: str
     description: str
     line_number: int
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -28,7 +28,7 @@ class ASTImpactAnalyzer:
         self.logger = logger
         self.logger.info("✅ ASTImpactAnalyzer initialized")
 
-    def analyze_code_impact(self, code: str) -> List[ASTImpact]:
+    def analyze_code_impact(self, code: str) -> list[ASTImpact]:
         """Analyze code impact using AST"""
         try:
             tree = ast.parse(code)
@@ -67,7 +67,7 @@ class ASTImpactAnalyzer:
             self.logger.error(f"❌ AST analysis failed: {e}")
             return []
 
-    def get_impact_summary(self, impacts: List[ASTImpact]) -> Dict[str, Any]:
+    def get_impact_summary(self, impacts: list[ASTImpact]) -> dict[str, Any]:
         """Get impact summary"""
         try:
             impact_counts = {}

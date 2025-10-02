@@ -28,7 +28,7 @@ import time
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from .reflection_scorer import ReflectionScorer, ScoringResult, ScoringWeights
 from .secrecy_filter import SecrecyFilter
@@ -65,9 +65,9 @@ class ReflectionContext:
     intent: str = "general"
     persona: str = "friendly"
     locale: str = "vi"
-    user_preferences: Dict[str, Any] = field(default_factory=dict)
-    conversation_history: List[Dict[str, str]] = field(default_factory=list)
-    constraints: Dict[str, Any] = field(default_factory=dict)
+    user_preferences: dict[str, Any] = field(default_factory=dict)
+    conversation_history: list[dict[str, str]] = field(default_factory=list)
+    constraints: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -81,8 +81,8 @@ class ReflectionResult:
     steps_taken: int
     time_taken: float
     stop_reason: str
-    trace: List[Dict[str, Any]] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    trace: list[dict[str, Any]] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class ReflectionController:
@@ -557,7 +557,7 @@ class ReflectionController:
             self._performance_stats["average_time"] * (total - 1) + time_taken
         ) / total
 
-    def get_performance_stats(self) -> Dict[str, Any]:
+    def get_performance_stats(self) -> dict[str, Any]:
         """Get performance statistics / Lấy thống kê hiệu suất"""
         return self._performance_stats.copy()
 

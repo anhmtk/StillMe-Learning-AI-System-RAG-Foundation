@@ -270,7 +270,7 @@ def main():
             success = False
 
     # Generate QA report
-    qa_report = generate_qa_report()
+    generate_qa_report()
 
     # Print final results
     print("\n" + "=" * 50)

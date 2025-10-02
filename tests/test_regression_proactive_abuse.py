@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any
 
 #!/usr/bin/env python3
 """
@@ -50,7 +50,7 @@ class RegressionProactiveAbuseTestSuite:
             "start_time": time.time()
         }
 
-    def _load_slang_cases(self) -> List[Dict[str, Any]]:
+    def _load_slang_cases(self) -> list[dict[str, Any]]:
         """Load slang test cases"""
         return [
             # Classic abbreviations
@@ -106,7 +106,7 @@ class RegressionProactiveAbuseTestSuite:
             {"text": "This is correct imo", "expected": False, "category": "end_slang"},
         ]
 
-    def _load_vague_cases(self) -> List[Dict[str, Any]]:
+    def _load_vague_cases(self) -> list[dict[str, Any]]:
         """Load vague test cases"""
         return [
             # Basic vague phrases
@@ -148,7 +148,7 @@ class RegressionProactiveAbuseTestSuite:
             {"text": "cải thiện nó", "expected": False, "category": "mixed_vague"},
         ]
 
-    def _load_edge_cases(self) -> List[Dict[str, Any]]:
+    def _load_edge_cases(self) -> list[dict[str, Any]]:
         """Load edge cases"""
         return [
             # Empty and minimal inputs
@@ -181,19 +181,19 @@ class RegressionProactiveAbuseTestSuite:
             {"text": "What is the most efficient way to sort a large dataset?", "expected": True, "category": "clear"},
         ]
 
-    def run_regression_tests(self) -> Dict[str, Any]:
+    def run_regression_tests(self) -> dict[str, Any]:
         """Run comprehensive regression tests"""
         print("🛡️ Starting Regression SEAL-GRADE Test Suite for Proactive Abuse Guard")
         print("=" * 80)
 
         # Test slang detection
-        slang_results = self._test_category("Slang Detection", self.slang_cases)
+        self._test_category("Slang Detection", self.slang_cases)
 
         # Test vague detection
-        vague_results = self._test_category("Vague Detection", self.vague_cases)
+        self._test_category("Vague Detection", self.vague_cases)
 
         # Test edge cases
-        edge_results = self._test_category("Edge Cases", self.edge_cases)
+        self._test_category("Edge Cases", self.edge_cases)
 
         # Calculate overall metrics
         self._calculate_metrics()
@@ -203,7 +203,7 @@ class RegressionProactiveAbuseTestSuite:
 
         return report
 
-    def _test_category(self, category_name: str, test_cases: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _test_category(self, category_name: str, test_cases: list[dict[str, Any]]) -> dict[str, Any]:
         """Test a specific category"""
         print(f"\n📋 Testing {category_name}...")
 
@@ -297,7 +297,7 @@ class RegressionProactiveAbuseTestSuite:
         self.metrics["total_time_s"] = time.time() - self.metrics["start_time"]
         self.metrics["throughput_req_s"] = self.metrics["total_tests"] / self.metrics["total_time_s"] if self.metrics["total_time_s"] > 0 else 0
 
-    def _generate_report(self) -> Dict[str, Any]:
+    def _generate_report(self) -> dict[str, Any]:
         """Generate comprehensive test report"""
         overall_pass_rate = (self.metrics["passed"] / self.metrics["total_tests"]) * 100 if self.metrics["total_tests"] > 0 else 0
 

@@ -180,7 +180,7 @@ class TestHTTPUtilities:
         client = AsyncHttpClient()
         builder = HttpRequestBuilder(client)
 
-        request = (
+        (
             builder.method(HTTPMethod.POST)
             .url("https://api.example.com/test")
             .header("Authorization", "Bearer token")

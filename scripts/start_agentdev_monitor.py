@@ -17,7 +17,6 @@ Usage:
 import argparse
 import json
 import logging
-import os
 import signal
 import sys
 import time
@@ -121,7 +120,7 @@ class AgentDevOpsService:
         """Run the service forever with patrol scheduling"""
         try:
             while self.running:
-                current_time = time.time()
+                time.time()
 
                 # Check if quick patrol should run
                 if self.patrol_runner.should_run_quick_patrol():

@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -30,10 +30,10 @@ class ReflectionScore:
     score_id: str
     reflection_id: str
     overall_score: float
-    individual_scores: List[Score]
+    individual_scores: list[Score]
     confidence: float
     timestamp: datetime
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -45,11 +45,11 @@ class ScoringResult:
     result_id: str
     reflection_id: str
     overall_score: float
-    individual_scores: List[Score]
+    individual_scores: list[Score]
     confidence: float
-    recommendations: List[str]
+    recommendations: list[str]
     timestamp: datetime
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -62,11 +62,11 @@ class ReflectionScorer:
 
     def __init__(self):
         self.logger = logger
-        self.scores: List[ReflectionScore] = []
+        self.scores: list[ReflectionScore] = []
         self.scoring_weights = self._initialize_scoring_weights()
         self.logger.info("✅ ReflectionScorer initialized")
 
-    def _initialize_scoring_weights(self) -> Dict[ScoringCriteria, float]:
+    def _initialize_scoring_weights(self) -> dict[ScoringCriteria, float]:
         """Initialize scoring weights"""
         return {
             ScoringCriteria.RELEVANCE: 0.25,
@@ -79,7 +79,7 @@ class ReflectionScorer:
     def score_reflection(self,
                         reflection_id: str,
                         content: str,
-                        context: Dict[str, Any] = None) -> ReflectionScore:
+                        context: dict[str, Any] = None) -> ReflectionScore:
         """Score a reflection"""
         try:
             score_id = f"score_{len(self.scores) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -127,7 +127,7 @@ class ReflectionScorer:
             self.logger.error(f"❌ Failed to score reflection: {e}")
             raise
 
-    def _calculate_criteria_score(self, criteria: ScoringCriteria, content: str, context: Dict[str, Any] = None) -> float:
+    def _calculate_criteria_score(self, criteria: ScoringCriteria, content: str, context: dict[str, Any] = None) -> float:
         """Calculate score for specific criteria"""
         try:
             if criteria == ScoringCriteria.RELEVANCE:
@@ -180,7 +180,7 @@ class ReflectionScorer:
         else:
             return f"Poor {criteria.value}"
 
-    def _calculate_confidence(self, individual_scores: List[Score]) -> float:
+    def _calculate_confidence(self, individual_scores: list[Score]) -> float:
         """Calculate confidence in the scoring"""
         try:
             # Simple confidence calculation based on score consistency
@@ -200,7 +200,7 @@ class ReflectionScorer:
             self.logger.error(f"❌ Failed to calculate confidence: {e}")
             return 0.5
 
-    def get_scores_by_reflection(self, reflection_id: str) -> List[ReflectionScore]:
+    def get_scores_by_reflection(self, reflection_id: str) -> list[ReflectionScore]:
         """Get scores for a specific reflection"""
         return [s for s in self.scores if s.reflection_id == reflection_id]
 
@@ -227,7 +227,7 @@ class ReflectionScorer:
             self.logger.error(f"❌ Failed to get average score: {e}")
             return 0.0
 
-    def get_scoring_summary(self) -> Dict[str, Any]:
+    def get_scoring_summary(self) -> dict[str, Any]:
         """Get scoring summary"""
         try:
             total_scores = len(self.scores)
@@ -275,7 +275,7 @@ class ReflectionScorer:
     def score_with_recommendations(self,
                                   reflection_id: str,
                                   content: str,
-                                  context: Dict[str, Any] = None) -> ScoringResult:
+                                  context: dict[str, Any] = None) -> ScoringResult:
         """Score reflection with recommendations"""
         try:
             # Get basic score
@@ -303,7 +303,7 @@ class ReflectionScorer:
             self.logger.error(f"❌ Failed to score with recommendations: {e}")
             raise
 
-    def _generate_recommendations(self, reflection_score: ReflectionScore) -> List[str]:
+    def _generate_recommendations(self, reflection_score: ReflectionScore) -> list[str]:
         """Generate recommendations based on score"""
         try:
             recommendations = []

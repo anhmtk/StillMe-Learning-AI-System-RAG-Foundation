@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -30,14 +30,14 @@ class LessonProposal:
     category: str
     difficulty: str
     estimated_duration: int  # minutes
-    prerequisites: List[str]
-    learning_objectives: List[str]
+    prerequisites: list[str]
+    learning_objectives: list[str]
     status: LessonStatus
     created_by: str
     created_at: datetime
     approved_by: Optional[str] = None
     approved_at: Optional[datetime] = None
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: Optional[dict[str, Any]] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -53,8 +53,8 @@ class DailySupervisor:
     lessons_failed: int
     total_learning_time: int  # minutes
     performance_score: float
-    notes: List[str]
-    metadata: Optional[Dict[str, Any]] = None
+    notes: list[str]
+    metadata: Optional[dict[str, Any]] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -65,12 +65,12 @@ class Supervisor:
 
     def __init__(self):
         self.logger = logger
-        self.lesson_proposals: List[LessonProposal] = []
-        self.daily_supervisors: List[DailySupervisor] = []
+        self.lesson_proposals: list[LessonProposal] = []
+        self.daily_supervisors: list[DailySupervisor] = []
         self.supervisor_config = self._initialize_supervisor_config()
         self.logger.info("✅ Supervisor initialized")
 
-    def _initialize_supervisor_config(self) -> Dict[str, Any]:
+    def _initialize_supervisor_config(self) -> dict[str, Any]:
         """Initialize supervisor configuration"""
         return {
             "max_lessons_per_day": 10,
@@ -94,8 +94,8 @@ class Supervisor:
                               category: str,
                               difficulty: str = "medium",
                               estimated_duration: int = 30,
-                              prerequisites: Optional[List[str]] = None,
-                              learning_objectives: Optional[List[str]] = None,
+                              prerequisites: Optional[list[str]] = None,
+                              learning_objectives: Optional[list[str]] = None,
                               created_by: str = "system") -> LessonProposal:
         """Create a new lesson proposal"""
         try:
@@ -160,11 +160,11 @@ class Supervisor:
             self.logger.error(f"❌ Failed to reject lesson proposal: {e}")
             return False
 
-    def get_pending_lesson_proposals(self) -> List[LessonProposal]:
+    def get_pending_lesson_proposals(self) -> list[LessonProposal]:
         """Get pending lesson proposals"""
         return [p for p in self.lesson_proposals if p.status == LessonStatus.PENDING]
 
-    def get_approved_lesson_proposals(self) -> List[LessonProposal]:
+    def get_approved_lesson_proposals(self) -> list[LessonProposal]:
         """Get approved lesson proposals"""
         return [p for p in self.lesson_proposals if p.status == LessonStatus.APPROVED]
 
@@ -245,7 +245,7 @@ class Supervisor:
             self.logger.error(f"❌ Failed to get daily supervisor: {e}")
             return None
 
-    def get_supervisor_summary(self) -> Dict[str, Any]:
+    def get_supervisor_summary(self) -> dict[str, Any]:
         """Get supervisor summary"""
         try:
             total_proposals = len(self.lesson_proposals)

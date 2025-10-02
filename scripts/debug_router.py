@@ -15,7 +15,6 @@ import argparse
 import os
 import sys
 import time
-from typing import Dict, List, Optional
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))
@@ -28,7 +27,7 @@ class RouterDebugger:
         self.manager = UnifiedAPIManager()
         self.analyzer = ComplexityAnalyzer()
 
-    def debug_prompt(self, prompt: str, verbose: bool = True) -> Dict:
+    def debug_prompt(self, prompt: str, verbose: bool = True) -> dict:
         """Debug a single prompt with detailed analysis"""
         print(f"🔍 Debugging Prompt: {prompt}")
         print("=" * 80)

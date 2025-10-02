@@ -12,10 +12,9 @@ Tính năng:
 
 import json
 import logging
-import os
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -30,21 +29,21 @@ class HTMLReportBuilder:
         self.logger = logger
 
     def build_comprehensive_report(self,
-                                 persona_scores: List[Dict],
-                                 safety_scores: List[Dict],
-                                 translation_scores: List[Dict],
-                                 efficiency_scores: List[Dict],
-                                 metadata: Dict[str, Any]) -> str:
+                                 persona_scores: list[dict],
+                                 safety_scores: list[dict],
+                                 translation_scores: list[dict],
+                                 efficiency_scores: list[dict],
+                                 metadata: dict[str, Any]) -> str:
         """
         Tạo báo cáo HTML toàn diện
-        
+
         Args:
             persona_scores: Kết quả PersonaEval
             safety_scores: Kết quả SafetyEval
             translation_scores: Kết quả TranslationEval
             efficiency_scores: Kết quả EfficiencyEval
             metadata: Metadata bổ sung
-            
+
         Returns:
             str: Đường dẫn file HTML
         """
@@ -78,10 +77,10 @@ class HTMLReportBuilder:
             return ""
 
     def _calculate_overall_metrics(self,
-                                 persona_scores: List[Dict],
-                                 safety_scores: List[Dict],
-                                 translation_scores: List[Dict],
-                                 efficiency_scores: List[Dict]) -> Dict[str, Any]:
+                                 persona_scores: list[dict],
+                                 safety_scores: list[dict],
+                                 translation_scores: list[dict],
+                                 efficiency_scores: list[dict]) -> dict[str, Any]:
         """Tính toán metrics tổng thể"""
         try:
             # Calculate averages
@@ -118,12 +117,12 @@ class HTMLReportBuilder:
             return {"overall_score": 0, "average_scores": {}, "total_responses": 0, "score_distribution": {}}
 
     def _generate_html_content(self,
-                             persona_scores: List[Dict],
-                             safety_scores: List[Dict],
-                             translation_scores: List[Dict],
-                             efficiency_scores: List[Dict],
-                             overall_metrics: Dict[str, Any],
-                             metadata: Dict[str, Any]) -> str:
+                             persona_scores: list[dict],
+                             safety_scores: list[dict],
+                             translation_scores: list[dict],
+                             efficiency_scores: list[dict],
+                             overall_metrics: dict[str, Any],
+                             metadata: dict[str, Any]) -> str:
         """Tạo nội dung HTML"""
 
         # HTML template
@@ -281,7 +280,7 @@ class HTMLReportBuilder:
             <h1>🤖 StillMe AI Evaluation Report</h1>
             <p>Comprehensive Performance Analysis & Metrics</p>
         </div>
-        
+
         <div class="content">
             <!-- Overall Metrics -->
             <div class="section">
@@ -319,7 +318,7 @@ class HTMLReportBuilder:
                     </div>
                 </div>
             </div>
-            
+
             <!-- Score Distribution Chart -->
             <div class="section">
                 <h2>📈 Score Distribution</h2>
@@ -328,36 +327,36 @@ class HTMLReportBuilder:
                     <div id="scoreDistributionChart"></div>
                 </div>
             </div>
-            
+
             <!-- Detailed Scores -->
             <div class="section">
                 <h2>🔍 Detailed Evaluation Scores</h2>
-                
+
                 <h3>Persona Evaluation</h3>
                 <div class="score-bar">
                     <div class="score-fill {persona_class}" style="width: {persona_width}%"></div>
                 </div>
                 <p>Addressing Style: {persona_addressing} | Communication Tone: {persona_tone} | Consistency: {persona_consistency}</p>
-                
+
                 <h3>Safety Evaluation</h3>
                 <div class="score-bar">
                     <div class="score-fill {safety_class}" style="width: {safety_width}%"></div>
                 </div>
                 <p>Ethical Filtering: {safety_ethical} | Jailbreak Resistance: {safety_jailbreak} | PII Protection: {safety_pii}</p>
-                
+
                 <h3>Translation Evaluation</h3>
                 <div class="score-bar">
                     <div class="score-fill {translation_class}" style="width: {translation_width}%"></div>
                 </div>
                 <p>Language Detection: {translation_detection} | Translation Accuracy: {translation_accuracy} | Context Preservation: {translation_context}</p>
-                
+
                 <h3>Efficiency Evaluation</h3>
                 <div class="score-bar">
                     <div class="score-fill {efficiency_class}" style="width: {efficiency_width}%"></div>
                 </div>
                 <p>Latency: {efficiency_latency} | Token Cost: {efficiency_cost} | Response Quality: {efficiency_quality}</p>
             </div>
-            
+
             <!-- Performance Comparison -->
             <div class="section">
                 <h2>⚖️ Performance Comparison</h2>
@@ -366,7 +365,7 @@ class HTMLReportBuilder:
                     <div id="comparisonChart"></div>
                 </div>
             </div>
-            
+
             <!-- Recommendations -->
             <div class="section">
                 <h2>💡 Recommendations & Next Steps</h2>
@@ -374,7 +373,7 @@ class HTMLReportBuilder:
                     {recommendations}
                 </div>
             </div>
-            
+
             <!-- Action Items -->
             <div class="section">
                 <h2>🔧 Action Items</h2>
@@ -382,7 +381,7 @@ class HTMLReportBuilder:
                     {action_items}
                 </div>
             </div>
-            
+
             <!-- Metadata -->
             <div class="section">
                 <h2>📋 Test Configuration</h2>
@@ -395,12 +394,12 @@ class HTMLReportBuilder:
                 </table>
             </div>
         </div>
-        
+
         <div class="footer">
             <p>Generated by StillMe Test & Evaluation Harness | {timestamp}</p>
         </div>
     </div>
-    
+
     <script>
         // Score Distribution Chart
         var scoreData = {{
@@ -411,16 +410,16 @@ class HTMLReportBuilder:
                 color: ['#28a745', '#ffc107', '#fd7e14', '#dc3545']
             }}
         }};
-        
+
         var scoreLayout = {{
             title: 'Score Distribution',
             xaxis: {{ title: 'Performance Level' }},
             yaxis: {{ title: 'Number of Responses' }},
             showlegend: false
         }};
-        
+
         Plotly.newPlot('scoreDistributionChart', [scoreData], scoreLayout);
-        
+
         // Comparison Chart
         var comparisonData = [
             {{
@@ -438,14 +437,14 @@ class HTMLReportBuilder:
                 marker: {{ color: '#6c757d' }}
             }}
         ];
-        
+
         var comparisonLayout = {{
             title: 'StillMe AI vs Baseline Performance',
             xaxis: {{ title: 'Evaluation Category' }},
             yaxis: {{ title: 'Score (0-1)' }},
             barmode: 'group'
         }};
-        
+
         Plotly.newPlot('comparisonChart', comparisonData, comparisonLayout);
     </script>
 </body>
@@ -495,7 +494,7 @@ class HTMLReportBuilder:
         else:
             return "poor"
 
-    def _generate_recommendations(self, overall_metrics: Dict[str, Any]) -> str:
+    def _generate_recommendations(self, overall_metrics: dict[str, Any]) -> str:
         """Tạo recommendations dựa trên kết quả"""
         recommendations = []
 
@@ -532,7 +531,7 @@ class HTMLReportBuilder:
 
         return "<br>".join(recommendations) if recommendations else "No specific recommendations at this time."
 
-    def _generate_action_items(self, overall_metrics: Dict[str, Any]) -> str:
+    def _generate_action_items(self, overall_metrics: dict[str, Any]) -> str:
         """Tạo action items dựa trên failed SLOs"""
         action_items = overall_metrics.get('action_items', [])
 
@@ -570,11 +569,11 @@ class HTMLReportBuilder:
         return ''.join(html_items)
 
     def export_json_report(self,
-                          persona_scores: List[Dict],
-                          safety_scores: List[Dict],
-                          translation_scores: List[Dict],
-                          efficiency_scores: List[Dict],
-                          metadata: Dict[str, Any]) -> str:
+                          persona_scores: list[dict],
+                          safety_scores: list[dict],
+                          translation_scores: list[dict],
+                          efficiency_scores: list[dict],
+                          metadata: dict[str, Any]) -> str:
         """Export báo cáo JSON"""
         try:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 """
 Test Suite for Observability Export
@@ -33,7 +33,7 @@ class ObservabilityTestResult:
     expected_value: Any
     actual_value: Any
     success: bool
-    details: Dict[str, Any]
+    details: dict[str, Any]
 
 
 class ObservabilityExportTestSuite:
@@ -380,7 +380,7 @@ class ObservabilityExportTestSuite:
         # Wait for server to start
         time.sleep(2)
 
-    def run_all_tests(self) -> Dict[str, Any]:
+    def run_all_tests(self) -> dict[str, Any]:
         """Run all observability export tests"""
         print("📊 Starting Observability Export Test Suite")
         print("=" * 60)

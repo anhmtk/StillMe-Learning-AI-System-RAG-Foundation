@@ -12,7 +12,7 @@ import time
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import aiohttp
 import psutil
@@ -33,8 +33,8 @@ class PerformanceMetric:
 class PerformanceReport:
     timestamp: str
     duration: float
-    metrics: List[PerformanceMetric]
-    recommendations: List[str]
+    metrics: list[PerformanceMetric]
+    recommendations: list[str]
     optimization_score: float
 
 class PerformanceOptimizer:
@@ -223,7 +223,7 @@ class PerformanceOptimizer:
                 start_time = time.time()
 
                 try:
-                    async with self.session.get(f"{self.base_url}{endpoint}") as response:
+                    async with self.session.get(f"{self.base_url}{endpoint}"):
                         response_time = time.time() - start_time
 
                         self.metrics.append(PerformanceMetric(
@@ -293,7 +293,7 @@ class PerformanceOptimizer:
         except Exception as e:
             logger.error(f"❌ Failed to collect security metrics: {e}")
 
-    async def _identify_bottlenecks(self) -> List[Dict[str, Any]]:
+    async def _identify_bottlenecks(self) -> list[dict[str, Any]]:
         """Identify performance bottlenecks"""
         bottlenecks = []
 
@@ -334,7 +334,7 @@ class PerformanceOptimizer:
 
         return bottlenecks
 
-    async def _generate_recommendations(self, bottlenecks: List[Dict[str, Any]]) -> List[str]:
+    async def _generate_recommendations(self, bottlenecks: list[dict[str, Any]]) -> list[str]:
         """Generate optimization recommendations"""
         recommendations = []
 
@@ -412,7 +412,7 @@ class PerformanceOptimizer:
 
         return max(0.0, score)
 
-    async def apply_optimizations(self) -> Dict[str, Any]:
+    async def apply_optimizations(self) -> dict[str, Any]:
         """Apply performance optimizations"""
         logger.info("🚀 Applying performance optimizations...")
 

@@ -16,13 +16,12 @@ Tính năng:
 
 import hashlib
 import json
-import os
 import time
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 
 class StrategyType(Enum):
@@ -58,14 +57,14 @@ class Strategy:
     strategy_type: StrategyType
     name: str
     description: str
-    context_types: List[ContextType]
-    conditions: List[str]
-    actions: List[str]
-    expected_outcomes: List[str]
+    context_types: list[ContextType]
+    conditions: list[str]
+    actions: list[str]
+    expected_outcomes: list[str]
     success_rate: float
     performance_level: PerformanceLevel
     risk_level: float
-    resource_usage: Dict[str, float]
+    resource_usage: dict[str, float]
     created_at: datetime
     last_updated: datetime
     usage_count: int = 0
@@ -80,8 +79,8 @@ class Context:
     complexity: float
     urgency: float
     risk_level: float
-    resource_constraints: Dict[str, float]
-    success_criteria: List[str]
+    resource_constraints: dict[str, float]
+    success_criteria: list[str]
     timestamp: datetime
 
 @dataclass
@@ -90,9 +89,9 @@ class StrategyResult:
     strategy_id: str
     context_id: str
     success: bool
-    performance_metrics: Dict[str, float]
-    actual_outcomes: List[str]
-    lessons_learned: List[str]
+    performance_metrics: dict[str, float]
+    actual_outcomes: list[str]
+    lessons_learned: list[str]
     execution_time: float
     timestamp: datetime
 
@@ -104,9 +103,9 @@ class AdaptiveStrategyResult:
     strategy_confidence: float
     expected_performance: PerformanceLevel
     risk_assessment: float
-    resource_requirements: Dict[str, float]
-    alternative_strategies: List[Strategy]
-    recommendations: List[str]
+    resource_requirements: dict[str, float]
+    alternative_strategies: list[Strategy]
+    recommendations: list[str]
     analysis_time: float
 
 class AdaptiveStrategy:
@@ -134,7 +133,7 @@ class AdaptiveStrategy:
         self.risk_weight = 0.3
         self.resource_weight = 0.3
 
-    def _load_strategies(self) -> List[Strategy]:
+    def _load_strategies(self) -> list[Strategy]:
         """Load strategies from database"""
         if not self.strategies_db.exists():
             return []
@@ -154,7 +153,7 @@ class AdaptiveStrategy:
             print(f"Error loading strategies: {e}")
             return []
 
-    def _load_strategy_results(self) -> List[StrategyResult]:
+    def _load_strategy_results(self) -> list[StrategyResult]:
         """Load strategy results from database"""
         if not self.results_db.exists():
             return []
@@ -319,7 +318,7 @@ class AdaptiveStrategy:
         if isinstance(context, dict):
             # Convert dict to Context object
             context = self.analyze_context(context.get("task", "unknown task"))
-        
+
         suitable_strategies = [
             strategy for strategy in self.strategies
             if context.context_type in strategy.context_types
@@ -406,7 +405,7 @@ class AdaptiveStrategy:
 
         return min(1.0, efficiency)
 
-    def _generate_recommendations(self, strategy: Strategy, context: Context) -> List[str]:
+    def _generate_recommendations(self, strategy: Strategy, context: Context) -> list[str]:
         """Generate recommendations based on selected strategy"""
         recommendations = []
 
@@ -441,8 +440,8 @@ class AdaptiveStrategy:
         return recommendations
 
     def record_strategy_result(self, strategy_id: str, context_id: str,
-                             success: bool, performance_metrics: Dict[str, float],
-                             actual_outcomes: List[str], execution_time: float) -> str:
+                             success: bool, performance_metrics: dict[str, float],
+                             actual_outcomes: list[str], execution_time: float) -> str:
         """Record the result of a strategy execution"""
         result_id = hashlib.md5(f"{strategy_id}_{context_id}_{time.time()}".encode()).hexdigest()[:12]
 
@@ -475,7 +474,7 @@ class AdaptiveStrategy:
 
         return result_id
 
-    def adapt_strategy(self, strategy_id: str, feedback: Dict[str, Any]) -> bool:
+    def adapt_strategy(self, strategy_id: str, feedback: dict[str, Any]) -> bool:
         """Adapt strategy based on feedback"""
         strategy = None
         for s in self.strategies:

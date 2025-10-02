@@ -8,7 +8,7 @@ import json
 import logging
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 from urllib.parse import urlparse
 
 import httpx
@@ -165,17 +165,17 @@ class SecureHttpClient:
         except Exception as e:
             logger.error(f"❌ Failed to log request: {e}")
 
-    async def get(self, url: str, headers: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+    async def get(self, url: str, headers: Optional[dict[str, str]] = None) -> dict[str, Any]:
         """GET request với bảo mật"""
         return await self._make_request("GET", url, headers=headers)
 
-    async def post(self, url: str, data: Optional[Dict[str, Any]] = None,
-                   headers: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+    async def post(self, url: str, data: Optional[dict[str, Any]] = None,
+                   headers: Optional[dict[str, str]] = None) -> dict[str, Any]:
         """POST request với bảo mật"""
         return await self._make_request("POST", url, data=data, headers=headers)
 
-    async def _make_request(self, method: str, url: str, data: Optional[Dict[str, Any]] = None,
-                           headers: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
+    async def _make_request(self, method: str, url: str, data: Optional[dict[str, Any]] = None,
+                           headers: Optional[dict[str, str]] = None) -> dict[str, Any]:
         """Thực hiện HTTP request với bảo mật"""
         start_time = time.time()
 
@@ -261,7 +261,7 @@ class SecureHttpClient:
         self.allowed_domains.add(domain.lower())
         logger.info(f"✅ Added domain to allowlist: {domain}")
 
-    def get_allowed_domains(self) -> List[str]:
+    def get_allowed_domains(self) -> list[str]:
         """Lấy danh sách allowed domains"""
         return list(self.allowed_domains)
 

@@ -9,10 +9,9 @@ Tạo chỉ mục symbol để biết symbol tồn tại ở đâu trong codebas
 import ast
 import json
 import logging
-import os
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -30,11 +29,11 @@ class SymbolIndex:
 
     def __init__(self, project_root: str):
         self.project_root = Path(project_root)
-        self.symbols: Dict[str, List[SymbolInfo]] = {}
+        self.symbols: dict[str, list[SymbolInfo]] = {}
         self.cache_file = self.project_root / "agentdev_symbol_cache.json"
         self.excluded_dirs = {'.git', '.venv', 'venv', 'env', 'artifacts', 'reports', '__pycache__', 'node_modules', 'dist', 'build'}
 
-    def build_index(self, force_rebuild: bool = False) -> Dict[str, int]:
+    def build_index(self, force_rebuild: bool = False) -> dict[str, int]:
         """Xây dựng chỉ mục symbol"""
         stats = {"files_scanned": 0, "symbols_found": 0, "modules_indexed": 0}
 
@@ -81,7 +80,7 @@ class SymbolIndex:
                 return True
         return False
 
-    def _extract_symbols_from_file(self, file_path: Path) -> List[SymbolInfo]:
+    def _extract_symbols_from_file(self, file_path: Path) -> list[SymbolInfo]:
         """Extract symbols from a Python file using AST"""
         symbols = []
 
@@ -124,14 +123,14 @@ class SymbolIndex:
 
         return symbols
 
-    def _add_symbols_to_index(self, symbols: List[SymbolInfo], file_path: Path):
+    def _add_symbols_to_index(self, symbols: list[SymbolInfo], file_path: Path):
         """Add symbols to index"""
         for symbol in symbols:
             if symbol.name not in self.symbols:
                 self.symbols[symbol.name] = []
             self.symbols[symbol.name].append(symbol)
 
-    def find_symbol(self, symbol_name: str) -> List[SymbolInfo]:
+    def find_symbol(self, symbol_name: str) -> list[SymbolInfo]:
         """Tìm symbol trong index"""
         return self.symbols.get(symbol_name, [])
 

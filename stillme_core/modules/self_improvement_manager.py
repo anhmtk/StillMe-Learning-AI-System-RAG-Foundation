@@ -23,7 +23,7 @@ import sys
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 # Add project root to Python path
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -81,8 +81,8 @@ class ProposedChange:
     proposed_content: str
     reason: str
     risk_level: str  # 'LOW', 'MEDIUM', 'HIGH', 'CRITICAL'
-    safety_checks: Dict[str, bool]
-    test_results: Dict[str, bool]
+    safety_checks: dict[str, bool]
+    test_results: dict[str, bool]
     approved: bool = False
     applied: bool = False
     rollback_available: bool = False
@@ -97,8 +97,8 @@ class SafetyReport:
     integrity_check: bool
     test_check: bool
     overall_safe: bool
-    warnings: List[str]
-    recommendations: List[str]
+    warnings: list[str]
+    recommendations: list[str]
 
 
 class SelfImprovementManager:
@@ -130,8 +130,8 @@ class SelfImprovementManager:
         self.file_manager = FileManager()
 
         self.config_path = config_path
-        self.proposed_changes: List[ProposedChange] = []
-        self.safety_reports: List[SafetyReport] = []
+        self.proposed_changes: list[ProposedChange] = []
+        self.safety_reports: list[SafetyReport] = []
         self.backup_dir = Path("backups/self_improvement")
         self.sandbox_dir = Path("sandbox/self_improvement")
         self.proposed_changes_file = "proposed_changes.json"
@@ -168,7 +168,7 @@ class SelfImprovementManager:
         # Tạo thư mục config nếu chưa có
         Path("config").mkdir(exist_ok=True)
 
-    def _load_config(self) -> Dict[str, Any]:
+    def _load_config(self) -> dict[str, Any]:
         """Load cấu hình từ file"""
         default_config = {
             "safety_mode": True,
@@ -238,7 +238,7 @@ class SelfImprovementManager:
 
         return True
 
-    def run_analysis(self) -> Dict[str, Any]:
+    def run_analysis(self) -> dict[str, Any]:
         """
         Bước 1: Thu thập và phân tích dữ liệu (CHỈ ĐỌC)
 
@@ -280,7 +280,7 @@ class SelfImprovementManager:
             self.logger.error(f"Analysis failed: {e}")
             return {"status": "error", "error": str(e), "safety_mode": self.safety_mode}
 
-    def _collect_analysis_data(self) -> Dict[str, Any]:
+    def _collect_analysis_data(self) -> dict[str, Any]:
         """Thu thập dữ liệu để phân tích (CHỈ ĐỌC)"""
         data = {
             "timestamp": datetime.now().isoformat(),
@@ -295,7 +295,7 @@ class SelfImprovementManager:
         self.logger.info(f"Collected analysis data: {len(data)} categories")
         return data
 
-    def _read_chat_history(self) -> List[Dict[str, Any]]:
+    def _read_chat_history(self) -> list[dict[str, Any]]:
         """Đọc lịch sử chat (CHỈ ĐỌC)"""
         chat_files = [
             "conversation_log.txt",
@@ -318,7 +318,7 @@ class SelfImprovementManager:
 
         return history
 
-    def _read_daily_learning_data(self) -> Dict[str, Any]:
+    def _read_daily_learning_data(self) -> dict[str, Any]:
         """Đọc dữ liệu học tập hàng ngày (READ-ONLY)"""
         try:
             # Import DailyLearningManager
@@ -354,7 +354,7 @@ class SelfImprovementManager:
             self.logger.error(f"Error reading daily learning data: {e}")
             return {}
 
-    def _read_performance_logs(self) -> List[Dict[str, Any]]:
+    def _read_performance_logs(self) -> list[dict[str, Any]]:
         """Đọc logs hiệu suất (CHỈ ĐỌC)"""
         perf_files = [
             "api_usage.log",
@@ -377,7 +377,7 @@ class SelfImprovementManager:
 
         return logs
 
-    def _read_error_logs(self) -> List[Dict[str, Any]]:
+    def _read_error_logs(self) -> list[dict[str, Any]]:
         """Đọc logs lỗi (CHỈ ĐỌC)"""
         error_files = ["api_errors.log", "stillme.log", "logs/errors.jsonl"]
 
@@ -393,7 +393,7 @@ class SelfImprovementManager:
 
         return errors
 
-    def _read_system_metrics(self) -> Dict[str, Any]:
+    def _read_system_metrics(self) -> dict[str, Any]:
         """Đọc metrics hệ thống (CHỈ ĐỌC)"""
         metrics = {
             "timestamp": datetime.now().isoformat(),
@@ -417,7 +417,7 @@ class SelfImprovementManager:
 
         return metrics
 
-    def _read_user_feedback(self) -> List[Dict[str, Any]]:
+    def _read_user_feedback(self) -> list[dict[str, Any]]:
         """Đọc feedback từ user (CHỈ ĐỌC)"""
         feedback_files = [
             "user_feedback.json",
@@ -440,7 +440,7 @@ class SelfImprovementManager:
 
         return feedback
 
-    def _analyze_with_ai(self, analysis_data: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _analyze_with_ai(self, analysis_data: dict[str, Any]) -> list[dict[str, Any]]:
         """
         Phân tích dữ liệu với AI để tạo đề xuất (KHÔNG THAY ĐỔI GÌ)
 
@@ -519,7 +519,7 @@ class SelfImprovementManager:
         )
         return proposed_changes
 
-    def _safety_check_change(self, change: Dict[str, Any]) -> bool:
+    def _safety_check_change(self, change: dict[str, Any]) -> bool:
         """
         Kiểm tra an toàn cho một đề xuất thay đổi (VÒNG KIỂM SOÁT 4 MẮT)
 
@@ -574,7 +574,7 @@ class SelfImprovementManager:
         self.logger.info(f"All safety checks passed for change: {change_id}")
         return True
 
-    def _save_proposed_changes(self, changes: List[Dict[str, Any]]) -> None:
+    def _save_proposed_changes(self, changes: list[dict[str, Any]]) -> None:
         """Lưu các đề xuất thay đổi vào file (KHÔNG ÁP DỤNG)"""
         if not changes:
             self.logger.info("No changes to save")
@@ -608,7 +608,7 @@ class SelfImprovementManager:
             f"Saved {len(proposed_changes)} proposed changes to {self.proposed_changes_file}"
         )
 
-    def get_proposed_changes(self) -> List[Dict[str, Any]]:
+    def get_proposed_changes(self) -> list[dict[str, Any]]:
         """Lấy danh sách đề xuất thay đổi (CHỈ ĐỌC)"""
         if os.path.exists(self.proposed_changes_file):
             try:
@@ -649,7 +649,7 @@ class SelfImprovementManager:
         self.logger.warning(f"Change not found: {change_id}")
         return False
 
-    def apply_approved_changes(self) -> Dict[str, Any]:
+    def apply_approved_changes(self) -> dict[str, Any]:
         """
         Áp dụng các đề xuất đã được phê duyệt (SANDOX MODE + ROLLBACK)
 
@@ -733,7 +733,7 @@ class SelfImprovementManager:
 
         return results
 
-    def _create_backup(self, change: Dict[str, Any]) -> str:
+    def _create_backup(self, change: dict[str, Any]) -> str:
         """Tạo backup của file trước khi thay đổi"""
         file_path = change["file_path"]
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -747,7 +747,7 @@ class SelfImprovementManager:
 
         return ""
 
-    def _apply_change_sandbox(self, change: Dict[str, Any]) -> bool:
+    def _apply_change_sandbox(self, change: dict[str, Any]) -> bool:
         """Áp dụng thay đổi trong sandbox"""
         try:
             # Tạo bản sao file trong sandbox
@@ -768,7 +768,7 @@ class SelfImprovementManager:
             self.logger.error(f"Failed to apply change in sandbox: {e}")
             return False
 
-    def _test_in_sandbox(self, change: Dict[str, Any]) -> bool:
+    def _test_in_sandbox(self, change: dict[str, Any]) -> bool:
         """Test thay đổi trong sandbox"""
         try:
             # Import và test module trong sandbox
@@ -794,7 +794,7 @@ class SelfImprovementManager:
             self.logger.error(f"Sandbox test failed: {e}")
             return False
 
-    def _apply_change_real(self, change: Dict[str, Any]) -> bool:
+    def _apply_change_real(self, change: dict[str, Any]) -> bool:
         """Áp dụng thay đổi thực tế"""
         try:
             file_path = change["file_path"]
@@ -830,7 +830,7 @@ class SelfImprovementManager:
             self.logger.error(f"Test suite failed: {e}")
             return False
 
-    def _rollback_change(self, change: Dict[str, Any], backup_path: str) -> bool:
+    def _rollback_change(self, change: dict[str, Any], backup_path: str) -> bool:
         """Rollback thay đổi từ backup"""
         try:
             if backup_path and os.path.exists(backup_path):
@@ -845,7 +845,7 @@ class SelfImprovementManager:
             self.logger.error(f"Rollback failed: {e}")
             return False
 
-    def get_safety_report(self) -> Dict[str, Any]:
+    def get_safety_report(self) -> dict[str, Any]:
         """Tạo báo cáo an toàn tổng quan"""
         changes = self.get_proposed_changes()
 
@@ -898,7 +898,7 @@ class SelfImprovementManager:
 
         return report
 
-    def emergency_rollback_all(self) -> Dict[str, Any]:
+    def emergency_rollback_all(self) -> dict[str, Any]:
         """Rollback khẩn cấp tất cả thay đổi"""
         self.logger.warning("EMERGENCY ROLLBACK INITIATED")
 

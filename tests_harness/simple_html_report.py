@@ -5,11 +5,10 @@ Simple HTML Report Builder - Version đơn giản không có JavaScript
 Tạo báo cáo HTML cơ bản với CSS styling, không có interactive charts
 """
 
-import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -24,11 +23,11 @@ class SimpleHTMLReportBuilder:
         self.logger = logger
 
     def build_simple_report(self,
-                          persona_scores: List[Dict],
-                          safety_scores: List[Dict],
-                          translation_scores: List[Dict],
-                          efficiency_scores: List[Dict],
-                          metadata: Dict[str, Any]) -> str:
+                          persona_scores: list[dict],
+                          safety_scores: list[dict],
+                          translation_scores: list[dict],
+                          efficiency_scores: list[dict],
+                          metadata: dict[str, Any]) -> str:
         """Tạo báo cáo HTML đơn giản"""
         try:
             self.logger.info("🏗️ Building simple HTML report...")
@@ -60,10 +59,10 @@ class SimpleHTMLReportBuilder:
             return ""
 
     def _calculate_overall_metrics(self,
-                                 persona_scores: List[Dict],
-                                 safety_scores: List[Dict],
-                                 translation_scores: List[Dict],
-                                 efficiency_scores: List[Dict]) -> Dict[str, Any]:
+                                 persona_scores: list[dict],
+                                 safety_scores: list[dict],
+                                 translation_scores: list[dict],
+                                 efficiency_scores: list[dict]) -> dict[str, Any]:
         """Tính toán metrics tổng thể"""
         try:
             # Calculate averages
@@ -100,12 +99,12 @@ class SimpleHTMLReportBuilder:
             return {"overall_score": 0, "average_scores": {}, "total_responses": 0, "score_distribution": {}}
 
     def _generate_simple_html(self,
-                             persona_scores: List[Dict],
-                             safety_scores: List[Dict],
-                             translation_scores: List[Dict],
-                             efficiency_scores: List[Dict],
-                             overall_metrics: Dict[str, Any],
-                             metadata: Dict[str, Any]) -> str:
+                             persona_scores: list[dict],
+                             safety_scores: list[dict],
+                             translation_scores: list[dict],
+                             efficiency_scores: list[dict],
+                             overall_metrics: dict[str, Any],
+                             metadata: dict[str, Any]) -> str:
         """Tạo HTML đơn giản"""
 
         # Get values
@@ -275,7 +274,7 @@ class SimpleHTMLReportBuilder:
             <h1>🤖 StillMe AI Evaluation Report</h1>
             <p>Comprehensive Performance Analysis & Metrics</p>
         </div>
-        
+
         <div class="content">
             <!-- Overall Metrics -->
             <div class="section">
@@ -313,7 +312,7 @@ class SimpleHTMLReportBuilder:
                     </div>
                 </div>
             </div>
-            
+
             <!-- Score Distribution -->
             <div class="section">
                 <h2>📈 Score Distribution</h2>
@@ -340,36 +339,36 @@ class SimpleHTMLReportBuilder:
                     </div>
                 </div>
             </div>
-            
+
             <!-- Detailed Scores -->
             <div class="section">
                 <h2>🔍 Detailed Evaluation Scores</h2>
-                
+
                 <h3>Persona Evaluation</h3>
                 <div class="score-bar">
                     <div class="score-fill {self._get_score_class(persona_score)}" style="width: {persona_score * 100}%"></div>
                 </div>
                 <p>Score: {persona_score:.3f} | Communication style and addressing consistency</p>
-                
+
                 <h3>Safety Evaluation</h3>
                 <div class="score-bar">
                     <div class="score-fill {self._get_score_class(safety_score)}" style="width: {safety_score * 100}%"></div>
                 </div>
                 <p>Score: {safety_score:.3f} | Ethical filtering and safety measures</p>
-                
+
                 <h3>Translation Evaluation</h3>
                 <div class="score-bar">
                     <div class="score-fill {self._get_score_class(translation_score)}" style="width: {translation_score * 100}%"></div>
                 </div>
                 <p>Score: {translation_score:.3f} | Language detection and translation accuracy</p>
-                
+
                 <h3>Efficiency Evaluation</h3>
                 <div class="score-bar">
                     <div class="score-fill {self._get_score_class(efficiency_score)}" style="width: {efficiency_score * 100}%"></div>
                 </div>
                 <p>Score: {efficiency_score:.3f} | Performance and cost optimization</p>
             </div>
-            
+
             <!-- Recommendations -->
             <div class="section">
                 <h2>💡 Recommendations & Next Steps</h2>
@@ -377,7 +376,7 @@ class SimpleHTMLReportBuilder:
                     {recommendations}
                 </div>
             </div>
-            
+
             <!-- Metadata -->
             <div class="section">
                 <h2>📋 Test Configuration</h2>
@@ -390,7 +389,7 @@ class SimpleHTMLReportBuilder:
                 </table>
             </div>
         </div>
-        
+
         <div class="footer">
             <p>Generated by StillMe Test & Evaluation Harness | {timestamp}</p>
         </div>
@@ -412,7 +411,7 @@ class SimpleHTMLReportBuilder:
         else:
             return "poor"
 
-    def _generate_recommendations(self, overall_metrics: Dict[str, Any]) -> str:
+    def _generate_recommendations(self, overall_metrics: dict[str, Any]) -> str:
         """Tạo recommendations dựa trên kết quả"""
         recommendations = []
 

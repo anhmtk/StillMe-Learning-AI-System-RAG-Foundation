@@ -5,16 +5,14 @@ Enterprise-grade runtime security monitoring and protection
 """
 
 import asyncio
-import hashlib
 import json
 import re
-import subprocess
 import threading
 import time
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Optional
 
 import aiofiles
 import psutil
@@ -47,7 +45,7 @@ class SecurityAlert:
     timestamp: float
     source: str
     description: str
-    details: Dict[str, Any]
+    details: dict[str, Any]
     mitigation_applied: bool = False
     false_positive: bool = False
 
@@ -69,15 +67,15 @@ class RuntimeProtection:
 
     def __init__(self, config_path: Optional[str] = None):
         self.config = self._load_config(config_path)
-        self.alerts: List[SecurityAlert] = []
-        self.process_profiles: Dict[int, ProcessProfile] = {}
-        self.baseline_processes: Dict[str, str] = {}
+        self.alerts: list[SecurityAlert] = []
+        self.process_profiles: dict[int, ProcessProfile] = {}
+        self.baseline_processes: dict[str, str] = {}
         self.suspicious_patterns = self._load_suspicious_patterns()
         self.monitoring_active = False
-        self.alert_callbacks: List[Callable[[SecurityAlert], None]] = []
+        self.alert_callbacks: list[Callable[[SecurityAlert], None]] = []
         self.lock = threading.RLock()
 
-    def _load_config(self, config_path: Optional[str] = None) -> Dict[str, Any]:
+    def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
         """Load runtime protection configuration"""
         if config_path:
             config_file = Path(config_path)
@@ -111,7 +109,7 @@ class RuntimeProtection:
                 }
             }
 
-    def _load_suspicious_patterns(self) -> Dict[str, List[str]]:
+    def _load_suspicious_patterns(self) -> dict[str, list[str]]:
         """Load suspicious command and behavior patterns"""
         return {
             'suspicious_commands': [
@@ -155,7 +153,7 @@ class RuntimeProtection:
         self.alert_callbacks.append(callback)
 
     def _create_alert(self, event_type: SecurityEvent, threat_level: ThreatLevel,
-                     source: str, description: str, details: Dict[str, Any]) -> SecurityAlert:
+                     source: str, description: str, details: dict[str, Any]) -> SecurityAlert:
         """Create a security alert"""
         alert = SecurityAlert(
             alert_id=f"alert_{int(time.time())}_{hash(description) % 10000}",
@@ -413,7 +411,7 @@ class RuntimeProtection:
         self.monitoring_active = False
         print("🛑 Runtime Protection monitoring stopped")
 
-    def get_security_report(self) -> Dict[str, Any]:
+    def get_security_report(self) -> dict[str, Any]:
         """Get comprehensive security report"""
         with self.lock:
             total_alerts = len(self.alerts)
@@ -476,7 +474,7 @@ def register_security_alert_handler(handler: Callable[[SecurityAlert], None]):
     """Register security alert handler"""
     runtime_protection.register_alert_callback(handler)
 
-def get_security_status() -> Dict[str, Any]:
+def get_security_status() -> dict[str, Any]:
     """Get current security status"""
     return runtime_protection.get_security_report()
 

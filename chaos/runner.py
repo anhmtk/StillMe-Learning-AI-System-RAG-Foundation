@@ -9,17 +9,12 @@ Author: StillMe AI Framework
 Created: 2025-01-08
 """
 
-import json
-import os
 import shutil
 import signal
-import subprocess
-import sys
 import tempfile
-import threading
 import time
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 @dataclass
@@ -28,15 +23,15 @@ class ChaosTestResult:
     test_name: str
     fault_type: str
     recovery_time_ms: float
-    error_surface: List[str]
+    error_surface: list[str]
     success: bool
-    details: Dict[str, Any]
+    details: dict[str, Any]
 
 
 class ChaosRunner:
     """
     Chaos engineering test runner
-    
+
     Tests:
     - Process kill (SIGKILL simulation)
     - Network delay (in-app delay simulation)
@@ -224,7 +219,7 @@ class ChaosRunner:
 
         return pass_rate >= 90.0
 
-    def _simulate_process_kill(self, name: str, signal_type: int, expected_recovery: int) -> Dict[str, Any]:
+    def _simulate_process_kill(self, name: str, signal_type: int, expected_recovery: int) -> dict[str, Any]:
         """Simulate process kill and measure recovery time"""
         start_time = time.time()
 
@@ -233,15 +228,12 @@ class ChaosRunner:
             if signal_type == signal.SIGTERM:
                 # Graceful shutdown
                 time.sleep(0.1)  # 100ms recovery
-                recovery_time = 100
             elif signal_type == signal.SIGINT:
                 # Interrupt - quick recovery
                 time.sleep(0.05)  # 50ms recovery
-                recovery_time = 50
             else:
                 # Force kill - longer recovery
                 time.sleep(0.2)  # 200ms recovery
-                recovery_time = 200
 
             end_time = time.time()
             recovery_time_ms = (end_time - start_time) * 1000
@@ -264,7 +256,7 @@ class ChaosRunner:
                 'details': {'error': str(e)}
             }
 
-    def _simulate_network_delay(self, delay_ms: int, expected_recovery: int) -> Dict[str, Any]:
+    def _simulate_network_delay(self, delay_ms: int, expected_recovery: int) -> dict[str, Any]:
         """Simulate network delay and measure recovery time"""
         start_time = time.time()
 
@@ -297,7 +289,7 @@ class ChaosRunner:
                 'details': {'error': str(e)}
             }
 
-    def _simulate_storage_drop(self, name: str, expected_recovery: int) -> Dict[str, Any]:
+    def _simulate_storage_drop(self, name: str, expected_recovery: int) -> dict[str, Any]:
         """Simulate storage drop and measure recovery time"""
         start_time = time.time()
 
@@ -309,15 +301,12 @@ class ChaosRunner:
                 if name == "disk_full":
                     # Simulate disk full
                     time.sleep(0.1)  # 100ms recovery
-                    recovery_time = 100
                 elif name == "permission_denied":
                     # Simulate permission denied
                     time.sleep(0.05)  # 50ms recovery
-                    recovery_time = 50
                 else:  # io_error
                     # Simulate I/O error
                     time.sleep(0.15)  # 150ms recovery
-                    recovery_time = 150
 
                 end_time = time.time()
                 recovery_time_ms = (end_time - start_time) * 1000
@@ -344,7 +333,7 @@ class ChaosRunner:
                 'details': {'error': str(e)}
             }
 
-    def _simulate_fault_injection(self, name: str, expected_recovery: int) -> Dict[str, Any]:
+    def _simulate_fault_injection(self, name: str, expected_recovery: int) -> dict[str, Any]:
         """Simulate fault injection and measure recovery time"""
         start_time = time.time()
 
@@ -352,15 +341,12 @@ class ChaosRunner:
             if name == "memory_pressure":
                 # Simulate memory pressure
                 time.sleep(0.2)  # 200ms recovery
-                recovery_time = 200
             elif name == "cpu_spike":
                 # Simulate CPU spike
                 time.sleep(0.15)  # 150ms recovery
-                recovery_time = 150
             else:  # resource_exhaustion
                 # Simulate resource exhaustion
                 time.sleep(0.3)  # 300ms recovery
-                recovery_time = 300
 
             end_time = time.time()
             recovery_time_ms = (end_time - start_time) * 1000
@@ -383,7 +369,7 @@ class ChaosRunner:
                 'details': {'error': str(e)}
             }
 
-    def run_all_tests(self) -> Dict[str, Any]:
+    def run_all_tests(self) -> dict[str, Any]:
         """Run all chaos engineering tests"""
         print("🌪️ Starting Chaos Engineering Test Suite")
         print("=" * 60)

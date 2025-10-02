@@ -4,7 +4,7 @@ controller.py - AgentDev orchestration controller
 
 import logging
 import time
-from typing import Any, Dict, List
+from typing import Any
 
 from .executor import PatchExecutor
 from .logging_utils import log_session_end, log_session_start, log_step
@@ -27,7 +27,7 @@ class AgentController:
         self.verifier = Verifier()
         self.repo_root = repo_root
 
-    def run_agent(self, goal: str, max_steps: int = 5) -> Dict[str, Any]:
+    def run_agent(self, goal: str, max_steps: int = 5) -> dict[str, Any]:
         """
         Run AgentDev orchestration loop.
 
@@ -266,11 +266,11 @@ class AgentController:
     def _create_result(
         self,
         goal: str,
-        steps: List[Dict[str, Any]],
+        steps: list[dict[str, Any]],
         passed_steps: int,
         total_duration: float,
         summary: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Create final result dictionary."""
         total_steps = len(steps)
         pass_rate = (passed_steps / total_steps) if total_steps > 0 else 0.0
@@ -288,7 +288,7 @@ class AgentController:
     def _create_summary(
         self,
         goal: str,
-        steps: List[Dict[str, Any]],
+        steps: list[dict[str, Any]],
         passed_steps: int,
         total_steps: int,
     ) -> str:
@@ -314,7 +314,7 @@ class AgentController:
 
 
 # Convenience function for direct usage
-def run_agent(goal: str, max_steps: int = 5, repo_root: str = ".") -> Dict[str, Any]:
+def run_agent(goal: str, max_steps: int = 5, repo_root: str = ".") -> dict[str, Any]:
     """
     Convenience function to run AgentDev.
 

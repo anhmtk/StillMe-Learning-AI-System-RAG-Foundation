@@ -94,7 +94,7 @@ def test_injection_en():
 
     # Check blocked
     assert (
-        result.get("blocked", False) == True
+        result.get("blocked", False)
     ), f"Expected blocked=True, got: {result.get('blocked')}"
 
 

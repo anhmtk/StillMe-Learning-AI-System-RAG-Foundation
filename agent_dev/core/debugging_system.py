@@ -14,18 +14,16 @@ Tính năng:
 
 import json
 import logging
-import os
 import queue
 import re
 import threading
 import time
-import traceback
-from collections import Counter, defaultdict
+from collections import Counter
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Optional
 
 
 class DebugLevel(Enum):
@@ -65,8 +63,8 @@ class ErrorPattern:
     description: str
     frequency: int
     severity: DebugLevel
-    common_causes: List[str]
-    solutions: List[str]
+    common_causes: list[str]
+    solutions: list[str]
     last_seen: datetime
 
 @dataclass
@@ -78,8 +76,8 @@ class DebugSession:
     status: DebugSessionStatus
     error_count: int
     warnings_count: int
-    logs: List[Dict[str, Any]]
-    error_patterns: List[ErrorPattern]
+    logs: list[dict[str, Any]]
+    error_patterns: list[ErrorPattern]
     root_cause: Optional[str]
     resolution: Optional[str]
     duration: Optional[float]
@@ -95,17 +93,17 @@ class LogEntry:
     line_number: int
     thread_id: str
     session_id: Optional[str]
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 @dataclass
 class RootCauseAnalysis:
     """Phân tích root cause"""
     analysis_id: str
-    error_patterns: List[ErrorPattern]
-    timeline: List[LogEntry]
-    probable_causes: List[str]
+    error_patterns: list[ErrorPattern]
+    timeline: list[LogEntry]
+    probable_causes: list[str]
     confidence_score: float
-    recommendations: List[str]
+    recommendations: list[str]
     analysis_time: float
 
 @dataclass
@@ -114,10 +112,10 @@ class DebuggingReport:
     total_sessions: int
     active_sessions: int
     error_patterns_found: int
-    common_errors: List[Tuple[str, int]]
-    performance_issues: List[str]
-    security_issues: List[str]
-    recommendations: List[str]
+    common_errors: list[tuple[str, int]]
+    performance_issues: list[str]
+    security_issues: list[str]
+    recommendations: list[str]
     analysis_time: float
 
 class AdvancedDebuggingSystem:
@@ -139,7 +137,7 @@ class AdvancedDebuggingSystem:
         self.error_patterns = self._load_error_patterns()
 
         # Active debug sessions
-        self.active_sessions: Dict[str, DebugSession] = {}
+        self.active_sessions: dict[str, DebugSession] = {}
         self.session_counter = 0
 
         # Log queue for real-time processing
@@ -167,7 +165,7 @@ class AdvancedDebuggingSystem:
 
         self.logger = logging.getLogger("AgentDevDebug")
 
-    def _load_error_patterns(self) -> Dict[str, ErrorPattern]:
+    def _load_error_patterns(self) -> dict[str, ErrorPattern]:
         """Load error patterns database"""
         patterns = {
             "syntax_error": ErrorPattern(
@@ -349,7 +347,7 @@ class AdvancedDebuggingSystem:
 
     def log_debug_event(self, level: DebugLevel, message: str, module: str = "",
                        function: str = "", line_number: int = 0, session_id: str = None,
-                       metadata: Dict[str, Any] = None) -> LogEntry:
+                       metadata: dict[str, Any] = None) -> LogEntry:
         """Log debug event"""
         if metadata is None:
             metadata = {}
@@ -482,7 +480,7 @@ class AdvancedDebuggingSystem:
 
         content = f"""# Troubleshooting Guide: {error_type.value.replace('_', ' ').title()}
 
-**Generated**: {timestamp}  
+**Generated**: {timestamp}
 **Source**: AgentDev Unified Advanced Debugging System
 
 ## Overview
@@ -496,8 +494,8 @@ This guide helps troubleshoot {error_type.value.replace('_', ' ')} issues in Age
         for pattern in patterns:
             content += f"""### {pattern.description}
 
-**Pattern**: `{pattern.pattern_regex}`  
-**Severity**: {pattern.severity.value}  
+**Pattern**: `{pattern.pattern_regex}`
+**Severity**: {pattern.severity.value}
 **Frequency**: {pattern.frequency} occurrences
 
 #### Common Causes:
@@ -607,7 +605,7 @@ This guide helps troubleshoot {error_type.value.replace('_', ' ')} issues in Age
         performance_issues = []
         security_issues = []
 
-        for pattern_id, pattern in self.error_patterns.items():
+        for _pattern_id, pattern in self.error_patterns.items():
             if pattern.error_type == ErrorType.PERFORMANCE_ERROR:
                 performance_issues.append(f"{pattern.description}: {pattern.frequency} occurrences")
             elif pattern.error_type == ErrorType.SECURITY_ERROR:
@@ -665,7 +663,7 @@ def main():
     )
 
     # End session
-    session = debug_system.end_debug_session(session_id, "Test completed")
+    debug_system.end_debug_session(session_id, "Test completed")
 
     # Generate report
     report = debug_system.generate_debugging_report()

@@ -19,7 +19,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 # Import Phase 2 modules
 try:
@@ -130,11 +130,11 @@ class UsageEvent:
     module_name: str
     feature_name: str
     duration: float
-    resource_usage: Dict[str, float]
-    context: Dict[str, Any]
+    resource_usage: dict[str, float]
+    context: dict[str, Any]
     value_generated: float
     cost_incurred: float
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 @dataclass
@@ -151,7 +151,7 @@ class ValueMetric:
     improvement_percentage: float
     monetary_value: float
     confidence_score: float
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 @dataclass
@@ -167,7 +167,7 @@ class CostAnalysis:
     units_consumed: float
     amortization_period: int
     total_cost_of_ownership: float
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 @dataclass
@@ -182,11 +182,11 @@ class AnalyticsReport:
     total_value_generated: float
     total_cost_incurred: float
     roi_percentage: float
-    top_features: List[Dict[str, Any]]
-    cost_breakdown: Dict[str, float]
-    value_breakdown: Dict[str, float]
-    recommendations: List[str]
-    metadata: Dict[str, Any]
+    top_features: list[dict[str, Any]]
+    cost_breakdown: dict[str, float]
+    value_breakdown: dict[str, float]
+    recommendations: list[str]
+    metadata: dict[str, Any]
 
 
 class UsageAnalyticsEngine:
@@ -194,7 +194,7 @@ class UsageAnalyticsEngine:
     Main Usage Analytics Engine
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         self.config = config or {}
         self.logger = self._setup_logging()
 
@@ -206,10 +206,10 @@ class UsageAnalyticsEngine:
         self.deployment_system = DeploymentProductionSystem()
 
         # Analytics state
-        self.usage_events: List[UsageEvent] = []
-        self.value_metrics: List[ValueMetric] = []
-        self.cost_analyses: List[CostAnalysis] = []
-        self.analytics_reports: List[AnalyticsReport] = []
+        self.usage_events: list[UsageEvent] = []
+        self.value_metrics: list[ValueMetric] = []
+        self.cost_analyses: list[CostAnalysis] = []
+        self.analytics_reports: list[AnalyticsReport] = []
 
         # Analytics components
         self.usage_tracker = UsageTracker()
@@ -224,7 +224,7 @@ class UsageAnalyticsEngine:
         self.real_time_analytics_enabled = True
 
         # Performance tracking
-        self.performance_metrics: Dict[str, List[float]] = {
+        self.performance_metrics: dict[str, list[float]] = {
             "usage_tracking_times": [],
             "value_calculation_times": [],
             "cost_analysis_times": [],
@@ -536,8 +536,8 @@ class UsageAnalyticsEngine:
         module_name: str,
         feature_name: str,
         duration: float,
-        resource_usage: Dict[str, float],
-        context: Dict[str, Any],
+        resource_usage: dict[str, float],
+        context: dict[str, Any],
     ):
         """Create usage event"""
         try:
@@ -669,7 +669,7 @@ class UsageAnalyticsEngine:
         try:
             self.analytics_db.execute(
                 """
-                INSERT OR REPLACE INTO usage_events 
+                INSERT OR REPLACE INTO usage_events
                 (event_id, event_type, timestamp, user_id, module_name, feature_name,
                  duration, resource_usage, context, value_generated, cost_incurred, metadata)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -700,7 +700,7 @@ class UsageAnalyticsEngine:
         try:
             self.analytics_db.execute(
                 """
-                INSERT OR REPLACE INTO value_metrics 
+                INSERT OR REPLACE INTO value_metrics
                 (metric_id, metric_type, timestamp, module_name, feature_name,
                  baseline_value, current_value, improvement_percentage, monetary_value, confidence_score, metadata)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -730,7 +730,7 @@ class UsageAnalyticsEngine:
         try:
             self.analytics_db.execute(
                 """
-                INSERT OR REPLACE INTO cost_analyses 
+                INSERT OR REPLACE INTO cost_analyses
                 (analysis_id, timestamp, category, module_name, cost_amount, cost_per_unit,
                  units_consumed, amortization_period, total_cost_of_ownership, metadata)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -754,7 +754,7 @@ class UsageAnalyticsEngine:
         except Exception as e:
             self.logger.error(f"Error storing cost analysis: {e}")
 
-    async def _get_analytics_status(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_analytics_status(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get analytics status endpoint"""
         try:
             return {
@@ -798,7 +798,7 @@ class UsageAnalyticsEngine:
                 "message": str(e),
             }
 
-    async def _get_usage_analytics(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_usage_analytics(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get usage analytics endpoint"""
         try:
             usage_data = []
@@ -851,7 +851,7 @@ class UsageAnalyticsEngine:
                 "message": str(e),
             }
 
-    async def _get_value_analytics(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_value_analytics(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get value analytics endpoint"""
         try:
             value_data = []
@@ -907,7 +907,7 @@ class UsageAnalyticsEngine:
                 "message": str(e),
             }
 
-    async def _get_cost_analytics(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_cost_analytics(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get cost analytics endpoint"""
         try:
             cost_data = []
@@ -958,7 +958,7 @@ class UsageAnalyticsEngine:
                 "message": str(e),
             }
 
-    async def _get_analytics_reports(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_analytics_reports(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get analytics reports endpoint"""
         try:
             reports_data = []
@@ -991,7 +991,7 @@ class UsageAnalyticsEngine:
                 "message": str(e),
             }
 
-    async def _track_usage_event(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _track_usage_event(self, data: dict[str, Any]) -> dict[str, Any]:
         """Track usage event endpoint"""
         try:
             event_type = UsageEventType(data.get("event_type", "system_operation"))
@@ -1187,7 +1187,7 @@ class VisualizationEngine:
     def __init__(self):
         self.visualization_history = []
 
-    def generate_dashboard(self) -> Dict[str, Any]:
+    def generate_dashboard(self) -> dict[str, Any]:
         """Generate analytics dashboard"""
         # Mock dashboard generation
         return {

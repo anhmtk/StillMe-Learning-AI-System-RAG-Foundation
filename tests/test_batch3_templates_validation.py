@@ -251,10 +251,10 @@ class TestTemplateManager:
         manager = TemplateManager()
 
         # Valid syntax
-        assert manager.validate_template_syntax("Hello {{ name }}!") == True
+        assert manager.validate_template_syntax("Hello {{ name }}!")
 
         # Invalid syntax
-        assert manager.validate_template_syntax("Hello {{ name }") == False
+        assert not manager.validate_template_syntax("Hello {{ name }")
 
     def test_list_templates(self):
         """Test listing templates - Kiểm thử liệt kê templates"""
@@ -405,12 +405,12 @@ class TestDataValidator:
         validator = DataValidator()
 
         # Valid booleans
-        assert validator.validate_boolean("true") == True
-        assert validator.validate_boolean("false") == False
-        assert validator.validate_boolean("1") == True
-        assert validator.validate_boolean("0") == False
-        assert validator.validate_boolean(True) == True
-        assert validator.validate_boolean(False) == False
+        assert validator.validate_boolean("true")
+        assert not validator.validate_boolean("false")
+        assert validator.validate_boolean("1")
+        assert not validator.validate_boolean("0")
+        assert validator.validate_boolean(True)
+        assert not validator.validate_boolean(False)
 
         # Invalid boolean
         with pytest.raises(ValidationError):
@@ -552,7 +552,7 @@ class TestValidationEngine:
 
         result = engine.validate_data(data, rules)
 
-        assert result.is_valid == True
+        assert result.is_valid
         assert len(result.errors) == 0
         assert result.sanitized_data["name"] == "John"
         assert result.sanitized_data["age"] == 25
@@ -574,7 +574,7 @@ class TestValidationEngine:
 
         result = engine.validate_data(data, rules)
 
-        assert result.is_valid == False
+        assert not result.is_valid
         assert len(result.errors) > 0
         assert "Required field 'name' is missing" in result.errors
 
@@ -593,7 +593,7 @@ class TestValidationEngine:
 
         result = engine.validate_data(data, rules)
 
-        assert result.is_valid == False
+        assert not result.is_valid
         assert len(result.errors) > 0
         assert "Invalid integer" in result.errors[0]
 
@@ -618,7 +618,7 @@ class TestValidationEngine:
 
         result = engine.validate_data(data, rules)
 
-        assert result.is_valid == False
+        assert not result.is_valid
         assert len(result.errors) > 0
         assert "Must be 18 or older" in result.errors[0]
 
@@ -641,7 +641,7 @@ class TestConvenienceFunctions:
             email_fields=["email"],
         )
 
-        assert result.is_valid == True
+        assert result.is_valid
         assert result.sanitized_data["name"] == "John Doe"
         # Email validation failed due to deliverability check, so it's not in sanitized_data
 

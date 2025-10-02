@@ -8,12 +8,9 @@ Quick deployment and testing of optimized gateway
 """
 
 import asyncio
-import json
-import os
 import subprocess
 import sys
 import time
-from typing import Any, Dict
 
 import aiohttp
 
@@ -32,7 +29,7 @@ class GatewayDeployer:
 
         try:
             # Start the gateway
-            process = subprocess.Popen([
+            subprocess.Popen([
                 sys.executable, "fastapi_gateway.py"
             ])
 

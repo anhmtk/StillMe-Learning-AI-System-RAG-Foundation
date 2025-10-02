@@ -15,7 +15,7 @@ import time
 from collections import defaultdict, deque
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 # Add project root to Python path
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -80,7 +80,7 @@ class EmotionSenseV1:
     Hỗ trợ tiếng Việt với độ chính xác cao
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         """Khởi tạo EmotionSense module"""
         # Initialize common utilities
         self.config_manager = ConfigManager("config/emotion_sense_config.json", {})
@@ -94,10 +94,10 @@ class EmotionSenseV1:
         self.emotion_model = None
         self.tokenizer = None
         self.language_detector = None
-        self.emotion_history: Dict[str, deque] = defaultdict(
+        self.emotion_history: dict[str, deque] = defaultdict(
             lambda: deque(maxlen=self.config.get("max_history_size", 1000))
         )
-        self.cache: Dict[str, Dict[str, Any]] = {}
+        self.cache: dict[str, dict[str, Any]] = {}
         self.cache_size = self.config.get("cache_size", 10000)
         self.confidence_threshold = self.config.get("confidence_threshold", 0.6)
 
@@ -123,7 +123,7 @@ class EmotionSenseV1:
 
         self.logger.info("EmotionSenseV1 initialized")
 
-    def _load_default_config(self) -> Dict[str, Any]:
+    def _load_default_config(self) -> dict[str, Any]:
         """Load default configuration"""
         try:
             config_path = Path("config/emotion_config.json")
@@ -262,7 +262,7 @@ class EmotionSenseV1:
 
     def detect_emotion(
         self, text: str, language: str = "auto", user_id: str = "default"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Nhận diện cảm xúc từ text"""
         start_time = time.time()
 
@@ -309,7 +309,7 @@ class EmotionSenseV1:
                 "neutral", 0.0, f"Error: {e!s}", language, error_code="EMOTION_002"
             )
 
-    def _detect_emotion_ml(self, text: str, language: str) -> Dict[str, Any]:
+    def _detect_emotion_ml(self, text: str, language: str) -> dict[str, Any]:
         """Detect emotion using ML models"""
         try:
             # Tokenize input
@@ -353,7 +353,7 @@ class EmotionSenseV1:
 
     def _classify_emotion_from_embeddings(
         self, embeddings, text: str, language: str
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """Classify emotion from embeddings using keyword enhancement"""
         emotion_scores = dict.fromkeys(EMOTION_CATEGORIES.keys(), 0.0)
 
@@ -380,7 +380,7 @@ class EmotionSenseV1:
 
         return emotion_scores
 
-    def _detect_emotion_keyword_based(self, text: str, language: str) -> Dict[str, Any]:
+    def _detect_emotion_keyword_based(self, text: str, language: str) -> dict[str, Any]:
         """Detect emotion using keyword-based approach"""
         try:
             emotion_scores = dict.fromkeys(EMOTION_CATEGORIES.keys(), 0.0)
@@ -438,7 +438,7 @@ class EmotionSenseV1:
         method: str,
         language: str,
         error_code: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Create standardized emotion result"""
         result = {
             "emotion": emotion,
@@ -456,7 +456,7 @@ class EmotionSenseV1:
         return result
 
     def _add_to_history(
-        self, user_id: str, text: str, result: Dict[str, Any], language: str
+        self, user_id: str, text: str, result: dict[str, Any], language: str
     ):
         """Add emotion detection result to user history"""
         try:
@@ -473,7 +473,7 @@ class EmotionSenseV1:
         except Exception as e:
             self.logger.warning(f"Failed to add to history: {e}")
 
-    def _update_cache(self, text: str, result: Dict[str, Any]):
+    def _update_cache(self, text: str, result: dict[str, Any]):
         """Update emotion detection cache"""
         try:
             # Simple text hash for cache key
@@ -509,7 +509,7 @@ class EmotionSenseV1:
 
     def get_emotion_history(
         self, user_id: str, limit: int = 100
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Lấy lịch sử cảm xúc của user"""
         try:
             if user_id not in self.emotion_history:
@@ -522,7 +522,7 @@ class EmotionSenseV1:
             self.logger.error(f"Failed to get emotion history: {e}")
             return []
 
-    def analyze_emotion_pattern(self, user_id: str, days: int = 7) -> Dict[str, Any]:
+    def analyze_emotion_pattern(self, user_id: str, days: int = 7) -> dict[str, Any]:
         """Phân tích pattern cảm xúc theo thời gian"""
         try:
             if user_id not in self.emotion_history:
@@ -577,7 +577,7 @@ class EmotionSenseV1:
             self.logger.error(f"Failed to analyze emotion pattern: {e}")
             return {"error": f"Analysis failed: {e!s}"}
 
-    def get_performance_metrics(self) -> Dict[str, Any]:
+    def get_performance_metrics(self) -> dict[str, Any]:
         """Get performance metrics"""
         return {
             **self.performance_metrics,
@@ -605,7 +605,7 @@ class EmotionSenseV1:
         except Exception as e:
             self.logger.error(f"Shutdown failed: {e}")
 
-    def health_check(self) -> Dict[str, Any]:
+    def health_check(self) -> dict[str, Any]:
         """Health check for the module"""
         try:
             return {

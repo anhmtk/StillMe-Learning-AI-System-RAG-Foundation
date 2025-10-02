@@ -4,7 +4,6 @@ Pre-commit hook to check for null bytes in test files
 """
 
 import sys
-from pathlib import Path
 
 
 def check_file_for_null_bytes(file_path):

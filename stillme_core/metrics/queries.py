@@ -17,20 +17,18 @@ Version: 1.0.0
 Date: 2025-09-28
 """
 
-import json
 import logging
 import sqlite3
-import statistics
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
 class MetricsQueries:
     """
     Metrics query và analytics system
-    
+
     Cung cấp SQL templates và analytics functions
     cho learning dashboard và reporting.
     """
@@ -50,7 +48,7 @@ class MetricsQueries:
         """Get database connection"""
         return sqlite3.connect(self.db_path)
 
-    def get_daily_summary(self, date: Optional[str] = None) -> Dict[str, Any]:
+    def get_daily_summary(self, date: Optional[str] = None) -> dict[str, Any]:
         """Get daily summary metrics"""
         if date is None:
             date = datetime.now().strftime('%Y-%m-%d')
@@ -63,7 +61,7 @@ class MetricsQueries:
             SELECT COUNT(*) as total_runs,
                    SUM(CASE WHEN success = 1 THEN 1 ELSE 0 END) as successful_runs,
                    AVG(CASE WHEN success = 1 THEN 1.0 ELSE 0.0 END) as success_rate
-            FROM runs 
+            FROM runs
             WHERE DATE(started_at) = ?
         """, (date,))
 
@@ -71,7 +69,7 @@ class MetricsQueries:
 
         # Get metrics summary
         cursor.execute("""
-            SELECT m.name, 
+            SELECT m.name,
                    COUNT(*) as count,
                    AVG(m.value) as avg_value,
                    MIN(m.value) as min_value,
@@ -126,7 +124,7 @@ class MetricsQueries:
             }
         }
 
-    def get_learning_curve(self, days: int = 30) -> List[Dict[str, Any]]:
+    def get_learning_curve(self, days: int = 30) -> list[dict[str, Any]]:
         """Get learning curve data"""
         conn = self.get_connection()
         cursor = conn.cursor()
@@ -156,7 +154,7 @@ class MetricsQueries:
         conn.close()
         return learning_curve
 
-    def get_performance_metrics(self, days: int = 7) -> Dict[str, Any]:
+    def get_performance_metrics(self, days: int = 7) -> dict[str, Any]:
         """Get performance metrics"""
         conn = self.get_connection()
         cursor = conn.cursor()
@@ -169,7 +167,7 @@ class MetricsQueries:
                    MAX(m.value) as max_latency
             FROM metrics m
             JOIN runs r ON m.run_id = r.id
-            WHERE m.name = 'latency_ms' 
+            WHERE m.name = 'latency_ms'
             AND r.started_at >= date('now', '-{days} days')
             GROUP BY m.tag
         """)
@@ -221,7 +219,7 @@ class MetricsQueries:
             }
         }
 
-    def get_ingest_volume(self, days: int = 7) -> List[Dict[str, Any]]:
+    def get_ingest_volume(self, days: int = 7) -> list[dict[str, Any]]:
         """Get ingest volume by source"""
         conn = self.get_connection()
         cursor = conn.cursor()
@@ -250,7 +248,7 @@ class MetricsQueries:
         conn.close()
         return ingest_data
 
-    def get_token_usage(self, days: int = 7) -> Dict[str, Any]:
+    def get_token_usage(self, days: int = 7) -> dict[str, Any]:
         """Get token usage statistics"""
         conn = self.get_connection()
         cursor = conn.cursor()
@@ -287,7 +285,7 @@ class MetricsQueries:
             'avg_tokens_per_day': avg_tokens_per_day
         }
 
-    def get_error_analysis(self, days: int = 7) -> Dict[str, Any]:
+    def get_error_analysis(self, days: int = 7) -> dict[str, Any]:
         """Get error analysis"""
         conn = self.get_connection()
         cursor = conn.cursor()
@@ -330,7 +328,7 @@ class MetricsQueries:
             'by_type': error_data
         }
 
-    def get_evolution_progress(self) -> Dict[str, Any]:
+    def get_evolution_progress(self) -> dict[str, Any]:
         """Get evolution stage progress"""
         conn = self.get_connection()
         cursor = conn.cursor()
@@ -360,7 +358,7 @@ class MetricsQueries:
 
         return evolution_data
 
-    def get_approval_metrics(self, days: int = 7) -> Dict[str, Any]:
+    def get_approval_metrics(self, days: int = 7) -> dict[str, Any]:
         """Get approval workflow metrics"""
         conn = self.get_connection()
         cursor = conn.cursor()
@@ -403,7 +401,7 @@ class MetricsQueries:
             'quality_metrics': quality_metrics
         }
 
-    def get_recent_sessions(self, limit: int = 20) -> List[Dict[str, Any]]:
+    def get_recent_sessions(self, limit: int = 20) -> list[dict[str, Any]]:
         """Get recent learning sessions"""
         conn = self.get_connection()
         cursor = conn.cursor()
@@ -442,7 +440,7 @@ class MetricsQueries:
         conn.close()
         return sessions
 
-    def get_metric_trends(self, metric_name: str, days: int = 30) -> List[Dict[str, Any]]:
+    def get_metric_trends(self, metric_name: str, days: int = 30) -> list[dict[str, Any]]:
         """Get trend data for a specific metric"""
         conn = self.get_connection()
         cursor = conn.cursor()

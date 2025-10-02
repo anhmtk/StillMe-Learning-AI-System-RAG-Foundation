@@ -1,4 +1,3 @@
-import secrets
 
 #!/usr/bin/env python3
 """
@@ -6,7 +5,6 @@ Install pre-commit hooks for NicheRadar v1.5
 Sets up development environment with quality gates
 """
 
-import os
 import subprocess
 import sys
 from pathlib import Path

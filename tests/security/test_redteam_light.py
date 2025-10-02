@@ -92,16 +92,16 @@ import subprocess
 def execute_command(user_input):
     # Dangerous: direct eval
     result = eval(user_input)
-    
+
     # Dangerous: exec
     exec("print('Hello')")
-    
+
     # Dangerous: system call
     os.system("ls -la")
-    
+
     # Dangerous: subprocess call
     subprocess.call(["rm", "-rf", "/tmp"])
-    
+
     return result
 """)
 
@@ -157,13 +157,13 @@ def hello_unicode():
 def mixed_function():
     # Clean code
     x = 1 + 1
-    
+
     # Secret
     secret = "password123"
-    
+
     # Dangerous
     exec("print('dangerous')")
-    
+
     return x
 """)
             ]

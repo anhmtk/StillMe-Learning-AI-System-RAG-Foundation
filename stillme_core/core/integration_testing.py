@@ -29,7 +29,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -45,7 +45,7 @@ class IntegrationTestResult:
     test_type: str
     status: str  # "passed", "failed", "skipped", "error"
     duration_ms: float
-    performance_metrics: Dict[str, float]
+    performance_metrics: dict[str, float]
     error_message: Optional[str]
     timestamp: datetime
 
@@ -60,7 +60,7 @@ class SystemIntegrationReport:
     failed_tests: int
     overall_performance_score: float
     integration_health_score: float
-    recommendations: List[str]
+    recommendations: list[str]
     timestamp: datetime
 
 
@@ -69,7 +69,7 @@ class IntegrationTesting:
     Enterprise-grade integration testing system
     """
 
-    def __init__(self, metrics_db_path: str, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, metrics_db_path: str, config: Optional[dict[str, Any]] = None):
         self.metrics_db_path = Path(metrics_db_path)
         self.config = config or self._get_default_config()
 
@@ -85,7 +85,7 @@ class IntegrationTesting:
             "✅ IntegrationTesting initialized với enterprise-grade configuration"
         )
 
-    def _get_default_config(self) -> Dict[str, Any]:
+    def _get_default_config(self) -> dict[str, Any]:
         """Default configuration với integration testing focus"""
         return {
             "accuracy_threshold": 0.9995,  # 99.95% accuracy requirement
@@ -173,7 +173,7 @@ class IntegrationTesting:
                 timestamp=datetime.now(),
             )
 
-    def _run_database_integration_tests(self) -> List[IntegrationTestResult]:
+    def _run_database_integration_tests(self) -> list[IntegrationTestResult]:
         """Run database integration tests"""
         test_results = []
 
@@ -195,7 +195,7 @@ class IntegrationTesting:
 
         return test_results
 
-    def _run_module_integration_tests(self) -> List[IntegrationTestResult]:
+    def _run_module_integration_tests(self) -> list[IntegrationTestResult]:
         """Run module integration tests"""
         test_results = []
 
@@ -217,7 +217,7 @@ class IntegrationTesting:
 
         return test_results
 
-    def _run_performance_integration_tests(self) -> List[IntegrationTestResult]:
+    def _run_performance_integration_tests(self) -> list[IntegrationTestResult]:
         """Run performance integration tests"""
         test_results = []
 
@@ -239,7 +239,7 @@ class IntegrationTesting:
 
         return test_results
 
-    def _run_scalability_tests(self) -> List[IntegrationTestResult]:
+    def _run_scalability_tests(self) -> list[IntegrationTestResult]:
         """Run scalability tests"""
         test_results = []
 
@@ -364,7 +364,7 @@ class IntegrationTesting:
                 # Check for data integrity issues
                 cursor = conn.execute(
                     """
-                    SELECT COUNT(*) FROM usage_events 
+                    SELECT COUNT(*) FROM usage_events
                     WHERE event_id IS NULL OR timestamp IS NULL OR module_name IS NULL
                 """
                 )
@@ -727,7 +727,7 @@ class IntegrationTesting:
             )
 
     def _calculate_overall_performance_score(
-        self, test_results: List[IntegrationTestResult]
+        self, test_results: list[IntegrationTestResult]
     ) -> float:
         """Calculate overall performance score"""
         try:
@@ -748,8 +748,8 @@ class IntegrationTesting:
             return 0.0
 
     def _generate_integration_recommendations(
-        self, test_results: List[IntegrationTestResult]
-    ) -> List[str]:
+        self, test_results: list[IntegrationTestResult]
+    ) -> list[str]:
         """Generate integration recommendations"""
         recommendations = []
 
@@ -781,7 +781,7 @@ class IntegrationTesting:
 
         return recommendations
 
-    def get_integration_summary(self) -> Dict[str, Any]:
+    def get_integration_summary(self) -> dict[str, Any]:
         """Get integration testing summary"""
         try:
             return {
@@ -803,7 +803,7 @@ class IntegrationTesting:
 
 # Factory function
 def create_integration_testing(
-    metrics_db_path: str, config: Optional[Dict[str, Any]] = None
+    metrics_db_path: str, config: Optional[dict[str, Any]] = None
 ) -> IntegrationTesting:
     """Factory function để create integration testing"""
     return IntegrationTesting(metrics_db_path, config)

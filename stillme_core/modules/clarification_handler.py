@@ -9,13 +9,12 @@ This module provides the core functionality for detecting ambiguous prompts
 and generating clarification questions to improve user interaction quality.
 """
 
-import json
 import logging
 import re
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 import yaml
 
@@ -83,29 +82,29 @@ class ClarificationResult:
     question: Optional[str]
     category: Optional[str]
     reasoning: str
-    options: Optional[List[str]] = None
+    options: Optional[list[str]] = None
     domain: Optional[str] = None
     round_number: int = 1
     max_rounds: int = 2
     trace_id: Optional[str] = None
     # Phase 3 additions
     input_type: Optional[str] = None  # "text", "code", "image", "mixed"
-    suggestions: Optional[List[str]] = None
-    metadata: Optional[Dict[str, Any]] = None
+    suggestions: Optional[list[str]] = None
+    metadata: Optional[dict[str, Any]] = None
 
 class ClarificationHandler:
     """
     Core clarification handler for StillMe
-    
+
     Detects ambiguous prompts and generates clarification questions
     to improve user interaction quality and reduce token waste.
-    
+
     Phase 2 Features:
     - Context-aware clarification
     - Learning from user feedback
     - Quick/Careful modes
     - Circuit breaker protection
-    
+
     Phase 3 Features:
     - Multi-modal input support (text, code, image)
     - Proactive suggestions
@@ -154,7 +153,7 @@ class ClarificationHandler:
             "audit_events_logged": 0
         }
 
-    def _load_config(self, config_path: Optional[str] = None) -> Dict[str, Any]:
+    def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
         """Load configuration from YAML file"""
         default_config = {
             "enabled": True,
@@ -270,7 +269,7 @@ class ClarificationHandler:
         except Exception as e:
             logger.warning(f"Phase 3 components initialization failed: {e}")
 
-    def _load_ambiguity_patterns(self) -> Dict[str, List[str]]:
+    def _load_ambiguity_patterns(self) -> dict[str, list[str]]:
         """Load ambiguity detection patterns"""
         return {
             "vague_instruction": [
@@ -440,7 +439,7 @@ class ClarificationHandler:
             ]
         }
 
-    def _load_clarification_templates(self) -> Dict[str, List[str]]:
+    def _load_clarification_templates(self) -> dict[str, list[str]]:
         """Load clarification question templates"""
         return {
             "vague_instruction": [
@@ -595,18 +594,18 @@ class ClarificationHandler:
             ]
         }
 
-    def detect_ambiguity(self, prompt: str, context: Optional[Dict[str, Any]] = None,
+    def detect_ambiguity(self, prompt: str, context: Optional[dict[str, Any]] = None,
                         mode: Optional[str] = None, round_number: int = 1, trace_id: Optional[str] = None) -> ClarificationResult:
         """
         Detect if a prompt is ambiguous and needs clarification
-        
+
         Args:
             prompt: User input prompt
             context: Conversation context (optional)
             mode: Clarification mode ("quick" or "careful")
             round_number: Current clarification round (1-based)
             trace_id: Trace ID for observability
-            
+
         Returns:
             ClarificationResult with detection results
         """
@@ -756,7 +755,7 @@ class ClarificationHandler:
             reasoning=best_reasoning
         )
 
-    def _detect_context_aware_ambiguity(self, prompt: str, context: Dict[str, Any],
+    def _detect_context_aware_ambiguity(self, prompt: str, context: dict[str, Any],
                                       basic_result: ClarificationResult, mode: str,
                                       round_number: int, trace_id: Optional[str]) -> ClarificationResult:
         """Phase 2 context-aware ambiguity detection"""
@@ -786,13 +785,13 @@ class ClarificationHandler:
 
         # Handle both dict and object types
         if isinstance(clarification_question, dict):
-            confidence = clarification_question.get("confidence", 0.5)
+            clarification_question.get("confidence", 0.5)
             question = clarification_question.get("question", "Could you provide more details?")
             options = clarification_question.get("options", [])
             reasoning = clarification_question.get("reasoning", "Context-aware analysis")
             domain = clarification_question.get("domain")
         else:
-            confidence = getattr(clarification_question, "confidence", 0.5)
+            getattr(clarification_question, "confidence", 0.5)
             question = getattr(clarification_question, "question", "Could you provide more details?")
             options = getattr(clarification_question, "options", [])
             reasoning = getattr(clarification_question, "reasoning", "Context-aware analysis")
@@ -855,7 +854,7 @@ class ClarificationHandler:
 
         return min(1.0, base_confidence * length_factor * category_weight)
 
-    def _generate_clarification_question(self, prompt: str, category: str, context: Optional[Dict[str, Any]] = None) -> str:
+    def _generate_clarification_question(self, prompt: str, category: str, context: Optional[dict[str, Any]] = None) -> str:
         """Generate appropriate clarification question"""
         if not category or category not in self.clarification_templates:
             return "Could you please clarify what you need help with?"
@@ -975,18 +974,18 @@ class ClarificationHandler:
 
         return template or "Could you please clarify what you need help with?"
 
-    def generate_clarification(self, prompt: str, context: Optional[Dict[str, Any]] = None,
+    def generate_clarification(self, prompt: str, context: Optional[dict[str, Any]] = None,
                              mode: Optional[str] = None, round_number: int = 1, trace_id: Optional[str] = None) -> Optional[str]:
         """
         Generate clarification question for ambiguous prompt
-        
+
         Args:
             prompt: User input prompt
             context: Conversation context (optional)
             mode: Clarification mode ("quick" or "careful")
             round_number: Current clarification round (1-based)
             trace_id: Trace ID for observability
-            
+
         Returns:
             Clarification question or None if not needed
         """
@@ -994,11 +993,11 @@ class ClarificationHandler:
         return result.question if result.needs_clarification else None
 
     async def record_clarification_feedback(self, prompt: str, question: str, user_reply: Optional[str],
-                                          success: bool, context: Optional[Dict[str, Any]] = None,
+                                          success: bool, context: Optional[dict[str, Any]] = None,
                                           trace_id: Optional[str] = None):
         """
         Record feedback from clarification attempt
-        
+
         Args:
             prompt: Original user prompt
             question: Clarification question asked
@@ -1031,7 +1030,7 @@ class ClarificationHandler:
         except Exception as e:
             logger.error(f"Failed to record clarification feedback: {e}")
 
-    def get_clarification_stats(self) -> Dict[str, Any]:
+    def get_clarification_stats(self) -> dict[str, Any]:
         """Get clarification handler statistics"""
         base_stats = {
             "patterns_loaded": sum(len(patterns) for patterns in self.ambiguity_patterns.values()),

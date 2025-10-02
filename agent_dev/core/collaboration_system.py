@@ -14,13 +14,12 @@ import json
 import logging
 import os
 import subprocess
-import threading
 import time
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 
 class ReviewStatus(Enum):
@@ -53,8 +52,8 @@ class CodeReview:
     reviewer: str
     review_type: ReviewType
     status: ReviewStatus
-    comments: List[str]
-    suggestions: List[str]
+    comments: list[str]
+    suggestions: list[str]
     score: float  # 0-100
     created_at: datetime
     updated_at: datetime
@@ -67,7 +66,7 @@ class KnowledgeShare:
     content: str
     category: str
     author: str
-    tags: List[str]
+    tags: list[str]
     created_at: datetime
     views: int
     likes: int
@@ -81,7 +80,7 @@ class MentoringSession:
     topic: str
     duration: int  # minutes
     feedback: str
-    recommendations: List[str]
+    recommendations: list[str]
     created_at: datetime
 
 @dataclass
@@ -91,8 +90,8 @@ class CollaborationReport:
     approved_reviews: int
     knowledge_shares: int
     mentoring_sessions: int
-    team_activity: Dict[str, int]
-    recommendations: List[str]
+    team_activity: dict[str, int]
+    recommendations: list[str]
     generated_at: datetime
 
 class CollaborationSystem:
@@ -112,9 +111,9 @@ class CollaborationSystem:
         self._setup_logging()
 
         # Collaboration data
-        self.reviews: List[CodeReview] = []
-        self.knowledge_shares: List[KnowledgeShare] = []
-        self.mentoring_sessions: List[MentoringSession] = []
+        self.reviews: list[CodeReview] = []
+        self.knowledge_shares: list[KnowledgeShare] = []
+        self.mentoring_sessions: list[MentoringSession] = []
 
         # Load existing data
         self._load_existing_data()
@@ -256,7 +255,7 @@ class CollaborationSystem:
         self.logger.info(f"Code review completed for {file_path}, score: {score}")
         return review
 
-    def _run_linting(self, file_path: str) -> Dict[str, List[str]]:
+    def _run_linting(self, file_path: str) -> dict[str, list[str]]:
         """Chạy linting tools"""
         errors = []
         warnings = []
@@ -293,7 +292,7 @@ class CollaborationSystem:
 
         return {'errors': errors, 'warnings': warnings}
 
-    def _analyze_code_quality(self, file_path: str) -> Dict[str, Any]:
+    def _analyze_code_quality(self, file_path: str) -> dict[str, Any]:
         """Phân tích chất lượng code"""
         try:
             with open(file_path, encoding='utf-8') as f:
@@ -325,7 +324,7 @@ class CollaborationSystem:
             self.logger.error(f"Error analyzing code quality for {file_path}: {e}")
             return {'complexity': 0, 'duplicate_code': 0, 'total_lines': 0}
 
-    def _analyze_security(self, file_path: str) -> Dict[str, List[str]]:
+    def _analyze_security(self, file_path: str) -> dict[str, list[str]]:
         """Phân tích bảo mật"""
         issues = []
 
@@ -353,7 +352,7 @@ class CollaborationSystem:
 
         return {'issues': issues}
 
-    def _analyze_performance(self, file_path: str) -> Dict[str, List[str]]:
+    def _analyze_performance(self, file_path: str) -> dict[str, list[str]]:
         """Phân tích hiệu suất"""
         slow_operations = []
 
@@ -388,7 +387,7 @@ class CollaborationSystem:
             json.dump(asdict(review), f, indent=2, default=str)
 
     def share_knowledge(self, title: str, content: str, author: str,
-                       category: str = "general", tags: List[str] = None) -> KnowledgeShare:
+                       category: str = "general", tags: list[str] = None) -> KnowledgeShare:
         """Chia sẻ kiến thức"""
         if tags is None:
             tags = []
@@ -447,7 +446,7 @@ class CollaborationSystem:
         self.logger.info(f"Mentoring session created: {topic} between {mentor} and {mentee}")
         return session
 
-    def _generate_mentoring_recommendations(self, topic: str) -> List[str]:
+    def _generate_mentoring_recommendations(self, topic: str) -> list[str]:
         """Tạo recommendations cho mentoring"""
         recommendations = []
 

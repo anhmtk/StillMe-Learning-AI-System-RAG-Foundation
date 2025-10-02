@@ -7,9 +7,7 @@ Automation system với kiểm soát thông minh và giới hạn tần suất.
 """
 
 import json
-import os
 import sys
-import time
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -54,7 +52,6 @@ class SmartAutomation:
 
         # Also check dashboard session state
         try:
-            from pathlib import Path
             session_file = project_root / "artifacts" / "dashboard_session.json"
             if session_file.exists():
                 with open(session_file) as f:

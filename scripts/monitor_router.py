@@ -17,7 +17,7 @@ import os
 import sys
 import time
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Optional
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))
@@ -31,7 +31,7 @@ class RouterMonitor:
         self.analyzer = ComplexityAnalyzer()
         self.session_log = []
 
-    def test_prompt(self, prompt: str, debug: bool = True) -> Dict:
+    def test_prompt(self, prompt: str, debug: bool = True) -> dict:
         """Test a single prompt and return detailed analysis"""
         start_time = time.time()
 
@@ -65,7 +65,7 @@ class RouterMonitor:
 
         return result
 
-    def print_analysis(self, result: Dict):
+    def print_analysis(self, result: dict):
         """Print formatted analysis results"""
         print("\n🔍 AI Router Analysis")
         print("=" * 60)

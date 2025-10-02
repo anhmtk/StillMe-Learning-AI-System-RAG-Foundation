@@ -4,7 +4,7 @@
 
 Comprehensive test suite cho Phase 2 Red/Blue Team System bao gồm:
 - Red Team Engine testing
-- Blue Team Engine testing  
+- Blue Team Engine testing
 - Security Orchestrator testing
 - Experience Memory Integration testing
 - End-to-end integration testing
@@ -13,16 +13,13 @@ Author: StillMe AI Security Team
 Version: 2.0.0
 """
 
-import asyncio
 import json
 import os
 import sys
-import tempfile
 import time
 import unittest
 from datetime import datetime, timedelta
-from typing import Any, Dict, List
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import Mock
 
 # Add project root to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../..'))

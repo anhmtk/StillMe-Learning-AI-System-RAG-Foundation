@@ -79,7 +79,7 @@ class TestLearningRollback:
         )
 
         # Create second snapshot
-        snapshot2 = await rollback_system.create_snapshot(
+        await rollback_system.create_snapshot(
             update_type=LearningUpdateType.PATTERN_LEARNING,
             description="Pattern learning update",
             changes={"pattern": "learned"}
@@ -214,7 +214,7 @@ class TestLearningRollback:
             changes={"base": "data"}
         )
 
-        snapshot2 = await rollback_system.create_snapshot(
+        await rollback_system.create_snapshot(
             update_type=LearningUpdateType.PATTERN_LEARNING,
             description="Dependent snapshot",
             changes={"dependent": "data"},
@@ -238,7 +238,7 @@ class TestLearningRollback:
             changes={"base": "data"}
         )
 
-        snapshot2 = await rollback_system.create_snapshot(
+        await rollback_system.create_snapshot(
             update_type=LearningUpdateType.PATTERN_LEARNING,
             description="Dependent snapshot",
             changes={"dependent": "data"},

@@ -8,7 +8,7 @@ import logging
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional
 
 log = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class RationaleSignal:
         self.source = source
         self.confidence = confidence
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "name": self.name,
             "value": self.value,
@@ -40,7 +40,7 @@ class RationaleExplanation:
         self.content = content
         self.confidence = confidence
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "type": self.type,
             "content": self.content,
@@ -59,7 +59,7 @@ class RationaleCitation:
         self.confidence = confidence
         self.excerpt = excerpt
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "source": self.source,
             "url": self.url,
@@ -72,14 +72,14 @@ class RationaleEntry:
     """Complete rationale entry for a decision."""
 
     def __init__(self, decision_id: str, policy: str,
-                 signals: List[RationaleSignal],
+                 signals: list[RationaleSignal],
                  final_action: Any,
-                 explanations: List[RationaleExplanation],
-                 citations: List[RationaleCitation],
+                 explanations: list[RationaleExplanation],
+                 citations: list[RationaleCitation],
                  trace_id: str,
                  timestamp: Optional[str] = None,
-                 context: Optional[Dict] = None,
-                 metadata: Optional[Dict] = None):
+                 context: Optional[dict] = None,
+                 metadata: Optional[dict] = None):
         self.decision_id = decision_id
         self.policy = policy
         self.signals = signals
@@ -91,7 +91,7 @@ class RationaleEntry:
         self.context = context or {}
         self.metadata = metadata or {}
 
-    def to_dict(self) -> Dict:
+    def to_dict(self) -> dict:
         return {
             "decision_id": self.decision_id,
             "policy": self.policy,
@@ -154,7 +154,7 @@ class RationaleLogger:
 
     def get_decisions(self, date: Optional[str] = None,
                      policy: Optional[str] = None,
-                     trace_id: Optional[str] = None) -> List[Dict]:
+                     trace_id: Optional[str] = None) -> list[dict]:
         """Retrieve rationale entries."""
         if date is None:
             date = datetime.now().strftime("%Y%m%d")
@@ -199,13 +199,13 @@ def get_rationale_logger() -> RationaleLogger:
 
 def log_decision_rationale(
     policy: str,
-    signals: List[RationaleSignal],
+    signals: list[RationaleSignal],
     final_action: Any,
-    explanations: List[RationaleExplanation],
-    citations: List[RationaleCitation],
+    explanations: list[RationaleExplanation],
+    citations: list[RationaleCitation],
     trace_id: Optional[str] = None,
-    context: Optional[Dict] = None,
-    metadata: Optional[Dict] = None
+    context: Optional[dict] = None,
+    metadata: Optional[dict] = None
 ) -> str:
     """Log a decision with rationale and return decision ID."""
 

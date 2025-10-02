@@ -384,20 +384,20 @@ class TestKillSwitch:
 
     def test_kill_switch_initialization(self):
         """Test kill switch initialization"""
-        assert KillSwitch.is_active() == False
+        assert not KillSwitch.is_active()
         assert KillSwitch.get_reason() == "Not activated"
 
     def test_kill_switch_activation(self):
         """Test kill switch activation"""
         KillSwitch.activate("Test activation")
-        assert KillSwitch.is_active() == True
+        assert KillSwitch.is_active()
         assert "Test activation" in KillSwitch.get_reason()
 
     def test_kill_switch_deactivation(self):
         """Test kill switch deactivation"""
         KillSwitch.activate("Test activation")
         KillSwitch.deactivate("Test deactivation")
-        assert KillSwitch.is_active() == False
+        assert not KillSwitch.is_active()
         assert "Test deactivation" in KillSwitch.get_reason()
 
     def test_kill_switch_check_and_exit(self):
@@ -463,8 +463,8 @@ class TestTransparencyLogger:
     def test_transparency_logger_initialization(self, transparency_logger):
         """Test transparency logger initialization"""
         assert transparency_logger is not None
-        assert transparency_logger.enabled == True
-        assert transparency_logger.log_rationale == True
+        assert transparency_logger.enabled
+        assert transparency_logger.log_rationale
 
     def test_log_decision(self, transparency_logger):
         """Test logging a decision"""
@@ -539,7 +539,7 @@ class TestSecurityManager:
         """Test security manager initialization"""
         assert security_manager is not None
         assert hasattr(security_manager, 'config')
-        assert security_manager.config["security"]["enabled"] == True
+        assert security_manager.config["security"]["enabled"]
 
     def test_validate_input(self, security_manager):
         """Test input validation"""
@@ -547,7 +547,7 @@ class TestSecurityManager:
         result = security_manager.validate_input(test_input)
         assert result is not None
         assert "safe" in result
-        assert result["safe"] == True
+        assert result["safe"]
 
     def test_encrypt_data(self, security_manager):
         """Test data encryption"""
@@ -573,7 +573,7 @@ class TestIntegrationScenarios:
     async def test_learning_workflow_integration(self):
         """Test complete learning workflow"""
         # Initialize components
-        metrics_collector = LearningMetricsCollector()
+        LearningMetricsCollector()
         reward_manager = RewardManager()
         meta_learning_manager = MetaLearningManager()
 
@@ -620,7 +620,7 @@ class TestIntegrationScenarios:
         user_data = {"user_id": "user_123", "data": "sensitive information"}
 
         # Encrypt data
-        encrypted_data = security_manager.encrypt_data(str(user_data))
+        security_manager.encrypt_data(str(user_data))
 
         # Export user data (should be encrypted)
         exported_data = privacy_manager.export_user_data("user_123")
@@ -632,17 +632,17 @@ class TestIntegrationScenarios:
     async def test_kill_switch_integration(self):
         """Test kill switch integration"""
         # Test normal operation
-        assert KillSwitch.is_active() == False
+        assert not KillSwitch.is_active()
 
         # Simulate critical issue
         KillSwitch.activate("Critical security issue detected")
 
         # Test system response
-        assert KillSwitch.is_active() == True
+        assert KillSwitch.is_active()
 
         # Test recovery
         KillSwitch.deactivate("Issue resolved")
-        assert KillSwitch.is_active() == False
+        assert not KillSwitch.is_active()
 
 
 # Performance Tests

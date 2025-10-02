@@ -18,7 +18,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Set
+from typing import Any, Callable
 
 import psutil
 
@@ -61,16 +61,16 @@ class PerformanceReport:
     optimized_modules: int
     bottlenecks_found: int
     performance_improvement: float
-    recommendations: List[OptimizationSuggestion]
-    metrics: List[PerformanceMetric]
+    recommendations: list[OptimizationSuggestion]
+    metrics: list[PerformanceMetric]
 
 
 class PerformanceProfiler:
     """Performance profiler for modules"""
 
     def __init__(self):
-        self.metrics: List[PerformanceMetric] = []
-        self.profiles: Dict[str, cProfile.Profile] = {}
+        self.metrics: list[PerformanceMetric] = []
+        self.profiles: dict[str, cProfile.Profile] = {}
         self.monitoring_active = False
         self.monitoring_thread = None
 
@@ -115,7 +115,7 @@ class PerformanceProfiler:
             self.profiles[module_name] = cProfile.Profile()
         self.profiles[module_name].enable()
 
-    def stop_profiling(self, module_name: str) -> Dict[str, Any]:
+    def stop_profiling(self, module_name: str) -> dict[str, Any]:
         """Stop profiling and get results"""
         if module_name in self.profiles:
             self.profiles[module_name].disable()
@@ -144,9 +144,9 @@ class PerformanceOptimizer:
     def __init__(self, root_path: str = "."):
         self.root_path = Path(root_path)
         self.profiler = PerformanceProfiler()
-        self.optimization_suggestions: List[OptimizationSuggestion] = []
-        self.performance_baseline: Dict[str, float] = {}
-        self.optimization_applied: Set[str] = set()
+        self.optimization_suggestions: list[OptimizationSuggestion] = []
+        self.performance_baseline: dict[str, float] = {}
+        self.optimization_applied: set[str] = set()
 
         # Performance thresholds
         self.thresholds = {
@@ -156,7 +156,7 @@ class PerformanceOptimizer:
             "call_frequency": 1000,  # calls per minute
         }
 
-    def analyze_performance(self) -> List[PerformanceMetric]:
+    def analyze_performance(self) -> list[PerformanceMetric]:
         """
         Analyze performance of all modules
         """
@@ -242,7 +242,7 @@ class PerformanceOptimizer:
             logger.debug(f"Could not execute {module_name}: {e}")
 
     def _analyze_profile_results(
-        self, module_name: str, profile_results: Dict[str, Any]
+        self, module_name: str, profile_results: dict[str, Any]
     ):
         """Analyze profiling results"""
         if not profile_results:
@@ -300,7 +300,7 @@ class PerformanceOptimizer:
                     )
 
         # Calculate performance improvement
-        total_modules = len(set(metric.module_name for metric in self.profiler.metrics))
+        total_modules = len({metric.module_name for metric in self.profiler.metrics})
         performance_improvement = (
             (optimized_count / total_modules * 100) if total_modules > 0 else 0
         )
@@ -415,13 +415,13 @@ class PerformanceAlert:
 
 class PerformanceMonitor:
     """Real-time performance monitoring"""
-    
+
     def __init__(self):
         self.alerts: List[PerformanceAlert] = []
         self.metrics_history: List[Dict[str, float]] = []
         self.monitoring_active = False
         self.monitoring_thread = None
-        
+
         # Alert thresholds
         self.thresholds = {
             "cpu_usage": 80.0,
@@ -429,19 +429,19 @@ class PerformanceMonitor:
             "disk_usage": 90.0,
             "response_time": 5.0
         }
-    
+
     def start_monitoring(self):
         """Start performance monitoring"""
         self.monitoring_active = True
         self.monitoring_thread = threading.Thread(target=self._monitoring_loop, daemon=True)
         self.monitoring_thread.start()
-    
+
     def stop_monitoring(self):
         """Stop performance monitoring"""
         self.monitoring_active = False
         if self.monitoring_thread:
             self.monitoring_thread.join(timeout=5)
-    
+
     def _monitoring_loop(self):
         """Main monitoring loop"""
         while self.monitoring_active:
@@ -449,20 +449,20 @@ class PerformanceMonitor:
                 # Collect system metrics
                 metrics = self._collect_metrics()
                 self.metrics_history.append(metrics)
-                
+
                 # Check for alerts
                 self._check_alerts(metrics)
-                
+
                 # Keep only last 1000 metrics
                 if len(self.metrics_history) > 1000:
                     self.metrics_history = self.metrics_history[-1000:]
-                
+
                 time.sleep(10)  # Monitor every 10 seconds
-                
+
             except Exception as e:
                 print(f"Error in monitoring loop: {e}")
                 time.sleep(30)
-    
+
     def _collect_metrics(self) -> Dict[str, float]:
         """Collect system metrics"""
         return {
@@ -472,7 +472,7 @@ class PerformanceMonitor:
             "disk_usage": psutil.disk_usage('/').percent,
             "process_count": len(psutil.pids())
         }
-    
+
     def _check_alerts(self, metrics: Dict[str, float]):
         """Check for performance alerts"""
         for metric_name, threshold in self.thresholds.items():
@@ -486,14 +486,14 @@ class PerformanceMonitor:
                 )
                 self.alerts.append(alert)
                 print(f"🚨 PERFORMANCE ALERT: {alert.message}")
-    
+
     def get_performance_summary(self) -> Dict[str, any]:
         """Get performance summary"""
         if not self.metrics_history:
             return {}
-        
+
         latest_metrics = self.metrics_history[-1]
-        
+
         return {
             "current_metrics": latest_metrics,
             "total_alerts": len(self.alerts),
@@ -540,7 +540,7 @@ def main():
     optimizer = PerformanceOptimizer()
 
     # Analyze performance
-    metrics = optimizer.analyze_performance()
+    optimizer.analyze_performance()
 
     # Apply optimizations
     report = optimizer.optimize_modules()

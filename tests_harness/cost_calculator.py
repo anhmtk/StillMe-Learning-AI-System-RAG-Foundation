@@ -5,10 +5,8 @@ Cost Calculator - Tính toán token và chi phí cho test harness
 
 import json
 import logging
-import re
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -36,8 +34,8 @@ class CostSummary:
     total_output_tokens: int
     total_tokens: int
     total_cost_usd: float
-    cost_by_model: Dict[str, float]
-    cost_by_method: Dict[str, float]
+    cost_by_model: dict[str, float]
+    cost_by_method: dict[str, float]
 
 class CostCalculator:
     """Calculator cho token và chi phí"""

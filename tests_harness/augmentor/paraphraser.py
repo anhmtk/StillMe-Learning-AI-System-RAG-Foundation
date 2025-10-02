@@ -11,7 +11,7 @@ import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -37,11 +37,11 @@ class ParaphraseConfig:
 class ParaphraseResult:
     """Kết quả paraphrase"""
     original: str
-    variants: List[str]
+    variants: list[str]
     model_used: str
     success: bool
     error: Optional[str] = None
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
 class Paraphraser:
     """Paraphraser sử dụng local AI models"""
@@ -133,7 +133,7 @@ Biến thể:"""
                 error=str(e)
             )
 
-    def _parse_paraphrase_response(self, response: str) -> List[str]:
+    def _parse_paraphrase_response(self, response: str) -> list[str]:
         """Parse response từ model thành list variants"""
         lines = response.strip().split('\n')
         variants = []
@@ -157,7 +157,7 @@ Biến thể:"""
 
         return variants[:self.config.num_variants]
 
-    def paraphrase_batch(self, texts: List[str]) -> List[ParaphraseResult]:
+    def paraphrase_batch(self, texts: list[str]) -> list[ParaphraseResult]:
         """Paraphrase nhiều câu cùng lúc"""
         results = []
         for text in texts:
@@ -182,7 +182,7 @@ class ParaphraseAugmentor:
         self.paraphraser = Paraphraser(config)
         self.logger = logging.getLogger(__name__)
 
-    def augment_dataset(self, input_file: str, output_file: str) -> Dict[str, Any]:
+    def augment_dataset(self, input_file: str, output_file: str) -> dict[str, Any]:
         """Augment dataset từ file input"""
         input_path = Path(input_file)
         output_path = Path(output_file)

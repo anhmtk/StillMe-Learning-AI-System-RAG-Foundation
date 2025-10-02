@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any
 
 """
 Fixed Performance Test Suite
@@ -59,7 +59,7 @@ class PerformanceLoadTestSuite:
         except:
             return 0.0
 
-    def _simulate_request(self, processing_time: float = 0.1) -> Dict[str, Any]:
+    def _simulate_request(self, processing_time: float = 0.1) -> dict[str, Any]:
         """Simulate a request with configurable processing time"""
         start_time = time.time()
 
@@ -143,12 +143,12 @@ class PerformanceLoadTestSuite:
             total += 1
             try:
                 # Simulate CPU-intensive work
-                start_time = time.time()
+                time.time()
                 cpu_usage_samples = []
 
                 for _ in range(test_config["requests"]):
                     # Simulate CPU work
-                    result = self._simulate_request(0.05)  # 50ms processing
+                    self._simulate_request(0.05)  # 50ms processing
 
                     # Sample CPU usage (less frequent)
                     if _ % 10 == 0:  # Sample every 10th request
@@ -158,7 +158,7 @@ class PerformanceLoadTestSuite:
                         except:
                             cpu_usage_samples.append(0)
 
-                end_time = time.time()
+                time.time()
                 max_cpu = max(cpu_usage_samples) if cpu_usage_samples else 0
 
                 if max_cpu <= test_config["max_cpu_percent"]:
@@ -276,7 +276,7 @@ class PerformanceLoadTestSuite:
 
         return pass_rate >= 90.0
 
-    def _percentile(self, data: List[float], percentile: int) -> float:
+    def _percentile(self, data: list[float], percentile: int) -> float:
         """Calculate percentile of data"""
         if not data:
             return 0.0
@@ -284,7 +284,7 @@ class PerformanceLoadTestSuite:
         index = int((percentile / 100) * len(sorted_data))
         return sorted_data[min(index, len(sorted_data) - 1)]
 
-    def run_all_tests(self) -> Dict[str, Any]:
+    def run_all_tests(self) -> dict[str, Any]:
         """Run all performance and load tests"""
         print("🚀 Starting Fixed Performance & Load Test Suite")
         print("=" * 60)

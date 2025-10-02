@@ -7,7 +7,6 @@ Script để tạo learning proposal tự động một lần.
 """
 
 import json
-import os
 import sys
 from datetime import datetime
 from pathlib import Path

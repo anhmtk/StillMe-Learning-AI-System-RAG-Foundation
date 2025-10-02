@@ -3,13 +3,10 @@
 Improved Impact Analyzer - Enhanced dependency detection
 """
 
-import os
-import re
 import time
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
 
 
 class ImpactLevel(Enum):
@@ -46,7 +43,7 @@ class PerformanceImpact:
     io_operations: int
     network_calls: int
     database_queries: int
-    caching_opportunities: List[str]
+    caching_opportunities: list[str]
 
 @dataclass
 class SecurityRisk:
@@ -65,15 +62,15 @@ class MaintainabilityScore:
     documentation_score: float
     coupling_score: float
     cohesion_score: float
-    suggestions: List[str]
+    suggestions: list[str]
 
 @dataclass
 class UserImpact:
     """Tác động người dùng"""
     level: ImpactLevel
-    affected_features: List[str]
-    user_experience_changes: List[str]
-    breaking_changes: List[str]
+    affected_features: list[str]
+    user_experience_changes: list[str]
+    breaking_changes: list[str]
     migration_required: bool
     user_training_needed: bool
 
@@ -90,14 +87,14 @@ class BusinessValue:
 @dataclass
 class ImpactAnalysisResult:
     """Kết quả phân tích tác động"""
-    dependencies: List[DependencyInfo]
+    dependencies: list[DependencyInfo]
     performance: PerformanceImpact
-    security_risks: List[SecurityRisk]
+    security_risks: list[SecurityRisk]
     maintainability: MaintainabilityScore
     user_impact: UserImpact
     business_value: BusinessValue
     overall_risk_level: RiskLevel
-    recommendations: List[str]
+    recommendations: list[str]
     analysis_time: float
 
 class ImpactAnalyzer:
@@ -148,7 +145,7 @@ class ImpactAnalyzer:
             analysis_time=analysis_time
         )
 
-    def _analyze_dependencies_enhanced(self, task: str) -> List[DependencyInfo]:
+    def _analyze_dependencies_enhanced(self, task: str) -> list[DependencyInfo]:
         """Enhanced dependency analysis with better detection"""
         dependencies = []
         task_lower = task.lower()
@@ -240,7 +237,7 @@ class ImpactAnalyzer:
             caching_opportunities=caching
         )
 
-    def _analyze_security_risks(self, task: str) -> List[SecurityRisk]:
+    def _analyze_security_risks(self, task: str) -> list[SecurityRisk]:
         """Phân tích rủi ro bảo mật"""
         risks = []
         task_lower = task.lower()
@@ -369,7 +366,7 @@ class ImpactAnalyzer:
             time_to_market=time_to_market
         )
 
-    def _assess_overall_risk(self, security_risks: List[SecurityRisk], performance: PerformanceImpact, user_impact: UserImpact) -> RiskLevel:
+    def _assess_overall_risk(self, security_risks: list[SecurityRisk], performance: PerformanceImpact, user_impact: UserImpact) -> RiskLevel:
         """Đánh giá rủi ro tổng thể"""
         if security_risks and any(risk.severity == "CRITICAL" for risk in security_risks):
             return RiskLevel.CRITICAL
@@ -380,7 +377,7 @@ class ImpactAnalyzer:
         else:
             return RiskLevel.LOW
 
-    def _generate_recommendations(self, dependencies: List[DependencyInfo], security_risks: List[SecurityRisk], performance: PerformanceImpact) -> List[str]:
+    def _generate_recommendations(self, dependencies: list[DependencyInfo], security_risks: list[SecurityRisk], performance: PerformanceImpact) -> list[str]:
         """Tạo khuyến nghị"""
         recommendations = []
 

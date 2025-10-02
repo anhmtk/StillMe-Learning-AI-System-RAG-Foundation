@@ -20,7 +20,6 @@ Date: 2025-09-29
 import csv
 import json
 import logging
-import os
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -29,7 +28,8 @@ from pathlib import Path
 project_root = Path(__file__).resolve().parents[1]
 sys.path.append(str(project_root))
 
-from stillme_core.learning.proposals_manager import ProposalsManager
+# Import after path setup
+from stillme_core.learning.proposals_manager import ProposalsManager  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -161,7 +161,7 @@ class DashboardDataExporter:
                 "total_proposals": len(proposals),
                 "approved_proposals": len([p for p in proposals if p.status == 'approved']),
                 "completed_learning": len([p for p in proposals if p.status == 'completed']),
-                "knowledge_sources": len(set(p.source.value if hasattr(p.source, 'value') else str(p.source) for p in proposals)),
+                "knowledge_sources": len({p.source.value if hasattr(p.source, 'value') else str(p.source) for p in proposals}),
                 "learning_sessions_today": len([p for p in proposals if p.created_at and p.created_at.date() == datetime.now().date()]),
                 "last_discovery": datetime.now().isoformat()
             }

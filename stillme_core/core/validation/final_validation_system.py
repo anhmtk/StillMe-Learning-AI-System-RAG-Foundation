@@ -8,13 +8,12 @@ Version: 1.0.0
 Phase: 0.1 - Security Remediation
 """
 
-import os
 import json
 import logging
-from typing import Dict, List, Optional, Any, Tuple
+import os
 from dataclasses import dataclass
 from datetime import datetime
-from pathlib import Path
+from typing import Any
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -28,7 +27,7 @@ class ValidationResult:
     check_type: str
     passed: bool
     message: str
-    details: Dict[str, Any]
+    details: dict[str, Any]
     timestamp: datetime
 
 
@@ -39,14 +38,14 @@ class FinalValidationSystem:
 
     def __init__(self, config_path: str = "config/validation_config.json"):
         self.config = self._load_config(config_path)
-        self.validation_results: List[ValidationResult] = []
+        self.validation_results: list[ValidationResult] = []
         self.security_middleware = None
         self.performance_monitor = None
         self.integration_bridge = None
         self.memory_security_integration = None
         self.module_governance_system = None
 
-    def _load_config(self, config_path: str) -> Dict[str, Any]:
+    def _load_config(self, config_path: str) -> dict[str, Any]:
         """Load validation configuration"""
         default_config = {
             "validation": {
@@ -68,7 +67,7 @@ class FinalValidationSystem:
 
         try:
             if os.path.exists(config_path):
-                with open(config_path, 'r', encoding='utf-8') as f:
+                with open(config_path, encoding='utf-8') as f:
                     config = json.load(f)
                     # Merge with defaults
                     for key, value in default_config.items():
@@ -126,10 +125,10 @@ class FinalValidationSystem:
         except Exception as e:
             logger.error(f"Error initializing components: {e}")
 
-    def run_security_validation(self) -> List[ValidationResult]:
+    def run_security_validation(self) -> list[ValidationResult]:
         """Run security validation checks"""
         results = []
-        
+
         if not self.config["validation"]["security"]["enabled"]:
             return results
 
@@ -152,11 +151,11 @@ class FinalValidationSystem:
                 ("xss_attempt", "<script>alert('xss')</script>", False),
                 ("sql_injection", "'; DROP TABLE users; --", False)
             ]
-            
+
             for test_name, test_input, expected_valid in test_inputs:
                 result = self.security_middleware.validate_input(test_input)
                 passed = result["is_valid"] == expected_valid
-                
+
                 results.append(ValidationResult(
                     component="security_middleware",
                     check_type="input_validation",
@@ -173,10 +172,10 @@ class FinalValidationSystem:
 
         return results
 
-    def run_performance_validation(self) -> List[ValidationResult]:
+    def run_performance_validation(self) -> list[ValidationResult]:
         """Run performance validation checks"""
         results = []
-        
+
         if not self.config["validation"]["performance"]["enabled"]:
             return results
 
@@ -194,25 +193,25 @@ class FinalValidationSystem:
 
         return results
 
-    def run_integration_validation(self) -> List[ValidationResult]:
+    def run_integration_validation(self) -> list[ValidationResult]:
         """Run integration validation checks"""
         results = []
-        
+
         if not self.config["validation"]["integration"]["enabled"]:
             return results
 
         required_components = self.config["validation"]["integration"]["required_components"]
-        
+
         for component in required_components:
             component_available = False
-            
+
             if component == "security" and self.security_middleware is not None:
                 component_available = True
             elif component == "memory" and self.memory_security_integration is not None:
                 component_available = True
             elif component == "governance" and self.module_governance_system is not None:
                 component_available = True
-            
+
             results.append(ValidationResult(
                 component=component,
                 check_type="integration",
@@ -227,27 +226,27 @@ class FinalValidationSystem:
 
         return results
 
-    def run_full_validation(self) -> Dict[str, Any]:
+    def run_full_validation(self) -> dict[str, Any]:
         """Run all validation checks"""
         logger.info("🔍 Starting full validation...")
-        
+
         # Initialize components
         self.initialize_components()
-        
+
         # Run all validation checks
         all_results = []
         all_results.extend(self.run_security_validation())
         all_results.extend(self.run_performance_validation())
         all_results.extend(self.run_integration_validation())
-        
+
         # Store results
         self.validation_results.extend(all_results)
-        
+
         # Calculate summary
         total_checks = len(all_results)
         passed_checks = sum(1 for r in all_results if r.passed)
         failed_checks = total_checks - passed_checks
-        
+
         summary = {
             "total_checks": total_checks,
             "passed_checks": passed_checks,
@@ -266,19 +265,19 @@ class FinalValidationSystem:
                 for r in all_results
             ]
         }
-        
+
         logger.info(f"✅ Validation complete: {passed_checks}/{total_checks} checks passed")
-        
+
         return summary
 
 
 def main():
     """Test the validation system"""
     validator = FinalValidationSystem()
-    
+
     # Run full validation
     results = validator.run_full_validation()
-    
+
     print("🔍 Validation Results:")
     print(f"Total checks: {results['total_checks']}")
     print(f"Passed: {results['passed_checks']}")

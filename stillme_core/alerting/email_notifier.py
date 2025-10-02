@@ -15,8 +15,6 @@ import logging
 import os
 import smtplib
 from datetime import datetime
-from email import encoders
-from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from pathlib import Path
@@ -100,26 +98,26 @@ class EmailNotifier:
                         <h1 style="margin: 0; font-size: 24px;">🧠 StillMe IPC Alert</h1>
                         <p style="margin: 5px 0 0 0; opacity: 0.9;">Intelligent Personal Companion</p>
                     </div>
-                    
+
                     <div style="background: #f8f9fa; padding: 20px; border-radius: 0 0 10px 10px;">
                         <h2 style="color: #2c3e50; margin-top: 0;">{title}</h2>
                         <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #3498db;">
                             <p style="margin: 0; white-space: pre-line;">{message}</p>
                         </div>
-                        
+
                         <div style="margin-top: 20px; padding: 15px; background: #e8f4fd; border-radius: 8px;">
                             <h3 style="color: #2c3e50; margin-top: 0;">📊 System Status</h3>
                             <p><strong>Time:</strong> {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
                             <p><strong>Level:</strong> {level.upper()}</p>
                             <p><strong>Source:</strong> StillMe IPC Learning System</p>
                         </div>
-                        
+
                         <div style="margin-top: 20px; text-align: center;">
                             <a href="http://localhost:8507" style="background: #3498db; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
                                 🚀 Open Dashboard
                             </a>
                         </div>
-                        
+
                         <div style="margin-top: 20px; padding: 15px; background: #f1f2f6; border-radius: 8px; font-size: 12px; color: #666;">
                             <p style="margin: 0;">This is an automated message from StillMe IPC Learning System.</p>
                             <p style="margin: 5px 0 0 0;">To configure notifications, check the dashboard settings.</p>

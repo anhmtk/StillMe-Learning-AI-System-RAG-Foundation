@@ -5,7 +5,7 @@ Approval System - Stub implementation
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 
 class ApprovalStatus(Enum):
@@ -41,21 +41,21 @@ class ApprovalRequest:
     content_type: ContentType
     priority: ApprovalPriority
     status: ApprovalStatus = ApprovalStatus.PENDING
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
 class ApprovalSystem:
     """Approval system stub implementation"""
 
     def __init__(self, config: ApprovalConfig = None):
         self.config = config or ApprovalConfig()
-        self.requests: List[ApprovalRequest] = []
+        self.requests: list[ApprovalRequest] = []
 
     async def submit_for_approval(
         self,
         content: str,
         content_type: ContentType = ContentType.TEXT,
         priority: ApprovalPriority = ApprovalPriority.MEDIUM,
-        metadata: Dict[str, Any] = None
+        metadata: dict[str, Any] = None
     ) -> str:
         """Submit content for approval"""
         request_id = f"req_{len(self.requests)}"
@@ -69,7 +69,7 @@ class ApprovalSystem:
         self.requests.append(request)
         return request_id
 
-    async def get_pending_requests(self) -> List[ApprovalRequest]:
+    async def get_pending_requests(self) -> list[ApprovalRequest]:
         """Get pending requests"""
         return [req for req in self.requests if req.status == ApprovalStatus.PENDING]
 
@@ -96,7 +96,7 @@ class ApprovalSystem:
                 return req
         return None
 
-    async def get_approval_stats(self) -> Dict[str, int]:
+    async def get_approval_stats(self) -> dict[str, int]:
         """Get approval statistics"""
         stats = {
             "total": len(self.requests),

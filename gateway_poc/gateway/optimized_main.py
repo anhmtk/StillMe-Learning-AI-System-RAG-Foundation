@@ -5,10 +5,9 @@ Tối ưu cho performance với workers, uvloop, httptools, orjson
 """
 
 import asyncio
-import json
 import logging
 import time
-from typing import Any, Dict, Optional
+from typing import Optional
 
 import httpx
 import uvicorn

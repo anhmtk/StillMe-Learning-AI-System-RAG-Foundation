@@ -11,7 +11,7 @@ import time
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +50,7 @@ class RiskFactor:
     impact: str
     probability: float
     mitigation: str
-    cost_estimate: Optional[str] = None
+    cost_estimate: str | None = None
 
 
 @dataclass
@@ -58,11 +58,11 @@ class RiskAssessment:
     """Comprehensive risk assessment"""
 
     total_risks: int
-    risks_by_level: Dict[RiskLevel, int]
-    risks_by_category: Dict[RiskCategory, int]
-    risk_factors: List[RiskFactor]
+    risks_by_level: dict[RiskLevel, int]
+    risks_by_category: dict[RiskCategory, int]
+    risk_factors: list[RiskFactor]
     overall_risk_score: float
-    recommendations: List[str]
+    recommendations: list[str]
     assessment_duration: float
 
 
@@ -76,7 +76,7 @@ class RiskAssessor:
         self.risk_patterns = self._load_risk_patterns()
         self.complexity_thresholds = self._load_complexity_thresholds()
 
-    def _load_risk_patterns(self) -> Dict[RiskCategory, List[Dict[str, Any]]]:
+    def _load_risk_patterns(self) -> dict[RiskCategory, list[dict[str, Any]]]:
         """Load risk detection patterns"""
         return {
             RiskCategory.SECURITY: [
@@ -221,7 +221,7 @@ class RiskAssessor:
             ],
         }
 
-    def _load_complexity_thresholds(self) -> Dict[str, int]:
+    def _load_complexity_thresholds(self) -> dict[str, int]:
         """Load complexity thresholds for risk assessment"""
         return {
             "cyclomatic_complexity": 10,
@@ -273,7 +273,7 @@ class RiskAssessor:
         file_str = str(file_path)
         return not any(pattern in file_str for pattern in skip_patterns)
 
-    def _analyze_file_risks(self, file_path: Path) -> List[RiskFactor]:
+    def _analyze_file_risks(self, file_path: Path) -> list[RiskFactor]:
         """Analyze risks in a single file"""
         risk_factors = []
 
@@ -334,12 +334,11 @@ class RiskAssessor:
 
         return risk_factors
 
-    def _analyze_ast_risks(self, tree: ast.AST, file_path: Path) -> List[RiskFactor]:
+    def _analyze_ast_risks(self, tree: ast.AST, file_path: Path) -> list[RiskFactor]:
         """Analyze risks using AST"""
-        risk_factors = []
 
         class RiskVisitor(ast.NodeVisitor):
-            def __init__(self, file_path: Path, complexity_thresholds: Dict[str, int]):
+            def __init__(self, file_path: Path, complexity_thresholds: dict[str, int]):
                 self.file_path = file_path
                 self.risks = []
                 self.complexity_thresholds = complexity_thresholds
@@ -428,7 +427,7 @@ class RiskAssessor:
         visitor.visit(tree)
         return visitor.risks
 
-    def _analyze_dependency_risks(self) -> List[RiskFactor]:
+    def _analyze_dependency_risks(self) -> list[RiskFactor]:
         """Analyze dependency-related risks"""
         risk_factors = []
 
@@ -475,7 +474,7 @@ class RiskAssessor:
 
         return risk_factors
 
-    def _check_outdated_packages(self, requirements: str) -> List[str]:
+    def _check_outdated_packages(self, requirements: str) -> list[str]:
         """Check for outdated packages (simplified)"""
         # This is a simplified check - in practice, you'd use pip-tools or similar
         outdated_indicators = ["django<3.0", "flask<2.0", "requests<2.25", "numpy<1.20"]
@@ -487,7 +486,7 @@ class RiskAssessor:
 
         return outdated
 
-    def _analyze_architecture_risks(self) -> List[RiskFactor]:
+    def _analyze_architecture_risks(self) -> list[RiskFactor]:
         """Analyze architecture-related risks"""
         risk_factors = []
 
@@ -525,13 +524,13 @@ class RiskAssessor:
 
         return risk_factors
 
-    def _detect_circular_imports(self) -> List[List[str]]:
+    def _detect_circular_imports(self) -> list[list[str]]:
         """Detect circular imports (simplified)"""
         # This is a simplified implementation
         # In practice, you'd use more sophisticated analysis
         return []
 
-    def _find_large_files(self) -> List[Tuple[str, int]]:
+    def _find_large_files(self) -> list[tuple[str, int]]:
         """Find files with excessive line counts"""
         large_files = []
         max_lines = 500  # Threshold for large files
@@ -551,7 +550,7 @@ class RiskAssessor:
         return large_files
 
     def _generate_risk_report(
-        self, risk_factors: List[RiskFactor], duration: float
+        self, risk_factors: list[RiskFactor], duration: float
     ) -> RiskAssessment:
         """Generate comprehensive risk report"""
         # Count risks by level
@@ -582,7 +581,7 @@ class RiskAssessor:
             assessment_duration=duration,
         )
 
-    def _calculate_overall_risk_score(self, risk_factors: List[RiskFactor]) -> float:
+    def _calculate_overall_risk_score(self, risk_factors: list[RiskFactor]) -> float:
         """Calculate overall risk score (0-100)"""
         if not risk_factors:
             return 0.0
@@ -608,8 +607,8 @@ class RiskAssessor:
         return min(100.0, (total_weighted_score / max_possible_score) * 100)
 
     def _generate_risk_recommendations(
-        self, risk_factors: List[RiskFactor], risks_by_level: Dict[RiskLevel, int]
-    ) -> List[str]:
+        self, risk_factors: list[RiskFactor], risks_by_level: dict[RiskLevel, int]
+    ) -> list[str]:
         """Generate risk mitigation recommendations"""
         recommendations = []
 

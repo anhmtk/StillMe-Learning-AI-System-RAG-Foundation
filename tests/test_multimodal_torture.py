@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 #!/usr/bin/env python3
 """
@@ -248,7 +248,7 @@ class MultiModalTortureTestSuite:
             print(f"ERROR in test_xss_in_code_torture: {e}")
             return False
 
-    def run_all_tests(self) -> Dict[str, Any]:
+    def run_all_tests(self) -> dict[str, Any]:
         """Run all Multi-Modal Torture tests"""
         print("🔥 Starting Multi-Modal Torture Test Suite")
 

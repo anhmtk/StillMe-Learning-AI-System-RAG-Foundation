@@ -69,7 +69,7 @@ RELATED FILES / FILES LIÊN QUAN:
 import logging
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -98,8 +98,8 @@ class AbuseEvent:
     threat_level: ThreatLevel
     timestamp: str
     user_id: Optional[str] = None
-    details: Dict[str, Any] = None
-    metadata: Dict[str, Any] = None
+    details: dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
 
 @dataclass
@@ -115,7 +115,7 @@ class GuardConfig:
 class ProactiveAbuseGuard:
     """
     Proactive Abuse Guard - Security monitoring and threat detection
-    
+
     This is a stub implementation to resolve F821 errors.
     TODO: Implement full security features.
     """
@@ -123,8 +123,8 @@ class ProactiveAbuseGuard:
     def __init__(self, config: Optional[GuardConfig] = None):
         """Initialize ProactiveAbuseGuard"""
         self.config = config or GuardConfig()
-        self.events: List[AbuseEvent] = []
-        self.patterns: Dict[AbusePattern, List[str]] = {
+        self.events: list[AbuseEvent] = []
+        self.patterns: dict[AbusePattern, list[str]] = {
             AbusePattern.RATE_LIMITING: ["rapid_requests", "burst_traffic"],
             AbusePattern.CONTENT_ABUSE: ["spam_content", "malicious_content"],
             AbusePattern.SYSTEM_ABUSE: ["resource_exhaustion", "system_manipulation"],
@@ -133,13 +133,13 @@ class ProactiveAbuseGuard:
         self.logger = logging.getLogger(__name__)
         self.logger.info("🛡️ ProactiveAbuseGuard initialized")
 
-    def detect_abuse(self, event_data: Dict[str, Any]) -> Optional[AbuseEvent]:
+    def detect_abuse(self, event_data: dict[str, Any]) -> Optional[AbuseEvent]:
         """
         Detect abuse patterns in event data
-        
+
         Args:
             event_data: Event data to analyze
-            
+
         Returns:
             AbuseEvent if abuse detected, None otherwise
         """
@@ -168,10 +168,10 @@ class ProactiveAbuseGuard:
     def assess_threat(self, event: AbuseEvent) -> ThreatLevel:
         """
         Assess threat level of an abuse event
-        
+
         Args:
             event: Abuse event to assess
-            
+
         Returns:
             Threat level assessment
         """
@@ -191,10 +191,10 @@ class ProactiveAbuseGuard:
     def respond_to_threat(self, event: AbuseEvent) -> bool:
         """
         Respond to detected threat
-        
+
         Args:
             event: Abuse event to respond to
-            
+
         Returns:
             True if response successful, False otherwise
         """
@@ -211,10 +211,10 @@ class ProactiveAbuseGuard:
             self.logger.error(f"❌ Error responding to threat: {e}")
             return False
 
-    def get_abuse_statistics(self) -> Dict[str, Any]:
+    def get_abuse_statistics(self) -> dict[str, Any]:
         """
         Get abuse detection statistics
-        
+
         Returns:
             Statistics dictionary
         """
@@ -246,10 +246,10 @@ class ProactiveAbuseGuard:
     def update_config(self, new_config: GuardConfig) -> bool:
         """
         Update guard configuration
-        
+
         Args:
             new_config: New configuration
-            
+
         Returns:
             True if update successful, False otherwise
         """

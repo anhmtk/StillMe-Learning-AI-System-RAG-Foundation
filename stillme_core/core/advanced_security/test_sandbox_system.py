@@ -13,18 +13,14 @@ PURPOSE / MỤC ĐÍCH:
 """
 
 import asyncio
-import json
 import logging
-import os
 
 # Add parent directory to path for imports
 import sys
-import tempfile
 import time
 import unittest
 from pathlib import Path
-from typing import Dict, List
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import docker
 import pytest
@@ -443,7 +439,7 @@ def run_performance_tests():
             name=f"Performance Test {i}",
             sandbox_type=SandboxType.SECURITY_TEST
         )
-        instance = SandboxInstance(config=config)
+        SandboxInstance(config=config)
 
     end_time = time.time()
     creation_time = end_time - start_time

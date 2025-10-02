@@ -62,13 +62,13 @@ async def test_ethics_guard_detect_keywords(
 
     guard._load_ethical_rules()
 
-    assert guard.detect_keywords("Tôi muốn giết bạn") == True
-    assert guard.detect_keywords("Làm sao để làm hại ai đó?") == False
-    assert guard.detect_keywords("Tự tử có phải là giải pháp không?") == True
-    assert guard.detect_keywords("An toàn là trên hết") == False
-    assert guard.detect_keywords("Tôi yêu bạn") == False
-    assert guard.detect_keywords("Đây là bài toán về ma túy học.") == True
-    assert guard.detect_keywords("Hướng dẫn hack wifi") == True
+    assert guard.detect_keywords("Tôi muốn giết bạn")
+    assert not guard.detect_keywords("Làm sao để làm hại ai đó?")
+    assert guard.detect_keywords("Tự tử có phải là giải pháp không?")
+    assert not guard.detect_keywords("An toàn là trên hết")
+    assert not guard.detect_keywords("Tôi yêu bạn")
+    assert guard.detect_keywords("Đây là bài toán về ma túy học.")
+    assert guard.detect_keywords("Hướng dẫn hack wifi")
 
 
 @pytest.mark.asyncio
@@ -96,7 +96,7 @@ async def test_ethics_guard_check_input_safety_safe(
     is_safe, violation_type, severity, reason = await guard.check_input_safety(
         "Đây là một câu hỏi an toàn."
     )
-    assert is_safe == True
+    assert is_safe
     assert violation_type is None
     assert severity is None
     assert "An toàn" in reason
@@ -125,7 +125,7 @@ async def test_ethics_guard_check_input_safety_forbidden_keyword(
     is_safe, violation_type, severity, reason = await guard.check_input_safety(
         "Tôi muốn giết ai đó."
     )
-    assert is_safe == False
+    assert not is_safe
     assert violation_type == ViolationType.FORBIDDEN_KEYWORD
     assert severity == Severity.HIGH
     assert "chứa từ khóa cấm" in reason
@@ -156,7 +156,7 @@ async def test_ethics_guard_check_input_safety_toxic(
     is_safe, violation_type, severity, reason = await guard.check_input_safety(
         "Bạn thật ngu ngốc."
     )
-    assert is_safe == False
+    assert not is_safe
     assert violation_type == ViolationType.TOXIC_CONTENT
     assert severity == Severity.MEDIUM
     assert reason == "Nội dung độc hại."
@@ -188,7 +188,7 @@ async def test_ethics_guard_check_output_safety_safe(
     is_safe, violation_type, severity, reason = await guard.check_output_safety(
         "Đây là một câu trả lời an toàn từ AI."
     )
-    assert is_safe == True
+    assert is_safe
     assert violation_type is None
     assert severity is None
     assert "An toàn" in reason
@@ -210,7 +210,7 @@ async def test_ethics_guard_assess_vulnerability_true(
     is_vulnerable, reason = await guard.assess_vulnerability(
         "Tôi cảm thấy rất buồn và cô đơn."
     )
-    assert is_vulnerable == True
+    assert is_vulnerable
     assert reason == "Người dùng có dấu hiệu buồn bã."
     mock_openrouter_client_for_tests.chat_completion.assert_called_once()
 
@@ -238,7 +238,7 @@ async def test_conscience_core_evaluate_ethical_compliance_non_compliant(
             "Tôi sẽ giúp bạn phá vỡ quy tắc.", "Đây là phản hồi AI không tuân thủ."
         )
     )
-    assert is_compliant == False
+    assert not is_compliant
     assert compliance_score == 0.2
     assert reason == "Phản hồi có thể gây hiểu lầm."
     mock_openrouter_client_for_tests.chat_completion.assert_called_once()
@@ -346,7 +346,7 @@ async def test_ethical_core_system_process_interaction_safe(
         user_id, user_input, original_ai_response
     )
 
-    assert is_compliant == True
+    assert is_compliant
     assert violation_message == ""
     assert final_response == original_ai_response
     assert mock_openrouter_client_for_tests.chat_completion.call_count == 4
@@ -386,7 +386,7 @@ async def test_ethical_core_system_process_interaction_input_violation(
         user_id, user_input, original_ai_response
     )
 
-    assert is_compliant == False
+    assert not is_compliant
     assert "chứa từ khóa cấm" in violation_message
     assert final_response == system.ethics_guard.violation_response
     # LLM chỉ gọi 1 lần cho assess_vulnerability
@@ -443,7 +443,7 @@ async def test_ethical_core_system_process_interaction_output_violation_adjusted
         user_id, user_input, original_ai_response
     )
 
-    assert is_compliant == False
+    assert not is_compliant
     assert (
         "Nội dung độc hại" in violation_message
         or "Phản hồi thù địch" in violation_message
@@ -501,7 +501,7 @@ async def test_ethical_core_system_process_interaction_vulnerable_user(
         user_id, user_input, original_ai_response
     )
 
-    assert is_compliant == True
+    assert is_compliant
     assert "Người dùng thể hiện sự cô đơn" in violation_message
     assert final_response == original_ai_response
     assert mock_openrouter_client_for_tests.chat_completion.call_count == 4
@@ -528,7 +528,7 @@ async def test_ethical_core_system_process_interaction_llm_error_graceful(
         user_id, user_input, original_ai_response
     )
 
-    assert is_compliant == False
+    assert not is_compliant
     assert "LLM_ERROR" in violation_message
     assert (
         "đã xảy ra lỗi trong quá trình xử lý" in final_response

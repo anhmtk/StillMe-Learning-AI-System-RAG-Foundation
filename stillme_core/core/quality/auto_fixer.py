@@ -12,7 +12,7 @@ import subprocess
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Optional
 
 from stillme_core.quality.code_quality_enforcer import QualityIssue
 
@@ -24,9 +24,9 @@ class FixResult:
     success: bool
     file_path: str
     fixes_applied: int
-    errors_fixed: List[str]
-    warnings: List[str]
-    errors: List[str]
+    errors_fixed: list[str]
+    warnings: list[str]
+    errors: list[str]
     backup_path: Optional[str] = None
 
 
@@ -63,8 +63,8 @@ class AutoFixer:
         }
 
     async def fix_issues(
-        self, issues: List[QualityIssue], target_path: str
-    ) -> List[FixResult]:
+        self, issues: list[QualityIssue], target_path: str
+    ) -> list[FixResult]:
         """
         Fix quality issues in files.
 
@@ -104,7 +104,7 @@ class AutoFixer:
         return results
 
     async def _fix_file_issues(
-        self, file_path: str, issues: List[QualityIssue]
+        self, file_path: str, issues: list[QualityIssue]
     ) -> FixResult:
         """Fix issues in a single file"""
         file_path = Path(file_path)  # type: ignore
@@ -177,7 +177,7 @@ class AutoFixer:
                 backup_path=backup_path,
             )
 
-    def _apply_issue_fix(self, content: str, issue: QualityIssue) -> Tuple[str, bool]:
+    def _apply_issue_fix(self, content: str, issue: QualityIssue) -> tuple[str, bool]:
         """Apply a specific fix for an issue"""
         fix_type = self._determine_fix_type(issue)
 
@@ -222,7 +222,7 @@ class AutoFixer:
 
         return code_mapping.get(issue.code, "unknown")
 
-    def _fix_import_order(self, content: str, issue: QualityIssue) -> Tuple[str, bool]:
+    def _fix_import_order(self, content: str, issue: QualityIssue) -> tuple[str, bool]:
         """Fix import order issues"""
         try:
             # Use isort to fix import order
@@ -253,7 +253,7 @@ class AutoFixer:
 
     def _fix_unused_imports(
         self, content: str, issue: QualityIssue
-    ) -> Tuple[str, bool]:
+    ) -> tuple[str, bool]:
         """Fix unused import issues"""
         try:
             # Parse AST to find unused imports
@@ -298,7 +298,7 @@ class AutoFixer:
         except Exception:
             return content, False
 
-    def _fix_line_length(self, content: str, issue: QualityIssue) -> Tuple[str, bool]:
+    def _fix_line_length(self, content: str, issue: QualityIssue) -> tuple[str, bool]:
         """Fix line length issues"""
         try:
             # Use black to fix line length
@@ -329,7 +329,7 @@ class AutoFixer:
 
     def _fix_trailing_whitespace(
         self, content: str, issue: QualityIssue
-    ) -> Tuple[str, bool]:
+    ) -> tuple[str, bool]:
         """Fix trailing whitespace issues"""
         lines = content.splitlines()
         fixed_lines = []
@@ -347,13 +347,13 @@ class AutoFixer:
 
     def _fix_missing_newline(
         self, content: str, issue: QualityIssue
-    ) -> Tuple[str, bool]:
+    ) -> tuple[str, bool]:
         """Fix missing newline at end of file"""
         if content and not content.endswith("\n"):
             return content + "\n", True
         return content, False
 
-    def _fix_quotes(self, content: str, issue: QualityIssue) -> Tuple[str, bool]:
+    def _fix_quotes(self, content: str, issue: QualityIssue) -> tuple[str, bool]:
         """Fix quote consistency issues"""
         # Simple quote fixing - convert to double quotes
         lines = content.splitlines()
@@ -371,7 +371,7 @@ class AutoFixer:
 
         return "\n".join(fixed_lines), fixed
 
-    def _fix_indentation(self, content: str, issue: QualityIssue) -> Tuple[str, bool]:
+    def _fix_indentation(self, content: str, issue: QualityIssue) -> tuple[str, bool]:
         """Fix indentation issues"""
         try:
             # Use black to fix indentation
@@ -400,7 +400,7 @@ class AutoFixer:
         except Exception:
             return content, False
 
-    def _fix_semicolons(self, content: str, issue: QualityIssue) -> Tuple[str, bool]:
+    def _fix_semicolons(self, content: str, issue: QualityIssue) -> tuple[str, bool]:
         """Fix semicolon issues"""
         lines = content.splitlines()
         fixed_lines = []
@@ -416,7 +416,7 @@ class AutoFixer:
 
         return "\n".join(fixed_lines), fixed
 
-    def _fix_comparison(self, content: str, issue: QualityIssue) -> Tuple[str, bool]:
+    def _fix_comparison(self, content: str, issue: QualityIssue) -> tuple[str, bool]:
         """Fix comparison issues"""
         lines = content.splitlines()
         fixed_lines = []
@@ -438,7 +438,7 @@ class AutoFixer:
 
         return "\n".join(fixed_lines), fixed
 
-    def _fix_f_strings(self, content: str, issue: QualityIssue) -> Tuple[str, bool]:
+    def _fix_f_strings(self, content: str, issue: QualityIssue) -> tuple[str, bool]:
         """Fix f-string issues"""
         lines = content.splitlines()
         fixed_lines = []
@@ -458,8 +458,8 @@ class AutoFixer:
         return "\n".join(fixed_lines), fixed
 
     def run_tool_fixes(
-        self, target_path: str, tools: List[str]
-    ) -> Dict[str, FixResult]:
+        self, target_path: str, tools: list[str]
+    ) -> dict[str, FixResult]:
         """Run tool-specific fixes"""
         results = {}
 

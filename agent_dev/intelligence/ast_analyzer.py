@@ -6,13 +6,12 @@ Enterprise-grade AST-based code analysis and semantic understanding
 
 import ast
 import hashlib
-import json
 import re
 import time
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Optional
 
 
 class CodeComplexity(Enum):
@@ -47,7 +46,7 @@ class CodeMetric:
     threshold: Optional[float]
     severity: str
     description: str
-    recommendations: List[str]
+    recommendations: list[str]
 
 @dataclass
 class CodePattern:
@@ -58,7 +57,7 @@ class CodePattern:
     severity: str
     line_number: int
     code_snippet: str
-    suggestions: List[str]
+    suggestions: list[str]
     confidence: float
 
 @dataclass
@@ -68,8 +67,8 @@ class ASTNode:
     name: Optional[str]
     line_number: int
     column_number: int
-    children: List['ASTNode']
-    attributes: Dict[str, Any]
+    children: list['ASTNode']
+    attributes: dict[str, Any]
     complexity_score: float
 
 @dataclass
@@ -78,16 +77,16 @@ class CodeAnalysis:
     file_path: str
     file_hash: str
     analysis_timestamp: float
-    metrics: List[CodeMetric]
-    patterns: List[CodePattern]
-    ast_nodes: List[ASTNode]
+    metrics: list[CodeMetric]
+    patterns: list[CodePattern]
+    ast_nodes: list[ASTNode]
     complexity_score: float
     quality_score: float
     maintainability_index: float
     technical_debt: float
-    security_issues: List[CodePattern]
-    performance_issues: List[CodePattern]
-    recommendations: List[str]
+    security_issues: list[CodePattern]
+    performance_issues: list[CodePattern]
+    recommendations: list[str]
 
 class ASTAnalyzer:
     """Enterprise AST-based code analyzer"""
@@ -96,9 +95,9 @@ class ASTAnalyzer:
         self.config = self._load_config(config_path)
         self.patterns = self._load_patterns()
         self.metrics_config = self._load_metrics_config()
-        self.analysis_cache: Dict[str, CodeAnalysis] = {}
+        self.analysis_cache: dict[str, CodeAnalysis] = {}
 
-    def _load_config(self, config_path: Optional[str] = None) -> Dict[str, Any]:
+    def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
         """Load AST analyzer configuration"""
         if config_path:
             config_file = Path(config_path)
@@ -128,7 +127,7 @@ class ASTAnalyzer:
                 'max_file_size': 1024 * 1024  # 1MB
             }
 
-    def _load_patterns(self) -> Dict[str, Dict[str, Any]]:
+    def _load_patterns(self) -> dict[str, dict[str, Any]]:
         """Load code pattern definitions"""
         return {
             'security_patterns': {
@@ -195,7 +194,7 @@ class ASTAnalyzer:
             }
         }
 
-    def _load_metrics_config(self) -> Dict[str, Any]:
+    def _load_metrics_config(self) -> dict[str, Any]:
         """Load metrics configuration"""
         return {
             'cyclomatic_complexity': {
@@ -315,7 +314,7 @@ class ASTAnalyzer:
             recommendations=recommendations
         )
 
-    def _extract_ast_nodes(self, tree: ast.AST) -> List[ASTNode]:
+    def _extract_ast_nodes(self, tree: ast.AST) -> list[ASTNode]:
         """Extract AST nodes with metadata"""
         nodes = []
 
@@ -342,7 +341,7 @@ class ASTAnalyzer:
                 return node.targets[0].id
         return None
 
-    def _get_node_attributes(self, node: ast.AST) -> Dict[str, Any]:
+    def _get_node_attributes(self, node: ast.AST) -> dict[str, Any]:
         """Get node attributes"""
         attributes = {}
 
@@ -386,7 +385,7 @@ class ASTAnalyzer:
 
         return complexity
 
-    def _calculate_metrics(self, tree: ast.AST, lines: List[str]) -> List[CodeMetric]:
+    def _calculate_metrics(self, tree: ast.AST, lines: list[str]) -> list[CodeMetric]:
         """Calculate code metrics"""
         metrics = []
 
@@ -450,7 +449,7 @@ class ASTAnalyzer:
 
         return complexity
 
-    def _detect_patterns(self, source_code: str, lines: List[str]) -> List[CodePattern]:
+    def _detect_patterns(self, source_code: str, lines: list[str]) -> list[CodePattern]:
         """Detect code patterns"""
         patterns = []
 
@@ -488,7 +487,7 @@ class ASTAnalyzer:
 
         return patterns
 
-    def _calculate_complexity_score(self, metrics: List[CodeMetric]) -> float:
+    def _calculate_complexity_score(self, metrics: list[CodeMetric]) -> float:
         """Calculate overall complexity score"""
         complexity_metrics = [m for m in metrics if 'complexity' in m.metric_name]
         if not complexity_metrics:
@@ -499,7 +498,7 @@ class ASTAnalyzer:
 
         return min(total_complexity / max_complexity, 1.0) if max_complexity > 0 else 0.0
 
-    def _calculate_quality_score(self, metrics: List[CodeMetric], patterns: List[CodePattern]) -> float:
+    def _calculate_quality_score(self, metrics: list[CodeMetric], patterns: list[CodePattern]) -> float:
         """Calculate code quality score"""
         score = 1.0
 
@@ -519,7 +518,7 @@ class ASTAnalyzer:
 
         return max(score, 0.0)
 
-    def _calculate_maintainability_index(self, metrics: List[CodeMetric]) -> float:
+    def _calculate_maintainability_index(self, metrics: list[CodeMetric]) -> float:
         """Calculate maintainability index"""
         # Simplified maintainability index calculation
         loc_metric = next((m for m in metrics if m.metric_name == 'lines_of_code'), None)
@@ -533,9 +532,9 @@ class ASTAnalyzer:
         mi = 171 - 5.2 * math.log(complexity_metric.value) - 0.23 * complexity_metric.value - 16.2 * math.log(loc_metric.value)
         return max(mi, 0.0)
 
-    def _calculate_technical_debt(self, metrics: List[CodeMetric], patterns: List[CodePattern]) -> float:
+    def _calculate_technical_debt(self, metrics: list[CodeMetric], patterns: list[CodePattern]) -> float:
         """Calculate technical debt ratio"""
-        total_issues = len(patterns)
+        len(patterns)
         critical_issues = len([p for p in patterns if p.severity == 'critical'])
         high_issues = len([p for p in patterns if p.severity == 'high'])
 
@@ -547,7 +546,7 @@ class ASTAnalyzer:
         debt_score = critical_issues * 10 + high_issues * 5
         return debt_score / loc_metric.value
 
-    def _generate_recommendations(self, metrics: List[CodeMetric], patterns: List[CodePattern]) -> List[str]:
+    def _generate_recommendations(self, metrics: list[CodeMetric], patterns: list[CodePattern]) -> list[str]:
         """Generate improvement recommendations"""
         recommendations = []
 
@@ -572,7 +571,7 @@ class ASTAnalyzer:
         except Exception:
             return str(file_path)
 
-    def analyze_directory(self, directory_path: str) -> Dict[str, CodeAnalysis]:
+    def analyze_directory(self, directory_path: str) -> dict[str, CodeAnalysis]:
         """Analyze all Python files in directory"""
         directory = Path(directory_path)
         analyses = {}
@@ -586,7 +585,7 @@ class ASTAnalyzer:
 
         return analyses
 
-    def get_analysis_summary(self, analyses: Dict[str, CodeAnalysis]) -> Dict[str, Any]:
+    def get_analysis_summary(self, analyses: dict[str, CodeAnalysis]) -> dict[str, Any]:
         """Get summary of multiple analyses"""
         total_files = len(analyses)
         total_lines = sum(a.metrics[1].value for a in analyses.values() if len(a.metrics) > 1)
@@ -617,11 +616,11 @@ def analyze_code_file(file_path: str) -> CodeAnalysis:
     """Analyze a single code file"""
     return ast_analyzer.analyze_file(file_path)
 
-def analyze_code_directory(directory_path: str) -> Dict[str, CodeAnalysis]:
+def analyze_code_directory(directory_path: str) -> dict[str, CodeAnalysis]:
     """Analyze all Python files in directory"""
     return ast_analyzer.analyze_directory(directory_path)
 
-def get_code_quality_summary(analyses: Dict[str, CodeAnalysis]) -> Dict[str, Any]:
+def get_code_quality_summary(analyses: dict[str, CodeAnalysis]) -> dict[str, Any]:
     """Get code quality summary"""
     return ast_analyzer.get_analysis_summary(analyses)
 

@@ -18,7 +18,7 @@ FUNCTIONALITY / CHỨC NĂNG:
 - Duy trì tất cả chức năng CircuitBreaker
 """
 
-from typing import Any, Dict, Optional, Type
+from typing import Any
 
 from .common.logging import get_logger
 from .common.retry import CircuitBreaker, CircuitBreakerConfig
@@ -34,10 +34,10 @@ class SafeCircuitBreaker:
     def __init__(self, **kwargs):
         """
         Initialize SafeCircuitBreaker with parameter mapping
-        
+
         Supported parameters:
         - failure_threshold: int (default: 5)
-        - recovery_timeout: float (default: 60.0) 
+        - recovery_timeout: float (default: 60.0)
         - expected_exception: Type[Exception] (default: Exception)
         - success_threshold: int (default: 2)
         - logger: logger instance (optional)

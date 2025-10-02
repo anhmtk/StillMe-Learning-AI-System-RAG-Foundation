@@ -3,7 +3,7 @@
 🎯 NicheRadar Feedback - Learning Weights & Performance Tracking
 ==============================================================
 
-Nhập số liệu thực chiến (thủ công hoặc tự động từ dashboard): 
+Nhập số liệu thực chiến (thủ công hoặc tự động từ dashboard):
 impressions, clicks, signups, revenue (nếu có).
 
 Cập nhật file data/feedback.csv.
@@ -15,16 +15,14 @@ Version: 1.5.0
 
 import csv
 import logging
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import numpy as np
 import pandas as pd
 import yaml
-
-from .scoring import NicheScore
 
 logger = logging.getLogger(__name__)
 
@@ -61,9 +59,9 @@ class FeedbackRecord:
 @dataclass
 class LearningWeights:
     """Learning weights suggestion"""
-    original_weights: Dict[str, float]
-    suggested_weights: Dict[str, float]
-    changes: Dict[str, float]
+    original_weights: dict[str, float]
+    suggested_weights: dict[str, float]
+    changes: dict[str, float]
     confidence: float
     sample_size: int
     rationale: str
@@ -147,7 +145,7 @@ class FeedbackTracker:
             self.logger.error(f"❌ Failed to load feedback data: {e}")
             return pd.DataFrame()
 
-    def calculate_performance_metrics(self, df: pd.DataFrame) -> Dict[str, Any]:
+    def calculate_performance_metrics(self, df: pd.DataFrame) -> dict[str, Any]:
         """Calculate performance metrics from feedback data"""
         if df.empty:
             return {}
@@ -195,7 +193,7 @@ class FeedbackTracker:
 
         return metrics
 
-    def analyze_weight_effectiveness(self, df: pd.DataFrame) -> Dict[str, float]:
+    def analyze_weight_effectiveness(self, df: pd.DataFrame) -> dict[str, float]:
         """Analyze effectiveness of current weights"""
         if df.empty:
             return {}
@@ -219,7 +217,7 @@ class FeedbackTracker:
 
         return effectiveness
 
-    def suggest_weight_adjustments(self, current_weights: Dict[str, float],
+    def suggest_weight_adjustments(self, current_weights: dict[str, float],
                                  days: int = 30) -> LearningWeights:
         """Suggest weight adjustments based on feedback"""
         try:
@@ -353,7 +351,7 @@ class FeedbackTracker:
         except Exception as e:
             self.logger.error(f"❌ Failed to export suggested weights: {e}")
 
-    def get_performance_summary(self, days: int = 30) -> Dict[str, Any]:
+    def get_performance_summary(self, days: int = 30) -> dict[str, Any]:
         """Get performance summary for dashboard"""
         df = self.get_feedback_data(days)
 

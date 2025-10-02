@@ -112,7 +112,7 @@ class SimpleDashboard:
                 manager = ProposalsManager()
                 db_proposals = manager.get_pending_proposals(limit=10)
                 pending_count = len(sample_proposals) + len(db_proposals)
-            except Exception as e:
+            except Exception:
                 # Fallback: try to get count directly from database
                 try:
                     import sqlite3
@@ -203,7 +203,6 @@ class SimpleDashboard:
                 is_selected = st.session_state.get('selected_session') == session['name']
 
                 # Create session card with better styling
-                button_style = "background-color: #e3f2fd;" if is_selected else ""
 
                 if st.button(
                     f"**{session['name']}**\n"
@@ -601,7 +600,7 @@ class SimpleDashboard:
                         }
                         sample_proposals.append(proposal_data)
 
-            except Exception as e2:
+            except Exception:
                 st.warning(f"Could not load database proposals: {e}")
                 # Try to get basic count from database
                 try:
@@ -631,20 +630,20 @@ class SimpleDashboard:
             with st.expander("ℹ️ What do these numbers mean?"):
                 st.markdown("""
                 **📊 Understanding Proposal Metrics:**
-                
+
                 **⭐ Quality Score (0.91, 0.92):**
                 - Range: 0.0 to 1.0 (higher is better)
                 - 0.9+ = Excellent quality
-                - 0.8-0.9 = Good quality  
+                - 0.8-0.9 = Good quality
                 - 0.7-0.8 = Average quality
                 - <0.7 = Needs improvement
-                
+
                 **⏱️ Duration (180min, 240min):**
                 - Estimated time to complete learning
                 - 180min = 3 hours
                 - 240min = 4 hours
                 - Based on content complexity
-                
+
                 **📅 Created Date:**
                 - When the proposal was generated
                 - Format: YYYY-MM-DDTHH:MM:SS
@@ -656,12 +655,11 @@ class SimpleDashboard:
                 st.session_state.selected_proposal_id = proposals[0]['id'] if proposals else None
 
             # Display proposal list with individual approve/reject buttons
-            for i, proposal in enumerate(proposals):
+            for _i, proposal in enumerate(proposals):
                 is_selected = st.session_state.get('selected_proposal_id') == proposal['id']
 
                 # Create proposal card with approve/reject buttons
                 is_selected = st.session_state.get('selected_proposal_id') == proposal['id']
-                container_style = "border: 2px solid #00ff00; background-color: #1a1a1a;" if is_selected else ""
 
                 with st.container():
                     if is_selected:
@@ -1073,7 +1071,7 @@ class SimpleDashboard:
                     # Sort by modification time (newest first)
                     founder_files.sort(key=lambda x: x.stat().st_mtime, reverse=True)
 
-                    for i, file_path in enumerate(founder_files[:5]):  # Show last 5
+                    for _i, file_path in enumerate(founder_files[:5]):  # Show last 5
                         try:
                             with open(file_path, encoding='utf-8') as f:
                                 founder_data = json.load(f)

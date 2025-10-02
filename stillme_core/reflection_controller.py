@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -36,8 +36,8 @@ class ReflectionResult:
     confidence_score: float
     processing_time: float
     steps_taken: int
-    insights: List[str]
-    metadata: Dict[str, Any] = None
+    insights: list[str]
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -54,11 +54,11 @@ class ReflectionSession:
     start_time: datetime
     end_time: Optional[datetime] = None
     duration: Optional[float] = None
-    insights: List[str] = None
-    improvements: List[str] = None
-    action_items: List[str] = None
+    insights: list[str] = None
+    improvements: list[str] = None
+    action_items: list[str] = None
     confidence_score: Optional[float] = None
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.insights is None:
@@ -90,7 +90,7 @@ class ReflectionContext:
     topic: Optional[str] = None
     domain: Optional[str] = None
     urgency: str = "normal"
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -101,12 +101,12 @@ class ReflectionController:
 
     def __init__(self, config: ReflectionConfig = None):
         self.logger = logger
-        self.reflection_sessions: List[ReflectionSession] = []
+        self.reflection_sessions: list[ReflectionSession] = []
         self.config = config or ReflectionConfig()
         self.reflection_config = self._initialize_reflection_config()
         self.logger.info("✅ ReflectionController initialized")
 
-    def _initialize_reflection_config(self) -> Dict[str, Any]:
+    def _initialize_reflection_config(self) -> dict[str, Any]:
         """Initialize reflection configuration"""
         return {
             "max_reflection_duration": 30,  # minutes
@@ -127,7 +127,7 @@ class ReflectionController:
                                 reflection_type: ReflectionType,
                                 title: str,
                                 description: str,
-                                metadata: Dict[str, Any] = None) -> ReflectionSession:
+                                metadata: dict[str, Any] = None) -> ReflectionSession:
         """Start a new reflection session"""
         try:
             session_id = f"reflection_{len(self.reflection_sessions) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -152,9 +152,9 @@ class ReflectionController:
 
     def complete_reflection_session(self,
                                    session_id: str,
-                                   insights: List[str] = None,
-                                   improvements: List[str] = None,
-                                   action_items: List[str] = None,
+                                   insights: list[str] = None,
+                                   improvements: list[str] = None,
+                                   action_items: list[str] = None,
                                    confidence_score: float = None) -> bool:
         """Complete a reflection session"""
         try:
@@ -203,23 +203,23 @@ class ReflectionController:
             self.logger.error(f"❌ Failed to fail reflection session: {e}")
             return False
 
-    def get_reflection_sessions_by_type(self, reflection_type: ReflectionType) -> List[ReflectionSession]:
+    def get_reflection_sessions_by_type(self, reflection_type: ReflectionType) -> list[ReflectionSession]:
         """Get reflection sessions by type"""
         return [s for s in self.reflection_sessions if s.reflection_type == reflection_type]
 
-    def get_reflection_sessions_by_status(self, status: ReflectionStatus) -> List[ReflectionSession]:
+    def get_reflection_sessions_by_status(self, status: ReflectionStatus) -> list[ReflectionSession]:
         """Get reflection sessions by status"""
         return [s for s in self.reflection_sessions if s.status == status]
 
-    def get_active_reflection_sessions(self) -> List[ReflectionSession]:
+    def get_active_reflection_sessions(self) -> list[ReflectionSession]:
         """Get active reflection sessions"""
         return [s for s in self.reflection_sessions if s.status == ReflectionStatus.IN_PROGRESS]
 
-    def get_completed_reflection_sessions(self) -> List[ReflectionSession]:
+    def get_completed_reflection_sessions(self) -> list[ReflectionSession]:
         """Get completed reflection sessions"""
         return [s for s in self.reflection_sessions if s.status == ReflectionStatus.COMPLETED]
 
-    def get_reflection_insights(self, limit: int = 10) -> List[str]:
+    def get_reflection_insights(self, limit: int = 10) -> list[str]:
         """Get recent reflection insights"""
         try:
             completed_sessions = self.get_completed_reflection_sessions()
@@ -234,7 +234,7 @@ class ReflectionController:
             self.logger.error(f"❌ Failed to get reflection insights: {e}")
             return []
 
-    def get_improvement_suggestions(self, limit: int = 10) -> List[str]:
+    def get_improvement_suggestions(self, limit: int = 10) -> list[str]:
         """Get recent improvement suggestions"""
         try:
             completed_sessions = self.get_completed_reflection_sessions()
@@ -249,7 +249,7 @@ class ReflectionController:
             self.logger.error(f"❌ Failed to get improvement suggestions: {e}")
             return []
 
-    def get_action_items(self, limit: int = 10) -> List[str]:
+    def get_action_items(self, limit: int = 10) -> list[str]:
         """Get recent action items"""
         try:
             completed_sessions = self.get_completed_reflection_sessions()
@@ -264,7 +264,7 @@ class ReflectionController:
             self.logger.error(f"❌ Failed to get action items: {e}")
             return []
 
-    def get_reflection_summary(self) -> Dict[str, Any]:
+    def get_reflection_summary(self) -> dict[str, Any]:
         """Get reflection summary"""
         try:
             total_sessions = len(self.reflection_sessions)

@@ -25,18 +25,15 @@ import gzip
 import json
 import logging
 import shutil
-import sqlite3
-import statistics
 
 # Add project root to path
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 sys.path.append(str(Path(__file__).parent.parent))
 
-from stillme_core.metrics.emitter import MetricsEmitter
 from stillme_core.metrics.queries import MetricsQueries
 
 logger = logging.getLogger(__name__)
@@ -44,7 +41,7 @@ logger = logging.getLogger(__name__)
 class MetricsAggregator:
     """
     Metrics aggregation system
-    
+
     Tổng hợp metrics từ JSONL và SQLite thành rollups
     cho dashboard và reporting.
     """
@@ -62,7 +59,7 @@ class MetricsAggregator:
 
         logger.info(f"MetricsAggregator initialized: db={db_path}, output={output_dir}")
 
-    def aggregate_daily_metrics(self, date: Optional[str] = None) -> Dict[str, Any]:
+    def aggregate_daily_metrics(self, date: Optional[str] = None) -> dict[str, Any]:
         """Aggregate daily metrics"""
         if date is None:
             date = datetime.now().strftime('%Y-%m-%d')
@@ -305,7 +302,7 @@ class MetricsAggregator:
         logger.info(f"Generated {len(reports)} reports")
         return reports
 
-    def create_metrics_summary(self) -> Dict[str, Any]:
+    def create_metrics_summary(self) -> dict[str, Any]:
         """Create overall metrics summary"""
         summary = {
             'generated_at': datetime.now().isoformat(),
@@ -360,7 +357,7 @@ async def main():
     try:
         if args.date:
             # Aggregate specific date
-            aggregated_data = aggregator.aggregate_daily_metrics(args.date)
+            aggregator.aggregate_daily_metrics(args.date)
             csv_path = aggregator.create_daily_summary_csv(args.date)
             print(f"✅ Daily summary created: {csv_path}")
         else:

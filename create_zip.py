@@ -5,7 +5,6 @@ Create ZIP archive for VPS deployment
 
 import os
 import zipfile
-from pathlib import Path
 
 
 def create_zip():
@@ -22,7 +21,7 @@ def create_zip():
     # Create ZIP file
     with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
         # Add all files from deployment_package
-        for root, dirs, files in os.walk("deployment_package"):
+        for root, _dirs, files in os.walk("deployment_package"):
             for file in files:
                 file_path = os.path.join(root, file)
                 arcname = os.path.relpath(file_path, "deployment_package")

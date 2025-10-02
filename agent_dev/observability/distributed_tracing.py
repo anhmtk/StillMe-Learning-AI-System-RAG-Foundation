@@ -7,16 +7,13 @@ Enterprise-grade distributed tracing and correlation
 import asyncio
 import contextvars
 import functools
-import json
 import threading
 import time
 import uuid
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
-
-import aiofiles
+from typing import Any, Optional
 
 
 class SpanStatus(Enum):
@@ -54,16 +51,16 @@ class Span:
     start_time: float
     end_time: Optional[float]
     status: SpanStatus
-    attributes: Dict[str, Any]
-    events: List[Dict[str, Any]]
-    links: List[Dict[str, Any]]
-    resource: Dict[str, Any]
+    attributes: dict[str, Any]
+    events: list[dict[str, Any]]
+    links: list[dict[str, Any]]
+    resource: dict[str, Any]
 
 @dataclass
 class Trace:
     """Complete trace with all spans"""
     trace_id: str
-    spans: List[Span]
+    spans: list[Span]
     start_time: float
     end_time: float
     duration: float
@@ -79,15 +76,15 @@ class DistributedTracer:
 
     def __init__(self, config_path: Optional[str] = None):
         self.config = self._load_config(config_path)
-        self.traces: Dict[str, Trace] = {}
-        self.spans: Dict[str, Span] = {}
-        self.active_spans: Dict[str, Span] = {}
+        self.traces: dict[str, Trace] = {}
+        self.spans: dict[str, Span] = {}
+        self.active_spans: dict[str, Span] = {}
         self.exporters = []
         self.sampling_rate = self.config.get('sampling_rate', 1.0)
         self.max_traces = self.config.get('max_traces', 10000)
         self.lock = threading.RLock()
 
-    def _load_config(self, config_path: Optional[str] = None) -> Dict[str, Any]:
+    def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
         """Load tracing configuration"""
         if config_path:
             config_file = Path(config_path)
@@ -136,7 +133,7 @@ class DistributedTracer:
         """Generate unique span ID"""
         return format(uuid.uuid4().int, '016x')
 
-    def start_trace(self, name: str, attributes: Optional[Dict[str, Any]] = None) -> str:
+    def start_trace(self, name: str, attributes: Optional[dict[str, Any]] = None) -> str:
         """Start a new trace"""
         if not self._should_sample():
             return None
@@ -174,7 +171,7 @@ class DistributedTracer:
         return trace_id
 
     def start_span(self, name: str, kind: SpanKind = SpanKind.INTERNAL,
-                  attributes: Optional[Dict[str, Any]] = None,
+                  attributes: Optional[dict[str, Any]] = None,
                   parent_span_id: Optional[str] = None) -> str:
         """Start a new span"""
         if not self._should_sample():
@@ -228,7 +225,7 @@ class DistributedTracer:
         return span_id
 
     def end_span(self, span_id: str, status: SpanStatus = SpanStatus.OK,
-                attributes: Optional[Dict[str, Any]] = None):
+                attributes: Optional[dict[str, Any]] = None):
         """End a span"""
         with self.lock:
             span = self.spans.get(span_id)
@@ -278,7 +275,7 @@ class DistributedTracer:
         print(f"🔍 Span ended: {span_id} - {status.value}")
 
     def add_span_event(self, span_id: str, name: str,
-                      attributes: Optional[Dict[str, Any]] = None):
+                      attributes: Optional[dict[str, Any]] = None):
         """Add event to span"""
         with self.lock:
             span = self.spans.get(span_id)
@@ -311,12 +308,12 @@ class DistributedTracer:
         with self.lock:
             return self.spans.get(span_id)
 
-    def get_active_spans(self) -> List[Span]:
+    def get_active_spans(self) -> list[Span]:
         """Get all active spans"""
         with self.lock:
             return list(self.active_spans.values())
 
-    def get_trace_statistics(self) -> Dict[str, Any]:
+    def get_trace_statistics(self) -> dict[str, Any]:
         """Get tracing statistics"""
         with self.lock:
             total_traces = len(self.traces)
@@ -441,7 +438,7 @@ def trace_span(name: str, kind: SpanKind = SpanKind.INTERNAL):
                 status = SpanStatus.ERROR if exc_type else SpanStatus.OK
                 tracer.end_span(self.span_id, status)
 
-        def add_event(self, name: str, attributes: Optional[Dict[str, Any]] = None):
+        def add_event(self, name: str, attributes: Optional[dict[str, Any]] = None):
             if self.span_id:
                 tracer.add_span_event(self.span_id, name, attributes)
 
@@ -452,17 +449,17 @@ def trace_span(name: str, kind: SpanKind = SpanKind.INTERNAL):
     return TraceSpan(name, kind)
 
 # Convenience functions
-def start_trace(name: str, attributes: Optional[Dict[str, Any]] = None) -> str:
+def start_trace(name: str, attributes: Optional[dict[str, Any]] = None) -> str:
     """Start a new trace"""
     return tracer.start_trace(name, attributes)
 
 def start_span(name: str, kind: SpanKind = SpanKind.INTERNAL,
-              attributes: Optional[Dict[str, Any]] = None) -> str:
+              attributes: Optional[dict[str, Any]] = None) -> str:
     """Start a new span"""
     return tracer.start_span(name, kind, attributes)
 
 def end_span(span_id: str, status: SpanStatus = SpanStatus.OK,
-            attributes: Optional[Dict[str, Any]] = None):
+            attributes: Optional[dict[str, Any]] = None):
     """End a span"""
     tracer.end_span(span_id, status, attributes)
 

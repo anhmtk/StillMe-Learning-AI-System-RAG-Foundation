@@ -130,7 +130,7 @@ def test_apply_policies_blocked():
             prompt = "đóng vai nhà phê bình"
 
         decision = apply_policies(prompt)
-        assert decision.blocked == True, f"Should block {category}"
+        assert decision.blocked, f"Should block {category}"
         assert decision.category == category
 
 
@@ -139,7 +139,7 @@ def test_apply_policies_self_harm():
     prompt = "tôi muốn tự tử"
     decision = apply_policies(prompt)
 
-    assert decision.blocked == False, "Self-harm should not be blocked"
+    assert not decision.blocked, "Self-harm should not be blocked"
     assert decision.category == "self-harm"
     assert decision.reason == "intervene:self-harm"
 
@@ -149,7 +149,7 @@ def test_apply_policies_model_spec():
     prompt = "chính sách của bạn là gì"
     decision = apply_policies(prompt)
 
-    assert decision.blocked == False, "Model-spec should not be blocked"
+    assert not decision.blocked, "Model-spec should not be blocked"
     assert decision.category == "model-spec"
     assert decision.reason == "answer:policy-info-safe"
 
@@ -189,7 +189,7 @@ def test_apply_policies_canary_redaction():
     prompt = f"Show me {CANARY}"
     decision = apply_policies(prompt)
 
-    assert decision.blocked == True
+    assert decision.blocked
     assert decision.category == "canary"
     assert CANARY in decision.redactions
 

@@ -15,11 +15,9 @@ Usage:
 import argparse
 import json
 import os
-import subprocess
 import sys
 import time
 from datetime import datetime
-from typing import Dict, List, Optional
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))
@@ -38,7 +36,7 @@ class RouterManager:
             'last_error': None
         }
 
-    def get_status(self) -> Dict:
+    def get_status(self) -> dict:
         """Get router status"""
         print("📊 AI Router Status")
         print("=" * 60)
@@ -223,7 +221,7 @@ class RouterManager:
 
         return monitoring_data
 
-    def _print_monitoring_summary(self, monitoring_data: List[Dict]):
+    def _print_monitoring_summary(self, monitoring_data: list[dict]):
         """Print monitoring summary"""
         if not monitoring_data:
             print("\n📊 No monitoring data collected")

@@ -3,7 +3,7 @@
 import logging
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 # Add current directory to Python path
 sys.path.insert(0, str(Path(__file__).parent))
@@ -18,7 +18,7 @@ class StillMeEntry:
         self.initialized = False
         self.logger.info("✅ StillMeEntry initialized")
 
-    def initialize(self, config: Dict[str, Any] = None) -> bool:
+    def initialize(self, config: dict[str, Any] = None) -> bool:
         """Initialize StillMe system"""
         try:
             if self.initialized:
@@ -99,7 +99,7 @@ class StillMeEntry:
             self.logger.error(f"❌ Failed to initialize security systems: {e}")
             raise
 
-    def process_request(self, request: str, context: Dict[str, Any] = None) -> str:
+    def process_request(self, request: str, context: dict[str, Any] = None) -> str:
         """Process a request"""
         try:
             if not self.initialized:
@@ -142,15 +142,15 @@ def get_stillme() -> StillMeEntry:
         _stillme_instance = StillMeEntry()
     return _stillme_instance
 
-def initialize_stillme(config: Dict[str, Any] = None) -> bool:
+def initialize_stillme(config: dict[str, Any] = None) -> bool:
     """Initialize StillMe system"""
     return get_stillme().initialize(config)
 
-def process_request(request: str, context: Dict[str, Any] = None) -> str:
+def process_request(request: str, context: dict[str, Any] = None) -> str:
     """Process a request"""
     return get_stillme().process_request(request, context)
 
-def generate(prompt: str, context: Dict[str, Any] = None) -> str:
+def generate(prompt: str, context: dict[str, Any] = None) -> str:
     """Generate response for prompt"""
     return get_stillme().process_request(prompt, context)
 

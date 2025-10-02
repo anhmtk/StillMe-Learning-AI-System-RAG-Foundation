@@ -106,7 +106,7 @@ class AgentDev:
 
             errors = []
             incomplete_sources = []
-            
+
             # Check if command failed
             if result.returncode != 0:
                 logger.error(f"Ruff failed with return code {result.returncode}")
@@ -138,7 +138,7 @@ class AgentDev:
                                     severity = 'minor'
                                 else:
                                     severity = data.get('severity', 'error')
-                                
+
                                 error = ErrorInfo(
                                     file=data.get('filename', ''),
                                     line=data.get('location', {}).get('row', 0),
@@ -169,10 +169,10 @@ class AgentDev:
 
             logger.info(f"Found {len(errors)} errors from ruff")
             logger.info(f"Raw output saved to: {raw_path}")
-            
+
             # Print source counts
             print(f"Source counts: ruff={len(errors)} | TOTAL={len(errors)}")
-            
+
             return errors
 
         except subprocess.TimeoutExpired:

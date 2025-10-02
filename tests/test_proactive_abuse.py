@@ -250,7 +250,7 @@ class ProactiveAbuseTestSuite:
             # Run multiple tests to get average latency
             for _ in range(10):
                 start_time = time.time()
-                result = self.guard.analyze(test_text)
+                self.guard.analyze(test_text)
                 latency = (time.time() - start_time) * 1000
                 latencies.append(latency)
 

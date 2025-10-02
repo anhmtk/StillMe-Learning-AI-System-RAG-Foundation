@@ -4,7 +4,6 @@ Setup QA environment for NicheRadar v1.5
 Installs all necessary tools and configurations for quality assurance
 """
 
-import os
 import subprocess
 import sys
 from pathlib import Path

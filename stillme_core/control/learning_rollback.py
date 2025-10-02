@@ -18,7 +18,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -45,9 +45,9 @@ class LearningSnapshot:
     update_type: str
     description: str
     state_hash: str
-    changes: Dict[str, Any]
-    dependencies: List[str]
-    rollback_data: Dict[str, Any]
+    changes: dict[str, Any]
+    dependencies: list[str]
+    rollback_data: dict[str, Any]
 
 @dataclass
 class RollbackResult:
@@ -55,14 +55,14 @@ class RollbackResult:
     version_id: str
     status: str
     timestamp: str
-    changes_reverted: List[str]
-    errors: List[str]
+    changes_reverted: list[str]
+    errors: list[str]
     rollback_duration: float
 
 class LearningRollback:
     """
     Version control and rollback system for learning updates.
-    
+
     Features:
     - Version control: Every learning update gets a version ID
     - Rollback capability: Revert to any previous version
@@ -70,13 +70,13 @@ class LearningRollback:
     - Safety checks: Validate rollback safety
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         self.config = config or {}
         self.logger = logger
 
         # Storage
-        self.snapshots: Dict[str, LearningSnapshot] = {}
-        self.rollback_history: List[RollbackResult] = []
+        self.snapshots: dict[str, LearningSnapshot] = {}
+        self.rollback_history: list[RollbackResult] = []
         self.current_version: Optional[str] = None
 
         # Configuration
@@ -97,18 +97,18 @@ class LearningRollback:
         self,
         update_type: LearningUpdateType,
         description: str,
-        changes: Dict[str, Any],
-        dependencies: Optional[List[str]] = None
+        changes: dict[str, Any],
+        dependencies: Optional[list[str]] = None
     ) -> LearningSnapshot:
         """
         Create a snapshot of current learning state.
-        
+
         Args:
             update_type: Type of learning update
             description: Human-readable description
             changes: Dictionary of changes made
             dependencies: List of dependent version IDs
-            
+
         Returns:
             LearningSnapshot with version ID and state hash
         """
@@ -151,11 +151,11 @@ class LearningRollback:
     ) -> RollbackResult:
         """
         Rollback learning state to a specific version.
-        
+
         Args:
             target_version_id: Version ID to rollback to
             force: Force rollback even if dependencies exist
-            
+
         Returns:
             RollbackResult with operation status
         """
@@ -236,7 +236,7 @@ class LearningRollback:
 
             return result
 
-    async def get_rollback_candidates(self) -> List[Dict[str, Any]]:
+    async def get_rollback_candidates(self) -> list[dict[str, Any]]:
         """Get list of versions that can be rolled back to"""
         candidates = []
 
@@ -258,7 +258,7 @@ class LearningRollback:
 
         return candidates
 
-    async def get_version_history(self, limit: int = 20) -> List[Dict[str, Any]]:
+    async def get_version_history(self, limit: int = 20) -> list[dict[str, Any]]:
         """Get version history with rollback information"""
         history = []
 
@@ -280,17 +280,17 @@ class LearningRollback:
         random_suffix = hashlib.sha256(str(time.time()).encode()).hexdigest()[:8]
         return f"v{timestamp}_{random_suffix}"
 
-    def _calculate_state_hash(self, changes: Dict[str, Any]) -> str:
+    def _calculate_state_hash(self, changes: dict[str, Any]) -> str:
         """Calculate hash of current state"""
         state_string = json.dumps(changes, sort_keys=True)
         return hashlib.sha256(state_string.encode()).hexdigest()[:16]
 
-    async def _prepare_rollback_data(self, changes: Dict[str, Any]) -> Dict[str, Any]:
+    async def _prepare_rollback_data(self, changes: dict[str, Any]) -> dict[str, Any]:
         """Prepare data needed for rollback"""
         rollback_data = {}
 
         # For each change, store the previous state
-        for key, new_value in changes.items():
+        for key, _new_value in changes.items():
             # In a real implementation, this would capture the previous state
             # For now, we'll simulate this
             rollback_data[key] = {
@@ -301,7 +301,7 @@ class LearningRollback:
 
         return rollback_data
 
-    async def _validate_rollback_safety(self, target_version_id: str) -> Dict[str, Any]:
+    async def _validate_rollback_safety(self, target_version_id: str) -> dict[str, Any]:
         """Validate that rollback is safe to perform"""
         errors = []
 
@@ -311,7 +311,7 @@ class LearningRollback:
             return {"safe": False, "errors": errors}
 
         # Check for dependent versions
-        target_snapshot = self.snapshots[target_version_id]
+        self.snapshots[target_version_id]
         dependent_versions = [
             vid for vid, snapshot in self.snapshots.items()
             if target_version_id in snapshot.dependencies
@@ -338,7 +338,7 @@ class LearningRollback:
         safety_check = await self._validate_rollback_safety(version_id)
         return safety_check["safe"]
 
-    async def _execute_rollback(self, target_version_id: str) -> List[str]:
+    async def _execute_rollback(self, target_version_id: str) -> list[str]:
         """Execute the actual rollback operation"""
         changes_reverted = []
 
@@ -350,7 +350,7 @@ class LearningRollback:
             try:
                 # In a real implementation, this would call the actual revert function
                 # For now, we'll simulate the rollback
-                revert_function = rollback_info.get("revert_function", f"revert_{key}")
+                rollback_info.get("revert_function", f"revert_{key}")
                 previous_value = rollback_info.get("previous_value")
 
                 # Simulate rollback

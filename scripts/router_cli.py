@@ -18,7 +18,6 @@ import os
 import sys
 import time
 from datetime import datetime
-from typing import Dict, List, Optional
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))
@@ -32,7 +31,7 @@ class RouterCLI:
         self.analyzer = ComplexityAnalyzer()
         self.session_history = []
 
-    def process_prompt(self, prompt: str, verbose: bool = True) -> Dict:
+    def process_prompt(self, prompt: str, verbose: bool = True) -> dict:
         """Process a single prompt"""
         if verbose:
             print(f"🔍 Processing Prompt: {prompt}")
@@ -256,7 +255,7 @@ class RouterCLI:
         except Exception as e:
             print(f"❌ Error getting statistics: {e}")
 
-    def batch_process(self, prompts: List[str]) -> List[Dict]:
+    def batch_process(self, prompts: list[str]) -> list[dict]:
         """Process multiple prompts in batch"""
         print(f"🔄 Batch Processing {len(prompts)} prompts...")
         print("=" * 60)
@@ -317,7 +316,7 @@ class RouterCLI:
 
         print(f"✅ Session data exported to {filename}")
 
-    def load_prompts_from_file(self, filename: str) -> List[str]:
+    def load_prompts_from_file(self, filename: str) -> list[str]:
         """Load prompts from a text file"""
         try:
             with open(filename, encoding='utf-8') as f:

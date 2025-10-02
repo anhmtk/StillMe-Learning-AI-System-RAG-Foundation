@@ -12,14 +12,13 @@ Created: 2025-01-08
 import hashlib
 import json
 import logging
-import time
 import uuid
 from contextvars import ContextVar
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
-from ..privacy.pii_redactor import PIIRedactor, PIIType
+from ..privacy.pii_redactor import PIIRedactor
 
 # Context variables for request tracking
 request_id_var: ContextVar[str] = ContextVar('request_id')
@@ -39,7 +38,7 @@ class LogEntry:
     event: str
     pii_redacted: bool
     message: str
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: Optional[dict[str, Any]] = None
     duration_ms: Optional[float] = None
     status_code: Optional[int] = None
     error: Optional[str] = None
@@ -48,7 +47,7 @@ class LogEntry:
 class StructuredLogger:
     """
     Enterprise-grade structured logger with PII redaction
-    
+
     Features:
     - JSON structured logging
     - PII redaction for all log content
@@ -58,7 +57,7 @@ class StructuredLogger:
     - Audit trail compliance
     """
 
-    def __init__(self, name: str, config: Optional[Dict] = None):
+    def __init__(self, name: str, config: Optional[dict] = None):
         """Initialize structured logger"""
         self.name = name
         self.config = config or {}
@@ -76,7 +75,7 @@ class StructuredLogger:
             handler.setFormatter(formatter)
             self.logger.addHandler(handler)
 
-    def _get_context(self) -> Dict[str, str]:
+    def _get_context(self) -> dict[str, str]:
         """Get current request context"""
         return {
             'request_id': request_id_var.get(''),
@@ -105,7 +104,7 @@ class StructuredLogger:
         level: str,
         event: str,
         message: str,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: Optional[dict[str, Any]] = None,
         duration_ms: Optional[float] = None,
         status_code: Optional[int] = None,
         error: Optional[str] = None
@@ -179,7 +178,7 @@ class StructuredLogger:
 class LoggingMiddleware:
     """
     Middleware for HTTP request/response logging with PII redaction
-    
+
     Features:
     - Request/response logging
     - PII redaction for query params and body
@@ -188,13 +187,13 @@ class LoggingMiddleware:
     - Correlation ID management
     """
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: Optional[dict] = None):
         """Initialize logging middleware"""
         self.config = config or {}
         self.logger = StructuredLogger('gateway.middleware', config)
         self.pii_redactor = PIIRedactor(self.config.get('pii_config', {}))
 
-    def _generate_correlation_ids(self) -> Dict[str, str]:
+    def _generate_correlation_ids(self) -> dict[str, str]:
         """Generate correlation IDs for request tracking"""
         trace_id = str(uuid.uuid4())
         span_id = str(uuid.uuid4())[:8]
@@ -206,7 +205,7 @@ class LoggingMiddleware:
             'request_id': request_id
         }
 
-    def _redact_query_params(self, query_params: Dict[str, Any]) -> Dict[str, Any]:
+    def _redact_query_params(self, query_params: dict[str, Any]) -> dict[str, Any]:
         """Redact PII from query parameters"""
         redacted = {}
         for key, value in query_params.items():
@@ -237,14 +236,14 @@ class LoggingMiddleware:
         self,
         method: str,
         path: str,
-        query_params: Optional[Dict[str, Any]] = None,
-        headers: Optional[Dict[str, str]] = None,
+        query_params: Optional[dict[str, Any]] = None,
+        headers: Optional[dict[str, str]] = None,
         body: Optional[str] = None,
         user_id: Optional[str] = None
     ) -> str:
         """
         Log incoming request and return request ID
-        
+
         Args:
             method: HTTP method
             path: Request path
@@ -252,7 +251,7 @@ class LoggingMiddleware:
             headers: Request headers
             body: Request body
             user_id: User identifier
-            
+
         Returns:
             Request ID for correlation
         """
@@ -293,14 +292,14 @@ class LoggingMiddleware:
         self,
         request_id: str,
         status_code: int,
-        headers: Optional[Dict[str, str]] = None,
+        headers: Optional[dict[str, str]] = None,
         body: Optional[str] = None,
         duration_ms: Optional[float] = None,
         error: Optional[str] = None
     ):
         """
         Log outgoing response
-        
+
         Args:
             request_id: Request ID for correlation
             status_code: HTTP status code
@@ -346,12 +345,12 @@ class LoggingMiddleware:
         status_code: int,
         user_id: Optional[str] = None,
         duration_ms: Optional[float] = None,
-        query_params: Optional[Dict[str, Any]] = None,
+        query_params: Optional[dict[str, Any]] = None,
         error: Optional[str] = None
     ):
         """
         Log access event (simplified version for high-volume logging)
-        
+
         Args:
             method: HTTP method
             path: Request path
@@ -413,7 +412,7 @@ def set_request_context(
         user_id_var.set(user_id)
 
 
-def get_request_context() -> Dict[str, str]:
+def get_request_context() -> dict[str, str]:
     """Get current request context"""
     return {
         'request_id': request_id_var.get(''),

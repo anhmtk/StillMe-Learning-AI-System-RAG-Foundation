@@ -6,7 +6,7 @@ Commands for running automated development tasks with AgentDev.
 
 import asyncio
 import json
-from typing import List, Optional
+from typing import Optional
 
 import typer
 from rich.console import Console
@@ -200,7 +200,7 @@ def plan(
 @app.command()
 def review(
     directory_path: str = typer.Argument(".", help="Directory to review"),
-    tools: Optional[List[str]] = typer.Option(
+    tools: Optional[list[str]] = typer.Option(
         None, "--tool", "-t", help="Specific tools to use (ruff, pylint, mypy)"
     ),
     output: Optional[str] = typer.Option(

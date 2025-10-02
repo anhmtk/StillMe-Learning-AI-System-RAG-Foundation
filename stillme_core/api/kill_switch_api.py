@@ -3,7 +3,7 @@ StillMe Kill Switch API
 FastAPI endpoints for kill switch operations.
 """
 
-from typing import Dict, List, Optional
+from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
@@ -42,7 +42,7 @@ class KillSwitchStatus(BaseModel):
 class AuditLogEntry(BaseModel):
     timestamp: str
     level: str
-    data: Optional[Dict] = None
+    data: Optional[dict] = None
     message: Optional[str] = None
 
 # Create router
@@ -115,7 +115,7 @@ async def disarm_kill_switch(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to disarm kill switch: {str(e)}")
 
-@router.get("/audit", response_model=List[AuditLogEntry])
+@router.get("/audit", response_model=list[AuditLogEntry])
 async def get_audit_log(
     limit: int = 100,
     manager: KillSwitchManager = Depends(get_manager)

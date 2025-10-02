@@ -7,7 +7,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import requests
 from interpreter import interpreter as oi  # pyright: ignore[reportMissingImports]
@@ -27,8 +27,8 @@ class OpenInterpreterController:
         self,
         model: str = MODEL_NAME,
         provider: str = "ollama",
-        context_window: Optional[int] = 8000,
-        max_tokens: Optional[int] = 1024,
+        context_window: int | None = 8000,
+        max_tokens: int | None = 1024,
         auto_run: bool = True,
         execute: bool = True,
     ):
@@ -118,7 +118,7 @@ class OpenInterpreterController:
 
     # ---- OI chat ---------------------------------------------------------
     def run_prompt(self, prompt: str) -> str:
-        out: List[str] = []
+        out: list[str] = []
         for chunk in self._oi.chat(prompt, stream=True):
             text = self._norm_piece(chunk)
             if text:
@@ -134,7 +134,7 @@ class OpenInterpreterController:
         return self.run_prompt(p)
 
     # ---- Ollama REST helpers --------------------------------------------
-    def _ollama_direct(self, prompt: str, *, model: Optional[str] = None) -> str:
+    def _ollama_direct(self, prompt: str, *, model: str | None = None) -> str:
         base = (self.ollama_host or OLLAMA_HOST).rstrip("/")
         for _ in range(6):
             try:
@@ -161,15 +161,15 @@ class OpenInterpreterController:
         self,
         *,
         prompt: str,
-        model: Optional[str] = None,
-        options: Optional[Dict[str, Any]] = None,
+        model: str | None = None,
+        options: dict[str, Any] | None = None,
         stream: bool = False,
         timeout: int = 60,
-        host: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        host: str | None = None,
+    ) -> dict[str, Any]:
         base = (host or self.ollama_host or OLLAMA_HOST).rstrip("/")
         url = f"{base}/api/generate"
-        payload: Dict[str, Any] = {
+        payload: dict[str, Any] = {
             "model": model or self.model,
             "prompt": prompt,
             "stream": stream,
@@ -217,11 +217,11 @@ class OpenInterpreterController:
         return f"[Mismatch] OI:{out!r} | Ollama:{fb!r}"
 
     # ---- health & warmup -------------------------------------------------
-    def health(self, model: Optional[str] = None) -> Dict[str, Any]:
+    def health(self, model: str | None = None) -> dict[str, Any]:
         """Kiểm tra Ollama + model + generate siêu ngắn (tự warmup khi cần)."""
         model = model or self.model
         base = OLLAMA_HOST.rstrip("/")
-        info: Dict[str, Any] = {"model": model}
+        info: dict[str, Any] = {"model": model}
 
         # 1) Ollama up?
         try:
@@ -271,13 +271,13 @@ class OpenInterpreterController:
         return info
 
     def warmup(
-        self, model: Optional[str] = None, tries: int = 3, delay: float = 2.0
-    ) -> Dict[str, Any]:
+        self, model: str | None = None, tries: int = 3, delay: float = 2.0
+    ) -> dict[str, Any]:
         """Gọi vài prompt ngắn để nạp model vào RAM, giảm ReadTimeout lần đầu."""
         model = model or self.model
         t0 = time.time()
         last_err = None
-        for i in range(tries):
+        for _i in range(tries):
             res = self._ollama_generate(
                 prompt="Warmup. Reply 'ok'.",
                 model=model,
@@ -305,7 +305,7 @@ class OpenInterpreterController:
         self,
         prompt: str,
         *,
-        model: Optional[str] = None,
+        model: str | None = None,
         temperature: float = 0.2,
         max_tokens: int = 512,
         timeout: int = 60,
@@ -329,7 +329,7 @@ class OpenInterpreterController:
         m = self._PY_BLOCK_RE.search(text or "")
         return (m.group(1) if m else "").strip()
 
-    def _run_python_subprocess(self, code: str, timeout: int = 30) -> Dict[str, str]:
+    def _run_python_subprocess(self, code: str, timeout: int = 30) -> dict[str, str]:
         self._ensure_work_dir()
         if not code.strip():
             return {"stdout": "", "stderr": "Empty code", "ok": False}
@@ -376,14 +376,14 @@ class OpenInterpreterController:
         self,
         prompt: str,
         *,
-        model: Optional[str] = None,
+        model: str | None = None,
         total_timeout: int = 75,
         step_sleep: float = 0.25,
         max_tokens: int = 512,
         temperature: float = 0.2,
         force_text_only_fallback: bool = False,
-    ) -> Dict[str, Any]:
-        debug_log: List[str] = []
+    ) -> dict[str, Any]:
+        debug_log: list[str] = []
         t0 = time.time()
         used_fallback = False
         model = model or self.model
@@ -427,7 +427,7 @@ class OpenInterpreterController:
         if not used_fallback:
             try:
                 log("[run_prompt_debug] initializing OI stream ...")
-                out_chunks: List[str] = []
+                out_chunks: list[str] = []
                 last_yield = time.time()
                 for chunk in self._oi.chat(prompt, stream=True):
                     text = self._norm_piece(chunk)

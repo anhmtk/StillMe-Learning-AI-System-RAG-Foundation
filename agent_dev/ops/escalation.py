@@ -7,7 +7,7 @@ Handles incident escalation and remediation planning.
 
 import logging
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .classifier import IssueClassifier, IssueSeverity
 from .notifier import EmailNotifier, TelegramNotifier
@@ -23,13 +23,13 @@ class EscalationManager:
         self.telegram_notifier = TelegramNotifier()
         self.classifier = IssueClassifier()
 
-    def handle_incident(self, patrol_result: Dict[str, Any]) -> Dict[str, Any]:
+    def handle_incident(self, patrol_result: dict[str, Any]) -> dict[str, Any]:
         """
         Handle incident based on patrol results
-        
+
         Args:
             patrol_result: Results from patrol run
-            
+
         Returns:
             Escalation result with actions taken
         """
@@ -54,7 +54,7 @@ class EscalationManager:
 
         return escalation_result
 
-    def _analyze_patrol_results(self, patrol_result: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _analyze_patrol_results(self, patrol_result: dict[str, Any]) -> list[dict[str, Any]]:
         """Analyze patrol results and identify incidents"""
         incidents = []
 
@@ -95,7 +95,7 @@ class EscalationManager:
 
         return incidents
 
-    def _process_incident(self, incident: Dict[str, Any]) -> Dict[str, Any]:
+    def _process_incident(self, incident: dict[str, Any]) -> dict[str, Any]:
         """Process individual incident"""
         incident_type = incident["type"]
         severity = incident["severity"]
@@ -129,10 +129,10 @@ class EscalationManager:
 
         return action
 
-    def _generate_incident_report(self, incident: Dict[str, Any]) -> tuple[str, str, str]:
+    def _generate_incident_report(self, incident: dict[str, Any]) -> tuple[str, str, str]:
         """Generate incident report in Vietnamese"""
         incident_type = incident["type"]
-        severity = incident["severity"]
+        incident["severity"]
 
         if incident_type == "code_quality":
             issues = incident["issues"]
@@ -166,7 +166,7 @@ class EscalationManager:
 
         return title, details, remediation
 
-    def _apply_auto_fixes(self, incident: Dict[str, Any]) -> bool:
+    def _apply_auto_fixes(self, incident: dict[str, Any]) -> bool:
         """Apply auto-fixes for minor issues"""
         try:
             issues = incident["issues"]

@@ -5,8 +5,7 @@ Handles provider initialization, health monitoring, and fallback.
 
 import asyncio
 import logging
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from .factory import ProviderFactory
 from .llm_base import (
@@ -14,7 +13,6 @@ from .llm_base import (
     LLMProviderManager,
     LLMRequest,
     LLMResponse,
-    ProviderConfig,
 )
 
 logger = logging.getLogger(__name__)
@@ -23,7 +21,7 @@ logger = logging.getLogger(__name__)
 class StillMeProviderManager:
     """High-level provider manager for StillMe AI Framework."""
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         self.config = config or {}
         self._manager: Optional[LLMProviderManager] = None
         self._health_check_task: Optional[asyncio.Task] = None
@@ -73,14 +71,14 @@ class StillMeProviderManager:
 
         return await self._manager.generate(request, preferred_provider)
 
-    async def health_check(self) -> Dict[str, Any]:
+    async def health_check(self) -> dict[str, Any]:
         """Check health of all providers."""
         if not self._initialized or not self._manager:
             return {"error": "Provider manager not initialized"}
 
         return await self._manager.health_check_all()
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """Get status of all providers."""
         if not self._initialized or not self._manager:
             return {"error": "Provider manager not initialized"}

@@ -8,11 +8,10 @@ import asyncio
 import json
 import time
 import uuid
-from collections import defaultdict, deque
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any, Callable, Optional
 
 import networkx as nx
 import yaml
@@ -52,16 +51,16 @@ class DAGNode:
     task_type: str
     command: str
     working_directory: Optional[str]
-    environment: Dict[str, str]
-    dependencies: List[str]
+    environment: dict[str, str]
+    dependencies: list[str]
     retry_count: int
     timeout: int
     priority: int
     condition: Optional[str]
     on_success: Optional[str]
     on_failure: Optional[str]
-    resources: Dict[str, Any]
-    metadata: Dict[str, Any]
+    resources: dict[str, Any]
+    metadata: dict[str, Any]
 
 @dataclass
 class DAGExecution:
@@ -72,12 +71,12 @@ class DAGExecution:
     start_time: float
     end_time: Optional[float]
     duration: Optional[float]
-    nodes_status: Dict[str, NodeStatus]
-    nodes_output: Dict[str, Any]
-    nodes_errors: Dict[str, str]
-    execution_log: List[Dict[str, Any]]
-    variables: Dict[str, Any]
-    context: Dict[str, Any]
+    nodes_status: dict[str, NodeStatus]
+    nodes_output: dict[str, Any]
+    nodes_errors: dict[str, str]
+    execution_log: list[dict[str, Any]]
+    variables: dict[str, Any]
+    context: dict[str, Any]
 
 @dataclass
 class ExecutionResult:
@@ -90,20 +89,20 @@ class ExecutionResult:
     output: Any
     error: Optional[str]
     retry_count: int
-    resources_used: Dict[str, Any]
+    resources_used: dict[str, Any]
 
 class DAGEngine:
     """Enterprise DAG execution engine"""
 
     def __init__(self, config_path: Optional[str] = None):
         self.config = self._load_config(config_path)
-        self.dags: Dict[str, nx.DiGraph] = {}
-        self.executions: Dict[str, DAGExecution] = {}
-        self.node_handlers: Dict[str, Callable] = {}
-        self.resource_pools: Dict[str, Dict[str, Any]] = {}
+        self.dags: dict[str, nx.DiGraph] = {}
+        self.executions: dict[str, DAGExecution] = {}
+        self.node_handlers: dict[str, Callable] = {}
+        self.resource_pools: dict[str, dict[str, Any]] = {}
         self.running = False
 
-    def _load_config(self, config_path: Optional[str] = None) -> Dict[str, Any]:
+    def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
         """Load DAG engine configuration"""
         if config_path:
             config_file = Path(config_path)
@@ -198,8 +197,8 @@ class DAGEngine:
         self.node_handlers[task_type] = handler
         print(f"✅ Node handler registered: {task_type}")
 
-    def execute_dag(self, dag_id: str, variables: Optional[Dict[str, Any]] = None,
-                   context: Optional[Dict[str, Any]] = None) -> str:
+    def execute_dag(self, dag_id: str, variables: Optional[dict[str, Any]] = None,
+                   context: Optional[dict[str, Any]] = None) -> str:
         """Execute a DAG"""
         if dag_id not in self.dags:
             raise ValueError(f"DAG not found: {dag_id}")
@@ -589,7 +588,7 @@ class DAGEngine:
 
         return False
 
-    def get_execution_status(self, execution_id: str) -> Optional[Dict[str, Any]]:
+    def get_execution_status(self, execution_id: str) -> Optional[dict[str, Any]]:
         """Get execution status"""
         execution = self.executions.get(execution_id)
         if not execution:
@@ -619,7 +618,7 @@ class DAGEngine:
 
         return completed_nodes / total_nodes
 
-    def get_dag_statistics(self, dag_id: str) -> Dict[str, Any]:
+    def get_dag_statistics(self, dag_id: str) -> dict[str, Any]:
         """Get DAG statistics"""
         if dag_id not in self.dags:
             return {}
@@ -664,11 +663,11 @@ def load_dag(dag_file: str) -> str:
     """Load DAG from file"""
     return dag_engine.load_dag(dag_file)
 
-def execute_dag(dag_id: str, variables: Optional[Dict[str, Any]] = None) -> str:
+def execute_dag(dag_id: str, variables: Optional[dict[str, Any]] = None) -> str:
     """Execute DAG"""
     return dag_engine.execute_dag(dag_id, variables)
 
-def get_execution_status(execution_id: str) -> Optional[Dict[str, Any]]:
+def get_execution_status(execution_id: str) -> Optional[dict[str, Any]]:
     """Get execution status"""
     return dag_engine.get_execution_status(execution_id)
 

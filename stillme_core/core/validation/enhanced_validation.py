@@ -28,7 +28,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -42,10 +42,10 @@ class StatisticalValidationResult:
     validation_id: str
     validation_type: str
     statistical_accuracy: float
-    confidence_interval: Tuple[float, float]
+    confidence_interval: tuple[float, float]
     p_value: float
     is_significant: bool
-    recommendations: List[str]
+    recommendations: list[str]
     timestamp: datetime
 
 
@@ -60,8 +60,8 @@ class DataQualityScore:
     consistency_score: float
     timeliness_score: float
     validity_score: float
-    quality_issues: List[str]
-    improvement_suggestions: List[str]
+    quality_issues: list[str]
+    improvement_suggestions: list[str]
     timestamp: datetime
 
 
@@ -75,8 +75,8 @@ class AdvancedAnomalyResult:
     detection_confidence: float
     statistical_significance: float
     affected_data_points: int
-    root_cause_analysis: List[str]
-    mitigation_strategies: List[str]
+    root_cause_analysis: list[str]
+    mitigation_strategies: list[str]
     timestamp: datetime
 
 
@@ -89,7 +89,7 @@ class EnhancedValidation:
         self,
         metrics_db_path: str,
         validation_db_path: str,
-        config: Optional[Dict[str, Any]] = None,
+        config: Optional[dict[str, Any]] = None,
     ):
         self.metrics_db_path = Path(metrics_db_path)
         self.validation_db_path = Path(validation_db_path)
@@ -107,7 +107,7 @@ class EnhancedValidation:
             "✅ EnhancedValidation initialized với enterprise-grade configuration"
         )
 
-    def _get_default_config(self) -> Dict[str, Any]:
+    def _get_default_config(self) -> dict[str, Any]:
         """Default configuration với enhanced validation focus"""
         return {
             "accuracy_threshold": 0.9995,  # 99.95% accuracy requirement
@@ -122,7 +122,7 @@ class EnhancedValidation:
         }
 
     def perform_statistical_validation(
-        self, data: List[float], validation_type: str = "normality"
+        self, data: list[float], validation_type: str = "normality"
     ) -> StatisticalValidationResult:
         """
         Perform statistical validation on data
@@ -269,7 +269,7 @@ class EnhancedValidation:
 
     def detect_advanced_anomalies(
         self, time_range_hours: int = 24
-    ) -> List[AdvancedAnomalyResult]:
+    ) -> list[AdvancedAnomalyResult]:
         """
         Detect advanced anomalies using statistical methods
 
@@ -310,7 +310,7 @@ class EnhancedValidation:
             logger.error(f"❌ Advanced anomaly detection failed: {e}")
             return []
 
-    def _validate_normality(self, data: List[float]) -> Dict[str, Any]:
+    def _validate_normality(self, data: list[float]) -> dict[str, Any]:
         """Validate data normality using Shapiro-Wilk test approximation"""
         try:
             if len(data) < 3:
@@ -367,7 +367,7 @@ class EnhancedValidation:
                 "recommendations": [f"Validation error: {e!s}"],
             }
 
-    def _validate_homoscedasticity(self, data: List[float]) -> Dict[str, Any]:
+    def _validate_homoscedasticity(self, data: list[float]) -> dict[str, Any]:
         """Validate homoscedasticity (constant variance)"""
         try:
             if len(data) < 6:
@@ -416,7 +416,7 @@ class EnhancedValidation:
                 "recommendations": [f"Validation error: {e!s}"],
             }
 
-    def _validate_independence(self, data: List[float]) -> Dict[str, Any]:
+    def _validate_independence(self, data: list[float]) -> dict[str, Any]:
         """Validate data independence using autocorrelation"""
         try:
             if len(data) < 4:
@@ -464,7 +464,7 @@ class EnhancedValidation:
                 "recommendations": [f"Validation error: {e!s}"],
             }
 
-    def _validate_basic_statistics(self, data: List[float]) -> Dict[str, Any]:
+    def _validate_basic_statistics(self, data: list[float]) -> dict[str, Any]:
         """Validate basic statistical properties"""
         try:
             if not data:
@@ -477,7 +477,7 @@ class EnhancedValidation:
                 }
 
             # Basic statistics
-            mean_val = statistics.mean(data)
+            statistics.mean(data)
             std_val = statistics.stdev(data) if len(data) > 1 else 0
             min_val = min(data)
             max_val = max(data)
@@ -524,11 +524,11 @@ class EnhancedValidation:
                 # Count complete records
                 cursor = conn.execute(
                     """
-                    SELECT COUNT(*) FROM usage_events 
-                    WHERE timestamp >= ? 
-                    AND event_id IS NOT NULL 
-                    AND timestamp IS NOT NULL 
-                    AND module_name IS NOT NULL 
+                    SELECT COUNT(*) FROM usage_events
+                    WHERE timestamp >= ?
+                    AND event_id IS NOT NULL
+                    AND timestamp IS NOT NULL
+                    AND module_name IS NOT NULL
                     AND feature_name IS NOT NULL
                 """,
                     [since_time.isoformat()],
@@ -551,9 +551,9 @@ class EnhancedValidation:
                 # Count accurate records
                 cursor = conn.execute(
                     """
-                    SELECT COUNT(*) FROM usage_events 
-                    WHERE timestamp >= ? 
-                    AND duration_ms >= 0 
+                    SELECT COUNT(*) FROM usage_events
+                    WHERE timestamp >= ?
+                    AND duration_ms >= 0
                     AND duration_ms <= 3600000
                     AND success IN (0, 1)
                 """,
@@ -584,8 +584,8 @@ class EnhancedValidation:
                 # Check for logical inconsistencies
                 cursor = conn.execute(
                     """
-                    SELECT COUNT(*) FROM usage_events 
-                    WHERE timestamp >= ? 
+                    SELECT COUNT(*) FROM usage_events
+                    WHERE timestamp >= ?
                     AND (
                         (success = 1 AND error_code IS NOT NULL) OR
                         (success = 0 AND error_code IS NULL) OR
@@ -620,7 +620,7 @@ class EnhancedValidation:
                 recent_time = datetime.now() - timedelta(hours=1)
                 cursor = conn.execute(
                     """
-                    SELECT COUNT(*) FROM usage_events 
+                    SELECT COUNT(*) FROM usage_events
                     WHERE timestamp >= ? AND timestamp >= ?
                 """,
                     [since_time.isoformat(), recent_time.isoformat()],
@@ -650,8 +650,8 @@ class EnhancedValidation:
                 # Count valid records
                 cursor = conn.execute(
                     """
-                    SELECT COUNT(*) FROM usage_events 
-                    WHERE timestamp >= ? 
+                    SELECT COUNT(*) FROM usage_events
+                    WHERE timestamp >= ?
                     AND timestamp >= '2020-01-01'
                     AND timestamp <= datetime('now', '+1 day')
                     AND module_name REGEXP '^[a-zA-Z_][a-zA-Z0-9_]*$'
@@ -682,7 +682,7 @@ class EnhancedValidation:
         consistency: float,
         timeliness: float,
         validity: float,
-    ) -> List[str]:
+    ) -> list[str]:
         """Identify data quality issues"""
         issues = []
 
@@ -708,7 +708,7 @@ class EnhancedValidation:
 
         return issues
 
-    def _generate_improvement_suggestions(self, quality_issues: List[str]) -> List[str]:
+    def _generate_improvement_suggestions(self, quality_issues: list[str]) -> list[str]:
         """Generate improvement suggestions based on quality issues"""
         suggestions = []
 
@@ -734,7 +734,7 @@ class EnhancedValidation:
 
         return suggestions
 
-    def _get_system_data(self, time_range_hours: int) -> Dict[str, Any]:
+    def _get_system_data(self, time_range_hours: int) -> dict[str, Any]:
         """Get system data for anomaly detection"""
         try:
             with sqlite3.connect(self.metrics_db_path) as conn:
@@ -742,7 +742,7 @@ class EnhancedValidation:
 
                 cursor = conn.execute(
                     """
-                    SELECT 
+                    SELECT
                         COUNT(*) as total_events,
                         AVG(duration_ms) as avg_duration,
                         AVG(CASE WHEN success = 1 THEN 1.0 ELSE 0.0 END) as success_rate,
@@ -767,8 +767,8 @@ class EnhancedValidation:
             return {}
 
     def _detect_statistical_anomalies(
-        self, system_data: Dict[str, Any]
-    ) -> List[AdvancedAnomalyResult]:
+        self, system_data: dict[str, Any]
+    ) -> list[AdvancedAnomalyResult]:
         """Detect statistical anomalies"""
         anomalies = []
 
@@ -802,8 +802,8 @@ class EnhancedValidation:
         return anomalies
 
     def _detect_pattern_anomalies(
-        self, system_data: Dict[str, Any]
-    ) -> List[AdvancedAnomalyResult]:
+        self, system_data: dict[str, Any]
+    ) -> list[AdvancedAnomalyResult]:
         """Detect pattern anomalies"""
         anomalies = []
 
@@ -837,8 +837,8 @@ class EnhancedValidation:
         return anomalies
 
     def _detect_trend_anomalies(
-        self, system_data: Dict[str, Any]
-    ) -> List[AdvancedAnomalyResult]:
+        self, system_data: dict[str, Any]
+    ) -> list[AdvancedAnomalyResult]:
         """Detect trend anomalies"""
         anomalies = []
 
@@ -871,7 +871,7 @@ class EnhancedValidation:
 
         return anomalies
 
-    def get_validation_summary(self) -> Dict[str, Any]:
+    def get_validation_summary(self) -> dict[str, Any]:
         """Get validation summary"""
         try:
             return {
@@ -896,7 +896,7 @@ class EnhancedValidation:
 def create_enhanced_validation(
     metrics_db_path: str,
     validation_db_path: str,
-    config: Optional[Dict[str, Any]] = None,
+    config: Optional[dict[str, Any]] = None,
 ) -> EnhancedValidation:
     """Factory function để create enhanced validation"""
     return EnhancedValidation(metrics_db_path, validation_db_path, config)

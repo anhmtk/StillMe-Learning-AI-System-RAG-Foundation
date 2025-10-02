@@ -7,11 +7,9 @@ This module provides the core functionality for detecting ambiguous prompts
 and generating clarification questions to improve user interaction quality.
 """
 
-import json
 import re
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 
 @dataclass
@@ -26,7 +24,7 @@ class ClarificationResult:
 class ClarificationHandler:
     """
     Core clarification handler for StillMe
-    
+
     Detects ambiguous prompts and generates clarification questions
     to improve user interaction quality and reduce token waste.
     """
@@ -36,7 +34,7 @@ class ClarificationHandler:
         self.clarification_templates = self._load_clarification_templates()
         self.confidence_threshold = 0.7
 
-    def _load_ambiguity_patterns(self) -> Dict[str, List[str]]:
+    def _load_ambiguity_patterns(self) -> dict[str, list[str]]:
         """Load ambiguity detection patterns"""
         return {
             "vague_instruction": [
@@ -69,7 +67,7 @@ class ClarificationHandler:
             ]
         }
 
-    def _load_clarification_templates(self) -> Dict[str, List[str]]:
+    def _load_clarification_templates(self) -> dict[str, list[str]]:
         """Load clarification question templates"""
         return {
             "vague_instruction": [
@@ -122,14 +120,14 @@ class ClarificationHandler:
             ]
         }
 
-    def detect_ambiguity(self, prompt: str, context: Dict[str, Any] = None) -> ClarificationResult:
+    def detect_ambiguity(self, prompt: str, context: dict[str, Any] = None) -> ClarificationResult:
         """
         Detect if a prompt is ambiguous and needs clarification
-        
+
         Args:
             prompt: User input prompt
             context: Conversation context (optional)
-            
+
         Returns:
             ClarificationResult with detection results
         """
@@ -196,7 +194,7 @@ class ClarificationHandler:
 
         return min(1.0, base_confidence * length_factor * category_weight)
 
-    def _generate_clarification_question(self, prompt: str, category: str, context: Dict[str, Any] = None) -> str:
+    def _generate_clarification_question(self, prompt: str, category: str, context: dict[str, Any] = None) -> str:
         """Generate appropriate clarification question"""
         if not category or category not in self.clarification_templates:
             return "Could you please clarify what you need help with?"
@@ -247,21 +245,21 @@ class ClarificationHandler:
 
         return template
 
-    def generate_clarification(self, prompt: str, context: Dict[str, Any] = None) -> Optional[str]:
+    def generate_clarification(self, prompt: str, context: dict[str, Any] = None) -> Optional[str]:
         """
         Generate clarification question for ambiguous prompt
-        
+
         Args:
             prompt: User input prompt
             context: Conversation context (optional)
-            
+
         Returns:
             Clarification question or None if not needed
         """
         result = self.detect_ambiguity(prompt, context)
         return result.question if result.needs_clarification else None
 
-    def get_clarification_stats(self) -> Dict[str, Any]:
+    def get_clarification_stats(self) -> dict[str, Any]:
         """Get clarification handler statistics"""
         return {
             "patterns_loaded": sum(len(patterns) for patterns in self.ambiguity_patterns.values()),

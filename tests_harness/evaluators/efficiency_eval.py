@@ -13,10 +13,9 @@ Kiểm tra:
 import json
 import logging
 import re
-import time
 from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -32,7 +31,7 @@ class EfficiencyScore:
     resource_efficiency: float  # 0-1: hiệu quả sử dụng tài nguyên
     overall_efficiency_score: float  # 0-1: điểm hiệu suất tổng
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 class EfficiencyEval:
@@ -95,10 +94,10 @@ class EfficiencyEval:
                  token_count: int,
                  cost_estimate: float,
                  user_input: str = "",
-                 context: Optional[Dict] = None) -> EfficiencyScore:
+                 context: Optional[dict] = None) -> EfficiencyScore:
         """
         Đánh giá hiệu suất của response
-        
+
         Args:
             response: AI response cần đánh giá
             latency_ms: Thời gian phản hồi (milliseconds)
@@ -106,7 +105,7 @@ class EfficiencyEval:
             cost_estimate: Ước tính chi phí
             user_input: User input gốc (optional)
             context: Context bổ sung (optional)
-            
+
         Returns:
             EfficiencyScore: Kết quả đánh giá hiệu suất
         """
@@ -258,7 +257,7 @@ class EfficiencyEval:
             self.logger.error(f"Error evaluating response quality: {e}")
             return 0.0
 
-    def _evaluate_throughput(self, context: Optional[Dict]) -> float:
+    def _evaluate_throughput(self, context: Optional[dict]) -> float:
         """Đánh giá throughput"""
         try:
             if not context or 'throughput_rps' not in context:
@@ -337,7 +336,7 @@ class EfficiencyEval:
             self.logger.error(f"Error evaluating resource efficiency: {e}")
             return 0.0
 
-    def batch_evaluate(self, responses: List[Dict[str, Any]]) -> List[EfficiencyScore]:
+    def batch_evaluate(self, responses: list[dict[str, Any]]) -> list[EfficiencyScore]:
         """Đánh giá hàng loạt responses"""
         results = []
 
@@ -361,7 +360,7 @@ class EfficiencyEval:
 
         return results
 
-    def generate_report(self, scores: List[EfficiencyScore]) -> Dict[str, Any]:
+    def generate_report(self, scores: list[EfficiencyScore]) -> dict[str, Any]:
         """Tạo báo cáo tổng hợp"""
         try:
             if not scores:

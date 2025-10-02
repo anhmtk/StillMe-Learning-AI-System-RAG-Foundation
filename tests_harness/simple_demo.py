@@ -104,7 +104,7 @@ def run_mock_augmentation():
 
     # Setup logging
     logging.basicConfig(level=logging.INFO)
-    logger = logging.getLogger(__name__)
+    logging.getLogger(__name__)
 
     print("🚀 StillMe Test Harness - Simple Mock Demo")
     print("="*60)

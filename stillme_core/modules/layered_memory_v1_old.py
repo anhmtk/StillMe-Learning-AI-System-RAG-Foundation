@@ -30,7 +30,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 import numpy as np
 from cryptography.fernet import Fernet
@@ -130,11 +130,11 @@ class BaseMemoryLayer(ABC):
         pass
 
     @abstractmethod
-    def search(self, query: str) -> List[MemoryItem]:
+    def search(self, query: str) -> list[MemoryItem]:
         pass
 
     @abstractmethod
-    def compress(self) -> List[MemoryItem]:
+    def compress(self) -> list[MemoryItem]:
         pass
 
 
@@ -170,7 +170,7 @@ class ShortTermMemory(BaseMemoryLayer):
         # Don't encrypt in short-term memory - keep content as plain text
         # Encryption will happen when moving to long-term memory
 
-    def search(self, query: str) -> List[MemoryItem]:
+    def search(self, query: str) -> list[MemoryItem]:
         results = []
         for item in self.buffer:
             try:
@@ -192,7 +192,7 @@ class ShortTermMemory(BaseMemoryLayer):
         cutoff = datetime.now() - timedelta(hours=ttl_hours)
         self.buffer = [item for item in self.buffer if item.timestamp > cutoff]
 
-    def compress(self) -> List[MemoryItem]:
+    def compress(self) -> list[MemoryItem]:
         # Only compress high-priority items
         high_priority = [item for item in self.buffer if item.priority >= 0.7]
         self.buffer = [item for item in self.buffer if item.priority < 0.7]
@@ -232,7 +232,7 @@ class MidTermMemory(BaseMemoryLayer):
             # Encryption will happen when moving to long-term memory
             self.memories.append(item)
 
-    def search(self, query: str) -> List[MemoryItem]:
+    def search(self, query: str) -> list[MemoryItem]:
         results = []
         for item in self.memories:
             try:
@@ -245,7 +245,7 @@ class MidTermMemory(BaseMemoryLayer):
                 continue
         return sorted(results, key=lambda x: x.priority, reverse=True)
 
-    def compress(self) -> List[MemoryItem]:
+    def compress(self) -> list[MemoryItem]:
         """Compress memories by moving high-priority items to long-term storage"""
         # Keep only high-priority memories
         high_priority = [item for item in self.memories if item.priority >= 0.8]
@@ -291,7 +291,7 @@ class LongTermMemory(BaseMemoryLayer):
             # FTS table for fast search
             self.conn.execute(
                 """
-                CREATE VIRTUAL TABLE IF NOT EXISTS memories_fts 
+                CREATE VIRTUAL TABLE IF NOT EXISTS memories_fts
                 USING fts5(content, content='memories', content_rowid='id')
             """
             )
@@ -317,7 +317,7 @@ class LongTermMemory(BaseMemoryLayer):
         except Exception as e:
             logging.error(f"[LongTermMemory] Table creation failed: {e}")
 
-    def add(self, items: List[MemoryItem]):
+    def add(self, items: list[MemoryItem]):
         """Add multiple memory items to long-term storage"""
         try:
             for item in items:
@@ -346,7 +346,7 @@ class LongTermMemory(BaseMemoryLayer):
         except Exception as e:
             logging.error(f"[LongTermMemory] Add failed: {e}")
 
-    def search(self, query: str) -> List[MemoryItem]:
+    def search(self, query: str) -> list[MemoryItem]:
         """Search memories by decrypting and searching content"""
         try:
             # Get all memories and search in decrypted content
@@ -371,7 +371,7 @@ class LongTermMemory(BaseMemoryLayer):
             logging.error(f"[LongTermMemory] Search failed: {e}")
             return []
 
-    def compress(self) -> List[MemoryItem]:
+    def compress(self) -> list[MemoryItem]:
         """Compress memories by moving old items to archive"""
         # Move memories older than 30 days to archive
         cutoff_date = datetime.now() - timedelta(days=30)
@@ -617,8 +617,8 @@ class LayeredMemoryV1:
                 self.logger.warning("No event loop running, skipping async save")
 
     def search(
-        self, query: str, time_range: Optional[Tuple[datetime, datetime]] = None
-    ) -> List[MemoryItem]:
+        self, query: str, time_range: Optional[tuple[datetime, datetime]] = None
+    ) -> list[MemoryItem]:
         """Search across all layers with optional time filter"""
         results = []
         results.extend(self.short_term.search(query))
@@ -696,7 +696,7 @@ class LayeredMemoryV1:
         """Force reload memory data from secure storage"""
         await self._load_from_secure_storage()
 
-    def get_storage_status(self) -> Dict[str, Any]:
+    def get_storage_status(self) -> dict[str, Any]:
         """Get status of secure storage integration"""
         try:
             health = self.secure_storage.get_health_status()

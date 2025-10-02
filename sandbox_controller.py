@@ -8,8 +8,8 @@ import os
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
-from urllib.parse import urljoin, urlparse
+from typing import Any
+from urllib.parse import urlparse
 
 import idna  # For IDN/Punycode handling
 import yaml
@@ -31,7 +31,7 @@ class SandboxController:
         self.egress_count = 0
 
         # Blocked domains log
-        self.blocked_domains: Set[str] = set()
+        self.blocked_domains: set[str] = set()
 
         # Redirect tracking
         self.redirect_count = 0
@@ -60,7 +60,7 @@ class SandboxController:
             "idn_blocked": 0
         }
 
-    def _load_allowlist(self) -> Set[str]:
+    def _load_allowlist(self) -> set[str]:
         """Load allowlist from config file"""
         try:
             if self.config_file.exists():
@@ -111,7 +111,7 @@ class SandboxController:
         """Validate URL scheme"""
         return scheme.lower() in self.allowed_schemes
 
-    def is_egress_allowed(self, url: str, redirect_count: int = 0) -> Dict[str, Any]:
+    def is_egress_allowed(self, url: str, redirect_count: int = 0) -> dict[str, Any]:
         """Enhanced egress permission check with security validations"""
         try:
             self.stats["total_requests"] += 1
@@ -235,13 +235,13 @@ class SandboxController:
             logger.error(f"❌ Failed to remove domain from allowlist: {e}")
             return False
 
-    def get_allowlist(self) -> List[str]:
+    def get_allowlist(self) -> list[str]:
         """Lấy danh sách allowlist"""
-        return sorted(list(self.egress_allowlist))
+        return sorted(self.egress_allowlist)
 
-    def get_blocked_domains(self) -> List[str]:
+    def get_blocked_domains(self) -> list[str]:
         """Lấy danh sách domains đã bị block"""
-        return sorted(list(self.blocked_domains))
+        return sorted(self.blocked_domains)
 
     def set_egress_limit(self, limit: int):
         """Set egress limit"""
@@ -253,7 +253,7 @@ class SandboxController:
         self.egress_count = 0
         logger.info("✅ Egress count reset")
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Lấy thống kê sandbox chi tiết"""
         return {
             "total_requests": self.stats["total_requests"],
@@ -272,7 +272,7 @@ class SandboxController:
             "allowed_schemes": list(self.allowed_schemes)
         }
 
-    def validate_allowlist(self) -> Dict[str, Any]:
+    def validate_allowlist(self) -> dict[str, Any]:
         """Validate allowlist configuration"""
         validation_results = {
             "valid": True,
@@ -284,7 +284,7 @@ class SandboxController:
         for domain in self.egress_allowlist:
             try:
                 # Check if domain is valid
-                normalized = self._normalize_domain(domain)
+                self._normalize_domain(domain)
 
                 # Check for homoglyphs
                 if self._detect_homoglyph(domain):
@@ -317,7 +317,7 @@ class SandboxController:
         self.max_redirects = max(0, min(max_redirects, 10))  # Limit between 0-10
         logger.info(f"✅ Max redirects set to: {self.max_redirects}")
 
-    def get_security_report(self) -> Dict[str, Any]:
+    def get_security_report(self) -> dict[str, Any]:
         """Get comprehensive security report"""
         stats = self.get_stats()
         validation = self.validate_allowlist()
@@ -334,14 +334,14 @@ class SandboxController:
             "allowlist_status": {
                 "size": len(self.egress_allowlist),
                 "validation": validation,
-                "domains": sorted(list(self.egress_allowlist))
+                "domains": sorted(self.egress_allowlist)
             },
             "security_stats": stats,
-            "blocked_domains": sorted(list(self.blocked_domains)),
+            "blocked_domains": sorted(self.blocked_domains),
             "recommendations": self._get_security_recommendations(stats)
         }
 
-    def _get_security_recommendations(self, stats: Dict[str, Any]) -> List[str]:
+    def _get_security_recommendations(self, stats: dict[str, Any]) -> list[str]:
         """Get security recommendations based on stats"""
         recommendations = []
 
@@ -373,7 +373,7 @@ class SandboxController:
         self.network_egress_limit = -1
         logger.info("🔓 Sandbox disabled - all egress allowed")
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """Lấy trạng thái sandbox"""
         return {
             "enabled": self.is_sandbox_enabled(),
@@ -387,7 +387,7 @@ class SandboxController:
 # Global instance
 sandbox_controller = SandboxController()
 
-def check_egress_permission(url: str) -> Dict[str, Any]:
+def check_egress_permission(url: str) -> dict[str, Any]:
     """Convenience function để check egress permission"""
     return sandbox_controller.is_egress_allowed(url)
 

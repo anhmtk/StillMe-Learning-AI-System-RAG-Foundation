@@ -8,13 +8,13 @@ Version: 1.0.0
 Phase: 0.1 - Security Remediation
 """
 
-import time
-import psutil
 import logging
-from typing import Dict, List, Any, Optional
+from collections import defaultdict, deque
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from collections import defaultdict, deque
+from typing import Any
+
+import psutil
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -28,7 +28,7 @@ class PerformanceMetric:
     value: float
     unit: str
     timestamp: datetime
-    tags: Dict[str, str] = None
+    tags: dict[str, str] = None
 
 
 class PerformanceMonitor:
@@ -43,7 +43,7 @@ class PerformanceMonitor:
         self.start_time = datetime.now()
         self.system_info = self._get_system_info()
 
-    def _get_system_info(self) -> Dict[str, Any]:
+    def _get_system_info(self) -> dict[str, Any]:
         """Get system information"""
         try:
             return {
@@ -58,7 +58,7 @@ class PerformanceMonitor:
             logger.warning(f"Could not get system info: {e}")
             return {}
 
-    def record_metric(self, name: str, value: float, unit: str = "", tags: Dict[str, str] = None):
+    def record_metric(self, name: str, value: float, unit: str = "", tags: dict[str, str] = None):
         """Record a performance metric"""
         metric = PerformanceMetric(
             name=name,
@@ -67,14 +67,14 @@ class PerformanceMonitor:
             timestamp=datetime.now(),
             tags=tags or {}
         )
-        
+
         self.metrics_history[name].append(metric)
         logger.debug(f"Recorded metric: {name} = {value} {unit}")
 
-    def record_execution_time(self, operation_name: str, execution_time: float, tags: Dict[str, str] = None):
+    def record_execution_time(self, operation_name: str, execution_time: float, tags: dict[str, str] = None):
         """Record execution time for an operation"""
         self.record_metric(f"execution_time_{operation_name}", execution_time, "seconds", tags)
-        
+
         # Check for performance issues
         if execution_time > 5.0:  # 5 seconds threshold
             self._log_performance_event("slow_operation", "WARNING", {
@@ -83,10 +83,10 @@ class PerformanceMonitor:
                 "tags": tags or {}
             })
 
-    def record_memory_usage(self, operation_name: str, memory_mb: float, tags: Dict[str, str] = None):
+    def record_memory_usage(self, operation_name: str, memory_mb: float, tags: dict[str, str] = None):
         """Record memory usage for an operation"""
         self.record_metric(f"memory_usage_{operation_name}", memory_mb, "MB", tags)
-        
+
         # Check for memory issues
         if memory_mb > 1000:  # 1GB threshold
             self._log_performance_event("high_memory_usage", "WARNING", {
@@ -95,10 +95,10 @@ class PerformanceMonitor:
                 "tags": tags or {}
             })
 
-    def record_cpu_usage(self, operation_name: str, cpu_percent: float, tags: Dict[str, str] = None):
+    def record_cpu_usage(self, operation_name: str, cpu_percent: float, tags: dict[str, str] = None):
         """Record CPU usage for an operation"""
         self.record_metric(f"cpu_usage_{operation_name}", cpu_percent, "percent", tags)
-        
+
         # Check for CPU issues
         if cpu_percent > 80:  # 80% threshold
             self._log_performance_event("high_cpu_usage", "WARNING", {
@@ -107,7 +107,7 @@ class PerformanceMonitor:
                 "tags": tags or {}
             })
 
-    def _log_performance_event(self, event_type: str, severity: str, details: Dict[str, Any]):
+    def _log_performance_event(self, event_type: str, severity: str, details: dict[str, Any]):
         """Log performance event"""
         event = {
             "event_type": event_type,
@@ -118,7 +118,7 @@ class PerformanceMonitor:
         self.performance_events.append(event)
         logger.warning(f"Performance event: {event_type} - {severity} - {details}")
 
-    def get_metric_summary(self, metric_name: str, hours: int = 24) -> Dict[str, Any]:
+    def get_metric_summary(self, metric_name: str, hours: int = 24) -> dict[str, Any]:
         """Get summary for a specific metric"""
         if metric_name not in self.metrics_history:
             return {"error": f"Metric {metric_name} not found"}
@@ -134,7 +134,7 @@ class PerformanceMonitor:
             return {"error": f"No data for {metric_name} in the last {hours} hours"}
 
         values = [m.value for m in recent_metrics]
-        
+
         return {
             "metric_name": metric_name,
             "count": len(values),
@@ -148,10 +148,10 @@ class PerformanceMonitor:
             "last_timestamp": recent_metrics[-1].timestamp.isoformat()
         }
 
-    def get_performance_summary(self) -> Dict[str, Any]:
+    def get_performance_summary(self) -> dict[str, Any]:
         """Get overall performance summary"""
         uptime = (datetime.now() - self.start_time).total_seconds()
-        
+
         # Get system metrics
         try:
             cpu_percent = psutil.cpu_percent(interval=1)
@@ -190,72 +190,72 @@ class PerformanceMonitor:
             "summary_timestamp": datetime.now().isoformat()
         }
 
-    def get_top_metrics(self, limit: int = 10) -> List[Dict[str, Any]]:
+    def get_top_metrics(self, limit: int = 10) -> list[dict[str, Any]]:
         """Get top metrics by count"""
         metric_counts = [
             {"name": name, "count": len(history)}
             for name, history in self.metrics_history.items()
         ]
-        
+
         return sorted(metric_counts, key=lambda x: x["count"], reverse=True)[:limit]
 
     def clear_old_data(self, hours: int = 24):
         """Clear old data to free memory"""
         cutoff_time = datetime.now() - timedelta(hours=hours)
-        
-        for metric_name, history in self.metrics_history.items():
+
+        for _metric_name, history in self.metrics_history.items():
             # Remove old metrics
             while history and history[0].timestamp < cutoff_time:
                 history.popleft()
-        
+
         # Remove old performance events
         self.performance_events = [
             event for event in self.performance_events
             if datetime.fromisoformat(event["timestamp"]) >= cutoff_time
         ]
-        
+
         logger.info(f"Cleared data older than {hours} hours")
 
 
 def main():
     """Test the performance monitor"""
     monitor = PerformanceMonitor()
-    
+
     # Record some test metrics
     print("📊 Performance Monitor Test:")
-    
+
     # Simulate some operations
     operations = ["validation", "security_check", "data_processing", "file_io"]
-    
+
     for operation in operations:
         # Simulate execution time
         execution_time = 0.5 + (hash(operation) % 100) / 100.0
         monitor.record_execution_time(operation, execution_time, {"test": "true"})
-        
+
         # Simulate memory usage
         memory_mb = 10 + (hash(operation) % 50)
         monitor.record_memory_usage(operation, memory_mb, {"test": "true"})
-        
+
         # Simulate CPU usage
         cpu_percent = 20 + (hash(operation) % 60)
         monitor.record_cpu_usage(operation, cpu_percent, {"test": "true"})
-        
+
         print(f"✅ Recorded metrics for {operation}")
-    
+
     # Get performance summary
     summary = monitor.get_performance_summary()
-    print(f"\n📈 Performance Summary:")
+    print("\n📈 Performance Summary:")
     print(f"Uptime: {summary['uptime_human']}")
     print(f"Metrics tracked: {len(summary['metrics_tracked'])}")
     print(f"Total metrics recorded: {summary['total_metrics_recorded']}")
     print(f"Performance events: {summary['performance_events']['total']}")
-    
+
     # Get top metrics
     top_metrics = monitor.get_top_metrics(5)
-    print(f"\n🏆 Top Metrics:")
+    print("\n🏆 Top Metrics:")
     for metric in top_metrics:
         print(f"  {metric['name']}: {metric['count']} records")
-    
+
     # Get specific metric summary
     if summary['metrics_tracked']:
         first_metric = summary['metrics_tracked'][0]

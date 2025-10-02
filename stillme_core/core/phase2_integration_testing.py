@@ -16,7 +16,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 # Import all Phase 2 modules
 try:
@@ -99,8 +99,8 @@ class IntegrationTestResult:
     passed: bool
     failed: bool
     error_message: Optional[str]
-    metrics: Dict[str, Any]
-    details: Dict[str, Any]
+    metrics: dict[str, Any]
+    details: dict[str, Any]
 
 
 @dataclass
@@ -110,8 +110,8 @@ class IntegrationTestSuite:
     suite_id: str
     suite_name: str
     description: str
-    tests: List[str]
-    dependencies: List[str]
+    tests: list[str]
+    dependencies: list[str]
     timeout_seconds: int
     parallel_execution: bool
     created_at: datetime
@@ -130,9 +130,9 @@ class IntegrationTestReport:
     error_tests: int
     total_duration: float
     success_rate: float
-    results: List[IntegrationTestResult]
-    summary: Dict[str, Any]
-    recommendations: List[str]
+    results: list[IntegrationTestResult]
+    summary: dict[str, Any]
+    recommendations: list[str]
 
 
 class Phase2IntegrationTesting:
@@ -140,7 +140,7 @@ class Phase2IntegrationTesting:
     Main Phase 2 Integration Testing System
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         self.config = config or {}
         self.logger = self._setup_logging()
 
@@ -150,11 +150,11 @@ class Phase2IntegrationTesting:
         self.security_compliance = SecurityComplianceSystem()
 
         # Integration testing state
-        self.test_results: List[IntegrationTestResult] = []
-        self.test_suites: Dict[str, IntegrationTestSuite] = {}
+        self.test_results: list[IntegrationTestResult] = []
+        self.test_suites: dict[str, IntegrationTestSuite] = {}
 
         # Performance tracking
-        self.performance_metrics: Dict[str, List[float]] = {
+        self.performance_metrics: dict[str, list[float]] = {
             "test_execution_times": [],
             "integration_times": [],
             "validation_times": [],
@@ -385,8 +385,8 @@ class Phase2IntegrationTesting:
             raise
 
     async def _run_tests_parallel(
-        self, test_names: List[str], suite_id: str
-    ) -> List[IntegrationTestResult]:
+        self, test_names: list[str], suite_id: str
+    ) -> list[IntegrationTestResult]:
         """Run tests in parallel"""
         try:
             results = []
@@ -432,8 +432,8 @@ class Phase2IntegrationTesting:
             return []
 
     async def _run_tests_sequential(
-        self, test_names: List[str], suite_id: str
-    ) -> List[IntegrationTestResult]:
+        self, test_names: list[str], suite_id: str
+    ) -> list[IntegrationTestResult]:
         """Run tests sequentially"""
         try:
             results = []
@@ -549,7 +549,7 @@ class Phase2IntegrationTesting:
 
     def _execute_integration_test(
         self, test_name: str, suite_id: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Execute a specific integration test"""
         try:
             if suite_id == "module_integration":
@@ -574,7 +574,7 @@ class Phase2IntegrationTesting:
                 "metrics": {},
             }
 
-    def _execute_module_integration_test(self, test_name: str) -> Dict[str, Any]:
+    def _execute_module_integration_test(self, test_name: str) -> dict[str, Any]:
         """Execute module integration test"""
         try:
             if test_name == "test_autonomous_learning_integration":
@@ -597,7 +597,7 @@ class Phase2IntegrationTesting:
                 "metrics": {},
             }
 
-    def _test_autonomous_learning_integration(self) -> Dict[str, Any]:
+    def _test_autonomous_learning_integration(self) -> dict[str, Any]:
         """Test autonomous management and learning engine integration"""
         try:
             start_time = time.time()
@@ -640,7 +640,7 @@ class Phase2IntegrationTesting:
                 "metrics": {},
             }
 
-    def _test_autonomous_security_integration(self) -> Dict[str, Any]:
+    def _test_autonomous_security_integration(self) -> dict[str, Any]:
         """Test autonomous management and security compliance integration"""
         try:
             start_time = time.time()
@@ -683,7 +683,7 @@ class Phase2IntegrationTesting:
                 "metrics": {},
             }
 
-    def _test_learning_security_integration(self) -> Dict[str, Any]:
+    def _test_learning_security_integration(self) -> dict[str, Any]:
         """Test learning engine and security compliance integration"""
         try:
             start_time = time.time()
@@ -726,7 +726,7 @@ class Phase2IntegrationTesting:
                 "metrics": {},
             }
 
-    def _test_all_modules_integration(self) -> Dict[str, Any]:
+    def _test_all_modules_integration(self) -> dict[str, Any]:
         """Test all Phase 2 modules integration"""
         try:
             start_time = time.time()
@@ -772,7 +772,7 @@ class Phase2IntegrationTesting:
                 "metrics": {},
             }
 
-    def _execute_end_to_end_test(self, test_name: str) -> Dict[str, Any]:
+    def _execute_end_to_end_test(self, test_name: str) -> dict[str, Any]:
         """Execute end-to-end test"""
         try:
             # Mock end-to-end test execution
@@ -795,7 +795,7 @@ class Phase2IntegrationTesting:
                 "metrics": {},
             }
 
-    def _execute_performance_test(self, test_name: str) -> Dict[str, Any]:
+    def _execute_performance_test(self, test_name: str) -> dict[str, Any]:
         """Execute performance test"""
         try:
             # Mock performance test execution
@@ -818,7 +818,7 @@ class Phase2IntegrationTesting:
                 "metrics": {},
             }
 
-    def _execute_security_test(self, test_name: str) -> Dict[str, Any]:
+    def _execute_security_test(self, test_name: str) -> dict[str, Any]:
         """Execute security test"""
         try:
             # Mock security test execution
@@ -841,7 +841,7 @@ class Phase2IntegrationTesting:
                 "metrics": {},
             }
 
-    def _execute_reliability_test(self, test_name: str) -> Dict[str, Any]:
+    def _execute_reliability_test(self, test_name: str) -> dict[str, Any]:
         """Execute reliability test"""
         try:
             # Mock reliability test execution
@@ -864,7 +864,7 @@ class Phase2IntegrationTesting:
                 "metrics": {},
             }
 
-    def _execute_generic_test(self, test_name: str) -> Dict[str, Any]:
+    def _execute_generic_test(self, test_name: str) -> dict[str, Any]:
         """Execute generic test"""
         try:
             time.sleep(0.1)
@@ -887,8 +887,8 @@ class Phase2IntegrationTesting:
             }
 
     def _generate_integration_summary(
-        self, results: List[IntegrationTestResult]
-    ) -> Dict[str, Any]:
+        self, results: list[IntegrationTestResult]
+    ) -> dict[str, Any]:
         """Generate integration test summary"""
         try:
             total_tests = len(results)
@@ -930,8 +930,8 @@ class Phase2IntegrationTesting:
             return {}
 
     def _generate_integration_recommendations(
-        self, results: List[IntegrationTestResult]
-    ) -> List[str]:
+        self, results: list[IntegrationTestResult]
+    ) -> list[str]:
         """Generate integration test recommendations"""
         try:
             recommendations = []
@@ -974,7 +974,7 @@ class Phase2IntegrationTesting:
             self.logger.error(f"Error generating integration recommendations: {e}")
             return []
 
-    async def _get_integration_status(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_integration_status(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get integration status endpoint"""
         try:
             return {
@@ -1006,7 +1006,7 @@ class Phase2IntegrationTesting:
                 "message": str(e),
             }
 
-    async def _run_integration_tests(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _run_integration_tests(self, data: dict[str, Any]) -> dict[str, Any]:
         """Run integration tests endpoint"""
         try:
             suite_id = data.get("suite_id", "module_integration")
@@ -1041,7 +1041,7 @@ class Phase2IntegrationTesting:
                 "message": str(e),
             }
 
-    async def _get_integration_reports(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_integration_reports(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get integration reports endpoint"""
         try:
             return {

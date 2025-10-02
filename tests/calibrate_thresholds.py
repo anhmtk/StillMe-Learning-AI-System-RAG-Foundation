@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any
 
 #!/usr/bin/env python3
 """
@@ -31,7 +31,7 @@ class ThresholdCalibrator:
         self.test_cases = self._load_test_cases()
         self.results = []
 
-    def _load_test_cases(self) -> List[Dict[str, Any]]:
+    def _load_test_cases(self) -> list[dict[str, Any]]:
         """Load test cases from regression suite"""
         # This would normally load from the regression test suite
         # For now, we'll use a subset of known cases
@@ -65,7 +65,7 @@ class ThresholdCalibrator:
             {"text": "What is the most efficient way to sort a large dataset?", "expected": True, "category": "clear"},
         ]
 
-    def calibrate_thresholds(self) -> Dict[str, Any]:
+    def calibrate_thresholds(self) -> dict[str, Any]:
         """Calibrate thresholds for optimal performance"""
         print("🔧 Starting Threshold Calibration...")
         print("=" * 50)
@@ -120,7 +120,7 @@ class ThresholdCalibrator:
 
         return best_config
 
-    def _test_configuration(self, config: Dict[str, Any]) -> Dict[str, Any]:
+    def _test_configuration(self, config: dict[str, Any]) -> dict[str, Any]:
         """Test a specific configuration"""
         guard = ProactiveAbuseGuard(config)
 
@@ -162,7 +162,7 @@ class ThresholdCalibrator:
             "false_negatives": false_negatives
         }
 
-    def _calculate_score(self, results: Dict[str, Any]) -> float:
+    def _calculate_score(self, results: dict[str, Any]) -> float:
         """Calculate weighted score for configuration"""
         precision = results["precision"]
         recall = results["recall"]
@@ -192,7 +192,7 @@ class ThresholdCalibrator:
 
         return score
 
-    def save_calibrated_config(self, best_config: Dict[str, Any]):
+    def save_calibrated_config(self, best_config: dict[str, Any]):
         """Save calibrated configuration to file"""
         config_data = {
             "abuse_threshold": best_config["abuse_threshold"],

@@ -13,7 +13,6 @@ Tính năng:
 
 import ast
 import json
-import os
 import re
 import time
 from collections import Counter, defaultdict
@@ -21,7 +20,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any
 
 import networkx as nx
 
@@ -85,7 +84,7 @@ class RefactoringSuggestion:
     effort: str  # "low", "medium", "high"
     code_before: str
     code_after: str
-    benefits: List[str]
+    benefits: list[str]
 
 @dataclass
 class TechnicalDebtItem:
@@ -108,21 +107,21 @@ class ArchitectureMetrics:
     total_functions: int
     total_lines: int
     cyclomatic_complexity: float
-    coupling_metrics: Dict[str, float]
-    cohesion_metrics: Dict[str, float]
-    design_patterns_found: List[DesignPatternMatch]
-    refactoring_suggestions: List[RefactoringSuggestion]
-    technical_debt: List[TechnicalDebtItem]
+    coupling_metrics: dict[str, float]
+    cohesion_metrics: dict[str, float]
+    design_patterns_found: list[DesignPatternMatch]
+    refactoring_suggestions: list[RefactoringSuggestion]
+    technical_debt: list[TechnicalDebtItem]
 
 @dataclass
 class ArchitectureReport:
     """Architecture Report"""
     analysis_timestamp: datetime
     metrics: ArchitectureMetrics
-    dependency_graph: Dict[str, List[str]]
-    coupling_analysis: Dict[str, CouplingLevel]
-    complexity_analysis: Dict[str, ComplexityLevel]
-    recommendations: List[str]
+    dependency_graph: dict[str, list[str]]
+    coupling_analysis: dict[str, CouplingLevel]
+    complexity_analysis: dict[str, ComplexityLevel]
+    recommendations: list[str]
     analysis_time: float
 
 class ArchitectureAnalyzer:
@@ -138,10 +137,10 @@ class ArchitectureAnalyzer:
 
         # Analysis data
         self.dependency_graph = nx.DiGraph()
-        self.dependencies: List[DependencyInfo] = []
-        self.design_patterns: List[DesignPatternMatch] = []
-        self.refactoring_suggestions: List[RefactoringSuggestion] = []
-        self.technical_debt: List[TechnicalDebtItem] = []
+        self.dependencies: list[DependencyInfo] = []
+        self.design_patterns: list[DesignPatternMatch] = []
+        self.refactoring_suggestions: list[RefactoringSuggestion] = []
+        self.technical_debt: list[TechnicalDebtItem] = []
 
         # Pattern recognition rules
         self.pattern_rules = self._load_pattern_rules()
@@ -151,7 +150,7 @@ class ArchitectureAnalyzer:
         for dir_path in [self.refactor_dir, self.analysis_dir]:
             dir_path.mkdir(parents=True, exist_ok=True)
 
-    def _load_pattern_rules(self) -> Dict[DesignPattern, Dict[str, Any]]:
+    def _load_pattern_rules(self) -> dict[DesignPattern, dict[str, Any]]:
         """Load design pattern recognition rules"""
         return {
             DesignPattern.SINGLETON: {
@@ -502,7 +501,7 @@ class ArchitectureAnalyzer:
         for dep in self.dependencies:
             self.dependency_graph.add_edge(dep.source, dep.target, weight=dep.strength)
 
-    def _calculate_metrics(self, python_files: List[Path]) -> ArchitectureMetrics:
+    def _calculate_metrics(self, python_files: list[Path]) -> ArchitectureMetrics:
         """Calculate architecture metrics"""
         total_files = len(python_files)
         total_classes = 0
@@ -548,7 +547,7 @@ class ArchitectureAnalyzer:
             technical_debt=self.technical_debt
         )
 
-    def _calculate_cyclomatic_complexity(self, python_files: List[Path]) -> float:
+    def _calculate_cyclomatic_complexity(self, python_files: list[Path]) -> float:
         """Calculate cyclomatic complexity"""
         total_complexity = 0
         total_functions = 0
@@ -578,7 +577,7 @@ class ArchitectureAnalyzer:
 
         return total_complexity / total_functions if total_functions > 0 else 0
 
-    def _calculate_coupling_metrics(self) -> Dict[str, float]:
+    def _calculate_coupling_metrics(self) -> dict[str, float]:
         """Calculate coupling metrics"""
         if not self.dependency_graph.nodes():
             return {}
@@ -604,7 +603,7 @@ class ArchitectureAnalyzer:
 
         return metrics
 
-    def _calculate_cohesion_metrics(self) -> Dict[str, float]:
+    def _calculate_cohesion_metrics(self) -> dict[str, float]:
         """Calculate cohesion metrics"""
         # Simplified cohesion calculation
         metrics = {}
@@ -615,7 +614,7 @@ class ArchitectureAnalyzer:
 
         return metrics
 
-    def _analyze_coupling(self) -> Dict[str, CouplingLevel]:
+    def _analyze_coupling(self) -> dict[str, CouplingLevel]:
         """Analyze coupling levels"""
         coupling_analysis = {}
 
@@ -633,7 +632,7 @@ class ArchitectureAnalyzer:
 
         return coupling_analysis
 
-    def _analyze_complexity(self) -> Dict[str, ComplexityLevel]:
+    def _analyze_complexity(self) -> dict[str, ComplexityLevel]:
         """Analyze complexity levels"""
         complexity_analysis = {}
 
@@ -674,8 +673,8 @@ class ArchitectureAnalyzer:
         return complexity
 
     def _generate_recommendations(self, metrics: ArchitectureMetrics,
-                                coupling_analysis: Dict[str, CouplingLevel],
-                                complexity_analysis: Dict[str, ComplexityLevel]) -> List[str]:
+                                coupling_analysis: dict[str, CouplingLevel],
+                                complexity_analysis: dict[str, ComplexityLevel]) -> list[str]:
         """Generate architecture recommendations"""
         recommendations = []
 

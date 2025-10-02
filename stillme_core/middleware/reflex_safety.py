@@ -8,11 +8,10 @@ Implements circuit breaker pattern and timeout handling for deep checks.
 from __future__ import annotations
 
 import asyncio
-import hashlib
 import logging
 import re
 import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +87,7 @@ class CircuitBreaker:
 class ReflexSafety:
     """Progressive safety checking with fast and deep validation."""
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self.circuit_breaker = CircuitBreaker()
         self.fast_check_enabled = self.config.get("fast_check_enabled", True)
@@ -110,10 +109,10 @@ class ReflexSafety:
             "timeouts": 0,
         }
 
-    def fast_check(self, text: str) -> Tuple[bool, str]:
+    def fast_check(self, text: str) -> tuple[bool, str]:
         """
         Fast, lightweight safety screening using pattern matching.
-        
+
         Returns:
             Tuple[bool, str]: (is_safe, reason)
         """
@@ -138,14 +137,14 @@ class ReflexSafety:
 
         return True, "safe"
 
-    async def deep_check(self, text: str, intended_action: Optional[str] = None) -> Tuple[bool, str]:
+    async def deep_check(self, text: str, intended_action: str | None = None) -> tuple[bool, str]:
         """
         Deeper, asynchronous safety check with timeout and circuit breaker.
-        
+
         Args:
             text: Input text to check
             intended_action: Optional action description for context
-            
+
         Returns:
             Tuple[bool, str]: (is_safe, reason)
         """
@@ -183,10 +182,10 @@ class ReflexSafety:
             self.circuit_breaker.on_failure()
             return False, f"deep_check_error: {str(e)}"
 
-    async def _perform_deep_check(self, text: str, intended_action: Optional[str] = None) -> Tuple[bool, str]:
+    async def _perform_deep_check(self, text: str, intended_action: str | None = None) -> tuple[bool, str]:
         """
         Simulate deep safety check (placeholder for EthicsGuard integration).
-        
+
         In a real implementation, this would:
         1. Call EthicsGuard LLM-based analysis
         2. Check against safety databases
@@ -207,16 +206,16 @@ class ReflexSafety:
 
         return True, "deep_check_passed"
 
-    def safety_gate(self, text: str, intended_action: Optional[str] = None,
-                   scores: Optional[Dict[str, float]] = None) -> Dict[str, Any]:
+    def safety_gate(self, text: str, intended_action: str | None = None,
+                   scores: dict[str, float] | None = None) -> dict[str, Any]:
         """
         Main safety gate that combines fast and deep checks.
-        
+
         Args:
             text: Input text to validate
             intended_action: Optional action description
             scores: Optional reflex scores for context
-            
+
         Returns:
             Dict with safety decision and details
         """
@@ -269,7 +268,7 @@ class ReflexSafety:
 
         return text
 
-    def _has_high_entropy(self, text: str, threshold: Optional[float] = None) -> bool:
+    def _has_high_entropy(self, text: str, threshold: float | None = None) -> bool:
         """Check if text has suspiciously high entropy (potential obfuscation)."""
         if threshold is None:
             threshold = self.config.get("entropy_threshold", 0.9)
@@ -297,7 +296,7 @@ class ReflexSafety:
 
         return normalized_entropy > threshold
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get safety statistics."""
         return {
             "stats": self.stats.copy(),

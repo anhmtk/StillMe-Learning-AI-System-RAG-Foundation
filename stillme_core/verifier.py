@@ -312,22 +312,22 @@ class LegacyVerifier:
         """Clear all verification results"""
         self.verification_results.clear()
         self.logger.info("🧹 All verification results cleared")
-    
+
     def verify(self, step: dict[str, Any], exec_result: dict[str, Any], success_criteria: Optional[dict[str, Any]] = None) -> Union[bool, dict[str, Any]]:
         """Verify execution result against step criteria"""
         try:
             # Use provided success_criteria or extract from step
             if success_criteria is None:
                 success_criteria = step.get("success_criteria", {})
-            
+
             # Ensure success_criteria is not None
             if success_criteria is None:
                 success_criteria = {}
-                
+
             expected_exit_code = success_criteria.get("exit_code", 0)
             stdout_patterns = success_criteria.get("stdout_patterns", [])
             stderr_patterns = success_criteria.get("stderr_patterns", [])
-            
+
             # Check basic execution success
             if not exec_result.get("ok", False):
                 return {
@@ -335,7 +335,7 @@ class LegacyVerifier:
                     "reason": "execution failed",
                     "details": exec_result
                 }
-            
+
             # Check exit code
             actual_exit_code = exec_result.get("exit_code", 0)
             if actual_exit_code != expected_exit_code:
@@ -344,7 +344,7 @@ class LegacyVerifier:
                     "reason": f"exit code mismatch: expected {expected_exit_code}, got {actual_exit_code}",
                     "details": exec_result
                 }
-            
+
             # Check stdout patterns
             stdout = exec_result.get("stdout", "")
             for pattern in stdout_patterns:
@@ -354,7 +354,7 @@ class LegacyVerifier:
                         "reason": f"stdout pattern not matched: {pattern}",
                         "details": exec_result
                     }
-            
+
             # Check stderr patterns
             stderr = exec_result.get("stderr", "")
             for pattern in stderr_patterns:
@@ -364,7 +364,7 @@ class LegacyVerifier:
                         "reason": f"stderr pattern not matched: {pattern}",
                         "details": exec_result
                     }
-            
+
             # Default success patterns if no custom criteria
             if not stdout_patterns and not stderr_patterns:
                 success_patterns = [r"(\d+)\s+passed", r"PASSED", r"SUCCESS"]
@@ -380,13 +380,13 @@ class LegacyVerifier:
                         "reason": "no success patterns found in output",
                         "details": exec_result
                     }
-            
+
             return {
                 "passed": True,
                 "reason": "all criteria met",
                 "details": exec_result
             }
-            
+
         except Exception as e:
             self.logger.error(f"Verification error: {e}")
             return {
@@ -394,17 +394,17 @@ class LegacyVerifier:
                 "reason": f"verification error: {e}",
                 "details": exec_result
             }
-    
+
     def verify_test_results(self, exec_result: dict[str, Any]) -> dict[str, Any]:
         """Verify test execution results"""
         try:
             stdout = exec_result.get("stdout", "")
             stderr = exec_result.get("stderr", "")
             exit_code = exec_result.get("exit_code", 0)
-            
+
             # Extract test statistics
             stats = self._extract_test_stats(stdout)
-            
+
             # Determine if tests passed
             if exit_code == 0 and stats.get("failed", 0) == 0:
                 return {
@@ -420,7 +420,7 @@ class LegacyVerifier:
                     "stats": stats,
                     "details": {"stats": stats, "exec_result": exec_result}
                 }
-                
+
         except Exception as e:
             self.logger.error(f"Test verification error: {e}")
             return {
@@ -428,11 +428,11 @@ class LegacyVerifier:
                 "reason": f"test verification error: {e}",
                 "details": exec_result
             }
-    
+
     def _extract_test_stats(self, text: str) -> dict[str, Any]:
         """Extract test statistics from output text"""
         import re
-        
+
         stats = {
             "passed": 0,
             "failed": 0,
@@ -440,7 +440,7 @@ class LegacyVerifier:
             "total": 0,
             "collected": 0
         }
-        
+
         # Common test output patterns
         patterns = {
             "passed": [r"(\d+)\s+passed", r"PASSED\s*(\d+)", r"✓\s*(\d+)"],
@@ -449,7 +449,7 @@ class LegacyVerifier:
             "total": [r"(\d+)\s+total", r"(\d+)\s+tests"],
             "collected": [r"collected\s+(\d+)\s+items?", r"(\d+)\s+collected"]
         }
-        
+
         for stat_type, pattern_list in patterns.items():
             for pattern in pattern_list:
                 match = re.search(pattern, text, re.IGNORECASE)
@@ -458,17 +458,17 @@ class LegacyVerifier:
                         stats[stat_type] = int(match.group(1))
                     except (ValueError, IndexError):
                         pass
-        
+
         # Calculate total if not found
         if stats["total"] == 0:
             stats["total"] = stats["passed"] + stats["failed"] + stats["skipped"]
-        
+
         return stats
-    
+
     def _check_patterns(self, text: str, patterns: list[str]) -> bool:
         """Check if text matches any of the patterns"""
         import re
-        
+
         for pattern in patterns:
             try:
                 if re.search(pattern, text, re.IGNORECASE):
@@ -477,7 +477,7 @@ class LegacyVerifier:
                 # If pattern is invalid, treat as literal string match
                 if pattern in text:
                     return True
-        
+
         return False
 
 

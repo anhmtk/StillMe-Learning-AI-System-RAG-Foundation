@@ -38,14 +38,14 @@ class TestLoadPerformance:
         # Check if StateStore has required methods
         if not hasattr(StateStore, 'create_job') or not hasattr(StateStore, 'close'):
             pytest.skip("StateStore missing required methods (create_job, close)")
-        
+
         temp_db = tempfile.NamedTemporaryFile(delete=False, suffix='.db')
         temp_db.close()
 
         store = StateStore(temp_db.name)
         asyncio.run(store.initialize())
         yield store
-        
+
         # Check if close method exists before calling
         if hasattr(store, 'close'):
             asyncio.run(store.close())

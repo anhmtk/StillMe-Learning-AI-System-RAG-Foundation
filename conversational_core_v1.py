@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -26,10 +26,10 @@ class Conversation:
     id: str
     type: ConversationType
     status: ConversationStatus
-    messages: List[Dict[str, Any]]
+    messages: list[dict[str, Any]]
     created_at: datetime
     updated_at: datetime
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -40,13 +40,13 @@ class ConversationalCore:
 
     def __init__(self):
         self.logger = logger
-        self.conversations: List[Conversation] = []
+        self.conversations: list[Conversation] = []
         self.logger.info("✅ ConversationalCore initialized")
 
     def start_conversation(self,
                           conversation_type: ConversationType,
                           initial_message: str = "",
-                          metadata: Dict[str, Any] = None) -> str:
+                          metadata: dict[str, Any] = None) -> str:
         """Start a new conversation"""
         try:
             conversation_id = f"conv_{len(self.conversations) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -119,15 +119,15 @@ class ConversationalCore:
                 return True
         return False
 
-    def get_conversations_by_type(self, conversation_type: ConversationType) -> List[Conversation]:
+    def get_conversations_by_type(self, conversation_type: ConversationType) -> list[Conversation]:
         """Get conversations by type"""
         return [c for c in self.conversations if c.type == conversation_type]
 
-    def get_conversations_by_status(self, status: ConversationStatus) -> List[Conversation]:
+    def get_conversations_by_status(self, status: ConversationStatus) -> list[Conversation]:
         """Get conversations by status"""
         return [c for c in self.conversations if c.status == status]
 
-    def get_conversation_summary(self) -> Dict[str, Any]:
+    def get_conversation_summary(self) -> dict[str, Any]:
         """Get conversation summary"""
         try:
             total_conversations = len(self.conversations)

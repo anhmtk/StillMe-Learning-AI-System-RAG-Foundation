@@ -7,11 +7,9 @@ Purpose: Đảm bảo tất cả entrypoints đều tuân thủ INTERACTION_POLI
 Usage: Gọi load_interaction_policy() ở đầu mọi entrypoint
 """
 
-import json
 import logging
 import os
-from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import yaml
 
@@ -20,19 +18,19 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Global policy instance
-_policy: Optional[Dict[str, Any]] = None
+_policy: Optional[dict[str, Any]] = None
 _policy_loaded = False
 
-def load_interaction_policy(policy_path: Optional[str] = None) -> Dict[str, Any]:
+def load_interaction_policy(policy_path: Optional[str] = None) -> dict[str, Any]:
     """
     Load Interaction Policy từ YAML file
-    
+
     Args:
         policy_path: Đường dẫn đến policy file (mặc định: policies/INTERACTION_POLICY.yaml)
-    
+
     Returns:
         Dict[str, Any]: InteractionPolicy object
-    
+
     Raises:
         FileNotFoundError: Nếu không tìm thấy policy file
         yaml.YAMLError: Nếu không parse được YAML
@@ -75,13 +73,13 @@ def load_interaction_policy(policy_path: Optional[str] = None) -> Dict[str, Any]
         logger.error(f"❌ {error_message}")
         raise ValueError(error_message)
 
-def _validate_policy(policy: Dict[str, Any]) -> None:
+def _validate_policy(policy: dict[str, Any]) -> None:
     """
     Validate policy structure
-    
+
     Args:
         policy: Policy object to validate
-    
+
     Raises:
         ValueError: Nếu policy không hợp lệ
     """
@@ -108,13 +106,13 @@ def _validate_policy(policy: Dict[str, Any]) -> None:
         if output not in policy['skip']['outputs']:
             raise ValueError(f"Missing required skip output: {output}")
 
-def get_interaction_policy() -> Dict[str, Any]:
+def get_interaction_policy() -> dict[str, Any]:
     """
     Get cached policy (must be loaded first)
-    
+
     Returns:
         Dict[str, Any]: InteractionPolicy object
-    
+
     Raises:
         ValueError: Nếu policy chưa được load
     """
@@ -125,7 +123,7 @@ def get_interaction_policy() -> Dict[str, Any]:
 def is_policy_loaded() -> bool:
     """
     Check if policy is loaded
-    
+
     Returns:
         bool: True nếu policy đã được load
     """
@@ -139,13 +137,13 @@ def reset_policy_cache() -> None:
     _policy = None
     _policy_loaded = False
 
-def get_skip_button_config(language: str = 'en') -> Dict[str, Any]:
+def get_skip_button_config(language: str = 'en') -> dict[str, Any]:
     """
     Get skip button configuration
-    
+
     Args:
         language: Language code ('vi' or 'en')
-    
+
     Returns:
         Dict[str, Any]: Skip button config
     """
@@ -160,13 +158,13 @@ def get_skip_button_config(language: str = 'en') -> Dict[str, Any]:
         'cancel_on_skip': policy['skip']['cancel_on_skip']
     }
 
-def get_cancel_button_config(language: str = 'en') -> Dict[str, Any]:
+def get_cancel_button_config(language: str = 'en') -> dict[str, Any]:
     """
     Get cancel button configuration
-    
+
     Args:
         language: Language code ('vi' or 'en')
-    
+
     Returns:
         Dict[str, Any]: Cancel button config
     """
@@ -185,11 +183,11 @@ def get_cancel_button_config(language: str = 'en') -> Dict[str, Any]:
 def get_skip_prompt(state: str, language: str = 'en') -> str:
     """
     Get prompt for skip diagnosis result
-    
+
     Args:
         state: Diagnosis state ('COMPLETED', 'RUNNING', 'STALLED', 'UNKNOWN')
         language: Language code ('vi' or 'en')
-    
+
     Returns:
         str: Prompt message
     """
@@ -197,40 +195,40 @@ def get_skip_prompt(state: str, language: str = 'en') -> str:
     key = f"{state.lower()}_{language}"
     return policy['skip']['prompts'].get(key, f"Unknown state: {state}")
 
-def get_log_tailing_config() -> Dict[str, Any]:
+def get_log_tailing_config() -> dict[str, Any]:
     """
     Get log tailing configuration
-    
+
     Returns:
         Dict[str, Any]: Log tailing config
     """
     policy = get_interaction_policy()
     return policy['skip']['log_tailing']
 
-def get_heartbeat_config() -> Dict[str, Any]:
+def get_heartbeat_config() -> dict[str, Any]:
     """
     Get heartbeat configuration
-    
+
     Returns:
         Dict[str, Any]: Heartbeat config
     """
     policy = get_interaction_policy()
     return policy['heartbeat']
 
-def get_pid_config() -> Dict[str, Any]:
+def get_pid_config() -> dict[str, Any]:
     """
     Get PID monitoring configuration
-    
+
     Returns:
         Dict[str, Any]: PID config
     """
     policy = get_interaction_policy()
     return policy['pid']
 
-def get_compliance_config() -> Dict[str, Any]:
+def get_compliance_config() -> dict[str, Any]:
     """
     Check compliance requirements
-    
+
     Returns:
         Dict[str, Any]: Compliance config
     """
@@ -240,7 +238,7 @@ def get_compliance_config() -> Dict[str, Any]:
 def ensure_policy_loaded() -> None:
     """
     Ensure policy is loaded, auto-load if not
-    
+
     Raises:
         ValueError: Nếu không thể load policy
     """

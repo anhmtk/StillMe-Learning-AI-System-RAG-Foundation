@@ -66,9 +66,9 @@ RELATED FILES / FILES LIÊN QUAN:
 
 import logging
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -105,7 +105,7 @@ class SecurityPolicy:
     description: str
     access_level: AccessLevel
     security_level: SecurityLevel
-    rules: List[str]
+    rules: list[str]
     enabled: bool = True
     created_at: str = None
 
@@ -123,7 +123,7 @@ class AccessRequest:
     action: str
     access_level: AccessLevel
     timestamp: str
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -144,7 +144,7 @@ class SecurityConfig:
 class SecurityGate:
     """
     Security Gate - Access control and authorization
-    
+
     This is a stub implementation to resolve F821 errors.
     TODO: Implement full security features.
     """
@@ -152,10 +152,10 @@ class SecurityGate:
     def __init__(self, config: Optional[SecurityConfig] = None):
         """Initialize SecurityGate"""
         self.config = config or SecurityConfig()
-        self.policies: Dict[str, SecurityPolicy] = {}
-        self.access_logs: List[AccessRequest] = []
-        self.blocked_users: Set[str] = set()
-        self.failed_attempts: Dict[str, int] = {}
+        self.policies: dict[str, SecurityPolicy] = {}
+        self.access_logs: list[AccessRequest] = []
+        self.blocked_users: set[str] = set()
+        self.failed_attempts: dict[str, int] = {}
         self.logger = logging.getLogger(__name__)
         self.logger.info("🔒 SecurityGate initialized")
 
@@ -166,13 +166,13 @@ class SecurityGate:
                     access_level: AccessLevel = None) -> bool:
         """
         Check if user has access to resource
-        
+
         Args:
             user_id: User identifier
             resource: Resource to access
             action: Action to perform
             access_level: Required access level
-            
+
         Returns:
             True if access granted, False otherwise
         """
@@ -272,10 +272,10 @@ class SecurityGate:
     def add_policy(self, policy: SecurityPolicy) -> bool:
         """
         Add security policy
-        
+
         Args:
             policy: Security policy to add
-            
+
         Returns:
             True if policy added successfully, False otherwise
         """
@@ -291,10 +291,10 @@ class SecurityGate:
     def remove_policy(self, policy_id: str) -> bool:
         """
         Remove security policy
-        
+
         Args:
             policy_id: Policy ID to remove
-            
+
         Returns:
             True if policy removed successfully, False otherwise
         """
@@ -313,14 +313,14 @@ class SecurityGate:
 
     def get_access_logs(self,
                        user_id: Optional[str] = None,
-                       limit: int = 100) -> List[AccessRequest]:
+                       limit: int = 100) -> list[AccessRequest]:
         """
         Get access logs with optional filtering
-        
+
         Args:
             user_id: Filter by user ID
             limit: Maximum number of logs to return
-            
+
         Returns:
             List of access requests
         """
@@ -336,10 +336,10 @@ class SecurityGate:
             self.logger.error(f"❌ Error getting access logs: {e}")
             return []
 
-    def get_security_status(self) -> Dict[str, Any]:
+    def get_security_status(self) -> dict[str, Any]:
         """
         Get security gate status
-        
+
         Returns:
             Security status dictionary
         """
@@ -362,10 +362,10 @@ class SecurityGate:
     def unblock_user(self, user_id: str) -> bool:
         """
         Unblock user
-        
+
         Args:
             user_id: User ID to unblock
-            
+
         Returns:
             True if user unblocked successfully, False otherwise
         """
@@ -386,10 +386,10 @@ class SecurityGate:
     def update_config(self, new_config: SecurityConfig) -> bool:
         """
         Update security gate configuration
-        
+
         Args:
             new_config: New configuration
-            
+
         Returns:
             True if update successful, False otherwise
         """

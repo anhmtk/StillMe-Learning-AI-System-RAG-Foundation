@@ -31,7 +31,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -43,12 +43,12 @@ class DashboardMetrics:
     """Dashboard metrics summary"""
 
     timestamp: datetime
-    system_health: Dict[str, Any]
-    performance_metrics: Dict[str, Any]
-    value_metrics: Dict[str, Any]
-    usage_statistics: Dict[str, Any]
-    alerts: List[Dict[str, Any]]
-    recommendations: List[str]
+    system_health: dict[str, Any]
+    performance_metrics: dict[str, Any]
+    value_metrics: dict[str, Any]
+    usage_statistics: dict[str, Any]
+    alerts: list[dict[str, Any]]
+    recommendations: list[str]
 
 
 @dataclass
@@ -72,11 +72,11 @@ class VisualizationData:
 
     chart_type: str
     title: str
-    data: List[Dict[str, Any]]
+    data: list[dict[str, Any]]
     x_axis: str
     y_axis: str
     time_range: str
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 class CoreDashboard:
@@ -88,7 +88,7 @@ class CoreDashboard:
         self,
         metrics_db_path: str,
         validation_db_path: str,
-        config: Optional[Dict[str, Any]] = None,
+        config: Optional[dict[str, Any]] = None,
     ):
         self.metrics_db_path = Path(metrics_db_path)
         self.validation_db_path = Path(validation_db_path)
@@ -116,7 +116,7 @@ class CoreDashboard:
 
         logger.info("✅ CoreDashboard initialized với enterprise-grade configuration")
 
-    def _get_default_config(self) -> Dict[str, Any]:
+    def _get_default_config(self) -> dict[str, Any]:
         """Default configuration với performance focus"""
         return {
             "update_interval_seconds": 30,
@@ -131,7 +131,7 @@ class CoreDashboard:
             "data_retention_hours": 24,
         }
 
-    def _load_alert_thresholds(self) -> Dict[str, Any]:
+    def _load_alert_thresholds(self) -> dict[str, Any]:
         """Load alert thresholds"""
         return {
             "performance": {
@@ -251,7 +251,7 @@ class CoreDashboard:
         except Exception as e:
             logger.error(f"❌ Dashboard metrics update failed: {e}")
 
-    async def _get_system_health(self) -> Dict[str, Any]:
+    async def _get_system_health(self) -> dict[str, Any]:
         """Get system health metrics"""
         try:
             with sqlite3.connect(self.metrics_db_path) as conn:
@@ -260,7 +260,7 @@ class CoreDashboard:
 
                 cursor = conn.execute(
                     """
-                    SELECT 
+                    SELECT
                         COUNT(*) as total_events,
                         AVG(CASE WHEN success = 1 THEN 1.0 ELSE 0.0 END) as success_rate,
                         AVG(duration_ms) as avg_response_time,
@@ -307,7 +307,7 @@ class CoreDashboard:
                 "last_updated": datetime.now().isoformat(),
             }
 
-    async def _get_performance_metrics(self) -> Dict[str, Any]:
+    async def _get_performance_metrics(self) -> dict[str, Any]:
         """Get performance metrics"""
         try:
             with sqlite3.connect(self.metrics_db_path) as conn:
@@ -316,7 +316,7 @@ class CoreDashboard:
 
                 cursor = conn.execute(
                     """
-                    SELECT 
+                    SELECT
                         module_name,
                         AVG(duration_ms) as avg_duration,
                         COUNT(*) as event_count,
@@ -367,7 +367,7 @@ class CoreDashboard:
             logger.error(f"❌ Error getting performance metrics: {e}")
             return {"error": str(e), "last_updated": datetime.now().isoformat()}
 
-    async def _get_value_metrics(self) -> Dict[str, Any]:
+    async def _get_value_metrics(self) -> dict[str, Any]:
         """Get value metrics"""
         try:
             with sqlite3.connect(self.metrics_db_path) as conn:
@@ -377,7 +377,7 @@ class CoreDashboard:
                 # Calculate time saved
                 cursor = conn.execute(
                     """
-                    SELECT 
+                    SELECT
                         SUM(duration_ms) / 1000.0 / 3600.0 * 0.5 as time_saved_hours
                     FROM usage_events
                     WHERE timestamp >= ? AND success = 1
@@ -422,7 +422,7 @@ class CoreDashboard:
             logger.error(f"❌ Error getting value metrics: {e}")
             return {"error": str(e), "last_updated": datetime.now().isoformat()}
 
-    async def _get_usage_statistics(self) -> Dict[str, Any]:
+    async def _get_usage_statistics(self) -> dict[str, Any]:
         """Get usage statistics"""
         try:
             with sqlite3.connect(self.metrics_db_path) as conn:
@@ -431,7 +431,7 @@ class CoreDashboard:
 
                 cursor = conn.execute(
                     """
-                    SELECT 
+                    SELECT
                         module_name,
                         COUNT(*) as usage_count,
                         COUNT(DISTINCT session_id) as unique_sessions
@@ -456,7 +456,7 @@ class CoreDashboard:
                 # Get usage by feature
                 cursor = conn.execute(
                     """
-                    SELECT 
+                    SELECT
                         feature_name,
                         COUNT(*) as usage_count
                     FROM usage_events
@@ -477,7 +477,7 @@ class CoreDashboard:
                 # Get hourly usage pattern
                 cursor = conn.execute(
                     """
-                    SELECT 
+                    SELECT
                         strftime('%H', timestamp) as hour,
                         COUNT(*) as usage_count
                     FROM usage_events
@@ -511,11 +511,11 @@ class CoreDashboard:
 
     async def _generate_recommendations(
         self,
-        system_health: Dict[str, Any],
-        performance_metrics: Dict[str, Any],
-        value_metrics: Dict[str, Any],
-        usage_statistics: Dict[str, Any],
-    ) -> List[str]:
+        system_health: dict[str, Any],
+        performance_metrics: dict[str, Any],
+        value_metrics: dict[str, Any],
+        usage_statistics: dict[str, Any],
+    ) -> list[str]:
         """Generate recommendations based on metrics"""
         recommendations = []
 
@@ -704,7 +704,7 @@ class CoreDashboard:
         except Exception as e:
             logger.error(f"❌ Alert creation failed: {e}")
 
-    def get_dashboard_data(self, time_range_hours: int = 1) -> Dict[str, Any]:
+    def get_dashboard_data(self, time_range_hours: int = 1) -> dict[str, Any]:
         """Get dashboard data for display"""
         try:
             with self._lock:
@@ -792,7 +792,7 @@ class CoreDashboard:
 
                 cursor = conn.execute(
                     """
-                    SELECT 
+                    SELECT
                         strftime('%Y-%m-%d %H:00:00', timestamp) as hour,
                         COUNT(*) as usage_count
                     FROM usage_events
@@ -837,7 +837,7 @@ class CoreDashboard:
 
                 cursor = conn.execute(
                     """
-                    SELECT 
+                    SELECT
                         module_name,
                         AVG(duration_ms) as avg_duration,
                         COUNT(*) as event_count
@@ -889,7 +889,7 @@ class CoreDashboard:
 
                 cursor = conn.execute(
                     """
-                    SELECT 
+                    SELECT
                         strftime('%Y-%m-%d %H:00:00', timestamp) as hour,
                         SUM(duration_ms) / 1000.0 / 3600.0 * 0.5 as time_saved_hours
                     FROM usage_events
@@ -968,7 +968,7 @@ class CoreDashboard:
             logger.error(f"❌ Error resolving alert: {e}")
             return False
 
-    def get_dashboard_summary(self) -> Dict[str, Any]:
+    def get_dashboard_summary(self) -> dict[str, Any]:
         """Get dashboard summary"""
         try:
             with self._lock:
@@ -1006,7 +1006,7 @@ class CoreDashboard:
 def create_dashboard(
     metrics_db_path: str,
     validation_db_path: str,
-    config: Optional[Dict[str, Any]] = None,
+    config: Optional[dict[str, Any]] = None,
 ) -> CoreDashboard:
     """Factory function để create dashboard"""
     return CoreDashboard(metrics_db_path, validation_db_path, config)

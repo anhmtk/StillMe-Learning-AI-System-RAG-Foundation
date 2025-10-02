@@ -25,7 +25,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -59,20 +59,20 @@ class PrivacyConfig:
     enable_audit_log: bool = True
     redaction_method: str = "hash"  # hash, mask, remove
     audit_log_path: str = "logs/privacy_audit.log"
-    allowed_domains: List[str] = field(default_factory=list)
-    blocked_patterns: List[str] = field(default_factory=list)
+    allowed_domains: list[str] = field(default_factory=list)
+    blocked_patterns: list[str] = field(default_factory=list)
 
 class PIIRedactor:
     """
     PII detection và redaction system
-    
+
     Tự động phát hiện và xử lý PII trong metrics data
     để đảm bảo privacy compliance.
     """
 
     def __init__(self, config: Optional[PrivacyConfig] = None):
         self.config = config or PrivacyConfig()
-        self.patterns: List[PIIPattern] = []
+        self.patterns: list[PIIPattern] = []
         self._load_default_patterns()
         self._setup_audit_logging()
 
@@ -162,7 +162,7 @@ class PIIRedactor:
             audit_dir = Path(self.config.audit_log_path).parent
             audit_dir.mkdir(parents=True, exist_ok=True)
 
-    def detect_pii(self, text: str) -> List[Dict[str, Any]]:
+    def detect_pii(self, text: str) -> list[dict[str, Any]]:
         """Detect PII in text"""
         detected = []
 
@@ -202,7 +202,7 @@ class PIIRedactor:
 
         return redacted_text
 
-    def redact_dict(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def redact_dict(self, data: dict[str, Any]) -> dict[str, Any]:
         """Redact PII from dictionary"""
         if not self.config.enable_redaction:
             return data
@@ -226,7 +226,7 @@ class PIIRedactor:
 
         return redacted_data
 
-    def anonymize_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def anonymize_data(self, data: dict[str, Any]) -> dict[str, Any]:
         """Anonymize data by hashing sensitive fields"""
         if not self.config.enable_anonymization:
             return data
@@ -258,7 +258,7 @@ class PIIRedactor:
         """Hash a value for anonymization"""
         return hashlib.sha256(value.encode()).hexdigest()[:16]
 
-    def _log_redaction(self, redactions: List[Dict[str, Any]], original_text: str):
+    def _log_redaction(self, redactions: list[dict[str, Any]], original_text: str):
         """Log redaction activity"""
         if not self.config.enable_audit_log:
             return
@@ -276,7 +276,7 @@ class PIIRedactor:
         except Exception as e:
             logger.error(f"Failed to write audit log: {e}")
 
-    def get_redaction_stats(self) -> Dict[str, Any]:
+    def get_redaction_stats(self) -> dict[str, Any]:
         """Get redaction statistics"""
         if not Path(self.config.audit_log_path).exists():
             return {'total_redactions': 0, 'by_type': {}}
@@ -303,7 +303,7 @@ class PIIRedactor:
 class PrivacyManager:
     """
     Privacy management system
-    
+
     Orchestrates PII redaction, anonymization, và compliance
     cho toàn bộ metrics collection system.
     """
@@ -314,7 +314,7 @@ class PrivacyManager:
 
         logger.info("PrivacyManager initialized")
 
-    def process_metrics_data(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def process_metrics_data(self, data: dict[str, Any]) -> dict[str, Any]:
         """Process metrics data for privacy compliance"""
         # Redact PII
         redacted_data = self.redactor.redact_dict(data)
@@ -324,7 +324,7 @@ class PrivacyManager:
 
         return anonymized_data
 
-    def process_event_data(self, event_data: Dict[str, Any]) -> Dict[str, Any]:
+    def process_event_data(self, event_data: dict[str, Any]) -> dict[str, Any]:
         """Process event data for privacy compliance"""
         # Redact PII in event data
         redacted_data = self.redactor.redact_dict(event_data)
@@ -334,7 +334,7 @@ class PrivacyManager:
 
         return anonymized_data
 
-    def validate_privacy_compliance(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def validate_privacy_compliance(self, data: dict[str, Any]) -> dict[str, Any]:
         """Validate privacy compliance of data"""
         compliance_report = {
             'compliant': True,
@@ -363,7 +363,7 @@ class PrivacyManager:
 
         return compliance_report
 
-    def get_privacy_summary(self) -> Dict[str, Any]:
+    def get_privacy_summary(self) -> dict[str, Any]:
         """Get privacy system summary"""
         return {
             'config': {

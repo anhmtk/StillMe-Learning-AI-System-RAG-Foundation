@@ -6,7 +6,6 @@ Cho phép bạn gửi kiến thức mới cho StillMe học
 
 import json
 import logging
-import os
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -15,8 +14,9 @@ from pathlib import Path
 project_root = Path(__file__).resolve().parents[1]
 sys.path.append(str(project_root))
 
-from stillme_core.alerting.alerting_system import AlertingSystem
-from stillme_core.learning.proposals_manager import ProposalsManager
+# Import after path setup
+from stillme_core.alerting.alerting_system import AlertingSystem  # noqa: E402
+from stillme_core.learning.proposals_manager import ProposalsManager  # noqa: E402
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

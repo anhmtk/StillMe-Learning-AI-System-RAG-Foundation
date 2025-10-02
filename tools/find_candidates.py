@@ -6,13 +6,10 @@ Chỉ đọc từ primary inventory, không đề xuất xóa excluded files
 """
 
 import csv
-import hashlib
-import json
-import os
 from collections import defaultdict
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Set, Tuple
+from typing import Any
 
 
 class DeletionCandidatesFinder:
@@ -47,7 +44,7 @@ class DeletionCandidatesFinder:
         self.file_hashes = defaultdict(list)
         self.duplicate_groups = []
 
-    def load_primary_inventory(self) -> List[Dict[str, Any]]:
+    def load_primary_inventory(self) -> list[dict[str, Any]]:
         """Load primary inventory từ CSV"""
         inventory_path = self.reports_dir / "primary_inventory.csv"
 
@@ -71,7 +68,7 @@ class DeletionCandidatesFinder:
 
         return inventory
 
-    def load_excluded_inventory(self) -> List[Dict[str, Any]]:
+    def load_excluded_inventory(self) -> list[dict[str, Any]]:
         """Load excluded inventory từ CSV (optional reference)"""
         inventory_path = self.reports_dir / "excluded_inventory.csv"
 
@@ -101,7 +98,7 @@ class DeletionCandidatesFinder:
                 return True
         return False
 
-    def classify_junk_candidates(self) -> List[Dict[str, Any]]:
+    def classify_junk_candidates(self) -> list[dict[str, Any]]:
         """Phân loại file rác theo patterns (chỉ từ primary inventory)"""
         candidates = []
 
@@ -153,7 +150,7 @@ class DeletionCandidatesFinder:
 
         return candidates
 
-    def find_duplicates(self) -> List[Dict[str, Any]]:
+    def find_duplicates(self) -> list[dict[str, Any]]:
         """Tìm file trùng lặp dựa trên hash (chỉ từ primary inventory)"""
         # Group by hash
         hash_groups = defaultdict(list)
@@ -171,7 +168,7 @@ class DeletionCandidatesFinder:
                 items.sort(key=lambda x: x["ref_count"], reverse=True)
 
                 # Keep the first one, mark others for deletion
-                for i, item in enumerate(items[1:], 1):
+                for _i, item in enumerate(items[1:], 1):
                     duplicate_candidates.append({
                         "path": item["path"],
                         "category": "duplicate",
@@ -187,7 +184,7 @@ class DeletionCandidatesFinder:
 
         return duplicate_candidates
 
-    def find_unreferenced_files(self) -> List[Dict[str, Any]]:
+    def find_unreferenced_files(self) -> list[dict[str, Any]]:
         """Tìm file không được reference (chỉ từ primary inventory)"""
         candidates = []
 
@@ -215,7 +212,7 @@ class DeletionCandidatesFinder:
 
         return candidates
 
-    def find_large_files(self) -> List[Dict[str, Any]]:
+    def find_large_files(self) -> list[dict[str, Any]]:
         """Tìm file lớn có thể cần xử lý (chỉ từ primary inventory)"""
         candidates = []
 
@@ -240,10 +237,10 @@ class DeletionCandidatesFinder:
 
         return candidates
 
-    def find_old_files(self) -> List[Dict[str, Any]]:
+    def find_old_files(self) -> list[dict[str, Any]]:
         """Tìm file cũ không được sử dụng (chỉ từ primary inventory)"""
         candidates = []
-        cutoff_date = datetime.now() - timedelta(days=90)  # 90 days ago
+        datetime.now() - timedelta(days=90)  # 90 days ago
 
         for item in self.primary_inventory:
             if (self.is_protected(item["path"]) or
@@ -273,7 +270,7 @@ class DeletionCandidatesFinder:
 
         return candidates
 
-    def get_risk_level(self, category: str, item: Dict[str, Any]) -> str:
+    def get_risk_level(self, category: str, item: dict[str, Any]) -> str:
         """Xác định mức độ rủi ro"""
         if item["ref_count"] > 0:
             return "HIGH"
@@ -290,7 +287,7 @@ class DeletionCandidatesFinder:
 
         return risk_map.get(category, "MEDIUM")
 
-    def get_recommendation(self, category: str, item: Dict[str, Any]) -> str:
+    def get_recommendation(self, category: str, item: dict[str, Any]) -> str:
         """Đưa ra khuyến nghị"""
         if item["ref_count"] > 0:
             return "REVIEW"
@@ -300,7 +297,7 @@ class DeletionCandidatesFinder:
 
         return "REVIEW"
 
-    def generate_report(self, all_candidates: List[Dict[str, Any]]) -> None:
+    def generate_report(self, all_candidates: list[dict[str, Any]]) -> None:
         """Tạo báo cáo deletion candidates"""
         report_path = self.reports_dir / "deletion_candidates.md"
 
@@ -363,7 +360,7 @@ class DeletionCandidatesFinder:
 
         print(f"📄 Deletion candidates report: {report_path}")
 
-    def generate_csv_report(self, all_candidates: List[Dict[str, Any]]) -> None:
+    def generate_csv_report(self, all_candidates: list[dict[str, Any]]) -> None:
         """Tạo CSV report cho quarantine tool"""
         csv_path = self.reports_dir / "deletion_candidates.csv"
 

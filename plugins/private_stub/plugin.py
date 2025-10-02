@@ -1,19 +1,18 @@
-from stillme_core.router_iface import Router
 
 
 class StubRouter:  # deliberately not inheriting to avoid hard dep
     """Public stub implementation for OSS mode.
-    
+
     Provides basic model selection logic without requiring private code.
     This ensures the framework always runs in open-source mode.
     """
 
     def choose_model(self, prompt: str) -> str:
         """Choose model based on simple heuristics.
-        
+
         Args:
             prompt: The input prompt to analyze
-            
+
         Returns:
             Model identifier string
         """

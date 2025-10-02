@@ -545,7 +545,7 @@ class TestLearningAlertManager:
         assert 'adult' in milestones
 
         # Check each stage has milestones
-        for stage, stage_milestones in milestones.items():
+        for _stage, stage_milestones in milestones.items():
             assert len(stage_milestones) > 0
 
     @pytest.mark.asyncio
@@ -589,7 +589,7 @@ class TestLearningAlertManager:
     async def test_check_evolution_milestones(self, learning_alert_manager, sample_metrics):
         """Test evolution milestone checking"""
         with patch.object(learning_alert_manager.alert_manager, 'send_alert', new_callable=AsyncMock, return_value="alert_001") as mock_send:
-            alerts_sent = await learning_alert_manager.check_evolution_milestones(sample_metrics)
+            await learning_alert_manager.check_evolution_milestones(sample_metrics)
 
             # Should check for milestones but may not send alerts if none achieved
             mock_send.assert_called()

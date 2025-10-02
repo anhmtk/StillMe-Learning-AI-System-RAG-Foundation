@@ -3,14 +3,13 @@ Learning Dashboard - Real-time monitoring and visualization
 Provides comprehensive monitoring of self-learning processes, metrics, and system health.
 """
 
-import asyncio
 import json
 import logging
 import statistics
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -20,12 +19,12 @@ class DashboardMetrics:
     timestamp: str
     session_id: str
     success_rate: float
-    reward_curve: List[float]
+    reward_curve: list[float]
     rollback_count: int
     ethics_violations: int
-    performance_metrics: Dict[str, float]
-    learning_progress: Dict[str, Any]
-    system_health: Dict[str, Any]
+    performance_metrics: dict[str, float]
+    learning_progress: dict[str, Any]
+    system_health: dict[str, Any]
 
 @dataclass
 class LearningSession:
@@ -53,9 +52,9 @@ class LearningDashboard:
         self.logs_dir.mkdir(exist_ok=True)
 
         # Dashboard state
-        self.sessions: List[LearningSession] = []
-        self.metrics_history: List[DashboardMetrics] = []
-        self.alerts: List[Dict[str, Any]] = []
+        self.sessions: list[LearningSession] = []
+        self.metrics_history: list[DashboardMetrics] = []
+        self.alerts: list[dict[str, Any]] = []
 
         logger.info("Learning Dashboard initialized")
 
@@ -63,15 +62,15 @@ class LearningDashboard:
         self,
         session_id: str,
         success_rate: float,
-        reward_curve: List[float],
+        reward_curve: list[float],
         rollback_count: int,
         ethics_violations: int,
-        performance_metrics: Dict[str, float],
-        learning_progress: Dict[str, Any]
+        performance_metrics: dict[str, float],
+        learning_progress: dict[str, Any]
     ) -> DashboardMetrics:
         """
         Update dashboard with new metrics
-        
+
         Args:
             session_id: Current session ID
             success_rate: Success rate for the session
@@ -80,7 +79,7 @@ class LearningDashboard:
             ethics_violations: Number of ethics violations
             performance_metrics: Performance metrics
             learning_progress: Learning progress data
-            
+
         Returns:
             Updated dashboard metrics
         """
@@ -120,8 +119,8 @@ class LearningDashboard:
         success_rate: float,
         rollback_count: int,
         ethics_violations: int,
-        performance_metrics: Dict[str, float]
-    ) -> Dict[str, Any]:
+        performance_metrics: dict[str, float]
+    ) -> dict[str, Any]:
         """Calculate overall system health"""
         health_score = 100.0
 
@@ -265,7 +264,7 @@ class LearningDashboard:
             logger.error(f"Failed to generate dashboard HTML: {e}")
             raise
 
-    async def _calculate_dashboard_statistics(self) -> Dict[str, Any]:
+    async def _calculate_dashboard_statistics(self) -> dict[str, Any]:
         """Calculate comprehensive dashboard statistics"""
         if not self.metrics_history:
             return {
@@ -322,7 +321,7 @@ class LearningDashboard:
             "last_updated": datetime.now().isoformat()
         }
 
-    def _calculate_trend(self, values: List[float]) -> str:
+    def _calculate_trend(self, values: list[float]) -> str:
         """Calculate trend direction"""
         if len(values) < 2:
             return "stable"
@@ -338,7 +337,7 @@ class LearningDashboard:
         else:
             return "stable"
 
-    def _generate_html_content(self, stats: Dict[str, Any]) -> str:
+    def _generate_html_content(self, stats: dict[str, Any]) -> str:
         """Generate HTML dashboard content"""
         return f"""
 <!DOCTYPE html>
@@ -426,7 +425,7 @@ class LearningDashboard:
             <p>Real-time monitoring of self-learning processes</p>
             <p>Last updated: {stats['last_updated']}</p>
         </div>
-        
+
         <div class="metrics-grid">
             <div class="metric-card">
                 <div class="metric-value">{stats['total_sessions']}</div>
@@ -453,12 +452,12 @@ class LearningDashboard:
                 <div class="metric-label">Health Score</div>
             </div>
         </div>
-        
+
         <div class="alerts">
             <h3>Recent Alerts</h3>
             {self._generate_alerts_html()}
         </div>
-        
+
         <div class="footer">
             <p>StillMe AI Framework - Learning Dashboard v2.0</p>
             <p>Generated on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
@@ -488,7 +487,7 @@ class LearningDashboard:
 
         return alerts_html
 
-    def get_dashboard_data(self) -> Dict[str, Any]:
+    def get_dashboard_data(self) -> dict[str, Any]:
         """Get current dashboard data"""
         return {
             "sessions": [asdict(session) for session in self.sessions],

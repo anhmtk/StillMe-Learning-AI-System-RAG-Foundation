@@ -14,7 +14,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -47,7 +47,7 @@ class PredictionSignal:
     strength: float  # 0-100
     direction: TrendDirection
     confidence: float  # 0-1
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 @dataclass
@@ -60,9 +60,9 @@ class TrendPrediction:
     confidence_score: float  # 0-1
     direction: TrendDirection
     time_horizon: str  # "short" (1-3 months), "medium" (3-6 months), "long" (6+ months)
-    signals: List[PredictionSignal]
+    signals: list[PredictionSignal]
     reasoning: str
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 @dataclass
@@ -75,7 +75,7 @@ class BusinessRecommendation:
     expected_impact: str
     timeline: str
     confidence: float
-    supporting_data: List[str]
+    supporting_data: list[str]
 
 
 class PredictionEngine:
@@ -113,8 +113,8 @@ class PredictionEngine:
         self.logger.info("✅ PredictionEngine initialized")
 
     def analyze_trends(
-        self, market_data: List[Dict[str, Any]]
-    ) -> List[TrendPrediction]:
+        self, market_data: list[dict[str, Any]]
+    ) -> list[TrendPrediction]:
         """
         Phân tích dữ liệu thị trường và tạo dự báo
 
@@ -146,8 +146,8 @@ class PredictionEngine:
         return predictions
 
     def _group_trends_by_technology(
-        self, market_data: List[Dict[str, Any]]
-    ) -> Dict[str, List[Dict[str, Any]]]:
+        self, market_data: list[dict[str, Any]]
+    ) -> dict[str, list[dict[str, Any]]]:
         """Group trends by technology/tool name"""
         grouped = {}
 
@@ -222,7 +222,7 @@ class PredictionEngine:
         return "General Technology"
 
     def _analyze_technology_trends(
-        self, tech_name: str, trends: List[Dict[str, Any]]
+        self, tech_name: str, trends: list[dict[str, Any]]
     ) -> Optional[TrendPrediction]:
         """Analyze trends for a specific technology"""
         if not trends:
@@ -270,17 +270,17 @@ class PredictionEngine:
             reasoning=reasoning,
             metadata={
                 "signal_count": signal_count,
-                "sources": list(set(signal.source for signal in signals)),
+                "sources": list({signal.source for signal in signals}),
                 "analysis_timestamp": datetime.now().isoformat(),
             },
         )
 
     def _create_prediction_signal(
-        self, trend: Dict[str, Any]
+        self, trend: dict[str, Any]
     ) -> Optional[PredictionSignal]:
         """Create prediction signal from trend data"""
         source = trend.get("source", "")
-        title = trend.get("title", "")
+        trend.get("title", "")
         score = trend.get("score", 0)
         metadata = trend.get("metadata", {})
 
@@ -302,7 +302,7 @@ class PredictionEngine:
         )
 
     def _calculate_signal_strength(
-        self, source: str, score: float, metadata: Dict[str, Any]
+        self, source: str, score: float, metadata: dict[str, Any]
     ) -> float:
         """Calculate signal strength (0-100)"""
         base_score = min(score, 100)  # Cap at 100
@@ -349,7 +349,7 @@ class PredictionEngine:
         return min(base_score * multiplier, 100)
 
     def _calculate_signal_confidence(
-        self, source: str, metadata: Dict[str, Any]
+        self, source: str, metadata: dict[str, Any]
     ) -> float:
         """Calculate signal confidence (0-1)"""
         base_confidence = 0.7  # Default confidence
@@ -390,7 +390,7 @@ class PredictionEngine:
         return min(base_confidence, 1.0)
 
     def _determine_signal_direction(
-        self, source: str, score: float, metadata: Dict[str, Any]
+        self, source: str, score: float, metadata: dict[str, Any]
     ) -> TrendDirection:
         """Determine trend direction from signal"""
         # Simple rule-based direction determination
@@ -402,14 +402,14 @@ class PredictionEngine:
             return TrendDirection.DECLINING
 
     def _determine_trend_direction(
-        self, signals: List[PredictionSignal]
+        self, signals: list[PredictionSignal]
     ) -> TrendDirection:
         """Determine overall trend direction from multiple signals"""
         if not signals:
             return TrendDirection.UNKNOWN
 
         rising_count = sum(1 for s in signals if s.direction == TrendDirection.RISING)
-        stable_count = sum(1 for s in signals if s.direction == TrendDirection.STABLE)
+        sum(1 for s in signals if s.direction == TrendDirection.STABLE)
         declining_count = sum(
             1 for s in signals if s.direction == TrendDirection.DECLINING
         )
@@ -423,7 +423,7 @@ class PredictionEngine:
         else:
             return TrendDirection.STABLE
 
-    def _determine_time_horizon(self, signals: List[PredictionSignal]) -> str:
+    def _determine_time_horizon(self, signals: list[PredictionSignal]) -> str:
         """Determine prediction time horizon"""
         # Simple heuristic based on signal types
         github_signals = [s for s in signals if s.source == "GitHub"]
@@ -436,7 +436,7 @@ class PredictionEngine:
         else:
             return "short"  # 1-3 months
 
-    def _get_signal_type(self, source: str, metadata: Dict[str, Any]) -> str:
+    def _get_signal_type(self, source: str, metadata: dict[str, Any]) -> str:
         """Get signal type based on source and metadata"""
         if source == "GitHub":
             return "adoption_velocity"
@@ -479,7 +479,7 @@ class PredictionEngine:
     def _generate_reasoning(
         self,
         tech_name: str,
-        signals: List[PredictionSignal],
+        signals: list[PredictionSignal],
         potential_score: float,
         direction: TrendDirection,
     ) -> str:
@@ -527,8 +527,8 @@ class PredictionEngine:
         return f"{tech_name} is " + ", ".join(reasoning_parts) + "."
 
     def generate_business_recommendations(
-        self, predictions: List[TrendPrediction]
-    ) -> List[BusinessRecommendation]:
+        self, predictions: list[TrendPrediction]
+    ) -> list[BusinessRecommendation]:
         """
         Generate business recommendations based on predictions
 
@@ -556,7 +556,7 @@ class PredictionEngine:
 
     def _create_recommendations_for_trend(
         self, prediction: TrendPrediction
-    ) -> List[BusinessRecommendation]:
+    ) -> list[BusinessRecommendation]:
         """Create business recommendations for a specific trend"""
         recommendations = []
 

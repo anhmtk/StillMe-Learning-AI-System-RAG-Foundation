@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Optional
 
 import psutil
 
@@ -34,7 +34,7 @@ class HealthCheck:
     name: str
     status: HealthStatus
     message: str
-    details: Optional[Dict[str, Any]] = None
+    details: Optional[dict[str, Any]] = None
     response_time_ms: Optional[float] = None
     last_checked: Optional[str] = None
 
@@ -45,8 +45,8 @@ class SystemHealth:
 
     status: HealthStatus
     timestamp: str
-    checks: List[HealthCheck]
-    summary: Dict[str, Any]
+    checks: list[HealthCheck]
+    summary: dict[str, Any]
 
 
 class HealthMonitor:
@@ -60,7 +60,7 @@ class HealthMonitor:
         self._lock = threading.Lock()
 
         # Health check functions
-        self._health_checks: Dict[str, Callable[[], HealthCheck]] = {}
+        self._health_checks: dict[str, Callable[[], HealthCheck]] = {}
 
         # Initialize database
         self._init_database()
@@ -92,7 +92,7 @@ class HealthMonitor:
             # Create index for faster queries
             cursor.execute(
                 """
-                CREATE INDEX IF NOT EXISTS idx_health_checks_name_timestamp 
+                CREATE INDEX IF NOT EXISTS idx_health_checks_name_timestamp
                 ON health_checks(name, timestamp)
             """
             )
@@ -176,7 +176,7 @@ class HealthMonitor:
 
     def get_health_history(
         self, check_name: Optional[str] = None, hours: int = 24
-    ) -> List[HealthCheck]:
+    ) -> list[HealthCheck]:
         """Get health check history"""
         with self._lock:
             conn = sqlite3.connect(self.db_path)
@@ -211,7 +211,7 @@ class HealthMonitor:
 
             return checks
 
-    def get_health_summary(self, hours: int = 24) -> Dict[str, Any]:
+    def get_health_summary(self, hours: int = 24) -> dict[str, Any]:
         """Get health summary statistics"""
         history = self.get_health_history(hours=hours)
 
@@ -489,7 +489,7 @@ class HealthMonitor:
                 message=f"Failed to check log files: {e!s}",
             )
 
-    def _create_summary(self, checks: List[HealthCheck]) -> Dict[str, Any]:
+    def _create_summary(self, checks: list[HealthCheck]) -> dict[str, Any]:
         """Create summary from health checks"""
         total_checks = len(checks)
         healthy_checks = sum(1 for c in checks if c.status == HealthStatus.HEALTHY)

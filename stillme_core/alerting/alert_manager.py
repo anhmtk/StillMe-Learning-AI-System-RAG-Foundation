@@ -20,7 +20,6 @@ Version: 2.0.0
 Date: 2025-09-28
 """
 
-import asyncio
 import json
 import logging
 import os
@@ -28,12 +27,10 @@ import smtplib
 import time
 from collections import defaultdict, deque
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
-from email.mime.image import MIMEImage
+from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional
 
 import requests
 
@@ -61,7 +58,7 @@ class AlertChannel:
     priority_threshold: str = "medium"  # low, medium, high, critical
     rate_limit: int = 10  # max alerts per hour
     cooldown: int = 300  # seconds between same-type alerts
-    config: Dict[str, Any] = None
+    config: dict[str, Any] = None
 
 @dataclass
 class AlertTemplate:
@@ -71,7 +68,7 @@ class AlertTemplate:
     body_template: str
     emoji: str = "🔔"
     priority: str = "medium"
-    channels: List[str] = None
+    channels: list[str] = None
     rate_limit: int = 5  # max per hour
     cooldown: int = 600  # seconds
 
@@ -85,8 +82,8 @@ class Alert:
     title: str
     message: str
     component: str
-    context: Dict[str, Any] = None
-    channels: List[str] = None
+    context: dict[str, Any] = None
+    channels: list[str] = None
     acknowledged: bool = False
     resolved: bool = False
     escalation_level: int = 0
@@ -95,7 +92,7 @@ class Alert:
 class EmailNotifier:
     """Email notification handler"""
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.config = config
         self.logger = logging.getLogger(__name__)
         self.smtp_server = None
@@ -187,28 +184,28 @@ class EmailNotifier:
                     <h1>🧠 StillMe AI Alert</h1>
                     <p>System: {alert.component} | Severity: {alert.severity.upper()}</p>
                 </div>
-                
+
                 <div class="content">
                     <h2>{alert.title}</h2>
                     <p>{alert.message}</p>
-                    
+
                     <div class="alert-info">
                         <strong>Alert ID:</strong> {alert.alert_id}<br>
                         <strong>Time:</strong> {alert.timestamp.strftime('%Y-%m-%d %H:%M:%S')}<br>
                         <strong>Component:</strong> {alert.component}<br>
                         <strong>Type:</strong> {alert.alert_type}
                     </div>
-                    
+
                     {self._create_metrics_section(alert)}
-                    
+
                     {self._create_context_section(alert)}
-                    
+
                     <div style="text-align: center; margin: 20px 0;">
                         <a href="#" class="button">View Dashboard</a>
                         <a href="#" class="button">Acknowledge Alert</a>
                     </div>
                 </div>
-                
+
                 <div class="footer">
                     <p>StillMe AI Framework - Automated Learning System</p>
                     <p>This is an automated alert. Please do not reply to this email.</p>
@@ -278,7 +275,7 @@ This is an automated alert. Please do not reply to this email.
 class DesktopNotifier:
     """Desktop notification handler"""
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.config = config
         self.logger = logging.getLogger(__name__)
         self.enabled = PLYER_AVAILABLE and config.get('enabled', True)
@@ -316,7 +313,7 @@ class DesktopNotifier:
 class TelegramNotifier:
     """Telegram notification handler"""
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.config = config
         self.logger = logging.getLogger(__name__)
         self.bot_token = None
@@ -396,7 +393,7 @@ class TelegramNotifier:
 class SMSNotifier:
     """SMS notification handler"""
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.config = config
         self.logger = logging.getLogger(__name__)
         self.client = None
@@ -449,7 +446,7 @@ class SMSNotifier:
 class WebhookNotifier:
     """Webhook notification handler"""
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.config = config
         self.logger = logging.getLogger(__name__)
         self.webhook_url = None
@@ -522,7 +519,7 @@ class AlertManager:
     Advanced alert manager for AGI learning automation
     """
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] = None):
         self.config = config or {}
         self.logger = logging.getLogger(__name__)
 
@@ -555,7 +552,7 @@ class AlertManager:
             'last_alert_time': None
         }
 
-    def _load_alert_templates(self) -> Dict[str, AlertTemplate]:
+    def _load_alert_templates(self) -> dict[str, AlertTemplate]:
         """Load alert templates"""
         return {
             'resource_high': AlertTemplate(
@@ -611,8 +608,8 @@ class AlertManager:
         }
 
     async def send_alert(self, alert_type: str, severity: str, title: str, message: str,
-                        component: str, context: Dict[str, Any] = None,
-                        channels: List[str] = None) -> str:
+                        component: str, context: dict[str, Any] = None,
+                        channels: list[str] = None) -> str:
         """Send alert through configured channels"""
 
         # Generate alert ID
@@ -714,7 +711,7 @@ class AlertManager:
         self.cooldowns[cooldown_key] = now
         return True
 
-    def _update_statistics(self, alert: Alert, successful_channels: List[str], failed_channels: List[str]):
+    def _update_statistics(self, alert: Alert, successful_channels: list[str], failed_channels: list[str]):
         """Update alert statistics"""
         self.stats['total_alerts'] += 1
         self.stats['alerts_by_severity'][alert.severity] += 1
@@ -723,7 +720,7 @@ class AlertManager:
         for channel in successful_channels:
             self.stats['alerts_by_channel'][channel] += 1
 
-    def get_alert_statistics(self) -> Dict[str, Any]:
+    def get_alert_statistics(self) -> dict[str, Any]:
         """Get alert statistics"""
         return {
             'statistics': dict(self.stats),
@@ -767,7 +764,7 @@ class AlertManager:
 # Global alert manager instance
 _alert_manager_instance: Optional[AlertManager] = None
 
-def get_alert_manager(config: Dict[str, Any] = None) -> AlertManager:
+def get_alert_manager(config: dict[str, Any] = None) -> AlertManager:
     """Get global alert manager instance"""
     global _alert_manager_instance
     if _alert_manager_instance is None:
@@ -775,8 +772,8 @@ def get_alert_manager(config: Dict[str, Any] = None) -> AlertManager:
     return _alert_manager_instance
 
 async def send_alert(alert_type: str, severity: str, title: str, message: str,
-                    component: str, context: Dict[str, Any] = None,
-                    channels: List[str] = None) -> str:
+                    component: str, context: dict[str, Any] = None,
+                    channels: list[str] = None) -> str:
     """Convenience function to send alert"""
     manager = get_alert_manager()
     return await manager.send_alert(alert_type, severity, title, message, component, context, channels)

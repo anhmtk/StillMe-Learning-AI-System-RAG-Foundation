@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ class ExperienceQuery:
     start_date: Optional[datetime] = None
     end_date: Optional[datetime] = None
     limit: int = 10
-    metadata_filter: Optional[Dict[str, Any]] = None
+    metadata_filter: Optional[dict[str, Any]] = None
 
 @dataclass
 class Experience:
@@ -43,9 +43,9 @@ class Experience:
     title: str
     description: str
     outcome: str
-    lessons_learned: List[str]
+    lessons_learned: list[str]
     timestamp: datetime
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -58,7 +58,7 @@ class ExperienceMemory:
 
     def __init__(self):
         self.logger = logger
-        self.experiences: List[Experience] = []
+        self.experiences: list[Experience] = []
         self.logger.info("✅ ExperienceMemory initialized")
 
     def add_experience(self,
@@ -67,8 +67,8 @@ class ExperienceMemory:
                       title: str,
                       description: str,
                       outcome: str,
-                      lessons_learned: List[str] = None,
-                      metadata: Dict[str, Any] = None) -> Experience:
+                      lessons_learned: list[str] = None,
+                      metadata: dict[str, Any] = None) -> Experience:
         """Add a new experience"""
         try:
             experience_id = f"exp_{len(self.experiences) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -93,7 +93,7 @@ class ExperienceMemory:
             self.logger.error(f"❌ Failed to add experience: {e}")
             raise
 
-    def query_experiences(self, query: ExperienceQuery) -> List[Experience]:
+    def query_experiences(self, query: ExperienceQuery) -> list[Experience]:
         """Query experiences based on criteria"""
         try:
             results = self.experiences
@@ -154,7 +154,7 @@ class ExperienceMemory:
             self.logger.error(f"❌ Failed to get experience by ID: {e}")
             return None
 
-    def get_experience_summary(self) -> Dict[str, Any]:
+    def get_experience_summary(self) -> dict[str, Any]:
         """Get experience memory summary"""
         try:
             total_experiences = len(self.experiences)

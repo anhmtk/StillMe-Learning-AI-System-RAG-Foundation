@@ -18,16 +18,12 @@ Version: 2.0.0
 """
 
 import asyncio
-import json
 import logging
-import os
-import statistics
-import time
-from collections import defaultdict, deque
-from dataclasses import asdict, dataclass
+from collections import deque
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 # Import existing modules
 try:
@@ -77,9 +73,9 @@ class SecurityExercise:
     scheduled_time: datetime
     duration_minutes: int
     status: ExerciseStatus
-    red_team_config: Dict[str, Any]
-    blue_team_config: Dict[str, Any]
-    sandbox_config: Dict[str, Any]
+    red_team_config: dict[str, Any]
+    blue_team_config: dict[str, Any]
+    sandbox_config: dict[str, Any]
     created_at: datetime
     updated_at: datetime
 
@@ -91,17 +87,17 @@ class ExerciseResult:
     start_time: datetime
     end_time: datetime
     status: ExerciseStatus
-    red_team_results: List[Dict[str, Any]]
-    blue_team_results: List[Dict[str, Any]]
+    red_team_results: list[dict[str, Any]]
+    blue_team_results: list[dict[str, Any]]
     overall_score: float
-    recommendations: List[str]
-    metadata: Dict[str, Any]
+    recommendations: list[str]
+    metadata: dict[str, Any]
 
 
 class SecurityOrchestrator:
     """Security Orchestrator - Điều phối Red/Blue Team"""
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] = None):
         self.config = config or {}
         self.logger = get_logger(__name__)
 
@@ -279,7 +275,7 @@ class SecurityOrchestrator:
             self.logger.error(f"Error creating sandbox for exercise {exercise.id}: {e}")
             raise
 
-    async def _execute_red_team_activities(self, exercise: SecurityExercise, sandbox_id: str) -> List[Dict[str, Any]]:
+    async def _execute_red_team_activities(self, exercise: SecurityExercise, sandbox_id: str) -> list[dict[str, Any]]:
         """Thực hiện hoạt động Red Team"""
         try:
             if not self.red_team_engine:
@@ -312,7 +308,7 @@ class SecurityOrchestrator:
             self.logger.error(f"Error executing Red Team activities: {e}")
             return []
 
-    async def _execute_blue_team_activities(self, exercise: SecurityExercise, sandbox_id: str) -> List[Dict[str, Any]]:
+    async def _execute_blue_team_activities(self, exercise: SecurityExercise, sandbox_id: str) -> list[dict[str, Any]]:
         """Thực hiện hoạt động Blue Team"""
         try:
             if not self.blue_team_engine:
@@ -340,8 +336,8 @@ class SecurityOrchestrator:
             self.logger.error(f"Error executing Blue Team activities: {e}")
             return []
 
-    async def _analyze_exercise_results(self, red_team_results: List[Dict[str, Any]],
-                                     blue_team_results: List[Dict[str, Any]]) -> float:
+    async def _analyze_exercise_results(self, red_team_results: list[dict[str, Any]],
+                                     blue_team_results: list[dict[str, Any]]) -> float:
         """Phân tích kết quả bài tập"""
         try:
             # Calculate Red Team effectiveness
@@ -365,8 +361,8 @@ class SecurityOrchestrator:
             self.logger.error(f"Error analyzing exercise results: {e}")
             return 0.0
 
-    async def _generate_recommendations(self, red_team_results: List[Dict[str, Any]],
-                                      blue_team_results: List[Dict[str, Any]]) -> List[str]:
+    async def _generate_recommendations(self, red_team_results: list[dict[str, Any]],
+                                      blue_team_results: list[dict[str, Any]]) -> list[str]:
         """Tạo khuyến nghị từ kết quả"""
         recommendations = []
 
@@ -439,7 +435,7 @@ class SecurityOrchestrator:
         except Exception as e:
             self.logger.error(f"Error cleaning up sandbox {sandbox_id}: {e}")
 
-    def get_exercise_statistics(self) -> Dict[str, Any]:
+    def get_exercise_statistics(self) -> dict[str, Any]:
         """Lấy thống kê bài tập"""
         return {
             'stats': self.stats.copy(),
@@ -449,7 +445,7 @@ class SecurityOrchestrator:
             'success_rate': self.stats['completed_exercises'] / max(self.stats['total_exercises'], 1)
         }
 
-    async def generate_exercise_report(self, exercise_id: str) -> Dict[str, Any]:
+    async def generate_exercise_report(self, exercise_id: str) -> dict[str, Any]:
         """Tạo báo cáo bài tập"""
         try:
             # Find exercise result

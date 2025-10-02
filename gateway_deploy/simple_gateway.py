@@ -6,7 +6,7 @@ Gateway đơn giản để test kết nối
 
 import json
 from datetime import datetime
-from typing import Dict, Optional
+from typing import Optional
 
 import httpx
 import uvicorn
@@ -31,7 +31,7 @@ app.add_middleware(
 )
 
 # Store active connections
-active_connections: Dict[str, WebSocket] = {}
+active_connections: dict[str, WebSocket] = {}
 
 # AI Server Configuration
 AI_SERVER_URL = "http://192.168.1.8:14725"

@@ -29,7 +29,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -42,8 +42,8 @@ class ForecastResult:
 
     metric_name: str
     forecast_type: str
-    predicted_values: List[float]
-    confidence_intervals: List[Tuple[float, float]]
+    predicted_values: list[float]
+    confidence_intervals: list[tuple[float, float]]
     forecast_horizon: int
     accuracy_score: float
     model_used: str
@@ -60,7 +60,7 @@ class PerformancePrediction:
     predicted_value: float
     prediction_confidence: float
     time_horizon_hours: int
-    recommendations: List[str]
+    recommendations: list[str]
     timestamp: datetime
 
 
@@ -72,8 +72,8 @@ class AnomalyPrediction:
     predicted_probability: float
     expected_timeframe: str
     severity_level: str
-    affected_components: List[str]
-    prevention_actions: List[str]
+    affected_components: list[str]
+    prevention_actions: list[str]
     confidence_score: float
     timestamp: datetime
 
@@ -83,7 +83,7 @@ class PredictiveCapabilities:
     Enterprise-grade predictive analytics system
     """
 
-    def __init__(self, metrics_db_path: str, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, metrics_db_path: str, config: Optional[dict[str, Any]] = None):
         self.metrics_db_path = Path(metrics_db_path)
         self.config = config or self._get_default_config()
 
@@ -103,7 +103,7 @@ class PredictiveCapabilities:
             "✅ PredictiveCapabilities initialized với enterprise-grade configuration"
         )
 
-    def _get_default_config(self) -> Dict[str, Any]:
+    def _get_default_config(self) -> dict[str, Any]:
         """Default configuration với predictive focus"""
         return {
             "accuracy_threshold": 0.9995,  # 99.95% accuracy requirement
@@ -273,7 +273,7 @@ class PredictiveCapabilities:
 
     def predict_anomalies(
         self, time_horizon_hours: int = 24
-    ) -> List[AnomalyPrediction]:
+    ) -> list[AnomalyPrediction]:
         """
         Predict potential anomalies
 
@@ -287,7 +287,7 @@ class PredictiveCapabilities:
             start_time = time.time()
 
             # Get historical anomaly data
-            historical_anomalies = self._get_historical_anomalies(168)  # 1 week
+            self._get_historical_anomalies(168)  # 1 week
 
             # Get current system metrics
             current_metrics = self._get_current_system_metrics()
@@ -326,7 +326,7 @@ class PredictiveCapabilities:
             logger.error(f"❌ Anomaly prediction failed: {e}")
             return []
 
-    def _get_historical_data(self, metric_name: str, hours: int) -> List[float]:
+    def _get_historical_data(self, metric_name: str, hours: int) -> list[float]:
         """Get historical data for forecasting"""
         try:
             with sqlite3.connect(self.metrics_db_path) as conn:
@@ -364,8 +364,8 @@ class PredictiveCapabilities:
             return []
 
     def _perform_forecasting(
-        self, historical_data: List[float], forecast_horizon: int
-    ) -> Tuple[List[float], List[Tuple[float, float]]]:
+        self, historical_data: list[float], forecast_horizon: int
+    ) -> tuple[list[float], list[tuple[float, float]]]:
         """Perform forecasting using simple linear regression"""
         try:
             if len(historical_data) < 2:
@@ -407,7 +407,7 @@ class PredictiveCapabilities:
             logger.error(f"❌ Forecasting failed: {e}")
             return [], []
 
-    def _calculate_forecast_accuracy(self, historical_data: List[float]) -> float:
+    def _calculate_forecast_accuracy(self, historical_data: list[float]) -> float:
         """Calculate forecast accuracy based on historical data"""
         try:
             if len(historical_data) < 10:
@@ -493,7 +493,7 @@ class PredictiveCapabilities:
 
     def _get_performance_history(
         self, component: str, metric: str, hours: int
-    ) -> List[float]:
+    ) -> list[float]:
         """Get performance history"""
         try:
             with sqlite3.connect(self.metrics_db_path) as conn:
@@ -531,8 +531,8 @@ class PredictiveCapabilities:
             return []
 
     def _predict_performance_value(
-        self, historical_data: List[float], time_horizon: int
-    ) -> Tuple[float, float]:
+        self, historical_data: list[float], time_horizon: int
+    ) -> tuple[float, float]:
         """Predict future performance value"""
         try:
             if len(historical_data) < 2:
@@ -562,7 +562,7 @@ class PredictiveCapabilities:
 
     def _generate_performance_recommendations(
         self, current: float, predicted: float, metric: str
-    ) -> List[str]:
+    ) -> list[str]:
         """Generate performance recommendations"""
         recommendations = []
 
@@ -587,7 +587,7 @@ class PredictiveCapabilities:
 
         return recommendations
 
-    def _get_historical_anomalies(self, hours: int) -> List[Dict[str, Any]]:
+    def _get_historical_anomalies(self, hours: int) -> list[dict[str, Any]]:
         """Get historical anomaly data"""
         try:
             with sqlite3.connect(self.metrics_db_path) as conn:
@@ -595,7 +595,7 @@ class PredictiveCapabilities:
 
                 cursor = conn.execute(
                     """
-                    SELECT 
+                    SELECT
                         timestamp,
                         module_name,
                         feature_name,
@@ -628,7 +628,7 @@ class PredictiveCapabilities:
             logger.error(f"❌ Error getting historical anomalies: {e}")
             return []
 
-    def _get_current_system_metrics(self) -> Dict[str, Any]:
+    def _get_current_system_metrics(self) -> dict[str, Any]:
         """Get current system metrics"""
         try:
             with sqlite3.connect(self.metrics_db_path) as conn:
@@ -637,7 +637,7 @@ class PredictiveCapabilities:
                 # Get current metrics
                 cursor = conn.execute(
                     """
-                    SELECT 
+                    SELECT
                         COUNT(*) as total_events,
                         AVG(duration_ms) as avg_response_time,
                         AVG(CASE WHEN success = 1 THEN 1.0 ELSE 0.0 END) as success_rate,
@@ -662,7 +662,7 @@ class PredictiveCapabilities:
             return {}
 
     def _predict_performance_anomaly(
-        self, current_metrics: Dict[str, Any], time_horizon: int
+        self, current_metrics: dict[str, Any], time_horizon: int
     ) -> Optional[AnomalyPrediction]:
         """Predict performance anomalies"""
         try:
@@ -705,7 +705,7 @@ class PredictiveCapabilities:
             return None
 
     def _predict_resource_anomaly(
-        self, current_metrics: Dict[str, Any], time_horizon: int
+        self, current_metrics: dict[str, Any], time_horizon: int
     ) -> Optional[AnomalyPrediction]:
         """Predict resource anomalies"""
         try:
@@ -748,7 +748,7 @@ class PredictiveCapabilities:
             return None
 
     def _predict_usage_anomaly(
-        self, current_metrics: Dict[str, Any], time_horizon: int
+        self, current_metrics: dict[str, Any], time_horizon: int
     ) -> Optional[AnomalyPrediction]:
         """Predict usage anomalies"""
         try:
@@ -789,7 +789,7 @@ class PredictiveCapabilities:
             logger.error(f"❌ Usage anomaly prediction failed: {e}")
             return None
 
-    def get_prediction_summary(self) -> Dict[str, Any]:
+    def get_prediction_summary(self) -> dict[str, Any]:
         """Get prediction summary"""
         try:
             return {
@@ -814,7 +814,7 @@ class PredictiveCapabilities:
 
 # Factory function
 def create_predictive_capabilities(
-    metrics_db_path: str, config: Optional[Dict[str, Any]] = None
+    metrics_db_path: str, config: Optional[dict[str, Any]] = None
 ) -> PredictiveCapabilities:
     """Factory function để create predictive capabilities"""
     return PredictiveCapabilities(metrics_db_path, config)

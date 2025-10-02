@@ -15,12 +15,10 @@ import argparse
 import json
 import os
 import subprocess
-import sys
-import time
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 @dataclass
@@ -296,7 +294,7 @@ class MonitoringDashboard:
         """Get system uptime in hours"""
         try:
             if os.name == 'nt':  # Windows
-                result = subprocess.run(['wmic', 'os', 'get', 'lastbootuptime'],
+                subprocess.run(['wmic', 'os', 'get', 'lastbootuptime'],
                                       capture_output=True, text=True)
                 # Parse Windows uptime (simplified)
                 return 24.0  # Mock value
@@ -311,12 +309,12 @@ class MonitoringDashboard:
         """Get CPU usage percentage"""
         try:
             if os.name == 'nt':  # Windows
-                result = subprocess.run(['wmic', 'cpu', 'get', 'loadpercentage'],
+                subprocess.run(['wmic', 'cpu', 'get', 'loadpercentage'],
                                       capture_output=True, text=True)
                 # Parse Windows CPU usage (simplified)
                 return 25.0  # Mock value
             else:  # Unix-like
-                result = subprocess.run(['top', '-bn1'], capture_output=True, text=True)
+                subprocess.run(['top', '-bn1'], capture_output=True, text=True)
                 # Parse CPU usage (simplified)
                 return 30.0  # Mock value
         except:
@@ -326,12 +324,12 @@ class MonitoringDashboard:
         """Get memory usage percentage"""
         try:
             if os.name == 'nt':  # Windows
-                result = subprocess.run(['wmic', 'OS', 'get', 'TotalVisibleMemorySize,FreePhysicalMemory'],
+                subprocess.run(['wmic', 'OS', 'get', 'TotalVisibleMemorySize,FreePhysicalMemory'],
                                       capture_output=True, text=True)
                 # Parse Windows memory usage (simplified)
                 return 45.0  # Mock value
             else:  # Unix-like
-                result = subprocess.run(['free', '-m'], capture_output=True, text=True)
+                subprocess.run(['free', '-m'], capture_output=True, text=True)
                 # Parse memory usage (simplified)
                 return 50.0  # Mock value
         except:
@@ -341,12 +339,12 @@ class MonitoringDashboard:
         """Get disk usage percentage"""
         try:
             if os.name == 'nt':  # Windows
-                result = subprocess.run(['wmic', 'logicaldisk', 'get', 'size,freespace'],
+                subprocess.run(['wmic', 'logicaldisk', 'get', 'size,freespace'],
                                       capture_output=True, text=True)
                 # Parse Windows disk usage (simplified)
                 return 60.0  # Mock value
             else:  # Unix-like
-                result = subprocess.run(['df', '-h'], capture_output=True, text=True)
+                subprocess.run(['df', '-h'], capture_output=True, text=True)
                 # Parse disk usage (simplified)
                 return 65.0  # Mock value
         except:
@@ -355,7 +353,7 @@ class MonitoringDashboard:
     def _get_network_latency(self) -> float:
         """Get network latency in milliseconds"""
         try:
-            result = subprocess.run(['ping', '-c', '1', '8.8.8.8'],
+            subprocess.run(['ping', '-c', '1', '8.8.8.8'],
                                   capture_output=True, text=True, timeout=5)
             # Parse ping output (simplified)
             return 25.0  # Mock value
@@ -453,7 +451,7 @@ class MonitoringDashboard:
             <h2>Monitoring Dashboard</h2>
             <p>Last Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
         </div>
-        
+
         <div class="metrics-grid">
             <!-- System Health -->
             <div class="metric-card">
@@ -467,7 +465,7 @@ class MonitoringDashboard:
                     <div>Uptime: {system_health.uptime:.1f}h</div>
                 </div>
             </div>
-            
+
             <!-- Test Metrics -->
             <div class="metric-card">
                 <div class="metric-title">Test Metrics</div>
@@ -480,7 +478,7 @@ class MonitoringDashboard:
                     <div>Coverage: {test_metrics.coverage_percentage:.1f}%</div>
                 </div>
             </div>
-            
+
             <!-- Security Metrics -->
             <div class="metric-card">
                 <div class="metric-title">Security Metrics</div>
@@ -493,7 +491,7 @@ class MonitoringDashboard:
                     <div>Low: {security_metrics.vulnerabilities_low}</div>
                 </div>
             </div>
-            
+
             <!-- Performance Metrics -->
             <div class="metric-card">
                 <div class="metric-title">Performance Metrics</div>
@@ -507,7 +505,7 @@ class MonitoringDashboard:
                 </div>
             </div>
         </div>
-        
+
         <!-- Detailed Charts -->
         <div class="chart-container">
             <h3>📊 System Overview</h3>
@@ -533,7 +531,7 @@ class MonitoringDashboard:
                 </div>
             </div>
         </div>
-        
+
         <div class="footer">
             <p>StillMe AI Framework Monitoring Dashboard | Generated at {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
         </div>
@@ -554,7 +552,7 @@ class MonitoringDashboard:
         print(f"📊 Dashboard saved to: {output_path}")
 
     def generate_json_report(self, system_health: SystemHealth, test_metrics: TestMetrics,
-                           security_metrics: SecurityMetrics, performance_metrics: PerformanceMetrics) -> Dict[str, Any]:
+                           security_metrics: SecurityMetrics, performance_metrics: PerformanceMetrics) -> dict[str, Any]:
         """Generate JSON report"""
         return {
             "timestamp": datetime.now().isoformat(),

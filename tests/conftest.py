@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 from unittest.mock import Mock
 
 """
@@ -383,19 +383,19 @@ class TestUtils:
     """Utility functions for tests."""
 
     @staticmethod
-    def load_json_fixture(file_path: str) -> Dict[str, Any]:
+    def load_json_fixture(file_path: str) -> dict[str, Any]:
         """Load JSON fixture file."""
         with open(file_path, encoding='utf-8') as f:
             return json.load(f)
 
     @staticmethod
-    def save_json_fixture(data: Dict[str, Any], file_path: str) -> None:
+    def save_json_fixture(data: dict[str, Any], file_path: str) -> None:
         """Save data as JSON fixture."""
         with open(file_path, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
 
     @staticmethod
-    def create_mock_response(status_code: int = 200, data: Dict[str, Any] = None) -> Mock:
+    def create_mock_response(status_code: int = 200, data: dict[str, Any] = None) -> Mock:
         """Create mock HTTP response."""
         response = Mock()
         response.status_code = status_code

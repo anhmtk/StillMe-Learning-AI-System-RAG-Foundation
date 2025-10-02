@@ -6,7 +6,7 @@ Manages policy levels and control mechanisms.
 import logging
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 logger = logging.getLogger(__name__)
 
@@ -27,13 +27,13 @@ class PolicyConfig:
     abuse_detection_enabled: bool
     proactive_suggestions_enabled: bool
     dry_run: bool
-    custom_rules: Dict[str, Any]
+    custom_rules: dict[str, Any]
 
 
 class PolicyController:
     """Controller for managing AI policy and behavior."""
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         self.config = config or {}
         self.policy_level = PolicyLevel(self.config.get("level", "balanced"))
         self.dry_run = self.config.get("dry_run", False)
@@ -141,9 +141,9 @@ class PolicyController:
         """Check if dry run mode is enabled."""
         return self.dry_run
 
-    def validate_request(self, request: Dict[str, Any]) -> Dict[str, Any]:
+    def validate_request(self, request: dict[str, Any]) -> dict[str, Any]:
         """Validate a request against the current policy."""
-        config = self.get_policy_config()
+        self.get_policy_config()
         validation_result = {
             "valid": True,
             "errors": [],
@@ -176,7 +176,7 @@ class PolicyController:
 
         return validation_result
 
-    def get_policy_summary(self) -> Dict[str, Any]:
+    def get_policy_summary(self) -> dict[str, Any]:
         """Get a summary of the current policy configuration."""
         config = self.get_policy_config()
         return {

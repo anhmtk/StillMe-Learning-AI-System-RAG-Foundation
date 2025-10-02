@@ -5,7 +5,6 @@ Kiểm tra các API keys và cấu hình khi khởi động
 """
 import logging
 import os
-from typing import Dict, List, Tuple
 
 from dotenv import load_dotenv
 
@@ -36,11 +35,11 @@ class EnvironmentValidator:
         }
 
         # Validation results
-        self.validation_results: Dict[str, bool] = {}
-        self.missing_keys: List[str] = []
-        self.warnings: List[str] = []
+        self.validation_results: dict[str, bool] = {}
+        self.missing_keys: list[str] = []
+        self.warnings: list[str] = []
 
-    def validate_all(self) -> Tuple[bool, List[str]]:
+    def validate_all(self) -> tuple[bool, list[str]]:
         """Validate tất cả environment variables"""
         logger.info("🔍 Validating environment variables...")
 
@@ -133,7 +132,7 @@ class EnvironmentValidator:
 
         logger.info("=" * 60)
 
-    def get_validation_summary(self) -> Dict:
+    def get_validation_summary(self) -> dict:
         """Lấy tóm tắt validation results"""
         return {
             "all_valid": len(self.missing_keys) == 0,
@@ -152,7 +151,7 @@ class EnvironmentValidator:
 # Global instance
 env_validator = EnvironmentValidator()
 
-def validate_environment() -> Tuple[bool, List[str]]:
+def validate_environment() -> tuple[bool, list[str]]:
     """Convenience function để validate environment"""
     return env_validator.validate_all()
 

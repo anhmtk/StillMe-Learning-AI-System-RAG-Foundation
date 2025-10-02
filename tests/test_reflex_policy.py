@@ -212,7 +212,7 @@ def test_matrix_policy_scores():
 
     policy = ReflexPolicy("balanced")
 
-    for pattern, context, history, abuse, expected_hint in test_cases:
+    for pattern, context, history, abuse, _expected_hint in test_cases:
         scores = {
             "pattern_score": pattern,
             "context_score": context,

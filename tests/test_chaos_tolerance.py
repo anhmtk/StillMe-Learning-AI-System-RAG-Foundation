@@ -1,5 +1,3 @@
-from typing import Any, Dict, List
-
 """
 Test Suite for Chaos Engineering
 ===============================
@@ -15,6 +13,7 @@ import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 # Import chaos runner
 sys.path.append(str(Path(__file__).parent.parent))
@@ -27,9 +26,9 @@ class ChaosTestResult:
     test_name: str
     fault_type: str
     recovery_time_ms: float
-    error_surface: List[str]
+    error_surface: list[str]
     success: bool
-    details: Dict[str, Any]
+    details: dict[str, Any]
 
 
 class ChaosToleranceTestSuite:
@@ -260,7 +259,7 @@ class ChaosToleranceTestSuite:
 
         return pass_rate >= 90.0
 
-    def run_all_tests(self) -> Dict[str, Any]:
+    def run_all_tests(self) -> dict[str, Any]:
         """Run all chaos engineering tests"""
         print("🌪️ Starting Chaos Engineering Test Suite")
         print("=" * 60)

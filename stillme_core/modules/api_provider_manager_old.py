@@ -1,12 +1,11 @@
 # modules/api_provider_manager.py
 import logging
 import os
-import re
 
 # Import common utilities
 import sys
 import time
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Optional
 
 try:
     from openai import OpenAI
@@ -45,14 +44,14 @@ class ComplexityAnalyzer:
 
     def __init__(self):
         # Pre-compile keyword sets for O(1) lookup performance
-        self.complex_indicators: Set[str] = {
+        self.complex_indicators: set[str] = {
             "tại sao", "như thế nào", "phân tích", "so sánh", "đánh giá",
             "giải thích", "mối quan hệ", "tác động", "ảnh hưởng", "nguyên nhân",
             "hậu quả", "xu hướng", "phát triển", "tiến hóa", "biến đổi",
             "tối ưu", "tối ưu hóa", "performance", "efficiency", "algorithm"
         }
 
-        self.academic_terms: Set[str] = {
+        self.academic_terms: set[str] = {
             "định lý", "định luật", "nguyên lý", "khái niệm", "lý thuyết",
             "phương pháp", "kỹ thuật", "công nghệ", "hệ thống", "mô hình",
             "thuật toán", "cấu trúc", "chức năng", "quy trình", "quy tắc",
@@ -61,17 +60,17 @@ class ComplexityAnalyzer:
             "giai thừa", "factorial", "recursion", "iteration", "loop"
         }
 
-        self.abstract_concepts: Set[str] = {
+        self.abstract_concepts: set[str] = {
             "ý nghĩa", "bản chất", "triết lý", "tư tưởng", "quan điểm",
             "góc độ", "khía cạnh", "chiều sâu", "tầm nhìn", "viễn cảnh",
             "tương lai", "quá khứ", "hiện tại", "bối cảnh", "môi trường"
         }
 
-        self.conditional_words: Set[str] = {
+        self.conditional_words: set[str] = {
             "nếu", "giả sử", "trường hợp", "khi nào", "trong trường hợp"
         }
 
-        self.domain_terms: Set[str] = {
+        self.domain_terms: set[str] = {
             "toán học", "triết học", "khoa học", "vật lý", "hóa học", "sinh học",
             "lịch sử", "văn học", "nghệ thuật", "âm nhạc", "kiến trúc",
             "tâm lý học", "xã hội học", "kinh tế học", "chính trị", "luật pháp"
@@ -95,21 +94,21 @@ class ComplexityAnalyzer:
         }
 
         # Fallback tracking
-        self.fallback_log: List[Dict] = []
+        self.fallback_log: list[dict] = []
         self.max_fallback_log = 1000
 
         # Performance tracking
-        self.analysis_times: List[float] = []
+        self.analysis_times: list[float] = []
         self.max_performance_log = 100
 
-    def analyze_complexity(self, prompt: str, debug: bool = False) -> Tuple[float, Dict[str, float]]:
+    def analyze_complexity(self, prompt: str, debug: bool = False) -> tuple[float, dict[str, float]]:
         """
         Analyze prompt complexity using weighted heuristics.
-        
+
         Args:
             prompt: Input prompt to analyze
             debug: Whether to return detailed breakdown
-            
+
         Returns:
             Tuple of (complexity_score, detailed_scores)
         """
@@ -186,13 +185,13 @@ class ComplexityAnalyzer:
                               selected_model: str, response_quality: str = "unknown") -> bool:
         """
         Determine if fallback should be triggered based on user feedback.
-        
+
         Args:
             user_feedback: User's response after AI answer
             original_prompt: Original user prompt
             selected_model: Model that was used
             response_quality: Quality assessment of the response
-            
+
         Returns:
             True if fallback should be triggered
         """
@@ -239,7 +238,7 @@ class ComplexityAnalyzer:
 
         return should_fallback
 
-    def get_performance_stats(self) -> Dict[str, Any]:
+    def get_performance_stats(self) -> dict[str, Any]:
         """Get performance statistics for the analyzer."""
         if not self.analysis_times:
             return {'avg_time_ms': 0, 'max_time_ms': 0, 'min_time_ms': 0}
@@ -252,7 +251,7 @@ class ComplexityAnalyzer:
             'total_analyses': len(self.analysis_times)
         }
 
-    def get_fallback_stats(self) -> Dict[str, Any]:
+    def get_fallback_stats(self) -> dict[str, Any]:
         """Get fallback statistics."""
         if not self.fallback_log:
             return {'total_fallbacks': 0, 'recent_fallbacks': []}
@@ -269,13 +268,13 @@ class ComplexityAnalyzer:
             'recent_fallbacks': self.fallback_log[-10:]  # Last 10 fallbacks
         }
 
-    def calibrate_weights(self, test_results: List[Dict]) -> Dict[str, float]:
+    def calibrate_weights(self, test_results: list[dict]) -> dict[str, float]:
         """
         Calibrate weights based on test results.
-        
+
         Args:
             test_results: List of test cases with expected vs actual results
-            
+
         Returns:
             Suggested new weights
         """
@@ -289,7 +288,7 @@ class UnifiedAPIManager:
 
     def __init__(
         self,
-        model_preferences: Optional[List[str]] = None,
+        model_preferences: Optional[list[str]] = None,
         fallback_model: str = "gpt-3.5-turbo",
     ):
         """
@@ -350,7 +349,7 @@ class UnifiedAPIManager:
         self._nllb_tokenizer = None
 
         # Usage stats
-        self.usage_stats: Dict[str, Dict] = {}
+        self.usage_stats: dict[str, dict] = {}
         self.logger = logging.getLogger("UnifiedAPIManager")
         self.logger.setLevel(logging.INFO)
 
@@ -456,13 +455,13 @@ class UnifiedAPIManager:
                        selected_model: str, response_quality: str = "unknown") -> Optional[str]:
         """
         Handle fallback when user feedback indicates poor response quality.
-        
+
         Args:
             original_prompt: Original user prompt
             user_feedback: User's feedback after AI response
             selected_model: Model that was originally used
             response_quality: Quality assessment of the response
-            
+
         Returns:
             New response from fallback model, or None if no fallback needed
         """
@@ -490,7 +489,7 @@ class UnifiedAPIManager:
 
         return None
 
-    def get_analyzer_stats(self) -> Dict[str, Any]:
+    def get_analyzer_stats(self) -> dict[str, Any]:
         """Get complexity analyzer statistics."""
         return {
             'performance': self.complexity_analyzer.get_performance_stats(),
@@ -536,7 +535,6 @@ class UnifiedAPIManager:
 
     def _unmask_code_and_urls(self, text: str, code_blocks: list, urls: list) -> str:
         """Restore code blocks and URLs after translation"""
-        import re
 
         # Restore URLs first
         for url in urls:
@@ -863,7 +861,7 @@ class UnifiedAPIManager:
             self.logger.error(f"Ollama error: {e}")
             return "Error: Unexpected error with Ollama API"
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """Get API manager status."""
         return {
             "preferred_provider": self.preferred_provider,
@@ -878,7 +876,7 @@ class UnifiedAPIManager:
         """Mock API response cho mục đích testing."""
         return f"Mock response for: {prompt[:50]}..."
 
-    def analyze_usage(self) -> Dict[str, Dict]:
+    def analyze_usage(self) -> dict[str, dict]:
         """Phân tích thống kê sử dụng API."""
         return self.usage_stats
 
@@ -886,7 +884,7 @@ class UnifiedAPIManager:
         self, model: str, prompt: str, response: str, elapsed_time: float, success: bool
     ):
         """Ghi log và cập nhật thống kê."""
-        log_entry = {
+        {
             "model": model,
             "prompt_length": len(prompt),
             "response_length": len(response),

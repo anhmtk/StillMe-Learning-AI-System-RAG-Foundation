@@ -11,7 +11,7 @@ Version: 2.0.0
 """
 
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from .agent_dev.config import AgentDevConfig
 from .core.config import CoreConfig
@@ -36,7 +36,7 @@ class ConfigManager:
             "config/platform/"
         ]
 
-    def get_config(self, component: str) -> Dict[str, Any]:
+    def get_config(self, component: str) -> dict[str, Any]:
         """Get configuration for specific component"""
         configs = {
             "shared": self.shared_config.to_dict(),
@@ -50,7 +50,7 @@ class ConfigManager:
 
         return configs[component]
 
-    def get_all_configs(self) -> Dict[str, Dict[str, Any]]:
+    def get_all_configs(self) -> dict[str, dict[str, Any]]:
         """Get all configurations"""
         return {
             "shared": self.shared_config.to_dict(),
@@ -92,11 +92,11 @@ class ConfigManager:
 # Global configuration manager instance
 config_manager = ConfigManager()
 
-def get_config(component: str) -> Dict[str, Any]:
+def get_config(component: str) -> dict[str, Any]:
     """Get configuration for component"""
     return config_manager.get_config(component)
 
-def get_all_configs() -> Dict[str, Dict[str, Any]]:
+def get_all_configs() -> dict[str, dict[str, Any]]:
     """Get all configurations"""
     return config_manager.get_all_configs()
 

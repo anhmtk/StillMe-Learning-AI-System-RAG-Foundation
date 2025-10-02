@@ -5,12 +5,10 @@ Emergency stop mechanism for AI system with audit logging.
 
 import json
 import logging
-import os
-import time
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Optional
 
 log = logging.getLogger(__name__)
 
@@ -45,7 +43,7 @@ class KillSwitchManager:
         # Initialize audit logger
         self._setup_audit_logger()
 
-    def _load_state(self) -> Dict:
+    def _load_state(self) -> dict:
         """Load kill switch state from file."""
         if self.state_file.exists():
             try:
@@ -113,7 +111,7 @@ class KillSwitchManager:
         self.audit_logger.info(json.dumps(log_entry))
         log.info(f"Kill switch {action.value} by {actor}: {result}")
 
-    def arm(self, actor: str, reason: Optional[str] = None) -> Dict:
+    def arm(self, actor: str, reason: Optional[str] = None) -> dict:
         """Arm the kill switch."""
         current_state = KillSwitchState(self._state["state"])
 
@@ -144,7 +142,7 @@ class KillSwitchManager:
             "reason": reason
         }
 
-    def fire(self, actor: str, reason: Optional[str] = None) -> Dict:
+    def fire(self, actor: str, reason: Optional[str] = None) -> dict:
         """Fire the kill switch (emergency stop)."""
         current_state = KillSwitchState(self._state["state"])
 
@@ -178,7 +176,7 @@ class KillSwitchManager:
             "reason": reason
         }
 
-    def disarm(self, actor: str, reason: Optional[str] = None) -> Dict:
+    def disarm(self, actor: str, reason: Optional[str] = None) -> dict:
         """Disarm the kill switch."""
         current_state = KillSwitchState(self._state["state"])
 
@@ -209,7 +207,7 @@ class KillSwitchManager:
             "reason": reason
         }
 
-    def status(self) -> Dict:
+    def status(self) -> dict:
         """Get kill switch status."""
         current_state = KillSwitchState(self._state["state"])
 
@@ -239,7 +237,7 @@ class KillSwitchManager:
         """Check if kill switch is fired."""
         return KillSwitchState(self._state["state"]) == KillSwitchState.FIRED
 
-    def get_audit_log(self, limit: int = 100) -> List[Dict]:
+    def get_audit_log(self, limit: int = 100) -> list[dict]:
         """Get recent audit log entries."""
         if not self.audit_file.exists():
             return []

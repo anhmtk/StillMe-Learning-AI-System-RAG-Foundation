@@ -16,56 +16,59 @@ import time
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional, TYPE_CHECKING
 
-# Import all Phase 2 modules
+# Import all Phase 2 modules with proper typing
+if TYPE_CHECKING:
+    from .autonomous_management_system import AutonomousManagementSystem
+    from .learning_optimization_engine import LearningOptimizationEngine
+    from .phase2_integration_testing import Phase2IntegrationTesting
+    from .security_compliance_system import SecurityComplianceSystem
+    from stillme_core.autonomous_management_system import AutonomousManagementSystem as CoreAutonomousManagementSystem
+    from stillme_core.learning_optimization_engine import LearningOptimizationEngine as CoreLearningOptimizationEngine
+    from stillme_core.phase2_integration_testing import Phase2IntegrationTesting as CorePhase2IntegrationTesting
+    from stillme_core.security_compliance_system import SecurityComplianceSystem as CoreSecurityComplianceSystem
+
+# Runtime imports with fallback
 try:
-    from .autonomous_management_system import AutonomousManagementSystem  # type: ignore
-    from .learning_optimization_engine import LearningOptimizationEngine  # type: ignore
-    from .phase2_integration_testing import Phase2IntegrationTesting  # type: ignore
-    from .security_compliance_system import SecurityComplianceSystem  # type: ignore
+    from .autonomous_management_system import AutonomousManagementSystem
+    from .learning_optimization_engine import LearningOptimizationEngine
+    from .phase2_integration_testing import Phase2IntegrationTesting
+    from .security_compliance_system import SecurityComplianceSystem
 except ImportError:
     try:
-        from stillme_core.autonomous_management_system import (
-            AutonomousManagementSystem,  # type: ignore
-        )
-        from stillme_core.learning_optimization_engine import (
-            LearningOptimizationEngine,  # type: ignore
-        )
-        from stillme_core.phase2_integration_testing import (
-            Phase2IntegrationTesting,  # type: ignore
-        )
-        from stillme_core.security_compliance_system import (
-            SecurityComplianceSystem,  # type: ignore
-        )
+        from stillme_core.autonomous_management_system import AutonomousManagementSystem as CoreAutonomousManagementSystem
+        from stillme_core.learning_optimization_engine import LearningOptimizationEngine as CoreLearningOptimizationEngine
+        from stillme_core.phase2_integration_testing import Phase2IntegrationTesting as CorePhase2IntegrationTesting
+        from stillme_core.security_compliance_system import SecurityComplianceSystem as CoreSecurityComplianceSystem
     except ImportError:
-        # Create mock classes for testing
+        # Create mock classes for testing with proper typing
         class AutonomousManagementSystem:
-            def __init__(self):
+            def __init__(self) -> None:
                 pass
 
-            def get_autonomous_status(self):
+            def get_autonomous_status(self) -> dict[str, Any]:
                 return {"status": "success", "data": {}}
 
         class LearningOptimizationEngine:
-            def __init__(self):
+            def __init__(self) -> None:
                 pass
 
-            def get_learning_status(self):
+            def get_learning_status(self) -> dict[str, Any]:
                 return {"status": "success", "data": {}}
 
         class SecurityComplianceSystem:
-            def __init__(self):
+            def __init__(self) -> None:
                 pass
 
-            def get_security_status(self):
+            def get_security_status(self) -> dict[str, Any]:
                 return {"status": "success", "data": {}}
 
         class Phase2IntegrationTesting:
-            def __init__(self):
+            def __init__(self) -> None:
                 pass
 
-            def get_integration_status(self):
+            def get_integration_status(self) -> dict[str, Any]:
                 return {"status": "success", "data": {}}
 
 
@@ -111,13 +114,13 @@ class DeploymentPlan:
     plan_id: str
     strategy: DeploymentStrategy
     target_environment: str
-    components: List[str]
-    dependencies: List[str]
+    components: list[str]
+    dependencies: list[str]
     rollback_plan: str
-    health_checks: List[str]
+    health_checks: list[str]
     created_at: datetime
     scheduled_at: Optional[datetime]
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 @dataclass
@@ -132,10 +135,10 @@ class DeploymentExecution:
     duration: float
     success: bool
     error_message: Optional[str]
-    steps_completed: List[str]
-    steps_failed: List[str]
+    steps_completed: list[str]
+    steps_failed: list[str]
     rollback_triggered: bool
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 @dataclass
@@ -148,10 +151,10 @@ class ProductionReadinessCheck:
     status: str
     last_check: datetime
     next_check: datetime
-    findings: List[str]
-    remediation: List[str]
+    findings: list[str]
+    remediation: list[str]
     critical: bool
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 @dataclass
@@ -166,10 +169,10 @@ class ProductionReadinessReport:
     passed_checks: int
     failed_checks: int
     critical_failures: int
-    checks: List[ProductionReadinessCheck]
-    recommendations: List[str]
+    checks: list[ProductionReadinessCheck]
+    recommendations: list[str]
     deployment_ready: bool
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 class DeploymentProductionSystem:
@@ -177,7 +180,7 @@ class DeploymentProductionSystem:
     Main Deployment Production System
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         self.config = config or {}
         self.logger = self._setup_logging()
 
@@ -188,10 +191,10 @@ class DeploymentProductionSystem:
         self.integration_testing = Phase2IntegrationTesting()
 
         # Deployment and production state
-        self.deployment_plans: Dict[str, DeploymentPlan] = {}
-        self.deployment_executions: List[DeploymentExecution] = []
-        self.readiness_checks: Dict[str, ProductionReadinessCheck] = {}
-        self.readiness_reports: List[ProductionReadinessReport] = []
+        self.deployment_plans: dict[str, DeploymentPlan] = {}
+        self.deployment_executions: list[DeploymentExecution] = []
+        self.readiness_checks: dict[str, ProductionReadinessCheck] = {}
+        self.readiness_reports: list[ProductionReadinessReport] = []
 
         # Deployment components
         self.deployment_automator = DeploymentAutomator()
@@ -204,7 +207,7 @@ class DeploymentProductionSystem:
         self.readiness_assessment_enabled = True
 
         # Performance tracking
-        self.performance_metrics: Dict[str, List[float]] = {
+        self.performance_metrics: dict[str, list[float]] = {
             "deployment_times": [],
             "readiness_check_times": [],
             "production_monitoring_times": [],
@@ -533,7 +536,7 @@ class DeploymentProductionSystem:
     def _check_production_readiness(self):
         """Check production readiness"""
         try:
-            for check_id, check in self.readiness_checks.items():
+            for _check_id, check in self.readiness_checks.items():
                 # Perform readiness check
                 readiness_result = self.readiness_assessor.assess_readiness(check)
 
@@ -824,7 +827,7 @@ class DeploymentProductionSystem:
             self.logger.error(f"Error getting production readiness: {e}")
             raise
 
-    async def _get_deployment_status(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_deployment_status(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get deployment status endpoint"""
         try:
             return {
@@ -869,11 +872,11 @@ class DeploymentProductionSystem:
                 "message": str(e),
             }
 
-    async def _get_deployment_plans(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_deployment_plans(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get deployment plans endpoint"""
         try:
             plans_data = []
-            for plan_id, plan in self.deployment_plans.items():
+            for _plan_id, plan in self.deployment_plans.items():
                 plans_data.append(
                     {
                         "plan_id": plan.plan_id,
@@ -906,7 +909,7 @@ class DeploymentProductionSystem:
                 "message": str(e),
             }
 
-    async def _execute_deployment(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _execute_deployment(self, data: dict[str, Any]) -> dict[str, Any]:
         """Execute deployment endpoint"""
         try:
             plan_id = data.get("plan_id", "")
@@ -940,7 +943,7 @@ class DeploymentProductionSystem:
                 "message": str(e),
             }
 
-    async def _get_production_readiness(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_production_readiness(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get production readiness endpoint"""
         try:
             # Get production readiness report
@@ -955,7 +958,7 @@ class DeploymentProductionSystem:
                 "message": str(e),
             }
 
-    async def _rollback_deployment(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _rollback_deployment(self, data: dict[str, Any]) -> dict[str, Any]:
         """Rollback deployment endpoint"""
         try:
             execution_id = data.get("execution_id", "")
@@ -1053,7 +1056,7 @@ class ProductionMonitor:
     def __init__(self):
         self.monitoring_data = []
 
-    def monitor_production(self) -> Dict[str, Any]:
+    def monitor_production(self) -> dict[str, Any]:
         """Monitor production environment"""
         # Mock production monitoring
         return {"status": "healthy", "uptime": 99.9, "performance": "good"}
@@ -1065,7 +1068,7 @@ class ReadinessAssessor:
     def __init__(self):
         self.assessment_history = []
 
-    def assess_readiness(self, check: ProductionReadinessCheck) -> Dict[str, Any]:
+    def assess_readiness(self, check: ProductionReadinessCheck) -> dict[str, Any]:
         """Assess production readiness"""
         # Mock readiness assessment
         return {"status": "passed", "findings": [], "remediation": []}

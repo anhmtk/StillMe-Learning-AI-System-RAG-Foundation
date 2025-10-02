@@ -13,7 +13,7 @@ import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Optional
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -39,7 +39,7 @@ class TemplateSlot:
     """Định nghĩa một slot trong template"""
     name: str
     category: str  # role, action, emotion, topic, etc.
-    values: List[str]
+    values: list[str]
     description: str = ""
 
 @dataclass
@@ -47,7 +47,7 @@ class Template:
     """Template với các slots"""
     name: str
     template: str  # Template string với [SLOT_NAME] placeholders
-    slots: List[TemplateSlot]
+    slots: list[TemplateSlot]
     description: str = ""
     category: str = "general"
 
@@ -56,11 +56,11 @@ class TemplateResult:
     """Kết quả từ template filling"""
     template_name: str
     original_template: str
-    variants: List[str]
-    slot_combinations: List[Dict[str, str]]
+    variants: list[str]
+    slot_combinations: list[dict[str, str]]
     success: bool
     error: Optional[str] = None
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
 class TemplateFiller:
     """Template filler sử dụng predefined slots và AI generation"""
@@ -85,7 +85,7 @@ class TemplateFiller:
         # Common templates
         self.common_templates = self._create_common_templates()
 
-    def _create_predefined_slots(self) -> Dict[str, List[str]]:
+    def _create_predefined_slots(self) -> dict[str, list[str]]:
         """Tạo các slots có sẵn"""
         return {
             "ROLE": [
@@ -130,7 +130,7 @@ class TemplateFiller:
             ]
         }
 
-    def _create_common_templates(self) -> List[Template]:
+    def _create_common_templates(self) -> list[Template]:
         """Tạo các template phổ biến"""
         return [
             Template(
@@ -192,12 +192,12 @@ class TemplateFiller:
             )
         ]
 
-    def _extract_slots_from_template(self, template: str) -> List[str]:
+    def _extract_slots_from_template(self, template: str) -> list[str]:
         """Trích xuất các slot từ template string"""
         pattern = r'\[([A-Z_]+)\]'
         return re.findall(pattern, template)
 
-    def _generate_slot_combinations(self, template: Template, num_combinations: int) -> List[Dict[str, str]]:
+    def _generate_slot_combinations(self, template: Template, num_combinations: int) -> list[dict[str, str]]:
         """Tạo các combination của slots"""
         combinations = []
 
@@ -221,7 +221,7 @@ class TemplateFiller:
 
         return unique_combinations
 
-    async def _generate_ai_variants(self, template: Template, num_variants: int) -> List[str]:
+    async def _generate_ai_variants(self, template: Template, num_variants: int) -> list[str]:
         """Sử dụng AI để tạo variants"""
         if not self.api_manager or not self.config.use_ai_generation:
             return []
@@ -266,7 +266,7 @@ Biến thể:"""
             self.logger.warning(f"AI variant generation failed: {e}")
             return []
 
-    def _fill_template(self, template: str, combination: Dict[str, str]) -> str:
+    def _fill_template(self, template: str, combination: dict[str, str]) -> str:
         """Điền template với combination"""
         result = template
         for slot_name, value in combination.items():
@@ -336,7 +336,7 @@ Biến thể:"""
                 error=str(e)
             )
 
-    async def fill_templates_batch(self, templates: List[Template]) -> List[TemplateResult]:
+    async def fill_templates_batch(self, templates: list[Template]) -> list[TemplateResult]:
         """Điền nhiều templates cùng lúc"""
         tasks = [self.fill_template(template) for template in templates]
         results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -365,7 +365,7 @@ class TemplateFillerAugmentor:
         self.template_filler = TemplateFiller(config)
         self.logger = logging.getLogger(__name__)
 
-    async def augment_from_templates(self, output_file: str, templates: List[Template] = None) -> Dict[str, Any]:
+    async def augment_from_templates(self, output_file: str, templates: list[Template] = None) -> dict[str, Any]:
         """Augment từ templates"""
         if templates is None:
             templates = self.template_filler.common_templates
@@ -413,7 +413,7 @@ class TemplateFillerAugmentor:
         self.logger.info(f"Template filling completed: {stats}")
         return stats
 
-    async def augment_from_custom_templates(self, template_file: str, output_file: str) -> Dict[str, Any]:
+    async def augment_from_custom_templates(self, template_file: str, output_file: str) -> dict[str, Any]:
         """Augment từ custom template file"""
         template_path = Path(template_file)
         if not template_path.exists():

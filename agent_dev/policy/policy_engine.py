@@ -10,7 +10,7 @@ import sys
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 import yaml
 
@@ -52,7 +52,7 @@ class PolicyEngine:
         with open(policy_path) as f:
             self.policies = yaml.safe_load(f)
 
-    def validate_project_spec(self, spec_path: Optional[str] = None) -> List[PolicyViolation]:
+    def validate_project_spec(self, spec_path: Optional[str] = None) -> list[PolicyViolation]:
         """Validate project specification compliance"""
         if spec_path:
             spec_file = Path(spec_path)
@@ -81,7 +81,7 @@ class PolicyEngine:
 
         return violations
 
-    def validate_task_config(self, config_path: str) -> List[PolicyViolation]:
+    def validate_task_config(self, config_path: str) -> list[PolicyViolation]:
         """Validate task configuration against policies"""
         config_file = Path(config_path)
         if not config_file.exists():
@@ -113,7 +113,7 @@ class PolicyEngine:
 
         return violations
 
-    def scan_codebase(self) -> List[PolicyViolation]:
+    def scan_codebase(self) -> list[PolicyViolation]:
         """Scan codebase for policy violations"""
         violations = []
 
@@ -128,7 +128,7 @@ class PolicyEngine:
 
         return violations
 
-    def _check_edge_stateless_compliance(self) -> List[PolicyViolation]:
+    def _check_edge_stateless_compliance(self) -> list[PolicyViolation]:
         """Check edge stateless compliance"""
         violations = []
 
@@ -144,7 +144,7 @@ class PolicyEngine:
 
         return violations
 
-    def _check_docker_compose_for_models(self, file_path: Path) -> List[PolicyViolation]:
+    def _check_docker_compose_for_models(self, file_path: Path) -> list[PolicyViolation]:
         """Check docker-compose file for forbidden model containers"""
         violations = []
 
@@ -177,7 +177,7 @@ class PolicyEngine:
 
         return violations
 
-    def _check_python_for_model_runtime(self, file_path: Path) -> List[PolicyViolation]:
+    def _check_python_for_model_runtime(self, file_path: Path) -> list[PolicyViolation]:
         """Check Python file for forbidden model runtime code"""
         violations = []
 
@@ -213,7 +213,7 @@ class PolicyEngine:
 
         return violations
 
-    def _check_inference_location_compliance(self, spec: Dict[str, Any]) -> List[PolicyViolation]:
+    def _check_inference_location_compliance(self, spec: dict[str, Any]) -> list[PolicyViolation]:
         """Check inference location compliance"""
         violations = []
 
@@ -230,7 +230,7 @@ class PolicyEngine:
 
         return violations
 
-    def _scan_forbidden_patterns(self) -> List[PolicyViolation]:
+    def _scan_forbidden_patterns(self) -> list[PolicyViolation]:
         """Scan for forbidden patterns in codebase"""
         violations = []
 
@@ -253,7 +253,7 @@ class PolicyEngine:
 
         return violations
 
-    def _check_file_patterns(self, file_path: Path, patterns: List[Tuple[str, str]]) -> List[PolicyViolation]:
+    def _check_file_patterns(self, file_path: Path, patterns: list[tuple[str, str]]) -> list[PolicyViolation]:
         """Check file for forbidden patterns"""
         violations = []
 
@@ -283,7 +283,7 @@ class PolicyEngine:
 
         return violations
 
-    def _scan_security_issues(self) -> List[PolicyViolation]:
+    def _scan_security_issues(self) -> list[PolicyViolation]:
         """Scan for security issues"""
         violations = []
 
@@ -302,7 +302,7 @@ class PolicyEngine:
 
         return violations
 
-    def _scan_architecture_violations(self) -> List[PolicyViolation]:
+    def _scan_architecture_violations(self) -> list[PolicyViolation]:
         """Scan for architecture violations"""
         violations = []
 
@@ -314,17 +314,17 @@ class PolicyEngine:
 
         return violations
 
-    def _check_circular_imports(self) -> List[PolicyViolation]:
+    def _check_circular_imports(self) -> list[PolicyViolation]:
         """Check for circular imports"""
         # This would implement actual circular import detection
         return []
 
-    def _check_dependency_violations(self) -> List[PolicyViolation]:
+    def _check_dependency_violations(self) -> list[PolicyViolation]:
         """Check for dependency violations"""
         # This would implement actual dependency violation detection
         return []
 
-    def generate_report(self, violations: List[PolicyViolation]) -> str:
+    def generate_report(self, violations: list[PolicyViolation]) -> str:
         """Generate policy violation report"""
         if not violations:
             return "✅ No policy violations found"

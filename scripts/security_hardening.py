@@ -1,4 +1,3 @@
-import secrets
 
 #!/usr/bin/env python3
 """
@@ -14,13 +13,10 @@ Last Updated: 2025-09-26
 
 import argparse
 import json
-import os
 import re
 import subprocess
-import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
 
 
 @dataclass
@@ -45,8 +41,8 @@ class SecurityReport:
     medium_issues: int
     low_issues: int
     security_score: int  # 0-100
-    issues: List[SecurityIssue]
-    recommendations: List[str]
+    issues: list[SecurityIssue]
+    recommendations: list[str]
 
 
 class SecurityHardener:
@@ -57,7 +53,7 @@ class SecurityHardener:
         self.security_patterns = self._load_security_patterns()
         self.best_practices = self._load_best_practices()
 
-    def _load_security_patterns(self) -> Dict[str, List[str]]:
+    def _load_security_patterns(self) -> dict[str, list[str]]:
         """Load security vulnerability patterns"""
         return {
             "sql_injection": [
@@ -109,7 +105,7 @@ class SecurityHardener:
             ]
         }
 
-    def _load_best_practices(self) -> Dict[str, List[str]]:
+    def _load_best_practices(self) -> dict[str, list[str]]:
         """Load security best practices"""
         return {
             "input_validation": [
@@ -203,7 +199,7 @@ class SecurityHardener:
 
         return any(pattern in str(file_path) for pattern in skip_patterns)
 
-    def _scan_file(self, file_path: Path) -> List[SecurityIssue]:
+    def _scan_file(self, file_path: Path) -> list[SecurityIssue]:
         """Scan a single file for security issues"""
         issues = []
 
@@ -289,7 +285,7 @@ class SecurityHardener:
 
         return fixes.get(pattern_name, "# Review and implement secure alternative")
 
-    def _check_missing_practices(self, file_path: Path, content: str) -> List[SecurityIssue]:
+    def _check_missing_practices(self, file_path: Path, content: str) -> list[SecurityIssue]:
         """Check for missing security practices"""
         issues = []
 
@@ -328,7 +324,7 @@ class SecurityHardener:
 
         return issues
 
-    def _run_external_security_tools(self) -> List[SecurityIssue]:
+    def _run_external_security_tools(self) -> list[SecurityIssue]:
         """Run external security tools"""
         issues = []
 
@@ -376,7 +372,7 @@ class SecurityHardener:
 
         return issues
 
-    def _calculate_security_score(self, issues: List[SecurityIssue]) -> int:
+    def _calculate_security_score(self, issues: list[SecurityIssue]) -> int:
         """Calculate security score (0-100)"""
         if not issues:
             return 100
@@ -395,7 +391,7 @@ class SecurityHardener:
 
         return max(0, score)
 
-    def _generate_recommendations(self, issues: List[SecurityIssue]) -> List[str]:
+    def _generate_recommendations(self, issues: list[SecurityIssue]) -> list[str]:
         """Generate security recommendations"""
         recommendations = []
 

@@ -18,7 +18,7 @@ class ListHandler(logging.Handler):
 @pytest.fixture
 def logger_capture():
     handler = ListHandler()
-    logger = logging.getLogger("stillme_core.middleware.reflex_engine")
+    logging.getLogger("stillme_core.middleware.reflex_engine")
     # Ensure our module logger name matches if different
     logging.getLogger().setLevel(logging.INFO)
     logging.getLogger().addHandler(handler)

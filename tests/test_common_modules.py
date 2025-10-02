@@ -490,7 +490,7 @@ class TestIntegration:
             config_manager = ConfigManager(temp_file, {"logging": {"level": "INFO"}})
 
             # Create logger with config
-            log_level = config_manager.get("logging.level", "INFO")
+            config_manager.get("logging.level", "INFO")
             log_file = config_manager.get("logging.file", "default.log")
 
             logger = StructuredLogger("integration_test", log_file=log_file)

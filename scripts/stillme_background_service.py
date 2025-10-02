@@ -6,10 +6,9 @@ Chạy ngầm, tự động khám phá kiến thức định kỳ
 
 import json
 import logging
-import os
 import sys
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 
 import schedule

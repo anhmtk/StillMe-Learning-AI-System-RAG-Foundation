@@ -19,7 +19,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 # Import Phase 2 modules
 try:
@@ -164,10 +164,10 @@ class PricingStrategy:
     base_price: float
     currency: Currency
     billing_cycle: BillingCycle
-    features: List[str]
-    limits: Dict[str, Any]
-    discounts: Dict[str, float]
-    metadata: Dict[str, Any]
+    features: list[str]
+    limits: dict[str, Any]
+    discounts: dict[str, float]
+    metadata: dict[str, Any]
 
 
 @dataclass
@@ -183,7 +183,7 @@ class PricePoint:
     elasticity: float
     demand_forecast: float
     revenue_projection: float
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 @dataclass
@@ -192,13 +192,13 @@ class CustomerSegment:
 
     segment_id: str
     name: str
-    characteristics: Dict[str, Any]
+    characteristics: dict[str, Any]
     price_sensitivity: float
     value_perception: float
     willingness_to_pay: float
     churn_probability: float
     lifetime_value: float
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 @dataclass
@@ -211,12 +211,12 @@ class BillingRecord:
     amount: float
     currency: Currency
     billing_cycle: BillingCycle
-    usage_metrics: Dict[str, float]
-    discounts_applied: List[str]
+    usage_metrics: dict[str, float]
+    discounts_applied: list[str]
     taxes: float
     total_amount: float
     payment_status: str
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 @dataclass
@@ -230,10 +230,10 @@ class PricingReport:
     total_revenue: float
     average_price: float
     price_elasticity: float
-    customer_segments: List[Dict[str, Any]]
-    pricing_recommendations: List[str]
-    revenue_forecast: Dict[str, float]
-    metadata: Dict[str, Any]
+    customer_segments: list[dict[str, Any]]
+    pricing_recommendations: list[str]
+    revenue_forecast: dict[str, float]
+    metadata: dict[str, Any]
 
 
 class IntelligentPricingEngine:
@@ -241,7 +241,7 @@ class IntelligentPricingEngine:
     Main Intelligent Pricing Engine
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         self.config = config or {}
         self.logger = self._setup_logging()
 
@@ -252,11 +252,11 @@ class IntelligentPricingEngine:
         self.usage_analytics = UAE()
 
         # Pricing state
-        self.pricing_strategies: List[PricingStrategy] = []
-        self.price_points: List[PricePoint] = []
-        self.customer_segments: List[CustomerSegment] = []
-        self.billing_records: List[BillingRecord] = []
-        self.pricing_reports: List[PricingReport] = []
+        self.pricing_strategies: list[PricingStrategy] = []
+        self.price_points: list[PricePoint] = []
+        self.customer_segments: list[CustomerSegment] = []
+        self.billing_records: list[BillingRecord] = []
+        self.pricing_reports: list[PricingReport] = []
 
         # Pricing components
         self.pricing_optimizer = PricingOptimizer()
@@ -271,7 +271,7 @@ class IntelligentPricingEngine:
         self.compliance_monitoring_enabled = True
 
         # Performance tracking
-        self.performance_metrics: Dict[str, List[float]] = {
+        self.performance_metrics: dict[str, list[float]] = {
             "pricing_calculation_times": [],
             "roi_optimization_times": [],
             "billing_processing_times": [],
@@ -633,7 +633,7 @@ class IntelligentPricingEngine:
         try:
             self.pricing_db.execute(
                 """
-                INSERT OR REPLACE INTO pricing_strategies 
+                INSERT OR REPLACE INTO pricing_strategies
                 (strategy_id, name, model, base_price, currency, billing_cycle,
                  features, limits, discounts, metadata)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -662,7 +662,7 @@ class IntelligentPricingEngine:
         try:
             self.pricing_db.execute(
                 """
-                INSERT OR REPLACE INTO price_points 
+                INSERT OR REPLACE INTO price_points
                 (price_point_id, timestamp, tier, price, currency, confidence_score,
                  elasticity, demand_forecast, revenue_projection, metadata)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -691,7 +691,7 @@ class IntelligentPricingEngine:
         try:
             self.pricing_db.execute(
                 """
-                INSERT OR REPLACE INTO customer_segments 
+                INSERT OR REPLACE INTO customer_segments
                 (segment_id, name, characteristics, price_sensitivity, value_perception,
                  willingness_to_pay, churn_probability, lifetime_value, metadata)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -719,7 +719,7 @@ class IntelligentPricingEngine:
         try:
             self.pricing_db.execute(
                 """
-                INSERT OR REPLACE INTO billing_records 
+                INSERT OR REPLACE INTO billing_records
                 (billing_id, customer_id, timestamp, amount, currency, billing_cycle,
                  usage_metrics, discounts_applied, taxes, total_amount, payment_status, metadata)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
@@ -745,7 +745,7 @@ class IntelligentPricingEngine:
         except Exception as e:
             self.logger.error(f"Error storing billing record: {e}")
 
-    async def _get_pricing_status(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_pricing_status(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get pricing status endpoint"""
         try:
             return {
@@ -790,7 +790,7 @@ class IntelligentPricingEngine:
                 "message": str(e),
             }
 
-    async def _get_pricing_strategies(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_pricing_strategies(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get pricing strategies endpoint"""
         try:
             strategies_data = []
@@ -824,7 +824,7 @@ class IntelligentPricingEngine:
                 "message": str(e),
             }
 
-    async def _get_price_points(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_price_points(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get price points endpoint"""
         try:
             price_points_data = []
@@ -858,7 +858,7 @@ class IntelligentPricingEngine:
                 "message": str(e),
             }
 
-    async def _get_customer_segments(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_customer_segments(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get customer segments endpoint"""
         try:
             segments_data = []
@@ -891,7 +891,7 @@ class IntelligentPricingEngine:
                 "message": str(e),
             }
 
-    async def _get_billing_records(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_billing_records(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get billing records endpoint"""
         try:
             billing_data = []
@@ -943,7 +943,7 @@ class IntelligentPricingEngine:
                 "message": str(e),
             }
 
-    async def _calculate_price(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _calculate_price(self, data: dict[str, Any]) -> dict[str, Any]:
         """Calculate price endpoint"""
         try:
             tier = PricingTier(data.get("tier", "professional"))
@@ -972,7 +972,7 @@ class IntelligentPricingEngine:
                 "message": str(e),
             }
 
-    async def _optimize_pricing(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _optimize_pricing(self, data: dict[str, Any]) -> dict[str, Any]:
         """Optimize pricing endpoint"""
         try:
             optimization_goals = data.get("goals", ["revenue_maximization"])
@@ -1025,8 +1025,8 @@ class PricingOptimizer:
         self.optimization_history = []
 
     def calculate_price(
-        self, tier: PricingTier, usage_metrics: Dict[str, float], customer_segment: str
-    ) -> Dict[str, Any]:
+        self, tier: PricingTier, usage_metrics: dict[str, float], customer_segment: str
+    ) -> dict[str, Any]:
         """Calculate optimal price"""
         # Mock price calculation
         base_prices = {
@@ -1073,7 +1073,7 @@ class ROICalculator:
     def __init__(self):
         self.calculation_history = []
 
-    def optimize_pricing(self, goals: List[str], time_horizon: int) -> Dict[str, Any]:
+    def optimize_pricing(self, goals: list[str], time_horizon: int) -> dict[str, Any]:
         """Optimize pricing for ROI"""
         # Mock ROI optimization
         optimization_results = {

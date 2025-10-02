@@ -1,4 +1,3 @@
-import subprocess
 
 """
 🛡️ SECURITY REMEDIATION SYSTEM
@@ -18,7 +17,7 @@ import secrets
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Set
+from typing import Any
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -48,7 +47,7 @@ class SecurityRemediation:
     ignored_issues: int
     remaining_issues: int
     security_score: float
-    recommendations: List[str]
+    recommendations: list[str]
 
 
 class SecurityRemediationSystem:
@@ -58,8 +57,8 @@ class SecurityRemediationSystem:
 
     def __init__(self, root_path: str = "."):
         self.root_path = Path(root_path)
-        self.security_issues: List[SecurityIssue] = []
-        self.fixed_files: Set[str] = set()
+        self.security_issues: list[SecurityIssue] = []
+        self.fixed_files: set[str] = set()
 
         # Security patterns to detect
         self.dangerous_functions = {
@@ -87,7 +86,7 @@ class SecurityRemediationSystem:
             r"\.format\(.*\)",
         ]
 
-    def scan_security_issues(self) -> List[SecurityIssue]:
+    def scan_security_issues(self) -> list[SecurityIssue]:
         """
         Scan toàn bộ codebase để tìm security issues
         """
@@ -122,7 +121,7 @@ class SecurityRemediationSystem:
 
         return any(pattern in str(file_path) for pattern in skip_patterns)
 
-    def _scan_file(self, file_path: Path) -> List[SecurityIssue]:
+    def _scan_file(self, file_path: Path) -> list[SecurityIssue]:
         """Scan individual file for security issues"""
         issues = []
 
@@ -275,7 +274,7 @@ class SecurityRemediationSystem:
             logger.error(f"Error fixing issue: {e}")
             return False
 
-    def _fix_dangerous_function(self, lines: List[str], issue: SecurityIssue) -> bool:
+    def _fix_dangerous_function(self, lines: list[str], issue: SecurityIssue) -> bool:
         """Fix dangerous function usage"""
         line_index = issue.line_number - 1
 
@@ -288,7 +287,6 @@ class SecurityRemediationSystem:
         replacements = {
             "ast.literal_eval(": "ast.literal_ast.literal_eval(",
             "exec(": "# exec(  # SECURITY: Replaced with safe alternative",
-            "subprocess.run(  # SECURITY: Replaced with safe alternative": "subprocess.run(  # SECURITY: Replaced with safe alternative",
             "subprocess.run(  # SECURITY: Replaced with safe alternative": "subprocess.run(  # SECURITY: Replaced with safe alternative",
         }
 
@@ -310,7 +308,7 @@ class SecurityRemediationSystem:
 
         return False
 
-    def _fix_hardcoded_credential(self, lines: List[str], issue: SecurityIssue) -> bool:
+    def _fix_hardcoded_credential(self, lines: list[str], issue: SecurityIssue) -> bool:
         """Fix hardcoded credentials"""
         line_index = issue.line_number - 1
 
@@ -356,7 +354,7 @@ class SecurityRemediationSystem:
 
         return False
 
-    def _generate_recommendations(self) -> List[str]:
+    def _generate_recommendations(self) -> list[str]:
         """Generate security recommendations"""
         recommendations = [
             "Implement input validation for all user inputs",
@@ -373,7 +371,7 @@ class SecurityRemediationSystem:
 
         return recommendations
 
-    def create_security_config(self) -> Dict[str, Any]:
+    def create_security_config(self) -> dict[str, Any]:
         """Create security configuration file"""
         config = {
             "security": {
@@ -438,7 +436,7 @@ def main():
     remediation_system = SecurityRemediationSystem()
 
     # Scan for issues
-    issues = remediation_system.scan_security_issues()
+    remediation_system.scan_security_issues()
 
     # Fix issues
     remediation = remediation_system.fix_security_issues()

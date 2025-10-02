@@ -5,11 +5,10 @@ Generates comprehensive test reports from CI/CD artifacts
 """
 
 import json
-import os
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import yaml
 
@@ -17,7 +16,7 @@ import yaml
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-def load_test_config() -> Dict[str, Any]:
+def load_test_config() -> dict[str, Any]:
     """Load test configuration."""
     config_path = project_root / "config" / "test_config.yaml"
     if config_path.exists():
@@ -25,7 +24,7 @@ def load_test_config() -> Dict[str, Any]:
             return yaml.safe_load(f)
     return {}
 
-def load_artifacts() -> Dict[str, Any]:
+def load_artifacts() -> dict[str, Any]:
     """Load test artifacts from various sources."""
     artifacts = {}
     artifacts_dir = project_root / "artifacts"
@@ -104,7 +103,7 @@ def load_artifacts() -> Dict[str, Any]:
 
     return artifacts
 
-def calculate_test_metrics(artifacts: Dict[str, Any]) -> Dict[str, Any]:
+def calculate_test_metrics(artifacts: dict[str, Any]) -> dict[str, Any]:
     """Calculate test metrics from artifacts."""
     metrics = {
         'total_tests': 0,
@@ -121,7 +120,7 @@ def calculate_test_metrics(artifacts: Dict[str, Any]) -> Dict[str, Any]:
     }
 
     # Extract pytest metrics (simplified - would need actual parsing)
-    for key, artifact in artifacts.items():
+    for _key, artifact in artifacts.items():
         if artifact['type'] == 'pytest_html' and artifact['exists']:
             # In a real implementation, would parse HTML for test results
             metrics['total_tests'] += 100  # Placeholder
@@ -129,7 +128,7 @@ def calculate_test_metrics(artifacts: Dict[str, Any]) -> Dict[str, Any]:
             metrics['failed_tests'] += 5    # Placeholder
 
     # Extract k6 metrics
-    for key, artifact in artifacts.items():
+    for _key, artifact in artifacts.items():
         if artifact['type'] == 'k6_results' and artifact['exists'] and artifact['data']:
             data = artifact['data']
             if 'metrics' in data:
@@ -154,7 +153,7 @@ def calculate_test_metrics(artifacts: Dict[str, Any]) -> Dict[str, Any]:
 
     return metrics
 
-def generate_executive_summary(metrics: Dict[str, Any], config: Dict[str, Any]) -> str:
+def generate_executive_summary(metrics: dict[str, Any], config: dict[str, Any]) -> str:
     """Generate executive summary."""
     summary = []
 
@@ -203,7 +202,7 @@ def generate_executive_summary(metrics: Dict[str, Any], config: Dict[str, Any]) 
 
     return "\n".join(summary)
 
-def generate_kpi_table(metrics: Dict[str, Any]) -> str:
+def generate_kpi_table(metrics: dict[str, Any]) -> str:
     """Generate KPI summary table."""
     table = []
 
@@ -249,7 +248,7 @@ def generate_test_matrix() -> str:
 
     return "\n".join(matrix)
 
-def generate_risk_analysis(metrics: Dict[str, Any]) -> str:
+def generate_risk_analysis(metrics: dict[str, Any]) -> str:
     """Generate risk analysis."""
     risks = []
 
@@ -356,7 +355,7 @@ def generate_architecture_info() -> str:
 
     return "\n".join(info)
 
-def generate_artifacts_links(artifacts: Dict[str, Any]) -> str:
+def generate_artifacts_links(artifacts: dict[str, Any]) -> str:
     """Generate artifacts links section."""
     links = []
 
@@ -386,7 +385,7 @@ def generate_artifacts_links(artifacts: Dict[str, Any]) -> str:
 
     return "\n".join(links)
 
-def generate_action_plan(metrics: Dict[str, Any]) -> str:
+def generate_action_plan(metrics: dict[str, Any]) -> str:
     """Generate action plan."""
     plan = []
 

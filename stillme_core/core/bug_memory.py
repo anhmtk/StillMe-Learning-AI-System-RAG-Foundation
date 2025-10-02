@@ -2,7 +2,7 @@ import hashlib
 import json
 import time
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 
 class BugMemory:
@@ -14,7 +14,7 @@ class BugMemory:
         base = f"{file}:{line or 0}:{message}"
         return hashlib.sha256(base.encode("utf-8")).hexdigest()
 
-    def append(self, record: Dict[str, Any]) -> None:
+    def append(self, record: dict[str, Any]) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)
         with self.path.open("a", encoding="utf-8") as f:
             f.write(json.dumps(record, ensure_ascii=False) + "\n")

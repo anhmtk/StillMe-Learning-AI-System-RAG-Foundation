@@ -12,7 +12,7 @@ import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -34,22 +34,22 @@ class ModuleInfo:
     description: str
     author: str
     status: ModuleStatus
-    dependencies: List[str]
-    config_schema: Optional[Dict[str, Any]] = None
+    dependencies: list[str]
+    config_schema: Optional[dict[str, Any]] = None
 
 
 class ModuleBase(ABC):
     """
     Base class for all StillMe modules
-    
+
     This abstract base class defines the interface that all modules must implement.
     It provides common functionality and ensures consistency across the framework.
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         """
         Initialize the module
-        
+
         Args:
             config: Optional configuration dictionary
         """
@@ -62,7 +62,7 @@ class ModuleBase(ABC):
     def module_info(self) -> ModuleInfo:
         """
         Get module information
-        
+
         Returns:
             ModuleInfo: Module information container
         """
@@ -72,7 +72,7 @@ class ModuleBase(ABC):
     async def initialize(self) -> bool:
         """
         Initialize the module
-        
+
         Returns:
             bool: True if initialization successful, False otherwise
         """
@@ -82,13 +82,13 @@ class ModuleBase(ABC):
     async def process(self, input_data: Any) -> Any:
         """
         Process input data
-        
+
         Args:
             input_data: Input data to process
-            
+
         Returns:
             Processed output data
-            
+
         Raises:
             NotImplementedError: If the module is a stub/placeholder
         """
@@ -114,7 +114,7 @@ class ModuleBase(ABC):
     def is_implemented(self) -> bool:
         """
         Check if module is fully implemented (not a stub)
-        
+
         Returns:
             bool: True if implemented, False if stub
         """
@@ -123,11 +123,11 @@ class ModuleBase(ABC):
     def get_config(self, key: str, default: Any = None) -> Any:
         """
         Get configuration value
-        
+
         Args:
             key: Configuration key
             default: Default value if key not found
-            
+
         Returns:
             Configuration value or default
         """
@@ -136,7 +136,7 @@ class ModuleBase(ABC):
     def set_config(self, key: str, value: Any) -> None:
         """
         Set configuration value
-        
+
         Args:
             key: Configuration key
             value: Configuration value
@@ -147,15 +147,15 @@ class ModuleBase(ABC):
 class StubModule(ModuleBase):
     """
     Stub module implementation for placeholder modules
-    
+
     This class provides a standard implementation for modules that are not yet
     fully implemented. It raises NotImplementedError with clear messages.
     """
 
-    def __init__(self, name: str, description: str = "Not implemented yet", config: Optional[Dict[str, Any]] = None):
+    def __init__(self, name: str, description: str = "Not implemented yet", config: Optional[dict[str, Any]] = None):
         """
         Initialize stub module
-        
+
         Args:
             name: Module name
             description: Module description
@@ -188,7 +188,7 @@ class StubModule(ModuleBase):
     async def process(self, input_data: Any) -> Any:
         """
         Process input data (stub implementation)
-        
+
         Raises:
             NotImplementedError: Always raises for stub modules
         """
@@ -205,11 +205,11 @@ class StubModule(ModuleBase):
 def create_stub_module(name: str, description: str = "Not implemented yet") -> StubModule:
     """
     Factory function to create stub modules
-    
+
     Args:
         name: Module name
         description: Module description
-        
+
     Returns:
         StubModule: Configured stub module
     """

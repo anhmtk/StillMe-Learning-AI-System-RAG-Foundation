@@ -11,7 +11,7 @@ Chức năng:
 
 import logging
 import random
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -37,7 +37,7 @@ class ConversationalCore:
     def __init__(
         self,
         persona_engine: Any,  # Type hint linh hoạt cho persona engine
-        delay_messages: Optional[List[str]] = None,
+        delay_messages: Optional[list[str]] = None,
         max_history: int = 10,
     ):
         """
@@ -50,7 +50,7 @@ class ConversationalCore:
         """
         self.persona_engine = persona_engine
         self.max_history = max(5, min(max_history, 20))  # Giới hạn 5-20
-        self.history: List[Dict[str, str]] = []
+        self.history: list[dict[str, str]] = []
         self.delay_messages = delay_messages or self.DEFAULT_DELAY_MESSAGES.copy()
 
         # Initialize IdentityHandler
@@ -157,7 +157,7 @@ class ConversationalCore:
         self.history.clear()
         logger.info("Conversation history reset")
 
-    def get_conversation_state(self) -> Dict[str, Union[int, List[Dict]]]:
+    def get_conversation_state(self) -> dict[str, Union[int, list[dict]]]:
         """Lấy trạng thái hiện tại của hội thoại"""
         return {
             "history_length": len(self.history),

@@ -7,7 +7,6 @@ Scans for potential secrets in code and configuration
 import re
 import sys
 from pathlib import Path
-from typing import List, Set, Tuple
 
 # Common secret patterns
 SECRET_PATTERNS = [
@@ -108,7 +107,7 @@ def is_safe_pattern(content: str, match: str) -> bool:
 
     # Check if it's in a comment or documentation
     lines = content.split('\n')
-    for i, line in enumerate(lines):
+    for _i, line in enumerate(lines):
         if match in line:
             # Check if line is a comment
             stripped = line.strip()
@@ -121,7 +120,7 @@ def is_safe_pattern(content: str, match: str) -> bool:
 
     return False
 
-def scan_file(file_path: Path) -> List[Tuple[int, str, str]]:
+def scan_file(file_path: Path) -> list[tuple[int, str, str]]:
     """Scan file for potential secrets"""
     findings = []
 
@@ -147,7 +146,7 @@ def scan_file(file_path: Path) -> List[Tuple[int, str, str]]:
 
     return findings
 
-def scan_directory(directory: Path) -> List[Tuple[Path, int, str, str]]:
+def scan_directory(directory: Path) -> list[tuple[Path, int, str, str]]:
     """Scan directory for potential secrets"""
     all_findings = []
 

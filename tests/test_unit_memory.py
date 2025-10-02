@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 """
 Unit Tests for Memory Module
@@ -17,7 +17,7 @@ try:
 except ImportError:
     # Mock classes for testing if not implemented
     class MemoryManager:
-        def __init__(self, config: Dict[str, Any]):
+        def __init__(self, config: dict[str, Any]):
             self.config = config
             self.layers = []
             self.ttl_enabled = config.get('ttl_enabled', True)
@@ -32,11 +32,11 @@ except ImportError:
         def clear(self, layer: str = None) -> bool:
             return True
 
-        def get_stats(self) -> Dict[str, Any]:
+        def get_stats(self) -> dict[str, Any]:
             return {'total_items': 0, 'layers': []}
 
     class MemoryLayer:
-        def __init__(self, name: str, config: Dict[str, Any]):
+        def __init__(self, name: str, config: dict[str, Any]):
             self.name = name
             self.config = config
             self.data = {}
@@ -64,14 +64,14 @@ except ImportError:
             return True
 
     class PersistenceManager:
-        def __init__(self, config: Dict[str, Any]):
+        def __init__(self, config: dict[str, Any]):
             self.config = config
             self.storage_path = config.get('storage_path', '/tmp')
 
-        def save(self, data: Dict[str, Any]) -> bool:
+        def save(self, data: dict[str, Any]) -> bool:
             return True
 
-        def load(self) -> Dict[str, Any]:
+        def load(self) -> dict[str, Any]:
             return {}
 
         def cleanup(self) -> bool:

@@ -12,15 +12,13 @@ Tính năng:
 6. Adaptive Defense - Phòng thủ thích ứng
 """
 
-import hashlib
 import json
-import os
 import time
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 
 class AttackType(Enum):
@@ -59,7 +57,7 @@ class AttackScenario:
     payload: str
     target: str
     expected_impact: SecurityLevel
-    success_criteria: List[str]
+    success_criteria: list[str]
     created_at: datetime
 
 @dataclass
@@ -79,9 +77,9 @@ class SecurityExercise:
     exercise_id: str
     title: str
     description: str
-    attack_scenarios: List[AttackScenario]
-    defense_strategies: List[DefenseStrategy]
-    learning_objectives: List[str]
+    attack_scenarios: list[AttackScenario]
+    defense_strategies: list[DefenseStrategy]
+    learning_objectives: list[str]
     difficulty_level: SecurityLevel
     created_at: datetime
 
@@ -92,9 +90,9 @@ class SecurityLearningResult:
     attack_scenarios_tested: int
     defense_strategies_implemented: int
     vulnerabilities_discovered: int
-    security_improvements: List[str]
+    security_improvements: list[str]
     learning_score: float
-    recommendations: List[str]
+    recommendations: list[str]
     analysis_time: float
 
 class RedBlueTeamIntegration:
@@ -116,7 +114,7 @@ class RedBlueTeamIntegration:
         if not self.exercises:
             self._initialize_default_exercises()
 
-    def _load_exercises(self) -> List[SecurityExercise]:
+    def _load_exercises(self) -> list[SecurityExercise]:
         """Load security exercises from database"""
         if not self.exercises_db.exists():
             return []
@@ -149,7 +147,7 @@ class RedBlueTeamIntegration:
             print(f"Error loading exercises: {e}")
             return []
 
-    def _load_learning_history(self) -> List[Dict]:
+    def _load_learning_history(self) -> list[dict]:
         """Load learning history from database"""
         if not self.learning_db.exists():
             return []
@@ -297,7 +295,7 @@ class RedBlueTeamIntegration:
         self.exercises = default_exercises
         self._save_exercises()
 
-    def run_security_exercise(self, exercise_id: str) -> Dict[str, Any]:
+    def run_security_exercise(self, exercise_id: str) -> dict[str, Any]:
         """Run a security exercise"""
         exercise = None
         for ex in self.exercises:
@@ -409,8 +407,8 @@ class RedBlueTeamIntegration:
         return effectiveness
 
     def _generate_security_recommendations(self, exercise: SecurityExercise,
-                                         attack_results: List[Dict],
-                                         defense_results: List[Dict]) -> List[str]:
+                                         attack_results: list[dict],
+                                         defense_results: list[dict]) -> list[str]:
         """Generate security recommendations"""
         recommendations = []
 

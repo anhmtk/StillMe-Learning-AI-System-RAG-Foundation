@@ -27,7 +27,6 @@ class TestCollectScoreTop10:
     async def test_collect_score_top10_pipeline(self):
         """Test full pipeline: collect→score→top10 with stable results"""
         # Extract topics from test message
-        test_message = "AI development trends and opportunities"
         topics = ["AI", "development", "trends", "opportunities"]
 
         # Collect data from all sources
@@ -125,7 +124,7 @@ class TestCollectScoreTop10:
 
         # Results should be identical
         assert len(top_niches) == len(top_niches2)
-        for i, (niche1, niche2) in enumerate(zip(top_niches, top_niches2)):
+        for _i, (niche1, niche2) in enumerate(zip(top_niches, top_niches2)):
             assert niche1.total_score == niche2.total_score
             assert niche1.topic == niche2.topic
 
@@ -196,10 +195,6 @@ class TestAllowlistRedirect:
     def test_redirect_outside_allowlist_deny(self):
         """Test redirect outside allowlist is DENIED"""
         # Test redirect chain
-        redirect_chain = [
-            "https://allowed.com/redirect",
-            "https://malicious.com/final"
-        ]
 
         # Load allowlist
         with open("policies/network_allowlist.yaml") as f:
@@ -253,7 +248,6 @@ class TestHomoglyphIDN:
     def test_punycode_normalization(self):
         """Test Punycode normalization"""
         # Test IDN domain
-        idn_domain = "xn--e1afmkfd.xn--p1ai"  # Punycode for .рф
 
         # In real implementation, this would be normalized
         # and checked against allowlist

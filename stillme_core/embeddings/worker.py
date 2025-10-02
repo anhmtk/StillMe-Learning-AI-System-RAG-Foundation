@@ -6,12 +6,10 @@ Subprocess-based embedding worker to avoid Windows torch crashes.
 """
 
 import json
-import os
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
-from typing import List
 
 
 class EmbeddingRuntimeError(Exception):
@@ -51,19 +49,19 @@ def main():
         input_data = json.loads(sys.stdin.read())
         model_name = input_data.get("model", "sentence-transformers/all-MiniLM-L6-v2")
         texts = input_data.get("texts", [])
-        
+
         # Load model
         model = SentenceTransformer(model_name)
-        
+
         # Generate embeddings
         embeddings = model.encode(texts)
-        
+
         # Convert to list format
         result = [emb.tolist() for emb in embeddings]
-        
+
         # Output result
         print(json.dumps({"embeddings": result}))
-        
+
     except Exception as e:
         print(json.dumps({"error": str(e)}))
         sys.exit(1)
@@ -77,7 +75,7 @@ if __name__ == "__main__":
         script_path.write_text(script_content)
         return script_path
 
-    def embed(self, texts: List[str]) -> List[List[float]]:
+    def embed(self, texts: list[str]) -> list[list[float]]:
         """Generate embeddings using subprocess worker"""
         if not texts:
             return []

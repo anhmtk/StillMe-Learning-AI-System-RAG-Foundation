@@ -5,10 +5,7 @@ Creates variations of existing prompts to scale up testing
 """
 
 import csv
-import random
-import re
 from pathlib import Path
-from typing import Any, Dict, List
 
 
 class PromptGenerator:
@@ -74,7 +71,7 @@ class PromptGenerator:
             "database", "system", "tool", "script", "API", "dashboard"
         ]
 
-    def generate_synonym_variations(self, prompt: str) -> List[str]:
+    def generate_synonym_variations(self, prompt: str) -> list[str]:
         """Generate variations using synonyms"""
         variations = []
         words = prompt.lower().split()
@@ -87,7 +84,7 @@ class PromptGenerator:
 
         return variations
 
-    def generate_vague_variations(self, prompt: str) -> List[str]:
+    def generate_vague_variations(self, prompt: str) -> list[str]:
         """Generate variations with vague phrases"""
         variations = []
 
@@ -105,7 +102,7 @@ class PromptGenerator:
 
         return variations
 
-    def generate_ambiguous_reference_variations(self, prompt: str) -> List[str]:
+    def generate_ambiguous_reference_variations(self, prompt: str) -> list[str]:
         """Generate variations with ambiguous references"""
         variations = []
 
@@ -122,7 +119,7 @@ class PromptGenerator:
 
         return variations
 
-    def generate_action_variations(self, prompt: str) -> List[str]:
+    def generate_action_variations(self, prompt: str) -> list[str]:
         """Generate variations with different action verbs"""
         variations = []
 
@@ -135,7 +132,7 @@ class PromptGenerator:
 
         return variations
 
-    def generate_goal_variations(self, prompt: str) -> List[str]:
+    def generate_goal_variations(self, prompt: str) -> list[str]:
         """Generate variations with different goals"""
         variations = []
 
@@ -155,7 +152,7 @@ class PromptGenerator:
 
         return variations
 
-    def generate_context_dependency_variations(self, prompt: str) -> List[str]:
+    def generate_context_dependency_variations(self, prompt: str) -> list[str]:
         """Generate variations with contextual dependencies"""
         variations = []
 
@@ -176,7 +173,7 @@ class PromptGenerator:
 
         return variations
 
-    def generate_slang_variations(self, prompt: str) -> List[str]:
+    def generate_slang_variations(self, prompt: str) -> list[str]:
         """Generate variations with slang and informal language"""
         variations = []
 
@@ -211,7 +208,7 @@ class PromptGenerator:
 
         return variations
 
-    def generate_cross_domain_variations(self, prompt: str) -> List[str]:
+    def generate_cross_domain_variations(self, prompt: str) -> list[str]:
         """Generate variations with cross-domain actions"""
         variations = []
 
@@ -230,7 +227,7 @@ class PromptGenerator:
 
         return variations
 
-    def generate_all_variations(self, base_prompts: List[str]) -> List[Dict[str, str]]:
+    def generate_all_variations(self, base_prompts: list[str]) -> list[dict[str, str]]:
         """Generate all variations for a list of base prompts"""
         all_variations = []
 

@@ -9,12 +9,12 @@ import hashlib
 import json
 import logging
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
@@ -59,7 +59,7 @@ class PrivacyManager:
         # Audit log
         self.audit_log = self.data_dir / "audit.log"
 
-    def export_user_data(self, user_id: str, format: str = "json", include_metadata: bool = True) -> Dict[str, Any]:
+    def export_user_data(self, user_id: str, format: str = "json", include_metadata: bool = True) -> dict[str, Any]:
         """Export all user data"""
         try:
             # Validate user ID
@@ -87,7 +87,7 @@ class PrivacyManager:
             logger.error(f"Error exporting data for user {user_id}: {e}")
             raise HTTPException(status_code=500, detail=f"Data export failed: {str(e)}")
 
-    def delete_user_data(self, user_id: str, confirmation_token: str, delete_all: bool = True) -> Dict[str, Any]:
+    def delete_user_data(self, user_id: str, confirmation_token: str, delete_all: bool = True) -> dict[str, Any]:
         """Delete user data"""
         try:
             # Validate user ID
@@ -118,7 +118,7 @@ class PrivacyManager:
             logger.error(f"Error deleting data for user {user_id}: {e}")
             raise HTTPException(status_code=500, detail=f"Data deletion failed: {str(e)}")
 
-    def update_consent(self, user_id: str, consent_type: str, granted: bool, timestamp: Optional[datetime] = None) -> Dict[str, Any]:
+    def update_consent(self, user_id: str, consent_type: str, granted: bool, timestamp: Optional[datetime] = None) -> dict[str, Any]:
         """Update user consent"""
         try:
             # Validate user ID
@@ -171,7 +171,7 @@ class PrivacyManager:
         expected_token = hashlib.sha256(f"delete_{user_id}".encode()).hexdigest()[:16]
         return token == expected_token
 
-    def _collect_user_data(self, user_id: str) -> Dict[str, Any]:
+    def _collect_user_data(self, user_id: str) -> dict[str, Any]:
         """Collect user data from various sources"""
         user_data = {
             "user_id": user_id,
@@ -199,7 +199,7 @@ class PrivacyManager:
 
         return user_data
 
-    def _get_conversation_history(self, user_id: str) -> Optional[List[Dict[str, Any]]]:
+    def _get_conversation_history(self, user_id: str) -> Optional[list[dict[str, Any]]]:
         """Get conversation history for user"""
         # Mock implementation - in real system, this would query the database
         return [
@@ -215,7 +215,7 @@ class PrivacyManager:
             }
         ]
 
-    def _get_user_preferences(self, user_id: str) -> Optional[Dict[str, Any]]:
+    def _get_user_preferences(self, user_id: str) -> Optional[dict[str, Any]]:
         """Get user preferences"""
         # Mock implementation
         return {
@@ -225,7 +225,7 @@ class PrivacyManager:
             "privacy_mode": "balanced"
         }
 
-    def _get_analytics_data(self, user_id: str) -> Optional[Dict[str, Any]]:
+    def _get_analytics_data(self, user_id: str) -> Optional[dict[str, Any]]:
         """Get analytics data for user"""
         # Mock implementation
         return {
@@ -238,7 +238,7 @@ class PrivacyManager:
             }
         }
 
-    def _get_audit_logs(self, user_id: str) -> Optional[List[Dict[str, Any]]]:
+    def _get_audit_logs(self, user_id: str) -> Optional[list[dict[str, Any]]]:
         """Get audit logs for user"""
         # Mock implementation
         return [
@@ -292,7 +292,7 @@ class PrivacyManager:
         # Mock implementation
         return 10
 
-    def _store_consent(self, consent_data: Dict[str, Any]):
+    def _store_consent(self, consent_data: dict[str, Any]):
         """Store consent data"""
         consent_file = self.data_dir / f"consent_{consent_data['user_id']}.json"
         try:
@@ -302,7 +302,7 @@ class PrivacyManager:
             logger.error(f"Error storing consent: {e}")
             raise
 
-    def _log_audit_event(self, event_type: str, user_id: str, details: Dict[str, Any]):
+    def _log_audit_event(self, event_type: str, user_id: str, details: dict[str, Any]):
         """Log audit event"""
         audit_entry = {
             "timestamp": datetime.now().isoformat(),

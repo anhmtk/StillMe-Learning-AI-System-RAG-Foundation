@@ -5,9 +5,7 @@ Task: Create a simple test file for conflict resolution
 Generated at: 2025-09-29 22:37:38
 """
 
-import os
 import sys
-from pathlib import Path
 
 
 def resolve_conflicts():

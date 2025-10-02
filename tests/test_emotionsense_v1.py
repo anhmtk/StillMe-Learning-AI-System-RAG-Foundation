@@ -486,7 +486,7 @@ class TestEmotionSenseV1(unittest.TestCase):
             self.emotion_sense.detect_emotion(
                 text, language="vi", user_id="perf_test_user"
             )
-        total_time = time.time() - start_time
+        time.time() - start_time
 
         # Get updated metrics
         updated_metrics = self.emotion_sense.get_performance_metrics()

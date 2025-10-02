@@ -9,11 +9,10 @@ Author: StillMe AI Framework
 Created: 2025-01-08
 """
 
-import hashlib
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import Dict, List, Optional, Tuple
+from typing import Optional
 
 
 class PIIType(Enum):
@@ -42,7 +41,7 @@ class PIIMatch:
 class PIIRedactor:
     """
     Advanced PII Redactor with format preservation and tagging
-    
+
     Features:
     - Format-preserving redaction (e.g., j***@d***.com)
     - Tagged redaction with [REDACTED:<type>]
@@ -51,14 +50,14 @@ class PIIRedactor:
     - Confidence scoring
     """
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: Optional[dict] = None):
         """Initialize PII redactor with configuration"""
         self.config = config or {}
         self.patterns = self._build_patterns()
         self.redaction_tag = self.config.get('redaction_tag', True)
         self.preserve_format = self.config.get('preserve_format', True)
 
-    def _build_patterns(self) -> Dict[PIIType, List[Tuple[re.Pattern, float]]]:
+    def _build_patterns(self) -> dict[PIIType, list[tuple[re.Pattern, float]]]:
         """Build regex patterns for PII detection"""
         patterns = {}
 
@@ -123,13 +122,13 @@ class PIIRedactor:
 
         return patterns
 
-    def redact(self, text: str) -> Tuple[str, List[PIIMatch]]:
+    def redact(self, text: str) -> tuple[str, list[PIIMatch]]:
         """
         Redact PII from text and return redacted text with match details
-        
+
         Args:
             text: Input text to redact
-            
+
         Returns:
             Tuple of (redacted_text, list_of_matches)
         """
@@ -342,7 +341,7 @@ class PIIRedactor:
             return f"{redacted} [REDACTED:{PIIType.SSN.value}]"
         return redacted
 
-    def get_stats(self, matches: List[PIIMatch]) -> Dict[str, int]:
+    def get_stats(self, matches: list[PIIMatch]) -> dict[str, int]:
         """Get statistics about redacted PII"""
         stats = {}
         for match in matches:

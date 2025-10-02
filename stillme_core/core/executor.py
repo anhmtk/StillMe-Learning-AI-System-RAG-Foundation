@@ -5,7 +5,7 @@ import subprocess
 import tempfile
 import time
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 import httpx
 
@@ -19,7 +19,7 @@ class ExecResult:
         self.stderr = stderr
 
 
-def _run(cmd: List[str], cwd: str | None = None, timeout: int = 30) -> ExecResult:
+def _run(cmd: list[str], cwd: str | None = None, timeout: int = 30) -> ExecResult:
     try:
         p = subprocess.run(
             cmd, cwd=cwd, capture_output=True, text=True, timeout=timeout
@@ -51,7 +51,7 @@ class PatchExecutor:
         res = _run(["git", "apply", "--index", tmp_path], cwd=target_cwd)
         return res
 
-    def apply_patch_and_test(self, plan_item) -> Dict[str, Any]:
+    def apply_patch_and_test(self, plan_item) -> dict[str, Any]:
         """
         Apply patch from plan_item and run tests.
         Returns dict with 'ok' boolean and execution details.
@@ -81,7 +81,7 @@ class PatchExecutor:
         except Exception as e:
             return {"ok": False, "error": str(e), "stdout": "", "stderr": str(e)}
 
-    def run_pytest(self, tests: List[str] | None = None) -> ExecResult:
+    def run_pytest(self, tests: list[str] | None = None) -> ExecResult:
         # Skip pytest and run direct test for fastest execution
         import os
 

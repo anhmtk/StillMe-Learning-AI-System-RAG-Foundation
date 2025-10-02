@@ -9,7 +9,7 @@ import re
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -18,9 +18,9 @@ logger = logging.getLogger(__name__)
 class ToolRequest:
     """Tool execution request from LLM"""
     tool_name: str
-    parameters: Dict[str, Any]
+    parameters: dict[str, Any]
     user_message: str
-    context: Dict[str, Any]
+    context: dict[str, Any]
     timestamp: str
 
 @dataclass
@@ -28,8 +28,8 @@ class ToolDecision:
     """Tool gate decision"""
     allowed: bool
     reason: str
-    sanitized_params: Optional[Dict[str, Any]] = None
-    estimated_cost: Optional[Dict[str, Any]] = None
+    sanitized_params: Optional[dict[str, Any]] = None
+    estimated_cost: Optional[dict[str, Any]] = None
     risk_level: str = "low"
 
 class ToolGatePolicy:
@@ -152,7 +152,7 @@ class ToolGatePolicy:
                 risk_level="high"
             )
 
-    def _validate_parameters(self, request: ToolRequest) -> Tuple[bool, str]:
+    def _validate_parameters(self, request: ToolRequest) -> tuple[bool, str]:
         """Validate tool parameters"""
         tool_config = self.allowed_tools[request.tool_name]
         params = request.parameters
@@ -228,7 +228,7 @@ class ToolGatePolicy:
         except (ValueError, TypeError) as e:
             return False, f"Parameter type error: {str(e)}"
 
-    def _check_suspicious_content(self, request: ToolRequest) -> Tuple[bool, str]:
+    def _check_suspicious_content(self, request: ToolRequest) -> tuple[bool, str]:
         """Check for suspicious content in request"""
         # Check user message
         user_text = request.user_message.lower()
@@ -264,7 +264,7 @@ class ToolGatePolicy:
 
         return True, "No suspicious content detected"
 
-    def _estimate_cost(self, request: ToolRequest) -> Dict[str, Any]:
+    def _estimate_cost(self, request: ToolRequest) -> dict[str, Any]:
         """Estimate tool execution cost"""
         tool_config = self.allowed_tools[request.tool_name]
         base_cost = tool_config['cost_multiplier']
@@ -291,7 +291,7 @@ class ToolGatePolicy:
 
         return estimated_cost
 
-    def _sanitize_parameters(self, request: ToolRequest) -> Dict[str, Any]:
+    def _sanitize_parameters(self, request: ToolRequest) -> dict[str, Any]:
         """Sanitize tool parameters"""
         sanitized = {}
 
@@ -319,8 +319,8 @@ class ToolGatePolicy:
         return sanitized
 
     def _create_decision(self, allowed: bool, reason: str,
-                        sanitized_params: Optional[Dict[str, Any]] = None,
-                        estimated_cost: Optional[Dict[str, Any]] = None,
+                        sanitized_params: Optional[dict[str, Any]] = None,
+                        estimated_cost: Optional[dict[str, Any]] = None,
                         risk_level: str = "low") -> ToolDecision:
         """Create tool decision"""
         return ToolDecision(
@@ -358,7 +358,7 @@ class ToolGatePolicy:
 
         self._write_log(log_entry)
 
-    def _write_log(self, log_entry: Dict[str, Any]):
+    def _write_log(self, log_entry: dict[str, Any]):
         """Write log entry to file"""
         try:
             with open(self.log_file, 'a', encoding='utf-8') as f:
@@ -366,7 +366,7 @@ class ToolGatePolicy:
         except Exception as e:
             logger.error(f"❌ Failed to write tool gate log: {e}")
 
-    def get_tool_info(self, tool_name: str) -> Dict[str, Any]:
+    def get_tool_info(self, tool_name: str) -> dict[str, Any]:
         """Get information about a tool"""
         if tool_name not in self.allowed_tools:
             return {"error": "Tool not found"}
@@ -379,11 +379,11 @@ class ToolGatePolicy:
             "risk_level": self.allowed_tools[tool_name]['risk_level']
         }
 
-    def get_allowed_tools(self) -> List[str]:
+    def get_allowed_tools(self) -> list[str]:
         """Get list of allowed tools"""
         return list(self.allowed_tools.keys())
 
-    def get_policy_summary(self) -> Dict[str, Any]:
+    def get_policy_summary(self) -> dict[str, Any]:
         """Get policy summary"""
         return {
             "total_tools": len(self.allowed_tools),
@@ -401,8 +401,8 @@ class ToolGatePolicy:
 tool_gate = ToolGatePolicy()
 
 # Export functions
-def validate_tool_request(tool_name: str, parameters: Dict[str, Any],
-                         user_message: str, context: Dict[str, Any] = None) -> ToolDecision:
+def validate_tool_request(tool_name: str, parameters: dict[str, Any],
+                         user_message: str, context: dict[str, Any] = None) -> ToolDecision:
     """Validate tool request"""
     if context is None:
         context = {}
@@ -417,11 +417,11 @@ def validate_tool_request(tool_name: str, parameters: Dict[str, Any],
 
     return tool_gate.validate_tool_request(request)
 
-def get_tool_info(tool_name: str) -> Dict[str, Any]:
+def get_tool_info(tool_name: str) -> dict[str, Any]:
     """Get tool information"""
     return tool_gate.get_tool_info(tool_name)
 
-def get_allowed_tools() -> List[str]:
+def get_allowed_tools() -> list[str]:
     """Get allowed tools list"""
     return tool_gate.get_allowed_tools()
 

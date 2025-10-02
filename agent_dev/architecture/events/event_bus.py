@@ -11,7 +11,7 @@ import uuid
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Type
+from typing import Any, Callable, Optional
 
 import aiofiles
 
@@ -64,16 +64,16 @@ class Event:
     event_type: EventType
     timestamp: float
     source: str
-    data: Dict[str, Any]
+    data: dict[str, Any]
     correlation_id: Optional[str] = None
     causation_id: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: Optional[dict[str, Any]] = None
 
 @dataclass
 class EventHandler:
     """Event handler definition"""
     handler_id: str
-    event_types: List[EventType]
+    event_types: list[EventType]
     handler_func: Callable[[Event], None]
     priority: int = 0
     async_handler: bool = False
@@ -82,15 +82,15 @@ class EventBus:
     """Enterprise event bus with persistence and replay capabilities"""
 
     def __init__(self, config_path: Optional[str] = None):
-        self.handlers: Dict[EventType, List[EventHandler]] = {}
-        self.event_store: List[Event] = []
+        self.handlers: dict[EventType, list[EventHandler]] = {}
+        self.event_store: list[Event] = []
         self.config = self._load_config(config_path)
         self.persistence_enabled = self.config.get('persistence', {}).get('enabled', True)
         self.event_store_file = Path(self.config.get('persistence', {}).get('file', '.agentdev/events.json'))
         self.max_events = self.config.get('max_events', 10000)
         self.running = False
 
-    def _load_config(self, config_path: Optional[str] = None) -> Dict[str, Any]:
+    def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
         """Load event bus configuration"""
         if config_path:
             config_file = Path(config_path)
@@ -111,7 +111,7 @@ class EventBus:
                 'replay_enabled': True
             }
 
-    def subscribe(self, event_types: List[EventType],
+    def subscribe(self, event_types: list[EventType],
                  handler_func: Callable[[Event], None],
                  handler_id: Optional[str] = None,
                  priority: int = 0,
@@ -155,10 +155,10 @@ class EventBus:
 
         return removed
 
-    async def publish(self, event_type: EventType, data: Dict[str, Any],
+    async def publish(self, event_type: EventType, data: dict[str, Any],
                      source: str, correlation_id: Optional[str] = None,
                      causation_id: Optional[str] = None,
-                     metadata: Optional[Dict[str, Any]] = None) -> str:
+                     metadata: Optional[dict[str, Any]] = None) -> str:
         """Publish an event"""
         event = Event(
             event_id=str(uuid.uuid4()),
@@ -219,9 +219,9 @@ class EventBus:
         except Exception as e:
             print(f"⚠️ Failed to persist event: {e}")
 
-    async def replay_events(self, event_types: Optional[List[EventType]] = None,
+    async def replay_events(self, event_types: Optional[list[EventType]] = None,
                           from_timestamp: Optional[float] = None,
-                          to_timestamp: Optional[float] = None) -> List[Event]:
+                          to_timestamp: Optional[float] = None) -> list[Event]:
         """Replay events from store"""
         events = []
 
@@ -270,7 +270,7 @@ class EventBus:
         except Exception as e:
             print(f"⚠️ Failed to load events from disk: {e}")
 
-    def get_event_statistics(self) -> Dict[str, Any]:
+    def get_event_statistics(self) -> dict[str, Any]:
         """Get event bus statistics"""
         event_counts = {}
         for event in self.event_store:
@@ -279,7 +279,7 @@ class EventBus:
 
         return {
             'total_events': len(self.event_store),
-            'event_types': len(set(e.event_type for e in self.event_store)),
+            'event_types': len({e.event_type for e in self.event_store}),
             'event_counts': event_counts,
             'handlers_registered': sum(len(handlers) for handlers in self.handlers.values()),
             'oldest_event': min(e.timestamp for e in self.event_store) if self.event_store else None,
@@ -308,7 +308,7 @@ event_bus = EventBus()
 
 # Convenience functions
 async def publish_task_event(event_type: EventType, task_id: str,
-                           data: Dict[str, Any], correlation_id: Optional[str] = None) -> str:
+                           data: dict[str, Any], correlation_id: Optional[str] = None) -> str:
     """Publish task-related event"""
     return await event_bus.publish(
         event_type=event_type,
@@ -318,7 +318,7 @@ async def publish_task_event(event_type: EventType, task_id: str,
     )
 
 async def publish_security_event(event_type: EventType,
-                               data: Dict[str, Any],
+                               data: dict[str, Any],
                                correlation_id: Optional[str] = None) -> str:
     """Publish security-related event"""
     return await event_bus.publish(
@@ -329,7 +329,7 @@ async def publish_security_event(event_type: EventType,
     )
 
 async def publish_system_event(event_type: EventType,
-                             data: Dict[str, Any],
+                             data: dict[str, Any],
                              correlation_id: Optional[str] = None) -> str:
     """Publish system-related event"""
     return await event_bus.publish(
@@ -340,7 +340,7 @@ async def publish_system_event(event_type: EventType,
     )
 
 # Event decorators
-def event_handler(event_types: List[EventType], priority: int = 0, async_handler: bool = False):
+def event_handler(event_types: list[EventType], priority: int = 0, async_handler: bool = False):
     """Decorator for event handlers"""
     def decorator(func):
         handler_id = event_bus.subscribe(

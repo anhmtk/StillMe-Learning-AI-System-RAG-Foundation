@@ -12,12 +12,10 @@ Last Updated: 2025-09-26
 
 import argparse
 import json
-import os
 import subprocess
-import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 
 @dataclass
@@ -27,14 +25,14 @@ class CoverageReport:
     covered_lines: int
     missing_lines: int
     coverage_percentage: float
-    files: List[Dict[str, Any]]
+    files: list[dict[str, Any]]
 
 
 @dataclass
 class CoverageImprovement:
     """Coverage improvement suggestion"""
     file_path: str
-    missing_lines: List[int]
+    missing_lines: list[int]
     priority: str
     effort: str
     suggestion: str
@@ -125,7 +123,7 @@ class CoverageAnalyzer:
             files=[]
         )
 
-    def analyze_coverage_gaps(self, report: CoverageReport) -> List[CoverageImprovement]:
+    def analyze_coverage_gaps(self, report: CoverageReport) -> list[CoverageImprovement]:
         """Analyze coverage gaps and suggest improvements"""
         improvements = []
 
@@ -138,7 +136,7 @@ class CoverageAnalyzer:
         improvements.sort(key=lambda x: (x.priority, x.effort))
         return improvements
 
-    def _create_improvement_suggestion(self, file_info: Dict[str, Any]) -> CoverageImprovement:
+    def _create_improvement_suggestion(self, file_info: dict[str, Any]) -> CoverageImprovement:
         """Create improvement suggestion for a file"""
         file_path = file_info['path']
         coverage_percentage = file_info['coverage_percentage']
@@ -173,7 +171,7 @@ class CoverageAnalyzer:
             suggestion=suggestion
         )
 
-    def _generate_suggestion(self, file_path: str, missing_lines: List[int], coverage_percentage: float) -> str:
+    def _generate_suggestion(self, file_path: str, missing_lines: list[int], coverage_percentage: float) -> str:
         """Generate improvement suggestion"""
         suggestions = []
 
@@ -192,7 +190,7 @@ class CoverageAnalyzer:
 
         return "; ".join(suggestions)
 
-    def generate_coverage_report(self, report: CoverageReport, improvements: List[CoverageImprovement]) -> str:
+    def generate_coverage_report(self, report: CoverageReport, improvements: list[CoverageImprovement]) -> str:
         """Generate comprehensive coverage report"""
         report_content = f"""
 # Test Coverage Analysis Report
@@ -263,7 +261,7 @@ Generated: {self._get_current_timestamp()}
 
         return report_content
 
-    def _analyze_critical_modules(self, report: CoverageReport) -> Dict[str, float]:
+    def _analyze_critical_modules(self, report: CoverageReport) -> dict[str, float]:
         """Analyze coverage for critical modules"""
         critical_coverage = {}
 

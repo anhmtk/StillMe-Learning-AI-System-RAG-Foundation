@@ -140,10 +140,15 @@ except ImportError:
 
 # Re-export from AI manager
 try:
-    from .ai_manager import controller, dev_agent, health, set_mode, warmup
+    from .ai_manager import dev_agent, health, set_mode, warmup
 except ImportError:
     # Don't override functions if import fails
     pass
+
+# Don't import controller module to avoid conflicts
+# The controller function is defined in __init__.py
+# Remove controller from __all__ to avoid conflicts
+# Override controller with function from __init__.py
 
 # Ensure functions are available
 if 'health' not in globals():

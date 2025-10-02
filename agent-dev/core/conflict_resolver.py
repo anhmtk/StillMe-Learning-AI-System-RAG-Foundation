@@ -1,6 +1,6 @@
 """Conflict Resolver - Stub Implementation"""
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 
 class ConflictResolver:
@@ -9,11 +9,11 @@ class ConflictResolver:
     def __init__(self):
         self.conflicts = []
 
-    def detect_conflicts(self, changes: List[str]) -> List[Dict[str, Any]]:
+    def detect_conflicts(self, changes: list[str]) -> list[dict[str, Any]]:
         """Detect conflicts"""
         return []
 
-    def resolve_conflicts(self, conflicts: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def resolve_conflicts(self, conflicts: list[dict[str, Any]]) -> dict[str, Any]:
         """Resolve conflicts"""
         return {
             "total_conflicts": 0,
@@ -24,6 +24,6 @@ class ConflictResolver:
             "recommendations": ["No conflicts found"]
         }
 
-    def suggest_resolution(self, conflict: Dict[str, Any]) -> str:
+    def suggest_resolution(self, conflict: dict[str, Any]) -> str:
         """Suggest resolution for conflict"""
         return "No resolution needed"

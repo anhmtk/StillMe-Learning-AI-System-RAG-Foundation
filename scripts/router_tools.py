@@ -13,13 +13,10 @@ Usage:
 """
 
 import argparse
-import json
 import os
 import statistics
 import sys
 import time
-from datetime import datetime
-from typing import Dict, List, Optional
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))
@@ -412,7 +409,7 @@ class RouterTools:
         except Exception as e:
             return {'passed': False, 'error': str(e)}
 
-    def _print_test_summary(self, test_results: Dict):
+    def _print_test_summary(self, test_results: dict):
         """Print test summary"""
         print("\n📊 Test Summary")
         print("=" * 60)

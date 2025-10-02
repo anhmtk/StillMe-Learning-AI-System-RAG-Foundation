@@ -4,10 +4,8 @@ Supports Ollama and other local LLM servers.
 """
 
 import asyncio
-import json
 import logging
-from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Optional
 
 import httpx
 

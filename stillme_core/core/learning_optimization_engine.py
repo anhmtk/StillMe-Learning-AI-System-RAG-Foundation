@@ -10,22 +10,16 @@ Phase: 2.2 - Internal Learning & Optimization Engine
 """
 
 import asyncio
-import hashlib
 import json
 import logging
-import os
-import pickle
 import sqlite3
 import threading
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
+from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
-
-import numpy as np
+from typing import Any, Optional
 
 # Import Phase 1 and 2.1 modules
 try:
@@ -162,13 +156,13 @@ class LearningEntry:
     entry_id: str
     learning_type: LearningType
     timestamp: datetime
-    context: Dict[str, Any]
-    input_data: Dict[str, Any]
-    output_data: Dict[str, Any]
-    performance_metrics: Dict[str, float]
+    context: dict[str, Any]
+    input_data: dict[str, Any]
+    output_data: dict[str, Any]
+    performance_metrics: dict[str, float]
     success: bool
     confidence_score: float
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 @dataclass
@@ -181,10 +175,10 @@ class OptimizationResult:
     baseline_value: float
     optimized_value: float
     improvement_percentage: float
-    parameters: Dict[str, Any]
+    parameters: dict[str, Any]
     timestamp: datetime
     validation_score: float
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 @dataclass
@@ -201,8 +195,8 @@ class KnowledgeBase:
     updated_at: datetime
     usage_count: int
     success_rate: float
-    tags: List[str]
-    metadata: Dict[str, Any]
+    tags: list[str]
+    metadata: dict[str, Any]
 
 
 class LearningOptimizationEngine:
@@ -210,7 +204,7 @@ class LearningOptimizationEngine:
     Main Learning Optimization Engine
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         self.config = config or {}
         self.logger = self._setup_logging()
 
@@ -225,9 +219,9 @@ class LearningOptimizationEngine:
         self.autonomous_management = AutonomousManagementSystem()
 
         # Learning and optimization state
-        self.learning_entries: List[LearningEntry] = []
-        self.optimization_results: List[OptimizationResult] = []
-        self.knowledge_base: Dict[str, KnowledgeBase] = {}
+        self.learning_entries: list[LearningEntry] = []
+        self.optimization_results: list[OptimizationResult] = []
+        self.knowledge_base: dict[str, KnowledgeBase] = {}
 
         # Learning components
         self.self_improvement_manager = SelfImprovementManager()
@@ -242,7 +236,7 @@ class LearningOptimizationEngine:
         self.adaptive_behavior_enabled = True
 
         # Performance tracking
-        self.performance_metrics: Dict[str, List[float]] = {
+        self.performance_metrics: dict[str, list[float]] = {
             "learning_times": [],
             "optimization_times": [],
             "knowledge_retrieval_times": [],
@@ -616,7 +610,7 @@ class LearningOptimizationEngine:
         except Exception as e:
             self.logger.error(f"Error processing learning entries: {e}")
 
-    def _analyze_patterns(self, entries: List[LearningEntry]) -> List[Dict[str, Any]]:
+    def _analyze_patterns(self, entries: list[LearningEntry]) -> list[dict[str, Any]]:
         """Analyze patterns in learning entries"""
         try:
             patterns = []
@@ -669,7 +663,7 @@ class LearningOptimizationEngine:
             self.logger.error(f"Error analyzing patterns: {e}")
             return []
 
-    def _add_knowledge_from_pattern(self, pattern: Dict[str, Any]):
+    def _add_knowledge_from_pattern(self, pattern: dict[str, Any]):
         """Add knowledge from pattern analysis"""
         try:
             knowledge_id = f"kb_{int(time.time())}_{len(self.knowledge_base)}"
@@ -697,7 +691,7 @@ class LearningOptimizationEngine:
         except Exception as e:
             self.logger.error(f"Error adding knowledge from pattern: {e}")
 
-    def _identify_optimization_opportunities(self) -> List[Dict[str, Any]]:
+    def _identify_optimization_opportunities(self) -> list[dict[str, Any]]:
         """Identify optimization opportunities"""
         try:
             opportunities = []
@@ -747,7 +741,7 @@ class LearningOptimizationEngine:
             self.logger.error(f"Error identifying optimization opportunities: {e}")
             return []
 
-    def _execute_optimization(self, opportunity: Dict[str, Any]):
+    def _execute_optimization(self, opportunity: dict[str, Any]):
         """Execute optimization"""
         try:
             start_time = time.time()
@@ -802,8 +796,8 @@ class LearningOptimizationEngine:
         try:
             self.learning_db.execute(
                 """
-                INSERT OR REPLACE INTO learning_entries 
-                (entry_id, learning_type, timestamp, context, input_data, output_data, 
+                INSERT OR REPLACE INTO learning_entries
+                (entry_id, learning_type, timestamp, context, input_data, output_data,
                  performance_metrics, success, confidence_score, metadata)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
@@ -832,8 +826,8 @@ class LearningOptimizationEngine:
         try:
             self.learning_db.execute(
                 """
-                INSERT OR REPLACE INTO optimization_results 
-                (result_id, strategy, target_metric, baseline_value, optimized_value, 
+                INSERT OR REPLACE INTO optimization_results
+                (result_id, strategy, target_metric, baseline_value, optimized_value,
                  improvement_percentage, parameters, timestamp, validation_score, metadata)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
@@ -861,7 +855,7 @@ class LearningOptimizationEngine:
         """Update knowledge base with new insights"""
         try:
             # Update knowledge usage counts
-            for knowledge_id, knowledge in self.knowledge_base.items():
+            for _knowledge_id, knowledge in self.knowledge_base.items():
                 # Mock usage count update
                 knowledge.usage_count += 1
                 knowledge.updated_at = datetime.now()
@@ -869,7 +863,7 @@ class LearningOptimizationEngine:
         except Exception as e:
             self.logger.error(f"Error updating knowledge base: {e}")
 
-    async def _get_learning_status(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_learning_status(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get learning status endpoint"""
         try:
             return {
@@ -906,11 +900,11 @@ class LearningOptimizationEngine:
                 "message": str(e),
             }
 
-    async def _get_knowledge_base(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_knowledge_base(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get knowledge base endpoint"""
         try:
             knowledge_data = []
-            for knowledge_id, knowledge in self.knowledge_base.items():
+            for _knowledge_id, knowledge in self.knowledge_base.items():
                 knowledge_data.append(
                     {
                         "knowledge_id": knowledge.knowledge_id,
@@ -933,7 +927,7 @@ class LearningOptimizationEngine:
                     "knowledge_base": knowledge_data,
                     "total_knowledge": len(knowledge_data),
                     "categories": list(
-                        set(kb.category.value for kb in self.knowledge_base.values())
+                        {kb.category.value for kb in self.knowledge_base.values()}
                     ),
                 },
             }
@@ -945,7 +939,7 @@ class LearningOptimizationEngine:
                 "message": str(e),
             }
 
-    async def _get_optimization_results(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_optimization_results(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get optimization results endpoint"""
         try:
             results_data = []
@@ -990,7 +984,7 @@ class LearningOptimizationEngine:
                 "message": str(e),
             }
 
-    async def _trigger_optimization(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _trigger_optimization(self, data: dict[str, Any]) -> dict[str, Any]:
         """Trigger optimization endpoint"""
         try:
             target_metric = data.get("target_metric", "system_performance")
@@ -1024,7 +1018,7 @@ class LearningOptimizationEngine:
                 "message": str(e),
             }
 
-    async def _get_learning_insights(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_learning_insights(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get learning insights endpoint"""
         try:
             insights = []
@@ -1107,7 +1101,7 @@ class SelfImprovementManager:
     def __init__(self):
         self.improvement_history = []
 
-    def analyze_improvement_opportunities(self) -> List[Dict[str, Any]]:
+    def analyze_improvement_opportunities(self) -> list[dict[str, Any]]:
         """Analyze improvement opportunities"""
         return [
             {
@@ -1125,7 +1119,7 @@ class PerformanceOptimizer:
     def __init__(self):
         self.optimization_strategies = []
 
-    def optimize_performance(self, target_metric: str) -> Dict[str, Any]:
+    def optimize_performance(self, target_metric: str) -> dict[str, Any]:
         """Optimize performance for target metric"""
         return {
             "target_metric": target_metric,
@@ -1140,7 +1134,7 @@ class KnowledgeAccumulator:
     def __init__(self):
         self.accumulated_knowledge = []
 
-    def accumulate_knowledge(self, data: Dict[str, Any]) -> str:
+    def accumulate_knowledge(self, data: dict[str, Any]) -> str:
         """Accumulate knowledge from data"""
         knowledge_id = f"acc_{int(time.time())}"
         self.accumulated_knowledge.append(
@@ -1155,7 +1149,7 @@ class AdaptiveBehaviorEngine:
     def __init__(self):
         self.behavior_patterns = []
 
-    def adapt_behavior(self, context: Dict[str, Any]) -> Dict[str, Any]:
+    def adapt_behavior(self, context: dict[str, Any]) -> dict[str, Any]:
         """Adapt behavior based on context"""
         return {
             "adapted": True,

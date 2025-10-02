@@ -16,7 +16,6 @@ import json
 import os
 import sys
 import time
-from typing import Dict, List, Optional, Tuple
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))
@@ -30,7 +29,7 @@ class RouterValidator:
         self.analyzer = ComplexityAnalyzer()
         self.validation_results = {}
 
-    def validate_configuration(self) -> Dict:
+    def validate_configuration(self) -> dict:
         """Validate router configuration"""
         print("⚙️  Validating Configuration")
         print("-" * 40)
@@ -127,7 +126,7 @@ class RouterValidator:
 
         return results
 
-    def validate_performance(self) -> Dict:
+    def validate_performance(self) -> dict:
         """Validate router performance"""
         print("\n⚡ Validating Performance")
         print("-" * 40)
@@ -191,7 +190,7 @@ class RouterValidator:
 
         return results
 
-    def validate_accuracy(self) -> Dict:
+    def validate_accuracy(self) -> dict:
         """Validate router accuracy"""
         print("\n🎯 Validating Accuracy")
         print("-" * 40)
@@ -249,7 +248,7 @@ class RouterValidator:
             total = len(cases)
 
             print(f"\n{category.capitalize()} prompts:")
-            for prompt, expected_model, expected_score in cases:
+            for prompt, expected_model, _expected_score in cases:
                 # Get actual complexity score
                 actual_score, _ = self.analyzer.analyze_complexity(prompt)
 
@@ -300,7 +299,7 @@ class RouterValidator:
 
         return results
 
-    def validate_fallback(self) -> Dict:
+    def validate_fallback(self) -> dict:
         """Validate fallback mechanism"""
         print("\n🔄 Validating Fallback Mechanism")
         print("-" * 40)
@@ -366,7 +365,7 @@ class RouterValidator:
 
         return results
 
-    def run_full_validation(self) -> Dict:
+    def run_full_validation(self) -> dict:
         """Run full validation suite"""
         print("🔍 AI Router Full Validation")
         print("=" * 60)
@@ -417,7 +416,7 @@ class RouterValidator:
 
         return overall_results
 
-    def run_quick_validation(self) -> Dict:
+    def run_quick_validation(self) -> dict:
         """Run quick validation (essential checks only)"""
         print("⚡ AI Router Quick Validation")
         print("=" * 40)
@@ -458,7 +457,7 @@ class RouterValidator:
 
         return results
 
-    def export_results(self, results: Dict, filename: str):
+    def export_results(self, results: dict, filename: str):
         """Export validation results to JSON file"""
         with open(filename, 'w', encoding='utf-8') as f:
             json.dump(results, f, indent=2, ensure_ascii=False)

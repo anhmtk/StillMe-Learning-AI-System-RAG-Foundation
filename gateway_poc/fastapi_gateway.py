@@ -14,23 +14,21 @@ Features:
 - Metrics collection
 """
 
-import asyncio
 import hashlib
 import json
 import logging
 import time
 from dataclasses import dataclass
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from datetime import datetime
+from typing import Any, Optional
 
 import httpx
 import redis
 import uvicorn
 from circuit_breaker import CircuitBreaker
-from fastapi import BackgroundTasks, FastAPI, HTTPException, Request, Response
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 # Configure logging
@@ -74,8 +72,8 @@ class ChatResponse(BaseModel):
 class HealthResponse(BaseModel):
     status: str
     timestamp: datetime
-    services: Dict[str, str]
-    metrics: Dict[str, Any]
+    services: dict[str, str]
+    metrics: dict[str, Any]
 
 class StillMeGateway:
     """Ultra Low Latency API Gateway for StillMe"""
@@ -283,7 +281,7 @@ class StillMeGateway:
                         "count": sum(1 for m in recent_metrics if m.endpoint == endpoint),
                         "avg_latency_ms": sum(m.request_time for m in recent_metrics if m.endpoint == endpoint) / max(1, sum(1 for m in recent_metrics if m.endpoint == endpoint)) * 1000
                     }
-                    for endpoint in set(m.endpoint for m in recent_metrics)
+                    for endpoint in {m.endpoint for m in recent_metrics}
                 }
             }
 

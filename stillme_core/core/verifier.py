@@ -4,7 +4,7 @@ verifier.py - Verification logic for AgentDev execution results
 
 import logging
 import re
-from typing import Any, Dict, Optional, Union
+from typing import Any, Optional, Union
 
 logger = logging.getLogger("AgentDev-Verifier")
 
@@ -33,10 +33,10 @@ class Verifier:
 
     def verify(
         self,
-        step: Dict[str, Any],
-        exec_result: Dict[str, Any],
-        success_criteria: Optional[Dict[str, Any]] = None,
-    ) -> Union[bool, Dict[str, Any]]:
+        step: dict[str, Any],
+        exec_result: dict[str, Any],
+        success_criteria: Optional[dict[str, Any]] = None,
+    ) -> Union[bool, dict[str, Any]]:
         """
         Verify execution result against success criteria.
 
@@ -287,7 +287,7 @@ class Verifier:
 
         return False
 
-    def verify_test_results(self, exec_result: Dict[str, Any]) -> Dict[str, Any]:
+    def verify_test_results(self, exec_result: dict[str, Any]) -> dict[str, Any]:
         """
         Specialized verification for test results.
 
@@ -312,7 +312,7 @@ class Verifier:
             "details": {"stats": stats, "stdout": stdout[:500], "stderr": stderr[:500]},
         }
 
-    def _extract_test_stats(self, text: str) -> Dict[str, int]:
+    def _extract_test_stats(self, text: str) -> dict[str, int]:
         """
         Extract test statistics from pytest output.
 

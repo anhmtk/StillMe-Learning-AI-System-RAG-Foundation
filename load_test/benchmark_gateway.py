@@ -17,7 +17,7 @@ import logging
 import statistics
 import time
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any
 
 import aiohttp
 
@@ -36,7 +36,7 @@ class GatewayBenchmark:
     """Comprehensive benchmark for StillMe Gateway"""
 
     def __init__(self):
-        self.results: List[TestResult] = []
+        self.results: list[TestResult] = []
         self.gateway_url = "http://localhost:8080"
         self.direct_urls = {
             "stillme": "http://localhost:1216",
@@ -370,7 +370,7 @@ class GatewayBenchmark:
         # Print summary
         self._print_summary(report)
 
-    def _percentile(self, data: List[float], percentile: int) -> float:
+    def _percentile(self, data: list[float], percentile: int) -> float:
         """Calculate percentile"""
         if not data:
             return 0
@@ -378,7 +378,7 @@ class GatewayBenchmark:
         index = int(len(sorted_data) * percentile / 100)
         return sorted_data[min(index, len(sorted_data) - 1)]
 
-    def _print_summary(self, report: Dict[str, Any]):
+    def _print_summary(self, report: dict[str, Any]):
         """Print performance summary"""
         print("\n" + "="*80)
         print("🚀 STILLME GATEWAY PERFORMANCE BENCHMARK REPORT")

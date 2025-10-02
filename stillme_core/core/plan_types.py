@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import Optional
 
 
 @dataclass
@@ -10,9 +10,9 @@ class PlanItem:
     target: Optional[str] = None
     patch: Optional[str] = None
     diff_hint: Optional[str] = None
-    tests_to_run: List[str] = field(default_factory=list)
+    tests_to_run: list[str] = field(default_factory=list)
     risk: str = "low"
-    deps: List[str] = field(default_factory=list)
+    deps: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict:
         return {

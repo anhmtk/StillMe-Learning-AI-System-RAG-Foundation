@@ -11,14 +11,11 @@ Last Updated: 2025-09-26
 """
 
 import argparse
-import glob
 import json
-import os
-import sys
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Optional
 
 
 @dataclass
@@ -45,9 +42,9 @@ class TestSummary:
     overall_pass_rate: float
     overall_coverage: float
     test_duration: float
-    test_results: List[TestResult]
-    critical_issues: List[str]
-    recommendations: List[str]
+    test_results: list[TestResult]
+    critical_issues: list[str]
+    recommendations: list[str]
 
 
 class TestSummaryGenerator:
@@ -96,7 +93,7 @@ class TestSummaryGenerator:
             recommendations=recommendations
         )
 
-    def _load_test_results(self, input_dir: str) -> List[TestResult]:
+    def _load_test_results(self, input_dir: str) -> list[TestResult]:
         """Load test results from artifact files"""
         test_results = []
         artifacts_path = self.project_root / input_dir
@@ -225,7 +222,7 @@ class TestSummaryGenerator:
             coverage=coverage
         )
 
-    def _determine_overall_status(self, test_results: List[TestResult]) -> str:
+    def _determine_overall_status(self, test_results: list[TestResult]) -> str:
         """Determine overall test status"""
         if not test_results:
             return "NO_TESTS"
@@ -242,7 +239,7 @@ class TestSummaryGenerator:
 
         return "PASS"
 
-    def _identify_critical_issues(self, test_results: List[TestResult]) -> List[str]:
+    def _identify_critical_issues(self, test_results: list[TestResult]) -> list[str]:
         """Identify critical issues from test results"""
         issues = []
 
@@ -257,7 +254,7 @@ class TestSummaryGenerator:
 
         return issues
 
-    def _generate_recommendations(self, test_results: List[TestResult], overall_status: str) -> List[str]:
+    def _generate_recommendations(self, test_results: list[TestResult], overall_status: str) -> list[str]:
         """Generate improvement recommendations"""
         recommendations = []
 

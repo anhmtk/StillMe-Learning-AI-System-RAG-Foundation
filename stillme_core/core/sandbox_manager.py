@@ -1,10 +1,7 @@
+import logging
 import os
 import subprocess
-import logging
-from typing import Optional, List
-from stillme_core.ai_manager import (
-    AIManager,
-)  # Cần import AIManager để sử dụng nếu sandbox cần gọi AI
+from typing import List, Optional
 
 logger = logging.getLogger("StillmeCore-SandboxManager")
 
@@ -52,11 +49,7 @@ class DockerSandboxManager:
             ["docker", "pull", self.docker_image], timeout=60
         )
         if result is None or result.returncode != 0:
-from stillme_core.observability.logger import get_logger
-from stillme_core.observability.logger import get_logger
-from stillme_core.observability.logger import get_logger
-from stillme_core.observability.logger import get_logger
-            logger.error(f"Failed to pull Docker image: {result.stderr}")
+            logger.error(f"Failed to pull Docker image: {result.stderr if result else 'unknown error'}")
             return False
 
         # Run the container, mounting the project directory
@@ -80,7 +73,6 @@ from stillme_core.observability.logger import get_logger
 
         result = self._run_command_in_host(cmd)
         if result.returncode != 0:
-from stillme_core.observability.logger import get_logger
             logger.error(f"Failed to start container: {result.stderr}")
             return False
 

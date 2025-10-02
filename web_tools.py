@@ -4,12 +4,10 @@ Web Tools Registry - Controlled Internet Access Tools
 Provides pure tools without LLM dependencies for web access
 """
 import asyncio
-import json
 import logging
 from dataclasses import dataclass
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
-from urllib.parse import urljoin, urlparse
+from datetime import datetime
+from typing import Any, Optional
 
 from common.http import SecureHttpClient
 from content_integrity_filter import ContentIntegrityFilter
@@ -23,9 +21,9 @@ logger = logging.getLogger(__name__)
 class WebResult:
     """Standardized web result with attribution"""
     success: bool
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[dict[str, Any]] = None
     error: Optional[str] = None
-    attribution: Optional[Dict[str, Any]] = None
+    attribution: Optional[dict[str, Any]] = None
     cache_hit: bool = False
     latency_ms: float = 0.0
 
@@ -97,7 +95,7 @@ class WebToolsRegistry:
         """Search news with attribution"""
         try:
             # Parse window parameter
-            hours = self._parse_time_window(window)
+            self._parse_time_window(window)
 
             # Search news
             result = await self.market_intel.search_news(query, "vi")
@@ -231,7 +229,7 @@ class WebToolsRegistry:
                 error=f"Hacker News search failed: {str(e)}"
             )
 
-    async def _google_trends(self, terms: List[str], region: str = 'VN', days: int = 7) -> WebResult:
+    async def _google_trends(self, terms: list[str], region: str = 'VN', days: int = 7) -> WebResult:
         """Get Google Trends data (mock implementation)"""
         try:
             # Mock Google Trends data (real implementation would require API)
@@ -284,11 +282,11 @@ class WebToolsRegistry:
         else:
             return 24  # Default to 24 hours
 
-    def get_available_tools(self) -> List[str]:
+    def get_available_tools(self) -> list[str]:
         """Get list of available tools"""
         return list(self.tools.keys())
 
-    def get_tool_info(self, tool_name: str) -> Dict[str, Any]:
+    def get_tool_info(self, tool_name: str) -> dict[str, Any]:
         """Get information about a specific tool"""
         if tool_name not in self.tools:
             return {"error": "Tool not found"}
@@ -313,7 +311,7 @@ class WebToolsRegistry:
         }
         return descriptions.get(tool_name, "Unknown tool")
 
-    def _get_tool_parameters(self, tool_name: str) -> Dict[str, Any]:
+    def _get_tool_parameters(self, tool_name: str) -> dict[str, Any]:
         """Get tool parameters schema"""
         schemas = {
             'web.search_news': {
@@ -335,7 +333,7 @@ class WebToolsRegistry:
         }
         return schemas.get(tool_name, {})
 
-    def _estimate_tool_cost(self, tool_name: str) -> Dict[str, Any]:
+    def _estimate_tool_cost(self, tool_name: str) -> dict[str, Any]:
         """Estimate tool execution cost"""
         costs = {
             'web.search_news': {"requests": 1, "complexity": "low", "estimated_ms": 2000},
@@ -361,7 +359,7 @@ async def hackernews_top(hours: int = 12) -> WebResult:
     """Get top Hacker News stories"""
     return await web_tools.call_tool('web.hackernews_top', hours=hours)
 
-async def google_trends(terms: List[str], region: str = 'VN', days: int = 7) -> WebResult:
+async def google_trends(terms: list[str], region: str = 'VN', days: int = 7) -> WebResult:
     """Get Google Trends data"""
     return await web_tools.call_tool('web.google_trends', terms=terms, region=region, days=days)
 

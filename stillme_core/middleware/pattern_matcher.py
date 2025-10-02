@@ -14,7 +14,7 @@ from __future__ import annotations
 import re
 import time
 import unicodedata
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 # Try to import Aho-Corasick library, fallback to regex if not available
 try:
@@ -25,7 +25,7 @@ except ImportError:
 
 
 class PatternMatcher:
-    def __init__(self, config: Optional[Dict[str, Any]] = None) -> None:
+    def __init__(self, config: dict[str, Any] | None = None) -> None:
         self.config = config or {}
         self.patterns = []
         self.automaton = None
@@ -59,7 +59,7 @@ class PatternMatcher:
                     "weight": 0.8
                 })
 
-        except Exception as e:
+        except Exception:
             # Fallback to default patterns if config loading fails
             self.patterns = [
                 {"id": "greeting", "text": "hello", "type": "literal", "weight": 1.0},
@@ -129,10 +129,10 @@ class PatternMatcher:
             text = text.replace(cyrillic, latin)
         return text
 
-    def match(self, text: str, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def match(self, text: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """
         Match patterns against text with performance tracking.
-        
+
         Returns:
             matches: List of hits with pattern_id, span, weight
             pattern_score: Overall pattern confidence (0-1)
@@ -181,7 +181,7 @@ class PatternMatcher:
             "normalized_text": normalized_text
         }
 
-    def _calculate_pattern_score(self, matches: List[Dict[str, Any]], text_length: int) -> float:
+    def _calculate_pattern_score(self, matches: list[dict[str, Any]], text_length: int) -> float:
         """Calculate overall pattern confidence score (0-1)"""
         if not matches:
             return 0.0

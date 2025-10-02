@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any
 
 #!/usr/bin/env python3
 """
@@ -19,7 +19,7 @@ class AmbiguityExtremesTestSuite:
         self.handler = ClarificationHandler()
         self.test_results = []
 
-    def run_all_tests(self) -> Dict[str, Any]:
+    def run_all_tests(self) -> dict[str, Any]:
         """Run all ambiguity extreme tests"""
         print("🧪 Starting Ambiguity Extremes Test Suite...")
 

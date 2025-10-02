@@ -4,15 +4,13 @@ Implements OWASP ASVS compliance, security headers, rate limiting, and audit log
 """
 
 import hashlib
-import hmac
-import json
 import logging
 import secrets
 import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +31,7 @@ class SecurityEvent:
     source_ip: str
     user_agent: str
     request_path: str
-    details: Dict[str, Any]
+    details: dict[str, Any]
     risk_score: float
 
 @dataclass
@@ -105,11 +103,11 @@ class SecurityHeaders:
             "Cross-Origin-Resource-Policy": "same-origin"
         }
 
-    def get_security_headers(self) -> Dict[str, str]:
+    def get_security_headers(self) -> dict[str, str]:
         """Get all security headers"""
         return self.headers.copy()
 
-    def get_cors_headers(self, allowed_origins: Optional[List[str]] = None) -> Dict[str, str]:
+    def get_cors_headers(self, allowed_origins: Optional[list[str]] = None) -> dict[str, str]:
         """Get CORS headers"""
         if allowed_origins is None:
             allowed_origins = ["https://stillme.ai", "https://staging.stillme.ai"]
@@ -122,7 +120,7 @@ class SecurityHeaders:
             "Access-Control-Allow-Credentials": "true"
         }
 
-    def get_custom_headers(self, custom_headers: Dict[str, str]) -> Dict[str, str]:
+    def get_custom_headers(self, custom_headers: dict[str, str]) -> dict[str, str]:
         """Get custom security headers"""
         return {**self.headers, **custom_headers}
 
@@ -175,7 +173,7 @@ class RateLimiter:
             window=window
         )
 
-    def get_rate_limit_headers(self, result: RateLimitResult) -> Dict[str, str]:
+    def get_rate_limit_headers(self, result: RateLimitResult) -> dict[str, str]:
         """Get rate limit headers for response"""
         return {
             "X-RateLimit-Limit": str(result.limit),
@@ -228,12 +226,12 @@ class SecurityAuditLogger:
         if event.risk_score >= self.risk_thresholds[SecurityLevel.CRITICAL]:
             logger.critical("CRITICAL SECURITY EVENT - IMMEDIATE ATTENTION REQUIRED")
 
-    def get_security_events(self, hours: int = 24) -> List[SecurityEvent]:
+    def get_security_events(self, hours: int = 24) -> list[SecurityEvent]:
         """Get security events from the last N hours"""
         cutoff_time = datetime.now() - timedelta(hours=hours)
         return [event for event in self.events if event.timestamp >= cutoff_time]
 
-    def get_risk_summary(self) -> Dict[str, Any]:
+    def get_risk_summary(self) -> dict[str, Any]:
         """Get risk summary statistics"""
         if not self.events:
             return {"total_events": 0, "risk_levels": {}, "avg_risk_score": 0.0}
@@ -262,7 +260,7 @@ class SecurityMiddleware:
         self.rate_limiter = RateLimiter()
         self.audit_logger = SecurityAuditLogger()
 
-    def process_request(self, request_data: Dict[str, Any]) -> Dict[str, Any]:
+    def process_request(self, request_data: dict[str, Any]) -> dict[str, Any]:
         """Process incoming request for security checks"""
         client_id = self._get_client_id(request_data)
 
@@ -296,7 +294,7 @@ class SecurityMiddleware:
             "rate_limit_headers": self.rate_limiter.get_rate_limit_headers(rate_limit_result)
         }
 
-    def process_response(self, response_data: Dict[str, Any]) -> Dict[str, Any]:
+    def process_response(self, response_data: dict[str, Any]) -> dict[str, Any]:
         """Process outgoing response for security headers"""
         # Add security headers
         security_headers = self.security_headers.get_security_headers()
@@ -308,7 +306,7 @@ class SecurityMiddleware:
 
         return response_data
 
-    def _get_client_id(self, request_data: Dict[str, Any]) -> str:
+    def _get_client_id(self, request_data: dict[str, Any]) -> str:
         """Get client identifier for rate limiting"""
         # Use IP address as client ID
         source_ip = request_data.get("source_ip", "unknown")
@@ -347,7 +345,7 @@ class SecurityConfig:
             }
         }
 
-    def get_security_settings(self) -> Dict[str, Any]:
+    def get_security_settings(self) -> dict[str, Any]:
         """Get security configuration settings"""
         return self.config.copy()
 
@@ -358,11 +356,11 @@ class SecurityConfig:
         else:
             logger.warning(f"Unknown security setting: {section}.{key}")
 
-    def get_rate_limit_config(self) -> Dict[str, Any]:
+    def get_rate_limit_config(self) -> dict[str, Any]:
         """Get rate limiting configuration"""
         return self.config["rate_limiting"].copy()
 
-    def get_cors_config(self) -> Dict[str, Any]:
+    def get_cors_config(self) -> dict[str, Any]:
         """Get CORS configuration"""
         return self.config["cors"].copy()
 
@@ -377,7 +375,7 @@ class SecurityMonitor:
             "failed_authentication_per_hour": 50
         }
 
-    def check_security_alerts(self) -> List[Dict[str, Any]]:
+    def check_security_alerts(self) -> list[dict[str, Any]]:
         """Check for security alerts based on recent events"""
         alerts = []
         recent_events = self.audit_logger.get_security_events(hours=1)
@@ -406,7 +404,7 @@ class SecurityMonitor:
 
         return alerts
 
-    def get_security_dashboard_data(self) -> Dict[str, Any]:
+    def get_security_dashboard_data(self) -> dict[str, Any]:
         """Get data for security dashboard"""
         risk_summary = self.audit_logger.get_risk_summary()
         alerts = self.check_security_alerts()

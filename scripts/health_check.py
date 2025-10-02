@@ -17,7 +17,6 @@ import sys
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
@@ -40,7 +39,7 @@ class HealthChecker:
         for dir_path in [self.artifacts_dir, self.reports_dir, self.logs_dir]:
             dir_path.mkdir(exist_ok=True)
 
-    def run_command(self, cmd: List[str], timeout: int = 30) -> Tuple[bool, str, str]:
+    def run_command(self, cmd: list[str], timeout: int = 30) -> tuple[bool, str, str]:
         """Run command with timeout and capture output."""
         try:
             result = subprocess.run(
@@ -56,7 +55,7 @@ class HealthChecker:
         except Exception as e:
             return False, "", str(e)
 
-    def check_unit_tests(self) -> Dict:
+    def check_unit_tests(self) -> dict:
         """Run unit tests with coverage."""
         print("🔍 Running unit tests...")
 
@@ -114,7 +113,7 @@ class HealthChecker:
         self.results["checks"]["unit_tests"] = result
         return result
 
-    def check_security_scan(self) -> Dict:
+    def check_security_scan(self) -> dict:
         """Run security scanning tools."""
         print("🔒 Running security scans...")
 
@@ -202,7 +201,7 @@ class HealthChecker:
         self.results["checks"]["security_scan"] = result
         return result
 
-    def check_ethics_tests(self) -> Dict:
+    def check_ethics_tests(self) -> dict:
         """Run ethics smoke tests."""
         print("⚖️ Running ethics tests...")
 
@@ -255,7 +254,7 @@ class HealthChecker:
         self.results["checks"]["ethics_tests"] = result
         return result
 
-    def check_open_ports(self) -> Dict:
+    def check_open_ports(self) -> dict:
         """Check for open ports (security concern)."""
         print("🔌 Checking open ports...")
 
@@ -292,7 +291,7 @@ class HealthChecker:
         self.results["checks"]["open_ports"] = result
         return result
 
-    def check_library_versions(self) -> Dict:
+    def check_library_versions(self) -> dict:
         """Check critical library versions."""
         print("📦 Checking library versions...")
 
@@ -326,7 +325,7 @@ class HealthChecker:
         self.results["checks"]["library_versions"] = result
         return result
 
-    def check_core_functionality(self) -> Dict:
+    def check_core_functionality(self) -> dict:
         """Smoke test core functionality."""
         print("🧪 Testing core functionality...")
 
@@ -337,7 +336,6 @@ class HealthChecker:
             model = router.choose_model("test prompt")
 
             # Test basic imports
-            import stillme_core
 
             result = {
                 "status": "PASS",
@@ -414,7 +412,7 @@ class HealthChecker:
 
         report = f"""# System Health Report
 
-**Generated:** {self.results['timestamp']}  
+**Generated:** {self.results['timestamp']}
 **Overall Status:** {self.results['overall_status']}
 
 ## Summary

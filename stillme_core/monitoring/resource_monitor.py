@@ -23,14 +23,12 @@ Date: 2025-09-28
 import asyncio
 import json
 import logging
-import queue
 import threading
 import time
 from collections import deque
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Optional
 
 try:
     import psutil
@@ -68,7 +66,7 @@ class ResourceMetrics:
     network_recv_mb: float
     network_speed_mbps: float
     processes_count: int
-    load_average: Tuple[float, float, float]
+    load_average: tuple[float, float, float]
     token_usage_daily: int
     token_usage_hourly: int
     token_remaining_daily: int
@@ -122,10 +120,10 @@ class TokenBudgetManager:
     def consume_tokens(self, tokens: int) -> bool:
         """
         Consume tokens if budget allows
-        
+
         Args:
             tokens: Number of tokens to consume
-            
+
         Returns:
             bool: True if consumption successful, False if budget exceeded
         """
@@ -152,7 +150,7 @@ class TokenBudgetManager:
                 logger.warning(f"Token budget exceeded. Requested: {tokens}, Daily: {self.daily_usage}/{self.daily_budget}, Hourly: {self.hourly_usage}/{self.hourly_budget}")
                 return False
 
-    def get_remaining_tokens(self) -> Tuple[int, int]:
+    def get_remaining_tokens(self) -> tuple[int, int]:
         """Get remaining tokens (daily, hourly)"""
         self.reset_if_needed()
 
@@ -162,7 +160,7 @@ class TokenBudgetManager:
                 max(0, self.hourly_budget - self.hourly_usage)
             )
 
-    def get_usage_stats(self) -> Dict[str, Any]:
+    def get_usage_stats(self) -> dict[str, Any]:
         """Get usage statistics"""
         self.reset_if_needed()
 
@@ -198,8 +196,8 @@ class ResourceMonitor:
         self.is_monitoring = False
         self.monitoring_task: Optional[asyncio.Task] = None
         self.metrics_history = deque(maxlen=1000)
-        self.alerts: List[ResourceAlert] = []
-        self.alert_callbacks: List[Callable[[ResourceAlert], None]] = []
+        self.alerts: list[ResourceAlert] = []
+        self.alert_callbacks: list[Callable[[ResourceAlert], None]] = []
 
         # Performance tracking
         self.performance_baseline = None
@@ -219,7 +217,7 @@ class ResourceMonitor:
     async def start_monitoring(self, interval: int = 10):
         """
         Start resource monitoring
-        
+
         Args:
             interval: Monitoring interval in seconds
         """
@@ -468,10 +466,10 @@ class ResourceMonitor:
         if callback in self.alert_callbacks:
             self.alert_callbacks.remove(callback)
 
-    def can_start_learning_session(self) -> Tuple[bool, str]:
+    def can_start_learning_session(self) -> tuple[bool, str]:
         """
         Check if a new learning session can be started
-        
+
         Returns:
             Tuple[bool, str]: (can_start, reason)
         """
@@ -525,7 +523,7 @@ class ResourceMonitor:
             return self.metrics_history[-1]
         return None
 
-    def get_metrics_summary(self) -> Dict[str, Any]:
+    def get_metrics_summary(self) -> dict[str, Any]:
         """Get metrics summary"""
         if not self.metrics_history:
             return {"error": "No metrics available"}

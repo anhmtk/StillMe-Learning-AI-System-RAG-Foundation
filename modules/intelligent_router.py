@@ -1,7 +1,7 @@
 # modules/intelligent_router.py
 # Stub for intelligent router with ModelRouter
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ class ModelRouter:
         self.request_count = 0
         self.route_history = []
 
-    def get_ai_response(self, prompt: str, context: Dict[str, Any] = None) -> str:
+    def get_ai_response(self, prompt: str, context: dict[str, Any] = None) -> str:
         """Get AI response for the given prompt"""
         self.request_count += 1
 
@@ -71,7 +71,7 @@ class ModelRouter:
         last_route = self.route_history[-1]
         return f"Last request routed to {last_route['selected_model']} for prompt of length {last_route['prompt_length']}"
 
-    def get_routing_stats(self) -> Dict[str, Any]:
+    def get_routing_stats(self) -> dict[str, Any]:
         """Get routing statistics"""
         if not self.route_history:
             return {"total_requests": 0, "model_usage": {}}
@@ -93,7 +93,7 @@ class ModelRouter:
             self.models[model_name]["available"] = available
             self.logger.info(f"Model {model_name} availability set to {available}")
 
-    def get_available_models(self) -> List[str]:
+    def get_available_models(self) -> list[str]:
         """Get list of available models"""
         return [model for model, info in self.models.items() if info["available"]]
 
@@ -108,7 +108,7 @@ def explain_last_route():
     router = ModelRouter()
     return router.explain_last_route()
 
-def route_request(prompt: str, context: Dict[str, Any] = None) -> str:
+def route_request(prompt: str, context: dict[str, Any] = None) -> str:
     """Global function to route request (for backward compatibility)"""
     router = ModelRouter()
     return router.get_ai_response(prompt, context)

@@ -19,7 +19,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Optional, Union
 
 import jwt
 import websockets
@@ -58,7 +58,7 @@ class IntegrationMessage:
     type: MessageType
     source: str
     target: str
-    payload: Dict[str, Any]
+    payload: dict[str, Any]
     timestamp: datetime
     auth_level: AuthLevel
     correlation_id: Optional[str] = None
@@ -78,8 +78,8 @@ class APIEndpoint:
     rate_limit: int  # requests per minute
     timeout: float  # seconds
     description: str
-    parameters: Dict[str, Any]
-    response_schema: Dict[str, Any]
+    parameters: dict[str, Any]
+    response_schema: dict[str, Any]
 
 
 @dataclass
@@ -97,13 +97,13 @@ class CircuitBreakerState:
 class AuthenticationManager:
     """Manages authentication and authorization"""
 
-    def __init__(self, secret_key: str = None):  # type: ignore
+    def __init__(self, secret_key: Optional[str] = None):
         self.secret_key = secret_key or secrets.token_urlsafe(32)
-        self.active_tokens: Dict[str, Dict[str, Any]] = {}
-        self.user_permissions: Dict[str, List[str]] = {}
+        self.active_tokens: dict[str, dict[str, Any]] = {}
+        self.user_permissions: dict[str, list[str]] = {}
         self.token_ttl = timedelta(hours=24)
 
-    def generate_token(self, user_id: str, permissions: List[str] = None) -> str:  # type: ignore
+    def generate_token(self, user_id: str, permissions: Optional[list[str]] = None) -> str:
         """Generate JWT token for user"""
         payload = {
             "user_id": user_id,
@@ -122,7 +122,7 @@ class AuthenticationManager:
 
         return token
 
-    def validate_token(self, token: str) -> Optional[Dict[str, Any]]:
+    def validate_token(self, token: str) -> Optional[dict[str, Any]]:
         """Validate JWT token"""
         try:
             payload = jwt.decode(token, self.secret_key, algorithms=["HS256"])
@@ -159,7 +159,7 @@ class RateLimiter:
     """Rate limiting for API endpoints"""
 
     def __init__(self):
-        self.requests: Dict[str, List[datetime]] = {}
+        self.requests: dict[str, list[datetime]] = {}
         self.cleanup_interval = timedelta(minutes=5)
         self.last_cleanup = datetime.utcnow()
 
@@ -255,8 +255,8 @@ class MessageQueue:
 
     def __init__(self, max_size: int = 10000):
         self.queue: asyncio.Queue = asyncio.Queue(maxsize=max_size)
-        self.subscribers: Dict[str, List[Callable]] = {}
-        self.message_history: List[IntegrationMessage] = []
+        self.subscribers: dict[MessageType, list[Callable]] = {}
+        self.message_history: list[IntegrationMessage] = []
         self.max_history = 1000
 
     async def publish(self, message: IntegrationMessage):
@@ -279,19 +279,19 @@ class MessageQueue:
     async def subscribe(self, message_type: MessageType, callback: Callable):
         """Subscribe to specific message type"""
         if message_type not in self.subscribers:
-            self.subscribers[message_type] = []  # type: ignore
-        self.subscribers[message_type].append(callback)  # type: ignore
+            self.subscribers[message_type] = []
+        self.subscribers[message_type].append(callback)
 
     async def _notify_subscribers(self, message: IntegrationMessage):
         """Notify subscribers of new message"""
         if message.type in self.subscribers:
-            for callback in self.subscribers[message.type]:  # type: ignore
+            for callback in self.subscribers[message.type]:
                 try:
                     await callback(message)
                 except Exception as e:
                     logger.error(f"Error in subscriber callback: {e}")
 
-    async def get_message(self, timeout: float = None) -> Optional[IntegrationMessage]:  # type: ignore
+    async def get_message(self, timeout: Optional[float] = None) -> Optional[IntegrationMessage]:
         """Get message from queue"""
         try:
             return await asyncio.wait_for(self.queue.get(), timeout=timeout)
@@ -304,20 +304,20 @@ class IntegrationBridge:
     Main integration bridge class
     """
 
-    def __init__(self, config: Dict[str, Any] = None):  # type: ignore
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         self.config = config or {}
         self.auth_manager = AuthenticationManager()
         self.rate_limiter = RateLimiter()
-        self.circuit_breakers: Dict[str, CircuitBreaker] = {}
+        self.circuit_breakers: dict[str, CircuitBreaker] = {}
         self.message_queue = MessageQueue()
-        self.endpoints: Dict[str, APIEndpoint] = {}
-        self.websocket_connections: Dict[str, websockets.WebSocketServerProtocol] = {}
-        self.metrics: Dict[str, Any] = {}
+        self.endpoints: dict[str, APIEndpoint] = {}
+        self.websocket_connections: dict[str, websockets.WebSocketServerProtocol] = {}
+        self.metrics: dict[str, Any] = {}
         self.is_running = False
 
         # Performance tracking
-        self.request_times: List[float] = []
-        self.error_counts: Dict[str, int] = {}
+        self.request_times: list[float] = []
+        self.error_counts: dict[str, int] = {}
         self.active_connections = 0
 
         # Setup default endpoints
@@ -370,8 +370,8 @@ class IntegrationBridge:
         rate_limit: int,
         timeout: float,
         description: str,
-        parameters: Dict[str, Any],
-        response_schema: Dict[str, Any],
+        parameters: dict[str, Any],
+        response_schema: dict[str, Any],
     ):
         """Add API endpoint"""
         endpoint_key = f"{method}:{path}"
@@ -388,7 +388,7 @@ class IntegrationBridge:
         )
         self.endpoints[endpoint_key] = endpoint
 
-    async def _health_check(self, request: Dict[str, Any]) -> Dict[str, Any]:
+    async def _health_check(self, request: dict[str, Any]) -> dict[str, Any]:
         """Health check endpoint"""
         return {
             "status": "healthy",
@@ -397,7 +397,7 @@ class IntegrationBridge:
             "queue_size": self.message_queue.queue.qsize(),
         }
 
-    async def _login(self, request: Dict[str, Any]) -> Dict[str, Any]:
+    async def _login(self, request: dict[str, Any]) -> dict[str, Any]:
         """Login endpoint"""
         username = request.get("username")
         password = request.get("password")
@@ -412,7 +412,7 @@ class IntegrationBridge:
 
         raise Exception("Invalid credentials")
 
-    async def _get_metrics(self, request: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_metrics(self, request: dict[str, Any]) -> dict[str, Any]:
         """Get metrics endpoint"""
         return {
             "metrics": {
@@ -428,9 +428,9 @@ class IntegrationBridge:
         self,
         method: str,
         path: str,
-        headers: Dict[str, str],
-        body: Dict[str, Any] = None,  # type: ignore
-    ) -> Dict[str, Any]:
+        headers: dict[str, str],
+        body: Optional[dict[str, Any]] = None,
+    ) -> dict[str, Any]:
         """Handle incoming API request"""
         start_time = time.time()
         endpoint_key = f"{method}:{path}"
@@ -498,7 +498,7 @@ class IntegrationBridge:
         self,
         target: str,
         message_type: MessageType,
-        payload: Dict[str, Any],
+        payload: dict[str, Any],
         auth_level: AuthLevel = AuthLevel.AUTHENTICATED,
     ) -> str:
         """Send message through integration bridge"""
@@ -542,13 +542,13 @@ class IntegrationBridge:
                     del self.websocket_connections[connection_id]
                 self.active_connections -= 1
 
-        server = await websockets.serve(handle_websocket, host, port)  # type: ignore
+        server = await websockets.serve(handle_websocket, host, port)
         logger.info(f"WebSocket server started on {host}:{port}")
         return server
 
     async def handle_websocket_message(
-        self, data: Dict[str, Any], connection_id: str
-    ) -> Dict[str, Any]:
+        self, data: dict[str, Any], connection_id: str
+    ) -> dict[str, Any]:
         """Handle WebSocket message"""
         message_type = data.get("type")
 
@@ -567,7 +567,7 @@ class IntegrationBridge:
             headers = data.get("headers", {})
             body = data.get("body")
 
-            return await self.handle_request(method, path, headers, body)  # type: ignore
+            return await self.handle_request(method, path, headers, body)
         else:
             return {"error": f"Unknown message type: {message_type}"}
 
@@ -632,9 +632,9 @@ class IntegrationTestFramework:
 
     def __init__(self, bridge: IntegrationBridge):
         self.bridge = bridge
-        self.test_results: List[Dict[str, Any]] = []
+        self.test_results: list[dict[str, Any]] = []
 
-    async def run_all_tests(self) -> Dict[str, Any]:
+    async def run_all_tests(self) -> dict[str, Any]:
         """Run all integration tests"""
         logger.info("🧪 Starting integration tests...")
 
@@ -668,7 +668,7 @@ class IntegrationTestFramework:
         )
         return results
 
-    async def test_health_endpoint(self) -> Dict[str, Any]:
+    async def test_health_endpoint(self) -> dict[str, Any]:
         """Test health endpoint"""
         try:
             response = await self.bridge.handle_request("GET", "/health", {})
@@ -678,7 +678,7 @@ class IntegrationTestFramework:
         except Exception as e:
             return {"name": "health_endpoint", "passed": False, "error": str(e)}
 
-    async def test_authentication(self) -> Dict[str, Any]:
+    async def test_authentication(self) -> dict[str, Any]:
         """Test authentication flow"""
         try:
             # Test login
@@ -699,7 +699,7 @@ class IntegrationTestFramework:
         except Exception as e:
             return {"name": "authentication", "passed": False, "error": str(e)}
 
-    async def test_rate_limiting(self) -> Dict[str, Any]:
+    async def test_rate_limiting(self) -> dict[str, Any]:
         """Test rate limiting"""
         try:
             # Make multiple requests quickly
@@ -718,7 +718,7 @@ class IntegrationTestFramework:
         except Exception as e:
             return {"name": "rate_limiting", "passed": False, "error": str(e)}
 
-    async def test_circuit_breaker(self) -> Dict[str, Any]:
+    async def test_circuit_breaker(self) -> dict[str, Any]:
         """Test circuit breaker"""
         try:
             # This would need a failing endpoint to test properly
@@ -730,7 +730,7 @@ class IntegrationTestFramework:
         except Exception as e:
             return {"name": "circuit_breaker", "passed": False, "error": str(e)}
 
-    async def test_message_queue(self) -> Dict[str, Any]:
+    async def test_message_queue(self) -> dict[str, Any]:
         """Test message queue"""
         try:
             message_id = await self.bridge.send_message(
@@ -741,7 +741,7 @@ class IntegrationTestFramework:
         except Exception as e:
             return {"name": "message_queue", "passed": False, "error": str(e)}
 
-    async def test_websocket_connection(self) -> Dict[str, Any]:
+    async def test_websocket_connection(self) -> dict[str, Any]:
         """Test WebSocket connection"""
         try:
             # This would need actual WebSocket client to test

@@ -15,7 +15,7 @@ import logging
 import re
 from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Optional
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -31,7 +31,7 @@ class TranslationScore:
     url_preservation: float  # 0-1: bảo toàn URLs
     overall_translation_score: float  # 0-1: điểm dịch thuật tổng
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 class TranslationEval:
@@ -126,13 +126,13 @@ class TranslationEval:
                  source_language: Optional[str] = None) -> TranslationScore:
         """
         Đánh giá khả năng dịch thuật của response
-        
+
         Args:
             response: AI response cần đánh giá
             user_input: User input gốc (optional)
             expected_language: Ngôn ngữ mong đợi (optional)
             source_language: Ngôn ngữ nguồn (optional)
-            
+
         Returns:
             TranslationScore: Kết quả đánh giá dịch thuật
         """
@@ -528,7 +528,7 @@ class TranslationEval:
             self.logger.error(f"Error extracting intent: {e}")
             return None
 
-    def _extract_context_keywords(self, text: str) -> List[str]:
+    def _extract_context_keywords(self, text: str) -> list[str]:
         """Trích xuất từ khóa ngữ cảnh"""
         try:
             keywords = []
@@ -557,7 +557,7 @@ class TranslationEval:
             self.logger.error(f"Error extracting context keywords: {e}")
             return []
 
-    def batch_evaluate(self, responses: List[Dict[str, Any]]) -> List[TranslationScore]:
+    def batch_evaluate(self, responses: list[dict[str, Any]]) -> list[TranslationScore]:
         """Đánh giá hàng loạt responses"""
         results = []
 
@@ -579,7 +579,7 @@ class TranslationEval:
 
         return results
 
-    def generate_report(self, scores: List[TranslationScore]) -> Dict[str, Any]:
+    def generate_report(self, scores: list[TranslationScore]) -> dict[str, Any]:
         """Tạo báo cáo tổng hợp"""
         try:
             if not scores:

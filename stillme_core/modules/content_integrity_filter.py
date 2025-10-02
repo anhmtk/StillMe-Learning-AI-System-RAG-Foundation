@@ -4,7 +4,7 @@ import os
 import re
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 import httpx  # Sử dụng httpx thay vì aiohttp để thống nhất với các module khác nếu có, hoặc dùng aiohttp nếu được yêu cầu cụ thể
 from dotenv import load_dotenv
@@ -163,7 +163,7 @@ class OpenRouterClient:
         messages: list,
         temperature: float = 0.1,
         max_tokens: int = 700,
-        response_format: Optional[Dict] = None,
+        response_format: Optional[dict] = None,
     ) -> str:
         """Gửi yêu cầu chat completion tới OpenRouter API."""
         payload = {
@@ -260,7 +260,7 @@ class ContentIntegrityFilter:
         self.normalization_map = self._create_normalization_map()
         logger.info("ContentIntegrityFilter initialized.")
 
-    def _load_rules(self) -> Dict:
+    def _load_rules(self) -> dict:
         """Tải các quy tắc từ file JSON hoặc tạo mặc định."""
         os.makedirs(os.path.dirname(CONTENT_RULES_PATH), exist_ok=True)
         default_rules = {
@@ -326,7 +326,7 @@ class ContentIntegrityFilter:
             json.dump(default_rules, f, indent=2, ensure_ascii=False)
         return default_rules
 
-    def _create_normalization_map(self) -> Dict[str, str]:
+    def _create_normalization_map(self) -> dict[str, str]:
         """Tạo bảng chuẩn hóa tiếng Việt (bỏ dấu, chữ hoa/thường)"""
         # Đã tối ưu hóa để bao gồm cả chữ hoa và bỏ dấu
         return {
@@ -362,7 +362,7 @@ class ContentIntegrityFilter:
 
     async def pre_filter_content(
         self, content_text: str, source_url: Optional[str] = None
-    ) -> Tuple[bool, str, Severity]:
+    ) -> tuple[bool, str, Severity]:
         """
         Giai đoạn 1: Lọc nhanh dựa trên từ khóa, nguồn và độ dài nội dung.
         """
@@ -415,7 +415,7 @@ class ContentIntegrityFilter:
 
         return True, "Vượt qua kiểm tra tiền lọc.", Severity.LOW
 
-    async def analyze_content_quality(self, content_text: str) -> Dict[str, Any]:
+    async def analyze_content_quality(self, content_text: str) -> dict[str, Any]:
         """
         Giai đoạn 2a: Phân tích sâu về độc hại, thiên vị, lời nói thù ghét bằng LLM.
         """
@@ -492,7 +492,7 @@ class ContentIntegrityFilter:
 
     async def fact_check_content(
         self, content_text: str
-    ) -> Tuple[bool, float, str, List[str]]:
+    ) -> tuple[bool, float, str, list[str]]:
         """
         Giai đoạn 2b: Đánh giá tính xác thực của các thông tin sự kiện trong nội dung bằng LLM.
         """
@@ -518,7 +518,6 @@ class ContentIntegrityFilter:
             "reason": string
         }}
         """
-        messages = [{"role": "user", "content": prompt}]
         response_format = {"type": "json_object"}
 
         try:
@@ -555,7 +554,7 @@ class ContentIntegrityFilter:
         violation_type: ContentViolationType,
         severity: Severity,
         details: str,
-        extra_data: Optional[Dict] = None,
+        extra_data: Optional[dict] = None,
     ):
         """
         Ghi lại chi tiết về một vi phạm nội dung vào file log chuyên biệt.
@@ -585,7 +584,7 @@ class ContentIntegrityFilter:
 
     async def filter_content(
         self, content_id: str, content_text: str, source_url: Optional[str] = None
-    ) -> Tuple[bool, str, Severity, Dict[str, Any]]:
+    ) -> tuple[bool, str, Severity, dict[str, Any]]:
         """
         Hàm chính điều phối quá trình lọc nội dung.
         Trả về (is_safe: bool, final_reason: str, overall_severity: Severity, detailed_analysis: Dict).
@@ -597,8 +596,8 @@ class ContentIntegrityFilter:
 
         is_safe = True
         overall_severity = Severity.LOW
-        detailed_analysis: Dict[str, Any] = {}
-        violation_reasons: List[str] = []
+        detailed_analysis: dict[str, Any] = {}
+        violation_reasons: list[str] = []
 
         # 1. Giai đoạn Lọc Nhanh (Pre-filtering)
         pre_filter_safe, pre_filter_reason, pre_filter_severity = (
@@ -758,7 +757,7 @@ class ContentIntegrityFilter:
         model: OpenRouterModel,
         temperature: float = 0.1,
         max_tokens: int = 700,
-        response_format: Optional[Dict] = None,
+        response_format: Optional[dict] = None,
     ) -> str:
         """Call LLM API hoặc trả về test response trong testing mode"""
         if self.testing_mode:

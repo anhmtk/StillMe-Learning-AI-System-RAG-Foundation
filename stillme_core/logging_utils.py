@@ -4,7 +4,7 @@ import logging
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 
 def setup_logger(name: str = "stillme",
@@ -55,7 +55,7 @@ def setup_logger(name: str = "stillme",
 def log_with_context(logger: logging.Logger,
                     level: int,
                     message: str,
-                    context: Dict[str, Any] = None):
+                    context: dict[str, Any] = None):
     """Log message with additional context"""
     try:
         if context:
@@ -102,7 +102,7 @@ def log_function_call(logger: logging.Logger,
 
 def log_error(logger: logging.Logger,
               error: Exception,
-              context: Dict[str, Any] = None):
+              context: dict[str, Any] = None):
     """Log error with context"""
     try:
         error_context = {
@@ -122,7 +122,7 @@ def log_error(logger: logging.Logger,
 def log_performance(logger: logging.Logger,
                    operation: str,
                    duration: float,
-                   metrics: Dict[str, Any] = None):
+                   metrics: dict[str, Any] = None):
     """Log performance metrics"""
     try:
         context = {
@@ -142,7 +142,7 @@ def log_performance(logger: logging.Logger,
 def log_security_event(logger: logging.Logger,
                       event: str,
                       severity: str = "medium",
-                      details: Dict[str, Any] = None):
+                      details: dict[str, Any] = None):
     """Log security event"""
     try:
         context = {
@@ -173,7 +173,7 @@ def log_audit(logger: logging.Logger,
               action: str,
               user: str = None,
               resource: str = None,
-              details: Dict[str, Any] = None):
+              details: dict[str, Any] = None):
     """Log audit trail"""
     try:
         context = {

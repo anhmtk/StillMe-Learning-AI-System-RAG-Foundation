@@ -28,7 +28,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import date, datetime
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Optional, Union
 
 import phonenumbers
 from email_validator import EmailNotValidError, validate_email
@@ -78,7 +78,7 @@ class ValidationRule:
     min_length: Optional[int] = None
     max_length: Optional[int] = None
     pattern: Optional[str] = None
-    allowed_values: Optional[List[Any]] = None
+    allowed_values: Optional[list[Any]] = None
     custom_validator: Optional[Callable] = None
     sanitize: bool = True
     severity: ValidationSeverity = ValidationSeverity.ERROR
@@ -89,10 +89,10 @@ class ValidationResult:
     """Validation result - Kết quả xác thực"""
 
     is_valid: bool
-    errors: List[str]
-    warnings: List[str]
-    sanitized_data: Dict[str, Any]
-    original_data: Dict[str, Any]
+    errors: list[str]
+    warnings: list[str]
+    sanitized_data: dict[str, Any]
+    original_data: dict[str, Any]
     validation_time: float
 
 
@@ -167,7 +167,7 @@ class InputSanitizer:
         return value.strip()
 
     @staticmethod
-    def sanitize_html(value: str, allowed_tags: Optional[List[str]] = None) -> str:
+    def sanitize_html(value: str, allowed_tags: Optional[list[str]] = None) -> str:
         """
         Sanitize HTML input
         Làm sạch input HTML
@@ -605,7 +605,7 @@ class ValidationEngine:
         self.logger.info("Validation engine initialized")
 
     def validate_data(
-        self, data: Dict[str, Any], rules: List[ValidationRule]
+        self, data: dict[str, Any], rules: list[ValidationRule]
     ) -> ValidationResult:
         """
         Validate data against rules
@@ -775,10 +775,10 @@ class ValidationEngine:
 
 
 def validate_user_input(
-    data: Dict[str, Any],
-    required_fields: Optional[List[str]] = None,
-    string_fields: Optional[List[str]] = None,
-    email_fields: Optional[List[str]] = None,
+    data: dict[str, Any],
+    required_fields: Optional[list[str]] = None,
+    string_fields: Optional[list[str]] = None,
+    email_fields: Optional[list[str]] = None,
 ) -> ValidationResult:
     """
     Validate user input with common rules
@@ -837,7 +837,7 @@ def validate_user_input(
     return engine.validate_data(data, rules)
 
 
-def sanitize_user_input(data: Dict[str, Any]) -> Dict[str, Any]:
+def sanitize_user_input(data: dict[str, Any]) -> dict[str, Any]:
     """
     Sanitize user input
     Làm sạch input người dùng

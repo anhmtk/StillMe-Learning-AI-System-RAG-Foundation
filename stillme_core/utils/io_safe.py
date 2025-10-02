@@ -6,7 +6,6 @@ Provides robust file reading operations that handle various encodings
 and prevent crashes from Unicode issues.
 """
 
-import io
 from pathlib import Path
 from typing import Optional
 
@@ -17,11 +16,11 @@ def safe_read_text(path: Path, encoding: Optional[str] = None) -> str:
     - Ưu tiên UTF-8
     - Fallback cp1252/latin-1
     - Cuối cùng dùng errors='replace' để không crash
-    
+
     Args:
         path: Đường dẫn file cần đọc
         encoding: Encoding cụ thể (nếu None thì auto-detect)
-        
+
     Returns:
         Nội dung file dưới dạng string, không bao giờ raise UnicodeDecodeError
     """
@@ -54,11 +53,11 @@ def safe_read_text(path: Path, encoding: Optional[str] = None) -> str:
 def safe_read_lines(path: Path, encoding: Optional[str] = None) -> list[str]:
     """
     Đọc file theo dòng an toàn
-    
+
     Args:
         path: Đường dẫn file
         encoding: Encoding cụ thể
-        
+
     Returns:
         List các dòng trong file
     """
@@ -69,10 +68,10 @@ def safe_read_lines(path: Path, encoding: Optional[str] = None) -> list[str]:
 def is_text_file(path: Path) -> bool:
     """
     Kiểm tra xem file có phải là text file không
-    
+
     Args:
         path: Đường dẫn file
-        
+
     Returns:
         True nếu là text file, False nếu binary
     """
@@ -89,10 +88,10 @@ def is_text_file(path: Path) -> bool:
 def safe_decode(data: bytes) -> str:
     """
     Decode bytes to string with fallback encodings
-    
+
     Args:
         data: Bytes to decode
-        
+
     Returns:
         Decoded string, never raises UnicodeDecodeError
     """

@@ -235,7 +235,7 @@ class TestHabitStore:
         store = HabitStore(config)
 
         # Single user tries to create habit with multiple observations
-        for i in range(2):  # Below quorum threshold
+        for _i in range(2):  # Below quorum threshold
             result = store.observe_cue("poison cue", "bad action", 0.8, "attacker", "tenant1")
             assert not result
 

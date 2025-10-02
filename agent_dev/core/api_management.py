@@ -13,16 +13,14 @@ Tính năng:
 
 import asyncio
 import json
-import os
 import random
-import re
 import string
 import time
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional
 
 import aiohttp
 import yaml
@@ -59,12 +57,12 @@ class APIEndpoint:
     method: APIMethod
     version: APIVersion
     description: str
-    parameters: List[Dict[str, Any]]
-    request_schema: Dict[str, Any]
-    response_schema: Dict[str, Any]
-    status_codes: Dict[int, str]
-    examples: List[Dict[str, Any]]
-    tags: List[str]
+    parameters: list[dict[str, Any]]
+    request_schema: dict[str, Any]
+    response_schema: dict[str, Any]
+    status_codes: dict[int, str]
+    examples: list[dict[str, Any]]
+    tags: list[str]
     deprecated: bool = False
 
 @dataclass
@@ -79,7 +77,7 @@ class APITestResult:
     status_code: int
     response_size: int
     error_message: Optional[str]
-    test_data: Dict[str, Any]
+    test_data: dict[str, Any]
     timestamp: datetime
 
 @dataclass
@@ -87,9 +85,9 @@ class APIContract:
     """API Contract definition"""
     contract_id: str
     endpoint: APIEndpoint
-    expected_schema: Dict[str, Any]
-    validation_rules: List[Dict[str, Any]]
-    test_cases: List[Dict[str, Any]]
+    expected_schema: dict[str, Any]
+    validation_rules: list[dict[str, Any]]
+    test_cases: list[dict[str, Any]]
     created_at: datetime
     updated_at: datetime
 
@@ -99,10 +97,10 @@ class APIManagementReport:
     total_endpoints: int
     tested_endpoints: int
     test_coverage: float
-    performance_metrics: Dict[str, float]
-    security_issues: List[str]
-    contract_violations: List[str]
-    recommendations: List[str]
+    performance_metrics: dict[str, float]
+    security_issues: list[str]
+    contract_violations: list[str]
+    recommendations: list[str]
     analysis_time: float
 
 class APIManagementSystem:
@@ -119,9 +117,9 @@ class APIManagementSystem:
         self._ensure_directories()
 
         # API endpoints registry
-        self.endpoints: Dict[str, APIEndpoint] = {}
-        self.contracts: Dict[str, APIContract] = {}
-        self.test_results: List[APITestResult] = []
+        self.endpoints: dict[str, APIEndpoint] = {}
+        self.contracts: dict[str, APIContract] = {}
+        self.test_results: list[APITestResult] = []
 
         # Load existing APIs
         self._load_existing_apis()
@@ -156,7 +154,7 @@ class APIManagementSystem:
                     endpoint = self._parse_openapi_endpoint(path, method, details, spec)
                     self.endpoints[f"{method.upper()}:{path}"] = endpoint
 
-    def _parse_openapi_endpoint(self, path: str, method: str, details: Dict, spec: Dict) -> APIEndpoint:
+    def _parse_openapi_endpoint(self, path: str, method: str, details: dict, spec: dict) -> APIEndpoint:
         """Parse OpenAPI endpoint to APIEndpoint"""
         # Extract parameters
         parameters = []
@@ -215,7 +213,7 @@ class APIManagementSystem:
         with open(endpoint_file, 'w', encoding='utf-8') as f:
             json.dump(asdict(endpoint), f, indent=2, default=str)
 
-    def create_contract(self, endpoint_id: str, expected_schema: Dict[str, Any]) -> APIContract:
+    def create_contract(self, endpoint_id: str, expected_schema: dict[str, Any]) -> APIContract:
         """Create API contract"""
         if endpoint_id not in self.endpoints:
             raise ValueError(f"Endpoint {endpoint_id} not found")
@@ -239,7 +237,7 @@ class APIManagementSystem:
 
         return contract
 
-    def _generate_validation_rules(self, schema: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _generate_validation_rules(self, schema: dict[str, Any]) -> list[dict[str, Any]]:
         """Generate validation rules from schema"""
         rules = []
 
@@ -267,7 +265,7 @@ class APIManagementSystem:
 
         return rules
 
-    def _generate_test_cases(self, endpoint: APIEndpoint, schema: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _generate_test_cases(self, endpoint: APIEndpoint, schema: dict[str, Any]) -> list[dict[str, Any]]:
         """Generate test cases for endpoint"""
         test_cases = []
 
@@ -306,7 +304,7 @@ class APIManagementSystem:
 
         return test_cases
 
-    def _generate_valid_data(self, schema: Dict[str, Any]) -> Dict[str, Any]:
+    def _generate_valid_data(self, schema: dict[str, Any]) -> dict[str, Any]:
         """Generate valid test data from schema"""
         data = {}
 
@@ -397,7 +395,7 @@ class APIManagementSystem:
         self.test_results.append(test_result)
         return test_result
 
-    async def _test_basic(self, endpoint: APIEndpoint, base_url: str) -> Dict[str, Any]:
+    async def _test_basic(self, endpoint: APIEndpoint, base_url: str) -> dict[str, Any]:
         """Basic endpoint test"""
         url = f"{base_url}{endpoint.path}"
 
@@ -426,7 +424,7 @@ class APIManagementSystem:
                         'data': {}
                     }
 
-    async def _test_contract(self, endpoint: APIEndpoint, base_url: str) -> Dict[str, Any]:
+    async def _test_contract(self, endpoint: APIEndpoint, base_url: str) -> dict[str, Any]:
         """Contract test"""
         # Find contract for this endpoint
         contract = None
@@ -460,7 +458,7 @@ class APIManagementSystem:
                         'data': {}
                     }
 
-    async def _test_fuzz(self, endpoint: APIEndpoint, base_url: str) -> Dict[str, Any]:
+    async def _test_fuzz(self, endpoint: APIEndpoint, base_url: str) -> dict[str, Any]:
         """Fuzz test"""
         url = f"{base_url}{endpoint.path}"
 
@@ -491,7 +489,7 @@ class APIManagementSystem:
                     'data': fuzz_data
                 }
 
-    def _generate_fuzz_data(self, schema: Dict[str, Any]) -> Dict[str, Any]:
+    def _generate_fuzz_data(self, schema: dict[str, Any]) -> dict[str, Any]:
         """Generate fuzz test data"""
         fuzz_data = {}
 
@@ -520,7 +518,7 @@ class APIManagementSystem:
 
         return fuzz_data
 
-    async def _test_integration(self, endpoint: APIEndpoint, base_url: str) -> Dict[str, Any]:
+    async def _test_integration(self, endpoint: APIEndpoint, base_url: str) -> dict[str, Any]:
         """Integration test"""
         # Test endpoint with other related endpoints
         url = f"{base_url}{endpoint.path}"
@@ -545,12 +543,12 @@ class APIManagementSystem:
                     }
 
     async def run_scalability_test(self, endpoint_id: str, num_requests: int = 1000,
-                                 base_url: str = "http://localhost:8000") -> List[APITestResult]:
+                                 base_url: str = "http://localhost:8000") -> list[APITestResult]:
         """Run scalability test with multiple requests"""
         if endpoint_id not in self.endpoints:
             raise ValueError(f"Endpoint {endpoint_id} not found")
 
-        endpoint = self.endpoints[endpoint_id]
+        self.endpoints[endpoint_id]
         results = []
 
         # Create semaphore to limit concurrent requests
@@ -569,7 +567,7 @@ class APIManagementSystem:
 
         return valid_results
 
-    def generate_openapi_spec(self) -> Dict[str, Any]:
+    def generate_openapi_spec(self) -> dict[str, Any]:
         """Generate OpenAPI specification"""
         spec = {
             'openapi': '3.0.0',
@@ -626,7 +624,7 @@ class APIManagementSystem:
         start_time = time.time()
 
         total_endpoints = len(self.endpoints)
-        tested_endpoints = len(set(r.endpoint for r in self.test_results))
+        tested_endpoints = len({r.endpoint for r in self.test_results})
         test_coverage = (tested_endpoints / total_endpoints * 100) if total_endpoints > 0 else 0
 
         # Calculate performance metrics

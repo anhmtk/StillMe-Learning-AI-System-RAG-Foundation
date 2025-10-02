@@ -140,7 +140,7 @@ class TestContentSafetyValidation:
     @pytest.mark.ethics
     def test_ethics_violation_threshold(self, mock_ethics_system, test_config):
         """Test ethics violation threshold compliance."""
-        threshold = test_config["performance"]["ethics_violation_threshold"]
+        test_config["performance"]["ethics_violation_threshold"]
 
         # Test with safe content
         safe_response = {"is_safe": True, "violations": []}

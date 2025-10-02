@@ -12,7 +12,7 @@ import random
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 
 @dataclass
@@ -21,7 +21,7 @@ class LearningCase:
 
     id: str
     question: str
-    expected_keywords: List[str]
+    expected_keywords: list[str]
     difficulty: str
     language: str
     category: str
@@ -44,9 +44,9 @@ class LearningMemoryItem:
     difficulty: str
     language: str
     timestamp: datetime
-    keywords_matched: List[str]
-    learning_insights: List[str]
-    improvement_suggestions: List[str]
+    keywords_matched: list[str]
+    learning_insights: list[str]
+    improvement_suggestions: list[str]
 
 
 class DailyLearningManager:
@@ -61,7 +61,7 @@ class DailyLearningManager:
         self.cases_file = Path(cases_file)
         self.logger = logging.getLogger(__name__)
         self.cases_data = self._load_cases()
-        self.today_cases: List[LearningCase] = []
+        self.today_cases: list[LearningCase] = []
 
         # Integration với LayeredMemoryV1
         self.memory_manager = memory_manager
@@ -83,7 +83,7 @@ class DailyLearningManager:
                 "⚠️ No improvement manager provided - no automatic improvement suggestions"
             )
 
-    def _load_cases(self) -> Dict[str, Any]:
+    def _load_cases(self) -> dict[str, Any]:
         """Load learning cases from JSON file"""
         try:
             if self.cases_file.exists():
@@ -106,12 +106,12 @@ class DailyLearningManager:
             self.logger.error(f"Error saving cases: {e}")
             return False
 
-    def get_today_schedule(self) -> List[str]:
+    def get_today_schedule(self) -> list[str]:
         """Lấy lịch học cho ngày hôm nay"""
         today = datetime.now().strftime("%A").lower()
         return self.cases_data.get("learning_schedule", {}).get(today, [])
 
-    def select_today_cases(self, max_cases: int = 5) -> List[LearningCase]:
+    def select_today_cases(self, max_cases: int = 5) -> list[LearningCase]:
         """Chọn các case học tập cho ngày hôm nay"""
         today_categories = self.get_today_schedule()
         selected_cases = []
@@ -144,7 +144,7 @@ class DailyLearningManager:
         self,
         category: str,
         question: str,
-        expected_keywords: List[str],
+        expected_keywords: list[str],
         difficulty: str = "medium",
         language: str = "vi",
     ) -> bool:
@@ -271,8 +271,8 @@ class DailyLearningManager:
             self.logger.error(f"Error saving to memory: {e}")
 
     def _analyze_keywords_matched(
-        self, expected_keywords: List[str], response: str
-    ) -> List[str]:
+        self, expected_keywords: list[str], response: str
+    ) -> list[str]:
         """Phân tích keywords được match trong response"""
         matched = []
         response_lower = response.lower()
@@ -283,7 +283,7 @@ class DailyLearningManager:
 
         return matched
 
-    def _extract_learning_insights(self, response: str, score: float) -> List[str]:
+    def _extract_learning_insights(self, response: str, score: float) -> list[str]:
         """Trích xuất learning insights từ response"""
         insights = []
 
@@ -304,7 +304,7 @@ class DailyLearningManager:
 
     def _generate_improvement_suggestions(
         self, case: LearningCase, score: float, feedback: str
-    ) -> List[str]:
+    ) -> list[str]:
         """Tạo improvement suggestions dựa trên performance"""
         suggestions = []
 
@@ -384,7 +384,7 @@ Feedback: {memory_item.feedback}
         query: str,
         category: Optional[str] = None,
         min_score: Optional[float] = None,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """Tìm kiếm learning results từ LayeredMemoryV1"""
         if not self.memory_manager:
             self.logger.warning("No memory manager available for search")
@@ -427,7 +427,7 @@ Feedback: {memory_item.feedback}
             self.logger.error(f"Error searching learning memory: {e}")
             return []
 
-    def get_learning_stats(self) -> Dict[str, Any]:
+    def get_learning_stats(self) -> dict[str, Any]:
         """Lấy thống kê học tập"""
         try:
             total_cases = self.cases_data.get("metadata", {}).get("total_cases", 0)
@@ -467,7 +467,7 @@ Feedback: {memory_item.feedback}
                             else 0
                         ),
                         "categories_in_memory": list(
-                            set(r["category"] for r in all_learning_results)
+                            {r["category"] for r in all_learning_results}
                         ),
                     }
                 except Exception as e:
@@ -511,7 +511,7 @@ Feedback: {memory_item.feedback}
 
         return report
 
-    def analyze_learning_performance(self) -> Dict[str, Any]:
+    def analyze_learning_performance(self) -> dict[str, Any]:
         """Phân tích performance học tập và tạo improvement suggestions"""
         try:
             # Lấy learning stats
@@ -552,8 +552,8 @@ Feedback: {memory_item.feedback}
             return {"error": str(e)}
 
     def _analyze_performance_patterns(
-        self, recent_results: List[Dict], stats: Dict
-    ) -> Dict[str, Any]:
+        self, recent_results: list[dict], stats: dict
+    ) -> dict[str, Any]:
         """Phân tích patterns trong performance"""
         analysis = {
             "overall_score_trend": "stable",
@@ -613,8 +613,8 @@ Feedback: {memory_item.feedback}
         return analysis
 
     def _generate_system_improvements(
-        self, performance_analysis: Dict
-    ) -> List[Dict[str, Any]]:
+        self, performance_analysis: dict
+    ) -> list[dict[str, Any]]:
         """Tạo system improvement suggestions dựa trên performance analysis"""
         suggestions = []
 
@@ -659,7 +659,7 @@ Feedback: {memory_item.feedback}
 
         return suggestions
 
-    def submit_improvement_suggestions(self, suggestions: List[Dict[str, Any]]) -> bool:
+    def submit_improvement_suggestions(self, suggestions: list[dict[str, Any]]) -> bool:
         """Submit improvement suggestions to SelfImprovementManager"""
         if not self.improvement_manager:
             self.logger.warning("No improvement manager available")
@@ -698,7 +698,7 @@ Feedback: {memory_item.feedback}
             self.logger.error(f"Error submitting improvement suggestions: {e}")
             return False
 
-    def run_learning_improvement_cycle(self) -> Dict[str, Any]:
+    def run_learning_improvement_cycle(self) -> dict[str, Any]:
         """Chạy chu trình phân tích và đề xuất improvements"""
         try:
             # 1. Phân tích performance

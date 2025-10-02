@@ -12,7 +12,7 @@ import json
 import logging
 import subprocess
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 from jsonschema import ValidationError, validate
 
@@ -116,8 +116,8 @@ def _extract_json_block(text: str) -> str:
 
 
 def _normalize_plan_v1(
-    raw: Dict[str, Any], problem_file: Optional[str]
-) -> Dict[str, Any]:
+    raw: dict[str, Any], problem_file: Optional[str]
+) -> dict[str, Any]:
     """
     Chuẩn hoá JSON “yếu” thành schema Planner (module_name, description, objectives, steps[{step_id, action, reasoning}]).
     - Điền mặc định khi thiếu
@@ -135,7 +135,7 @@ def _normalize_plan_v1(
         objectives = [str(x) for x in objectives_in if x is not None]
 
     steps_in = raw.get("steps") or []
-    steps_out: List[Dict[str, str]] = []
+    steps_out: list[dict[str, str]] = []
 
     # Ánh xạ một số action “tự do” về nhóm chung (tùy chọn)
     ACTION_MAP = {
@@ -187,7 +187,7 @@ class Planner:
         self.ai_manager = AIManager()
         self.last_plan = None
         self.last_raw_ai_response = None
-        self.fallback_cache: Dict[str, Dict[str, Any]] = {}
+        self.fallback_cache: dict[str, dict[str, Any]] = {}
         self.bugmem = BugMemory()
         self.plan_cache = {}
         self.cache_ttl = 300  # 5 minutes
@@ -197,7 +197,7 @@ class Planner:
         prompt: str,
         error_type: Optional[str] = None,
         problem_file: Optional[str] = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Tạo kế hoạch sửa lỗi cho DevAgent.
         - Ưu tiên: rule-based → AI (safe) → cache → AI (fast) → last_plan → safe_dummy
@@ -321,7 +321,7 @@ class Planner:
 
     def _try_parse_and_validate_plan(
         self, raw_response: Optional[str], problem_file: Optional[str] = None
-    ) -> Optional[Dict[str, Any]]:
+    ) -> Optional[dict[str, Any]]:
         # Chặn None / chuỗi rỗng
         if (
             not raw_response
@@ -394,18 +394,18 @@ class Planner:
         else:
             return base_prompt + problem_desc
 
-    def _cache_valid_response(self, prompt: str, plan: Dict[str, Any]):
+    def _cache_valid_response(self, prompt: str, plan: dict[str, Any]):
         prompt_key = hashlib.sha256(prompt.encode()).hexdigest()
         self.fallback_cache[prompt_key] = plan
 
-    def _get_cached_plan(self, prompt: str) -> Optional[Dict[str, Any]]:
+    def _get_cached_plan(self, prompt: str) -> Optional[dict[str, Any]]:
         prompt_key = hashlib.sha256(prompt.encode()).hexdigest()
         return self.fallback_cache.get(prompt_key)
 
     # ------------------------------
     # Multi-step builder (heuristic)
     # ------------------------------
-    def build_plan(self, max_items: int = 5) -> List[PlanItem]:
+    def build_plan(self, max_items: int = 5) -> list[PlanItem]:
         # Check cache first
         cache_key = f"plan_{max_items}"
         import time
@@ -418,7 +418,7 @@ class Planner:
                 logger.info(f"Using cached plan for max_items={max_items}")
                 return cached_items
 
-        items: List[PlanItem] = []
+        items: list[PlanItem] = []
 
         try:
             logger.info(f"Building plan with max_items={max_items}")
@@ -584,7 +584,7 @@ class Planner:
         error_type: Optional[str] = None,
         previous_plan_feedback: Optional[str] = None,
         current_attempt: int = 1,
-    ) -> Optional[Dict[str, Any]]:
+    ) -> Optional[dict[str, Any]]:
         prompt = self._build_prompt(
             problem_description=problem_description,
             problem_file=problem_file,

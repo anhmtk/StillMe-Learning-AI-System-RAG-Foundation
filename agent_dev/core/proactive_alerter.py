@@ -17,16 +17,12 @@ Date: 2025-09-30
 
 import json
 import logging
-import os
-import smtplib
 import time
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
-
-import requests
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +48,7 @@ class AlertRule:
     name: str
     condition: str
     priority: AlertPriority
-    channels: List[AlertChannel]
+    channels: list[AlertChannel]
     enabled: bool = True
     cooldown_minutes: int = 15
 
@@ -65,13 +61,13 @@ class AlertEvent:
     message: str
     priority: AlertPriority
     timestamp: datetime
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
     resolved: bool = False
 
 class ProactiveAlerter:
     """Hệ thống cảnh báo chủ động"""
 
-    def __init__(self, config: Optional[Dict] = None):
+    def __init__(self, config: Optional[dict] = None):
         self.config = config or self._default_config()
         self.rules = self._load_rules()
         self.events = []
@@ -82,7 +78,7 @@ class ProactiveAlerter:
 
         logger.info("🚨 Proactive Alerter initialized")
 
-    def _default_config(self) -> Dict:
+    def _default_config(self) -> dict:
         """Default configuration"""
         return {
             "channels": {
@@ -149,7 +145,7 @@ class ProactiveAlerter:
             ]
         )
 
-    def _load_rules(self) -> List[AlertRule]:
+    def _load_rules(self) -> list[AlertRule]:
         """Load alert rules from config"""
         rules = []
 
@@ -168,7 +164,7 @@ class ProactiveAlerter:
 
         return rules
 
-    def check_metrics(self, metrics: Dict[str, Any]) -> List[AlertEvent]:
+    def check_metrics(self, metrics: dict[str, Any]) -> list[AlertEvent]:
         """Check metrics against alert rules"""
         events = []
 
@@ -203,7 +199,7 @@ class ProactiveAlerter:
 
         return events
 
-    def _evaluate_condition(self, condition: str, metrics: Dict[str, Any]) -> bool:
+    def _evaluate_condition(self, condition: str, metrics: dict[str, Any]) -> bool:
         """Evaluate alert condition"""
         try:
             # Simple condition evaluation
@@ -224,7 +220,7 @@ class ProactiveAlerter:
             logger.error(f"Error evaluating condition '{condition}': {e}")
             return False
 
-    def _generate_message(self, rule: AlertRule, metrics: Dict[str, Any]) -> str:
+    def _generate_message(self, rule: AlertRule, metrics: dict[str, Any]) -> str:
         """Generate alert message"""
         if rule.id == "high_error_count":
             return f"High error count detected: {metrics.get('total_errors', 0)} errors found"
@@ -249,7 +245,7 @@ class ProactiveAlerter:
 
         return datetime.now() < cooldown_end
 
-    def _send_alert(self, event: AlertEvent, channels: List[AlertChannel]):
+    def _send_alert(self, event: AlertEvent, channels: list[AlertChannel]):
         """Send alert to specified channels"""
         for channel in channels:
             try:
@@ -324,13 +320,13 @@ class ProactiveAlerter:
 
         logger.info(f"File alert written: {event.title}")
 
-    def get_recent_events(self, hours: int = 24) -> List[Dict]:
+    def get_recent_events(self, hours: int = 24) -> list[dict]:
         """Get recent alert events"""
         cutoff_time = datetime.now() - timedelta(hours=hours)
         recent_events = [e for e in self.events if e.timestamp > cutoff_time]
         return [asdict(event) for event in recent_events]
 
-    def get_alert_summary(self) -> Dict[str, Any]:
+    def get_alert_summary(self) -> dict[str, Any]:
         """Get alert summary"""
         if not self.events:
             return {"message": "No alerts"}

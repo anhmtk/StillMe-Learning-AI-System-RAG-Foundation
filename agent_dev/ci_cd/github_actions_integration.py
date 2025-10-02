@@ -5,15 +5,13 @@ Enterprise-grade CI/CD integration with automated workflows
 """
 
 import asyncio
-import base64
 import hashlib
 import hmac
 import json
-import time
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Optional
 
 import aiohttp
 import yaml
@@ -76,9 +74,9 @@ class WorkflowRun:
     cancel_url: str
     rerun_url: str
     workflow_url: str
-    head_commit: Dict[str, Any]
-    repository: Dict[str, Any]
-    head_repository: Dict[str, Any]
+    head_commit: dict[str, Any]
+    repository: dict[str, Any]
+    head_repository: dict[str, Any]
 
 @dataclass
 class Job:
@@ -90,9 +88,9 @@ class Job:
     conclusion: Optional[str]
     started_at: str
     completed_at: Optional[str]
-    steps: List[Dict[str, Any]]
+    steps: list[dict[str, Any]]
     check_run_url: str
-    labels: List[str]
+    labels: list[str]
     runner_id: int
     runner_name: str
     runner_group_id: int
@@ -108,10 +106,10 @@ class GitHubActionsIntegration:
         self.repository = self.config.get('repository')
         self.owner = self.config.get('owner')
         self.base_url = "https://api.github.com"
-        self.webhook_handlers: Dict[EventType, List[Callable]] = {}
+        self.webhook_handlers: dict[EventType, list[Callable]] = {}
         self.session: Optional[aiohttp.ClientSession] = None
 
-    def _load_config(self, config_path: Optional[str] = None) -> Dict[str, Any]:
+    def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
         """Load GitHub Actions configuration"""
         if config_path:
             config_file = Path(config_path)
@@ -172,7 +170,7 @@ class GitHubActionsIntegration:
         if self.session:
             await self.session.close()
 
-    async def get_workflows(self) -> List[GitHubWorkflow]:
+    async def get_workflows(self) -> list[GitHubWorkflow]:
         """Get all workflows for the repository"""
         session = await self._get_session()
         url = f"{self.base_url}/repos/{self.owner}/{self.repository}/actions/workflows"
@@ -205,7 +203,7 @@ class GitHubActionsIntegration:
 
     async def get_workflow_runs(self, workflow_id: str,
                               status: Optional[WorkflowStatus] = None,
-                              limit: int = 10) -> List[WorkflowRun]:
+                              limit: int = 10) -> list[WorkflowRun]:
         """Get workflow runs"""
         session = await self._get_session()
         url = f"{self.base_url}/repos/{self.owner}/{self.repository}/actions/workflows/{workflow_id}/runs"
@@ -250,7 +248,7 @@ class GitHubActionsIntegration:
             print(f"⚠️ Failed to get workflow runs: {e}")
             return []
 
-    async def get_jobs(self, run_id: int) -> List[Job]:
+    async def get_jobs(self, run_id: int) -> list[Job]:
         """Get jobs for a workflow run"""
         session = await self._get_session()
         url = f"{self.base_url}/repos/{self.owner}/{self.repository}/actions/runs/{run_id}/jobs"
@@ -288,7 +286,7 @@ class GitHubActionsIntegration:
 
     async def trigger_workflow(self, workflow_id: str,
                              ref: str = "main",
-                             inputs: Optional[Dict[str, Any]] = None) -> bool:
+                             inputs: Optional[dict[str, Any]] = None) -> bool:
         """Trigger a workflow run"""
         session = await self._get_session()
         url = f"{self.base_url}/repos/{self.owner}/{self.repository}/actions/workflows/{workflow_id}/dispatches"
@@ -384,7 +382,7 @@ class GitHubActionsIntegration:
 
         return hmac.compare_digest(signature, expected_signature)
 
-    async def handle_webhook(self, event_type: str, payload: Dict[str, Any],
+    async def handle_webhook(self, event_type: str, payload: dict[str, Any],
                            signature: Optional[str] = None) -> bool:
         """Handle GitHub webhook event"""
         # Verify signature if provided
@@ -428,7 +426,7 @@ class GitHubActionsIntegration:
             print(f"⚠️ Failed to create workflow: {e}")
             return False
 
-    async def get_workflow_status_summary(self) -> Dict[str, Any]:
+    async def get_workflow_status_summary(self) -> dict[str, Any]:
         """Get comprehensive workflow status summary"""
         workflows = await self.get_workflows()
 
@@ -473,7 +471,7 @@ class GitHubActionsIntegration:
 github_actions = GitHubActionsIntegration()
 
 # Convenience functions
-async def trigger_agentdev_workflow(workflow_name: str, inputs: Optional[Dict[str, Any]] = None) -> bool:
+async def trigger_agentdev_workflow(workflow_name: str, inputs: Optional[dict[str, Any]] = None) -> bool:
     """Trigger AgentDev workflow"""
     # Map workflow names to IDs (this would need to be configured)
     workflow_mapping = {
@@ -489,7 +487,7 @@ async def trigger_agentdev_workflow(workflow_name: str, inputs: Optional[Dict[st
 
     return await github_actions.trigger_workflow(workflow_id, inputs=inputs)
 
-async def get_ci_status() -> Dict[str, Any]:
+async def get_ci_status() -> dict[str, Any]:
     """Get CI/CD status summary"""
     return await github_actions.get_workflow_status_summary()
 
@@ -510,27 +508,27 @@ on:
 jobs:
   agentdev-deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
-    
+
     - name: Install dependencies
       run: |
         pip install -r requirements.txt
         pip install -r agent-dev/requirements.txt
-    
+
     - name: Run AgentDev CLI
       run: |
         python agent-dev/cli/agentdev_cli.py init-task deploy_edge
         python agent-dev/cli/agentdev_cli.py plan --task task.config.json
         python agent-dev/cli/agentdev_cli.py dry-run --task task.config.json
         python agent-dev/cli/agentdev_cli.py execute --task task.config.json
-    
+
     - name: Upload artifacts
       uses: actions/upload-artifact@v3
       with:
@@ -552,25 +550,25 @@ on:
 jobs:
   agentdev-test:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
-    
+
     - name: Install dependencies
       run: |
         pip install -r requirements.txt
         pip install -r agent-dev/requirements.txt
         pip install pytest pytest-cov
-    
+
     - name: Run tests
       run: |
         pytest agent-dev/tests/ -v --cov=agent-dev --cov-report=xml
-    
+
     - name: Upload coverage
       uses: codecov/codecov-action@v3
       with:
@@ -589,27 +587,27 @@ on:
 jobs:
   security-scan:
     runs-on: ubuntu-latest
-    
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Setup Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.11'
-    
+
     - name: Install dependencies
       run: |
         pip install -r requirements.txt
         pip install -r agent-dev/requirements.txt
         pip install bandit safety pip-audit
-    
+
     - name: Run security scans
       run: |
         bandit -r agent-dev/ -f json -o bandit-report.json
         safety check --json --output safety-report.json
         pip-audit --format=json --output=pip-audit-report.json
-    
+
     - name: Upload security reports
       uses: actions/upload-artifact@v3
       with:

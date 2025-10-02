@@ -11,7 +11,7 @@ import uuid
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Optional
 
 import yaml
 
@@ -52,13 +52,13 @@ class PipelineStep:
     description: str
     command: str
     working_directory: Optional[str]
-    environment: Dict[str, str]
-    dependencies: List[str]
+    environment: dict[str, str]
+    dependencies: list[str]
     timeout: int
     retry_count: int
     condition: Optional[str]
-    artifacts: List[str]
-    notifications: List[str]
+    artifacts: list[str]
+    notifications: list[str]
 
 @dataclass
 class Pipeline:
@@ -67,11 +67,11 @@ class Pipeline:
     name: str
     description: str
     version: str
-    triggers: List[TriggerType]
-    steps: List[PipelineStep]
-    environment: Dict[str, str]
-    variables: Dict[str, str]
-    notifications: Dict[str, Any]
+    triggers: list[TriggerType]
+    steps: list[PipelineStep]
+    environment: dict[str, str]
+    variables: dict[str, str]
+    notifications: dict[str, Any]
     timeout: int
     parallel_execution: bool
 
@@ -82,28 +82,28 @@ class PipelineExecution:
     pipeline_id: str
     status: PipelineStatus
     trigger_type: TriggerType
-    trigger_data: Dict[str, Any]
+    trigger_data: dict[str, Any]
     started_at: float
     completed_at: Optional[float]
     duration: Optional[float]
-    steps_executed: List[str]
-    steps_failed: List[str]
-    artifacts: List[str]
-    logs: List[Dict[str, Any]]
-    variables: Dict[str, str]
+    steps_executed: list[str]
+    steps_failed: list[str]
+    artifacts: list[str]
+    logs: list[dict[str, Any]]
+    variables: dict[str, str]
 
 class AutomatedWorkflows:
     """Enterprise automated workflows system"""
 
     def __init__(self, config_path: Optional[str] = None):
         self.config = self._load_config(config_path)
-        self.pipelines: Dict[str, Pipeline] = {}
-        self.executions: Dict[str, PipelineExecution] = {}
-        self.scheduled_jobs: Dict[str, Any] = {}
-        self.webhook_handlers: Dict[str, Callable] = {}
+        self.pipelines: dict[str, Pipeline] = {}
+        self.executions: dict[str, PipelineExecution] = {}
+        self.scheduled_jobs: dict[str, Any] = {}
+        self.webhook_handlers: dict[str, Callable] = {}
         self.running = False
 
-    def _load_config(self, config_path: Optional[str] = None) -> Dict[str, Any]:
+    def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
         """Load automated workflows configuration"""
         if config_path:
             config_file = Path(config_path)
@@ -209,8 +209,8 @@ class AutomatedWorkflows:
         print(f"📋 Loaded {len(self.pipelines)} pipelines")
 
     async def execute_pipeline(self, pipeline_id: str, trigger_type: TriggerType,
-                             trigger_data: Optional[Dict[str, Any]] = None,
-                             variables: Optional[Dict[str, str]] = None) -> str:
+                             trigger_data: Optional[dict[str, Any]] = None,
+                             variables: Optional[dict[str, str]] = None) -> str:
         """Execute a pipeline"""
         if pipeline_id not in self.pipelines:
             raise ValueError(f"Pipeline not found: {pipeline_id}")
@@ -477,17 +477,17 @@ class AutomatedWorkflows:
         except Exception as e:
             print(f"⚠️ Notification error: {e}")
 
-    async def _send_slack_notification(self, execution: PipelineExecution, slack_config: Dict[str, Any]):
+    async def _send_slack_notification(self, execution: PipelineExecution, slack_config: dict[str, Any]):
         """Send Slack notification"""
         # Implementation would depend on Slack API
         print(f"📱 Slack notification: Pipeline {execution.pipeline_id} - {execution.status.value}")
 
-    async def _send_email_notification(self, execution: PipelineExecution, email_config: Dict[str, Any]):
+    async def _send_email_notification(self, execution: PipelineExecution, email_config: dict[str, Any]):
         """Send email notification"""
         # Implementation would depend on SMTP
         print(f"📧 Email notification: Pipeline {execution.pipeline_id} - {execution.status.value}")
 
-    def get_pipeline_status(self, pipeline_id: str) -> Dict[str, Any]:
+    def get_pipeline_status(self, pipeline_id: str) -> dict[str, Any]:
         """Get pipeline status and statistics"""
         if pipeline_id not in self.pipelines:
             return {}
@@ -525,7 +525,7 @@ class AutomatedWorkflows:
             ]
         }
 
-    def get_execution_logs(self, execution_id: str) -> List[Dict[str, Any]]:
+    def get_execution_logs(self, execution_id: str) -> list[dict[str, Any]]:
         """Get execution logs"""
         execution = self.executions.get(execution_id)
         return execution.logs if execution else []
@@ -556,11 +556,11 @@ def load_pipeline(pipeline_file: str) -> Optional[Pipeline]:
     return automated_workflows.load_pipeline(pipeline_file)
 
 async def execute_pipeline(pipeline_id: str, trigger_type: TriggerType,
-                         trigger_data: Optional[Dict[str, Any]] = None) -> str:
+                         trigger_data: Optional[dict[str, Any]] = None) -> str:
     """Execute pipeline"""
     return await automated_workflows.execute_pipeline(pipeline_id, trigger_type, trigger_data)
 
-def get_pipeline_status(pipeline_id: str) -> Dict[str, Any]:
+def get_pipeline_status(pipeline_id: str) -> dict[str, Any]:
     """Get pipeline status"""
     return automated_workflows.get_pipeline_status(pipeline_id)
 

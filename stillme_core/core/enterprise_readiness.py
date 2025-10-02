@@ -7,7 +7,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 # --- Cấu hình và Logging ---
 logging.basicConfig(
@@ -44,8 +44,8 @@ class SecurityAssessment:
     """Đánh giá bảo mật."""
 
     security_score: float = 0.0
-    vulnerabilities: List[str] = field(default_factory=list)
-    compliance_status: Dict[str, str] = field(default_factory=dict)
+    vulnerabilities: list[str] = field(default_factory=list)
+    compliance_status: dict[str, str] = field(default_factory=dict)
     encryption_status: str = "disabled"
     notes: str = ""
 
@@ -68,8 +68,8 @@ class ComplianceReport:
     standard_type: str
     compliance_level: str
     audit_date: str
-    findings: List[str] = field(default_factory=list)
-    recommendations: List[str] = field(default_factory=list)
+    findings: list[str] = field(default_factory=list)
+    recommendations: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -94,7 +94,7 @@ class EnterpriseReadiness:
     def __init__(
         self,
         db_path: str = "enterprise_data.db",
-        config: Dict[str, Any] = DEFAULT_CONFIG,
+        config: dict[str, Any] = DEFAULT_CONFIG,
     ):
         self.db_path = db_path
         self.config = config
@@ -180,7 +180,7 @@ class EnterpriseReadiness:
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(self.executor, func, *args)
 
-    async def assess_scalability(self, data: Dict[str, Any]) -> ScalabilityMetrics:
+    async def assess_scalability(self, data: dict[str, Any]) -> ScalabilityMetrics:
         """Đánh giá khả năng mở rộng dựa trên các metrics."""
         try:
             logger.info(
@@ -226,7 +226,7 @@ class EnterpriseReadiness:
             logger.error(f"Lỗi khi đánh giá khả năng mở rộng: {e}")
             raise
 
-    async def evaluate_security(self, data: Dict[str, Any]) -> SecurityAssessment:
+    async def evaluate_security(self, data: dict[str, Any]) -> SecurityAssessment:
         """Đánh giá bảo mật và tuân thủ."""
         try:
             logger.info("Đang đánh giá bảo mật.")
@@ -269,7 +269,7 @@ class EnterpriseReadiness:
             raise
 
     async def run_performance_benchmark(
-        self, data: Dict[str, Any]
+        self, data: dict[str, Any]
     ) -> PerformanceBenchmark:
         """Chạy benchmark hiệu suất cho một hoạt động cụ thể."""
         try:
@@ -315,7 +315,7 @@ class EnterpriseReadiness:
             raise
 
     async def generate_compliance_report(
-        self, data: Dict[str, Any]
+        self, data: dict[str, Any]
     ) -> ComplianceReport:
         """Tạo báo cáo tuân thủ dựa trên tiêu chuẩn."""
         try:
@@ -356,7 +356,7 @@ class EnterpriseReadiness:
             raise
 
     async def configure_enterprise(
-        self, config_data: Dict[str, Any]
+        self, config_data: dict[str, Any]
     ) -> EnterpriseConfig:
         """Cấu hình các tham số cấp doanh nghiệp."""
         try:

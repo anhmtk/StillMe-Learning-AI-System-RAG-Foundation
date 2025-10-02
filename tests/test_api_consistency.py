@@ -10,10 +10,9 @@ Author: StillMe AI Framework
 Version: 1.0.0
 """
 
-import pytest
 import inspect
-from typing import Any, Dict, List, Optional, Union
 from dataclasses import dataclass
+from typing import Any, Dict, List
 
 
 @dataclass
@@ -29,23 +28,23 @@ class APIConsistencyIssue:
 
 class APIConsistencyChecker:
     """Checks API consistency across modules"""
-    
+
     def __init__(self):
         self.issues: List[APIConsistencyIssue] = []
-    
+
     def check_verifier_consistency(self) -> List[APIConsistencyIssue]:
         """Check consistency between Verifier classes"""
         issues = []
-        
+
         try:
             # Import both Verifier classes
-            from stillme_core.verifier import LegacyVerifier as VerifierOld
             from stillme_core.core.verifier import Verifier as VerifierNew
-            
+            from stillme_core.verifier import LegacyVerifier as VerifierOld
+
             # Check verify method signatures
             old_verify_sig = inspect.signature(VerifierOld.verify)
             new_verify_sig = inspect.signature(VerifierNew.verify)
-            
+
             if old_verify_sig != new_verify_sig:
                 issues.append(APIConsistencyIssue(
                     issue_type="method_signature_mismatch",
@@ -58,11 +57,11 @@ class APIConsistencyChecker:
                         "new_signature": str(new_verify_sig)
                     }
                 ))
-            
+
             # Check verify_test_results method signatures
             old_verify_test_sig = inspect.signature(VerifierOld.verify_test_results)
             new_verify_test_sig = inspect.signature(VerifierNew.verify_test_results)
-            
+
             if old_verify_test_sig != new_verify_test_sig:
                 issues.append(APIConsistencyIssue(
                     issue_type="method_signature_mismatch",
@@ -75,11 +74,11 @@ class APIConsistencyChecker:
                         "new_signature": str(new_verify_test_sig)
                     }
                 ))
-            
+
             # Check return types
             old_verify_annotations = VerifierOld.verify.__annotations__
             new_verify_annotations = VerifierNew.verify.__annotations__
-            
+
             if old_verify_annotations.get('return') != new_verify_annotations.get('return'):
                 issues.append(APIConsistencyIssue(
                     issue_type="return_type_mismatch",
@@ -92,7 +91,7 @@ class APIConsistencyChecker:
                         "new_return_type": new_verify_annotations.get('return')
                     }
                 ))
-                
+
         except ImportError as e:
             issues.append(APIConsistencyIssue(
                 issue_type="import_error",
@@ -102,18 +101,18 @@ class APIConsistencyChecker:
                 method="N/A",
                 details={"error": str(e)}
             ))
-        
+
         return issues
-    
+
     def check_duplicate_classes(self) -> List[APIConsistencyIssue]:
         """Check for duplicate class names across modules"""
         issues = []
-        
+
         # Check for duplicate Verifier classes
         try:
-            from stillme_core.verifier import LegacyVerifier as VerifierOld
             from stillme_core.core.verifier import Verifier as VerifierNew
-            
+            from stillme_core.verifier import LegacyVerifier as VerifierOld
+
             # No longer consider this a duplicate class issue since we renamed to LegacyVerifier
             # issues.append(APIConsistencyIssue(
             #     issue_type="duplicate_class",
@@ -129,20 +128,20 @@ class APIConsistencyChecker:
             # ))
         except ImportError:
             pass
-        
+
         return issues
-    
+
     def check_method_availability(self) -> List[APIConsistencyIssue]:
         """Check if expected methods are available in classes"""
         issues = []
-        
+
         # Check Verifier classes have required methods
         try:
-            from stillme_core.verifier import LegacyVerifier as VerifierOld
             from stillme_core.core.verifier import Verifier as VerifierNew
-            
+            from stillme_core.verifier import LegacyVerifier as VerifierOld
+
             required_methods = ['verify', 'verify_test_results']
-            
+
             for method in required_methods:
                 if not hasattr(VerifierOld, method):
                     issues.append(APIConsistencyIssue(
@@ -153,7 +152,7 @@ class APIConsistencyChecker:
                         method=method,
                         details={"expected_method": method}
                     ))
-                
+
                 if not hasattr(VerifierNew, method):
                     issues.append(APIConsistencyIssue(
                         issue_type="missing_method",
@@ -163,28 +162,28 @@ class APIConsistencyChecker:
                         method=method,
                         details={"expected_method": method}
                     ))
-                    
+
         except ImportError:
             pass
-        
+
         return issues
-    
+
     def run_all_checks(self) -> Dict[str, Any]:
         """Run all API consistency checks"""
         all_issues = []
-        
+
         # Run all checks
         all_issues.extend(self.check_verifier_consistency())
         all_issues.extend(self.check_duplicate_classes())
         all_issues.extend(self.check_method_availability())
-        
+
         # Categorize issues
         issue_types = {}
         for issue in all_issues:
             if issue.issue_type not in issue_types:
                 issue_types[issue.issue_type] = []
             issue_types[issue.issue_type].append(issue)
-        
+
         return {
             "total_issues": len(all_issues),
             "issue_types": issue_types,
@@ -195,12 +194,12 @@ class APIConsistencyChecker:
 
 class TestAPIConsistency:
     """Test API consistency across modules"""
-    
+
     def test_verifier_consistency(self):
         """Test Verifier class consistency"""
         checker = APIConsistencyChecker()
         issues = checker.check_verifier_consistency()
-        
+
         # Report issues but don't fail the test yet
         if issues:
             print(f"\nFound {len(issues)} Verifier consistency issues:")
@@ -211,53 +210,53 @@ class TestAPIConsistency:
                 print(f"    Method: {issue.method}")
                 print(f"    Details: {issue.details}")
                 print()
-        
+
         # For now, just report - we'll fix these issues
         assert True  # Don't fail the test yet
-    
+
     def test_duplicate_classes(self):
         """Test for duplicate class names"""
         checker = APIConsistencyChecker()
         issues = checker.check_duplicate_classes()
-        
+
         if issues:
             print(f"\nFound {len(issues)} duplicate class issues:")
             for issue in issues:
                 print(f"  - {issue.description}")
                 print(f"    Recommendation: {issue.details.get('recommendation', 'N/A')}")
                 print()
-        
+
         assert True  # Don't fail the test yet
-    
+
     def test_method_availability(self):
         """Test method availability in classes"""
         checker = APIConsistencyChecker()
         issues = checker.check_method_availability()
-        
+
         if issues:
             print(f"\nFound {len(issues)} missing method issues:")
             for issue in issues:
                 print(f"  - {issue.description}")
                 print()
-        
+
         assert True  # Don't fail the test yet
-    
+
     def test_api_consistency_summary(self):
         """Test overall API consistency"""
         checker = APIConsistencyChecker()
         results = checker.run_all_checks()
-        
-        print(f"\nAPI Consistency Summary:")
+
+        print("\nAPI Consistency Summary:")
         print(f"  Total Issues: {results['total_issues']}")
         print(f"  Consistency Score: {results['consistency_score']}/100")
         print(f"  Issue Types: {list(results['issue_types'].keys())}")
-        
+
         # Report detailed issues
         for issue_type, issues in results['issue_types'].items():
             print(f"\n  {issue_type.upper()}: {len(issues)} issues")
             for issue in issues:
                 print(f"    - {issue.description}")
-        
+
         # For now, just report - we'll fix these issues
         assert True  # Don't fail the test yet
 
@@ -266,11 +265,11 @@ if __name__ == "__main__":
     # Run the consistency checker directly
     checker = APIConsistencyChecker()
     results = checker.run_all_checks()
-    
+
     print("API Consistency Check Results:")
     print(f"Total Issues: {results['total_issues']}")
     print(f"Consistency Score: {results['consistency_score']}/100")
-    
+
     if results['total_issues'] > 0:
         print("\nIssues Found:")
         for issue in results['issues']:

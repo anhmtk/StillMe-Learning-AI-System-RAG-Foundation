@@ -4,15 +4,10 @@ StillMe IPC Knowledge Discovery System
 Tự động tìm kiến thức mới từ web, RSS, documents
 """
 
-import json
 import logging
-import os
 import sys
-from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List
-
-import requests
+from typing import Any
 
 # Add project root to path
 project_root = Path(__file__).resolve().parents[1]
@@ -79,7 +74,7 @@ class KnowledgeDiscovery:
             logger.error(f"❌ Knowledge discovery failed: {e}")
             return 0
 
-    def _discover_tech_trends(self) -> List[Dict[str, Any]]:
+    def _discover_tech_trends(self) -> list[dict[str, Any]]:
         """Khám phá xu hướng công nghệ"""
         logger.info("📱 Discovering tech trends...")
 
@@ -110,7 +105,7 @@ class KnowledgeDiscovery:
 
         return tech_trends
 
-    def _discover_ai_news(self) -> List[Dict[str, Any]]:
+    def _discover_ai_news(self) -> list[dict[str, Any]]:
         """Khám phá tin tức AI/ML"""
         logger.info("🤖 Discovering AI/ML news...")
 
@@ -141,7 +136,7 @@ class KnowledgeDiscovery:
 
         return ai_topics
 
-    def _discover_programming_trends(self) -> List[Dict[str, Any]]:
+    def _discover_programming_trends(self) -> list[dict[str, Any]]:
         """Khám phá xu hướng lập trình"""
         logger.info("💻 Discovering programming trends...")
 
@@ -172,7 +167,7 @@ class KnowledgeDiscovery:
 
         return prog_topics
 
-    def _create_proposal_from_topic(self, topic: Dict[str, Any]) -> bool:
+    def _create_proposal_from_topic(self, topic: dict[str, Any]) -> bool:
         """Tạo proposal từ topic được khám phá"""
         try:
             # Kiểm tra xem topic đã được tạo chưa

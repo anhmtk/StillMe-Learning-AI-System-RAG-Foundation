@@ -5,7 +5,6 @@ PHA 1 - Thu thập bằng chứng cho AgentDev interface
 
 import os
 import re
-from pathlib import Path
 
 
 def analyze_agentdev_interface():
@@ -66,7 +65,7 @@ def analyze_agentdev_interface():
                             "symbol": symbol
                         })
 
-        except Exception as e:
+        except Exception:
             continue
 
     # Suy luận spec từ usages

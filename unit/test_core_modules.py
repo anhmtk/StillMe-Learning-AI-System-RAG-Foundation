@@ -5,8 +5,6 @@ Test cases for Senior Thinking, Execution Engine, and Learning Foundation
 
 import os
 import sys
-from pathlib import Path
-from unittest.mock import MagicMock, Mock, patch
 
 import pytest
 
@@ -15,7 +13,6 @@ agent_dev_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__
 if agent_dev_path not in sys.path:
     sys.path.insert(0, agent_dev_path)
 
-from agent_dev.core.agentdev import AgentDev
 from fixtures import TestFixtures
 
 
@@ -190,7 +187,7 @@ class TestConflictResolver:
             resolver = ConflictResolver(str(temp_project))
 
             # Create sample files with import conflicts
-            sample_files = TestFixtures.get_sample_code_files()
+            TestFixtures.get_sample_code_files()
 
             # Test conflict detection
             result = resolver.analyze_conflicts()
@@ -332,7 +329,7 @@ class TestPerformance:
 
             # Measure execution time
             start_time = time.time()
-            result = agentdev.execute_task("Create test file", "SENIOR")
+            agentdev.execute_task("Create test file", "SENIOR")
             end_time = time.time()
 
             execution_time = (end_time - start_time) * 1000  # Convert to ms

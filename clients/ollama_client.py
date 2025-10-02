@@ -10,7 +10,8 @@ import logging
 import os
 import threading
 import time
-from typing import Any, Dict, Generator, List, Optional
+from collections.abc import Generator
+from typing import Any, Optional
 
 import httpx
 import requests
@@ -59,7 +60,7 @@ def _ollama_ping() -> bool:
         return False
 
 
-def get_available_models() -> List[str]:
+def get_available_models() -> list[str]:
     """Get list of available Ollama models."""
     try:
         r = requests.get(f"{OLLAMA_HOST}/api/tags", timeout=(OLLAMA_CONNECT_TIMEOUT, 3))
@@ -75,7 +76,7 @@ def get_available_models() -> List[str]:
 
 def call_ollama_simple_stream(
     model: str, prompt: str, options: dict = None
-) -> Generator[Dict[str, Any], None, None]:
+) -> Generator[dict[str, Any], None, None]:
     """Simple streaming function using requests (more reliable than httpx)."""
     try:
         payload = {
@@ -113,7 +114,7 @@ def call_ollama_simple_stream(
         yield {"error": str(e), "done": True}
 
 
-def _messages_to_prompt(messages: List[Dict[str, str]]) -> str:
+def _messages_to_prompt(messages: list[dict[str, str]]) -> str:
     """Convert messages to prompt format for /api/generate endpoint."""
     sys = "\n".join(
         m.get("content", "") for m in messages if m.get("role") == "system"
@@ -124,7 +125,7 @@ def _messages_to_prompt(messages: List[Dict[str, str]]) -> str:
     return (sys + ("\n\n" if sys and usr else "") + usr).strip() or usr
 
 
-def _stream_post(url: str, payload: dict) -> Generator[Dict[str, Any], None, None]:
+def _stream_post(url: str, payload: dict) -> Generator[dict[str, Any], None, None]:
     """Stream POST request with first chunk timeout detection."""
     with requests.post(
         url,
@@ -155,11 +156,11 @@ def _stream_post(url: str, payload: dict) -> Generator[Dict[str, Any], None, Non
 
 def call_ollama_chat(
     model: str,
-    messages: List[Dict[str, str]],
+    messages: list[dict[str, str]],
     stream: bool = True,
     options: dict = None,
     timeout: float = None,
-) -> Generator[Dict[str, Any], None, None]:
+) -> Generator[dict[str, Any], None, None]:
     """
     Call Ollama with /api/generate using httpx singleton with real timeout.
 

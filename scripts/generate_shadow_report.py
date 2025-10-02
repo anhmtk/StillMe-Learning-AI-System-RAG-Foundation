@@ -11,7 +11,8 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from stillme_core.middleware.observability import ObservabilityManager
+# Import after path setup
+from stillme_core.middleware.observability import ObservabilityManager  # noqa: E402
 
 
 def main():

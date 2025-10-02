@@ -1,7 +1,6 @@
 import shutil
 import subprocess
 from pathlib import Path
-from typing import List
 
 
 def prepare_sandbox(repo_root: str | Path, sandbox_dir: str | Path) -> Path:
@@ -17,6 +16,6 @@ def prepare_sandbox(repo_root: str | Path, sandbox_dir: str | Path) -> Path:
     return sandbox_dir
 
 
-def run_tests_in_sandbox(cmd: List[str], sandbox_dir: str | Path):
+def run_tests_in_sandbox(cmd: list[str], sandbox_dir: str | Path):
     p = subprocess.run(cmd, cwd=str(sandbox_dir), capture_output=True, text=True)
     return p.returncode == 0, p.stdout, p.stderr

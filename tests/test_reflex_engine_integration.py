@@ -113,7 +113,7 @@ class TestReflexEngineIntegration:
                     engine.policy = mock_policy
                     engine.safety = mock_safety
 
-                    result = engine.analyze(
+                    engine.analyze(
                         text="Hello world",
                         context={"mode": "test"},
                         user_id="user1",
@@ -155,7 +155,7 @@ class TestReflexEngineIntegration:
                     engine.policy = mock_policy
                     engine.safety = mock_safety
 
-                    result = engine.analyze(
+                    engine.analyze(
                         text="Hello world",
                         context={"mode": "test"},
                         user_id="user1",
@@ -191,7 +191,7 @@ class TestReflexEngineIntegration:
                     engine.policy = mock_policy
                     engine.safety = mock_safety
 
-                    result = engine.analyze(
+                    engine.analyze(
                         text="Hello world",
                         context={"mode": "test"},
                         user_id="user1",

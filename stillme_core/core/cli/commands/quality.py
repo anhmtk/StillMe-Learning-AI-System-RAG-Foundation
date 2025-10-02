@@ -6,7 +6,7 @@ Commands for code quality analysis, fixing, and monitoring.
 
 import asyncio
 import json
-from typing import List, Optional
+from typing import Optional
 
 import typer
 from rich.console import Console
@@ -26,7 +26,7 @@ console = Console()
 @app.command()
 def check(
     target_path: str = typer.Argument(".", help="Path to analyze"),
-    tools: Optional[List[str]] = typer.Option(
+    tools: Optional[list[str]] = typer.Option(
         None,
         "--tool",
         "-t",

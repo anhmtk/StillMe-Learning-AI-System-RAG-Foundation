@@ -7,8 +7,6 @@ Apply fixes for F821 errors using compat layer and missing implementations.
 """
 
 import json
-import os
-import subprocess
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -18,7 +16,8 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(project_root / "agent_dev" / "core"))
 
-from agent_dev.core.agentdev import AgentDev
+# Import after path setup
+from agent_dev.core.agentdev import AgentDev  # noqa: E402
 
 
 def apply_p2_fixes():

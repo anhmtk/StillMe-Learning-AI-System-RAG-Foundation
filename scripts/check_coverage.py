@@ -5,7 +5,6 @@ Ensures test coverage meets minimum requirements
 """
 
 import json
-import os
 import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
@@ -205,7 +204,7 @@ def main():
 
     # Generate summary
     print("\n📊 Coverage Summary:")
-    summary = generate_coverage_summary()
+    generate_coverage_summary()
 
     if all_passed:
         print("\n✅ All coverage checks passed!")

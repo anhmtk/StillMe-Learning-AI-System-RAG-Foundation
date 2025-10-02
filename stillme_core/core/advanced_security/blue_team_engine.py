@@ -16,17 +16,14 @@ Version: 2.0.0
 """
 
 import asyncio
-import json
 import logging
-import os
-import re
 import statistics
 import time
 from collections import defaultdict, deque
-from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
+from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any
 
 # Import existing modules
 try:
@@ -85,11 +82,11 @@ class AnomalyDetection:
     anomaly_type: AnomalyType
     threat_level: ThreatLevel
     description: str
-    indicators: List[str]
+    indicators: list[str]
     confidence: float
     source: str
-    metadata: Dict[str, Any]
-    recommended_actions: List[DefenseAction]
+    metadata: dict[str, Any]
+    recommended_actions: list[DefenseAction]
 
 
 @dataclass
@@ -98,8 +95,8 @@ class DefenseRule:
     id: str
     name: str
     description: str
-    conditions: Dict[str, Any]
-    actions: List[DefenseAction]
+    conditions: dict[str, Any]
+    actions: list[DefenseAction]
     priority: int
     enabled: bool
     created_at: datetime
@@ -114,14 +111,14 @@ class DefenseResult:
     action: DefenseAction
     status: str  # "success", "failed", "partial"
     timestamp: datetime
-    details: Dict[str, Any]
+    details: dict[str, Any]
     effectiveness_score: float
 
 
 class AnomalyDetector:
     """Bộ phát hiện bất thường"""
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.config = config
         self.logger = get_logger(__name__)
         self.baseline_metrics = {}
@@ -138,7 +135,7 @@ class AnomalyDetector:
             'unusual_patterns': 0.7
         }
 
-    def detect_behavioral_anomalies(self, logs: List[Dict[str, Any]]) -> List[AnomalyDetection]:
+    def detect_behavioral_anomalies(self, logs: list[dict[str, Any]]) -> list[AnomalyDetection]:
         """Phát hiện bất thường về hành vi"""
         anomalies = []
 
@@ -163,7 +160,7 @@ class AnomalyDetector:
 
         return anomalies
 
-    def detect_performance_anomalies(self, metrics: Dict[str, float]) -> List[AnomalyDetection]:
+    def detect_performance_anomalies(self, metrics: dict[str, float]) -> list[AnomalyDetection]:
         """Phát hiện bất thường về hiệu suất"""
         anomalies = []
 
@@ -201,7 +198,7 @@ class AnomalyDetector:
 
         return anomalies
 
-    def detect_security_anomalies(self, security_events: List[Dict[str, Any]]) -> List[AnomalyDetection]:
+    def detect_security_anomalies(self, security_events: list[dict[str, Any]]) -> list[AnomalyDetection]:
         """Phát hiện bất thường về bảo mật"""
         anomalies = []
 
@@ -242,7 +239,7 @@ class AnomalyDetector:
 
         return anomalies
 
-    def _analyze_log_patterns(self, logs: List[Dict[str, Any]]) -> Dict[str, float]:
+    def _analyze_log_patterns(self, logs: list[dict[str, Any]]) -> dict[str, float]:
         """Phân tích pattern trong logs"""
         patterns = defaultdict(int)
 
@@ -264,7 +261,7 @@ class AnomalyDetector:
 
         return dict(patterns)
 
-    def _detect_suspicious_ips(self, security_events: List[Dict[str, Any]]) -> Dict[str, int]:
+    def _detect_suspicious_ips(self, security_events: list[dict[str, Any]]) -> dict[str, int]:
         """Phát hiện IP đáng ngờ"""
         ip_counts = defaultdict(int)
 
@@ -279,7 +276,7 @@ class AnomalyDetector:
 class DefenseEngine:
     """Bộ máy phòng thủ tự động"""
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.config = config
         self.logger = get_logger(__name__)
         self.defense_rules = {}
@@ -330,7 +327,7 @@ class DefenseEngine:
         for rule in default_rules:
             self.defense_rules[rule.id] = rule
 
-    def evaluate_defense_rules(self, anomaly: AnomalyDetection) -> List[DefenseRule]:
+    def evaluate_defense_rules(self, anomaly: AnomalyDetection) -> list[DefenseRule]:
         """Đánh giá quy tắc phòng thủ phù hợp"""
         applicable_rules = []
 
@@ -534,7 +531,7 @@ class DefenseEngine:
 class BlueTeamEngine:
     """Blue Team Engine - Hệ thống phòng thủ tự động"""
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] = None):
         self.config = config or {}
         self.logger = get_logger(__name__)
 
@@ -569,9 +566,9 @@ class BlueTeamEngine:
         }
 
     async def analyze_system_state(self,
-                                 logs: List[Dict[str, Any]] = None,
-                                 metrics: Dict[str, float] = None,
-                                 security_events: List[Dict[str, Any]] = None) -> List[AnomalyDetection]:
+                                 logs: list[dict[str, Any]] = None,
+                                 metrics: dict[str, float] = None,
+                                 security_events: list[dict[str, Any]] = None) -> list[AnomalyDetection]:
         """Phân tích trạng thái hệ thống và phát hiện bất thường"""
 
         anomalies = []
@@ -605,7 +602,7 @@ class BlueTeamEngine:
             self.logger.error(f"Error analyzing system state: {e}")
             return []
 
-    async def execute_defense_strategy(self, anomalies: List[AnomalyDetection]) -> List[DefenseResult]:
+    async def execute_defense_strategy(self, anomalies: list[AnomalyDetection]) -> list[DefenseResult]:
         """Thực hiện chiến lược phòng thủ"""
         defense_results = []
 
@@ -633,7 +630,7 @@ class BlueTeamEngine:
 
         return defense_results
 
-    async def verify_defense_effectiveness(self, defense_results: List[DefenseResult]) -> Dict[str, float]:
+    async def verify_defense_effectiveness(self, defense_results: list[DefenseResult]) -> dict[str, float]:
         """Kiểm tra hiệu quả của các biện pháp phòng thủ"""
         effectiveness_metrics = {
             'overall_effectiveness': 0.0,
@@ -665,7 +662,7 @@ class BlueTeamEngine:
 
         return effectiveness_metrics
 
-    async def _store_anomalies_in_memory(self, anomalies: List[AnomalyDetection]):
+    async def _store_anomalies_in_memory(self, anomalies: list[AnomalyDetection]):
         """Lưu thông tin bất thường vào memory"""
         try:
             for anomaly in anomalies:
@@ -688,7 +685,7 @@ class BlueTeamEngine:
         except Exception as e:
             self.logger.error(f"Error storing anomalies in memory: {e}")
 
-    def get_defense_statistics(self) -> Dict[str, Any]:
+    def get_defense_statistics(self) -> dict[str, Any]:
         """Lấy thống kê phòng thủ"""
         return {
             'stats': self.stats.copy(),
@@ -727,7 +724,7 @@ class BlueTeamEngine:
                 self.logger.error(f"Error in continuous monitoring: {e}")
                 await asyncio.sleep(interval)
 
-    async def _collect_system_logs(self) -> List[Dict[str, Any]]:
+    async def _collect_system_logs(self) -> list[dict[str, Any]]:
         """Thu thập system logs"""
         # Simulate log collection
         return [
@@ -736,7 +733,7 @@ class BlueTeamEngine:
             {"timestamp": datetime.now(), "level": "ERROR", "message": "Connection timeout"}
         ]
 
-    async def _collect_system_metrics(self) -> Dict[str, float]:
+    async def _collect_system_metrics(self) -> dict[str, float]:
         """Thu thập system metrics"""
         # Simulate metrics collection
         return {
@@ -746,7 +743,7 @@ class BlueTeamEngine:
             'error_rate': 0.02
         }
 
-    async def _collect_security_events(self) -> List[Dict[str, Any]]:
+    async def _collect_security_events(self) -> list[dict[str, Any]]:
         """Thu thập security events"""
         # Simulate security events
         return [

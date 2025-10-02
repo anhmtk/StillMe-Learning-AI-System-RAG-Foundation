@@ -22,7 +22,7 @@ import logging
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -66,8 +66,8 @@ class MetricDefinition:
     description: str
     metric_type: MetricType
     unit: MetricUnit
-    tags: List[str] = field(default_factory=list)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    tags: list[str] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
     min_value: Optional[float] = None
     max_value: Optional[float] = None
     default_value: Optional[float] = None
@@ -75,14 +75,14 @@ class MetricDefinition:
 class MetricsRegistry:
     """
     Registry quản lý định nghĩa metrics
-    
+
     Đảm bảo consistency, validation, và type safety
     cho toàn bộ metrics system.
     """
 
     def __init__(self, config_path: Optional[str] = None):
         self.config_path = config_path or "config/metrics_registry.yaml"
-        self.definitions: Dict[str, MetricDefinition] = {}
+        self.definitions: dict[str, MetricDefinition] = {}
         self._load_default_definitions()
 
         # Load from config if exists
@@ -258,7 +258,7 @@ class MetricsRegistry:
         """Get metric definition by name"""
         return self.definitions.get(name)
 
-    def validate_metric(self, name: str, value: float, tags: Optional[Dict[str, str]] = None) -> bool:
+    def validate_metric(self, name: str, value: float, tags: Optional[dict[str, str]] = None) -> bool:
         """Validate metric value and tags"""
         definition = self.get_definition(name)
         if not definition:
@@ -285,15 +285,15 @@ class MetricsRegistry:
 
         return True
 
-    def get_all_metrics(self) -> List[MetricDefinition]:
+    def get_all_metrics(self) -> list[MetricDefinition]:
         """Get all registered metric definitions"""
         return list(self.definitions.values())
 
-    def get_metrics_by_type(self, metric_type: MetricType) -> List[MetricDefinition]:
+    def get_metrics_by_type(self, metric_type: MetricType) -> list[MetricDefinition]:
         """Get metrics by type"""
         return [m for m in self.definitions.values() if m.metric_type == metric_type]
 
-    def get_metrics_by_tag(self, tag: str) -> List[MetricDefinition]:
+    def get_metrics_by_tag(self, tag: str) -> list[MetricDefinition]:
         """Get metrics that use a specific tag"""
         return [m for m in self.definitions.values() if tag in m.tags]
 
@@ -321,7 +321,7 @@ class MetricsRegistry:
 
         logger.info(f"Exported {len(self.definitions)} metric definitions to {output_path}")
 
-    def get_metric_summary(self) -> Dict[str, Any]:
+    def get_metric_summary(self) -> dict[str, Any]:
         """Get summary of all metrics"""
         summary = {
             'total_metrics': len(self.definitions),

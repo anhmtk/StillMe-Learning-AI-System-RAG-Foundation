@@ -1,4 +1,3 @@
-from typing import List
 
 #!/usr/bin/env python3
 """
@@ -58,7 +57,7 @@ class TestNicheRadarE2E:
         assert len(all_data) > 0, "Should have data from at least one source"
 
         # Check each collector
-        for source_name, collector in collectors.items():
+        for source_name, _collector in collectors.items():
             if source_name in all_data:
                 records = all_data[source_name]
                 assert isinstance(records, list), f"{source_name} should return list of records"
@@ -263,7 +262,7 @@ class TestNicheRadarE2E:
 
         logger.info("✅ Attribution requirements met")
 
-    def _generate_top10_report(self, niche_scores: List[NicheScore]) -> str:
+    def _generate_top10_report(self, niche_scores: list[NicheScore]) -> str:
         """Generate Top 10 report file"""
         reports_dir = Path("reports")
         reports_dir.mkdir(exist_ok=True)
@@ -292,7 +291,7 @@ async def test_full_pipeline():
     logger.info("🧪 Testing full NicheRadar pipeline...")
 
     # Initialize components
-    collectors = get_all_collectors()
+    get_all_collectors()
     scorer = NicheScorer()
     playbook_generator = PlaybookGenerator()
 
@@ -307,7 +306,7 @@ async def test_full_pipeline():
     logger.info("🎯 Step 2: Scoring niches...")
     scored_niches = []
 
-    for source, records in all_data.items():
+    for _source, records in all_data.items():
         if records:
             # Group by topic
             topic_groups = {}

@@ -51,7 +51,7 @@ def main():
                 stats[cat]["skip"] += 1
 
         # Compute pass rate
-        for c, v in stats.items():
+        for _c, v in stats.items():
             passed = v["total"] - v["fail"] - v["error"]
             v["pass"] = passed
             v["pass_rate"] = round(100.0 * passed / v["total"], 1) if v["total"] else 0.0

@@ -68,7 +68,7 @@ import logging
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -118,7 +118,7 @@ class RedactionConfig:
 class PIIRedactor:
     """
     PII Redactor - Removes personally identifiable information from text
-    
+
     This is a stub implementation to resolve F821 errors.
     TODO: Implement full privacy features.
     """
@@ -130,7 +130,7 @@ class PIIRedactor:
         self.logger = logging.getLogger(__name__)
         self.logger.info("🔒 PIIRedactor initialized")
 
-    def _initialize_patterns(self) -> Dict[PIIType, str]:
+    def _initialize_patterns(self) -> dict[PIIType, str]:
         """Initialize PII detection patterns"""
         return {
             PIIType.EMAIL: r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b',
@@ -141,13 +141,13 @@ class PIIRedactor:
             PIIType.DATE_OF_BIRTH: r'\b(?:0[1-9]|1[0-2])/(?:0[1-9]|[12][0-9]|3[01])/(?:19|20)\d{2}\b'
         }
 
-    def detect_pii(self, text: str) -> List[PIIDetection]:
+    def detect_pii(self, text: str) -> list[PIIDetection]:
         """
         Detect PII in text
-        
+
         Args:
             text: Text to analyze
-            
+
         Returns:
             List of PII detections
         """
@@ -181,10 +181,10 @@ class PIIRedactor:
     def redact(self, text: str) -> str:
         """
         Redact PII from text
-        
+
         Args:
             text: Text to redact
-            
+
         Returns:
             Redacted text
         """
@@ -220,10 +220,10 @@ class PIIRedactor:
     def _apply_redaction(self, detection: PIIDetection) -> str:
         """
         Apply redaction to a PII detection
-        
+
         Args:
             detection: PII detection to redact
-            
+
         Returns:
             Redacted value
         """
@@ -246,13 +246,13 @@ class PIIRedactor:
             self.logger.error(f"❌ Error applying redaction: {e}")
             return detection.original_text
 
-    def redact_with_metadata(self, text: str) -> Tuple[str, List[PIIDetection]]:
+    def redact_with_metadata(self, text: str) -> tuple[str, list[PIIDetection]]:
         """
         Redact PII and return metadata
-        
+
         Args:
             text: Text to redact
-            
+
         Returns:
             Tuple of (redacted_text, detections)
         """
@@ -266,13 +266,13 @@ class PIIRedactor:
             self.logger.error(f"❌ Error redacting with metadata: {e}")
             return text, []
 
-    def get_redaction_statistics(self, text: str) -> Dict[str, Any]:
+    def get_redaction_statistics(self, text: str) -> dict[str, Any]:
         """
         Get redaction statistics for text
-        
+
         Args:
             text: Text to analyze
-            
+
         Returns:
             Statistics dictionary
         """
@@ -324,10 +324,10 @@ class PIIRedactor:
     def update_config(self, new_config: RedactionConfig) -> bool:
         """
         Update redaction configuration
-        
+
         Args:
             new_config: New configuration
-            
+
         Returns:
             True if update successful, False otherwise
         """
@@ -343,11 +343,11 @@ class PIIRedactor:
     def add_custom_pattern(self, pii_type: PIIType, pattern: str) -> bool:
         """
         Add custom PII detection pattern
-        
+
         Args:
             pii_type: PII type
             pattern: Regex pattern
-            
+
         Returns:
             True if pattern added successfully, False otherwise
         """

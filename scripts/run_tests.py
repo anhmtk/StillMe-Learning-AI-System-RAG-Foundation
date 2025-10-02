@@ -168,7 +168,7 @@ def main():
         success &= run_all_tests_with_reports()
 
     # Generate summary
-    summary = generate_test_summary()
+    generate_test_summary()
 
     # Print final results
     print("\n" + "=" * 50)

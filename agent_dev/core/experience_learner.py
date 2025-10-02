@@ -16,13 +16,12 @@ Tính năng:
 
 import hashlib
 import json
-import os
 import time
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Optional
 
 
 class LearningType(Enum):
@@ -52,8 +51,8 @@ class Experience:
     action: str
     result: str
     success: bool
-    performance_metrics: Dict[str, float]
-    lessons_learned: List[str]
+    performance_metrics: dict[str, float]
+    lessons_learned: list[str]
     confidence: LearningConfidence
     timestamp: datetime
     frequency: int = 1
@@ -65,12 +64,12 @@ class LearningPattern:
     pattern_id: str
     pattern_type: LearningType
     description: str
-    conditions: List[str]
-    actions: List[str]
-    expected_outcomes: List[str]
+    conditions: list[str]
+    actions: list[str]
+    expected_outcomes: list[str]
     success_rate: float
     confidence: LearningConfidence
-    examples: List[str]
+    examples: list[str]
     created_at: datetime
     last_updated: datetime
     usage_count: int = 0
@@ -83,8 +82,8 @@ class LearningInsight:
     description: str
     learning_type: LearningType
     confidence: LearningConfidence
-    evidence: List[str]
-    recommendations: List[str]
+    evidence: list[str]
+    recommendations: list[str]
     impact_score: float
     created_at: datetime
 
@@ -92,11 +91,11 @@ class LearningInsight:
 class ExperienceLearningResult:
     """Kết quả học hỏi kinh nghiệm"""
     total_experiences: int
-    learning_patterns: List[LearningPattern]
-    insights: List[LearningInsight]
-    success_patterns: List[LearningPattern]
-    failure_patterns: List[LearningPattern]
-    recommendations: List[str]
+    learning_patterns: list[LearningPattern]
+    insights: list[LearningInsight]
+    success_patterns: list[LearningPattern]
+    failure_patterns: list[LearningPattern]
+    recommendations: list[str]
     learning_score: float
     analysis_time: float
 
@@ -122,7 +121,7 @@ class ExperienceLearner:
         self.pattern_min_frequency = 3
         self.insight_min_evidence = 2
 
-    def _load_experiences(self) -> List[Experience]:
+    def _load_experiences(self) -> list[Experience]:
         """Load experiences from database"""
         if not self.experience_db.exists():
             return []
@@ -143,7 +142,7 @@ class ExperienceLearner:
             print(f"Error loading experiences: {e}")
             return []
 
-    def _load_patterns(self) -> List[LearningPattern]:
+    def _load_patterns(self) -> list[LearningPattern]:
         """Load learning patterns from database"""
         if not self.patterns_db.exists():
             return []
@@ -163,7 +162,7 @@ class ExperienceLearner:
             print(f"Error loading patterns: {e}")
             return []
 
-    def _load_insights(self) -> List[LearningInsight]:
+    def _load_insights(self) -> list[LearningInsight]:
         """Load learning insights from database"""
         if not self.insights_db.exists():
             return []
@@ -228,7 +227,7 @@ class ExperienceLearner:
             print(f"Error saving insights: {e}")
 
     def record_experience(self, context: str, action: str, result: str,
-                         success: bool, performance_metrics: Dict[str, float] = None,
+                         success: bool, performance_metrics: dict[str, float] = None,
                          learning_type: LearningType = LearningType.SUCCESS_PATTERN) -> str:
         """Record a new experience"""
         if performance_metrics is None:
@@ -274,7 +273,7 @@ class ExperienceLearner:
 
         return experience_id
 
-    def analyze_patterns(self) -> List[LearningPattern]:
+    def analyze_patterns(self) -> list[LearningPattern]:
         """Analyze experiences to identify patterns"""
         patterns = []
 
@@ -323,7 +322,7 @@ class ExperienceLearner:
 
         return patterns
 
-    def generate_insights(self) -> List[LearningInsight]:
+    def generate_insights(self) -> list[LearningInsight]:
         """Generate insights from experiences and patterns"""
         insights = []
 
@@ -412,7 +411,7 @@ class ExperienceLearner:
             analysis_time=time.time() - start_time
         )
 
-    def get_recommendations(self, context: str) -> List[str]:
+    def get_recommendations(self, context: str) -> list[str]:
         """Get recommendations based on learned patterns"""
         recommendations = []
 

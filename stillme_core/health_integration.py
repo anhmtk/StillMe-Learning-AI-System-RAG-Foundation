@@ -6,19 +6,19 @@ Provides compatibility layer for different route registration styles.
 """
 
 import logging
-from typing import Any, Dict, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
-def register_health_endpoint(app, health_checker) -> Dict[str, Any]:
+def register_health_endpoint(app, health_checker) -> dict[str, Any]:
     """
     Register health endpoint with app using compatible route style.
-    
+
     Args:
         app: Application object with route method
         health_checker: HealthChecker instance
-        
+
     Returns:
         Dict with registration details
     """
@@ -55,14 +55,14 @@ def register_health_endpoint(app, health_checker) -> Dict[str, Any]:
     return {"used_style": used_style}
 
 
-def register_liveness_endpoint(app, health_checker) -> Dict[str, Any]:
+def register_liveness_endpoint(app, health_checker) -> dict[str, Any]:
     """
     Register liveness endpoint with app using compatible route style.
-    
+
     Args:
         app: Application object with route method
         health_checker: HealthChecker instance
-        
+
     Returns:
         Dict with registration details
     """
@@ -101,14 +101,14 @@ def register_liveness_endpoint(app, health_checker) -> Dict[str, Any]:
     return {"used_style": used_style}
 
 
-def register_metrics_endpoint(app, health_checker) -> Dict[str, Any]:
+def register_metrics_endpoint(app, health_checker) -> dict[str, Any]:
     """
     Register metrics endpoint with app using compatible route style.
-    
+
     Args:
         app: Application object with route method
         health_checker: HealthChecker instance
-        
+
     Returns:
         Dict with registration details
     """

@@ -7,7 +7,6 @@ Tạo kế hoạch fix F821 errors theo ma trận.
 """
 
 import json
-from collections import defaultdict
 from pathlib import Path
 
 

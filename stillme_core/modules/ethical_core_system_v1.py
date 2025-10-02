@@ -44,7 +44,7 @@ import os
 # Import common utilities
 import sys
 from enum import Enum
-from typing import Optional, Tuple
+from typing import Optional
 
 import httpx  # Import httpx cần thiết cho OpenRouterClient
 
@@ -224,7 +224,7 @@ class EthicsGuard:
 
     async def check_input_safety(
         self, user_input: str
-    ) -> Tuple[bool, Optional[ViolationType], Optional[Severity], str]:
+    ) -> tuple[bool, Optional[ViolationType], Optional[Severity], str]:
         if self.detect_keywords(user_input):
             return (
                 False,
@@ -242,7 +242,7 @@ class EthicsGuard:
             - "hate_speech_score": float (từ 0.0 đến 1.0)
             - "sensitive_topics_detected": list of strings (ví dụ: "bạo lực", "tự hại", "phân biệt đối xử")
             - "reason": string giải thích lý do
-            
+
             Văn bản: "{user_input}"
             """
             response_content = await self.openrouter_client.chat_completion(
@@ -288,7 +288,7 @@ class EthicsGuard:
 
     async def check_output_safety(
         self, ai_response: str
-    ) -> Tuple[bool, Optional[ViolationType], Optional[Severity], str]:
+    ) -> tuple[bool, Optional[ViolationType], Optional[Severity], str]:
         if self.detect_keywords(ai_response):
             return (
                 False,
@@ -348,13 +348,13 @@ class EthicsGuard:
                 f"Đã xảy ra lỗi trong quá trình kiểm tra an toàn output: {e}",
             )
 
-    async def assess_vulnerability(self, user_input: str) -> Tuple[bool, str]:
+    async def assess_vulnerability(self, user_input: str) -> tuple[bool, str]:
         try:
             prompt = f"""Phân tích văn bản sau để xác định xem người dùng có vẻ dễ bị tổn thương, căng thẳng, buồn bã hoặc có ý định tự hại không.
             Trả về một đối tượng JSON với các trường:
             - "is_vulnerable": boolean
             - "reason": string giải thích lý do (Nếu is_vulnerable là true)
-            
+
             Văn bản: "{user_input}"
             """
             response_content = await self.openrouter_client.chat_completion(
@@ -376,14 +376,14 @@ class ConscienceCore:
 
     async def evaluate_ethical_compliance(
         self, user_input: str, ai_response: str
-    ) -> Tuple[bool, float, str]:
+    ) -> tuple[bool, float, str]:
         try:
             prompt = f"""Đánh giá mức độ tuân thủ đạo đức của phản hồi AI dưới đây, dựa trên input của người dùng và các nguyên tắc đạo đức chung.
             Trả về một đối tượng JSON với các trường:
             - "is_compliant": boolean
             - "compliance_score": float (từ 0.0 đến 1.0, 1.0 là tuân thủ hoàn toàn)
             - "reason": string giải thích lý do
-            
+
             Input người dùng: "{user_input}"
             Phản hồi AI: "{ai_response}"
             """
@@ -411,10 +411,10 @@ class ConscienceCore:
             prompt = f"""Phản hồi AI sau đây đã được xác định là không tuân thủ đạo đức vì: {violation_reason}.
             Vui lòng điều chỉnh lại phản hồi này để nó trở nên phù hợp và có đạo đức, đồng thời vẫn hữu ích nếu có thể.
             Nếu không thể điều chỉnh, hãy đưa ra một phản hồi từ chối lịch sự.
-            
+
             Input người dùng: "{user_input}"
             Phản hồi AI gốc: "{ai_response}"
-            
+
             Phản hồi AI đã điều chỉnh:"""
             adjusted_response = await self.openrouter_client.chat_completion(
                 messages=[{"role": "user", "content": prompt}]
@@ -505,7 +505,7 @@ class EthicalCoreSystem:
 
     async def process_interaction(
         self, user_id: str, user_input: str, original_ai_response: str
-    ) -> Tuple[str, bool, str]:
+    ) -> tuple[str, bool, str]:
         violation_message = ""
         is_compliant = True
         final_response = original_ai_response

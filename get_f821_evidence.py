@@ -6,7 +6,6 @@ PHA 1 - Thu thập bằng chứng cho F821 symbols
 import json
 import re
 from collections import defaultdict
-from pathlib import Path
 
 
 def get_f821_evidence():

@@ -12,13 +12,10 @@ PURPOSE / MỤC ĐÍCH:
 - Cung cấp quên thông minh và củng cố bộ nhớ
 """
 
-import json
 import logging
-import os
 import time
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 # Initialize logger
 logger = logging.getLogger("StillMe.LayeredMemory")
@@ -32,7 +29,7 @@ class MemoryItem:
     importance: float
     access_count: int = 0
     last_accessed: float = 0.0
-    tags: Optional[List[str]] = None
+    tags: Optional[list[str]] = None
 
     def __post_init__(self):
         if self.tags is None:
@@ -43,14 +40,14 @@ class MemoryItem:
 class LayeredMemoryV1:
     """Simple layered memory system with intelligent forgetting"""
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         self.logger = logger
         self.config = config or self._get_default_config()
 
         # Memory layers
-        self.short_term: List[MemoryItem] = []
-        self.mid_term: List[MemoryItem] = []
-        self.long_term: List[MemoryItem] = []
+        self.short_term: list[MemoryItem] = []
+        self.mid_term: list[MemoryItem] = []
+        self.long_term: list[MemoryItem] = []
 
         # Statistics
         self.stats = {
@@ -64,7 +61,7 @@ class LayeredMemoryV1:
 
         self.logger.info("✅ LayeredMemoryV1 initialized (simple mode)")
 
-    def _get_default_config(self) -> Dict[str, Any]:
+    def _get_default_config(self) -> dict[str, Any]:
         """Get default configuration"""
         return {
             "short_term_capacity": 100,
@@ -77,7 +74,7 @@ class LayeredMemoryV1:
             "importance_decay_rate": 0.1
         }
 
-    def store(self, content: str, importance: float = 0.5, tags: Optional[List[str]] = None) -> str:
+    def store(self, content: str, importance: float = 0.5, tags: Optional[list[str]] = None) -> str:
         """Store a new memory item"""
         try:
             memory_id = f"mem_{int(time.time() * 1000)}"
@@ -106,7 +103,7 @@ class LayeredMemoryV1:
             self.logger.error(f"❌ Failed to store memory: {e}")
             return ""
 
-    def retrieve(self, query: str, limit: int = 10) -> List[MemoryItem]:
+    def retrieve(self, query: str, limit: int = 10) -> list[MemoryItem]:
         """Retrieve memories based on query"""
         try:
             query_lower = query.lower()
@@ -201,7 +198,7 @@ class LayeredMemoryV1:
                 self.short_term.sort(key=lambda x: (x.importance, x.timestamp))
                 excess = len(self.short_term) - self.config["short_term_capacity"]
                 for _ in range(excess):
-                    forgotten = self.short_term.pop(0)
+                    self.short_term.pop(0)
                     self.stats["forgotten_count"] += 1
 
             # Mid-term capacity
@@ -209,7 +206,7 @@ class LayeredMemoryV1:
                 self.mid_term.sort(key=lambda x: (x.importance, x.timestamp))
                 excess = len(self.mid_term) - self.config["mid_term_capacity"]
                 for _ in range(excess):
-                    forgotten = self.mid_term.pop(0)
+                    self.mid_term.pop(0)
                     self.stats["forgotten_count"] += 1
 
             # Long-term capacity
@@ -217,13 +214,13 @@ class LayeredMemoryV1:
                 self.long_term.sort(key=lambda x: (x.importance, x.timestamp))
                 excess = len(self.long_term) - self.config["long_term_capacity"]
                 for _ in range(excess):
-                    forgotten = self.long_term.pop(0)
+                    self.long_term.pop(0)
                     self.stats["forgotten_count"] += 1
 
         except Exception as e:
             self.logger.error(f"❌ Failed to enforce capacity limits: {e}")
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get memory system statistics"""
         return {
             **self.stats,
@@ -248,7 +245,7 @@ class LayeredMemoryV1:
         }
         self.logger.info("🗑️ All memories cleared")
 
-    def export_memories(self) -> Dict[str, Any]:
+    def export_memories(self) -> dict[str, Any]:
         """Export all memories for backup"""
         return {
             "short_term": [asdict(memory) for memory in self.short_term],
@@ -258,7 +255,7 @@ class LayeredMemoryV1:
             "export_timestamp": time.time()
         }
 
-    def import_memories(self, data: Dict[str, Any]):
+    def import_memories(self, data: dict[str, Any]):
         """Import memories from backup"""
         try:
             self.clear_all()

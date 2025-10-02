@@ -12,7 +12,7 @@ import os
 import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Optional
 
 
 class QuarantineMover:
@@ -32,7 +32,7 @@ class QuarantineMover:
             "data/", "deploy/", ".github/", "sandbox/"
         }
 
-    def load_candidates(self) -> List[Dict[str, Any]]:
+    def load_candidates(self) -> list[dict[str, Any]]:
         """Load deletion candidates từ CSV"""
         candidates_path = self.reports_dir / "deletion_candidates.csv"
 
@@ -65,7 +65,7 @@ class QuarantineMover:
                 return True
         return False
 
-    def get_quarantine_candidates(self, risk_level: str = "LOW") -> List[Dict[str, Any]]:
+    def get_quarantine_candidates(self, risk_level: str = "LOW") -> list[dict[str, Any]]:
         """Lấy danh sách file có thể quarantine"""
         quarantine_candidates = []
 
@@ -78,7 +78,7 @@ class QuarantineMover:
 
         return quarantine_candidates
 
-    def create_quarantine_manifest(self, moved_files: List[Dict[str, Any]]) -> None:
+    def create_quarantine_manifest(self, moved_files: list[dict[str, Any]]) -> None:
         """Tạo manifest file cho việc restore"""
         manifest = {
             "created_at": datetime.now().isoformat(),
@@ -93,7 +93,7 @@ class QuarantineMover:
 
         print(f"📄 Quarantine manifest: {manifest_path}")
 
-    def move_to_graveyard(self, file_path: str, candidate: Dict[str, Any]) -> bool:
+    def move_to_graveyard(self, file_path: str, candidate: dict[str, Any]) -> bool:
         """Di chuyển file vào graveyard"""
         try:
             source_path = self.repo_root / file_path
@@ -251,7 +251,7 @@ class QuarantineMover:
         total_files = 0
         total_size = 0
 
-        for root, dirs, files in os.walk(self.graveyard_dir):
+        for root, _dirs, files in os.walk(self.graveyard_dir):
             for file in files:
                 file_path = Path(root) / file
                 total_files += 1

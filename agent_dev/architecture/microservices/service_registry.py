@@ -10,7 +10,7 @@ import time
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import aiohttp
 import yaml
@@ -33,10 +33,10 @@ class ServiceInstance:
     port: int
     status: ServiceStatus
     health_check_url: str
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
     registered_at: float
     last_heartbeat: float
-    tags: List[str]
+    tags: list[str]
 
 @dataclass
 class ServiceDefinition:
@@ -46,21 +46,21 @@ class ServiceDefinition:
     host: str
     port: int
     health_check_path: str = "/health"
-    metadata: Optional[Dict[str, Any]] = None
-    tags: Optional[List[str]] = None
+    metadata: Optional[dict[str, Any]] = None
+    tags: Optional[list[str]] = None
 
 class ServiceRegistry:
     """Enterprise service registry with health monitoring"""
 
     def __init__(self, config_path: Optional[str] = None):
-        self.services: Dict[str, ServiceInstance] = {}
+        self.services: dict[str, ServiceInstance] = {}
         self.config = self._load_config(config_path)
         self.heartbeat_interval = self.config.get('heartbeat_interval', 30)
         self.health_check_timeout = self.config.get('health_check_timeout', 5)
         self.cleanup_interval = self.config.get('cleanup_interval', 60)
         self.running = False
 
-    def _load_config(self, config_path: Optional[str] = None) -> Dict[str, Any]:
+    def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
         """Load service registry configuration"""
         if config_path:
             config_file = Path(config_path)
@@ -122,7 +122,7 @@ class ServiceRegistry:
         return False
 
     async def discover_services(self, service_name: Optional[str] = None,
-                              tags: Optional[List[str]] = None) -> List[ServiceInstance]:
+                              tags: Optional[list[str]] = None) -> list[ServiceInstance]:
         """Discover healthy service instances"""
         healthy_services = []
 
@@ -273,7 +273,7 @@ class ServiceRegistry:
             await asyncio.sleep(self.cleanup_interval)
             await self._cleanup_stale_services()
 
-    def get_registry_status(self) -> Dict[str, Any]:
+    def get_registry_status(self) -> dict[str, Any]:
         """Get registry status and statistics"""
         total_services = len(self.services)
         healthy_services = len([s for s in self.services.values()
@@ -301,7 +301,7 @@ class ServiceRegistry:
 service_registry = ServiceRegistry()
 
 async def register_agentdev_service(service_name: str, port: int,
-                                  metadata: Optional[Dict[str, Any]] = None) -> str:
+                                  metadata: Optional[dict[str, Any]] = None) -> str:
     """Convenience function to register AgentDev service"""
     service_def = ServiceDefinition(
         name=service_name,

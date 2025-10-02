@@ -32,7 +32,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import psutil
 
@@ -52,10 +52,10 @@ class UsageEvent:
     user_id: Optional[str]
     session_id: str
     duration_ms: float
-    resource_usage: Dict[str, float]  # CPU, memory, disk, network
+    resource_usage: dict[str, float]  # CPU, memory, disk, network
     success: bool
     error_code: Optional[str]
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 @dataclass
@@ -90,7 +90,7 @@ class CoreMetricsCollector:
     Enterprise-grade metrics collector với focus vào accuracy và efficiency
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         self.config = config or self._get_default_config()
         self.db_path = Path(self.config["db_path"])
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
@@ -116,7 +116,7 @@ class CoreMetricsCollector:
             "✅ CoreMetricsCollector initialized với enterprise-grade configuration"
         )
 
-    def _get_default_config(self) -> Dict[str, Any]:
+    def _get_default_config(self) -> dict[str, Any]:
         """Default configuration với memory constraints"""
         return {
             "db_path": "data/metrics/core_metrics.db",
@@ -255,7 +255,7 @@ class CoreMetricsCollector:
         user_id: Optional[str] = None,
         session_id: Optional[str] = None,
         error_code: Optional[str] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: Optional[dict[str, Any]] = None,
     ) -> str:
         """
         Track usage event với complete resource monitoring
@@ -340,15 +340,15 @@ class CoreMetricsCollector:
         except Exception as e:
             logger.error(f"❌ Buffer flush failed: {e}")
 
-    def _process_batch(self, events: List[UsageEvent]):
+    def _process_batch(self, events: list[UsageEvent]):
         """Process batch of events to database"""
         try:
             with sqlite3.connect(self.db_path) as conn:
                 for event in events:
                     conn.execute(
                         """
-                        INSERT INTO usage_events 
-                        (event_id, timestamp, module_name, feature_name, user_id, 
+                        INSERT INTO usage_events
+                        (event_id, timestamp, module_name, feature_name, user_id,
                          session_id, duration_ms, resource_usage, success, error_code, metadata)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
@@ -387,7 +387,7 @@ class CoreMetricsCollector:
 
     def get_performance_metrics(
         self, module_name: Optional[str] = None, time_range_hours: int = 24
-    ) -> List[PerformanceMetrics]:
+    ) -> list[PerformanceMetrics]:
         """
         Get performance metrics với caching
 
@@ -412,15 +412,15 @@ class CoreMetricsCollector:
                 since_time = datetime.now() - timedelta(hours=time_range_hours)
 
                 query = """
-                    SELECT module_name, 
+                    SELECT module_name,
                            AVG(duration_ms) as avg_response_time,
-                           (SELECT duration_ms FROM usage_events u2 
-                            WHERE u2.module_name = u1.module_name 
-                            ORDER BY duration_ms LIMIT 1 OFFSET 
+                           (SELECT duration_ms FROM usage_events u2
+                            WHERE u2.module_name = u1.module_name
+                            ORDER BY duration_ms LIMIT 1 OFFSET
                             (SELECT COUNT(*) * 0.95 FROM usage_events u3 WHERE u3.module_name = u1.module_name)) as p95_response_time,
-                           (SELECT duration_ms FROM usage_events u2 
-                            WHERE u2.module_name = u1.module_name 
-                            ORDER BY duration_ms LIMIT 1 OFFSET 
+                           (SELECT duration_ms FROM usage_events u2
+                            WHERE u2.module_name = u1.module_name
+                            ORDER BY duration_ms LIMIT 1 OFFSET
                             (SELECT COUNT(*) * 0.99 FROM usage_events u3 WHERE u3.module_name = u1.module_name)) as p99_response_time,
                            AVG(CASE WHEN success = 1 THEN 1.0 ELSE 0.0 END) as success_rate,
                            AVG(CASE WHEN success = 0 THEN 1.0 ELSE 0.0 END) as error_rate,
@@ -565,7 +565,7 @@ class CoreMetricsCollector:
             logger.error(f"❌ Error calculating value metrics: {e}")
             return ValueMetrics(0, 0, 0, 0, 0, 0)
 
-    def get_accuracy_report(self) -> Dict[str, Any]:
+    def get_accuracy_report(self) -> dict[str, Any]:
         """
         Generate accuracy report cho validation
 
@@ -590,9 +590,9 @@ class CoreMetricsCollector:
                 # Get data completeness
                 cursor = conn.execute(
                     """
-                    SELECT COUNT(*) FROM usage_events 
-                    WHERE event_id IS NOT NULL 
-                    AND timestamp IS NOT NULL 
+                    SELECT COUNT(*) FROM usage_events
+                    WHERE event_id IS NOT NULL
+                    AND timestamp IS NOT NULL
                     AND module_name IS NOT NULL
                 """
                 )
@@ -664,7 +664,7 @@ class SystemMonitor:
         """Stop monitoring"""
         pass
 
-    def get_current_usage(self) -> Dict[str, float]:
+    def get_current_usage(self) -> dict[str, float]:
         """Get current system resource usage"""
         try:
             return {
@@ -697,7 +697,7 @@ class SystemMonitor:
 
 # Factory function
 def create_metrics_collector(
-    config: Optional[Dict[str, Any]] = None,
+    config: Optional[dict[str, Any]] = None,
 ) -> CoreMetricsCollector:
     """Factory function để create metrics collector"""
     return CoreMetricsCollector(config)

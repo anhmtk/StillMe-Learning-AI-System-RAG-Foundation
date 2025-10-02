@@ -62,7 +62,7 @@ class TestInternetAccess:
 
         for url in allowed_urls:
             result = sandbox_controller.is_egress_allowed(url)
-            assert result["allowed"] == True
+            assert result["allowed"]
             assert "domain" in result
 
         # Test blocked domains
@@ -73,7 +73,7 @@ class TestInternetAccess:
 
         for url in blocked_urls:
             result = sandbox_controller.is_egress_allowed(url)
-            assert result["allowed"] == False
+            assert not result["allowed"]
             assert "reason" in result
 
         # Test egress limit
@@ -81,13 +81,13 @@ class TestInternetAccess:
         sandbox_controller.reset_egress_count()
 
         # First two requests should be allowed
-        for i in range(2):
+        for _i in range(2):
             result = sandbox_controller.is_egress_allowed("https://api.github.com/test")
-            assert result["allowed"] == True
+            assert result["allowed"]
 
         # Third request should be blocked
         result = sandbox_controller.is_egress_allowed("https://api.github.com/test")
-        assert result["allowed"] == False
+        assert not result["allowed"]
         assert "limit reached" in result["reason"]
 
         print("✅ Sandbox controller tests passed")
@@ -99,8 +99,8 @@ class TestInternetAccess:
         # Test clean content
         clean_content = "This is a clean article about AI technology."
         result = content_filter.filter_content(clean_content, "test")
-        assert result["success"] == True
-        assert result["filtered"] == False
+        assert result["success"]
+        assert not result["filtered"]
         assert result["content"] == clean_content
 
         # Test dangerous content
@@ -111,8 +111,8 @@ class TestInternetAccess:
         This is some text with dangerous content.
         """
         result = content_filter.filter_content(dangerous_content, "test")
-        assert result["success"] == True
-        assert result["filtered"] == True
+        assert result["success"]
+        assert result["filtered"]
         assert len(result["warnings"]) > 0
         assert "<script>" not in result["content"]
         assert "javascript:" not in result["content"]
@@ -128,8 +128,8 @@ class TestInternetAccess:
             ]
         }
         result = content_filter.filter_json_response(json_data, "test")
-        assert result["success"] == True
-        assert result["filtered"] == True
+        assert result["success"]
+        assert result["filtered"]
         assert "<script>" not in str(result["content"])
 
         print("✅ Content integrity filter tests passed")
@@ -233,7 +233,7 @@ class TestInternetAccess:
 
             # 3. Filter content
             filtered_result = content_filter.filter_json_response(web_data, "integration_test")
-            assert filtered_result["success"] == True
+            assert filtered_result["success"]
 
             print("✅ Integration flow test passed")
         else:
@@ -252,16 +252,16 @@ class TestInternetAccess:
 
         for url in invalid_urls:
             result = sandbox_controller.is_egress_allowed(url)
-            assert result["allowed"] == False
+            assert not result["allowed"]
             assert "reason" in result
 
         # Test with empty content
         result = content_filter.filter_content("", "test")
-        assert result["success"] == True
+        assert result["success"]
 
         # Test with None content
         result = content_filter.filter_content(None, "test")
-        assert result["success"] == True
+        assert result["success"]
 
         print("✅ Error handling tests passed")
 

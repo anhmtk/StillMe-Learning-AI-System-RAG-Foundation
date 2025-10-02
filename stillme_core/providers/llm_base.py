@@ -5,13 +5,12 @@ This module provides a common interface for different LLM providers,
 enabling easy switching between providers and graceful fallback handling.
 """
 
-import asyncio
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -56,9 +55,9 @@ class LLMRequest:
     top_p: float = 1.0
     frequency_penalty: float = 0.0
     presence_penalty: float = 0.0
-    stop: Optional[List[str]] = None
+    stop: Optional[list[str]] = None
     user: Optional[str] = None
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: Optional[dict[str, Any]] = None
 
 
 @dataclass
@@ -67,10 +66,10 @@ class LLMResponse:
     content: str
     model: str
     provider: str
-    usage: Dict[str, int]
+    usage: dict[str, int]
     finish_reason: str
     response_time: float
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: Optional[dict[str, Any]] = None
 
 
 @dataclass
@@ -210,7 +209,7 @@ class LLMProviderBase(ABC):
 class LLMProviderManager:
     """Manager for multiple LLM providers with fallback support."""
 
-    def __init__(self, providers: List[LLMProviderBase], fallback_strategy: FallbackStrategy = FallbackStrategy.ROUND_ROBIN):
+    def __init__(self, providers: list[LLMProviderBase], fallback_strategy: FallbackStrategy = FallbackStrategy.ROUND_ROBIN):
         self.providers = {p.config.name: p for p in providers}
         self.fallback_strategy = fallback_strategy
         self._current_provider_index = 0
@@ -280,7 +279,7 @@ class LLMProviderManager:
             provider.update_health(False, response_time)
             raise e
 
-    async def health_check_all(self) -> Dict[str, ProviderHealth]:
+    async def health_check_all(self) -> dict[str, ProviderHealth]:
         """Check health of all providers."""
         health_status = {}
 
@@ -301,7 +300,7 @@ class LLMProviderManager:
         for provider in self.providers.values():
             await provider.cleanup()
 
-    def get_provider_status(self) -> Dict[str, Dict[str, Any]]:
+    def get_provider_status(self) -> dict[str, dict[str, Any]]:
         """Get status of all providers."""
         status = {}
         for name, provider in self.providers.items():

@@ -24,7 +24,7 @@ import re
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any, Callable, Optional
 
 import bleach
 import jinja2
@@ -66,10 +66,10 @@ class TemplateConfig:
     name: str
     template_type: TemplateType
     security_level: SecurityLevel
-    allowed_variables: Optional[Set[str]] = None
+    allowed_variables: Optional[set[str]] = None
     max_length: Optional[int] = None
-    required_variables: Optional[Set[str]] = None
-    custom_validators: Optional[List[Callable]] = None
+    required_variables: Optional[set[str]] = None
+    custom_validators: Optional[list[Callable]] = None
     cache_enabled: bool = True
     audit_logging: bool = True
 
@@ -78,9 +78,9 @@ class TemplateConfig:
 class TemplateContext:
     """Template rendering context - Context render template"""
 
-    variables: Dict[str, Any]
-    metadata: Optional[Dict[str, Any]] = None
-    security_context: Optional[Dict[str, Any]] = None
+    variables: dict[str, Any]
+    metadata: Optional[dict[str, Any]] = None
+    security_context: Optional[dict[str, Any]] = None
 
 
 class SecurityValidator:
@@ -197,9 +197,9 @@ class SecurityValidator:
 
     @staticmethod
     def validate_variables(
-        variables: Dict[str, Any],
-        allowed_variables: Optional[Set[str]] = None,
-        required_variables: Optional[Set[str]] = None,
+        variables: dict[str, Any],
+        allowed_variables: Optional[set[str]] = None,
+        required_variables: Optional[set[str]] = None,
     ) -> None:
         """
         Validate template variables
@@ -260,8 +260,8 @@ class TemplateManager:
         self.file_manager = FileManager()
 
         # Template cache
-        self.template_cache: Dict[str, Template] = {}
-        self.template_configs: Dict[str, TemplateConfig] = {}
+        self.template_cache: dict[str, Template] = {}
+        self.template_configs: dict[str, TemplateConfig] = {}
 
         # Jinja2 environment with security settings
         self.jinja_env = Environment(
@@ -540,7 +540,7 @@ class TemplateManager:
         """
         return self.template_configs.get(template_name)
 
-    def list_templates(self) -> List[str]:
+    def list_templates(self) -> list[str]:
         """
         List all loaded templates
         Liệt kê tất cả templates đã tải
@@ -607,7 +607,7 @@ def create_response_template(
 
 def render_secure_response(
     template_name: str,
-    variables: Dict[str, Any],
+    variables: dict[str, Any],
     security_level: SecurityLevel = SecurityLevel.MEDIUM,
 ) -> str:
     """

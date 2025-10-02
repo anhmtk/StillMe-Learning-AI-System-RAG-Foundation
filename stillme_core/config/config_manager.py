@@ -14,27 +14,26 @@ Version: 1.0.0
 
 import logging
 import os
-from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 import yaml
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
 
 class ThresholdsConfig(BaseModel):
     """Threshold configuration schema"""
-    abuse_guard: Dict[str, float] = Field(default_factory=lambda: {
+    abuse_guard: dict[str, float] = Field(default_factory=lambda: {
         "suggestion": 0.8,
         "abuse": 0.15
     })
-    latency: Dict[str, float] = Field(default_factory=lambda: {
+    latency: dict[str, float] = Field(default_factory=lambda: {
         "p95": 500.0,
         "p99": 1000.0
     })
-    quality: Dict[str, float] = Field(default_factory=lambda: {
+    quality: dict[str, float] = Field(default_factory=lambda: {
         "min_score": 70.0,
         "max_errors": 0.0
     })
@@ -50,7 +49,7 @@ class PerformanceConfig(BaseModel):
 
 class SecurityConfig(BaseModel):
     """Security configuration schema"""
-    cors_origins: List[str] = Field(default_factory=lambda: ["http://localhost:3000"])
+    cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
     rate_limit_window: int = Field(default=30)
     max_requests_per_window: int = Field(default=100)
     pii_redaction: bool = Field(default=True)
@@ -59,7 +58,7 @@ class SecurityConfig(BaseModel):
 
 class ProviderConfig(BaseModel):
     """Provider configuration schema"""
-    order: List[str] = Field(default_factory=lambda: ["local_llm", "openai", "openrouter"])
+    order: list[str] = Field(default_factory=lambda: ["local_llm", "openai", "openrouter"])
     timeout: int = Field(default=30)
     retry_attempts: int = Field(default=3)
     circuit_breaker_threshold: int = Field(default=5)
@@ -82,20 +81,20 @@ class StillMeConfig(BaseModel):
     features: FeaturesConfig = Field(default_factory=FeaturesConfig)
 
     # Logging configuration
-    logging: Dict[str, Any] = Field(default_factory=lambda: {
+    logging: dict[str, Any] = Field(default_factory=lambda: {
         "level": "INFO",
         "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         "rationale": False
     })
 
     # Policy configuration
-    policy: Dict[str, Any] = Field(default_factory=lambda: {
+    policy: dict[str, Any] = Field(default_factory=lambda: {
         "level": "balanced",  # strict | balanced | creative
         "dry_run": False
     })
 
     # Privacy configuration
-    privacy: Dict[str, Any] = Field(default_factory=lambda: {
+    privacy: dict[str, Any] = Field(default_factory=lambda: {
         "mode": "standard",  # standard | strict
         "opt_in_required": False,
         "data_retention_days": 30
@@ -105,7 +104,7 @@ class StillMeConfig(BaseModel):
 class ConfigManager:
     """
     Configuration manager for StillMe AI Framework
-    
+
     Handles loading, validation, and access to configuration values
     with support for environment variable overrides.
     """
@@ -113,7 +112,7 @@ class ConfigManager:
     def __init__(self, config_path: Optional[Union[str, Path]] = None):
         """
         Initialize configuration manager
-        
+
         Args:
             config_path: Path to configuration file
         """
@@ -124,7 +123,7 @@ class ConfigManager:
     def load_config(self) -> StillMeConfig:
         """
         Load configuration from file and environment variables
-        
+
         Returns:
             StillMeConfig: Loaded and validated configuration
         """
@@ -143,7 +142,7 @@ class ConfigManager:
         logger.info("Configuration loaded successfully")
         return self._config
 
-    def _load_file_config(self) -> Dict[str, Any]:
+    def _load_file_config(self) -> dict[str, Any]:
         """Load configuration from YAML file"""
         if not self.config_path.exists():
             logger.warning(f"Configuration file not found: {self.config_path}")
@@ -158,7 +157,7 @@ class ConfigManager:
             logger.error(f"Error loading configuration file: {e}")
             return {}
 
-    def _load_env_config(self) -> Dict[str, Any]:
+    def _load_env_config(self) -> dict[str, Any]:
         """Load configuration from environment variables"""
         env_config = {}
 
@@ -195,7 +194,7 @@ class ConfigManager:
         # Return as string
         return value
 
-    def _merge_configs(self, base: Dict[str, Any], override: Dict[str, Any]) -> Dict[str, Any]:
+    def _merge_configs(self, base: dict[str, Any], override: dict[str, Any]) -> dict[str, Any]:
         """Merge base configuration with overrides"""
         merged = base.copy()
 
@@ -210,7 +209,7 @@ class ConfigManager:
     def get_config(self) -> StillMeConfig:
         """
         Get current configuration
-        
+
         Returns:
             StillMeConfig: Current configuration
         """
@@ -221,12 +220,12 @@ class ConfigManager:
     def get_threshold(self, category: str, threshold: str, default: float = 0.0) -> float:
         """
         Get threshold value
-        
+
         Args:
             category: Threshold category (e.g., 'abuse_guard', 'latency')
             threshold: Threshold name (e.g., 'suggestion', 'p95')
             default: Default value if not found
-            
+
         Returns:
             float: Threshold value
         """
@@ -244,11 +243,11 @@ class ConfigManager:
     def get_feature_flag(self, feature: str, default: bool = False) -> bool:
         """
         Get feature flag value
-        
+
         Args:
             feature: Feature name
             default: Default value if not found
-            
+
         Returns:
             bool: Feature flag value
         """
@@ -278,7 +277,7 @@ _config_manager: Optional[ConfigManager] = None
 def get_config_manager() -> ConfigManager:
     """
     Get global configuration manager instance
-    
+
     Returns:
         ConfigManager: Global configuration manager
     """
@@ -291,7 +290,7 @@ def get_config_manager() -> ConfigManager:
 def get_config() -> StillMeConfig:
     """
     Get current configuration
-    
+
     Returns:
         StillMeConfig: Current configuration
     """
@@ -301,12 +300,12 @@ def get_config() -> StillMeConfig:
 def get_threshold(category: str, threshold: str, default: float = 0.0) -> float:
     """
     Get threshold value (convenience function)
-    
+
     Args:
         category: Threshold category
         threshold: Threshold name
         default: Default value
-        
+
     Returns:
         float: Threshold value
     """
@@ -316,11 +315,11 @@ def get_threshold(category: str, threshold: str, default: float = 0.0) -> float:
 def get_feature_flag(feature: str, default: bool = False) -> bool:
     """
     Get feature flag value (convenience function)
-    
+
     Args:
         feature: Feature name
         default: Default value
-        
+
     Returns:
         bool: Feature flag value
     """

@@ -14,22 +14,21 @@ Bilingual comments are omitted per repo standardization to English.
 
 from __future__ import annotations
 
-import json
 import logging
 import time
 import uuid
 from dataclasses import dataclass
-from typing import Any, Dict, Optional, Tuple
+from typing import Any
 
 # Local imports (stubs for Phase 1)
 try:
     from .pattern_matcher import PatternMatcher
 except Exception:  # pragma: no cover - pattern matcher will be added in next prompts
     class PatternMatcher:  # type: ignore
-        def __init__(self, config: Dict[str, Any] | None = None):
+        def __init__(self, config: dict[str, Any] | None = None):
             self.config = config or {}
 
-        def match(self, text: str, context: Dict[str, Any] | None = None) -> Dict[str, Any]:
+        def match(self, text: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
             return {"matches": [], "pattern_score": None}
 
 try:
@@ -39,7 +38,7 @@ except Exception:  # pragma: no cover
         def __init__(self, policy_level: str = "balanced"):
             self.level = policy_level
 
-        def decide(self, scores: Dict[str, Optional[float]]) -> Tuple[str, float]:
+        def decide(self, scores: dict[str, float | None]) -> tuple[str, float]:
             # Return (decision, confidence). Shadow: always fallback
             return "fallback", 0.0
 
@@ -53,55 +52,55 @@ except Exception:  # pragma: no cover
         async def deep_check(self, text: str) -> bool:
             return True
 
-        def safety_gate(self, text: str, intended_action: Optional[str] = None,
-                       scores: Optional[Dict[str, float]] = None) -> Dict[str, Any]:
+        def safety_gate(self, text: str, intended_action: str | None = None,
+                       scores: dict[str, float] | None = None) -> dict[str, Any]:
             return {"safe": True, "reason": "stub_safety"}
 
 try:
     from .action_sandbox import ActionSandbox
 except Exception:  # pragma: no cover
     class ActionSandbox:  # type: ignore
-        def __init__(self, config: Optional[Dict[str, Any]] = None):
+        def __init__(self, config: dict[str, Any] | None = None):
             self.config = config or {}
             self.dry_run = self.config.get("dry_run", True)
 
-        def execute(self, action: str, params: Dict[str, Any], trace_id: str,
-                   dry_run: Optional[bool] = None) -> Dict[str, Any]:
+        def execute(self, action: str, params: dict[str, Any], trace_id: str,
+                   dry_run: bool | None = None) -> dict[str, Any]:
             return {"ok": True, "dry_run": self.dry_run, "action": action, "params": params}
 
 try:
     from .habit_store import HabitStore
 except Exception:  # pragma: no cover
     class HabitStore:  # type: ignore
-        def __init__(self, config: Optional[Dict[str, Any]] = None):
+        def __init__(self, config: dict[str, Any] | None = None):
             self.config = config or {}
 
         def is_enabled(self) -> bool:
             return False
 
-        def get_habit_score(self, cue: str) -> Tuple[float, Optional[str]]:
+        def get_habit_score(self, cue: str) -> tuple[float, str | None]:
             return 0.0, None
 
         def observe_cue(self, cue: str, action: str, confidence: float = 1.0,
-                       user_id: Optional[str] = None, tenant_id: Optional[str] = None) -> bool:
+                       user_id: str | None = None, tenant_id: str | None = None) -> bool:
             return False
 
 try:
     from .observability import ObservabilityManager
 except Exception:  # pragma: no cover
     class ObservabilityManager:  # type: ignore
-        def __init__(self, config: Optional[Dict[str, Any]] = None):
+        def __init__(self, config: dict[str, Any] | None = None):
             self.config = config or {}
 
         def log_reflex_decision(self, trace_id: str, decision: str, confidence: float,
-                               processing_time_ms: float, scores: Dict[str, float],
-                               why_reflex: Dict[str, Any], user_id: Optional[str] = None,
-                               tenant_id: Optional[str] = None, shadow_mode: bool = True):
+                               processing_time_ms: float, scores: dict[str, float],
+                               why_reflex: dict[str, Any], user_id: str | None = None,
+                               tenant_id: str | None = None, shadow_mode: bool = True):
             pass
 
         def log_shadow_evaluation(self, trace_id: str, reflex_decision: str,
                                  reasoning_decision: str, processing_time_ms: float,
-                                 scores: Dict[str, float]):
+                                 scores: dict[str, float]):
             pass
 
 
@@ -133,7 +132,7 @@ def _load_config_from_yaml() -> ReflexConfig:
 class ReflexEngine:
     """Shadow-mode Reflex Engine orchestrator"""
 
-    def __init__(self, config: Optional[ReflexConfig] = None) -> None:
+    def __init__(self, config: ReflexConfig | None = None) -> None:
         self.config = config or _load_config_from_yaml()
         self.matcher = PatternMatcher({})
         self.policy = ReflexPolicy(self.config.policy)
@@ -150,10 +149,10 @@ class ReflexEngine:
         self,
         *,
         text: str,
-        context: Optional[Dict[str, Any]] = None,
-        user_id: Optional[str] = None,
-        tenant_id: Optional[str] = None,
-    ) -> Dict[str, Any]:
+        context: dict[str, Any] | None = None,
+        user_id: str | None = None,
+        tenant_id: str | None = None,
+    ) -> dict[str, Any]:
         """
         Analyze input with shadow reflex logic and ALWAYS fallback.
         Returns a dict containing trace_id and decision metadata.

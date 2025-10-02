@@ -15,7 +15,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 # Context variables for request tracking
 request_id_var: ContextVar[Optional[str]] = ContextVar("request_id", default=None)
@@ -46,7 +46,7 @@ class LogEntry:
     request_id: Optional[str] = None
     user_id: Optional[str] = None
     session_id: Optional[str] = None
-    extra_data: Optional[Dict[str, Any]] = None
+    extra_data: Optional[dict[str, Any]] = None
     duration_ms: Optional[float] = None
     trace_id: Optional[str] = None
 
@@ -79,9 +79,9 @@ class StructuredLogger:
         self._lock = threading.Lock()
 
         # Performance tracking
-        self._start_times: Dict[str, float] = {}
+        self._start_times: dict[str, float] = {}
 
-    def _get_context(self) -> Dict[str, Optional[str]]:
+    def _get_context(self) -> dict[str, Optional[str]]:
         """Get current context variables"""
         return {
             "request_id": request_id_var.get(),
@@ -104,7 +104,7 @@ class StructuredLogger:
         self,
         level: LogLevel,
         message: str,
-        extra_data: Optional[Dict[str, Any]] = None,
+        extra_data: Optional[dict[str, Any]] = None,
         duration_ms: Optional[float] = None,
     ) -> LogEntry:
         """Create a structured log entry"""
@@ -273,7 +273,7 @@ class StructuredLogger:
         user_id_var.set(None)
         session_id_var.set(None)
 
-    def get_log_stats(self) -> Dict[str, Any]:
+    def get_log_stats(self) -> dict[str, Any]:
         """Get logging statistics"""
         if not self.log_file.exists():
             return {"total_logs": 0, "file_size": 0}

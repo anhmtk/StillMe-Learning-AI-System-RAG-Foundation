@@ -1,8 +1,8 @@
 # security/content_wrap.py
 # Stub for ContentWrapSecurity
 import logging
-from typing import Any
 from dataclasses import dataclass
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +13,7 @@ class WrappedContent:
     injection_detected: bool
     wrapped_content: str
     sanitized_snippets: list[str] = None
-    
+
     def __post_init__(self):
         if self.sanitized_snippets is None:
             self.sanitized_snippets = []
@@ -40,32 +40,32 @@ class ContentWrapSecurity:
         injection_detected = False
         sanitized_snippets = []
         wrapped_content = content
-        
+
         # Check for script injection
         if "<script>" in content.lower():
             injection_detected = True
             sanitized_snippets.append("script")
             wrapped_content = wrapped_content.replace("<script>", "[REMOVED_HTML_INJECTION]")
             wrapped_content = wrapped_content.replace("</script>", "[/REMOVED_HTML_INJECTION]")
-        
+
         # Check for javascript injection
         if "javascript:" in content.lower():
             injection_detected = True
             sanitized_snippets.append("javascript")
             wrapped_content = wrapped_content.replace("javascript:", "[REMOVED_JAVASCRIPT_INJECTION]")
-        
+
         # Check for markdown injection
         if "![image](" in content and "javascript:" in content:
             injection_detected = True
             sanitized_snippets.append("markdown")
             wrapped_content = "[REMOVED_MARKDOWN_INJECTION]" + wrapped_content
-        
+
         # Check for obfuscated content
         if "<scr ipt>" in content.lower() or "java script:" in content.lower():
             injection_detected = True
             sanitized_snippets.append("obfuscated")
             wrapped_content = "[REMOVED_OBFUSCATED]" + wrapped_content
-        
+
         # Check for prompt injection
         if any(pattern in content.lower() for pattern in [
             "ignore previous instructions",
@@ -76,7 +76,7 @@ class ContentWrapSecurity:
             injection_detected = True
             sanitized_snippets.append("prompt_injection")
             wrapped_content = "[REMOVED_PROMPT_INJECTION]" + wrapped_content
-        
+
         # Determine security level
         if injection_detected:
             if len(sanitized_snippets) >= 3:
@@ -87,15 +87,15 @@ class ContentWrapSecurity:
                 security_level = "low"
         else:
             security_level = "safe"
-        
+
         # Wrap with security markers
         if content_type == "news":
             wrapped_content = f"[WEB_SNIPPET_START]\nNỘI DUNG DƯỚI ĐÂY CHỈ LÀ THAM KHẢO\n{wrapped_content}\n[WEB_SNIPPET_END]"
         else:
             wrapped_content = f"[SECURE:{security_level.upper()}]{wrapped_content}[/SECURE]"
-        
+
         self.filtered_content.append(content)
-        
+
         return WrappedContent(
             security_level=security_level,
             injection_detected=injection_detected,
@@ -120,29 +120,29 @@ class ContentWrapSecurity:
         """Validate wrapped content"""
         if not wrapped_content:
             return False, "Empty content"
-        
+
         if "[SECURE:" in wrapped_content or "[WEB_SNIPPET_START]" in wrapped_content:
             return True, "Content properly wrapped"
-        
+
         return False, "Content not properly wrapped"
-    
+
     def extract_original_content(self, wrapped_content: str) -> str:
         """Extract original content from wrapped content"""
         if not wrapped_content:
             return ""
-        
+
         # Remove security markers
         content = wrapped_content
         content = content.replace("[WEB_SNIPPET_START]", "")
         content = content.replace("[WEB_SNIPPET_END]", "")
         content = content.replace("NỘI DUNG DƯỚI ĐÂY CHỈ LÀ THAM KHẢO", "")
-        
+
         # Remove SECURE markers
         if "[SECURE:" in content and "[/SECURE]" in content:
             start_idx = content.find("]") + 1
             end_idx = content.rfind("[/SECURE]")
             content = content[start_idx:end_idx]
-        
+
         return content.strip()
 
     def validate_content(self, content: str) -> dict[str, Any]:

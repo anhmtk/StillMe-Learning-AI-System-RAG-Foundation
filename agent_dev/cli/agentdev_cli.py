@@ -8,7 +8,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 import yaml
 
@@ -36,7 +36,7 @@ class AgentDevCLI:
         print(f"✅ Task configuration saved to {config_path}")
         return config
 
-    def _preflight_qa(self, task_type: str) -> Dict[str, Any]:
+    def _preflight_qa(self, task_type: str) -> dict[str, Any]:
         """Interactive preflight Q&A"""
         config = {"task_type": task_type}
 
@@ -183,7 +183,7 @@ class AgentDevCLI:
 
         return result["success"]
 
-    def _load_config(self, config_path: Optional[str] = None) -> Dict[str, Any]:
+    def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
         """Load task configuration"""
         if config_path:
             path = Path(config_path)
@@ -198,7 +198,7 @@ class AgentDevCLI:
         with open(path) as f:
             return json.load(f)
 
-    def _validate_policies(self, config: Dict[str, Any]) -> Dict[str, Any]:
+    def _validate_policies(self, config: dict[str, Any]) -> dict[str, Any]:
         """Validate against project policies"""
         # Load project spec
         spec_path = self.repo_root / "project.spec.yaml"
@@ -219,7 +219,7 @@ class AgentDevCLI:
 
         return {"valid": len(errors) == 0, "errors": errors}
 
-    def _generate_plan(self, config: Dict[str, Any]) -> Dict[str, Any]:
+    def _generate_plan(self, config: dict[str, Any]) -> dict[str, Any]:
         """Generate execution plan"""
         # This would integrate with the actual AgentDev planning system
         return {
@@ -234,25 +234,25 @@ class AgentDevCLI:
             "duration": "15-30 minutes"
         }
 
-    def _run_conformance_tests(self, config: Dict[str, Any]) -> Dict[str, Any]:
+    def _run_conformance_tests(self, config: dict[str, Any]) -> dict[str, Any]:
         """Run conformance tests"""
         print("🔍 Running conformance tests...")
         # This would run actual conformance tests
         return {"passed": True, "details": "All conformance tests passed"}
 
-    def _run_contract_tests(self, config: Dict[str, Any]) -> Dict[str, Any]:
+    def _run_contract_tests(self, config: dict[str, Any]) -> dict[str, Any]:
         """Run contract tests"""
         print("📋 Running contract tests...")
         # This would run actual contract tests
         return {"passed": True, "details": "All contract tests passed"}
 
-    def _run_security_scan(self) -> Dict[str, Any]:
+    def _run_security_scan(self) -> dict[str, Any]:
         """Run security scan"""
         print("🔒 Running security scan...")
         # This would run actual security scan
         return {"passed": True, "details": "No security issues found"}
 
-    def _execute_plan(self, config: Dict[str, Any]) -> Dict[str, Any]:
+    def _execute_plan(self, config: dict[str, Any]) -> dict[str, Any]:
         """Execute the actual plan"""
         print("⚡ Executing plan...")
         # This would integrate with the actual AgentDev execution system

@@ -45,7 +45,7 @@ import shutil
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 
 from cryptography.fernet import Fernet
 
@@ -177,7 +177,7 @@ class SecureMemoryManager:
             return False
 
     async def save(
-        self, data: Union[str, Dict, List], auto_backup: Optional[bool] = None
+        self, data: Union[str, dict, list], auto_backup: Optional[bool] = None
     ) -> bool:
         """Mã hóa và lưu dữ liệu vào file với error handling và async support."""
         start_time = time.time()
@@ -317,7 +317,7 @@ class SecureMemoryManager:
             self.last_error = str(e)
             return False
 
-    async def list_backups(self) -> List[Dict[str, Any]]:
+    async def list_backups(self) -> list[dict[str, Any]]:
         """Liệt kê tất cả backup có sẵn."""
         try:
             backups = []
@@ -352,7 +352,7 @@ class SecureMemoryManager:
             self.logger.error(f"❌ Error clearing data: {e}")
             return False
 
-    def get_performance_metrics(self) -> Dict[str, Any]:
+    def get_performance_metrics(self) -> dict[str, Any]:
         """Lấy metrics về hiệu suất."""
         return {
             **self.performance_metrics,
@@ -366,7 +366,7 @@ class SecureMemoryManager:
             "should_rotate_key": self._should_rotate_key(),
         }
 
-    def get_health_status(self) -> Dict[str, Any]:
+    def get_health_status(self) -> dict[str, Any]:
         """Kiểm tra trạng thái sức khỏe của module."""
         try:
             # Test encryption/decryption

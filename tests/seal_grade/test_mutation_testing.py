@@ -213,7 +213,6 @@ class TestMutationTesting:
         # Simulate mutation testing results
         total_mutations = 100
         killed_mutations = 80
-        survived_mutations = 20
 
         mutation_score = (killed_mutations / total_mutations) * 100
 
@@ -301,14 +300,6 @@ class TestMutationTesting:
         # Test that all critical paths are covered
         def test_mutation_coverage():
             # Critical paths to test
-            critical_paths = [
-                "state_management",
-                "security_gate",
-                "event_bus",
-                "dag_executor",
-                "rbac",
-                "observability"
-            ]
 
             # Simulate mutation coverage
             covered_paths = 6  # All paths covered

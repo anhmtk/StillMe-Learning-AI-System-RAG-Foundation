@@ -23,7 +23,7 @@ import logging
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -43,10 +43,10 @@ class FilterResult:
 
     is_safe: bool
     filtered_content: str
-    violations: List[str]
+    violations: list[str]
     security_level: SecurityLevel
     policy_response: Optional[str] = None
-    metadata: Dict[str, Any] = None  # type: ignore
+    metadata: dict[str, Any] = None  # type: ignore
 
 
 class SecrecyFilter:
@@ -273,7 +273,7 @@ class SecrecyFilter:
                 metadata={"error": str(e)},
             )
 
-    def _check_critical_keywords(self, content: str) -> List[str]:
+    def _check_critical_keywords(self, content: str) -> list[str]:
         """Check for critical security violations / Kiểm tra vi phạm bảo mật quan trọng"""
         violations = []
         content_lower = content.lower()
@@ -284,7 +284,7 @@ class SecrecyFilter:
 
         return violations
 
-    def _check_internal_keywords(self, content: str) -> List[str]:
+    def _check_internal_keywords(self, content: str) -> list[str]:
         """Check for internal architecture keywords / Kiểm tra từ khóa kiến trúc nội bộ"""
         violations = []
         content_lower = content.lower()
@@ -295,7 +295,7 @@ class SecrecyFilter:
 
         return violations
 
-    def _check_sensitive_patterns(self, content: str) -> List[str]:
+    def _check_sensitive_patterns(self, content: str) -> list[str]:
         """Check for sensitive content patterns / Kiểm tra mẫu nội dung nhạy cảm"""
         violations = []
 
@@ -306,7 +306,7 @@ class SecrecyFilter:
 
         return violations
 
-    def _check_query_policy(self, query: str) -> List[str]:
+    def _check_query_policy(self, query: str) -> list[str]:
         """Check query for policy violations / Kiểm tra câu hỏi về vi phạm chính sách"""
         violations = []
         query_lower = query.lower()
@@ -334,7 +334,7 @@ class SecrecyFilter:
 
         return violations
 
-    def _apply_filtering(self, content: str, violations: List[str]) -> str:
+    def _apply_filtering(self, content: str, violations: list[str]) -> str:
         """Apply content filtering based on violations / Áp dụng lọc nội dung dựa trên vi phạm"""
         filtered_content = content
 
@@ -371,7 +371,7 @@ class SecrecyFilter:
                 locale, "I cannot share internal information."
             )
 
-    def should_use_policy_response(self, query: str) -> Tuple[bool, str]:
+    def should_use_policy_response(self, query: str) -> tuple[bool, str]:
         """
         Check if query should get policy response
         Kiểm tra xem câu hỏi có nên nhận phản hồi chính sách không
@@ -430,7 +430,7 @@ class SecrecyFilter:
 
         return False, "default"
 
-    def log_security_event(self, event_type: str, details: Dict[str, Any]):
+    def log_security_event(self, event_type: str, details: dict[str, Any]):
         """Log security event / Ghi log sự kiện bảo mật"""
         try:
             self.logger.warning(f"Security event: {event_type} - {details}")

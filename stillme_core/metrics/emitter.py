@@ -23,15 +23,13 @@ import json
 import logging
 import sqlite3
 import threading
-import time
 import uuid
 from collections import deque
 from collections.abc import Mapping
-from contextlib import asynccontextmanager
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +41,7 @@ class Metric:
     unit: str = ""
     tag: str = ""
     ts: Optional[datetime] = None
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: Optional[dict[str, Any]] = None
 
 @dataclass
 class Event:
@@ -53,13 +51,13 @@ class Event:
     stage: str
     component: str
     event: str
-    meta: Dict[str, Any]
-    metrics: Dict[str, Any]
+    meta: dict[str, Any]
+    metrics: dict[str, Any]
 
 class MetricsEmitter:
     """
     Hệ thống thu thập metrics thời gian thực
-    
+
     Ghi events vào JSONL và SQLite, hỗ trợ batch processing
     và privacy protection cho learning dashboard.
     """
@@ -361,7 +359,7 @@ class MetricsEmitter:
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
         cursor.execute("""
-            UPDATE runs 
+            UPDATE runs
             SET ended_at = ?, success = ?, notes = ?
             WHERE session_id = ?
         """, (end_time.isoformat(), success, notes, self.session_id))
@@ -376,7 +374,7 @@ class MetricsEmitter:
         self.session_start = None
         self.current_stage = None
 
-    def get_session_stats(self) -> Dict[str, Any]:
+    def get_session_stats(self) -> dict[str, Any]:
         """Lấy thống kê session hiện tại"""
         if not self.session_id:
             return {}
@@ -386,7 +384,7 @@ class MetricsEmitter:
 
         # Get run info
         cursor.execute("SELECT * FROM runs WHERE session_id = ?", (self.session_id,))
-        run = cursor.fetchone()
+        cursor.fetchone()
 
         # Get metrics count
         cursor.execute("SELECT COUNT(*) FROM metrics WHERE run_id = (SELECT id FROM runs WHERE session_id = ?)", (self.session_id,))
@@ -417,7 +415,7 @@ def get_metrics_emitter() -> MetricsEmitter:
         _metrics_emitter_instance = MetricsEmitter()
     return _metrics_emitter_instance
 
-def initialize_metrics_emitter(config: Optional[Dict[str, Any]] = None) -> MetricsEmitter:
+def initialize_metrics_emitter(config: Optional[dict[str, Any]] = None) -> MetricsEmitter:
     """Initialize global metrics emitter with config"""
     global _metrics_emitter_instance
     if config:

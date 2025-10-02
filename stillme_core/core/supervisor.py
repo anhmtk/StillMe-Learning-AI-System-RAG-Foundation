@@ -8,7 +8,7 @@ import logging
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger("Supervisor")
 
@@ -20,7 +20,7 @@ class LessonProposal:
     id: str
     title: str
     guideline: str
-    examples: List[str]
+    examples: list[str]
     safety_notes: str
     success_criteria: str
     created_at: str
@@ -34,7 +34,7 @@ class KnowledgePack:
     id: str
     version: str
     created_at: str
-    lessons: List[LessonProposal]
+    lessons: list[LessonProposal]
     summary: str
 
 
@@ -54,7 +54,7 @@ class DailySupervisor:
         self.knowledge_packs_dir.mkdir(parents=True, exist_ok=True)
         self.logs_dir.mkdir(parents=True, exist_ok=True)
 
-    def collect_signals(self) -> Dict[str, Any]:
+    def collect_signals(self) -> dict[str, Any]:
         """Collect signals from logs and memory"""
         signals = {
             "timestamp": datetime.now().isoformat(),
@@ -108,7 +108,7 @@ class DailySupervisor:
 
         return signals
 
-    def propose_lessons(self, signals: Dict[str, Any]) -> List[LessonProposal]:
+    def propose_lessons(self, signals: dict[str, Any]) -> list[LessonProposal]:
         """Generate lesson proposals based on collected signals"""
         proposals = []
 
@@ -172,7 +172,7 @@ class DailySupervisor:
 
         return proposals
 
-    def save_lesson_proposals(self, proposals: List[LessonProposal]) -> str:
+    def save_lesson_proposals(self, proposals: list[LessonProposal]) -> str:
         """Save lesson proposals to file"""
         today = datetime.now().strftime("%Y%m%d")
         proposals_file = self.lesson_proposals_dir / f"{today}.json"
@@ -189,7 +189,7 @@ class DailySupervisor:
         logger.info(f"Saved {len(proposals)} lesson proposals to {proposals_file}")
         return str(proposals_file)
 
-    def approve_lessons(self, proposal_ids: List[str]) -> KnowledgePack:
+    def approve_lessons(self, proposal_ids: list[str]) -> KnowledgePack:
         """Create knowledge pack from approved lesson proposals"""
         today = datetime.now().strftime("%Y%m%d")
         proposals_file = self.lesson_proposals_dir / f"{today}.json"
@@ -227,7 +227,7 @@ class DailySupervisor:
         )
         return knowledge_pack
 
-    def get_current_proposals(self) -> List[LessonProposal]:
+    def get_current_proposals(self) -> list[LessonProposal]:
         """Get today's lesson proposals"""
         today = datetime.now().strftime("%Y%m%d")
         proposals_file = self.lesson_proposals_dir / f"{today}.json"

@@ -15,7 +15,7 @@ import uuid
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -59,13 +59,13 @@ class AttackScenario:
     category: AttackCategory
     severity: AttackSeverity
     description: str
-    attack_vectors: List[str]
-    payloads: List[Dict[str, Any]]
+    attack_vectors: list[str]
+    payloads: list[dict[str, Any]]
     expected_behavior: str
-    safety_measures: List[str]
-    isolation_requirements: Dict[str, Any]
-    success_criteria: Dict[str, Any]
-    failure_criteria: Dict[str, Any]
+    safety_measures: list[str]
+    isolation_requirements: dict[str, Any]
+    success_criteria: dict[str, Any]
+    failure_criteria: dict[str, Any]
 
 
 @dataclass
@@ -79,12 +79,12 @@ class SimulationResult:
     end_time: float
     duration: float
     success: bool
-    vulnerabilities_found: List[Dict[str, Any]]
-    defenses_triggered: List[Dict[str, Any]]
-    impact_assessment: Dict[str, Any]
+    vulnerabilities_found: list[dict[str, Any]]
+    defenses_triggered: list[dict[str, Any]]
+    impact_assessment: dict[str, Any]
     safety_checks_passed: bool
-    logs: List[Dict[str, Any]]
-    recommendations: List[str]
+    logs: list[dict[str, Any]]
+    recommendations: list[str]
     risk_score: float
 
 
@@ -104,7 +104,7 @@ class SafeAttackSimulator:
     Safe Attack Simulation Framework with comprehensive safety measures
     """
 
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config_path: str | None = None):
         self.config_path = config_path or ".attack_sim_config.json"
         self.scenarios: list[AttackScenario] = []
         self.simulation_history: list[SimulationResult] = []

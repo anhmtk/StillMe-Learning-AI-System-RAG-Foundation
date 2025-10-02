@@ -7,7 +7,7 @@ Generates intelligent clarification questions based on context
 import logging
 import re
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -15,11 +15,11 @@ logger = logging.getLogger(__name__)
 class ClarificationQuestion:
     """Structured clarification question"""
     question: str
-    options: List[str]
+    options: list[str]
     confidence: float
     domain: str
     reasoning: str
-    follow_up_hints: List[str] = None
+    follow_up_hints: list[str] = None
 
 class ContextAwareClarifier:
     """
@@ -32,7 +32,7 @@ class ContextAwareClarifier:
         self.learner = learner
         self.domain_question_banks = self._initialize_question_banks()
 
-    def _initialize_question_banks(self) -> Dict[str, List[Tuple[str, List[str]]]]:
+    def _initialize_question_banks(self) -> dict[str, list[tuple[str, list[str]]]]:
         """Initialize domain-specific question banks"""
         return {
             "web": [
@@ -109,7 +109,7 @@ class ContextAwareClarifier:
             ]
         }
 
-    def _detect_domain_from_history(self, conversation_history: List[Dict[str, Any]]) -> str:
+    def _detect_domain_from_history(self, conversation_history: list[dict[str, Any]]) -> str:
         """Detect domain from conversation history"""
         if not conversation_history:
             return "generic"
@@ -143,7 +143,7 @@ class ContextAwareClarifier:
 
         return "generic"
 
-    def _detect_domain_from_project_context(self, project_context: Dict[str, Any]) -> str:
+    def _detect_domain_from_project_context(self, project_context: dict[str, Any]) -> str:
         """Detect domain from project context"""
         if not project_context:
             return "generic"
@@ -172,7 +172,7 @@ class ContextAwareClarifier:
 
         return "generic"
 
-    def _extract_keywords_from_prompt(self, prompt: str) -> List[str]:
+    def _extract_keywords_from_prompt(self, prompt: str) -> list[str]:
         """Extract relevant keywords from prompt"""
         # Simple keyword extraction
         words = re.findall(r'\b\w+\b', prompt.lower())
@@ -183,7 +183,7 @@ class ContextAwareClarifier:
 
         return keywords[:10]  # Top 10 keywords
 
-    def _get_semantic_suggestions(self, prompt: str, context: Dict[str, Any]) -> List[str]:
+    def _get_semantic_suggestions(self, prompt: str, context: dict[str, Any]) -> list[str]:
         """Get semantic suggestions from knowledge base"""
         if not self.semantic_search:
             return []
@@ -208,16 +208,16 @@ class ContextAwareClarifier:
             logger.warning(f"Semantic search failed: {e}")
             return []
 
-    def make_question(self, prompt: str, conversation_history: List[Dict[str, Any]],
-                     project_context: Dict[str, Any]) -> ClarificationQuestion:
+    def make_question(self, prompt: str, conversation_history: list[dict[str, Any]],
+                     project_context: dict[str, Any]) -> ClarificationQuestion:
         """
         Generate context-aware clarification question
-        
+
         Args:
             prompt: User prompt to clarify
             conversation_history: Recent conversation messages
             project_context: Project files and context
-            
+
         Returns:
             ClarificationQuestion with question, options, and metadata
         """
@@ -232,11 +232,6 @@ class ContextAwareClarifier:
         learned_suggestion = None
         if self.learner:
             try:
-                context_dict = {
-                    "domain_hint": domain,
-                    "conversation_history": conversation_history,
-                    "project_context": project_context
-                }
                 # Note: suggest_patterns is async, but we're in sync context
                 # For now, skip learned patterns in sync context
                 learned_suggestion = None
@@ -271,7 +266,7 @@ class ContextAwareClarifier:
             follow_up_hints=follow_up_hints
         )
 
-    def _select_best_question(self, prompt: str, question_bank: List[Tuple[str, List[str]]]) -> Tuple[str, List[str]]:
+    def _select_best_question(self, prompt: str, question_bank: list[tuple[str, list[str]]]) -> tuple[str, list[str]]:
         """Select the most appropriate question from the bank based on prompt content"""
         if not question_bank:
             return "Could you please provide more details?", []
@@ -304,7 +299,7 @@ class ContextAwareClarifier:
 
         return question_bank[0]
 
-    def get_domain_stats(self) -> Dict[str, int]:
+    def get_domain_stats(self) -> dict[str, int]:
         """Get statistics about domain usage"""
         return {domain: len(questions) for domain, questions in self.domain_question_banks.items()}
 

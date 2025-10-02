@@ -12,14 +12,13 @@ Tính năng:
 """
 
 import json
-import os
 import sqlite3
 import time
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 # import matplotlib.pyplot as plt
 # import pandas as pd
@@ -55,7 +54,7 @@ class MetricData:
     value: float
     unit: str
     timestamp: datetime
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 @dataclass
 class TrendAnalysis:
@@ -65,7 +64,7 @@ class TrendAnalysis:
     direction: TrendDirection
     change_percentage: float
     confidence: float
-    data_points: List[float]
+    data_points: list[float]
     prediction: Optional[float]
 
 @dataclass
@@ -74,10 +73,10 @@ class PerformanceReport:
     report_id: str
     period_start: datetime
     period_end: datetime
-    metrics: List[MetricData]
-    trends: List[TrendAnalysis]
-    insights: List[str]
-    recommendations: List[str]
+    metrics: list[MetricData]
+    trends: list[TrendAnalysis]
+    insights: list[str]
+    recommendations: list[str]
     generated_at: datetime
 
 @dataclass
@@ -85,9 +84,9 @@ class DashboardConfig:
     """Cấu hình dashboard"""
     title: str
     refresh_interval: int  # seconds
-    metrics_to_show: List[MetricType]
-    chart_types: Dict[str, str]
-    alert_thresholds: Dict[str, float]
+    metrics_to_show: list[MetricType]
+    chart_types: dict[str, str]
+    alert_thresholds: dict[str, float]
 
 class AnalyticsDashboard:
     """Analytics Dashboard - Dashboard phân tích toàn diện"""
@@ -108,7 +107,7 @@ class AnalyticsDashboard:
         self.config = self._load_dashboard_config()
 
         # Metrics cache
-        self.metrics_cache: Dict[str, List[MetricData]] = {}
+        self.metrics_cache: dict[str, list[MetricData]] = {}
 
     def _ensure_directories(self):
         """Đảm bảo thư mục cần thiết tồn tại"""
@@ -180,7 +179,7 @@ class AnalyticsDashboard:
             }
         )
 
-    def collect_metrics(self) -> List[MetricData]:
+    def collect_metrics(self) -> list[MetricData]:
         """Thu thập metrics từ hệ thống"""
         metrics = []
         current_time = datetime.now()
@@ -206,7 +205,7 @@ class AnalyticsDashboard:
 
         return metrics
 
-    def _collect_code_quality_metrics(self, timestamp: datetime) -> List[MetricData]:
+    def _collect_code_quality_metrics(self, timestamp: datetime) -> list[MetricData]:
         """Thu thập metrics chất lượng code"""
         metrics = []
 
@@ -292,7 +291,7 @@ class AnalyticsDashboard:
 
         return metrics
 
-    def _collect_performance_metrics(self, timestamp: datetime) -> List[MetricData]:
+    def _collect_performance_metrics(self, timestamp: datetime) -> list[MetricData]:
         """Thu thập metrics hiệu suất"""
         metrics = []
 
@@ -337,7 +336,7 @@ class AnalyticsDashboard:
 
         return metrics
 
-    def _collect_security_metrics(self, timestamp: datetime) -> List[MetricData]:
+    def _collect_security_metrics(self, timestamp: datetime) -> list[MetricData]:
         """Thu thập metrics bảo mật"""
         metrics = []
 
@@ -383,7 +382,7 @@ class AnalyticsDashboard:
 
         return metrics
 
-    def _collect_testing_metrics(self, timestamp: datetime) -> List[MetricData]:
+    def _collect_testing_metrics(self, timestamp: datetime) -> list[MetricData]:
         """Thu thập metrics testing"""
         metrics = []
 
@@ -437,7 +436,7 @@ class AnalyticsDashboard:
 
         return metrics
 
-    def _save_metrics_to_db(self, metrics: List[MetricData]):
+    def _save_metrics_to_db(self, metrics: list[MetricData]):
         """Lưu metrics vào database"""
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -467,7 +466,7 @@ class AnalyticsDashboard:
         # Lấy dữ liệu trong khoảng thời gian
         start_date = datetime.now() - timedelta(days=period_days)
         cursor.execute('''
-            SELECT value, timestamp FROM metrics 
+            SELECT value, timestamp FROM metrics
             WHERE metric_id = ? AND timestamp >= ?
             ORDER BY timestamp
         ''', (metric_id, start_date))
@@ -488,7 +487,7 @@ class AnalyticsDashboard:
             )
 
         values = [row[0] for row in data]
-        timestamps = [row[1] for row in data]
+        [row[1] for row in data]
 
         # Tính toán xu hướng
         if len(values) >= 2:
@@ -562,7 +561,7 @@ class AnalyticsDashboard:
             generated_at=datetime.now()
         )
 
-    def _generate_insights(self, metrics: List[MetricData], trends: List[TrendAnalysis]) -> List[str]:
+    def _generate_insights(self, metrics: list[MetricData], trends: list[TrendAnalysis]) -> list[str]:
         """Tạo insights từ metrics và trends"""
         insights = []
 
@@ -610,7 +609,7 @@ class AnalyticsDashboard:
 
         return insights
 
-    def _generate_recommendations(self, metrics: List[MetricData], trends: List[TrendAnalysis]) -> List[str]:
+    def _generate_recommendations(self, metrics: list[MetricData], trends: list[TrendAnalysis]) -> list[str]:
         """Tạo recommendations từ metrics và trends"""
         recommendations = []
 
@@ -729,7 +728,7 @@ class AnalyticsDashboard:
         <p>Báo cáo được tạo lúc: {report.generated_at.strftime('%d/%m/%Y %H:%M:%S')}</p>
         <p>Khoảng thời gian: {report.period_start.strftime('%d/%m/%Y')} - {report.period_end.strftime('%d/%m/%Y')}</p>
     </div>
-    
+
     <div class="metrics-grid">
 """
 
@@ -744,7 +743,7 @@ class AnalyticsDashboard:
 
         html_content += """
     </div>
-    
+
     <div class="insights-section">
         <h2>📊 Phân tích và Insights</h2>
 """
@@ -757,7 +756,7 @@ class AnalyticsDashboard:
 
         html_content += """
     </div>
-    
+
     <div class="recommendations-section">
         <h2>💡 Khuyến nghị</h2>
 """
@@ -770,17 +769,17 @@ class AnalyticsDashboard:
 
         html_content += """
     </div>
-    
+
     <div class="chart-container">
         <h2>📈 Biểu đồ xu hướng</h2>
         <div id="trends-chart"></div>
     </div>
-    
+
     <script>
         // Tạo biểu đồ xu hướng
         var trendsData = [];
         var trendsLabels = [];
-        
+
         // Dữ liệu mẫu cho biểu đồ
         var sampleData = {
             x: ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'],
@@ -790,7 +789,7 @@ class AnalyticsDashboard:
             name: 'Code Quality Score',
             line: {color: '#667eea'}
         };
-        
+
         var layout = {
             title: 'Xu hướng Code Quality',
             xaxis: {title: 'Thời gian'},
@@ -798,7 +797,7 @@ class AnalyticsDashboard:
             plot_bgcolor: 'rgba(0,0,0,0)',
             paper_bgcolor: 'rgba(0,0,0,0)'
         };
-        
+
         Plotly.newPlot('trends-chart', [sampleData], layout);
     </script>
 </body>

@@ -14,7 +14,7 @@ import logging
 import re
 from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -29,7 +29,7 @@ class PersonaScore:
     dynamic_adaptation: float  # 0-1: khả năng thích ứng
     overall_score: float  # 0-1: điểm tổng
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
 class PersonaEval:
@@ -87,15 +87,15 @@ class PersonaEval:
         }
 
     def evaluate(self, response: str, user_input: str = "",
-                 user_preferences: Optional[Dict] = None) -> PersonaScore:
+                 user_preferences: Optional[dict] = None) -> PersonaScore:
         """
         Đánh giá persona của response
-        
+
         Args:
             response: AI response cần đánh giá
             user_input: User input gốc (optional)
             user_preferences: User preferences (optional)
-            
+
         Returns:
             PersonaScore: Kết quả đánh giá
         """
@@ -138,7 +138,7 @@ class PersonaEval:
             return PersonaScore(0, 0, 0, 0, 0)
 
     def _evaluate_addressing_style(self, response: str,
-                                 user_preferences: Optional[Dict] = None) -> float:
+                                 user_preferences: Optional[dict] = None) -> float:
         """Đánh giá cách xưng hô"""
         try:
             score = 0.0
@@ -259,7 +259,7 @@ class PersonaEval:
             return 0.0
 
     def _evaluate_dynamic_adaptation(self, response: str,
-                                   user_preferences: Optional[Dict] = None) -> float:
+                                   user_preferences: Optional[dict] = None) -> float:
         """Đánh giá khả năng thích ứng động"""
         try:
             score = 0.0
@@ -297,7 +297,7 @@ class PersonaEval:
             self.logger.error(f"Error evaluating dynamic adaptation: {e}")
             return 0.0
 
-    def batch_evaluate(self, responses: List[Dict[str, Any]]) -> List[PersonaScore]:
+    def batch_evaluate(self, responses: list[dict[str, Any]]) -> list[PersonaScore]:
         """Đánh giá hàng loạt responses"""
         results = []
 
@@ -318,7 +318,7 @@ class PersonaEval:
 
         return results
 
-    def generate_report(self, scores: List[PersonaScore]) -> Dict[str, Any]:
+    def generate_report(self, scores: list[PersonaScore]) -> dict[str, Any]:
         """Tạo báo cáo tổng hợp"""
         try:
             if not scores:

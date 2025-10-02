@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ class QualityGateResult:
     threshold: float
     passed: bool
     timestamp: datetime
-    details: Optional[Dict[str, Any]] = None
+    details: Optional[dict[str, Any]] = None
 
     def __post_init__(self):
         if self.details is None:
@@ -43,11 +43,11 @@ class AgentDevQualityIntegration:
     def __init__(self):
         self.logger = logger
         self.integration_status = IntegrationStatus.ACTIVE
-        self.quality_gates: List[QualityGateResult] = []
+        self.quality_gates: list[QualityGateResult] = []
         self.gate_thresholds = self._initialize_gate_thresholds()
         self.logger.info("✅ AgentDevQualityIntegration initialized")
 
-    def _initialize_gate_thresholds(self) -> Dict[QualityGate, float]:
+    def _initialize_gate_thresholds(self) -> dict[QualityGate, float]:
         """Initialize quality gate thresholds"""
         return {
             QualityGate.COVERAGE: 80.0,  # 80% coverage
@@ -59,9 +59,9 @@ class AgentDevQualityIntegration:
 
     def run_quality_gates(self,
                          code_content: str,
-                         test_results: Dict[str, Any] = None,
-                         security_scan: Dict[str, Any] = None,
-                         performance_metrics: Dict[str, Any] = None) -> List[QualityGateResult]:
+                         test_results: dict[str, Any] = None,
+                         security_scan: dict[str, Any] = None,
+                         performance_metrics: dict[str, Any] = None) -> list[QualityGateResult]:
         """Run quality gates"""
         try:
             results = []
@@ -103,7 +103,7 @@ class AgentDevQualityIntegration:
             self.logger.error(f"❌ Failed to run quality gates: {e}")
             return []
 
-    def _run_coverage_gate(self, test_results: Dict[str, Any] = None) -> Optional[QualityGateResult]:
+    def _run_coverage_gate(self, test_results: dict[str, Any] = None) -> Optional[QualityGateResult]:
         """Run coverage quality gate"""
         try:
             if not test_results:
@@ -136,7 +136,7 @@ class AgentDevQualityIntegration:
             self.logger.error(f"❌ Failed to run coverage gate: {e}")
             return None
 
-    def _run_security_gate(self, security_scan: Dict[str, Any] = None) -> Optional[QualityGateResult]:
+    def _run_security_gate(self, security_scan: dict[str, Any] = None) -> Optional[QualityGateResult]:
         """Run security quality gate"""
         try:
             if not security_scan:
@@ -176,7 +176,7 @@ class AgentDevQualityIntegration:
             self.logger.error(f"❌ Failed to run security gate: {e}")
             return None
 
-    def _run_performance_gate(self, performance_metrics: Dict[str, Any] = None) -> Optional[QualityGateResult]:
+    def _run_performance_gate(self, performance_metrics: dict[str, Any] = None) -> Optional[QualityGateResult]:
         """Run performance quality gate"""
         try:
             if not performance_metrics:
@@ -316,7 +316,7 @@ class AgentDevQualityIntegration:
             self.logger.error(f"❌ Failed to run ethics gate: {e}")
             return None
 
-    def get_quality_gate_summary(self) -> Dict[str, Any]:
+    def get_quality_gate_summary(self) -> dict[str, Any]:
         """Get quality gate summary"""
         try:
             total_gates = len(self.quality_gates)

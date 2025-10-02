@@ -7,7 +7,7 @@ Manages Service Level Objectives and alert generation
 import logging
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -31,15 +31,15 @@ class SLOAlert:
 class SLOPolicyManager:
     """Manages SLO policies and generates alerts"""
 
-    def __init__(self, slo_policy: Dict[str, Any]):
+    def __init__(self, slo_policy: dict[str, Any]):
         self.slo_policy = slo_policy
-        self.alerts: List[SLOAlert] = []
+        self.alerts: list[SLOAlert] = []
 
-    def load_policy(self) -> Dict[str, Any]:
+    def load_policy(self) -> dict[str, Any]:
         """Load SLO policy (for compatibility)"""
         return self.slo_policy
 
-    def evaluate_slos(self, report_data: Dict[str, Any]) -> List[SLOAlert]:
+    def evaluate_slos(self, report_data: dict[str, Any]) -> list[SLOAlert]:
         """Evaluate all SLOs and generate alerts"""
         self.alerts = []
 
@@ -57,7 +57,7 @@ class SLOPolicyManager:
 
         return self.alerts
 
-    def _evaluate_performance_slos(self, report_data: Dict[str, Any]):
+    def _evaluate_performance_slos(self, report_data: dict[str, Any]):
         """Evaluate performance-related SLOs"""
         performance_slos = self.slo_policy.get('performance', {})
         evaluations = report_data.get('evaluations', {})
@@ -215,7 +215,7 @@ class SLOPolicyManager:
                 recommendation="Improve error handling and decision validation"
             ))
 
-    def _evaluate_security_slos(self, report_data: Dict[str, Any]):
+    def _evaluate_security_slos(self, report_data: dict[str, Any]):
         """Evaluate security-related SLOs"""
         security_slos = self.slo_policy.get('security', {})
         security_data = report_data.get('security', {})
@@ -253,7 +253,7 @@ class SLOPolicyManager:
                         recommendation=f"Strengthen {attack_type} detection and prevention mechanisms"
                     ))
 
-    def _evaluate_latency_slos(self, report_data: Dict[str, Any]):
+    def _evaluate_latency_slos(self, report_data: dict[str, Any]):
         """Evaluate latency-related SLOs"""
         latency_slos = self.slo_policy.get('latency', {})
         efficiency_eval = report_data.get('evaluations', {}).get('efficiency', {})
@@ -295,7 +295,7 @@ class SLOPolicyManager:
                 recommendation="Investigate and fix performance bottlenecks"
             ))
 
-    def _evaluate_cost_slos(self, report_data: Dict[str, Any]):
+    def _evaluate_cost_slos(self, report_data: dict[str, Any]):
         """Evaluate cost-related SLOs"""
         cost_slos = self.slo_policy.get('cost', {})
         efficiency_eval = report_data.get('evaluations', {}).get('efficiency', {})
@@ -325,7 +325,7 @@ class SLOPolicyManager:
                 recommendation="Improve TokenOptimizer and implement compression"
             ))
 
-    def get_overall_slo_status(self) -> Tuple[bool, str]:
+    def get_overall_slo_status(self) -> tuple[bool, str]:
         """Get overall SLO status (PASS/FAIL)"""
         critical_alerts = [a for a in self.alerts if a.level == AlertLevel.CRITICAL]
         high_alerts = [a for a in self.alerts if a.level == AlertLevel.HIGH]
@@ -337,7 +337,7 @@ class SLOPolicyManager:
         else:
             return True, "PASS - All SLOs met"
 
-    def get_alert_summary(self) -> Dict[str, int]:
+    def get_alert_summary(self) -> dict[str, int]:
         """Get summary of alerts by level"""
         summary = {
             "critical": 0,
@@ -352,7 +352,7 @@ class SLOPolicyManager:
 
         return summary
 
-    def get_failed_slos(self) -> List[str]:
+    def get_failed_slos(self) -> list[str]:
         """Get list of failed SLO metrics"""
         failed = []
         for alert in self.alerts:

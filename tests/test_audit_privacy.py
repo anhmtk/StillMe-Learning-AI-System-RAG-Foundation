@@ -18,7 +18,7 @@ import re
 import tempfile
 import time
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any
 
 from stillme_core.gateway.logging_mw import LoggingMiddleware, StructuredLogger
 
@@ -28,7 +28,7 @@ class TestCase:
     """Test case for PII redaction"""
     name: str
     input_text: str
-    expected_pii_types: List[PIIType]
+    expected_pii_types: list[PIIType]
     should_redact: bool
     description: str
 
@@ -54,7 +54,7 @@ class EnterpriseAuditPrivacyTestSuite:
         self.passed_tests = 0
         self.total_tests = 0
 
-    def _load_test_cases(self) -> List[TestCase]:
+    def _load_test_cases(self) -> list[TestCase]:
         """Load comprehensive test cases for PII redaction"""
         return [
             # Email tests
@@ -550,7 +550,7 @@ class EnterpriseAuditPrivacyTestSuite:
             print(f"ERROR: Performance test failed - {e}")
             return False
 
-    def run_all_tests(self) -> Dict[str, Any]:
+    def run_all_tests(self) -> dict[str, Any]:
         """Run all tests and return results"""
         print("🧪 Starting Enterprise Audit & Privacy Test Suite")
         print("=" * 60)

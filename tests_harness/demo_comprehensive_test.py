@@ -13,10 +13,9 @@ Tính năng:
 import json
 import logging
 import sys
-import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 # Add current directory to path for imports
 sys.path.append(str(Path(__file__).parent))
@@ -50,7 +49,7 @@ class ComprehensiveTestDemo:
         # Initialize test runner
         self.test_runner = RealTestRunner()
 
-    def run_demo(self) -> Dict[str, Any]:
+    def run_demo(self) -> dict[str, Any]:
         """Chạy demo toàn diện"""
         try:
             self.logger.info("🚀 Starting Comprehensive Test & Evaluation Harness Demo...")
@@ -80,7 +79,7 @@ class ComprehensiveTestDemo:
             self.logger.error(f"❌ Comprehensive Demo failed: {e}")
             return {"error": str(e)}
 
-    def _test_evaluators(self) -> Dict[str, Any]:
+    def _test_evaluators(self) -> dict[str, Any]:
         """Test tất cả evaluators"""
         try:
             # Sample test data
@@ -142,7 +141,7 @@ class ComprehensiveTestDemo:
             self.logger.error(f"Error testing evaluators: {e}")
             return {"error": str(e)}
 
-    def _test_html_report_builder(self, evaluator_results: Dict[str, Any]) -> Dict[str, Any]:
+    def _test_html_report_builder(self, evaluator_results: dict[str, Any]) -> dict[str, Any]:
         """Test HTML Report Builder"""
         try:
             # Extract scores from evaluator results
@@ -189,7 +188,7 @@ class ComprehensiveTestDemo:
             self.logger.error(f"Error testing HTML report builder: {e}")
             return {"error": str(e)}
 
-    def _test_real_stillme_ai(self) -> Dict[str, Any]:
+    def _test_real_stillme_ai(self) -> dict[str, Any]:
         """Test Real StillMe AI (if available)"""
         try:
             # Check if StillMe AI is available
@@ -220,9 +219,9 @@ class ComprehensiveTestDemo:
             }
 
     def _generate_demo_report(self,
-                            evaluator_results: Dict[str, Any],
-                            report_results: Dict[str, Any],
-                            real_test_results: Dict[str, Any]) -> Dict[str, Any]:
+                            evaluator_results: dict[str, Any],
+                            report_results: dict[str, Any],
+                            real_test_results: dict[str, Any]) -> dict[str, Any]:
         """Tạo báo cáo demo tổng hợp"""
         try:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -262,7 +261,7 @@ class ComprehensiveTestDemo:
             self.logger.error(f"Error generating demo report: {e}")
             return {"error": str(e)}
 
-    def print_demo_summary(self, demo_report: Dict[str, Any]):
+    def print_demo_summary(self, demo_report: dict[str, Any]):
         """In tóm tắt demo"""
         try:
             print("\n" + "="*80)

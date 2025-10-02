@@ -8,17 +8,15 @@ Version: 1.0.0
 Phase: 0.1 - Security Remediation
 """
 
-import os
-import json
-import time
 import hashlib
-import secrets
+import json
 import logging
-from typing import Dict, List, Optional, Any, Callable, Set
+import os
+import re
+import secrets
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-import re
-from pathlib import Path
+from typing import Any
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -33,7 +31,7 @@ class SecurityEvent:
     severity: str
     source_ip: str
     user_agent: str
-    details: Dict[str, Any]
+    details: dict[str, Any]
     action_taken: str
 
 
@@ -44,12 +42,12 @@ class SecurityMiddleware:
 
     def __init__(self, config_path: str = "config/security_config.json"):
         self.config = self._load_config(config_path)
-        self.security_events: List[SecurityEvent] = []
-        self.rate_limit_tracker: Dict[str, List[datetime]] = {}
-        self.blocked_ips: Set[str] = set()
-        self.csrf_tokens: Dict[str, str] = {}
+        self.security_events: list[SecurityEvent] = []
+        self.rate_limit_tracker: dict[str, list[datetime]] = {}
+        self.blocked_ips: set[str] = set()
+        self.csrf_tokens: dict[str, str] = {}
 
-    def _load_config(self, config_path: str) -> Dict[str, Any]:
+    def _load_config(self, config_path: str) -> dict[str, Any]:
         """Load security configuration"""
         default_config = {
             "security": {
@@ -86,7 +84,7 @@ class SecurityMiddleware:
 
         try:
             if os.path.exists(config_path):
-                with open(config_path, 'r', encoding='utf-8') as f:
+                with open(config_path, encoding='utf-8') as f:
                     config = json.load(f)
                     # Merge with defaults
                     for key, value in default_config.items():
@@ -105,14 +103,14 @@ class SecurityMiddleware:
 
         now = datetime.now()
         key = f"{client_ip}:{endpoint}"
-        
+
         if key not in self.rate_limit_tracker:
             self.rate_limit_tracker[key] = []
 
         # Clean old requests
         cutoff_time = now - timedelta(minutes=1)
         self.rate_limit_tracker[key] = [
-            req_time for req_time in self.rate_limit_tracker[key] 
+            req_time for req_time in self.rate_limit_tracker[key]
             if req_time > cutoff_time
         ]
 
@@ -133,7 +131,7 @@ class SecurityMiddleware:
         self.rate_limit_tracker[key].append(now)
         return True
 
-    def validate_input(self, data: str) -> Dict[str, Any]:
+    def validate_input(self, data: str) -> dict[str, Any]:
         """Validate and sanitize input data"""
         result = {"is_valid": True, "sanitized_data": data, "threats_detected": []}
 
@@ -165,20 +163,20 @@ class SecurityMiddleware:
         """Basic input sanitization"""
         # Remove null bytes
         data = data.replace('\x00', '')
-        
+
         # Remove control characters except newlines and tabs
         data = ''.join(char for char in data if ord(char) >= 32 or char in '\n\t')
-        
+
         # Escape HTML entities
         data = data.replace('&', '&amp;')
         data = data.replace('<', '&lt;')
         data = data.replace('>', '&gt;')
         data = data.replace('"', '&quot;')
         data = data.replace("'", '&#x27;')
-        
+
         return data
 
-    def add_security_headers(self, headers: Dict[str, str]) -> Dict[str, str]:
+    def add_security_headers(self, headers: dict[str, str]) -> dict[str, str]:
         """Add security headers"""
         security_headers = self.config["security"]["headers"]
         headers.update(security_headers)
@@ -190,7 +188,7 @@ class SecurityMiddleware:
         severity: str,
         source_ip: str,
         user_agent: str,
-        details: Dict[str, Any],
+        details: dict[str, Any],
         action_taken: str
     ):
         """Log security event"""
@@ -224,7 +222,7 @@ class SecurityMiddleware:
         try:
             log_file = self.config["security"]["logging"]["log_file"]
             os.makedirs(os.path.dirname(log_file), exist_ok=True)
-            
+
             with open(log_file, 'a', encoding='utf-8') as f:
                 f.write(f"{event.timestamp.isoformat()} | {event.event_type} | {event.severity} | {event.source_ip} | {event.action_taken}\n")
         except Exception as e:
@@ -276,13 +274,13 @@ class SecurityMiddleware:
         except Exception:
             return False
 
-    def get_security_report(self) -> Dict[str, Any]:
+    def get_security_report(self) -> dict[str, Any]:
         """Get security report"""
         now = datetime.now()
         last_24h = now - timedelta(hours=24)
-        
+
         recent_events = [e for e in self.security_events if e.timestamp > last_24h]
-        
+
         return {
             "total_events": len(self.security_events),
             "recent_events_24h": len(recent_events),
@@ -295,12 +293,12 @@ class SecurityMiddleware:
         """Calculate security score based on recent events"""
         now = datetime.now()
         last_24h = now - timedelta(hours=24)
-        
+
         recent_events = [e for e in self.security_events if e.timestamp > last_24h]
-        
+
         if not recent_events:
             return 100.0
-        
+
         # Calculate score based on severity
         score = 100.0
         for event in recent_events:
@@ -312,20 +310,20 @@ class SecurityMiddleware:
                 score -= 15
             elif event.severity == "critical":
                 score -= 30
-        
+
         return max(0.0, score)
 
 
 def main():
     """Test the security middleware"""
     middleware = SecurityMiddleware()
-    
+
     # Test rate limiting
     print("Testing rate limiting...")
     for i in range(65):
         result = middleware.check_rate_limit("192.168.1.1")
         print(f"Request {i+1}: {'Allowed' if result else 'Blocked'}")
-    
+
     # Test input validation
     print("\nTesting input validation...")
     test_inputs = [
@@ -334,11 +332,11 @@ def main():
         "javascript:alert('xss')",
         "A" * 10001
     ]
-    
+
     for test_input in test_inputs:
         result = middleware.validate_input(test_input)
         print(f"Input: {test_input[:50]}... -> Valid: {result['is_valid']}")
-    
+
     # Test security report
     print("\nSecurity Report:")
     report = middleware.get_security_report()

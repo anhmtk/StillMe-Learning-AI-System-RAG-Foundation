@@ -15,7 +15,7 @@ PURPOSE / MỤC ĐÍCH:
 import logging
 import os
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 # Initialize logger
 logger = logging.getLogger("StillMe.APIProvider")
@@ -124,7 +124,7 @@ class UnifiedAPIManager:
         """Generate fallback response when all else fails"""
         return f"Xin lỗi, tôi đang gặp khó khăn trong việc xử lý câu hỏi: '{prompt}'. Vui lòng thử lại sau."
 
-    def translate(self, text: str, src_lang: str, tgt_lang: str, quality_hint: Optional[str] = None) -> Dict[str, Any]:
+    def translate(self, text: str, src_lang: str, tgt_lang: str, quality_hint: Optional[str] = None) -> dict[str, Any]:
         """Simple translation with fallback"""
         try:
             # Simple translation logic
@@ -145,7 +145,7 @@ class UnifiedAPIManager:
             self.logger.error(f"❌ Translation failed: {e}")
             return {"text": text, "engine": "none", "confidence": 0.0}
 
-    def get_analyzer_stats(self) -> Dict[str, Any]:
+    def get_analyzer_stats(self) -> dict[str, Any]:
         """Get complexity analyzer statistics"""
         return self.complexity_analyzer.get_stats()
 
@@ -219,7 +219,7 @@ class ComplexityAnalyzer:
             logger.error(f"❌ Complexity analysis failed: {e}")
             return 0.5  # Default medium complexity
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get analyzer statistics"""
         return {
             "total_analyses": len(self.analysis_times),

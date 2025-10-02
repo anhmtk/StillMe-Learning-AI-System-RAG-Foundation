@@ -13,18 +13,15 @@ PURPOSE / MỤC ĐÍCH:
 """
 
 import asyncio
-import json
 import logging
-import os
 import shutil
-import subprocess
 import tempfile
 import time
 import uuid
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 import docker
 import psutil
@@ -71,10 +68,10 @@ class SandboxConfig:
     memory_limit: int = 512  # MB
     network_mode: str = "none"  # No network access
     timeout: int = 900  # 15 minutes
-    environment_vars: Dict[str, str] = None
-    volume_mounts: List[Dict[str, str]] = None
-    allowed_ports: List[int] = None
-    security_policies: List[str] = None
+    environment_vars: dict[str, str] = None
+    volume_mounts: list[dict[str, str]] = None
+    allowed_ports: list[int] = None
+    security_policies: list[str] = None
 
     def __post_init__(self):
         if self.environment_vars is None:
@@ -96,10 +93,10 @@ class SandboxInstance:
     created_at: float = 0.0
     started_at: Optional[float] = None
     stopped_at: Optional[float] = None
-    resource_usage: Dict[str, Any] = None
-    logs: List[Dict[str, Any]] = None
-    health_checks: List[Dict[str, Any]] = None
-    security_violations: List[Dict[str, Any]] = None
+    resource_usage: dict[str, Any] = None
+    logs: list[dict[str, Any]] = None
+    health_checks: list[dict[str, Any]] = None
+    security_violations: list[dict[str, Any]] = None
 
     def __post_init__(self):
         if self.created_at == 0.0:
@@ -123,7 +120,7 @@ class SandboxController:
     def __init__(self, docker_client: Optional[docker.DockerClient] = None):
         """
         Initialize Sandbox Controller
-        
+
         Args:
             docker_client: Optional Docker client instance
         """
@@ -145,8 +142,8 @@ class SandboxController:
                 self.docker_client.containers.get = Mock()
                 self.docker_client.images = Mock()
                 self.docker_client.images.pull = Mock()
-        self.active_sandboxes: Dict[str, SandboxInstance] = {}
-        self.sandbox_history: List[SandboxInstance] = []
+        self.active_sandboxes: dict[str, SandboxInstance] = {}
+        self.sandbox_history: list[SandboxInstance] = []
         self.isolation_base = Path(tempfile.mkdtemp(prefix="sandbox_"))
         self.monitoring_task: Optional[asyncio.Task] = None
         self.is_monitoring = False
@@ -195,13 +192,13 @@ class SandboxController:
     ) -> SandboxInstance:
         """
         Create a new sandbox instance
-        
+
         Args:
             name: Sandbox name
             sandbox_type: Type of sandbox
             image: Docker image to use
             **kwargs: Additional configuration options
-            
+
         Returns:
             SandboxInstance: Created sandbox instance
         """
@@ -372,17 +369,17 @@ class SandboxController:
     async def execute_in_sandbox(
         self,
         sandbox_id: str,
-        command: List[str],
+        command: list[str],
         timeout: Optional[int] = None
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Execute command in sandbox
-        
+
         Args:
             sandbox_id: Sandbox identifier
             command: Command to execute
             timeout: Execution timeout
-            
+
         Returns:
             Dict with execution results
         """
@@ -432,10 +429,10 @@ class SandboxController:
     async def destroy_sandbox(self, sandbox_id: str) -> bool:
         """
         Destroy sandbox instance
-        
+
         Args:
             sandbox_id: Sandbox identifier
-            
+
         Returns:
             bool: Success status
         """
@@ -484,7 +481,7 @@ class SandboxController:
         """Monitor active sandboxes for resource usage and violations"""
         while self.is_monitoring:
             try:
-                for sandbox_id, sandbox in list(self.active_sandboxes.items()):
+                for _sandbox_id, sandbox in list(self.active_sandboxes.items()):
                     await self._check_sandbox_health(sandbox)
                     await self._check_resource_limits(sandbox)
                     await self._check_timeout(sandbox)
@@ -586,7 +583,7 @@ class SandboxController:
             # Auto-destroy timeout sandboxes
             await self.destroy_sandbox(sandbox.config.sandbox_id)
 
-    def get_sandbox_status(self, sandbox_id: str) -> Optional[Dict[str, Any]]:
+    def get_sandbox_status(self, sandbox_id: str) -> Optional[dict[str, Any]]:
         """Get sandbox status and information"""
         if sandbox_id in self.active_sandboxes:
             sandbox = self.active_sandboxes[sandbox_id]
@@ -609,7 +606,7 @@ class SandboxController:
             "logs_count": len(sandbox.logs)
         }
 
-    def get_all_sandboxes(self) -> List[Dict[str, Any]]:
+    def get_all_sandboxes(self) -> list[dict[str, Any]]:
         """Get all sandbox instances"""
         all_sandboxes = list(self.active_sandboxes.values()) + self.sandbox_history
         return [self.get_sandbox_status(s.config.sandbox_id) for s in all_sandboxes]

@@ -62,7 +62,7 @@ class TestRetryPolicy:
         assert policy.base_delay == 1.0
         assert policy.max_delay == 60.0
         assert policy.strategy == RetryStrategy.EXPONENTIAL
-        assert policy.jitter == True
+        assert policy.jitter
         assert policy.backoff_multiplier == 2.0
         assert len(policy.retryable_errors) > 0
         assert len(policy.non_retryable_errors) > 0
@@ -81,7 +81,7 @@ class TestRetryPolicy:
         assert policy.base_delay == 2.0
         assert policy.max_delay == 120.0
         assert policy.strategy == RetryStrategy.FIXED
-        assert policy.jitter == False
+        assert not policy.jitter
 
 class TestCircuitBreaker:
     """Test CircuitBreaker"""
@@ -125,7 +125,7 @@ class TestCircuitBreaker:
             raise ConnectionError("Connection failed")
 
         # First few failures should not open circuit
-        for i in range(2):
+        for _i in range(2):
             with pytest.raises(ConnectionError):
                 await circuit_breaker.call(failing_func)
             assert circuit_breaker.state == CircuitBreakerState.CLOSED
@@ -207,20 +207,20 @@ class TestErrorHandler:
     def test_is_retryable_retryable_error(self, error_handler):
         """Test retryable error detection"""
         error = ConnectionError("Connection failed")
-        policy = RetryPolicy()
+        RetryPolicy()
 
         is_retryable = error_handler._is_retryable(error, "default")
 
-        assert is_retryable == True
+        assert is_retryable
 
     def test_is_retryable_non_retryable_error(self, error_handler):
         """Test non-retryable error detection"""
         error = ValueError("Invalid input")
-        policy = RetryPolicy()
+        RetryPolicy()
 
         is_retryable = error_handler._is_retryable(error, "default")
 
-        assert is_retryable == False
+        assert not is_retryable
 
     def test_calculate_delay_fixed(self, error_handler):
         """Test fixed delay calculation"""
@@ -312,17 +312,17 @@ class TestResilienceManager:
         """Test initial manager state"""
         assert manager.current_health == SystemHealth.HEALTHY
         assert len(manager.component_states) > 0
-        assert manager.is_monitoring == False
+        assert not manager.is_monitoring
         assert manager.stats['total_failures'] == 0
 
     @pytest.mark.asyncio
     async def test_start_stop_monitoring(self, manager):
         """Test start/stop monitoring"""
         await manager.start_monitoring()
-        assert manager.is_monitoring == True
+        assert manager.is_monitoring
 
         await manager.stop_monitoring()
-        assert manager.is_monitoring == False
+        assert not manager.is_monitoring
 
     @pytest.mark.asyncio
     async def test_collect_health_metrics(self, manager):
@@ -495,7 +495,7 @@ class TestIntegration:
 
         # Test resilience manager
         await manager.start_monitoring()
-        assert manager.is_monitoring == True
+        assert manager.is_monitoring
 
         await manager.stop_monitoring()
-        assert manager.is_monitoring == False
+        assert not manager.is_monitoring

@@ -24,7 +24,7 @@ import logging
 import re
 from collections import Counter
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -50,9 +50,9 @@ class ScoringResult:
     clarity_score: float
     brevity_score: float
     helpfulness_score: float
-    penalties: List[str]
-    suggestions: List[str]
-    metadata: Dict[str, Any]
+    penalties: list[str]
+    suggestions: list[str]
+    metadata: dict[str, Any]
 
 
 class ReflectionScorer:
@@ -189,7 +189,7 @@ class ReflectionScorer:
         ]
 
     def score_response(
-        self, response: str, query: str, context: Optional[Dict[str, Any]] = None
+        self, response: str, query: str, context: Optional[dict[str, Any]] = None
     ) -> ScoringResult:
         """
         Score a response across multiple dimensions
@@ -488,7 +488,7 @@ class ReflectionScorer:
         helpfulness: float,
         response: str,
         query: str,
-    ) -> List[str]:
+    ) -> list[str]:
         """Generate improvement suggestions / Tạo gợi ý cải thiện"""
         suggestions = []
 
@@ -513,7 +513,7 @@ class ReflectionScorer:
 
         return suggestions
 
-    def _collect_penalties(self, response: str, query: str) -> List[str]:
+    def _collect_penalties(self, response: str, query: str) -> list[str]:
         """Collect penalties for the response / Thu thập các phạt cho phản hồi"""
         penalties = []
 
@@ -538,7 +538,7 @@ class ReflectionScorer:
 # Utility functions / Hàm tiện ích
 
 
-def create_scorer_with_weights(weights_dict: Dict[str, float]) -> ReflectionScorer:
+def create_scorer_with_weights(weights_dict: dict[str, float]) -> ReflectionScorer:
     """Create scorer with custom weights / Tạo scorer với trọng số tùy chỉnh"""
     weights = ScoringWeights(**weights_dict)
     return ReflectionScorer(weights)
@@ -556,13 +556,13 @@ if __name__ == "__main__":
 
     test_response = """
     # Hướng dẫn cài đặt Python
-    
+
     Để cài đặt Python, bạn có thể làm theo các bước sau:
-    
+
     1. Truy cập python.org
     2. Tải xuống phiên bản mới nhất
     3. Chạy installer
-    
+
     Ví dụ:
     ```bash
     python --version

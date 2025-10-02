@@ -5,7 +5,7 @@
 
 Chuẩn hoá tín hiệu → [0,1] hoặc z-score.
 Tính NicheScore với công thức:
-NicheScore = w1*TrendMomentum + w2*GHVelocity + w3*HNHeat + 
+NicheScore = w1*TrendMomentum + w2*GHVelocity + w3*HNHeat +
              w4*NewsDelta + w5*RedditEngagement - w6*CompetitionProxy + w7*FeasibilityFit
 
 Author: StillMe Framework Team
@@ -14,10 +14,10 @@ Version: 1.5.0
 
 import logging
 import math
-from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
+from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import yaml
 
@@ -31,14 +31,14 @@ class NicheScore:
     topic: str
     total_score: float
     confidence: float
-    breakdown: Dict[str, float]
-    sources: List[str]
+    breakdown: dict[str, float]
+    sources: list[str]
     timestamp: datetime
     category: str
     feasibility_fit: float
     competition_proxy: float
-    key_signals: List[str]
-    recommendations: List[str]
+    key_signals: list[str]
+    recommendations: list[str]
 
 class NicheScorer:
     """Main scoring engine for niche opportunities"""
@@ -48,7 +48,7 @@ class NicheScorer:
         self.weights_file = weights_file
         self.weights = self._load_weights()
 
-    def _load_weights(self) -> Dict[str, Any]:
+    def _load_weights(self) -> dict[str, Any]:
         """Load scoring weights from YAML file"""
         try:
             weights_path = Path(self.weights_file)
@@ -66,7 +66,7 @@ class NicheScorer:
             self.logger.error(f"❌ Failed to load weights: {e}, using defaults")
             return self._get_default_weights()
 
-    def _get_default_weights(self) -> Dict[str, Any]:
+    def _get_default_weights(self) -> dict[str, Any]:
         """Get default weights if file loading fails"""
         return {
             "scoring_weights": {
@@ -123,7 +123,7 @@ class NicheScorer:
             self.logger.error(f"❌ Signal normalization failed for {signal_type}: {e}")
             return 0.0
 
-    def calculate_feasibility_fit(self, topic: str, records: List[NicheRecord]) -> float:
+    def calculate_feasibility_fit(self, topic: str, records: list[NicheRecord]) -> float:
         """Calculate how well the niche fits StillMe capabilities"""
         try:
             # Extract keywords from topic and records
@@ -169,7 +169,7 @@ class NicheScorer:
             self.logger.error(f"❌ Feasibility calculation failed: {e}")
             return 0.5
 
-    def calculate_competition_proxy(self, topic: str, records: List[NicheRecord]) -> float:
+    def calculate_competition_proxy(self, topic: str, records: list[NicheRecord]) -> float:
         """Calculate competition proxy (higher = more competition)"""
         try:
             # Extract keywords
@@ -210,14 +210,14 @@ class NicheScorer:
             self.logger.error(f"❌ Competition calculation failed: {e}")
             return 0.5
 
-    def calculate_confidence(self, records: List[NicheRecord]) -> float:
+    def calculate_confidence(self, records: list[NicheRecord]) -> float:
         """Calculate confidence based on source coverage and consistency"""
         try:
             if not records:
                 return 0.0
 
             # Source coverage (0.4 weight)
-            unique_sources = len(set(record.source for record in records))
+            unique_sources = len({record.source for record in records})
             max_sources = 5  # We have 5 collectors
             source_coverage = min(unique_sources / max_sources, 1.0)
 
@@ -266,7 +266,7 @@ class NicheScorer:
             self.logger.error(f"❌ Confidence calculation failed: {e}")
             return 0.5
 
-    def score_niche(self, topic: str, records: List[NicheRecord]) -> NicheScore:
+    def score_niche(self, topic: str, records: list[NicheRecord]) -> NicheScore:
         """Calculate comprehensive niche score"""
         try:
             self.logger.info(f"🎯 Scoring niche: {topic} with {len(records)} records")
@@ -430,7 +430,7 @@ class NicheScorer:
                 recommendations=[]
             )
 
-def calculate_confidence(records: List[NicheRecord]) -> float:
+def calculate_confidence(records: list[NicheRecord]) -> float:
     """Standalone confidence calculation function"""
     scorer = NicheScorer()
     return scorer.calculate_confidence(records)

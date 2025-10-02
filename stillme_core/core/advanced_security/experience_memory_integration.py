@@ -20,14 +20,13 @@ import asyncio
 import hashlib
 import json
 import logging
-import os
 import statistics
 import time
-from collections import defaultdict, deque
+from collections import defaultdict
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any
 
 # Import existing modules
 try:
@@ -76,11 +75,11 @@ class SecurityExperience:
     category: LearningCategory
     title: str
     description: str
-    data: Dict[str, Any]
-    metadata: Dict[str, Any]
+    data: dict[str, Any]
+    metadata: dict[str, Any]
     effectiveness_score: float
     confidence_level: float
-    tags: List[str]
+    tags: list[str]
     created_at: datetime
     updated_at: datetime
     access_count: int = 0
@@ -93,18 +92,18 @@ class LearningPattern:
     id: str
     pattern_type: str
     description: str
-    conditions: Dict[str, Any]
-    outcomes: Dict[str, Any]
+    conditions: dict[str, Any]
+    outcomes: dict[str, Any]
     confidence: float
     frequency: int
     last_seen: datetime
-    tags: List[str]
+    tags: list[str]
 
 
 class ExperienceMemoryIntegration:
     """Experience Memory Integration - Tích hợp bộ nhớ kinh nghiệm"""
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] = None):
         self.config = config or {}
         self.logger = get_logger(__name__)
 
@@ -322,9 +321,9 @@ class ExperienceMemoryIntegration:
     async def retrieve_experiences(self,
                                  experience_type: ExperienceType = None,
                                  category: LearningCategory = None,
-                                 tags: List[str] = None,
+                                 tags: list[str] = None,
                                  min_effectiveness: float = 0.0,
-                                 limit: int = 100) -> List[SecurityExperience]:
+                                 limit: int = 100) -> list[SecurityExperience]:
         """Truy xuất kinh nghiệm"""
         try:
             experiences = []
@@ -416,7 +415,7 @@ class ExperienceMemoryIntegration:
         except Exception as e:
             self.logger.error(f"Error extracting learning patterns: {e}")
 
-    async def predict_threat_likelihood(self, context: Dict[str, Any]) -> Dict[str, float]:
+    async def predict_threat_likelihood(self, context: dict[str, Any]) -> dict[str, float]:
         """Dự đoán khả năng đe dọa"""
         try:
             if not self.prediction_engine:
@@ -451,7 +450,7 @@ class ExperienceMemoryIntegration:
             self.logger.error(f"Error predicting threat likelihood: {e}")
             return {"unknown": 0.5}
 
-    async def recommend_attack_strategy(self, target: str, context: Dict[str, Any]) -> List[Dict[str, Any]]:
+    async def recommend_attack_strategy(self, target: str, context: dict[str, Any]) -> list[dict[str, Any]]:
         """Khuyến nghị chiến lược tấn công"""
         try:
             # Get successful attack experiences
@@ -484,7 +483,7 @@ class ExperienceMemoryIntegration:
             self.logger.error(f"Error recommending attack strategy: {e}")
             return []
 
-    async def recommend_defense_strategy(self, threat_type: str, context: Dict[str, Any]) -> List[Dict[str, Any]]:
+    async def recommend_defense_strategy(self, threat_type: str, context: dict[str, Any]) -> list[dict[str, Any]]:
         """Khuyến nghị chiến lược phòng thủ"""
         try:
             # Get successful defense experiences
@@ -528,7 +527,7 @@ class ExperienceMemoryIntegration:
         except Exception:
             return f"exp_{int(time.time())}_{id(obj)}"
 
-    def get_learning_statistics(self) -> Dict[str, Any]:
+    def get_learning_statistics(self) -> dict[str, Any]:
         """Lấy thống kê học tập"""
         return {
             'stats': self.stats.copy(),

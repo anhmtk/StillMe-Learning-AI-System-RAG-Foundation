@@ -19,13 +19,10 @@ import json
 import logging
 import re
 import time
-import uuid
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
-
-from stillme_core.core.security.attack_simulator import AttackType
+from typing import Any, Optional
 
 # Import existing modules for integration
 from stillme_core.decision_making.decision_engine import RiskLevel
@@ -92,11 +89,11 @@ class AttackContext:
     target_type: str  # web_app, api, database, etc.
     target_technology: str  # python, nodejs, java, etc.
     target_framework: str  # django, flask, express, etc.
-    known_vulnerabilities: List[str]
-    defense_mechanisms: List[str]
-    previous_attacks: List[Dict[str, Any]]
+    known_vulnerabilities: list[str]
+    defense_mechanisms: list[str]
+    previous_attacks: list[dict[str, Any]]
     success_rate: float
-    environment_info: Dict[str, Any]
+    environment_info: dict[str, Any]
 
 
 @dataclass
@@ -110,8 +107,8 @@ class AttackPattern:
     confidence_score: float
     success_rate: float
     detection_difficulty: float
-    payload_templates: List[Dict[str, Any]]
-    mitigation_techniques: List[str]
+    payload_templates: list[dict[str, Any]]
+    mitigation_techniques: list[str]
 
 
 @dataclass
@@ -123,8 +120,8 @@ class GeneratedAttack:
     attack_vector: str
     target_parameter: str
     expected_response: str
-    success_indicators: List[str]
-    failure_indicators: List[str]
+    success_indicators: list[str]
+    failure_indicators: list[str]
     risk_level: RiskLevel
     confidence: float
     adaptation_strategy: Optional[str] = None
@@ -138,11 +135,11 @@ class AttackResult:
     response_code: int
     response_body: str
     response_time: float
-    vulnerabilities_detected: List[str]
-    defenses_triggered: List[str]
+    vulnerabilities_detected: list[str]
+    defenses_triggered: list[str]
     adaptation_applied: bool
-    learning_insights: List[str]
-    risk_assessment: Dict[str, Any]
+    learning_insights: list[str]
+    risk_assessment: dict[str, Any]
 
 
 class RedTeamEngine:
@@ -151,10 +148,10 @@ class RedTeamEngine:
     🎯 Động cơ Red Team nâng cao với khả năng AI
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None, config_path: Optional[str] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None, config_path: Optional[str] = None):
         """
         Initialize Red Team Engine
-        
+
         Args:
             config: Configuration dictionary
             config_path: Path to configuration file
@@ -172,9 +169,9 @@ class RedTeamEngine:
         self.attack_simulator = None
 
         # Attack patterns database
-        self.attack_patterns: Dict[str, AttackPattern] = {}
-        self.attack_history: List[AttackResult] = []
-        self.learning_insights: List[Dict[str, Any]] = []
+        self.attack_patterns: dict[str, AttackPattern] = {}
+        self.attack_history: list[AttackResult] = []
+        self.learning_insights: list[dict[str, Any]] = []
 
         # Performance metrics
         self.metrics = {
@@ -193,7 +190,7 @@ class RedTeamEngine:
 
         logger.info("🎯 RedTeamEngine initialized successfully")
 
-    def _load_configuration(self) -> Dict[str, Any]:
+    def _load_configuration(self) -> dict[str, Any]:
         """Load configuration from file"""
         config_file = Path(self.config_path)
         if config_file.exists():
@@ -332,7 +329,7 @@ class RedTeamEngine:
 
         logger.info(f"✅ Initialized {len(self.attack_patterns)} attack patterns")
 
-    def run_light_security_check(self, repo_root: str = ".") -> Dict[str, Any]:
+    def run_light_security_check(self, repo_root: str = ".") -> dict[str, Any]:
         """
         Chạy security scan nhẹ, trả về dict chuẩn hoá:
         {
@@ -399,7 +396,7 @@ class RedTeamEngine:
                                 "matches": len(matches)
                             })
 
-                except Exception as e:
+                except Exception:
                     # Skip files that can't be processed
                     continue
 
@@ -426,16 +423,16 @@ class RedTeamEngine:
 
     async def generate_adaptive_attacks(
         self,
-        target_analysis: Dict[str, Any],
+        target_analysis: dict[str, Any],
         context: AttackContext
-    ) -> List[GeneratedAttack]:
+    ) -> list[GeneratedAttack]:
         """
         Generate adaptive attacks based on target analysis
-        
+
         Args:
             target_analysis: Analysis of target system
             context: Attack context information
-            
+
         Returns:
             List of generated attacks
         """
@@ -473,9 +470,9 @@ class RedTeamEngine:
 
     async def _analyze_target_patterns(
         self,
-        target_analysis: Dict[str, Any],
+        target_analysis: dict[str, Any],
         context: AttackContext
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """Analyze target for vulnerability patterns"""
         detected_patterns = {}
 
@@ -526,7 +523,7 @@ class RedTeamEngine:
         self,
         pattern: AttackPattern,
         context: AttackContext
-    ) -> List[GeneratedAttack]:
+    ) -> list[GeneratedAttack]:
         """Generate attacks for a specific pattern"""
         attacks = []
 
@@ -567,7 +564,7 @@ class RedTeamEngine:
 
         return attacks
 
-    def _customize_payload(self, payload_template: Dict[str, Any], context: AttackContext) -> str:
+    def _customize_payload(self, payload_template: dict[str, Any], context: AttackContext) -> str:
         """Customize payload based on context"""
         base_payload = payload_template["payload"]
 
@@ -626,7 +623,7 @@ class RedTeamEngine:
         else:
             return "unexpected_behavior"
 
-    def _generate_success_indicators(self, pattern: AttackPattern) -> List[str]:
+    def _generate_success_indicators(self, pattern: AttackPattern) -> list[str]:
         """Generate success indicators for the attack"""
         if pattern.vulnerability_type == VulnerabilityType.SQL_INJECTION:
             return ["sql_error", "data_exposure", "time_delay", "union_success"]
@@ -637,7 +634,7 @@ class RedTeamEngine:
         else:
             return ["unexpected_response", "error_message", "behavior_change"]
 
-    def _generate_failure_indicators(self, pattern: AttackPattern) -> List[str]:
+    def _generate_failure_indicators(self, pattern: AttackPattern) -> list[str]:
         """Generate failure indicators for the attack"""
         if pattern.vulnerability_type == VulnerabilityType.SQL_INJECTION:
             return ["input_validation", "parameterized_query", "sql_escaping"]
@@ -660,9 +657,9 @@ class RedTeamEngine:
 
     async def _apply_ai_adaptation(
         self,
-        attacks: List[GeneratedAttack],
+        attacks: list[GeneratedAttack],
         context: AttackContext
-    ) -> List[GeneratedAttack]:
+    ) -> list[GeneratedAttack]:
         """Apply AI-powered adaptation to attacks"""
         adapted_attacks = []
 
@@ -703,7 +700,7 @@ class RedTeamEngine:
 
         return adapted_attacks
 
-    def _adapt_payload(self, original_payload: str, previous_results: List[Dict[str, Any]]) -> str:
+    def _adapt_payload(self, original_payload: str, previous_results: list[dict[str, Any]]) -> str:
         """Adapt payload based on previous results"""
         # Simple payload adaptation logic
         adapted_payload = original_payload
@@ -727,7 +724,7 @@ class RedTeamEngine:
 
     async def _store_attack_generation_experience(
         self,
-        attacks: List[GeneratedAttack],
+        attacks: list[GeneratedAttack],
         context: AttackContext
     ):
         """Store attack generation experience in memory"""
@@ -741,11 +738,11 @@ class RedTeamEngine:
                 "timestamp": time.time(),
                 "context": asdict(context),
                 "attacks_generated": len(attacks),
-                "patterns_used": list(set(attack.pattern_id for attack in attacks)),
-                "success_indicators": list(set(
+                "patterns_used": list({attack.pattern_id for attack in attacks}),
+                "success_indicators": list({
                     indicator for attack in attacks
                     for indicator in attack.success_indicators
-                ))
+                })
             }
 
             # Store in memory
@@ -762,16 +759,16 @@ class RedTeamEngine:
 
     async def execute_attack_campaign(
         self,
-        attacks: List[GeneratedAttack],
-        target_config: Dict[str, Any]
-    ) -> List[AttackResult]:
+        attacks: list[GeneratedAttack],
+        target_config: dict[str, Any]
+    ) -> list[AttackResult]:
         """
         Execute a campaign of attacks safely in sandbox
-        
+
         Args:
             attacks: List of attacks to execute
             target_config: Target configuration
-            
+
         Returns:
             List of attack results
         """
@@ -810,8 +807,8 @@ class RedTeamEngine:
 
     def _validate_attack_campaign_safety(
         self,
-        attacks: List[GeneratedAttack],
-        target_config: Dict[str, Any]
+        attacks: list[GeneratedAttack],
+        target_config: dict[str, Any]
     ) -> bool:
         """Validate attack campaign safety"""
         try:
@@ -847,9 +844,9 @@ class RedTeamEngine:
 
     async def _execute_attacks_in_sandbox(
         self,
-        attacks: List[GeneratedAttack],
-        target_config: Dict[str, Any]
-    ) -> List[AttackResult]:
+        attacks: list[GeneratedAttack],
+        target_config: dict[str, Any]
+    ) -> list[AttackResult]:
         """Execute attacks in sandbox environment"""
         results = []
 
@@ -878,7 +875,7 @@ class RedTeamEngine:
         self,
         attack: GeneratedAttack,
         sandbox,
-        target_config: Dict[str, Any]
+        target_config: dict[str, Any]
     ) -> AttackResult:
         """Execute a single attack in sandbox"""
         start_time = time.time()
@@ -927,7 +924,7 @@ class RedTeamEngine:
                 risk_assessment={"error": str(e)}
             )
 
-    def _create_attack_script(self, attack: GeneratedAttack, target_config: Dict[str, Any]) -> str:
+    def _create_attack_script(self, attack: GeneratedAttack, target_config: dict[str, Any]) -> str:
         """Create attack script for sandbox execution"""
         script = f"""
 import requests
@@ -953,7 +950,7 @@ except Exception as e:
 """
         return script
 
-    def _analyze_attack_result(self, attack: GeneratedAttack, result: Dict[str, Any]) -> bool:
+    def _analyze_attack_result(self, attack: GeneratedAttack, result: dict[str, Any]) -> bool:
         """Analyze if attack was successful"""
         if result["exit_code"] != 0:
             return False
@@ -972,7 +969,7 @@ except Exception as e:
 
         return False
 
-    def _extract_vulnerabilities(self, attack: GeneratedAttack, result: Dict[str, Any]) -> List[str]:
+    def _extract_vulnerabilities(self, attack: GeneratedAttack, result: dict[str, Any]) -> list[str]:
         """Extract detected vulnerabilities from attack result"""
         vulnerabilities = []
         response_body = result["stdout"].lower()
@@ -983,7 +980,7 @@ except Exception as e:
 
         return vulnerabilities
 
-    def _extract_defenses(self, attack: GeneratedAttack, result: Dict[str, Any]) -> List[str]:
+    def _extract_defenses(self, attack: GeneratedAttack, result: dict[str, Any]) -> list[str]:
         """Extract triggered defenses from attack result"""
         defenses = []
         response_body = result["stdout"].lower()
@@ -994,7 +991,7 @@ except Exception as e:
 
         return defenses
 
-    def _extract_learning_insights(self, attack: GeneratedAttack, result: Dict[str, Any]) -> List[str]:
+    def _extract_learning_insights(self, attack: GeneratedAttack, result: dict[str, Any]) -> list[str]:
         """Extract learning insights from attack result"""
         insights = []
 
@@ -1008,7 +1005,7 @@ except Exception as e:
 
         return insights
 
-    def _assess_attack_risk_result(self, attack: GeneratedAttack, result: Dict[str, Any]) -> Dict[str, Any]:
+    def _assess_attack_risk_result(self, attack: GeneratedAttack, result: dict[str, Any]) -> dict[str, Any]:
         """Assess risk of attack result"""
         return {
             "attack_risk": attack.risk_level.value,
@@ -1019,9 +1016,9 @@ except Exception as e:
 
     async def _execute_attacks_with_simulator(
         self,
-        attacks: List[GeneratedAttack],
-        target_config: Dict[str, Any]
-    ) -> List[AttackResult]:
+        attacks: list[GeneratedAttack],
+        target_config: dict[str, Any]
+    ) -> list[AttackResult]:
         """Execute attacks using attack simulator"""
         results = []
 
@@ -1074,9 +1071,9 @@ except Exception as e:
 
     async def _execute_attacks_mock(
         self,
-        attacks: List[GeneratedAttack],
-        target_config: Dict[str, Any]
-    ) -> List[AttackResult]:
+        attacks: list[GeneratedAttack],
+        target_config: dict[str, Any]
+    ) -> list[AttackResult]:
         """Execute attacks in mock mode for testing"""
         results = []
 
@@ -1098,7 +1095,7 @@ except Exception as e:
 
         return results
 
-    async def _store_attack_results(self, results: List[AttackResult]):
+    async def _store_attack_results(self, results: list[AttackResult]):
         """Store attack results in experience memory"""
         if not self.memory_manager:
             return
@@ -1127,14 +1124,14 @@ except Exception as e:
         except Exception as e:
             logger.error(f"❌ Failed to store attack results: {e}")
 
-    def _update_metrics(self, results: List[AttackResult]):
+    def _update_metrics(self, results: list[AttackResult]):
         """Update performance metrics"""
         self.metrics["total_attacks"] += len(results)
         self.metrics["successful_attacks"] += sum(1 for r in results if r.success)
         self.metrics["vulnerabilities_found"] += sum(len(r.vulnerabilities_detected) for r in results)
         self.metrics["adaptations_made"] += sum(1 for r in results if r.adaptation_applied)
 
-    def get_attack_statistics(self) -> Dict[str, Any]:
+    def get_attack_statistics(self) -> dict[str, Any]:
         """Get attack statistics and metrics"""
         return {
             "metrics": self.metrics,
@@ -1147,7 +1144,7 @@ except Exception as e:
             )
         }
 
-    def get_learning_insights(self) -> List[Dict[str, Any]]:
+    def get_learning_insights(self) -> list[dict[str, Any]]:
         """Get learning insights from attack campaigns"""
         return self.learning_insights
 

@@ -197,21 +197,21 @@ class RateLimiter:
     def record_request(self, key):
         """Record a request"""
         pass
-    
+
     def check_rate_limit(self, client_id, limit=100, window=60):
         """Check rate limit for client"""
         import time
         current_time = time.time()
-        
+
         if client_id not in self.requests:
             self.requests[client_id] = []
-        
+
         # Clean old requests
         self.requests[client_id] = [
             req_time for req_time in self.requests[client_id]
             if current_time - req_time < window
         ]
-        
+
         # Check if under limit
         if len(self.requests[client_id]) < limit:
             self.requests[client_id].append(current_time)
@@ -226,7 +226,7 @@ class RateLimiter:
                 "remaining": 0,
                 "reset_time": int(current_time + window)
             }
-    
+
     def get_rate_limit_headers(self, result):
         """Get rate limit headers"""
         return {
@@ -247,7 +247,7 @@ class SecurityHeaders:
     def get_headers(self):
         """Get all security headers"""
         return self.headers
-    
+
     def get_security_headers(self):
         """Get security headers - alias for get_headers"""
         return {
@@ -259,13 +259,13 @@ class SecurityHeaders:
             "X-XSS-Protection": "1; mode=block",
             "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=()"
         }
-    
+
     def get_cors_headers(self, allowed_origins=None):
         """Get CORS headers"""
         if allowed_origins and "https://malicious.com" in allowed_origins:
             # Don't include malicious origins
             allowed_origins = [origin for origin in allowed_origins if origin != "https://malicious.com"]
-        
+
         origin = allowed_origins[0] if allowed_origins else "*"
         return {
             "Access-Control-Allow-Origin": origin,
@@ -280,7 +280,7 @@ class SecurityMiddleware:
         self.app = app
         self.rate_limiter = RateLimiter()
         self.security_headers = SecurityHeaders()
-        
+
     def __call__(self, environ, start_response):
         """WSGI middleware call"""
         if self.app:
@@ -288,11 +288,11 @@ class SecurityMiddleware:
         else:
             start_response('200 OK', [('Content-Type', 'text/plain')])
             return [b'OK']
-    
+
     def process_request(self, request):
         """Process incoming request"""
         return None
-    
+
     def process_response(self, request, response):
         """Process outgoing response"""
         return response
@@ -301,7 +301,7 @@ class SecurityConfig:
     """Security configuration - stub implementation"""
     def __init__(self):
         self.settings = {}
-    
+
     def get_security_settings(self):
         """Get security settings"""
         return {

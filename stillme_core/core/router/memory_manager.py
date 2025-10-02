@@ -16,7 +16,7 @@ import time
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 # Import StillMe core components
 try:
@@ -127,8 +127,8 @@ class RouterMemory:
     success: bool
     duration: float
     user_satisfaction: Optional[float]
-    context: Dict[str, Any]
-    outcome: Dict[str, Any]
+    context: dict[str, Any]
+    outcome: dict[str, Any]
 
 
 class RouterMemoryManager:
@@ -139,7 +139,7 @@ class RouterMemoryManager:
     enabling long-term learning and pattern recognition.
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         """Initialize the Router Memory Manager"""
         self.config = config or {}
         self.logger = logger if logger is not None else logging.getLogger(__name__)
@@ -232,8 +232,8 @@ class RouterMemoryManager:
         confidence: float,
         success: bool,
         duration: float,
-        context: Optional[Dict[str, Any]] = None,
-        outcome: Optional[Dict[str, Any]] = None,
+        context: Optional[dict[str, Any]] = None,
+        outcome: Optional[dict[str, Any]] = None,
         user_satisfaction: Optional[float] = None,
     ) -> str:
         """Store a router decision in memory"""
@@ -283,7 +283,7 @@ class RouterMemoryManager:
 
     async def retrieve_similar_memories(
         self, task_type: TaskType, complexity: TaskComplexity, limit: int = 10
-    ) -> List[RouterMemory]:
+    ) -> list[RouterMemory]:
         """Retrieve similar memories based on task type and complexity"""
         start_time = time.time()
 
@@ -346,7 +346,7 @@ class RouterMemoryManager:
 
     async def get_agent_performance_history(
         self, agent_type: AgentType, days: int = 30
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Get performance history for a specific agent"""
         cutoff_time = time.time() - (days * 24 * 60 * 60)
 
@@ -402,7 +402,7 @@ class RouterMemoryManager:
 
     async def get_task_type_statistics(
         self, days: int = 30
-    ) -> Dict[str, Dict[str, Any]]:
+    ) -> dict[str, dict[str, Any]]:
         """Get statistics for different task types"""
         cutoff_time = time.time() - (days * 24 * 60 * 60)
 
@@ -463,7 +463,7 @@ class RouterMemoryManager:
             self.logger.error(f"Error getting task type statistics: {e}")
             return {}
 
-    async def get_learning_insights(self) -> Dict[str, Any]:
+    async def get_learning_insights(self) -> dict[str, Any]:
         """Get insights for learning and improvement"""
         insights = {
             "best_performing_agents": [],
@@ -558,13 +558,13 @@ class RouterMemoryManager:
         except Exception as e:
             self.logger.error(f"Error cleaning up old memories: {e}")
 
-    def get_memory_metrics(self) -> Dict[str, Any]:
+    def get_memory_metrics(self) -> dict[str, Any]:
         """Get current memory metrics"""
         return self.memory_metrics.copy()
 
     async def export_memory_data(
         self, days: int = 30, limit: int = 1000
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Export memory data for analysis"""
         cutoff_time = time.time() - (days * 24 * 60 * 60)
 
@@ -650,7 +650,7 @@ _memory_manager_instance: Optional[RouterMemoryManager] = None
 
 
 def get_router_memory_manager(
-    config: Optional[Dict[str, Any]] = None,
+    config: Optional[dict[str, Any]] = None,
 ) -> RouterMemoryManager:
     """Get or create global RouterMemoryManager instance"""
     global _memory_manager_instance
@@ -670,8 +670,8 @@ async def store_router_memory(
     confidence: float,
     success: bool,
     duration: float,
-    context: Optional[Dict[str, Any]] = None,
-    outcome: Optional[Dict[str, Any]] = None,
+    context: Optional[dict[str, Any]] = None,
+    outcome: Optional[dict[str, Any]] = None,
     user_satisfaction: Optional[float] = None,
 ) -> str:
     """Convenience function to store router memory"""
@@ -692,7 +692,7 @@ async def store_router_memory(
 
 async def get_similar_memories(
     task_type: TaskType, complexity: TaskComplexity, limit: int = 10
-) -> List[RouterMemory]:
+) -> list[RouterMemory]:
     """Convenience function to get similar memories"""
     manager = get_router_memory_manager()
     return await manager.retrieve_similar_memories(task_type, complexity, limit)

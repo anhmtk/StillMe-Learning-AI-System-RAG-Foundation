@@ -17,15 +17,11 @@ import random
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 # Add current directory to path for imports
 sys.path.append(str(Path(__file__).parent))
 
-from augmentor.augment_runner import AugmentConfig, AugmentRunner
-from augmentor.backtranslate import BacktranslateConfig
-from augmentor.paraphraser import ParaphraseConfig
-from augmentor.template_filler import TemplateConfig
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -119,7 +115,7 @@ class DatasetScaler:
             'personal': "Tôi tôn trọng quyền riêng tư của bạn."
         }
 
-    def generate_large_dataset(self, target_size: int = 1000) -> List[Dict[str, Any]]:
+    def generate_large_dataset(self, target_size: int = 1000) -> list[dict[str, Any]]:
         """Tạo dataset lớn với target_size mẫu"""
         try:
             self.logger.info(f"🚀 Generating large dataset with {target_size} samples...")
@@ -140,7 +136,7 @@ class DatasetScaler:
             self.logger.error(f"❌ Failed to generate large dataset: {e}")
             return []
 
-    def _generate_base_cases(self) -> List[Dict[str, Any]]:
+    def _generate_base_cases(self) -> list[dict[str, Any]]:
         """Tạo base test cases từ templates"""
         base_cases = []
         case_id = 1
@@ -161,7 +157,7 @@ class DatasetScaler:
 
         return base_cases
 
-    def _augment_dataset(self, base_cases: List[Dict[str, Any]], target_size: int) -> List[Dict[str, Any]]:
+    def _augment_dataset(self, base_cases: list[dict[str, Any]], target_size: int) -> list[dict[str, Any]]:
         """Augment dataset để đạt target_size"""
         try:
             augmented_cases = base_cases.copy()
@@ -203,7 +199,7 @@ class DatasetScaler:
             self.logger.error(f"Error augmenting dataset: {e}")
             return base_cases
 
-    def _create_variations(self, base_case: Dict[str, Any], variation_index: int) -> List[Dict[str, Any]]:
+    def _create_variations(self, base_case: dict[str, Any], variation_index: int) -> list[dict[str, Any]]:
         """Tạo các biến thể của base case"""
         variations = []
 
@@ -252,7 +248,7 @@ class DatasetScaler:
 
         return variations
 
-    def _create_random_case(self, case_id: int) -> Dict[str, Any]:
+    def _create_random_case(self, case_id: int) -> dict[str, Any]:
         """Tạo test case ngẫu nhiên"""
         categories = list(self.base_templates.keys())
         category = random.choice(categories)
@@ -269,7 +265,7 @@ class DatasetScaler:
             "scenario": "random_generation"
         }
 
-    def _add_metadata(self, cases: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _add_metadata(self, cases: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Thêm metadata cho dataset"""
         for case in cases:
             case["created_at"] = datetime.now().isoformat()
@@ -292,7 +288,7 @@ class DatasetScaler:
 
         return cases
 
-    def save_dataset(self, dataset: List[Dict[str, Any]], filename: str = None) -> str:
+    def save_dataset(self, dataset: list[dict[str, Any]], filename: str = None) -> str:
         """Lưu dataset ra file"""
         try:
             if filename is None:
@@ -311,7 +307,7 @@ class DatasetScaler:
             self.logger.error(f"❌ Failed to save dataset: {e}")
             return ""
 
-    def generate_statistics(self, dataset: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def generate_statistics(self, dataset: list[dict[str, Any]]) -> dict[str, Any]:
         """Tạo thống kê dataset"""
         try:
             total_cases = len(dataset)

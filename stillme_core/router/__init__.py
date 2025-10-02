@@ -7,7 +7,13 @@ It wraps the IntelligentRouter with a simpler interface.
 """
 
 from typing import Any, Dict
-from ..core.router.intelligent_router import IntelligentRouter, RequestContext, TaskComplexity, TaskType
+
+from ..core.router.intelligent_router import (
+    IntelligentRouter,
+    RequestContext,
+    TaskComplexity,
+    TaskType,
+)
 
 
 class Router:
@@ -15,14 +21,14 @@ class Router:
     Simple Router interface that wraps IntelligentRouter.
     This provides the interface that tests expect.
     """
-    
+
     def __init__(self, config: Dict[str, Any]):
         """Initialize Router with config."""
         self.config = config
         self.models = config.get('models', {})
         self.fallback_enabled = config.get('fallback_enabled', True)
         self.intelligent_router = IntelligentRouter(config)
-    
+
     def route(self, request: Dict[str, Any]) -> Dict[str, Any]:
         """
         Route a request and return routing decision.
@@ -39,16 +45,16 @@ class Router:
         # Validate request
         if not request:
             raise ValueError("Request cannot be empty")
-        
+
         if 'prompt' not in request:
             raise ValueError("Request must contain 'prompt' field")
-        
+
         prompt = request.get('prompt', '')
         if not prompt or not prompt.strip():
             raise ValueError("Prompt cannot be empty")
-        
+
         # Simple routing without complex context
-        
+
         # Route using intelligent router (sync version)
         try:
             # For now, return a simple routing decision
@@ -76,7 +82,7 @@ class ModelSelector:
     """
     Model selector for choosing appropriate models.
     """
-    
+
     def __init__(self, config: Dict[str, Any] = None):
         """Initialize ModelSelector."""
         self.config = config or {}
@@ -85,7 +91,7 @@ class ModelSelector:
             'gpt-3.5-turbo': {'provider': 'openai', 'complexity_threshold': 0.3},
             'claude-3': {'provider': 'anthropic', 'complexity_threshold': 0.6}
         })
-    
+
     def select_model(self, request: Dict[str, Any]) -> str:
         """
         Select model based on request.
@@ -98,15 +104,15 @@ class ModelSelector:
         """
         prompt = request.get('prompt', '')
         complexity = self._assess_complexity(prompt)
-        
+
         # Select model based on complexity
         for model_name, model_config in self.models.items():
             if complexity >= model_config.get('complexity_threshold', 0.5):
                 return model_name
-        
+
         # Default fallback
         return 'gpt-3.5-turbo'
-    
+
     def select_model_by_complexity(self, complexity: float) -> str:
         """
         Select model by complexity score.
@@ -119,23 +125,23 @@ class ModelSelector:
         """
         if complexity <= 0:
             raise ValueError("Complexity must be positive")
-        
+
         # Select model based on complexity
         for model_name, model_config in self.models.items():
             if complexity >= model_config.get('complexity_threshold', 0.5):
                 return model_name
-        
+
         # Default fallback
         return 'gpt-3.5-turbo'
-    
+
     def _assess_complexity(self, prompt: str) -> float:
         """Assess prompt complexity (0.0 to 1.0)."""
         if not prompt:
             return 0.1
-        
+
         # Simple complexity assessment based on length and keywords
         complexity = 0.1
-        
+
         # Length factor
         if len(prompt) > 1000:
             complexity += 0.4
@@ -145,17 +151,17 @@ class ModelSelector:
             complexity += 0.2
         elif len(prompt) > 50:
             complexity += 0.1
-        
+
         # Keyword factors
         complex_keywords = ['analyze', 'implement', 'design', 'architecture', 'optimize', 'debug', 'refactor', 'detailed', 'analysis', 'quantum', 'computing', 'applications', 'healthcare']
         for keyword in complex_keywords:
             if keyword in prompt.lower():
                 complexity += 0.15
-        
+
         # Special case for very simple prompts
         if len(prompt) < 20 and not any(keyword in prompt.lower() for keyword in complex_keywords):
             complexity = 0.1
-        
+
         return min(complexity, 1.0)
 
 
@@ -163,12 +169,12 @@ class FallbackHandler:
     """
     Fallback handler for when primary routing fails.
     """
-    
+
     def __init__(self, config: Dict[str, Any] = None):
         """Initialize FallbackHandler."""
         self.config = config or {}
         self.fallback_providers = self.config.get('fallback_providers', ['openai', 'anthropic'])
-    
+
     def handle_fallback(self, request: Dict[str, Any]) -> Dict[str, Any]:
         """
         Handle fallback routing.

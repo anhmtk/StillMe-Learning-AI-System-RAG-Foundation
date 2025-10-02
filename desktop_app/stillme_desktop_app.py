@@ -10,8 +10,7 @@ import time
 import tkinter as tk
 import uuid
 from datetime import datetime
-from tkinter import messagebox, scrolledtext, simpledialog, ttk
-from typing import Dict, List, Optional
+from tkinter import messagebox, scrolledtext, simpledialog
 
 import requests
 

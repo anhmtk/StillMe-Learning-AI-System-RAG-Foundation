@@ -9,14 +9,12 @@ Author: StillMe Framework Team
 Version: 1.0.0
 """
 
-import json
 import logging
 import re
 import time
 from collections import Counter, defaultdict
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 from .normalizer import TextNormalizer
 
@@ -29,13 +27,13 @@ class AbuseGuardResult:
     confidence: float
     abuse_score: float
     reasoning: str
-    features: Dict[str, Any]
+    features: dict[str, Any]
     latency_ms: float
 
 class ProactiveAbuseGuard:
     """Guard bảo vệ hệ thống đề xuất chủ động khỏi abuse"""
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         self.config = config or {}
 
         # Initialize normalizer
@@ -119,11 +117,11 @@ class ProactiveAbuseGuard:
     def analyze(self, text: str, session_id: str = "default") -> AbuseGuardResult:
         """
         Phân tích text để quyết định có nên đề xuất hay không
-        
+
         Args:
             text: Input text cần phân tích
             session_id: Session ID để rate limiting
-            
+
         Returns:
             AbuseGuardResult với quyết định và lý do
         """
@@ -355,7 +353,7 @@ class ProactiveAbuseGuard:
 
         # Find words that appear too frequently
         stuffing_score = 0.0
-        for word, count in word_counts.items():
+        for _word, count in word_counts.items():
             if count > 1:  # Word appears more than once
                 frequency = count / total_words
                 if frequency > 0.3:  # More than 30% of text (lowered threshold)
@@ -422,7 +420,7 @@ class ProactiveAbuseGuard:
             else:
                 return f"Low confidence ({confidence:.2f}) - need more context for better suggestions"
 
-    def _extract_features(self, text: str, abuse_score: float) -> Dict[str, Any]:
+    def _extract_features(self, text: str, abuse_score: float) -> dict[str, Any]:
         """Extract features for analysis"""
         text_lower = text.lower()
 
@@ -439,7 +437,7 @@ class ProactiveAbuseGuard:
             "abuse_score": abuse_score
         }
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get performance statistics"""
         total_requests = self.stats["total_requests"]
         avg_latency = (

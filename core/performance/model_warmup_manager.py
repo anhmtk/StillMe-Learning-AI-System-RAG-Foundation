@@ -16,7 +16,7 @@ import time
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Optional
 
 # Import Ollama client
 try:
@@ -61,7 +61,7 @@ class ModelWarmupManager:
         self.config = self._load_config()
 
         # Model tracking
-        self.model_status: Dict[str, ModelStatus] = {}
+        self.model_status: dict[str, ModelStatus] = {}
         self.target_models = self.config.get(
             "target_models", ["gemma2:2b", "deepseek-coder:6.7b"]
         )
@@ -90,7 +90,7 @@ class ModelWarmupManager:
 
         self.logger.info("ModelWarmupManager initialized")
 
-    def _load_config(self) -> Dict:
+    def _load_config(self) -> dict:
         """Load configuration from file"""
         try:
             if self.config_file.exists():
@@ -112,7 +112,7 @@ class ModelWarmupManager:
             self.logger.error(f"Error loading config: {e}")
             return {}
 
-    def _save_config(self, config: Dict):
+    def _save_config(self, config: dict):
         """Save configuration to file"""
         try:
             self.config_file.parent.mkdir(parents=True, exist_ok=True)
@@ -121,7 +121,7 @@ class ModelWarmupManager:
         except Exception as e:
             self.logger.error(f"Error saving config: {e}")
 
-    def preload_models(self) -> Dict[str, bool]:
+    def preload_models(self) -> dict[str, bool]:
         """
         Pre-load all target models to eliminate cold start latency.
 
@@ -324,7 +324,7 @@ class ModelWarmupManager:
         with self._lock:
             return self.model_status.get(model, ModelStatus(model)).is_warm
 
-    def get_warm_models(self) -> List[str]:
+    def get_warm_models(self) -> list[str]:
         """Get list of currently warm models"""
         with self._lock:
             return [
@@ -336,12 +336,12 @@ class ModelWarmupManager:
         with self._lock:
             return self.model_status.get(model)
 
-    def get_all_status(self) -> Dict[str, ModelStatus]:
+    def get_all_status(self) -> dict[str, ModelStatus]:
         """Get status of all models"""
         with self._lock:
             return self.model_status.copy()
 
-    def get_performance_stats(self) -> Dict:
+    def get_performance_stats(self) -> dict:
         """Get performance statistics"""
         with self._lock:
             return {

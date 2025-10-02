@@ -190,7 +190,7 @@ class TestSystemWideIntegration:
 
         # Step 3: Process with conversational core
         if ethics_check["is_safe"]:
-            conv_result = mock_conversational_core.process_message(request, context)
+            mock_conversational_core.process_message(request, context)
 
         # Step 4: Framework processes complete request
         final_result = mock_framework.process_request(request)
@@ -304,7 +304,7 @@ class TestChaosEngineering:
         failure_count = 0
         total_requests = 100
 
-        for i in range(total_requests):
+        for _i in range(total_requests):
             # Simulate 10% drop rate
             if secrets.randbelow() < (drop_percent / 100):
                 # Network drop - simulate failure
@@ -439,7 +439,7 @@ class TestFaultTolerance:
         mock_api_manager.send_request.side_effect = Exception("Service unavailable")
 
         failure_count = 0
-        for i in range(5):  # Simulate 5 consecutive failures
+        for _i in range(5):  # Simulate 5 consecutive failures
             try:
                 mock_api_manager.send_request("test request")
             except Exception:
@@ -543,7 +543,7 @@ class TestDataConsistency:
         memory_result = mock_memory_system.store("test_key", test_data)
 
         # Encrypt and store in secure memory
-        encrypted_data = mock_secure_memory.encrypt(test_data)
+        mock_secure_memory.encrypt(test_data)
         secure_result = mock_secure_memory.encrypt(test_data)
 
         # Verify consistency

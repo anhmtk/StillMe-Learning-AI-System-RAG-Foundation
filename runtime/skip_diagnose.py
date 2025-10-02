@@ -12,8 +12,7 @@ import os
 import subprocess
 import time
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 import psutil
 
@@ -34,7 +33,7 @@ class SkipDiagnosisResult:
     state: str  # 'COMPLETED' | 'RUNNING' | 'STALLED' | 'UNKNOWN'
     details: str
     confidence: float  # 0-1
-    recommendations: List[str]
+    recommendations: list[str]
     log_snippet: Optional[str] = None
     heartbeat_status: Optional[bool] = None
     pid_status: Optional[bool] = None
@@ -52,10 +51,10 @@ class SkipDiagnoseOptions:
 def diagnose_on_skip(opts: SkipDiagnoseOptions = None) -> SkipDiagnosisResult:
     """
     Diagnose task status when Skip is pressed
-    
+
     Args:
         opts: Diagnosis options
-    
+
     Returns:
         SkipDiagnosisResult: Diagnosis result
     """
@@ -107,9 +106,9 @@ def diagnose_on_skip(opts: SkipDiagnoseOptions = None) -> SkipDiagnosisResult:
 
 def _analyze_logs(
     log_path: Optional[str],
-    log_config: Dict[str, Any],
+    log_config: dict[str, Any],
     working_directory: str
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Analyze log files for task status"""
     log_files = [log_path] if log_path else _find_log_files(working_directory)
 
@@ -149,7 +148,7 @@ def _analyze_logs(
 
 def _check_heartbeat(
     heartbeat_path: Optional[str],
-    heartbeat_config: Dict[str, Any],
+    heartbeat_config: dict[str, Any],
     working_directory: str
 ) -> bool:
     """Check heartbeat status"""
@@ -174,7 +173,7 @@ def _check_heartbeat(
 
 def _check_pid(
     pid: Optional[int],
-    pid_config: Dict[str, Any],
+    pid_config: dict[str, Any],
     working_directory: str
 ) -> bool:
     """Check PID status"""
@@ -199,7 +198,7 @@ def _check_pid(
 
     return False
 
-def _find_log_files(working_directory: str) -> List[str]:
+def _find_log_files(working_directory: str) -> list[str]:
     """Find log files in working directory"""
     log_files = []
     common_log_paths = [
@@ -219,7 +218,7 @@ def _find_log_files(working_directory: str) -> List[str]:
 
     return log_files
 
-def _tail_file(file_path: str, lines: int) -> List[str]:
+def _tail_file(file_path: str, lines: int) -> list[str]:
     """Tail file to get last N lines"""
     try:
         # Use tail command if available
@@ -242,7 +241,7 @@ def _tail_file(file_path: str, lines: int) -> List[str]:
     except Exception:
         return []
 
-def _analyze_log_patterns(lines: List[str], patterns: Dict[str, List[str]]) -> str:
+def _analyze_log_patterns(lines: list[str], patterns: dict[str, list[str]]) -> str:
     """Analyze log patterns to determine state"""
     text = '\n'.join(lines).lower()
 
@@ -263,7 +262,7 @@ def _analyze_log_patterns(lines: List[str], patterns: Dict[str, List[str]]) -> s
 
     return 'UNKNOWN'
 
-def _calculate_log_confidence(lines: List[str], patterns: Dict[str, List[str]]) -> float:
+def _calculate_log_confidence(lines: list[str], patterns: dict[str, list[str]]) -> float:
     """Calculate confidence based on log analysis"""
     confidence = 0.0
     text = '\n'.join(lines).lower()
@@ -292,7 +291,7 @@ def _is_process_running(pid: int) -> bool:
         return False
 
 def _combine_diagnosis_results(
-    log_analysis: Dict[str, Any],
+    log_analysis: dict[str, Any],
     heartbeat_status: bool,
     pid_status: bool,
     diagnose_ms: int

@@ -9,7 +9,7 @@ import uuid
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -31,10 +31,10 @@ class TransparencyEvent:
     module: str
     input_data: Any
     output_data: Any
-    decision_factors: List[Dict[str, Any]]
-    confidence_scores: Dict[str, float]
+    decision_factors: list[dict[str, Any]]
+    confidence_scores: dict[str, float]
     reasoning: str
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
     trace_id: Optional[str] = None
     user_id: Optional[str] = None
     session_id: Optional[str] = None
@@ -43,7 +43,7 @@ class TransparencyEvent:
 class TransparencyLogger:
     """Logger for AI decision transparency."""
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         self.config = config or {}
         self.enabled = self.config.get("enabled", True)
         self.level = TransparencyLevel(self.config.get("level", "basic"))
@@ -67,10 +67,10 @@ class TransparencyLogger:
         module: str,
         input_data: Any,
         output_data: Any,
-        decision_factors: List[Dict[str, Any]],
-        confidence_scores: Dict[str, float],
+        decision_factors: list[dict[str, Any]],
+        confidence_scores: dict[str, float],
         reasoning: str,
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: Optional[dict[str, Any]] = None,
         trace_id: Optional[str] = None,
         user_id: Optional[str] = None,
         session_id: Optional[str] = None
@@ -177,7 +177,7 @@ class TransparencyLogger:
         else:
             return data
 
-    def get_trace_id(self, headers: Dict[str, str]) -> Optional[str]:
+    def get_trace_id(self, headers: dict[str, str]) -> Optional[str]:
         """Extract trace ID from request headers."""
         return headers.get(self.trace_id_header)
 

@@ -10,117 +10,129 @@ Phase: 2.1 - Autonomous StillMe Management
 """
 
 import asyncio
-import heapq
-import json
 import logging
-import os
-import queue
 import threading
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
+from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, Optional, TYPE_CHECKING
 
 import numpy as np
 import psutil
 
-# Import Phase 1 modules
+# Import Phase 1 modules with proper typing
+if TYPE_CHECKING:
+    from .security_middleware import SecurityMiddleware
+    from .performance_monitor import PerformanceMonitor
+    from .final_validation_system import FinalValidationSystem
+    from .integration_bridge import IntegrationBridge
+    from .memory_security_integration import MemorySecurityIntegration
+    from .module_governance_system import ModuleGovernanceSystem
+    from .validation_framework import ComprehensiveValidationFramework
+    from stillme_core.security_middleware import SecurityMiddleware as CoreSecurityMiddleware
+    from stillme_core.performance_monitor import PerformanceMonitor as CorePerformanceMonitor
+    from stillme_core.final_validation_system import FinalValidationSystem as CoreFinalValidationSystem
+    from stillme_core.integration_bridge import IntegrationBridge as CoreIntegrationBridge
+    from stillme_core.memory_security_integration import MemorySecurityIntegration as CoreMemorySecurityIntegration
+    from stillme_core.module_governance_system import ModuleGovernanceSystem as CoreModuleGovernanceSystem
+    from stillme_core.validation_framework import ComprehensiveValidationFramework as CoreComprehensiveValidationFramework
+
+# Runtime imports with fallback
 try:
-    from .security_middleware import SecurityMiddleware  # type: ignore
+    from .security_middleware import SecurityMiddleware
 except ImportError:
-    pass
+    SecurityMiddleware = None
 
 try:
     from .performance_monitor import PerformanceMonitor
 except ImportError:
-    pass
+    PerformanceMonitor = None
 
 try:
-    from .final_validation_system import FinalValidationSystem  # type: ignore
-    from .integration_bridge import IntegrationBridge  # type: ignore
-    from .memory_security_integration import MemorySecurityIntegration  # type: ignore
-    from .module_governance_system import ModuleGovernanceSystem  # type: ignore
-    from .validation_framework import ComprehensiveValidationFramework  # type: ignore
+    from .final_validation_system import FinalValidationSystem
+    from .integration_bridge import IntegrationBridge
+    from .memory_security_integration import MemorySecurityIntegration
+    from .module_governance_system import ModuleGovernanceSystem
+    from .validation_framework import ComprehensiveValidationFramework
 except ImportError:
-    pass
+    FinalValidationSystem = None
+    IntegrationBridge = None
+    MemorySecurityIntegration = None
+    ModuleGovernanceSystem = None
+    ComprehensiveValidationFramework = None
 
 try:
-    from stillme_core.security_middleware import SecurityMiddleware  # type: ignore
+    from stillme_core.security_middleware import SecurityMiddleware as CoreSecurityMiddleware
 except ImportError:
-    pass
-try:
-    from stillme_core.performance_monitor import PerformanceMonitor
-except ImportError:
-    pass
+    CoreSecurityMiddleware = None
 
 try:
-    from stillme_core.final_validation_system import (
-        FinalValidationSystem,  # type: ignore
-    )
-    from stillme_core.integration_bridge import IntegrationBridge  # type: ignore
-    from stillme_core.memory_security_integration import (
-        MemorySecurityIntegration,  # type: ignore
-    )
-    from stillme_core.module_governance_system import (
-        ModuleGovernanceSystem,  # type: ignore
-    )
-    from stillme_core.validation_framework import (
-        ComprehensiveValidationFramework,  # type: ignore
-    )
+    from stillme_core.performance_monitor import PerformanceMonitor as CorePerformanceMonitor
 except ImportError:
-    pass
+    CorePerformanceMonitor = None
 
-# Create mock classes for testing
+try:
+    from stillme_core.final_validation_system import FinalValidationSystem as CoreFinalValidationSystem
+    from stillme_core.integration_bridge import IntegrationBridge as CoreIntegrationBridge
+    from stillme_core.memory_security_integration import MemorySecurityIntegration as CoreMemorySecurityIntegration
+    from stillme_core.module_governance_system import ModuleGovernanceSystem as CoreModuleGovernanceSystem
+    from stillme_core.validation_framework import ComprehensiveValidationFramework as CoreComprehensiveValidationFramework
+except ImportError:
+    CoreFinalValidationSystem = None
+    CoreIntegrationBridge = None
+    CoreMemorySecurityIntegration = None
+    CoreModuleGovernanceSystem = None
+    CoreComprehensiveValidationFramework = None
+
+# Create mock classes for testing with proper typing
 class SecurityMiddleware:
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
-    def get_security_report(self):
+    def get_security_report(self) -> dict[str, Any]:
         return {"security_score": 100}
 
 class PerformanceMonitor:
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
-    def get_performance_summary(self):
+    def get_performance_summary(self) -> dict[str, Any]:
         return {"status": "healthy"}
 
 class IntegrationBridge:
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
-    def register_endpoint(self, method, path, handler, auth_required=False):
+    def register_endpoint(self, method: str, path: str, handler: Any, auth_required: bool = False) -> None:
         pass
 
 class MemorySecurityIntegration:
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
-    def get_memory_statistics(self):
+    def get_memory_statistics(self) -> dict[str, Any]:
         return {"access_logs_count": 0}
 
 class ModuleGovernanceSystem:
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
-    def get_governance_status(self):
+    def get_governance_status(self) -> dict[str, Any]:
         return {"status": "success", "data": {}}
 
 class ComprehensiveValidationFramework:
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
-    def get_validation_status(self):
+    def get_validation_status(self) -> dict[str, Any]:
         return {"status": "success", "data": {}}
 
 class FinalValidationSystem:
-    def __init__(self):
+    def __init__(self) -> None:
         pass
 
-    def get_system_health(self):
+    def get_system_health(self) -> dict[str, Any]:
         return {"status": "success", "data": {}}
 
 
@@ -169,7 +181,7 @@ class SystemMetric:
     unit: str
     timestamp: datetime
     source: str
-    tags: Dict[str, str]
+    tags: dict[str, str]
 
 
 @dataclass
@@ -184,7 +196,7 @@ class Alert:
     timestamp: datetime
     resolved: bool
     resolved_at: Optional[datetime]
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 @dataclass
@@ -197,7 +209,7 @@ class HealthCheck:
     last_check: datetime
     response_time: float
     error_message: Optional[str]
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 @dataclass
@@ -206,11 +218,11 @@ class RecoveryPlan:
 
     plan_id: str
     trigger_condition: str
-    actions: List[RecoveryAction]
+    actions: list[RecoveryAction]
     priority: int
     timeout_seconds: int
     rollback_plan: Optional[str]
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 class AutonomousManagementSystem:
@@ -218,7 +230,7 @@ class AutonomousManagementSystem:
     Main Autonomous Management System
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: Optional[dict[str, Any]] = None):
         self.config = config or {}
         self.logger = self._setup_logging()
 
@@ -232,10 +244,10 @@ class AutonomousManagementSystem:
         self.final_validation = FinalValidationSystem()
 
         # Autonomous management state
-        self.system_metrics: List[SystemMetric] = []
-        self.active_alerts: List[Alert] = []
-        self.health_checks: Dict[str, HealthCheck] = {}
-        self.recovery_plans: Dict[str, RecoveryPlan] = {}
+        self.system_metrics: list[SystemMetric] = []
+        self.active_alerts: list[Alert] = []
+        self.health_checks: dict[str, HealthCheck] = {}
+        self.recovery_plans: dict[str, RecoveryPlan] = {}
 
         # Monitoring and control
         self.monitoring_active = False
@@ -244,7 +256,7 @@ class AutonomousManagementSystem:
         self.auto_scaling_enabled = True
 
         # Performance tracking
-        self.performance_metrics: Dict[str, List[float]] = {
+        self.performance_metrics: dict[str, list[float]] = {
             "monitoring_times": [],
             "healing_times": [],
             "scaling_times": [],
@@ -631,7 +643,7 @@ class AutonomousManagementSystem:
     def _check_memory_system(self) -> SystemState:
         """Check memory system"""
         try:
-            memory_stats = self.memory_integration.get_memory_statistics()
+            self.memory_integration.get_memory_statistics()
             # Mock check - in real implementation, check actual memory system health
             return SystemState.HEALTHY
 
@@ -833,7 +845,7 @@ class AutonomousManagementSystem:
         except Exception as e:
             self.logger.error(f"Error in predictive maintenance check: {e}")
 
-    def _schedule_maintenance(self, metric_name: str, trend: Dict[str, Any]):
+    def _schedule_maintenance(self, metric_name: str, trend: dict[str, Any]):
         """Schedule maintenance"""
         try:
             self.logger.info(f"🔧 Scheduling maintenance for {metric_name}")
@@ -903,7 +915,7 @@ class AutonomousManagementSystem:
         except Exception as e:
             self.logger.error(f"Error creating alert: {e}")
 
-    async def _get_autonomous_status(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_autonomous_status(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get autonomous status endpoint"""
         try:
             return {
@@ -947,7 +959,7 @@ class AutonomousManagementSystem:
                 "message": str(e),
             }
 
-    async def _get_system_health(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_system_health(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get system health endpoint"""
         try:
             health_summary = {}
@@ -976,7 +988,7 @@ class AutonomousManagementSystem:
                 "message": str(e),
             }
 
-    async def _get_active_alerts(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_active_alerts(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get active alerts endpoint"""
         try:
             alerts_data = []
@@ -1022,7 +1034,7 @@ class AutonomousManagementSystem:
                 "message": str(e),
             }
 
-    async def _trigger_recovery(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _trigger_recovery(self, data: dict[str, Any]) -> dict[str, Any]:
         """Trigger recovery endpoint"""
         try:
             plan_id = data.get("plan_id", "")
@@ -1052,7 +1064,7 @@ class AutonomousManagementSystem:
                 "message": str(e),
             }
 
-    async def _get_system_metrics(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_system_metrics(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get system metrics endpoint"""
         try:
             metrics_data = []
@@ -1108,7 +1120,7 @@ class AnomalyDetector:
     def __init__(self):
         self.threshold = 2.0  # Standard deviations
 
-    def detect_anomaly(self, values: List[float]) -> bool:
+    def detect_anomaly(self, values: list[float]) -> bool:
         """Detect anomaly in values"""
         try:
             if len(values) < 5:
@@ -1125,7 +1137,7 @@ class AnomalyDetector:
             latest_value = values[-1]
             z_score = abs(latest_value - mean) / std
 
-            return z_score > self.threshold  # type: ignore
+            return z_score > self.threshold
 
         except Exception:
             return False
@@ -1137,7 +1149,7 @@ class PredictiveAnalyzer:
     def __init__(self):
         self.trend_threshold = 0.1  # 10% increase per check
 
-    def analyze_trend(self, values: List[float]) -> Dict[str, Any]:
+    def analyze_trend(self, values: list[float]) -> dict[str, Any]:
         """Analyze trend in values"""
         try:
             if len(values) < 10:

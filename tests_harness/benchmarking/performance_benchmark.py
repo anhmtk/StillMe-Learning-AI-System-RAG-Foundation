@@ -12,10 +12,9 @@ Tính năng:
 import json
 import logging
 import sys
-import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent))
@@ -72,17 +71,17 @@ class PerformanceBenchmark:
         }
 
     def run_benchmark(self,
-                     test_cases: List[Dict[str, Any]],
-                     stillme_responses: List[Dict[str, Any]],
-                     baseline_responses: List[Dict[str, Any]]) -> Dict[str, Any]:
+                     test_cases: list[dict[str, Any]],
+                     stillme_responses: list[dict[str, Any]],
+                     baseline_responses: list[dict[str, Any]]) -> dict[str, Any]:
         """
         Chạy benchmark so sánh StillMe vs Baseline
-        
+
         Args:
             test_cases: Danh sách test cases
             stillme_responses: Responses từ StillMe AI
             baseline_responses: Responses từ baseline model
-            
+
         Returns:
             Dict: Kết quả benchmark
         """
@@ -115,7 +114,7 @@ class PerformanceBenchmark:
             self.logger.error(f"❌ Performance benchmark failed: {e}")
             return {"error": str(e)}
 
-    def _evaluate_responses(self, responses: List[Dict[str, Any]], model_name: str) -> Dict[str, Any]:
+    def _evaluate_responses(self, responses: list[dict[str, Any]], model_name: str) -> dict[str, Any]:
         """Đánh giá responses từ một model"""
         try:
             # Prepare data for evaluators
@@ -200,8 +199,8 @@ class PerformanceBenchmark:
             self.logger.error(f"Error evaluating responses: {e}")
             return {}
 
-    def _calculate_improvements(self, stillme_scores: Dict[str, Any],
-                              baseline_scores: Dict[str, Any]) -> Dict[str, Any]:
+    def _calculate_improvements(self, stillme_scores: dict[str, Any],
+                              baseline_scores: dict[str, Any]) -> dict[str, Any]:
         """Tính toán mức cải thiện"""
         try:
             improvements = {}
@@ -244,7 +243,7 @@ class PerformanceBenchmark:
             self.logger.error(f"Error calculating improvements: {e}")
             return {}
 
-    def _calculate_overall_score(self, scores: Dict[str, Any]) -> float:
+    def _calculate_overall_score(self, scores: dict[str, Any]) -> float:
         """Tính điểm tổng thể"""
         try:
             reports = scores.get('reports', {})
@@ -271,7 +270,7 @@ class PerformanceBenchmark:
             self.logger.error(f"Error calculating overall score: {e}")
             return 0.0
 
-    def _get_average_score(self, scores: Dict[str, Any], category: str) -> float:
+    def _get_average_score(self, scores: dict[str, Any], category: str) -> float:
         """Lấy điểm trung bình của một category"""
         try:
             reports = scores.get('reports', {})
@@ -296,10 +295,10 @@ class PerformanceBenchmark:
             return 0.0
 
     def _generate_benchmark_report(self,
-                                 test_cases: List[Dict[str, Any]],
-                                 stillme_scores: Dict[str, Any],
-                                 baseline_scores: Dict[str, Any],
-                                 improvements: Dict[str, Any]) -> Dict[str, Any]:
+                                 test_cases: list[dict[str, Any]],
+                                 stillme_scores: dict[str, Any],
+                                 baseline_scores: dict[str, Any],
+                                 improvements: dict[str, Any]) -> dict[str, Any]:
         """Tạo báo cáo benchmark"""
         try:
             report = {
@@ -326,7 +325,7 @@ class PerformanceBenchmark:
             self.logger.error(f"Error generating benchmark report: {e}")
             return {}
 
-    def _get_best_improvement_category(self, improvements: Dict[str, Any]) -> str:
+    def _get_best_improvement_category(self, improvements: dict[str, Any]) -> str:
         """Lấy category có cải thiện tốt nhất"""
         try:
             best_category = "overall"
@@ -345,7 +344,7 @@ class PerformanceBenchmark:
             self.logger.error(f"Error getting best improvement category: {e}")
             return "overall"
 
-    def _get_worst_improvement_category(self, improvements: Dict[str, Any]) -> str:
+    def _get_worst_improvement_category(self, improvements: dict[str, Any]) -> str:
         """Lấy category có cải thiện kém nhất"""
         try:
             worst_category = "overall"
@@ -364,7 +363,7 @@ class PerformanceBenchmark:
             self.logger.error(f"Error getting worst improvement category: {e}")
             return "overall"
 
-    def _generate_recommendations(self, improvements: Dict[str, Any]) -> List[str]:
+    def _generate_recommendations(self, improvements: dict[str, Any]) -> list[str]:
         """Tạo recommendations dựa trên kết quả benchmark"""
         try:
             recommendations = []
@@ -401,7 +400,7 @@ class PerformanceBenchmark:
             self.logger.error(f"Error generating recommendations: {e}")
             return []
 
-    def _save_benchmark_results(self, benchmark_report: Dict[str, Any]) -> str:
+    def _save_benchmark_results(self, benchmark_report: dict[str, Any]) -> str:
         """Lưu kết quả benchmark"""
         try:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

@@ -5,16 +5,13 @@ Enterprise-grade multi-user support and team collaboration
 """
 
 import asyncio
-import hashlib
-import json
 import time
 import uuid
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Optional
 
-import aiofiles
 import yaml
 
 
@@ -53,10 +50,10 @@ class User:
     email: str
     full_name: str
     role: UserRole
-    permissions: List[str]
+    permissions: list[str]
     created_at: float
     last_active: float
-    preferences: Dict[str, Any]
+    preferences: dict[str, Any]
     avatar_url: Optional[str] = None
 
 @dataclass
@@ -65,12 +62,12 @@ class Team:
     team_id: str
     name: str
     description: str
-    members: List[str]  # User IDs
-    roles: Dict[str, UserRole]  # User ID -> Role mapping
-    permissions: Dict[str, List[str]]  # Role -> Permissions mapping
+    members: list[str]  # User IDs
+    roles: dict[str, UserRole]  # User ID -> Role mapping
+    permissions: dict[str, list[str]]  # Role -> Permissions mapping
     created_at: float
     updated_at: float
-    settings: Dict[str, Any]
+    settings: dict[str, Any]
 
 @dataclass
 class TaskAssignment:
@@ -83,8 +80,8 @@ class TaskAssignment:
     priority: int
     estimated_hours: Optional[float]
     actual_hours: Optional[float]
-    dependencies: List[str]
-    blockers: List[str]
+    dependencies: list[str]
+    blockers: list[str]
     notes: str
 
 @dataclass
@@ -93,8 +90,8 @@ class Conflict:
     conflict_id: str
     conflict_type: ConflictType
     description: str
-    involved_users: List[str]
-    affected_resources: List[str]
+    involved_users: list[str]
+    affected_resources: list[str]
     created_at: float
     resolved_at: Optional[float]
     resolution: Optional[str]
@@ -106,12 +103,12 @@ class CollaborationSession:
     """Active collaboration session"""
     session_id: str
     task_id: str
-    participants: List[str]
+    participants: list[str]
     started_at: float
     last_activity: float
-    shared_resources: List[str]
-    chat_messages: List[Dict[str, Any]]
-    screen_shares: List[Dict[str, Any]]
+    shared_resources: list[str]
+    chat_messages: list[dict[str, Any]]
+    screen_shares: list[dict[str, Any]]
     voice_enabled: bool
     video_enabled: bool
 
@@ -120,16 +117,16 @@ class TeamManager:
 
     def __init__(self, config_path: Optional[str] = None):
         self.config = self._load_config(config_path)
-        self.users: Dict[str, User] = {}
-        self.teams: Dict[str, Team] = {}
-        self.task_assignments: Dict[str, TaskAssignment] = {}
-        self.conflicts: Dict[str, Conflict] = {}
-        self.active_sessions: Dict[str, CollaborationSession] = {}
-        self.user_sessions: Dict[str, str] = {}  # User ID -> Session ID
-        self.locks: Dict[str, Dict[str, Any]] = {}  # Resource locks
+        self.users: dict[str, User] = {}
+        self.teams: dict[str, Team] = {}
+        self.task_assignments: dict[str, TaskAssignment] = {}
+        self.conflicts: dict[str, Conflict] = {}
+        self.active_sessions: dict[str, CollaborationSession] = {}
+        self.user_sessions: dict[str, str] = {}  # User ID -> Session ID
+        self.locks: dict[str, dict[str, Any]] = {}  # Resource locks
         self.running = False
 
-    def _load_config(self, config_path: Optional[str] = None) -> Dict[str, Any]:
+    def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
         """Load team management configuration"""
         if config_path:
             config_file = Path(config_path)
@@ -317,7 +314,7 @@ class TeamManager:
                 )
 
     def _create_conflict(self, conflict_type: ConflictType, description: str,
-                        involved_users: List[str], affected_resources: List[str],
+                        involved_users: list[str], affected_resources: list[str],
                         severity: str = "medium") -> str:
         """Create a new conflict"""
         conflict_id = str(uuid.uuid4())
@@ -492,7 +489,7 @@ class TeamManager:
         print(f"💬 Chat message in session {session_id}: {user_id} - {message}")
         return True
 
-    def get_user_tasks(self, user_id: str) -> List[TaskAssignment]:
+    def get_user_tasks(self, user_id: str) -> list[TaskAssignment]:
         """Get tasks assigned to user"""
         user_tasks = []
         for assignment in self.task_assignments.values():
@@ -503,7 +500,7 @@ class TeamManager:
         user_tasks.sort(key=lambda x: (-x.priority, x.assigned_at))
         return user_tasks
 
-    def get_team_tasks(self, team_id: str) -> List[TaskAssignment]:
+    def get_team_tasks(self, team_id: str) -> list[TaskAssignment]:
         """Get all tasks for team members"""
         if team_id not in self.teams:
             return []
@@ -517,11 +514,11 @@ class TeamManager:
 
         return team_tasks
 
-    def get_active_conflicts(self) -> List[Conflict]:
+    def get_active_conflicts(self) -> list[Conflict]:
         """Get all unresolved conflicts"""
         return [conflict for conflict in self.conflicts.values() if not conflict.resolved_at]
 
-    def get_collaboration_statistics(self) -> Dict[str, Any]:
+    def get_collaboration_statistics(self) -> dict[str, Any]:
         """Get collaboration statistics"""
         total_users = len(self.users)
         total_teams = len(self.teams)
@@ -611,7 +608,7 @@ def assign_task(task_id: str, assigned_to: str, assigned_by: str) -> bool:
     """Assign task to user"""
     return team_manager.assign_task(task_id, assigned_to, assigned_by)
 
-def get_user_tasks(user_id: str) -> List[TaskAssignment]:
+def get_user_tasks(user_id: str) -> list[TaskAssignment]:
     """Get tasks for user"""
     return team_manager.get_user_tasks(user_id)
 

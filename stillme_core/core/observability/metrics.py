@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 
 class MetricType(Enum):
@@ -34,7 +34,7 @@ class MetricPoint:
     value: float
     metric_type: str
     timestamp: str
-    labels: Optional[Dict[str, str]] = None
+    labels: Optional[dict[str, str]] = None
     unit: Optional[str] = None
 
 
@@ -66,7 +66,7 @@ class MetricsCollector:
         self._lock = threading.Lock()
 
         # In-memory cache for fast access
-        self._cache: Dict[str, List[MetricPoint]] = {}
+        self._cache: dict[str, list[MetricPoint]] = {}
         self._cache_lock = threading.Lock()
 
         # Initialize database
@@ -96,14 +96,14 @@ class MetricsCollector:
             # Create index for faster queries
             cursor.execute(
                 """
-                CREATE INDEX IF NOT EXISTS idx_metrics_name_timestamp 
+                CREATE INDEX IF NOT EXISTS idx_metrics_name_timestamp
                 ON metrics(name, timestamp)
             """
             )
 
             cursor.execute(
                 """
-                CREATE INDEX IF NOT EXISTS idx_metrics_type 
+                CREATE INDEX IF NOT EXISTS idx_metrics_type
                 ON metrics(metric_type)
             """
             )
@@ -153,7 +153,7 @@ class MetricsCollector:
         name: str,
         value: float,
         metric_type: MetricType = MetricType.GAUGE,
-        labels: Optional[Dict[str, str]] = None,
+        labels: Optional[dict[str, str]] = None,
         unit: Optional[str] = None,
     ):
         """Record a metric"""
@@ -173,7 +173,7 @@ class MetricsCollector:
         self._store_metric(metric)
 
     def increment_counter(
-        self, name: str, value: float = 1.0, labels: Optional[Dict[str, str]] = None
+        self, name: str, value: float = 1.0, labels: Optional[dict[str, str]] = None
     ):
         """Increment a counter metric"""
         self.record_metric(name, value, MetricType.COUNTER, labels)
@@ -182,25 +182,25 @@ class MetricsCollector:
         self,
         name: str,
         value: float,
-        labels: Optional[Dict[str, str]] = None,
+        labels: Optional[dict[str, str]] = None,
         unit: Optional[str] = None,
     ):
         """Set a gauge metric"""
         self.record_metric(name, value, MetricType.GAUGE, labels, unit)
 
     def record_histogram(
-        self, name: str, value: float, labels: Optional[Dict[str, str]] = None
+        self, name: str, value: float, labels: Optional[dict[str, str]] = None
     ):
         """Record a histogram value"""
         self.record_metric(name, value, MetricType.HISTOGRAM, labels)
 
     def record_timer(
-        self, name: str, duration_ms: float, labels: Optional[Dict[str, str]] = None
+        self, name: str, duration_ms: float, labels: Optional[dict[str, str]] = None
     ):
         """Record a timer metric"""
         self.record_metric(name, duration_ms, MetricType.TIMER, labels, "ms")
 
-    def time_operation(self, name: str, labels: Optional[Dict[str, str]] = None):
+    def time_operation(self, name: str, labels: Optional[dict[str, str]] = None):
         """Context manager for timing operations"""
         return TimerContext(self, name, labels)
 
@@ -247,7 +247,7 @@ class MetricsCollector:
                 time_range=f"Last {time_range}" if time_range else "All time",
             )
 
-    def get_metrics_by_type(self, metric_type: MetricType) -> List[str]:
+    def get_metrics_by_type(self, metric_type: MetricType) -> list[str]:
         """Get all metric names of a specific type"""
         with self._lock:
             conn = sqlite3.connect(self.db_path)
@@ -265,7 +265,7 @@ class MetricsCollector:
 
             return names
 
-    def get_recent_metrics(self, name: str, limit: int = 100) -> List[MetricPoint]:
+    def get_recent_metrics(self, name: str, limit: int = 100) -> list[MetricPoint]:
         """Get recent metric values"""
         with self._lock:
             conn = sqlite3.connect(self.db_path)
@@ -297,7 +297,7 @@ class MetricsCollector:
             conn.close()
             return list(reversed(metrics))  # Return in chronological order
 
-    def get_metrics_overview(self) -> Dict[str, Any]:
+    def get_metrics_overview(self) -> dict[str, Any]:
         """Get overview of all metrics"""
         with self._lock:
             conn = sqlite3.connect(self.db_path)
@@ -339,7 +339,7 @@ class MetricsCollector:
         self,
         output_file: str,
         time_range: Optional[timedelta] = None,
-        metric_names: Optional[List[str]] = None,
+        metric_names: Optional[list[str]] = None,
     ) -> bool:
         """Export metrics to JSON file"""
         try:
@@ -420,7 +420,7 @@ class MetricsCollector:
 
             return deleted_count
 
-    def _percentile(self, values: List[float], percentile: int) -> float:
+    def _percentile(self, values: list[float], percentile: int) -> float:
         """Calculate percentile of values"""
         if not values:
             return 0.0
@@ -438,7 +438,7 @@ class TimerContext:
         self,
         collector: MetricsCollector,
         name: str,
-        labels: Optional[Dict[str, str]] = None,
+        labels: Optional[dict[str, str]] = None,
     ):
         self.collector = collector
         self.name = name

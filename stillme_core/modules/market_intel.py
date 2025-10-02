@@ -19,7 +19,7 @@ import time
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import aiohttp
 
@@ -39,7 +39,7 @@ class TrendData:
     score: float
     timestamp: datetime
     category: str
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 @dataclass
@@ -48,10 +48,10 @@ class MarketIntelligenceReport:
 
     timestamp: datetime
     summary: str
-    trends: List[TrendData]
-    sources_used: List[str]
+    trends: list[TrendData]
+    sources_used: list[str]
     confidence_score: float
-    recommendations: List[str]
+    recommendations: list[str]
 
 
 class MarketIntelligence:
@@ -197,7 +197,7 @@ class MarketIntelligence:
             current_avg_sources * (total_reports - 1) + sources_count
         ) / total_reports
 
-    def get_analytics_summary(self) -> Dict[str, Any]:
+    def get_analytics_summary(self) -> dict[str, Any]:
         """Get analytics summary"""
         total_requests = self.analytics["total_requests"]
         success_rate = (
@@ -232,7 +232,7 @@ class MarketIntelligence:
         self.last_request_time[source] = now
         return True
 
-    def _get_next_proxy(self) -> Optional[Dict[str, str]]:
+    def _get_next_proxy(self) -> Optional[dict[str, str]]:
         """Get next proxy in rotation"""
         if not self.proxy_list:
             return None
@@ -254,7 +254,7 @@ class MarketIntelligence:
                 logger.info(f"⏳ Waiting {wait_time:.1f}s for rate limit reset...")
                 time.sleep(wait_time)
 
-    def _load_cache(self) -> Dict[str, Any]:
+    def _load_cache(self) -> dict[str, Any]:
         """Load cached data if still valid"""
         try:
             if self.cache_file.exists():
@@ -270,7 +270,7 @@ class MarketIntelligence:
 
         return {}
 
-    def _save_cache(self, data: Dict[str, Any]) -> None:
+    def _save_cache(self, data: dict[str, Any]) -> None:
         """Save data to cache"""
         try:
             # Convert datetime objects to ISO format strings
@@ -305,7 +305,7 @@ class MarketIntelligence:
 
     async def get_github_trending(
         self, language: str = "python", since: str = "daily"
-    ) -> List[TrendData]:
+    ) -> list[TrendData]:
         """
         Lấy danh sách repositories trending từ GitHub
 
@@ -364,8 +364,8 @@ class MarketIntelligence:
             return []
 
     async def get_google_trends(
-        self, keywords: List[str], timeframe: str = "today 3-m"
-    ) -> List[TrendData]:
+        self, keywords: list[str], timeframe: str = "today 3-m"
+    ) -> list[TrendData]:
         """
         Lấy dữ liệu xu hướng từ Google Trends với proxy rotation và rate limiting
 
@@ -480,8 +480,8 @@ class MarketIntelligence:
             return []
 
     async def get_tech_news(
-        self, keywords: List[str], max_articles: int = 10
-    ) -> List[TrendData]:
+        self, keywords: list[str], max_articles: int = 10
+    ) -> list[TrendData]:
         """
         Lấy tin tức công nghệ từ News API
 
@@ -512,8 +512,8 @@ class MarketIntelligence:
             return []
 
     async def _get_gnews(
-        self, keywords: List[str], max_articles: int
-    ) -> List[TrendData]:
+        self, keywords: list[str], max_articles: int
+    ) -> list[TrendData]:
         """Get news from GNews API"""
         try:
             try:
@@ -564,8 +564,8 @@ class MarketIntelligence:
             return []
 
     async def _get_newsapi(
-        self, keywords: List[str], max_articles: int
-    ) -> List[TrendData]:
+        self, keywords: list[str], max_articles: int
+    ) -> list[TrendData]:
         """Get news from NewsAPI"""
         try:
 
@@ -622,7 +622,7 @@ class MarketIntelligence:
             logger.error(f"❌ Error with NewsAPI: {e}")
             return []
 
-    async def _get_hacker_news(self, max_articles: int) -> List[TrendData]:
+    async def _get_hacker_news(self, max_articles: int) -> list[TrendData]:
         """Get top stories from Hacker News API (no API key required)"""
         try:
             logger.info("🔍 Fetching top stories from Hacker News")
@@ -683,8 +683,8 @@ class MarketIntelligence:
             return []
 
     async def get_reddit_trends(
-        self, subreddits: Optional[List[str]] = None, max_posts: int = 10
-    ) -> List[TrendData]:
+        self, subreddits: Optional[list[str]] = None, max_posts: int = 10
+    ) -> list[TrendData]:
         """
         Lấy trending posts từ Reddit
 
@@ -772,8 +772,8 @@ class MarketIntelligence:
             return []
 
     async def get_stackoverflow_trends(
-        self, tags: Optional[List[str]] = None, max_questions: int = 10
-    ) -> List[TrendData]:
+        self, tags: Optional[list[str]] = None, max_questions: int = 10
+    ) -> list[TrendData]:
         """
         Lấy trending questions từ Stack Overflow
 
@@ -867,7 +867,7 @@ class MarketIntelligence:
             return []
 
     async def consolidate_trends(
-        self, keywords: Optional[List[str]] = None
+        self, keywords: Optional[list[str]] = None
     ) -> MarketIntelligenceReport:
         """
         Tổng hợp dữ liệu từ tất cả các nguồn và tạo báo cáo xu hướng
@@ -960,7 +960,7 @@ class MarketIntelligence:
             return self._create_error_report(str(e))
 
     def _create_report_from_cache(
-        self, cached_data: Dict[str, Any]
+        self, cached_data: dict[str, Any]
     ) -> MarketIntelligenceReport:
         """Create report from cached data"""
         trends_data = cached_data.get("data", {}).get("trends", [])
@@ -975,7 +975,7 @@ class MarketIntelligence:
         return self._create_intelligence_report(trends, sources_used, keywords)
 
     def _create_intelligence_report(
-        self, trends: List[TrendData], sources_used: List[str], keywords: List[str]
+        self, trends: list[TrendData], sources_used: list[str], keywords: list[str]
     ) -> MarketIntelligenceReport:
         """Create comprehensive intelligence report"""
 
@@ -1003,7 +1003,7 @@ class MarketIntelligence:
         )
 
     def _generate_summary(
-        self, trends: List[TrendData], sources_used: List[str], keywords: List[str]
+        self, trends: list[TrendData], sources_used: list[str], keywords: list[str]
     ) -> str:
         """Generate summary of market intelligence"""
         if not trends:
@@ -1026,7 +1026,7 @@ class MarketIntelligence:
 
         return "\n".join(summary_parts)
 
-    def _generate_recommendations(self, trends: List[TrendData]) -> List[str]:
+    def _generate_recommendations(self, trends: list[TrendData]) -> list[str]:
         """Generate actionable recommendations based on trends"""
         recommendations = []
 
@@ -1066,8 +1066,8 @@ class MarketIntelligence:
         )
 
     async def get_predictive_analysis(
-        self, keywords: Optional[List[str]] = None
-    ) -> Dict[str, Any]:
+        self, keywords: Optional[list[str]] = None
+    ) -> dict[str, Any]:
         """
         Lấy phân tích dự báo xu hướng với khuyến nghị kinh doanh
 
@@ -1148,7 +1148,7 @@ class MarketIntelligence:
 
 # Convenience functions for easy integration
 async def get_market_intelligence(
-    keywords: Optional[List[str]] = None,
+    keywords: Optional[list[str]] = None,
 ) -> MarketIntelligenceReport:
     """
     Convenience function to get market intelligence report
@@ -1164,7 +1164,7 @@ async def get_market_intelligence(
 
 
 def get_market_intelligence_sync(
-    keywords: Optional[List[str]] = None,
+    keywords: Optional[list[str]] = None,
 ) -> MarketIntelligenceReport:
     """
     Synchronous version of get_market_intelligence

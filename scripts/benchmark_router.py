@@ -18,7 +18,6 @@ import os
 import statistics
 import sys
 import time
-from typing import Dict, List, Optional, Tuple
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))
@@ -32,7 +31,7 @@ class RouterBenchmark:
         self.analyzer = ComplexityAnalyzer()
         self.benchmark_results = {}
 
-    def benchmark_performance(self, num_iterations: int = 1000) -> Dict:
+    def benchmark_performance(self, num_iterations: int = 1000) -> dict:
         """Benchmark router performance"""
         print(f"🏃‍♂️ Performance Benchmark ({num_iterations} iterations)")
         print("=" * 60)
@@ -171,7 +170,7 @@ class RouterBenchmark:
 
         return results
 
-    def benchmark_accuracy(self) -> Dict:
+    def benchmark_accuracy(self) -> dict:
         """Benchmark router accuracy"""
         print("\n🎯 Accuracy Benchmark")
         print("=" * 60)
@@ -311,7 +310,7 @@ class RouterBenchmark:
 
         return results
 
-    def benchmark_fallback(self) -> Dict:
+    def benchmark_fallback(self) -> dict:
         """Benchmark fallback mechanism"""
         print("\n🔄 Fallback Benchmark")
         print("=" * 60)
@@ -423,7 +422,7 @@ class RouterBenchmark:
 
         return results
 
-    def run_full_benchmark(self, num_iterations: int = 1000) -> Dict:
+    def run_full_benchmark(self, num_iterations: int = 1000) -> dict:
         """Run full benchmark suite"""
         print("🔍 AI Router Full Benchmark")
         print("=" * 80)
@@ -495,7 +494,7 @@ class RouterBenchmark:
         else:
             return "D (Needs Improvement)"
 
-    def export_results(self, results: Dict, filename: str):
+    def export_results(self, results: dict, filename: str):
         """Export benchmark results to JSON file"""
         with open(filename, 'w', encoding='utf-8') as f:
             json.dump(results, f, indent=2, ensure_ascii=False)

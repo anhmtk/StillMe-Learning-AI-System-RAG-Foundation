@@ -1,6 +1,6 @@
 # modules/input_sketcher.py
 import re
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 VI_CHARS = "ăâđêôơưáàạảãấầậẩẫắằặẳẵéèẹẻẽếềệểễíìịỉĩóòọỏõốồộổỗớờợởỡúùụủũứừựửữýỳỵỷỹ"
 CODE_MARKERS = [
@@ -135,7 +135,7 @@ class InputSketcher:
         """Initialize InputSketcher"""
         pass
 
-    def sketch_input(self, user_input: str) -> Dict[str, Any]:
+    def sketch_input(self, user_input: str) -> dict[str, Any]:
         """
         Phân tích input của user và trả về sketch với các thông tin:
         - language: vi/en/mixed

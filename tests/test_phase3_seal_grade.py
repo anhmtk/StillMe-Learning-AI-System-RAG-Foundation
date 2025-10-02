@@ -28,7 +28,7 @@ import tempfile
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import pytest
 
@@ -85,13 +85,13 @@ class SealGradeResult:
     passed: bool
     execution_time: float
     error_message: Optional[str] = None
-    metrics: Dict[str, Any] = None
+    metrics: dict[str, Any] = None
 
 class SealGradeTestSuite:
     """SEAL-GRADE Test Suite for Phase 3 Clarification Core"""
 
     def __init__(self):
-        self.results: List[SealGradeResult] = []
+        self.results: list[SealGradeResult] = []
         self.handler: Optional[ClarificationHandler] = None
         self.multi_modal_clarifier: Optional[MultiModalClarifier] = None
         self.proactive_suggestion: Optional[ProactiveSuggestion] = None
@@ -147,7 +147,7 @@ class SealGradeTestSuite:
             logger.error(f"❌ {test_name} - ERROR ({execution_time:.3f}s): {e}")
             return SealGradeResult(test_name, False, execution_time, str(e))
 
-    def run_all_tests(self) -> Dict[str, Any]:
+    def run_all_tests(self) -> dict[str, Any]:
         """Run all SEAL-GRADE tests"""
         logger.info("🚀 Starting SEAL-GRADE Test Suite for Phase 3 Clarification Core")
 
@@ -430,7 +430,7 @@ def export_data():
         input_with_email = "My email is test@example.com"
 
         # Log the request
-        trace_id = self.audit_logger.log_clarification_request(
+        self.audit_logger.log_clarification_request(
             "user123", "session456", input_with_email, "text", "generic", "careful", {}
         )
 
@@ -630,7 +630,7 @@ def export_data():
         assert result is not None  # Should not crash
 
         # Check that input is not logged in plaintext
-        trace_id = self.audit_logger.log_clarification_request(
+        self.audit_logger.log_clarification_request(
             "user123", "session456", unicode_input, "text", "generic", "careful", {}
         )
 

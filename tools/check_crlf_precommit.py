@@ -4,7 +4,6 @@ Pre-commit hook to check for CRLF line endings in test files
 """
 
 import sys
-from pathlib import Path
 
 
 def check_file_for_crlf(file_path):

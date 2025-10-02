@@ -4,7 +4,6 @@ Encoding and line ending normalization tool
 Converts test files to UTF-8 (no BOM) with LF line endings
 """
 
-import os
 import sys
 from pathlib import Path
 

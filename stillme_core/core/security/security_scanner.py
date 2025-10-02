@@ -13,7 +13,7 @@ import time
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -40,9 +40,9 @@ class SecurityIssue:
     line_number: int
     code_snippet: str
     confidence: str
-    cwe_id: Optional[str] = None
-    owasp_category: Optional[str] = None
-    remediation: Optional[str] = None
+    cwe_id: str | None = None
+    owasp_category: str | None = None
+    remediation: str | None = None
 
 
 @dataclass
@@ -50,10 +50,10 @@ class SecurityReport:
     """Comprehensive security report"""
 
     total_issues: int
-    issues_by_level: Dict[VulnerabilityLevel, int]
-    issues_by_tool: Dict[str, int]
-    issues: List[SecurityIssue]
-    recommendations: List[str]
+    issues_by_level: dict[VulnerabilityLevel, int]
+    issues_by_tool: dict[str, int]
+    issues: list[SecurityIssue]
+    recommendations: list[str]
     risk_score: float
     scan_duration: float
 
@@ -68,7 +68,7 @@ class SecurityScanner:
         self.tools_available = self._check_available_tools()
         self.secret_patterns = self._load_secret_patterns()
 
-    def _check_available_tools(self) -> Dict[str, bool]:
+    def _check_available_tools(self) -> dict[str, bool]:
         """Check which security tools are available"""
         tools = {}
 
@@ -101,7 +101,7 @@ class SecurityScanner:
 
         return tools
 
-    def _load_secret_patterns(self) -> List[Dict[str, Any]]:
+    def _load_secret_patterns(self) -> list[dict[str, Any]]:
         """Load patterns for detecting secrets"""
         return [
             {
@@ -174,7 +174,7 @@ class SecurityScanner:
         # Generate report
         return self._generate_security_report(all_issues, scan_duration)
 
-    def _run_bandit_scan(self, include_tests: bool) -> List[SecurityIssue]:
+    def _run_bandit_scan(self, include_tests: bool) -> list[SecurityIssue]:
         """Run Bandit security scan"""
         issues = []
 
@@ -215,7 +215,7 @@ class SecurityScanner:
 
         return issues
 
-    def _run_semgrep_scan(self, include_tests: bool) -> List[SecurityIssue]:
+    def _run_semgrep_scan(self, include_tests: bool) -> list[SecurityIssue]:
         """Run Semgrep security scan"""
         issues = []
 
@@ -259,7 +259,7 @@ class SecurityScanner:
 
         return issues
 
-    def _run_safety_scan(self) -> List[SecurityIssue]:
+    def _run_safety_scan(self) -> list[SecurityIssue]:
         """Run Safety scan for dependency vulnerabilities"""
         issues = []
 
@@ -294,7 +294,7 @@ class SecurityScanner:
 
         return issues
 
-    def _run_secret_detection(self) -> List[SecurityIssue]:
+    def _run_secret_detection(self) -> list[SecurityIssue]:
         """Run custom secret detection"""
         issues = []
 
@@ -328,7 +328,7 @@ class SecurityScanner:
 
         return issues
 
-    def _run_custom_patterns(self) -> List[SecurityIssue]:
+    def _run_custom_patterns(self) -> list[SecurityIssue]:
         """Run custom vulnerability patterns"""
         issues = []
 
@@ -389,7 +389,7 @@ class SecurityScanner:
         return issues
 
     def _generate_security_report(
-        self, issues: List[SecurityIssue], duration: float
+        self, issues: list[SecurityIssue], duration: float
     ) -> SecurityReport:
         """Generate comprehensive security report"""
         # Count issues by level
@@ -419,7 +419,7 @@ class SecurityScanner:
             scan_duration=duration,
         )
 
-    def _calculate_risk_score(self, issues: List[SecurityIssue]) -> float:
+    def _calculate_risk_score(self, issues: list[SecurityIssue]) -> float:
         """Calculate overall risk score (0-100)"""
         if not issues:
             return 0.0
@@ -440,9 +440,9 @@ class SecurityScanner:
 
     def _generate_recommendations(
         self,
-        issues: List[SecurityIssue],
-        issues_by_level: Dict[VulnerabilityLevel, int],
-    ) -> List[str]:
+        issues: list[SecurityIssue],
+        issues_by_level: dict[VulnerabilityLevel, int],
+    ) -> list[str]:
         """Generate security recommendations"""
         recommendations = []
 
@@ -468,7 +468,7 @@ class SecurityScanner:
             )
 
         # Tool-specific recommendations
-        tools_used = set(issue.tool for issue in issues)
+        tools_used = {issue.tool for issue in issues}
 
         if "secret_detection" in tools_used:
             recommendations.append(

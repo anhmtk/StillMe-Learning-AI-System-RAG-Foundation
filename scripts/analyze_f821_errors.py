@@ -7,7 +7,6 @@ Phân loại F821 errors để tạo kế hoạch fix.
 """
 
 import json
-import os
 import re
 import sys
 from collections import Counter, defaultdict
@@ -18,9 +17,9 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(project_root / "agent_dev" / "core"))
 
-from symbol_index import SymbolIndex
-
-from agent_dev.core.agentdev import AgentDev
+# Import after path setup
+from symbol_index import SymbolIndex  # noqa: E402
+from agent_dev.core.agentdev import AgentDev  # noqa: E402
 
 
 def analyze_f821_errors():
@@ -90,7 +89,7 @@ def analyze_f821_errors():
 
         analysis["symbol_analysis"][symbol_name] = {
             "occurrences": len(occurrences),
-            "files": len(set(occ["file"] for occ in occurrences)),
+            "files": len({occ["file"] for occ in occurrences}),
             "in_core": len(core_symbols) > 0,
             "is_stdlib": is_stdlib,
             "core_module": core_symbols[0].module_path if core_symbols else None,

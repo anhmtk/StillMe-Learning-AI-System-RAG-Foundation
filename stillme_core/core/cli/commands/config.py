@@ -187,10 +187,10 @@ def import_config(
             import yaml
 
             with open(config_file, encoding="utf-8") as f:
-                imported_config = yaml.safe_load(f)
+                yaml.safe_load(f)
         else:
             with open(config_file, encoding="utf-8") as f:
-                imported_config = json.load(f)
+                json.load(f)
 
         # This would implement actual configuration import
         action = "merged" if merge else "replaced"

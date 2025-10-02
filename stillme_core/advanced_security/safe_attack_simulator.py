@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ class AttackSimulation:
     actual_behavior: str
     success: bool
     timestamp: datetime
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -47,11 +47,11 @@ class SafeAttackSimulator:
 
     def __init__(self):
         self.logger = logger
-        self.simulations: List[AttackSimulation] = []
+        self.simulations: list[AttackSimulation] = []
         self.attack_payloads = self._initialize_attack_payloads()
         self.logger.info("✅ SafeAttackSimulator initialized")
 
-    def _initialize_attack_payloads(self) -> Dict[AttackType, List[str]]:
+    def _initialize_attack_payloads(self) -> dict[AttackType, list[str]]:
         """Initialize attack payloads for testing"""
         return {
             AttackType.PROMPT_INJECTION: [
@@ -198,7 +198,7 @@ class SafeAttackSimulator:
             self.logger.error(f"❌ Failed to execute attack simulation: {e}")
             return False
 
-    def run_security_test_suite(self, target_system: str = "test") -> List[AttackSimulation]:
+    def run_security_test_suite(self, target_system: str = "test") -> list[AttackSimulation]:
         """Run a comprehensive security test suite"""
         try:
             results = []
@@ -217,19 +217,19 @@ class SafeAttackSimulator:
             self.logger.error(f"❌ Failed to run security test suite: {e}")
             return []
 
-    def get_simulations_by_type(self, attack_type: AttackType) -> List[AttackSimulation]:
+    def get_simulations_by_type(self, attack_type: AttackType) -> list[AttackSimulation]:
         """Get simulations by attack type"""
         return [s for s in self.simulations if s.attack_type == attack_type]
 
-    def get_simulations_by_severity(self, severity: AttackSeverity) -> List[AttackSimulation]:
+    def get_simulations_by_severity(self, severity: AttackSeverity) -> list[AttackSimulation]:
         """Get simulations by severity"""
         return [s for s in self.simulations if s.severity == severity]
 
-    def get_successful_attacks(self) -> List[AttackSimulation]:
+    def get_successful_attacks(self) -> list[AttackSimulation]:
         """Get successful attack simulations"""
         return [s for s in self.simulations if s.success]
 
-    def get_security_summary(self) -> Dict[str, Any]:
+    def get_security_summary(self) -> dict[str, Any]:
         """Get security simulation summary"""
         try:
             total_simulations = len(self.simulations)

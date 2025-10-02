@@ -205,8 +205,7 @@ class StatePropertyTests:
     async def test_status_transition_consistency(self, state_store, job_id, status_transitions):
         """Test that status transitions are consistent and valid"""
         # Create job
-        job = await state_store.create_job(job_id, "Test Job", "Test Description")
-        initial_status = job.status
+        await state_store.create_job(job_id, "Test Job", "Test Description")
 
         # Apply status transitions
         for status in status_transitions:
@@ -357,7 +356,7 @@ class StatePropertyTests:
     async def test_metadata_consistency(self, state_store, job_id, metadata):
         """Test that metadata handling is consistent"""
         # Create job with metadata
-        job = await state_store.create_job(job_id, "Test Job", "Test Description")
+        await state_store.create_job(job_id, "Test Job", "Test Description")
 
         # Update metadata
         await state_store.update_job_metadata(job_id, metadata)
@@ -436,9 +435,9 @@ class StateMachineTests(RuleBasedStateMachine):
         """Complete a step"""
         # Create step if it doesn't exist
         try:
-            step = await self.state_store.get_job_step(job.job_id, step_id)
+            await self.state_store.get_job_step(job.job_id, step_id)
         except:
-            step = await self.state_store.create_job_step(job.job_id, step_id, f"Step {step_id}", "testing")
+            await self.state_store.create_job_step(job.job_id, step_id, f"Step {step_id}", "testing")
 
         # Complete step
         await self.state_store.complete_job_step(job.job_id, step_id, success=success)

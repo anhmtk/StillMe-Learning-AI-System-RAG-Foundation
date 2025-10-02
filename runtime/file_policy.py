@@ -7,14 +7,12 @@ Purpose: Đảm bảo tất cả entrypoints đều tuân thủ FILE_PROTECTION.
 Usage: Gọi load_file_policy() ở đầu mọi entrypoint
 """
 
-import hashlib
 import logging
 import os
 import re
 import shutil
 from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 import yaml
 
@@ -23,19 +21,19 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Global policy instance
-_policy: Optional[Dict[str, Any]] = None
+_policy: Optional[dict[str, Any]] = None
 _policy_loaded = False
 
-def load_file_policy(policy_path: Optional[str] = None) -> Dict[str, Any]:
+def load_file_policy(policy_path: Optional[str] = None) -> dict[str, Any]:
     """
     Load File Protection Policy từ YAML file
-    
+
     Args:
         policy_path: Đường dẫn đến policy file (mặc định: policies/FILE_PROTECTION.yaml)
-    
+
     Returns:
         Dict[str, Any]: FileProtectionPolicy object
-    
+
     Raises:
         FileNotFoundError: Nếu không tìm thấy policy file
         yaml.YAMLError: Nếu không parse được YAML
@@ -78,13 +76,13 @@ def load_file_policy(policy_path: Optional[str] = None) -> Dict[str, Any]:
         logger.error(f"❌ {error_message}")
         raise ValueError(error_message)
 
-def _validate_policy(policy: Dict[str, Any]) -> None:
+def _validate_policy(policy: dict[str, Any]) -> None:
     """
     Validate policy structure
-    
+
     Args:
         policy: Policy object to validate
-    
+
     Raises:
         ValueError: Nếu policy không hợp lệ
     """
@@ -107,13 +105,13 @@ def _validate_policy(policy: Dict[str, Any]) -> None:
         if operation not in policy['rules']:
             raise ValueError(f"Missing rule for operation: {operation}")
 
-def get_file_policy() -> Dict[str, Any]:
+def get_file_policy() -> dict[str, Any]:
     """
     Get cached policy (must be loaded first)
-    
+
     Returns:
         Dict[str, Any]: FileProtectionPolicy object
-    
+
     Raises:
         ValueError: Nếu policy chưa được load
     """
@@ -124,7 +122,7 @@ def get_file_policy() -> Dict[str, Any]:
 def is_policy_loaded() -> bool:
     """
     Check if policy is loaded
-    
+
     Returns:
         bool: True nếu policy đã được load
     """
@@ -141,10 +139,10 @@ def reset_policy_cache() -> None:
 def is_protected_file(file_path: str) -> bool:
     """
     Check if file is protected
-    
+
     Args:
         file_path: Path to file to check
-    
+
     Returns:
         bool: True nếu file được bảo vệ
     """
@@ -153,14 +151,14 @@ def is_protected_file(file_path: str) -> bool:
 
     return file_name in policy['protected_files']
 
-def assert_protected_files(action: str, file_paths: List[str]) -> None:
+def assert_protected_files(action: str, file_paths: list[str]) -> None:
     """
     Assert that protected files are not being modified
-    
+
     Args:
         action: Action being performed ('delete', 'rename', 'move', 'modify')
         file_paths: List of file paths being affected
-    
+
     Raises:
         ValueError: Nếu vi phạm policy
     """
@@ -181,13 +179,13 @@ def assert_protected_files(action: str, file_paths: List[str]) -> None:
                                                    f'Approval required to {action} protected file: {file_path}')
                     raise ValueError(message)
 
-def validate_env_file(file_path: str) -> Tuple[bool, List[str]]:
+def validate_env_file(file_path: str) -> tuple[bool, list[str]]:
     """
     Validate .env file content
-    
+
     Args:
         file_path: Path to .env file
-    
+
     Returns:
         Tuple[bool, List[str]]: (is_valid, error_messages)
     """
@@ -235,11 +233,11 @@ def validate_env_file(file_path: str) -> Tuple[bool, List[str]]:
 def create_backup(file_path: str, operation: str = 'manual') -> str:
     """
     Create backup of protected file
-    
+
     Args:
         file_path: Path to file to backup
         operation: Operation that triggered backup
-    
+
     Returns:
         str: Path to backup file
     """
@@ -287,7 +285,7 @@ def create_backup(file_path: str, operation: str = 'manual') -> str:
 def _cleanup_old_backups(backup_dir: str, max_backups: int) -> None:
     """
     Cleanup old backup files
-    
+
     Args:
         backup_dir: Backup directory path
         max_backups: Maximum number of backups to keep
@@ -310,60 +308,60 @@ def _cleanup_old_backups(backup_dir: str, max_backups: int) -> None:
     except Exception as e:
         logger.error(f"❌ Failed to cleanup old backups: {e}")
 
-def get_protected_files() -> List[str]:
+def get_protected_files() -> list[str]:
     """
     Get list of protected files
-    
+
     Returns:
         List[str]: List of protected file names
     """
     policy = get_file_policy()
     return policy['protected_files']
 
-def get_commit_rules() -> Dict[str, str]:
+def get_commit_rules() -> dict[str, str]:
     """
     Get commit rules for protected files
-    
+
     Returns:
         Dict[str, str]: Commit rules (file_name -> action)
     """
     policy = get_file_policy()
     return policy['commit']
 
-def get_validation_rules() -> Dict[str, Any]:
+def get_validation_rules() -> dict[str, Any]:
     """
     Get validation rules
-    
+
     Returns:
         Dict[str, Any]: Validation rules
     """
     policy = get_file_policy()
     return policy['validation']
 
-def get_backup_config() -> Dict[str, Any]:
+def get_backup_config() -> dict[str, Any]:
     """
     Get backup configuration
-    
+
     Returns:
         Dict[str, Any]: Backup configuration
     """
     policy = get_file_policy()
     return policy['backup']
 
-def get_monitoring_config() -> Dict[str, Any]:
+def get_monitoring_config() -> dict[str, Any]:
     """
     Get monitoring configuration
-    
+
     Returns:
         Dict[str, Any]: Monitoring configuration
     """
     policy = get_file_policy()
     return policy['monitoring']
 
-def get_compliance_config() -> Dict[str, Any]:
+def get_compliance_config() -> dict[str, Any]:
     """
     Get compliance configuration
-    
+
     Returns:
         Dict[str, Any]: Compliance configuration
     """
@@ -373,7 +371,7 @@ def get_compliance_config() -> Dict[str, Any]:
 def ensure_policy_loaded() -> None:
     """
     Ensure policy is loaded, auto-load if not
-    
+
     Raises:
         ValueError: Nếu không thể load policy
     """

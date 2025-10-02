@@ -20,7 +20,7 @@ FUNCTIONALITY / CHỨC NĂNG:
 
 import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Optional
 
 from .common.logging import get_logger
 
@@ -35,7 +35,7 @@ class FakeSandboxDeployer:
     def __init__(self, project_root: Optional[str] = None):
         """Initialize fake deployer"""
         self.project_root = Path(project_root or os.getcwd())
-        self.deployment_logs: List[Dict] = []
+        self.deployment_logs: list[dict] = []
         logger.info(f"🚀 FakeSandboxDeployer initialized (Docker unavailable) for project: {self.project_root}")
 
     async def deploy_security_sandbox(
@@ -43,7 +43,7 @@ class FakeSandboxDeployer:
         name: str = "security-test",
         image: str = "fake-security-image",
         custom_dockerfile: Optional[str] = None
-    ) -> Tuple[bool, str, Dict]:
+    ) -> tuple[bool, str, dict]:
         """
         Fake deployment that always succeeds
         """
@@ -67,7 +67,7 @@ class FakeSandboxDeployer:
         logger.info(f"🎭 Fake deployment completed for {name}")
         return True, f"Fake deployment successful for {name}", result
 
-    async def cleanup(self, container_id: str) -> Tuple[bool, str]:
+    async def cleanup(self, container_id: str) -> tuple[bool, str]:
         """
         Fake cleanup that always succeeds
         """
@@ -79,7 +79,7 @@ class FakeSandboxDeployer:
         logger.info(f"🎭 Fake cleanup completed for {container_id}")
         return True, f"Fake cleanup successful for {container_id}"
 
-    def get_logs(self) -> List[Dict]:
+    def get_logs(self) -> list[dict]:
         """
         Get deployment logs
         """
@@ -95,7 +95,7 @@ class RealDockerDeployer:
         """Initialize real deployer with Docker client"""
         self.docker_client = docker_client
         self.project_root = Path(project_root or os.getcwd())
-        self.deployment_logs: List[Dict] = []
+        self.deployment_logs: list[dict] = []
         logger.info(f"🐳 RealDockerDeployer initialized for project: {self.project_root}")
 
     async def deploy_security_sandbox(
@@ -103,7 +103,7 @@ class RealDockerDeployer:
         name: str = "security-test",
         image: str = "alpine:latest",
         custom_dockerfile: Optional[str] = None
-    ) -> Tuple[bool, str, Dict]:
+    ) -> tuple[bool, str, dict]:
         """
         Real Docker deployment
         """
@@ -146,7 +146,7 @@ class RealDockerDeployer:
             logger.error(error_msg)
             return False, error_msg, {"engine": "docker", "status": "failed", "error": str(e)}
 
-    async def cleanup(self, container_id: str) -> Tuple[bool, str]:
+    async def cleanup(self, container_id: str) -> tuple[bool, str]:
         """
         Real Docker cleanup
         """
@@ -168,7 +168,7 @@ class RealDockerDeployer:
             logger.error(error_msg)
             return False, error_msg
 
-    def get_logs(self) -> List[Dict]:
+    def get_logs(self) -> list[dict]:
         """
         Get deployment logs
         """
@@ -178,7 +178,7 @@ class RealDockerDeployer:
 def get_sandbox_deployer(project_root: Optional[str] = None):
     """
     Get appropriate sandbox deployer based on Docker availability
-    
+
     Returns:
         RealDockerDeployer if Docker is available, FakeSandboxDeployer otherwise
     """

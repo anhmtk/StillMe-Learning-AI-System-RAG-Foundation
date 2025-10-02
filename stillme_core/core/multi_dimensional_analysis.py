@@ -30,7 +30,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -44,7 +44,7 @@ class TimeSeriesData:
     timestamp: datetime
     value: float
     dimension: str
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 @dataclass
@@ -54,8 +54,8 @@ class UserBehaviorMetrics:
     user_id: str
     session_count: int
     avg_session_duration: float
-    feature_usage_frequency: Dict[str, int]
-    usage_patterns: Dict[str, Any]
+    feature_usage_frequency: dict[str, int]
+    usage_patterns: dict[str, Any]
     engagement_score: float
     retention_rate: float
 
@@ -68,8 +68,8 @@ class FeatureUsagePattern:
     usage_frequency: int
     user_adoption_rate: float
     usage_trend: str  # "increasing", "stable", "decreasing"
-    peak_usage_hours: List[int]
-    correlation_with_other_features: Dict[str, float]
+    peak_usage_hours: list[int]
+    correlation_with_other_features: dict[str, float]
     business_impact_score: float
 
 
@@ -78,11 +78,11 @@ class MultiDimensionalResult:
     """Multi-dimensional analysis result"""
 
     analysis_type: str
-    dimensions: List[str]
-    time_range: Tuple[datetime, datetime]
-    aggregated_data: Dict[str, Any]
-    insights: List[str]
-    recommendations: List[str]
+    dimensions: list[str]
+    time_range: tuple[datetime, datetime]
+    aggregated_data: dict[str, Any]
+    insights: list[str]
+    recommendations: list[str]
     confidence_score: float
     timestamp: datetime
 
@@ -92,7 +92,7 @@ class MultiDimensionalAnalysis:
     Enterprise-grade multi-dimensional analytics system
     """
 
-    def __init__(self, metrics_db_path: str, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, metrics_db_path: str, config: Optional[dict[str, Any]] = None):
         self.metrics_db_path = Path(metrics_db_path)
         self.config = config or self._get_default_config()
 
@@ -111,7 +111,7 @@ class MultiDimensionalAnalysis:
             "✅ MultiDimensionalAnalysis initialized với enterprise-grade configuration"
         )
 
-    def _get_default_config(self) -> Dict[str, Any]:
+    def _get_default_config(self) -> dict[str, Any]:
         """Default configuration với analytics focus"""
         return {
             "accuracy_threshold": 0.9995,  # 99.95% accuracy requirement
@@ -210,7 +210,7 @@ class MultiDimensionalAnalysis:
 
     def analyze_user_behavior(
         self, time_range_hours: int = 168
-    ) -> Dict[str, UserBehaviorMetrics]:
+    ) -> dict[str, UserBehaviorMetrics]:
         """
         Analyze user behavior patterns
 
@@ -229,7 +229,7 @@ class MultiDimensionalAnalysis:
                 # Get user behavior data
                 cursor = conn.execute(
                     """
-                    SELECT 
+                    SELECT
                         user_id,
                         session_id,
                         COUNT(*) as event_count,
@@ -249,7 +249,7 @@ class MultiDimensionalAnalysis:
                 # Get feature usage by user
                 cursor = conn.execute(
                     """
-                    SELECT 
+                    SELECT
                         user_id,
                         feature_name,
                         COUNT(*) as usage_count
@@ -339,7 +339,7 @@ class MultiDimensionalAnalysis:
 
     def analyze_feature_usage_patterns(
         self, time_range_hours: int = 168
-    ) -> Dict[str, FeatureUsagePattern]:
+    ) -> dict[str, FeatureUsagePattern]:
         """
         Analyze feature usage patterns
 
@@ -358,7 +358,7 @@ class MultiDimensionalAnalysis:
                 # Get feature usage data
                 cursor = conn.execute(
                     """
-                    SELECT 
+                    SELECT
                         feature_name,
                         COUNT(*) as usage_count,
                         COUNT(DISTINCT user_id) as unique_users,
@@ -376,7 +376,7 @@ class MultiDimensionalAnalysis:
                 # Get hourly usage patterns
                 cursor = conn.execute(
                     """
-                    SELECT 
+                    SELECT
                         feature_name,
                         strftime('%H', timestamp) as hour,
                         COUNT(*) as usage_count
@@ -456,7 +456,7 @@ class MultiDimensionalAnalysis:
 
     def _get_time_series_data(
         self, dimension: str, time_range_hours: int, granularity: str
-    ) -> List[TimeSeriesData]:
+    ) -> list[TimeSeriesData]:
         """Get time series data for analysis"""
         try:
             with sqlite3.connect(self.metrics_db_path) as conn:
@@ -474,7 +474,7 @@ class MultiDimensionalAnalysis:
 
                 cursor = conn.execute(
                     f"""
-                    SELECT 
+                    SELECT
                         {time_format} as time_bucket,
                         COUNT(*) as event_count,
                         AVG(duration_ms) as avg_duration,
@@ -505,8 +505,8 @@ class MultiDimensionalAnalysis:
             return []
 
     def _perform_statistical_analysis(
-        self, time_series_data: List[TimeSeriesData]
-    ) -> Dict[str, Any]:
+        self, time_series_data: list[TimeSeriesData]
+    ) -> dict[str, Any]:
         """Perform statistical analysis on time series data"""
         try:
             if not time_series_data:
@@ -546,7 +546,7 @@ class MultiDimensionalAnalysis:
             logger.error(f"❌ Statistical analysis failed: {e}")
             return {}
 
-    def _calculate_trend(self, values: List[float]) -> str:
+    def _calculate_trend(self, values: list[float]) -> str:
         """Calculate trend direction"""
         try:
             if len(values) < 2:
@@ -574,7 +574,7 @@ class MultiDimensionalAnalysis:
             logger.error(f"❌ Trend calculation failed: {e}")
             return "error"
 
-    def _detect_seasonality(self, values: List[float]) -> Dict[str, Any]:
+    def _detect_seasonality(self, values: list[float]) -> dict[str, Any]:
         """Detect seasonality patterns"""
         try:
             if len(values) < 24:  # Need at least 24 data points
@@ -604,7 +604,7 @@ class MultiDimensionalAnalysis:
             logger.error(f"❌ Seasonality detection failed: {e}")
             return {"detected": False, "pattern": "error"}
 
-    def _calculate_volatility(self, values: List[float]) -> float:
+    def _calculate_volatility(self, values: list[float]) -> float:
         """Calculate volatility (coefficient of variation)"""
         try:
             if not values:
@@ -623,9 +623,9 @@ class MultiDimensionalAnalysis:
 
     def _generate_time_series_insights(
         self,
-        time_series_data: List[TimeSeriesData],
-        statistical_analysis: Dict[str, Any],
-    ) -> List[str]:
+        time_series_data: list[TimeSeriesData],
+        statistical_analysis: dict[str, Any],
+    ) -> list[str]:
         """Generate insights from time series analysis"""
         insights = []
 
@@ -673,8 +673,8 @@ class MultiDimensionalAnalysis:
         return insights
 
     def _generate_time_series_recommendations(
-        self, statistical_analysis: Dict[str, Any]
-    ) -> List[str]:
+        self, statistical_analysis: dict[str, Any]
+    ) -> list[str]:
         """Generate recommendations from time series analysis"""
         recommendations = []
 
@@ -710,8 +710,8 @@ class MultiDimensionalAnalysis:
 
     def _calculate_confidence_score(
         self,
-        time_series_data: List[TimeSeriesData],
-        statistical_analysis: Dict[str, Any],
+        time_series_data: list[TimeSeriesData],
+        statistical_analysis: dict[str, Any],
     ) -> float:
         """Calculate confidence score for analysis"""
         try:
@@ -740,8 +740,8 @@ class MultiDimensionalAnalysis:
             return 0.0
 
     def _calculate_usage_patterns(
-        self, sessions: List[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+        self, sessions: list[dict[str, Any]]
+    ) -> dict[str, Any]:
         """Calculate usage patterns from sessions"""
         try:
             if not sessions:
@@ -772,7 +772,7 @@ class MultiDimensionalAnalysis:
             return {}
 
     def _calculate_engagement_score(
-        self, sessions: List[Dict[str, Any]], feature_usage: Dict[str, int]
+        self, sessions: list[dict[str, Any]], feature_usage: dict[str, int]
     ) -> float:
         """Calculate user engagement score"""
         try:
@@ -803,7 +803,7 @@ class MultiDimensionalAnalysis:
             return 0.0
 
     def _calculate_retention_rate(
-        self, sessions: List[Dict[str, Any]], time_range_hours: int
+        self, sessions: list[dict[str, Any]], time_range_hours: int
     ) -> float:
         """Calculate user retention rate"""
         try:
@@ -856,7 +856,7 @@ class MultiDimensionalAnalysis:
 
                 cursor = conn.execute(
                     """
-                    SELECT 
+                    SELECT
                         strftime('%Y-%m-%d', timestamp) as date,
                         COUNT(*) as usage_count
                     FROM usage_events
@@ -880,7 +880,7 @@ class MultiDimensionalAnalysis:
             logger.error(f"❌ Usage trend calculation failed: {e}")
             return "error"
 
-    def _get_peak_usage_hours(self, hourly_usage: Dict[int, int]) -> List[int]:
+    def _get_peak_usage_hours(self, hourly_usage: dict[int, int]) -> list[int]:
         """Get peak usage hours"""
         try:
             if not hourly_usage:
@@ -902,7 +902,7 @@ class MultiDimensionalAnalysis:
 
     def _calculate_feature_correlation(
         self, feature_name: str, time_range_hours: int
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """Calculate correlation with other features"""
         try:
             with sqlite3.connect(self.metrics_db_path) as conn:
@@ -911,7 +911,7 @@ class MultiDimensionalAnalysis:
                 # Get usage data for all features
                 cursor = conn.execute(
                     """
-                    SELECT 
+                    SELECT
                         feature_name,
                         strftime('%Y-%m-%d %H:00:00', timestamp) as hour,
                         COUNT(*) as usage_count
@@ -945,7 +945,7 @@ class MultiDimensionalAnalysis:
             return {}
 
     def _calculate_correlation(
-        self, usage1: Dict[str, int], usage2: Dict[str, int]
+        self, usage1: dict[str, int], usage2: dict[str, int]
     ) -> Optional[float]:
         """Calculate correlation between two usage patterns"""
         try:
@@ -1015,7 +1015,7 @@ class MultiDimensionalAnalysis:
             logger.error(f"❌ Business impact score calculation failed: {e}")
             return 0.0
 
-    def get_analysis_summary(self, time_range_hours: int = 24) -> Dict[str, Any]:
+    def get_analysis_summary(self, time_range_hours: int = 24) -> dict[str, Any]:
         """Get analysis summary"""
         try:
             return {
@@ -1043,7 +1043,7 @@ class MultiDimensionalAnalysis:
 
 # Factory function
 def create_multi_dimensional_analysis(
-    metrics_db_path: str, config: Optional[Dict[str, Any]] = None
+    metrics_db_path: str, config: Optional[dict[str, Any]] = None
 ) -> MultiDimensionalAnalysis:
     """Factory function để create multi-dimensional analysis"""
     return MultiDimensionalAnalysis(metrics_db_path, config)

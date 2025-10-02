@@ -8,7 +8,7 @@ Stub implementations for symbols used in tests but missing from core.
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # TODO: These are stub implementations for tests
 # Replace with real implementations when available
@@ -38,7 +38,7 @@ class SemanticSearchEngine:
     def __init__(self, *args, **kwargs):
         pass
 
-    def search(self, query: str) -> List[Any]:
+    def search(self, query: str) -> list[Any]:
         """Stub search method"""
         return []
 

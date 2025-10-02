@@ -5,13 +5,11 @@ Ensures all entrypoints load required policies
 """
 
 import ast
-import os
 import sys
 from pathlib import Path
-from typing import List, Set
 
 
-def find_entrypoints() -> List[Path]:
+def find_entrypoints() -> list[Path]:
     """Find all Python entrypoints in the project"""
     entrypoints = []
 
@@ -44,15 +42,8 @@ def find_entrypoints() -> List[Path]:
 
     return entrypoints
 
-def check_policy_imports(file_path: Path) -> Set[str]:
+def check_policy_imports(file_path: Path) -> set[str]:
     """Check if file imports required policies"""
-    required_imports = {
-        "load_interaction_policy",
-        "get_interaction_policy",
-        "load_file_policy",
-        "assert_protected_files",
-        "diagnose_on_skip"
-    }
 
     found_imports = set()
 

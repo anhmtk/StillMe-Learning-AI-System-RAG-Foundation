@@ -357,7 +357,7 @@ class TestKillSwitchMock:
 
     def test_kill_switch_initialization(self, mock_kill_switch):
         """Test kill switch initialization"""
-        assert mock_kill_switch.is_active() == False
+        assert not mock_kill_switch.is_active()
         assert mock_kill_switch.get_reason() == "Not activated"
 
     def test_kill_switch_activation(self, mock_kill_switch):
@@ -365,7 +365,7 @@ class TestKillSwitchMock:
         mock_kill_switch.is_active.return_value = True
         mock_kill_switch.get_reason.return_value = "Test activation"
         mock_kill_switch.activate("Test activation")
-        assert mock_kill_switch.is_active() == True
+        assert mock_kill_switch.is_active()
         assert "Test activation" in mock_kill_switch.get_reason()
 
     def test_kill_switch_deactivation(self, mock_kill_switch):
@@ -373,7 +373,7 @@ class TestKillSwitchMock:
         mock_kill_switch.is_active.return_value = False
         mock_kill_switch.get_reason.return_value = "Test deactivation"
         mock_kill_switch.deactivate("Test deactivation")
-        assert mock_kill_switch.is_active() == False
+        assert not mock_kill_switch.is_active()
         assert "Test deactivation" in mock_kill_switch.get_reason()
 
     def test_kill_switch_check_and_exit(self, mock_kill_switch):
@@ -443,8 +443,8 @@ class TestTransparencyLoggerMock:
     def test_transparency_logger_initialization(self, mock_transparency_logger):
         """Test transparency logger initialization"""
         assert mock_transparency_logger is not None
-        assert mock_transparency_logger.enabled == True
-        assert mock_transparency_logger.log_rationale == True
+        assert mock_transparency_logger.enabled
+        assert mock_transparency_logger.log_rationale
 
     def test_log_decision(self, mock_transparency_logger):
         """Test logging a decision"""
@@ -536,7 +536,7 @@ class TestSecurityManagerMock:
         """Test security manager initialization"""
         assert mock_security_manager is not None
         assert hasattr(mock_security_manager, 'config')
-        assert mock_security_manager.config["security"]["enabled"] == True
+        assert mock_security_manager.config["security"]["enabled"]
 
     def test_validate_input(self, mock_security_manager):
         """Test input validation"""
@@ -544,7 +544,7 @@ class TestSecurityManagerMock:
         result = mock_security_manager.validate_input(test_input)
         assert result is not None
         assert "safe" in result
-        assert result["safe"] == True
+        assert result["safe"]
 
     def test_encrypt_data(self, mock_security_manager):
         """Test data encryption"""
@@ -569,7 +569,7 @@ class TestIntegrationScenariosMock:
     async def test_learning_workflow_integration(self):
         """Test complete learning workflow"""
         # Mock components
-        metrics_collector = Mock()
+        Mock()
         reward_manager = Mock()
         meta_learning_manager = Mock()
 
@@ -642,19 +642,19 @@ class TestIntegrationScenariosMock:
         kill_switch.deactivate = Mock()
 
         # Test normal operation
-        assert kill_switch.is_active() == False
+        assert not kill_switch.is_active()
 
         # Simulate critical issue
         kill_switch.is_active = Mock(return_value=True)
         kill_switch.activate("Critical security issue detected")
 
         # Test system response
-        assert kill_switch.is_active() == True
+        assert kill_switch.is_active()
 
         # Test recovery
         kill_switch.is_active = Mock(return_value=False)
         kill_switch.deactivate("Issue resolved")
-        assert kill_switch.is_active() == False
+        assert not kill_switch.is_active()
 
 
 # Performance Tests

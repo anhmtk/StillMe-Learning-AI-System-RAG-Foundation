@@ -5,7 +5,7 @@ Metrics collection for AgentDev
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 
 def ensure_parent_dir(file_path: str | Path) -> None:
@@ -71,7 +71,7 @@ class AgentDevMetrics:
         # Save metrics
         self._save_metrics(existing_metrics)
 
-    def _update_summary_stats(self, metrics: Dict[str, Any]) -> None:
+    def _update_summary_stats(self, metrics: dict[str, Any]) -> None:
         """Update summary statistics"""
         sessions = metrics.get("sessions", [])
 
@@ -104,7 +104,7 @@ class AgentDevMetrics:
             "last_updated": datetime.now().isoformat(),
         }
 
-    def load_metrics(self) -> Dict[str, Any]:
+    def load_metrics(self) -> dict[str, Any]:
         """Load existing metrics from file"""
         if not self.metrics_file.exists():
             return {}
@@ -115,13 +115,13 @@ class AgentDevMetrics:
         except (OSError, json.JSONDecodeError):
             return {}
 
-    def _save_metrics(self, metrics: Dict[str, Any]) -> None:
+    def _save_metrics(self, metrics: dict[str, Any]) -> None:
         """Save metrics to file"""
         ensure_parent_dir(self.metrics_file)
         with open(self.metrics_file, "w", encoding="utf-8") as f:
             json.dump(metrics, f, ensure_ascii=False, indent=2)
 
-    def get_summary(self) -> Dict[str, Any]:
+    def get_summary(self) -> dict[str, Any]:
         """Get summary statistics"""
         metrics = self.load_metrics()
         return metrics.get("summary", {})
@@ -132,7 +132,7 @@ class AgentDevMetrics:
         sessions = metrics.get("sessions", [])
         return sessions[-limit:] if sessions else []
 
-    def get_action_stats(self) -> Dict[str, Dict[str, int]]:
+    def get_action_stats(self) -> dict[str, dict[str, int]]:
         """Get statistics by action type"""
         metrics = self.load_metrics()
         sessions = metrics.get("sessions", [])
@@ -188,7 +188,7 @@ def record_session(
     )
 
 
-def get_summary() -> Dict[str, Any]:
+def get_summary() -> dict[str, Any]:
     """Convenience function to get summary statistics"""
     return get_metrics().get_summary()
 
@@ -198,6 +198,6 @@ def get_recent_sessions(limit: int = 10) -> list:
     return get_metrics().get_recent_sessions(limit=limit)
 
 
-def get_action_stats() -> Dict[str, Dict[str, int]]:
+def get_action_stats() -> dict[str, dict[str, int]]:
     """Convenience function to get action statistics"""
     return get_metrics().get_action_stats()

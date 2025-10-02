@@ -175,7 +175,7 @@ class TestSubprocessDecode:
         data = b"Test data " * 1000
 
         # Multiple decodes should not cause memory leaks
-        for i in range(100):
+        for _i in range(100):
             result = safe_decode(data)
             assert isinstance(result, str)
             assert "Test data" in result

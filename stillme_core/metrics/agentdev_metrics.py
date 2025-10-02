@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class MetricRecord:
     unit: str
     metric_type: MetricType
     timestamp: datetime
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -34,8 +34,8 @@ class AgentDevMetrics:
 
     def __init__(self):
         self.logger = logger
-        self.metrics: List[MetricRecord] = []
-        self.sessions: List[Dict[str, Any]] = []
+        self.metrics: list[MetricRecord] = []
+        self.sessions: list[dict[str, Any]] = []
         self.logger.info("✅ AgentDevMetrics initialized")
 
     def record_metric(self,
@@ -43,7 +43,7 @@ class AgentDevMetrics:
                      value: float,
                      unit: str,
                      metric_type: MetricType,
-                     metadata: Dict[str, Any] = None) -> MetricRecord:
+                     metadata: dict[str, Any] = None) -> MetricRecord:
         """Record a metric"""
         try:
             metric = MetricRecord(
@@ -63,7 +63,7 @@ class AgentDevMetrics:
             self.logger.error(f"❌ Failed to record metric: {e}")
             raise
 
-    def record_session(self, session_data: Dict[str, Any]) -> str:
+    def record_session(self, session_data: dict[str, Any]) -> str:
         """Record a session"""
         try:
             session_id = f"session_{len(self.sessions) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -78,11 +78,11 @@ class AgentDevMetrics:
             self.logger.error(f"❌ Failed to record session: {e}")
             raise
 
-    def get_metrics_by_type(self, metric_type: MetricType) -> List[MetricRecord]:
+    def get_metrics_by_type(self, metric_type: MetricType) -> list[MetricRecord]:
         """Get metrics by type"""
         return [m for m in self.metrics if m.metric_type == metric_type]
 
-    def get_summary(self) -> Dict[str, Any]:
+    def get_summary(self) -> dict[str, Any]:
         """Get metrics summary"""
         try:
             total_metrics = len(self.metrics)
@@ -120,10 +120,10 @@ def get_metrics() -> AgentDevMetrics:
         _metrics_instance = AgentDevMetrics()
     return _metrics_instance
 
-def get_summary() -> Dict[str, Any]:
+def get_summary() -> dict[str, Any]:
     """Get metrics summary (convenience function)"""
     return get_metrics().get_summary()
 
-def record_session(session_data: Dict[str, Any]) -> str:
+def record_session(session_data: dict[str, Any]) -> str:
     """Record a session (convenience function)"""
     return get_metrics().record_session(session_data)

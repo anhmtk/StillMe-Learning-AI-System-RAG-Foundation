@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ class ValidationResult:
     success: bool
     message: str
     severity: ErrorSeverity
-    details: Dict[str, Any] = None
+    details: dict[str, Any] = None
     timestamp: datetime = None
 
     def __post_init__(self):
@@ -34,10 +34,10 @@ class AgentDevValidator:
 
     def __init__(self):
         self.logger = logger
-        self.validation_history: List[ValidationResult] = []
+        self.validation_history: list[ValidationResult] = []
         self.logger.info("✅ AgentDevValidator initialized")
 
-    def validate_agentdev_task(self, task: Dict[str, Any]) -> ValidationResult:
+    def validate_agentdev_task(self, task: dict[str, Any]) -> ValidationResult:
         """Validate AgentDev task"""
         try:
             # Basic validation
@@ -99,7 +99,7 @@ class AgentDevValidator:
                 severity=ErrorSeverity.CRITICAL
             )
 
-    def get_validation_summary(self) -> Dict[str, Any]:
+    def get_validation_summary(self) -> dict[str, Any]:
         """Get validation summary"""
         try:
             total_validations = len(self.validation_history)

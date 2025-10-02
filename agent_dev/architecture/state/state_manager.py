@@ -6,7 +6,6 @@ Enterprise-grade state management with persistence and recovery
 
 import asyncio
 import json
-import pickle
 import threading
 import time
 import uuid
@@ -14,7 +13,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, Generic, List, Optional, Type, TypeVar
+from typing import Any, Optional, TypeVar
 
 import aiofiles
 
@@ -36,10 +35,10 @@ class StateSnapshot:
     snapshot_id: str
     state_type: StateType
     entity_id: str
-    data: Dict[str, Any]
+    data: dict[str, Any]
     timestamp: float
     version: int
-    metadata: Optional[Dict[str, Any]] = None
+    metadata: Optional[dict[str, Any]] = None
 
 @dataclass
 class StateTransition:
@@ -50,15 +49,15 @@ class StateTransition:
     to_state: str
     timestamp: float
     reason: str
-    data: Optional[Dict[str, Any]] = None
+    data: Optional[dict[str, Any]] = None
 
 class StateManager:
     """Enterprise state manager with persistence, recovery, and versioning"""
 
     def __init__(self, config_path: Optional[str] = None):
-        self.states: Dict[str, Dict[str, Any]] = {}
-        self.snapshots: Dict[str, List[StateSnapshot]] = {}
-        self.transitions: Dict[str, List[StateTransition]] = {}
+        self.states: dict[str, dict[str, Any]] = {}
+        self.snapshots: dict[str, list[StateSnapshot]] = {}
+        self.transitions: dict[str, list[StateTransition]] = {}
         self.config = self._load_config(config_path)
         self.persistence_enabled = self.config.get('persistence', {}).get('enabled', True)
         self.state_dir = Path(self.config.get('persistence', {}).get('directory', '.agentdev/state'))
@@ -68,7 +67,7 @@ class StateManager:
         self.executor = ThreadPoolExecutor(max_workers=4)
         self.running = False
 
-    def _load_config(self, config_path: Optional[str] = None) -> Dict[str, Any]:
+    def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
         """Load state manager configuration"""
         if config_path:
             config_file = Path(config_path)
@@ -91,14 +90,14 @@ class StateManager:
                 'compression': True
             }
 
-    def get_state(self, entity_id: str, state_type: StateType) -> Optional[Dict[str, Any]]:
+    def get_state(self, entity_id: str, state_type: StateType) -> Optional[dict[str, Any]]:
         """Get current state for an entity"""
         with self.lock:
             state_key = f"{state_type.value}:{entity_id}"
             return self.states.get(state_key, {}).copy()
 
     def set_state(self, entity_id: str, state_type: StateType,
-                 state_data: Dict[str, Any], reason: str = "manual_update") -> bool:
+                 state_data: dict[str, Any], reason: str = "manual_update") -> bool:
         """Set state for an entity"""
         with self.lock:
             state_key = f"{state_type.value}:{entity_id}"
@@ -130,7 +129,7 @@ class StateManager:
             return True
 
     def create_checkpoint(self, entity_id: str, state_type: StateType,
-                         metadata: Optional[Dict[str, Any]] = None) -> str:
+                         metadata: Optional[dict[str, Any]] = None) -> str:
         """Create a checkpoint/snapshot of current state"""
         with self.lock:
             state_key = f"{state_type.value}:{entity_id}"
@@ -182,12 +181,12 @@ class StateManager:
             print(f"🔄 State restored: {entity_id} from snapshot {snapshot_id}")
             return True
 
-    def get_checkpoints(self, entity_id: str) -> List[StateSnapshot]:
+    def get_checkpoints(self, entity_id: str) -> list[StateSnapshot]:
         """Get all checkpoints for an entity"""
         with self.lock:
             return self.snapshots.get(entity_id, []).copy()
 
-    def get_state_transitions(self, entity_id: str) -> List[StateTransition]:
+    def get_state_transitions(self, entity_id: str) -> list[StateTransition]:
         """Get state transition history for an entity"""
         with self.lock:
             return self.transitions.get(entity_id, []).copy()
@@ -300,7 +299,7 @@ class StateManager:
     async def _create_checkpoint_async(self, entity_id: str, state_type: StateType):
         """Create checkpoint asynchronously"""
         try:
-            checkpoint_id = self.create_checkpoint(
+            self.create_checkpoint(
                 entity_id,
                 state_type,
                 metadata={"auto_checkpoint": True}
@@ -309,7 +308,7 @@ class StateManager:
         except Exception as e:
             print(f"⚠️ Failed to create auto checkpoint for {entity_id}: {e}")
 
-    def get_state_statistics(self) -> Dict[str, Any]:
+    def get_state_statistics(self) -> dict[str, Any]:
         """Get state manager statistics"""
         with self.lock:
             total_states = len(self.states)
@@ -362,7 +361,7 @@ class TaskState:
     """Task state management"""
 
     @staticmethod
-    def create_task(task_id: str, task_type: str, config: Dict[str, Any]) -> bool:
+    def create_task(task_id: str, task_type: str, config: dict[str, Any]) -> bool:
         """Create a new task state"""
         return state_manager.set_state(
             entity_id=task_id,
@@ -379,7 +378,7 @@ class TaskState:
         )
 
     @staticmethod
-    def update_task_status(task_id: str, status: str, progress: Optional[Dict[str, Any]] = None) -> bool:
+    def update_task_status(task_id: str, status: str, progress: Optional[dict[str, Any]] = None) -> bool:
         """Update task status"""
         current_state = state_manager.get_state(task_id, StateType.TASK_STATE)
         if not current_state:
@@ -428,7 +427,7 @@ class ExecutionState:
         )
 
     @staticmethod
-    def add_execution_step(execution_id: str, step_data: Dict[str, Any]) -> bool:
+    def add_execution_step(execution_id: str, step_data: dict[str, Any]) -> bool:
         """Add execution step"""
         current_state = state_manager.get_state(execution_id, StateType.EXECUTION_STATE)
         if not current_state:

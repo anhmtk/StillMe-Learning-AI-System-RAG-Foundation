@@ -11,7 +11,7 @@ import time
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set
+from typing import Any, Optional
 
 import aiofiles
 import requests
@@ -48,8 +48,8 @@ class ThreatIndicator:
     source: str
     first_seen: float
     last_seen: float
-    tags: List[str]
-    metadata: Dict[str, Any]
+    tags: list[str]
+    metadata: dict[str, Any]
 
 @dataclass
 class ThreatReport:
@@ -59,25 +59,25 @@ class ThreatReport:
     description: str
     threat_type: ThreatType
     severity: ThreatSeverity
-    indicators: List[ThreatIndicator]
+    indicators: list[ThreatIndicator]
     created_at: float
     updated_at: float
     source: str
-    references: List[str]
+    references: list[str]
 
 class ThreatIntelligence:
     """Enterprise threat intelligence system"""
 
     def __init__(self, config_path: Optional[str] = None):
         self.config = self._load_config(config_path)
-        self.indicators: Dict[str, ThreatIndicator] = {}
-        self.reports: Dict[str, ThreatReport] = {}
-        self.blocked_indicators: Set[str] = set()
+        self.indicators: dict[str, ThreatIndicator] = {}
+        self.reports: dict[str, ThreatReport] = {}
+        self.blocked_indicators: set[str] = set()
         self.intelligence_sources = self._load_intelligence_sources()
         self.update_interval = self.config.get('update_interval', 3600)  # 1 hour
         self.running = False
 
-    def _load_config(self, config_path: Optional[str] = None) -> Dict[str, Any]:
+    def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
         """Load threat intelligence configuration"""
         if config_path:
             config_file = Path(config_path)
@@ -109,7 +109,7 @@ class ThreatIntelligence:
                 }
             }
 
-    def _load_intelligence_sources(self) -> Dict[str, Dict[str, Any]]:
+    def _load_intelligence_sources(self) -> dict[str, dict[str, Any]]:
         """Load threat intelligence sources configuration"""
         return {
             'virustotal': {
@@ -146,8 +146,8 @@ class ThreatIntelligence:
 
     def add_indicator(self, indicator_type: ThreatType, value: str,
                      severity: ThreatSeverity, confidence: float,
-                     source: str, tags: Optional[List[str]] = None,
-                     metadata: Optional[Dict[str, Any]] = None) -> str:
+                     source: str, tags: Optional[list[str]] = None,
+                     metadata: Optional[dict[str, Any]] = None) -> str:
         """Add threat indicator"""
         indicator_id = self._calculate_indicator_hash(indicator_type, value)
 
@@ -202,7 +202,7 @@ class ThreatIntelligence:
             return True
         return False
 
-    async def _fetch_virustotal_data(self, indicator_type: ThreatType, value: str) -> Optional[Dict[str, Any]]:
+    async def _fetch_virustotal_data(self, indicator_type: ThreatType, value: str) -> Optional[dict[str, Any]]:
         """Fetch data from VirusTotal API"""
         api_key = self.config['sources']['api_keys'].get('virustotal')
         if not api_key:
@@ -241,7 +241,7 @@ class ThreatIntelligence:
             print(f"⚠️ VirusTotal API error: {e}")
             return None
 
-    async def _fetch_abuseipdb_data(self, ip: str) -> Optional[Dict[str, Any]]:
+    async def _fetch_abuseipdb_data(self, ip: str) -> Optional[dict[str, Any]]:
         """Fetch data from AbuseIPDB API"""
         api_key = self.config['sources']['api_keys'].get('abuseipdb')
         if not api_key:
@@ -264,7 +264,7 @@ class ThreatIntelligence:
             print(f"⚠️ AbuseIPDB API error: {e}")
             return None
 
-    async def _fetch_malware_domains(self) -> List[str]:
+    async def _fetch_malware_domains(self) -> list[str]:
         """Fetch malware domains list"""
         source_config = self.intelligence_sources['malware_domains']
 
@@ -286,7 +286,7 @@ class ThreatIntelligence:
             print(f"⚠️ Malware domains fetch error: {e}")
             return []
 
-    async def _fetch_openphish_urls(self) -> List[str]:
+    async def _fetch_openphish_urls(self) -> list[str]:
         """Fetch OpenPhish phishing URLs"""
         source_config = self.intelligence_sources['openphish']
 
@@ -334,7 +334,7 @@ class ThreatIntelligence:
 
         print(f"✅ Threat intelligence updated: {len(self.indicators)} indicators")
 
-    async def analyze_artifact(self, artifact_type: str, artifact_value: str) -> Dict[str, Any]:
+    async def analyze_artifact(self, artifact_type: str, artifact_value: str) -> dict[str, Any]:
         """Analyze artifact against threat intelligence"""
         analysis_result = {
             'artifact_type': artifact_type,
@@ -402,7 +402,7 @@ class ThreatIntelligence:
 
         return analysis_result
 
-    def get_threat_statistics(self) -> Dict[str, Any]:
+    def get_threat_statistics(self) -> dict[str, Any]:
         """Get threat intelligence statistics"""
         total_indicators = len(self.indicators)
         blocked_indicators = len(self.blocked_indicators)
@@ -494,7 +494,7 @@ def check_threat(artifact_type: str, artifact_value: str) -> Optional[ThreatIndi
         return threat_intelligence.check_indicator(threat_type, artifact_value)
     return None
 
-async def analyze_artifact(artifact_type: str, artifact_value: str) -> Dict[str, Any]:
+async def analyze_artifact(artifact_type: str, artifact_value: str) -> dict[str, Any]:
     """Analyze artifact against threat intelligence"""
     return await threat_intelligence.analyze_artifact(artifact_type, artifact_value)
 
