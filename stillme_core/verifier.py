@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 logger = logging.getLogger(__name__)
 
@@ -38,14 +38,14 @@ class VerificationResult:
         if self.metadata is None:
             self.metadata = {}
 
-class Verifier:
-    """Verifier for StillMe Framework"""
+class LegacyVerifier:
+    """Legacy Verifier for StillMe Framework - DEPRECATED"""
 
     def __init__(self):
         self.logger = logger
         self.verification_results: list[VerificationResult] = []
         self.verification_config = self._initialize_verification_config()
-        self.logger.info("✅ Verifier initialized")
+        self.logger.info("✅ Legacy Verifier initialized")
 
     def _initialize_verification_config(self) -> dict[str, Any]:
         """Initialize verification configuration"""
@@ -313,11 +313,12 @@ class Verifier:
         self.verification_results.clear()
         self.logger.info("🧹 All verification results cleared")
     
-    def verify(self, step: dict[str, Any], exec_result: dict[str, Any]) -> dict[str, Any]:
+    def verify(self, step: dict[str, Any], exec_result: dict[str, Any], success_criteria: Optional[dict[str, Any]] = None) -> Union[bool, dict[str, Any]]:
         """Verify execution result against step criteria"""
         try:
-            # Extract success criteria from step
-            success_criteria = step.get("success_criteria", {})
+            # Use provided success_criteria or extract from step
+            if success_criteria is None:
+                success_criteria = step.get("success_criteria", {})
             expected_exit_code = success_criteria.get("exit_code", 0)
             stdout_patterns = success_criteria.get("stdout_patterns", [])
             stderr_patterns = success_criteria.get("stderr_patterns", [])
@@ -473,3 +474,7 @@ class Verifier:
                     return True
         
         return False
+
+
+# Backward compatibility alias
+Verifier = LegacyVerifier
