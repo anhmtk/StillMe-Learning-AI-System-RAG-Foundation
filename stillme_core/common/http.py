@@ -11,7 +11,7 @@ import json
 import time
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 from urllib.parse import urljoin
 
 import httpx
@@ -41,10 +41,10 @@ class HTTPRequest:
 
     method: HTTPMethod
     url: str
-    headers: Optional[Dict[str, str]] = None
-    params: Optional[Dict[str, Any]] = None
-    data: Optional[Union[Dict[str, Any], str, bytes]] = None
-    json_data: Optional[Dict[str, Any]] = None
+    headers: Optional[dict[str, str]] = None
+    params: Optional[dict[str, Any]] = None
+    data: Optional[Union[dict[str, Any], str, bytes]] = None
+    json_data: Optional[dict[str, Any]] = None
     timeout: Optional[float] = None
     follow_redirects: bool = True
     verify_ssl: bool = True
@@ -55,13 +55,13 @@ class HTTPResponse:
     """HTTP Response wrapper - Wrapper HTTP Response"""
 
     status_code: int
-    headers: Dict[str, str]
+    headers: dict[str, str]
     content: bytes
     text: str
     url: str
     elapsed_time: float
     request: HTTPRequest
-    json_data: Optional[Dict[str, Any]] = None
+    json_data: Optional[dict[str, Any]] = None
 
     def is_success(self) -> bool:
         """Check if response is successful - Kiểm tra response có thành công không"""
@@ -90,7 +90,7 @@ class HTTPClientConfig:
     """HTTP Client configuration - Cấu hình HTTP Client"""
 
     base_url: Optional[str] = None
-    default_headers: Optional[Dict[str, str]] = None
+    default_headers: Optional[dict[str, str]] = None
     timeout: float = 30.0
     max_retries: int = 3
     retry_delay: float = 1.0
@@ -147,7 +147,7 @@ class AsyncHttpClient:
             return urljoin(self.config.base_url, url)
         return url
 
-    def _prepare_headers(self, request: HTTPRequest) -> Dict[str, str]:
+    def _prepare_headers(self, request: HTTPRequest) -> dict[str, str]:
         """Prepare headers for request - Chuẩn bị headers cho request"""
         headers = self.default_headers.copy()
         if request.headers:
@@ -156,7 +156,7 @@ class AsyncHttpClient:
 
     def _prepare_data(
         self, request: HTTPRequest
-    ) -> Optional[Union[Dict[str, Any], str, bytes]]:
+    ) -> Optional[Union[dict[str, Any], str, bytes]]:
         """Prepare data for request - Chuẩn bị data cho request"""
         if request.json_data:
             return json.dumps(request.json_data)
@@ -355,7 +355,7 @@ class HttpRequestBuilder:
         self._request.url = url
         return self
 
-    def headers(self, headers: Dict[str, str]) -> "HttpRequestBuilder":
+    def headers(self, headers: dict[str, str]) -> "HttpRequestBuilder":
         """Set headers - Thiết lập headers"""
         self._request.headers = headers
         return self
@@ -367,7 +367,7 @@ class HttpRequestBuilder:
         self._request.headers[key] = value
         return self
 
-    def params(self, params: Dict[str, Any]) -> "HttpRequestBuilder":
+    def params(self, params: dict[str, Any]) -> "HttpRequestBuilder":
         """Set query parameters - Thiết lập query parameters"""
         self._request.params = params
         return self
@@ -379,12 +379,12 @@ class HttpRequestBuilder:
         self._request.params[key] = value
         return self
 
-    def data(self, data: Union[Dict[str, Any], str, bytes]) -> "HttpRequestBuilder":
+    def data(self, data: Union[dict[str, Any], str, bytes]) -> "HttpRequestBuilder":
         """Set request data - Thiết lập request data"""
         self._request.data = data
         return self
 
-    def json(self, json_data: Dict[str, Any]) -> "HttpRequestBuilder":
+    def json(self, json_data: dict[str, Any]) -> "HttpRequestBuilder":
         """Set JSON data - Thiết lập JSON data"""
         self._request.json_data = json_data
         return self
@@ -417,8 +417,8 @@ class ResponseValidator:
 
     @staticmethod
     def validate_json_response(
-        response: HTTPResponse, required_fields: Optional[List[str]] = None
-    ) -> Dict[str, Any]:
+        response: HTTPResponse, required_fields: Optional[list[str]] = None
+    ) -> dict[str, Any]:
         """
         Validate JSON response - Xác thực JSON response
 
@@ -448,7 +448,7 @@ class ResponseValidator:
         return response.json_data
 
     @staticmethod
-    def validate_status_code(response: HTTPResponse, expected_codes: List[int]) -> None:
+    def validate_status_code(response: HTTPResponse, expected_codes: list[int]) -> None:
         """
         Validate status code - Xác thực status code
 
@@ -468,7 +468,7 @@ class ResponseValidator:
 # Convenience functions - Các hàm tiện ích
 
 
-async def get_json(url: str, **kwargs) -> Dict[str, Any]:
+async def get_json(url: str, **kwargs) -> dict[str, Any]:
     """
     Make GET request and return JSON - Thực hiện GET request và trả về JSON
 
@@ -485,7 +485,7 @@ async def get_json(url: str, **kwargs) -> Dict[str, Any]:
     return ResponseValidator.validate_json_response(response)
 
 
-async def post_json(url: str, data: Dict[str, Any], **kwargs) -> Dict[str, Any]:
+async def post_json(url: str, data: dict[str, Any], **kwargs) -> dict[str, Any]:
     """
     Make POST request with JSON data - Thực hiện POST request với JSON data
 
@@ -546,3 +546,12 @@ class SecureHttpClient(AsyncHttpClient):
 
         super().__init__(config)
         logger.info("Secure HTTP client initialized with security headers")
+    
+    async def __aenter__(self):
+        """Async context manager entry"""
+        return self
+    
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Async context manager exit"""
+        # Clean up resources if needed
+        pass
