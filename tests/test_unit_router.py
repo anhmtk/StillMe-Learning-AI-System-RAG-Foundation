@@ -3,7 +3,7 @@ Unit Tests for Router Module
 Tests model selection, fallback mechanisms, and routing logic
 """
 
-from typing import Any, Dict
+from typing import Any
 
 import pytest
 
@@ -13,12 +13,12 @@ try:
 except ImportError:
     # Mock classes for testing if not implemented
     class Router:
-        def __init__(self, config: Dict[str, Any]):
+        def __init__(self, config: dict[str, Any]):
             self.config = config
             self.models = config.get('models', {})
             self.fallback_enabled = config.get('fallback_enabled', True)
 
-        def route(self, request: Dict[str, Any]) -> Dict[str, Any]:
+        def route(self, request: dict[str, Any]) -> dict[str, Any]:
             return {
                 'provider': 'mock-provider',
                 'model': 'mock-model',
@@ -27,11 +27,11 @@ except ImportError:
             }
 
     class ModelSelector:
-        def select_model(self, request: Dict[str, Any]) -> str:
+        def select_model(self, request: dict[str, Any]) -> str:
             return 'mock-model'
 
     class FallbackHandler:
-        def handle_fallback(self, request: Dict[str, Any]) -> Dict[str, Any]:
+        def handle_fallback(self, request: dict[str, Any]) -> dict[str, Any]:
             return {'fallback': True, 'provider': 'fallback-provider'}
 
 @pytest.mark.unit
@@ -252,6 +252,9 @@ class TestRouterPerformance:
         end_time = time.time()
 
         total_time = end_time - start_time
+        # Handle case where total_time is too small (avoid ZeroDivisionError)
+        if total_time < 0.001:  # Less than 1ms
+            total_time = 0.001  # Set minimum time to avoid division by zero
         throughput = len(requests) / total_time
 
         assert throughput > 10  # Should handle at least 10 requests/second

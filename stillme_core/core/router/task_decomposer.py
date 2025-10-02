@@ -180,7 +180,6 @@ class TaskDecomposer:
             "avg_decomposition_time": 0.0,
         }
 
-from stillme_core.observability.logger import get_logger
         self.logger.info("🔧 Task Decomposer initialized")
 
     def _load_decomposition_patterns(self) -> Dict[str, Any]:
@@ -459,7 +458,6 @@ from stillme_core.observability.logger import get_logger
                 return decomposition
 
             except Exception as e:
-from stillme_core.observability.logger import get_logger
                 self.logger.error(f"Error decomposing task: {e}")
                 span.record_exception(e)
                 raise
@@ -1066,7 +1064,6 @@ from stillme_core.observability.logger import get_logger
         self, decomposition: TaskDecomposition, processing_time: float
     ):
         """Log decomposition for debugging and analysis"""
-from stillme_core.observability.logger import get_logger
         self.logger.info(
             "Task decomposed successfully",
             extra={
@@ -1100,7 +1097,6 @@ from stillme_core.observability.logger import get_logger
         """Update the status of a subtask"""
         # This would typically update a database or storage system
         # For now, we'll just log the update
-from stillme_core.observability.logger import get_logger
         self.logger.info(
             "Subtask status updated",
             extra={

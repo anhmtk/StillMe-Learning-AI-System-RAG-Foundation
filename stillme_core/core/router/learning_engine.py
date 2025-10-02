@@ -160,7 +160,6 @@ class LearningEngine:
             "accuracy_improvement": 0.0,
         }
 
-from stillme_core.observability.logger import get_logger
         self.logger.info("🧠 Learning Engine initialized")
 
     async def record_learning_event(
@@ -188,8 +187,6 @@ from stillme_core.observability.logger import get_logger
 
         # Trigger pattern learning
         await self._learn_from_event(event)
-
-from stillme_core.observability.logger import get_logger
         self.logger.debug(f"Recorded learning event: {event_type.value}")
 
     async def _learn_from_event(self, event: LearningEvent):
