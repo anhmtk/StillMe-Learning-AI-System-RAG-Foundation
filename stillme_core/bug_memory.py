@@ -1,10 +1,9 @@
 """Bug Memory System for StillMe Framework"""
 
-import json
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +16,7 @@ class BugRecord:
     status: str
     created_at: datetime
     updated_at: datetime
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -28,7 +27,7 @@ class BugMemory:
 
     def __init__(self):
         self.logger = logger
-        self.bugs: Dict[str, BugRecord] = {}
+        self.bugs: dict[str, BugRecord] = {}
         self.logger.info("✅ BugMemory initialized")
 
     def add_bug(self, bug_id: str, description: str, severity: str = "medium") -> bool:
@@ -63,11 +62,11 @@ class BugMemory:
             return True
         return False
 
-    def get_all_bugs(self) -> List[BugRecord]:
+    def get_all_bugs(self) -> list[BugRecord]:
         """Get all bugs"""
         return list(self.bugs.values())
 
-    def get_bugs_by_severity(self, severity: str) -> List[BugRecord]:
+    def get_bugs_by_severity(self, severity: str) -> list[BugRecord]:
         """Get bugs by severity"""
         return [bug for bug in self.bugs.values() if bug.severity == severity]
 
@@ -75,3 +74,13 @@ class BugMemory:
         """Clear all bugs"""
         self.bugs.clear()
         self.logger.info("🧹 All bugs cleared")
+
+    def record(self, file: str, test_name: Optional[str], message: str) -> bool:
+        """Record a bug/error for AgentDev compatibility"""
+        try:
+            bug_id = f"{file}_{test_name or 'unknown'}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            description = f"File: {file}, Test: {test_name or 'N/A'}, Message: {message[:200]}"
+            return self.add_bug(bug_id, description, "medium")
+        except Exception as e:
+            self.logger.error(f"❌ Failed to record bug: {e}")
+            return False

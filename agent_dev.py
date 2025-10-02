@@ -480,8 +480,8 @@ def _log_jsonl(log_dir: _Path, record: dict) -> _Path:
 def agentdev_run_once(
     *,
     planner: Optional[object] = None,
-    executor: Optional[object] = None,
-    bug_memory: Optional[object] = None,
+    executor: Optional[_PatchExecutor] = None,
+    bug_memory: Optional[_BugMemory] = None,
     log_dir: _Path = _Path("logs/agentdev"),
     run_full_suite_after_pass: bool = False,
     tests_dir: str = "tests",
@@ -502,8 +502,8 @@ def agentdev_run_once(
     """
     # Defaults for real run, tests may inject fakes
     planner = planner or _Planner()
-    executor = executor or _PatchExecutor()
-    bug_memory = bug_memory or _BugMemory()
+    actual_executor: _PatchExecutor = executor or _PatchExecutor()
+    actual_bug_memory: _BugMemory = bug_memory or _BugMemory()
 
     # Build plan items
     items = None
@@ -542,10 +542,10 @@ def agentdev_run_once(
     branch_name = None
     # Create feature branch up front
     try:
-        if hasattr(executor, "create_feature_branch"):
+        if hasattr(actual_executor, "create_feature_branch"):
             ts = _dt.datetime.now().strftime("%Y%m%d%H%M%S")
             branch_name = f"feature/agentdev-{ts}"
-            _ = executor.create_feature_branch(branch_name)  # type: ignore
+            _ = actual_executor.create_feature_branch(branch_name)
     except Exception:
         branch_name = None
     t0 = _t.perf_counter()
@@ -555,15 +555,15 @@ def agentdev_run_once(
             # Synthesize patch via model
             ai = _AIManager()
             context = ""  # TODO: optional file context extraction
-            diff = ai.generate_patch(chosen, context=context)  # type: ignore
-            setattr(chosen, "patch", diff or None)  # type: ignore
+            diff = ai.generate_patch(chosen, context=context)
+            chosen.patch = diff or None
 
-        if hasattr(executor, "apply_patch_and_test"):
-            exec_res = executor.apply_patch_and_test(chosen)  # type: ignore
+        if hasattr(actual_executor, "apply_patch_and_test"):
+            exec_res = actual_executor.apply_patch_and_test(chosen)
         else:
             if diff:
-                _ = executor.apply_unified_diff(diff)  # type: ignore
-            exec_res = executor.run_pytest(getattr(chosen, "tests_to_run", None))  # type: ignore
+                _ = actual_executor.apply_unified_diff(diff)
+            exec_res = actual_executor.run_pytest(chosen.tests_to_run)
             exec_res = {"ok": bool(getattr(exec_res, "ok", False))}
     except Exception as e:
         exec_res = {"ok": False, "error": str(e)}
@@ -571,16 +571,16 @@ def agentdev_run_once(
     ok = bool(exec_res.get("ok", False)) if isinstance(exec_res, dict) else False
     duration_ms = int((_t.perf_counter() - t0) * 1000)
     if ok:
-        _log_jsonl(log_dir, {"step": "apply", "item_id": chosen.id, "action": getattr(chosen, "action", "unknown"), "ok": True, "branch": branch_name, "refined": False, "test_files": getattr(chosen, "tests_to_run", []), "duration_ms": duration_ms})
+        _log_jsonl(log_dir, {"step": "apply", "item_id": chosen.id, "action": chosen.action, "ok": True, "branch": branch_name, "refined": False, "test_files": chosen.tests_to_run, "duration_ms": duration_ms})
         result_bool = True
     else:
         # Record bug memory once
         try:
-            if hasattr(bug_memory, "record"):
-                bug_memory.record(file=getattr(chosen, "target", ""), test_name=(getattr(chosen, "tests_to_run", None) or [None])[0], message=str(exec_res))  # type: ignore
+            if hasattr(actual_bug_memory, "record"):
+                actual_bug_memory.record(file=chosen.target or "unknown", test_name=(chosen.tests_to_run or [None])[0], message=str(exec_res))
         except Exception:
             pass
-        _log_jsonl(log_dir, {"step": "apply", "item_id": getattr(chosen, "id", "?"), "action": getattr(chosen, "action", ""), "ok": False, "error_summary": str(exec_res)[:500], "duration_ms": duration_ms, "branch": branch_name})
+        _log_jsonl(log_dir, {"step": "apply", "item_id": chosen.id, "action": chosen.action, "ok": False, "error_summary": str(exec_res)[:500], "duration_ms": duration_ms, "branch": branch_name})
 
         # Try one refine (REFINE_MAX=1)
         try:
@@ -588,20 +588,20 @@ def agentdev_run_once(
             refine_prompt_context = {
                 "previous_patch": diff or "",
                 "result": exec_res,
-                "tests": getattr(chosen, "tests_to_run", []),
+                "tests": chosen.tests_to_run,
             }
             # Reuse PlanItem with updated diff_hint
-            setattr(chosen, "diff_hint", (diff or "") + "\n# refine based on test failures above")  # type: ignore
+            chosen.diff_hint = (diff or "") + "\n# refine based on test failures above"
             t1 = _t.perf_counter()
-            new_diff = ai.generate_patch(chosen, context=json.dumps(refine_prompt_context))  # type: ignore
+            new_diff = ai.generate_patch(chosen, context=json.dumps(refine_prompt_context))
             if new_diff:
-                if hasattr(executor, "apply_patch_and_test"):
-                    setattr(chosen, "patch", new_diff)  # type: ignore
-                    r2 = executor.apply_patch_and_test(chosen)  # type: ignore
+                if hasattr(actual_executor, "apply_patch_and_test"):
+                    chosen.patch = new_diff
+                    r2 = actual_executor.apply_patch_and_test(chosen)
                     ok2 = bool(r2.get("ok", False)) if isinstance(r2, dict) else False
                 else:
-                    _ = executor.apply_unified_diff(new_diff)  # type: ignore
-                    r2 = executor.run_pytest(getattr(chosen, "tests_to_run", None))  # type: ignore
+                    _ = actual_executor.apply_unified_diff(new_diff)
+                    r2 = actual_executor.run_pytest(chosen.tests_to_run)
                     ok2 = bool(getattr(r2, "ok", False))
             else:
                 ok2 = False
@@ -620,7 +620,7 @@ def agentdev_run_once(
     if result_bool and run_full_suite_after_pass:
         fs_attempted = True
         try:
-            ok_all, collected, failed, dur_ms_all, raw_path = executor.run_pytest_all(tests_dir)  # type: ignore
+            ok_all, collected, failed, dur_ms_all, raw_path = actual_executor.run_pytest_all(tests_dir)
             fs_ok = ok_all
             fs_col = collected
             fs_failed = failed
@@ -640,8 +640,8 @@ def agentdev_run_once(
         body = pr_body or "Automated fix by AgentDev. See logs for details."
         try:
             # push branch first
-            _ = executor.push_branch(pr_remote)  # type: ignore
-            pr_summary = executor.create_pull_request(title=title, body=body, base=pr_base, remote=pr_remote, draft=pr_draft)  # type: ignore
+            _ = actual_executor.push_branch(pr_remote)
+            pr_summary = actual_executor.create_pull_request(title=title, body=body, base=pr_base, remote=pr_remote, draft=pr_draft)
         except Exception as e:
             pr_summary = {"attempted": True, "ok": False, "url": None, "number": None, "provider": None, "error": str(e)}
         _log_jsonl(log_dir, {"step": "pr_create", "ok": bool(pr_summary.get("ok")), "branch": branch_name, "pr_url": pr_summary.get("url"), "pr_number": pr_summary.get("number"), "error_summary": pr_summary.get("error")})
