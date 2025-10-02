@@ -25,8 +25,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Optional
 
-import psutil
-import schedule
+import psutil  # type: ignore
+import schedule  # type: ignore
 
 
 # Stub for AgentMode
@@ -280,7 +280,10 @@ class AutomatedMonitor:
         try:
             # Run comprehensive analysis
             task = "analyze code quality and identify critical issues"
-            result = self.agentdev.execute_task(task, AgentMode.SENIOR)
+            if self.agentdev and hasattr(self.agentdev, 'execute_task'):
+                result = self.agentdev.execute_task(task, AgentMode.SENIOR)
+            else:
+                result = "AgentDev not available"
 
             # Parse result and create alerts if needed
             if "❌" in result or "error" in result.lower():
@@ -304,7 +307,8 @@ class AutomatedMonitor:
         try:
             # Run cleanup tasks
             cleanup_task = "perform automated cleanup and optimization"
-            self.agentdev.execute_task(cleanup_task, AgentMode.SENIOR)
+            if self.agentdev and hasattr(self.agentdev, 'execute_task'):
+                self.agentdev.execute_task(cleanup_task, AgentMode.SENIOR)
 
             # Clean up old metrics
             self._cleanup_old_metrics()
@@ -467,7 +471,10 @@ class AutomatedMonitor:
         try:
             if alert.error_type == "syntax_errors":
                 task = "fix critical syntax errors in the codebase"
-                result = self.agentdev.execute_task(task, AgentMode.SENIOR)
+                if self.agentdev and hasattr(self.agentdev, 'execute_task'):
+                    result = self.agentdev.execute_task(task, AgentMode.SENIOR)
+                else:
+                    result = "AgentDev not available"
 
                 if "✅" in result:
                     logger.info("✅ Auto-fix successful")

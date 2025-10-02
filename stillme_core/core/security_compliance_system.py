@@ -28,7 +28,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 # Import Phase 1 and 2.x modules
 try:
     from .security_middleware import SecurityMiddleware  # type: ignore
-    from .performance_monitor import PerformanceMonitor
+    from .performance_monitor import PerformanceMonitor  # type: ignore
     from .integration_bridge import IntegrationBridge  # type: ignore
     from .memory_security_integration import MemorySecurityIntegration  # type: ignore
     from .module_governance_system import ModuleGovernanceSystem  # type: ignore

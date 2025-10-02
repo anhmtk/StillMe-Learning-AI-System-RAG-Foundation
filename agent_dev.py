@@ -13,22 +13,21 @@ from dotenv import load_dotenv
 from jsonschema import validate
 import datetime as _dt
 from pathlib import Path as _Path
-from typing import Optional
-from stillme_core.ai_manager import AIManager as _AIManager
-from stillme_core.bug_memory import BugMemory as _BugMemory
-from stillme_core.executor import PatchExecutor as _PatchExecutor
-from stillme_core.plan_types import PlanItem as _PlanItem
-from stillme_core.planner import Planner as _Planner
+from stillme_core.ai_manager import AIManager as _AIManager  # type: ignore
+from stillme_core.bug_memory import BugMemory as _BugMemory  # type: ignore
+from stillme_core.executor import PatchExecutor as _PatchExecutor  # type: ignore
+from stillme_core.plan_types import PlanItem as _PlanItem  # type: ignore
+from stillme_core.planner import Planner as _Planner  # type: ignore
 
 # Ensure local modules path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "modules")))
 
-from stillme_core.git_manager import GitManager
-from stillme_core.planner import Planner
-from stillme_core.sandbox_manager import DockerSandboxManager
+from stillme_core.git_manager import GitManager  # type: ignore
+from stillme_core.planner import Planner  # type: ignore
+from stillme_core.sandbox_manager import DockerSandboxManager  # type: ignore
 
 # Core components
-from stillme_ethical_core.ethics_checker import EthicsChecker
+from stillme_ethical_core.ethics_checker import EthicsChecker  # type: ignore
 
 # --- Bridge: AgentDev -> API server (/dev-agent/bridge)
 try:
