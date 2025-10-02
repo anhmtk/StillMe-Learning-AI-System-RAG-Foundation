@@ -15,28 +15,24 @@ Version: 1.0.0
 Date: 2025-09-30
 """
 
-import asyncio
-import json
-import os
 import subprocess
-import sys
 import threading
 import time
-from typing import Any, Callable, Dict, List, Optional
+import logging
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
+from enum import Enum
+from pathlib import Path
+from typing import Any, Optional
+
+import psutil
+import schedule
 
 
 # Stub for AgentMode
 class AgentMode:
     SENIOR = "senior"
     SIMPLE = "simple"
-import logging
-from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta
-from enum import Enum
-from pathlib import Path
-
-import psutil
-import schedule
 
 # Import AgentDev Unified
 try:
@@ -88,7 +84,7 @@ class Alert:
 class AutomatedMonitor:
     """Hệ thống giám sát tự động cho AgentDev"""
 
-    def __init__(self, project_root: str = ".", config: Optional[Dict] = None):
+    def __init__(self, project_root: str = ".", config: Optional[dict] = None):
         self.project_root = Path(project_root)
         self.config = config or self._default_config()
         self.status = MonitorStatus.INACTIVE
@@ -109,7 +105,7 @@ class AutomatedMonitor:
 
         logger.info("🤖 AgentDev Automated Monitor initialized")
 
-    def _default_config(self) -> Dict:
+    def _default_config(self) -> dict:
         """Default configuration"""
         return {
             "scan_interval_minutes": 15,  # Scan every 15 minutes
@@ -308,7 +304,7 @@ class AutomatedMonitor:
         try:
             # Run cleanup tasks
             cleanup_task = "perform automated cleanup and optimization"
-            result = self.agentdev.execute_task(cleanup_task, AgentMode.SENIOR)
+            self.agentdev.execute_task(cleanup_task, AgentMode.SENIOR)
 
             # Clean up old metrics
             self._cleanup_old_metrics()
@@ -365,10 +361,10 @@ class AutomatedMonitor:
 
             # Count files with errors
             if metrics.total_errors > 0:
-                metrics.files_with_errors = len(set(
+                metrics.files_with_errors = len({
                     line.split(':')[0] for line in result.stdout.split('\n')
                     if ':' in line and ('E999' in line or 'F821' in line)
-                ))
+                })
 
         except Exception as e:
             logger.error(f"❌ Error scanning code quality: {e}")
@@ -497,7 +493,7 @@ class AutomatedMonitor:
             if a.timestamp > cutoff_time
         ]
 
-    def get_status(self) -> Dict[str, Any]:
+    def get_status(self) -> dict[str, Any]:
         """Get current monitor status"""
         return {
             "status": self.status.value,
@@ -508,13 +504,13 @@ class AutomatedMonitor:
             "last_scan": self.metrics_history[-1].last_scan_time.isoformat() if self.metrics_history else None
         }
 
-    def get_recent_alerts(self, hours: int = 24) -> List[Dict]:
+    def get_recent_alerts(self, hours: int = 24) -> list[dict]:
         """Get recent alerts"""
         cutoff_time = datetime.now() - timedelta(hours=hours)
         recent_alerts = [a for a in self.alerts if a.timestamp > cutoff_time]
         return [asdict(alert) for alert in recent_alerts]
 
-    def get_metrics_summary(self) -> Dict[str, Any]:
+    def get_metrics_summary(self) -> dict[str, Any]:
         """Get metrics summary"""
         if not self.metrics_history:
             return {"message": "No metrics available"}
