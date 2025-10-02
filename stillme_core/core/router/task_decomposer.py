@@ -29,17 +29,17 @@ except ImportError:
     sys.path.append(str(Path(__file__).parent.parent / "observability"))
 
 try:
-    from stillme_core.observability.logger import get_logger
+    from ...core.observability.logger import get_logger
 except ImportError:
     pass
 
 try:
-    from stillme_core.observability.metrics import MetricType, get_metrics_collector
+    from ...core.observability.metrics import MetricType, get_metrics_collector
 except ImportError:
     pass
 
 try:
-    from stillme_core.observability.tracer import get_tracer
+    from ...core.observability.tracer import get_tracer
 except ImportError:
     pass
 
@@ -75,17 +75,17 @@ except ImportError:
 # Initialize observability components safely
 try:
     logger = get_logger(__name__)
-except NameError:
+except (NameError, ImportError):
     logger = None
 
 try:
     metrics = get_metrics_collector()
-except NameError:
+except (NameError, ImportError):
     metrics = None
 
 try:
     tracer = get_tracer()
-except NameError:
+except (NameError, ImportError):
     tracer = None
 
 
@@ -180,7 +180,8 @@ class TaskDecomposer:
             "avg_decomposition_time": 0.0,
         }
 
-        self.logger.info("🔧 Task Decomposer initialized")
+        if self.logger:
+            self.logger.info("🔧 Task Decomposer initialized")
 
     def _load_decomposition_patterns(self) -> Dict[str, Any]:
         """Load patterns for task decomposition"""
@@ -458,7 +459,8 @@ class TaskDecomposer:
                 return decomposition
 
             except Exception as e:
-                self.logger.error(f"Error decomposing task: {e}")
+                if self.logger:
+                    self.logger.error(f"Error decomposing task: {e}")
                 span.record_exception(e)
                 raise
 
@@ -1028,20 +1030,22 @@ class TaskDecomposer:
         self, decomposition: TaskDecomposition, processing_time: float
     ):
         """Record decomposition performance metrics"""
-        self.metrics.increment_counter("task_decompositions_total")
-        self.metrics.increment_counter(
-            f"task_decompositions_by_type_{decomposition.main_task_type.value}"
-        )
-        self.metrics.increment_counter(
-            f"task_decompositions_by_complexity_{decomposition.main_complexity.value}"
-        )
-        self.metrics.record_histogram(
-            "task_decomposition_time_seconds", processing_time
-        )
-        self.metrics.record_histogram(
-            "subtasks_per_decomposition", len(decomposition.subtasks)
-        )
-        self.metrics.record_gauge("decomposition_confidence", 0.8)  # Placeholder
+        if self.metrics:
+            self.metrics.increment_counter("task_decompositions_total")
+            self.metrics.increment_counter(
+                f"task_decompositions_by_type_{decomposition.main_task_type.value}"
+            )
+            self.metrics.increment_counter(
+                f"task_decompositions_by_complexity_{decomposition.main_complexity.value}"
+            )
+            self.metrics.record_histogram(
+                "task_decomposition_time_seconds", processing_time
+            )
+            self.metrics.record_histogram(
+                "subtasks_per_decomposition", len(decomposition.subtasks)
+            )
+            # Note: record_gauge might not exist, using record_histogram instead
+            self.metrics.record_histogram("decomposition_confidence", 0.8)
 
         # Update performance metrics
         self.performance_metrics["total_decompositions"] += 1
@@ -1064,7 +1068,8 @@ class TaskDecomposer:
         self, decomposition: TaskDecomposition, processing_time: float
     ):
         """Log decomposition for debugging and analysis"""
-        self.logger.info(
+        if self.logger:
+            self.logger.info(
             "Task decomposed successfully",
             extra={
                 "task_id": decomposition.task_id,
@@ -1097,7 +1102,8 @@ class TaskDecomposer:
         """Update the status of a subtask"""
         # This would typically update a database or storage system
         # For now, we'll just log the update
-        self.logger.info(
+        if self.logger:
+            self.logger.info(
             "Subtask status updated",
             extra={
                 "task_id": task_id,

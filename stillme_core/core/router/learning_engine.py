@@ -33,17 +33,17 @@ except ImportError:
     sys.path.append(str(Path(__file__).parent.parent / "observability"))
 
 try:
-    from stillme_core.observability.logger import get_logger
+    from ...core.observability.logger import get_logger
 except ImportError:
     pass
 
 try:
-    from stillme_core.observability.metrics import MetricType, get_metrics_collector
+    from ...core.observability.metrics import MetricType, get_metrics_collector
 except ImportError:
     pass
 
 try:
-    from stillme_core.observability.tracer import get_tracer
+    from ...core.observability.tracer import get_tracer
 except ImportError:
     pass
 
@@ -84,17 +84,17 @@ except ImportError:
 # Initialize observability components safely
 try:
     logger = get_logger(__name__)
-except NameError:
+except (NameError, ImportError):
     logger = None
 
 try:
     metrics = get_metrics_collector()
-except NameError:
+except (NameError, ImportError):
     metrics = None
 
 try:
     tracer = get_tracer()
-except NameError:
+except (NameError, ImportError):
     tracer = None
 
 
@@ -160,7 +160,8 @@ class LearningEngine:
             "accuracy_improvement": 0.0,
         }
 
-        self.logger.info("🧠 Learning Engine initialized")
+        if self.logger:
+            self.logger.info("🧠 Learning Engine initialized")
 
     async def record_learning_event(
         self,
@@ -187,7 +188,8 @@ class LearningEngine:
 
         # Trigger pattern learning
         await self._learn_from_event(event)
-        self.logger.debug(f"Recorded learning event: {event_type.value}")
+        if self.logger:
+            self.logger.debug(f"Recorded learning event: {event_type.value}")
 
     async def _learn_from_event(self, event: LearningEvent):
         """Learn patterns from a learning event"""
@@ -201,7 +203,8 @@ class LearningEngine:
             elif event.event_type == LearningEventType.ERROR_EVENT:
                 await self._learn_from_error_event(event)
         except Exception as e:
-            self.logger.error(f"Error learning from event: {e}")
+            if self.logger:
+                self.logger.error(f"Error learning from event: {e}")
 
     async def _learn_from_routing_decision(self, event: LearningEvent):
         """Learn from routing decisions"""
