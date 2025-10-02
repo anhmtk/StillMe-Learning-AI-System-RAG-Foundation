@@ -8,7 +8,7 @@ import csv
 import os
 from collections import defaultdict
 from pathlib import Path
-from typing import Any
+# from typing import Any  # Not used
 
 
 def find_type_ignores(root_dir: str = ".") -> list[dict[str, str]]:
@@ -18,7 +18,7 @@ def find_type_ignores(root_dir: str = ".") -> list[dict[str, str]]:
     Returns:
         List of dicts với keys: file, line_number, code_context
     """
-    ignores = []
+    ignores: list[dict[str, str]] = []
     root_path = Path(root_dir)
 
     # Patterns để ignore
@@ -140,8 +140,8 @@ def generate_summary_report(
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
 
     # Thống kê theo thư mục
-    dir_counts = defaultdict(int)
-    file_counts = defaultdict(int)
+    dir_counts: defaultdict[str, int] = defaultdict(int)
+    file_counts: defaultdict[str, int] = defaultdict(int)
 
     for ignore in ignores:
         file_path = Path(ignore["file"])
@@ -189,10 +189,10 @@ def main():
 
     if ignores:
         print("\n📁 By directory:")
-        dir_counts = defaultdict(int)
+        dir_counts: defaultdict[str, int] = defaultdict(int)
         for ignore in ignores:
             file_path = Path(ignore["file"])
-            dir_name = (
+            dir_name: str = (
                 str(file_path.parent) if file_path.parent != Path(".") else "root"
             )
             dir_counts[dir_name] += 1
