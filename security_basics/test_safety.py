@@ -4,9 +4,7 @@ Test basic safety, sandbox isolation, and prompt injection defense
 """
 
 import os
-import shutil
 import sys
-import tempfile
 from pathlib import Path
 
 import pytest
@@ -16,7 +14,8 @@ agent_dev_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__
 if agent_dev_path not in sys.path:
     sys.path.insert(0, agent_dev_path)
 
-from fixtures import TestFixtures
+# Import after path setup
+from fixtures import TestFixtures  # noqa: E402
 
 
 class TestSandboxIsolation:
@@ -335,7 +334,7 @@ class TestDataPrivacy:
 
             # Execute task with sensitive data
             task = "Process user data with password: secret123"
-            result = agentdev.execute_task(task, "senior")
+            agentdev.execute_task(task, "senior")
 
             # Check log messages for sensitive data
             log_messages = agentdev.log_messages
