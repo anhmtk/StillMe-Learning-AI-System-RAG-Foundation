@@ -13,7 +13,8 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from stillme_core.kill_switch import KillSwitchAction, KillSwitchManager
+# Import after path setup
+from stillme_core.kill_switch import KillSwitchManager  # noqa: E402
 
 
 def format_status(status: dict) -> str:
@@ -54,7 +55,7 @@ def format_audit_log(entries: list) -> str:
 
     for entry in entries[-10:]:  # Show last 10 entries
         timestamp = entry.get("timestamp", "Unknown")
-        level = entry.get("level", "INFO")
+        entry.get("level", "INFO")
         data = entry.get("data", {})
 
         action = data.get("action", "unknown")
@@ -161,15 +162,21 @@ Examples:
             print(json.dumps(result, indent=2))
         else:
             if args.status:
-                print(format_status(result))
+                if result:
+                    print(format_status(result))
+                else:
+                    print("❌ No status available")
             else:
                 # Action result
-                success_emoji = "✅" if result.get("success") else "❌"
-                print(f"{success_emoji} {result.get('message', 'Action completed')}")
+                if result:
+                    success_emoji = "✅" if result.get("success") else "❌"
+                    print(f"{success_emoji} {result.get('message', 'Action completed')}")
 
-                if result.get("success") and not args.status:
-                    # Show updated status
-                    print("\n" + format_status(manager.status()))
+                    if result.get("success") and not args.status:
+                        # Show updated status
+                        print("\n" + format_status(manager.status()))
+                else:
+                    print("❌ Action failed - no result")
 
         # Exit with appropriate code
         if result and not result.get("success", True):
