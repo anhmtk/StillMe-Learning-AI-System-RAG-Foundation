@@ -5,8 +5,6 @@ Test complete workflows: Plan → Evaluate → Execute
 
 import os
 import sys
-from pathlib import Path
-from unittest.mock import Mock, patch
 
 import pytest
 
@@ -15,7 +13,10 @@ agent_dev_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__
 if agent_dev_path not in sys.path:
     sys.path.insert(0, agent_dev_path)
 
-from fixtures import TestFixtures
+# Import after path setup
+from agent_dev.core.agent_mode import AgentMode  # noqa: E402
+from agent_dev.core.agentdev import AgentDev  # noqa: E402
+from fixtures import TestFixtures  # noqa: E402
 
 
 class TestWorkflows:
@@ -24,8 +25,6 @@ class TestWorkflows:
     def test_plan_evaluate_execute_flow(self):
         """Test workflow: Plan → Evaluate → Execute"""
         try:
-            from agent_dev.core.agent_mode import AgentMode
-            from agent_dev.core.agentdev import AgentDev
 
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDev(str(temp_project))
@@ -49,8 +48,6 @@ class TestWorkflows:
     def test_learning_feedback_loop(self):
         """Test learning from experience feedback loop"""
         try:
-            from agent_dev.core.agent_mode import AgentMode
-            from agent_dev.core.agentdev import AgentDev
 
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDev(str(temp_project))
@@ -81,8 +78,6 @@ class TestWorkflows:
     def test_policy_levels_impact(self):
         """Test how policy levels affect decision making"""
         try:
-            from agent_dev.core.agent_mode import AgentMode
-            from agent_dev.core.agentdev import AgentDev
 
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDev(str(temp_project))
@@ -110,8 +105,6 @@ class TestWorkflows:
     def test_error_handling_workflow(self):
         """Test error handling in workflows"""
         try:
-            from agent_dev.core.agent_mode import AgentMode
-            from agent_dev.core.agentdev import AgentDev
 
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDev(str(temp_project))
@@ -132,8 +125,6 @@ class TestWorkflows:
     def test_multi_module_integration(self):
         """Test integration between multiple modules"""
         try:
-            from agent_dev.core.agent_mode import AgentMode
-            from agent_dev.core.agentdev import AgentDev
 
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDev(str(temp_project))
@@ -171,7 +162,7 @@ class TestStillMeIntegration:
             if stillme_path not in sys.path:
                 sys.path.insert(0, stillme_path)
 
-            from framework import StillMeFramework
+            from stillme_core.framework import StillMeFramework
 
             # Initialize framework
             config = {
@@ -207,8 +198,6 @@ class TestStillMeIntegration:
     def test_agentdev_as_technical_manager(self):
         """Test AgentDev as Technical Manager of StillMe"""
         try:
-            from agent_dev.core.agent_mode import AgentMode
-            from agent_dev.core.agentdev import AgentDev
 
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDev(str(temp_project))
@@ -243,7 +232,7 @@ class TestDataPersistence:
     def test_experience_persistence(self):
         """Test that experience is persisted across sessions"""
         try:
-            from experience_learner import ExperienceLearner
+            from agent_dev.core.experience_learner import ExperienceLearner
 
             temp_project = TestFixtures.create_temp_project()
 
@@ -267,7 +256,7 @@ class TestDataPersistence:
     def test_strategy_persistence(self):
         """Test that strategies are persisted across sessions"""
         try:
-            from adaptive_strategy import AdaptiveStrategy
+            from agent_dev.core.adaptive_strategy import AdaptiveStrategy
 
             temp_project = TestFixtures.create_temp_project()
 

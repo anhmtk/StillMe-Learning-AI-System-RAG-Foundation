@@ -6,7 +6,6 @@ Real-world scenarios that test complete functionality
 import os
 import sys
 import time
-from pathlib import Path
 
 import pytest
 
@@ -15,8 +14,9 @@ agent_dev_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__
 if agent_dev_path not in sys.path:
     sys.path.insert(0, agent_dev_path)
 
-from agent_dev.core.agentdev import AgentDev, AgentMode
-from fixtures import TestFixtures
+# Import after path setup
+from agent_dev.core.agentdev import AgentDev  # noqa: E402
+from fixtures import TestFixtures  # noqa: E402
 
 # E2E Scenarios
 SCENARIOS = [
@@ -95,7 +95,7 @@ class TestE2EScenarios:
 
             # Execute scenario
             start_time = time.time()
-            result = agentdev.execute_task(scenario["input"], AgentMode.SENIOR)
+            result = agentdev.execute_task(scenario["input"], "senior")
             end_time = time.time()
 
             execution_time = end_time - start_time
@@ -130,7 +130,7 @@ class TestE2EScenarios:
 
             results = []
             for scenario in bug_scenarios:
-                result = agentdev.execute_task(scenario["input"], AgentMode.SENIOR)
+                result = agentdev.execute_task(scenario["input"], "senior")
                 results.append(result)
 
             # All bug fix scenarios should succeed
@@ -154,7 +154,7 @@ class TestE2EScenarios:
 
             results = []
             for scenario in security_scenarios:
-                result = agentdev.execute_task(scenario["input"], AgentMode.SENIOR)
+                result = agentdev.execute_task(scenario["input"], "senior")
                 results.append(result)
 
             # All security scenarios should succeed
@@ -178,7 +178,7 @@ class TestE2EScenarios:
 
             results = []
             for scenario in feature_scenarios:
-                result = agentdev.execute_task(scenario["input"], AgentMode.SENIOR)
+                result = agentdev.execute_task(scenario["input"], "senior")
                 results.append(result)
 
             # All feature scenarios should succeed
@@ -208,7 +208,7 @@ class TestE2EScenarios:
 
             results = []
             for step in workflow_steps:
-                result = agentdev.execute_task(step, AgentMode.SENIOR)
+                result = agentdev.execute_task(step, "senior")
                 results.append(result)
 
             # All workflow steps should succeed
@@ -237,7 +237,7 @@ class TestE2EScenarios:
 
             results = []
             for scenario in error_scenarios:
-                result = agentdev.execute_task(scenario, AgentMode.SENIOR)
+                result = agentdev.execute_task(scenario, "senior")
                 results.append(result)
 
             # Should handle errors gracefully
@@ -272,7 +272,7 @@ class TestRealWorldScenarios:
 
             results = []
             for task in incident_tasks:
-                result = agentdev.execute_task(task, AgentMode.SENIOR)
+                result = agentdev.execute_task(task, "senior")
                 results.append(result)
 
             # All incident response tasks should complete
@@ -302,7 +302,7 @@ class TestRealWorldScenarios:
 
             results = []
             for task in debt_tasks:
-                result = agentdev.execute_task(task, AgentMode.SENIOR)
+                result = agentdev.execute_task(task, "senior")
                 results.append(result)
 
             # All debt management tasks should complete
