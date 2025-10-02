@@ -8,17 +8,15 @@ import logging
 import os
 import sys
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
+# Environment variables loaded automatically
 
 # Add common to path
 sys.path.append(str(Path(__file__).parent / "common"))
 
-from common.http import SecureHttpClient
+# Import after path setup
+from common.http import SecureHttpClient  # noqa: E402
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +34,7 @@ class MarketIntelligence:
         self.github_trending_url = "https://api.github.com/search/repositories"
         self.hackernews_url = "https://hn.algolia.com/api/v1/search"
 
-    async def search_news(self, query: str, language: str = "vi") -> Dict[str, Any]:
+    async def search_news(self, query: str, language: str = "vi") -> dict[str, Any]:
         """Tìm kiếm tin tức"""
         try:
             logger.info(f"🔍 Searching news for: {query}")
@@ -94,21 +92,14 @@ class MarketIntelligence:
                 "data": None
             }
 
-    async def _search_newsapi(self, query: str, language: str) -> Dict[str, Any]:
+    async def _search_newsapi(self, query: str, language: str) -> dict[str, Any]:
         """Search using NewsAPI"""
         try:
-            params = {
-                "q": query,
-                "language": language,
-                "sortBy": "publishedAt",
-                "pageSize": 10,
-                "apiKey": self.newsapi_key
-            }
 
             async with SecureHttpClient() as client:
-                response = await client.get(self.newsapi_url, headers={
-                    "X-API-Key": self.newsapi_key
-                })
+                # Ensure headers don't contain None values
+                headers = {"X-API-Key": self.newsapi_key} if self.newsapi_key else {}
+                response = await client.get(self.newsapi_url, headers=headers)
 
                 if response["success"]:
                     articles = response["data"].get("articles", [])
@@ -142,16 +133,9 @@ class MarketIntelligence:
                 "data": None
             }
 
-    async def _search_gnews(self, query: str, language: str) -> Dict[str, Any]:
+    async def _search_gnews(self, query: str, language: str) -> dict[str, Any]:
         """Search using GNews API"""
         try:
-            params = {
-                "q": query,
-                "lang": language,
-                "country": "vn" if language == "vi" else "us",
-                "max": 10,
-                "apikey": self.gnews_api_key
-            }
 
             url = f"{self.gnews_url}?q={query}&lang={language}&apikey={self.gnews_api_key}"
 
@@ -190,7 +174,7 @@ class MarketIntelligence:
                 "data": None
             }
 
-    async def get_github_trending(self, language: str = "python") -> Dict[str, Any]:
+    async def get_github_trending(self, language: str = "python") -> dict[str, Any]:
         """Lấy GitHub trending repositories"""
         try:
             logger.info(f"🔍 Getting GitHub trending for: {language}")
@@ -240,7 +224,7 @@ class MarketIntelligence:
                 "data": None
             }
 
-    async def search_github_trending(self, topic: str, since: str = "daily") -> Dict[str, Any]:
+    async def search_github_trending(self, topic: str, since: str = "daily") -> dict[str, Any]:
         """Search GitHub trending repositories by topic"""
         try:
             logger.info(f"🔍 Searching GitHub trending for topic: {topic}, since: {since}")
@@ -251,7 +235,7 @@ class MarketIntelligence:
                 "weekly": "weekly",
                 "monthly": "monthly"
             }
-            since_param = since_map.get(since, "daily")
+            since_map.get(since, "daily")
 
             # Build search query
             query = f"{topic} language:{topic} stars:>10"
@@ -347,7 +331,7 @@ class MarketIntelligence:
                 "data": None
             }
 
-    async def search_hackernews_top(self, hours: int = 12) -> Dict[str, Any]:
+    async def search_hackernews_top(self, hours: int = 12) -> dict[str, Any]:
         """Search top Hacker News stories from last N hours"""
         try:
             logger.info(f"🔍 Searching Hacker News top stories from last {hours} hours")
@@ -425,7 +409,7 @@ class MarketIntelligence:
                 "data": None
             }
 
-    async def get_hackernews_trending(self) -> Dict[str, Any]:
+    async def get_hackernews_trending(self) -> dict[str, Any]:
         """Lấy Hacker News trending"""
         try:
             logger.info("🔍 Getting Hacker News trending")
@@ -467,7 +451,7 @@ class MarketIntelligence:
                 "data": None
             }
 
-    async def process_web_request(self, request_type: str, query: str, **kwargs) -> Dict[str, Any]:
+    async def process_web_request(self, request_type: str, query: str, **kwargs) -> dict[str, Any]:
         """Xử lý web request dựa trên loại"""
         try:
             if request_type == "news":
@@ -499,7 +483,7 @@ class MarketIntelligence:
 # Global instance
 market_intel = MarketIntelligence()
 
-async def handle_web_request(request_type: str, query: str, **kwargs) -> Dict[str, Any]:
+async def handle_web_request(request_type: str, query: str, **kwargs) -> dict[str, Any]:
     """Convenience function để xử lý web request"""
     return await market_intel.process_web_request(request_type, query, **kwargs)
 
