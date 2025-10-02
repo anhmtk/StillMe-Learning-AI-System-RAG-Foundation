@@ -21,7 +21,7 @@ except ImportError:
     HAS_PANDAS = False
 
 try:
-    import plotly.express as px
+    # Import plotly components only if needed
     import plotly.graph_objects as go
     from plotly.subplots import make_subplots
 

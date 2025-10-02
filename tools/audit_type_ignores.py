@@ -8,10 +8,10 @@ import csv
 import os
 from collections import defaultdict
 from pathlib import Path
-from typing import Dict, List
+from typing import Any
 
 
-def find_type_ignores(root_dir: str = ".") -> List[Dict[str, str]]:
+def find_type_ignores(root_dir: str = ".") -> list[dict[str, str]]:
     """
     Tìm tất cả '# type: ignore' trong repository.
 
@@ -112,7 +112,7 @@ def find_type_ignores(root_dir: str = ".") -> List[Dict[str, str]]:
 
 
 def generate_csv_report(
-    ignores: List[Dict[str, str]], output_file: str = "artifacts/type_ignores.csv"
+    ignores: list[dict[str, str]], output_file: str = "artifacts/type_ignores.csv"
 ):
     """Tạo CSV report với tất cả type ignores."""
     os.makedirs(os.path.dirname(output_file), exist_ok=True)
@@ -133,7 +133,7 @@ def generate_csv_report(
 
 
 def generate_summary_report(
-    ignores: List[Dict[str, str]],
+    ignores: list[dict[str, str]],
     output_file: str = "artifacts/type_ignores_summary.md",
 ):
     """Tạo summary report theo thư mục và module."""

@@ -23,12 +23,20 @@ from typing import Any, Optional
 
 # Import Phase 1 and 2.1 modules
 try:
-    from .autonomous_management_system import AutonomousManagementSystem as _AutonomousManagementSystem
+    from .autonomous_management_system import (
+        AutonomousManagementSystem as _AutonomousManagementSystem,
+    )
     from .integration_bridge import IntegrationBridge as _IntegrationBridge
-    from .memory_security_integration import MemorySecurityIntegration as _MemorySecurityIntegration
-    from .module_governance_system import ModuleGovernanceSystem as _ModuleGovernanceSystem
+    from .memory_security_integration import (
+        MemorySecurityIntegration as _MemorySecurityIntegration,
+    )
+    from .module_governance_system import (
+        ModuleGovernanceSystem as _ModuleGovernanceSystem,
+    )
     from .security_middleware import SecurityMiddleware as _SecurityMiddleware
-    from .validation.performance_monitor import PerformanceMonitor as _PerformanceMonitor
+    from .validation.performance_monitor import (
+        PerformanceMonitor as _PerformanceMonitor,
+    )
 except ImportError:
     # Create mock classes for testing
     class SecurityMiddleware:

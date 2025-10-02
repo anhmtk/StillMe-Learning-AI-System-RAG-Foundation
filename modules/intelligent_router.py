@@ -20,7 +20,9 @@ class ModelRouter:
         self.request_count = 0
         self.route_history: list[dict[str, Any]] = []
 
-    def get_ai_response(self, prompt: str, context: Optional[dict[str, Any]] = None) -> str:
+    def get_ai_response(
+        self, prompt: str, context: Optional[dict[str, Any]] = None
+    ) -> str:
         """Get AI response for the given prompt"""
         self.request_count += 1
 

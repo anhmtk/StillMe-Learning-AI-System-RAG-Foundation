@@ -412,7 +412,7 @@ class MemorySecurityIntegration:
                 results = self.memory_system.search(query=query)  # type: ignore
             else:
                 results = []
-            
+
             # Type cast to ensure proper type
             filtered_results: list[dict[str, Any]] = []
             for r in results:
@@ -470,7 +470,7 @@ class MemorySecurityIntegration:
                 results = self.memory_system.search(query=query)
             else:
                 results = []
-            
+
             # Type cast to ensure proper type
             filtered_results: list[dict[str, Any]] = []
             for r in results:

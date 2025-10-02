@@ -1,7 +1,3 @@
-import os
-import secrets
-from unittest.mock import patch
-
 #!/usr/bin/env python3
 """
 🧪 SEAL-GRADE Test Suite - Phase 3 Clarification Core
@@ -24,17 +20,18 @@ Version: 1.0.0
 import concurrent.futures
 import json
 import logging
+import os
+import secrets
 import tempfile
 import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Optional
+from unittest.mock import patch
 
 import pytest
 
 from stillme_core import AuditLogger
-
-# Import Phase 3 modules
 from stillme_core.modules.clarification_handler import (
     ClarificationHandler,
 )
@@ -802,7 +799,7 @@ def export_data():
         for i in range(100):
             try:
                 self.handler.detect_ambiguity(f"test prompt {i}")
-            except:
+            except Exception:
                 pass  # Simulate some failures
 
         # Check that we can detect failure rate
