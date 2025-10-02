@@ -1,16 +1,17 @@
 import inspect
 import logging
+import sys
 import time
 
-from fastapi import FastAPI, HTTPException
-from framework import StillMeFramework
-from pydantic import BaseModel
+from fastapi import FastAPI, HTTPException  # type: ignore
+from framework import StillMeFramework  # type: ignore
+from pydantic import BaseModel  # type: ignore
 
 try:
     from stillme_core.safety_guard import (  # type: ignore
-        apply_policies,
-        redact_output,
-        safe_reply,
+        apply_policies,  # type: ignore
+        redact_output,  # type: ignore
+        safe_reply,  # type: ignore
     )
 except ImportError:
     # Fallback for environments without safety_guard
@@ -35,7 +36,6 @@ app = FastAPI()
 log = logging.getLogger("api")
 
 # UTF-8 logging
-import sys
 
 handler = logging.StreamHandler(stream=sys.stdout)
 handler.setFormatter(
