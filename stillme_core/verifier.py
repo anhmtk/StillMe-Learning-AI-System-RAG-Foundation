@@ -32,7 +32,7 @@ class VerificationResult:
     details: dict[str, Any]
     timestamp: datetime
     duration: Optional[float] = None
-    metadata: dict[str, Any] = None
+    metadata: Optional[dict[str, Any]] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -63,7 +63,7 @@ class LegacyVerifier:
             "pass_threshold": 0.8
         }
 
-    def verify_code_quality(self, code_content: str, file_path: str = None) -> VerificationResult:
+    def verify_code_quality(self, code_content: str, file_path: Optional[str] = None) -> VerificationResult:
         """Verify code quality"""
         try:
             result_id = f"verify_{len(self.verification_results) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -124,7 +124,7 @@ class LegacyVerifier:
             self.logger.error(f"❌ Failed to verify code quality: {e}")
             raise
 
-    def verify_security(self, code_content: str, file_path: str = None) -> VerificationResult:
+    def verify_security(self, code_content: str, file_path: Optional[str] = None) -> VerificationResult:
         """Verify security"""
         try:
             result_id = f"verify_{len(self.verification_results) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -189,7 +189,7 @@ class LegacyVerifier:
             self.logger.error(f"❌ Failed to verify security: {e}")
             raise
 
-    def verify_performance(self, code_content: str, file_path: str = None) -> VerificationResult:
+    def verify_performance(self, code_content: str, file_path: Optional[str] = None) -> VerificationResult:
         """Verify performance"""
         try:
             result_id = f"verify_{len(self.verification_results) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -246,7 +246,7 @@ class LegacyVerifier:
             self.logger.error(f"❌ Failed to verify performance: {e}")
             raise
 
-    def run_comprehensive_verification(self, code_content: str, file_path: str = None) -> list[VerificationResult]:
+    def run_comprehensive_verification(self, code_content: str, file_path: Optional[str] = None) -> list[VerificationResult]:
         """Run comprehensive verification"""
         try:
             results = []
@@ -319,6 +319,11 @@ class LegacyVerifier:
             # Use provided success_criteria or extract from step
             if success_criteria is None:
                 success_criteria = step.get("success_criteria", {})
+            
+            # Ensure success_criteria is not None
+            if success_criteria is None:
+                success_criteria = {}
+                
             expected_exit_code = success_criteria.get("exit_code", 0)
             stdout_patterns = success_criteria.get("stdout_patterns", [])
             stderr_patterns = success_criteria.get("stderr_patterns", [])
