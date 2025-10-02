@@ -30,11 +30,14 @@ class SecurityFixer:
 
         # Common secret patterns
         secret_patterns = [
-            (r'password\s*=\s*["\'][^"\']+["\']', 'password = os.getenv("PASSWORD", "")'),
+            (
+                r'password\s*=\s*["\'][^"\']+["\']',
+                'password = os.getenv("PASSWORD", "")',
+            ),
             (r'api_key\s*=\s*["\'][^"\']+["\']', 'api_key = os.getenv("API_KEY", "")'),
             (r'secret\s*=\s*["\'][^"\']+["\']', 'secret = os.getenv("SECRET", "")'),
             (r'token\s*=\s*["\'][^"\']+["\']', 'token = os.getenv("TOKEN", "")'),
-            (r'key\s*=\s*["\'][^"\']+["\']', 'key = os.getenv("KEY", "")')
+            (r'key\s*=\s*["\'][^"\']+["\']', 'key = os.getenv("KEY", "")'),
         ]
 
         python_files = list(self.project_root.rglob("*.py"))
@@ -43,7 +46,7 @@ class SecurityFixer:
                 continue
 
             try:
-                with open(file_path, encoding='utf-8') as f:
+                with open(file_path, encoding="utf-8") as f:
                     content = f.read()
 
                 original_content = content
@@ -55,14 +58,16 @@ class SecurityFixer:
                         self.fixes_applied += 1
 
                 # Add os import if needed
-                if 'os.getenv' in content and 'import os' not in content:
-                    content = 'import os\n' + content
+                if "os.getenv" in content and "import os" not in content:
+                    content = "import os\n" + content
 
                 if content != original_content:
-                    with open(file_path, 'w', encoding='utf-8') as f:
+                    with open(file_path, "w", encoding="utf-8") as f:
                         f.write(content)
                     print(f"✅ Fixed secrets in {file_path}")
-                    self.security_improvements.append(f"Fixed hardcoded secrets in {file_path}")
+                    self.security_improvements.append(
+                        f"Fixed hardcoded secrets in {file_path}"
+                    )
 
             except Exception as e:
                 print(f"⚠️ Error fixing {file_path}: {e}")
@@ -73,9 +78,18 @@ class SecurityFixer:
 
         # SQL injection patterns and fixes
         sql_patterns = [
-            (r'execute\s*\(\s*f["\'][^"\']*%s[^"\']*["\']', 'execute("SELECT * FROM table WHERE id = %s", (user_id,))'),
-            (r'cursor\.execute\s*\(\s*f["\'][^"\']*%s[^"\']*["\']', 'cursor.execute("SELECT * FROM table WHERE id = %s", (user_id,))'),
-            (r'query\s*=\s*f["\'][^"\']*\+[^"\']*["\']', 'query = "SELECT * FROM table WHERE id = %s"')
+            (
+                r'execute\s*\(\s*f["\'][^"\']*%s[^"\']*["\']',
+                'execute("SELECT * FROM table WHERE id = %s", (user_id,))',
+            ),
+            (
+                r'cursor\.execute\s*\(\s*f["\'][^"\']*%s[^"\']*["\']',
+                'cursor.execute("SELECT * FROM table WHERE id = %s", (user_id,))',
+            ),
+            (
+                r'query\s*=\s*f["\'][^"\']*\+[^"\']*["\']',
+                'query = "SELECT * FROM table WHERE id = %s"',
+            ),
         ]
 
         python_files = list(self.project_root.rglob("*.py"))
@@ -84,7 +98,7 @@ class SecurityFixer:
                 continue
 
             try:
-                with open(file_path, encoding='utf-8') as f:
+                with open(file_path, encoding="utf-8") as f:
                     content = f.read()
 
                 original_content = content
@@ -95,10 +109,12 @@ class SecurityFixer:
                         self.fixes_applied += 1
 
                 if content != original_content:
-                    with open(file_path, 'w', encoding='utf-8') as f:
+                    with open(file_path, "w", encoding="utf-8") as f:
                         f.write(content)
                     print(f"✅ Fixed SQL injection in {file_path}")
-                    self.security_improvements.append(f"Fixed SQL injection in {file_path}")
+                    self.security_improvements.append(
+                        f"Fixed SQL injection in {file_path}"
+                    )
 
             except Exception as e:
                 print(f"⚠️ Error fixing {file_path}: {e}")
@@ -109,9 +125,15 @@ class SecurityFixer:
 
         # Command injection patterns and fixes
         cmd_patterns = [
-            (r'os\.system\s*\(\s*f["\'][^"\']*\+[^"\']*["\']', 'subprocess.run([command], shell=False)'),
-            (r'subprocess\.run\s*\(\s*f["\'][^"\']*\+[^"\']*["\']', 'subprocess.run([command], shell=False)'),
-            (r'shell\s*=\s*True', 'shell=False')
+            (
+                r'os\.system\s*\(\s*f["\'][^"\']*\+[^"\']*["\']',
+                "subprocess.run([command], shell=False)",
+            ),
+            (
+                r'subprocess\.run\s*\(\s*f["\'][^"\']*\+[^"\']*["\']',
+                "subprocess.run([command], shell=False)",
+            ),
+            (r"shell\s*=\s*True", "shell=False"),
         ]
 
         python_files = list(self.project_root.rglob("*.py"))
@@ -120,7 +142,7 @@ class SecurityFixer:
                 continue
 
             try:
-                with open(file_path, encoding='utf-8') as f:
+                with open(file_path, encoding="utf-8") as f:
                     content = f.read()
 
                 original_content = content
@@ -131,14 +153,16 @@ class SecurityFixer:
                         self.fixes_applied += 1
 
                 # Add subprocess import if needed
-                if 'subprocess.run' in content and 'import subprocess' not in content:
-                    content = 'import subprocess\n' + content
+                if "subprocess.run" in content and "import subprocess" not in content:
+                    content = "import subprocess\n" + content
 
                 if content != original_content:
-                    with open(file_path, 'w', encoding='utf-8') as f:
+                    with open(file_path, "w", encoding="utf-8") as f:
                         f.write(content)
                     print(f"✅ Fixed command injection in {file_path}")
-                    self.security_improvements.append(f"Fixed command injection in {file_path}")
+                    self.security_improvements.append(
+                        f"Fixed command injection in {file_path}"
+                    )
 
             except Exception as e:
                 print(f"⚠️ Error fixing {file_path}: {e}")
@@ -149,10 +173,10 @@ class SecurityFixer:
 
         # Weak crypto patterns and fixes
         crypto_patterns = [
-            (r'hashlib\.md5\s*\(', 'hashlib.sha256('),
-            (r'hashlib\.sha1\s*\(', 'hashlib.sha256('),
-            (r'random\.random\s*\(', 'secrets.randbelow('),
-            (r'random\.randint\s*\(', 'secrets.randbelow(')
+            (r"hashlib\.md5\s*\(", "hashlib.sha256("),
+            (r"hashlib\.sha1\s*\(", "hashlib.sha256("),
+            (r"random\.random\s*\(", "secrets.randbelow("),
+            (r"random\.randint\s*\(", "secrets.randbelow("),
         ]
 
         python_files = list(self.project_root.rglob("*.py"))
@@ -161,7 +185,7 @@ class SecurityFixer:
                 continue
 
             try:
-                with open(file_path, encoding='utf-8') as f:
+                with open(file_path, encoding="utf-8") as f:
                     content = f.read()
 
                 original_content = content
@@ -172,14 +196,16 @@ class SecurityFixer:
                         self.fixes_applied += 1
 
                 # Add secrets import if needed
-                if 'secrets.' in content and 'import secrets' not in content:
-                    content = 'import secrets\n' + content
+                if "secrets." in content and "import secrets" not in content:
+                    content = "import secrets\n" + content
 
                 if content != original_content:
-                    with open(file_path, 'w', encoding='utf-8') as f:
+                    with open(file_path, "w", encoding="utf-8") as f:
                         f.write(content)
                     print(f"✅ Fixed weak crypto in {file_path}")
-                    self.security_improvements.append(f"Fixed weak crypto in {file_path}")
+                    self.security_improvements.append(
+                        f"Fixed weak crypto in {file_path}"
+                    )
 
             except Exception as e:
                 print(f"⚠️ Error fixing {file_path}: {e}")
@@ -191,36 +217,30 @@ class SecurityFixer:
         security_config = {
             "security": {
                 "enabled": True,
-                "encryption": {
-                    "algorithm": "AES-256-GCM",
-                    "key_rotation_days": 90
-                },
+                "encryption": {"algorithm": "AES-256-GCM", "key_rotation_days": 90},
                 "input_validation": {
                     "max_input_length": 10000,
                     "sanitize_html": True,
-                    "validate_file_uploads": True
+                    "validate_file_uploads": True,
                 },
                 "authentication": {
                     "session_timeout": 3600,
                     "max_login_attempts": 5,
-                    "lockout_duration": 1800
+                    "lockout_duration": 1800,
                 },
-                "rate_limiting": {
-                    "requests_per_minute": 60,
-                    "burst_limit": 10
-                },
+                "rate_limiting": {"requests_per_minute": 60, "burst_limit": 10},
                 "cors": {
                     "allowed_origins": ["https://stillme.ai"],
                     "allowed_methods": ["GET", "POST", "PUT", "DELETE"],
-                    "allowed_headers": ["Content-Type", "Authorization"]
-                }
+                    "allowed_headers": ["Content-Type", "Authorization"],
+                },
             }
         }
 
         config_file = self.project_root / "config" / "security_config.json"
         config_file.parent.mkdir(exist_ok=True)
 
-        with open(config_file, 'w', encoding='utf-8') as f:
+        with open(config_file, "w", encoding="utf-8") as f:
             json.dump(security_config, f, indent=2, ensure_ascii=False)
 
         print(f"✅ Created security config: {config_file}")
@@ -255,7 +275,7 @@ LOG_LEVEL=INFO
 """
 
         env_file = self.project_root / ".env.example"
-        with open(env_file, 'w', encoding='utf-8') as f:
+        with open(env_file, "w", encoding="utf-8") as f:
             f.write(env_example)
 
         print(f"✅ Created .env.example: {env_file}")
@@ -273,7 +293,7 @@ LOG_LEVEL=INFO
             "site-packages",
             "dist-packages",
             "build",
-            "dist"
+            "dist",
         ]
 
         return any(pattern in str(file_path) for pattern in skip_patterns)
@@ -298,8 +318,12 @@ LOG_LEVEL=INFO
 
 def main():
     """Main function"""
-    parser = argparse.ArgumentParser(description="Fix critical security vulnerabilities")
-    parser.add_argument("--project-root", type=str, default=".", help="Project root directory")
+    parser = argparse.ArgumentParser(
+        description="Fix critical security vulnerabilities"
+    )
+    parser.add_argument(
+        "--project-root", type=str, default=".", help="Project root directory"
+    )
 
     args = parser.parse_args()
 

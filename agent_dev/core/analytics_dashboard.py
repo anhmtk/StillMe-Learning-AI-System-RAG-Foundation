@@ -29,8 +29,10 @@ import numpy as np
 # from plotly.subplots import make_subplots
 # import seaborn as sns
 
+
 class MetricType(Enum):
     """Loại metrics"""
+
     CODE_QUALITY = "code_quality"
     PERFORMANCE = "performance"
     SECURITY = "security"
@@ -38,16 +40,20 @@ class MetricType(Enum):
     DEPLOYMENT = "deployment"
     USER_ACTIVITY = "user_activity"
 
+
 class TrendDirection(Enum):
     """Hướng xu hướng"""
+
     IMPROVING = "improving"
     DECLINING = "declining"
     STABLE = "stable"
     VOLATILE = "volatile"
 
+
 @dataclass
 class MetricData:
     """Dữ liệu metrics"""
+
     metric_id: str
     metric_type: MetricType
     name: str
@@ -56,9 +62,11 @@ class MetricData:
     timestamp: datetime
     metadata: dict[str, Any]
 
+
 @dataclass
 class TrendAnalysis:
     """Phân tích xu hướng"""
+
     metric_id: str
     period: str
     direction: TrendDirection
@@ -67,9 +75,11 @@ class TrendAnalysis:
     data_points: list[float]
     prediction: Optional[float]
 
+
 @dataclass
 class PerformanceReport:
     """Báo cáo hiệu suất"""
+
     report_id: str
     period_start: datetime
     period_end: datetime
@@ -79,14 +89,17 @@ class PerformanceReport:
     recommendations: list[str]
     generated_at: datetime
 
+
 @dataclass
 class DashboardConfig:
     """Cấu hình dashboard"""
+
     title: str
     refresh_interval: int  # seconds
     metrics_to_show: list[MetricType]
     chart_types: dict[str, str]
     alert_thresholds: dict[str, float]
+
 
 class AnalyticsDashboard:
     """Analytics Dashboard - Dashboard phân tích toàn diện"""
@@ -119,7 +132,7 @@ class AnalyticsDashboard:
         cursor = conn.cursor()
 
         # Tạo bảng metrics
-        cursor.execute('''
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS metrics (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 metric_id TEXT NOT NULL,
@@ -130,10 +143,10 @@ class AnalyticsDashboard:
                 timestamp DATETIME NOT NULL,
                 metadata TEXT
             )
-        ''')
+        """)
 
         # Tạo bảng trends
-        cursor.execute('''
+        cursor.execute("""
             CREATE TABLE IF NOT EXISTS trends (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 metric_id TEXT NOT NULL,
@@ -145,11 +158,15 @@ class AnalyticsDashboard:
                 prediction REAL,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             )
-        ''')
+        """)
 
         # Tạo index
-        cursor.execute('CREATE INDEX IF NOT EXISTS idx_metrics_timestamp ON metrics(timestamp)')
-        cursor.execute('CREATE INDEX IF NOT EXISTS idx_metrics_type ON metrics(metric_type)')
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_metrics_timestamp ON metrics(timestamp)"
+        )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_metrics_type ON metrics(metric_type)"
+        )
 
         conn.commit()
         conn.close()
@@ -163,20 +180,20 @@ class AnalyticsDashboard:
                 MetricType.CODE_QUALITY,
                 MetricType.PERFORMANCE,
                 MetricType.SECURITY,
-                MetricType.TESTING
+                MetricType.TESTING,
             ],
             chart_types={
                 "line": "line",
                 "bar": "bar",
                 "pie": "pie",
-                "scatter": "scatter"
+                "scatter": "scatter",
             },
             alert_thresholds={
                 "code_quality": 0.8,
                 "performance": 1.0,
                 "security": 0.9,
-                "testing": 0.85
-            }
+                "testing": 0.85,
+            },
         )
 
     def collect_metrics(self) -> list[MetricData]:
@@ -213,15 +230,17 @@ class AnalyticsDashboard:
         python_files = list(self.project_root.rglob("*.py"))
         python_files = [f for f in python_files if "__pycache__" not in str(f)]
 
-        metrics.append(MetricData(
-            metric_id="total_python_files",
-            metric_type=MetricType.CODE_QUALITY,
-            name="Tổng số file Python",
-            value=len(python_files),
-            unit="files",
-            timestamp=timestamp,
-            metadata={"description": "Tổng số file Python trong project"}
-        ))
+        metrics.append(
+            MetricData(
+                metric_id="total_python_files",
+                metric_type=MetricType.CODE_QUALITY,
+                name="Tổng số file Python",
+                value=len(python_files),
+                unit="files",
+                timestamp=timestamp,
+                metadata={"description": "Tổng số file Python trong project"},
+            )
+        )
 
         # Đếm số lượng classes
         total_classes = 0
@@ -230,64 +249,72 @@ class AnalyticsDashboard:
 
         for file_path in python_files:
             try:
-                with open(file_path, encoding='utf-8') as f:
+                with open(file_path, encoding="utf-8") as f:
                     content = f.read()
 
-                lines = content.split('\n')
+                lines = content.split("\n")
                 total_lines += len(lines)
 
                 # Đếm classes và functions
                 for line in lines:
-                    if line.strip().startswith('class '):
+                    if line.strip().startswith("class "):
                         total_classes += 1
-                    elif line.strip().startswith('def '):
+                    elif line.strip().startswith("def "):
                         total_functions += 1
 
             except Exception:
                 continue
 
-        metrics.append(MetricData(
-            metric_id="total_classes",
-            metric_type=MetricType.CODE_QUALITY,
-            name="Tổng số classes",
-            value=total_classes,
-            unit="classes",
-            timestamp=timestamp,
-            metadata={"description": "Tổng số classes trong project"}
-        ))
+        metrics.append(
+            MetricData(
+                metric_id="total_classes",
+                metric_type=MetricType.CODE_QUALITY,
+                name="Tổng số classes",
+                value=total_classes,
+                unit="classes",
+                timestamp=timestamp,
+                metadata={"description": "Tổng số classes trong project"},
+            )
+        )
 
-        metrics.append(MetricData(
-            metric_id="total_functions",
-            metric_type=MetricType.CODE_QUALITY,
-            name="Tổng số functions",
-            value=total_functions,
-            unit="functions",
-            timestamp=timestamp,
-            metadata={"description": "Tổng số functions trong project"}
-        ))
+        metrics.append(
+            MetricData(
+                metric_id="total_functions",
+                metric_type=MetricType.CODE_QUALITY,
+                name="Tổng số functions",
+                value=total_functions,
+                unit="functions",
+                timestamp=timestamp,
+                metadata={"description": "Tổng số functions trong project"},
+            )
+        )
 
-        metrics.append(MetricData(
-            metric_id="total_lines_of_code",
-            metric_type=MetricType.CODE_QUALITY,
-            name="Tổng số dòng code",
-            value=total_lines,
-            unit="lines",
-            timestamp=timestamp,
-            metadata={"description": "Tổng số dòng code trong project"}
-        ))
+        metrics.append(
+            MetricData(
+                metric_id="total_lines_of_code",
+                metric_type=MetricType.CODE_QUALITY,
+                name="Tổng số dòng code",
+                value=total_lines,
+                unit="lines",
+                timestamp=timestamp,
+                metadata={"description": "Tổng số dòng code trong project"},
+            )
+        )
 
         # Tính complexity trung bình
         if total_functions > 0:
             avg_complexity = total_lines / total_functions
-            metrics.append(MetricData(
-                metric_id="avg_complexity",
-                metric_type=MetricType.CODE_QUALITY,
-                name="Độ phức tạp trung bình",
-                value=avg_complexity,
-                unit="lines/function",
-                timestamp=timestamp,
-                metadata={"description": "Số dòng code trung bình mỗi function"}
-            ))
+            metrics.append(
+                MetricData(
+                    metric_id="avg_complexity",
+                    metric_type=MetricType.CODE_QUALITY,
+                    name="Độ phức tạp trung bình",
+                    value=avg_complexity,
+                    unit="lines/function",
+                    timestamp=timestamp,
+                    metadata={"description": "Số dòng code trung bình mỗi function"},
+                )
+            )
 
         return metrics
 
@@ -300,39 +327,45 @@ class AnalyticsDashboard:
         if test_files:
             # Giả lập thời gian chạy test
             avg_test_time = np.random.uniform(0.5, 5.0)  # 0.5-5 giây
-            metrics.append(MetricData(
-                metric_id="avg_test_execution_time",
-                metric_type=MetricType.PERFORMANCE,
-                name="Thời gian chạy test trung bình",
-                value=avg_test_time,
-                unit="seconds",
-                timestamp=timestamp,
-                metadata={"description": "Thời gian chạy test trung bình"}
-            ))
+            metrics.append(
+                MetricData(
+                    metric_id="avg_test_execution_time",
+                    metric_type=MetricType.PERFORMANCE,
+                    name="Thời gian chạy test trung bình",
+                    value=avg_test_time,
+                    unit="seconds",
+                    timestamp=timestamp,
+                    metadata={"description": "Thời gian chạy test trung bình"},
+                )
+            )
 
         # Kiểm tra memory usage
         memory_usage = np.random.uniform(50, 200)  # 50-200 MB
-        metrics.append(MetricData(
-            metric_id="memory_usage",
-            metric_type=MetricType.PERFORMANCE,
-            name="Sử dụng bộ nhớ",
-            value=memory_usage,
-            unit="MB",
-            timestamp=timestamp,
-            metadata={"description": "Lượng bộ nhớ đang sử dụng"}
-        ))
+        metrics.append(
+            MetricData(
+                metric_id="memory_usage",
+                metric_type=MetricType.PERFORMANCE,
+                name="Sử dụng bộ nhớ",
+                value=memory_usage,
+                unit="MB",
+                timestamp=timestamp,
+                metadata={"description": "Lượng bộ nhớ đang sử dụng"},
+            )
+        )
 
         # Kiểm tra CPU usage
         cpu_usage = np.random.uniform(10, 80)  # 10-80%
-        metrics.append(MetricData(
-            metric_id="cpu_usage",
-            metric_type=MetricType.PERFORMANCE,
-            name="Sử dụng CPU",
-            value=cpu_usage,
-            unit="%",
-            timestamp=timestamp,
-            metadata={"description": "Phần trăm CPU đang sử dụng"}
-        ))
+        metrics.append(
+            MetricData(
+                metric_id="cpu_usage",
+                metric_type=MetricType.PERFORMANCE,
+                name="Sử dụng CPU",
+                value=cpu_usage,
+                unit="%",
+                timestamp=timestamp,
+                metadata={"description": "Phần trăm CPU đang sử dụng"},
+            )
+        )
 
         return metrics
 
@@ -346,39 +379,43 @@ class AnalyticsDashboard:
 
         for file_path in python_files:
             try:
-                with open(file_path, encoding='utf-8') as f:
+                with open(file_path, encoding="utf-8") as f:
                     content = f.read()
 
                 # Kiểm tra các pattern bảo mật
-                if 'password' in content.lower() or 'secret' in content.lower():
+                if "password" in content.lower() or "secret" in content.lower():
                     security_issues += 1
 
             except Exception:
                 continue
 
-        metrics.append(MetricData(
-            metric_id="security_issues",
-            metric_type=MetricType.SECURITY,
-            name="Số lượng vấn đề bảo mật",
-            value=security_issues,
-            unit="issues",
-            timestamp=timestamp,
-            metadata={"description": "Số lượng vấn đề bảo mật được phát hiện"}
-        ))
+        metrics.append(
+            MetricData(
+                metric_id="security_issues",
+                metric_type=MetricType.SECURITY,
+                name="Số lượng vấn đề bảo mật",
+                value=security_issues,
+                unit="issues",
+                timestamp=timestamp,
+                metadata={"description": "Số lượng vấn đề bảo mật được phát hiện"},
+            )
+        )
 
         # Tính security score
         total_files = len(python_files)
         if total_files > 0:
             security_score = max(0, 1 - (security_issues / total_files))
-            metrics.append(MetricData(
-                metric_id="security_score",
-                metric_type=MetricType.SECURITY,
-                name="Điểm bảo mật",
-                value=security_score,
-                unit="score",
-                timestamp=timestamp,
-                metadata={"description": "Điểm bảo mật tổng thể (0-1)"}
-            ))
+            metrics.append(
+                MetricData(
+                    metric_id="security_score",
+                    metric_type=MetricType.SECURITY,
+                    name="Điểm bảo mật",
+                    value=security_score,
+                    unit="score",
+                    timestamp=timestamp,
+                    metadata={"description": "Điểm bảo mật tổng thể (0-1)"},
+                )
+            )
 
         return metrics
 
@@ -388,51 +425,57 @@ class AnalyticsDashboard:
 
         # Đếm số lượng test files
         test_files = list(self.project_root.rglob("*test*.py"))
-        metrics.append(MetricData(
-            metric_id="total_test_files",
-            metric_type=MetricType.TESTING,
-            name="Tổng số file test",
-            value=len(test_files),
-            unit="files",
-            timestamp=timestamp,
-            metadata={"description": "Tổng số file test trong project"}
-        ))
+        metrics.append(
+            MetricData(
+                metric_id="total_test_files",
+                metric_type=MetricType.TESTING,
+                name="Tổng số file test",
+                value=len(test_files),
+                unit="files",
+                timestamp=timestamp,
+                metadata={"description": "Tổng số file test trong project"},
+            )
+        )
 
         # Đếm số lượng test functions
         total_test_functions = 0
         for test_file in test_files:
             try:
-                with open(test_file, encoding='utf-8') as f:
+                with open(test_file, encoding="utf-8") as f:
                     content = f.read()
 
-                for line in content.split('\n'):
-                    if line.strip().startswith('def test_'):
+                for line in content.split("\n"):
+                    if line.strip().startswith("def test_"):
                         total_test_functions += 1
 
             except Exception:
                 continue
 
-        metrics.append(MetricData(
-            metric_id="total_test_functions",
-            metric_type=MetricType.TESTING,
-            name="Tổng số test functions",
-            value=total_test_functions,
-            unit="functions",
-            timestamp=timestamp,
-            metadata={"description": "Tổng số test functions trong project"}
-        ))
+        metrics.append(
+            MetricData(
+                metric_id="total_test_functions",
+                metric_type=MetricType.TESTING,
+                name="Tổng số test functions",
+                value=total_test_functions,
+                unit="functions",
+                timestamp=timestamp,
+                metadata={"description": "Tổng số test functions trong project"},
+            )
+        )
 
         # Tính test coverage (giả lập)
         test_coverage = np.random.uniform(0.7, 0.95)  # 70-95%
-        metrics.append(MetricData(
-            metric_id="test_coverage",
-            metric_type=MetricType.TESTING,
-            name="Test coverage",
-            value=test_coverage,
-            unit="%",
-            timestamp=timestamp,
-            metadata={"description": "Phần trăm code được test"}
-        ))
+        metrics.append(
+            MetricData(
+                metric_id="test_coverage",
+                metric_type=MetricType.TESTING,
+                name="Test coverage",
+                value=test_coverage,
+                unit="%",
+                timestamp=timestamp,
+                metadata={"description": "Phần trăm code được test"},
+            )
+        )
 
         return metrics
 
@@ -442,18 +485,21 @@ class AnalyticsDashboard:
         cursor = conn.cursor()
 
         for metric in metrics:
-            cursor.execute('''
+            cursor.execute(
+                """
                 INSERT INTO metrics (metric_id, metric_type, name, value, unit, timestamp, metadata)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
-            ''', (
-                metric.metric_id,
-                metric.metric_type.value,
-                metric.name,
-                metric.value,
-                metric.unit,
-                metric.timestamp,
-                json.dumps(metric.metadata)
-            ))
+            """,
+                (
+                    metric.metric_id,
+                    metric.metric_type.value,
+                    metric.name,
+                    metric.value,
+                    metric.unit,
+                    metric.timestamp,
+                    json.dumps(metric.metadata),
+                ),
+            )
 
         conn.commit()
         conn.close()
@@ -465,11 +511,14 @@ class AnalyticsDashboard:
 
         # Lấy dữ liệu trong khoảng thời gian
         start_date = datetime.now() - timedelta(days=period_days)
-        cursor.execute('''
+        cursor.execute(
+            """
             SELECT value, timestamp FROM metrics
             WHERE metric_id = ? AND timestamp >= ?
             ORDER BY timestamp
-        ''', (metric_id, start_date))
+        """,
+            (metric_id, start_date),
+        )
 
         data = cursor.fetchall()
         conn.close()
@@ -483,7 +532,7 @@ class AnalyticsDashboard:
                 change_percentage=0.0,
                 confidence=0.0,
                 data_points=[],
-                prediction=None
+                prediction=None,
             )
 
         values = [row[0] for row in data]
@@ -493,7 +542,11 @@ class AnalyticsDashboard:
         if len(values) >= 2:
             first_value = values[0]
             last_value = values[-1]
-            change_percentage = ((last_value - first_value) / first_value) * 100 if first_value != 0 else 0
+            change_percentage = (
+                ((last_value - first_value) / first_value) * 100
+                if first_value != 0
+                else 0
+            )
 
             # Xác định hướng xu hướng
             if change_percentage > 5:
@@ -527,7 +580,7 @@ class AnalyticsDashboard:
             change_percentage=change_percentage,
             confidence=confidence,
             data_points=values,
-            prediction=prediction
+            prediction=prediction,
         )
 
     def generate_performance_report(self, period_days: int = 7) -> PerformanceReport:
@@ -558,58 +611,102 @@ class AnalyticsDashboard:
             trends=trends,
             insights=insights,
             recommendations=recommendations,
-            generated_at=datetime.now()
+            generated_at=datetime.now(),
         )
 
-    def _generate_insights(self, metrics: list[MetricData], trends: list[TrendAnalysis]) -> list[str]:
+    def _generate_insights(
+        self, metrics: list[MetricData], trends: list[TrendAnalysis]
+    ) -> list[str]:
         """Tạo insights từ metrics và trends"""
         insights = []
 
         # Phân tích code quality
-        code_quality_metrics = [m for m in metrics if m.metric_type == MetricType.CODE_QUALITY]
+        code_quality_metrics = [
+            m for m in metrics if m.metric_type == MetricType.CODE_QUALITY
+        ]
         if code_quality_metrics:
-            total_files = next((m.value for m in code_quality_metrics if m.metric_id == "total_python_files"), 0)
-            total_classes = next((m.value for m in code_quality_metrics if m.metric_id == "total_classes"), 0)
+            total_files = next(
+                (
+                    m.value
+                    for m in code_quality_metrics
+                    if m.metric_id == "total_python_files"
+                ),
+                0,
+            )
+            total_classes = next(
+                (
+                    m.value
+                    for m in code_quality_metrics
+                    if m.metric_id == "total_classes"
+                ),
+                0,
+            )
 
             if total_files > 0:
                 classes_per_file = total_classes / total_files
                 if classes_per_file > 2:
-                    insights.append(f"Project có {classes_per_file:.1f} classes mỗi file, cho thấy cấu trúc tốt")
+                    insights.append(
+                        f"Project có {classes_per_file:.1f} classes mỗi file, cho thấy cấu trúc tốt"
+                    )
                 else:
-                    insights.append(f"Project có {classes_per_file:.1f} classes mỗi file, có thể cần refactoring")
+                    insights.append(
+                        f"Project có {classes_per_file:.1f} classes mỗi file, có thể cần refactoring"
+                    )
 
         # Phân tích performance
-        performance_metrics = [m for m in metrics if m.metric_type == MetricType.PERFORMANCE]
+        performance_metrics = [
+            m for m in metrics if m.metric_type == MetricType.PERFORMANCE
+        ]
         if performance_metrics:
-            cpu_usage = next((m.value for m in performance_metrics if m.metric_id == "cpu_usage"), 0)
-            memory_usage = next((m.value for m in performance_metrics if m.metric_id == "memory_usage"), 0)
+            cpu_usage = next(
+                (m.value for m in performance_metrics if m.metric_id == "cpu_usage"), 0
+            )
+            memory_usage = next(
+                (m.value for m in performance_metrics if m.metric_id == "memory_usage"),
+                0,
+            )
 
             if cpu_usage > 70:
-                insights.append(f"CPU usage cao ({cpu_usage:.1f}%), cần tối ưu hiệu suất")
+                insights.append(
+                    f"CPU usage cao ({cpu_usage:.1f}%), cần tối ưu hiệu suất"
+                )
             if memory_usage > 150:
-                insights.append(f"Memory usage cao ({memory_usage:.1f}MB), cần kiểm tra memory leaks")
+                insights.append(
+                    f"Memory usage cao ({memory_usage:.1f}MB), cần kiểm tra memory leaks"
+                )
 
         # Phân tích security
         security_metrics = [m for m in metrics if m.metric_type == MetricType.SECURITY]
         if security_metrics:
-            security_score = next((m.value for m in security_metrics if m.metric_id == "security_score"), 0)
+            security_score = next(
+                (m.value for m in security_metrics if m.metric_id == "security_score"),
+                0,
+            )
             if security_score < 0.8:
-                insights.append(f"Security score thấp ({security_score:.2f}), cần cải thiện bảo mật")
+                insights.append(
+                    f"Security score thấp ({security_score:.2f}), cần cải thiện bảo mật"
+                )
             else:
                 insights.append(f"Security score tốt ({security_score:.2f})")
 
         # Phân tích testing
         testing_metrics = [m for m in metrics if m.metric_type == MetricType.TESTING]
         if testing_metrics:
-            test_coverage = next((m.value for m in testing_metrics if m.metric_id == "test_coverage"), 0)
+            test_coverage = next(
+                (m.value for m in testing_metrics if m.metric_id == "test_coverage"), 0
+            )
             if test_coverage < 0.8:
-                insights.append(f"Test coverage thấp ({test_coverage:.1%}), cần tăng cường testing")
+                insights.append(
+                    f"Test coverage thấp ({test_coverage:.1%}), cần tăng cường testing"
+                )
             else:
                 insights.append(f"Test coverage tốt ({test_coverage:.1%})")
 
         return insights
 
-    def _generate_recommendations(self, metrics: list[MetricData], trends: list[TrendAnalysis]) -> list[str]:
+    def _generate_recommendations(
+        self, metrics: list[MetricData], trends: list[TrendAnalysis]
+    ) -> list[str]:
         """Tạo recommendations từ metrics và trends"""
         recommendations = []
 
@@ -617,13 +714,17 @@ class AnalyticsDashboard:
         for metric in metrics:
             if metric.metric_type == MetricType.CODE_QUALITY:
                 if metric.metric_id == "avg_complexity" and metric.value > 20:
-                    recommendations.append("Giảm độ phức tạp của functions bằng cách chia nhỏ")
+                    recommendations.append(
+                        "Giảm độ phức tạp của functions bằng cách chia nhỏ"
+                    )
                 elif metric.metric_id == "total_lines_of_code" and metric.value > 10000:
                     recommendations.append("Xem xét refactoring để giảm số dòng code")
 
             elif metric.metric_type == MetricType.PERFORMANCE:
                 if metric.metric_id == "cpu_usage" and metric.value > 70:
-                    recommendations.append("Tối ưu hóa CPU usage bằng cách cải thiện algorithms")
+                    recommendations.append(
+                        "Tối ưu hóa CPU usage bằng cách cải thiện algorithms"
+                    )
                 elif metric.metric_id == "memory_usage" and metric.value > 150:
                     recommendations.append("Kiểm tra và sửa memory leaks")
 
@@ -633,14 +734,20 @@ class AnalyticsDashboard:
 
             elif metric.metric_type == MetricType.TESTING:
                 if metric.metric_id == "test_coverage" and metric.value < 0.8:
-                    recommendations.append("Tăng test coverage bằng cách viết thêm tests")
+                    recommendations.append(
+                        "Tăng test coverage bằng cách viết thêm tests"
+                    )
 
         # Recommendations dựa trên trends
         for trend in trends:
             if trend.direction == TrendDirection.DECLINING and trend.confidence > 0.7:
-                recommendations.append(f"Metric {trend.metric_id} đang giảm, cần điều tra nguyên nhân")
+                recommendations.append(
+                    f"Metric {trend.metric_id} đang giảm, cần điều tra nguyên nhân"
+                )
             elif trend.direction == TrendDirection.IMPROVING and trend.confidence > 0.7:
-                recommendations.append(f"Metric {trend.metric_id} đang cải thiện, tiếp tục duy trì")
+                recommendations.append(
+                    f"Metric {trend.metric_id} đang cải thiện, tiếp tục duy trì"
+                )
 
         return recommendations
 
@@ -804,7 +911,7 @@ class AnalyticsDashboard:
 </html>"""
 
         # Lưu file HTML
-        with open(html_file, 'w', encoding='utf-8') as f:
+        with open(html_file, "w", encoding="utf-8") as f:
             f.write(html_content)
 
         return str(html_file)
@@ -814,10 +921,11 @@ class AnalyticsDashboard:
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         json_file = self.artifacts_dir / f"analytics_report_{timestamp}.json"
 
-        with open(json_file, 'w', encoding='utf-8') as f:
+        with open(json_file, "w", encoding="utf-8") as f:
             json.dump(asdict(report), f, indent=2, default=str)
 
         return str(json_file)
+
 
 def main():
     """Main function for testing"""
@@ -829,7 +937,9 @@ def main():
 
     # Tạo báo cáo
     report = dashboard.generate_performance_report()
-    print(f"Đã tạo báo cáo với {len(report.insights)} insights và {len(report.recommendations)} khuyến nghị")
+    print(
+        f"Đã tạo báo cáo với {len(report.insights)} insights và {len(report.recommendations)} khuyến nghị"
+    )
 
     # Tạo HTML dashboard
     html_file = dashboard.create_html_dashboard(report)
@@ -838,6 +948,7 @@ def main():
     # Lưu JSON report
     json_file = dashboard.save_report_json(report)
     print(f"JSON report: {json_file}")
+
 
 if __name__ == "__main__":
     main()

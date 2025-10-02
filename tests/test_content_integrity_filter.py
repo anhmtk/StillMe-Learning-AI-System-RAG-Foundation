@@ -245,9 +245,12 @@ async def test_fact_check_content_factual(
     )
 
     content_text = "Nước sôi ở 100 độ C tại áp suất khí quyển tiêu chuẩn."
-    is_factual, confidence, reason, misinformation_detected = (
-        await content_filter_instance.fact_check_content(content_text)
-    )
+    (
+        is_factual,
+        confidence,
+        reason,
+        misinformation_detected,
+    ) = await content_filter_instance.fact_check_content(content_text)
 
     assert is_factual
     assert confidence > 0.9
@@ -273,9 +276,12 @@ async def test_fact_check_content_misinformation(
     )
 
     content_text = "Trái đất phẳng và được chống đỡ bởi bốn con voi."
-    is_factual, confidence, reason, misinformation_detected = (
-        await content_filter_instance.fact_check_content(content_text)
-    )
+    (
+        is_factual,
+        confidence,
+        reason,
+        misinformation_detected,
+    ) = await content_filter_instance.fact_check_content(content_text)
 
     assert not is_factual
     assert confidence < 0.3
@@ -296,9 +302,12 @@ async def test_fact_check_content_llm_error_fallback(
     )
 
     content_text = "Nội dung bất kỳ."
-    is_factual, confidence, reason, misinformation_detected = (
-        await content_filter_instance.fact_check_content(content_text)
-    )
+    (
+        is_factual,
+        confidence,
+        reason,
+        misinformation_detected,
+    ) = await content_filter_instance.fact_check_content(content_text)
 
     assert not is_factual  # Giá trị mặc định an toàn
     assert confidence == 0.0  # Giá trị mặc định an toàn

@@ -24,6 +24,7 @@ import aiohttp
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class TestResult:
     endpoint: str
@@ -31,6 +32,7 @@ class TestResult:
     status_code: int
     response_size: int
     timestamp: float
+
 
 class GatewayBenchmark:
     """Comprehensive benchmark for StillMe Gateway"""
@@ -40,7 +42,7 @@ class GatewayBenchmark:
         self.gateway_url = "http://localhost:8080"
         self.direct_urls = {
             "stillme": "http://localhost:1216",
-            "ollama": "http://localhost:11434"
+            "ollama": "http://localhost:11434",
         }
 
     async def run_benchmark(self):
@@ -77,25 +79,27 @@ class GatewayBenchmark:
                 payload = {
                     "message": f"Test message {i}",
                     "user_id": "benchmark_user",
-                    "use_cache": True
+                    "use_cache": True,
                 }
 
                 try:
                     async with session.post(
                         f"{self.gateway_url}/api/chat",
                         json=payload,
-                        timeout=aiohttp.ClientTimeout(total=30)
+                        timeout=aiohttp.ClientTimeout(total=30),
                     ) as response:
                         latency = (time.time() - start_time) * 1000
                         response_text = await response.text()
 
-                        self.results.append(TestResult(
-                            endpoint="chat_gateway",
-                            latency_ms=latency,
-                            status_code=response.status,
-                            response_size=len(response_text),
-                            timestamp=time.time()
-                        ))
+                        self.results.append(
+                            TestResult(
+                                endpoint="chat_gateway",
+                                latency_ms=latency,
+                                status_code=response.status,
+                                response_size=len(response_text),
+                                timestamp=time.time(),
+                            )
+                        )
 
                 except Exception as e:
                     logger.warning(f"Chat gateway request {i} failed: {e}")
@@ -106,27 +110,26 @@ class GatewayBenchmark:
             for i in range(num_requests):
                 start_time = time.time()
 
-                payload = {
-                    "message": f"Test message {i}",
-                    "user_id": "benchmark_user"
-                }
+                payload = {"message": f"Test message {i}", "user_id": "benchmark_user"}
 
                 try:
                     async with session.post(
                         f"{self.direct_urls['stillme']}/chat",
                         json=payload,
-                        timeout=aiohttp.ClientTimeout(total=30)
+                        timeout=aiohttp.ClientTimeout(total=30),
                     ) as response:
                         latency = (time.time() - start_time) * 1000
                         response_text = await response.text()
 
-                        self.results.append(TestResult(
-                            endpoint="chat_direct",
-                            latency_ms=latency,
-                            status_code=response.status,
-                            response_size=len(response_text),
-                            timestamp=time.time()
-                        ))
+                        self.results.append(
+                            TestResult(
+                                endpoint="chat_direct",
+                                latency_ms=latency,
+                                status_code=response.status,
+                                response_size=len(response_text),
+                                timestamp=time.time(),
+                            )
+                        )
 
                 except Exception as e:
                     logger.warning(f"Chat direct request {i} failed: {e}")
@@ -140,25 +143,27 @@ class GatewayBenchmark:
                 payload = {
                     "model": "gemma2:2b",
                     "prompt": f"Hello, this is test {i}",
-                    "stream": False
+                    "stream": False,
                 }
 
                 try:
                     async with session.post(
                         f"{self.gateway_url}/api/ollama",
                         json=payload,
-                        timeout=aiohttp.ClientTimeout(total=30)
+                        timeout=aiohttp.ClientTimeout(total=30),
                     ) as response:
                         latency = (time.time() - start_time) * 1000
                         response_text = await response.text()
 
-                        self.results.append(TestResult(
-                            endpoint="ollama_gateway",
-                            latency_ms=latency,
-                            status_code=response.status,
-                            response_size=len(response_text),
-                            timestamp=time.time()
-                        ))
+                        self.results.append(
+                            TestResult(
+                                endpoint="ollama_gateway",
+                                latency_ms=latency,
+                                status_code=response.status,
+                                response_size=len(response_text),
+                                timestamp=time.time(),
+                            )
+                        )
 
                 except Exception as e:
                     logger.warning(f"Ollama gateway request {i} failed: {e}")
@@ -172,25 +177,27 @@ class GatewayBenchmark:
                 payload = {
                     "model": "gemma2:2b",
                     "prompt": f"Hello, this is test {i}",
-                    "stream": False
+                    "stream": False,
                 }
 
                 try:
                     async with session.post(
                         f"{self.direct_urls['ollama']}/api/generate",
                         json=payload,
-                        timeout=aiohttp.ClientTimeout(total=30)
+                        timeout=aiohttp.ClientTimeout(total=30),
                     ) as response:
                         latency = (time.time() - start_time) * 1000
                         response_text = await response.text()
 
-                        self.results.append(TestResult(
-                            endpoint="ollama_direct",
-                            latency_ms=latency,
-                            status_code=response.status,
-                            response_size=len(response_text),
-                            timestamp=time.time()
-                        ))
+                        self.results.append(
+                            TestResult(
+                                endpoint="ollama_direct",
+                                latency_ms=latency,
+                                status_code=response.status,
+                                response_size=len(response_text),
+                                timestamp=time.time(),
+                            )
+                        )
 
                 except Exception as e:
                     logger.warning(f"Ollama direct request {i} failed: {e}")
@@ -204,23 +211,27 @@ class GatewayBenchmark:
                 try:
                     async with session.get(
                         f"{self.gateway_url}/health",
-                        timeout=aiohttp.ClientTimeout(total=5)
+                        timeout=aiohttp.ClientTimeout(total=5),
                     ) as response:
                         latency = (time.time() - start_time) * 1000
                         response_text = await response.text()
 
-                        self.results.append(TestResult(
-                            endpoint="health_gateway",
-                            latency_ms=latency,
-                            status_code=response.status,
-                            response_size=len(response_text),
-                            timestamp=time.time()
-                        ))
+                        self.results.append(
+                            TestResult(
+                                endpoint="health_gateway",
+                                latency_ms=latency,
+                                status_code=response.status,
+                                response_size=len(response_text),
+                                timestamp=time.time(),
+                            )
+                        )
 
                 except Exception as e:
                     logger.warning(f"Health gateway request {i} failed: {e}")
 
-    async def test_concurrent_load(self, num_requests: int = 100, concurrency: int = 10):
+    async def test_concurrent_load(
+        self, num_requests: int = 100, concurrency: int = 10
+    ):
         """Test concurrent load handling"""
         semaphore = asyncio.Semaphore(concurrency)
 
@@ -231,7 +242,7 @@ class GatewayBenchmark:
                 payload = {
                     "message": f"Concurrent test {i}",
                     "user_id": "load_test_user",
-                    "use_cache": True
+                    "use_cache": True,
                 }
 
                 try:
@@ -239,18 +250,20 @@ class GatewayBenchmark:
                         async with session.post(
                             f"{self.gateway_url}/api/chat",
                             json=payload,
-                            timeout=aiohttp.ClientTimeout(total=30)
+                            timeout=aiohttp.ClientTimeout(total=30),
                         ) as response:
                             latency = (time.time() - start_time) * 1000
                             response_text = await response.text()
 
-                            self.results.append(TestResult(
-                                endpoint="concurrent_load",
-                                latency_ms=latency,
-                                status_code=response.status,
-                                response_size=len(response_text),
-                                timestamp=time.time()
-                            ))
+                            self.results.append(
+                                TestResult(
+                                    endpoint="concurrent_load",
+                                    latency_ms=latency,
+                                    status_code=response.status,
+                                    response_size=len(response_text),
+                                    timestamp=time.time(),
+                                )
+                            )
 
                 except Exception as e:
                     logger.warning(f"Concurrent request {i} failed: {e}")
@@ -269,25 +282,27 @@ class GatewayBenchmark:
             payload = {
                 "message": message,
                 "user_id": "cache_test_user",
-                "use_cache": True
+                "use_cache": True,
             }
 
             try:
                 async with session.post(
                     f"{self.gateway_url}/api/chat",
                     json=payload,
-                    timeout=aiohttp.ClientTimeout(total=30)
+                    timeout=aiohttp.ClientTimeout(total=30),
                 ) as response:
                     latency = (time.time() - start_time) * 1000
                     response_text = await response.text()
 
-                    self.results.append(TestResult(
-                        endpoint="cache_miss",
-                        latency_ms=latency,
-                        status_code=response.status,
-                        response_size=len(response_text),
-                        timestamp=time.time()
-                    ))
+                    self.results.append(
+                        TestResult(
+                            endpoint="cache_miss",
+                            latency_ms=latency,
+                            status_code=response.status,
+                            response_size=len(response_text),
+                            timestamp=time.time(),
+                        )
+                    )
 
             except Exception as e:
                 logger.warning(f"Cache miss request failed: {e}")
@@ -300,18 +315,20 @@ class GatewayBenchmark:
                     async with session.post(
                         f"{self.gateway_url}/api/chat",
                         json=payload,
-                        timeout=aiohttp.ClientTimeout(total=30)
+                        timeout=aiohttp.ClientTimeout(total=30),
                     ) as response:
                         latency = (time.time() - start_time) * 1000
                         response_text = await response.text()
 
-                        self.results.append(TestResult(
-                            endpoint="cache_hit",
-                            latency_ms=latency,
-                            status_code=response.status,
-                            response_size=len(response_text),
-                            timestamp=time.time()
-                        ))
+                        self.results.append(
+                            TestResult(
+                                endpoint="cache_hit",
+                                latency_ms=latency,
+                                status_code=response.status,
+                                response_size=len(response_text),
+                                timestamp=time.time(),
+                            )
+                        )
 
                 except Exception as e:
                     logger.warning(f"Cache hit request {i} failed: {e}")
@@ -331,11 +348,19 @@ class GatewayBenchmark:
         report = {
             "summary": {
                 "total_requests": len(self.results),
-                "successful_requests": len([r for r in self.results if r.status_code == 200]),
-                "failed_requests": len([r for r in self.results if r.status_code != 200]),
-                "success_rate": len([r for r in self.results if r.status_code == 200]) / len(self.results) * 100 if self.results else 0
+                "successful_requests": len(
+                    [r for r in self.results if r.status_code == 200]
+                ),
+                "failed_requests": len(
+                    [r for r in self.results if r.status_code != 200]
+                ),
+                "success_rate": len([r for r in self.results if r.status_code == 200])
+                / len(self.results)
+                * 100
+                if self.results
+                else 0,
             },
-            "endpoints": {}
+            "endpoints": {},
         }
 
         for endpoint, results in endpoint_results.items():
@@ -355,12 +380,12 @@ class GatewayBenchmark:
                     "avg_ms": statistics.mean(latencies),
                     "median_ms": statistics.median(latencies),
                     "p95_ms": self._percentile(latencies, 95),
-                    "p99_ms": self._percentile(latencies, 99)
+                    "p99_ms": self._percentile(latencies, 99),
                 },
                 "response_size": {
                     "avg_bytes": statistics.mean([r.response_size for r in results]),
-                    "total_bytes": sum([r.response_size for r in results])
-                }
+                    "total_bytes": sum([r.response_size for r in results]),
+                },
             }
 
         # Save report
@@ -380,9 +405,9 @@ class GatewayBenchmark:
 
     def _print_summary(self, report: dict[str, Any]):
         """Print performance summary"""
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("🚀 STILLME GATEWAY PERFORMANCE BENCHMARK REPORT")
-        print("="*80)
+        print("=" * 80)
 
         summary = report["summary"]
         print(f"📊 Total Requests: {summary['total_requests']}")
@@ -395,17 +420,26 @@ class GatewayBenchmark:
 
         for endpoint, stats in report["endpoints"].items():
             print(f"\n🔗 {endpoint.upper()}:")
-            print(f"   Requests: {stats['total_requests']} (Success: {stats['success_rate']:.1f}%)")
+            print(
+                f"   Requests: {stats['total_requests']} (Success: {stats['success_rate']:.1f}%)"
+            )
 
             latency = stats["latency_stats"]
-            print(f"   Latency: Avg={latency['avg_ms']:.1f}ms, P95={latency['p95_ms']:.1f}ms, P99={latency['p99_ms']:.1f}ms")
-            print(f"   Response Size: {stats['response_size']['avg_bytes']:.0f} bytes avg")
+            print(
+                f"   Latency: Avg={latency['avg_ms']:.1f}ms, P95={latency['p95_ms']:.1f}ms, P99={latency['p99_ms']:.1f}ms"
+            )
+            print(
+                f"   Response Size: {stats['response_size']['avg_bytes']:.0f} bytes avg"
+            )
 
         # Latency comparison
         print("\n⚡ LATENCY COMPARISON:")
         print("-" * 80)
 
-        if "chat_gateway" in report["endpoints"] and "chat_direct" in report["endpoints"]:
+        if (
+            "chat_gateway" in report["endpoints"]
+            and "chat_direct" in report["endpoints"]
+        ):
             gateway_avg = report["endpoints"]["chat_gateway"]["latency_stats"]["avg_ms"]
             direct_avg = report["endpoints"]["chat_direct"]["latency_stats"]["avg_ms"]
             overhead = gateway_avg - direct_avg
@@ -415,8 +449,13 @@ class GatewayBenchmark:
             print(f"Chat API - Direct:  {direct_avg:.1f}ms")
             print(f"Gateway Overhead:   {overhead:.1f}ms ({overhead_pct:+.1f}%)")
 
-        if "ollama_gateway" in report["endpoints"] and "ollama_direct" in report["endpoints"]:
-            gateway_avg = report["endpoints"]["ollama_gateway"]["latency_stats"]["avg_ms"]
+        if (
+            "ollama_gateway" in report["endpoints"]
+            and "ollama_direct" in report["endpoints"]
+        ):
+            gateway_avg = report["endpoints"]["ollama_gateway"]["latency_stats"][
+                "avg_ms"
+            ]
             direct_avg = report["endpoints"]["ollama_direct"]["latency_stats"]["avg_ms"]
             overhead = gateway_avg - direct_avg
             overhead_pct = (overhead / direct_avg) * 100 if direct_avg > 0 else 0
@@ -437,12 +476,14 @@ class GatewayBenchmark:
             print(f"Cache Hit:  {hit_avg:.1f}ms")
             print(f"Improvement: {improvement:.1f}ms ({improvement_pct:.1f}% faster)")
 
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
+
 
 async def main():
     """Main benchmark function"""
     benchmark = GatewayBenchmark()
     await benchmark.run_benchmark()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

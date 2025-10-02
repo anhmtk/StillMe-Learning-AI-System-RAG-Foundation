@@ -27,7 +27,7 @@ class TestVisualClarifier:
         config = {
             "max_image_size_mb": 10,
             "supported_image_formats": ["jpg", "jpeg", "png", "gif", "webp"],
-            "image_analysis": "stub"
+            "image_analysis": "stub",
         }
         return VisualClarifier(config)
 
@@ -35,9 +35,9 @@ class TestVisualClarifier:
     def sample_image_bytes(self):
         """Create a sample image for testing"""
         # Create a simple 100x100 red image
-        img = Image.new('RGB', (100, 100), color='red')
+        img = Image.new("RGB", (100, 100), color="red")
         img_bytes = io.BytesIO()
-        img.save(img_bytes, format='PNG')
+        img.save(img_bytes, format="PNG")
         return img_bytes.getvalue()
 
     def test_visual_clarifier_initialization(self, visual_clarifier):
@@ -75,7 +75,10 @@ class TestVisualClarifier:
         metadata = {"size": (200, 50), "format": "png", "size_mb": 0.1}
         result = visual_clarifier._stub_analysis(metadata)
 
-        assert "diagram" in result["question"].lower() or "chart" in result["question"].lower()
+        assert (
+            "diagram" in result["question"].lower()
+            or "chart" in result["question"].lower()
+        )
         assert len(result["options"]) > 0
         assert result["confidence"] > 0.5
         assert "diagram" in result["detected_objects"]
@@ -85,7 +88,10 @@ class TestVisualClarifier:
         metadata = {"size": (50, 200), "format": "png", "size_mb": 0.1}
         result = visual_clarifier._stub_analysis(metadata)
 
-        assert "document" in result["question"].lower() or "code" in result["question"].lower()
+        assert (
+            "document" in result["question"].lower()
+            or "code" in result["question"].lower()
+        )
         assert len(result["options"]) > 0
         assert result["confidence"] > 0.5
         assert "document" in result["detected_objects"]
@@ -113,6 +119,7 @@ class TestVisualClarifier:
         assert "validation failed" in result.question.lower()
         assert result.confidence > 0.5
 
+
 class TestCodeClarifier:
     """Test CodeClarifier functionality"""
 
@@ -121,7 +128,15 @@ class TestCodeClarifier:
         """Create a CodeClarifier instance for testing"""
         config = {
             "code_analysis": "ast",
-            "code_languages": ["python", "javascript", "typescript", "java", "cpp", "go", "rust"]
+            "code_languages": [
+                "python",
+                "javascript",
+                "typescript",
+                "java",
+                "cpp",
+                "go",
+                "rust",
+            ],
         }
         return CodeClarifier(config)
 
@@ -186,7 +201,7 @@ class Calculator:
         analysis = {
             "valid": True,
             "functions": [{"name": "calculate_sum", "args": ["a", "b"], "line": 1}],
-            "classes": []
+            "classes": [],
         }
         result = code_clarifier._generate_code_question(analysis, "python")
 
@@ -201,9 +216,9 @@ class Calculator:
             "valid": True,
             "functions": [
                 {"name": "func1", "args": [], "line": 1},
-                {"name": "func2", "args": [], "line": 5}
+                {"name": "func2", "args": [], "line": 5},
             ],
-            "classes": []
+            "classes": [],
         }
         result = code_clarifier._generate_code_question(analysis, "python")
 
@@ -213,10 +228,7 @@ class Calculator:
 
     def test_generate_code_question_syntax_error(self, code_clarifier):
         """Test question generation for syntax error"""
-        analysis = {
-            "valid": False,
-            "error": "Syntax error: invalid syntax"
-        }
+        analysis = {"valid": False, "error": "Syntax error: invalid syntax"}
         result = code_clarifier._generate_code_question(analysis, "python")
 
         assert "syntax error" in result["question"].lower()
@@ -246,6 +258,7 @@ class Calculator:
         assert result.input_type == "code"
         assert result.domain == "code"
         assert result.metadata["language"] == "javascript"
+
 
 class TestTextClarifier:
     """Test TextClarifier functionality"""
@@ -312,6 +325,7 @@ class TestTextClarifier:
         assert result.domain == "generic"
         assert "more details" in result.question.lower()
 
+
 class TestMultiModalClarifier:
     """Test MultiModalClarifier functionality"""
 
@@ -324,7 +338,7 @@ class TestMultiModalClarifier:
             "supported_image_formats": ["jpg", "jpeg", "png", "gif", "webp"],
             "image_analysis": "stub",
             "code_analysis": "ast",
-            "text_analysis": "enhanced"
+            "text_analysis": "enhanced",
         }
         return MultiModalClarifier(config, context_aware_clarifier=None)
 
@@ -410,6 +424,7 @@ class TestMultiModalClarifier:
         assert result.needs_clarification is True
         assert "error" in result.reasoning.lower()
 
+
 class TestMultiModalIntegration:
     """Integration tests for multi-modal clarification"""
 
@@ -423,7 +438,7 @@ class TestMultiModalIntegration:
             "image_analysis": "stub",
             "code_analysis": "ast",
             "text_analysis": "enhanced",
-            "code_languages": ["python", "javascript"]
+            "code_languages": ["python", "javascript"],
         }
         return MultiModalClarifier(config)
 
@@ -432,7 +447,7 @@ class TestMultiModalIntegration:
         context = {
             "user_id": "test_user",
             "conversation_history": [],
-            "project_context": {"files": ["app.py"], "extensions": [".py"]}
+            "project_context": {"files": ["app.py"], "extensions": [".py"]},
         }
 
         result = full_clarifier.analyze("Build a web application", context)
@@ -448,7 +463,7 @@ class TestMultiModalIntegration:
         context = {
             "user_id": "test_user",
             "conversation_history": [],
-            "project_context": {"files": ["main.py"], "extensions": [".py"]}
+            "project_context": {"files": ["main.py"], "extensions": [".py"]},
         }
 
         code = """
@@ -472,6 +487,7 @@ def process_data(data):
         large_code = "def func():\n    pass\n" * 1000  # 1000 functions
 
         import time
+
         start_time = time.time()
         result = full_clarifier.analyze(large_code)
         end_time = time.time()

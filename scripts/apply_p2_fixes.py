@@ -53,7 +53,7 @@ def apply_p2_fixes():
 
         try:
             # Read file
-            with open(file_path, encoding='utf-8') as f:
+            with open(file_path, encoding="utf-8") as f:
                 lines = f.readlines()
 
             # Add imports at the top
@@ -61,6 +61,7 @@ def apply_p2_fixes():
             for error in errors:
                 # Extract symbol name
                 import re
+
                 match = re.search(r"undefined name '(\w+)'", error.message)
                 if not match:
                     continue
@@ -72,8 +73,13 @@ def apply_p2_fixes():
                     symbol_info = analysis["symbol_analysis"][symbol_name]
 
                     if symbol_info["in_core"] or symbol_name in [
-                        "NodeType", "ImpactLevel", "MatchType", "SemanticSearchEngine",
-                        "RedisEventBus", "DAGExecutor", "RBACManager"
+                        "NodeType",
+                        "ImpactLevel",
+                        "MatchType",
+                        "SemanticSearchEngine",
+                        "RedisEventBus",
+                        "DAGExecutor",
+                        "RBACManager",
                     ]:
                         # Add import from stillme_core
                         import_line = f"from stillme_core import {symbol_name}"
@@ -86,18 +92,20 @@ def apply_p2_fixes():
                 # Find insertion point
                 insert_index = 0
                 for i, line in enumerate(lines):
-                    if line.strip().startswith('import ') or line.strip().startswith('from '):
+                    if line.strip().startswith("import ") or line.strip().startswith(
+                        "from "
+                    ):
                         insert_index = i + 1
-                    elif line.strip() and not line.strip().startswith('#'):
+                    elif line.strip() and not line.strip().startswith("#"):
                         break
 
                 # Insert imports
                 for import_line in imports_added:
-                    lines.insert(insert_index, import_line + '\n')
+                    lines.insert(insert_index, import_line + "\n")
                     insert_index += 1
 
                 # Write back
-                with open(file_path, 'w', encoding='utf-8') as f:
+                with open(file_path, "w", encoding="utf-8") as f:
                     f.writelines(lines)
 
                 print(f"  ✅ Added {len(imports_added)} imports")
@@ -126,14 +134,21 @@ def apply_p2_fixes():
         "reexports_added": [
             "stillme_core/compat.py",
             "stillme_core/missing_implementations.py",
-            "stillme_core/__init__.py"
+            "stillme_core/__init__.py",
         ],
         "missing_in_core_implemented": [
-            "NodeType", "ImpactLevel", "MatchType",
-            "SemanticSearchEngine", "RedisEventBus", "DAGExecutor", "RBACManager"
+            "NodeType",
+            "ImpactLevel",
+            "MatchType",
+            "SemanticSearchEngine",
+            "RedisEventBus",
+            "DAGExecutor",
+            "RBACManager",
         ],
         "improvement": len(f821_before) - len(f821_after),
-        "success_rate": f"{(len(f821_before) - len(f821_after)) / len(f821_before) * 100:.1f}%" if len(f821_before) > 0 else "N/A"
+        "success_rate": f"{(len(f821_before) - len(f821_after)) / len(f821_before) * 100:.1f}%"
+        if len(f821_before) > 0
+        else "N/A",
     }
 
     print("\n📋 P2 FIX REPORT:")
@@ -145,6 +160,7 @@ def apply_p2_fixes():
 
     return report
 
+
 def main():
     """Main function"""
     report = apply_p2_fixes()
@@ -154,6 +170,7 @@ def main():
         print(f"Success rate: {report['success_rate']}")
     else:
         print("\n❌ P2 FAILED: No improvement in F821 errors")
+
 
 if __name__ == "__main__":
     main()

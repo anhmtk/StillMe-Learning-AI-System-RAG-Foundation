@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class SandboxConfig:
     """Sandbox configuration"""
+
     timeout: float = 30.0
     max_memory: int = 512  # MB
     max_disk: int = 100  # MB
@@ -62,7 +63,7 @@ class Sandbox:
                 "success": False,
                 "error": "Sandbox not active",
                 "output": "",
-                "exit_code": -1
+                "exit_code": -1,
             }
 
         return {
@@ -70,7 +71,7 @@ class Sandbox:
             "output": f"Stub execution: {command}",
             "exit_code": 0,
             "execution_time": 0.1,
-            "warnings": ["Stub implementation - no real execution"]
+            "warnings": ["Stub implementation - no real execution"],
         }
 
     def get_status(self) -> dict[str, Any]:
@@ -79,7 +80,7 @@ class Sandbox:
             "sandbox_id": self.sandbox_id,
             "is_active": self.is_active,
             "config": self.config.__dict__,
-            "status": "stub"
+            "status": "stub",
         }
 
 
@@ -94,7 +95,9 @@ def prepare_sandbox(config: Optional[SandboxConfig] = None) -> Sandbox:
     return sandbox
 
 
-def run_tests_in_sandbox(tests: list[str], config: Optional[SandboxConfig] = None) -> dict[str, Any]:
+def run_tests_in_sandbox(
+    tests: list[str], config: Optional[SandboxConfig] = None
+) -> dict[str, Any]:
     """
     Run tests in sandbox
 
@@ -107,10 +110,7 @@ def run_tests_in_sandbox(tests: list[str], config: Optional[SandboxConfig] = Non
         results = []
         for test in tests:
             result = sandbox.execute(f"python -m pytest {test}")
-            results.append({
-                "test": test,
-                "result": result
-            })
+            results.append({"test": test, "result": result})
 
         return {
             "success": True,
@@ -119,8 +119,8 @@ def run_tests_in_sandbox(tests: list[str], config: Optional[SandboxConfig] = Non
                 "total": len(tests),
                 "passed": len(tests),
                 "failed": 0,
-                "warnings": ["Stub implementation - no real test execution"]
-            }
+                "warnings": ["Stub implementation - no real test execution"],
+            },
         }
     finally:
         sandbox.destroy()

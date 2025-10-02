@@ -23,8 +23,8 @@ def check_coverage_xml():
         root = tree.getroot()
 
         # Get overall coverage
-        line_rate = float(root.get('line-rate', 0))
-        branch_rate = float(root.get('branch-rate', 0))
+        line_rate = float(root.get("line-rate", 0))
+        branch_rate = float(root.get("branch-rate", 0))
 
         print("📊 Overall Coverage:")
         print(f"   Line Coverage: {line_rate:.1%}")
@@ -39,13 +39,13 @@ def check_coverage_xml():
             return False
 
         # Check specific modules
-        modules = root.findall('.//class')
+        modules = root.findall(".//class")
         niche_radar_coverage = {}
 
         for module in modules:
-            filename = module.get('filename', '')
-            if 'niche_radar' in filename:
-                line_rate = float(module.get('line-rate', 0))
+            filename = module.get("filename", "")
+            if "niche_radar" in filename:
+                line_rate = float(module.get("line-rate", 0))
                 niche_radar_coverage[filename] = line_rate
 
         if niche_radar_coverage:
@@ -55,7 +55,9 @@ def check_coverage_xml():
                 print(f"   {status} {module}: {coverage:.1%}")
 
             # Check if all modules meet minimum
-            all_meet_minimum = all(coverage >= min_coverage for coverage in niche_radar_coverage.values())
+            all_meet_minimum = all(
+                coverage >= min_coverage for coverage in niche_radar_coverage.values()
+            )
             if all_meet_minimum:
                 print("✅ All NicheRadar modules meet minimum coverage")
             else:
@@ -70,6 +72,7 @@ def check_coverage_xml():
     except Exception as e:
         print(f"❌ Error reading coverage XML: {e}")
         return False
+
 
 def check_coverage_html():
     """Check if HTML coverage report exists"""
@@ -87,6 +90,7 @@ def check_coverage_html():
     print("✅ Coverage HTML report exists")
     return True
 
+
 def check_missing_coverage():
     """Check for missing coverage in critical files"""
     critical_files = [
@@ -97,7 +101,7 @@ def check_missing_coverage():
         "policy/tool_gate.py",
         "security/content_wrap.py",
         "cache/web_cache.py",
-        "metrics/web_metrics.py"
+        "metrics/web_metrics.py",
     ]
 
     missing_files = []
@@ -111,6 +115,7 @@ def check_missing_coverage():
 
     print("✅ All critical files exist")
     return True
+
 
 def check_test_coverage_ratio():
     """Check test coverage ratio"""
@@ -143,6 +148,7 @@ def check_test_coverage_ratio():
         print(f"❌ Test coverage ratio below minimum requirement ({min_ratio:.2f})")
         return False
 
+
 def check_coverage_trends():
     """Check coverage trends (if previous reports exist)"""
     # This would compare with previous coverage reports
@@ -156,19 +162,17 @@ def check_coverage_trends():
         print("❌ No current coverage report found")
         return False
 
+
 def generate_coverage_summary():
     """Generate coverage summary"""
     summary = {
         "timestamp": "2024-09-22T10:00:00Z",
         "coverage_files": [],
-        "coverage_issues": []
+        "coverage_issues": [],
     }
 
     # Check coverage files
-    coverage_files = [
-        "reports/coverage.xml",
-        "reports/coverage/index.html"
-    ]
+    coverage_files = ["reports/coverage.xml", "reports/coverage/index.html"]
 
     for file_path in coverage_files:
         if Path(file_path).exists():
@@ -178,11 +182,12 @@ def generate_coverage_summary():
 
     # Save summary
     summary_path = "reports/coverage_summary.json"
-    with open(summary_path, 'w') as f:
+    with open(summary_path, "w") as f:
         json.dump(summary, f, indent=2)
 
     print(f"📋 Coverage summary saved to {summary_path}")
     return summary
+
 
 def main():
     """Main coverage check function"""
@@ -193,7 +198,7 @@ def main():
         ("Test Coverage Ratio", check_test_coverage_ratio),
         ("Coverage XML Report", check_coverage_xml),
         ("Coverage HTML Report", check_coverage_html),
-        ("Coverage Trends", check_coverage_trends)
+        ("Coverage Trends", check_coverage_trends),
     ]
 
     all_passed = True
@@ -212,6 +217,7 @@ def main():
     else:
         print("\n❌ Some coverage checks failed!")
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

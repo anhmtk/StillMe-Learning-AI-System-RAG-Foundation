@@ -20,7 +20,7 @@ def test_zero_guard_when_sources_fail():
     """Test that AgentDev doesn't report 0 errors when sources fail"""
 
     # Mock subprocess.run to simulate ruff failure
-    with patch('agent_dev.core.agentdev.subprocess.run') as mock_run:
+    with patch("agent_dev.core.agentdev.subprocess.run") as mock_run:
         # Simulate ruff command failure
         mock_result = MagicMock()
         mock_result.returncode = 1
@@ -35,11 +35,19 @@ def test_zero_guard_when_sources_fail():
         assert len(errors) > 0, "Should not return empty list when ruff fails"
 
         # Should have system error indicating failure
-        assert any(e.rule == "RUFF_FAILED" for e in errors), "Should have RUFF_FAILED error"
+        assert any(
+            e.rule == "RUFF_FAILED" for e in errors
+        ), "Should have RUFF_FAILED error"
 
         # Should not have "Found 0 errors" behavior
         # Filter out system errors and command failures
-        real_errors = [e for e in errors if not e.rule.startswith("SYSTEM_") and e.rule not in ["RUFF_FAILED", "TIMEOUT", "EXCEPTION", "JSON_PARSE_FAILED"]]
+        real_errors = [
+            e
+            for e in errors
+            if not e.rule.startswith("SYSTEM_")
+            and e.rule
+            not in ["RUFF_FAILED", "TIMEOUT", "EXCEPTION", "JSON_PARSE_FAILED"]
+        ]
         assert len(real_errors) == 0, "Should have 0 real errors when source fails"
 
         print("PASS: AgentDev correctly guards against false zero when sources fail")
@@ -48,9 +56,10 @@ def test_zero_guard_when_sources_fail():
 def test_timeout_guard():
     """Test that timeout is properly reported"""
 
-    with patch('agent_dev.core.agentdev.subprocess.run') as mock_run:
+    with patch("agent_dev.core.agentdev.subprocess.run") as mock_run:
         # Simulate timeout
         import subprocess
+
         mock_run.side_effect = subprocess.TimeoutExpired("ruff", 120)
 
         agentdev = AgentDev()

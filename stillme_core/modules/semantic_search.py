@@ -10,13 +10,16 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class SearchResult:
     """Search result item"""
+
     name: str
     content: str
     relevance_score: float
     metadata: dict[str, Any]
+
 
 class SemanticSearch:
     """
@@ -38,92 +41,97 @@ class SemanticSearch:
                 "name": "Flask",
                 "content": "Flask is a lightweight Python web framework",
                 "category": "web_framework",
-                "tags": ["python", "web", "framework", "lightweight"]
+                "tags": ["python", "web", "framework", "lightweight"],
             },
             {
                 "name": "FastAPI",
                 "content": "FastAPI is a modern Python web framework for building APIs",
                 "category": "web_framework",
-                "tags": ["python", "web", "api", "modern", "fast"]
+                "tags": ["python", "web", "api", "modern", "fast"],
             },
             {
                 "name": "React",
                 "content": "React is a JavaScript library for building user interfaces",
                 "category": "frontend_framework",
-                "tags": ["javascript", "frontend", "ui", "library"]
+                "tags": ["javascript", "frontend", "ui", "library"],
             },
             {
                 "name": "Vue.js",
                 "content": "Vue.js is a progressive JavaScript framework",
                 "category": "frontend_framework",
-                "tags": ["javascript", "frontend", "framework", "progressive"]
+                "tags": ["javascript", "frontend", "framework", "progressive"],
             },
             {
                 "name": "Pandas",
                 "content": "Pandas is a Python library for data manipulation and analysis",
                 "category": "data_library",
-                "tags": ["python", "data", "analysis", "dataframe"]
+                "tags": ["python", "data", "analysis", "dataframe"],
             },
             {
                 "name": "NumPy",
                 "content": "NumPy is a Python library for numerical computing",
                 "category": "data_library",
-                "tags": ["python", "numerical", "arrays", "computing"]
+                "tags": ["python", "numerical", "arrays", "computing"],
             },
             {
                 "name": "TensorFlow",
                 "content": "TensorFlow is an open-source machine learning platform",
                 "category": "ml_framework",
-                "tags": ["python", "machine_learning", "deep_learning", "neural_networks"]
+                "tags": [
+                    "python",
+                    "machine_learning",
+                    "deep_learning",
+                    "neural_networks",
+                ],
             },
             {
                 "name": "PyTorch",
                 "content": "PyTorch is a machine learning framework for Python",
                 "category": "ml_framework",
-                "tags": ["python", "machine_learning", "deep_learning", "research"]
+                "tags": ["python", "machine_learning", "deep_learning", "research"],
             },
             {
                 "name": "Docker",
                 "content": "Docker is a containerization platform",
                 "category": "devops_tool",
-                "tags": ["containerization", "deployment", "devops", "virtualization"]
+                "tags": ["containerization", "deployment", "devops", "virtualization"],
             },
             {
                 "name": "Kubernetes",
                 "content": "Kubernetes is a container orchestration platform",
                 "category": "devops_tool",
-                "tags": ["orchestration", "containers", "scaling", "devops"]
+                "tags": ["orchestration", "containers", "scaling", "devops"],
             },
             {
                 "name": "app.py",
                 "content": "Main application file for Python web applications",
                 "category": "file_type",
-                "tags": ["python", "web", "main", "application"]
+                "tags": ["python", "web", "main", "application"],
             },
             {
                 "name": "requirements.txt",
                 "content": "Python dependencies file",
                 "category": "file_type",
-                "tags": ["python", "dependencies", "packages", "pip"]
+                "tags": ["python", "dependencies", "packages", "pip"],
             },
             {
                 "name": "package.json",
                 "content": "Node.js project configuration and dependencies",
                 "category": "file_type",
-                "tags": ["nodejs", "javascript", "dependencies", "npm"]
+                "tags": ["nodejs", "javascript", "dependencies", "npm"],
             },
             {
                 "name": "models.py",
                 "content": "Database models file in Django/Flask applications",
                 "category": "file_type",
-                "tags": ["python", "database", "models", "orm"]
+                "tags": ["python", "database", "models", "orm"],
             },
             {
                 "name": "views.py",
                 "content": "Views/controllers file in Django applications",
                 "category": "file_type",
-                "tags": ["python", "django", "views", "controllers"]
-            }
+                "tags": ["python", "django", "views", "controllers"],
+            },
         ]
 
     def _build_index(self) -> dict[str, list[int]]:
@@ -212,8 +220,8 @@ class SemanticSearch:
                 relevance_score=score,
                 metadata={
                     "category": item.get("category", ""),
-                    "tags": item.get("tags", [])
-                }
+                    "tags": item.get("tags", []),
+                },
             )
             results.append(result)
 
@@ -242,8 +250,8 @@ class SemanticSearch:
                     relevance_score=1.0,
                     metadata={
                         "category": item.get("category", ""),
-                        "tags": item.get("tags", [])
-                    }
+                        "tags": item.get("tags", []),
+                    },
                 )
                 results.append(result)
 
@@ -276,8 +284,8 @@ class SemanticSearch:
                     relevance_score=score,
                     metadata={
                         "category": item.get("category", ""),
-                        "tags": item.get("tags", [])
-                    }
+                        "tags": item.get("tags", []),
+                    },
                 )
                 results.append(result)
 
@@ -301,7 +309,7 @@ class SemanticSearch:
             "data": ["data_library"],
             "ml": ["ml_framework"],
             "devops": ["devops_tool"],
-            "programming": ["file_type"]
+            "programming": ["file_type"],
         }
 
         categories = domain_mapping.get(domain.lower(), [])
@@ -324,8 +332,9 @@ class SemanticSearch:
         return {
             "total_items": len(self.knowledge_base),
             "categories": categories,
-            "index_size": len(self.index)
+            "index_size": len(self.index),
         }
+
 
 # Example usage and testing
 if __name__ == "__main__":
@@ -338,7 +347,9 @@ if __name__ == "__main__":
     results = search.find_related_items("python web framework")
     print("\nSearch for 'python web framework':")
     for result in results:
-        print(f"  - {result.name}: {result.content} (score: {result.relevance_score:.2f})")
+        print(
+            f"  - {result.name}: {result.content} (score: {result.relevance_score:.2f})"
+        )
 
     # Test category search
     results = search.find_by_category("web_framework")

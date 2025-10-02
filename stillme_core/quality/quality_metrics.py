@@ -8,6 +8,7 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
+
 class MetricType(Enum):
     COVERAGE = "coverage"
     COMPLEXITY = "complexity"
@@ -16,9 +17,11 @@ class MetricType(Enum):
     RELIABILITY = "reliability"
     SECURITY = "security"
 
+
 @dataclass
 class QualityMetric:
     """Quality metric record"""
+
     metric_id: str
     metric_type: MetricType
     value: float
@@ -31,6 +34,7 @@ class QualityMetric:
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
+
 
 class QualityMetrics:
     """Quality metrics collector for StillMe Framework"""
@@ -49,14 +53,16 @@ class QualityMetrics:
             MetricType.DUPLICATION: 3.0,  # Max 3% duplication
             MetricType.MAINTAINABILITY: 7.0,  # Maintainability index (1-10)
             MetricType.RELIABILITY: 8.0,  # Reliability rating (1-10)
-            MetricType.SECURITY: 9.0  # Security rating (1-10)
+            MetricType.SECURITY: 9.0,  # Security rating (1-10)
         }
 
-    def record_metric(self,
-                     metric_type: MetricType,
-                     value: float,
-                     unit: str = "percentage",
-                     metadata: dict[str, Any] = None) -> QualityMetric:
+    def record_metric(
+        self,
+        metric_type: MetricType,
+        value: float,
+        unit: str = "percentage",
+        metadata: dict[str, Any] = None,
+    ) -> QualityMetric:
         """Record a quality metric"""
         try:
             metric_id = f"metric_{len(self.metrics) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -78,11 +84,13 @@ class QualityMetrics:
                 threshold=threshold,
                 status=status,
                 timestamp=datetime.now(),
-                metadata=metadata or {}
+                metadata=metadata or {},
             )
 
             self.metrics.append(metric)
-            self.logger.info(f"📊 Quality metric recorded: {metric_type.value} = {value} {unit} ({status})")
+            self.logger.info(
+                f"📊 Quality metric recorded: {metric_type.value} = {value} {unit} ({status})"
+            )
             return metric
 
         except Exception as e:
@@ -123,7 +131,10 @@ class QualityMetrics:
                 metrics_by_status[status_key] = metrics_by_status.get(status_key, 0) + 1
 
                 # Latest metrics
-                if type_key not in latest_metrics or metric.timestamp > latest_metrics[type_key].timestamp:
+                if (
+                    type_key not in latest_metrics
+                    or metric.timestamp > latest_metrics[type_key].timestamp
+                ):
                     latest_metrics[type_key] = metric
 
             # Calculate overall quality score
@@ -133,21 +144,26 @@ class QualityMetrics:
                 "total_metrics": total_metrics,
                 "metrics_by_type": metrics_by_type,
                 "metrics_by_status": metrics_by_status,
-                "latest_metrics": {k: {
-                    "value": v.value,
-                    "unit": v.unit,
-                    "status": v.status,
-                    "timestamp": v.timestamp.isoformat()
-                } for k, v in latest_metrics.items()},
+                "latest_metrics": {
+                    k: {
+                        "value": v.value,
+                        "unit": v.unit,
+                        "status": v.status,
+                        "timestamp": v.timestamp.isoformat(),
+                    }
+                    for k, v in latest_metrics.items()
+                },
                 "overall_quality_score": overall_score,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
         except Exception as e:
             self.logger.error(f"❌ Failed to get quality summary: {e}")
             return {"error": str(e)}
 
-    def _calculate_overall_score(self, latest_metrics: dict[str, QualityMetric]) -> float:
+    def _calculate_overall_score(
+        self, latest_metrics: dict[str, QualityMetric]
+    ) -> float:
         """Calculate overall quality score"""
         try:
             if not latest_metrics:

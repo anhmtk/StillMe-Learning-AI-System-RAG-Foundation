@@ -2,6 +2,7 @@
 """
 Optimized Gateway for StillMe - Without Redis (for testing)
 """
+
 import time
 
 import httpx
@@ -13,17 +14,18 @@ app = FastAPI(title="StillMe Optimized Gateway")
 
 # HTTP client with connection pooling
 http_client = httpx.AsyncClient(
-    timeout=30.0,
-    limits=httpx.Limits(max_keepalive_connections=20, max_connections=100)
+    timeout=30.0, limits=httpx.Limits(max_keepalive_connections=20, max_connections=100)
 )
 
 # Simple in-memory cache
 cache = {}
 CACHE_TTL = 300  # 5 minutes
 
+
 @app.get("/health")
 async def health_check():
     return {"status": "ok", "message": "Optimized Gateway is healthy"}
+
 
 @app.post("/chat")
 async def chat_proxy(request: Request):
@@ -45,7 +47,9 @@ async def chat_proxy(request: Request):
 
         # Forward to StillMe backend
         start_time = time.monotonic()
-        stillme_response = await http_client.post("http://localhost:1216/chat", json=body)
+        stillme_response = await http_client.post(
+            "http://localhost:1216/chat", json=body
+        )
         stillme_response.raise_for_status()
         response_data = stillme_response.json()
 
@@ -60,19 +64,17 @@ async def chat_proxy(request: Request):
     except httpx.RequestError as e:
         print(f"StillMe backend request failed: {e}")
         return JSONResponse(
-            {"error": "StillMe backend is unavailable"},
-            status_code=503
+            {"error": "StillMe backend is unavailable"}, status_code=503
         )
     except Exception as e:
         print(f"Gateway error: {e}")
-        return JSONResponse(
-            {"error": "Internal server error"},
-            status_code=500
-        )
+        return JSONResponse({"error": "Internal server error"}, status_code=500)
+
 
 @app.on_event("shutdown")
 async def shutdown_event():
     await http_client.aclose()
+
 
 if __name__ == "__main__":
     print("Starting StillMe Optimized Gateway on port 8080...")

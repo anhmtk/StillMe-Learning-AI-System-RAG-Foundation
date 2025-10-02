@@ -23,19 +23,23 @@ class UnicodeDetector(BaseDetector):
 
         # Unicode ranges for different languages
         self.unicode_ranges = {
-            "chinese": (0x4e00, 0x9fff),
-            "japanese_hiragana": (0x3040, 0x309f),
-            "japanese_katakana": (0x30a0, 0x30ff),
-            "korean": (0xac00, 0xd7af),
-            "cyrillic": (0x0400, 0x04ff),
-            "arabic": (0x0600, 0x06ff),
-            "greek": (0x0370, 0x03ff),
+            "chinese": (0x4E00, 0x9FFF),
+            "japanese_hiragana": (0x3040, 0x309F),
+            "japanese_katakana": (0x30A0, 0x30FF),
+            "korean": (0xAC00, 0xD7AF),
+            "cyrillic": (0x0400, 0x04FF),
+            "arabic": (0x0600, 0x06FF),
+            "greek": (0x0370, 0x03FF),
         }
 
         # Test-specific Unicode text
         self.test_unicode_text = [
-            "函数名", "関数名", "함수명",  # Function names
-            "中文", "日本語", "한국어"    # Return values
+            "函数名",
+            "関数名",
+            "함수명",  # Function names
+            "中文",
+            "日本語",
+            "한국어",  # Return values
         ]
 
     def detect(self, text: str) -> dict[str, Any]:
@@ -61,7 +65,9 @@ class UnicodeDetector(BaseDetector):
                 test_unicode_found.append(unicode_text)
 
         # Check for Unicode function definitions
-        unicode_function_pattern = r"def\s+[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]+\s*\("
+        unicode_function_pattern = (
+            r"def\s+[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]+\s*\("
+        )
         unicode_functions = re.findall(unicode_function_pattern, text)
 
         # Check for Unicode return values
@@ -99,6 +105,6 @@ class UnicodeDetector(BaseDetector):
                 "test_unicode_found": test_unicode_found,
                 "unicode_functions": unicode_functions,
                 "unicode_returns": unicode_returns,
-                "total_unicode_chars": len(unicode_chars)
-            }
+                "total_unicode_chars": len(unicode_chars),
+            },
         }

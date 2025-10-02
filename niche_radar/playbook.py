@@ -22,9 +22,11 @@ from .scoring import NicheScore
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class Persona:
     """Target user persona"""
+
     name: str
     role: str
     company_size: str
@@ -33,9 +35,11 @@ class Persona:
     tech_stack: list[str]
     budget_range: str
 
+
 @dataclass
 class ProductBrief:
     """Product brief for niche opportunity"""
+
     title: str
     description: str
     personas: list[Persona]
@@ -45,9 +49,11 @@ class ProductBrief:
     target_market: str
     competitive_advantage: str
 
+
 @dataclass
 class Feature:
     """MVP feature specification"""
+
     name: str
     description: str
     priority: str  # "must_have", "should_have", "nice_to_have"
@@ -55,9 +61,11 @@ class Feature:
     dependencies: list[str]
     stillme_capability: str
 
+
 @dataclass
 class MVPSpec:
     """MVP specification"""
+
     name: str
     description: str
     features: list[Feature]
@@ -67,9 +75,11 @@ class MVPSpec:
     dependencies: list[str]
     deployment_requirements: list[str]
 
+
 @dataclass
 class PricingTier:
     """Pricing tier specification"""
+
     name: str
     price: float
     currency: str
@@ -77,9 +87,11 @@ class PricingTier:
     target_users: str
     rationale: str
 
+
 @dataclass
 class PricingSuggestion:
     """Pricing strategy suggestion"""
+
     tiers: list[PricingTier]
     pricing_model: str  # "subscription", "usage", "one_time"
     free_tier: bool
@@ -87,9 +99,11 @@ class PricingSuggestion:
     rationale: str
     revenue_projections: dict[str, float]
 
+
 @dataclass
 class LandingPageSpec:
     """Landing page specification"""
+
     headline: str
     subheadline: str
     value_propositions: list[str]
@@ -98,9 +112,11 @@ class LandingPageSpec:
     cta_text: str
     design_tokens: dict[str, str]
 
+
 @dataclass
 class RepoScaffold:
     """Repository scaffold specification"""
+
     name: str
     description: str
     tech_stack: list[str]
@@ -109,18 +125,22 @@ class RepoScaffold:
     license: str
     initial_commits: list[str]
 
+
 @dataclass
 class OutreachTemplate:
     """Email/DM outreach template"""
+
     subject: str
     body: str
     language: str  # "en" or "vi"
     personalization_placeholders: list[str]
     call_to_action: str
 
+
 @dataclass
 class ExecutionPack:
     """Complete execution pack for niche opportunity"""
+
     niche_score: NicheScore
     product_brief: ProductBrief
     mvp_spec: MVPSpec
@@ -132,6 +152,7 @@ class ExecutionPack:
     compliance_notes: list[str]
     kpis: list[str]
     timeline: dict[str, str]
+
 
 class PlaybookGenerator:
     """Generate execution playbooks for niche opportunities"""
@@ -147,10 +168,16 @@ class PlaybookGenerator:
             # Generate each component
             product_brief = self._generate_product_brief(niche_score)
             mvp_spec = self._generate_mvp_spec(niche_score, product_brief)
-            pricing_suggestion = self._generate_pricing_suggestion(niche_score, mvp_spec)
-            landing_page_spec = self._generate_landing_page_spec(niche_score, product_brief)
+            pricing_suggestion = self._generate_pricing_suggestion(
+                niche_score, mvp_spec
+            )
+            landing_page_spec = self._generate_landing_page_spec(
+                niche_score, product_brief
+            )
             repo_scaffold = self._generate_repo_scaffold(niche_score, mvp_spec)
-            outreach_templates = self._generate_outreach_templates(niche_score, product_brief)
+            outreach_templates = self._generate_outreach_templates(
+                niche_score, product_brief
+            )
             risk_assessment = self._generate_risk_assessment(niche_score)
             compliance_notes = self._generate_compliance_notes(niche_score)
             kpis = self._generate_kpis(niche_score)
@@ -167,7 +194,7 @@ class PlaybookGenerator:
                 risk_assessment=risk_assessment,
                 compliance_notes=compliance_notes,
                 kpis=kpis,
-                timeline=timeline
+                timeline=timeline,
             )
 
         except Exception as e:
@@ -198,7 +225,7 @@ class PlaybookGenerator:
             jobs_to_be_done=jobs_to_be_done,
             unique_selling_proposition=usp,
             target_market=self._determine_target_market(topic),
-            competitive_advantage=f"Built on StillMe's proven AI framework with {niche_score.feasibility_fit:.0%} capability fit"
+            competitive_advantage=f"Built on StillMe's proven AI framework with {niche_score.feasibility_fit:.0%} capability fit",
         )
 
     def _generate_personas(self, topic: str) -> list[Persona]:
@@ -206,62 +233,68 @@ class PlaybookGenerator:
         personas = []
 
         if "ai" in topic.lower() or "assistant" in topic.lower():
-            personas.append(Persona(
-                name="Sarah Chen",
-                role="Product Manager",
-                company_size="50-200 employees",
-                pain_points=[
-                    "Manual data analysis takes too long",
-                    "Need quick insights for decision making",
-                    "Struggling with repetitive tasks"
-                ],
-                goals=[
-                    "Automate routine analysis",
-                    "Get instant insights",
-                    "Focus on strategic work"
-                ],
-                tech_stack=["Python", "SQL", "Jupyter", "Slack"],
-                budget_range="$100-500/month"
-            ))
+            personas.append(
+                Persona(
+                    name="Sarah Chen",
+                    role="Product Manager",
+                    company_size="50-200 employees",
+                    pain_points=[
+                        "Manual data analysis takes too long",
+                        "Need quick insights for decision making",
+                        "Struggling with repetitive tasks",
+                    ],
+                    goals=[
+                        "Automate routine analysis",
+                        "Get instant insights",
+                        "Focus on strategic work",
+                    ],
+                    tech_stack=["Python", "SQL", "Jupyter", "Slack"],
+                    budget_range="$100-500/month",
+                )
+            )
 
         if "translation" in topic.lower():
-            personas.append(Persona(
-                name="Marco Rodriguez",
-                role="Content Manager",
-                company_size="10-50 employees",
-                pain_points=[
-                    "Expensive translation services",
-                    "Slow turnaround times",
-                    "Quality inconsistencies"
-                ],
-                goals=[
-                    "Fast, accurate translations",
-                    "Cost-effective solution",
-                    "Easy integration"
-                ],
-                tech_stack=["WordPress", "CMS", "API"],
-                budget_range="$50-200/month"
-            ))
+            personas.append(
+                Persona(
+                    name="Marco Rodriguez",
+                    role="Content Manager",
+                    company_size="10-50 employees",
+                    pain_points=[
+                        "Expensive translation services",
+                        "Slow turnaround times",
+                        "Quality inconsistencies",
+                    ],
+                    goals=[
+                        "Fast, accurate translations",
+                        "Cost-effective solution",
+                        "Easy integration",
+                    ],
+                    tech_stack=["WordPress", "CMS", "API"],
+                    budget_range="$50-200/month",
+                )
+            )
 
         # Default persona if no specific match
         if not personas:
-            personas.append(Persona(
-                name="Alex Developer",
-                role="Software Developer",
-                company_size="1-10 employees",
-                pain_points=[
-                    "Need to automate repetitive tasks",
-                    "Want to focus on core development",
-                    "Limited time for tool research"
-                ],
-                goals=[
-                    "Increase productivity",
-                    "Automate workflows",
-                    "Quick implementation"
-                ],
-                tech_stack=["Python", "JavaScript", "API"],
-                budget_range="$25-100/month"
-            ))
+            personas.append(
+                Persona(
+                    name="Alex Developer",
+                    role="Software Developer",
+                    company_size="1-10 employees",
+                    pain_points=[
+                        "Need to automate repetitive tasks",
+                        "Want to focus on core development",
+                        "Limited time for tool research",
+                    ],
+                    goals=[
+                        "Increase productivity",
+                        "Automate workflows",
+                        "Quick implementation",
+                    ],
+                    tech_stack=["Python", "JavaScript", "API"],
+                    budget_range="$25-100/month",
+                )
+            )
 
         return personas
 
@@ -271,25 +304,31 @@ class PlaybookGenerator:
 
         # Base pain points by topic
         if "ai" in topic.lower():
-            pain_points.extend([
-                "Manual processes are time-consuming",
-                "Need intelligent automation",
-                "Lack of AI expertise in team"
-            ])
+            pain_points.extend(
+                [
+                    "Manual processes are time-consuming",
+                    "Need intelligent automation",
+                    "Lack of AI expertise in team",
+                ]
+            )
 
         if "translation" in topic.lower():
-            pain_points.extend([
-                "Expensive human translation",
-                "Slow turnaround times",
-                "Quality inconsistencies"
-            ])
+            pain_points.extend(
+                [
+                    "Expensive human translation",
+                    "Slow turnaround times",
+                    "Quality inconsistencies",
+                ]
+            )
 
         if "automation" in topic.lower():
-            pain_points.extend([
-                "Repetitive tasks waste time",
-                "Manual processes are error-prone",
-                "Need reliable automation"
-            ])
+            pain_points.extend(
+                [
+                    "Repetitive tasks waste time",
+                    "Manual processes are error-prone",
+                    "Need reliable automation",
+                ]
+            )
 
         # Add pain points based on competition proxy
         if niche_score.competition_proxy > 0.7:
@@ -299,7 +338,9 @@ class PlaybookGenerator:
 
         return pain_points[:5]  # Limit to 5 pain points
 
-    def _generate_jobs_to_be_done(self, topic: str, pain_points: list[str]) -> list[str]:
+    def _generate_jobs_to_be_done(
+        self, topic: str, pain_points: list[str]
+    ) -> list[str]:
         """Generate jobs to be done"""
         jobs = []
 
@@ -316,11 +357,13 @@ class PlaybookGenerator:
                 jobs.append("Automate manual processes")
 
         # Add default jobs
-        jobs.extend([
-            "Get work done faster and more efficiently",
-            "Focus on high-value activities",
-            "Reduce errors and improve reliability"
-        ])
+        jobs.extend(
+            [
+                "Get work done faster and more efficiently",
+                "Focus on high-value activities",
+                "Reduce errors and improve reliability",
+            ]
+        )
 
         return list(set(jobs))[:5]  # Remove duplicates and limit to 5
 
@@ -342,7 +385,9 @@ class PlaybookGenerator:
         else:
             return "B2B SMB to Mid-market (10-500 employees)"
 
-    def _generate_mvp_spec(self, niche_score: NicheScore, product_brief: ProductBrief) -> MVPSpec:
+    def _generate_mvp_spec(
+        self, niche_score: NicheScore, product_brief: ProductBrief
+    ) -> MVPSpec:
         """Generate MVP specification"""
         topic = niche_score.topic
 
@@ -351,60 +396,64 @@ class PlaybookGenerator:
 
         if niche_score.feasibility_fit > 0.8:
             # High fit - can implement advanced features
-            features.extend([
-                Feature(
-                    name="Core AI Processing",
-                    description=f"Main {topic} processing engine",
-                    priority="must_have",
-                    effort_days=3,
-                    dependencies=[],
-                    stillme_capability="ai_processing"
-                ),
-                Feature(
-                    name="API Integration",
-                    description="RESTful API for integration",
-                    priority="must_have",
-                    effort_days=2,
-                    dependencies=["Core AI Processing"],
-                    stillme_capability="api_integration"
-                ),
-                Feature(
-                    name="Web Interface",
-                    description="Simple web interface",
-                    priority="should_have",
-                    effort_days=2,
-                    dependencies=["API Integration"],
-                    stillme_capability="web_interface"
-                ),
-                Feature(
-                    name="Batch Processing",
-                    description="Process multiple items at once",
-                    priority="nice_to_have",
-                    effort_days=1,
-                    dependencies=["Core AI Processing"],
-                    stillme_capability="batch_processing"
-                )
-            ])
+            features.extend(
+                [
+                    Feature(
+                        name="Core AI Processing",
+                        description=f"Main {topic} processing engine",
+                        priority="must_have",
+                        effort_days=3,
+                        dependencies=[],
+                        stillme_capability="ai_processing",
+                    ),
+                    Feature(
+                        name="API Integration",
+                        description="RESTful API for integration",
+                        priority="must_have",
+                        effort_days=2,
+                        dependencies=["Core AI Processing"],
+                        stillme_capability="api_integration",
+                    ),
+                    Feature(
+                        name="Web Interface",
+                        description="Simple web interface",
+                        priority="should_have",
+                        effort_days=2,
+                        dependencies=["API Integration"],
+                        stillme_capability="web_interface",
+                    ),
+                    Feature(
+                        name="Batch Processing",
+                        description="Process multiple items at once",
+                        priority="nice_to_have",
+                        effort_days=1,
+                        dependencies=["Core AI Processing"],
+                        stillme_capability="batch_processing",
+                    ),
+                ]
+            )
         else:
             # Lower fit - simpler features
-            features.extend([
-                Feature(
-                    name="Basic Processing",
-                    description=f"Basic {topic} functionality",
-                    priority="must_have",
-                    effort_days=2,
-                    dependencies=[],
-                    stillme_capability="basic_processing"
-                ),
-                Feature(
-                    name="Simple API",
-                    description="Basic API endpoint",
-                    priority="must_have",
-                    effort_days=1,
-                    dependencies=["Basic Processing"],
-                    stillme_capability="api_integration"
-                )
-            ])
+            features.extend(
+                [
+                    Feature(
+                        name="Basic Processing",
+                        description=f"Basic {topic} functionality",
+                        priority="must_have",
+                        effort_days=2,
+                        dependencies=[],
+                        stillme_capability="basic_processing",
+                    ),
+                    Feature(
+                        name="Simple API",
+                        description="Basic API endpoint",
+                        priority="must_have",
+                        effort_days=1,
+                        dependencies=["Basic Processing"],
+                        stillme_capability="api_integration",
+                    ),
+                ]
+            )
 
         # Calculate total development days
         total_days = sum(f.effort_days for f in features if f.priority == "must_have")
@@ -417,15 +466,17 @@ class PlaybookGenerator:
                 "backend": "StillMe Framework + FastAPI",
                 "frontend": "React + Tailwind CSS",
                 "database": "SQLite (development) / PostgreSQL (production)",
-                "deployment": "Docker + Railway/Render"
+                "deployment": "Docker + Railway/Render",
             },
             tech_stack=["Python", "FastAPI", "React", "Tailwind CSS", "SQLite"],
             estimated_development_days=total_days,
             dependencies=["StillMe Framework", "OpenRouter API"],
-            deployment_requirements=["Docker", "Domain", "SSL Certificate"]
+            deployment_requirements=["Docker", "Domain", "SSL Certificate"],
         )
 
-    def _generate_pricing_suggestion(self, niche_score: NicheScore, mvp_spec: MVPSpec) -> PricingSuggestion:
+    def _generate_pricing_suggestion(
+        self, niche_score: NicheScore, mvp_spec: MVPSpec
+    ) -> PricingSuggestion:
         """Generate pricing suggestion"""
         # Base pricing on feasibility fit and competition
         base_price = 29.0
@@ -445,13 +496,9 @@ class PlaybookGenerator:
                 name="Starter",
                 price=base_price * 0.5,
                 currency="USD",
-                features=[
-                    "Basic processing",
-                    "100 requests/month",
-                    "Email support"
-                ],
+                features=["Basic processing", "100 requests/month", "Email support"],
                 target_users="Individual users",
-                rationale="Low barrier to entry for testing"
+                rationale="Low barrier to entry for testing",
             ),
             PricingTier(
                 name="Professional",
@@ -461,10 +508,10 @@ class PlaybookGenerator:
                     "Full feature set",
                     "1000 requests/month",
                     "API access",
-                    "Priority support"
+                    "Priority support",
                 ],
                 target_users="Small teams",
-                rationale="Main revenue tier for active users"
+                rationale="Main revenue tier for active users",
             ),
             PricingTier(
                 name="Business",
@@ -474,11 +521,11 @@ class PlaybookGenerator:
                     "Unlimited requests",
                     "Custom integrations",
                     "Dedicated support",
-                    "SLA guarantee"
+                    "SLA guarantee",
                 ],
                 target_users="Growing businesses",
-                rationale="Premium tier for enterprise features"
-            )
+                rationale="Premium tier for enterprise features",
+            ),
         ]
 
         return PricingSuggestion(
@@ -491,11 +538,13 @@ class PlaybookGenerator:
                 "month_1": 0,
                 "month_3": base_price * 10,
                 "month_6": base_price * 50,
-                "month_12": base_price * 200
-            }
+                "month_12": base_price * 200,
+            },
         )
 
-    def _generate_landing_page_spec(self, niche_score: NicheScore, product_brief: ProductBrief) -> LandingPageSpec:
+    def _generate_landing_page_spec(
+        self, niche_score: NicheScore, product_brief: ProductBrief
+    ) -> LandingPageSpec:
         """Generate landing page specification"""
         return LandingPageSpec(
             headline=f"Automate {niche_score.topic.title()} with AI",
@@ -504,18 +553,18 @@ class PlaybookGenerator:
                 "Built on proven StillMe AI framework",
                 f"{niche_score.feasibility_fit:.0%} capability fit - designed for this exact use case",
                 "Deploy in days, not months",
-                "Enterprise-grade reliability"
+                "Enterprise-grade reliability",
             ],
             features=[
                 "Intelligent processing",
                 "Easy API integration",
                 "Real-time results",
-                "Scalable architecture"
+                "Scalable architecture",
             ],
             testimonials=[
                 "Finally, an AI tool that actually works for our use case!",
                 "Saved us 10 hours per week from day one.",
-                "Easy to integrate and reliable."
+                "Easy to integrate and reliable.",
             ],
             cta_text="Start Free Trial",
             design_tokens={
@@ -523,11 +572,13 @@ class PlaybookGenerator:
                 "secondary_color": "#8b5cf6",
                 "accent_color": "#06b6d4",
                 "text_color": "#1f2937",
-                "background_color": "#ffffff"
-            }
+                "background_color": "#ffffff",
+            },
         )
 
-    def _generate_repo_scaffold(self, niche_score: NicheScore, mvp_spec: MVPSpec) -> RepoScaffold:
+    def _generate_repo_scaffold(
+        self, niche_score: NicheScore, mvp_spec: MVPSpec
+    ) -> RepoScaffold:
         """Generate repository scaffold"""
         topic = niche_score.topic
         repo_name = f"{topic.replace(' ', '-')}-assistant"
@@ -541,7 +592,7 @@ class PlaybookGenerator:
                 "frontend": ["src/", "public/", "package.json"],
                 "docs": ["README.md", "API.md", "DEPLOYMENT.md"],
                 "tests": ["test_backend.py", "test_api.py"],
-                "deployment": ["Dockerfile", "docker-compose.yml", ".env.example"]
+                "deployment": ["Dockerfile", "docker-compose.yml", ".env.example"],
             },
             readme_template=f"""# {topic.title()} Assistant
 
@@ -578,18 +629,21 @@ MIT License - see [LICENSE](LICENSE) file.
                 "Initial commit with StillMe framework integration",
                 "Add basic API endpoints",
                 "Add web interface",
-                "Add deployment configuration"
-            ]
+                "Add deployment configuration",
+            ],
         )
 
-    def _generate_outreach_templates(self, niche_score: NicheScore, product_brief: ProductBrief) -> list[OutreachTemplate]:
+    def _generate_outreach_templates(
+        self, niche_score: NicheScore, product_brief: ProductBrief
+    ) -> list[OutreachTemplate]:
         """Generate outreach templates"""
         templates = []
 
         # English template
-        templates.append(OutreachTemplate(
-            subject=f"Quick question about {niche_score.topic} automation",
-            body=f"""Hi {{name}},
+        templates.append(
+            OutreachTemplate(
+                subject=f"Quick question about {niche_score.topic} automation",
+                body=f"""Hi {{name}},
 
 I noticed you're working on {{company}} and might be dealing with {niche_score.topic} challenges.
 
@@ -601,15 +655,22 @@ Best regards,
 {{sender_name}}
 
 P.S. Here's a quick preview: {{demo_link}}""",
-            language="en",
-            personalization_placeholders=["name", "company", "sender_name", "demo_link"],
-            call_to_action="Schedule a 15-minute demo"
-        ))
+                language="en",
+                personalization_placeholders=[
+                    "name",
+                    "company",
+                    "sender_name",
+                    "demo_link",
+                ],
+                call_to_action="Schedule a 15-minute demo",
+            )
+        )
 
         # Vietnamese template
-        templates.append(OutreachTemplate(
-            subject=f"Câu hỏi nhanh về tự động hóa {niche_score.topic}",
-            body=f"""Chào {{name}},
+        templates.append(
+            OutreachTemplate(
+                subject=f"Câu hỏi nhanh về tự động hóa {niche_score.topic}",
+                body=f"""Chào {{name}},
 
 Tôi thấy bạn đang làm việc tại {{company}} và có thể đang gặp thách thức với {niche_score.topic}.
 
@@ -621,10 +682,16 @@ Trân trọng,
 {{sender_name}}
 
 P.S. Đây là bản xem trước nhanh: {{demo_link}}""",
-            language="vi",
-            personalization_placeholders=["name", "company", "sender_name", "demo_link"],
-            call_to_action="Đặt lịch demo 15 phút"
-        ))
+                language="vi",
+                personalization_placeholders=[
+                    "name",
+                    "company",
+                    "sender_name",
+                    "demo_link",
+                ],
+                call_to_action="Đặt lịch demo 15 phút",
+            )
+        )
 
         return templates
 
@@ -633,28 +700,34 @@ P.S. Đây là bản xem trước nhanh: {{demo_link}}""",
         risks = []
 
         if niche_score.competition_proxy > 0.7:
-            risks.append({
-                "risk": "High competition",
-                "impact": "Medium",
-                "probability": "High",
-                "mitigation": "Focus on unique StillMe capabilities and faster implementation"
-            })
+            risks.append(
+                {
+                    "risk": "High competition",
+                    "impact": "Medium",
+                    "probability": "High",
+                    "mitigation": "Focus on unique StillMe capabilities and faster implementation",
+                }
+            )
 
         if niche_score.confidence < 0.6:
-            risks.append({
-                "risk": "Low data confidence",
-                "impact": "High",
-                "probability": "Medium",
-                "mitigation": "Validate with additional market research before full commitment"
-            })
+            risks.append(
+                {
+                    "risk": "Low data confidence",
+                    "impact": "High",
+                    "probability": "Medium",
+                    "mitigation": "Validate with additional market research before full commitment",
+                }
+            )
 
         if niche_score.feasibility_fit < 0.5:
-            risks.append({
-                "risk": "Low feasibility fit",
-                "impact": "High",
-                "probability": "Medium",
-                "mitigation": "Consider simpler implementation or pivot to higher-fit features"
-            })
+            risks.append(
+                {
+                    "risk": "Low feasibility fit",
+                    "impact": "High",
+                    "probability": "Medium",
+                    "mitigation": "Consider simpler implementation or pivot to higher-fit features",
+                }
+            )
 
         return {
             "overall_risk_level": "Medium" if len(risks) <= 2 else "High",
@@ -663,8 +736,8 @@ P.S. Đây là bản xem trước nhanh: {{demo_link}}""",
                 "Start with MVP to validate market demand",
                 "Focus on unique StillMe capabilities",
                 "Monitor competition closely",
-                "Build strong user feedback loop"
-            ]
+                "Build strong user feedback loop",
+            ],
         }
 
     def _generate_compliance_notes(self, niche_score: NicheScore) -> list[str]:
@@ -675,15 +748,17 @@ P.S. Đây là bản xem trước nhanh: {{demo_link}}""",
             "Add privacy policy and terms of service",
             "Consider data residency requirements for target markets",
             "Implement proper API rate limiting and abuse prevention",
-            "Ensure all third-party integrations have proper agreements"
+            "Ensure all third-party integrations have proper agreements",
         ]
 
         if "translation" in niche_score.topic.lower():
-            notes.extend([
-                "Consider translation quality guarantees",
-                "Implement content moderation for translated text",
-                "Ensure compliance with language-specific regulations"
-            ])
+            notes.extend(
+                [
+                    "Consider translation quality guarantees",
+                    "Implement content moderation for translated text",
+                    "Ensure compliance with language-specific regulations",
+                ]
+            )
 
         return notes
 
@@ -697,10 +772,12 @@ P.S. Đây là bản xem trước nhanh: {{demo_link}}""",
             "Customer acquisition cost (target: <$50)",
             "Time to first value (target: <24 hours)",
             "User engagement score (target: >70%)",
-            "Support ticket volume (target: <5% of users)"
+            "Support ticket volume (target: <5% of users)",
         ]
 
-    def _generate_timeline(self, niche_score: NicheScore, mvp_spec: MVPSpec) -> dict[str, str]:
+    def _generate_timeline(
+        self, niche_score: NicheScore, mvp_spec: MVPSpec
+    ) -> dict[str, str]:
         """Generate development timeline"""
         datetime.now()
 
@@ -710,8 +787,9 @@ P.S. Đây là bản xem trước nhanh: {{demo_link}}""",
             "Week 3": "Integration testing and deployment",
             "Week 4": "User testing and feedback collection",
             "Month 2": "Iteration based on feedback",
-            "Month 3": "Scale and optimize"
+            "Month 3": "Scale and optimize",
         }
+
 
 if __name__ == "__main__":
     # Test playbook generation
@@ -729,7 +807,7 @@ if __name__ == "__main__":
         feasibility_fit=0.9,
         competition_proxy=0.4,
         key_signals=["High feasibility fit", "Low competition"],
-        recommendations=["High feasibility for StillMe implementation"]
+        recommendations=["High feasibility for StillMe implementation"],
     )
 
     generator = PlaybookGenerator()

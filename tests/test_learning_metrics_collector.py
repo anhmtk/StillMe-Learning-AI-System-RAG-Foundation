@@ -44,7 +44,9 @@ class TestLearningMetricsCollector:
     @pytest.fixture
     def metrics_collector(self, temp_dir):
         """Create metrics collector with temporary directory"""
-        with patch('stillme_core.learning.learning_metrics_collector.Path') as mock_path:
+        with patch(
+            "stillme_core.learning.learning_metrics_collector.Path"
+        ) as mock_path:
             mock_path.return_value = Path(temp_dir)
             collector = LearningMetricsCollector()
             return collector
@@ -58,29 +60,35 @@ class TestLearningMetricsCollector:
                 "input": "def broken_function(\n    return 'hello'",
                 "expected_output": "def broken_function():\n    return 'hello'",
                 "error_type": "syntax",
-                "difficulty": "easy"
+                "difficulty": "easy",
             },
             {
                 "test_id": "test_2",
                 "input": "def calculate_sum(a, b):\n    return a - b",
                 "expected_output": "def calculate_sum(a, b):\n    return a + b",
                 "error_type": "logic",
-                "difficulty": "medium"
-            }
+                "difficulty": "medium",
+            },
         ]
 
     @pytest.mark.asyncio
-    async def test_validate_learning_effectiveness(self, metrics_collector, mock_benchmark_data):
+    async def test_validate_learning_effectiveness(
+        self, metrics_collector, mock_benchmark_data
+    ):
         """Test learning effectiveness validation"""
         # Mock benchmark data loading
-        with patch.object(metrics_collector, '_load_benchmark_dataset', return_value=mock_benchmark_data):
+        with patch.object(
+            metrics_collector,
+            "_load_benchmark_dataset",
+            return_value=mock_benchmark_data,
+        ):
             before_state = {"accuracy": 0.7, "speed": 0.8}
             after_state = {"accuracy": 0.85, "speed": 0.9}
 
             result = await metrics_collector.validate_learning_effectiveness(
                 learning_session_id="test_session",
                 before_state=before_state,
-                after_state=after_state
+                after_state=after_state,
             )
 
             assert result.session_id == "test_session"
@@ -97,14 +105,19 @@ class TestLearningMetricsCollector:
         import os
         import tempfile
 
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.jsonl', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".jsonl", delete=False) as f:
             # Write some test data
-            f.write('{"input": "test input", "expected_output": "test output", "category": "test"}\n')
-            f.write('{"input": "test input 2", "expected_output": "test output 2", "category": "test"}\n')
+            f.write(
+                '{"input": "test input", "expected_output": "test output", "category": "test"}\n'
+            )
+            f.write(
+                '{"input": "test input 2", "expected_output": "test output 2", "category": "test"}\n'
+            )
             temp_file = f.name
 
         # Temporarily replace the benchmark path
         from pathlib import Path
+
         original_path = metrics_collector.benchmark_path
         metrics_collector.benchmark_path = Path(temp_file)
 
@@ -127,7 +140,7 @@ class TestLearningMetricsCollector:
             "input": "test input",
             "expected_output": "test output",
             "error_type": "syntax",
-            "difficulty": "easy"
+            "difficulty": "easy",
         }
 
         before_state = {"accuracy": 0.7}
@@ -190,7 +203,7 @@ class TestLearningMetricsCollector:
                 error_types={"syntax": 1},
                 safety_violations={},
                 execution_time=0.1,
-                timestamp="2025-01-27T00:00:00Z"
+                timestamp="2025-01-27T00:00:00Z",
             )
         ]
 
@@ -204,13 +217,15 @@ class TestLearningMetricsCollector:
             total_tests=1,
             passed_tests=1,
             failed_tests=0,
-            success_rate=1.0
+            success_rate=1.0,
         )
 
         await metrics_collector._save_validation_results(metrics)
 
         # Check if file was created
-        artifacts_file = metrics_collector.artifacts_path / "self_learning_validation.json"
+        artifacts_file = (
+            metrics_collector.artifacts_path / "self_learning_validation.json"
+        )
         assert artifacts_file.exists()
 
     @pytest.mark.asyncio
@@ -222,7 +237,11 @@ class TestLearningMetricsCollector:
         )
 
         # Mock transparency logger
-        with patch.object(metrics_collector.transparency_logger, 'log_decision', new_callable=AsyncMock):
+        with patch.object(
+            metrics_collector.transparency_logger,
+            "log_decision",
+            new_callable=AsyncMock,
+        ):
             benchmark_results = [
                 BenchmarkResult(
                     test_id="test_1",
@@ -232,7 +251,7 @@ class TestLearningMetricsCollector:
                     error_types={"syntax": 1},
                     safety_violations={},
                     execution_time=0.1,
-                    timestamp="2025-01-27T00:00:00Z"
+                    timestamp="2025-01-27T00:00:00Z",
                 )
             ]
 
@@ -246,7 +265,7 @@ class TestLearningMetricsCollector:
                 total_tests=1,
                 passed_tests=1,
                 failed_tests=0,
-                success_rate=1.0
+                success_rate=1.0,
             )
 
             await metrics_collector._log_validation_to_transparency(metrics)
@@ -272,7 +291,7 @@ class TestLearningMetricsCollector:
                 error_types={"syntax": 1},
                 safety_violations={"content_violation": 1},
                 execution_time=0.1,
-                timestamp="2025-01-27T00:00:00Z"
+                timestamp="2025-01-27T00:00:00Z",
             )
         ]
 
@@ -286,7 +305,7 @@ class TestLearningMetricsCollector:
             total_tests=1,
             passed_tests=1,
             failed_tests=0,
-            success_rate=1.0
+            success_rate=1.0,
         )
 
         await metrics_collector._check_safety_thresholds(metrics)
@@ -314,7 +333,7 @@ class TestLearningMetricsCollector:
                 error_types={"syntax": 1},
                 safety_violations={},
                 execution_time=0.1,
-                timestamp="2025-01-27T00:00:00Z"
+                timestamp="2025-01-27T00:00:00Z",
             )
         ]
 
@@ -328,7 +347,7 @@ class TestLearningMetricsCollector:
             total_tests=1,
             passed_tests=1,
             failed_tests=0,
-            success_rate=1.0
+            success_rate=1.0,
         )
 
         metrics_collector.validation_history.append(metrics)
@@ -359,7 +378,7 @@ class TestLearningMetricsCollector:
                     error_types={"syntax": 1},
                     safety_violations={},
                     execution_time=0.1,
-                    timestamp="2025-01-27T00:00:00Z"
+                    timestamp="2025-01-27T00:00:00Z",
                 )
             ]
 
@@ -373,7 +392,7 @@ class TestLearningMetricsCollector:
                 total_tests=1,
                 passed_tests=1,
                 failed_tests=0,
-                success_rate=1.0
+                success_rate=1.0,
             )
 
             metrics_collector.validation_history.append(metrics)

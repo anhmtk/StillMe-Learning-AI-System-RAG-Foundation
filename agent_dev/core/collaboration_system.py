@@ -24,29 +24,36 @@ from typing import Any
 
 class ReviewStatus(Enum):
     """Trạng thái review"""
+
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
     NEEDS_CHANGES = "needs_changes"
 
+
 class ReviewType(Enum):
     """Loại review"""
+
     CODE_QUALITY = "code_quality"
     SECURITY = "security"
     PERFORMANCE = "performance"
     STYLE = "style"
     DOCUMENTATION = "documentation"
 
+
 class CollaborationLevel(Enum):
     """Mức độ cộng tác"""
+
     BEGINNER = "beginner"
     INTERMEDIATE = "intermediate"
     ADVANCED = "advanced"
     EXPERT = "expert"
 
+
 @dataclass
 class CodeReview:
     """Code review"""
+
     review_id: str
     file_path: str
     reviewer: str
@@ -58,9 +65,11 @@ class CodeReview:
     created_at: datetime
     updated_at: datetime
 
+
 @dataclass
 class KnowledgeShare:
     """Chia sẻ kiến thức"""
+
     share_id: str
     title: str
     content: str
@@ -71,9 +80,11 @@ class KnowledgeShare:
     views: int
     likes: int
 
+
 @dataclass
 class MentoringSession:
     """Phiên mentoring"""
+
     session_id: str
     mentor: str
     mentee: str
@@ -83,9 +94,11 @@ class MentoringSession:
     recommendations: list[str]
     created_at: datetime
 
+
 @dataclass
 class CollaborationReport:
     """Báo cáo cộng tác"""
+
     total_reviews: int
     approved_reviews: int
     knowledge_shares: int
@@ -93,6 +106,7 @@ class CollaborationReport:
     team_activity: dict[str, int]
     recommendations: list[str]
     generated_at: datetime
+
 
 class CollaborationSystem:
     """Collaboration System - Hệ thống cộng tác toàn diện"""
@@ -120,7 +134,12 @@ class CollaborationSystem:
 
     def _ensure_directories(self):
         """Đảm bảo thư mục cần thiết tồn tại"""
-        for dir_path in [self.collab_dir, self.reviews_dir, self.knowledge_dir, self.mentoring_dir]:
+        for dir_path in [
+            self.collab_dir,
+            self.reviews_dir,
+            self.knowledge_dir,
+            self.mentoring_dir,
+        ]:
             dir_path.mkdir(parents=True, exist_ok=True)
 
     def _setup_logging(self):
@@ -129,11 +148,8 @@ class CollaborationSystem:
 
         logging.basicConfig(
             level=logging.INFO,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-            handlers=[
-                logging.FileHandler(log_file),
-                logging.StreamHandler()
-            ]
+            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            handlers=[logging.FileHandler(log_file), logging.StreamHandler()],
         )
 
         self.logger = logging.getLogger("CollaborationSystem")
@@ -144,7 +160,7 @@ class CollaborationSystem:
         review_files = list(self.reviews_dir.glob("*.json"))
         for file_path in review_files:
             try:
-                with open(file_path, encoding='utf-8') as f:
+                with open(file_path, encoding="utf-8") as f:
                     data = json.load(f)
                 review = CodeReview(**data)
                 self.reviews.append(review)
@@ -155,7 +171,7 @@ class CollaborationSystem:
         knowledge_files = list(self.knowledge_dir.glob("*.json"))
         for file_path in knowledge_files:
             try:
-                with open(file_path, encoding='utf-8') as f:
+                with open(file_path, encoding="utf-8") as f:
                     data = json.load(f)
                 share = KnowledgeShare(**data)
                 self.knowledge_shares.append(share)
@@ -166,7 +182,7 @@ class CollaborationSystem:
         mentoring_files = list(self.mentoring_dir.glob("*.json"))
         for file_path in mentoring_files:
             try:
-                with open(file_path, encoding='utf-8') as f:
+                with open(file_path, encoding="utf-8") as f:
                     data = json.load(f)
                 session = MentoringSession(**data)
                 self.mentoring_sessions.append(session)
@@ -195,36 +211,49 @@ class CollaborationSystem:
         score = 100.0
 
         # Xử lý linting results
-        if lint_results['errors']:
-            comments.extend([f"Lỗi linting: {error}" for error in lint_results['errors']])
-            score -= len(lint_results['errors']) * 5
+        if lint_results["errors"]:
+            comments.extend(
+                [f"Lỗi linting: {error}" for error in lint_results["errors"]]
+            )
+            score -= len(lint_results["errors"]) * 5
 
-        if lint_results['warnings']:
-            comments.extend([f"Cảnh báo linting: {warning}" for warning in lint_results['warnings']])
-            score -= len(lint_results['warnings']) * 2
+        if lint_results["warnings"]:
+            comments.extend(
+                [f"Cảnh báo linting: {warning}" for warning in lint_results["warnings"]]
+            )
+            score -= len(lint_results["warnings"]) * 2
 
         # Xử lý quality analysis
-        if quality_analysis['complexity'] > 10:
+        if quality_analysis["complexity"] > 10:
             comments.append(f"Độ phức tạp cao: {quality_analysis['complexity']}")
             suggestions.append("Xem xét chia nhỏ function để giảm độ phức tạp")
             score -= 10
 
-        if quality_analysis['duplicate_code'] > 0:
-            comments.append(f"Phát hiện {quality_analysis['duplicate_code']} đoạn code trùng lặp")
+        if quality_analysis["duplicate_code"] > 0:
+            comments.append(
+                f"Phát hiện {quality_analysis['duplicate_code']} đoạn code trùng lặp"
+            )
             suggestions.append("Refactor để loại bỏ code trùng lặp")
             score -= 5
 
         # Xử lý security analysis
-        if security_analysis['issues']:
-            comments.extend([f"Vấn đề bảo mật: {issue}" for issue in security_analysis['issues']])
+        if security_analysis["issues"]:
+            comments.extend(
+                [f"Vấn đề bảo mật: {issue}" for issue in security_analysis["issues"]]
+            )
             suggestions.append("Sửa các vấn đề bảo mật được phát hiện")
-            score -= len(security_analysis['issues']) * 15
+            score -= len(security_analysis["issues"]) * 15
 
         # Xử lý performance analysis
-        if performance_analysis['slow_operations']:
-            comments.extend([f"Thao tác chậm: {op}" for op in performance_analysis['slow_operations']])
+        if performance_analysis["slow_operations"]:
+            comments.extend(
+                [
+                    f"Thao tác chậm: {op}"
+                    for op in performance_analysis["slow_operations"]
+                ]
+            )
             suggestions.append("Tối ưu hóa các thao tác chậm")
-            score -= len(performance_analysis['slow_operations']) * 5
+            score -= len(performance_analysis["slow_operations"]) * 5
 
         # Xác định status
         if score >= 90:
@@ -245,7 +274,7 @@ class CollaborationSystem:
             suggestions=suggestions,
             score=score,
             created_at=datetime.now(),
-            updated_at=datetime.now()
+            updated_at=datetime.now(),
         )
 
         # Lưu review
@@ -262,14 +291,16 @@ class CollaborationSystem:
 
         try:
             # Chạy flake8
-            result = subprocess.run(['flake8', file_path], capture_output=True, text=True)
+            result = subprocess.run(
+                ["flake8", file_path], capture_output=True, text=True
+            )
             if result.returncode != 0:
-                lines = result.stdout.split('\n')
+                lines = result.stdout.split("\n")
                 for line in lines:
                     if line.strip():
-                        if 'E' in line:  # Error
+                        if "E" in line:  # Error
                             errors.append(line.strip())
-                        elif 'W' in line:  # Warning
+                        elif "W" in line:  # Warning
                             warnings.append(line.strip())
         except FileNotFoundError:
             # flake8 không có sẵn, bỏ qua
@@ -277,70 +308,75 @@ class CollaborationSystem:
 
         try:
             # Chạy pylint
-            result = subprocess.run(['pylint', file_path], capture_output=True, text=True)
+            result = subprocess.run(
+                ["pylint", file_path], capture_output=True, text=True
+            )
             if result.returncode != 0:
-                lines = result.stdout.split('\n')
+                lines = result.stdout.split("\n")
                 for line in lines:
-                    if line.strip() and ':' in line:
-                        if 'error' in line.lower():
+                    if line.strip() and ":" in line:
+                        if "error" in line.lower():
                             errors.append(line.strip())
-                        elif 'warning' in line.lower():
+                        elif "warning" in line.lower():
                             warnings.append(line.strip())
         except FileNotFoundError:
             # pylint không có sẵn, bỏ qua
             pass
 
-        return {'errors': errors, 'warnings': warnings}
+        return {"errors": errors, "warnings": warnings}
 
     def _analyze_code_quality(self, file_path: str) -> dict[str, Any]:
         """Phân tích chất lượng code"""
         try:
-            with open(file_path, encoding='utf-8') as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
 
-            lines = content.split('\n')
+            lines = content.split("\n")
 
             # Tính độ phức tạp (đơn giản)
             complexity = 0
             for line in lines:
-                if any(keyword in line for keyword in ['if', 'for', 'while', 'try', 'except']):
+                if any(
+                    keyword in line
+                    for keyword in ["if", "for", "while", "try", "except"]
+                ):
                     complexity += 1
 
             # Tìm code trùng lặp (đơn giản)
             duplicate_code = 0
             line_counts = {}
             for line in lines:
-                if line.strip() and not line.strip().startswith('#'):
+                if line.strip() and not line.strip().startswith("#"):
                     line_counts[line] = line_counts.get(line, 0) + 1
 
             duplicate_code = sum(1 for count in line_counts.values() if count > 3)
 
             return {
-                'complexity': complexity,
-                'duplicate_code': duplicate_code,
-                'total_lines': len(lines)
+                "complexity": complexity,
+                "duplicate_code": duplicate_code,
+                "total_lines": len(lines),
             }
         except Exception as e:
             self.logger.error(f"Error analyzing code quality for {file_path}: {e}")
-            return {'complexity': 0, 'duplicate_code': 0, 'total_lines': 0}
+            return {"complexity": 0, "duplicate_code": 0, "total_lines": 0}
 
     def _analyze_security(self, file_path: str) -> dict[str, list[str]]:
         """Phân tích bảo mật"""
         issues = []
 
         try:
-            with open(file_path, encoding='utf-8') as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
 
             # Kiểm tra các pattern bảo mật
             security_patterns = {
-                'password': 'Phát hiện từ khóa "password" - có thể chứa thông tin nhạy cảm',
-                'secret': 'Phát hiện từ khóa "secret" - có thể chứa thông tin nhạy cảm',
-                'key': 'Phát hiện từ khóa "key" - có thể chứa API key',
-                'token': 'Phát hiện từ khóa "token" - có thể chứa token nhạy cảm',
-                'eval(': 'Sử dụng eval() có thể gây lỗ hổng bảo mật',
-                'exec(': 'Sử dụng exec() có thể gây lỗ hổng bảo mật',
-                'subprocess': 'Sử dụng subprocess cần kiểm tra input validation'
+                "password": 'Phát hiện từ khóa "password" - có thể chứa thông tin nhạy cảm',
+                "secret": 'Phát hiện từ khóa "secret" - có thể chứa thông tin nhạy cảm',
+                "key": 'Phát hiện từ khóa "key" - có thể chứa API key',
+                "token": 'Phát hiện từ khóa "token" - có thể chứa token nhạy cảm',
+                "eval(": "Sử dụng eval() có thể gây lỗ hổng bảo mật",
+                "exec(": "Sử dụng exec() có thể gây lỗ hổng bảo mật",
+                "subprocess": "Sử dụng subprocess cần kiểm tra input validation",
             }
 
             for pattern, message in security_patterns.items():
@@ -350,24 +386,24 @@ class CollaborationSystem:
         except Exception as e:
             self.logger.error(f"Error analyzing security for {file_path}: {e}")
 
-        return {'issues': issues}
+        return {"issues": issues}
 
     def _analyze_performance(self, file_path: str) -> dict[str, list[str]]:
         """Phân tích hiệu suất"""
         slow_operations = []
 
         try:
-            with open(file_path, encoding='utf-8') as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
 
             # Kiểm tra các pattern hiệu suất
             performance_patterns = {
-                'for i in range(len(': 'Sử dụng range(len()) có thể chậm',
-                'list.append(': 'Sử dụng list.append() trong vòng lặp có thể chậm',
-                'string +=': 'Sử dụng string concatenation có thể chậm',
-                'time.sleep(': 'Sử dụng time.sleep() có thể ảnh hưởng hiệu suất',
-                'requests.get(': 'HTTP requests có thể chậm, cần timeout',
-                'open(': 'File operations cần được tối ưu'
+                "for i in range(len(": "Sử dụng range(len()) có thể chậm",
+                "list.append(": "Sử dụng list.append() trong vòng lặp có thể chậm",
+                "string +=": "Sử dụng string concatenation có thể chậm",
+                "time.sleep(": "Sử dụng time.sleep() có thể ảnh hưởng hiệu suất",
+                "requests.get(": "HTTP requests có thể chậm, cần timeout",
+                "open(": "File operations cần được tối ưu",
             }
 
             for pattern, message in performance_patterns.items():
@@ -377,17 +413,23 @@ class CollaborationSystem:
         except Exception as e:
             self.logger.error(f"Error analyzing performance for {file_path}: {e}")
 
-        return {'slow_operations': slow_operations}
+        return {"slow_operations": slow_operations}
 
     def _save_review(self, review: CodeReview):
         """Lưu review vào file"""
         review_file = self.reviews_dir / f"{review.review_id}.json"
 
-        with open(review_file, 'w', encoding='utf-8') as f:
+        with open(review_file, "w", encoding="utf-8") as f:
             json.dump(asdict(review), f, indent=2, default=str)
 
-    def share_knowledge(self, title: str, content: str, author: str,
-                       category: str = "general", tags: list[str] = None) -> KnowledgeShare:
+    def share_knowledge(
+        self,
+        title: str,
+        content: str,
+        author: str,
+        category: str = "general",
+        tags: list[str] = None,
+    ) -> KnowledgeShare:
         """Chia sẻ kiến thức"""
         if tags is None:
             tags = []
@@ -403,7 +445,7 @@ class CollaborationSystem:
             tags=tags,
             created_at=datetime.now(),
             views=0,
-            likes=0
+            likes=0,
         )
 
         # Lưu knowledge share
@@ -417,11 +459,12 @@ class CollaborationSystem:
         """Lưu knowledge share vào file"""
         share_file = self.knowledge_dir / f"{share.share_id}.json"
 
-        with open(share_file, 'w', encoding='utf-8') as f:
+        with open(share_file, "w", encoding="utf-8") as f:
             json.dump(asdict(share), f, indent=2, default=str)
 
-    def create_mentoring_session(self, mentor: str, mentee: str, topic: str,
-                                duration: int, feedback: str = "") -> MentoringSession:
+    def create_mentoring_session(
+        self, mentor: str, mentee: str, topic: str, duration: int, feedback: str = ""
+    ) -> MentoringSession:
         """Tạo phiên mentoring"""
         session_id = f"session_{int(time.time())}"
 
@@ -436,14 +479,16 @@ class CollaborationSystem:
             duration=duration,
             feedback=feedback,
             recommendations=recommendations,
-            created_at=datetime.now()
+            created_at=datetime.now(),
         )
 
         # Lưu mentoring session
         self._save_mentoring_session(session)
         self.mentoring_sessions.append(session)
 
-        self.logger.info(f"Mentoring session created: {topic} between {mentor} and {mentee}")
+        self.logger.info(
+            f"Mentoring session created: {topic} between {mentor} and {mentee}"
+        )
         return session
 
     def _generate_mentoring_recommendations(self, topic: str) -> list[str]:
@@ -452,44 +497,52 @@ class CollaborationSystem:
 
         topic_lower = topic.lower()
 
-        if 'python' in topic_lower:
-            recommendations.extend([
-                "Học Python basics: variables, functions, classes",
-                "Thực hành với Python exercises",
-                "Đọc Python documentation",
-                "Tham gia Python community"
-            ])
+        if "python" in topic_lower:
+            recommendations.extend(
+                [
+                    "Học Python basics: variables, functions, classes",
+                    "Thực hành với Python exercises",
+                    "Đọc Python documentation",
+                    "Tham gia Python community",
+                ]
+            )
 
-        if 'testing' in topic_lower:
-            recommendations.extend([
-                "Học về unit testing với pytest",
-                "Thực hành viết test cases",
-                "Tìm hiểu về test coverage",
-                "Học về mocking và fixtures"
-            ])
+        if "testing" in topic_lower:
+            recommendations.extend(
+                [
+                    "Học về unit testing với pytest",
+                    "Thực hành viết test cases",
+                    "Tìm hiểu về test coverage",
+                    "Học về mocking và fixtures",
+                ]
+            )
 
-        if 'security' in topic_lower:
-            recommendations.extend([
-                "Học về OWASP Top 10",
-                "Thực hành với security tools",
-                "Tìm hiểu về encryption",
-                "Học về authentication và authorization"
-            ])
+        if "security" in topic_lower:
+            recommendations.extend(
+                [
+                    "Học về OWASP Top 10",
+                    "Thực hành với security tools",
+                    "Tìm hiểu về encryption",
+                    "Học về authentication và authorization",
+                ]
+            )
 
-        if 'performance' in topic_lower:
-            recommendations.extend([
-                "Học về profiling tools",
-                "Tìm hiểu về algorithms complexity",
-                "Thực hành optimization techniques",
-                "Học về caching strategies"
-            ])
+        if "performance" in topic_lower:
+            recommendations.extend(
+                [
+                    "Học về profiling tools",
+                    "Tìm hiểu về algorithms complexity",
+                    "Thực hành optimization techniques",
+                    "Học về caching strategies",
+                ]
+            )
 
         if not recommendations:
             recommendations = [
                 "Tìm hiểu thêm về chủ đề này",
                 "Thực hành thường xuyên",
                 "Tham gia community discussions",
-                "Đọc documentation và tutorials"
+                "Đọc documentation và tutorials",
             ]
 
         return recommendations
@@ -498,13 +551,15 @@ class CollaborationSystem:
         """Lưu mentoring session vào file"""
         session_file = self.mentoring_dir / f"{session.session_id}.json"
 
-        with open(session_file, 'w', encoding='utf-8') as f:
+        with open(session_file, "w", encoding="utf-8") as f:
             json.dump(asdict(session), f, indent=2, default=str)
 
     def generate_collaboration_report(self) -> CollaborationReport:
         """Tạo báo cáo cộng tác"""
         total_reviews = len(self.reviews)
-        approved_reviews = len([r for r in self.reviews if r.status == ReviewStatus.APPROVED])
+        approved_reviews = len(
+            [r for r in self.reviews if r.status == ReviewStatus.APPROVED]
+        )
         knowledge_shares = len(self.knowledge_shares)
         mentoring_sessions = len(self.mentoring_sessions)
 
@@ -526,7 +581,9 @@ class CollaborationSystem:
         if total_reviews > 0:
             approval_rate = approved_reviews / total_reviews
             if approval_rate < 0.8:
-                recommendations.append("Cải thiện chất lượng code để tăng tỷ lệ approval")
+                recommendations.append(
+                    "Cải thiện chất lượng code để tăng tỷ lệ approval"
+                )
             else:
                 recommendations.append("Duy trì chất lượng code hiện tại")
 
@@ -546,7 +603,7 @@ class CollaborationSystem:
             mentoring_sessions=mentoring_sessions,
             team_activity=team_activity,
             recommendations=recommendations,
-            generated_at=datetime.now()
+            generated_at=datetime.now(),
         )
 
     def create_collaboration_summary(self) -> str:
@@ -595,20 +652,23 @@ class CollaborationSystem:
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
         # Lưu JSON report
-        json_file = self.project_root / "artifacts" / f"collaboration_report_{timestamp}.json"
+        json_file = (
+            self.project_root / "artifacts" / f"collaboration_report_{timestamp}.json"
+        )
         json_file.parent.mkdir(exist_ok=True)
 
-        with open(json_file, 'w', encoding='utf-8') as f:
+        with open(json_file, "w", encoding="utf-8") as f:
             json.dump(asdict(report), f, indent=2, default=str)
 
         # Lưu summary
         summary = self.create_collaboration_summary()
         summary_file = self.collab_dir / f"collaboration_summary_{timestamp}.md"
 
-        with open(summary_file, 'w', encoding='utf-8') as f:
+        with open(summary_file, "w", encoding="utf-8") as f:
             f.write(summary)
 
         return str(json_file)
+
 
 def main():
     """Main function for testing"""
@@ -626,7 +686,7 @@ def main():
         "Một số best practices cho Python development...",
         "AgentDev",
         "programming",
-        ["python", "best-practices"]
+        ["python", "best-practices"],
     )
     print(f"Knowledge shared: {share.title}")
 
@@ -636,7 +696,7 @@ def main():
         "Junior Dev",
         "Python Testing",
         60,
-        "Good progress on testing concepts"
+        "Good progress on testing concepts",
     )
     print(f"Mentoring session created: {session.topic}")
 
@@ -644,6 +704,7 @@ def main():
     report = collab_system.generate_collaboration_report()
     json_file = collab_system.save_collaboration_report(report)
     print(f"Collaboration report saved: {json_file}")
+
 
 if __name__ == "__main__":
     main()

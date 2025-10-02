@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 """
 StillMe AgentDev Security Scanner
@@ -24,9 +23,11 @@ class SecuritySeverity(Enum):
     LOW = "LOW"
     INFO = "INFO"
 
+
 @dataclass
 class SecurityIssue:
     """Represents a security issue"""
+
     id: str
     severity: SecuritySeverity
     title: str
@@ -36,6 +37,7 @@ class SecurityIssue:
     cwe_id: Optional[str] = None
     remediation: Optional[str] = None
     confidence: str = "MEDIUM"
+
 
 class SecurityScanner:
     """Main security scanner for AgentDev"""
@@ -77,27 +79,66 @@ class SecurityScanner:
         # Define secret patterns
         secret_patterns = [
             # API Keys
-            (r'api[_-]?key\s*[=:]\s*["\']?([a-zA-Z0-9_\-]{20,})["\']?', "API Key", SecuritySeverity.HIGH),
-            (r'access[_-]?key\s*[=:]\s*["\']?([a-zA-Z0-9_\-]{20,})["\']?', "Access Key", SecuritySeverity.HIGH),
-            (r'secret[_-]?key\s*[=:]\s*["\']?([a-zA-Z0-9_\-]{20,})["\']?', "Secret Key", SecuritySeverity.HIGH),
-
+            (
+                r'api[_-]?key\s*[=:]\s*["\']?([a-zA-Z0-9_\-]{20,})["\']?',
+                "API Key",
+                SecuritySeverity.HIGH,
+            ),
+            (
+                r'access[_-]?key\s*[=:]\s*["\']?([a-zA-Z0-9_\-]{20,})["\']?',
+                "Access Key",
+                SecuritySeverity.HIGH,
+            ),
+            (
+                r'secret[_-]?key\s*[=:]\s*["\']?([a-zA-Z0-9_\-]{20,})["\']?',
+                "Secret Key",
+                SecuritySeverity.HIGH,
+            ),
             # Tokens
-            (r'token\s*[=:]\s*["\']?([a-zA-Z0-9_\-\.]{20,})["\']?', "Token", SecuritySeverity.HIGH),
-            (r'bearer\s+([a-zA-Z0-9_\-\.]{20,})', "Bearer Token", SecuritySeverity.HIGH),
-
+            (
+                r'token\s*[=:]\s*["\']?([a-zA-Z0-9_\-\.]{20,})["\']?',
+                "Token",
+                SecuritySeverity.HIGH,
+            ),
+            (
+                r"bearer\s+([a-zA-Z0-9_\-\.]{20,})",
+                "Bearer Token",
+                SecuritySeverity.HIGH,
+            ),
             # Passwords
-            (r'password\s*[=:]\s*["\']?([^"\'\s]{8,})["\']?', "Password", SecuritySeverity.CRITICAL),
-            (r'passwd\s*[=:]\s*["\']?([^"\'\s]{8,})["\']?', "Password", SecuritySeverity.CRITICAL),
-
+            (
+                r'password\s*[=:]\s*["\']?([^"\'\s]{8,})["\']?',
+                "Password",
+                SecuritySeverity.CRITICAL,
+            ),
+            (
+                r'passwd\s*[=:]\s*["\']?([^"\'\s]{8,})["\']?',
+                "Password",
+                SecuritySeverity.CRITICAL,
+            ),
             # Database credentials
-            (r'db[_-]?password\s*[=:]\s*["\']?([^"\'\s]{8,})["\']?', "Database Password", SecuritySeverity.CRITICAL),
-            (r'database[_-]?password\s*[=:]\s*["\']?([^"\'\s]{8,})["\']?', "Database Password", SecuritySeverity.CRITICAL),
-
+            (
+                r'db[_-]?password\s*[=:]\s*["\']?([^"\'\s]{8,})["\']?',
+                "Database Password",
+                SecuritySeverity.CRITICAL,
+            ),
+            (
+                r'database[_-]?password\s*[=:]\s*["\']?([^"\'\s]{8,})["\']?',
+                "Database Password",
+                SecuritySeverity.CRITICAL,
+            ),
             # SSH keys
-            (r'-----BEGIN (RSA|DSA|EC|OPENSSH) PRIVATE KEY-----', "SSH Private Key", SecuritySeverity.CRITICAL),
-
+            (
+                r"-----BEGIN (RSA|DSA|EC|OPENSSH) PRIVATE KEY-----",
+                "SSH Private Key",
+                SecuritySeverity.CRITICAL,
+            ),
             # JWT secrets
-            (r'jwt[_-]?secret\s*[=:]\s*["\']?([a-zA-Z0-9_\-]{20,})["\']?', "JWT Secret", SecuritySeverity.HIGH),
+            (
+                r'jwt[_-]?secret\s*[=:]\s*["\']?([a-zA-Z0-9_\-]{20,})["\']?',
+                "JWT Secret",
+                SecuritySeverity.HIGH,
+            ),
         ]
 
         # Scan files
@@ -129,22 +170,34 @@ class SecurityScanner:
 
         # SQL Injection patterns
         sql_patterns = [
-            (r'execute\s*\(\s*["\'].*%s.*["\']', "Potential SQL Injection", SecuritySeverity.HIGH),
-            (r'query\s*\(\s*["\'].*\+.*["\']', "Potential SQL Injection", SecuritySeverity.HIGH),
+            (
+                r'execute\s*\(\s*["\'].*%s.*["\']',
+                "Potential SQL Injection",
+                SecuritySeverity.HIGH,
+            ),
+            (
+                r'query\s*\(\s*["\'].*\+.*["\']',
+                "Potential SQL Injection",
+                SecuritySeverity.HIGH,
+            ),
         ]
 
         # XSS patterns
         xss_patterns = [
-            (r'innerHTML\s*=\s*[^;]+', "Potential XSS", SecuritySeverity.MEDIUM),
-            (r'document\.write\s*\(', "Potential XSS", SecuritySeverity.MEDIUM),
+            (r"innerHTML\s*=\s*[^;]+", "Potential XSS", SecuritySeverity.MEDIUM),
+            (r"document\.write\s*\(", "Potential XSS", SecuritySeverity.MEDIUM),
         ]
 
         # Command injection patterns
         cmd_patterns = [
-            (r'os\.system\s*\(', "Command Injection Risk", SecuritySeverity.HIGH),
-            (r'subprocess\.call\s*\([^,)]*shell\s*=\s*True', "Command Injection Risk", SecuritySeverity.HIGH),
-            (r'eval\s*\(', "Code Injection Risk", SecuritySeverity.CRITICAL),
-            (r'exec\s*\(', "Code Injection Risk", SecuritySeverity.CRITICAL),
+            (r"os\.system\s*\(", "Command Injection Risk", SecuritySeverity.HIGH),
+            (
+                r"subprocess\.call\s*\([^,)]*shell\s*=\s*True",
+                "Command Injection Risk",
+                SecuritySeverity.HIGH,
+            ),
+            (r"eval\s*\(", "Code Injection Risk", SecuritySeverity.CRITICAL),
+            (r"exec\s*\(", "Code Injection Risk", SecuritySeverity.CRITICAL),
         ]
 
         # Scan files
@@ -199,13 +252,32 @@ class SecurityScanner:
         files = []
 
         # Include common file types
-        extensions = ['.py', '.js', '.ts', '.java', '.go', '.rb', '.php', '.yaml', '.yml', '.json']
+        extensions = [
+            ".py",
+            ".js",
+            ".ts",
+            ".java",
+            ".go",
+            ".rb",
+            ".php",
+            ".yaml",
+            ".yml",
+            ".json",
+        ]
 
         for ext in extensions:
-            files.extend(self.repo_root.rglob(f'*{ext}'))
+            files.extend(self.repo_root.rglob(f"*{ext}"))
 
         # Exclude common directories
-        exclude_dirs = {'.git', 'node_modules', '__pycache__', '.venv', 'venv', 'build', 'dist'}
+        exclude_dirs = {
+            ".git",
+            "node_modules",
+            "__pycache__",
+            ".venv",
+            "venv",
+            "build",
+            "dist",
+        }
 
         filtered_files = []
         for file_path in files:
@@ -214,14 +286,16 @@ class SecurityScanner:
 
         return filtered_files
 
-    def _scan_file_for_secrets(self, file_path: Path, patterns: list[tuple[str, str, SecuritySeverity]]) -> list[SecurityIssue]:
+    def _scan_file_for_secrets(
+        self, file_path: Path, patterns: list[tuple[str, str, SecuritySeverity]]
+    ) -> list[SecurityIssue]:
         """Scan file for secret patterns"""
         issues = []
 
         try:
-            with open(file_path, encoding='utf-8', errors='ignore') as f:
+            with open(file_path, encoding="utf-8", errors="ignore") as f:
                 content = f.read()
-                lines = content.split('\n')
+                lines = content.split("\n")
 
             for line_num, line in enumerate(lines, 1):
                 for pattern, secret_type, severity in patterns:
@@ -231,36 +305,42 @@ class SecurityScanner:
                         if self._is_comment_or_test(line, file_path):
                             continue
 
-                        issues.append(SecurityIssue(
-                            id=f"SECRET_{secret_type.upper().replace(' ', '_')}",
-                            severity=severity,
-                            title=f"Hardcoded {secret_type}",
-                            description=f"Potential hardcoded {secret_type} found",
-                            file_path=str(file_path),
-                            line_number=line_num,
-                            cwe_id="CWE-798",
-                            remediation=f"Move {secret_type} to environment variables or secure secret store"
-                        ))
+                        issues.append(
+                            SecurityIssue(
+                                id=f"SECRET_{secret_type.upper().replace(' ', '_')}",
+                                severity=severity,
+                                title=f"Hardcoded {secret_type}",
+                                description=f"Potential hardcoded {secret_type} found",
+                                file_path=str(file_path),
+                                line_number=line_num,
+                                cwe_id="CWE-798",
+                                remediation=f"Move {secret_type} to environment variables or secure secret store",
+                            )
+                        )
 
         except Exception as e:
-            issues.append(SecurityIssue(
-                id="FILE_READ_ERROR",
-                severity=SecuritySeverity.INFO,
-                title="File Read Error",
-                description=f"Could not read file: {e}",
-                file_path=str(file_path)
-            ))
+            issues.append(
+                SecurityIssue(
+                    id="FILE_READ_ERROR",
+                    severity=SecuritySeverity.INFO,
+                    title="File Read Error",
+                    description=f"Could not read file: {e}",
+                    file_path=str(file_path),
+                )
+            )
 
         return issues
 
-    def _scan_file_for_patterns(self, file_path: Path, patterns: list[tuple[str, str, SecuritySeverity]]) -> list[SecurityIssue]:
+    def _scan_file_for_patterns(
+        self, file_path: Path, patterns: list[tuple[str, str, SecuritySeverity]]
+    ) -> list[SecurityIssue]:
         """Scan file for security patterns"""
         issues = []
 
         try:
-            with open(file_path, encoding='utf-8', errors='ignore') as f:
+            with open(file_path, encoding="utf-8", errors="ignore") as f:
                 content = f.read()
-                lines = content.split('\n')
+                lines = content.split("\n")
 
             for line_num, line in enumerate(lines, 1):
                 for pattern, issue_type, severity in patterns:
@@ -269,24 +349,28 @@ class SecurityScanner:
                         if self._is_comment_or_test(line, file_path):
                             continue
 
-                        issues.append(SecurityIssue(
-                            id=f"CODE_{issue_type.upper().replace(' ', '_')}",
-                            severity=severity,
-                            title=issue_type,
-                            description=f"Potential {issue_type.lower()} detected",
-                            file_path=str(file_path),
-                            line_number=line_num,
-                            remediation="Review and secure the code"
-                        ))
+                        issues.append(
+                            SecurityIssue(
+                                id=f"CODE_{issue_type.upper().replace(' ', '_')}",
+                                severity=severity,
+                                title=issue_type,
+                                description=f"Potential {issue_type.lower()} detected",
+                                file_path=str(file_path),
+                                line_number=line_num,
+                                remediation="Review and secure the code",
+                            )
+                        )
 
         except Exception as e:
-            issues.append(SecurityIssue(
-                id="FILE_READ_ERROR",
-                severity=SecuritySeverity.INFO,
-                title="File Read Error",
-                description=f"Could not read file: {e}",
-                file_path=str(file_path)
-            ))
+            issues.append(
+                SecurityIssue(
+                    id="FILE_READ_ERROR",
+                    severity=SecuritySeverity.INFO,
+                    title="File Read Error",
+                    description=f"Could not read file: {e}",
+                    file_path=str(file_path),
+                )
+            )
 
         return issues
 
@@ -294,11 +378,15 @@ class SecurityScanner:
         """Check if line is a comment or in test file"""
         # Check for comments
         stripped = line.strip()
-        if stripped.startswith('#') or stripped.startswith('//') or stripped.startswith('/*'):
+        if (
+            stripped.startswith("#")
+            or stripped.startswith("//")
+            or stripped.startswith("/*")
+        ):
             return True
 
         # Check if it's a test file
-        if 'test' in str(file_path).lower():
+        if "test" in str(file_path).lower():
             return True
 
         return False
@@ -318,24 +406,34 @@ class SecurityScanner:
                 try:
                     # Run pip-audit if available
                     result = subprocess.run(
-                        ['pip-audit', '--format=json', '--requirement', str(req_file)],
+                        ["pip-audit", "--format=json", "--requirement", str(req_file)],
                         capture_output=True,
                         text=True,
-                        timeout=30
+                        timeout=30,
                     )
 
                     if result.returncode == 0:
                         audit_data = json.loads(result.stdout)
-                        for vuln in audit_data.get('vulnerabilities', []):
-                            issues.append(SecurityIssue(
-                                id=f"PYTHON_VULN_{vuln.get('id', 'UNKNOWN')}",
-                                severity=SecuritySeverity.HIGH,
-                                title=f"Vulnerable Python Package: {vuln.get('package', 'Unknown')}",
-                                description=vuln.get('description', 'No description'),
-                                remediation=vuln.get('fix_versions', 'Update package')
-                            ))
+                        for vuln in audit_data.get("vulnerabilities", []):
+                            issues.append(
+                                SecurityIssue(
+                                    id=f"PYTHON_VULN_{vuln.get('id', 'UNKNOWN')}",
+                                    severity=SecuritySeverity.HIGH,
+                                    title=f"Vulnerable Python Package: {vuln.get('package', 'Unknown')}",
+                                    description=vuln.get(
+                                        "description", "No description"
+                                    ),
+                                    remediation=vuln.get(
+                                        "fix_versions", "Update package"
+                                    ),
+                                )
+                            )
 
-                except (subprocess.TimeoutExpired, FileNotFoundError, json.JSONDecodeError):
+                except (
+                    subprocess.TimeoutExpired,
+                    FileNotFoundError,
+                    json.JSONDecodeError,
+                ):
                     # pip-audit not available or failed
                     pass
 
@@ -350,22 +448,30 @@ class SecurityScanner:
             try:
                 # Run npm audit if available
                 result = subprocess.run(
-                    ['npm', 'audit', '--json'],
+                    ["npm", "audit", "--json"],
                     capture_output=True,
                     text=True,
-                    timeout=30
+                    timeout=30,
                 )
 
-                if result.returncode != 0:  # npm audit returns non-zero for vulnerabilities
+                if (
+                    result.returncode != 0
+                ):  # npm audit returns non-zero for vulnerabilities
                     audit_data = json.loads(result.stdout)
-                    for vuln_id, vuln_data in audit_data.get('vulnerabilities', {}).items():
-                        issues.append(SecurityIssue(
-                            id=f"NODE_VULN_{vuln_id}",
-                            severity=SecuritySeverity.HIGH,
-                            title=f"Vulnerable Node Package: {vuln_id}",
-                            description=vuln_data.get('description', 'No description'),
-                            remediation="Run 'npm audit fix' to update"
-                        ))
+                    for vuln_id, vuln_data in audit_data.get(
+                        "vulnerabilities", {}
+                    ).items():
+                        issues.append(
+                            SecurityIssue(
+                                id=f"NODE_VULN_{vuln_id}",
+                                severity=SecuritySeverity.HIGH,
+                                title=f"Vulnerable Node Package: {vuln_id}",
+                                description=vuln_data.get(
+                                    "description", "No description"
+                                ),
+                                remediation="Run 'npm audit fix' to update",
+                            )
+                        )
 
             except (subprocess.TimeoutExpired, FileNotFoundError, json.JSONDecodeError):
                 # npm not available or failed
@@ -388,22 +494,24 @@ class SecurityScanner:
 
                 # Check for insecure base images
                 insecure_images = [
-                    'node:latest',
-                    'python:latest',
-                    'ubuntu:latest',
-                    'debian:latest',
+                    "node:latest",
+                    "python:latest",
+                    "ubuntu:latest",
+                    "debian:latest",
                 ]
 
                 for image in insecure_images:
                     if image in content:
-                        issues.append(SecurityIssue(
-                            id="INSECURE_BASE_IMAGE",
-                            severity=SecuritySeverity.MEDIUM,
-                            title=f"Insecure base image: {image}",
-                            description="Using 'latest' tag can lead to unpredictable builds",
-                            file_path=str(dockerfile),
-                            remediation="Use specific version tags"
-                        ))
+                        issues.append(
+                            SecurityIssue(
+                                id="INSECURE_BASE_IMAGE",
+                                severity=SecuritySeverity.MEDIUM,
+                                title=f"Insecure base image: {image}",
+                                description="Using 'latest' tag can lead to unpredictable builds",
+                                file_path=str(dockerfile),
+                                remediation="Use specific version tags",
+                            )
+                        )
 
             except Exception:
                 pass
@@ -421,29 +529,33 @@ class SecurityScanner:
                 with open(compose_file) as f:
                     content = yaml.safe_load(f)
 
-                services = content.get('services', {})
+                services = content.get("services", {})
                 for service_name, service_config in services.items():
                     # Check for privileged mode
-                    if service_config.get('privileged'):
-                        issues.append(SecurityIssue(
-                            id="DOCKER_PRIVILEGED",
-                            severity=SecuritySeverity.HIGH,
-                            title=f"Privileged Docker container: {service_name}",
-                            description="Privileged containers have full host access",
-                            file_path=str(compose_file),
-                            remediation="Remove privileged mode if not required"
-                        ))
+                    if service_config.get("privileged"):
+                        issues.append(
+                            SecurityIssue(
+                                id="DOCKER_PRIVILEGED",
+                                severity=SecuritySeverity.HIGH,
+                                title=f"Privileged Docker container: {service_name}",
+                                description="Privileged containers have full host access",
+                                file_path=str(compose_file),
+                                remediation="Remove privileged mode if not required",
+                            )
+                        )
 
                     # Check for host network
-                    if service_config.get('network_mode') == 'host':
-                        issues.append(SecurityIssue(
-                            id="DOCKER_HOST_NETWORK",
-                            severity=SecuritySeverity.MEDIUM,
-                            title=f"Host network mode: {service_name}",
-                            description="Host network mode bypasses Docker networking",
-                            file_path=str(compose_file),
-                            remediation="Use bridge network mode"
-                        ))
+                    if service_config.get("network_mode") == "host":
+                        issues.append(
+                            SecurityIssue(
+                                id="DOCKER_HOST_NETWORK",
+                                severity=SecuritySeverity.MEDIUM,
+                                title=f"Host network mode: {service_name}",
+                                description="Host network mode bypasses Docker networking",
+                                file_path=str(compose_file),
+                                remediation="Use bridge network mode",
+                            )
+                        )
 
             except Exception:
                 pass
@@ -458,23 +570,25 @@ class SecurityScanner:
 
         for env_file in env_files:
             # Check if .env files are in git
-            if '.git' not in str(env_file):
+            if ".git" not in str(env_file):
                 try:
                     result = subprocess.run(
-                        ['git', 'check-ignore', str(env_file)],
+                        ["git", "check-ignore", str(env_file)],
                         capture_output=True,
-                        text=True
+                        text=True,
                     )
 
                     if result.returncode != 0:  # Not ignored by git
-                        issues.append(SecurityIssue(
-                            id="ENV_IN_GIT",
-                            severity=SecuritySeverity.HIGH,
-                            title=f"Environment file in git: {env_file.name}",
-                            description="Environment files may contain secrets",
-                            file_path=str(env_file),
-                            remediation="Add to .gitignore"
-                        ))
+                        issues.append(
+                            SecurityIssue(
+                                id="ENV_IN_GIT",
+                                severity=SecuritySeverity.HIGH,
+                                title=f"Environment file in git: {env_file.name}",
+                                description="Environment files may contain secrets",
+                                file_path=str(env_file),
+                                remediation="Add to .gitignore",
+                            )
+                        )
 
                 except subprocess.CalledProcessError:
                     pass
@@ -503,15 +617,17 @@ class SecurityScanner:
 
             # Check for hardcoded secrets in workflows
             content_str = str(content)
-            if 'password' in content_str.lower() or 'token' in content_str.lower():
-                issues.append(SecurityIssue(
-                    id="WORKFLOW_HARDCODED_SECRET",
-                    severity=SecuritySeverity.HIGH,
-                    title="Potential hardcoded secret in workflow",
-                    description="Workflow may contain hardcoded secrets",
-                    file_path=str(workflow_file),
-                    remediation="Use GitHub secrets"
-                ))
+            if "password" in content_str.lower() or "token" in content_str.lower():
+                issues.append(
+                    SecurityIssue(
+                        id="WORKFLOW_HARDCODED_SECRET",
+                        severity=SecuritySeverity.HIGH,
+                        title="Potential hardcoded secret in workflow",
+                        description="Workflow may contain hardcoded secrets",
+                        file_path=str(workflow_file),
+                        remediation="Use GitHub secrets",
+                    )
+                )
 
         except Exception:
             pass
@@ -522,7 +638,9 @@ class SecurityScanner:
         """Scan Kubernetes configurations for security issues"""
         issues = []
 
-        k8s_files = list(self.repo_root.rglob("*.yaml")) + list(self.repo_root.rglob("*.yml"))
+        k8s_files = list(self.repo_root.rglob("*.yaml")) + list(
+            self.repo_root.rglob("*.yml")
+        )
 
         for k8s_file in k8s_files:
             try:
@@ -532,21 +650,27 @@ class SecurityScanner:
                 # Check for security contexts
                 if isinstance(content, dict):
                     # Check for privileged containers
-                    if content.get('kind') in ['Deployment', 'Pod', 'DaemonSet']:
-                        spec = content.get('spec', {})
-                        containers = spec.get('template', {}).get('spec', {}).get('containers', [])
+                    if content.get("kind") in ["Deployment", "Pod", "DaemonSet"]:
+                        spec = content.get("spec", {})
+                        containers = (
+                            spec.get("template", {})
+                            .get("spec", {})
+                            .get("containers", [])
+                        )
 
                         for container in containers:
-                            security_context = container.get('securityContext', {})
-                            if security_context.get('privileged'):
-                                issues.append(SecurityIssue(
-                                    id="K8S_PRIVILEGED",
-                                    severity=SecuritySeverity.HIGH,
-                                    title="Privileged Kubernetes container",
-                                    description="Privileged containers have full host access",
-                                    file_path=str(k8s_file),
-                                    remediation="Remove privileged security context"
-                                ))
+                            security_context = container.get("securityContext", {})
+                            if security_context.get("privileged"):
+                                issues.append(
+                                    SecurityIssue(
+                                        id="K8S_PRIVILEGED",
+                                        severity=SecuritySeverity.HIGH,
+                                        title="Privileged Kubernetes container",
+                                        description="Privileged containers have full host access",
+                                        file_path=str(k8s_file),
+                                        remediation="Remove privileged security context",
+                                    )
+                                )
 
             except Exception:
                 pass
@@ -565,15 +689,17 @@ class SecurityScanner:
                     content = f.read()
 
                 # Check for hardcoded secrets
-                if 'password' in content.lower() and 'var.' not in content:
-                    issues.append(SecurityIssue(
-                        id="TERRAFORM_HARDCODED_SECRET",
-                        severity=SecuritySeverity.HIGH,
-                        title="Potential hardcoded secret in Terraform",
-                        description="Terraform may contain hardcoded secrets",
-                        file_path=str(tf_file),
-                        remediation="Use Terraform variables or secret management"
-                    ))
+                if "password" in content.lower() and "var." not in content:
+                    issues.append(
+                        SecurityIssue(
+                            id="TERRAFORM_HARDCODED_SECRET",
+                            severity=SecuritySeverity.HIGH,
+                            title="Potential hardcoded secret in Terraform",
+                            description="Terraform may contain hardcoded secrets",
+                            file_path=str(tf_file),
+                            remediation="Use Terraform variables or secret management",
+                        )
+                    )
 
             except Exception:
                 pass
@@ -623,14 +749,21 @@ class SecurityScanner:
         print(report)
 
         # Check if any critical or high severity issues
-        critical_issues = [i for i in issues if i.severity in [SecuritySeverity.CRITICAL, SecuritySeverity.HIGH]]
+        critical_issues = [
+            i
+            for i in issues
+            if i.severity in [SecuritySeverity.CRITICAL, SecuritySeverity.HIGH]
+        ]
 
         if critical_issues:
-            print(f"\n❌ Security scan FAILED - {len(critical_issues)} critical/high issues found")
+            print(
+                f"\n❌ Security scan FAILED - {len(critical_issues)} critical/high issues found"
+            )
             return False
         else:
             print("\n✅ Security scan PASSED")
             return True
+
 
 def main():
     """CLI entry point for security scanner"""
@@ -646,10 +779,11 @@ def main():
     success = scanner.scan_and_report()
 
     if args.output:
-        with open(args.output, 'w') as f:
+        with open(args.output, "w") as f:
             f.write(scanner.generate_report(scanner.issues))
 
     sys.exit(0 if success else 1)
+
 
 if __name__ == "__main__":
     main()

@@ -5,6 +5,7 @@ Handles safety filtering, refusal logic, and ethical compliance
 """
 
 import re
+from typing import Callable, Optional
 
 # Safety keyword patterns
 DANGEROUS_KEYWORDS = [
@@ -47,7 +48,9 @@ LEGAL_KEYWORDS = [
 ]
 
 
-def conscience_hook(user_input: str, fallback_func=None) -> tuple[str, str]:
+def conscience_hook(
+    user_input: str, fallback_func: Optional[Callable[[str], str]] = None
+) -> tuple[str, str]:
     """
     Safety and ethics hook for StillMe AI
 
@@ -93,7 +96,7 @@ def conscience_hook(user_input: str, fallback_func=None) -> tuple[str, str]:
         except Exception as e:
             return f"Error in fallback: {e}", "gemma2:2b (error)"
 
-    return None, None  # type: ignore
+    return "No fallback function provided", "gemma2:2b (no-fallback)"
 
 
 def detect_verdict(response_text: str) -> str:

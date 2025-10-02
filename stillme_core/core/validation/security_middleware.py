@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class SecurityThreat:
     """Represents a security threat"""
+
     threat_type: str
     severity: str
     description: str
@@ -49,27 +50,27 @@ class SecurityMiddleware:
                 r"on\w+\s*=",
                 r"<iframe[^>]*>",
                 r"<object[^>]*>",
-                r"<embed[^>]*>"
+                r"<embed[^>]*>",
             ],
             "sql_injection": [
                 r"(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION)\b)",
                 r"(\b(OR|AND)\s+\d+\s*=\s*\d+)",
                 r"(--|\#|\/\*|\*\/)",
-                r"(\b(WAITFOR|DELAY)\b)"
+                r"(\b(WAITFOR|DELAY)\b)",
             ],
             "path_traversal": [
                 r"\.\.\/",
                 r"\.\.\\",
                 r"\/etc\/passwd",
                 r"\/windows\/system32",
-                r"\/proc\/version"
+                r"\/proc\/version",
             ],
             "command_injection": [
                 r"[;&|`$]",
                 r"\b(cat|ls|dir|type|more|less|head|tail|grep|find|awk|sed)\b",
                 r"\b(ping|nslookup|tracert|traceroute)\b",
-                r"\b(wget|curl|nc|netcat)\b"
-            ]
+                r"\b(wget|curl|nc|netcat)\b",
+            ],
         }
 
     def _load_blocked_patterns(self) -> list[str]:
@@ -84,7 +85,7 @@ class SecurityMiddleware:
             r"\.\.\/",
             r"\.\.\\",
             r"[;&|`$]",
-            r"\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION)\b"
+            r"\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|UNION)\b",
         ]
 
     def validate_input(self, input_data: str) -> dict[str, Any]:
@@ -94,7 +95,7 @@ class SecurityMiddleware:
                 "is_valid": False,
                 "threats_detected": ["Invalid input type"],
                 "sanitized_input": "",
-                "validation_timestamp": datetime.now().isoformat()
+                "validation_timestamp": datetime.now().isoformat(),
             }
 
         threats_detected = []
@@ -112,20 +113,26 @@ class SecurityMiddleware:
 
         # Log security event
         if threats_detected:
-            self._log_security_event("input_validation", "HIGH", {
-                "threats_detected": threats_detected,
-                "original_input": input_data,
-                "sanitized_input": sanitized_input
-            })
+            self._log_security_event(
+                "input_validation",
+                "HIGH",
+                {
+                    "threats_detected": threats_detected,
+                    "original_input": input_data,
+                    "sanitized_input": sanitized_input,
+                },
+            )
 
         return {
             "is_valid": len(threats_detected) == 0,
             "threats_detected": threats_detected,
             "sanitized_input": sanitized_input,
-            "validation_timestamp": datetime.now().isoformat()
+            "validation_timestamp": datetime.now().isoformat(),
         }
 
-    def check_rate_limit(self, identifier: str, limit: int = 100, window: int = 3600) -> bool:
+    def check_rate_limit(
+        self, identifier: str, limit: int = 100, window: int = 3600
+    ) -> bool:
         """Check if rate limit is exceeded"""
         current_time = datetime.now()
 
@@ -134,31 +141,38 @@ class SecurityMiddleware:
 
         # Clean old entries
         self.rate_limits[identifier] = [
-            timestamp for timestamp in self.rate_limits[identifier]
+            timestamp
+            for timestamp in self.rate_limits[identifier]
             if (current_time - timestamp).total_seconds() < window
         ]
 
         # Check limit
         if len(self.rate_limits[identifier]) >= limit:
-            self._log_security_event("rate_limit_exceeded", "MEDIUM", {
-                "identifier": identifier,
-                "limit": limit,
-                "window": window,
-                "current_count": len(self.rate_limits[identifier])
-            })
+            self._log_security_event(
+                "rate_limit_exceeded",
+                "MEDIUM",
+                {
+                    "identifier": identifier,
+                    "limit": limit,
+                    "window": window,
+                    "current_count": len(self.rate_limits[identifier]),
+                },
+            )
             return False
 
         # Add current request
         self.rate_limits[identifier].append(current_time)
         return True
 
-    def _log_security_event(self, event_type: str, severity: str, details: dict[str, Any]):
+    def _log_security_event(
+        self, event_type: str, severity: str, details: dict[str, Any]
+    ):
         """Log security event"""
         event = {
             "event_type": event_type,
             "severity": severity,
             "details": details,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
         self.security_events.append(event)
         logger.warning(f"Security event: {event_type} - {severity} - {details}")
@@ -166,9 +180,15 @@ class SecurityMiddleware:
     def get_security_summary(self) -> dict[str, Any]:
         """Get security summary"""
         total_events = len(self.security_events)
-        high_severity_events = sum(1 for e in self.security_events if e["severity"] == "HIGH")
-        medium_severity_events = sum(1 for e in self.security_events if e["severity"] == "MEDIUM")
-        low_severity_events = sum(1 for e in self.security_events if e["severity"] == "LOW")
+        high_severity_events = sum(
+            1 for e in self.security_events if e["severity"] == "HIGH"
+        )
+        medium_severity_events = sum(
+            1 for e in self.security_events if e["severity"] == "MEDIUM"
+        )
+        low_severity_events = sum(
+            1 for e in self.security_events if e["severity"] == "LOW"
+        )
 
         return {
             "total_events": total_events,
@@ -176,8 +196,10 @@ class SecurityMiddleware:
             "medium_severity_events": medium_severity_events,
             "low_severity_events": low_severity_events,
             "rate_limits_active": len(self.rate_limits),
-            "last_event": self.security_events[-1]["timestamp"] if self.security_events else None,
-            "recent_events": self.security_events[-10:] if self.security_events else []
+            "last_event": self.security_events[-1]["timestamp"]
+            if self.security_events
+            else None,
+            "recent_events": self.security_events[-10:] if self.security_events else [],
         }
 
 
@@ -191,7 +213,7 @@ def main():
         "<script>alert('xss')</script>",
         "SELECT * FROM users",
         "../../etc/passwd",
-        "cat /etc/passwd"
+        "cat /etc/passwd",
     ]
 
     print("🛡️ Security Middleware Test:")

@@ -11,28 +11,79 @@ from pathlib import Path
 def create_mock_seeds():
     """Tạo mock seed data"""
     seeds = [
-        {"text": "Xin chào, hôm nay thế nào?", "type": "greeting", "language": "vi", "category": "persona"},
-        {"text": "Hello, how are you today?", "type": "greeting", "language": "en", "category": "persona"},
-        {"text": "Tôi muốn học lập trình Python", "type": "request", "language": "vi", "category": "coding"},
-        {"text": "How can I learn machine learning?", "type": "request", "language": "en", "category": "coding"},
-        {"text": "Cảm ơn bạn rất nhiều", "type": "gratitude", "language": "vi", "category": "persona"},
-        {"text": "Thank you very much", "type": "gratitude", "language": "en", "category": "persona"},
-        {"text": "Làm thế nào để tối ưu hóa database?", "type": "question", "language": "vi", "category": "technical"},
-        {"text": "What is the best way to optimize performance?", "type": "question", "language": "en", "category": "technical"},
-        {"text": "Tôi cảm thấy buồn hôm nay", "type": "emotion", "language": "vi", "category": "emotion"},
-        {"text": "I feel sad today", "type": "emotion", "language": "en", "category": "emotion"}
+        {
+            "text": "Xin chào, hôm nay thế nào?",
+            "type": "greeting",
+            "language": "vi",
+            "category": "persona",
+        },
+        {
+            "text": "Hello, how are you today?",
+            "type": "greeting",
+            "language": "en",
+            "category": "persona",
+        },
+        {
+            "text": "Tôi muốn học lập trình Python",
+            "type": "request",
+            "language": "vi",
+            "category": "coding",
+        },
+        {
+            "text": "How can I learn machine learning?",
+            "type": "request",
+            "language": "en",
+            "category": "coding",
+        },
+        {
+            "text": "Cảm ơn bạn rất nhiều",
+            "type": "gratitude",
+            "language": "vi",
+            "category": "persona",
+        },
+        {
+            "text": "Thank you very much",
+            "type": "gratitude",
+            "language": "en",
+            "category": "persona",
+        },
+        {
+            "text": "Làm thế nào để tối ưu hóa database?",
+            "type": "question",
+            "language": "vi",
+            "category": "technical",
+        },
+        {
+            "text": "What is the best way to optimize performance?",
+            "type": "question",
+            "language": "en",
+            "category": "technical",
+        },
+        {
+            "text": "Tôi cảm thấy buồn hôm nay",
+            "type": "emotion",
+            "language": "vi",
+            "category": "emotion",
+        },
+        {
+            "text": "I feel sad today",
+            "type": "emotion",
+            "language": "en",
+            "category": "emotion",
+        },
     ]
 
     # Save to file
     seed_file = Path("datasets/seed/mock_seeds.jsonl")
     seed_file.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(seed_file, 'w', encoding='utf-8') as f:
+    with open(seed_file, "w", encoding="utf-8") as f:
         for seed in seeds:
-            f.write(json.dumps(seed, ensure_ascii=False) + '\n')
+            f.write(json.dumps(seed, ensure_ascii=False) + "\n")
 
     print(f"✅ Created {len(seeds)} mock seeds in {seed_file}")
     return str(seed_file)
+
 
 def mock_paraphrase(text: str, num_variants: int = 3) -> list:
     """Mock paraphrase function"""
@@ -55,6 +106,7 @@ def mock_paraphrase(text: str, num_variants: int = 3) -> list:
 
     return variants
 
+
 def mock_backtranslate(text: str) -> list:
     """Mock backtranslate function"""
     variants = []
@@ -69,19 +121,34 @@ def mock_backtranslate(text: str) -> list:
 
     return variants
 
+
 def mock_template_fill() -> list:
     """Mock template fill function"""
     templates = [
         "Xin chào [ROLE], [TIME] [QUESTION]?",
         "Hello [ROLE], [TIME] [QUESTION]?",
         "Chào [ROLE], hôm nay [ACTION]?",
-        "Hi [ROLE], how are you [TIME]?"
+        "Hi [ROLE], how are you [TIME]?",
     ]
 
     roles = ["bạn", "anh", "chị", "friend", "sir", "madam"]
     times = ["hôm nay", "hôm qua", "ngày mai", "today", "yesterday", "tomorrow"]
-    questions = ["thế nào", "có gì mới", "có khỏe không", "how are you", "what's new", "are you okay"]
-    actions = ["làm gì", "đi đâu", "ăn gì", "what are you doing", "where are you going", "what are you eating"]
+    questions = [
+        "thế nào",
+        "có gì mới",
+        "có khỏe không",
+        "how are you",
+        "what's new",
+        "are you okay",
+    ]
+    actions = [
+        "làm gì",
+        "đi đâu",
+        "ăn gì",
+        "what are you doing",
+        "where are you going",
+        "what are you eating",
+    ]
 
     variants = []
     for template in templates:
@@ -90,14 +157,23 @@ def mock_template_fill() -> list:
                 for time in times[:2]:
                     if "[QUESTION]" in template:
                         for question in questions[:2]:
-                            variant = template.replace("[ROLE]", role).replace("[TIME]", time).replace("[QUESTION]", question)
+                            variant = (
+                                template.replace("[ROLE]", role)
+                                .replace("[TIME]", time)
+                                .replace("[QUESTION]", question)
+                            )
                             variants.append(variant)
                     elif "[ACTION]" in template:
                         for action in actions[:2]:
-                            variant = template.replace("[ROLE]", role).replace("[TIME]", time).replace("[ACTION]", action)
+                            variant = (
+                                template.replace("[ROLE]", role)
+                                .replace("[TIME]", time)
+                                .replace("[ACTION]", action)
+                            )
                             variants.append(variant)
 
     return variants[:20]  # Limit to 20 variants
+
 
 def run_mock_augmentation():
     """Chạy mock augmentation"""
@@ -107,14 +183,14 @@ def run_mock_augmentation():
     logging.getLogger(__name__)
 
     print("🚀 StillMe Test Harness - Simple Mock Demo")
-    print("="*60)
+    print("=" * 60)
 
     # Create mock seeds
     seed_file = create_mock_seeds()
 
     # Load seeds
     seeds = []
-    with open(seed_file, encoding='utf-8') as f:
+    with open(seed_file, encoding="utf-8") as f:
         for line in f:
             seeds.append(json.loads(line.strip()))
 
@@ -131,14 +207,16 @@ def run_mock_augmentation():
     print("\n🔄 Running mock paraphrase...")
     paraphrase_variants = []
     for seed in seeds:
-        variants = mock_paraphrase(seed['text'], 3)
+        variants = mock_paraphrase(seed["text"], 3)
         for variant in variants:
-            paraphrase_variants.append({
-                "original": seed['text'],
-                "variant": variant,
-                "method": "paraphrase",
-                "metadata": {"mock": True}
-            })
+            paraphrase_variants.append(
+                {
+                    "original": seed["text"],
+                    "variant": variant,
+                    "method": "paraphrase",
+                    "metadata": {"mock": True},
+                }
+            )
 
     print(f"✅ Generated {len(paraphrase_variants)} paraphrase variants")
     all_variants.extend(paraphrase_variants)
@@ -147,14 +225,16 @@ def run_mock_augmentation():
     print("\n🔄 Running mock backtranslate...")
     backtranslate_variants = []
     for seed in seeds:
-        variants = mock_backtranslate(seed['text'])
+        variants = mock_backtranslate(seed["text"])
         for variant in variants:
-            backtranslate_variants.append({
-                "original": seed['text'],
-                "variant": variant,
-                "method": "backtranslate",
-                "metadata": {"mock": True}
-            })
+            backtranslate_variants.append(
+                {
+                    "original": seed["text"],
+                    "variant": variant,
+                    "method": "backtranslate",
+                    "metadata": {"mock": True},
+                }
+            )
 
     print(f"✅ Generated {len(backtranslate_variants)} backtranslate variants")
     all_variants.extend(backtranslate_variants)
@@ -164,20 +244,18 @@ def run_mock_augmentation():
     template_variants = []
     variants = mock_template_fill()
     for variant in variants:
-        template_variants.append({
-            "variant": variant,
-            "method": "template_fill",
-            "metadata": {"mock": True}
-        })
+        template_variants.append(
+            {"variant": variant, "method": "template_fill", "metadata": {"mock": True}}
+        )
 
     print(f"✅ Generated {len(template_variants)} template variants")
     all_variants.extend(template_variants)
 
     # Save results
     output_file = output_dir / "mock_augmented_combined.jsonl"
-    with open(output_file, 'w', encoding='utf-8') as f:
+    with open(output_file, "w", encoding="utf-8") as f:
         for variant in all_variants:
-            f.write(json.dumps(variant, ensure_ascii=False) + '\n')
+            f.write(json.dumps(variant, ensure_ascii=False) + "\n")
 
     # Generate statistics
     stats = {
@@ -187,21 +265,21 @@ def run_mock_augmentation():
         "success_rates": {
             "paraphrase": 1.0,
             "backtranslate": 1.0,
-            "template_fill": 1.0
+            "template_fill": 1.0,
         },
-        "output_files": [str(output_file)]
+        "output_files": [str(output_file)],
     }
 
     # Print results
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("MOCK AUGMENTATION RESULTS")
-    print("="*60)
+    print("=" * 60)
     print(f"Total Seeds Processed: {stats['total_seeds']}")
     print(f"Total Outputs Generated: {stats['total_outputs']}")
     print(f"Methods Used: {', '.join(stats['methods_used'])}")
 
     print("\nSuccess Rates by Method:")
-    for method, rate in stats['success_rates'].items():
+    for method, rate in stats["success_rates"].items():
         print(f"  {method}: {rate:.2%}")
 
     print(f"\nOutput File: {output_file}")
@@ -209,20 +287,21 @@ def run_mock_augmentation():
 
     # Show sample outputs
     print("\nSample Outputs:")
-    with open(output_file, encoding='utf-8') as f:
+    with open(output_file, encoding="utf-8") as f:
         for i, line in enumerate(f):
             if i >= 10:  # Show only first 10 lines
                 break
             data = json.loads(line.strip())
-            if 'variant' in data:
+            if "variant" in data:
                 print(f"  {data['variant']}")
-            elif 'text' in data:
+            elif "text" in data:
                 print(f"  {data['text']}")
 
-    print("="*60)
+    print("=" * 60)
     print("✅ Mock demo completed successfully!")
 
     return stats
+
 
 if __name__ == "__main__":
     run_mock_augmentation()

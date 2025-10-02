@@ -164,6 +164,6 @@ class XSSDetector(BaseDetector):
                 "test_xss_found": test_xss_found,
                 "html_like_count": html_like_count,
                 "suspicious_concatenation": suspicious_concatenation,
-                "total_xss_matches": len(xss_matches)
-            }
+                "total_xss_matches": len(xss_matches),
+            },
         }

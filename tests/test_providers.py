@@ -28,9 +28,9 @@ class TestProviderConfig:
         """Test creating a ProviderConfig."""
         config = ProviderConfig(
             name="test",
-            api_key = os.getenv("API_KEY", ""),
+            api_key=os.getenv("API_KEY", ""),
             base_url="https://api.test.com",
-            model="test-model"
+            model="test-model",
         )
 
         assert config.name == "test"
@@ -92,6 +92,7 @@ class TestCircuitBreaker:
 
         # Wait for timeout
         import time
+
         time.sleep(0.2)
 
         assert cb.can_attempt() is True
@@ -103,11 +104,7 @@ class TestLLMRequest:
 
     def test_llm_request_creation(self):
         """Test creating an LLMRequest."""
-        request = LLMRequest(
-            prompt="Test prompt",
-            max_tokens=100,
-            temperature=0.7
-        )
+        request = LLMRequest(prompt="Test prompt", max_tokens=100, temperature=0.7)
 
         assert request.prompt == "Test prompt"
         assert request.max_tokens == 100
@@ -131,13 +128,17 @@ class TestLLMResponse:
             provider="test-provider",
             usage={"prompt_tokens": 10, "completion_tokens": 20, "total_tokens": 30},
             finish_reason="stop",
-            response_time=1.5
+            response_time=1.5,
         )
 
         assert response.content == "Test response"
         assert response.model == "test-model"
         assert response.provider == "test-provider"
-        assert response.usage == {"prompt_tokens": 10, "completion_tokens": 20, "total_tokens": 30}
+        assert response.usage == {
+            "prompt_tokens": 10,
+            "completion_tokens": 20,
+            "total_tokens": 30,
+        }
         assert response.finish_reason == "stop"
         assert response.response_time == 1.5
         assert response.metadata is None
@@ -148,6 +149,7 @@ class TestProviderFactory:
 
     def test_register_provider(self):
         """Test registering a new provider."""
+
         class TestProvider(LLMProviderBase):
             async def initialize(self) -> bool:
                 return True
@@ -159,7 +161,7 @@ class TestProviderFactory:
                     provider="test",
                     usage={},
                     finish_reason="stop",
-                    response_time=0.0
+                    response_time=0.0,
                 )
 
             async def health_check(self) -> bool:
@@ -172,9 +174,9 @@ class TestProviderFactory:
         """Test creating a provider instance."""
         config = ProviderConfig(
             name="openai",
-            api_key = os.getenv("API_KEY", ""),
+            api_key=os.getenv("API_KEY", ""),
             base_url="https://api.openai.com",
-            model="gpt-3.5-turbo"
+            model="gpt-3.5-turbo",
         )
 
         provider = ProviderFactory.create_provider(config)
@@ -185,9 +187,9 @@ class TestProviderFactory:
         """Test creating a provider with unknown type."""
         config = ProviderConfig(
             name="unknown",
-            api_key = os.getenv("API_KEY", ""),
+            api_key=os.getenv("API_KEY", ""),
             base_url="https://api.test.com",
-            model="test-model"
+            model="test-model",
         )
 
         with pytest.raises(ValueError, match="Unknown provider type"):
@@ -200,14 +202,14 @@ class TestProviderFactory:
                 "name": "openai",
                 "api_key": "test-key",
                 "base_url": "https://api.openai.com",
-                "model": "gpt-3.5-turbo"
+                "model": "gpt-3.5-turbo",
             },
             {
                 "name": "local_llm",
                 "api_key": "",
                 "base_url": "http://localhost:11434",
-                "model": "llama2"
-            }
+                "model": "llama2",
+            },
         ]
 
         providers = ProviderFactory.create_providers_from_config(configs)
@@ -229,17 +231,17 @@ class TestStillMeProviderManager:
                     "api_key": "test-key",
                     "base_url": "https://api.openai.com",
                     "model": "gpt-3.5-turbo",
-                    "priority": 1
+                    "priority": 1,
                 },
                 {
                     "name": "local_llm",
                     "api_key": "",
                     "base_url": "http://localhost:11434",
                     "model": "llama2",
-                    "priority": 2
-                }
+                    "priority": 2,
+                },
             ],
-            "fallback_strategy": "round_robin"
+            "fallback_strategy": "round_robin",
         }
 
         manager = StillMeProviderManager(config)
@@ -249,7 +251,9 @@ class TestStillMeProviderManager:
     @pytest.mark.asyncio
     async def test_provider_manager_initialization(self, provider_manager):
         """Test provider manager initialization."""
-        with patch.object(provider_manager._manager, 'initialize_all', return_value=True):
+        with patch.object(
+            provider_manager._manager, "initialize_all", return_value=True
+        ):
             result = await provider_manager.initialize()
             assert result is True
             assert provider_manager._initialized is True
@@ -257,7 +261,9 @@ class TestStillMeProviderManager:
     @pytest.mark.asyncio
     async def test_provider_manager_initialization_failure(self, provider_manager):
         """Test provider manager initialization failure."""
-        with patch.object(provider_manager._manager, 'initialize_all', return_value=False):
+        with patch.object(
+            provider_manager._manager, "initialize_all", return_value=False
+        ):
             result = await provider_manager.initialize()
             assert result is False
             assert provider_manager._initialized is False
@@ -274,10 +280,12 @@ class TestStillMeProviderManager:
             provider="test-provider",
             usage={},
             finish_reason="stop",
-            response_time=0.0
+            response_time=0.0,
         )
 
-        with patch.object(provider_manager._manager, 'generate', return_value=expected_response):
+        with patch.object(
+            provider_manager._manager, "generate", return_value=expected_response
+        ):
             response = await provider_manager.generate(request)
             assert response == expected_response
 
@@ -288,7 +296,9 @@ class TestStillMeProviderManager:
 
         expected_health = {"openai": "healthy", "local_llm": "healthy"}
 
-        with patch.object(provider_manager._manager, 'health_check_all', return_value=expected_health):
+        with patch.object(
+            provider_manager._manager, "health_check_all", return_value=expected_health
+        ):
             health = await provider_manager.health_check()
             assert health == expected_health
 
@@ -299,10 +309,14 @@ class TestStillMeProviderManager:
 
         expected_status = {
             "openai": {"enabled": True, "priority": 1},
-            "local_llm": {"enabled": True, "priority": 2}
+            "local_llm": {"enabled": True, "priority": 2},
         }
 
-        with patch.object(provider_manager._manager, 'get_provider_status', return_value=expected_status):
+        with patch.object(
+            provider_manager._manager,
+            "get_provider_status",
+            return_value=expected_status,
+        ):
             status = provider_manager.get_status()
             assert status == expected_status
 

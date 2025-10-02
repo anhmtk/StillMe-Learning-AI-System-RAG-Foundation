@@ -42,27 +42,56 @@ class ThresholdCalibrator:
             {"text": "that's mid", "expected": False, "category": "slang"},
             {"text": "vl thật", "expected": False, "category": "slang"},
             {"text": "đẹp vl", "expected": False, "category": "slang"},
-
             # Vague cases (should block)
             {"text": "change something", "expected": False, "category": "vague"},
-            {"text": "what do you think about this?", "expected": False, "category": "vague"},
+            {
+                "text": "what do you think about this?",
+                "expected": False,
+                "category": "vague",
+            },
             {"text": "what's wrong with this?", "expected": False, "category": "vague"},
-            {"text": "improve system performance", "expected": False, "category": "vague"},
-            {"text": "how should I handle this?", "expected": False, "category": "vague"},
-
+            {
+                "text": "improve system performance",
+                "expected": False,
+                "category": "vague",
+            },
+            {
+                "text": "how should I handle this?",
+                "expected": False,
+                "category": "vague",
+            },
             # Edge cases (should block)
             {"text": "", "expected": False, "category": "edge"},
             {"text": " ", "expected": False, "category": "edge"},
             {"text": "...", "expected": False, "category": "edge"},
             {"text": "@#$%^&*()", "expected": False, "category": "edge"},
             {"text": "!@#$%^&*()", "expected": False, "category": "edge"},
-
             # Clear cases (should allow)
-            {"text": "How can I implement a binary search algorithm in Python?", "expected": True, "category": "clear"},
-            {"text": "What are the best practices for error handling in JavaScript?", "expected": True, "category": "clear"},
-            {"text": "Can you explain the difference between REST and GraphQL APIs?", "expected": True, "category": "clear"},
-            {"text": "How do I optimize database queries for better performance?", "expected": True, "category": "clear"},
-            {"text": "What is the most efficient way to sort a large dataset?", "expected": True, "category": "clear"},
+            {
+                "text": "How can I implement a binary search algorithm in Python?",
+                "expected": True,
+                "category": "clear",
+            },
+            {
+                "text": "What are the best practices for error handling in JavaScript?",
+                "expected": True,
+                "category": "clear",
+            },
+            {
+                "text": "Can you explain the difference between REST and GraphQL APIs?",
+                "expected": True,
+                "category": "clear",
+            },
+            {
+                "text": "How do I optimize database queries for better performance?",
+                "expected": True,
+                "category": "clear",
+            },
+            {
+                "text": "What is the most efficient way to sort a large dataset?",
+                "expected": True,
+                "category": "clear",
+            },
         ]
 
     def calibrate_thresholds(self) -> dict[str, Any]:
@@ -74,8 +103,8 @@ class ThresholdCalibrator:
         best_score = 0.0
 
         # Sweep parameters
-        abuse_thresholds = [i/100.0 for i in range(10, 21)]  # 0.10 to 0.20
-        suggestion_thresholds = [i/100.0 for i in range(80, 91)]  # 0.80 to 0.90
+        abuse_thresholds = [i / 100.0 for i in range(10, 21)]  # 0.10 to 0.20
+        suggestion_thresholds = [i / 100.0 for i in range(80, 91)]  # 0.80 to 0.90
 
         total_combinations = len(abuse_thresholds) * len(suggestion_thresholds)
         current_combination = 0
@@ -84,13 +113,15 @@ class ThresholdCalibrator:
             for suggestion_threshold in suggestion_thresholds:
                 current_combination += 1
 
-                print(f"Testing combination {current_combination}/{total_combinations}: "
-                      f"abuse={abuse_threshold:.2f}, suggestion={suggestion_threshold:.2f}")
+                print(
+                    f"Testing combination {current_combination}/{total_combinations}: "
+                    f"abuse={abuse_threshold:.2f}, suggestion={suggestion_threshold:.2f}"
+                )
 
                 # Test this configuration
                 config = {
                     "abuse_threshold": abuse_threshold,
-                    "suggestion_threshold": suggestion_threshold
+                    "suggestion_threshold": suggestion_threshold,
                 }
 
                 results = self._test_configuration(config)
@@ -104,11 +135,13 @@ class ThresholdCalibrator:
                         "abuse_threshold": abuse_threshold,
                         "suggestion_threshold": suggestion_threshold,
                         "results": results,
-                        "score": score
+                        "score": score,
                     }
 
-                print(f"  Score: {score:.3f} (Precision: {results['precision']:.3f}, "
-                      f"Recall: {results['recall']:.3f}, FPR: {results['false_positive_rate']:.3f})")
+                print(
+                    f"  Score: {score:.3f} (Precision: {results['precision']:.3f}, "
+                    f"Recall: {results['recall']:.3f}, FPR: {results['false_positive_rate']:.3f})"
+                )
 
         print("\n🎯 Best Configuration Found:")
         print(f"   Abuse Threshold: {best_config['abuse_threshold']:.2f}")
@@ -116,7 +149,9 @@ class ThresholdCalibrator:
         print(f"   Score: {best_config['score']:.3f}")
         print(f"   Precision: {best_config['results']['precision']:.3f}")
         print(f"   Recall: {best_config['results']['recall']:.3f}")
-        print(f"   False Positive Rate: {best_config['results']['false_positive_rate']:.3f}")
+        print(
+            f"   False Positive Rate: {best_config['results']['false_positive_rate']:.3f}"
+        )
 
         return best_config
 
@@ -144,11 +179,31 @@ class ThresholdCalibrator:
                 true_negatives += 1
 
         # Calculate metrics
-        precision = true_positives / (true_positives + false_positives) if (true_positives + false_positives) > 0 else 0
-        recall = true_positives / (true_positives + false_negatives) if (true_positives + false_negatives) > 0 else 0
-        f1_score = 2 * (precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
-        false_positive_rate = false_positives / (false_positives + true_negatives) if (false_positives + true_negatives) > 0 else 0
-        false_negative_rate = false_negatives / (false_negatives + true_positives) if (false_negatives + true_positives) > 0 else 0
+        precision = (
+            true_positives / (true_positives + false_positives)
+            if (true_positives + false_positives) > 0
+            else 0
+        )
+        recall = (
+            true_positives / (true_positives + false_negatives)
+            if (true_positives + false_negatives) > 0
+            else 0
+        )
+        f1_score = (
+            2 * (precision * recall) / (precision + recall)
+            if (precision + recall) > 0
+            else 0
+        )
+        false_positive_rate = (
+            false_positives / (false_positives + true_negatives)
+            if (false_positives + true_negatives) > 0
+            else 0
+        )
+        false_negative_rate = (
+            false_negatives / (false_negatives + true_positives)
+            if (false_negatives + true_positives) > 0
+            else 0
+        )
 
         return {
             "precision": precision,
@@ -159,7 +214,7 @@ class ThresholdCalibrator:
             "true_positives": true_positives,
             "false_positives": false_positives,
             "true_negatives": true_negatives,
-            "false_negatives": false_negatives
+            "false_negatives": false_negatives,
         }
 
     def _calculate_score(self, results: dict[str, Any]) -> float:
@@ -199,7 +254,7 @@ class ThresholdCalibrator:
             "suggestion_threshold": best_config["suggestion_threshold"],
             "calibration_results": best_config["results"],
             "calibration_score": best_config["score"],
-            "calibration_timestamp": time.time()
+            "calibration_timestamp": time.time(),
         }
 
         # Save to YAML file
@@ -210,6 +265,7 @@ class ThresholdCalibrator:
             yaml.dump(config_data, f, default_flow_style=False, indent=2)
 
         print(f"\n💾 Calibrated configuration saved to: {config_file}")
+
 
 if __name__ == "__main__":
     calibrator = ThresholdCalibrator()

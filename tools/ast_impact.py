@@ -8,9 +8,11 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class ASTImpact:
     """AST impact analysis result"""
+
     node_type: str
     impact_level: str
     description: str
@@ -20,6 +22,7 @@ class ASTImpact:
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
+
 
 class ASTImpactAnalyzer:
     """AST impact analyzer"""
@@ -36,26 +39,32 @@ class ASTImpactAnalyzer:
 
             for node in ast.walk(tree):
                 if isinstance(node, ast.FunctionDef):
-                    impacts.append(ASTImpact(
-                        node_type="FunctionDef",
-                        impact_level="medium",
-                        description=f"Function definition: {node.name}",
-                        line_number=node.lineno
-                    ))
+                    impacts.append(
+                        ASTImpact(
+                            node_type="FunctionDef",
+                            impact_level="medium",
+                            description=f"Function definition: {node.name}",
+                            line_number=node.lineno,
+                        )
+                    )
                 elif isinstance(node, ast.ClassDef):
-                    impacts.append(ASTImpact(
-                        node_type="ClassDef",
-                        impact_level="high",
-                        description=f"Class definition: {node.name}",
-                        line_number=node.lineno
-                    ))
+                    impacts.append(
+                        ASTImpact(
+                            node_type="ClassDef",
+                            impact_level="high",
+                            description=f"Class definition: {node.name}",
+                            line_number=node.lineno,
+                        )
+                    )
                 elif isinstance(node, ast.Import):
-                    impacts.append(ASTImpact(
-                        node_type="Import",
-                        impact_level="low",
-                        description="Import statement",
-                        line_number=node.lineno
-                    ))
+                    impacts.append(
+                        ASTImpact(
+                            node_type="Import",
+                            impact_level="low",
+                            description="Import statement",
+                            line_number=node.lineno,
+                        )
+                    )
 
             self.logger.info(f"🔍 AST analysis completed: {len(impacts)} impacts found")
             return impacts
@@ -78,7 +87,7 @@ class ASTImpactAnalyzer:
             return {
                 "total_impacts": len(impacts),
                 "impact_by_level": impact_counts,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
         except Exception as e:

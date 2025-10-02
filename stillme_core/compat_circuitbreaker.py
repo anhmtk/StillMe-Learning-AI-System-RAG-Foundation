@@ -43,23 +43,25 @@ class SafeCircuitBreaker:
         - logger: logger instance (optional)
         """
         # Extract known parameters
-        failure_threshold = kwargs.pop('failure_threshold', 5)
-        recovery_timeout = kwargs.pop('recovery_timeout', 60.0)
-        expected_exception = kwargs.pop('expected_exception', Exception)
-        success_threshold = kwargs.pop('success_threshold', 2)
-        logger_instance = kwargs.pop('logger', None)
+        failure_threshold = kwargs.pop("failure_threshold", 5)
+        recovery_timeout = kwargs.pop("recovery_timeout", 60.0)
+        expected_exception = kwargs.pop("expected_exception", Exception)
+        success_threshold = kwargs.pop("success_threshold", 2)
+        logger_instance = kwargs.pop("logger", None)
 
         # Check for unknown parameters
         if kwargs:
-            unknown_params = ', '.join(kwargs.keys())
-            logger.warning(f"Unknown parameters passed to SafeCircuitBreaker: {unknown_params}")
+            unknown_params = ", ".join(kwargs.keys())
+            logger.warning(
+                f"Unknown parameters passed to SafeCircuitBreaker: {unknown_params}"
+            )
 
         # Create CircuitBreakerConfig
         config = CircuitBreakerConfig(
             failure_threshold=failure_threshold,
             recovery_timeout=recovery_timeout,
             expected_exception=expected_exception,
-            success_threshold=success_threshold
+            success_threshold=success_threshold,
         )
 
         # Initialize the actual CircuitBreaker
@@ -113,4 +115,4 @@ class SafeCircuitBreaker:
         return self._circuit_breaker.reset()
 
 
-__all__ = ['SafeCircuitBreaker']
+__all__ = ["SafeCircuitBreaker"]

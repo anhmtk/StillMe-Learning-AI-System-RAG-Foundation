@@ -8,11 +8,13 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
+
 class IdentityType(Enum):
     USER = "user"
     SYSTEM = "system"
     SERVICE = "service"
     ANONYMOUS = "anonymous"
+
 
 class IdentityStatus(Enum):
     ACTIVE = "active"
@@ -20,9 +22,11 @@ class IdentityStatus(Enum):
     SUSPENDED = "suspended"
     PENDING = "pending"
 
+
 @dataclass
 class Identity:
     """Identity record"""
+
     id: str
     name: str
     identity_type: IdentityType
@@ -35,6 +39,7 @@ class Identity:
         if self.metadata is None:
             self.metadata = {}
 
+
 class IdentityHandler:
     """Identity handler for StillMe framework"""
 
@@ -43,10 +48,9 @@ class IdentityHandler:
         self.identities: list[Identity] = []
         self.logger.info("✅ IdentityHandler initialized")
 
-    def create_identity(self,
-                       name: str,
-                       identity_type: IdentityType,
-                       metadata: dict[str, Any] = None) -> str:
+    def create_identity(
+        self, name: str, identity_type: IdentityType, metadata: dict[str, Any] = None
+    ) -> str:
         """Create a new identity"""
         try:
             identity_id = f"id_{len(self.identities) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -58,7 +62,7 @@ class IdentityHandler:
                 status=IdentityStatus.ACTIVE,
                 created_at=datetime.now(),
                 last_accessed=datetime.now(),
-                metadata=metadata or {}
+                metadata=metadata or {},
             )
 
             self.identities.append(identity)
@@ -82,7 +86,9 @@ class IdentityHandler:
             if identity.id == identity_id:
                 identity.status = status
                 identity.last_accessed = datetime.now()
-                self.logger.info(f"🔄 Identity {identity_id} status updated to {status.value}")
+                self.logger.info(
+                    f"🔄 Identity {identity_id} status updated to {status.value}"
+                )
                 return True
         return False
 
@@ -108,13 +114,15 @@ class IdentityHandler:
 
                 # Count by status
                 status_key = identity.status.value
-                identities_by_status[status_key] = identities_by_status.get(status_key, 0) + 1
+                identities_by_status[status_key] = (
+                    identities_by_status.get(status_key, 0) + 1
+                )
 
             return {
                 "total_identities": total_identities,
                 "identities_by_type": identities_by_type,
                 "identities_by_status": identities_by_status,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
         except Exception as e:

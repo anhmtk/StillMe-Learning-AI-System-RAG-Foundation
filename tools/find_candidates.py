@@ -24,20 +24,73 @@ class DeletionCandidatesFinder:
 
         # Protected patterns (không được đụng)
         self.protected_patterns = {
-            ".env", ".env.local", ".env.prod", ".env.dev",
-            "policies/", "models/", "weights/", "checkpoints/",
-            "data/", "deploy/", ".github/", "sandbox/"
+            ".env",
+            ".env.local",
+            ".env.prod",
+            ".env.dev",
+            "policies/",
+            "models/",
+            "weights/",
+            "checkpoints/",
+            "data/",
+            "deploy/",
+            ".github/",
+            "sandbox/",
         }
 
         # Junk patterns (chỉ áp dụng cho primary files)
         self.junk_patterns = {
-            "backup": ["backup", "bak", "old", "archive", "temp", "tmp", "cache", "log"],
-            "build": ["/build/", "/dist/", "/target/", "/out/", "/bin/", "/obj/", "/.pytest_cache/", "/__pycache__/"],
-            "test_artifacts": [".coverage", "/coverage/", "/htmlcov/", "/reports/coverage/", "/.nyc_output/"],
-            "ide": ["/.vscode/", "/.idea/", "*.swp", "*.swo", "*~", ".DS_Store", "Thumbs.db"],
-            "node": ["/node_modules/", "npm-debug.log*", "yarn-error.log*", "package-lock.json"],
-            "python": ["*.pyc", "*.pyo", "*.pyd", "/__pycache__/", "/.pytest_cache/", "*.egg-info/"],
-            "logs": ["*.log", "/logs/", "*.out", "*.err", "debug.log", "error.log"]
+            "backup": [
+                "backup",
+                "bak",
+                "old",
+                "archive",
+                "temp",
+                "tmp",
+                "cache",
+                "log",
+            ],
+            "build": [
+                "/build/",
+                "/dist/",
+                "/target/",
+                "/out/",
+                "/bin/",
+                "/obj/",
+                "/.pytest_cache/",
+                "/__pycache__/",
+            ],
+            "test_artifacts": [
+                ".coverage",
+                "/coverage/",
+                "/htmlcov/",
+                "/reports/coverage/",
+                "/.nyc_output/",
+            ],
+            "ide": [
+                "/.vscode/",
+                "/.idea/",
+                "*.swp",
+                "*.swo",
+                "*~",
+                ".DS_Store",
+                "Thumbs.db",
+            ],
+            "node": [
+                "/node_modules/",
+                "npm-debug.log*",
+                "yarn-error.log*",
+                "package-lock.json",
+            ],
+            "python": [
+                "*.pyc",
+                "*.pyo",
+                "*.pyd",
+                "/__pycache__/",
+                "/.pytest_cache/",
+                "*.egg-info/",
+            ],
+            "logs": ["*.log", "/logs/", "*.out", "*.err", "debug.log", "error.log"],
         }
 
         # Duplicate detection
@@ -49,22 +102,26 @@ class DeletionCandidatesFinder:
         inventory_path = self.reports_dir / "primary_inventory.csv"
 
         if not inventory_path.exists():
-            print("❌ Primary inventory not found. Please run repo_inventory.py --mode primary first.")
+            print(
+                "❌ Primary inventory not found. Please run repo_inventory.py --mode primary first."
+            )
             return []
 
         inventory = []
-        with open(inventory_path, encoding='utf-8') as f:
+        with open(inventory_path, encoding="utf-8") as f:
             reader = csv.DictReader(f)
             for row in reader:
-                inventory.append({
-                    "path": row["path"],
-                    "size": int(row["size"]),
-                    "type": row["type"],
-                    "last_commit": row["last_commit"],
-                    "ref_count": int(row["ref_count"]),
-                    "bin_guess": row["bin_guess"] == "True",
-                    "hash": row["hash"]
-                })
+                inventory.append(
+                    {
+                        "path": row["path"],
+                        "size": int(row["size"]),
+                        "type": row["type"],
+                        "last_commit": row["last_commit"],
+                        "ref_count": int(row["ref_count"]),
+                        "bin_guess": row["bin_guess"] == "True",
+                        "hash": row["hash"],
+                    }
+                )
 
         return inventory
 
@@ -76,18 +133,20 @@ class DeletionCandidatesFinder:
             return []
 
         inventory = []
-        with open(inventory_path, encoding='utf-8') as f:
+        with open(inventory_path, encoding="utf-8") as f:
             reader = csv.DictReader(f)
             for row in reader:
-                inventory.append({
-                    "path": row["path"],
-                    "size": int(row["size"]),
-                    "type": row["type"],
-                    "last_commit": row["last_commit"],
-                    "ref_count": int(row["ref_count"]),
-                    "bin_guess": row["bin_guess"] == "True",
-                    "hash": row["hash"]
-                })
+                inventory.append(
+                    {
+                        "path": row["path"],
+                        "size": int(row["size"]),
+                        "type": row["type"],
+                        "last_commit": row["last_commit"],
+                        "ref_count": int(row["ref_count"]),
+                        "bin_guess": row["bin_guess"] == "True",
+                        "hash": row["hash"],
+                    }
+                )
 
         return inventory
 
@@ -117,8 +176,13 @@ class DeletionCandidatesFinder:
 
                     if pattern.startswith("/") and pattern.endswith("/"):
                         # Directory pattern (e.g., "/build/", "/dist/")
-                        dir_pattern = pattern[1:-1]  # Remove leading and trailing slashes
-                        if f"/{dir_pattern}/" in f"/{dir_path}/" or f"/{dir_pattern}/" in f"/{file_path}/":
+                        dir_pattern = pattern[
+                            1:-1
+                        ]  # Remove leading and trailing slashes
+                        if (
+                            f"/{dir_pattern}/" in f"/{dir_path}/"
+                            or f"/{dir_pattern}/" in f"/{file_path}/"
+                        ):
                             matched = True
                     elif pattern.startswith("*"):
                         # Wildcard pattern (e.g., "*.pyc", "*.log")
@@ -127,25 +191,36 @@ class DeletionCandidatesFinder:
                     elif pattern.endswith("/"):
                         # Directory pattern without leading slash
                         dir_pattern = pattern.rstrip("/")
-                        if f"/{dir_pattern}/" in f"/{dir_path}/" or f"/{dir_pattern}/" in f"/{file_path}/":
+                        if (
+                            f"/{dir_pattern}/" in f"/{dir_path}/"
+                            or f"/{dir_pattern}/" in f"/{file_path}/"
+                        ):
                             matched = True
                     else:
                         # Exact match pattern
-                        if pattern in file_name or pattern in dir_path or pattern in file_path:
+                        if (
+                            pattern in file_name
+                            or pattern in dir_path
+                            or pattern in file_path
+                        ):
                             matched = True
 
                     if matched:
-                        candidates.append({
-                            "path": file_path,
-                            "category": category,
-                            "reason": f"Matches pattern: {pattern}",
-                            "risk": self.get_risk_level(category, item),
-                            "size": item["size"],
-                            "ref_count": item["ref_count"],
-                            "last_commit": item["last_commit"],
-                            "recommendation": self.get_recommendation(category, item),
-                            "source": "primary"
-                        })
+                        candidates.append(
+                            {
+                                "path": file_path,
+                                "category": category,
+                                "reason": f"Matches pattern: {pattern}",
+                                "risk": self.get_risk_level(category, item),
+                                "size": item["size"],
+                                "ref_count": item["ref_count"],
+                                "last_commit": item["last_commit"],
+                                "recommendation": self.get_recommendation(
+                                    category, item
+                                ),
+                                "source": "primary",
+                            }
+                        )
                         break
 
         return candidates
@@ -169,18 +244,22 @@ class DeletionCandidatesFinder:
 
                 # Keep the first one, mark others for deletion
                 for _i, item in enumerate(items[1:], 1):
-                    duplicate_candidates.append({
-                        "path": item["path"],
-                        "category": "duplicate",
-                        "reason": f"Duplicate of {items[0]['path']} (hash: {file_hash[:8]})",
-                        "risk": "LOW" if item["ref_count"] == 0 else "MEDIUM",
-                        "size": item["size"],
-                        "ref_count": item["ref_count"],
-                        "last_commit": item["last_commit"],
-                        "recommendation": "QUARANTINE" if item["ref_count"] == 0 else "REVIEW",
-                        "duplicate_of": items[0]["path"],
-                        "source": "primary"
-                    })
+                    duplicate_candidates.append(
+                        {
+                            "path": item["path"],
+                            "category": "duplicate",
+                            "reason": f"Duplicate of {items[0]['path']} (hash: {file_hash[:8]})",
+                            "risk": "LOW" if item["ref_count"] == 0 else "MEDIUM",
+                            "size": item["size"],
+                            "ref_count": item["ref_count"],
+                            "last_commit": item["last_commit"],
+                            "recommendation": "QUARANTINE"
+                            if item["ref_count"] == 0
+                            else "REVIEW",
+                            "duplicate_of": items[0]["path"],
+                            "source": "primary",
+                        }
+                    )
 
         return duplicate_candidates
 
@@ -189,26 +268,35 @@ class DeletionCandidatesFinder:
         candidates = []
 
         for item in self.primary_inventory:
-            if (self.is_protected(item["path"]) or
-                item["ref_count"] > 0 or
-                item["type"] in ["config", "doc"]):
+            if (
+                self.is_protected(item["path"])
+                or item["ref_count"] > 0
+                or item["type"] in ["config", "doc"]
+            ):
                 continue
 
             # Skip if it's a main entry point
-            if any(main_file in item["path"] for main_file in ["main.py", "app.py", "index.js", "main.dart"]):
+            if any(
+                main_file in item["path"]
+                for main_file in ["main.py", "app.py", "index.js", "main.dart"]
+            ):
                 continue
 
-            candidates.append({
-                "path": item["path"],
-                "category": "unreferenced",
-                "reason": f"No references found (ref_count: {item['ref_count']})",
-                "risk": "LOW" if item["type"] in ["test", "bin"] else "MEDIUM",
-                "size": item["size"],
-                "ref_count": item["ref_count"],
-                "last_commit": item["last_commit"],
-                "recommendation": "QUARANTINE" if item["type"] in ["test", "bin"] else "REVIEW",
-                "source": "primary"
-            })
+            candidates.append(
+                {
+                    "path": item["path"],
+                    "category": "unreferenced",
+                    "reason": f"No references found (ref_count: {item['ref_count']})",
+                    "risk": "LOW" if item["type"] in ["test", "bin"] else "MEDIUM",
+                    "size": item["size"],
+                    "ref_count": item["ref_count"],
+                    "last_commit": item["last_commit"],
+                    "recommendation": "QUARANTINE"
+                    if item["type"] in ["test", "bin"]
+                    else "REVIEW",
+                    "source": "primary",
+                }
+            )
 
         return candidates
 
@@ -223,17 +311,21 @@ class DeletionCandidatesFinder:
             size_mb = item["size"] / (1024 * 1024)
 
             if size_mb > 10:  # > 10MB
-                candidates.append({
-                    "path": item["path"],
-                    "category": "large_file",
-                    "reason": f"Large file: {size_mb:.1f}MB",
-                    "risk": "MEDIUM" if item["type"] == "bin" else "HIGH",
-                    "size": item["size"],
-                    "ref_count": item["ref_count"],
-                    "last_commit": item["last_commit"],
-                    "recommendation": "REVIEW" if item["type"] == "bin" else "QUARANTINE",
-                    "source": "primary"
-                })
+                candidates.append(
+                    {
+                        "path": item["path"],
+                        "category": "large_file",
+                        "reason": f"Large file: {size_mb:.1f}MB",
+                        "risk": "MEDIUM" if item["type"] == "bin" else "HIGH",
+                        "size": item["size"],
+                        "ref_count": item["ref_count"],
+                        "last_commit": item["last_commit"],
+                        "recommendation": "REVIEW"
+                        if item["type"] == "bin"
+                        else "QUARANTINE",
+                        "source": "primary",
+                    }
+                )
 
         return candidates
 
@@ -243,9 +335,11 @@ class DeletionCandidatesFinder:
         datetime.now() - timedelta(days=90)  # 90 days ago
 
         for item in self.primary_inventory:
-            if (self.is_protected(item["path"]) or
-                item["ref_count"] > 0 or
-                item["type"] in ["config", "doc"]):
+            if (
+                self.is_protected(item["path"])
+                or item["ref_count"] > 0
+                or item["type"] in ["config", "doc"]
+            ):
                 continue
 
             # Try to parse last commit date
@@ -254,17 +348,19 @@ class DeletionCandidatesFinder:
                     # This is simplified - in reality, we'd parse the actual date
                     # For now, we'll use a heuristic based on file type and size
                     if item["type"] in ["test", "bin"] and item["size"] < 1024 * 1024:
-                        candidates.append({
-                            "path": item["path"],
-                            "category": "old_file",
-                            "reason": f"Old file with no references (type: {item['type']})",
-                            "risk": "LOW",
-                            "size": item["size"],
-                            "ref_count": item["ref_count"],
-                            "last_commit": item["last_commit"],
-                            "recommendation": "QUARANTINE",
-                            "source": "primary"
-                        })
+                        candidates.append(
+                            {
+                                "path": item["path"],
+                                "category": "old_file",
+                                "reason": f"Old file with no references (type: {item['type']})",
+                                "risk": "LOW",
+                                "size": item["size"],
+                                "ref_count": item["ref_count"],
+                                "last_commit": item["last_commit"],
+                                "recommendation": "QUARANTINE",
+                                "source": "primary",
+                            }
+                        )
             except:
                 pass
 
@@ -282,7 +378,7 @@ class DeletionCandidatesFinder:
             "ide": "LOW",
             "node": "LOW",
             "python": "LOW",
-            "logs": "LOW"
+            "logs": "LOW",
         }
 
         return risk_map.get(category, "MEDIUM")
@@ -292,7 +388,15 @@ class DeletionCandidatesFinder:
         if item["ref_count"] > 0:
             return "REVIEW"
 
-        if category in ["backup", "build", "test_artifacts", "ide", "node", "python", "logs"]:
+        if category in [
+            "backup",
+            "build",
+            "test_artifacts",
+            "ide",
+            "node",
+            "python",
+            "logs",
+        ]:
             return "QUARANTINE"
 
         return "REVIEW"
@@ -311,7 +415,7 @@ class DeletionCandidatesFinder:
         for candidate in all_candidates:
             by_risk[candidate["risk"]].append(candidate)
 
-        with open(report_path, 'w', encoding='utf-8') as f:
+        with open(report_path, "w", encoding="utf-8") as f:
             f.write("# 🗑️ Deletion Candidates Report\n\n")
             f.write(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
 
@@ -352,7 +456,9 @@ class DeletionCandidatesFinder:
                 items.sort(key=lambda x: x["size"], reverse=True)
 
                 for item in items[:10]:  # Show top 10
-                    f.write(f"- `{item['path']}` ({item['size']:,} bytes, {item['risk']} risk)\n")
+                    f.write(
+                        f"- `{item['path']}` ({item['size']:,} bytes, {item['risk']} risk)\n"
+                    )
 
                 if len(items) > 10:
                     f.write(f"- ... and {len(items) - 10} more\n")
@@ -364,23 +470,35 @@ class DeletionCandidatesFinder:
         """Tạo CSV report cho quarantine tool"""
         csv_path = self.reports_dir / "deletion_candidates.csv"
 
-        with open(csv_path, 'w', newline='', encoding='utf-8') as f:
-            fieldnames = ["path", "category", "reason", "risk", "size", "ref_count", "last_commit", "recommendation", "source"]
+        with open(csv_path, "w", newline="", encoding="utf-8") as f:
+            fieldnames = [
+                "path",
+                "category",
+                "reason",
+                "risk",
+                "size",
+                "ref_count",
+                "last_commit",
+                "recommendation",
+                "source",
+            ]
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
 
             for candidate in all_candidates:
-                writer.writerow({
-                    "path": candidate["path"],
-                    "category": candidate["category"],
-                    "reason": candidate["reason"],
-                    "risk": candidate["risk"],
-                    "size": candidate["size"],
-                    "ref_count": candidate["ref_count"],
-                    "last_commit": candidate["last_commit"],
-                    "recommendation": candidate["recommendation"],
-                    "source": candidate["source"]
-                })
+                writer.writerow(
+                    {
+                        "path": candidate["path"],
+                        "category": candidate["category"],
+                        "reason": candidate["reason"],
+                        "risk": candidate["risk"],
+                        "size": candidate["size"],
+                        "ref_count": candidate["ref_count"],
+                        "last_commit": candidate["last_commit"],
+                        "recommendation": candidate["recommendation"],
+                        "source": candidate["source"],
+                    }
+                )
 
         print(f"📊 CSV report: {csv_path}")
 
@@ -389,12 +507,16 @@ class DeletionCandidatesFinder:
         print("🗑️ Finding deletion candidates...")
 
         if not self.primary_inventory:
-            print("❌ No primary inventory data found. Please run repo_inventory.py --mode primary first.")
+            print(
+                "❌ No primary inventory data found. Please run repo_inventory.py --mode primary first."
+            )
             return
 
         print(f"📋 Primary inventory: {len(self.primary_inventory)} files")
         if self.excluded_inventory:
-            print(f"📋 Excluded inventory: {len(self.excluded_inventory)} files (reference only)")
+            print(
+                f"📋 Excluded inventory: {len(self.excluded_inventory)} files (reference only)"
+            )
 
         # Find different types of candidates
         print("  🔍 Finding junk files...")
@@ -413,8 +535,13 @@ class DeletionCandidatesFinder:
         old_candidates = self.find_old_files()
 
         # Combine all candidates
-        all_candidates = (junk_candidates + duplicate_candidates +
-                         unreferenced_candidates + large_candidates + old_candidates)
+        all_candidates = (
+            junk_candidates
+            + duplicate_candidates
+            + unreferenced_candidates
+            + large_candidates
+            + old_candidates
+        )
 
         # Remove duplicates
         seen_paths = set()
@@ -440,6 +567,7 @@ class DeletionCandidatesFinder:
             print(f"  {risk}: {by_risk[risk]}")
 
         return unique_candidates
+
 
 if __name__ == "__main__":
     finder = DeletionCandidatesFinder()

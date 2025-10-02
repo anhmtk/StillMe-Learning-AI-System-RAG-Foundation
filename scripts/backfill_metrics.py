@@ -38,6 +38,7 @@ from stillme_core.metrics.registry import get_metrics_registry
 
 logger = logging.getLogger(__name__)
 
+
 class MetricsBackfill:
     """
     Metrics backfill system
@@ -46,9 +47,11 @@ class MetricsBackfill:
     learning dashboard.
     """
 
-    def __init__(self,
-                 db_path: str = "data/metrics/metrics.db",
-                 events_dir: str = "data/metrics/events"):
+    def __init__(
+        self,
+        db_path: str = "data/metrics/metrics.db",
+        events_dir: str = "data/metrics/events",
+    ):
         self.db_path = db_path
         self.events_dir = Path(events_dir)
         self.events_dir.mkdir(parents=True, exist_ok=True)
@@ -65,7 +68,9 @@ class MetricsBackfill:
 
         logger.info(f"MetricsBackfill initialized: db={db_path}")
 
-    def generate_learning_curve_data(self, days: int, start_date: Optional[datetime] = None) -> list[dict[str, Any]]:
+    def generate_learning_curve_data(
+        self, days: int, start_date: Optional[datetime] = None
+    ) -> list[dict[str, Any]]:
         """Generate realistic learning curve data"""
         if start_date is None:
             start_date = datetime.now() - timedelta(days=days)
@@ -90,12 +95,14 @@ class MetricsBackfill:
             self_assessment = 0.2 + (progress * 0.7) + random.uniform(-0.08, 0.08)
             self_assessment = max(0.0, min(1.0, self_assessment))
 
-            learning_data.append({
-                'date': date.strftime('%Y-%m-%d'),
-                'pass_rate': round(pass_rate, 3),
-                'accuracy': round(accuracy, 3),
-                'self_assessment': round(self_assessment, 3)
-            })
+            learning_data.append(
+                {
+                    "date": date.strftime("%Y-%m-%d"),
+                    "pass_rate": round(pass_rate, 3),
+                    "accuracy": round(accuracy, 3),
+                    "self_assessment": round(self_assessment, 3),
+                }
+            )
 
         return learning_data
 
@@ -104,7 +111,7 @@ class MetricsBackfill:
         performance_data = []
 
         for i in range(days):
-            date = datetime.now() - timedelta(days=days-i)
+            date = datetime.now() - timedelta(days=days - i)
 
             # Latency: improves over time with some variation
             base_latency = 1000 - (i * 10)  # Improve by 10ms per day
@@ -116,12 +123,14 @@ class MetricsBackfill:
             # CPU usage: varies based on load
             cpu = 30 + random.uniform(-10, 40)
 
-            performance_data.append({
-                'date': date.strftime('%Y-%m-%d'),
-                'latency_ms': round(latency, 1),
-                'memory_mb': round(memory, 1),
-                'cpu_percent': round(cpu, 1)
-            })
+            performance_data.append(
+                {
+                    "date": date.strftime("%Y-%m-%d"),
+                    "latency_ms": round(latency, 1),
+                    "memory_mb": round(memory, 1),
+                    "cpu_percent": round(cpu, 1),
+                }
+            )
 
         return performance_data
 
@@ -130,26 +139,25 @@ class MetricsBackfill:
         ingest_data = []
 
         for i in range(days):
-            date = datetime.now() - timedelta(days=days-i)
+            date = datetime.now() - timedelta(days=days - i)
 
             for source in self.sources:
                 # Different sources have different volumes
-                base_volume = {
-                    'rss': 50,
-                    'experience': 30,
-                    'manual': 10,
-                    'api': 20
-                }[source]
+                base_volume = {"rss": 50, "experience": 30, "manual": 10, "api": 20}[
+                    source
+                ]
 
                 # Add some variation
                 volume = base_volume + random.randint(-10, 20)
                 volume = max(0, volume)
 
-                ingest_data.append({
-                    'date': date.strftime('%Y-%m-%d'),
-                    'source': source,
-                    'items': volume
-                })
+                ingest_data.append(
+                    {
+                        "date": date.strftime("%Y-%m-%d"),
+                        "source": source,
+                        "items": volume,
+                    }
+                )
 
         return ingest_data
 
@@ -158,7 +166,7 @@ class MetricsBackfill:
         error_data = []
 
         for i in range(days):
-            date = datetime.now() - timedelta(days=days-i)
+            date = datetime.now() - timedelta(days=days - i)
 
             # Errors decrease over time as system improves
             error_probability = 0.1 - (i * 0.001)  # Decrease by 0.1% per day
@@ -167,11 +175,13 @@ class MetricsBackfill:
             for error_type in self.error_types:
                 if random.random() < error_probability:
                     count = random.randint(1, 5)
-                    error_data.append({
-                        'date': date.strftime('%Y-%m-%d'),
-                        'type': error_type,
-                        'count': count
-                    })
+                    error_data.append(
+                        {
+                            "date": date.strftime("%Y-%m-%d"),
+                            "type": error_type,
+                            "count": count,
+                        }
+                    )
 
         return error_data
 
@@ -180,7 +190,7 @@ class MetricsBackfill:
         evolution_data = []
 
         for i in range(days):
-            date = datetime.now() - timedelta(days=days-i)
+            date = datetime.now() - timedelta(days=days - i)
 
             # Evolution stages: 0=infant, 1=child, 2=adolescent, 3=adult
             if i < days * 0.25:
@@ -192,10 +202,7 @@ class MetricsBackfill:
             else:
                 stage = 3  # Adult
 
-            evolution_data.append({
-                'date': date.strftime('%Y-%m-%d'),
-                'stage': stage
-            })
+            evolution_data.append({"date": date.strftime("%Y-%m-%d"), "stage": stage})
 
         return evolution_data
 
@@ -203,9 +210,7 @@ class MetricsBackfill:
         """Backfill data for a specific date"""
         # Start session
         self.emitter.start_session(
-            stage="backfill",
-            notes=f"Backfill data for {date}",
-            version="1.0.0"
+            stage="backfill", notes=f"Backfill data for {date}", version="1.0.0"
         )
 
         try:
@@ -216,58 +221,81 @@ class MetricsBackfill:
                     component=component,
                     metrics={
                         "items_processed": random.randint(10, 100),
-                        "success_rate": random.uniform(0.8, 1.0)
+                        "success_rate": random.uniform(0.8, 1.0),
                     },
-                    meta={"date": date, "backfill": True}
+                    meta={"date": date, "backfill": True},
                 )
 
             # Log metrics
             metrics_to_log = [
                 # Learning metrics
-                Metric("learning_pass_rate", data.get('pass_rate', 0.8), "ratio", "daily"),
-                Metric("learning_accuracy", data.get('accuracy', 0.85), "ratio", "daily"),
-                Metric("self_assessment_score", data.get('self_assessment', 0.75), "ratio", "daily"),
-
+                Metric(
+                    "learning_pass_rate", data.get("pass_rate", 0.8), "ratio", "daily"
+                ),
+                Metric(
+                    "learning_accuracy", data.get("accuracy", 0.85), "ratio", "daily"
+                ),
+                Metric(
+                    "self_assessment_score",
+                    data.get("self_assessment", 0.75),
+                    "ratio",
+                    "daily",
+                ),
                 # Performance metrics
-                Metric("latency_ms", data.get('latency_ms', 500), "ms", "system"),
-                Metric("memory_usage_mb", data.get('memory_mb', 600), "MB", "system"),
-                Metric("cpu_usage_percent", data.get('cpu_percent', 40), "%", "system"),
-
+                Metric("latency_ms", data.get("latency_ms", 500), "ms", "system"),
+                Metric("memory_usage_mb", data.get("memory_mb", 600), "MB", "system"),
+                Metric("cpu_usage_percent", data.get("cpu_percent", 40), "%", "system"),
                 # Ingest metrics
-                Metric("ingested_items", data.get('ingested_items', 100), "count", "rss"),
-                Metric("ingested_items", data.get('ingested_experience', 50), "count", "experience"),
-                Metric("ingested_items", data.get('ingested_manual', 20), "count", "manual"),
-
+                Metric(
+                    "ingested_items", data.get("ingested_items", 100), "count", "rss"
+                ),
+                Metric(
+                    "ingested_items",
+                    data.get("ingested_experience", 50),
+                    "count",
+                    "experience",
+                ),
+                Metric(
+                    "ingested_items", data.get("ingested_manual", 20), "count", "manual"
+                ),
                 # Token usage
-                Metric("tokens_used", data.get('tokens_used', 5000), "tokens", "learning"),
-
+                Metric(
+                    "tokens_used", data.get("tokens_used", 5000), "tokens", "learning"
+                ),
                 # Evolution
-                Metric("evolution_stage", data.get('evolution_stage', 2), "count", "system"),
-
+                Metric(
+                    "evolution_stage", data.get("evolution_stage", 2), "count", "system"
+                ),
                 # Quality metrics
-                Metric("quality_score", data.get('quality_score', 0.8), "ratio", "content"),
-                Metric("risk_score", data.get('risk_score', 0.2), "ratio", "content"),
-                Metric("approval_rate", data.get('approval_rate', 0.9), "ratio", "content")
+                Metric(
+                    "quality_score", data.get("quality_score", 0.8), "ratio", "content"
+                ),
+                Metric("risk_score", data.get("risk_score", 0.2), "ratio", "content"),
+                Metric(
+                    "approval_rate", data.get("approval_rate", 0.9), "ratio", "content"
+                ),
             ]
 
             for metric in metrics_to_log:
                 self.emitter.log_metric(metric)
 
             # Log some errors
-            if data.get('errors', 0) > 0:
-                for _ in range(data['errors']):
+            if data.get("errors", 0) > 0:
+                for _ in range(data["errors"]):
                     self.emitter.log_event(
                         event="error",
                         component=random.choice(self.components),
                         metrics={"error_count": 1},
                         meta={
                             "error_type": random.choice(self.error_types),
-                            "message": "Sample error for backfill"
-                        }
+                            "message": "Sample error for backfill",
+                        },
                     )
 
             # End session
-            self.emitter.end_session(success=True, notes=f"Backfill completed for {date}")
+            self.emitter.end_session(
+                success=True, notes=f"Backfill completed for {date}"
+            )
 
         except Exception as e:
             logger.error(f"Error backfilling data for {date}: {e}")
@@ -288,23 +316,39 @@ class MetricsBackfill:
         combined_data = {}
 
         for i, learning in enumerate(learning_data):
-            date = learning['date']
+            date = learning["date"]
             combined_data[date] = {
-                'pass_rate': learning['pass_rate'],
-                'accuracy': learning['accuracy'],
-                'self_assessment': learning['self_assessment'],
-                'latency_ms': performance_data[i]['latency_ms'],
-                'memory_mb': performance_data[i]['memory_mb'],
-                'cpu_percent': performance_data[i]['cpu_percent'],
-                'evolution_stage': evolution_data[i]['stage'],
-                'ingested_items': sum(item['items'] for item in ingest_data if item['date'] == date),
-                'ingested_experience': next((item['items'] for item in ingest_data if item['date'] == date and item['source'] == 'experience'), 0),
-                'ingested_manual': next((item['items'] for item in ingest_data if item['date'] == date and item['source'] == 'manual'), 0),
-                'tokens_used': random.randint(3000, 8000),
-                'quality_score': random.uniform(0.7, 0.95),
-                'risk_score': random.uniform(0.1, 0.3),
-                'approval_rate': random.uniform(0.85, 0.98),
-                'errors': len([e for e in error_data if e['date'] == date])
+                "pass_rate": learning["pass_rate"],
+                "accuracy": learning["accuracy"],
+                "self_assessment": learning["self_assessment"],
+                "latency_ms": performance_data[i]["latency_ms"],
+                "memory_mb": performance_data[i]["memory_mb"],
+                "cpu_percent": performance_data[i]["cpu_percent"],
+                "evolution_stage": evolution_data[i]["stage"],
+                "ingested_items": sum(
+                    item["items"] for item in ingest_data if item["date"] == date
+                ),
+                "ingested_experience": next(
+                    (
+                        item["items"]
+                        for item in ingest_data
+                        if item["date"] == date and item["source"] == "experience"
+                    ),
+                    0,
+                ),
+                "ingested_manual": next(
+                    (
+                        item["items"]
+                        for item in ingest_data
+                        if item["date"] == date and item["source"] == "manual"
+                    ),
+                    0,
+                ),
+                "tokens_used": random.randint(3000, 8000),
+                "quality_score": random.uniform(0.7, 0.95),
+                "risk_score": random.uniform(0.1, 0.3),
+                "approval_rate": random.uniform(0.85, 0.98),
+                "errors": len([e for e in error_data if e["date"] == date]),
             }
 
         # Backfill each day
@@ -319,18 +363,24 @@ class MetricsBackfill:
         logger.info(f"Creating sample event files for {days} days")
 
         for i in range(days):
-            date = datetime.now() - timedelta(days=days-i)
-            date_str = date.strftime('%Y-%m-%d')
+            date = datetime.now() - timedelta(days=days - i)
+            date_str = date.strftime("%Y-%m-%d")
 
             event_file = self.events_dir / f"{date_str}.jsonl"
 
-            with open(event_file, 'w', encoding='utf-8') as f:
+            with open(event_file, "w", encoding="utf-8") as f:
                 # Generate 10-50 events per day
                 num_events = random.randint(10, 50)
 
                 for _ in range(num_events):
                     event = {
-                        "ts": (date + timedelta(hours=random.randint(0, 23), minutes=random.randint(0, 59))).isoformat(),
+                        "ts": (
+                            date
+                            + timedelta(
+                                hours=random.randint(0, 23),
+                                minutes=random.randint(0, 59),
+                            )
+                        ).isoformat(),
                         "session_id": f"sess_{date_str}_{uuid.uuid4().hex[:4]}",
                         "stage": random.choice(self.stages),
                         "component": random.choice(self.components),
@@ -338,25 +388,34 @@ class MetricsBackfill:
                         "meta": {
                             "model": "stillme-v1",
                             "source": random.choice(self.sources),
-                            "operation": random.choice(self.operations)
+                            "operation": random.choice(self.operations),
                         },
                         "metrics": {
                             "latency_ms": random.randint(100, 2000),
                             "items": random.randint(1, 100),
-                            "tokens": random.randint(100, 5000)
-                        }
+                            "tokens": random.randint(100, 5000),
+                        },
                     }
-                    f.write(json.dumps(event, ensure_ascii=False) + '\n')
+                    f.write(json.dumps(event, ensure_ascii=False) + "\n")
 
             logger.info(f"Created {num_events} events for {date_str}")
+
 
 async def main():
     """Main function"""
     parser = argparse.ArgumentParser(description="StillMe Metrics Backfill")
-    parser.add_argument("--days", type=int, default=7, help="Number of days to backfill")
-    parser.add_argument("--db-path", type=str, default="data/metrics/metrics.db", help="Database path")
-    parser.add_argument("--events-dir", type=str, default="data/metrics/events", help="Events directory")
-    parser.add_argument("--events-only", action="store_true", help="Only create event files")
+    parser.add_argument(
+        "--days", type=int, default=7, help="Number of days to backfill"
+    )
+    parser.add_argument(
+        "--db-path", type=str, default="data/metrics/metrics.db", help="Database path"
+    )
+    parser.add_argument(
+        "--events-dir", type=str, default="data/metrics/events", help="Events directory"
+    )
+    parser.add_argument(
+        "--events-only", action="store_true", help="Only create event files"
+    )
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose logging")
 
     args = parser.parse_args()
@@ -364,15 +423,11 @@ async def main():
     # Setup logging
     log_level = logging.DEBUG if args.verbose else logging.INFO
     logging.basicConfig(
-        level=log_level,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        level=log_level, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     )
 
     # Initialize backfill
-    backfill = MetricsBackfill(
-        db_path=args.db_path,
-        events_dir=args.events_dir
-    )
+    backfill = MetricsBackfill(db_path=args.db_path, events_dir=args.events_dir)
 
     try:
         if args.events_only:
@@ -390,6 +445,7 @@ async def main():
         return 1
 
     return 0
+
 
 if __name__ == "__main__":
     exit(asyncio.run(main()))

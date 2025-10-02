@@ -26,13 +26,15 @@ class TestTokenOptimizerLogic:
             embedding_model="fake-model",
             max_cache_size=100,
             semantic_threshold=0.8,
-            token_limit=1000
+            token_limit=1000,
         )
 
     @pytest.fixture
     def optimizer(self, config):
         """Create TokenOptimizer with fake backend"""
-        with patch('stillme_core.modules.token_optimizer_v1.SentenceTransformerBackend') as mock_backend:
+        with patch(
+            "stillme_core.modules.token_optimizer_v1.SentenceTransformerBackend"
+        ) as mock_backend:
             mock_backend.return_value = FakeBackend()
             return TokenOptimizer(config)
 
@@ -56,7 +58,9 @@ class TestTokenOptimizerLogic:
         # Check for normalized Vietnamese text (handle Unicode encoding)
         assert "kh" in normalized and "ng" in normalized  # "không" parts
         assert "được" in normalized or "dc" in normalized  # "được" or fallback
-        assert "như thế nào" in normalized or "ntn" in normalized  # "như thế nào" or fallback
+        assert (
+            "như thế nào" in normalized or "ntn" in normalized
+        )  # "như thế nào" or fallback
 
         # Test case normalization
         normalized = optimizer.cache._normalize_text("HELLO WORLD")
@@ -150,6 +154,7 @@ class TestTokenOptimizerLogic:
 
         # Wait for expiration
         import time
+
         time.sleep(0.2)
 
         # Should be expired
@@ -201,7 +206,7 @@ class TestTokenOptimizerLogic:
         queries = [
             "What is Python?",
             "Tell me about Python",
-            "Python programming language"
+            "Python programming language",
         ]
 
         for i, query in enumerate(queries):

@@ -28,6 +28,7 @@ from observability.metrics_server import metrics_collector, start_metrics_server
 @dataclass
 class ObservabilityTestResult:
     """Result of an observability test"""
+
     test_name: str
     metric_name: str
     expected_value: Any
@@ -80,7 +81,7 @@ class ObservabilityExportTestSuite:
                     "detector_hits_total",
                     "system_uptime_seconds",
                     "system_memory_usage_bytes",
-                    "system_cpu_usage_percent"
+                    "system_cpu_usage_percent",
                 ]
 
                 missing_metrics = []
@@ -95,7 +96,9 @@ class ObservabilityExportTestSuite:
                     print(f"FAILED: Missing metrics: {missing_metrics}")
 
             else:
-                print(f"FAILED: Metrics endpoint returned status {response.status_code}")
+                print(
+                    f"FAILED: Metrics endpoint returned status {response.status_code}"
+                )
 
         except Exception as e:
             print(f"ERROR: Metrics endpoint test failed - {e}")
@@ -103,12 +106,14 @@ class ObservabilityExportTestSuite:
         pass_rate = (passed / total) * 100 if total > 0 else 0
         print(f"Metrics Endpoint: {passed}/{total} ({pass_rate:.1f}%)")
 
-        self.test_results.append({
-            'test': 'metrics_endpoint',
-            'passed': passed,
-            'total': total,
-            'pass_rate': pass_rate
-        })
+        self.test_results.append(
+            {
+                "test": "metrics_endpoint",
+                "passed": passed,
+                "total": total,
+                "pass_rate": pass_rate,
+            }
+        )
 
         return pass_rate >= 90.0
 
@@ -150,12 +155,14 @@ class ObservabilityExportTestSuite:
         pass_rate = (passed / total) * 100 if total > 0 else 0
         print(f"Health Endpoint: {passed}/{total} ({pass_rate:.1f}%)")
 
-        self.test_results.append({
-            'test': 'health_endpoint',
-            'passed': passed,
-            'total': total,
-            'pass_rate': pass_rate
-        })
+        self.test_results.append(
+            {
+                "test": "health_endpoint",
+                "passed": passed,
+                "total": total,
+                "pass_rate": pass_rate,
+            }
+        )
 
         return pass_rate >= 90.0
 
@@ -168,10 +175,24 @@ class ObservabilityExportTestSuite:
 
         # Test different metric types
         metric_tests = [
-            {"name": "requests", "function": lambda: metrics_collector.increment_requests(0.1)},
-            {"name": "clarify_trigger", "function": lambda: metrics_collector.increment_clarify_trigger("test")},
-            {"name": "errors", "function": lambda: metrics_collector.increment_errors("test_error")},
-            {"name": "detector_hits", "function": lambda: metrics_collector.increment_detector_hits("test_detector")},
+            {
+                "name": "requests",
+                "function": lambda: metrics_collector.increment_requests(0.1),
+            },
+            {
+                "name": "clarify_trigger",
+                "function": lambda: metrics_collector.increment_clarify_trigger("test"),
+            },
+            {
+                "name": "errors",
+                "function": lambda: metrics_collector.increment_errors("test_error"),
+            },
+            {
+                "name": "detector_hits",
+                "function": lambda: metrics_collector.increment_detector_hits(
+                    "test_detector"
+                ),
+            },
         ]
 
         for test_config in metric_tests:
@@ -198,12 +219,14 @@ class ObservabilityExportTestSuite:
         pass_rate = (passed / total) * 100 if total > 0 else 0
         print(f"Metrics Collection: {passed}/{total} ({pass_rate:.1f}%)")
 
-        self.test_results.append({
-            'test': 'metrics_collection',
-            'passed': passed,
-            'total': total,
-            'pass_rate': pass_rate
-        })
+        self.test_results.append(
+            {
+                "test": "metrics_collection",
+                "passed": passed,
+                "total": total,
+                "pass_rate": pass_rate,
+            }
+        )
 
         return pass_rate >= 90.0
 
@@ -217,7 +240,11 @@ class ObservabilityExportTestSuite:
         # Test dashboard file exists and is valid JSON
         total += 1
         try:
-            dashboard_path = Path(__file__).parent.parent / "observability" / "grafana_dashboard.json"
+            dashboard_path = (
+                Path(__file__).parent.parent
+                / "observability"
+                / "grafana_dashboard.json"
+            )
 
             if dashboard_path.exists():
                 with open(dashboard_path) as f:
@@ -252,12 +279,14 @@ class ObservabilityExportTestSuite:
         pass_rate = (passed / total) * 100 if total > 0 else 0
         print(f"Grafana Dashboard: {passed}/{total} ({pass_rate:.1f}%)")
 
-        self.test_results.append({
-            'test': 'grafana_dashboard',
-            'passed': passed,
-            'total': total,
-            'pass_rate': pass_rate
-        })
+        self.test_results.append(
+            {
+                "test": "grafana_dashboard",
+                "passed": passed,
+                "total": total,
+                "pass_rate": pass_rate,
+            }
+        )
 
         return pass_rate >= 90.0
 
@@ -284,7 +313,7 @@ class ObservabilityExportTestSuite:
                     "HighP95Latency",
                     "ServiceDown",
                     "HighMemoryUsage",
-                    "HighCPUUsage"
+                    "HighCPUUsage",
                 ]
 
                 missing_alerts = []
@@ -307,12 +336,14 @@ class ObservabilityExportTestSuite:
         pass_rate = (passed / total) * 100 if total > 0 else 0
         print(f"Alert Rules: {passed}/{total} ({pass_rate:.1f}%)")
 
-        self.test_results.append({
-            'test': 'alert_rules',
-            'passed': passed,
-            'total': total,
-            'pass_rate': pass_rate
-        })
+        self.test_results.append(
+            {
+                "test": "alert_rules",
+                "passed": passed,
+                "total": total,
+                "pass_rate": pass_rate,
+            }
+        )
 
         return pass_rate >= 90.0
 
@@ -329,27 +360,29 @@ class ObservabilityExportTestSuite:
             metrics_text = metrics_collector.get_metrics()
 
             # Check for Prometheus format compliance
-            lines = metrics_text.split('\n')
+            lines = metrics_text.split("\n")
             format_issues = []
 
             for line in lines:
-                if line.strip() and not line.startswith('#'):
+                if line.strip() and not line.startswith("#"):
                     # Check metric format: name{labels} value
-                    if ' ' not in line:
+                    if " " not in line:
                         format_issues.append(f"Missing value: {line}")
                     else:
                         # Extract metric name (before first space)
                         metric_part = line.split()[0]
                         # Remove labels and check if metric name is valid
-                        metric_name = metric_part.split('{')[0]
-                        if not metric_name.replace('_', '').isalnum():
+                        metric_name = metric_part.split("{")[0]
+                        if not metric_name.replace("_", "").isalnum():
                             format_issues.append(f"Invalid metric name: {line}")
 
             if not format_issues:
                 passed += 1
                 print("PASSED: Metrics format is Prometheus compliant")
             else:
-                print(f"FAILED: Format issues: {format_issues[:3]}...")  # Show first 3 issues
+                print(
+                    f"FAILED: Format issues: {format_issues[:3]}..."
+                )  # Show first 3 issues
 
         except Exception as e:
             print(f"ERROR: Metrics format test failed - {e}")
@@ -357,17 +390,20 @@ class ObservabilityExportTestSuite:
         pass_rate = (passed / total) * 100 if total > 0 else 0
         print(f"Metrics Format: {passed}/{total} ({pass_rate:.1f}%)")
 
-        self.test_results.append({
-            'test': 'metrics_format',
-            'passed': passed,
-            'total': total,
-            'pass_rate': pass_rate
-        })
+        self.test_results.append(
+            {
+                "test": "metrics_format",
+                "passed": passed,
+                "total": total,
+                "pass_rate": pass_rate,
+            }
+        )
 
         return pass_rate >= 90.0
 
     def _start_metrics_server(self):
         """Start metrics server in background thread"""
+
         def run_server():
             try:
                 start_metrics_server(port=9090)
@@ -417,20 +453,28 @@ class ObservabilityExportTestSuite:
         overall_pass_rate = (passed_tests / total_tests) * 100
 
         # Calculate detailed pass rate
-        total_passed = sum(result['passed'] for result in self.test_results)
-        total_cases = sum(result['total'] for result in self.test_results)
-        detailed_pass_rate = (total_passed / total_cases) * 100 if total_cases > 0 else 0
+        total_passed = sum(result["passed"] for result in self.test_results)
+        total_cases = sum(result["total"] for result in self.test_results)
+        detailed_pass_rate = (
+            (total_passed / total_cases) * 100 if total_cases > 0 else 0
+        )
 
         print("\n" + "=" * 60)
         print("📊 OBSERVABILITY EXPORT TEST RESULTS")
         print("=" * 60)
-        print(f"Overall Pass Rate: {passed_tests}/{total_tests} ({overall_pass_rate:.1f}%)")
-        print(f"Detailed Pass Rate: {total_passed}/{total_cases} ({detailed_pass_rate:.1f}%)")
+        print(
+            f"Overall Pass Rate: {passed_tests}/{total_tests} ({overall_pass_rate:.1f}%)"
+        )
+        print(
+            f"Detailed Pass Rate: {total_passed}/{total_cases} ({detailed_pass_rate:.1f}%)"
+        )
         print(f"Total Duration: {total_duration:.2f}s")
 
         print("\n📋 Test Breakdown:")
         for result in self.test_results:
-            print(f"  {result['test']}: {result['passed']}/{result['total']} ({result['pass_rate']:.1f}%)")
+            print(
+                f"  {result['test']}: {result['passed']}/{result['total']} ({result['pass_rate']:.1f}%)"
+            )
 
         # Determine success
         success = overall_pass_rate >= 90.0 and detailed_pass_rate >= 90.0
@@ -439,15 +483,15 @@ class ObservabilityExportTestSuite:
         print(f"✅ Result: {'PASSED' if success else 'FAILED'}")
 
         return {
-            'overall_pass_rate': overall_pass_rate,
-            'detailed_pass_rate': detailed_pass_rate,
-            'passed_tests': passed_tests,
-            'total_tests': total_tests,
-            'total_passed': total_passed,
-            'total_cases': total_cases,
-            'duration': total_duration,
-            'success': success,
-            'test_results': self.test_results
+            "overall_pass_rate": overall_pass_rate,
+            "detailed_pass_rate": detailed_pass_rate,
+            "passed_tests": passed_tests,
+            "total_tests": total_tests,
+            "total_passed": total_passed,
+            "total_cases": total_cases,
+            "duration": total_duration,
+            "success": success,
+            "test_results": self.test_results,
         }
 
 
@@ -457,4 +501,4 @@ if __name__ == "__main__":
     results = test_suite.run_all_tests()
 
     # Exit with appropriate code
-    exit(0 if results['success'] else 1)
+    exit(0 if results["success"] else 1)

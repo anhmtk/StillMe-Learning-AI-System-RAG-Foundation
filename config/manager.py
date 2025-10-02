@@ -33,7 +33,7 @@ class ConfigManager:
             "config/shared/",
             "config/core/",
             "config/agent-dev/",
-            "config/platform/"
+            "config/platform/",
         ]
 
     def get_config(self, component: str) -> dict[str, Any]:
@@ -42,7 +42,7 @@ class ConfigManager:
             "shared": self.shared_config.to_dict(),
             "core": self.core_config.to_dict(),
             "agent-dev": self.agent_dev_config.to_dict(),
-            "platform": self.platform_config.to_dict()
+            "platform": self.platform_config.to_dict(),
         }
 
         if component not in configs:
@@ -56,7 +56,7 @@ class ConfigManager:
             "shared": self.shared_config.to_dict(),
             "core": self.core_config.to_dict(),
             "agent-dev": self.agent_dev_config.to_dict(),
-            "platform": self.platform_config.to_dict()
+            "platform": self.platform_config.to_dict(),
         }
 
     def validate_config(self, component: str) -> bool:
@@ -66,7 +66,10 @@ class ConfigManager:
 
             # Basic validation rules
             if component == "shared":
-                return bool(config.get("secret_key")) and config.get("secret_key") != "your-secret-key-here"
+                return (
+                    bool(config.get("secret_key"))
+                    and config.get("secret_key") != "your-secret-key-here"
+                )
             elif component == "core":
                 return bool(config.get("default_model")) and config.get("repo_root")
             elif component == "agent-dev":
@@ -89,16 +92,20 @@ class ConfigManager:
         self.agent_dev_config = AgentDevConfig.from_env()
         self.platform_config = PlatformConfig.from_env()
 
+
 # Global configuration manager instance
 config_manager = ConfigManager()
+
 
 def get_config(component: str) -> dict[str, Any]:
     """Get configuration for component"""
     return config_manager.get_config(component)
 
+
 def get_all_configs() -> dict[str, dict[str, Any]]:
     """Get all configurations"""
     return config_manager.get_all_configs()
+
 
 def validate_config(component: str) -> bool:
     """Validate configuration for component"""

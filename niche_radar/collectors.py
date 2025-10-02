@@ -24,9 +24,11 @@ from web_tools import github_trending, google_trends, hackernews_top, search_new
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class NicheRecord:
     """Standardized record format for all collectors"""
+
     source: str
     url: str
     title: str
@@ -36,6 +38,7 @@ class NicheRecord:
     topic: str
     category: str = "general"
     confidence: float = 0.0
+
 
 class BaseCollector:
     """Base class for all niche collectors"""
@@ -48,10 +51,17 @@ class BaseCollector:
         """Collect data and return standardized records"""
         raise NotImplementedError
 
-    def _create_record(self, source: str, url: str, title: str,
-                      metrics: dict[str, Any], raw: dict[str, Any],
-                      topic: str, category: str = "general",
-                      confidence: float = 0.0) -> NicheRecord:
+    def _create_record(
+        self,
+        source: str,
+        url: str,
+        title: str,
+        metrics: dict[str, Any],
+        raw: dict[str, Any],
+        topic: str,
+        category: str = "general",
+        confidence: float = 0.0,
+    ) -> NicheRecord:
         """Create standardized NicheRecord"""
         return NicheRecord(
             source=source,
@@ -62,8 +72,9 @@ class BaseCollector:
             raw=raw,
             topic=topic,
             category=category,
-            confidence=confidence
+            confidence=confidence,
         )
+
 
 class GitHubTrendingCollector(BaseCollector):
     """Collect GitHub trending repositories"""
@@ -72,10 +83,14 @@ class GitHubTrendingCollector(BaseCollector):
         super().__init__("github_trending")
         self.market_intel = MarketIntelligence()
 
-    async def collect(self, topic: str = "python", since: str = "daily") -> list[NicheRecord]:
+    async def collect(
+        self, topic: str = "python", since: str = "daily"
+    ) -> list[NicheRecord]:
         """Collect GitHub trending repositories"""
         try:
-            self.logger.info(f"🔍 Collecting GitHub trending for topic: {topic}, since: {since}")
+            self.logger.info(
+                f"🔍 Collecting GitHub trending for topic: {topic}, since: {since}"
+            )
 
             # Use existing web_tools.github_trending
             result = await github_trending(topic, since)
@@ -97,8 +112,12 @@ class GitHubTrendingCollector(BaseCollector):
                 velocity = 0.0
                 if created_at:
                     try:
-                        created_date = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
-                        days_since_creation = (datetime.now() - created_date.replace(tzinfo=None)).days
+                        created_date = datetime.fromisoformat(
+                            created_at.replace("Z", "+00:00")
+                        )
+                        days_since_creation = (
+                            datetime.now() - created_date.replace(tzinfo=None)
+                        ).days
                         if days_since_creation > 0:
                             velocity = stars / days_since_creation
                     except:
@@ -110,7 +129,7 @@ class GitHubTrendingCollector(BaseCollector):
                     "language": language,
                     "created_at": created_at,
                     "description": repo.get("description", ""),
-                    "trending_score": min(velocity * 0.1, 1.0)  # Normalize to 0-1
+                    "trending_score": min(velocity * 0.1, 1.0),  # Normalize to 0-1
                 }
 
                 record = self._create_record(
@@ -121,7 +140,7 @@ class GitHubTrendingCollector(BaseCollector):
                     raw=repo,
                     topic=topic,
                     category="development",
-                    confidence=0.8 if velocity > 10 else 0.5
+                    confidence=0.8 if velocity > 10 else 0.5,
                 )
                 records.append(record)
 
@@ -131,6 +150,7 @@ class GitHubTrendingCollector(BaseCollector):
         except Exception as e:
             self.logger.error(f"❌ GitHub trending collection failed: {e}")
             return []
+
 
 class HackerNewsCollector(BaseCollector):
     """Collect Hacker News top stories"""
@@ -168,7 +188,7 @@ class HackerNewsCollector(BaseCollector):
                     "score": score,
                     "heat_score": heat_score,
                     "engagement": score * 0.1,  # Estimate comments/engagement
-                    "time_factor": 1.0 - (hours / 24.0)  # Decay over time
+                    "time_factor": 1.0 - (hours / 24.0),  # Decay over time
                 }
 
                 record = self._create_record(
@@ -179,7 +199,7 @@ class HackerNewsCollector(BaseCollector):
                     raw=story,
                     topic=topic,
                     category="tech_news",
-                    confidence=0.7 if score > 50 else 0.4
+                    confidence=0.7 if score > 50 else 0.4,
                 )
                 records.append(record)
 
@@ -195,18 +215,32 @@ class HackerNewsCollector(BaseCollector):
         title_lower = title.lower()
 
         # Tech topics
-        if any(word in title_lower for word in ["ai", "artificial intelligence", "machine learning", "ml"]):
+        if any(
+            word in title_lower
+            for word in ["ai", "artificial intelligence", "machine learning", "ml"]
+        ):
             return "ai"
-        elif any(word in title_lower for word in ["python", "javascript", "react", "vue", "angular"]):
+        elif any(
+            word in title_lower
+            for word in ["python", "javascript", "react", "vue", "angular"]
+        ):
             return "programming"
-        elif any(word in title_lower for word in ["startup", "funding", "venture", "investment"]):
+        elif any(
+            word in title_lower
+            for word in ["startup", "funding", "venture", "investment"]
+        ):
             return "startup"
-        elif any(word in title_lower for word in ["crypto", "bitcoin", "blockchain", "defi"]):
+        elif any(
+            word in title_lower for word in ["crypto", "bitcoin", "blockchain", "defi"]
+        ):
             return "crypto"
-        elif any(word in title_lower for word in ["saas", "api", "cloud", "aws", "azure"]):
+        elif any(
+            word in title_lower for word in ["saas", "api", "cloud", "aws", "azure"]
+        ):
             return "saas"
         else:
             return "general"
+
 
 class NewsDeltaCollector(BaseCollector):
     """Collect news with delta analysis"""
@@ -217,7 +251,9 @@ class NewsDeltaCollector(BaseCollector):
     async def collect(self, query: str, window: str = "24h") -> list[NicheRecord]:
         """Collect news with delta analysis"""
         try:
-            self.logger.info(f"🔍 Collecting news delta for query: {query}, window: {window}")
+            self.logger.info(
+                f"🔍 Collecting news delta for query: {query}, window: {window}"
+            )
 
             # Use existing web_tools.search_news
             result = await search_news(query, window)
@@ -247,14 +283,16 @@ class NewsDeltaCollector(BaseCollector):
 
                 # Calculate news delta metrics
                 recency_score = self._calculate_recency_score(published_at)
-                relevance_score = self._calculate_relevance_score(title, description, query)
+                relevance_score = self._calculate_relevance_score(
+                    title, description, query
+                )
 
                 metrics = {
                     "recency_score": recency_score,
                     "relevance_score": relevance_score,
                     "source_credibility": self._get_source_credibility(source_name),
                     "engagement_estimate": len(description) / 100.0,  # Simple proxy
-                    "delta_score": (recency_score + relevance_score) / 2.0
+                    "delta_score": (recency_score + relevance_score) / 2.0,
                 }
 
                 record = self._create_record(
@@ -265,7 +303,7 @@ class NewsDeltaCollector(BaseCollector):
                     raw=article,
                     topic=query,
                     category="news",
-                    confidence=0.6
+                    confidence=0.6,
                 )
                 records.append(record)
 
@@ -282,7 +320,7 @@ class NewsDeltaCollector(BaseCollector):
             if not published_at:
                 return 0.0
 
-            pub_time = datetime.fromisoformat(published_at.replace('Z', '+00:00'))
+            pub_time = datetime.fromisoformat(published_at.replace("Z", "+00:00"))
             now = datetime.now(pub_time.tzinfo)
             hours_ago = (now - pub_time).total_seconds() / 3600
 
@@ -291,7 +329,9 @@ class NewsDeltaCollector(BaseCollector):
         except:
             return 0.5  # Default score
 
-    def _calculate_relevance_score(self, title: str, description: str, query: str) -> float:
+    def _calculate_relevance_score(
+        self, title: str, description: str, query: str
+    ) -> float:
         """Calculate relevance score based on keyword matching"""
         text = (title + " " + description).lower()
         query_words = query.lower().split()
@@ -309,9 +349,10 @@ class NewsDeltaCollector(BaseCollector):
             "MIT Technology Review": 0.9,
             "IEEE Spectrum": 0.9,
             "Nature": 0.95,
-            "Science": 0.95
+            "Science": 0.95,
         }
         return credible_sources.get(source_name, 0.5)
+
 
 class GoogleTrendsCollector(BaseCollector):
     """Collect Google Trends data"""
@@ -319,10 +360,14 @@ class GoogleTrendsCollector(BaseCollector):
     def __init__(self):
         super().__init__("google_trends")
 
-    async def collect(self, terms: list[str], region: str = "VN", days: int = 7) -> list[NicheRecord]:
+    async def collect(
+        self, terms: list[str], region: str = "VN", days: int = 7
+    ) -> list[NicheRecord]:
         """Collect Google Trends data"""
         try:
-            self.logger.info(f"🔍 Collecting Google Trends for terms: {terms}, region: {region}, days: {days}")
+            self.logger.info(
+                f"🔍 Collecting Google Trends for terms: {terms}, region: {region}, days: {days}"
+            )
 
             # Use existing web_tools.google_trends
             result = await google_trends(terms, region, days)
@@ -347,7 +392,7 @@ class GoogleTrendsCollector(BaseCollector):
                     "momentum_score": momentum_score,
                     "region": region,
                     "timeframe_days": days,
-                    "trend_direction": "up" if value > 50 else "down"
+                    "trend_direction": "up" if value > 50 else "down",
                 }
 
                 record = self._create_record(
@@ -358,7 +403,7 @@ class GoogleTrendsCollector(BaseCollector):
                     raw=trend,
                     topic=term,
                     category="search_trends",
-                    confidence=0.8 if value > 70 else 0.5
+                    confidence=0.8 if value > 70 else 0.5,
                 )
                 records.append(record)
 
@@ -369,6 +414,7 @@ class GoogleTrendsCollector(BaseCollector):
             self.logger.error(f"❌ Google Trends collection failed: {e}")
             return []
 
+
 class RedditEngagementCollector(BaseCollector):
     """Collect Reddit engagement data"""
 
@@ -378,7 +424,9 @@ class RedditEngagementCollector(BaseCollector):
     async def collect(self, query: str, window: str = "24h") -> list[NicheRecord]:
         """Collect Reddit engagement data"""
         try:
-            self.logger.info(f"🔍 Collecting Reddit engagement for query: {query}, window: {window}")
+            self.logger.info(
+                f"🔍 Collecting Reddit engagement for query: {query}, window: {window}"
+            )
 
             # For now, return mock data since Reddit API requires authentication
             # In production, integrate with Reddit API using REDDIT_CLIENT_ID/SECRET
@@ -390,7 +438,7 @@ class RedditEngagementCollector(BaseCollector):
                     "score": 150,
                     "comments": 45,
                     "subreddit": "technology",
-                    "created_utc": time.time() - 3600  # 1 hour ago
+                    "created_utc": time.time() - 3600,  # 1 hour ago
                 },
                 {
                     "title": f"New developments in {query}",
@@ -398,8 +446,8 @@ class RedditEngagementCollector(BaseCollector):
                     "score": 89,
                     "comments": 23,
                     "subreddit": "programming",
-                    "created_utc": time.time() - 7200  # 2 hours ago
-                }
+                    "created_utc": time.time() - 7200,  # 2 hours ago
+                },
             ]
 
             records = []
@@ -415,7 +463,8 @@ class RedditEngagementCollector(BaseCollector):
                     "comments": comments,
                     "engagement_score": engagement_score,
                     "subreddit": post.get("subreddit", ""),
-                    "time_factor": 1.0 - ((time.time() - post.get("created_utc", 0)) / 86400.0)
+                    "time_factor": 1.0
+                    - ((time.time() - post.get("created_utc", 0)) / 86400.0),
                 }
 
                 record = self._create_record(
@@ -426,16 +475,19 @@ class RedditEngagementCollector(BaseCollector):
                     raw=post,
                     topic=query,
                     category="social_engagement",
-                    confidence=0.6
+                    confidence=0.6,
                 )
                 records.append(record)
 
-            self.logger.info(f"✅ Collected {len(records)} Reddit engagement records (mock)")
+            self.logger.info(
+                f"✅ Collected {len(records)} Reddit engagement records (mock)"
+            )
             return records
 
         except Exception as e:
             self.logger.error(f"❌ Reddit engagement collection failed: {e}")
             return []
+
 
 # Factory function to get all collectors
 def get_all_collectors() -> dict[str, BaseCollector]:
@@ -445,10 +497,13 @@ def get_all_collectors() -> dict[str, BaseCollector]:
         "hackernews": HackerNewsCollector(),
         "news_delta": NewsDeltaCollector(),
         "google_trends": GoogleTrendsCollector(),
-        "reddit_engagement": RedditEngagementCollector()
+        "reddit_engagement": RedditEngagementCollector(),
     }
 
-async def collect_all_data(topics: Optional[list[str]] = None) -> dict[str, list[NicheRecord]]:
+
+async def collect_all_data(
+    topics: Optional[list[str]] = None,
+) -> dict[str, list[NicheRecord]]:
     """Collect data from all sources"""
     if topics is None:
         topics = ["python", "ai", "startup", "saas", "crypto"]
@@ -480,6 +535,7 @@ async def collect_all_data(topics: Optional[list[str]] = None) -> dict[str, list
 
     return all_data
 
+
 if __name__ == "__main__":
     # Test collectors
     async def test_collectors():
@@ -490,6 +546,8 @@ if __name__ == "__main__":
         for source, records in data.items():
             print(f"\n📊 {source}: {len(records)} records")
             for record in records[:2]:  # Show first 2 records
-                print(f"  - {record.title[:50]}... (confidence: {record.confidence:.2f})")
+                print(
+                    f"  - {record.title[:50]}... (confidence: {record.confidence:.2f})"
+                )
 
     asyncio.run(test_collectors())

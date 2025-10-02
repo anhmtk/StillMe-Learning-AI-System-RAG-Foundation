@@ -23,6 +23,7 @@ from chaos.runner import ChaosRunner
 @dataclass
 class ChaosTestResult:
     """Result of a chaos test"""
+
     test_name: str
     fault_type: str
     recovery_time_ms: float
@@ -84,9 +85,13 @@ class ChaosToleranceTestSuite:
 
                 if recovery_time <= test_config["expected_recovery"]:
                     passed += 1
-                    print(f"PASSED: {test_config['name']} - {recovery_time:.1f}ms recovery")
+                    print(
+                        f"PASSED: {test_config['name']} - {recovery_time:.1f}ms recovery"
+                    )
                 else:
-                    print(f"FAILED: {test_config['name']} - {recovery_time:.1f}ms recovery (expected {test_config['expected_recovery']}ms)")
+                    print(
+                        f"FAILED: {test_config['name']} - {recovery_time:.1f}ms recovery (expected {test_config['expected_recovery']}ms)"
+                    )
 
             except Exception as e:
                 print(f"ERROR: Graceful shutdown test failed - {e}")
@@ -94,12 +99,14 @@ class ChaosToleranceTestSuite:
         pass_rate = (passed / total) * 100 if total > 0 else 0
         print(f"Graceful Shutdown: {passed}/{total} ({pass_rate:.1f}%)")
 
-        self.test_results.append({
-            'test': 'graceful_shutdown',
-            'passed': passed,
-            'total': total,
-            'pass_rate': pass_rate
-        })
+        self.test_results.append(
+            {
+                "test": "graceful_shutdown",
+                "passed": passed,
+                "total": total,
+                "pass_rate": pass_rate,
+            }
+        )
 
         return pass_rate >= 90.0
 
@@ -136,9 +143,13 @@ class ChaosToleranceTestSuite:
 
                 if recovery_time <= test_config["expected_recovery"]:
                     passed += 1
-                    print(f"PASSED: {test_config['name']} - {recovery_time:.1f}ms recovery")
+                    print(
+                        f"PASSED: {test_config['name']} - {recovery_time:.1f}ms recovery"
+                    )
                 else:
-                    print(f"FAILED: {test_config['name']} - {recovery_time:.1f}ms recovery (expected {test_config['expected_recovery']}ms)")
+                    print(
+                        f"FAILED: {test_config['name']} - {recovery_time:.1f}ms recovery (expected {test_config['expected_recovery']}ms)"
+                    )
 
             except Exception as e:
                 print(f"ERROR: State preservation test failed - {e}")
@@ -146,12 +157,14 @@ class ChaosToleranceTestSuite:
         pass_rate = (passed / total) * 100 if total > 0 else 0
         print(f"State Preservation: {passed}/{total} ({pass_rate:.1f}%)")
 
-        self.test_results.append({
-            'test': 'state_preservation',
-            'passed': passed,
-            'total': total,
-            'pass_rate': pass_rate
-        })
+        self.test_results.append(
+            {
+                "test": "state_preservation",
+                "passed": passed,
+                "total": total,
+                "pass_rate": pass_rate,
+            }
+        )
 
         return pass_rate >= 90.0
 
@@ -188,9 +201,13 @@ class ChaosToleranceTestSuite:
 
                 if recovery_time <= test_config["expected_recovery"]:
                     passed += 1
-                    print(f"PASSED: {test_config['name']} - {recovery_time:.1f}ms recovery")
+                    print(
+                        f"PASSED: {test_config['name']} - {recovery_time:.1f}ms recovery"
+                    )
                 else:
-                    print(f"FAILED: {test_config['name']} - {recovery_time:.1f}ms recovery (expected {test_config['expected_recovery']}ms)")
+                    print(
+                        f"FAILED: {test_config['name']} - {recovery_time:.1f}ms recovery (expected {test_config['expected_recovery']}ms)"
+                    )
 
             except Exception as e:
                 print(f"ERROR: Error handling test failed - {e}")
@@ -198,12 +215,14 @@ class ChaosToleranceTestSuite:
         pass_rate = (passed / total) * 100 if total > 0 else 0
         print(f"Error Handling: {passed}/{total} ({pass_rate:.1f}%)")
 
-        self.test_results.append({
-            'test': 'error_handling',
-            'passed': passed,
-            'total': total,
-            'pass_rate': pass_rate
-        })
+        self.test_results.append(
+            {
+                "test": "error_handling",
+                "passed": passed,
+                "total": total,
+                "pass_rate": pass_rate,
+            }
+        )
 
         return pass_rate >= 90.0
 
@@ -240,9 +259,13 @@ class ChaosToleranceTestSuite:
 
                 if recovery_time <= test_config["expected_recovery"]:
                     passed += 1
-                    print(f"PASSED: {test_config['name']} - {recovery_time:.1f}ms recovery")
+                    print(
+                        f"PASSED: {test_config['name']} - {recovery_time:.1f}ms recovery"
+                    )
                 else:
-                    print(f"FAILED: {test_config['name']} - {recovery_time:.1f}ms recovery (expected {test_config['expected_recovery']}ms)")
+                    print(
+                        f"FAILED: {test_config['name']} - {recovery_time:.1f}ms recovery (expected {test_config['expected_recovery']}ms)"
+                    )
 
             except Exception as e:
                 print(f"ERROR: Fault tolerance test failed - {e}")
@@ -250,12 +273,14 @@ class ChaosToleranceTestSuite:
         pass_rate = (passed / total) * 100 if total > 0 else 0
         print(f"Fault Tolerance: {passed}/{total} ({pass_rate:.1f}%)")
 
-        self.test_results.append({
-            'test': 'fault_tolerance',
-            'passed': passed,
-            'total': total,
-            'pass_rate': pass_rate
-        })
+        self.test_results.append(
+            {
+                "test": "fault_tolerance",
+                "passed": passed,
+                "total": total,
+                "pass_rate": pass_rate,
+            }
+        )
 
         return pass_rate >= 90.0
 
@@ -291,28 +316,36 @@ class ChaosToleranceTestSuite:
         total_duration = end_time - start_time
 
         # Combine results
-        all_test_results = chaos_results['test_results'] + self.test_results
+        all_test_results = chaos_results["test_results"] + self.test_results
 
         # Calculate overall pass rate
-        overall_passed = chaos_results['passed_tests'] + passed_tests
-        overall_total = chaos_results['total_tests'] + total_tests
+        overall_passed = chaos_results["passed_tests"] + passed_tests
+        overall_total = chaos_results["total_tests"] + total_tests
         overall_pass_rate = (overall_passed / overall_total) * 100
 
         # Calculate detailed pass rate
-        total_passed = sum(result['passed'] for result in all_test_results)
-        total_cases = sum(result['total'] for result in all_test_results)
-        detailed_pass_rate = (total_passed / total_cases) * 100 if total_cases > 0 else 0
+        total_passed = sum(result["passed"] for result in all_test_results)
+        total_cases = sum(result["total"] for result in all_test_results)
+        detailed_pass_rate = (
+            (total_passed / total_cases) * 100 if total_cases > 0 else 0
+        )
 
         print("\n" + "=" * 60)
         print("📊 CHAOS ENGINEERING TEST RESULTS")
         print("=" * 60)
-        print(f"Overall Pass Rate: {overall_passed}/{overall_total} ({overall_pass_rate:.1f}%)")
-        print(f"Detailed Pass Rate: {total_passed}/{total_cases} ({detailed_pass_rate:.1f}%)")
+        print(
+            f"Overall Pass Rate: {overall_passed}/{overall_total} ({overall_pass_rate:.1f}%)"
+        )
+        print(
+            f"Detailed Pass Rate: {total_passed}/{total_cases} ({detailed_pass_rate:.1f}%)"
+        )
         print(f"Total Duration: {total_duration:.2f}s")
 
         print("\n📋 Test Breakdown:")
         for result in all_test_results:
-            print(f"  {result['test']}: {result['passed']}/{result['total']} ({result['pass_rate']:.1f}%)")
+            print(
+                f"  {result['test']}: {result['passed']}/{result['total']} ({result['pass_rate']:.1f}%)"
+            )
 
         # Determine success
         success = overall_pass_rate >= 90.0 and detailed_pass_rate >= 90.0
@@ -321,15 +354,15 @@ class ChaosToleranceTestSuite:
         print(f"✅ Result: {'PASSED' if success else 'FAILED'}")
 
         return {
-            'overall_pass_rate': overall_pass_rate,
-            'detailed_pass_rate': detailed_pass_rate,
-            'passed_tests': overall_passed,
-            'total_tests': overall_total,
-            'total_passed': total_passed,
-            'total_cases': total_cases,
-            'duration': total_duration,
-            'success': success,
-            'test_results': all_test_results
+            "overall_pass_rate": overall_pass_rate,
+            "detailed_pass_rate": detailed_pass_rate,
+            "passed_tests": overall_passed,
+            "total_tests": overall_total,
+            "total_passed": total_passed,
+            "total_cases": total_cases,
+            "duration": total_duration,
+            "success": success,
+            "test_results": all_test_results,
         }
 
 
@@ -339,4 +372,4 @@ if __name__ == "__main__":
     results = test_suite.run_all_tests()
 
     # Exit with appropriate code
-    exit(0 if results['success'] else 1)
+    exit(0 if results["success"] else 1)

@@ -29,9 +29,7 @@ class GatewayDeployer:
 
         try:
             # Start the gateway
-            subprocess.Popen([
-                sys.executable, "fastapi_gateway.py"
-            ])
+            subprocess.Popen([sys.executable, "fastapi_gateway.py"])
 
             # Wait for startup
             await asyncio.sleep(5)
@@ -65,7 +63,7 @@ class GatewayDeployer:
                     async with session.post(
                         f"{self.stillme_url}/chat",
                         json={"message": f"{test_message} {i}"},
-                        timeout=aiohttp.ClientTimeout(total=30)
+                        timeout=aiohttp.ClientTimeout(total=30),
                     ) as response:
                         if response.status == 200:
                             direct_times.append((time.time() - start_time) * 1000)
@@ -83,9 +81,9 @@ class GatewayDeployer:
                         json={
                             "message": f"{test_message} {i}",
                             "user_id": "test_user",
-                            "use_cache": True
+                            "use_cache": True,
                         },
-                        timeout=aiohttp.ClientTimeout(total=30)
+                        timeout=aiohttp.ClientTimeout(total=30),
                     ) as response:
                         if response.status == 200:
                             gateway_times.append((time.time() - start_time) * 1000)
@@ -126,9 +124,9 @@ class GatewayDeployer:
                     json={
                         "message": message,
                         "user_id": "cache_test",
-                        "use_cache": True
+                        "use_cache": True,
                     },
-                    timeout=aiohttp.ClientTimeout(total=30)
+                    timeout=aiohttp.ClientTimeout(total=30),
                 ) as response:
                     if response.status == 200:
                         cache_miss_time = (time.time() - start_time) * 1000
@@ -146,9 +144,9 @@ class GatewayDeployer:
                     json={
                         "message": message,
                         "user_id": "cache_test",
-                        "use_cache": True
+                        "use_cache": True,
                     },
-                    timeout=aiohttp.ClientTimeout(total=30)
+                    timeout=aiohttp.ClientTimeout(total=30),
                 ) as response:
                     if response.status == 200:
                         cache_hit_time = (time.time() - start_time) * 1000
@@ -156,7 +154,9 @@ class GatewayDeployer:
                         improvement_pct = (improvement / cache_miss_time) * 100
 
                         print(f"   Cache Hit:  {cache_hit_time:.1f}ms")
-                        print(f"   Improvement: {improvement:.1f}ms ({improvement_pct:.1f}% faster)")
+                        print(
+                            f"   Improvement: {improvement:.1f}ms ({improvement_pct:.1f}% faster)"
+                        )
 
                         if improvement > 100:  # More than 100ms improvement
                             print("✅ Cache is working effectively")
@@ -172,13 +172,15 @@ class GatewayDeployer:
         endpoints = [
             ("Gateway Health", f"{self.gateway_url}/health"),
             ("StillMe Backend", f"{self.stillme_url}/health"),
-            ("Ollama Backend", f"{self.ollama_url}/api/tags")
+            ("Ollama Backend", f"{self.ollama_url}/api/tags"),
         ]
 
         for name, url in endpoints:
             try:
                 async with aiohttp.ClientSession() as session:
-                    async with session.get(url, timeout=aiohttp.ClientTimeout(total=5)) as response:
+                    async with session.get(
+                        url, timeout=aiohttp.ClientTimeout(total=5)
+                    ) as response:
                         if response.status == 200:
                             print(f"   ✅ {name}: Healthy")
                         else:
@@ -196,9 +198,15 @@ class GatewayDeployer:
                     if response.status == 200:
                         metrics = await response.json()
                         print(f"   Total Requests: {metrics.get('total_requests', 0)}")
-                        print(f"   Recent Requests: {metrics.get('recent_requests', 0)}")
-                        print(f"   Avg Latency: {metrics.get('avg_latency_ms', 0):.1f}ms")
-                        print(f"   Cache Hit Rate: {metrics.get('cache_hit_rate', 0):.1%}")
+                        print(
+                            f"   Recent Requests: {metrics.get('recent_requests', 0)}"
+                        )
+                        print(
+                            f"   Avg Latency: {metrics.get('avg_latency_ms', 0):.1f}ms"
+                        )
+                        print(
+                            f"   Cache Hit Rate: {metrics.get('cache_hit_rate', 0):.1%}"
+                        )
                     else:
                         print("   ❌ Could not retrieve metrics")
         except Exception as e:
@@ -223,10 +231,12 @@ class GatewayDeployer:
         print("\n" + "=" * 50)
         print("✅ Test suite completed!")
 
+
 async def main():
     """Main function"""
     deployer = GatewayDeployer()
     await deployer.run_full_test()
+
 
 if __name__ == "__main__":
     asyncio.run(main())

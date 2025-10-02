@@ -18,14 +18,22 @@ from datetime import datetime
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("StillMe.AIServer")
 
+
 # Simple Pydantic-like models
 class ChatRequest:
     def __init__(self, message: str, locale: str = "vi"):
         self.message = message
         self.locale = locale
 
+
 class ChatResponse:
-    def __init__(self, text: str, blocked: bool = False, reason: str = "", latency_ms: float = 0.0):
+    def __init__(
+        self,
+        text: str,
+        blocked: bool = False,
+        reason: str = "",
+        latency_ms: float = 0.0,
+    ):
         self.text = text
         self.blocked = blocked
         self.reason = reason
@@ -36,8 +44,9 @@ class ChatResponse:
             "text": self.text,
             "blocked": self.blocked,
             "reason": self.reason,
-            "latency_ms": self.latency_ms
+            "latency_ms": self.latency_ms,
         }
+
 
 # StillMe AI Server Class
 class StillMeAI:
@@ -67,12 +76,14 @@ class StillMeAI:
         """Process user message and generate AI response"""
         try:
             # Add to conversation history
-            self.conversation_history.append({
-                "user": message,
-                "ai": "",
-                "timestamp": datetime.now().isoformat(),
-                "locale": locale
-            })
+            self.conversation_history.append(
+                {
+                    "user": message,
+                    "ai": "",
+                    "timestamp": datetime.now().isoformat(),
+                    "locale": locale,
+                }
+            )
 
             # Generate response
             response = self._generate_response(message, locale)
@@ -87,6 +98,7 @@ class StillMeAI:
             logger.error(f"Error processing message: {e}")
             return "Xin lỗi anh, em đang gặp sự cố kỹ thuật. Anh có thể thử lại sau được không?"
 
+
 # Initialize StillMe AI
 stillme_ai = StillMeAI()
 
@@ -98,27 +110,27 @@ try:
 
     class StillMeHandler(BaseHTTPRequestHandler):
         def do_GET(self):
-            if self.path == '/health':
+            if self.path == "/health":
                 self.send_response(200)
-                self.send_header('Content-type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header("Content-type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
                 response = {
                     "status": "healthy",
                     "timestamp": datetime.now().isoformat(),
-                    "version": "2.0.0-simple"
+                    "version": "2.0.0-simple",
                 }
                 self.wfile.write(json.dumps(response).encode())
-            elif self.path == '/':
+            elif self.path == "/":
                 self.send_response(200)
-                self.send_header('Content-type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
+                self.send_header("Content-type", "application/json")
+                self.send_header("Access-Control-Allow-Origin", "*")
                 self.end_headers()
                 response = {
                     "message": "StillMe AI Server is running!",
                     "version": "2.0.0-simple",
                     "status": "healthy",
-                    "timestamp": datetime.now().isoformat()
+                    "timestamp": datetime.now().isoformat(),
                 }
                 self.wfile.write(json.dumps(response).encode())
             else:
@@ -126,14 +138,14 @@ try:
                 self.end_headers()
 
         def do_POST(self):
-            if self.path == '/inference':
-                content_length = int(self.headers['Content-Length'])
+            if self.path == "/inference":
+                content_length = int(self.headers["Content-Length"])
                 post_data = self.rfile.read(content_length)
 
                 try:
-                    data = json.loads(post_data.decode('utf-8'))
-                    message = data.get('message', '')
-                    locale = data.get('locale', 'vi')
+                    data = json.loads(post_data.decode("utf-8"))
+                    message = data.get("message", "")
+                    locale = data.get("locale", "vi")
 
                     start_time = time.perf_counter()
                     response_text = stillme_ai.process_message(message, locale)
@@ -143,25 +155,22 @@ try:
                         text=response_text,
                         blocked=False,
                         reason="",
-                        latency_ms=latency_ms
+                        latency_ms=latency_ms,
                     )
 
                     self.send_response(200)
-                    self.send_header('Content-type', 'application/json')
-                    self.send_header('Access-Control-Allow-Origin', '*')
+                    self.send_header("Content-type", "application/json")
+                    self.send_header("Access-Control-Allow-Origin", "*")
                     self.end_headers()
                     self.wfile.write(json.dumps(response.to_dict()).encode())
 
                 except Exception as e:
                     logger.error(f"Error processing request: {e}")
                     self.send_response(500)
-                    self.send_header('Content-type', 'application/json')
-                    self.send_header('Access-Control-Allow-Origin', '*')
+                    self.send_header("Content-type", "application/json")
+                    self.send_header("Access-Control-Allow-Origin", "*")
                     self.end_headers()
-                    error_response = {
-                        "error": str(e),
-                        "status": "error"
-                    }
+                    error_response = {"error": str(e), "status": "error"}
                     self.wfile.write(json.dumps(error_response).encode())
             else:
                 self.send_response(404)
@@ -169,9 +178,9 @@ try:
 
         def do_OPTIONS(self):
             self.send_response(200)
-            self.send_header('Access-Control-Allow-Origin', '*')
-            self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-            self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type")
             self.end_headers()
 
     if __name__ == "__main__":
@@ -179,7 +188,7 @@ try:
         logger.info("🌐 Starting StillMe AI on http://0.0.0.0:1216")
         logger.info("✅ Server is stable and production-ready!")
 
-        server = HTTPServer(('0.0.0.0', 1216), StillMeHandler)
+        server = HTTPServer(("0.0.0.0", 1216), StillMeHandler)
         server.serve_forever()
 
 except ImportError:

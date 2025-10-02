@@ -31,8 +31,7 @@ from stillme_core.core.advanced_security.sandbox_deploy import SandboxDeployer
 
 # Configure logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
 
@@ -113,7 +112,7 @@ class SandboxDemo:
         sandbox = await self.controller.create_sandbox(
             name="demo-security-test",
             sandbox_type=SandboxType.SECURITY_TEST,
-            image="python:3.9-slim"
+            image="python:3.9-slim",
         )
 
         print(f"✅ Sandbox created: {sandbox.config.sandbox_id}")
@@ -123,7 +122,7 @@ class SandboxDemo:
         print("⚡ Testing command execution...")
         result = await self.controller.execute_in_sandbox(
             sandbox.config.sandbox_id,
-            ["python", "-c", "print('Hello from StillMe Sandbox!')"]
+            ["python", "-c", "print('Hello from StillMe Sandbox!')"],
         )
 
         if result["exit_code"] == 0:
@@ -137,7 +136,7 @@ class SandboxDemo:
         print("🐍 Testing Python imports...")
         import_result = await self.controller.execute_in_sandbox(
             sandbox.config.sandbox_id,
-            ["python", "-c", "import sys; print(f'Python {sys.version}')"]
+            ["python", "-c", "import sys; print(f'Python {sys.version}')"],
         )
 
         if import_result["exit_code"] == 0:
@@ -159,7 +158,11 @@ class SandboxDemo:
         print("🌐 Testing network isolation...")
         network_test = await self.controller.execute_in_sandbox(
             self.demo_results["sandbox_id"],
-            ["python", "-c", "import requests; requests.get('http://google.com', timeout=5)"]
+            [
+                "python",
+                "-c",
+                "import requests; requests.get('http://google.com', timeout=5)",
+            ],
         )
 
         if network_test["exit_code"] != 0:
@@ -177,12 +180,14 @@ class SandboxDemo:
                 target_config={
                     "host": "localhost",
                     "use_test_data": True,
-                    "use_real_data": False
-                }
+                    "use_real_data": False,
+                },
             )
 
             print(f"✅ Attack simulation completed: {simulation_result.status}")
-            print(f"🔍 Vulnerabilities found: {len(simulation_result.vulnerabilities_found)}")
+            print(
+                f"🔍 Vulnerabilities found: {len(simulation_result.vulnerabilities_found)}"
+            )
             print(f"🛡️ Defenses triggered: {len(simulation_result.defenses_triggered)}")
             print(f"📊 Risk score: {simulation_result.risk_score:.2f}")
 
@@ -191,7 +196,7 @@ class SandboxDemo:
                 "status": simulation_result.status.value,
                 "vulnerabilities": len(simulation_result.vulnerabilities_found),
                 "defenses": len(simulation_result.defenses_triggered),
-                "risk_score": simulation_result.risk_score
+                "risk_score": simulation_result.risk_score,
             }
 
         except Exception as e:
@@ -216,8 +221,12 @@ class SandboxDemo:
             if status.get("resource_usage"):
                 resource_usage = status["resource_usage"]
                 print(f"💻 CPU usage: {resource_usage.get('cpu_percent', 0):.1f}%")
-                print(f"🧠 Memory usage: {resource_usage.get('memory_usage_mb', 0):.1f} MB")
-                print(f"📊 Memory percentage: {resource_usage.get('memory_percent', 0):.1f}%")
+                print(
+                    f"🧠 Memory usage: {resource_usage.get('memory_usage_mb', 0):.1f} MB"
+                )
+                print(
+                    f"📊 Memory percentage: {resource_usage.get('memory_percent', 0):.1f}%"
+                )
 
                 self.demo_results["resource_monitoring"] = "SUCCESS"
                 self.demo_results["resource_usage"] = resource_usage
@@ -233,7 +242,9 @@ class SandboxDemo:
             violations = status["security_violations"]
             print(f"🚨 Security violations detected: {len(violations)}")
             for violation in violations:
-                print(f"   - {violation['type']}: {violation['value']} (limit: {violation['limit']})")
+                print(
+                    f"   - {violation['type']}: {violation['value']} (limit: {violation['limit']})"
+                )
         else:
             print("✅ No security violations detected")
 
@@ -258,7 +269,9 @@ class SandboxDemo:
 
         # Clean up sandbox
         print("🧹 Cleaning up sandbox...")
-        cleanup_success = await self.controller.destroy_sandbox(self.demo_results["sandbox_id"])
+        cleanup_success = await self.controller.destroy_sandbox(
+            self.demo_results["sandbox_id"]
+        )
 
         if cleanup_success:
             print("✅ Sandbox cleaned up successfully")
@@ -277,9 +290,14 @@ class SandboxDemo:
         print("\n📊 DEMO SUMMARY")
         print("=" * 60)
 
-        total_tests = len(self.demo_results) - 2  # Exclude sandbox_id and simulation_details
-        passed_tests = sum(1 for key, value in self.demo_results.items()
-                          if key not in ["sandbox_id", "simulation_details"] and value == "SUCCESS")
+        total_tests = (
+            len(self.demo_results) - 2
+        )  # Exclude sandbox_id and simulation_details
+        passed_tests = sum(
+            1
+            for key, value in self.demo_results.items()
+            if key not in ["sandbox_id", "simulation_details"] and value == "SUCCESS"
+        )
 
         print(f"📈 Total tests: {total_tests}")
         print(f"✅ Passed: {passed_tests}")
@@ -289,7 +307,9 @@ class SandboxDemo:
         print("\n📋 Detailed Results:")
         for key, value in self.demo_results.items():
             if key not in ["sandbox_id", "simulation_details"]:
-                status_emoji = "✅" if value == "SUCCESS" else "❌" if value == "FAILED" else "⚠️"
+                status_emoji = (
+                    "✅" if value == "SUCCESS" else "❌" if value == "FAILED" else "⚠️"
+                )
                 print(f"   {status_emoji} {key.replace('_', ' ').title()}: {value}")
 
         if "simulation_details" in self.demo_results:
@@ -317,6 +337,7 @@ async def main():
     # Check if Docker is available
     try:
         import docker
+
         client = docker.from_env()
         client.ping()
         print("✅ Docker is available and running")

@@ -30,7 +30,10 @@ from stillme_core.control.policy_controller import PolicyController
 from stillme_core.framework import StillMeFramework
 
 # Skip due to missing module
-pytest.skip("Module stillme_core.learning.collab_learning not available", allow_module_level=True)
+pytest.skip(
+    "Module stillme_core.learning.collab_learning not available",
+    allow_module_level=True,
+)
 from stillme_core.learning.collab_learning import CollaborativeLearning
 from stillme_core.learning.learning_metrics_collector import LearningMetricsCollector
 from stillme_core.learning.meta_learning_manager import MetaLearningManager
@@ -47,15 +50,11 @@ class TestStillMeFramework:
     def framework(self):
         """Create StillMe framework instance"""
         config = {
-            "framework": {
-                "name": "StillMe",
-                "version": "1.0.0",
-                "debug": True
-            },
+            "framework": {"name": "StillMe", "version": "1.0.0", "debug": True},
             "logging": {
                 "level": "INFO",
-                "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-            }
+                "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            },
         }
         return StillMeFramework(config)
 
@@ -75,7 +74,7 @@ class TestStillMeFramework:
     async def test_framework_startup(self, framework):
         """Test framework startup process"""
         # Mock the startup process
-        with patch.object(framework, 'initialize_modules') as mock_init:
+        with patch.object(framework, "initialize_modules") as mock_init:
             mock_init.return_value = True
             result = await framework.start()
             assert result is True
@@ -84,7 +83,7 @@ class TestStillMeFramework:
     @pytest.mark.asyncio
     async def test_framework_shutdown(self, framework):
         """Test framework shutdown process"""
-        with patch.object(framework, 'cleanup_modules') as mock_cleanup:
+        with patch.object(framework, "cleanup_modules") as mock_cleanup:
             mock_cleanup.return_value = True
             result = await framework.stop()
             assert result is True
@@ -102,8 +101,8 @@ class TestLearningMetricsCollector:
     def test_metrics_collector_initialization(self, metrics_collector):
         """Test metrics collector initialization"""
         assert metrics_collector is not None
-        assert hasattr(metrics_collector, 'logger')
-        assert hasattr(metrics_collector, 'artifacts_path')
+        assert hasattr(metrics_collector, "logger")
+        assert hasattr(metrics_collector, "artifacts_path")
 
     @pytest.mark.asyncio
     async def test_validate_learning_effectiveness(self, metrics_collector):
@@ -111,14 +110,18 @@ class TestLearningMetricsCollector:
         session_id = "test_session_123"
 
         # Mock the validation process
-        with patch.object(metrics_collector, '_load_benchmark_dataset') as mock_load:
+        with patch.object(metrics_collector, "_load_benchmark_dataset") as mock_load:
             mock_load.return_value = [
-                {"input": "test input", "expected_output": "test output", "category": "test"}
+                {
+                    "input": "test input",
+                    "expected_output": "test output",
+                    "category": "test",
+                }
             ]
 
             result = await metrics_collector.validate_learning_effectiveness(session_id)
             assert result is not None
-            assert hasattr(result, 'session_id')
+            assert hasattr(result, "session_id")
             assert result.session_id == session_id
 
     @pytest.mark.asyncio
@@ -126,7 +129,7 @@ class TestLearningMetricsCollector:
         """Test accuracy measurement"""
         test_cases = [
             {"input": "test1", "expected": "output1", "actual": "output1"},
-            {"input": "test2", "expected": "output2", "actual": "output2"}
+            {"input": "test2", "expected": "output2", "actual": "output2"},
         ]
 
         accuracy = await metrics_collector.measure_accuracy(test_cases)
@@ -138,7 +141,7 @@ class TestLearningMetricsCollector:
         errors = [
             {"type": "syntax", "message": "Syntax error"},
             {"type": "logic", "message": "Logic error"},
-            {"type": "syntax", "message": "Another syntax error"}
+            {"type": "syntax", "message": "Another syntax error"},
         ]
 
         error_types = await metrics_collector.detect_error_types(errors)
@@ -159,9 +162,9 @@ class TestRewardManager:
     def test_reward_manager_initialization(self, reward_manager):
         """Test reward manager initialization"""
         assert reward_manager is not None
-        assert hasattr(reward_manager, 'sessions')
-        assert hasattr(reward_manager, 'reward_history')
-        assert hasattr(reward_manager, 'penalty_history')
+        assert hasattr(reward_manager, "sessions")
+        assert hasattr(reward_manager, "reward_history")
+        assert hasattr(reward_manager, "penalty_history")
 
     @pytest.mark.asyncio
     async def test_start_learning_session(self, reward_manager):
@@ -187,7 +190,7 @@ class TestRewardManager:
             session_id=session_id,
             reward_type="SUCCESSFUL_FIX",
             context={"fix_type": "bug_fix"},
-            rationale="Successfully fixed a bug"
+            rationale="Successfully fixed a bug",
         )
 
         assert reward is not None
@@ -208,7 +211,7 @@ class TestRewardManager:
             session_id=session_id,
             penalty_type="FAILED_FIX",
             context={"error": "fix_failed"},
-            rationale="Failed to fix a bug"
+            rationale="Failed to fix a bug",
         )
 
         assert penalty is not None
@@ -227,8 +230,8 @@ class TestMetaLearningManager:
     def test_meta_learning_manager_initialization(self, meta_learning_manager):
         """Test meta learning manager initialization"""
         assert meta_learning_manager is not None
-        assert hasattr(meta_learning_manager, 'learning_sessions')
-        assert hasattr(meta_learning_manager, 'adaptive_config')
+        assert hasattr(meta_learning_manager, "learning_sessions")
+        assert hasattr(meta_learning_manager, "adaptive_config")
 
     @pytest.mark.asyncio
     async def test_record_learning_session(self, meta_learning_manager):
@@ -245,7 +248,7 @@ class TestMetaLearningManager:
             "penalty_score": -1.0,
             "accuracy_improvement": 0.1,
             "error_types": {"syntax": 1, "logic": 1},
-            "safety_violations": 0
+            "safety_violations": 0,
         }
 
         result = await meta_learning_manager.record_learning_session(**session_data)
@@ -269,7 +272,7 @@ class TestMetaLearningManager:
                 penalty_score=-1.0,
                 accuracy_improvement=0.1,
                 error_types={"syntax": 1},
-                safety_violations=0
+                safety_violations=0,
             )
 
         patterns = await meta_learning_manager.analyze_learning_patterns("user_123")
@@ -289,20 +292,28 @@ class TestCollaborativeLearning:
     def test_collab_learning_initialization(self, collab_learning):
         """Test collaborative learning initialization"""
         assert collab_learning is not None
-        assert hasattr(collab_learning, 'datasets')
-        assert hasattr(collab_learning, 'validation_results')
+        assert hasattr(collab_learning, "datasets")
+        assert hasattr(collab_learning, "validation_results")
 
     @pytest.mark.asyncio
     async def test_ingest_dataset(self, collab_learning):
         """Test dataset ingestion"""
         # Create temporary dataset file
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.jsonl', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".jsonl", delete=False) as f:
             dataset_data = [
-                {"input": "test input 1", "expected_output": "test output 1", "category": "test"},
-                {"input": "test input 2", "expected_output": "test output 2", "category": "test"}
+                {
+                    "input": "test input 1",
+                    "expected_output": "test output 1",
+                    "category": "test",
+                },
+                {
+                    "input": "test input 2",
+                    "expected_output": "test output 2",
+                    "category": "test",
+                },
             ]
             for item in dataset_data:
-                f.write(json.dumps(item) + '\n')
+                f.write(json.dumps(item) + "\n")
             temp_file = f.name
 
         try:
@@ -321,7 +332,7 @@ class TestCollaborativeLearning:
         collab_learning.datasets[dataset_id] = {
             "status": "approved",
             "validation_score": 0.9,
-            "ethics_score": 0.95
+            "ethics_score": 0.95,
         }
 
         result = await collab_learning.merge_dataset(dataset_id)
@@ -340,8 +351,8 @@ class TestLearningRollback:
     def test_learning_rollback_initialization(self, learning_rollback):
         """Test learning rollback initialization"""
         assert learning_rollback is not None
-        assert hasattr(learning_rollback, 'snapshots')
-        assert hasattr(learning_rollback, 'rollback_history')
+        assert hasattr(learning_rollback, "snapshots")
+        assert hasattr(learning_rollback, "rollback_history")
 
     @pytest.mark.asyncio
     async def test_create_snapshot(self, learning_rollback):
@@ -350,7 +361,7 @@ class TestLearningRollback:
             "session_id": "test_session_123",
             "user_id": "user_123",
             "knowledge_state": {"facts": ["fact1", "fact2"]},
-            "metadata": {"version": "1.0.0"}
+            "metadata": {"version": "1.0.0"},
         }
 
         snapshot = await learning_rollback.create_snapshot(snapshot_data)
@@ -366,7 +377,7 @@ class TestLearningRollback:
             "session_id": "test_session_123",
             "user_id": "user_123",
             "knowledge_state": {"facts": ["fact1", "fact2"]},
-            "metadata": {"version": "1.0.0"}
+            "metadata": {"version": "1.0.0"},
         }
 
         snapshot = await learning_rollback.create_snapshot(snapshot_data)
@@ -419,8 +430,8 @@ class TestPolicyController:
     def test_policy_controller_initialization(self, policy_controller):
         """Test policy controller initialization"""
         assert policy_controller is not None
-        assert hasattr(policy_controller, 'current_policy')
-        assert hasattr(policy_controller, 'policy_levels')
+        assert hasattr(policy_controller, "current_policy")
+        assert hasattr(policy_controller, "policy_levels")
 
     def test_set_policy_level(self, policy_controller):
         """Test setting policy level"""
@@ -439,10 +450,12 @@ class TestPolicyController:
         policy_controller.set_policy_level("strict")
 
         # Test strict policy validation
-        result = policy_controller.validate_policy_compliance({
-            "action": "code_generation",
-            "content": "def hello(): print('Hello World')"
-        })
+        result = policy_controller.validate_policy_compliance(
+            {
+                "action": "code_generation",
+                "content": "def hello(): print('Hello World')",
+            }
+        )
         assert result is not None
         assert "compliant" in result
 
@@ -453,11 +466,7 @@ class TestTransparencyLogger:
     @pytest.fixture
     def transparency_logger(self):
         """Create TransparencyLogger instance"""
-        config = {
-            "enabled": True,
-            "level": "basic",
-            "log_rationale": True
-        }
+        config = {"enabled": True, "level": "basic", "log_rationale": True}
         return TransparencyLogger(config)
 
     def test_transparency_logger_initialization(self, transparency_logger):
@@ -476,7 +485,7 @@ class TestTransparencyLogger:
             "decision_factors": [{"factor": "test", "value": 1.0}],
             "confidence_scores": {"overall": 0.9},
             "reasoning": "Test decision",
-            "metadata": {"test": True}
+            "metadata": {"test": True},
         }
 
         trace_id = transparency_logger.log_decision(**decision_data)
@@ -495,8 +504,8 @@ class TestPrivacyManager:
     def test_privacy_manager_initialization(self, privacy_manager):
         """Test privacy manager initialization"""
         assert privacy_manager is not None
-        assert hasattr(privacy_manager, 'privacy_mode')
-        assert hasattr(privacy_manager, 'data_retention_days')
+        assert hasattr(privacy_manager, "privacy_mode")
+        assert hasattr(privacy_manager, "data_retention_days")
 
     def test_set_privacy_mode(self, privacy_manager):
         """Test setting privacy mode"""
@@ -530,7 +539,7 @@ class TestSecurityManager:
             "security": {
                 "enabled": True,
                 "encryption": {"algorithm": "AES-256-GCM"},
-                "rate_limiting": {"requests_per_minute": 60}
+                "rate_limiting": {"requests_per_minute": 60},
             }
         }
         return SecurityManager(config)
@@ -538,7 +547,7 @@ class TestSecurityManager:
     def test_security_manager_initialization(self, security_manager):
         """Test security manager initialization"""
         assert security_manager is not None
-        assert hasattr(security_manager, 'config')
+        assert hasattr(security_manager, "config")
         assert security_manager.config["security"]["enabled"]
 
     def test_validate_input(self, security_manager):
@@ -596,7 +605,7 @@ class TestIntegrationScenarios:
             penalty_score=-1.0,
             accuracy_improvement=0.1,
             error_types={"syntax": 1},
-            safety_violations=0
+            safety_violations=0,
         )
 
         # Award reward
@@ -604,7 +613,7 @@ class TestIntegrationScenarios:
             session_id=session_id,
             reward_type="SUCCESSFUL_FIX",
             context={"fix_type": "integration_test"},
-            rationale="Integration test successful"
+            rationale="Integration test successful",
         )
 
         assert reward is not None
@@ -656,7 +665,11 @@ class TestPerformance:
 
         # Test with large dataset
         large_dataset = [
-            {"input": f"test input {i}", "expected_output": f"test output {i}", "category": "test"}
+            {
+                "input": f"test input {i}",
+                "expected_output": f"test output {i}",
+                "category": "test",
+            }
             for i in range(1000)
         ]
 
@@ -715,7 +728,7 @@ class TestErrorHandling:
                 session_id="nonexistent_session",
                 reward_type="SUCCESSFUL_FIX",
                 context={},
-                rationale="Test"
+                rationale="Test",
             )
 
     def test_kill_switch_error_handling(self):
@@ -731,5 +744,5 @@ pytestmark = [
     pytest.mark.integration,
     pytest.mark.performance,
     pytest.mark.security,
-    pytest.mark.learning
+    pytest.mark.learning,
 ]

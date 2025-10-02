@@ -125,13 +125,16 @@ def execute_command(user_input):
 
             # Create file with Unicode content
             unicode_file = temp_path / "unicode.py"
-            unicode_file.write_text("""
+            unicode_file.write_text(
+                """
 # File with Unicode content: 你好世界
 def hello_unicode():
     message = "Xin chào thế giới! 🌍"
     password = "secret_password"  # This should be detected
     return message
-""", encoding="utf-8")
+""",
+                encoding="utf-8",
+            )
 
             # Run security check
             result = engine.run_light_security_check(str(temp_path))
@@ -153,7 +156,9 @@ def hello_unicode():
                 ("clean.py", "def clean_function(): pass"),
                 ("secrets.py", 'api_key = "sk-test123"'),
                 ("dangerous.py", "eval('print(1)')"),
-                ("mixed.py", """
+                (
+                    "mixed.py",
+                    """
 def mixed_function():
     # Clean code
     x = 1 + 1
@@ -165,7 +170,8 @@ def mixed_function():
     exec("print('dangerous')")
 
     return x
-""")
+""",
+                ),
             ]
 
             for filename, content in files:

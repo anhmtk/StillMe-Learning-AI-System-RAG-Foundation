@@ -1,6 +1,7 @@
 """
 Tests for Habit Store
 """
+
 import time
 
 from stillme_core.middleware.habit_store import HabitEntry, HabitStats, HabitStore
@@ -17,23 +18,14 @@ class TestHabitStore:
 
     def test_habit_store_enabled_with_opt_in(self):
         """Test habit store can be enabled with opt-in"""
-        config = {
-            "privacy": {
-                "habits_opt_in": True
-            }
-        }
+        config = {"privacy": {"habits_opt_in": True}}
         store = HabitStore(config)
         assert store.is_enabled()
         assert store.habits_opt_in
 
     def test_cue_hashing_privacy(self):
         """Test that cues are hashed for privacy"""
-        config = {
-            "privacy": {
-                "habits_opt_in": True,
-                "hash_cues": True
-            }
-        }
+        config = {"privacy": {"habits_opt_in": True, "hash_cues": True}}
         store = HabitStore(config)
 
         cue_hash = store._hash_cue("Hello world")
@@ -43,12 +35,7 @@ class TestHabitStore:
 
     def test_cue_hashing_disabled(self):
         """Test that cue hashing can be disabled"""
-        config = {
-            "privacy": {
-                "habits_opt_in": True,
-                "hash_cues": False
-            }
-        }
+        config = {"privacy": {"habits_opt_in": True, "hash_cues": False}}
         store = HabitStore(config)
 
         cue_hash = store._hash_cue("Hello world")
@@ -58,7 +45,7 @@ class TestHabitStore:
         """Test that habits require quorum before creation"""
         config = {
             "privacy": {"habits_opt_in": True},
-            "quorum": {"threshold": 2, "window_days": 1}
+            "quorum": {"threshold": 2, "window_days": 1},
         }
         store = HabitStore(config)
 
@@ -76,7 +63,10 @@ class TestHabitStore:
         """Test that quorum window expires"""
         config = {
             "privacy": {"habits_opt_in": True},
-            "quorum": {"threshold": 2, "window_days": 0.00001}  # Very short window (0.86 seconds)
+            "quorum": {
+                "threshold": 2,
+                "window_days": 0.00001,
+            },  # Very short window (0.86 seconds)
         }
         store = HabitStore(config)
 
@@ -109,7 +99,9 @@ class TestHabitStore:
         assert habit.metadata["first_tenant"] == "tenant1"
 
         # Update habit
-        result = store.observe_cue("test cue", "updated action", 0.9, "user2", "tenant2")
+        result = store.observe_cue(
+            "test cue", "updated action", 0.9, "user2", "tenant2"
+        )
         assert result
         assert len(store.habits) == 1
 
@@ -143,7 +135,7 @@ class TestHabitStore:
         config = {
             "privacy": {"habits_opt_in": True},
             "quorum": {"threshold": 1},
-            "decay": {"half_life_days": 0.001, "min_threshold": 0.1}  # Very fast decay
+            "decay": {"half_life_days": 0.001, "min_threshold": 0.1},  # Very fast decay
         }
         store = HabitStore(config)
 
@@ -167,8 +159,11 @@ class TestHabitStore:
     def test_ttl_expiration(self):
         """Test TTL expiration of habits"""
         config = {
-            "privacy": {"habits_opt_in": True, "ttl_days": 0.00001},  # Very short TTL (0.86 seconds)
-            "quorum": {"threshold": 1}
+            "privacy": {
+                "habits_opt_in": True,
+                "ttl_days": 0.00001,
+            },  # Very short TTL (0.86 seconds)
+            "quorum": {"threshold": 1},
         }
         store = HabitStore(config)
 
@@ -230,13 +225,15 @@ class TestHabitStore:
         """Test that single user cannot poison habits (quorum requirement)"""
         config = {
             "privacy": {"habits_opt_in": True},
-            "quorum": {"threshold": 3, "window_days": 1}
+            "quorum": {"threshold": 3, "window_days": 1},
         }
         store = HabitStore(config)
 
         # Single user tries to create habit with multiple observations
         for _i in range(2):  # Below quorum threshold
-            result = store.observe_cue("poison cue", "bad action", 0.8, "attacker", "tenant1")
+            result = store.observe_cue(
+                "poison cue", "bad action", 0.8, "attacker", "tenant1"
+            )
             assert not result
 
         assert len(store.habits) == 0
@@ -244,7 +241,9 @@ class TestHabitStore:
         # Multiple users create legitimate habit
         store.observe_cue("legitimate cue", "good action", 0.8, "user1", "tenant1")
         store.observe_cue("legitimate cue", "good action", 0.8, "user2", "tenant1")
-        result = store.observe_cue("legitimate cue", "good action", 0.8, "user3", "tenant1")
+        result = store.observe_cue(
+            "legitimate cue", "good action", 0.8, "user3", "tenant1"
+        )
         assert result
         assert len(store.habits) == 1
 
@@ -283,6 +282,7 @@ class TestHabitStore:
         assert len(store.habits) == 0
         assert len(store.observations) == 0
 
+
 class TestHabitEntry:
     """Test HabitEntry dataclass"""
 
@@ -294,7 +294,7 @@ class TestHabitEntry:
             confidence=0.8,
             frequency=5,
             first_seen=time.time(),
-            last_seen=time.time()
+            last_seen=time.time(),
         )
 
         assert entry.cue_hash == "test_hash"
@@ -314,10 +314,11 @@ class TestHabitEntry:
             frequency=1,
             first_seen=time.time(),
             last_seen=time.time(),
-            metadata=metadata
+            metadata=metadata,
         )
 
         assert entry.metadata == metadata
+
 
 class TestHabitStats:
     """Test HabitStats dataclass"""

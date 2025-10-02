@@ -19,16 +19,16 @@ class TestHealthChecker:
     def health_checker(self):
         """Create health checker instance"""
         config = {
-            'version': '1.0.0',
-            'environment': 'test',
-            'database': {'path': ':memory:'}
+            "version": "1.0.0",
+            "environment": "test",
+            "database": {"path": ":memory:"},
         }
         return HealthChecker(config)
 
     def test_health_checker_initialization(self, health_checker):
         """Test health checker initialization"""
-        assert health_checker.version == '1.0.0'
-        assert health_checker.environment == 'test'
+        assert health_checker.version == "1.0.0"
+        assert health_checker.environment == "test"
         assert health_checker.start_time > 0
 
     def test_database_check_healthy(self, health_checker):
@@ -44,15 +44,18 @@ class TestHealthChecker:
 
     def test_memory_check_healthy(self, health_checker):
         """Test memory health check when healthy"""
-        with patch('psutil.virtual_memory') as mock_memory, \
-             patch('psutil.Process') as mock_process:
-
+        with (
+            patch("psutil.virtual_memory") as mock_memory,
+            patch("psutil.Process") as mock_process,
+        ):
             # Mock healthy memory usage
             mock_memory.return_value.percent = 50.0
             mock_memory.return_value.available = 4 * 1024 * 1024 * 1024  # 4GB
 
             mock_process_instance = Mock()
-            mock_process_instance.memory_info.return_value.rss = 512 * 1024 * 1024  # 512MB
+            mock_process_instance.memory_info.return_value.rss = (
+                512 * 1024 * 1024
+            )  # 512MB
             mock_process.return_value = mock_process_instance
 
             check = health_checker.check_memory()
@@ -65,15 +68,18 @@ class TestHealthChecker:
 
     def test_memory_check_unhealthy(self, health_checker):
         """Test memory health check when unhealthy"""
-        with patch('psutil.virtual_memory') as mock_memory, \
-             patch('psutil.Process') as mock_process:
-
+        with (
+            patch("psutil.virtual_memory") as mock_memory,
+            patch("psutil.Process") as mock_process,
+        ):
             # Mock unhealthy memory usage
             mock_memory.return_value.percent = 95.0
             mock_memory.return_value.available = 100 * 1024 * 1024  # 100MB
 
             mock_process_instance = Mock()
-            mock_process_instance.memory_info.return_value.rss = 512 * 1024 * 1024  # 512MB
+            mock_process_instance.memory_info.return_value.rss = (
+                512 * 1024 * 1024
+            )  # 512MB
             mock_process.return_value = mock_process_instance
 
             check = health_checker.check_memory()
@@ -85,7 +91,7 @@ class TestHealthChecker:
 
     def test_disk_check_healthy(self, health_checker):
         """Test disk health check when healthy"""
-        with patch('psutil.disk_usage') as mock_disk:
+        with patch("psutil.disk_usage") as mock_disk:
             # Mock healthy disk usage
             mock_disk.return_value.used = 50 * 1024 * 1024 * 1024  # 50GB
             mock_disk.return_value.total = 100 * 1024 * 1024 * 1024  # 100GB
@@ -100,7 +106,7 @@ class TestHealthChecker:
 
     def test_disk_check_unhealthy(self, health_checker):
         """Test disk health check when unhealthy"""
-        with patch('psutil.disk_usage') as mock_disk:
+        with patch("psutil.disk_usage") as mock_disk:
             # Mock unhealthy disk usage
             mock_disk.return_value.used = 95 * 1024 * 1024 * 1024  # 95GB
             mock_disk.return_value.total = 100 * 1024 * 1024 * 1024  # 100GB
@@ -115,7 +121,7 @@ class TestHealthChecker:
 
     def test_agentdev_check_healthy(self, health_checker):
         """Test AgentDev health check when healthy"""
-        with patch('agent_dev.core.agentdev.AgentDev') as mock_agentdev:
+        with patch("agent_dev.core.agentdev.AgentDev") as mock_agentdev:
             # Mock healthy AgentDev
             mock_instance = Mock()
             mock_instance.execute_task.return_value = "✅ Test completed successfully"
@@ -130,7 +136,7 @@ class TestHealthChecker:
 
     def test_agentdev_check_unhealthy(self, health_checker):
         """Test AgentDev health check when unhealthy"""
-        with patch('agent_dev.core.agentdev.AgentDev') as mock_agentdev:
+        with patch("agent_dev.core.agentdev.AgentDev") as mock_agentdev:
             # Mock unhealthy AgentDev
             mock_agentdev.side_effect = Exception("AgentDev failed to initialize")
 
@@ -143,11 +149,12 @@ class TestHealthChecker:
 
     def test_run_all_checks_healthy(self, health_checker):
         """Test running all checks when all are healthy"""
-        with patch.object(health_checker, 'check_database') as mock_db, \
-             patch.object(health_checker, 'check_memory') as mock_mem, \
-             patch.object(health_checker, 'check_disk') as mock_disk, \
-             patch.object(health_checker, 'check_agentdev') as mock_agentdev:
-
+        with (
+            patch.object(health_checker, "check_database") as mock_db,
+            patch.object(health_checker, "check_memory") as mock_mem,
+            patch.object(health_checker, "check_disk") as mock_disk,
+            patch.object(health_checker, "check_agentdev") as mock_agentdev,
+        ):
             # Mock all checks as healthy
             mock_db.return_value.status = HealthStatus.HEALTHY
             mock_mem.return_value.status = HealthStatus.HEALTHY
@@ -164,11 +171,12 @@ class TestHealthChecker:
 
     def test_run_all_checks_mixed(self, health_checker):
         """Test running all checks with mixed results"""
-        with patch.object(health_checker, 'check_database') as mock_db, \
-             patch.object(health_checker, 'check_memory') as mock_mem, \
-             patch.object(health_checker, 'check_disk') as mock_disk, \
-             patch.object(health_checker, 'check_agentdev') as mock_agentdev:
-
+        with (
+            patch.object(health_checker, "check_database") as mock_db,
+            patch.object(health_checker, "check_memory") as mock_mem,
+            patch.object(health_checker, "check_disk") as mock_disk,
+            patch.object(health_checker, "check_agentdev") as mock_agentdev,
+        ):
             # Mock mixed results
             mock_db.return_value.status = HealthStatus.HEALTHY
             mock_mem.return_value.status = HealthStatus.DEGRADED
@@ -177,7 +185,9 @@ class TestHealthChecker:
 
             response = health_checker.run_all_checks()
 
-            assert response.status == HealthStatus.UNHEALTHY  # Should be unhealthy due to one unhealthy check
+            assert (
+                response.status == HealthStatus.UNHEALTHY
+            )  # Should be unhealthy due to one unhealthy check
             assert response.metrics["healthy_checks"] == 2
             assert response.metrics["degraded_checks"] == 1
             assert response.metrics["unhealthy_checks"] == 1
@@ -203,6 +213,7 @@ class TestHealthChecker:
         assert isinstance(json_str, str)
         assert len(json_str) > 0
 
+
 class TestHealthEndpoints:
     """Test health check endpoints"""
 
@@ -216,9 +227,9 @@ class TestHealthEndpoints:
     def test_create_health_endpoints(self, mock_app):
         """Test health endpoints are created correctly"""
         config = {
-            'version': '1.0.0',
-            'environment': 'test',
-            'database': {'path': ':memory:'}
+            "version": "1.0.0",
+            "environment": "test",
+            "database": {"path": ":memory:"},
         }
 
         from stillme_core.health import create_health_endpoints
@@ -231,9 +242,10 @@ class TestHealthEndpoints:
 
     def test_liveness_probe_success(self, mock_app):
         """Test liveness probe returns success"""
-        config = {'version': '1.0.0', 'environment': 'test'}
+        config = {"version": "1.0.0", "environment": "test"}
 
         from stillme_core.health import create_health_endpoints
+
         create_health_endpoints(mock_app, config)
 
         # Get the liveness probe function
@@ -249,12 +261,13 @@ class TestHealthEndpoints:
     def test_readiness_probe_success(self, mock_app):
         """Test readiness probe returns success"""
         config = {
-            'version': '1.0.0',
-            'environment': 'test',
-            'database': {'path': ':memory:'}
+            "version": "1.0.0",
+            "environment": "test",
+            "database": {"path": ":memory:"},
         }
 
         from stillme_core.health import create_health_endpoints
+
         create_health_endpoints(mock_app, config)
 
         # Get the readiness probe function
@@ -271,12 +284,13 @@ class TestHealthEndpoints:
     def test_metrics_endpoint_success(self, mock_app):
         """Test metrics endpoint returns Prometheus format"""
         config = {
-            'version': '1.0.0',
-            'environment': 'test',
-            'database': {'path': ':memory:'}
+            "version": "1.0.0",
+            "environment": "test",
+            "database": {"path": ":memory:"},
         }
 
         from stillme_core.health import create_health_endpoints
+
         create_health_endpoints(mock_app, config)
 
         # Get the metrics function

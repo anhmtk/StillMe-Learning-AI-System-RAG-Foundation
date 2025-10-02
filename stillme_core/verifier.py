@@ -8,12 +8,14 @@ from typing import Any, Optional, Union
 
 logger = logging.getLogger(__name__)
 
+
 class VerificationStatus(Enum):
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
     PASSED = "passed"
     FAILED = "failed"
     SKIPPED = "skipped"
+
 
 class VerificationType(Enum):
     CODE_QUALITY = "code_quality"
@@ -22,9 +24,11 @@ class VerificationType(Enum):
     FUNCTIONALITY = "functionality"
     INTEGRATION = "integration"
 
+
 @dataclass
 class VerificationResult:
     """Verification result record"""
+
     result_id: str
     verification_type: VerificationType
     status: VerificationStatus
@@ -37,6 +41,7 @@ class VerificationResult:
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
+
 
 class LegacyVerifier:
     """Legacy Verifier for StillMe Framework - DEPRECATED"""
@@ -58,12 +63,14 @@ class LegacyVerifier:
                 "security",
                 "performance",
                 "functionality",
-                "integration"
+                "integration",
             ],
-            "pass_threshold": 0.8
+            "pass_threshold": 0.8,
         }
 
-    def verify_code_quality(self, code_content: str, file_path: Optional[str] = None) -> VerificationResult:
+    def verify_code_quality(
+        self, code_content: str, file_path: Optional[str] = None
+    ) -> VerificationResult:
         """Verify code quality"""
         try:
             result_id = f"verify_{len(self.verification_results) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -110,21 +117,25 @@ class LegacyVerifier:
                     "score": score,
                     "issues": issues,
                     "file_path": file_path,
-                    "code_length": len(code_content)
+                    "code_length": len(code_content),
                 },
                 timestamp=datetime.now(),
-                duration=duration
+                duration=duration,
             )
 
             self.verification_results.append(result)
-            self.logger.info(f"✅ Code quality verification: {status.value} (score: {score:.1f})")
+            self.logger.info(
+                f"✅ Code quality verification: {status.value} (score: {score:.1f})"
+            )
             return result
 
         except Exception as e:
             self.logger.error(f"❌ Failed to verify code quality: {e}")
             raise
 
-    def verify_security(self, code_content: str, file_path: Optional[str] = None) -> VerificationResult:
+    def verify_security(
+        self, code_content: str, file_path: Optional[str] = None
+    ) -> VerificationResult:
         """Verify security"""
         try:
             result_id = f"verify_{len(self.verification_results) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -175,21 +186,25 @@ class LegacyVerifier:
                     "score": score,
                     "vulnerabilities": vulnerabilities,
                     "file_path": file_path,
-                    "code_length": len(code_content)
+                    "code_length": len(code_content),
                 },
                 timestamp=datetime.now(),
-                duration=duration
+                duration=duration,
             )
 
             self.verification_results.append(result)
-            self.logger.info(f"✅ Security verification: {status.value} (score: {score:.1f})")
+            self.logger.info(
+                f"✅ Security verification: {status.value} (score: {score:.1f})"
+            )
             return result
 
         except Exception as e:
             self.logger.error(f"❌ Failed to verify security: {e}")
             raise
 
-    def verify_performance(self, code_content: str, file_path: Optional[str] = None) -> VerificationResult:
+    def verify_performance(
+        self, code_content: str, file_path: Optional[str] = None
+    ) -> VerificationResult:
         """Verify performance"""
         try:
             result_id = f"verify_{len(self.verification_results) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -232,21 +247,25 @@ class LegacyVerifier:
                     "score": score,
                     "issues": issues,
                     "file_path": file_path,
-                    "code_length": len(code_content)
+                    "code_length": len(code_content),
                 },
                 timestamp=datetime.now(),
-                duration=duration
+                duration=duration,
             )
 
             self.verification_results.append(result)
-            self.logger.info(f"✅ Performance verification: {status.value} (score: {score:.1f})")
+            self.logger.info(
+                f"✅ Performance verification: {status.value} (score: {score:.1f})"
+            )
             return result
 
         except Exception as e:
             self.logger.error(f"❌ Failed to verify performance: {e}")
             raise
 
-    def run_comprehensive_verification(self, code_content: str, file_path: Optional[str] = None) -> list[VerificationResult]:
+    def run_comprehensive_verification(
+        self, code_content: str, file_path: Optional[str] = None
+    ) -> list[VerificationResult]:
         """Run comprehensive verification"""
         try:
             results = []
@@ -256,18 +275,28 @@ class LegacyVerifier:
             results.append(self.verify_security(code_content, file_path))
             results.append(self.verify_performance(code_content, file_path))
 
-            self.logger.info(f"🔍 Comprehensive verification completed: {len(results)} checks")
+            self.logger.info(
+                f"🔍 Comprehensive verification completed: {len(results)} checks"
+            )
             return results
 
         except Exception as e:
             self.logger.error(f"❌ Failed to run comprehensive verification: {e}")
             return []
 
-    def get_verification_results_by_type(self, verification_type: VerificationType) -> list[VerificationResult]:
+    def get_verification_results_by_type(
+        self, verification_type: VerificationType
+    ) -> list[VerificationResult]:
         """Get verification results by type"""
-        return [r for r in self.verification_results if r.verification_type == verification_type]
+        return [
+            r
+            for r in self.verification_results
+            if r.verification_type == verification_type
+        ]
 
-    def get_verification_results_by_status(self, status: VerificationStatus) -> list[VerificationResult]:
+    def get_verification_results_by_status(
+        self, status: VerificationStatus
+    ) -> list[VerificationResult]:
         """Get verification results by status"""
         return [r for r in self.verification_results if r.status == status]
 
@@ -275,8 +304,12 @@ class LegacyVerifier:
         """Get verification summary"""
         try:
             total_verifications = len(self.verification_results)
-            passed_verifications = len(self.get_verification_results_by_status(VerificationStatus.PASSED))
-            failed_verifications = len(self.get_verification_results_by_status(VerificationStatus.FAILED))
+            passed_verifications = len(
+                self.get_verification_results_by_status(VerificationStatus.PASSED)
+            )
+            failed_verifications = len(
+                self.get_verification_results_by_status(VerificationStatus.FAILED)
+            )
 
             verifications_by_type = {}
             verifications_by_status = {}
@@ -284,11 +317,15 @@ class LegacyVerifier:
             for result in self.verification_results:
                 # By type
                 type_key = result.verification_type.value
-                verifications_by_type[type_key] = verifications_by_type.get(type_key, 0) + 1
+                verifications_by_type[type_key] = (
+                    verifications_by_type.get(type_key, 0) + 1
+                )
 
                 # By status
                 status_key = result.status.value
-                verifications_by_status[status_key] = verifications_by_status.get(status_key, 0) + 1
+                verifications_by_status[status_key] = (
+                    verifications_by_status.get(status_key, 0) + 1
+                )
 
             # Calculate pass rate
             pass_rate = (passed_verifications / max(1, total_verifications)) * 100
@@ -301,7 +338,7 @@ class LegacyVerifier:
                 "verifications_by_type": verifications_by_type,
                 "verifications_by_status": verifications_by_status,
                 "verification_config": self.verification_config,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
         except Exception as e:
@@ -313,7 +350,12 @@ class LegacyVerifier:
         self.verification_results.clear()
         self.logger.info("🧹 All verification results cleared")
 
-    def verify(self, step: dict[str, Any], exec_result: dict[str, Any], success_criteria: Optional[dict[str, Any]] = None) -> Union[bool, dict[str, Any]]:
+    def verify(
+        self,
+        step: dict[str, Any],
+        exec_result: dict[str, Any],
+        success_criteria: Optional[dict[str, Any]] = None,
+    ) -> Union[bool, dict[str, Any]]:
         """Verify execution result against step criteria"""
         try:
             # Use provided success_criteria or extract from step
@@ -333,7 +375,7 @@ class LegacyVerifier:
                 return {
                     "passed": False,
                     "reason": "execution failed",
-                    "details": exec_result
+                    "details": exec_result,
                 }
 
             # Check exit code
@@ -342,7 +384,7 @@ class LegacyVerifier:
                 return {
                     "passed": False,
                     "reason": f"exit code mismatch: expected {expected_exit_code}, got {actual_exit_code}",
-                    "details": exec_result
+                    "details": exec_result,
                 }
 
             # Check stdout patterns
@@ -352,7 +394,7 @@ class LegacyVerifier:
                     return {
                         "passed": False,
                         "reason": f"stdout pattern not matched: {pattern}",
-                        "details": exec_result
+                        "details": exec_result,
                     }
 
             # Check stderr patterns
@@ -362,7 +404,7 @@ class LegacyVerifier:
                     return {
                         "passed": False,
                         "reason": f"stderr pattern not matched: {pattern}",
-                        "details": exec_result
+                        "details": exec_result,
                     }
 
             # Default success patterns if no custom criteria
@@ -372,19 +414,19 @@ class LegacyVerifier:
                     return {
                         "passed": True,
                         "reason": "success patterns matched",
-                        "details": exec_result
+                        "details": exec_result,
                     }
                 else:
                     return {
                         "passed": False,
                         "reason": "no success patterns found in output",
-                        "details": exec_result
+                        "details": exec_result,
                     }
 
             return {
                 "passed": True,
                 "reason": "all criteria met",
-                "details": exec_result
+                "details": exec_result,
             }
 
         except Exception as e:
@@ -392,7 +434,7 @@ class LegacyVerifier:
             return {
                 "passed": False,
                 "reason": f"verification error: {e}",
-                "details": exec_result
+                "details": exec_result,
             }
 
     def verify_test_results(self, exec_result: dict[str, Any]) -> dict[str, Any]:
@@ -411,14 +453,14 @@ class LegacyVerifier:
                     "passed": True,
                     "reason": "test results verification passed",
                     "stats": stats,
-                    "details": {"stats": stats, "exec_result": exec_result}
+                    "details": {"stats": stats, "exec_result": exec_result},
                 }
             else:
                 return {
                     "passed": False,
                     "reason": "test results verification failed",
                     "stats": stats,
-                    "details": {"stats": stats, "exec_result": exec_result}
+                    "details": {"stats": stats, "exec_result": exec_result},
                 }
 
         except Exception as e:
@@ -426,20 +468,14 @@ class LegacyVerifier:
             return {
                 "passed": False,
                 "reason": f"test verification error: {e}",
-                "details": exec_result
+                "details": exec_result,
             }
 
     def _extract_test_stats(self, text: str) -> dict[str, Any]:
         """Extract test statistics from output text"""
         import re
 
-        stats = {
-            "passed": 0,
-            "failed": 0,
-            "skipped": 0,
-            "total": 0,
-            "collected": 0
-        }
+        stats = {"passed": 0, "failed": 0, "skipped": 0, "total": 0, "collected": 0}
 
         # Common test output patterns
         patterns = {
@@ -447,7 +483,7 @@ class LegacyVerifier:
             "failed": [r"(\d+)\s+failed", r"FAILED\s*(\d+)", r"✗\s*(\d+)"],
             "skipped": [r"(\d+)\s+skipped", r"SKIPPED\s*(\d+)"],
             "total": [r"(\d+)\s+total", r"(\d+)\s+tests"],
-            "collected": [r"collected\s+(\d+)\s+items?", r"(\d+)\s+collected"]
+            "collected": [r"collected\s+(\d+)\s+items?", r"(\d+)\s+collected"],
         }
 
         for stat_type, pattern_list in patterns.items():

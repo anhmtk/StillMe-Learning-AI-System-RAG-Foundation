@@ -8,6 +8,7 @@ from enum import Enum
 
 class PIIType(Enum):
     """PII Type enum - MINIMAL CONTRACT derived from tests/usages"""
+
     EMAIL = "email"
     PHONE = "phone"
     NAME = "name"
@@ -17,11 +18,13 @@ class PIIType(Enum):
     CREDIT_CARD = "credit_card"
     SSN = "ssn"
 
+
 class PrivacyManager:
     """Privacy Manager - MINIMAL CONTRACT derived from tests/usages"""
 
     def __init__(self):
         """Initialize Privacy Manager"""
         pass
+
 
 __all__ = ["PIIType", "PrivacyManager"]

@@ -568,7 +568,6 @@ class MarketIntelligence:
     ) -> list[TrendData]:
         """Get news from NewsAPI"""
         try:
-
             logger.info("🔍 Fetching news from NewsAPI")
 
             trends = []

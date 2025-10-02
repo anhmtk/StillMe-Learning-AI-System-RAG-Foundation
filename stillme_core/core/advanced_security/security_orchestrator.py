@@ -46,6 +46,7 @@ except ImportError as e:
 
 class ExerciseType(Enum):
     """Loại bài tập bảo mật"""
+
     PENETRATION_TEST = "penetration_test"
     VULNERABILITY_ASSESSMENT = "vulnerability_assessment"
     INCIDENT_RESPONSE = "incident_response"
@@ -56,6 +57,7 @@ class ExerciseType(Enum):
 
 class ExerciseStatus(Enum):
     """Trạng thái bài tập"""
+
     SCHEDULED = "scheduled"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -66,6 +68,7 @@ class ExerciseStatus(Enum):
 @dataclass
 class SecurityExercise:
     """Bài tập bảo mật"""
+
     id: str
     name: str
     exercise_type: ExerciseType
@@ -83,6 +86,7 @@ class SecurityExercise:
 @dataclass
 class ExerciseResult:
     """Kết quả bài tập"""
+
     exercise_id: str
     start_time: datetime
     end_time: datetime
@@ -130,18 +134,16 @@ class SecurityOrchestrator:
 
         # Circuit breaker for resilience
         self.circuit_breaker = SafeCircuitBreaker(
-            failure_threshold=5,
-            recovery_timeout=60,
-            expected_exception=Exception
+            failure_threshold=5, recovery_timeout=60, expected_exception=Exception
         )
 
         # Statistics
         self.stats = {
-            'total_exercises': 0,
-            'completed_exercises': 0,
-            'failed_exercises': 0,
-            'average_score': 0.0,
-            'total_runtime': 0.0
+            "total_exercises": 0,
+            "completed_exercises": 0,
+            "failed_exercises": 0,
+            "average_score": 0.0,
+            "total_runtime": 0.0,
         }
 
     async def schedule_exercise(self, exercise: SecurityExercise) -> bool:
@@ -162,7 +164,9 @@ class SecurityOrchestrator:
             else:
                 asyncio.create_task(self._execute_exercise(exercise))
 
-            self.logger.info(f"Scheduled exercise: {exercise.name} at {exercise.scheduled_time}")
+            self.logger.info(
+                f"Scheduled exercise: {exercise.name} at {exercise.scheduled_time}"
+            )
             return True
 
         except Exception as e:
@@ -189,16 +193,24 @@ class SecurityOrchestrator:
             sandbox_id = await self._create_exercise_sandbox(exercise)
 
             # Execute Red Team activities
-            red_team_results = await self._execute_red_team_activities(exercise, sandbox_id)
+            red_team_results = await self._execute_red_team_activities(
+                exercise, sandbox_id
+            )
 
             # Execute Blue Team activities
-            blue_team_results = await self._execute_blue_team_activities(exercise, sandbox_id)
+            blue_team_results = await self._execute_blue_team_activities(
+                exercise, sandbox_id
+            )
 
             # Analyze results
-            overall_score = await self._analyze_exercise_results(red_team_results, blue_team_results)
+            overall_score = await self._analyze_exercise_results(
+                red_team_results, blue_team_results
+            )
 
             # Generate recommendations
-            recommendations = await self._generate_recommendations(red_team_results, blue_team_results)
+            recommendations = await self._generate_recommendations(
+                red_team_results, blue_team_results
+            )
 
             # Create result
             result = ExerciseResult(
@@ -210,7 +222,7 @@ class SecurityOrchestrator:
                 blue_team_results=blue_team_results,
                 overall_score=overall_score,
                 recommendations=recommendations,
-                metadata={"sandbox_id": sandbox_id}
+                metadata={"sandbox_id": sandbox_id},
             )
 
             # Store result
@@ -228,14 +240,16 @@ class SecurityOrchestrator:
             if exercise_id in self.active_exercises:
                 del self.active_exercises[exercise_id]
 
-            self.logger.info(f"Completed exercise: {exercise.name} (score: {overall_score:.2f})")
+            self.logger.info(
+                f"Completed exercise: {exercise.name} (score: {overall_score:.2f})"
+            )
 
         except Exception as e:
             self.logger.error(f"Error executing exercise {exercise_id}: {e}")
             exercise.status = ExerciseStatus.FAILED
 
             # Update statistics
-            self.stats['failed_exercises'] += 1
+            self.stats["failed_exercises"] += 1
 
             # Cleanup
             if exercise_id in self.active_exercises:
@@ -265,7 +279,7 @@ class SecurityOrchestrator:
                 "image": "stillme-security-sandbox",
                 "resources": exercise.sandbox_config.get("resources", {}),
                 "network": exercise.sandbox_config.get("network", {}),
-                "security": exercise.sandbox_config.get("security", {})
+                "security": exercise.sandbox_config.get("security", {}),
             }
 
             sandbox_id = await self.sandbox_controller.create_sandbox(sandbox_config)
@@ -275,7 +289,9 @@ class SecurityOrchestrator:
             self.logger.error(f"Error creating sandbox for exercise {exercise.id}: {e}")
             raise
 
-    async def _execute_red_team_activities(self, exercise: SecurityExercise, sandbox_id: str) -> list[dict[str, Any]]:
+    async def _execute_red_team_activities(
+        self, exercise: SecurityExercise, sandbox_id: str
+    ) -> list[dict[str, Any]]:
         """Thực hiện hoạt động Red Team"""
         try:
             if not self.red_team_engine:
@@ -289,17 +305,23 @@ class SecurityOrchestrator:
 
             # Pattern-based attacks
             if red_team_config.get("pattern_attacks", False):
-                pattern_results = await self.red_team_engine.execute_pattern_attacks(sandbox_id)
+                pattern_results = await self.red_team_engine.execute_pattern_attacks(
+                    sandbox_id
+                )
                 results.extend(pattern_results)
 
             # AI-powered attacks
             if red_team_config.get("ai_attacks", False):
-                ai_results = await self.red_team_engine.execute_ai_powered_attacks(sandbox_id)
+                ai_results = await self.red_team_engine.execute_ai_powered_attacks(
+                    sandbox_id
+                )
                 results.extend(ai_results)
 
             # Adaptive attacks
             if red_team_config.get("adaptive_attacks", False):
-                adaptive_results = await self.red_team_engine.execute_adaptive_attacks(sandbox_id)
+                adaptive_results = await self.red_team_engine.execute_adaptive_attacks(
+                    sandbox_id
+                )
                 results.extend(adaptive_results)
 
             return results
@@ -308,7 +330,9 @@ class SecurityOrchestrator:
             self.logger.error(f"Error executing Red Team activities: {e}")
             return []
 
-    async def _execute_blue_team_activities(self, exercise: SecurityExercise, sandbox_id: str) -> list[dict[str, Any]]:
+    async def _execute_blue_team_activities(
+        self, exercise: SecurityExercise, sandbox_id: str
+    ) -> list[dict[str, Any]]:
         """Thực hiện hoạt động Blue Team"""
         try:
             if not self.blue_team_engine:
@@ -327,7 +351,9 @@ class SecurityOrchestrator:
 
             # Defense execution
             if blue_team_config.get("defense_execution", False):
-                defense_results = await self.blue_team_engine.execute_defense_strategy(anomaly_results)
+                defense_results = await self.blue_team_engine.execute_defense_strategy(
+                    anomaly_results
+                )
                 results.extend(defense_results)
 
             return results
@@ -336,20 +362,27 @@ class SecurityOrchestrator:
             self.logger.error(f"Error executing Blue Team activities: {e}")
             return []
 
-    async def _analyze_exercise_results(self, red_team_results: list[dict[str, Any]],
-                                     blue_team_results: list[dict[str, Any]]) -> float:
+    async def _analyze_exercise_results(
+        self,
+        red_team_results: list[dict[str, Any]],
+        blue_team_results: list[dict[str, Any]],
+    ) -> float:
         """Phân tích kết quả bài tập"""
         try:
             # Calculate Red Team effectiveness
             red_team_score = 0.0
             if red_team_results:
-                successful_attacks = len([r for r in red_team_results if r.get("success", False)])
+                successful_attacks = len(
+                    [r for r in red_team_results if r.get("success", False)]
+                )
                 red_team_score = successful_attacks / len(red_team_results)
 
             # Calculate Blue Team effectiveness
             blue_team_score = 0.0
             if blue_team_results:
-                successful_defenses = len([r for r in blue_team_results if r.get("success", False)])
+                successful_defenses = len(
+                    [r for r in blue_team_results if r.get("success", False)]
+                )
                 blue_team_score = successful_defenses / len(blue_team_results)
 
             # Calculate overall score (balanced approach)
@@ -361,19 +394,28 @@ class SecurityOrchestrator:
             self.logger.error(f"Error analyzing exercise results: {e}")
             return 0.0
 
-    async def _generate_recommendations(self, red_team_results: list[dict[str, Any]],
-                                      blue_team_results: list[dict[str, Any]]) -> list[str]:
+    async def _generate_recommendations(
+        self,
+        red_team_results: list[dict[str, Any]],
+        blue_team_results: list[dict[str, Any]],
+    ) -> list[str]:
         """Tạo khuyến nghị từ kết quả"""
         recommendations = []
 
         try:
             # Analyze Red Team results
-            failed_attacks = [r for r in red_team_results if not r.get("success", False)]
+            failed_attacks = [
+                r for r in red_team_results if not r.get("success", False)
+            ]
             if failed_attacks:
-                recommendations.append("Strengthen defense mechanisms for identified attack vectors")
+                recommendations.append(
+                    "Strengthen defense mechanisms for identified attack vectors"
+                )
 
             # Analyze Blue Team results
-            failed_defenses = [r for r in blue_team_results if not r.get("success", False)]
+            failed_defenses = [
+                r for r in blue_team_results if not r.get("success", False)
+            ]
             if failed_defenses:
                 recommendations.append("Improve detection and response capabilities")
 
@@ -391,16 +433,20 @@ class SecurityOrchestrator:
 
     def _update_statistics(self, result: ExerciseResult):
         """Cập nhật thống kê"""
-        self.stats['total_exercises'] += 1
-        self.stats['completed_exercises'] += 1
+        self.stats["total_exercises"] += 1
+        self.stats["completed_exercises"] += 1
 
         # Update average score
-        total_score = self.stats['average_score'] * (self.stats['completed_exercises'] - 1)
-        self.stats['average_score'] = (total_score + result.overall_score) / self.stats['completed_exercises']
+        total_score = self.stats["average_score"] * (
+            self.stats["completed_exercises"] - 1
+        )
+        self.stats["average_score"] = (total_score + result.overall_score) / self.stats[
+            "completed_exercises"
+        ]
 
         # Update runtime
         runtime = (result.end_time - result.start_time).total_seconds()
-        self.stats['total_runtime'] += runtime
+        self.stats["total_runtime"] += runtime
 
     async def _store_exercise_in_memory(self, result: ExerciseResult):
         """Lưu kết quả bài tập vào memory"""
@@ -409,19 +455,19 @@ class SecurityOrchestrator:
                 return
 
             memory_data = {
-                'type': 'SECURITY_EXERCISE',
-                'exercise_id': result.exercise_id,
-                'overall_score': result.overall_score,
-                'status': result.status.value,
-                'recommendations': result.recommendations,
-                'timestamp': result.start_time.isoformat(),
-                'metadata': result.metadata
+                "type": "SECURITY_EXERCISE",
+                "exercise_id": result.exercise_id,
+                "overall_score": result.overall_score,
+                "status": result.status.value,
+                "recommendations": result.recommendations,
+                "timestamp": result.start_time.isoformat(),
+                "metadata": result.metadata,
             }
 
             await self.memory_manager.store_experience(
-                experience_type='SECURITY_TESTING',
+                experience_type="SECURITY_TESTING",
                 data=memory_data,
-                tags=['exercise', 'security', 'red_team', 'blue_team']
+                tags=["exercise", "security", "red_team", "blue_team"],
             )
 
         except Exception as e:
@@ -438,11 +484,12 @@ class SecurityOrchestrator:
     def get_exercise_statistics(self) -> dict[str, Any]:
         """Lấy thống kê bài tập"""
         return {
-            'stats': self.stats.copy(),
-            'scheduled_exercises': len(self.scheduled_exercises),
-            'active_exercises': len(self.active_exercises),
-            'completed_exercises': len(self.exercise_history),
-            'success_rate': self.stats['completed_exercises'] / max(self.stats['total_exercises'], 1)
+            "stats": self.stats.copy(),
+            "scheduled_exercises": len(self.scheduled_exercises),
+            "active_exercises": len(self.active_exercises),
+            "completed_exercises": len(self.exercise_history),
+            "success_rate": self.stats["completed_exercises"]
+            / max(self.stats["total_exercises"], 1),
         }
 
     async def generate_exercise_report(self, exercise_id: str) -> dict[str, Any]:
@@ -465,12 +512,12 @@ class SecurityOrchestrator:
                     "overall_score": result.overall_score,
                     "status": result.status.value,
                     "duration": (result.end_time - result.start_time).total_seconds(),
-                    "recommendations": result.recommendations
+                    "recommendations": result.recommendations,
                 },
                 "red_team_results": result.red_team_results,
                 "blue_team_results": result.blue_team_results,
                 "metadata": result.metadata,
-                "generated_at": datetime.now().isoformat()
+                "generated_at": datetime.now().isoformat(),
             }
 
             return report
@@ -488,16 +535,21 @@ class SecurityOrchestrator:
                 # Check for scheduled exercises
                 current_time = datetime.now()
                 for exercise_id, exercise in list(self.scheduled_exercises.items()):
-                    if exercise.scheduled_time <= current_time and exercise.status == ExerciseStatus.SCHEDULED:
+                    if (
+                        exercise.scheduled_time <= current_time
+                        and exercise.status == ExerciseStatus.SCHEDULED
+                    ):
                         await self._execute_exercise(exercise)
 
                 # Monitor active exercises
                 for exercise_id, exercise in list(self.active_exercises.items()):
                     # Check for timeout
-                    if (current_time - exercise.scheduled_time).total_seconds() > exercise.duration_minutes * 60:
+                    if (
+                        current_time - exercise.scheduled_time
+                    ).total_seconds() > exercise.duration_minutes * 60:
                         exercise.status = ExerciseStatus.FAILED
                         del self.active_exercises[exercise_id]
-                        self.stats['failed_exercises'] += 1
+                        self.stats["failed_exercises"] += 1
 
                 # Wait for next check
                 await asyncio.sleep(interval)
@@ -515,9 +567,9 @@ async def demo_security_orchestrator():
 
     # Initialize orchestrator
     config = {
-        'monitoring_interval': 60,
-        'max_concurrent_exercises': 3,
-        'default_duration': 30
+        "monitoring_interval": 60,
+        "max_concurrent_exercises": 3,
+        "default_duration": 30,
     }
 
     orchestrator = SecurityOrchestrator(config)
@@ -534,19 +586,16 @@ async def demo_security_orchestrator():
         red_team_config={
             "pattern_attacks": True,
             "ai_attacks": True,
-            "adaptive_attacks": False
+            "adaptive_attacks": False,
         },
-        blue_team_config={
-            "anomaly_detection": True,
-            "defense_execution": True
-        },
+        blue_team_config={"anomaly_detection": True, "defense_execution": True},
         sandbox_config={
             "resources": {"cpu": "1", "memory": "512M"},
             "network": {"isolated": True},
-            "security": {"strict": True}
+            "security": {"strict": True},
         },
         created_at=datetime.now(),
-        updated_at=datetime.now()
+        updated_at=datetime.now(),
     )
 
     # Schedule exercise

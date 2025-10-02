@@ -21,12 +21,7 @@ class ReflexPolicy:
 
     def _load_weights(self) -> dict[str, float]:
         """Load scoring weights with ENV override support"""
-        default_weights = {
-            "pattern": 0.4,
-            "context": 0.3,
-            "history": 0.2,
-            "abuse": 0.1
-        }
+        default_weights = {"pattern": 0.4, "context": 0.3, "history": 0.2, "abuse": 0.1}
 
         # ENV override support
         for key in default_weights:
@@ -42,24 +37,17 @@ class ReflexPolicy:
     def _load_thresholds(self) -> dict[str, dict[str, float]]:
         """Load policy thresholds for different modes"""
         thresholds = {
-            "strict": {
-                "allow_reflex": 0.8,
-                "confidence_min": 0.7
-            },
-            "balanced": {
-                "allow_reflex": 0.6,
-                "confidence_min": 0.5
-            },
-            "creative": {
-                "allow_reflex": 0.4,
-                "confidence_min": 0.3
-            }
+            "strict": {"allow_reflex": 0.8, "confidence_min": 0.7},
+            "balanced": {"allow_reflex": 0.6, "confidence_min": 0.5},
+            "creative": {"allow_reflex": 0.4, "confidence_min": 0.3},
         }
 
         # ENV override for current policy level
         if f"STILLME__REFLEX__THRESHOLD_{self.level.upper()}" in os.environ:
             try:
-                threshold = float(os.environ[f"STILLME__REFLEX__THRESHOLD_{self.level.upper()}"])
+                threshold = float(
+                    os.environ[f"STILLME__REFLEX__THRESHOLD_{self.level.upper()}"]
+                )
                 thresholds[self.level]["allow_reflex"] = threshold
             except ValueError:
                 pass
@@ -108,14 +96,16 @@ class ReflexPolicy:
         # More recent = higher score
         recency_score = max(0.0, 1.0 - (recency / 168.0))  # Decay over a week
 
-        return (freq_score * 0.6 + recency_score * 0.4)
+        return freq_score * 0.6 + recency_score * 0.4
 
     def _calculate_abuse_score(self, context: dict[str, any] | None = None) -> float:
         """Calculate abuse score - placeholder for SafetyGuard integration"""
         # Placeholder - would integrate with abuse detection
         return 0.0
 
-    def decide(self, scores: dict[str, float | None], context: dict[str, any] | None = None) -> tuple[str, float]:
+    def decide(
+        self, scores: dict[str, float | None], context: dict[str, any] | None = None
+    ) -> tuple[str, float]:
         """
         Make decision based on multi-score analysis.
 
@@ -168,7 +158,9 @@ class ReflexPolicy:
 
         return decision, round(confidence, 3)
 
-    def get_breakdown(self, scores: dict[str, float | None], context: dict[str, any] | None = None) -> dict[str, any]:
+    def get_breakdown(
+        self, scores: dict[str, float | None], context: dict[str, any] | None = None
+    ) -> dict[str, any]:
         """Get detailed breakdown of decision making process"""
         # Create a copy to avoid modifying original scores
         scores_copy = scores.copy()
@@ -191,7 +183,7 @@ class ReflexPolicy:
             contributions[score_type] = {
                 "raw_score": score_value,
                 "weight": weight,
-                "contribution": score_value * weight
+                "contribution": score_value * weight,
             }
 
         # Calculate total
@@ -227,7 +219,5 @@ class ReflexPolicy:
             "decision": decision,
             "confidence": round(confidence, 3),
             "policy_level": self.level,
-            "thresholds": self.thresholds[self.level]
+            "thresholds": self.thresholds[self.level],
         }
-
-

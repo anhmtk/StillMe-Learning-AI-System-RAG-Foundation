@@ -22,6 +22,7 @@ def register_health_endpoint(app, health_checker) -> dict[str, Any]:
     Returns:
         Dict with registration details
     """
+
     # Handler function
     def _health_handler():
         """Health endpoint handler"""
@@ -34,7 +35,7 @@ def register_health_endpoint(app, health_checker) -> dict[str, Any]:
             return {
                 "status": "error",
                 "version": health_checker.version,
-                "error": str(e)
+                "error": str(e),
             }, 503
 
     # Try callable-first style (test expects this)
@@ -66,6 +67,7 @@ def register_liveness_endpoint(app, health_checker) -> dict[str, Any]:
     Returns:
         Dict with registration details
     """
+
     # Handler function
     def _liveness_handler():
         """Liveness endpoint handler"""
@@ -73,15 +75,11 @@ def register_liveness_endpoint(app, health_checker) -> dict[str, Any]:
             return {
                 "status": "alive",
                 "version": health_checker.version,
-                "timestamp": health_checker.start_time
+                "timestamp": health_checker.start_time,
             }, 200
         except Exception as e:
             logger.error(f"Liveness check failed: {e}")
-            return {
-                "status": "error",
-                "version": "unknown",
-                "error": str(e)
-            }, 503
+            return {"status": "error", "version": "unknown", "error": str(e)}, 503
 
     # Try callable-first style (test expects this)
     try:
@@ -112,6 +110,7 @@ def register_metrics_endpoint(app, health_checker) -> dict[str, Any]:
     Returns:
         Dict with registration details
     """
+
     # Handler function
     def _metrics_handler():
         """Metrics endpoint handler"""
@@ -120,14 +119,22 @@ def register_metrics_endpoint(app, health_checker) -> dict[str, Any]:
 
             # Convert to Prometheus format
             metrics = []
-            metrics.append(f"stillme_health_status{{environment=\"{health_response.environment}\"}} {1 if health_response.status.value == 'healthy' else 0}")
+            metrics.append(
+                f"stillme_health_status{{environment=\"{health_response.environment}\"}} {1 if health_response.status.value == 'healthy' else 0}"
+            )
             metrics.append(f"stillme_uptime_seconds {health_response.uptime_seconds}")
-            metrics.append(f"stillme_version_info{{version=\"{health_response.version}\"}} 1")
+            metrics.append(
+                f'stillme_version_info{{version="{health_response.version}"}} 1'
+            )
 
             for check_name, check in health_response.checks.items():
-                status_value = 1 if check.status.value == 'healthy' else 0
-                metrics.append(f"stillme_health_check_status{{check=\"{check_name}\"}} {status_value}")
-                metrics.append(f"stillme_health_check_duration_ms{{check=\"{check_name}\"}} {check.duration_ms}")
+                status_value = 1 if check.status.value == "healthy" else 0
+                metrics.append(
+                    f'stillme_health_check_status{{check="{check_name}"}} {status_value}'
+                )
+                metrics.append(
+                    f'stillme_health_check_duration_ms{{check="{check_name}"}} {check.duration_ms}'
+                )
 
             return "\n".join(metrics), 200, {"Content-Type": "text/plain"}
         except Exception as e:

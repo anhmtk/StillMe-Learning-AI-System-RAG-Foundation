@@ -16,19 +16,22 @@ import yaml
 
 
 class PolicySeverity(Enum):
-    BLOCK = "BLOCK"      # Must fix before proceeding
-    WARN = "WARN"        # Should fix but can proceed
-    INFO = "INFO"        # Informational only
+    BLOCK = "BLOCK"  # Must fix before proceeding
+    WARN = "WARN"  # Should fix but can proceed
+    INFO = "INFO"  # Informational only
+
 
 @dataclass
 class PolicyViolation:
     """Represents a policy violation"""
+
     rule_id: str
     severity: PolicySeverity
     message: str
     file_path: Optional[str] = None
     line_number: Optional[int] = None
     suggestion: Optional[str] = None
+
 
 class PolicyEngine:
     """Main policy engine for AgentDev"""
@@ -52,7 +55,9 @@ class PolicyEngine:
         with open(policy_path) as f:
             self.policies = yaml.safe_load(f)
 
-    def validate_project_spec(self, spec_path: Optional[str] = None) -> list[PolicyViolation]:
+    def validate_project_spec(
+        self, spec_path: Optional[str] = None
+    ) -> list[PolicyViolation]:
         """Validate project specification compliance"""
         if spec_path:
             spec_file = Path(spec_path)
@@ -60,11 +65,13 @@ class PolicyEngine:
             spec_file = self.repo_root / "project.spec.yaml"
 
         if not spec_file.exists():
-            return [PolicyViolation(
-                rule_id="PROJECT_SPEC_MISSING",
-                severity=PolicySeverity.WARN,
-                message="project.spec.yaml not found - using defaults"
-            )]
+            return [
+                PolicyViolation(
+                    rule_id="PROJECT_SPEC_MISSING",
+                    severity=PolicySeverity.WARN,
+                    message="project.spec.yaml not found - using defaults",
+                )
+            ]
 
         with open(spec_file) as f:
             spec = yaml.safe_load(f)
@@ -85,11 +92,13 @@ class PolicyEngine:
         """Validate task configuration against policies"""
         config_file = Path(config_path)
         if not config_file.exists():
-            return [PolicyViolation(
-                rule_id="TASK_CONFIG_MISSING",
-                severity=PolicySeverity.BLOCK,
-                message=f"Task config not found: {config_path}"
-            )]
+            return [
+                PolicyViolation(
+                    rule_id="TASK_CONFIG_MISSING",
+                    severity=PolicySeverity.BLOCK,
+                    message=f"Task config not found: {config_path}",
+                )
+            ]
 
         with open(config_file) as f:
             config = json.load(f)
@@ -104,12 +113,14 @@ class PolicyEngine:
         if config.get("inference_location") == "CORE_CLOUD":
             budget = config.get("cloud_budget_usd", 0)
             if budget > 1000:
-                violations.append(PolicyViolation(
-                    rule_id="BUDGET_EXCESSIVE",
-                    severity=PolicySeverity.WARN,
-                    message=f"Cloud budget ${budget} exceeds recommended limit of $1000",
-                    suggestion="Consider optimizing for cost or getting approval"
-                ))
+                violations.append(
+                    PolicyViolation(
+                        rule_id="BUDGET_EXCESSIVE",
+                        severity=PolicySeverity.WARN,
+                        message=f"Cloud budget ${budget} exceeds recommended limit of $1000",
+                        suggestion="Consider optimizing for cost or getting approval",
+                    )
+                )
 
         return violations
 
@@ -144,7 +155,9 @@ class PolicyEngine:
 
         return violations
 
-    def _check_docker_compose_for_models(self, file_path: Path) -> list[PolicyViolation]:
+    def _check_docker_compose_for_models(
+        self, file_path: Path
+    ) -> list[PolicyViolation]:
         """Check docker-compose file for forbidden model containers"""
         violations = []
 
@@ -154,26 +167,33 @@ class PolicyEngine:
 
             # Check for forbidden model services
             forbidden_services = [
-                "ollama", "vllm", "text-generation-inference",
-                "transformers", "torchserve"
+                "ollama",
+                "vllm",
+                "text-generation-inference",
+                "transformers",
+                "torchserve",
             ]
 
             for service in forbidden_services:
                 if service in content.lower():
-                    violations.append(PolicyViolation(
-                        rule_id="EDGE_MODEL_RUNTIME",
-                        severity=PolicySeverity.BLOCK,
-                        message=f"Detected forbidden '{service}' in edge docker-compose",
-                        file_path=str(file_path),
-                        suggestion="Move model runtime to CORE or remove from edge"
-                    ))
+                    violations.append(
+                        PolicyViolation(
+                            rule_id="EDGE_MODEL_RUNTIME",
+                            severity=PolicySeverity.BLOCK,
+                            message=f"Detected forbidden '{service}' in edge docker-compose",
+                            file_path=str(file_path),
+                            suggestion="Move model runtime to CORE or remove from edge",
+                        )
+                    )
 
         except Exception as e:
-            violations.append(PolicyViolation(
-                rule_id="FILE_READ_ERROR",
-                severity=PolicySeverity.WARN,
-                message=f"Could not read {file_path}: {e}"
-            ))
+            violations.append(
+                PolicyViolation(
+                    rule_id="FILE_READ_ERROR",
+                    severity=PolicySeverity.WARN,
+                    message=f"Could not read {file_path}: {e}",
+                )
+            )
 
         return violations
 
@@ -196,37 +216,47 @@ class PolicyEngine:
 
             for pattern, description in forbidden_patterns:
                 if re.search(pattern, content, re.IGNORECASE):
-                    violations.append(PolicyViolation(
-                        rule_id="EDGE_MODEL_RUNTIME",
-                        severity=PolicySeverity.BLOCK,
-                        message=f"Detected {description} in edge code",
-                        file_path=str(file_path),
-                        suggestion="Move model runtime to CORE or remove from edge"
-                    ))
+                    violations.append(
+                        PolicyViolation(
+                            rule_id="EDGE_MODEL_RUNTIME",
+                            severity=PolicySeverity.BLOCK,
+                            message=f"Detected {description} in edge code",
+                            file_path=str(file_path),
+                            suggestion="Move model runtime to CORE or remove from edge",
+                        )
+                    )
 
         except Exception as e:
-            violations.append(PolicyViolation(
-                rule_id="FILE_READ_ERROR",
-                severity=PolicySeverity.WARN,
-                message=f"Could not read {file_path}: {e}"
-            ))
+            violations.append(
+                PolicyViolation(
+                    rule_id="FILE_READ_ERROR",
+                    severity=PolicySeverity.WARN,
+                    message=f"Could not read {file_path}: {e}",
+                )
+            )
 
         return violations
 
-    def _check_inference_location_compliance(self, spec: dict[str, Any]) -> list[PolicyViolation]:
+    def _check_inference_location_compliance(
+        self, spec: dict[str, Any]
+    ) -> list[PolicyViolation]:
         """Check inference location compliance"""
         violations = []
 
-        allowed_locations = spec.get("allowed_inference_locations", ["CORE_LOCAL", "CORE_CLOUD"])
+        allowed_locations = spec.get(
+            "allowed_inference_locations", ["CORE_LOCAL", "CORE_CLOUD"]
+        )
         inference_location = spec.get("inference_location", "CORE_LOCAL")
 
         if inference_location not in allowed_locations:
-            violations.append(PolicyViolation(
-                rule_id="INFERENCE_LOCATION_VIOLATION",
-                severity=PolicySeverity.BLOCK,
-                message=f"Inference location '{inference_location}' not allowed",
-                suggestion=f"Use one of: {', '.join(allowed_locations)}"
-            ))
+            violations.append(
+                PolicyViolation(
+                    rule_id="INFERENCE_LOCATION_VIOLATION",
+                    severity=PolicySeverity.BLOCK,
+                    message=f"Inference location '{inference_location}' not allowed",
+                    suggestion=f"Use one of: {', '.join(allowed_locations)}",
+                )
+            )
 
         return violations
 
@@ -249,37 +279,45 @@ class PolicyEngine:
             scan_dir = self.repo_root / dir_name
             if scan_dir.exists():
                 for file_path in scan_dir.rglob("*.py"):
-                    violations.extend(self._check_file_patterns(file_path, forbidden_patterns))
+                    violations.extend(
+                        self._check_file_patterns(file_path, forbidden_patterns)
+                    )
 
         return violations
 
-    def _check_file_patterns(self, file_path: Path, patterns: list[tuple[str, str]]) -> list[PolicyViolation]:
+    def _check_file_patterns(
+        self, file_path: Path, patterns: list[tuple[str, str]]
+    ) -> list[PolicyViolation]:
         """Check file for forbidden patterns"""
         violations = []
 
         try:
             with open(file_path) as f:
                 content = f.read()
-                lines = content.split('\n')
+                lines = content.split("\n")
 
             for line_num, line in enumerate(lines, 1):
                 for pattern, description in patterns:
                     if re.search(pattern, line, re.IGNORECASE):
-                        violations.append(PolicyViolation(
-                            rule_id="FORBIDDEN_PATTERN",
-                            severity=PolicySeverity.WARN,
-                            message=f"Found {description}",
-                            file_path=str(file_path),
-                            line_number=line_num,
-                            suggestion="Remove or replace with proper logging"
-                        ))
+                        violations.append(
+                            PolicyViolation(
+                                rule_id="FORBIDDEN_PATTERN",
+                                severity=PolicySeverity.WARN,
+                                message=f"Found {description}",
+                                file_path=str(file_path),
+                                line_number=line_num,
+                                suggestion="Remove or replace with proper logging",
+                            )
+                        )
 
         except Exception as e:
-            violations.append(PolicyViolation(
-                rule_id="FILE_READ_ERROR",
-                severity=PolicySeverity.WARN,
-                message=f"Could not read {file_path}: {e}"
-            ))
+            violations.append(
+                PolicyViolation(
+                    rule_id="FILE_READ_ERROR",
+                    severity=PolicySeverity.WARN,
+                    message=f"Could not read {file_path}: {e}",
+                )
+            )
 
         return violations
 
@@ -380,14 +418,19 @@ class PolicyEngine:
         print(report)
 
         # Check if any BLOCK violations
-        block_violations = [v for v in all_violations if v.severity == PolicySeverity.BLOCK]
+        block_violations = [
+            v for v in all_violations if v.severity == PolicySeverity.BLOCK
+        ]
 
         if block_violations:
-            print(f"\n❌ Policy validation FAILED - {len(block_violations)} blocking violations")
+            print(
+                f"\n❌ Policy validation FAILED - {len(block_violations)} blocking violations"
+            )
             return False
         else:
             print("\n✅ Policy validation PASSED")
             return True
+
 
 def main():
     """CLI entry point for policy engine"""
@@ -405,6 +448,7 @@ def main():
     success = engine.validate_all(args.config)
 
     sys.exit(0 if success else 1)
+
 
 if __name__ == "__main__":
     main()

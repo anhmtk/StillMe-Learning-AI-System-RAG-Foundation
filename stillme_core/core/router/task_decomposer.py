@@ -1070,18 +1070,18 @@ class TaskDecomposer:
         """Log decomposition for debugging and analysis"""
         if self.logger:
             self.logger.info(
-            "Task decomposed successfully",
-            extra={
-                "task_id": decomposition.task_id,
-                "task_type": decomposition.main_task_type.value,
-                "complexity": decomposition.main_complexity.value,
-                "subtasks_count": len(decomposition.subtasks),
-                "total_duration": decomposition.total_estimated_duration,
-                "critical_path_length": len(decomposition.critical_path),
-                "parallel_groups": len(decomposition.parallel_groups),
-                "processing_time": processing_time,
-            },
-        )
+                "Task decomposed successfully",
+                extra={
+                    "task_id": decomposition.task_id,
+                    "task_type": decomposition.main_task_type.value,
+                    "complexity": decomposition.main_complexity.value,
+                    "subtasks_count": len(decomposition.subtasks),
+                    "total_duration": decomposition.total_estimated_duration,
+                    "critical_path_length": len(decomposition.critical_path),
+                    "parallel_groups": len(decomposition.parallel_groups),
+                    "processing_time": processing_time,
+                },
+            )
 
     def get_performance_metrics(self) -> Dict[str, Any]:
         """Get current performance metrics"""
@@ -1104,15 +1104,15 @@ class TaskDecomposer:
         # For now, we'll just log the update
         if self.logger:
             self.logger.info(
-            "Subtask status updated",
-            extra={
-                "task_id": task_id,
-                "subtask_id": subtask_id,
-                "status": status.value,
-                "has_result": result is not None,
-                "has_error": error_message is not None,
-            },
-        )
+                "Subtask status updated",
+                extra={
+                    "task_id": task_id,
+                    "subtask_id": subtask_id,
+                    "status": status.value,
+                    "has_result": result is not None,
+                    "has_error": error_message is not None,
+                },
+            )
 
     def export_decomposition_data(self) -> Dict[str, Any]:
         """Export decomposition data for analysis"""

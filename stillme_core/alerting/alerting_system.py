@@ -21,9 +21,11 @@ logger = logging.getLogger(__name__)
 try:
     from .email_notifier import EmailNotifier
     from .telegram_notifier import TelegramNotifier
+
     REAL_NOTIFIERS_AVAILABLE = True
 except ImportError:
     REAL_NOTIFIERS_AVAILABLE = False
+
 
 class AlertingSystem:
     """Simple alerting system for StillMe IPC"""
@@ -49,15 +51,18 @@ class AlertingSystem:
                 "message": message,
                 "level": level,
                 "timestamp": datetime.now().isoformat(),
-                "source": "stillme_ipc"
+                "source": "stillme_ipc",
             }
 
             # Log the alert
             self.logger.info(f"🔔 ALERT [{level.upper()}]: {title} - {message}")
 
             # Save to file
-            alert_file = self.artifacts_dir / f"alert_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-            with open(alert_file, 'w', encoding='utf-8') as f:
+            alert_file = (
+                self.artifacts_dir
+                / f"alert_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            )
+            with open(alert_file, "w", encoding="utf-8") as f:
                 json.dump(alert_data, f, indent=2, ensure_ascii=False)
 
             # Try desktop notification
@@ -92,10 +97,9 @@ class AlertingSystem:
         """Send desktop notification"""
         try:
             import plyer
+
             plyer.notification.notify(
-                title=f"StillMe IPC - {title}",
-                message=message,
-                timeout=10
+                title=f"StillMe IPC - {title}", message=message, timeout=10
             )
         except ImportError:
             pass  # plyer not available
@@ -117,7 +121,7 @@ class AlertingSystem:
             alerts = []
             for file_path in alert_files[:limit]:
                 try:
-                    with open(file_path, encoding='utf-8') as f:
+                    with open(file_path, encoding="utf-8") as f:
                         alert_data = json.load(f)
                     alerts.append(alert_data)
                 except Exception as e:
@@ -132,6 +136,7 @@ class AlertingSystem:
         """Clear alerts older than specified days"""
         try:
             from datetime import timedelta
+
             cutoff_date = datetime.now() - timedelta(days=days)
 
             alert_files = list(self.artifacts_dir.glob("alert_*.json"))

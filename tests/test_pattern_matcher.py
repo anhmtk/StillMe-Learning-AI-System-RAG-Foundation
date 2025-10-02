@@ -105,7 +105,9 @@ def test_performance_benchmark(pattern_matcher):
     match_time_ms = (end_time - start_time) * 1000
 
     # Performance should be under 10ms for regex fallback (Aho-Corasick would be <2ms)
-    assert match_time_ms < 15.0, f"Match time {match_time_ms:.3f}ms exceeds 15ms threshold"
+    assert (
+        match_time_ms < 15.0
+    ), f"Match time {match_time_ms:.3f}ms exceeds 15ms threshold"
     assert result["match_time_us"] > 0
 
 

@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 # Add stillme_core to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 try:
     from stillme_core.modules.api_provider_manager import UnifiedAPIManager
@@ -22,9 +22,11 @@ except ImportError:
     print("Warning: UnifiedAPIManager not available, using mock")
     UnifiedAPIManager = None
 
+
 @dataclass
 class ParaphraseConfig:
     """Cấu hình cho paraphraser"""
+
     model: str = "gemma2:2b"  # Local model mặc định
     num_variants: int = 5  # Số biến thể tạo ra
     temperature: float = 0.8  # Độ sáng tạo
@@ -33,15 +35,18 @@ class ParaphraseConfig:
     preserve_tone: bool = True  # Giữ nguyên giọng điệu
     preserve_language: bool = True  # Giữ nguyên ngôn ngữ
 
+
 @dataclass
 class ParaphraseResult:
     """Kết quả paraphrase"""
+
     original: str
     variants: list[str]
     model_used: str
     success: bool
     error: Optional[str] = None
     metadata: dict[str, Any] = None
+
 
 class Paraphraser:
     """Paraphraser sử dụng local AI models"""
@@ -89,14 +94,14 @@ Biến thể:"""
                     f"Biến thể 2 của: {text}",
                     f"Biến thể 3 của: {text}",
                     f"Biến thể 4 của: {text}",
-                    f"Biến thể 5 của: {text}"
+                    f"Biến thể 5 của: {text}",
                 ]
                 return ParaphraseResult(
                     original=text,
                     variants=variants,
                     model_used="mock",
                     success=True,
-                    metadata={"method": "mock"}
+                    metadata={"method": "mock"},
                 )
 
             # Create prompt
@@ -104,8 +109,7 @@ Biến thể:"""
 
             # Call local model
             response = self.api_manager.get_response(
-                prompt=prompt,
-                model=self.config.model
+                prompt=prompt, model=self.config.model
             )
 
             # Parse response
@@ -119,8 +123,8 @@ Biến thể:"""
                 metadata={
                     "temperature": self.config.temperature,
                     "max_tokens": self.config.max_tokens,
-                    "num_variants": len(variants)
-                }
+                    "num_variants": len(variants),
+                },
             )
 
         except Exception as e:
@@ -130,21 +134,21 @@ Biến thể:"""
                 variants=[],
                 model_used=self.config.model,
                 success=False,
-                error=str(e)
+                error=str(e),
             )
 
     def _parse_paraphrase_response(self, response: str) -> list[str]:
         """Parse response từ model thành list variants"""
-        lines = response.strip().split('\n')
+        lines = response.strip().split("\n")
         variants = []
 
         for line in lines:
             line = line.strip()
-            if line and not line.startswith('#'):
+            if line and not line.startswith("#"):
                 # Remove numbering if present
-                if line.startswith(('1.', '2.', '3.', '4.', '5.', '-', '*')):
-                    line = line.split('.', 1)[-1].strip()
-                    line = line.lstrip('-* ').strip()
+                if line.startswith(("1.", "2.", "3.", "4.", "5.", "-", "*")):
+                    line = line.split(".", 1)[-1].strip()
+                    line = line.lstrip("-* ").strip()
 
                 if line:
                     variants.append(line)
@@ -155,7 +159,7 @@ Biến thể:"""
             for i in range(len(variants), self.config.num_variants):
                 variants.append(f"{variants[0]} (biến thể {i+1})")
 
-        return variants[:self.config.num_variants]
+        return variants[: self.config.num_variants]
 
     def paraphrase_batch(self, texts: list[str]) -> list[ParaphraseResult]:
         """Paraphrase nhiều câu cùng lúc"""
@@ -165,15 +169,18 @@ Biến thể:"""
                 result = self.paraphrase_text(text)
                 results.append(result)
             except Exception as e:
-                results.append(ParaphraseResult(
-                    original=text,
-                    variants=[],
-                    model_used=self.config.model,
-                    success=False,
-                    error=str(e)
-                ))
+                results.append(
+                    ParaphraseResult(
+                        original=text,
+                        variants=[],
+                        model_used=self.config.model,
+                        success=False,
+                        error=str(e),
+                    )
+                )
 
         return results
+
 
 class ParaphraseAugmentor:
     """Augmentor chính cho paraphrase"""
@@ -192,16 +199,16 @@ class ParaphraseAugmentor:
 
         # Load input data
         texts = []
-        with open(input_path, encoding='utf-8') as f:
+        with open(input_path, encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
                 if line:
                     try:
                         data = json.loads(line)
-                        if 'text' in data:
-                            texts.append(data['text'])
-                        elif 'message' in data:
-                            texts.append(data['message'])
+                        if "text" in data:
+                            texts.append(data["text"])
+                        elif "message" in data:
+                            texts.append(data["message"])
                         else:
                             texts.append(str(data))
                     except json.JSONDecodeError:
@@ -214,8 +221,10 @@ class ParaphraseAugmentor:
         all_results = []
 
         for i in range(0, len(texts), batch_size):
-            batch = texts[i:i+batch_size]
-            self.logger.info(f"Processing batch {i//batch_size + 1}/{(len(texts)-1)//batch_size + 1}")
+            batch = texts[i : i + batch_size]
+            self.logger.info(
+                f"Processing batch {i//batch_size + 1}/{(len(texts)-1)//batch_size + 1}"
+            )
 
             results = self.paraphraser.paraphrase_batch(batch)
             all_results.extend(results)
@@ -223,7 +232,7 @@ class ParaphraseAugmentor:
         # Save results
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             for result in all_results:
                 if result.success:
                     for variant in result.variants:
@@ -232,9 +241,9 @@ class ParaphraseAugmentor:
                             "variant": variant,
                             "method": "paraphrase",
                             "model": result.model_used,
-                            "metadata": result.metadata
+                            "metadata": result.metadata,
                         }
-                        f.write(json.dumps(output_data, ensure_ascii=False) + '\n')
+                        f.write(json.dumps(output_data, ensure_ascii=False) + "\n")
 
         # Generate statistics
         stats = {
@@ -244,20 +253,17 @@ class ParaphraseAugmentor:
             "model_used": self.paraphraser.config.model,
             "config": {
                 "num_variants": self.paraphraser.config.num_variants,
-                "temperature": self.paraphraser.config.temperature
-            }
+                "temperature": self.paraphraser.config.temperature,
+            },
         }
 
         self.logger.info(f"Paraphrase augmentation completed: {stats}")
         return stats
 
+
 async def main():
     """Demo function"""
-    config = ParaphraseConfig(
-        model="gemma2:2b",
-        num_variants=3,
-        temperature=0.7
-    )
+    config = ParaphraseConfig(model="gemma2:2b", num_variants=3, temperature=0.7)
 
     augmentor = ParaphraseAugmentor(config)
 
@@ -267,6 +273,7 @@ async def main():
     print("Variants:")
     for i, variant in enumerate(result.variants, 1):
         print(f"  {i}. {variant}")
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

@@ -12,24 +12,26 @@ def analyze_f821_evidence():
     """Phân tích bằng chứng cho các F821 symbols"""
 
     # Đọc F821 errors
-    with open('f821_analysis.json', encoding='utf-8', errors='replace') as f:
+    with open("f821_analysis.json", encoding="utf-8", errors="replace") as f:
         f821_errors = json.load(f)
 
     # Nhóm theo symbol
     symbol_evidence = defaultdict(list)
 
     for error in f821_errors:
-        message = error['message']
-        if 'Undefined name' in message:
+        message = error["message"]
+        if "Undefined name" in message:
             # Extract symbol name
-            match = re.search(r'`([^`]+)`', message)
+            match = re.search(r"`([^`]+)`", message)
             if match:
                 symbol = match.group(1)
-                symbol_evidence[symbol].append({
-                    'file': error['filename'],
-                    'line': error['location']['row'],
-                    'message': message
-                })
+                symbol_evidence[symbol].append(
+                    {
+                        "file": error["filename"],
+                        "line": error["location"]["row"],
+                        "message": message,
+                    }
+                )
 
     # Phân tích từng symbol
     symbols_analysis = []
@@ -39,11 +41,11 @@ def analyze_f821_evidence():
         usages_with_context = []
 
         for usage in usages:
-            file_path = usage['file']
-            line_num = usage['line']
+            file_path = usage["file"]
+            line_num = usage["line"]
 
             try:
-                with open(file_path, encoding='utf-8', errors='replace') as f:
+                with open(file_path, encoding="utf-8", errors="replace") as f:
                     lines = f.readlines()
 
                 # Lấy 3 dòng context
@@ -56,87 +58,97 @@ def analyze_f821_evidence():
                     prefix = "+" if i == line_num - 1 else "-"
                     context_lines.append(f"{prefix}{i+1}:{line_content}")
 
-                usages_with_context.append({
-                    'file': file_path,
-                    'line': line_num,
-                    'context': context_lines
-                })
+                usages_with_context.append(
+                    {"file": file_path, "line": line_num, "context": context_lines}
+                )
 
             except Exception as e:
-                usages_with_context.append({
-                    'file': file_path,
-                    'line': line_num,
-                    'context': [f"Error reading file: {e}"]
-                })
+                usages_with_context.append(
+                    {
+                        "file": file_path,
+                        "line": line_num,
+                        "context": [f"Error reading file: {e}"],
+                    }
+                )
 
         # Suy luận kind dựa trên context
-        inferred_kind, required_members, confidence = infer_symbol_kind(symbol, usages_with_context)
+        inferred_kind, required_members, confidence = infer_symbol_kind(
+            symbol, usages_with_context
+        )
 
         # Tìm preferred module
         preferred_module = find_preferred_module(symbol, usages_with_context)
 
-        symbols_analysis.append({
-            'name': symbol,
-            'usages': usages_with_context,
-            'inferred_kind': inferred_kind,
-            'required_members_or_fields': required_members,
-            'preferred_module': preferred_module,
-            'confidence': confidence
-        })
+        symbols_analysis.append(
+            {
+                "name": symbol,
+                "usages": usages_with_context,
+                "inferred_kind": inferred_kind,
+                "required_members_or_fields": required_members,
+                "preferred_module": preferred_module,
+                "confidence": confidence,
+            }
+        )
 
     # Sắp xếp theo confidence giảm dần
-    symbols_analysis.sort(key=lambda x: x['confidence'], reverse=True)
+    symbols_analysis.sort(key=lambda x: x["confidence"], reverse=True)
 
-    return {
-        'symbols': symbols_analysis,
-        'total_candidates': len(symbols_analysis)
-    }
+    return {"symbols": symbols_analysis, "total_candidates": len(symbols_analysis)}
+
 
 def infer_symbol_kind(symbol, usages):
     """Suy luận loại symbol dựa trên usage patterns"""
 
     all_context = []
     for usage in usages:
-        all_context.extend(usage['context'])
+        all_context.extend(usage["context"])
 
-    context_text = '\n'.join(all_context)
+    context_text = "\n".join(all_context)
 
     # Enum patterns
     enum_patterns = [
-        rf'{symbol}\.(\w+)',  # Symbol.MEMBER
-        rf'\.{symbol}\.(\w+)',  # .Symbol.MEMBER
-        rf'{symbol}\.value',  # Symbol.value
-        rf'{symbol}\.name',   # Symbol.name
+        rf"{symbol}\.(\w+)",  # Symbol.MEMBER
+        rf"\.{symbol}\.(\w+)",  # .Symbol.MEMBER
+        rf"{symbol}\.value",  # Symbol.value
+        rf"{symbol}\.name",  # Symbol.name
     ]
 
     # Class patterns
     class_patterns = [
-        rf'{symbol}\(',  # Symbol()
-        rf'{symbol}\.\w+\(',  # Symbol.method()
-        rf': {symbol}',  # type hint
-        rf'-> {symbol}',  # return type
+        rf"{symbol}\(",  # Symbol()
+        rf"{symbol}\.\w+\(",  # Symbol.method()
+        rf": {symbol}",  # type hint
+        rf"-> {symbol}",  # return type
     ]
 
     # Literal/Const patterns
     literal_patterns = [
-        rf'== {symbol}',  # == Symbol
-        rf'!= {symbol}',  # != Symbol
-        rf'is {symbol}',  # is Symbol
-        rf'"{symbol}"',   # "Symbol"
-        rf"'{symbol}'",   # 'Symbol'
+        rf"== {symbol}",  # == Symbol
+        rf"!= {symbol}",  # != Symbol
+        rf"is {symbol}",  # is Symbol
+        rf'"{symbol}"',  # "Symbol"
+        rf"'{symbol}'",  # 'Symbol'
     ]
 
     # Dataclass patterns
     dataclass_patterns = [
-        rf'{symbol}\.\w+',  # Symbol.field
-        rf'{symbol}\[',     # Symbol[...]
+        rf"{symbol}\.\w+",  # Symbol.field
+        rf"{symbol}\[",  # Symbol[...]
     ]
 
     # Đếm patterns
-    enum_count = sum(len(re.findall(pattern, context_text)) for pattern in enum_patterns)
-    class_count = sum(len(re.findall(pattern, context_text)) for pattern in class_patterns)
-    literal_count = sum(len(re.findall(pattern, context_text)) for pattern in literal_patterns)
-    dataclass_count = sum(len(re.findall(pattern, context_text)) for pattern in dataclass_patterns)
+    enum_count = sum(
+        len(re.findall(pattern, context_text)) for pattern in enum_patterns
+    )
+    class_count = sum(
+        len(re.findall(pattern, context_text)) for pattern in class_patterns
+    )
+    literal_count = sum(
+        len(re.findall(pattern, context_text)) for pattern in literal_patterns
+    )
+    dataclass_count = sum(
+        len(re.findall(pattern, context_text)) for pattern in dataclass_patterns
+    )
 
     # Suy luận kind
     if enum_count > 0:
@@ -147,45 +159,47 @@ def infer_symbol_kind(symbol, usages):
             members.update(matches)
 
         confidence = min(0.9, 0.5 + (enum_count * 0.1))
-        return 'Enum', list(members), confidence
+        return "Enum", list(members), confidence
 
     elif class_count > 0:
         confidence = min(0.8, 0.4 + (class_count * 0.1))
-        return 'Class', [], confidence
+        return "Class", [], confidence
 
     elif literal_count > 0:
         confidence = min(0.7, 0.3 + (literal_count * 0.1))
-        return 'Literal', [symbol], confidence
+        return "Literal", [symbol], confidence
 
     elif dataclass_count > 0:
         confidence = min(0.6, 0.2 + (dataclass_count * 0.1))
-        return 'Dataclass', [], confidence
+        return "Dataclass", [], confidence
 
     else:
         # Default based on symbol name patterns
         if symbol.isupper():
-            return 'Const', [symbol], 0.3
+            return "Const", [symbol], 0.3
         elif symbol[0].isupper():
-            return 'Class', [], 0.2
+            return "Class", [], 0.2
         else:
-            return 'Unknown', [], 0.1
+            return "Unknown", [], 0.1
+
 
 def find_preferred_module(symbol, usages):
     """Tìm module ưu tiên dựa trên usage patterns"""
 
     # Common patterns
-    if symbol in ['JobStatus', 'HealthStatus', 'RiskLevel']:
-        return 'stillme_core.core.status'
-    elif symbol in ['Mock', 'patch', 'AsyncMock']:
-        return 'unittest.mock'
-    elif symbol in ['Any', 'Dict', 'List', 'Optional', 'Union']:
-        return 'typing'
-    elif symbol in ['PIIType', 'PrivacyLevel']:
-        return 'stillme_core.privacy.privacy_manager'
-    elif symbol in ['given', 'settings']:
-        return 'hypothesis'
+    if symbol in ["JobStatus", "HealthStatus", "RiskLevel"]:
+        return "stillme_core.core.status"
+    elif symbol in ["Mock", "patch", "AsyncMock"]:
+        return "unittest.mock"
+    elif symbol in ["Any", "Dict", "List", "Optional", "Union"]:
+        return "typing"
+    elif symbol in ["PIIType", "PrivacyLevel"]:
+        return "stillme_core.privacy.privacy_manager"
+    elif symbol in ["given", "settings"]:
+        return "hypothesis"
     else:
-        return f'stillme_core.core.{symbol.lower()}'
+        return f"stillme_core.core.{symbol.lower()}"
+
 
 if __name__ == "__main__":
     result = analyze_f821_evidence()

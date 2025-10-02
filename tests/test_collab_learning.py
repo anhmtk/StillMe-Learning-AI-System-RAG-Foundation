@@ -28,7 +28,10 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 # Skip test due to missing module
-pytest.skip("Module stillme_core.learning.collab_learning not available", allow_module_level=True)
+pytest.skip(
+    "Module stillme_core.learning.collab_learning not available",
+    allow_module_level=True,
+)
 
 from stillme_core.learning.collab_learning import (
     CollaborativeLearning,
@@ -51,7 +54,7 @@ class TestCollaborativeLearning:
     @pytest.fixture
     def collab_learning(self, temp_dir):
         """Create collaborative learning with temporary directory"""
-        with patch('stillme_core.learning.collab_learning.Path') as mock_path:
+        with patch("stillme_core.learning.collab_learning.Path") as mock_path:
             mock_path.return_value = Path(temp_dir)
             collab = CollaborativeLearning()
             return collab
@@ -63,21 +66,61 @@ class TestCollaborativeLearning:
 
         # Create valid dataset content with enough records
         valid_records = [
-            {"input": "def hello():\n    return 'world'", "expected_output": "def hello():\n    return 'world'", "category": "syntax"},
-            {"input": "def add(a, b):\n    return a + b", "expected_output": "def add(a, b):\n    return a + b", "category": "logic"},
-            {"input": "What is Python?", "expected_output": "Python is a programming language", "category": "knowledge"},
-            {"input": "def multiply(x, y):\n    return x * y", "expected_output": "def multiply(x, y):\n    return x * y", "category": "logic"},
-            {"input": "How to create a list?", "expected_output": "Use square brackets: []", "category": "knowledge"},
-            {"input": "def divide(a, b):\n    return a / b", "expected_output": "def divide(a, b):\n    return a / b", "category": "logic"},
-            {"input": "What is a function?", "expected_output": "A reusable block of code", "category": "knowledge"},
-            {"input": "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n-1)", "expected_output": "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n-1)", "category": "recursion"},
-            {"input": "How to import modules?", "expected_output": "Use import statement", "category": "knowledge"},
-            {"input": "def fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n-1) + fibonacci(n-2)", "expected_output": "def fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n-1) + fibonacci(n-2)", "category": "recursion"}
+            {
+                "input": "def hello():\n    return 'world'",
+                "expected_output": "def hello():\n    return 'world'",
+                "category": "syntax",
+            },
+            {
+                "input": "def add(a, b):\n    return a + b",
+                "expected_output": "def add(a, b):\n    return a + b",
+                "category": "logic",
+            },
+            {
+                "input": "What is Python?",
+                "expected_output": "Python is a programming language",
+                "category": "knowledge",
+            },
+            {
+                "input": "def multiply(x, y):\n    return x * y",
+                "expected_output": "def multiply(x, y):\n    return x * y",
+                "category": "logic",
+            },
+            {
+                "input": "How to create a list?",
+                "expected_output": "Use square brackets: []",
+                "category": "knowledge",
+            },
+            {
+                "input": "def divide(a, b):\n    return a / b",
+                "expected_output": "def divide(a, b):\n    return a / b",
+                "category": "logic",
+            },
+            {
+                "input": "What is a function?",
+                "expected_output": "A reusable block of code",
+                "category": "knowledge",
+            },
+            {
+                "input": "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n-1)",
+                "expected_output": "def factorial(n):\n    if n <= 1:\n        return 1\n    return n * factorial(n-1)",
+                "category": "recursion",
+            },
+            {
+                "input": "How to import modules?",
+                "expected_output": "Use import statement",
+                "category": "knowledge",
+            },
+            {
+                "input": "def fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n-1) + fibonacci(n-2)",
+                "expected_output": "def fibonacci(n):\n    if n <= 1:\n        return n\n    return fibonacci(n-1) + fibonacci(n-2)",
+                "category": "recursion",
+            },
         ]
 
-        with open(dataset_file, 'w', encoding='utf-8') as f:
+        with open(dataset_file, "w", encoding="utf-8") as f:
             for record in valid_records:
-                f.write(json.dumps(record) + '\n')
+                f.write(json.dumps(record) + "\n")
 
         return str(dataset_file)
 
@@ -88,14 +131,26 @@ class TestCollaborativeLearning:
 
         # Create dataset with issues
         bad_records = [
-            {"input": "harmful content about violence", "expected_output": "I cannot help with that", "category": "ethics"},
-            {"input": "", "expected_output": "", "category": "quality"},  # Empty content
-            {"input": "password=123456", "expected_output": "password=get_secure_password()", "category": "security"}
+            {
+                "input": "harmful content about violence",
+                "expected_output": "I cannot help with that",
+                "category": "ethics",
+            },
+            {
+                "input": "",
+                "expected_output": "",
+                "category": "quality",
+            },  # Empty content
+            {
+                "input": "password=123456",
+                "expected_output": "password=get_secure_password()",
+                "category": "security",
+            },
         ]
 
-        with open(dataset_file, 'w', encoding='utf-8') as f:
+        with open(dataset_file, "w", encoding="utf-8") as f:
             for record in bad_records:
-                f.write(json.dumps(record) + '\n')
+                f.write(json.dumps(record) + "\n")
 
         return str(dataset_file)
 
@@ -107,7 +162,7 @@ class TestCollaborativeLearning:
             name="Test Dataset",
             description="A test dataset for validation",
             contributor="test_contributor",
-            source=DatasetSource.COMMUNITY_CONTRIBUTION
+            source=DatasetSource.COMMUNITY_CONTRIBUTION,
         )
 
         assert success is True
@@ -125,7 +180,7 @@ class TestCollaborativeLearning:
             name="Bad Dataset",
             description="A dataset with issues",
             contributor="test_contributor",
-            source=DatasetSource.COMMUNITY_CONTRIBUTION
+            source=DatasetSource.COMMUNITY_CONTRIBUTION,
         )
 
         assert success is False
@@ -141,7 +196,7 @@ class TestCollaborativeLearning:
             file_path="nonexistent_file.jsonl",
             name="Nonexistent Dataset",
             description="A dataset that doesn't exist",
-            contributor="test_contributor"
+            contributor="test_contributor",
         )
 
         assert success is False
@@ -156,7 +211,7 @@ class TestCollaborativeLearning:
             file_path=mock_dataset_file,
             name="Test Dataset",
             description="First ingestion",
-            contributor="test_contributor"
+            contributor="test_contributor",
         )
 
         assert success1 is True
@@ -166,7 +221,7 @@ class TestCollaborativeLearning:
             file_path=mock_dataset_file,
             name="Test Dataset",
             description="Second ingestion",
-            contributor="test_contributor"
+            contributor="test_contributor",
         )
 
         assert success2 is False
@@ -180,7 +235,7 @@ class TestCollaborativeLearning:
             file_path=mock_dataset_file,
             name="Test Dataset",
             description="A test dataset",
-            contributor="test_contributor"
+            contributor="test_contributor",
         )
 
         assert success is True
@@ -205,7 +260,7 @@ class TestCollaborativeLearning:
             file_path=mock_bad_dataset_file,
             name="Bad Dataset",
             description="A bad dataset",
-            contributor="test_contributor"
+            contributor="test_contributor",
         )
 
         assert success is False
@@ -237,7 +292,7 @@ class TestCollaborativeLearning:
             file_path=mock_dataset_file,
             name="Test Dataset",
             description="A test dataset",
-            contributor="test_contributor"
+            contributor="test_contributor",
         )
 
         assert success is True
@@ -261,21 +316,23 @@ class TestCollaborativeLearning:
         assert status is None
 
     @pytest.mark.asyncio
-    async def test_list_community_datasets(self, collab_learning, mock_dataset_file, mock_bad_dataset_file):
+    async def test_list_community_datasets(
+        self, collab_learning, mock_dataset_file, mock_bad_dataset_file
+    ):
         """Test listing community datasets"""
         # Ingest multiple datasets
         await collab_learning.ingest_community_dataset(
             file_path=mock_dataset_file,
             name="Good Dataset",
             description="A good dataset",
-            contributor="contributor1"
+            contributor="contributor1",
         )
 
         await collab_learning.ingest_community_dataset(
             file_path=mock_bad_dataset_file,
             name="Bad Dataset",
             description="A bad dataset",
-            contributor="contributor2"
+            contributor="contributor2",
         )
 
         # List all datasets
@@ -283,12 +340,16 @@ class TestCollaborativeLearning:
         assert len(all_datasets) == 2
 
         # List only approved datasets
-        approved_datasets = await collab_learning.list_community_datasets(ValidationStatus.APPROVED)
+        approved_datasets = await collab_learning.list_community_datasets(
+            ValidationStatus.APPROVED
+        )
         assert len(approved_datasets) == 1
         assert approved_datasets[0]["name"] == "Good Dataset"
 
         # List only rejected datasets
-        rejected_datasets = await collab_learning.list_community_datasets(ValidationStatus.REJECTED)
+        rejected_datasets = await collab_learning.list_community_datasets(
+            ValidationStatus.REJECTED
+        )
         assert len(rejected_datasets) == 1
         assert rejected_datasets[0]["name"] == "Bad Dataset"
 
@@ -299,25 +360,37 @@ class TestCollaborativeLearning:
         ethics_file = Path(collab_learning.datasets_path) / "ethics_test.jsonl"
 
         ethics_records = [
-            {"input": "harmful content about violence", "expected_output": "I cannot help with that"},
-            {"input": "hate speech example", "expected_output": "I cannot generate hate speech"},
-            {"input": "discrimination example", "expected_output": "I promote equality"}
+            {
+                "input": "harmful content about violence",
+                "expected_output": "I cannot help with that",
+            },
+            {
+                "input": "hate speech example",
+                "expected_output": "I cannot generate hate speech",
+            },
+            {
+                "input": "discrimination example",
+                "expected_output": "I promote equality",
+            },
         ]
 
-        with open(ethics_file, 'w', encoding='utf-8') as f:
+        with open(ethics_file, "w", encoding="utf-8") as f:
             for record in ethics_records:
-                f.write(json.dumps(record) + '\n')
+                f.write(json.dumps(record) + "\n")
 
         success, message, dataset = await collab_learning.ingest_community_dataset(
             file_path=str(ethics_file),
             name="Ethics Test Dataset",
             description="Dataset with ethics issues",
-            contributor="test_contributor"
+            contributor="test_contributor",
         )
 
         assert success is False
         assert dataset.validation_status == ValidationStatus.REJECTED.value
-        assert dataset.ethics_score < collab_learning.validation_thresholds["min_ethics_score"]
+        assert (
+            dataset.ethics_score
+            < collab_learning.validation_thresholds["min_ethics_score"]
+        )
 
     @pytest.mark.asyncio
     async def test_dataset_validation_quality(self, collab_learning):
@@ -329,24 +402,27 @@ class TestCollaborativeLearning:
             {"input": "valid input", "expected_output": "valid output"},  # Valid
             {"input": "", "expected_output": ""},  # Empty
             {"invalid": "missing required fields"},  # Missing required fields
-            {"input": "valid", "expected_output": "valid"}  # Valid
+            {"input": "valid", "expected_output": "valid"},  # Valid
         ]
 
-        with open(quality_file, 'w', encoding='utf-8') as f:
+        with open(quality_file, "w", encoding="utf-8") as f:
             for record in quality_records:
-                f.write(json.dumps(record) + '\n')
+                f.write(json.dumps(record) + "\n")
 
         success, message, dataset = await collab_learning.ingest_community_dataset(
             file_path=str(quality_file),
             name="Quality Test Dataset",
             description="Dataset with quality issues",
-            contributor="test_contributor"
+            contributor="test_contributor",
         )
 
         # Should be rejected due to quality issues
         assert success is False
         assert dataset.validation_status == ValidationStatus.REJECTED.value
-        assert dataset.quality_score < collab_learning.validation_thresholds["min_quality_score"]
+        assert (
+            dataset.quality_score
+            < collab_learning.validation_thresholds["min_quality_score"]
+        )
 
     @pytest.mark.asyncio
     async def test_dataset_validation_safety(self, collab_learning):
@@ -355,20 +431,29 @@ class TestCollaborativeLearning:
         safety_file = Path(collab_learning.datasets_path) / "safety_test.jsonl"
 
         safety_records = [
-            {"input": "password=123456", "expected_output": "password=get_secure_password()"},
-            {"input": "SELECT * FROM users WHERE id = 1", "expected_output": "Use parameterized queries"},
-            {"input": "eval('malicious_code')", "expected_output": "Avoid eval() function"}
+            {
+                "input": "password=123456",
+                "expected_output": "password=get_secure_password()",
+            },
+            {
+                "input": "SELECT * FROM users WHERE id = 1",
+                "expected_output": "Use parameterized queries",
+            },
+            {
+                "input": "eval('malicious_code')",
+                "expected_output": "Avoid eval() function",
+            },
         ]
 
-        with open(safety_file, 'w', encoding='utf-8') as f:
+        with open(safety_file, "w", encoding="utf-8") as f:
             for record in safety_records:
-                f.write(json.dumps(record) + '\n')
+                f.write(json.dumps(record) + "\n")
 
         success, message, dataset = await collab_learning.ingest_community_dataset(
             file_path=str(safety_file),
             name="Safety Test Dataset",
             description="Dataset with safety issues",
-            contributor="test_contributor"
+            contributor="test_contributor",
         )
 
         # Should be rejected due to safety flags
@@ -383,17 +468,20 @@ class TestCollaborativeLearning:
         large_file = Path(temp_dir) / "large_dataset.jsonl"
 
         # Create file larger than limit (100MB)
-        with open(large_file, 'w', encoding='utf-8') as f:
+        with open(large_file, "w", encoding="utf-8") as f:
             # Write enough data to exceed 100MB
             for i in range(1000000):  # 1M records
-                record = {"input": f"input_{i}" * 100, "expected_output": f"output_{i}" * 100}
-                f.write(json.dumps(record) + '\n')
+                record = {
+                    "input": f"input_{i}" * 100,
+                    "expected_output": f"output_{i}" * 100,
+                }
+                f.write(json.dumps(record) + "\n")
 
         success, message, dataset = await collab_learning.ingest_community_dataset(
             file_path=str(large_file),
             name="Large Dataset",
             description="A very large dataset",
-            contributor="test_contributor"
+            contributor="test_contributor",
         )
 
         assert success is False
@@ -421,7 +509,7 @@ class TestCollaborativeLearning:
             validation_errors=[],
             ethics_score=0.95,
             quality_score=0.85,
-            safety_flags=[]
+            safety_flags=[],
         )
 
         mock_dataset2 = CommunityDataset(
@@ -439,7 +527,7 @@ class TestCollaborativeLearning:
             validation_errors=["Low quality score"],
             ethics_score=0.70,
             quality_score=0.60,
-            safety_flags=["potential_security_issue"]
+            safety_flags=["potential_security_issue"],
         )
 
         collab_learning.community_datasets["dataset1"] = mock_dataset1
@@ -468,14 +556,14 @@ class TestCollaborativeLearning:
             file_path=mock_dataset_file,
             name="Test Dataset",
             description="A test dataset",
-            contributor="test_contributor"
+            contributor="test_contributor",
         )
 
         # Log file should exist now
         assert log_file.exists()
 
         # Check log content
-        with open(log_file, encoding='utf-8') as f:
+        with open(log_file, encoding="utf-8") as f:
             log_content = f.read()
             assert "dataset_validation" in log_content
             assert "Test Dataset" in log_content

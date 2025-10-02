@@ -3,12 +3,14 @@
 StillMe Environment Validation
 Kiểm tra các API keys và cấu hình khi khởi động
 """
+
 import logging
 import os
 
 from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
+
 
 class EnvironmentValidator:
     """Validator cho environment variables"""
@@ -23,7 +25,7 @@ class EnvironmentValidator:
             "GNEWS_API_KEY": "GNews API cho tin tức thay thế",
             "OPENROUTER_API_KEY": "OpenRouter API cho LLM",
             "DEEPSEEK_API_KEY": "DeepSeek Cloud API",
-            "OPENAI_API_KEY": "OpenAI API (optional)"
+            "OPENAI_API_KEY": "OpenAI API (optional)",
         }
 
         # Optional keys
@@ -31,7 +33,7 @@ class EnvironmentValidator:
             "OLLAMA_URL": "Ollama local server URL",
             "REDDIT_CLIENT_ID": "Reddit API client ID",
             "REDDIT_CLIENT_SECRET": "Reddit API client secret",
-            "GITHUB_TOKEN": "GitHub API token"
+            "GITHUB_TOKEN": "GitHub API token",
         }
 
         # Validation results
@@ -114,7 +116,11 @@ class EnvironmentValidator:
 
         # Summary
         total_required = len(self.required_keys)
-        valid_required = sum(1 for k in self.required_keys.keys() if self.validation_results.get(k, False))
+        valid_required = sum(
+            1
+            for k in self.required_keys.keys()
+            if self.validation_results.get(k, False)
+        )
 
         logger.info("\n📊 Summary:")
         logger.info(f"  Required keys: {valid_required}/{total_required}")
@@ -122,7 +128,9 @@ class EnvironmentValidator:
         logger.info(f"  Warnings: {len(self.warnings)}")
 
         if self.missing_keys:
-            logger.warning(f"\n⚠️  Missing required keys: {', '.join(self.missing_keys)}")
+            logger.warning(
+                f"\n⚠️  Missing required keys: {', '.join(self.missing_keys)}"
+            )
             logger.warning("   Internet access features may be limited.")
 
         if self.warnings:
@@ -140,7 +148,11 @@ class EnvironmentValidator:
             "warnings": self.warnings,
             "validation_results": self.validation_results,
             "total_required": len(self.required_keys),
-            "valid_required": sum(1 for k in self.required_keys.keys() if self.validation_results.get(k, False))
+            "valid_required": sum(
+                1
+                for k in self.required_keys.keys()
+                if self.validation_results.get(k, False)
+            ),
         }
 
     def check_internet_access_ready(self) -> bool:
@@ -148,16 +160,20 @@ class EnvironmentValidator:
         internet_keys = ["NEWSAPI_KEY", "GNEWS_API_KEY", "OPENROUTER_API_KEY"]
         return all(self.validation_results.get(key, False) for key in internet_keys)
 
+
 # Global instance
 env_validator = EnvironmentValidator()
+
 
 def validate_environment() -> tuple[bool, list[str]]:
     """Convenience function để validate environment"""
     return env_validator.validate_all()
 
+
 def is_internet_access_ready() -> bool:
     """Convenience function để check internet access readiness"""
     return env_validator.check_internet_access_ready()
+
 
 if __name__ == "__main__":
     # Test validation

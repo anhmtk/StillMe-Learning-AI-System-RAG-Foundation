@@ -16,7 +16,7 @@ class TestSafeIO:
 
     def test_safe_read_text_utf8(self):
         """Test reading UTF-8 file"""
-        with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False) as f:
             f.write("Hello, World! 🌍")
             temp_path = Path(f.name)
 
@@ -28,7 +28,9 @@ class TestSafeIO:
 
     def test_safe_read_text_cp1252(self):
         """Test reading CP1252 file"""
-        with tempfile.NamedTemporaryFile(mode='w', encoding='cp1252', delete=False) as f:
+        with tempfile.NamedTemporaryFile(
+            mode="w", encoding="cp1252", delete=False
+        ) as f:
             f.write("Hello, World!")
             temp_path = Path(f.name)
 
@@ -40,7 +42,7 @@ class TestSafeIO:
 
     def test_safe_read_text_with_encoding(self):
         """Test reading with specific encoding"""
-        with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False) as f:
             f.write("Test content")
             temp_path = Path(f.name)
 
@@ -53,7 +55,7 @@ class TestSafeIO:
     def test_safe_read_text_corrupted_encoding(self):
         """Test reading file with corrupted encoding"""
         # Create file with mixed encoding
-        with tempfile.NamedTemporaryFile(mode='wb', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="wb", delete=False) as f:
             # Write UTF-8 content but with some invalid bytes
             f.write(b"Hello, World! \xff\xfe")
             temp_path = Path(f.name)
@@ -74,7 +76,7 @@ class TestSafeIO:
 
     def test_safe_read_lines(self):
         """Test reading file as lines"""
-        with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False) as f:
             f.write("Line 1\nLine 2\nLine 3")
             temp_path = Path(f.name)
 
@@ -86,7 +88,7 @@ class TestSafeIO:
 
     def test_safe_read_lines_empty_file(self):
         """Test reading empty file"""
-        with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False) as f:
             f.write("")
             temp_path = Path(f.name)
 
@@ -98,7 +100,7 @@ class TestSafeIO:
 
     def test_is_text_file_text(self):
         """Test detecting text file"""
-        with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False) as f:
             f.write("This is a text file")
             temp_path = Path(f.name)
 
@@ -109,7 +111,7 @@ class TestSafeIO:
 
     def test_is_text_file_binary(self):
         """Test detecting binary file"""
-        with tempfile.NamedTemporaryFile(mode='wb', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="wb", delete=False) as f:
             # Write binary data with null bytes
             f.write(b"Binary data\x00\x01\x02\x03")
             temp_path = Path(f.name)
@@ -138,7 +140,9 @@ class TestSafeIO:
         ]
 
         for test_content in test_cases:
-            with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', delete=False) as f:
+            with tempfile.NamedTemporaryFile(
+                mode="w", encoding="utf-8", delete=False
+            ) as f:
                 f.write(test_content)
                 temp_path = Path(f.name)
 
@@ -153,7 +157,7 @@ class TestSafeIO:
         # Create a large file (1MB)
         large_content = "A" * 1024 * 1024
 
-        with tempfile.NamedTemporaryFile(mode='w', encoding='utf-8', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", delete=False) as f:
             f.write(large_content)
             temp_path = Path(f.name)
 

@@ -106,7 +106,9 @@ class CodeQualityEnforcer:
 
         # Get list of Python files to analyze
         python_files = self._get_python_files(
-            target_path, include_patterns, exclude_patterns  # type: ignore
+            target_path,
+            include_patterns,
+            exclude_patterns,  # type: ignore
         )
 
         if not python_files:
@@ -135,7 +137,11 @@ class CodeQualityEnforcer:
         # Generate report
         execution_time = time.time() - start_time
         report = self._generate_report(
-            target_path, python_files, all_issues, auto_fixes_applied, execution_time  # type: ignore
+            target_path,
+            python_files,
+            all_issues,
+            auto_fixes_applied,
+            execution_time,  # type: ignore
         )
 
         self.logger.info(

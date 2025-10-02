@@ -21,6 +21,7 @@ from typing import Any
 @dataclass
 class CoverageReport:
     """Coverage report data structure"""
+
     total_lines: int
     covered_lines: int
     missing_lines: int
@@ -31,6 +32,7 @@ class CoverageReport:
 @dataclass
 class CoverageImprovement:
     """Coverage improvement suggestion"""
+
     file_path: str
     missing_lines: list[int]
     priority: str
@@ -49,7 +51,7 @@ class CoverageAnalyzer:
             "stillme_core/privacy",
             "stillme_core/learning",
             "stillme_core/control",
-            "stillme_core/transparency"
+            "stillme_core/transparency",
         ]
 
     def run_coverage_analysis(self) -> CoverageReport:
@@ -58,16 +60,20 @@ class CoverageAnalyzer:
 
         # Run pytest with coverage
         cmd = [
-            "python", "-m", "pytest",
+            "python",
+            "-m",
+            "pytest",
             "--cov=stillme_core",
             "--cov-report=json:artifacts/coverage.json",
             "--cov-report=html:artifacts/coverage.html",
             "--cov-report=term-missing",
-            "tests/"
+            "tests/",
         ]
 
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, cwd=self.project_root)
+            result = subprocess.run(
+                cmd, capture_output=True, text=True, cwd=self.project_root
+            )
             if result.returncode != 0:
                 print(f"⚠️ Coverage analysis completed with warnings: {result.stderr}")
         except Exception as e:
@@ -87,27 +93,29 @@ class CoverageAnalyzer:
             with open(coverage_file) as f:
                 data = json.load(f)
 
-            total_lines = data.get('totals', {}).get('num_statements', 0)
-            covered_lines = data.get('totals', {}).get('covered_lines', 0)
+            total_lines = data.get("totals", {}).get("num_statements", 0)
+            covered_lines = data.get("totals", {}).get("covered_lines", 0)
             missing_lines = total_lines - covered_lines
-            coverage_percentage = data.get('totals', {}).get('percent_covered', 0.0)
+            coverage_percentage = data.get("totals", {}).get("percent_covered", 0.0)
 
             files = []
-            for file_path, file_data in data.get('files', {}).items():
-                files.append({
-                    'path': file_path,
-                    'total_lines': file_data.get('num_statements', 0),
-                    'covered_lines': file_data.get('covered_lines', 0),
-                    'missing_lines': file_data.get('missing_lines', []),
-                    'coverage_percentage': file_data.get('percent_covered', 0.0)
-                })
+            for file_path, file_data in data.get("files", {}).items():
+                files.append(
+                    {
+                        "path": file_path,
+                        "total_lines": file_data.get("num_statements", 0),
+                        "covered_lines": file_data.get("covered_lines", 0),
+                        "missing_lines": file_data.get("missing_lines", []),
+                        "coverage_percentage": file_data.get("percent_covered", 0.0),
+                    }
+                )
 
             return CoverageReport(
                 total_lines=total_lines,
                 covered_lines=covered_lines,
                 missing_lines=missing_lines,
                 coverage_percentage=coverage_percentage,
-                files=files
+                files=files,
             )
         except Exception as e:
             print(f"❌ Error parsing coverage file: {e}")
@@ -120,15 +128,17 @@ class CoverageAnalyzer:
             covered_lines=0,
             missing_lines=0,
             coverage_percentage=0.0,
-            files=[]
+            files=[],
         )
 
-    def analyze_coverage_gaps(self, report: CoverageReport) -> list[CoverageImprovement]:
+    def analyze_coverage_gaps(
+        self, report: CoverageReport
+    ) -> list[CoverageImprovement]:
         """Analyze coverage gaps and suggest improvements"""
         improvements = []
 
         for file_info in report.files:
-            if file_info['coverage_percentage'] < self.target_coverage:
+            if file_info["coverage_percentage"] < self.target_coverage:
                 improvement = self._create_improvement_suggestion(file_info)
                 improvements.append(improvement)
 
@@ -136,11 +146,13 @@ class CoverageAnalyzer:
         improvements.sort(key=lambda x: (x.priority, x.effort))
         return improvements
 
-    def _create_improvement_suggestion(self, file_info: dict[str, Any]) -> CoverageImprovement:
+    def _create_improvement_suggestion(
+        self, file_info: dict[str, Any]
+    ) -> CoverageImprovement:
         """Create improvement suggestion for a file"""
-        file_path = file_info['path']
-        coverage_percentage = file_info['coverage_percentage']
-        missing_lines = file_info['missing_lines']
+        file_path = file_info["path"]
+        coverage_percentage = file_info["coverage_percentage"]
+        missing_lines = file_info["missing_lines"]
 
         # Determine priority
         if any(module in file_path for module in self.critical_modules):
@@ -161,17 +173,21 @@ class CoverageAnalyzer:
             effort = "LOW"
 
         # Create suggestion
-        suggestion = self._generate_suggestion(file_path, missing_lines, coverage_percentage)
+        suggestion = self._generate_suggestion(
+            file_path, missing_lines, coverage_percentage
+        )
 
         return CoverageImprovement(
             file_path=file_path,
             missing_lines=missing_lines,
             priority=priority,
             effort=effort,
-            suggestion=suggestion
+            suggestion=suggestion,
         )
 
-    def _generate_suggestion(self, file_path: str, missing_lines: list[int], coverage_percentage: float) -> str:
+    def _generate_suggestion(
+        self, file_path: str, missing_lines: list[int], coverage_percentage: float
+    ) -> str:
         """Generate improvement suggestion"""
         suggestions = []
 
@@ -186,11 +202,15 @@ class CoverageAnalyzer:
             suggestions.append("Add tests for error handling paths")
 
         if len(missing_lines) > 0:
-            suggestions.append(f"Focus on lines: {missing_lines[:10]}{'...' if len(missing_lines) > 10 else ''}")
+            suggestions.append(
+                f"Focus on lines: {missing_lines[:10]}{'...' if len(missing_lines) > 10 else ''}"
+            )
 
         return "; ".join(suggestions)
 
-    def generate_coverage_report(self, report: CoverageReport, improvements: list[CoverageImprovement]) -> str:
+    def generate_coverage_report(
+        self, report: CoverageReport, improvements: list[CoverageImprovement]
+    ) -> str:
         """Generate comprehensive coverage report"""
         report_content = f"""
 # Test Coverage Analysis Report
@@ -207,7 +227,9 @@ Generated: {self._get_current_timestamp()}
 """
 
         if report.coverage_percentage >= self.target_coverage:
-            report_content += "✅ **TARGET ACHIEVED** - Coverage meets target requirements\n\n"
+            report_content += (
+                "✅ **TARGET ACHIEVED** - Coverage meets target requirements\n\n"
+            )
         else:
             report_content += f"⚠️ **BELOW TARGET** - Need {self.target_coverage - report.coverage_percentage:.1f}% more coverage\n\n"
 
@@ -243,7 +265,9 @@ Generated: {self._get_current_timestamp()}
                     report_content += f"- **{imp.file_path}** ({imp.effort} effort)\n"
                     report_content += f"  - {imp.suggestion}\n\n"
         else:
-            report_content += "🎉 **No improvements needed** - All modules meet coverage targets!\n\n"
+            report_content += (
+                "🎉 **No improvements needed** - All modules meet coverage targets!\n\n"
+            )
 
         # Recommendations
         report_content += "## Recommendations\n\n"
@@ -251,13 +275,21 @@ Generated: {self._get_current_timestamp()}
             report_content += "1. **Focus on critical modules** - Ensure security, privacy, and learning modules have 95%+ coverage\n"
             report_content += "2. **Add integration tests** - Test cross-module interactions and workflows\n"
             report_content += "3. **Add error handling tests** - Test exception paths and edge cases\n"
-            report_content += "4. **Add performance tests** - Test under load and stress conditions\n"
+            report_content += (
+                "4. **Add performance tests** - Test under load and stress conditions\n"
+            )
             report_content += "5. **Automate coverage checks** - Add coverage gates to CI/CD pipeline\n\n"
         else:
-            report_content += "1. **Maintain coverage** - Ensure new code includes tests\n"
-            report_content += "2. **Improve test quality** - Focus on meaningful test cases\n"
+            report_content += (
+                "1. **Maintain coverage** - Ensure new code includes tests\n"
+            )
+            report_content += (
+                "2. **Improve test quality** - Focus on meaningful test cases\n"
+            )
             report_content += "3. **Add mutation testing** - Test test quality with mutation testing\n"
-            report_content += "4. **Regular coverage reviews** - Monthly coverage analysis\n\n"
+            report_content += (
+                "4. **Regular coverage reviews** - Monthly coverage analysis\n\n"
+            )
 
         return report_content
 
@@ -266,11 +298,13 @@ Generated: {self._get_current_timestamp()}
         critical_coverage = {}
 
         for module in self.critical_modules:
-            module_files = [f for f in report.files if module in f['path']]
+            module_files = [f for f in report.files if module in f["path"]]
             if module_files:
-                total_lines = sum(f['total_lines'] for f in module_files)
-                covered_lines = sum(f['covered_lines'] for f in module_files)
-                coverage = (covered_lines / total_lines * 100) if total_lines > 0 else 0.0
+                total_lines = sum(f["total_lines"] for f in module_files)
+                covered_lines = sum(f["covered_lines"] for f in module_files)
+                coverage = (
+                    (covered_lines / total_lines * 100) if total_lines > 0 else 0.0
+                )
                 critical_coverage[module] = coverage
 
         return critical_coverage
@@ -278,14 +312,19 @@ Generated: {self._get_current_timestamp()}
     def _get_current_timestamp(self) -> str:
         """Get current timestamp"""
         from datetime import datetime
+
         return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    def save_report(self, report_content: str, output_file: str = "artifacts/coverage_improvement_report.md"):
+    def save_report(
+        self,
+        report_content: str,
+        output_file: str = "artifacts/coverage_improvement_report.md",
+    ):
         """Save coverage report to file"""
         output_path = self.project_root / output_file
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             f.write(report_content)
 
         print(f"📄 Coverage report saved to: {output_path}")
@@ -293,10 +332,21 @@ Generated: {self._get_current_timestamp()}
 
 def main():
     """Main function"""
-    parser = argparse.ArgumentParser(description="Improve test coverage for StillMe AI Framework")
-    parser.add_argument("--target", type=float, default=90.0, help="Target coverage percentage")
-    parser.add_argument("--output", type=str, default="artifacts/coverage_improvement_report.md", help="Output file path")
-    parser.add_argument("--project-root", type=str, default=".", help="Project root directory")
+    parser = argparse.ArgumentParser(
+        description="Improve test coverage for StillMe AI Framework"
+    )
+    parser.add_argument(
+        "--target", type=float, default=90.0, help="Target coverage percentage"
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default="artifacts/coverage_improvement_report.md",
+        help="Output file path",
+    )
+    parser.add_argument(
+        "--project-root", type=str, default=".", help="Project root directory"
+    )
 
     args = parser.parse_args()
 
@@ -326,7 +376,9 @@ def main():
     if report.coverage_percentage >= args.target:
         print("🎉 Target coverage achieved!")
     else:
-        print(f"⚠️ Need to improve coverage by {args.target - report.coverage_percentage:.1f}%")
+        print(
+            f"⚠️ Need to improve coverage by {args.target - report.coverage_percentage:.1f}%"
+        )
 
     print(f"\n📄 Detailed report: {args.output}")
 

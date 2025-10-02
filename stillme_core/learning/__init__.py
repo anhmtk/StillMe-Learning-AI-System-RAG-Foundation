@@ -12,9 +12,9 @@ from .proposals_manager import ProposalsManager
 
 __all__ = [
     # Learning Proposals System
-    'LearningProposal',
-    'LearningPriority',
-    'ContentSource',
-    'ProposalStatus',
-    'ProposalsManager'
+    "LearningProposal",
+    "LearningPriority",
+    "ContentSource",
+    "ProposalStatus",
+    "ProposalsManager",
 ]

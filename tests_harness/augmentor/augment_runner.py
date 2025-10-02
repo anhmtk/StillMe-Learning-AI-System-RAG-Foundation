@@ -26,6 +26,7 @@ from template_filler import TemplateConfig, TemplateFillerAugmentor
 @dataclass
 class AugmentConfig:
     """Cấu hình tổng thể cho augmentation"""
+
     # Input/Output
     seed_file: str
     output_dir: str
@@ -57,9 +58,11 @@ class AugmentConfig:
         if self.template_config is None:
             self.template_config = TemplateConfig()
 
+
 @dataclass
 class AugmentStats:
     """Thống kê augmentation"""
+
     total_seeds: int
     total_outputs: int
     methods_used: list[str]
@@ -67,6 +70,7 @@ class AugmentStats:
     processing_time: float
     output_files: list[str]
     metadata: dict[str, Any]
+
 
 class AugmentRunner:
     """Runner chính cho augmentation pipeline"""
@@ -79,13 +83,19 @@ class AugmentRunner:
         self.augmentors = {}
 
         if config.use_paraphrase:
-            self.augmentors['paraphrase'] = ParaphraseAugmentor(config.paraphrase_config)
+            self.augmentors["paraphrase"] = ParaphraseAugmentor(
+                config.paraphrase_config
+            )
 
         if config.use_backtranslate:
-            self.augmentors['backtranslate'] = BacktranslateAugmentor(config.backtranslate_config)
+            self.augmentors["backtranslate"] = BacktranslateAugmentor(
+                config.backtranslate_config
+            )
 
         if config.use_template_fill:
-            self.augmentors['template_fill'] = TemplateFillerAugmentor(config.template_config)
+            self.augmentors["template_fill"] = TemplateFillerAugmentor(
+                config.template_config
+            )
 
     def _load_seed_data(self) -> list[dict[str, Any]]:
         """Load seed data từ file"""
@@ -94,7 +104,7 @@ class AugmentRunner:
             raise FileNotFoundError(f"Seed file not found: {self.config.seed_file}")
 
         seeds = []
-        with open(seed_path, encoding='utf-8') as f:
+        with open(seed_path, encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
                 if line:
@@ -107,8 +117,10 @@ class AugmentRunner:
 
         # Limit seed size
         if len(seeds) > self.config.max_seed_size:
-            self.logger.warning(f"Limiting seeds from {len(seeds)} to {self.config.max_seed_size}")
-            seeds = seeds[:self.config.max_seed_size]
+            self.logger.warning(
+                f"Limiting seeds from {len(seeds)} to {self.config.max_seed_size}"
+            )
+            seeds = seeds[: self.config.max_seed_size]
 
         self.logger.info(f"Loaded {len(seeds)} seeds")
         return seeds
@@ -118,17 +130,22 @@ class AugmentRunner:
         temp_file = Path(self.config.output_dir) / f"temp_seed_{method}.jsonl"
         temp_file.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(temp_file, 'w', encoding='utf-8') as f:
+        with open(temp_file, "w", encoding="utf-8") as f:
             for seed in seeds:
                 # Extract text for augmentation
-                text = seed.get('text', seed.get('message', str(seed)))
-                f.write(json.dumps({"text": text, "original_seed": seed}, ensure_ascii=False) + '\n')
+                text = seed.get("text", seed.get("message", str(seed)))
+                f.write(
+                    json.dumps(
+                        {"text": text, "original_seed": seed}, ensure_ascii=False
+                    )
+                    + "\n"
+                )
 
         return str(temp_file)
 
     async def _run_paraphrase(self, seeds: list[dict[str, Any]]) -> dict[str, Any]:
         """Chạy paraphrase augmentation"""
-        if 'paraphrase' not in self.augmentors:
+        if "paraphrase" not in self.augmentors:
             return {"error": "Paraphrase augmentor not available"}
 
         self.logger.info("Starting paraphrase augmentation...")
@@ -139,20 +156,25 @@ class AugmentRunner:
         output_file = Path(self.config.output_dir) / "augmented_paraphrase.jsonl"
 
         try:
-            stats = await self.augmentors['paraphrase'].augment_dataset(seed_file, str(output_file))
-            stats['processing_time'] = (datetime.now() - start_time).total_seconds()
-            stats['output_file'] = str(output_file)
+            stats = await self.augmentors["paraphrase"].augment_dataset(
+                seed_file, str(output_file)
+            )
+            stats["processing_time"] = (datetime.now() - start_time).total_seconds()
+            stats["output_file"] = str(output_file)
             return stats
         except Exception as e:
             self.logger.error(f"Paraphrase augmentation failed: {e}")
-            return {"error": str(e), "processing_time": (datetime.now() - start_time).total_seconds()}
+            return {
+                "error": str(e),
+                "processing_time": (datetime.now() - start_time).total_seconds(),
+            }
         finally:
             # Clean up temp file
             Path(seed_file).unlink(missing_ok=True)
 
     async def _run_backtranslate(self, seeds: list[dict[str, Any]]) -> dict[str, Any]:
         """Chạy backtranslate augmentation"""
-        if 'backtranslate' not in self.augmentors:
+        if "backtranslate" not in self.augmentors:
             return {"error": "Backtranslate augmentor not available"}
 
         self.logger.info("Starting backtranslate augmentation...")
@@ -163,20 +185,25 @@ class AugmentRunner:
         output_file = Path(self.config.output_dir) / "augmented_backtranslate.jsonl"
 
         try:
-            stats = await self.augmentors['backtranslate'].augment_dataset(seed_file, str(output_file))
-            stats['processing_time'] = (datetime.now() - start_time).total_seconds()
-            stats['output_file'] = str(output_file)
+            stats = await self.augmentors["backtranslate"].augment_dataset(
+                seed_file, str(output_file)
+            )
+            stats["processing_time"] = (datetime.now() - start_time).total_seconds()
+            stats["output_file"] = str(output_file)
             return stats
         except Exception as e:
             self.logger.error(f"Backtranslate augmentation failed: {e}")
-            return {"error": str(e), "processing_time": (datetime.now() - start_time).total_seconds()}
+            return {
+                "error": str(e),
+                "processing_time": (datetime.now() - start_time).total_seconds(),
+            }
         finally:
             # Clean up temp file
             Path(seed_file).unlink(missing_ok=True)
 
     async def _run_template_fill(self) -> dict[str, Any]:
         """Chạy template fill augmentation"""
-        if 'template_fill' not in self.augmentors:
+        if "template_fill" not in self.augmentors:
             return {"error": "Template fill augmentor not available"}
 
         self.logger.info("Starting template fill augmentation...")
@@ -185,13 +212,18 @@ class AugmentRunner:
         output_file = Path(self.config.output_dir) / "augmented_template_fill.jsonl"
 
         try:
-            stats = await self.augmentors['template_fill'].augment_from_templates(str(output_file))
-            stats['processing_time'] = (datetime.now() - start_time).total_seconds()
-            stats['output_file'] = str(output_file)
+            stats = await self.augmentors["template_fill"].augment_from_templates(
+                str(output_file)
+            )
+            stats["processing_time"] = (datetime.now() - start_time).total_seconds()
+            stats["output_file"] = str(output_file)
             return stats
         except Exception as e:
             self.logger.error(f"Template fill augmentation failed: {e}")
-            return {"error": str(e), "processing_time": (datetime.now() - start_time).total_seconds()}
+            return {
+                "error": str(e),
+                "processing_time": (datetime.now() - start_time).total_seconds(),
+            }
 
     async def run_augmentation(self) -> AugmentStats:
         """Chạy toàn bộ pipeline augmentation"""
@@ -208,17 +240,19 @@ class AugmentRunner:
         tasks = []
 
         if self.config.use_paraphrase:
-            tasks.append(('paraphrase', self._run_paraphrase(seeds)))
+            tasks.append(("paraphrase", self._run_paraphrase(seeds)))
 
         if self.config.use_backtranslate:
-            tasks.append(('backtranslate', self._run_backtranslate(seeds)))
+            tasks.append(("backtranslate", self._run_backtranslate(seeds)))
 
         if self.config.use_template_fill:
-            tasks.append(('template_fill', self._run_template_fill()))
+            tasks.append(("template_fill", self._run_template_fill()))
 
         # Execute tasks
         if tasks:
-            task_results = await asyncio.gather(*[task[1] for task in tasks], return_exceptions=True)
+            task_results = await asyncio.gather(
+                *[task[1] for task in tasks], return_exceptions=True
+            )
 
             for (method_name, _), result in zip(tasks, task_results):
                 if isinstance(result, Exception):
@@ -255,10 +289,10 @@ class AugmentRunner:
             "config": asdict(self.config),
             "results": results,
             "timestamp": datetime.now().isoformat(),
-            "total_processing_time": processing_time
+            "total_processing_time": processing_time,
         }
 
-        with open(metadata_file, 'w', encoding='utf-8') as f:
+        with open(metadata_file, "w", encoding="utf-8") as f:
             json.dump(metadata, f, ensure_ascii=False, indent=2)
 
         return AugmentStats(
@@ -268,28 +302,30 @@ class AugmentRunner:
             success_rates=success_rates,
             processing_time=processing_time,
             output_files=output_files,
-            metadata=metadata
+            metadata=metadata,
         )
 
-    async def _create_combined_output(self, output_files: list[str], combined_file: str):
+    async def _create_combined_output(
+        self, output_files: list[str], combined_file: str
+    ):
         """Tạo file output kết hợp từ tất cả methods"""
         combined_path = Path(combined_file)
         combined_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(combined_path, 'w', encoding='utf-8') as f:
+        with open(combined_path, "w", encoding="utf-8") as f:
             for output_file in output_files:
                 if Path(output_file).exists():
-                    with open(output_file, encoding='utf-8') as inf:
+                    with open(output_file, encoding="utf-8") as inf:
                         for line in inf:
                             line = line.strip()
                             if line:
-                                f.write(line + '\n')
+                                f.write(line + "\n")
 
     def print_stats(self, stats: AugmentStats):
         """In thống kê augmentation"""
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print("AUGMENTATION STATISTICS")
-        print("="*60)
+        print("=" * 60)
         print(f"Total Seeds Processed: {stats.total_seeds}")
         print(f"Total Outputs Generated: {stats.total_outputs}")
         print(f"Processing Time: {stats.processing_time:.2f} seconds")
@@ -300,20 +336,35 @@ class AugmentRunner:
         print(f"\nOutput Files Generated: {len(stats.output_files)}")
         for file_path in stats.output_files:
             print(f"  - {file_path}")
-        print("="*60)
+        print("=" * 60)
+
 
 async def main():
     """Main function với CLI interface"""
-    parser = argparse.ArgumentParser(description="Augment dataset using multiple methods")
+    parser = argparse.ArgumentParser(
+        description="Augment dataset using multiple methods"
+    )
     parser.add_argument("--seed-file", required=True, help="Path to seed file")
     parser.add_argument("--output-dir", required=True, help="Output directory")
-    parser.add_argument("--methods", nargs="+",
-                       choices=["paraphrase", "backtranslate", "template_fill"],
-                       default=["paraphrase", "backtranslate", "template_fill"],
-                       help="Augmentation methods to use")
-    parser.add_argument("--max-seeds", type=int, default=1000, help="Maximum seeds to process")
-    parser.add_argument("--paraphrase-variants", type=int, default=5, help="Number of paraphrase variants")
-    parser.add_argument("--template-variants", type=int, default=10, help="Number of template variants")
+    parser.add_argument(
+        "--methods",
+        nargs="+",
+        choices=["paraphrase", "backtranslate", "template_fill"],
+        default=["paraphrase", "backtranslate", "template_fill"],
+        help="Augmentation methods to use",
+    )
+    parser.add_argument(
+        "--max-seeds", type=int, default=1000, help="Maximum seeds to process"
+    )
+    parser.add_argument(
+        "--paraphrase-variants",
+        type=int,
+        default=5,
+        help="Number of paraphrase variants",
+    )
+    parser.add_argument(
+        "--template-variants", type=int, default=10, help="Number of template variants"
+    )
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose logging")
 
     args = parser.parse_args()
@@ -321,8 +372,7 @@ async def main():
     # Setup logging
     log_level = logging.DEBUG if args.verbose else logging.INFO
     logging.basicConfig(
-        level=log_level,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        level=log_level, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     )
 
     # Create config
@@ -334,7 +384,9 @@ async def main():
         use_template_fill="template_fill" in args.methods,
         max_seed_size=args.max_seeds,
         paraphrase_config=ParaphraseConfig(num_variants=args.paraphrase_variants),
-        template_config=TemplateConfig(num_variants_per_template=args.template_variants)
+        template_config=TemplateConfig(
+            num_variants_per_template=args.template_variants
+        ),
     )
 
     # Run augmentation
@@ -343,6 +395,7 @@ async def main():
 
     # Print results
     runner.print_stats(stats)
+
 
 if __name__ == "__main__":
     asyncio.run(main())

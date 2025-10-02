@@ -288,7 +288,9 @@ class CoreDashboard:
                     "status": (
                         "healthy"
                         if health_score > 80
-                        else "warning" if health_score > 60 else "critical"
+                        else "warning"
+                        if health_score > 60
+                        else "critical"
                     ),
                     "total_events": stats[0] or 0,
                     "success_rate": success_rate,

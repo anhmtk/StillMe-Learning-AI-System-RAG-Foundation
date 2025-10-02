@@ -23,7 +23,7 @@ class EthicsChecker:
     def assess_framework_safety(self, old_code: str, new_code: str) -> bool:
         """Assess if new code is safe for framework"""
         logger.info("Assessing framework safety...")
-        
+
         # Check for dangerous patterns
         dangerous_patterns = [
             "subprocess.run(",
@@ -35,15 +35,15 @@ class EthicsChecker:
             "open(",
             "file(",
         ]
-        
+
         for pattern in dangerous_patterns:
             if pattern in new_code:
                 logger.warning(f"Potentially dangerous pattern detected: {pattern}")
                 return False
-        
+
         # Check if new code removes too much
         if len(new_code) < len(old_code) * 0.1:  # Less than 10% of original
             logger.warning("New code removes too much content")
             return False
-            
+
         return True

@@ -26,14 +26,16 @@ class MultiModalTortureTestSuite:
 
     def __init__(self):
         self.handler = ClarificationHandler()
-        self.temp_audit_file = tempfile.NamedTemporaryFile(mode='w+', delete=False, suffix='.jsonl')
+        self.temp_audit_file = tempfile.NamedTemporaryFile(
+            mode="w+", delete=False, suffix=".jsonl"
+        )
 
         # Setup audit logger
         audit_config = {
             "enabled": True,
             "redact_pii": True,
             "log_file": self.temp_audit_file.name,
-            "privacy_filters": ["email", "password", "api_key", "token", "secret"]
+            "privacy_filters": ["email", "password", "api_key", "token", "secret"],
         }
         self.audit_logger = AuditLogger(audit_config)
 
@@ -282,21 +284,25 @@ class MultiModalTortureTestSuite:
                     print(f"❌ {test_name} - FAILED ({execution_time:.3f}s)")
                     failed += 1
 
-                results.append({
-                    "name": test_name,
-                    "passed": result,
-                    "execution_time": execution_time
-                })
+                results.append(
+                    {
+                        "name": test_name,
+                        "passed": result,
+                        "execution_time": execution_time,
+                    }
+                )
 
             except Exception as e:
                 print(f"❌ {test_name} - ERROR: {e}")
                 failed += 1
-                results.append({
-                    "name": test_name,
-                    "passed": False,
-                    "execution_time": 0,
-                    "error": str(e)
-                })
+                results.append(
+                    {
+                        "name": test_name,
+                        "passed": False,
+                        "execution_time": 0,
+                        "error": str(e),
+                    }
+                )
 
         total = passed + failed
         pass_rate = (passed / total) * 100 if total > 0 else 0
@@ -312,8 +318,9 @@ class MultiModalTortureTestSuite:
             "passed_tests": passed,
             "failed_tests": failed,
             "pass_rate": pass_rate,
-            "results": results
+            "results": results,
         }
+
 
 if __name__ == "__main__":
     # Run Multi-Modal Torture test suite directly

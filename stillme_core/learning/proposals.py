@@ -29,33 +29,41 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
+
 class ProposalStatus(Enum):
     """Trạng thái đề xuất học tập"""
-    PENDING = "pending"           # Chờ phê duyệt
-    APPROVED = "approved"         # Đã phê duyệt
-    REJECTED = "rejected"         # Đã từ chối
-    LEARNING = "learning"         # Đang học
-    COMPLETED = "completed"       # Hoàn thành
-    FAILED = "failed"            # Thất bại
+
+    PENDING = "pending"  # Chờ phê duyệt
+    APPROVED = "approved"  # Đã phê duyệt
+    REJECTED = "rejected"  # Đã từ chối
+    LEARNING = "learning"  # Đang học
+    COMPLETED = "completed"  # Hoàn thành
+    FAILED = "failed"  # Thất bại
+
 
 class LearningPriority(Enum):
     """Mức độ ưu tiên học tập"""
-    LOW = "low"                   # Thấp
-    MEDIUM = "medium"             # Trung bình
-    HIGH = "high"                 # Cao
-    CRITICAL = "critical"         # Quan trọng
+
+    LOW = "low"  # Thấp
+    MEDIUM = "medium"  # Trung bình
+    HIGH = "high"  # Cao
+    CRITICAL = "critical"  # Quan trọng
+
 
 class ContentSource(Enum):
     """Nguồn nội dung học tập"""
-    RSS = "rss"                   # RSS feeds
-    EXPERIENCE = "experience"     # Kinh nghiệm cá nhân
-    MANUAL = "manual"             # Nhập thủ công
-    API = "api"                   # API calls
-    COMMUNITY = "community"       # Đóng góp cộng đồng
+
+    RSS = "rss"  # RSS feeds
+    EXPERIENCE = "experience"  # Kinh nghiệm cá nhân
+    MANUAL = "manual"  # Nhập thủ công
+    API = "api"  # API calls
+    COMMUNITY = "community"  # Đóng góp cộng đồng
+
 
 @dataclass
 class LearningProposal:
     """Đề xuất học tập"""
+
     id: str
     title: str
     description: str
@@ -87,20 +95,21 @@ class LearningProposal:
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary"""
         data = asdict(self)
-        data['created_at'] = self.created_at.isoformat()
-        data['source'] = self.source.value
-        data['priority'] = self.priority.value
-        data['status'] = self.status.value
+        data["created_at"] = self.created_at.isoformat()
+        data["source"] = self.source.value
+        data["priority"] = self.priority.value
+        data["status"] = self.status.value
         return data
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> 'LearningProposal':
+    def from_dict(cls, data: dict[str, Any]) -> "LearningProposal":
         """Create from dictionary"""
-        data['created_at'] = datetime.fromisoformat(data['created_at'])
-        data['source'] = ContentSource(data['source'])
-        data['priority'] = LearningPriority(data['priority'])
-        data['status'] = ProposalStatus(data['status'])
+        data["created_at"] = datetime.fromisoformat(data["created_at"])
+        data["source"] = ContentSource(data["source"])
+        data["priority"] = LearningPriority(data["priority"])
+        data["status"] = ProposalStatus(data["status"])
         return cls(**data)
+
 
 class LearningProposalsManager:
     """Quản lý đề xuất học tập"""
@@ -173,23 +182,35 @@ class LearningProposalsManager:
         """Tạo đề xuất học tập mới"""
         try:
             with sqlite3.connect(self.db_path) as conn:
-                conn.execute("""
+                conn.execute(
+                    """
                     INSERT INTO proposals (
                         id, title, description, content, source, priority,
                         estimated_duration, learning_objectives, prerequisites,
                         expected_outcomes, risk_assessment, quality_score,
                         created_at, created_by, status, approval_required, metadata
                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    proposal.id, proposal.title, proposal.description,
-                    proposal.content, proposal.source.value, proposal.priority.value,
-                    proposal.estimated_duration, json.dumps(proposal.learning_objectives),
-                    json.dumps(proposal.prerequisites), json.dumps(proposal.expected_outcomes),
-                    json.dumps(proposal.risk_assessment), proposal.quality_score,
-                    proposal.created_at.isoformat(), proposal.created_by,
-                    proposal.status.value, proposal.approval_required,
-                    json.dumps(proposal.metadata)
-                ))
+                """,
+                    (
+                        proposal.id,
+                        proposal.title,
+                        proposal.description,
+                        proposal.content,
+                        proposal.source.value,
+                        proposal.priority.value,
+                        proposal.estimated_duration,
+                        json.dumps(proposal.learning_objectives),
+                        json.dumps(proposal.prerequisites),
+                        json.dumps(proposal.expected_outcomes),
+                        json.dumps(proposal.risk_assessment),
+                        proposal.quality_score,
+                        proposal.created_at.isoformat(),
+                        proposal.created_by,
+                        proposal.status.value,
+                        proposal.approval_required,
+                        json.dumps(proposal.metadata),
+                    ),
+                )
 
             logger.info(f"Created learning proposal: {proposal.id}")
             return proposal.id
@@ -202,9 +223,12 @@ class LearningProposalsManager:
         """Lấy đề xuất theo ID"""
         try:
             with sqlite3.connect(self.db_path) as conn:
-                cursor = conn.execute("""
+                cursor = conn.execute(
+                    """
                     SELECT * FROM proposals WHERE id = ?
-                """, (proposal_id,))
+                """,
+                    (proposal_id,),
+                )
 
                 row = cursor.fetchone()
                 if not row:
@@ -215,11 +239,11 @@ class LearningProposalsManager:
                 data = dict(zip(columns, row))
 
                 # Parse JSON fields
-                data['learning_objectives'] = json.loads(data['learning_objectives'])
-                data['prerequisites'] = json.loads(data['prerequisites'])
-                data['expected_outcomes'] = json.loads(data['expected_outcomes'])
-                data['risk_assessment'] = json.loads(data['risk_assessment'])
-                data['metadata'] = json.loads(data['metadata'])
+                data["learning_objectives"] = json.loads(data["learning_objectives"])
+                data["prerequisites"] = json.loads(data["prerequisites"])
+                data["expected_outcomes"] = json.loads(data["expected_outcomes"])
+                data["risk_assessment"] = json.loads(data["risk_assessment"])
+                data["metadata"] = json.loads(data["metadata"])
 
                 return LearningProposal.from_dict(data)
 
@@ -231,12 +255,15 @@ class LearningProposalsManager:
         """Lấy danh sách đề xuất chờ phê duyệt"""
         try:
             with sqlite3.connect(self.db_path) as conn:
-                cursor = conn.execute("""
+                cursor = conn.execute(
+                    """
                     SELECT * FROM proposals
                     WHERE status = 'pending'
                     ORDER BY created_at DESC
                     LIMIT ?
-                """, (limit,))
+                """,
+                    (limit,),
+                )
 
                 proposals = []
                 for row in cursor.fetchall():
@@ -244,11 +271,13 @@ class LearningProposalsManager:
                     data = dict(zip(columns, row))
 
                     # Parse JSON fields
-                    data['learning_objectives'] = json.loads(data['learning_objectives'])
-                    data['prerequisites'] = json.loads(data['prerequisites'])
-                    data['expected_outcomes'] = json.loads(data['expected_outcomes'])
-                    data['risk_assessment'] = json.loads(data['risk_assessment'])
-                    data['metadata'] = json.loads(data['metadata'])
+                    data["learning_objectives"] = json.loads(
+                        data["learning_objectives"]
+                    )
+                    data["prerequisites"] = json.loads(data["prerequisites"])
+                    data["expected_outcomes"] = json.loads(data["expected_outcomes"])
+                    data["risk_assessment"] = json.loads(data["risk_assessment"])
+                    data["metadata"] = json.loads(data["metadata"])
 
                     proposals.append(LearningProposal.from_dict(data))
 
@@ -258,24 +287,38 @@ class LearningProposalsManager:
             logger.error(f"Failed to get pending proposals: {e}")
             return []
 
-    def approve_proposal(self, proposal_id: str, approver_id: str, reason: str = "") -> bool:
+    def approve_proposal(
+        self, proposal_id: str, approver_id: str, reason: str = ""
+    ) -> bool:
         """Phê duyệt đề xuất"""
         try:
             with sqlite3.connect(self.db_path) as conn:
                 # Update proposal status
-                conn.execute("""
+                conn.execute(
+                    """
                     UPDATE proposals
                     SET status = 'approved', approved_at = ?, approved_by = ?
                     WHERE id = ?
-                """, (datetime.now().isoformat(), approver_id, proposal_id))
+                """,
+                    (datetime.now().isoformat(), approver_id, proposal_id),
+                )
 
                 # Add approval record
                 approval_id = str(uuid.uuid4())
-                conn.execute("""
+                conn.execute(
+                    """
                     INSERT INTO proposal_approvals (
                         id, proposal_id, approver_id, decision, reason, approved_at
                     ) VALUES (?, ?, ?, 'approved', ?, ?)
-                """, (approval_id, proposal_id, approver_id, reason, datetime.now().isoformat()))
+                """,
+                    (
+                        approval_id,
+                        proposal_id,
+                        approver_id,
+                        reason,
+                        datetime.now().isoformat(),
+                    ),
+                )
 
                 logger.info(f"Approved proposal: {proposal_id}")
                 return True
@@ -289,19 +332,31 @@ class LearningProposalsManager:
         try:
             with sqlite3.connect(self.db_path) as conn:
                 # Update proposal status
-                conn.execute("""
+                conn.execute(
+                    """
                     UPDATE proposals
                     SET status = 'rejected', rejected_at = ?, rejected_by = ?, rejection_reason = ?
                     WHERE id = ?
-                """, (datetime.now().isoformat(), approver_id, reason, proposal_id))
+                """,
+                    (datetime.now().isoformat(), approver_id, reason, proposal_id),
+                )
 
                 # Add approval record
                 approval_id = str(uuid.uuid4())
-                conn.execute("""
+                conn.execute(
+                    """
                     INSERT INTO proposal_approvals (
                         id, proposal_id, approver_id, decision, reason, approved_at
                     ) VALUES (?, ?, ?, 'rejected', ?, ?)
-                """, (approval_id, proposal_id, approver_id, reason, datetime.now().isoformat()))
+                """,
+                    (
+                        approval_id,
+                        proposal_id,
+                        approver_id,
+                        reason,
+                        datetime.now().isoformat(),
+                    ),
+                )
 
                 logger.info(f"Rejected proposal: {proposal_id}")
                 return True
@@ -315,19 +370,25 @@ class LearningProposalsManager:
         try:
             with sqlite3.connect(self.db_path) as conn:
                 # Update proposal status
-                conn.execute("""
+                conn.execute(
+                    """
                     UPDATE proposals
                     SET status = 'learning', learning_started_at = ?
                     WHERE id = ?
-                """, (datetime.now().isoformat(), proposal_id))
+                """,
+                    (datetime.now().isoformat(), proposal_id),
+                )
 
                 # Add learning session record
                 learning_id = str(uuid.uuid4())
-                conn.execute("""
+                conn.execute(
+                    """
                     INSERT INTO proposal_learning_sessions (
                         id, proposal_id, session_id, started_at, status
                     ) VALUES (?, ?, ?, ?, 'learning')
-                """, (learning_id, proposal_id, session_id, datetime.now().isoformat()))
+                """,
+                    (learning_id, proposal_id, session_id, datetime.now().isoformat()),
+                )
 
                 logger.info(f"Started learning for proposal: {proposal_id}")
                 return True
@@ -336,23 +397,36 @@ class LearningProposalsManager:
             logger.error(f"Failed to start learning for proposal {proposal_id}: {e}")
             return False
 
-    def complete_learning(self, proposal_id: str, session_id: str, metrics: dict[str, Any]) -> bool:
+    def complete_learning(
+        self, proposal_id: str, session_id: str, metrics: dict[str, Any]
+    ) -> bool:
         """Hoàn thành học tập"""
         try:
             with sqlite3.connect(self.db_path) as conn:
                 # Update proposal status
-                conn.execute("""
+                conn.execute(
+                    """
                     UPDATE proposals
                     SET status = 'completed', learning_completed_at = ?
                     WHERE id = ?
-                """, (datetime.now().isoformat(), proposal_id))
+                """,
+                    (datetime.now().isoformat(), proposal_id),
+                )
 
                 # Update learning session
-                conn.execute("""
+                conn.execute(
+                    """
                     UPDATE proposal_learning_sessions
                     SET status = 'completed', completed_at = ?, metrics = ?
                     WHERE proposal_id = ? AND session_id = ?
-                """, (datetime.now().isoformat(), json.dumps(metrics), proposal_id, session_id))
+                """,
+                    (
+                        datetime.now().isoformat(),
+                        json.dumps(metrics),
+                        proposal_id,
+                        session_id,
+                    ),
+                )
 
                 logger.info(f"Completed learning for proposal: {proposal_id}")
                 return True
@@ -379,9 +453,9 @@ class LearningProposalsManager:
                 for row in cursor.fetchall():
                     status, count, avg_quality, avg_duration = row
                     stats[status] = {
-                        'count': count,
-                        'avg_quality': avg_quality or 0,
-                        'avg_duration': avg_duration or 0
+                        "count": count,
+                        "avg_quality": avg_quality or 0,
+                        "avg_duration": avg_duration or 0,
                     }
 
                 return stats
@@ -390,9 +464,11 @@ class LearningProposalsManager:
             logger.error(f"Failed to get proposal stats: {e}")
             return {}
 
+
 def get_proposals_manager() -> LearningProposalsManager:
     """Get proposals manager instance"""
     return LearningProposalsManager()
+
 
 def create_sample_proposal() -> LearningProposal:
     """Tạo đề xuất mẫu"""
@@ -407,22 +483,19 @@ def create_sample_proposal() -> LearningProposal:
         learning_objectives=[
             "Hiểu các thuật toán ML cơ bản",
             "Thực hành với Python và scikit-learn",
-            "Áp dụng vào dự án thực tế"
+            "Áp dụng vào dự án thực tế",
         ],
-        prerequisites=[
-            "Kiến thức Python cơ bản",
-            "Hiểu toán học cơ bản"
-        ],
+        prerequisites=["Kiến thức Python cơ bản", "Hiểu toán học cơ bản"],
         expected_outcomes=[
             "Có thể implement các thuật toán ML",
             "Hiểu được cách chọn model phù hợp",
-            "Có thể đánh giá performance của model"
+            "Có thể đánh giá performance của model",
         ],
         risk_assessment={
             "complexity": "medium",
             "time_required": "high",
             "prerequisites": "low",
-            "practical_value": "high"
+            "practical_value": "high",
         },
         quality_score=0.85,
         created_at=datetime.now(),
@@ -432,6 +505,6 @@ def create_sample_proposal() -> LearningProposal:
         metadata={
             "tags": ["machine_learning", "python", "ai"],
             "difficulty": "intermediate",
-            "category": "technical"
-        }
+            "category": "technical",
+        },
     )

@@ -1,10 +1,10 @@
 import pytest
 
 try:
-
     pass
 except Exception as e:
     pytest.skip(f"FastAPI TestClient unavailable: {e}", allow_module_level=True)
+
 
 # Mock client to avoid import issues
 class MockResponse:
@@ -15,12 +15,14 @@ class MockResponse:
     def json(self):
         return self._json_data
 
+
 class MockClient:
     def post(self, url, json=None):
         return MockResponse()
 
     def get(self, url):
         return MockResponse()
+
 
 client = MockClient()
 

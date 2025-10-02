@@ -19,6 +19,7 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+
 class BaseDetector(ABC):
     """Base class for all specialized detectors"""
 
@@ -72,12 +73,16 @@ class BaseDetector(ABC):
             logger.error(f"Detector {self.name} failed: {e}")
 
             # Log failure telemetry
-            self._log_telemetry({
-                "needs_clarification": False,
-                "confidence": 0.0,
-                "category": "error",
-                "features": {"error": str(e)}
-            }, latency, success=False)
+            self._log_telemetry(
+                {
+                    "needs_clarification": False,
+                    "confidence": 0.0,
+                    "category": "error",
+                    "features": {"error": str(e)},
+                },
+                latency,
+                success=False,
+            )
 
             # Check loop guard
             if self.failure_count >= self.max_failures:
@@ -88,7 +93,7 @@ class BaseDetector(ABC):
                 "needs_clarification": False,
                 "confidence": 0.0,
                 "category": "error",
-                "features": {"error": str(e), "fallback": True}
+                "features": {"error": str(e), "fallback": True},
             }
 
     def _log_telemetry(self, result: dict[str, Any], latency: float, success: bool):
@@ -101,7 +106,7 @@ class BaseDetector(ABC):
                 "confidence": result.get("confidence", 0.0),
                 "latency_ms": latency,
                 "success": success,
-                "features": result.get("features", {})
+                "features": result.get("features", {}),
             }
 
             with open(self.telemetry_file, "a", encoding="utf-8") as f:
@@ -120,9 +125,13 @@ class BaseDetector(ABC):
                 f.write(f"**Date**: {time.strftime('%Y-%m-%d %H:%M:%S')}\n")
                 f.write(f"**Detector**: {self.name}\n")
                 f.write(f"**Failure Count**: {self.failure_count}\n")
-                f.write(f"**Last Failure**: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(self.last_failure_time))}\n\n")
+                f.write(
+                    f"**Last Failure**: {time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(self.last_failure_time))}\n\n"
+                )
                 f.write("## Analysis\n\n")
-                f.write("Detector has failed 3+ times consecutively. Manual intervention required.\n\n")
+                f.write(
+                    "Detector has failed 3+ times consecutively. Manual intervention required.\n\n"
+                )
                 f.write("## Recommendations\n\n")
                 f.write("1. Review detector logic\n")
                 f.write("2. Check input validation\n")
@@ -140,5 +149,5 @@ class BaseDetector(ABC):
             "name": self.name,
             "failure_count": self.failure_count,
             "last_failure_time": self.last_failure_time,
-            "telemetry_file": str(self.telemetry_file)
+            "telemetry_file": str(self.telemetry_file),
         }

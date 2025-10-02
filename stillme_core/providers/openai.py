@@ -27,9 +27,9 @@ class OpenAIProvider(LLMProviderBase):
                 base_url=self.config.base_url,
                 headers={
                     "Authorization": f"Bearer {self.config.api_key}",
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                 },
-                timeout=self.config.timeout
+                timeout=self.config.timeout,
             )
 
             # Test the connection
@@ -47,13 +47,11 @@ class OpenAIProvider(LLMProviderBase):
         # Prepare the request payload
         payload = {
             "model": self.config.model,
-            "messages": [
-                {"role": "user", "content": request.prompt}
-            ],
+            "messages": [{"role": "user", "content": request.prompt}],
             "temperature": request.temperature,
             "top_p": request.top_p,
             "frequency_penalty": request.frequency_penalty,
-            "presence_penalty": request.presence_penalty
+            "presence_penalty": request.presence_penalty,
         }
 
         if request.max_tokens:
@@ -68,10 +66,7 @@ class OpenAIProvider(LLMProviderBase):
         # Make the request with retries
         for attempt in range(self.config.max_retries):
             try:
-                response = await self._client.post(
-                    "/v1/chat/completions",
-                    json=payload
-                )
+                response = await self._client.post("/v1/chat/completions", json=payload)
                 response.raise_for_status()
 
                 data = response.json()
@@ -90,27 +85,31 @@ class OpenAIProvider(LLMProviderBase):
                     metadata={
                         "openai_response_id": data.get("id"),
                         "openai_created": data.get("created"),
-                        "openai_system_fingerprint": data.get("system_fingerprint")
-                    }
+                        "openai_system_fingerprint": data.get("system_fingerprint"),
+                    },
                 )
 
             except httpx.HTTPStatusError as e:
                 if e.response.status_code == 429:  # Rate limit
                     if attempt < self.config.max_retries - 1:
-                        wait_time = 2 ** attempt  # Exponential backoff
-                        logger.warning(f"Rate limited, waiting {wait_time}s before retry {attempt + 1}")
+                        wait_time = 2**attempt  # Exponential backoff
+                        logger.warning(
+                            f"Rate limited, waiting {wait_time}s before retry {attempt + 1}"
+                        )
                         await asyncio.sleep(wait_time)
                         continue
                 raise e
             except Exception as e:
                 if attempt < self.config.max_retries - 1:
-                    wait_time = 2 ** attempt
+                    wait_time = 2**attempt
                     logger.warning(f"Request failed, retrying in {wait_time}s: {e}")
                     await asyncio.sleep(wait_time)
                     continue
                 raise e
 
-        raise Exception(f"Failed to generate response after {self.config.max_retries} attempts")
+        raise Exception(
+            f"Failed to generate response after {self.config.max_retries} attempts"
+        )
 
     async def health_check(self) -> bool:
         """Check if the OpenAI API is healthy."""

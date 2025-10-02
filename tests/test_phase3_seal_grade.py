@@ -53,39 +53,53 @@ SEAL_GRADE_CONFIG = {
         "enabled": True,
         "default_mode": "careful",
         "max_rounds": 2,
-        "confidence_thresholds": {
-            "ask_clarify": 0.25,
-            "proceed": 0.80
-        },
+        "confidence_thresholds": {"ask_clarify": 0.25, "proceed": 0.80},
         "multi_modal": {
             "enabled": True,
             "image_analysis": "stub",
             "code_analysis": "ast",
-            "text_analysis": "enhanced"
+            "text_analysis": "enhanced",
         },
         "proactive": {
             "enabled": True,
             "max_suggestions": 3,
-            "categories": ["performance", "security", "ux", "scalability", "maintainability"],
-            "confidence_threshold": 0.6
+            "categories": [
+                "performance",
+                "security",
+                "ux",
+                "scalability",
+                "maintainability",
+            ],
+            "confidence_threshold": 0.6,
         },
         "enterprise_audit": {
             "enabled": True,
             "redact_pii": True,
             "log_file": "logs/seal_grade_audit.jsonl",
-            "privacy_filters": ["email", "password", "api_key", "token", "secret", "credit_card", "ssn"]
-        }
+            "privacy_filters": [
+                "email",
+                "password",
+                "api_key",
+                "token",
+                "secret",
+                "credit_card",
+                "ssn",
+            ],
+        },
     }
 }
+
 
 @dataclass
 class SealGradeResult:
     """Result of SEAL-GRADE test"""
+
     test_name: str
     passed: bool
     execution_time: float
     error_message: Optional[str] = None
     metrics: dict[str, Any] = None
+
 
 class SealGradeTestSuite:
     """SEAL-GRADE Test Suite for Phase 3 Clarification Core"""
@@ -108,7 +122,7 @@ class SealGradeTestSuite:
             # Initialize Phase 3 components
             self.multi_modal_clarifier = MultiModalClarifier(
                 SEAL_GRADE_CONFIG["clarification"]["multi_modal"],
-                self.handler.context_aware_clarifier
+                self.handler.context_aware_clarifier,
             )
 
             self.proactive_suggestion = ProactiveSuggestion(
@@ -116,7 +130,9 @@ class SealGradeTestSuite:
             )
 
             # Create temporary audit log file
-            self.temp_audit_file = tempfile.NamedTemporaryFile(mode='w+', delete=False, suffix='.jsonl')
+            self.temp_audit_file = tempfile.NamedTemporaryFile(
+                mode="w+", delete=False, suffix=".jsonl"
+            )
             audit_config = SEAL_GRADE_CONFIG["clarification"]["enterprise_audit"].copy()
             audit_config["log_file"] = self.temp_audit_file.name
 
@@ -140,7 +156,9 @@ class SealGradeTestSuite:
                 return SealGradeResult(test_name, True, execution_time)
             else:
                 logger.error(f"❌ {test_name} - FAILED ({execution_time:.3f}s)")
-                return SealGradeResult(test_name, False, execution_time, "Test returned False")
+                return SealGradeResult(
+                    test_name, False, execution_time, "Test returned False"
+                )
 
         except Exception as e:
             execution_time = time.time() - start_time
@@ -157,49 +175,49 @@ class SealGradeTestSuite:
                 self.test_ambiguous_input_basic,
                 self.test_ambiguous_input_optimize,
                 self.test_nested_vague_phrases,
-                self.test_slang_input
+                self.test_slang_input,
             ],
             "Multi-Modal Torture": [
                 self.test_code_syntax_error,
                 self.test_code_multiple_functions,
                 self.test_corrupted_image_input,
-                self.test_mixed_image_text_contradiction
+                self.test_mixed_image_text_contradiction,
             ],
             "Proactive Suggestion Abuse": [
                 self.test_proactive_improve_system,
                 self.test_proactive_slang_input,
                 self.test_proactive_repeated_keywords,
-                self.test_proactive_max_suggestions_limit
+                self.test_proactive_max_suggestions_limit,
             ],
             "Enterprise Audit & Privacy": [
                 self.test_pii_redaction_email,
                 self.test_pii_redaction_password,
                 self.test_pii_redaction_api_key,
                 self.test_audit_log_format,
-                self.test_audit_log_size_limit
+                self.test_audit_log_size_limit,
             ],
             "Performance & Load": [
                 self.test_performance_1000_prompts,
                 self.test_concurrent_100_users,
-                self.test_memory_leak_prevention
+                self.test_memory_leak_prevention,
             ],
             "Chaos Engineering": [
                 self.test_process_kill_recovery,
                 self.test_network_delay_tolerance,
-                self.test_storage_drop_fallback
+                self.test_storage_drop_fallback,
             ],
             "Fuzz & Security": [
                 self.test_unicode_fuzz_input,
                 self.test_emoji_spam_input,
                 self.test_sqli_injection_input,
                 self.test_xss_injection_input,
-                self.test_large_input_truncation
+                self.test_large_input_truncation,
             ],
             "Observability": [
                 self.test_prometheus_metrics,
                 self.test_grafana_dashboard_data,
-                self.test_alert_rules
-            ]
+                self.test_alert_rules,
+            ],
         }
 
         # Run all tests
@@ -226,7 +244,7 @@ class SealGradeTestSuite:
             "passed_tests": passed_tests,
             "failed_tests": total_tests - passed_tests,
             "pass_rate": pass_rate,
-            "results": self.results
+            "results": self.results,
         }
 
         logger.info("\n🎯 SEAL-GRADE Test Summary:")
@@ -311,7 +329,10 @@ def foo(:
 
         assert result.needs_clarification is True
         assert result.input_type == "code"
-        assert "syntax error" in result.question.lower() or "fix" in result.question.lower()
+        assert (
+            "syntax error" in result.question.lower()
+            or "fix" in result.question.lower()
+        )
         assert result.confidence > 0.8  # High confidence for syntax errors
 
         return True
@@ -343,8 +364,7 @@ def export_data():
         corrupted_image_bytes = b"not_a_valid_image" * 100
 
         result = self.multi_modal_clarifier.clarify(
-            "Analyze this image",
-            {"image_data": corrupted_image_bytes}
+            "Analyze this image", {"image_data": corrupted_image_bytes}
         )
 
         # Should not crash and should handle gracefully
@@ -361,8 +381,7 @@ def export_data():
         contradictory_prompt = "Draw me a cat"
 
         result = self.multi_modal_clarifier.clarify(
-            contradictory_prompt,
-            {"image_data": image_data}
+            contradictory_prompt, {"image_data": image_data}
         )
 
         assert result is not None
@@ -384,7 +403,13 @@ def export_data():
         # Check that suggestions are from different categories
         categories = set()
         for suggestion in suggestions.suggestions:
-            for category in ["performance", "security", "ux", "scalability", "maintainability"]:
+            for category in [
+                "performance",
+                "security",
+                "ux",
+                "scalability",
+                "maintainability",
+            ]:
                 if category in suggestion.lower():
                     categories.add(category)
 
@@ -449,7 +474,13 @@ def export_data():
         input_with_password = os.getenv("PASSWORD", "")
 
         self.audit_logger.log_clarification_request(
-            "user123", "session456", input_with_password, "text", "generic", "careful", {}
+            "user123",
+            "session456",
+            input_with_password,
+            "text",
+            "generic",
+            "careful",
+            {},
         )
 
         with open(self.temp_audit_file.name) as f:
@@ -465,7 +496,13 @@ def export_data():
         input_with_api_key = os.getenv("API_KEY", "")
 
         self.audit_logger.log_clarification_request(
-            "user123", "session456", input_with_api_key, "text", "generic", "careful", {}
+            "user123",
+            "session456",
+            input_with_api_key,
+            "text",
+            "generic",
+            "careful",
+            {},
         )
 
         with open(self.temp_audit_file.name) as f:
@@ -485,7 +522,16 @@ def export_data():
         with open(self.temp_audit_file.name) as f:
             log_entry = json.loads(f.readline())
 
-        required_fields = ["trace_id", "user_id", "domain", "mode", "question", "success", "timestamp", "input_type"]
+        required_fields = [
+            "trace_id",
+            "user_id",
+            "domain",
+            "mode",
+            "question",
+            "success",
+            "timestamp",
+            "input_type",
+        ]
         for field in required_fields:
             assert field in log_entry
 
@@ -496,7 +542,13 @@ def export_data():
         # Generate 1000 prompts (simulate 10k with smaller sample)
         for i in range(1000):
             self.audit_logger.log_clarification_request(
-                f"user{i}", f"session{i}", f"test prompt {i}", "text", "generic", "careful", {}
+                f"user{i}",
+                f"session{i}",
+                f"test prompt {i}",
+                "text",
+                "generic",
+                "careful",
+                {},
             )
 
         # Check file size
@@ -529,10 +581,13 @@ def export_data():
 
     def test_concurrent_100_users(self) -> bool:
         """Test: 100 concurrent users → no deadlock, no race condition"""
+
         def user_request(user_id: int):
             """Simulate a user request"""
             try:
-                result = self.handler.detect_ambiguity(f"User {user_id} wants to optimize")
+                result = self.handler.detect_ambiguity(
+                    f"User {user_id} wants to optimize"
+                )
                 return result is not None
             except Exception as e:
                 logger.error(f"User {user_id} request failed: {e}")
@@ -541,7 +596,9 @@ def export_data():
         # Run 100 concurrent requests
         with concurrent.futures.ThreadPoolExecutor(max_workers=100) as executor:
             futures = [executor.submit(user_request, i) for i in range(100)]
-            results = [future.result() for future in concurrent.futures.as_completed(futures)]
+            results = [
+                future.result() for future in concurrent.futures.as_completed(futures)
+            ]
 
         # All requests should succeed
         assert all(results)
@@ -595,7 +652,7 @@ def export_data():
     def test_network_delay_tolerance(self) -> bool:
         """Test: 500ms network delay → no timeout > 2s"""
         # Mock network delay
-        with patch('time.sleep') as mock_sleep:
+        with patch("time.sleep") as mock_sleep:
             mock_sleep.side_effect = lambda x: time.sleep(0.001)  # Simulate delay
 
             start_time = time.time()
@@ -614,7 +671,7 @@ def export_data():
         # In real scenario, this would be handled by the PatternStore
 
         # Simulate storage failure
-        with patch.object(self.handler, 'learner', None):
+        with patch.object(self.handler, "learner", None):
             result = self.handler.detect_ambiguity("Test storage failure")
             assert result is not None  # Should not crash
 
@@ -624,7 +681,9 @@ def export_data():
 
     def test_unicode_fuzz_input(self) -> bool:
         """Test: Random Unicode input → no crash, no plaintext injection"""
-        unicode_input = "".join([chr(secrets.randbelow(0, 0x10FFFF)) for _ in range(100)])
+        unicode_input = "".join(
+            [chr(secrets.randbelow(0, 0x10FFFF)) for _ in range(100)]
+        )
 
         result = self.handler.detect_ambiguity(unicode_input)
         assert result is not None  # Should not crash
@@ -755,12 +814,15 @@ def export_data():
 
         return True
 
+
 # ==================== PYTEST INTEGRATION ====================
+
 
 @pytest.fixture
 def seal_grade_suite():
     """Fixture for SEAL-GRADE test suite"""
     return SealGradeTestSuite()
+
 
 def test_seal_grade_full_suite(seal_grade_suite):
     """Run the complete SEAL-GRADE test suite"""
@@ -778,15 +840,16 @@ def test_seal_grade_full_suite(seal_grade_suite):
     # In production, you might want to assert a minimum pass rate
     assert results["pass_rate"] >= 0.0  # At least some tests should run
 
+
 if __name__ == "__main__":
     # Run SEAL-GRADE test suite directly
     suite = SealGradeTestSuite()
     results = suite.run_all_tests()
 
     # Print detailed results
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("🧪 SEAL-GRADE TEST RESULTS")
-    print("="*80)
+    print("=" * 80)
 
     for result in results["results"]:
         status = "✅ PASS" if result.passed else "❌ FAIL"
@@ -794,7 +857,9 @@ if __name__ == "__main__":
         if not result.passed and result.error_message:
             print(f"    Error: {result.error_message}")
 
-    print(f"\n📊 Summary: {results['passed_tests']}/{results['total_tests']} tests passed ({results['pass_rate']:.1f}%)")
+    print(
+        f"\n📊 Summary: {results['passed_tests']}/{results['total_tests']} tests passed ({results['pass_rate']:.1f}%)"
+    )
 
     if results["pass_rate"] < 100:
         print(f"⚠️  {results['failed_tests']} tests failed - review and fix issues")

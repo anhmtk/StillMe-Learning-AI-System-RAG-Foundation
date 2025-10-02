@@ -27,7 +27,15 @@ class TestPrivacyFilter:
         """Create a PrivacyFilter instance for testing"""
         config = {
             "redact_pii": True,
-            "privacy_filters": ["email", "password", "api_key", "token", "secret", "credit_card", "ssn"]
+            "privacy_filters": [
+                "email",
+                "password",
+                "api_key",
+                "token",
+                "secret",
+                "credit_card",
+                "ssn",
+            ],
         }
         return PrivacyFilter(config)
 
@@ -101,10 +109,7 @@ class TestPrivacyFilter:
         data = {
             "user": "john@example.com",
             "password": "secret123",
-            "info": {
-                "email": "jane@example.com",
-                "phone": "555-123-4567"
-            }
+            "info": {"email": "jane@example.com", "phone": "555-123-4567"},
         }
         redacted = privacy_filter.redact(data)
 
@@ -137,6 +142,7 @@ class TestPrivacyFilter:
         assert privacy_filter.redact(None) is None
         assert privacy_filter.redact({}) == {}
 
+
 class TestComplianceManager:
     """Test ComplianceManager functionality"""
 
@@ -147,10 +153,19 @@ class TestComplianceManager:
             "compliance": {
                 "gdpr_enabled": True,
                 "ccpa_enabled": True,
-                "sox_enabled": False
+                "sox_enabled": False,
             },
             "retention_days": 90,
-            "fields": ["trace_id", "user_id", "domain", "mode", "question", "success", "timestamp", "input_type"]
+            "fields": [
+                "trace_id",
+                "user_id",
+                "domain",
+                "mode",
+                "question",
+                "success",
+                "timestamp",
+                "input_type",
+            ],
         }
         return ComplianceManager(config)
 
@@ -189,7 +204,7 @@ class TestComplianceManager:
             confidence=0.8,
             reasoning="Test reasoning",
             metadata={"test": "data"},
-            compliance_flags=["gdpr", "ccpa"]
+            compliance_flags=["gdpr", "ccpa"],
         )
 
         validation = compliance_manager.validate_event(event)
@@ -217,7 +232,7 @@ class TestComplianceManager:
             confidence=0.8,
             reasoning="Test reasoning",
             metadata={"test": "data"},
-            compliance_flags=["gdpr", "ccpa"]
+            compliance_flags=["gdpr", "ccpa"],
         )
 
         validation = compliance_manager.validate_event(event)
@@ -244,7 +259,7 @@ class TestComplianceManager:
             confidence=0.8,
             reasoning="Test reasoning",
             metadata={"test": "data"},
-            compliance_flags=["gdpr", "ccpa"]
+            compliance_flags=["gdpr", "ccpa"],
         )
 
         validation = compliance_manager.validate_event(event)
@@ -270,7 +285,7 @@ class TestComplianceManager:
             confidence=0.8,
             reasoning="Test reasoning",
             metadata={"test": "data"},
-            compliance_flags=["gdpr", "ccpa"]
+            compliance_flags=["gdpr", "ccpa"],
         )
 
         validation = compliance_manager.validate_event(event)
@@ -278,13 +293,14 @@ class TestComplianceManager:
         assert validation["valid"] is False
         assert any("CCPA requires timestamp" in error for error in validation["errors"])
 
+
 class TestAuditLogger:
     """Test AuditLogger functionality"""
 
     @pytest.fixture
     def temp_log_file(self):
         """Create a temporary log file for testing"""
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.jsonl') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".jsonl") as f:
             temp_file = f.name
         yield temp_file
         # Cleanup
@@ -304,8 +320,8 @@ class TestAuditLogger:
             "compliance": {
                 "gdpr_enabled": True,
                 "ccpa_enabled": True,
-                "sox_enabled": False
-            }
+                "sox_enabled": False,
+            },
         }
         return AuditLogger(config)
 
@@ -347,7 +363,7 @@ class TestAuditLogger:
             confidence=0.8,
             reasoning="Test reasoning",
             metadata={"test": "data"},
-            compliance_flags=["gdpr", "ccpa"]
+            compliance_flags=["gdpr", "ccpa"],
         )
 
         serialized = audit_logger._serialize_event(event)
@@ -376,7 +392,7 @@ class TestAuditLogger:
             input_type=input_type,
             domain=domain,
             mode=mode,
-            context=context
+            context=context,
         )
 
         assert trace_id is not None
@@ -417,7 +433,7 @@ class TestAuditLogger:
             suggestions=suggestions,
             confidence=confidence,
             reasoning=reasoning,
-            success=success
+            success=success,
         )
 
         assert result is True
@@ -451,7 +467,7 @@ class TestAuditLogger:
             user_id=user_id,
             suggestion=suggestion,
             category=category,
-            success=success
+            success=success,
         )
 
         assert result is True
@@ -484,7 +500,7 @@ class TestAuditLogger:
             user_id=user_id,
             error_type=error_type,
             error_message=error_message,
-            context=context
+            context=context,
         )
 
         assert result is True
@@ -515,7 +531,7 @@ class TestAuditLogger:
             input_text=input_text,
             input_type="text",
             domain="web",
-            mode="careful"
+            mode="careful",
         )
 
         # Check that PII was redacted in the log
@@ -535,12 +551,20 @@ class TestAuditLogger:
         """Test getting audit statistics"""
         # Log some events
         audit_logger.log_clarification_request(
-            user_id="user1", session_id="session1", input_text="test1",
-            input_type="text", domain="web", mode="careful"
+            user_id="user1",
+            session_id="session1",
+            input_text="test1",
+            input_type="text",
+            domain="web",
+            mode="careful",
         )
         audit_logger.log_clarification_request(
-            user_id="user2", session_id="session2", input_text="test2",
-            input_type="text", domain="data", mode="quick"
+            user_id="user2",
+            session_id="session2",
+            input_text="test2",
+            input_type="text",
+            domain="data",
+            mode="quick",
         )
 
         stats = audit_logger.get_audit_stats()
@@ -559,12 +583,20 @@ class TestAuditLogger:
         """Test exporting audit logs"""
         # Log some events
         audit_logger.log_clarification_request(
-            user_id="user1", session_id="session1", input_text="test1",
-            input_type="text", domain="web", mode="careful"
+            user_id="user1",
+            session_id="session1",
+            input_text="test1",
+            input_type="text",
+            domain="web",
+            mode="careful",
         )
         audit_logger.log_clarification_request(
-            user_id="user2", session_id="session2", input_text="test2",
-            input_type="text", domain="data", mode="quick"
+            user_id="user2",
+            session_id="session2",
+            input_text="test2",
+            input_type="text",
+            domain="data",
+            mode="quick",
         )
 
         # Export all logs
@@ -578,6 +610,7 @@ class TestAuditLogger:
 
         # Export logs with time filter
         import time
+
         current_time = time.time()
         recent_logs = audit_logger.export_audit_logs(start_time=current_time - 3600)
         assert len(recent_logs) == 2  # Both logs are recent
@@ -586,8 +619,12 @@ class TestAuditLogger:
         """Test clearing audit logs"""
         # Log some events
         audit_logger.log_clarification_request(
-            user_id="user1", session_id="session1", input_text="test1",
-            input_type="text", domain="web", mode="careful"
+            user_id="user1",
+            session_id="session1",
+            input_text="test1",
+            input_type="text",
+            domain="web",
+            mode="careful",
         )
 
         # Verify log file exists and has content
@@ -607,15 +644,16 @@ class TestAuditLogger:
 
     def test_audit_logger_disabled(self, temp_log_file):
         """Test audit logger when disabled"""
-        config = {
-            "enabled": False,
-            "log_file": temp_log_file
-        }
+        config = {"enabled": False, "log_file": temp_log_file}
         disabled_logger = AuditLogger(config)
 
         trace_id = disabled_logger.log_clarification_request(
-            user_id="test_user", session_id="test_session", input_text="test",
-            input_type="text", domain="web", mode="careful"
+            user_id="test_user",
+            session_id="test_session",
+            input_text="test",
+            input_type="text",
+            domain="web",
+            mode="careful",
         )
 
         assert trace_id == "audit_disabled"
@@ -624,13 +662,14 @@ class TestAuditLogger:
         # Log file should not exist
         assert not Path(temp_log_file).exists()
 
+
 class TestAuditIntegration:
     """Integration tests for audit logging"""
 
     @pytest.fixture
     def temp_log_file(self):
         """Create a temporary log file for testing"""
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.jsonl') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".jsonl") as f:
             temp_file = f.name
         yield temp_file
         if os.path.exists(temp_file):
@@ -649,8 +688,8 @@ class TestAuditIntegration:
             "compliance": {
                 "gdpr_enabled": True,
                 "ccpa_enabled": True,
-                "sox_enabled": False
-            }
+                "sox_enabled": False,
+            },
         }
         return AuditLogger(config)
 
@@ -666,7 +705,7 @@ class TestAuditIntegration:
             input_text="Build a web application with user authentication",
             input_type="text",
             domain="web",
-            mode="careful"
+            mode="careful",
         )
 
         assert trace_id is not None
@@ -681,7 +720,7 @@ class TestAuditIntegration:
             suggestions=["Use React", "Implement authentication", "Add database"],
             confidence=0.8,
             reasoning="Generated based on web domain and authentication mention",
-            success=True
+            success=True,
         )
 
         assert result is True
@@ -693,7 +732,7 @@ class TestAuditIntegration:
             user_id=user_id,
             suggestion="Use React",
             category="ux",
-            success=True
+            success=True,
         )
 
         assert suggestion_result is True
@@ -726,7 +765,9 @@ class TestAuditIntegration:
     def test_pii_redaction_workflow(self, full_audit_system):
         """Test PII redaction in complete workflow"""
         user_id = "test_user"
-        input_text = "My email is john@example.com and my API key is sk-1234567890abcdef"
+        input_text = (
+            "My email is john@example.com and my API key is sk-1234567890abcdef"
+        )
 
         full_audit_system.log_clarification_request(
             user_id=user_id,
@@ -734,7 +775,7 @@ class TestAuditIntegration:
             input_text=input_text,
             input_type="text",
             domain="web",
-            mode="careful"
+            mode="careful",
         )
 
         # Check that PII was redacted
@@ -758,7 +799,7 @@ class TestAuditIntegration:
             input_text="test input",
             input_type="text",
             domain="web",
-            mode="careful"
+            mode="careful",
         )
 
         assert trace_id is not None
@@ -782,7 +823,7 @@ class TestAuditIntegration:
             user_id="test_user",
             error_type="processing_error",
             error_message="Failed to process input",
-            context={"input": "test", "error_code": 500}
+            context={"input": "test", "error_code": 500},
         )
 
         assert result is True
@@ -812,7 +853,7 @@ class TestAuditIntegration:
                 input_text=f"test input {i}",
                 input_type="text",
                 domain="web",
-                mode="careful"
+                mode="careful",
             )
         end_time = time.time()
 

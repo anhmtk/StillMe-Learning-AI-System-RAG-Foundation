@@ -45,7 +45,7 @@ class TestCollectScoreTop10:
                 # Group records by topic
                 topic_groups = {}
                 for record in records:
-                    topic = getattr(record, 'topic', source)
+                    topic = getattr(record, "topic", source)
                     if topic not in topic_groups:
                         topic_groups[topic] = []
                     topic_groups[topic].append(record)
@@ -67,22 +67,22 @@ class TestCollectScoreTop10:
 
         # Check each item has attribution
         for niche in top_niches:
-            assert hasattr(niche, 'sources')
+            assert hasattr(niche, "sources")
             assert len(niche.sources) > 0
 
             # Check attribution fields
             for source in niche.sources:
-                assert hasattr(source, 'source_name')
-                assert hasattr(source, 'url')
-                assert hasattr(source, 'timestamp')
-                assert hasattr(source, 'domain')
+                assert hasattr(source, "source_name")
+                assert hasattr(source, "url")
+                assert hasattr(source, "timestamp")
+                assert hasattr(source, "domain")
 
                 # Check URL format
                 assert source.url.startswith("https://")
 
                 # Check timestamp format
                 try:
-                    datetime.fromisoformat(source.timestamp.replace('Z', '+00:00'))
+                    datetime.fromisoformat(source.timestamp.replace("Z", "+00:00"))
                 except ValueError:
                     pytest.fail("Timestamp is not in ISO format")
 
@@ -216,7 +216,7 @@ class TestAllowlistRedirect:
             "https://site2.com",
             "https://site3.com",
             "https://site4.com",  # This should be blocked
-            "https://site5.com"
+            "https://site5.com",
         ]
 
         # Check redirect limit
@@ -258,7 +258,7 @@ class TestHomoglyphIDN:
         similar_domains = [
             "g00gle.com",  # Zero instead of o
             "goog1e.com",  # 1 instead of l
-            "googIe.com"   # Capital I instead of l
+            "googIe.com",  # Capital I instead of l
         ]
 
         # Load allowlist
@@ -282,15 +282,19 @@ class TestToolGate:
             "query": "'; DROP TABLE users; --",
             "url": "javascript:alert('xss')",
             "timeout": -1,
-            "retries": 999999
+            "retries": 999999,
         }
 
         # Validate tool request
-        decision = validate_tool_request("web.search_news", strange_params, "test message")
+        decision = validate_tool_request(
+            "web.search_news", strange_params, "test message"
+        )
 
         # Should be denied
         assert not decision.allowed
-        assert "strange" in decision.reason.lower() or "invalid" in decision.reason.lower()
+        assert (
+            "strange" in decision.reason.lower() or "invalid" in decision.reason.lower()
+        )
 
     def test_malicious_tool_name_deny(self):
         """Test malicious tool name is DENIED"""
@@ -307,13 +311,12 @@ class TestToolGate:
     def test_valid_tool_request_allow(self):
         """Test valid tool request is ALLOWED"""
         # Test valid parameters
-        valid_params = {
-            "query": "AI technology news",
-            "window": "24h"
-        }
+        valid_params = {"query": "AI technology news", "window": "24h"}
 
         # Validate tool request
-        decision = validate_tool_request("web.search_news", valid_params, "test message")
+        decision = validate_tool_request(
+            "web.search_news", valid_params, "test message"
+        )
 
         # Should be allowed
         assert decision.allowed
@@ -337,16 +340,16 @@ class TestPlaybook:
                 "news_delta": 0.8,
                 "reddit_engagement": 0.6,
                 "competition_proxy": 0.3,
-                "feasibility_fit": 0.9
+                "feasibility_fit": 0.9,
             },
             "sources": [
                 {
                     "source_name": "GitHub Trending",
                     "url": "https://github.com/trending",
                     "timestamp": "2024-09-22T10:00:00Z",
-                    "domain": "github.com"
+                    "domain": "github.com",
                 }
-            ]
+            ],
         }
 
         # Generate playbook
@@ -354,44 +357,44 @@ class TestPlaybook:
         playbook = generator.generate_playbook(test_niche)
 
         # Check playbook structure
-        assert hasattr(playbook, 'product_brief')
-        assert hasattr(playbook, 'mvp_spec')
-        assert hasattr(playbook, 'pricing_suggestion')
-        assert hasattr(playbook, 'assets')
-        assert hasattr(playbook, 'kpi')
-        assert hasattr(playbook, 'risk_assessment')
+        assert hasattr(playbook, "product_brief")
+        assert hasattr(playbook, "mvp_spec")
+        assert hasattr(playbook, "pricing_suggestion")
+        assert hasattr(playbook, "assets")
+        assert hasattr(playbook, "kpi")
+        assert hasattr(playbook, "risk_assessment")
 
         # Check product brief
-        assert hasattr(playbook.product_brief, 'title')
-        assert hasattr(playbook.product_brief, 'persona')
-        assert hasattr(playbook.product_brief, 'pain_points')
-        assert hasattr(playbook.product_brief, 'jtbd')
-        assert hasattr(playbook.product_brief, 'usp')
+        assert hasattr(playbook.product_brief, "title")
+        assert hasattr(playbook.product_brief, "persona")
+        assert hasattr(playbook.product_brief, "pain_points")
+        assert hasattr(playbook.product_brief, "jtbd")
+        assert hasattr(playbook.product_brief, "usp")
 
         # Check MVP spec
-        assert hasattr(playbook.mvp_spec, 'feature_list')
-        assert hasattr(playbook.mvp_spec, 'architecture')
-        assert hasattr(playbook.mvp_spec, 'dependencies')
-        assert hasattr(playbook.mvp_spec, 'estimated_development_days')
+        assert hasattr(playbook.mvp_spec, "feature_list")
+        assert hasattr(playbook.mvp_spec, "architecture")
+        assert hasattr(playbook.mvp_spec, "dependencies")
+        assert hasattr(playbook.mvp_spec, "estimated_development_days")
 
         # Check pricing
-        assert hasattr(playbook.pricing_suggestion, 'tiers')
+        assert hasattr(playbook.pricing_suggestion, "tiers")
         assert len(playbook.pricing_suggestion.tiers) >= 2
 
         # Check assets
-        assert hasattr(playbook.assets, 'landing_skeleton')
-        assert hasattr(playbook.assets, 'repo_scaffold')
-        assert hasattr(playbook.assets, 'outreach_template')
+        assert hasattr(playbook.assets, "landing_skeleton")
+        assert hasattr(playbook.assets, "repo_scaffold")
+        assert hasattr(playbook.assets, "outreach_template")
 
         # Check KPI
-        assert hasattr(playbook.kpi, 'leads_per_day')
-        assert hasattr(playbook.kpi, 'signups_per_day')
-        assert hasattr(playbook.kpi, 'revenue_prototype_per_day')
+        assert hasattr(playbook.kpi, "leads_per_day")
+        assert hasattr(playbook.kpi, "signups_per_day")
+        assert hasattr(playbook.kpi, "revenue_prototype_per_day")
 
         # Check risk assessment
-        assert hasattr(playbook.risk_assessment, 'overall_risk_level')
-        assert hasattr(playbook.risk_assessment, 'compliance_risks')
-        assert hasattr(playbook.risk_assessment, 'technical_risks')
+        assert hasattr(playbook.risk_assessment, "overall_risk_level")
+        assert hasattr(playbook.risk_assessment, "compliance_risks")
+        assert hasattr(playbook.risk_assessment, "technical_risks")
 
     def test_playbook_file_creation(self):
         """Test playbook files are created in reports/playbook_* directory"""
@@ -399,7 +402,9 @@ class TestPlaybook:
         # For now, we'll test the structure
 
         playbook_dir = "reports/playbooks"
-        assert os.path.exists(playbook_dir) or True  # Directory should exist or be created
+        assert (
+            os.path.exists(playbook_dir) or True
+        )  # Directory should exist or be created
 
         # In real implementation, would check for:
         # - brief.md

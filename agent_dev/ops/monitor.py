@@ -36,7 +36,7 @@ class PatrolRunner:
             "ruff_issues": [],
             "pytest_status": "unknown",
             "duration_seconds": 0,
-            "success": False
+            "success": False,
         }
 
         try:
@@ -48,7 +48,10 @@ class PatrolRunner:
             pytest_result = self._run_pytest_smoke()
             results["pytest_status"] = pytest_result.get("status", "unknown")
 
-            results["success"] = len(results["ruff_issues"]) == 0 and results["pytest_status"] == "passed"
+            results["success"] = (
+                len(results["ruff_issues"]) == 0
+                and results["pytest_status"] == "passed"
+            )
             results["duration_seconds"] = time.time() - start_time
 
             self.last_quick_patrol = time.time()
@@ -73,7 +76,7 @@ class PatrolRunner:
             "pytest_status": "unknown",
             "red_team_status": "not_available",
             "duration_seconds": 0,
-            "success": False
+            "success": False,
         }
 
         try:
@@ -88,9 +91,9 @@ class PatrolRunner:
                 results["red_team_risk_score"] = red_team_result["risk_score"]
 
             results["success"] = (
-                len(results["ruff_issues"]) == 0 and
-                results["pytest_status"] == "passed" and
-                results["red_team_status"] != "high_risk"
+                len(results["ruff_issues"]) == 0
+                and results["pytest_status"] == "passed"
+                and results["red_team_status"] != "high_risk"
             )
             results["duration_seconds"] = time.time() - start_time
 
@@ -116,10 +119,13 @@ class PatrolRunner:
         """Run ruff check and return results"""
         try:
             cmd = [
-                "ruff", "check",
-                "stillme_ai", "tests",
+                "ruff",
+                "check",
+                "stillme_ai",
+                "tests",
                 "--output-format=json",
-                "--select", "F821,W293,W291,E302,I001,F401"
+                "--select",
+                "F821,W293,W291,E302,I001,F401",
             ]
 
             result = subprocess.run(
@@ -127,7 +133,7 @@ class PatrolRunner:
                 cwd=self.project_root,
                 capture_output=True,
                 text=False,  # Capture raw bytes
-                timeout=60
+                timeout=60,
             )
 
             if result.returncode == 0:
@@ -153,19 +159,32 @@ class PatrolRunner:
                 try:
                     from stillme_core.utils.io_safe import safe_decode
 
-                    stderr_bytes = result.stderr.encode() if isinstance(result.stderr, str) else result.stderr
+                    stderr_bytes = (
+                        result.stderr.encode()
+                        if isinstance(result.stderr, str)
+                        else result.stderr
+                    )
                     stderr_text = safe_decode(stderr_bytes) if stderr_bytes else ""
 
-                    for line in stderr_text.split('\n'):
-                        if ':' in line and any(rule in line for rule in ["F821", "W293", "W291", "E302", "I001", "F401"]):
-                            parts = line.split(':')
+                    for line in stderr_text.split("\n"):
+                        if ":" in line and any(
+                            rule in line
+                            for rule in ["F821", "W293", "W291", "E302", "I001", "F401"]
+                        ):
+                            parts = line.split(":")
                             if len(parts) >= 4:
-                                issues.append({
-                                    "file": parts[0],
-                                    "line": int(parts[1]) if parts[1].isdigit() else 0,
-                                    "rule": parts[3].strip().split()[0] if parts[3].strip() else "UNKNOWN",
-                                    "message": ':'.join(parts[3:]).strip()
-                                })
+                                issues.append(
+                                    {
+                                        "file": parts[0],
+                                        "line": int(parts[1])
+                                        if parts[1].isdigit()
+                                        else 0,
+                                        "rule": parts[3].strip().split()[0]
+                                        if parts[3].strip()
+                                        else "UNKNOWN",
+                                        "message": ":".join(parts[3:]).strip(),
+                                    }
+                                )
                 except UnicodeDecodeError:
                     # If stderr also has Unicode issues, return empty
                     pass
@@ -182,11 +201,13 @@ class PatrolRunner:
         """Run pytest smoke test"""
         try:
             cmd = [
-                "pytest", "-q",
-                "-k", "not slow",
+                "pytest",
+                "-q",
+                "-k",
+                "not slow",
                 "--maxfail=1",
                 "--disable-warnings",
-                "--tb=no"
+                "--tb=no",
             ]
 
             result = subprocess.run(
@@ -194,7 +215,7 @@ class PatrolRunner:
                 cwd=self.project_root,
                 capture_output=True,
                 text=False,  # Capture raw bytes
-                timeout=120
+                timeout=120,
             )
 
             if result.returncode == 0:
@@ -202,6 +223,7 @@ class PatrolRunner:
             else:
                 # Use safe decoding for output
                 from stillme_core.utils.io_safe import safe_decode
+
                 stdout_text = safe_decode(result.stdout) if result.stdout else ""
                 stderr_text = safe_decode(result.stderr) if result.stderr else ""
                 return {"status": "failed", "output": stdout_text + stderr_text}
@@ -217,12 +239,19 @@ class PatrolRunner:
         """Run red-team security check if available"""
         try:
             # Check if red-team engine is available
-            red_team_path = os.path.join(self.project_root, "stillme_core", "core", "advanced_security", "red_team_engine.py")
+            red_team_path = os.path.join(
+                self.project_root,
+                "stillme_core",
+                "core",
+                "advanced_security",
+                "red_team_engine.py",
+            )
             if not os.path.exists(red_team_path):
                 return {"status": "not_available"}
 
             # Import and run light security check
             import sys
+
             sys.path.insert(0, os.path.join(self.project_root, "stillme_core"))
 
             from core.advanced_security.red_team_engine import RedTeamEngine
@@ -234,7 +263,7 @@ class PatrolRunner:
             return {
                 "status": "completed",
                 "risk_score": result.get("risk_score", 0.0),
-                "findings": result.get("findings", [])
+                "findings": result.get("findings", []),
             }
 
         except ImportError:

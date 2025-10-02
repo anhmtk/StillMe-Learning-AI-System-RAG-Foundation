@@ -15,14 +15,17 @@ from typing import Optional
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class SymbolInfo:
     """Thông tin về một symbol"""
+
     name: str
     module_path: str
     symbol_type: str  # 'function', 'class', 'variable'
     line_number: int
     is_exported: bool = True  # Có thể import được không
+
 
 class SymbolIndex:
     """Chỉ mục symbol trong codebase"""
@@ -31,7 +34,18 @@ class SymbolIndex:
         self.project_root = Path(project_root)
         self.symbols: dict[str, list[SymbolInfo]] = {}
         self.cache_file = self.project_root / "agentdev_symbol_cache.json"
-        self.excluded_dirs = {'.git', '.venv', 'venv', 'env', 'artifacts', 'reports', '__pycache__', 'node_modules', 'dist', 'build'}
+        self.excluded_dirs = {
+            ".git",
+            ".venv",
+            "venv",
+            "env",
+            "artifacts",
+            "reports",
+            "__pycache__",
+            "node_modules",
+            "dist",
+            "build",
+        }
 
     def build_index(self, force_rebuild: bool = False) -> dict[str, int]:
         """Xây dựng chỉ mục symbol"""
@@ -68,8 +82,12 @@ class SymbolIndex:
         stats["modules_indexed"] = len(self.symbols)
         self._save_cache()
 
-        logger.info("Built symbol index: %d files, %d symbols, %d modules",
-                   stats["files_scanned"], stats["symbols_found"], stats["modules_indexed"])
+        logger.info(
+            "Built symbol index: %d files, %d symbols, %d modules",
+            stats["files_scanned"],
+            stats["symbols_found"],
+            stats["modules_indexed"],
+        )
         return stats
 
     def _should_skip_file(self, file_path: Path) -> bool:
@@ -85,38 +103,50 @@ class SymbolIndex:
         symbols = []
 
         try:
-            with open(file_path, encoding='utf-8') as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
 
             tree = ast.parse(content, filename=str(file_path))
 
             for node in ast.walk(tree):
                 if isinstance(node, ast.FunctionDef):
-                    symbols.append(SymbolInfo(
-                        name=node.name,
-                        module_path=str(file_path.relative_to(self.project_root)).replace('\\', '/'),
-                        symbol_type='function',
-                        line_number=node.lineno,
-                        is_exported=not node.name.startswith('_')
-                    ))
+                    symbols.append(
+                        SymbolInfo(
+                            name=node.name,
+                            module_path=str(
+                                file_path.relative_to(self.project_root)
+                            ).replace("\\", "/"),
+                            symbol_type="function",
+                            line_number=node.lineno,
+                            is_exported=not node.name.startswith("_"),
+                        )
+                    )
                 elif isinstance(node, ast.ClassDef):
-                    symbols.append(SymbolInfo(
-                        name=node.name,
-                        module_path=str(file_path.relative_to(self.project_root)).replace('\\', '/'),
-                        symbol_type='class',
-                        line_number=node.lineno,
-                        is_exported=not node.name.startswith('_')
-                    ))
+                    symbols.append(
+                        SymbolInfo(
+                            name=node.name,
+                            module_path=str(
+                                file_path.relative_to(self.project_root)
+                            ).replace("\\", "/"),
+                            symbol_type="class",
+                            line_number=node.lineno,
+                            is_exported=not node.name.startswith("_"),
+                        )
+                    )
                 elif isinstance(node, ast.Assign):
                     for target in node.targets:
                         if isinstance(target, ast.Name):
-                            symbols.append(SymbolInfo(
-                                name=target.id,
-                                module_path=str(file_path.relative_to(self.project_root)).replace('\\', '/'),
-                                symbol_type='variable',
-                                line_number=node.lineno,
-                                is_exported=not target.id.startswith('_')
-                            ))
+                            symbols.append(
+                                SymbolInfo(
+                                    name=target.id,
+                                    module_path=str(
+                                        file_path.relative_to(self.project_root)
+                                    ).replace("\\", "/"),
+                                    symbol_type="variable",
+                                    line_number=node.lineno,
+                                    is_exported=not target.id.startswith("_"),
+                                )
+                            )
 
         except Exception as e:
             logger.debug("Error parsing %s: %s", file_path, e)
@@ -134,7 +164,9 @@ class SymbolIndex:
         """Tìm symbol trong index"""
         return self.symbols.get(symbol_name, [])
 
-    def get_import_for_symbol(self, symbol_name: str, target_file: str) -> Optional[str]:
+    def get_import_for_symbol(
+        self, symbol_name: str, target_file: str
+    ) -> Optional[str]:
         """Tạo import statement cho symbol"""
         symbols = self.find_symbol(symbol_name)
         if not symbols:
@@ -143,7 +175,7 @@ class SymbolIndex:
         # Tìm symbol phù hợp nhất (exported, trong stillme_ai)
         best_symbol = None
         for symbol in symbols:
-            if symbol.is_exported and 'stillme_ai' in symbol.module_path:
+            if symbol.is_exported and "stillme_ai" in symbol.module_path:
                 best_symbol = symbol
                 break
 
@@ -151,18 +183,18 @@ class SymbolIndex:
             return None
 
         # Tạo import statement
-        module_path = best_symbol.module_path.replace('/', '.').replace('\\', '.')
-        if module_path.endswith('.py'):
+        module_path = best_symbol.module_path.replace("/", ".").replace("\\", ".")
+        if module_path.endswith(".py"):
             module_path = module_path[:-3]
 
-        if best_symbol.symbol_type == 'class':
+        if best_symbol.symbol_type == "class":
             return f"from {module_path} import {symbol_name}"
         else:
             return f"from {module_path} import {symbol_name}"
 
     def _load_cache(self):
         """Load symbol cache from file"""
-        with open(self.cache_file, encoding='utf-8') as f:
+        with open(self.cache_file, encoding="utf-8") as f:
             data = json.load(f)
 
         self.symbols = {}
@@ -177,8 +209,9 @@ class SymbolIndex:
         for symbol_name, symbol_list in self.symbols.items():
             data[symbol_name] = [asdict(symbol) for symbol in symbol_list]
 
-        with open(self.cache_file, 'w', encoding='utf-8') as f:
+        with open(self.cache_file, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
+
 
 # Test
 if __name__ == "__main__":

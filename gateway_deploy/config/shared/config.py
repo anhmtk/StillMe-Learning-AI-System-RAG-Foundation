@@ -26,11 +26,15 @@ class SharedConfig:
 
     # Logging configuration
     log_level: str = os.getenv("LOG_LEVEL", "INFO")
-    log_format: str = os.getenv("LOG_FORMAT", "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    log_format: str = os.getenv(
+        "LOG_FORMAT", "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
 
     # Security settings
     secret_key: str = os.getenv("SECRET_KEY", "your-secret-key-here")
-    cors_origins: str = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:8080")
+    cors_origins: str = os.getenv(
+        "CORS_ORIGINS", "http://localhost:3000,http://localhost:8080"
+    )
 
     # Common environment
     environment: str = os.getenv("ENVIRONMENT", "development")
@@ -51,5 +55,5 @@ class SharedConfig:
             "secret_key": self.secret_key,
             "cors_origins": self.cors_origins,
             "environment": self.environment,
-            "debug": self.debug
+            "debug": self.debug,
         }

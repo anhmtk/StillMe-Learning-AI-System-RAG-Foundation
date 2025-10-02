@@ -42,8 +42,7 @@ class TestRollbackManager:
     def rollback_manager(self, temp_snapshots_dir, temp_sandbox_dir):
         """Create RollbackManager instance for testing"""
         return RollbackManager(
-            snapshots_dir=str(temp_snapshots_dir),
-            sandbox_dir=str(temp_sandbox_dir)
+            snapshots_dir=str(temp_snapshots_dir), sandbox_dir=str(temp_sandbox_dir)
         )
 
     @pytest.fixture
@@ -52,7 +51,7 @@ class TestRollbackManager:
         return {
             "weights": {"layer1": [0.1, 0.2, 0.3], "layer2": [0.4, 0.5, 0.6]},
             "parameters": {"learning_rate": 0.001, "batch_size": 32},
-            "version": "1.0.0"
+            "version": "1.0.0",
         }
 
     @pytest.fixture
@@ -61,7 +60,7 @@ class TestRollbackManager:
         return {
             "training_data": ["sample1", "sample2", "sample3"],
             "validation_data": ["val1", "val2"],
-            "hyperparameters": {"epochs": 10, "optimizer": "adam"}
+            "hyperparameters": {"epochs": 10, "optimizer": "adam"},
         }
 
     def test_initialization(self, rollback_manager):
@@ -71,7 +70,9 @@ class TestRollbackManager:
         assert isinstance(rollback_manager.snapshots, dict)
 
     @pytest.mark.asyncio
-    async def test_create_snapshot(self, rollback_manager, sample_model_state, sample_learning_data):
+    async def test_create_snapshot(
+        self, rollback_manager, sample_model_state, sample_learning_data
+    ):
         """Test creating a learning snapshot"""
         performance_metrics = {"accuracy": 0.85, "f1_score": 0.82}
         ethics_scores = {"overall": 0.9, "bias_score": 0.88}
@@ -83,7 +84,7 @@ class TestRollbackManager:
             performance_metrics=performance_metrics,
             ethics_scores=ethics_scores,
             safety_metrics=safety_metrics,
-            description="Test snapshot"
+            description="Test snapshot",
         )
 
         assert version_id is not None
@@ -98,7 +99,9 @@ class TestRollbackManager:
         assert snapshot.description == "Test snapshot"
 
     @pytest.mark.asyncio
-    async def test_create_multiple_snapshots(self, rollback_manager, sample_model_state, sample_learning_data):
+    async def test_create_multiple_snapshots(
+        self, rollback_manager, sample_model_state, sample_learning_data
+    ):
         """Test creating multiple snapshots"""
         performance_metrics = {"accuracy": 0.85}
         ethics_scores = {"overall": 0.9}
@@ -111,7 +114,7 @@ class TestRollbackManager:
             performance_metrics=performance_metrics,
             ethics_scores=ethics_scores,
             safety_metrics=safety_metrics,
-            description="First snapshot"
+            description="First snapshot",
         )
 
         # Create second snapshot
@@ -121,7 +124,7 @@ class TestRollbackManager:
             performance_metrics=performance_metrics,
             ethics_scores=ethics_scores,
             safety_metrics=safety_metrics,
-            description="Second snapshot"
+            description="Second snapshot",
         )
 
         assert version_id_1 != version_id_2
@@ -130,7 +133,9 @@ class TestRollbackManager:
         assert version_id_2 in rollback_manager.snapshots
 
     @pytest.mark.asyncio
-    async def test_execute_in_sandbox(self, rollback_manager, sample_model_state, sample_learning_data):
+    async def test_execute_in_sandbox(
+        self, rollback_manager, sample_model_state, sample_learning_data
+    ):
         """Test sandbox execution"""
         # Create baseline snapshot
         performance_metrics = {"accuracy": 0.85}
@@ -143,24 +148,28 @@ class TestRollbackManager:
             performance_metrics=performance_metrics,
             ethics_scores=ethics_scores,
             safety_metrics=safety_metrics,
-            description="Baseline snapshot"
+            description="Baseline snapshot",
         )
 
         # Execute in sandbox
         learning_update = {
             "new_weights": [0.1, 0.2, 0.3],
-            "new_parameters": {"learning_rate": 0.002}
+            "new_parameters": {"learning_rate": 0.002},
         }
 
         result = await rollback_manager.execute_in_sandbox(
             learning_update=learning_update,
             baseline_snapshot=baseline_version,
-            timeout=60
+            timeout=60,
         )
 
         assert isinstance(result, SandboxResult)
         assert result.sandbox_id is not None
-        assert result.status in [SandboxStatus.COMPLETED, SandboxStatus.ROLLED_BACK, SandboxStatus.FAILED]
+        assert result.status in [
+            SandboxStatus.COMPLETED,
+            SandboxStatus.ROLLED_BACK,
+            SandboxStatus.FAILED,
+        ]
         assert result.execution_time > 0
         assert isinstance(result.rollback_required, bool)
 
@@ -173,11 +182,13 @@ class TestRollbackManager:
             await rollback_manager.execute_in_sandbox(
                 learning_update=learning_update,
                 baseline_snapshot="nonexistent",
-                timeout=60
+                timeout=60,
             )
 
     @pytest.mark.asyncio
-    async def test_rollback_to_version(self, rollback_manager, sample_model_state, sample_learning_data):
+    async def test_rollback_to_version(
+        self, rollback_manager, sample_model_state, sample_learning_data
+    ):
         """Test rollback to specific version"""
         # Create snapshot
         performance_metrics = {"accuracy": 0.85}
@@ -190,21 +201,23 @@ class TestRollbackManager:
             performance_metrics=performance_metrics,
             ethics_scores=ethics_scores,
             safety_metrics=safety_metrics,
-            description="Test snapshot"
+            description="Test snapshot",
         )
 
         # Rollback to version
         success = await rollback_manager.rollback_to_version(
-            version_id=version_id,
-            reason=RollbackReason.USER_REQUEST
+            version_id=version_id, reason=RollbackReason.USER_REQUEST
         )
 
         assert success
 
         # Check that a new rollback snapshot was created
         assert len(rollback_manager.snapshots) == 2
-        rollback_snapshots = [s for s in rollback_manager.snapshots.values()
-                             if "rollback" in s.description.lower()]
+        rollback_snapshots = [
+            s
+            for s in rollback_manager.snapshots.values()
+            if "rollback" in s.description.lower()
+        ]
         assert len(rollback_snapshots) == 1
         assert rollback_snapshots[0].description.endswith("user_request")
 
@@ -212,8 +225,7 @@ class TestRollbackManager:
     async def test_rollback_to_nonexistent_version(self, rollback_manager):
         """Test rollback to non-existent version"""
         success = await rollback_manager.rollback_to_version(
-            version_id="nonexistent",
-            reason=RollbackReason.USER_REQUEST
+            version_id="nonexistent", reason=RollbackReason.USER_REQUEST
         )
 
         assert not success
@@ -234,7 +246,7 @@ class TestRollbackManager:
             ethics_scores={"overall": 0.9},
             safety_metrics={"overall": 0.9},
             checksum="abc123",
-            description="Snapshot 1"
+            description="Snapshot 1",
         )
 
         snapshot2 = LearningSnapshot(
@@ -246,7 +258,7 @@ class TestRollbackManager:
             ethics_scores={"overall": 0.92},
             safety_metrics={"overall": 0.91},
             checksum="def456",
-            description="Snapshot 2"
+            description="Snapshot 2",
         )
 
         rollback_manager.snapshots["v1"] = snapshot1
@@ -273,7 +285,7 @@ class TestRollbackManager:
             ethics_scores={},
             safety_metrics={},
             checksum="abc123",
-            description="Snapshot 1"
+            description="Snapshot 1",
         )
 
         snapshot2 = LearningSnapshot(
@@ -285,7 +297,7 @@ class TestRollbackManager:
             ethics_scores={},
             safety_metrics={},
             checksum="def456",
-            description="Snapshot 2"
+            description="Snapshot 2",
         )
 
         rollback_manager.snapshots["v1"] = snapshot1
@@ -311,7 +323,7 @@ class TestRollbackManager:
             ethics_scores={},
             safety_metrics={},
             checksum="test123",
-            description="Test snapshot"
+            description="Test snapshot",
         )
 
         rollback_manager.snapshots["test_v1"] = test_snapshot
@@ -334,14 +346,16 @@ class TestRollbackManager:
             ethics_scores={"overall": 0.95},
             safety_metrics={"overall": 0.93},
             checksum="export123",
-            description="Export test snapshot"
+            description="Export test snapshot",
         )
 
         rollback_manager.snapshots["export_test"] = test_snapshot
 
         # Export to file
         output_path = temp_snapshots_dir / "exported_snapshot.json"
-        success = await rollback_manager.export_snapshot_data("export_test", str(output_path))
+        success = await rollback_manager.export_snapshot_data(
+            "export_test", str(output_path)
+        )
 
         assert success
         assert output_path.exists()
@@ -356,7 +370,9 @@ class TestRollbackManager:
     @pytest.mark.asyncio
     async def test_export_nonexistent_snapshot(self, rollback_manager):
         """Test exporting non-existent snapshot"""
-        success = await rollback_manager.export_snapshot_data("nonexistent", "output.json")
+        success = await rollback_manager.export_snapshot_data(
+            "nonexistent", "output.json"
+        )
         assert not success
 
     def test_get_rollback_statistics(self, rollback_manager):
@@ -378,7 +394,7 @@ class TestRollbackManager:
             ethics_scores={"overall": 0.9},
             safety_metrics={"overall": 0.9},
             checksum="abc123",
-            description="Normal snapshot"
+            description="Normal snapshot",
         )
 
         snapshot2 = LearningSnapshot(
@@ -390,7 +406,7 @@ class TestRollbackManager:
             ethics_scores={"overall": 0.95},
             safety_metrics={"overall": 0.95},
             checksum="def456",
-            description="Rollback to v1 - user_request"
+            description="Rollback to v1 - user_request",
         )
 
         rollback_manager.snapshots["v1"] = snapshot1
@@ -403,6 +419,7 @@ class TestRollbackManager:
         assert stats["snapshot_health"] == "good"  # Less than 30% rollbacks
         assert stats["average_ethics_score"] == 0.925  # (0.9 + 0.95) / 2
         assert stats["average_safety_score"] == 0.925  # (0.9 + 0.95) / 2
+
 
 class TestLearningSnapshot:
     """Test cases for LearningSnapshot dataclass"""
@@ -418,7 +435,7 @@ class TestLearningSnapshot:
             ethics_scores={"overall": 0.9},
             safety_metrics={"overall": 0.92},
             checksum="abc123",
-            description="Test snapshot"
+            description="Test snapshot",
         )
 
         assert snapshot.version_id == "test_v1"
@@ -427,6 +444,7 @@ class TestLearningSnapshot:
         assert snapshot.performance_metrics["accuracy"] == 0.85
         assert snapshot.checksum == "abc123"
         assert snapshot.description == "Test snapshot"
+
 
 class TestSandboxResult:
     """Test cases for SandboxResult dataclass"""
@@ -443,7 +461,7 @@ class TestSandboxResult:
             errors=[],
             warnings=["Minor warning"],
             rollback_required=False,
-            rollback_reason=None
+            rollback_reason=None,
         )
 
         assert result.sandbox_id == "test_sandbox"
@@ -457,6 +475,7 @@ class TestSandboxResult:
         assert not result.rollback_required
         assert result.rollback_reason is None
 
+
 @pytest.mark.asyncio
 async def test_integration_workflow():
     """Test complete rollback workflow"""
@@ -468,8 +487,7 @@ async def test_integration_workflow():
 
         # Create manager
         manager = RollbackManager(
-            snapshots_dir=str(snapshots_dir),
-            sandbox_dir=str(sandbox_dir)
+            snapshots_dir=str(snapshots_dir), sandbox_dir=str(sandbox_dir)
         )
 
         # Create initial snapshot
@@ -485,26 +503,28 @@ async def test_integration_workflow():
             performance_metrics=performance_metrics,
             ethics_scores=ethics_scores,
             safety_metrics=safety_metrics,
-            description="Initial snapshot"
+            description="Initial snapshot",
         )
 
         # Execute sandbox test
         learning_update = {"new_weights": [0.2, 0.3, 0.4]}
         result = await manager.execute_in_sandbox(
-            learning_update=learning_update,
-            baseline_snapshot=version_id,
-            timeout=60
+            learning_update=learning_update, baseline_snapshot=version_id, timeout=60
         )
 
         # Verify sandbox result
         assert result.sandbox_id is not None
-        assert result.status in [SandboxStatus.COMPLETED, SandboxStatus.ROLLED_BACK, SandboxStatus.FAILED]
+        assert result.status in [
+            SandboxStatus.COMPLETED,
+            SandboxStatus.ROLLED_BACK,
+            SandboxStatus.FAILED,
+        ]
 
         # Test rollback if needed
         if result.rollback_required:
             rollback_success = await manager.rollback_to_version(
                 version_id=version_id,
-                reason=result.rollback_reason or RollbackReason.AUTOMATIC_SAFETY
+                reason=result.rollback_reason or RollbackReason.AUTOMATIC_SAFETY,
             )
             assert rollback_success
 

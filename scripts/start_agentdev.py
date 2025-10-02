@@ -56,10 +56,7 @@ class AgentDevService:
         print("🚀 Starting AgentDev Service...")
 
         # Initialize AgentDev
-        self.agentdev = AgentDev(
-            project_root=str(project_root),
-            auto_fix=self.auto_fix
-        )
+        self.agentdev = AgentDev(project_root=str(project_root), auto_fix=self.auto_fix)
 
         # Start monitoring
         self.agentdev.start_monitoring(interval=self.interval)
@@ -93,8 +90,10 @@ class AgentDevService:
 
                 # Print status
                 status = self.agentdev.get_status()
-                print(f"📊 Status: {status['errors_in_queue']} errors in queue, "
-                      f"{status['successful_fixes']} fixes applied")
+                print(
+                    f"📊 Status: {status['errors_in_queue']} errors in queue, "
+                    f"{status['successful_fixes']} fixes applied"
+                )
 
         except KeyboardInterrupt:
             self.stop()
@@ -107,7 +106,7 @@ class AgentDevService:
 
                 # Print status
                 status = self.agentdev.get_status()
-                if status['errors_in_queue'] > 0:
+                if status["errors_in_queue"] > 0:
                     print(f"🔍 {status['errors_in_queue']} errors in queue")
 
         except KeyboardInterrupt:
@@ -134,6 +133,7 @@ class AgentDevService:
             return self.agentdev.get_fix_history()
         return []
 
+
 def main():
     """Main function"""
     parser = argparse.ArgumentParser(
@@ -145,39 +145,31 @@ Examples:
   python scripts/start_agentdev.py --interval 60      # Check every 60 seconds
   python scripts/start_agentdev.py --no-auto-fix      # Disable auto-fix
   python scripts/start_agentdev.py --daemon           # Run in daemon mode
-        """
+        """,
     )
 
     parser.add_argument(
         "--interval",
         type=int,
         default=30,
-        help="Monitoring interval in seconds (default: 30)"
+        help="Monitoring interval in seconds (default: 30)",
     )
 
     parser.add_argument(
         "--auto-fix",
         action="store_true",
         default=True,
-        help="Enable auto-fix (default: True)"
+        help="Enable auto-fix (default: True)",
     )
 
-    parser.add_argument(
-        "--no-auto-fix",
-        action="store_true",
-        help="Disable auto-fix"
-    )
+    parser.add_argument("--no-auto-fix", action="store_true", help="Disable auto-fix")
 
-    parser.add_argument(
-        "--daemon",
-        action="store_true",
-        help="Run in daemon mode"
-    )
+    parser.add_argument("--daemon", action="store_true", help="Run in daemon mode")
 
     parser.add_argument(
         "--force-scan",
         action="store_true",
-        help="Force scan and fix errors once, then exit"
+        help="Force scan and fix errors once, then exit",
     )
 
     args = parser.parse_args()
@@ -187,9 +179,7 @@ Examples:
 
     # Create service
     service = AgentDevService(
-        interval=args.interval,
-        auto_fix=auto_fix,
-        daemon=args.daemon
+        interval=args.interval, auto_fix=auto_fix, daemon=args.daemon
     )
 
     try:
@@ -207,6 +197,7 @@ Examples:
         print(f"❌ Error: {e}")
         service.stop()
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

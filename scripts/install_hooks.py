@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 """
 Install pre-commit hooks for NicheRadar v1.5
@@ -17,7 +16,9 @@ def run_command(command, description):
     print("-" * 50)
 
     try:
-        result = subprocess.run(command, shell=False, check=True, capture_output=True, text=True)
+        result = subprocess.run(
+            command, shell=False, check=True, capture_output=True, text=True
+        )
         print("✅ Success")
         if result.stdout:
             print("Output:", result.stdout)
@@ -26,6 +27,7 @@ def run_command(command, description):
         print("❌ Failed")
         print("Error:", e.stderr)
         return False
+
 
 def install_pre_commit():
     """Install pre-commit"""
@@ -37,15 +39,19 @@ def install_pre_commit():
 
     return True
 
+
 def install_hooks():
     """Install pre-commit hooks"""
     if not run_command("pre-commit install", "Installing pre-commit hooks"):
         return False
 
-    if not run_command("pre-commit install --hook-type pre-push", "Installing pre-push hooks"):
+    if not run_command(
+        "pre-commit install --hook-type pre-push", "Installing pre-push hooks"
+    ):
         return False
 
     return True
+
 
 def install_hook_dependencies():
     """Install dependencies for hooks"""
@@ -56,7 +62,7 @@ def install_hook_dependencies():
         "mypy",
         "bandit",
         "safety",
-        "detect-secrets"
+        "detect-secrets",
     ]
 
     for dep in dependencies:
@@ -65,13 +71,18 @@ def install_hook_dependencies():
 
     return True
 
+
 def create_secrets_baseline():
     """Create secrets baseline for detect-secrets"""
     if not Path(".secrets.baseline").exists():
-        if not run_command("detect-secrets scan --baseline .secrets.baseline", "Creating secrets baseline"):
+        if not run_command(
+            "detect-secrets scan --baseline .secrets.baseline",
+            "Creating secrets baseline",
+        ):
             return False
 
     return True
+
 
 def test_hooks():
     """Test pre-commit hooks"""
@@ -79,6 +90,7 @@ def test_hooks():
         return False
 
     return True
+
 
 def setup_git_attributes():
     """Setup .gitattributes for better diff handling"""
@@ -105,6 +117,7 @@ e2e/** diff=typescript
 
     print("✅ Created .gitattributes")
     return True
+
 
 def setup_gitignore():
     """Setup .gitignore for test artifacts"""
@@ -198,6 +211,7 @@ config/production.yaml
 
     return True
 
+
 def create_hooks_readme():
     """Create README for hooks setup"""
     readme_content = """# Pre-commit Hooks Setup
@@ -269,6 +283,7 @@ For persistent issues, check the hook documentation or project maintainers.
     print("✅ Created HOOKS.md")
     return True
 
+
 def main():
     """Main installation function"""
     print("🔧 Installing pre-commit hooks for NicheRadar v1.5")
@@ -282,7 +297,7 @@ def main():
         ("Setup .gitattributes", setup_git_attributes),
         ("Setup .gitignore", setup_gitignore),
         ("Create hooks README", create_hooks_readme),
-        ("Test hooks", test_hooks)
+        ("Test hooks", test_hooks),
     ]
 
     all_passed = True
@@ -299,6 +314,7 @@ def main():
     else:
         print("\n❌ Some hook installation steps failed!")
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

@@ -20,7 +20,7 @@ import sys
 import time
 
 # Add stillme_core to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "stillme_core"))
 
 from modules.api_provider_manager import ComplexityAnalyzer, UnifiedAPIManager
 
@@ -38,7 +38,7 @@ class RouterBenchmark:
 
         # Test prompts of different complexities
         test_prompts = {
-            'simple': [
+            "simple": [
                 "chào bạn",
                 "bạn khỏe không?",
                 "2+2 bằng mấy?",
@@ -48,9 +48,9 @@ class RouterBenchmark:
                 "tên bạn là gì?",
                 "bạn có thể giúp gì?",
                 "cảm ơn",
-                "tạm biệt"
+                "tạm biệt",
             ],
-            'coding': [
+            "coding": [
                 "viết code Python tính giai thừa",
                 "lập trình JavaScript",
                 "debug lỗi",
@@ -60,9 +60,9 @@ class RouterBenchmark:
                 "sửa lỗi code",
                 "tạo class Python",
                 "nếu tôi muốn học lập trình thì nên bắt đầu từ đâu?",
-                "tối ưu hóa performance của database query"
+                "tối ưu hóa performance của database query",
             ],
-            'complex': [
+            "complex": [
                 "Giải thích định lý bất toàn của Gödel",
                 "Phân tích mối quan hệ giữa triết học và khoa học",
                 "So sánh các phương pháp học máy",
@@ -72,14 +72,14 @@ class RouterBenchmark:
                 "Tác động của AI đến xã hội",
                 "Phân tích xu hướng phát triển công nghệ",
                 "giả sử tôi có một bài toán phức tạp, làm thế nào để giải quyết nó?",
-                "trong trường hợp nào thì nên sử dụng AI?"
-            ]
+                "trong trường hợp nào thì nên sử dụng AI?",
+            ],
         }
 
         results = {
-            'overall': {'times': [], 'scores': []},
-            'by_category': {},
-            'statistics': {}
+            "overall": {"times": [], "scores": []},
+            "by_category": {},
+            "statistics": {},
         }
 
         # Benchmark each category
@@ -102,37 +102,41 @@ class RouterBenchmark:
                 category_scores.append(score)
 
                 # Add to overall results
-                results['overall']['times'].append(analysis_time)
-                results['overall']['scores'].append(score)
+                results["overall"]["times"].append(analysis_time)
+                results["overall"]["scores"].append(score)
 
                 if (i + 1) % 100 == 0:
                     print(f"  Completed {i + 1}/{num_iterations} iterations...")
 
             # Calculate category statistics
-            results['by_category'][category] = {
-                'times': category_times,
-                'scores': category_scores,
-                'avg_time': statistics.mean(category_times),
-                'min_time': min(category_times),
-                'max_time': max(category_times),
-                'std_time': statistics.stdev(category_times) if len(category_times) > 1 else 0,
-                'avg_score': statistics.mean(category_scores),
-                'min_score': min(category_scores),
-                'max_score': max(category_scores),
-                'std_score': statistics.stdev(category_scores) if len(category_scores) > 1 else 0
+            results["by_category"][category] = {
+                "times": category_times,
+                "scores": category_scores,
+                "avg_time": statistics.mean(category_times),
+                "min_time": min(category_times),
+                "max_time": max(category_times),
+                "std_time": statistics.stdev(category_times)
+                if len(category_times) > 1
+                else 0,
+                "avg_score": statistics.mean(category_scores),
+                "min_score": min(category_scores),
+                "max_score": max(category_scores),
+                "std_score": statistics.stdev(category_scores)
+                if len(category_scores) > 1
+                else 0,
             }
 
         # Calculate overall statistics
-        results['statistics'] = {
-            'avg_time': statistics.mean(results['overall']['times']),
-            'min_time': min(results['overall']['times']),
-            'max_time': max(results['overall']['times']),
-            'std_time': statistics.stdev(results['overall']['times']),
-            'avg_score': statistics.mean(results['overall']['scores']),
-            'min_score': min(results['overall']['scores']),
-            'max_score': max(results['overall']['scores']),
-            'std_score': statistics.stdev(results['overall']['scores']),
-            'total_iterations': num_iterations
+        results["statistics"] = {
+            "avg_time": statistics.mean(results["overall"]["times"]),
+            "min_time": min(results["overall"]["times"]),
+            "max_time": max(results["overall"]["times"]),
+            "std_time": statistics.stdev(results["overall"]["times"]),
+            "avg_score": statistics.mean(results["overall"]["scores"]),
+            "min_score": min(results["overall"]["scores"]),
+            "max_score": max(results["overall"]["scores"]),
+            "std_score": statistics.stdev(results["overall"]["scores"]),
+            "total_iterations": num_iterations,
         }
 
         # Print results
@@ -140,21 +144,25 @@ class RouterBenchmark:
         print("=" * 60)
 
         print("Overall Statistics:")
-        print(f"  Average analysis time: {results['statistics']['avg_time']*1000:.2f}ms")
+        print(
+            f"  Average analysis time: {results['statistics']['avg_time']*1000:.2f}ms"
+        )
         print(f"  Min analysis time: {results['statistics']['min_time']*1000:.2f}ms")
         print(f"  Max analysis time: {results['statistics']['max_time']*1000:.2f}ms")
         print(f"  Standard deviation: {results['statistics']['std_time']*1000:.2f}ms")
         print(f"  Average complexity score: {results['statistics']['avg_score']:.3f}")
 
         print("\nBy Category:")
-        for category, stats in results['by_category'].items():
+        for category, stats in results["by_category"].items():
             print(f"  {category.capitalize()}:")
             print(f"    Avg time: {stats['avg_time']*1000:.2f}ms")
             print(f"    Avg score: {stats['avg_score']:.3f}")
-            print(f"    Score range: {stats['min_score']:.3f} - {stats['max_score']:.3f}")
+            print(
+                f"    Score range: {stats['min_score']:.3f} - {stats['max_score']:.3f}"
+            )
 
         # Performance grade
-        avg_time = results['statistics']['avg_time']
+        avg_time = results["statistics"]["avg_time"]
         if avg_time < 0.001:  # < 1ms
             grade = "A+ (Excellent)"
         elif avg_time < 0.005:  # < 5ms
@@ -188,7 +196,6 @@ class RouterBenchmark:
             ("bạn có thể giúp gì?", "gemma2:2b", 0.0),
             ("cảm ơn", "gemma2:2b", 0.0),
             ("tạm biệt", "gemma2:2b", 0.0),
-
             # Coding prompts
             ("viết code Python", "deepseek-coder:6.7b", 0.3),
             ("lập trình JavaScript", "deepseek-coder:6.7b", 0.3),
@@ -199,13 +206,16 @@ class RouterBenchmark:
             ("sửa lỗi code", "deepseek-coder:6.7b", 0.3),
             ("tạo class Python", "deepseek-coder:6.7b", 0.3),
             ("viết code Python tính giai thừa", "deepseek-coder:6.7b", 0.3),
-            ("nếu tôi muốn học lập trình thì nên bắt đầu từ đâu?", "deepseek-coder:6.7b", 0.3),
+            (
+                "nếu tôi muốn học lập trình thì nên bắt đầu từ đâu?",
+                "deepseek-coder:6.7b",
+                0.3,
+            ),
             ("tối ưu hóa performance của database query", "deepseek-coder:6.7b", 0.3),
             ("sửa lỗi trong thuật toán sắp xếp", "deepseek-coder:6.7b", 0.3),
             ("tạo function JavaScript để validate email", "deepseek-coder:6.7b", 0.3),
             ("debug lỗi trong code Python", "deepseek-coder:6.7b", 0.3),
             ("tối ưu hóa memory usage", "deepseek-coder:6.7b", 0.3),
-
             # Complex prompts
             ("Giải thích định lý bất toàn của Gödel", "deepseek-chat", 0.7),
             ("Phân tích mối quan hệ giữa triết học và khoa học", "deepseek-chat", 0.7),
@@ -215,20 +225,44 @@ class RouterBenchmark:
             ("Bản chất của thực tại là gì?", "deepseek-chat", 0.7),
             ("Tác động của AI đến xã hội", "deepseek-chat", 0.7),
             ("Phân tích xu hướng phát triển công nghệ", "deepseek-chat", 0.7),
-            ("giả sử tôi có một bài toán phức tạp, làm thế nào để giải quyết nó?", "deepseek-chat", 0.7),
+            (
+                "giả sử tôi có một bài toán phức tạp, làm thế nào để giải quyết nó?",
+                "deepseek-chat",
+                0.7,
+            ),
             ("trong trường hợp nào thì nên sử dụng AI?", "deepseek-chat", 0.7),
-            ("Giải thích định lý bất toàn của Gödel và tác động của nó đến toán học hiện đại", "deepseek-chat", 0.7),
-            ("Phân tích mối quan hệ giữa triết học và khoa học trong việc hiểu bản chất của thực tại", "deepseek-chat", 0.7),
-            ("So sánh và đánh giá các phương pháp học máy khác nhau trong việc xử lý ngôn ngữ tự nhiên", "deepseek-chat", 0.7),
-            ("Tại sao các hệ thống phức tạp lại có xu hướng tự tổ chức và phát triển theo quy luật nào?", "deepseek-chat", 0.7),
-            ("Phân tích tác động của trí tuệ nhân tạo đến xã hội và tương lai của nhân loại", "deepseek-chat", 0.7),
+            (
+                "Giải thích định lý bất toàn của Gödel và tác động của nó đến toán học hiện đại",
+                "deepseek-chat",
+                0.7,
+            ),
+            (
+                "Phân tích mối quan hệ giữa triết học và khoa học trong việc hiểu bản chất của thực tại",
+                "deepseek-chat",
+                0.7,
+            ),
+            (
+                "So sánh và đánh giá các phương pháp học máy khác nhau trong việc xử lý ngôn ngữ tự nhiên",
+                "deepseek-chat",
+                0.7,
+            ),
+            (
+                "Tại sao các hệ thống phức tạp lại có xu hướng tự tổ chức và phát triển theo quy luật nào?",
+                "deepseek-chat",
+                0.7,
+            ),
+            (
+                "Phân tích tác động của trí tuệ nhân tạo đến xã hội và tương lai của nhân loại",
+                "deepseek-chat",
+                0.7,
+            ),
         ]
 
         results = {
-            'simple': {'correct': 0, 'total': 0, 'accuracy': 0.0, 'details': []},
-            'coding': {'correct': 0, 'total': 0, 'accuracy': 0.0, 'details': []},
-            'complex': {'correct': 0, 'total': 0, 'accuracy': 0.0, 'details': []},
-            'overall': {'correct': 0, 'total': 0, 'accuracy': 0.0}
+            "simple": {"correct": 0, "total": 0, "accuracy": 0.0, "details": []},
+            "coding": {"correct": 0, "total": 0, "accuracy": 0.0, "details": []},
+            "complex": {"correct": 0, "total": 0, "accuracy": 0.0, "details": []},
+            "overall": {"correct": 0, "total": 0, "accuracy": 0.0},
         }
 
         # Categorize test cases
@@ -237,7 +271,11 @@ class RouterBenchmark:
         complex_cases = test_cases[25:]
 
         # Test each category
-        for category, cases in [('simple', simple_cases), ('coding', coding_cases), ('complex', complex_cases)]:
+        for category, cases in [
+            ("simple", simple_cases),
+            ("coding", coding_cases),
+            ("complex", complex_cases),
+        ]:
             correct = 0
             total = len(cases)
             details = []
@@ -260,37 +298,45 @@ class RouterBenchmark:
                 if is_correct:
                     correct += 1
 
-                details.append({
-                    'prompt': prompt,
-                    'expected_model': expected_model,
-                    'actual_model': actual_model,
-                    'expected_score': expected_score,
-                    'actual_score': actual_score,
-                    'correct': is_correct
-                })
+                details.append(
+                    {
+                        "prompt": prompt,
+                        "expected_model": expected_model,
+                        "actual_model": actual_model,
+                        "expected_score": expected_score,
+                        "actual_score": actual_score,
+                        "correct": is_correct,
+                    }
+                )
 
                 status = "✅" if is_correct else "❌"
-                print(f"  {status} {prompt[:50]}... → {actual_model} (score: {actual_score:.3f})")
+                print(
+                    f"  {status} {prompt[:50]}... → {actual_model} (score: {actual_score:.3f})"
+                )
 
                 if not is_correct:
                     print(f"    Expected: {expected_model}, Got: {actual_model}")
 
             accuracy = correct / total
-            results[category]['correct'] = correct
-            results[category]['total'] = total
-            results[category]['accuracy'] = accuracy
-            results[category]['details'] = details
+            results[category]["correct"] = correct
+            results[category]["total"] = total
+            results[category]["accuracy"] = accuracy
+            results[category]["details"] = details
 
             print(f"  📊 {category} accuracy: {accuracy:.1%} ({correct}/{total})")
 
         # Overall accuracy
-        total_correct = sum(results[cat]['correct'] for cat in ['simple', 'coding', 'complex'])
-        total_tests = sum(results[cat]['total'] for cat in ['simple', 'coding', 'complex'])
+        total_correct = sum(
+            results[cat]["correct"] for cat in ["simple", "coding", "complex"]
+        )
+        total_tests = sum(
+            results[cat]["total"] for cat in ["simple", "coding", "complex"]
+        )
         overall_accuracy = total_correct / total_tests
 
-        results['overall']['correct'] = total_correct
-        results['overall']['total'] = total_tests
-        results['overall']['accuracy'] = overall_accuracy
+        results["overall"]["correct"] = total_correct
+        results["overall"]["total"] = total_tests
+        results["overall"]["accuracy"] = overall_accuracy
 
         print(f"\n🎯 Overall accuracy: {overall_accuracy:.1%}")
 
@@ -333,7 +379,6 @@ class RouterBenchmark:
             ("không rõ", True),
             ("mơ hồ", True),
             ("không chính xác", True),
-
             # Positive feedback (should NOT trigger fallback)
             ("đúng rồi", False),
             ("ok", False),
@@ -353,9 +398,9 @@ class RouterBenchmark:
         ]
 
         results = {
-            'negative_feedback': {'correct': 0, 'total': 0, 'accuracy': 0.0},
-            'positive_feedback': {'correct': 0, 'total': 0, 'accuracy': 0.0},
-            'overall': {'correct': 0, 'total': 0, 'accuracy': 0.0}
+            "negative_feedback": {"correct": 0, "total": 0, "accuracy": 0.0},
+            "positive_feedback": {"correct": 0, "total": 0, "accuracy": 0.0},
+            "overall": {"correct": 0, "total": 0, "accuracy": 0.0},
         }
 
         # Test negative feedback
@@ -364,46 +409,70 @@ class RouterBenchmark:
 
         print("Testing negative feedback detection:")
         for feedback, should_trigger in negative_cases:
-            actual_trigger = self.analyzer.should_trigger_fallback(feedback, "original prompt", "gemma2:2b")
+            actual_trigger = self.analyzer.should_trigger_fallback(
+                feedback, "original prompt", "gemma2:2b"
+            )
             is_correct = actual_trigger == should_trigger
 
             if is_correct:
-                results['negative_feedback']['correct'] += 1
+                results["negative_feedback"]["correct"] += 1
 
-            results['negative_feedback']['total'] += 1
+            results["negative_feedback"]["total"] += 1
 
             status = "✅" if is_correct else "❌"
-            print(f"  {status} '{feedback}' → {actual_trigger} (expected: {should_trigger})")
+            print(
+                f"  {status} '{feedback}' → {actual_trigger} (expected: {should_trigger})"
+            )
 
         print("\nTesting positive feedback detection:")
         for feedback, should_trigger in positive_cases:
-            actual_trigger = self.analyzer.should_trigger_fallback(feedback, "original prompt", "gemma2:2b")
+            actual_trigger = self.analyzer.should_trigger_fallback(
+                feedback, "original prompt", "gemma2:2b"
+            )
             is_correct = actual_trigger == should_trigger
 
             if is_correct:
-                results['positive_feedback']['correct'] += 1
+                results["positive_feedback"]["correct"] += 1
 
-            results['positive_feedback']['total'] += 1
+            results["positive_feedback"]["total"] += 1
 
             status = "✅" if is_correct else "❌"
-            print(f"  {status} '{feedback}' → {actual_trigger} (expected: {should_trigger})")
+            print(
+                f"  {status} '{feedback}' → {actual_trigger} (expected: {should_trigger})"
+            )
 
         # Calculate accuracies
-        results['negative_feedback']['accuracy'] = results['negative_feedback']['correct'] / results['negative_feedback']['total']
-        results['positive_feedback']['accuracy'] = results['positive_feedback']['correct'] / results['positive_feedback']['total']
+        results["negative_feedback"]["accuracy"] = (
+            results["negative_feedback"]["correct"]
+            / results["negative_feedback"]["total"]
+        )
+        results["positive_feedback"]["accuracy"] = (
+            results["positive_feedback"]["correct"]
+            / results["positive_feedback"]["total"]
+        )
 
         # Overall accuracy
-        total_correct = results['negative_feedback']['correct'] + results['positive_feedback']['correct']
-        total_tests = results['negative_feedback']['total'] + results['positive_feedback']['total']
+        total_correct = (
+            results["negative_feedback"]["correct"]
+            + results["positive_feedback"]["correct"]
+        )
+        total_tests = (
+            results["negative_feedback"]["total"]
+            + results["positive_feedback"]["total"]
+        )
         overall_accuracy = total_correct / total_tests
 
-        results['overall']['correct'] = total_correct
-        results['overall']['total'] = total_tests
-        results['overall']['accuracy'] = overall_accuracy
+        results["overall"]["correct"] = total_correct
+        results["overall"]["total"] = total_tests
+        results["overall"]["accuracy"] = overall_accuracy
 
         print("\n📊 Fallback Benchmark Results:")
-        print(f"  Negative feedback accuracy: {results['negative_feedback']['accuracy']:.1%}")
-        print(f"  Positive feedback accuracy: {results['positive_feedback']['accuracy']:.1%}")
+        print(
+            f"  Negative feedback accuracy: {results['negative_feedback']['accuracy']:.1%}"
+        )
+        print(
+            f"  Positive feedback accuracy: {results['positive_feedback']['accuracy']:.1%}"
+        )
         print(f"  Overall accuracy: {overall_accuracy:.1%}")
 
         # Fallback grade
@@ -438,19 +507,25 @@ class RouterBenchmark:
 
         # Compile overall results
         overall_results = {
-            'performance': performance_results,
-            'accuracy': accuracy_results,
-            'fallback': fallback_results,
-            'total_time': end_time - start_time,
-            'timestamp': time.strftime('%Y-%m-%d %H:%M:%S')
+            "performance": performance_results,
+            "accuracy": accuracy_results,
+            "fallback": fallback_results,
+            "total_time": end_time - start_time,
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         }
 
         # Print summary
         print("\n📊 Full Benchmark Summary")
         print("=" * 60)
-        print(f"Performance Grade: {self._get_performance_grade(performance_results['statistics']['avg_time'])}")
-        print(f"Accuracy Grade: {self._get_accuracy_grade(accuracy_results['overall']['accuracy'])}")
-        print(f"Fallback Grade: {self._get_fallback_grade(fallback_results['overall']['accuracy'])}")
+        print(
+            f"Performance Grade: {self._get_performance_grade(performance_results['statistics']['avg_time'])}"
+        )
+        print(
+            f"Accuracy Grade: {self._get_accuracy_grade(accuracy_results['overall']['accuracy'])}"
+        )
+        print(
+            f"Fallback Grade: {self._get_fallback_grade(fallback_results['overall']['accuracy'])}"
+        )
         print(f"Total benchmark time: {overall_results['total_time']:.2f}s")
 
         return overall_results
@@ -496,19 +571,31 @@ class RouterBenchmark:
 
     def export_results(self, results: dict, filename: str):
         """Export benchmark results to JSON file"""
-        with open(filename, 'w', encoding='utf-8') as f:
+        with open(filename, "w", encoding="utf-8") as f:
             json.dump(results, f, indent=2, ensure_ascii=False)
 
         print(f"✅ Benchmark results exported to {filename}")
 
+
 def main():
-    parser = argparse.ArgumentParser(description='AI Router Benchmark Script')
-    parser.add_argument('--performance', action='store_true', help='Run performance benchmark')
-    parser.add_argument('--accuracy', action='store_true', help='Run accuracy benchmark')
-    parser.add_argument('--fallback', action='store_true', help='Run fallback benchmark')
-    parser.add_argument('--full', action='store_true', help='Run full benchmark suite')
-    parser.add_argument('--iterations', type=int, default=1000, help='Number of iterations for performance benchmark')
-    parser.add_argument('--export', type=str, help='Export results to JSON file')
+    parser = argparse.ArgumentParser(description="AI Router Benchmark Script")
+    parser.add_argument(
+        "--performance", action="store_true", help="Run performance benchmark"
+    )
+    parser.add_argument(
+        "--accuracy", action="store_true", help="Run accuracy benchmark"
+    )
+    parser.add_argument(
+        "--fallback", action="store_true", help="Run fallback benchmark"
+    )
+    parser.add_argument("--full", action="store_true", help="Run full benchmark suite")
+    parser.add_argument(
+        "--iterations",
+        type=int,
+        default=1000,
+        help="Number of iterations for performance benchmark",
+    )
+    parser.add_argument("--export", type=str, help="Export results to JSON file")
 
     args = parser.parse_args()
 
@@ -529,6 +616,7 @@ def main():
 
     if args.export:
         benchmark.export_results(results, args.export)
+
 
 if __name__ == "__main__":
     main()

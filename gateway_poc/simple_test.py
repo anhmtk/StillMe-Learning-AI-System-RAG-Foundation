@@ -15,6 +15,7 @@ import pytest
 # Skip async tests due to missing pytest-asyncio
 pytest.skip("Async tests require pytest-asyncio", allow_module_level=True)
 
+
 async def test_direct_backend():
     """Test direct StillMe backend"""
     print("🔗 Testing Direct StillMe Backend...")
@@ -27,7 +28,7 @@ async def test_direct_backend():
                 async with session.post(
                     "http://localhost:1216/chat",
                     json={"message": f"Test message {i}"},
-                    timeout=aiohttp.ClientTimeout(total=30)
+                    timeout=aiohttp.ClientTimeout(total=30),
                 ) as response:
                     if response.status == 200:
                         latency = (time.time() - start_time) * 1000
@@ -41,6 +42,7 @@ async def test_direct_backend():
         print(f"   Average: {avg_time:.1f}ms")
         return avg_time
     return None
+
 
 async def test_gateway():
     """Test through gateway"""
@@ -56,9 +58,9 @@ async def test_gateway():
                     json={
                         "message": f"Test message {i}",
                         "user_id": "test_user",
-                        "use_cache": True
+                        "use_cache": True,
                     },
-                    timeout=aiohttp.ClientTimeout(total=30)
+                    timeout=aiohttp.ClientTimeout(total=30),
                 ) as response:
                     if response.status == 200:
                         latency = (time.time() - start_time) * 1000
@@ -72,6 +74,7 @@ async def test_gateway():
         print(f"   Average: {avg_time:.1f}ms")
         return avg_time
     return None
+
 
 async def main():
     """Main test function"""
@@ -109,6 +112,7 @@ async def main():
         print("Gateway:        Not running or failed")
         print("\n💡 To start the gateway:")
         print("   python fastapi_gateway.py")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

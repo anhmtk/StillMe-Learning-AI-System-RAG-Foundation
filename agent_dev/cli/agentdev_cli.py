@@ -30,7 +30,7 @@ class AgentDevCLI:
 
         # Save task config
         config_path = self.config_dir / "task.config.json"
-        with open(config_path, 'w') as f:
+        with open(config_path, "w") as f:
             json.dump(config, f, indent=2)
 
         print(f"✅ Task configuration saved to {config_path}")
@@ -53,7 +53,7 @@ class AgentDevCLI:
         config["inference_location"] = {
             "a": "CORE_LOCAL",
             "b": "CORE_CLOUD",
-            "c": "EDGE_STATELESS"
+            "c": "EDGE_STATELESS",
         }[choice]
 
         # Budget constraints
@@ -68,11 +68,9 @@ class AgentDevCLI:
         print("   c) MODERATE - < 30 minutes")
 
         choice = input("   Choose (a/b/c) [b]: ").strip().lower() or "b"
-        config["downtime_tolerance"] = {
-            "a": "ZERO",
-            "b": "MINIMAL",
-            "c": "MODERATE"
-        }[choice]
+        config["downtime_tolerance"] = {"a": "ZERO", "b": "MINIMAL", "c": "MODERATE"}[
+            choice
+        ]
 
         # PII handling
         print("\n4. PII/Logging Requirements:")
@@ -81,15 +79,15 @@ class AgentDevCLI:
         print("   c) RELAXED - Standard logging")
 
         choice = input("   Choose (a/b/c) [a]: ").strip().lower() or "a"
-        config["pii_handling"] = {
-            "a": "STRICT",
-            "b": "MODERATE",
-            "c": "RELAXED"
-        }[choice]
+        config["pii_handling"] = {"a": "STRICT", "b": "MODERATE", "c": "RELAXED"}[
+            choice
+        ]
 
         # Tunnel endpoint
         if config["inference_location"] == "EDGE_STATELESS":
-            tunnel = input("\n5. Tunnel Endpoint (WireGuard) [auto]: ").strip() or "auto"
+            tunnel = (
+                input("\n5. Tunnel Endpoint (WireGuard) [auto]: ").strip() or "auto"
+            )
             config["tunnel_endpoint"] = tunnel
 
         return config
@@ -121,7 +119,7 @@ class AgentDevCLI:
         print("\n📝 EXECUTION STEPS:")
         for i, step in enumerate(plan["steps"], 1):
             print(f"   {i}. {step['action']}")
-            if step.get('risk'):
+            if step.get("risk"):
                 print(f"      ⚠️  Risk: {step['risk']}")
 
         print(f"\n💰 ESTIMATED COST: ${plan.get('cost', 0)}")
@@ -146,11 +144,13 @@ class AgentDevCLI:
         security_result = self._run_security_scan()
 
         # Summary
-        all_passed = all([
-            conformance_result["passed"],
-            contract_result["passed"],
-            security_result["passed"]
-        ])
+        all_passed = all(
+            [
+                conformance_result["passed"],
+                contract_result["passed"],
+                security_result["passed"],
+            ]
+        )
 
         if all_passed:
             print("✅ DRY RUN PASSED - Ready for execution")
@@ -211,10 +211,16 @@ class AgentDevCLI:
         errors = []
 
         # Check edge stateless policy
-        if spec.get("edge_stateless", True) and config["inference_location"] == "EDGE_STATELESS":
+        if (
+            spec.get("edge_stateless", True)
+            and config["inference_location"] == "EDGE_STATELESS"
+        ):
             # This is allowed
             pass
-        elif spec.get("edge_stateless", True) and config["inference_location"] != "EDGE_STATELESS":
+        elif (
+            spec.get("edge_stateless", True)
+            and config["inference_location"] != "EDGE_STATELESS"
+        ):
             errors.append("EDGE must be stateless per project.spec.yaml")
 
         return {"valid": len(errors) == 0, "errors": errors}
@@ -228,10 +234,10 @@ class AgentDevCLI:
                 {"action": "Run security scan", "risk": "Medium"},
                 {"action": "Execute task", "risk": "High"},
                 {"action": "Run tests", "risk": "Low"},
-                {"action": "Commit changes", "risk": "Low"}
+                {"action": "Commit changes", "risk": "Low"},
             ],
             "cost": config.get("cloud_budget_usd", 0),
-            "duration": "15-30 minutes"
+            "duration": "15-30 minutes",
         }
 
     def _run_conformance_tests(self, config: dict[str, Any]) -> dict[str, Any]:
@@ -256,10 +262,8 @@ class AgentDevCLI:
         """Execute the actual plan"""
         print("⚡ Executing plan...")
         # This would integrate with the actual AgentDev execution system
-        return {
-            "success": True,
-            "summary": "Task completed successfully"
-        }
+        return {"success": True, "summary": "Task completed successfully"}
+
 
 def main():
     """Main CLI entry point"""
@@ -298,6 +302,7 @@ def main():
         cli.dry_run(args.task)
     elif args.command == "execute":
         cli.execute(args.task)
+
 
 if __name__ == "__main__":
     main()

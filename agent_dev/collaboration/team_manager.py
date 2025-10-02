@@ -17,6 +17,7 @@ import yaml
 
 class UserRole(Enum):
     """User roles in AgentDev"""
+
     ADMIN = "admin"
     LEAD_DEVELOPER = "lead_developer"
     DEVELOPER = "developer"
@@ -24,8 +25,10 @@ class UserRole(Enum):
     DEVOPS_ENGINEER = "devops_engineer"
     VIEWER = "viewer"
 
+
 class TaskStatus(Enum):
     """Task status for collaboration"""
+
     AVAILABLE = "available"
     ASSIGNED = "assigned"
     IN_PROGRESS = "in_progress"
@@ -34,17 +37,21 @@ class TaskStatus(Enum):
     BLOCKED = "blocked"
     CANCELLED = "cancelled"
 
+
 class ConflictType(Enum):
     """Conflict types in collaborative work"""
+
     FILE_EDIT = "file_edit"
     CONFIG_CHANGE = "config_change"
     DEPENDENCY_UPDATE = "dependency_update"
     RESOURCE_LOCK = "resource_lock"
     PERMISSION_CONFLICT = "permission_conflict"
 
+
 @dataclass
 class User:
     """User information"""
+
     user_id: str
     username: str
     email: str
@@ -56,9 +63,11 @@ class User:
     preferences: dict[str, Any]
     avatar_url: Optional[str] = None
 
+
 @dataclass
 class Team:
     """Team information"""
+
     team_id: str
     name: str
     description: str
@@ -69,9 +78,11 @@ class Team:
     updated_at: float
     settings: dict[str, Any]
 
+
 @dataclass
 class TaskAssignment:
     """Task assignment for collaboration"""
+
     task_id: str
     assigned_to: str  # User ID
     assigned_by: str  # User ID
@@ -84,9 +95,11 @@ class TaskAssignment:
     blockers: list[str]
     notes: str
 
+
 @dataclass
 class Conflict:
     """Conflict in collaborative work"""
+
     conflict_id: str
     conflict_type: ConflictType
     description: str
@@ -98,9 +111,11 @@ class Conflict:
     resolved_by: Optional[str]
     severity: str  # low, medium, high, critical
 
+
 @dataclass
 class CollaborationSession:
     """Active collaboration session"""
+
     session_id: str
     task_id: str
     participants: list[str]
@@ -111,6 +126,7 @@ class CollaborationSession:
     screen_shares: list[dict[str, Any]]
     voice_enabled: bool
     video_enabled: bool
+
 
 class TeamManager:
     """Enterprise team management and collaboration system"""
@@ -138,34 +154,49 @@ class TeamManager:
                 return yaml.safe_load(f)
         else:
             return {
-                'default_permissions': {
-                    'admin': ['*'],
-                    'lead_developer': ['task.create', 'task.assign', 'task.review', 'team.manage'],
-                    'developer': ['task.create', 'task.execute', 'task.review'],
-                    'qa_engineer': ['task.review', 'task.test', 'security.scan'],
-                    'devops_engineer': ['deploy.execute', 'infrastructure.manage', 'monitoring.view'],
-                    'viewer': ['task.view', 'logs.view']
+                "default_permissions": {
+                    "admin": ["*"],
+                    "lead_developer": [
+                        "task.create",
+                        "task.assign",
+                        "task.review",
+                        "team.manage",
+                    ],
+                    "developer": ["task.create", "task.execute", "task.review"],
+                    "qa_engineer": ["task.review", "task.test", "security.scan"],
+                    "devops_engineer": [
+                        "deploy.execute",
+                        "infrastructure.manage",
+                        "monitoring.view",
+                    ],
+                    "viewer": ["task.view", "logs.view"],
                 },
-                'conflict_resolution': {
-                    'auto_resolve': True,
-                    'escalation_threshold': 300,  # 5 minutes
-                    'notification_enabled': True
+                "conflict_resolution": {
+                    "auto_resolve": True,
+                    "escalation_threshold": 300,  # 5 minutes
+                    "notification_enabled": True,
                 },
-                'collaboration': {
-                    'max_session_duration': 3600,  # 1 hour
-                    'max_participants': 10,
-                    'auto_cleanup': True
+                "collaboration": {
+                    "max_session_duration": 3600,  # 1 hour
+                    "max_participants": 10,
+                    "auto_cleanup": True,
                 },
-                'data_directory': '.agentdev/team_data'
+                "data_directory": ".agentdev/team_data",
             }
 
-    def create_user(self, username: str, email: str, full_name: str,
-                   role: UserRole, password_hash: str) -> str:
+    def create_user(
+        self,
+        username: str,
+        email: str,
+        full_name: str,
+        role: UserRole,
+        password_hash: str,
+    ) -> str:
         """Create a new user"""
         user_id = str(uuid.uuid4())
 
         # Get default permissions for role
-        permissions = self.config['default_permissions'].get(role.value, [])
+        permissions = self.config["default_permissions"].get(role.value, [])
 
         user = User(
             user_id=user_id,
@@ -176,7 +207,7 @@ class TeamManager:
             permissions=permissions,
             created_at=time.time(),
             last_active=time.time(),
-            preferences={}
+            preferences={},
         )
 
         self.users[user_id] = user
@@ -193,10 +224,10 @@ class TeamManager:
             description=description,
             members=[creator_id],
             roles={creator_id: UserRole.ADMIN},
-            permissions=self.config['default_permissions'].copy(),
+            permissions=self.config["default_permissions"].copy(),
             created_at=time.time(),
             updated_at=time.time(),
-            settings={}
+            settings={},
         )
 
         self.teams[team_id] = team
@@ -235,8 +266,14 @@ class TeamManager:
 
         return False
 
-    def assign_task(self, task_id: str, assigned_to: str, assigned_by: str,
-                   priority: int = 1, estimated_hours: Optional[float] = None) -> bool:
+    def assign_task(
+        self,
+        task_id: str,
+        assigned_to: str,
+        assigned_by: str,
+        priority: int = 1,
+        estimated_hours: Optional[float] = None,
+    ) -> bool:
         """Assign task to user"""
         if assigned_to not in self.users:
             return False
@@ -252,15 +289,16 @@ class TeamManager:
             actual_hours=None,
             dependencies=[],
             blockers=[],
-            notes=""
+            notes="",
         )
 
         self.task_assignments[task_id] = assignment
         print(f"✅ Task {task_id} assigned to {assigned_to}")
         return True
 
-    def update_task_status(self, task_id: str, status: TaskStatus,
-                          user_id: str, notes: str = "") -> bool:
+    def update_task_status(
+        self, task_id: str, status: TaskStatus, user_id: str, notes: str = ""
+    ) -> bool:
         """Update task status"""
         if task_id not in self.task_assignments:
             return False
@@ -276,7 +314,9 @@ class TeamManager:
         assignment.notes = notes
 
         # Log status change
-        print(f"📝 Task {task_id} status changed from {old_status.value} to {status.value} by {user_id}")
+        print(
+            f"📝 Task {task_id} status changed from {old_status.value} to {status.value} by {user_id}"
+        )
 
         # Check for conflicts
         if status == TaskStatus.IN_PROGRESS:
@@ -305,17 +345,25 @@ class TeamManager:
         """Check for potential conflicts when starting task"""
         # Check for resource locks
         for resource, lock_info in self.locks.items():
-            if lock_info['locked_by'] != user_id and lock_info['expires_at'] > time.time():
+            if (
+                lock_info["locked_by"] != user_id
+                and lock_info["expires_at"] > time.time()
+            ):
                 self._create_conflict(
                     ConflictType.RESOURCE_LOCK,
                     f"Resource {resource} is locked by {lock_info['locked_by']}",
-                    [user_id, lock_info['locked_by']],
-                    [resource]
+                    [user_id, lock_info["locked_by"]],
+                    [resource],
                 )
 
-    def _create_conflict(self, conflict_type: ConflictType, description: str,
-                        involved_users: list[str], affected_resources: list[str],
-                        severity: str = "medium") -> str:
+    def _create_conflict(
+        self,
+        conflict_type: ConflictType,
+        description: str,
+        involved_users: list[str],
+        affected_resources: list[str],
+        severity: str = "medium",
+    ) -> str:
         """Create a new conflict"""
         conflict_id = str(uuid.uuid4())
 
@@ -329,13 +377,13 @@ class TeamManager:
             resolved_at=None,
             resolution=None,
             resolved_by=None,
-            severity=severity
+            severity=severity,
         )
 
         self.conflicts[conflict_id] = conflict
 
         # Auto-resolve if configured
-        if self.config['conflict_resolution']['auto_resolve']:
+        if self.config["conflict_resolution"]["auto_resolve"]:
             asyncio.create_task(self._auto_resolve_conflict(conflict_id))
 
         print(f"⚠️ Conflict created: {conflict_id} - {description}")
@@ -343,7 +391,7 @@ class TeamManager:
 
     async def _auto_resolve_conflict(self, conflict_id: str):
         """Attempt to auto-resolve conflict"""
-        await asyncio.sleep(self.config['conflict_resolution']['escalation_threshold'])
+        await asyncio.sleep(self.config["conflict_resolution"]["escalation_threshold"])
 
         conflict = self.conflicts.get(conflict_id)
         if not conflict or conflict.resolved_at:
@@ -355,9 +403,11 @@ class TeamManager:
             for resource in conflict.affected_resources:
                 if resource in self.locks:
                     lock_info = self.locks[resource]
-                    if lock_info['expires_at'] <= time.time():
+                    if lock_info["expires_at"] <= time.time():
                         # Lock expired, resolve conflict
-                        self._resolve_conflict(conflict_id, "auto", "Lock expired automatically")
+                        self._resolve_conflict(
+                            conflict_id, "auto", "Lock expired automatically"
+                        )
                         return
 
     def _resolve_conflict(self, conflict_id: str, resolved_by: str, resolution: str):
@@ -379,14 +429,17 @@ class TeamManager:
         # Check if resource is already locked
         if resource in self.locks:
             lock_info = self.locks[resource]
-            if lock_info['expires_at'] > current_time and lock_info['locked_by'] != user_id:
+            if (
+                lock_info["expires_at"] > current_time
+                and lock_info["locked_by"] != user_id
+            ):
                 return False
 
         # Lock the resource
         self.locks[resource] = {
-            'locked_by': user_id,
-            'locked_at': current_time,
-            'expires_at': current_time + duration
+            "locked_by": user_id,
+            "locked_at": current_time,
+            "expires_at": current_time + duration,
         }
 
         print(f"🔒 Resource locked: {resource} by {user_id}")
@@ -398,7 +451,7 @@ class TeamManager:
             return False
 
         lock_info = self.locks[resource]
-        if lock_info['locked_by'] != user_id:
+        if lock_info["locked_by"] != user_id:
             return False
 
         del self.locks[resource]
@@ -419,7 +472,7 @@ class TeamManager:
             chat_messages=[],
             screen_shares=[],
             voice_enabled=False,
-            video_enabled=False
+            video_enabled=False,
         )
 
         self.active_sessions[session_id] = session
@@ -436,7 +489,10 @@ class TeamManager:
         session = self.active_sessions[session_id]
 
         # Check session capacity
-        if len(session.participants) >= self.config['collaboration']['max_participants']:
+        if (
+            len(session.participants)
+            >= self.config["collaboration"]["max_participants"]
+        ):
             return False
 
         session.participants.append(user_id)
@@ -477,10 +533,10 @@ class TeamManager:
             return False
 
         chat_message = {
-            'message_id': str(uuid.uuid4()),
-            'user_id': user_id,
-            'message': message,
-            'timestamp': time.time()
+            "message_id": str(uuid.uuid4()),
+            "user_id": user_id,
+            "message": message,
+            "timestamp": time.time(),
         }
 
         session.chat_messages.append(chat_message)
@@ -516,7 +572,9 @@ class TeamManager:
 
     def get_active_conflicts(self) -> list[Conflict]:
         """Get all unresolved conflicts"""
-        return [conflict for conflict in self.conflicts.values() if not conflict.resolved_at]
+        return [
+            conflict for conflict in self.conflicts.values() if not conflict.resolved_at
+        ]
 
     def get_collaboration_statistics(self) -> dict[str, Any]:
         """Get collaboration statistics"""
@@ -533,27 +591,32 @@ class TeamManager:
             task_status_counts[status] = task_status_counts.get(status, 0) + 1
 
         # User activity
-        active_users = len([user for user in self.users.values()
-                          if time.time() - user.last_active < 3600])  # Last hour
+        active_users = len(
+            [
+                user
+                for user in self.users.values()
+                if time.time() - user.last_active < 3600
+            ]
+        )  # Last hour
 
         return {
-            'total_users': total_users,
-            'total_teams': total_teams,
-            'total_tasks': total_tasks,
-            'active_sessions': active_sessions,
-            'active_conflicts': active_conflicts,
-            'active_users': active_users,
-            'task_status_breakdown': task_status_counts,
-            'user_roles': {
+            "total_users": total_users,
+            "total_teams": total_teams,
+            "total_tasks": total_tasks,
+            "active_sessions": active_sessions,
+            "active_conflicts": active_conflicts,
+            "active_users": active_users,
+            "task_status_breakdown": task_status_counts,
+            "user_roles": {
                 role.value: len([u for u in self.users.values() if u.role == role])
                 for role in UserRole
-            }
+            },
         }
 
     async def cleanup_inactive_sessions(self):
         """Cleanup inactive collaboration sessions"""
         current_time = time.time()
-        max_duration = self.config['collaboration']['max_session_duration']
+        max_duration = self.config["collaboration"]["max_session_duration"]
 
         sessions_to_remove = []
         for session_id, session in self.active_sessions.items():
@@ -596,38 +659,51 @@ class TeamManager:
             except Exception as e:
                 print(f"⚠️ Cleanup task error: {e}")
 
+
 # Global team manager instance
 team_manager = TeamManager()
+
 
 # Convenience functions
 def create_user(username: str, email: str, full_name: str, role: UserRole) -> str:
     """Create a new user"""
     return team_manager.create_user(username, email, full_name, role, "")
 
+
 def assign_task(task_id: str, assigned_to: str, assigned_by: str) -> bool:
     """Assign task to user"""
     return team_manager.assign_task(task_id, assigned_to, assigned_by)
+
 
 def get_user_tasks(user_id: str) -> list[TaskAssignment]:
     """Get tasks for user"""
     return team_manager.get_user_tasks(user_id)
 
+
 def start_collaboration(task_id: str, user_id: str) -> str:
     """Start collaboration session"""
     return team_manager.start_collaboration_session(task_id, user_id)
 
+
 if __name__ == "__main__":
+
     async def main():
         # Example usage
         manager = TeamManager()
         await manager.start_team_manager()
 
         # Create users
-        admin_id = manager.create_user("admin", "admin@example.com", "Admin User", UserRole.ADMIN)
-        dev_id = manager.create_user("developer", "dev@example.com", "Developer", UserRole.DEVELOPER)
+        admin_id = manager.create_user(
+            "admin", "admin@example.com", "Admin User", UserRole.ADMIN
+        )
+        dev_id = manager.create_user(
+            "developer", "dev@example.com", "Developer", UserRole.DEVELOPER
+        )
 
         # Create team
-        team_id = manager.create_team("Development Team", "Main development team", admin_id)
+        team_id = manager.create_team(
+            "Development Team", "Main development team", admin_id
+        )
         manager.add_user_to_team(team_id, dev_id, UserRole.DEVELOPER)
 
         # Assign task

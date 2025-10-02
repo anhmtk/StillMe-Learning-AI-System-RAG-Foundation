@@ -31,6 +31,7 @@ from typing import Any, Optional
 # Import với fallback để tránh lỗi
 try:
     import httpx  # Sử dụng httpx thay vì aiohttp để thống nhất với các module khác nếu có, hoặc dùng aiohttp nếu được yêu cầu cụ thể
+
     HTTPX_AVAILABLE = True
 except ImportError:
     print("⚠️ httpx not available. Install with: pip install httpx")
@@ -39,6 +40,7 @@ except ImportError:
 
 try:
     from dotenv import load_dotenv
+
     load_dotenv()
     DOTENV_AVAILABLE = True
 except ImportError:
@@ -224,11 +226,19 @@ class OpenRouterClient:
             data = response.json()
             return data["choices"][0]["message"]["content"]
         except Exception as e:
-            if HTTPX_AVAILABLE and hasattr(httpx, 'HTTPStatusError') and isinstance(e, httpx.HTTPStatusError):
+            if (
+                HTTPX_AVAILABLE
+                and hasattr(httpx, "HTTPStatusError")
+                and isinstance(e, httpx.HTTPStatusError)
+            ):
                 logger.error(
                     f"OpenRouter API HTTP Error ({e.response.status_code}): {e.response.text}"
                 )
-            elif HTTPX_AVAILABLE and hasattr(httpx, 'RequestError') and isinstance(e, httpx.RequestError):
+            elif (
+                HTTPX_AVAILABLE
+                and hasattr(httpx, "RequestError")
+                and isinstance(e, httpx.RequestError)
+            ):
                 logger.error(f"OpenRouter API Network Error: {e}")
             else:
                 logger.error(f"OpenRouter API Error: {e}")
@@ -645,9 +655,11 @@ class ContentIntegrityFilter:
         violation_reasons: list[str] = []
 
         # 1. Giai đoạn Lọc Nhanh (Pre-filtering)
-        pre_filter_safe, pre_filter_reason, pre_filter_severity = (
-            await self.pre_filter_content(content_text, source_url)
-        )
+        (
+            pre_filter_safe,
+            pre_filter_reason,
+            pre_filter_severity,
+        ) = await self.pre_filter_content(content_text, source_url)
         if not pre_filter_safe:
             violation_type = (
                 ContentViolationType.FORBIDDEN_KEYWORD

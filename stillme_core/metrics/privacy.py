@@ -29,8 +29,10 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
+
 class PIIType(Enum):
     """Types of PII"""
+
     EMAIL = "email"
     PHONE = "phone"
     NAME = "name"
@@ -43,17 +45,21 @@ class PIIType(Enum):
     API_KEY = "api_key"
     PASSWORD = "password"
 
+
 @dataclass
 class PIIPattern:
     """PII detection pattern"""
+
     pii_type: PIIType
     pattern: re.Pattern
     replacement: str
     description: str
 
+
 @dataclass
 class PrivacyConfig:
     """Privacy configuration"""
+
     enable_redaction: bool = True
     enable_anonymization: bool = True
     enable_audit_log: bool = True
@@ -61,6 +67,7 @@ class PrivacyConfig:
     audit_log_path: str = "logs/privacy_audit.log"
     allowed_domains: list[str] = field(default_factory=list)
     blocked_patterns: list[str] = field(default_factory=list)
+
 
 class PIIRedactor:
     """
@@ -84,74 +91,79 @@ class PIIRedactor:
             # Email
             PIIPattern(
                 pii_type=PIIType.EMAIL,
-                pattern=re.compile(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'),
+                pattern=re.compile(
+                    r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
+                ),
                 replacement="[EMAIL_REDACTED]",
-                description="Email address"
+                description="Email address",
             ),
-
             # Phone numbers
             PIIPattern(
                 pii_type=PIIType.PHONE,
-                pattern=re.compile(r'(\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})'),
+                pattern=re.compile(
+                    r"(\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})"
+                ),
                 replacement="[PHONE_REDACTED]",
-                description="Phone number"
+                description="Phone number",
             ),
-
             # IP addresses
             PIIPattern(
                 pii_type=PIIType.IP_ADDRESS,
-                pattern=re.compile(r'\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b'),
+                pattern=re.compile(r"\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b"),
                 replacement="[IP_REDACTED]",
-                description="IP address"
+                description="IP address",
             ),
-
             # Credit card numbers
             PIIPattern(
                 pii_type=PIIType.CREDIT_CARD,
-                pattern=re.compile(r'\b(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13}|3[0-9]{13}|6(?:011|5[0-9]{2})[0-9]{12})\b'),
+                pattern=re.compile(
+                    r"\b(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13}|3[0-9]{13}|6(?:011|5[0-9]{2})[0-9]{12})\b"
+                ),
                 replacement="[CARD_REDACTED]",
-                description="Credit card number"
+                description="Credit card number",
             ),
-
             # SSN
             PIIPattern(
                 pii_type=PIIType.SSN,
-                pattern=re.compile(r'\b(?:[0-9]{3}-[0-9]{2}-[0-9]{4}|[0-9]{9})\b'),
+                pattern=re.compile(r"\b(?:[0-9]{3}-[0-9]{2}-[0-9]{4}|[0-9]{9})\b"),
                 replacement="[SSN_REDACTED]",
-                description="Social Security Number"
+                description="Social Security Number",
             ),
-
             # API keys (common patterns)
             PIIPattern(
                 pii_type=PIIType.API_KEY,
-                pattern=re.compile(r'\b(?:sk-|pk-|api_|key_)[A-Za-z0-9]{20,}\b'),
+                pattern=re.compile(r"\b(?:sk-|pk-|api_|key_)[A-Za-z0-9]{20,}\b"),
                 replacement="[API_KEY_REDACTED]",
-                description="API key"
+                description="API key",
             ),
-
             # Passwords (basic detection)
             PIIPattern(
                 pii_type=PIIType.PASSWORD,
-                pattern=re.compile(r'\b(?:password|passwd|pwd)\s*[:=]\s*[^\s]+\b', re.IGNORECASE),
+                pattern=re.compile(
+                    r"\b(?:password|passwd|pwd)\s*[:=]\s*[^\s]+\b", re.IGNORECASE
+                ),
                 replacement="[PASSWORD_REDACTED]",
-                description="Password field"
+                description="Password field",
             ),
-
             # User IDs (common patterns)
             PIIPattern(
                 pii_type=PIIType.USER_ID,
-                pattern=re.compile(r'\b(?:user_id|uid|id)\s*[:=]\s*[A-Za-z0-9_-]+\b', re.IGNORECASE),
+                pattern=re.compile(
+                    r"\b(?:user_id|uid|id)\s*[:=]\s*[A-Za-z0-9_-]+\b", re.IGNORECASE
+                ),
                 replacement="[USER_ID_REDACTED]",
-                description="User ID"
+                description="User ID",
             ),
-
             # Session IDs
             PIIPattern(
                 pii_type=PIIType.SESSION_ID,
-                pattern=re.compile(r'\b(?:session_id|sid|session)\s*[:=]\s*[A-Za-z0-9_-]+\b', re.IGNORECASE),
+                pattern=re.compile(
+                    r"\b(?:session_id|sid|session)\s*[:=]\s*[A-Za-z0-9_-]+\b",
+                    re.IGNORECASE,
+                ),
                 replacement="[SESSION_ID_REDACTED]",
-                description="Session ID"
-            )
+                description="Session ID",
+            ),
         ]
 
         self.patterns = default_patterns
@@ -169,12 +181,14 @@ class PIIRedactor:
         for pattern in self.patterns:
             matches = pattern.pattern.findall(text)
             if matches:
-                detected.append({
-                    'type': pattern.pii_type.value,
-                    'pattern': pattern.description,
-                    'matches': len(matches),
-                    'replacement': pattern.replacement
-                })
+                detected.append(
+                    {
+                        "type": pattern.pii_type.value,
+                        "pattern": pattern.description,
+                        "matches": len(matches),
+                        "replacement": pattern.replacement,
+                    }
+                )
 
         return detected
 
@@ -191,10 +205,9 @@ class PIIRedactor:
             redacted_text = pattern.pattern.sub(pattern.replacement, redacted_text)
 
             if redacted_text != original_text:
-                redactions_made.append({
-                    'type': pattern.pii_type.value,
-                    'description': pattern.description
-                })
+                redactions_made.append(
+                    {"type": pattern.pii_type.value, "description": pattern.description}
+                )
 
         # Log redactions if audit is enabled
         if redactions_made and self.config.enable_audit_log:
@@ -218,7 +231,10 @@ class PIIRedactor:
             elif isinstance(value, dict):
                 redacted_value = self.redact_dict(value)
             elif isinstance(value, list):
-                redacted_value = [self.redact_text(str(item)) if isinstance(item, str) else item for item in value]
+                redacted_value = [
+                    self.redact_text(str(item)) if isinstance(item, str) else item
+                    for item in value
+                ]
             else:
                 redacted_value = value
 
@@ -247,8 +263,18 @@ class PIIRedactor:
     def _is_sensitive_field(self, field_name: str) -> bool:
         """Check if field name indicates sensitive data"""
         sensitive_patterns = [
-            'id', 'key', 'token', 'secret', 'password', 'passwd',
-            'email', 'phone', 'address', 'ssn', 'credit', 'card'
+            "id",
+            "key",
+            "token",
+            "secret",
+            "password",
+            "passwd",
+            "email",
+            "phone",
+            "address",
+            "ssn",
+            "credit",
+            "card",
         ]
 
         field_lower = field_name.lower()
@@ -264,41 +290,44 @@ class PIIRedactor:
             return
 
         log_entry = {
-            'timestamp': str(datetime.now()),
-            'action': 'redaction',
-            'redactions': redactions,
-            'original_preview': original_text
+            "timestamp": str(datetime.now()),
+            "action": "redaction",
+            "redactions": redactions,
+            "original_preview": original_text,
         }
 
         try:
-            with open(self.config.audit_log_path, 'a', encoding='utf-8') as f:
-                f.write(json.dumps(log_entry) + '\n')
+            with open(self.config.audit_log_path, "a", encoding="utf-8") as f:
+                f.write(json.dumps(log_entry) + "\n")
         except Exception as e:
             logger.error(f"Failed to write audit log: {e}")
 
     def get_redaction_stats(self) -> dict[str, Any]:
         """Get redaction statistics"""
         if not Path(self.config.audit_log_path).exists():
-            return {'total_redactions': 0, 'by_type': {}}
+            return {"total_redactions": 0, "by_type": {}}
 
-        stats = {'total_redactions': 0, 'by_type': {}}
+        stats = {"total_redactions": 0, "by_type": {}}
 
         try:
-            with open(self.config.audit_log_path, encoding='utf-8') as f:
+            with open(self.config.audit_log_path, encoding="utf-8") as f:
                 for line in f:
                     try:
                         entry = json.loads(line.strip())
-                        if entry.get('action') == 'redaction':
-                            stats['total_redactions'] += 1
-                            for redaction in entry.get('redactions', []):
-                                pii_type = redaction.get('type', 'unknown')
-                                stats['by_type'][pii_type] = stats['by_type'].get(pii_type, 0) + 1
+                        if entry.get("action") == "redaction":
+                            stats["total_redactions"] += 1
+                            for redaction in entry.get("redactions", []):
+                                pii_type = redaction.get("type", "unknown")
+                                stats["by_type"][pii_type] = (
+                                    stats["by_type"].get(pii_type, 0) + 1
+                                )
                     except json.JSONDecodeError:
                         continue
         except Exception as e:
             logger.error(f"Failed to read audit log: {e}")
 
         return stats
+
 
 class PrivacyManager:
     """
@@ -336,20 +365,18 @@ class PrivacyManager:
 
     def validate_privacy_compliance(self, data: dict[str, Any]) -> dict[str, Any]:
         """Validate privacy compliance of data"""
-        compliance_report = {
-            'compliant': True,
-            'issues': [],
-            'recommendations': []
-        }
+        compliance_report = {"compliant": True, "issues": [], "recommendations": []}
 
         # Check for PII
         text_data = json.dumps(data)
         detected_pii = self.redactor.detect_pii(text_data)
 
         if detected_pii:
-            compliance_report['compliant'] = False
-            compliance_report['issues'].append(f"PII detected: {len(detected_pii)} types")
-            compliance_report['recommendations'].append("Enable PII redaction")
+            compliance_report["compliant"] = False
+            compliance_report["issues"].append(
+                f"PII detected: {len(detected_pii)} types"
+            )
+            compliance_report["recommendations"].append("Enable PII redaction")
 
         # Check for sensitive fields
         sensitive_fields = []
@@ -358,25 +385,29 @@ class PrivacyManager:
                 sensitive_fields.append(key)
 
         if sensitive_fields:
-            compliance_report['issues'].append(f"Sensitive fields found: {sensitive_fields}")
-            compliance_report['recommendations'].append("Consider anonymization")
+            compliance_report["issues"].append(
+                f"Sensitive fields found: {sensitive_fields}"
+            )
+            compliance_report["recommendations"].append("Consider anonymization")
 
         return compliance_report
 
     def get_privacy_summary(self) -> dict[str, Any]:
         """Get privacy system summary"""
         return {
-            'config': {
-                'redaction_enabled': self.config.enable_redaction,
-                'anonymization_enabled': self.config.enable_anonymization,
-                'audit_enabled': self.config.enable_audit_log
+            "config": {
+                "redaction_enabled": self.config.enable_redaction,
+                "anonymization_enabled": self.config.enable_anonymization,
+                "audit_enabled": self.config.enable_audit_log,
             },
-            'redaction_stats': self.redactor.get_redaction_stats(),
-            'patterns_loaded': len(self.redactor.patterns)
+            "redaction_stats": self.redactor.get_redaction_stats(),
+            "patterns_loaded": len(self.redactor.patterns),
         }
+
 
 # Global instance
 _privacy_manager_instance: Optional[PrivacyManager] = None
+
 
 def get_privacy_manager() -> PrivacyManager:
     """Get global privacy manager instance"""
@@ -385,7 +416,10 @@ def get_privacy_manager() -> PrivacyManager:
         _privacy_manager_instance = PrivacyManager()
     return _privacy_manager_instance
 
-def initialize_privacy_manager(config: Optional[PrivacyConfig] = None) -> PrivacyManager:
+
+def initialize_privacy_manager(
+    config: Optional[PrivacyConfig] = None,
+) -> PrivacyManager:
     """Initialize global privacy manager with config"""
     global _privacy_manager_instance
     _privacy_manager_instance = PrivacyManager(config)

@@ -13,20 +13,27 @@ def run_pytest_collect(test_files):
     """Run pytest collect on specific files"""
     try:
         cmd = [
-            sys.executable, '-X', 'utf8', '-m', 'pytest',
-            '--collect-only', '-q', '--disable-warnings'
+            sys.executable,
+            "-X",
+            "utf8",
+            "-m",
+            "pytest",
+            "--collect-only",
+            "-q",
+            "--disable-warnings",
         ] + test_files
 
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
-            env={**os.environ, 'PYTEST_DISABLE_PLUGIN_AUTOLOAD': '1'}
+            env={**os.environ, "PYTEST_DISABLE_PLUGIN_AUTOLOAD": "1"},
         )
 
         return result.returncode == 0, result.stderr
     except Exception as e:
         return False, str(e)
+
 
 def find_test_files():
     """Find all test files in tests/ directory"""
@@ -38,6 +45,7 @@ def find_test_files():
             test_files.append(str(py_file))
 
     return sorted(test_files)
+
 
 def bisect_test_files(test_files):
     """Bisect test files to find problematic ones"""
@@ -57,8 +65,8 @@ def bisect_test_files(test_files):
             return
 
         mid = (start + end) // 2
-        left_files = test_files[start:mid+1]
-        right_files = test_files[mid+1:end+1]
+        left_files = test_files[start : mid + 1]
+        right_files = test_files[mid + 1 : end + 1]
 
         # Test left half
         if left_files:
@@ -76,17 +84,18 @@ def bisect_test_files(test_files):
                 if len(right_files) == 1:
                     problematic_files.append(right_files[0])
                 else:
-                    bisect_range(mid+1, end)
+                    bisect_range(mid + 1, end)
 
     bisect_range(0, len(test_files) - 1)
     return problematic_files, error
+
 
 def generate_bisect_report(problematic_files, error_message):
     """Generate bisect report"""
     report_path = Path("reports/pytest_bisect.txt")
     report_path.parent.mkdir(exist_ok=True)
 
-    with open(report_path, 'w', encoding='utf-8') as f:
+    with open(report_path, "w", encoding="utf-8") as f:
         f.write("Pytest Bisect Report\n")
         f.write("=" * 30 + "\n\n")
 
@@ -101,6 +110,7 @@ def generate_bisect_report(problematic_files, error_message):
             f.write(f"\nError details:\n{error_message}\n")
 
     return report_path
+
 
 def main():
     """Main bisect function"""
@@ -130,6 +140,7 @@ def main():
     print(f"📄 Report saved to: {report_path}")
 
     return len(problematic_files)
+
 
 if __name__ == "__main__":
     sys.exit(main())

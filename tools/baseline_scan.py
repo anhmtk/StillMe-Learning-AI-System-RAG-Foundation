@@ -29,7 +29,7 @@ class BaselineScanner:
             "ruff": {"ok": False, "count": 0, "raw_path": None},
             "pytest": {"ok": False, "failures": 0},
             "mypy": {"ok": False, "reason": "not configured"},
-            "bandit": {"ok": False, "count": 0, "raw_path": None}
+            "bandit": {"ok": False, "count": 0, "raw_path": None},
         }
 
     def run_command(self, cmd: List[str], timeout: int = 120) -> Dict[str, Any]:
@@ -39,10 +39,10 @@ class BaselineScanner:
                 cmd,
                 capture_output=True,
                 text=True,
-                encoding='utf-8',
-                errors='replace',
+                encoding="utf-8",
+                errors="replace",
                 cwd=self.project_root,
-                timeout=timeout
+                timeout=timeout,
             )
 
             return {
@@ -50,7 +50,7 @@ class BaselineScanner:
                 "returncode": result.returncode,
                 "stdout": result.stdout,
                 "stderr": result.stderr,
-                "timeout": False
+                "timeout": False,
             }
         except subprocess.TimeoutExpired:
             return {
@@ -58,7 +58,7 @@ class BaselineScanner:
                 "returncode": -1,
                 "stdout": "",
                 "stderr": f"Command timed out after {timeout}s",
-                "timeout": True
+                "timeout": True,
             }
         except Exception as e:
             return {
@@ -66,7 +66,7 @@ class BaselineScanner:
                 "returncode": -1,
                 "stdout": "",
                 "stderr": str(e),
-                "timeout": False
+                "timeout": False,
             }
 
     def scan_ruff(self) -> Dict[str, Any]:
@@ -82,7 +82,12 @@ class BaselineScanner:
         if not result["ok"]:
             print(f"Ruff failed with return code {result['returncode']}")
             print(f"Stderr: {result['stderr']}")
-            return {"ok": False, "count": 0, "raw_path": None, "error": "command_failed"}
+            return {
+                "ok": False,
+                "count": 0,
+                "raw_path": None,
+                "error": "command_failed",
+            }
 
         try:
             # Parse JSON output
@@ -92,7 +97,7 @@ class BaselineScanner:
 
             # Save raw output
             raw_path = self.artifacts_dir / "ruff.json"
-            with open(raw_path, 'w', encoding='utf-8') as f:
+            with open(raw_path, "w", encoding="utf-8") as f:
                 json.dump(ruff_data, f, indent=2, ensure_ascii=False)
 
             count = len(ruff_data)
@@ -101,12 +106,17 @@ class BaselineScanner:
             return {
                 "ok": True,
                 "count": count,
-                "raw_path": str(raw_path.relative_to(self.project_root))
+                "raw_path": str(raw_path.relative_to(self.project_root)),
             }
 
         except json.JSONDecodeError as e:
             print(f"Failed to parse ruff JSON: {e}")
-            return {"ok": False, "count": 0, "raw_path": None, "error": "json_parse_failed"}
+            return {
+                "ok": False,
+                "count": 0,
+                "raw_path": None,
+                "error": "json_parse_failed",
+            }
 
     def scan_pytest(self) -> Dict[str, Any]:
         """Scan with pytest and count failures"""
@@ -123,7 +133,8 @@ class BaselineScanner:
         if "failed" in result["stdout"]:
             # Look for "X failed" pattern
             import re
-            match = re.search(r'(\d+) failed', result["stdout"])
+
+            match = re.search(r"(\d+) failed", result["stdout"])
             if match:
                 failures = int(match.group(1))
 
@@ -132,25 +143,18 @@ class BaselineScanner:
 
         print(f"Pytest: {failures} failures, return code: {result['returncode']}")
 
-        return {
-            "ok": ok,
-            "failures": failures,
-            "returncode": result["returncode"]
-        }
+        return {"ok": ok, "failures": failures, "returncode": result["returncode"]}
 
     def scan_mypy(self) -> Dict[str, Any]:
         """Check if mypy is configured and run it"""
         print("Checking mypy...")
 
         # Check if mypy config exists
-        mypy_configs = [
-            "mypy.ini",
-            "pyproject.toml",
-            ".mypy.ini",
-            "setup.cfg"
-        ]
+        mypy_configs = ["mypy.ini", "pyproject.toml", ".mypy.ini", "setup.cfg"]
 
-        has_config = any((self.project_root / config).exists() for config in mypy_configs)
+        has_config = any(
+            (self.project_root / config).exists() for config in mypy_configs
+        )
 
         if not has_config:
             print("No mypy configuration found")
@@ -183,7 +187,12 @@ class BaselineScanner:
         if not result["ok"]:
             print(f"Bandit failed with return code {result['returncode']}")
             print(f"Stderr: {result['stderr']}")
-            return {"ok": False, "count": 0, "raw_path": None, "error": "command_failed"}
+            return {
+                "ok": False,
+                "count": 0,
+                "raw_path": None,
+                "error": "command_failed",
+            }
 
         try:
             # Parse JSON output
@@ -193,7 +202,7 @@ class BaselineScanner:
 
             # Save raw output
             raw_path = self.artifacts_dir / "bandit.json"
-            with open(raw_path, 'w', encoding='utf-8') as f:
+            with open(raw_path, "w", encoding="utf-8") as f:
                 json.dump(bandit_data, f, indent=2, ensure_ascii=False)
 
             count = len(bandit_data.get("results", []))
@@ -202,12 +211,17 @@ class BaselineScanner:
             return {
                 "ok": True,
                 "count": count,
-                "raw_path": str(raw_path.relative_to(self.project_root))
+                "raw_path": str(raw_path.relative_to(self.project_root)),
             }
 
         except json.JSONDecodeError as e:
             print(f"Failed to parse bandit JSON: {e}")
-            return {"ok": False, "count": 0, "raw_path": None, "error": "json_parse_failed"}
+            return {
+                "ok": False,
+                "count": 0,
+                "raw_path": None,
+                "error": "json_parse_failed",
+            }
 
     def run_baseline_scan(self) -> Dict[str, Any]:
         """Run complete baseline scan"""
@@ -223,7 +237,7 @@ class BaselineScanner:
 
         # Save results
         baseline_path = self.artifacts_dir / "baseline_scan.json"
-        with open(baseline_path, 'w', encoding='utf-8') as f:
+        with open(baseline_path, "w", encoding="utf-8") as f:
             json.dump(self.results, f, indent=2, ensure_ascii=False)
 
         print(f"Baseline results saved to: {baseline_path}")

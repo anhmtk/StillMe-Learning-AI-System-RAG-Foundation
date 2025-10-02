@@ -19,7 +19,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Callable, Optional, Union
+from typing import Any, Callable, Optional
 
 import jwt
 import websockets
@@ -103,7 +103,9 @@ class AuthenticationManager:
         self.user_permissions: dict[str, list[str]] = {}
         self.token_ttl = timedelta(hours=24)
 
-    def generate_token(self, user_id: str, permissions: Optional[list[str]] = None) -> str:
+    def generate_token(
+        self, user_id: str, permissions: Optional[list[str]] = None
+    ) -> str:
         """Generate JWT token for user"""
         payload = {
             "user_id": user_id,
@@ -291,7 +293,9 @@ class MessageQueue:
                 except Exception as e:
                     logger.error(f"Error in subscriber callback: {e}")
 
-    async def get_message(self, timeout: Optional[float] = None) -> Optional[IntegrationMessage]:
+    async def get_message(
+        self, timeout: Optional[float] = None
+    ) -> Optional[IntegrationMessage]:
         """Get message from queue"""
         try:
             return await asyncio.wait_for(self.queue.get(), timeout=timeout)

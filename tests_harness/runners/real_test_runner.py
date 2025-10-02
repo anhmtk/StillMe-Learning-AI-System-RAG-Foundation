@@ -32,13 +32,16 @@ from report_builder import HTMLReportBuilder
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class RealTestRunner:
     """Runner cho testing thực tế với StillMe AI"""
 
-    def __init__(self,
-                 gateway_url: str = "http://localhost:21568",
-                 ai_server_url: str = "http://localhost:1216",
-                 output_dir: str = "tests_harness/reports"):
+    def __init__(
+        self,
+        gateway_url: str = "http://localhost:21568",
+        ai_server_url: str = "http://localhost:1216",
+        output_dir: str = "tests_harness/reports",
+    ):
         self.gateway_url = gateway_url
         self.ai_server_url = ai_server_url
         self.output_dir = Path(output_dir)
@@ -57,10 +60,12 @@ class RealTestRunner:
         self.test_results = []
         self.performance_metrics = []
 
-    def run_comprehensive_test(self,
-                             test_cases: list[dict[str, Any]],
-                             max_concurrent: int = 5,
-                             timeout: int = 30) -> dict[str, Any]:
+    def run_comprehensive_test(
+        self,
+        test_cases: list[dict[str, Any]],
+        max_concurrent: int = 5,
+        timeout: int = 30,
+    ) -> dict[str, Any]:
         """
         Chạy test toàn diện với StillMe AI
 
@@ -73,7 +78,9 @@ class RealTestRunner:
             Dict: Kết quả test tổng hợp
         """
         try:
-            self.logger.info(f"🚀 Starting comprehensive test with {len(test_cases)} test cases...")
+            self.logger.info(
+                f"🚀 Starting comprehensive test with {len(test_cases)} test cases..."
+            )
 
             # Check server health
             if not self._check_server_health():
@@ -85,7 +92,9 @@ class RealTestRunner:
             end_time = time.time()
 
             # Calculate performance metrics
-            performance_metrics = self._calculate_performance_metrics(results, end_time - start_time)
+            performance_metrics = self._calculate_performance_metrics(
+                results, end_time - start_time
+            )
 
             # Evaluate results
             evaluation_results = self._evaluate_results(results)
@@ -108,13 +117,17 @@ class RealTestRunner:
             # Check Gateway health
             gateway_response = requests.get(f"{self.gateway_url}/health", timeout=10)
             if gateway_response.status_code != 200:
-                self.logger.error(f"Gateway health check failed: {gateway_response.status_code}")
+                self.logger.error(
+                    f"Gateway health check failed: {gateway_response.status_code}"
+                )
                 return False
 
             # Check AI Server health
             ai_response = requests.get(f"{self.ai_server_url}/health", timeout=10)
             if ai_response.status_code != 200:
-                self.logger.error(f"AI Server health check failed: {ai_response.status_code}")
+                self.logger.error(
+                    f"AI Server health check failed: {ai_response.status_code}"
+                )
                 return False
 
             self.logger.info("✅ Server health check passed")
@@ -124,32 +137,33 @@ class RealTestRunner:
             self.logger.error(f"❌ Server health check failed: {e}")
             return False
 
-    def _run_test_batch(self,
-                       test_cases: list[dict[str, Any]],
-                       max_concurrent: int,
-                       timeout: int) -> list[dict[str, Any]]:
+    def _run_test_batch(
+        self, test_cases: list[dict[str, Any]], max_concurrent: int, timeout: int
+    ) -> list[dict[str, Any]]:
         """Chạy batch test cases"""
         results = []
 
         for i, test_case in enumerate(test_cases):
             try:
-                self.logger.info(f"🧪 Running test case {i+1}/{len(test_cases)}: {test_case.get('id', 'unknown')}")
+                self.logger.info(
+                    f"🧪 Running test case {i+1}/{len(test_cases)}: {test_case.get('id', 'unknown')}"
+                )
 
                 # Send request to StillMe AI
                 response_data = self._send_request(test_case, timeout)
 
                 # Store result
                 result = {
-                    "test_case_id": test_case.get('id', f"test_{i+1}"),
-                    "user_input": test_case.get('user_input', ''),
-                    "expected_response": test_case.get('expected_response', ''),
-                    "actual_response": response_data.get('response', ''),
-                    "latency_ms": response_data.get('latency_ms', 0),
-                    "token_count": response_data.get('token_count', 0),
-                    "cost_estimate": response_data.get('cost_estimate', 0),
-                    "success": response_data.get('success', False),
-                    "error": response_data.get('error', ''),
-                    "timestamp": datetime.now().isoformat()
+                    "test_case_id": test_case.get("id", f"test_{i+1}"),
+                    "user_input": test_case.get("user_input", ""),
+                    "expected_response": test_case.get("expected_response", ""),
+                    "actual_response": response_data.get("response", ""),
+                    "latency_ms": response_data.get("latency_ms", 0),
+                    "token_count": response_data.get("token_count", 0),
+                    "cost_estimate": response_data.get("cost_estimate", 0),
+                    "success": response_data.get("success", False),
+                    "error": response_data.get("error", ""),
+                    "timestamp": datetime.now().isoformat(),
                 }
 
                 results.append(result)
@@ -159,18 +173,20 @@ class RealTestRunner:
 
             except Exception as e:
                 self.logger.error(f"❌ Test case {i+1} failed: {e}")
-                results.append({
-                    "test_case_id": test_case.get('id', f"test_{i+1}"),
-                    "user_input": test_case.get('user_input', ''),
-                    "expected_response": test_case.get('expected_response', ''),
-                    "actual_response": '',
-                    "latency_ms": 0,
-                    "token_count": 0,
-                    "cost_estimate": 0,
-                    "success": False,
-                    "error": str(e),
-                    "timestamp": datetime.now().isoformat()
-                })
+                results.append(
+                    {
+                        "test_case_id": test_case.get("id", f"test_{i+1}"),
+                        "user_input": test_case.get("user_input", ""),
+                        "expected_response": test_case.get("expected_response", ""),
+                        "actual_response": "",
+                        "latency_ms": 0,
+                        "token_count": 0,
+                        "cost_estimate": 0,
+                        "success": False,
+                        "error": str(e),
+                        "timestamp": datetime.now().isoformat(),
+                    }
+                )
 
         return results
 
@@ -181,9 +197,9 @@ class RealTestRunner:
 
             # Prepare request payload
             payload = {
-                "message": test_case.get('user_input', ''),
-                "locale": test_case.get('locale', 'vi'),
-                "user_preferences": test_case.get('user_preferences', {})
+                "message": test_case.get("user_input", ""),
+                "locale": test_case.get("locale", "vi"),
+                "user_preferences": test_case.get("user_preferences", {}),
             }
 
             # Send request to Gateway
@@ -191,7 +207,7 @@ class RealTestRunner:
                 f"{self.gateway_url}/send-message",
                 json=payload,
                 headers={"Content-Type": "application/json"},
-                timeout=timeout
+                timeout=timeout,
             )
 
             end_time = time.time()
@@ -201,9 +217,9 @@ class RealTestRunner:
                 response_data = response.json()
 
                 # Extract response text
-                ai_response = response_data.get('response', '')
-                if not ai_response and 'text' in response_data:
-                    ai_response = response_data['text']
+                ai_response = response_data.get("response", "")
+                if not ai_response and "text" in response_data:
+                    ai_response = response_data["text"]
 
                 # Estimate token count (rough approximation)
                 token_count = len(ai_response.split()) * 1.3  # Rough estimate
@@ -217,31 +233,31 @@ class RealTestRunner:
                     "token_count": int(token_count),
                     "cost_estimate": round(cost_estimate, 6),
                     "success": True,
-                    "error": ""
+                    "error": "",
                 }
             else:
                 return {
-                    "response": '',
+                    "response": "",
                     "latency_ms": latency_ms,
                     "token_count": 0,
                     "cost_estimate": 0,
                     "success": False,
-                    "error": f"HTTP {response.status_code}: {response.text}"
+                    "error": f"HTTP {response.status_code}: {response.text}",
                 }
 
         except Exception as e:
             return {
-                "response": '',
+                "response": "",
                 "latency_ms": 0,
                 "token_count": 0,
                 "cost_estimate": 0,
                 "success": False,
-                "error": str(e)
+                "error": str(e),
             }
 
-    def _calculate_performance_metrics(self,
-                                     results: list[dict[str, Any]],
-                                     total_duration: float) -> dict[str, Any]:
+    def _calculate_performance_metrics(
+        self, results: list[dict[str, Any]], total_duration: float
+    ) -> dict[str, Any]:
         """Tính toán performance metrics"""
         try:
             if not results:
@@ -249,22 +265,28 @@ class RealTestRunner:
 
             # Calculate basic metrics
             total_requests = len(results)
-            successful_requests = len([r for r in results if r.get('success', False)])
+            successful_requests = len([r for r in results if r.get("success", False)])
             failed_requests = total_requests - successful_requests
 
             # Calculate latency metrics
-            latencies = [r.get('latency_ms', 0) for r in results if r.get('success', False)]
+            latencies = [
+                r.get("latency_ms", 0) for r in results if r.get("success", False)
+            ]
             avg_latency = sum(latencies) / len(latencies) if latencies else 0
             min_latency = min(latencies) if latencies else 0
             max_latency = max(latencies) if latencies else 0
 
             # Calculate token metrics
-            token_counts = [r.get('token_count', 0) for r in results if r.get('success', False)]
+            token_counts = [
+                r.get("token_count", 0) for r in results if r.get("success", False)
+            ]
             total_tokens = sum(token_counts)
             avg_tokens = total_tokens / len(token_counts) if token_counts else 0
 
             # Calculate cost metrics
-            costs = [r.get('cost_estimate', 0) for r in results if r.get('success', False)]
+            costs = [
+                r.get("cost_estimate", 0) for r in results if r.get("success", False)
+            ]
             total_cost = sum(costs)
             avg_cost = total_cost / len(costs) if costs else 0
 
@@ -275,22 +297,24 @@ class RealTestRunner:
                 "total_requests": total_requests,
                 "successful_requests": successful_requests,
                 "failed_requests": failed_requests,
-                "success_rate": successful_requests / total_requests if total_requests > 0 else 0,
+                "success_rate": successful_requests / total_requests
+                if total_requests > 0
+                else 0,
                 "total_duration_seconds": total_duration,
                 "throughput_rps": throughput,
                 "latency_metrics": {
                     "average_ms": round(avg_latency, 2),
                     "min_ms": min_latency,
-                    "max_ms": max_latency
+                    "max_ms": max_latency,
                 },
                 "token_metrics": {
                     "total_tokens": total_tokens,
-                    "average_tokens": round(avg_tokens, 2)
+                    "average_tokens": round(avg_tokens, 2),
                 },
                 "cost_metrics": {
                     "total_cost": round(total_cost, 6),
-                    "average_cost": round(avg_cost, 6)
-                }
+                    "average_cost": round(avg_cost, 6),
+                },
             }
 
         except Exception as e:
@@ -308,28 +332,34 @@ class RealTestRunner:
             translation_data = []
 
             for result in results:
-                if result.get('success', False):
+                if result.get("success", False):
                     # Persona evaluation data
-                    persona_data.append({
-                        "response": result.get('actual_response', ''),
-                        "user_input": result.get('user_input', ''),
-                        "user_preferences": {}
-                    })
+                    persona_data.append(
+                        {
+                            "response": result.get("actual_response", ""),
+                            "user_input": result.get("user_input", ""),
+                            "user_preferences": {},
+                        }
+                    )
 
                     # Safety evaluation data
-                    safety_data.append({
-                        "response": result.get('actual_response', ''),
-                        "user_input": result.get('user_input', ''),
-                        "context": {}
-                    })
+                    safety_data.append(
+                        {
+                            "response": result.get("actual_response", ""),
+                            "user_input": result.get("user_input", ""),
+                            "context": {},
+                        }
+                    )
 
                     # Translation evaluation data
-                    translation_data.append({
-                        "response": result.get('actual_response', ''),
-                        "user_input": result.get('user_input', ''),
-                        "expected_language": "vietnamese",
-                        "source_language": "auto"
-                    })
+                    translation_data.append(
+                        {
+                            "response": result.get("actual_response", ""),
+                            "user_input": result.get("user_input", ""),
+                            "expected_language": "vietnamese",
+                            "source_language": "auto",
+                        }
+                    )
 
             # Run evaluations
             persona_scores = self.persona_eval.batch_evaluate(persona_data)
@@ -339,72 +369,91 @@ class RealTestRunner:
             # Generate evaluation reports
             persona_report = self.persona_eval.generate_report(persona_scores)
             safety_report = self.safety_eval.generate_report(safety_scores)
-            translation_report = self.translation_eval.generate_report(translation_scores)
+            translation_report = self.translation_eval.generate_report(
+                translation_scores
+            )
 
             return {
                 "persona_evaluation": {
                     "scores": [score.to_dict() for score in persona_scores],
-                    "report": persona_report
+                    "report": persona_report,
                 },
                 "safety_evaluation": {
                     "scores": [score.to_dict() for score in safety_scores],
-                    "report": safety_report
+                    "report": safety_report,
                 },
                 "translation_evaluation": {
                     "scores": [score.to_dict() for score in translation_scores],
-                    "report": translation_report
-                }
+                    "report": translation_report,
+                },
             }
 
         except Exception as e:
             self.logger.error(f"Error evaluating results: {e}")
             return {}
 
-    def _generate_comprehensive_report(self,
-                                     results: list[dict[str, Any]],
-                                     evaluation_results: dict[str, Any],
-                                     performance_metrics: dict[str, Any]) -> dict[str, Any]:
+    def _generate_comprehensive_report(
+        self,
+        results: list[dict[str, Any]],
+        evaluation_results: dict[str, Any],
+        performance_metrics: dict[str, Any],
+    ) -> dict[str, Any]:
         """Tạo báo cáo toàn diện"""
         try:
             self.logger.info("📊 Generating comprehensive report...")
 
             # Prepare data for HTML report
-            persona_scores = evaluation_results.get('persona_evaluation', {}).get('scores', [])
-            safety_scores = evaluation_results.get('safety_evaluation', {}).get('scores', [])
-            translation_scores = evaluation_results.get('translation_evaluation', {}).get('scores', [])
+            persona_scores = evaluation_results.get("persona_evaluation", {}).get(
+                "scores", []
+            )
+            safety_scores = evaluation_results.get("safety_evaluation", {}).get(
+                "scores", []
+            )
+            translation_scores = evaluation_results.get(
+                "translation_evaluation", {}
+            ).get("scores", [])
 
             # Mock efficiency scores (would be calculated from performance metrics)
             efficiency_scores = []
             for result in results:
-                if result.get('success', False):
-                    efficiency_scores.append({
-                        "overall_efficiency_score": 0.8,  # Mock score
-                        "latency": result.get('latency_ms', 0) / 1000,  # Convert to seconds
-                        "token_cost": result.get('cost_estimate', 0),
-                        "response_quality": 0.7  # Mock score
-                    })
+                if result.get("success", False):
+                    efficiency_scores.append(
+                        {
+                            "overall_efficiency_score": 0.8,  # Mock score
+                            "latency": result.get("latency_ms", 0)
+                            / 1000,  # Convert to seconds
+                            "token_cost": result.get("cost_estimate", 0),
+                            "response_quality": 0.7,  # Mock score
+                        }
+                    )
 
             # Prepare metadata
             metadata = {
-                "test_date": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                "test_date": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                 "dataset_size": f"{len(results)} test cases",
                 "test_duration": f"{performance_metrics.get('total_duration_seconds', 0):.2f} seconds",
                 "environment": "Local Development",
                 "stillme_version": "1.0.0",
                 "gateway_url": self.gateway_url,
-                "ai_server_url": self.ai_server_url
+                "ai_server_url": self.ai_server_url,
             }
 
             # Generate HTML report
             html_file = self.report_builder.build_comprehensive_report(
-                persona_scores, safety_scores, translation_scores,
-                efficiency_scores, metadata
+                persona_scores,
+                safety_scores,
+                translation_scores,
+                efficiency_scores,
+                metadata,
             )
 
             # Generate JSON report
             json_file = self.report_builder.export_json_report(
-                persona_scores, safety_scores, translation_scores,
-                efficiency_scores, metadata
+                persona_scores,
+                safety_scores,
+                translation_scores,
+                efficiency_scores,
+                metadata,
             )
 
             # Compile comprehensive report
@@ -414,24 +463,31 @@ class RealTestRunner:
                 "performance_metrics": performance_metrics,
                 "evaluation_results": evaluation_results,
                 "test_results": results,
-                "reports": {
-                    "html_report": html_file,
-                    "json_report": json_file
-                },
+                "reports": {"html_report": html_file, "json_report": json_file},
                 "summary": {
                     "total_tests": len(results),
-                    "successful_tests": len([r for r in results if r.get('success', False)]),
-                    "average_latency_ms": performance_metrics.get('latency_metrics', {}).get('average_ms', 0),
-                    "total_cost": performance_metrics.get('cost_metrics', {}).get('total_cost', 0),
-                    "overall_performance": "Good" if performance_metrics.get('success_rate', 0) > 0.8 else "Needs Improvement"
-                }
+                    "successful_tests": len(
+                        [r for r in results if r.get("success", False)]
+                    ),
+                    "average_latency_ms": performance_metrics.get(
+                        "latency_metrics", {}
+                    ).get("average_ms", 0),
+                    "total_cost": performance_metrics.get("cost_metrics", {}).get(
+                        "total_cost", 0
+                    ),
+                    "overall_performance": "Good"
+                    if performance_metrics.get("success_rate", 0) > 0.8
+                    else "Needs Improvement",
+                },
             }
 
             # Save comprehensive report
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            report_file = self.output_dir / f"comprehensive_test_report_{timestamp}.json"
+            report_file = (
+                self.output_dir / f"comprehensive_test_report_{timestamp}.json"
+            )
 
-            with open(report_file, 'w', encoding='utf-8') as f:
+            with open(report_file, "w", encoding="utf-8") as f:
                 json.dump(comprehensive_report, f, indent=2, ensure_ascii=False)
 
             self.logger.info(f"✅ Comprehensive report generated: {report_file}")
@@ -444,10 +500,10 @@ class RealTestRunner:
     def load_test_cases_from_file(self, file_path: str) -> list[dict[str, Any]]:
         """Load test cases từ file"""
         try:
-            with open(file_path, encoding='utf-8') as f:
-                if file_path.endswith('.json'):
+            with open(file_path, encoding="utf-8") as f:
+                if file_path.endswith(".json"):
                     return json.load(f)
-                elif file_path.endswith('.jsonl'):
+                elif file_path.endswith(".jsonl"):
                     return [json.loads(line) for line in f if line.strip()]
                 else:
                     self.logger.error(f"Unsupported file format: {file_path}")
@@ -468,36 +524,36 @@ class RealTestRunner:
                 "user_input": "Xin chào StillMe",
                 "expected_response": "Xin chào",
                 "locale": "vi",
-                "category": "greeting"
+                "category": "greeting",
             },
             {
                 "id": "greeting_en",
                 "user_input": "Hello StillMe",
                 "expected_response": "Hello",
                 "locale": "en",
-                "category": "greeting"
+                "category": "greeting",
             },
             {
                 "id": "question_vi",
                 "user_input": "Hôm nay thế nào?",
                 "expected_response": "Hôm nay",
                 "locale": "vi",
-                "category": "question"
+                "category": "question",
             },
             {
                 "id": "question_en",
                 "user_input": "How are you today?",
                 "expected_response": "Today",
                 "locale": "en",
-                "category": "question"
+                "category": "question",
             },
             {
                 "id": "help_request",
                 "user_input": "Bạn có thể giúp tôi không?",
                 "expected_response": "giúp",
                 "locale": "vi",
-                "category": "help_request"
-            }
+                "category": "help_request",
+            },
         ]
 
         # Generate more test cases
@@ -505,15 +561,16 @@ class RealTestRunner:
             base_case = sample_cases[i % len(sample_cases)]
             test_case = {
                 "id": f"{base_case['id']}_{i+1}",
-                "user_input": base_case['user_input'],
-                "expected_response": base_case['expected_response'],
-                "locale": base_case['locale'],
-                "category": base_case['category'],
-                "user_preferences": {}
+                "user_input": base_case["user_input"],
+                "expected_response": base_case["expected_response"],
+                "locale": base_case["locale"],
+                "category": base_case["category"],
+                "user_preferences": {},
             }
             test_cases.append(test_case)
 
         return test_cases
+
 
 # Example usage
 if __name__ == "__main__":
@@ -527,4 +584,4 @@ if __name__ == "__main__":
     results = runner.run_comprehensive_test(test_cases)
 
     print("🧪 Real Test Runner Test Results:")
-    print(json.dumps(results.get('summary', {}), indent=2, ensure_ascii=False))
+    print(json.dumps(results.get("summary", {}), indent=2, ensure_ascii=False))

@@ -17,15 +17,18 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class SuggestionResult:
     """Result of proactive suggestion analysis"""
+
     suggestions: list[str]
     confidence: float
     reasoning: str
     category: str
     metadata: dict[str, Any]
     learning_enabled: bool = True
+
 
 class ProactiveSuggestion:
     """
@@ -37,7 +40,10 @@ class ProactiveSuggestion:
         self.config = config
         self.enabled = config.get("enabled", True)
         self.max_suggestions = config.get("max_suggestions", 3)
-        self.categories = config.get("categories", ["performance", "security", "ux", "scalability", "maintainability"])
+        self.categories = config.get(
+            "categories",
+            ["performance", "security", "ux", "scalability", "maintainability"],
+        )
         self.confidence_threshold = config.get("confidence_threshold", 0.6)
         self.learning_enabled = config.get("learning_enabled", True)
 
@@ -54,15 +60,15 @@ class ProactiveSuggestion:
                     "Implement caching strategy",
                     "Add performance monitoring",
                     "Optimize image loading",
-                    "Minify CSS/JS files"
+                    "Minify CSS/JS files",
                 ],
                 "scalability": [
                     "Implement horizontal scaling",
                     "Add load balancing",
                     "Optimize memory usage",
                     "Implement connection pooling",
-                    "Add auto-scaling"
-                ]
+                    "Add auto-scaling",
+                ],
             },
             "security": {
                 "authentication": [
@@ -70,15 +76,15 @@ class ProactiveSuggestion:
                     "Add session management",
                     "Implement OAuth2",
                     "Add password policies",
-                    "Implement JWT tokens"
+                    "Implement JWT tokens",
                 ],
                 "data_protection": [
                     "Encrypt sensitive data",
                     "Implement HTTPS",
                     "Add input validation",
                     "Implement rate limiting",
-                    "Add security headers"
-                ]
+                    "Add security headers",
+                ],
             },
             "ux": {
                 "usability": [
@@ -86,15 +92,15 @@ class ProactiveSuggestion:
                     "Add loading indicators",
                     "Implement responsive design",
                     "Add accessibility features",
-                    "Optimize user flow"
+                    "Optimize user flow",
                 ],
                 "interaction": [
                     "Add keyboard shortcuts",
                     "Implement drag and drop",
                     "Add tooltips",
                     "Implement auto-save",
-                    "Add undo/redo functionality"
-                ]
+                    "Add undo/redo functionality",
+                ],
             },
             "scalability": {
                 "architecture": [
@@ -102,15 +108,15 @@ class ProactiveSuggestion:
                     "Add message queues",
                     "Implement event-driven architecture",
                     "Add distributed caching",
-                    "Implement API gateway"
+                    "Implement API gateway",
                 ],
                 "infrastructure": [
                     "Implement containerization",
                     "Add monitoring and logging",
                     "Implement CI/CD pipeline",
                     "Add backup strategies",
-                    "Implement disaster recovery"
-                ]
+                    "Implement disaster recovery",
+                ],
             },
             "maintainability": {
                 "code_quality": [
@@ -118,16 +124,16 @@ class ProactiveSuggestion:
                     "Implement code review process",
                     "Add documentation",
                     "Implement linting",
-                    "Add code coverage"
+                    "Add code coverage",
                 ],
                 "architecture": [
                     "Implement design patterns",
                     "Add dependency injection",
                     "Implement SOLID principles",
                     "Add error handling",
-                    "Implement logging"
-                ]
-            }
+                    "Implement logging",
+                ],
+            },
         }
 
         # Pattern matching for suggestion triggers
@@ -135,28 +141,28 @@ class ProactiveSuggestion:
             "performance": [
                 r"\b(slow|fast|speed|performance|optimize|efficient)\b",
                 r"\b(load|time|response|latency|throughput)\b",
-                r"\b(cache|memory|cpu|resource)\b"
+                r"\b(cache|memory|cpu|resource)\b",
             ],
             "security": [
                 r"\b(secure|security|auth|login|password|encrypt)\b",
                 r"\b(vulnerability|attack|hack|breach|protect)\b",
-                r"\b(ssl|https|certificate|token|session)\b"
+                r"\b(ssl|https|certificate|token|session)\b",
             ],
             "ux": [
                 r"\b(ui|ux|interface|user|experience|design)\b",
                 r"\b(button|form|navigation|menu|layout)\b",
-                r"\b(accessibility|responsive|mobile|desktop)\b"
+                r"\b(accessibility|responsive|mobile|desktop)\b",
             ],
             "scalability": [
                 r"\b(scale|scalable|grow|expand|handle|traffic)\b",
                 r"\b(microservice|distributed|cluster|load)\b",
-                r"\b(concurrent|parallel|async|queue)\b"
+                r"\b(concurrent|parallel|async|queue)\b",
             ],
             "maintainability": [
                 r"\b(maintain|clean|refactor|test|document)\b",
                 r"\b(code|quality|review|standards|best)\b",
-                r"\b(debug|fix|error|exception|log)\b"
-            ]
+                r"\b(debug|fix|error|exception|log)\b",
+            ],
         }
 
     def _analyze_input_patterns(self, text: str) -> dict[str, float]:
@@ -186,25 +192,27 @@ class ProactiveSuggestion:
 
         # File-based suggestions
         if any(ext in [".js", ".ts", ".jsx", ".tsx"] for ext in extensions):
-            suggestions.extend([
-                "Add TypeScript types",
-                "Implement error boundaries",
-                "Add performance monitoring"
-            ])
+            suggestions.extend(
+                [
+                    "Add TypeScript types",
+                    "Implement error boundaries",
+                    "Add performance monitoring",
+                ]
+            )
 
         if any(ext in [".py"] for ext in extensions):
-            suggestions.extend([
-                "Add type hints",
-                "Implement logging",
-                "Add unit tests"
-            ])
+            suggestions.extend(
+                ["Add type hints", "Implement logging", "Add unit tests"]
+            )
 
         if any(ext in [".sql"] for ext in extensions):
-            suggestions.extend([
-                "Add database indexes",
-                "Implement query optimization",
-                "Add data validation"
-            ])
+            suggestions.extend(
+                [
+                    "Add database indexes",
+                    "Implement query optimization",
+                    "Add data validation",
+                ]
+            )
 
         # Conversation history analysis
         conversation_history = context.get("conversation_history", [])
@@ -220,18 +228,22 @@ class ProactiveSuggestion:
                     recent_topics.append("testing")
 
             if "debugging" in recent_topics:
-                suggestions.extend([
-                    "Add comprehensive error handling",
-                    "Implement logging strategy",
-                    "Add debugging tools"
-                ])
+                suggestions.extend(
+                    [
+                        "Add comprehensive error handling",
+                        "Implement logging strategy",
+                        "Add debugging tools",
+                    ]
+                )
 
             if "optimization" in recent_topics:
-                suggestions.extend([
-                    "Profile performance bottlenecks",
-                    "Implement caching layer",
-                    "Optimize database queries"
-                ])
+                suggestions.extend(
+                    [
+                        "Profile performance bottlenecks",
+                        "Implement caching layer",
+                        "Optimize database queries",
+                    ]
+                )
 
         return suggestions[:3]  # Limit to 3 context suggestions
 
@@ -254,11 +266,15 @@ class ProactiveSuggestion:
                 templates = self.suggestion_templates[cat]
                 for _subcategory, template_list in templates.items():
                     if template_list:
-                        suggestions.extend(template_list[:1])  # Take 1 from each subcategory
+                        suggestions.extend(
+                            template_list[:1]
+                        )  # Take 1 from each subcategory
 
         return suggestions[:2]  # Limit learned suggestions
 
-    def _generate_suggestions(self, text: str, context: dict[str, Any] = None) -> SuggestionResult:
+    def _generate_suggestions(
+        self, text: str, context: dict[str, Any] = None
+    ) -> SuggestionResult:
         """Generate proactive suggestions based on input analysis"""
         if not self.enabled:
             return SuggestionResult(
@@ -266,7 +282,7 @@ class ProactiveSuggestion:
                 confidence=0.0,
                 reasoning="Proactive suggestions disabled",
                 category="none",
-                metadata={"disabled": True}
+                metadata={"disabled": True},
             )
 
         try:
@@ -274,13 +290,16 @@ class ProactiveSuggestion:
             category_scores = self._analyze_input_patterns(text)
 
             # Find top category
-            if not category_scores or max(category_scores.values()) < self.confidence_threshold:
+            if (
+                not category_scores
+                or max(category_scores.values()) < self.confidence_threshold
+            ):
                 return SuggestionResult(
                     suggestions=[],
                     confidence=0.0,
                     reasoning="No clear category detected",
                     category="none",
-                    metadata={"category_scores": category_scores}
+                    metadata={"category_scores": category_scores},
                 )
 
             top_category = max(category_scores, key=category_scores.get)
@@ -294,7 +313,9 @@ class ProactiveSuggestion:
                 templates = self.suggestion_templates[top_category]
                 for _subcategory, template_list in templates.items():
                     if template_list:
-                        suggestions.extend(template_list[:1])  # Take 1 from each subcategory
+                        suggestions.extend(
+                            template_list[:1]
+                        )  # Take 1 from each subcategory
 
             # 2. Context-based suggestions
             if context:
@@ -304,12 +325,16 @@ class ProactiveSuggestion:
             # 3. Learned suggestions
             user_id = context.get("user_id") if context else None
             if user_id:
-                learned_suggestions = self._get_learned_suggestions(user_id, top_category)
+                learned_suggestions = self._get_learned_suggestions(
+                    user_id, top_category
+                )
                 suggestions.extend(learned_suggestions)
 
             # Remove duplicates and limit
-            unique_suggestions = list(dict.fromkeys(suggestions))  # Preserve order, remove duplicates
-            final_suggestions = unique_suggestions[:self.max_suggestions]
+            unique_suggestions = list(
+                dict.fromkeys(suggestions)
+            )  # Preserve order, remove duplicates
+            final_suggestions = unique_suggestions[: self.max_suggestions]
 
             return SuggestionResult(
                 suggestions=final_suggestions,
@@ -319,9 +344,9 @@ class ProactiveSuggestion:
                 metadata={
                     "category_scores": category_scores,
                     "context_used": context is not None,
-                    "learning_used": user_id is not None and self.learning_enabled
+                    "learning_used": user_id is not None and self.learning_enabled,
                 },
-                learning_enabled=self.learning_enabled
+                learning_enabled=self.learning_enabled,
             )
 
         except Exception as e:
@@ -331,10 +356,12 @@ class ProactiveSuggestion:
                 confidence=0.0,
                 reasoning=f"Generation error: {str(e)}",
                 category="error",
-                metadata={"error": str(e)}
+                metadata={"error": str(e)},
             )
 
-    def record_suggestion_usage(self, user_id: str, suggestion: str, category: str, success: bool = True):
+    def record_suggestion_usage(
+        self, user_id: str, suggestion: str, category: str, success: bool = True
+    ):
         """Record suggestion usage for learning"""
         if not self.learning_enabled or not user_id:
             return
@@ -345,19 +372,23 @@ class ProactiveSuggestion:
                 self.user_preferences[user_id][category] += 1
 
             # Record in suggestion history
-            self.suggestion_history.append({
-                "timestamp": time.time(),
-                "user_id": user_id,
-                "suggestion": suggestion,
-                "category": category,
-                "success": success
-            })
+            self.suggestion_history.append(
+                {
+                    "timestamp": time.time(),
+                    "user_id": user_id,
+                    "suggestion": suggestion,
+                    "category": category,
+                    "success": success,
+                }
+            )
 
             # Keep only recent history (last 1000 entries)
             if len(self.suggestion_history) > 1000:
                 self.suggestion_history = self.suggestion_history[-1000:]
 
-            logger.debug(f"Recorded suggestion usage: {suggestion} for user {user_id}, success={success}")
+            logger.debug(
+                f"Recorded suggestion usage: {suggestion} for user {user_id}, success={success}"
+            )
 
         except Exception as e:
             logger.error(f"Failed to record suggestion usage: {e}")
@@ -366,7 +397,9 @@ class ProactiveSuggestion:
         """Get statistics about suggestion usage"""
         try:
             total_suggestions = len(self.suggestion_history)
-            successful_suggestions = sum(1 for s in self.suggestion_history if s.get("success", False))
+            successful_suggestions = sum(
+                1 for s in self.suggestion_history if s.get("success", False)
+            )
 
             # Category distribution
             category_counts = Counter()
@@ -381,11 +414,13 @@ class ProactiveSuggestion:
             return {
                 "total_suggestions": total_suggestions,
                 "successful_suggestions": successful_suggestions,
-                "success_rate": successful_suggestions / total_suggestions if total_suggestions > 0 else 0.0,
+                "success_rate": successful_suggestions / total_suggestions
+                if total_suggestions > 0
+                else 0.0,
                 "category_distribution": dict(category_counts),
                 "active_users": len(user_counts),
                 "learning_enabled": self.learning_enabled,
-                "categories_available": len(self.categories)
+                "categories_available": len(self.categories),
             }
 
         except Exception as e:

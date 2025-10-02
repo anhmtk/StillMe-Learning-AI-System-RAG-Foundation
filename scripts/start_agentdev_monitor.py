@@ -33,6 +33,7 @@ from agent_dev.ops.monitor import PatrolRunner
 # Setup logging
 logger = logging.getLogger(__name__)
 
+
 class AgentDevOpsService:
     """AgentDev Operations Service - 24/7 Technical Manager"""
 
@@ -61,11 +62,7 @@ class AgentDevOpsService:
             "quick_patrol_minutes": 15,
             "deep_patrol_hours": 6,
             "auto_fix_enabled": True,
-            "notifications": {
-                "console": True,
-                "email": True,
-                "telegram": True
-            }
+            "notifications": {"console": True, "email": True, "telegram": True},
         }
 
     def _setup_logging(self):
@@ -75,11 +72,11 @@ class AgentDevOpsService:
 
         logging.basicConfig(
             level=logging.INFO,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             handlers=[
                 logging.FileHandler(log_dir / "agentdev_ops.log"),
-                logging.StreamHandler()
-            ]
+                logging.StreamHandler(),
+            ],
         )
 
     def _signal_handler(self, signum, frame):
@@ -99,7 +96,9 @@ class AgentDevOpsService:
 
             print("✅ AgentDev Operations Service started successfully")
             print("📊 Service Status: Active")
-            print(f"⏰ Quick patrol every {self.config['quick_patrol_minutes']} minutes")
+            print(
+                f"⏰ Quick patrol every {self.config['quick_patrol_minutes']} minutes"
+            )
             print(f"🔍 Deep patrol every {self.config['deep_patrol_hours']} hours")
 
             # Keep running
@@ -126,14 +125,18 @@ class AgentDevOpsService:
                 if self.patrol_runner.should_run_quick_patrol():
                     print("🔍 Running quick patrol...")
                     patrol_result = self.patrol_runner.run_quick_patrol()
-                    escalation_result = self.escalation_manager.handle_incident(patrol_result)
+                    escalation_result = self.escalation_manager.handle_incident(
+                        patrol_result
+                    )
                     self._log_patrol_result("quick", patrol_result, escalation_result)
 
                 # Check if deep patrol should run
                 if self.patrol_runner.should_run_deep_patrol():
                     print("🔍 Running deep patrol...")
                     patrol_result = self.patrol_runner.run_deep_patrol()
-                    escalation_result = self.escalation_manager.handle_incident(patrol_result)
+                    escalation_result = self.escalation_manager.handle_incident(
+                        patrol_result
+                    )
                     self._log_patrol_result("deep", patrol_result, escalation_result)
 
                 # Sleep for 1 minute before next check
@@ -142,7 +145,9 @@ class AgentDevOpsService:
         except KeyboardInterrupt:
             self.stop()
 
-    def _log_patrol_result(self, patrol_type: str, patrol_result: dict, escalation_result: dict):
+    def _log_patrol_result(
+        self, patrol_type: str, patrol_result: dict, escalation_result: dict
+    ):
         """Log patrol results"""
         logger.info(f"{patrol_type.capitalize()} patrol completed")
         logger.info(f"  - Success: {patrol_result.get('success', False)}")
@@ -151,13 +156,18 @@ class AgentDevOpsService:
         logger.info(f"  - Escalations: {escalation_result.get('escalations_sent', 0)}")
         logger.info(f"  - Auto-fixes: {escalation_result.get('auto_fixes_applied', 0)}")
 
+
 def main():
     """Main function"""
-    parser = argparse.ArgumentParser(description="AgentDev Operations Service - 24/7 Technical Manager")
+    parser = argparse.ArgumentParser(
+        description="AgentDev Operations Service - 24/7 Technical Manager"
+    )
     parser.add_argument("--config", help="Configuration file path")
     parser.add_argument("--daemon", action="store_true", help="Run as daemon")
     parser.add_argument("--status", action="store_true", help="Show status and exit")
-    parser.add_argument("--dry-run", action="store_true", help="Run one patrol cycle and exit")
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Run one patrol cycle and exit"
+    )
 
     args = parser.parse_args()
 
@@ -191,15 +201,16 @@ def main():
         # Run as daemon (simplified)
         print("🔄 Running as daemon...")
         import subprocess
-        subprocess.Popen([
-            sys.executable, __file__,
-            "--config", args.config or "config.json"
-        ])
+
+        subprocess.Popen(
+            [sys.executable, __file__, "--config", args.config or "config.json"]
+        )
         print("✅ Daemon started")
         return
 
     # Run normally
     service.start()
+
 
 if __name__ == "__main__":
     main()

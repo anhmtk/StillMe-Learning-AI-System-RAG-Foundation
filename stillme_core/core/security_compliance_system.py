@@ -9,33 +9,27 @@ Version: 2.0.0
 Phase: 2.3 - Internal Security & Compliance System
 """
 
-import os
-import json
-import logging
 import asyncio
-import time
+import logging
+import secrets
 import threading
-from pathlib import Path
-from typing import Dict, List, Set, Tuple, Optional, Any, Union
-from dataclasses import dataclass, asdict
+import time
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-import hashlib
-import hmac
-import secrets
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Any, Dict, List, Optional
 
 # Import Phase 1 and 2.x modules
 try:
-    from .security_middleware import SecurityMiddleware  # type: ignore
-    from .performance_monitor import PerformanceMonitor  # type: ignore
+    from .autonomous_management_system import AutonomousManagementSystem  # type: ignore
+    from .final_validation_system import FinalValidationSystem  # type: ignore
     from .integration_bridge import IntegrationBridge  # type: ignore
+    from .learning_optimization_engine import LearningOptimizationEngine  # type: ignore
     from .memory_security_integration import MemorySecurityIntegration  # type: ignore
     from .module_governance_system import ModuleGovernanceSystem  # type: ignore
+    from .performance_monitor import PerformanceMonitor  # type: ignore
+    from .security_middleware import SecurityMiddleware  # type: ignore
     from .validation_framework import ComprehensiveValidationFramework  # type: ignore
-    from .final_validation_system import FinalValidationSystem  # type: ignore
-    from .autonomous_management_system import AutonomousManagementSystem  # type: ignore
-    from .learning_optimization_engine import LearningOptimizationEngine  # type: ignore
 except ImportError:
     # Create mock classes for testing
     class SecurityMiddleware:

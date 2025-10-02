@@ -23,9 +23,11 @@ class ServiceStatus(Enum):
     STOPPING = "STOPPING"
     UNKNOWN = "UNKNOWN"
 
+
 @dataclass
 class ServiceInstance:
     """Represents a service instance"""
+
     service_id: str
     service_name: str
     version: str
@@ -38,9 +40,11 @@ class ServiceInstance:
     last_heartbeat: float
     tags: list[str]
 
+
 @dataclass
 class ServiceDefinition:
     """Service definition for registration"""
+
     name: str
     version: str
     host: str
@@ -49,15 +53,16 @@ class ServiceDefinition:
     metadata: Optional[dict[str, Any]] = None
     tags: Optional[list[str]] = None
 
+
 class ServiceRegistry:
     """Enterprise service registry with health monitoring"""
 
     def __init__(self, config_path: Optional[str] = None):
         self.services: dict[str, ServiceInstance] = {}
         self.config = self._load_config(config_path)
-        self.heartbeat_interval = self.config.get('heartbeat_interval', 30)
-        self.health_check_timeout = self.config.get('health_check_timeout', 5)
-        self.cleanup_interval = self.config.get('cleanup_interval', 60)
+        self.heartbeat_interval = self.config.get("heartbeat_interval", 30)
+        self.health_check_timeout = self.config.get("health_check_timeout", 5)
+        self.cleanup_interval = self.config.get("cleanup_interval", 60)
         self.running = False
 
     def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
@@ -72,13 +77,10 @@ class ServiceRegistry:
                 return yaml.safe_load(f)
         else:
             return {
-                'heartbeat_interval': 30,
-                'health_check_timeout': 5,
-                'cleanup_interval': 60,
-                'persistence': {
-                    'enabled': True,
-                    'file': '.agentdev/services.json'
-                }
+                "heartbeat_interval": 30,
+                "health_check_timeout": 5,
+                "cleanup_interval": 60,
+                "persistence": {"enabled": True, "file": ".agentdev/services.json"},
             }
 
     async def register_service(self, service_def: ServiceDefinition) -> str:
@@ -96,7 +98,7 @@ class ServiceRegistry:
             metadata=service_def.metadata or {},
             registered_at=time.time(),
             last_heartbeat=time.time(),
-            tags=service_def.tags or []
+            tags=service_def.tags or [],
         )
 
         self.services[service_id] = instance
@@ -121,8 +123,9 @@ class ServiceRegistry:
             return True
         return False
 
-    async def discover_services(self, service_name: Optional[str] = None,
-                              tags: Optional[list[str]] = None) -> list[ServiceInstance]:
+    async def discover_services(
+        self, service_name: Optional[str] = None, tags: Optional[list[str]] = None
+    ) -> list[ServiceInstance]:
         """Discover healthy service instances"""
         healthy_services = []
 
@@ -140,8 +143,9 @@ class ServiceRegistry:
 
         return healthy_services
 
-    async def get_service_url(self, service_name: str,
-                            version: Optional[str] = None) -> Optional[str]:
+    async def get_service_url(
+        self, service_name: str, version: Optional[str] = None
+    ) -> Optional[str]:
         """Get URL for a healthy service instance"""
         services = await self.discover_services(service_name)
 
@@ -166,7 +170,7 @@ class ServiceRegistry:
                 async with aiohttp.ClientSession() as session:
                     async with session.get(
                         instance.health_check_url,
-                        timeout=aiohttp.ClientTimeout(total=self.health_check_timeout)
+                        timeout=aiohttp.ClientTimeout(total=self.health_check_timeout),
                     ) as response:
                         if response.status == 200:
                             instance.status = ServiceStatus.HEALTHY
@@ -196,10 +200,10 @@ class ServiceRegistry:
 
     async def _persist_services(self):
         """Persist service registry to disk"""
-        if not self.config.get('persistence', {}).get('enabled', True):
+        if not self.config.get("persistence", {}).get("enabled", True):
             return
 
-        persistence_file = Path(self.config['persistence']['file'])
+        persistence_file = Path(self.config["persistence"]["file"])
         persistence_file.parent.mkdir(parents=True, exist_ok=True)
 
         # Convert to serializable format
@@ -207,15 +211,15 @@ class ServiceRegistry:
         for service_id, instance in self.services.items():
             services_data[service_id] = {
                 **asdict(instance),
-                'status': instance.status.value
+                "status": instance.status.value,
             }
 
-        with open(persistence_file, 'w') as f:
+        with open(persistence_file, "w") as f:
             json.dump(services_data, f, indent=2)
 
     async def _load_persisted_services(self):
         """Load persisted services from disk"""
-        persistence_file = Path(self.config['persistence']['file'])
+        persistence_file = Path(self.config["persistence"]["file"])
 
         if not persistence_file.exists():
             return
@@ -226,17 +230,17 @@ class ServiceRegistry:
 
             for service_id, data in services_data.items():
                 instance = ServiceInstance(
-                    service_id=data['service_id'],
-                    service_name=data['service_name'],
-                    version=data['version'],
-                    host=data['host'],
-                    port=data['port'],
-                    status=ServiceStatus(data['status']),
-                    health_check_url=data['health_check_url'],
-                    metadata=data['metadata'],
-                    registered_at=data['registered_at'],
-                    last_heartbeat=data['last_heartbeat'],
-                    tags=data['tags']
+                    service_id=data["service_id"],
+                    service_name=data["service_name"],
+                    version=data["version"],
+                    host=data["host"],
+                    port=data["port"],
+                    status=ServiceStatus(data["status"]),
+                    health_check_url=data["health_check_url"],
+                    metadata=data["metadata"],
+                    registered_at=data["registered_at"],
+                    last_heartbeat=data["last_heartbeat"],
+                    tags=data["tags"],
                 )
                 self.services[service_id] = instance
 
@@ -276,32 +280,40 @@ class ServiceRegistry:
     def get_registry_status(self) -> dict[str, Any]:
         """Get registry status and statistics"""
         total_services = len(self.services)
-        healthy_services = len([s for s in self.services.values()
-                              if s.status == ServiceStatus.HEALTHY])
+        healthy_services = len(
+            [s for s in self.services.values() if s.status == ServiceStatus.HEALTHY]
+        )
 
         return {
-            'total_services': total_services,
-            'healthy_services': healthy_services,
-            'unhealthy_services': total_services - healthy_services,
-            'uptime': time.time() - (min(s.registered_at for s in self.services.values())
-                                   if self.services else time.time()),
-            'services': [
+            "total_services": total_services,
+            "healthy_services": healthy_services,
+            "unhealthy_services": total_services - healthy_services,
+            "uptime": time.time()
+            - (
+                min(s.registered_at for s in self.services.values())
+                if self.services
+                else time.time()
+            ),
+            "services": [
                 {
-                    'service_id': s.service_id,
-                    'service_name': s.service_name,
-                    'version': s.version,
-                    'status': s.status.value,
-                    'last_heartbeat': s.last_heartbeat
+                    "service_id": s.service_id,
+                    "service_name": s.service_name,
+                    "version": s.version,
+                    "status": s.status.value,
+                    "last_heartbeat": s.last_heartbeat,
                 }
                 for s in self.services.values()
-            ]
+            ],
         }
+
 
 # Global service registry instance
 service_registry = ServiceRegistry()
 
-async def register_agentdev_service(service_name: str, port: int,
-                                  metadata: Optional[dict[str, Any]] = None) -> str:
+
+async def register_agentdev_service(
+    service_name: str, port: int, metadata: Optional[dict[str, Any]] = None
+) -> str:
     """Convenience function to register AgentDev service"""
     service_def = ServiceDefinition(
         name=service_name,
@@ -310,16 +322,19 @@ async def register_agentdev_service(service_name: str, port: int,
         port=port,
         health_check_path="/health",
         metadata=metadata,
-        tags=["agentdev", "automation"]
+        tags=["agentdev", "automation"],
     )
 
     return await service_registry.register_service(service_def)
+
 
 async def discover_agentdev_service(service_name: str) -> Optional[str]:
     """Convenience function to discover AgentDev service"""
     return await service_registry.get_service_url(service_name)
 
+
 if __name__ == "__main__":
+
     async def main():
         # Example usage
         registry = ServiceRegistry()
@@ -331,7 +346,7 @@ if __name__ == "__main__":
             version="1.0.0",
             host="localhost",
             port=8080,
-            metadata={"capabilities": ["planning", "execution"]}
+            metadata={"capabilities": ["planning", "execution"]},
         )
 
         service_id = await registry.register_service(service_def)

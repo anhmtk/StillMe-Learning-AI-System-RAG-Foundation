@@ -51,6 +51,7 @@ class TestAgentFlow:
                     # Run the agent
                     controller = AgentController()
                     import asyncio
+
                     result = asyncio.run(controller.execute_task("Run unit tests"))
 
                     # Verify result structure
@@ -116,6 +117,7 @@ class TestAgentFlow:
                     # Run the agent
                     controller = AgentController()
                     import asyncio
+
                     result = asyncio.run(controller.execute_task("Run failing tests"))
 
                     # Verify result
@@ -142,6 +144,7 @@ class TestAgentFlow:
             # Run the agent
             controller = AgentController()
             import asyncio
+
             result = asyncio.run(controller.execute_task("No plan goal"))
 
             # Verify result
@@ -204,6 +207,7 @@ class TestAgentFlow:
                     # Run the agent
                     controller = AgentController()
                     import asyncio
+
                     result = asyncio.run(controller.execute_task("Run multiple tests"))
 
                     # Verify result
@@ -225,6 +229,7 @@ class TestAgentFlow:
 
             # Test convenience function
             import asyncio
+
             result = asyncio.run(run_agent("Test goal"))
 
             # Verify result structure
@@ -243,6 +248,7 @@ class TestAgentFlow:
             # Run the agent
             controller = AgentController()
             import asyncio
+
             result = asyncio.run(controller.execute_task("Error goal"))
 
             # Verify result

@@ -8,6 +8,7 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+
 class EmotionType(Enum):
     HAPPY = "happy"
     SAD = "sad"
@@ -17,6 +18,7 @@ class EmotionType(Enum):
     DISGUST = "disgust"
     NEUTRAL = "neutral"
 
+
 class ErrorCode(Enum):
     SUCCESS = 0
     INVALID_INPUT = 1
@@ -24,9 +26,11 @@ class ErrorCode(Enum):
     MODEL_ERROR = 3
     TIMEOUT = 4
 
+
 @dataclass
 class EmotionResult:
     """Emotion detection result"""
+
     emotion: EmotionType
     confidence: float
     timestamp: datetime
@@ -35,6 +39,7 @@ class EmotionResult:
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
+
 
 class EmotionSenseV1:
     """EmotionSense V1 - Basic emotion detection"""
@@ -51,28 +56,50 @@ class EmotionSenseV1:
             text_lower = text.lower()
 
             # Happy keywords
-            happy_keywords = ["happy", "joy", "excited", "great", "wonderful", "amazing"]
+            happy_keywords = [
+                "happy",
+                "joy",
+                "excited",
+                "great",
+                "wonderful",
+                "amazing",
+            ]
             if any(keyword in text_lower for keyword in happy_keywords):
                 emotion = EmotionType.HAPPY
                 confidence = 0.8
             # Sad keywords
-            elif any(keyword in text_lower for keyword in ["sad", "depressed", "unhappy", "terrible", "awful"]):
+            elif any(
+                keyword in text_lower
+                for keyword in ["sad", "depressed", "unhappy", "terrible", "awful"]
+            ):
                 emotion = EmotionType.SAD
                 confidence = 0.8
             # Angry keywords
-            elif any(keyword in text_lower for keyword in ["angry", "mad", "furious", "rage", "hate"]):
+            elif any(
+                keyword in text_lower
+                for keyword in ["angry", "mad", "furious", "rage", "hate"]
+            ):
                 emotion = EmotionType.ANGRY
                 confidence = 0.8
             # Fear keywords
-            elif any(keyword in text_lower for keyword in ["scared", "afraid", "fear", "worried", "anxious"]):
+            elif any(
+                keyword in text_lower
+                for keyword in ["scared", "afraid", "fear", "worried", "anxious"]
+            ):
                 emotion = EmotionType.FEAR
                 confidence = 0.8
             # Surprise keywords
-            elif any(keyword in text_lower for keyword in ["surprised", "shocked", "amazed", "wow", "incredible"]):
+            elif any(
+                keyword in text_lower
+                for keyword in ["surprised", "shocked", "amazed", "wow", "incredible"]
+            ):
                 emotion = EmotionType.SURPRISE
                 confidence = 0.8
             # Disgust keywords
-            elif any(keyword in text_lower for keyword in ["disgusted", "gross", "nasty", "revolting"]):
+            elif any(
+                keyword in text_lower
+                for keyword in ["disgusted", "gross", "nasty", "revolting"]
+            ):
                 emotion = EmotionType.DISGUST
                 confidence = 0.8
             else:
@@ -80,21 +107,19 @@ class EmotionSenseV1:
                 confidence = 0.5
 
             result = EmotionResult(
-                emotion=emotion,
-                confidence=confidence,
-                timestamp=datetime.now()
+                emotion=emotion, confidence=confidence, timestamp=datetime.now()
             )
 
             self.detection_history.append(result)
-            self.logger.info(f"😊 Emotion detected: {emotion.value} (confidence: {confidence})")
+            self.logger.info(
+                f"😊 Emotion detected: {emotion.value} (confidence: {confidence})"
+            )
             return result
 
         except Exception as e:
             self.logger.error(f"❌ Emotion detection failed: {e}")
             return EmotionResult(
-                emotion=EmotionType.NEUTRAL,
-                confidence=0.0,
-                timestamp=datetime.now()
+                emotion=EmotionType.NEUTRAL, confidence=0.0, timestamp=datetime.now()
             )
 
     def get_emotion_summary(self) -> dict[str, Any]:
@@ -110,7 +135,7 @@ class EmotionSenseV1:
             return {
                 "total_detections": total_detections,
                 "emotions_by_type": emotions_by_type,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
         except Exception as e:
@@ -122,11 +147,12 @@ class EmotionSenseV1:
         self.detection_history.clear()
         self.logger.info("🧹 Emotion detection history cleared")
 
+
 # Error codes for compatibility
 ERROR_CODES = {
     "SUCCESS": ErrorCode.SUCCESS,
     "INVALID_INPUT": ErrorCode.INVALID_INPUT,
     "PROCESSING_ERROR": ErrorCode.PROCESSING_ERROR,
     "MODEL_ERROR": ErrorCode.MODEL_ERROR,
-    "TIMEOUT": ErrorCode.TIMEOUT
+    "TIMEOUT": ErrorCode.TIMEOUT,
 }

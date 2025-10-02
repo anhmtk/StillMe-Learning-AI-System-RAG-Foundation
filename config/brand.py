@@ -51,7 +51,7 @@ SUPPORTED_LANGUAGES = {
     "en-US": "English",
     "ja-JP": "日本語",
     "zh-CN": "中文",
-    "ko-KR": "한국어"
+    "ko-KR": "한국어",
 }
 
 # Version Information
@@ -71,7 +71,7 @@ FEATURES = {
     "persona_enforcement": True,
     "multi_agent": True,
     "adaptive_learning": True,
-    "ethical_ai": True
+    "ethical_ai": True,
 }
 
 # Color Scheme
@@ -84,7 +84,7 @@ COLORS = {
     "error": "#f44336",
     "text_primary": "#ffffff",
     "text_secondary": "#a0a0a0",
-    "text_muted": "#888888"
+    "text_muted": "#888888",
 }
 
 # Icons
@@ -96,8 +96,9 @@ ICONS = {
     "success": "✅",
     "error": "❌",
     "warning": "⚠️",
-    "info": "ℹ️"
+    "info": "ℹ️",
 }
+
 
 def get_brand_info():
     """Get complete brand information"""
@@ -110,33 +111,29 @@ def get_brand_info():
         "framework_version": FRAMEWORK_VERSION,
         "features": FEATURES,
         "colors": COLORS,
-        "icons": ICONS
+        "icons": ICONS,
     }
+
 
 def get_window_title():
     """Get window title"""
     return WINDOW_TITLE
 
+
 def get_header_text():
     """Get header text"""
-    return {
-        "title": HEADER_TITLE,
-        "subtitle": HEADER_SUBTITLE
-    }
+    return {"title": HEADER_TITLE, "subtitle": HEADER_SUBTITLE}
+
 
 def get_about_text():
     """Get about dialog text"""
-    return {
-        "title": ABOUT_TITLE,
-        "description": ABOUT_DESCRIPTION
-    }
+    return {"title": ABOUT_TITLE, "description": ABOUT_DESCRIPTION}
+
 
 def get_settings_text():
     """Get settings dialog text"""
-    return {
-        "title": SETTINGS_TITLE,
-        "description": SETTINGS_DESCRIPTION
-    }
+    return {"title": SETTINGS_TITLE, "description": SETTINGS_DESCRIPTION}
+
 
 if __name__ == "__main__":
     # Test brand configuration

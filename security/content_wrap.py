@@ -6,9 +6,11 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class WrappedContent:
     """Result of content wrapping"""
+
     security_level: str
     injection_detected: bool
     wrapped_content: str
@@ -18,6 +20,7 @@ class WrappedContent:
         if self.sanitized_snippets is None:
             self.sanitized_snippets = []
 
+
 class ContentWrapSecurity:
     """Content wrap security handler"""
 
@@ -26,14 +29,16 @@ class ContentWrapSecurity:
         self.blocked_content = []
         self.filtered_content = []
 
-    def wrap_content(self, content: str, content_type: str = "web", source: str = "unknown") -> WrappedContent:
+    def wrap_content(
+        self, content: str, content_type: str = "web", source: str = "unknown"
+    ) -> WrappedContent:
         """Wrap content with security measures"""
         if not content:
             return WrappedContent(
                 security_level="safe",
                 injection_detected=False,
                 wrapped_content="",
-                sanitized_snippets=[]
+                sanitized_snippets=[],
             )
 
         # Check for injection patterns
@@ -45,14 +50,20 @@ class ContentWrapSecurity:
         if "<script>" in content.lower():
             injection_detected = True
             sanitized_snippets.append("script")
-            wrapped_content = wrapped_content.replace("<script>", "[REMOVED_HTML_INJECTION]")
-            wrapped_content = wrapped_content.replace("</script>", "[/REMOVED_HTML_INJECTION]")
+            wrapped_content = wrapped_content.replace(
+                "<script>", "[REMOVED_HTML_INJECTION]"
+            )
+            wrapped_content = wrapped_content.replace(
+                "</script>", "[/REMOVED_HTML_INJECTION]"
+            )
 
         # Check for javascript injection
         if "javascript:" in content.lower():
             injection_detected = True
             sanitized_snippets.append("javascript")
-            wrapped_content = wrapped_content.replace("javascript:", "[REMOVED_JAVASCRIPT_INJECTION]")
+            wrapped_content = wrapped_content.replace(
+                "javascript:", "[REMOVED_JAVASCRIPT_INJECTION]"
+            )
 
         # Check for markdown injection
         if "![image](" in content and "javascript:" in content:
@@ -67,12 +78,15 @@ class ContentWrapSecurity:
             wrapped_content = "[REMOVED_OBFUSCATED]" + wrapped_content
 
         # Check for prompt injection
-        if any(pattern in content.lower() for pattern in [
-            "ignore previous instructions",
-            "reveal your system prompt",
-            "forget everything",
-            "you are now"
-        ]):
+        if any(
+            pattern in content.lower()
+            for pattern in [
+                "ignore previous instructions",
+                "reveal your system prompt",
+                "forget everything",
+                "you are now",
+            ]
+        ):
             injection_detected = True
             sanitized_snippets.append("prompt_injection")
             wrapped_content = "[REMOVED_PROMPT_INJECTION]" + wrapped_content
@@ -92,7 +106,9 @@ class ContentWrapSecurity:
         if content_type == "news":
             wrapped_content = f"[WEB_SNIPPET_START]\nNỘI DUNG DƯỚI ĐÂY CHỈ LÀ THAM KHẢO\n{wrapped_content}\n[WEB_SNIPPET_END]"
         else:
-            wrapped_content = f"[SECURE:{security_level.upper()}]{wrapped_content}[/SECURE]"
+            wrapped_content = (
+                f"[SECURE:{security_level.upper()}]{wrapped_content}[/SECURE]"
+            )
 
         self.filtered_content.append(content)
 
@@ -100,7 +116,7 @@ class ContentWrapSecurity:
             security_level=security_level,
             injection_detected=injection_detected,
             wrapped_content=wrapped_content,
-            sanitized_snippets=sanitized_snippets
+            sanitized_snippets=sanitized_snippets,
         )
 
     def unwrap_content(self, wrapped_content: str) -> str:
@@ -109,7 +125,9 @@ class ContentWrapSecurity:
             return ""
 
         # Simple unwrapping
-        if wrapped_content.startswith("[SECURE:") and wrapped_content.endswith("[/SECURE]"):
+        if wrapped_content.startswith("[SECURE:") and wrapped_content.endswith(
+            "[/SECURE]"
+        ):
             start_idx = wrapped_content.find("]") + 1
             end_idx = wrapped_content.rfind("[/SECURE]")
             return wrapped_content[start_idx:end_idx]
@@ -168,7 +186,7 @@ class ContentWrapSecurity:
         return {
             "valid": is_valid,
             "issues": issues,
-            "risk_level": "high" if len(issues) > 2 else "medium" if issues else "low"
+            "risk_level": "high" if len(issues) > 2 else "medium" if issues else "low",
         }
 
     def scan_for_vulnerabilities(self, content: str) -> list[dict[str, Any]]:
@@ -191,12 +209,16 @@ class ContentWrapSecurity:
 
         for pattern, description in patterns.items():
             if pattern.lower() in content.lower():
-                vulnerabilities.append({
-                    "pattern": pattern,
-                    "description": description,
-                    "severity": "high" if any(x in pattern.lower() for x in ["drop", "system", "exec"]) else "medium",
-                    "position": content.lower().find(pattern.lower())
-                })
+                vulnerabilities.append(
+                    {
+                        "pattern": pattern,
+                        "description": description,
+                        "severity": "high"
+                        if any(x in pattern.lower() for x in ["drop", "system", "exec"])
+                        else "medium",
+                        "position": content.lower().find(pattern.lower()),
+                    }
+                )
 
         return vulnerabilities
 
@@ -205,7 +227,8 @@ class ContentWrapSecurity:
         return {
             "total_filtered": len(self.filtered_content),
             "total_blocked": len(self.blocked_content),
-            "block_rate": len(self.blocked_content) / max(1, len(self.filtered_content) + len(self.blocked_content))
+            "block_rate": len(self.blocked_content)
+            / max(1, len(self.filtered_content) + len(self.blocked_content)),
         }
 
     def reset_statistics(self):
@@ -213,20 +236,27 @@ class ContentWrapSecurity:
         self.blocked_content.clear()
         self.filtered_content.clear()
 
+
 class ContentWrap(ContentWrapSecurity):
     """Alias for ContentWrapSecurity for backward compatibility"""
+
     pass
 
+
 # Global functions for backward compatibility
-def wrap_content(content: str, content_type: str = "web", source: str = "unknown") -> WrappedContent:
+def wrap_content(
+    content: str, content_type: str = "web", source: str = "unknown"
+) -> WrappedContent:
     """Global function to wrap content with security measures"""
     wrapper = ContentWrapSecurity()
     return wrapper.wrap_content(content, content_type, source)
+
 
 def unwrap_content(wrapped_content: str) -> str:
     """Global function to unwrap secured content"""
     wrapper = ContentWrapSecurity()
     return wrapper.unwrap_content(wrapped_content)
+
 
 def validate_content(content: str) -> dict[str, Any]:
     """Global function to validate content security"""

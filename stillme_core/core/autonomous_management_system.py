@@ -16,27 +16,42 @@ import time
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
 import numpy as np
 import psutil
 
 # Import Phase 1 modules with proper typing
 if TYPE_CHECKING:
-    from .security_middleware import SecurityMiddleware
-    from .performance_monitor import PerformanceMonitor
+    from stillme_core.final_validation_system import (
+        FinalValidationSystem as CoreFinalValidationSystem,
+    )
+    from stillme_core.integration_bridge import (
+        IntegrationBridge as CoreIntegrationBridge,
+    )
+    from stillme_core.memory_security_integration import (
+        MemorySecurityIntegration as CoreMemorySecurityIntegration,
+    )
+    from stillme_core.module_governance_system import (
+        ModuleGovernanceSystem as CoreModuleGovernanceSystem,
+    )
+    from stillme_core.performance_monitor import (
+        PerformanceMonitor as CorePerformanceMonitor,
+    )
+    from stillme_core.security_middleware import (
+        SecurityMiddleware as CoreSecurityMiddleware,
+    )
+    from stillme_core.validation_framework import (
+        ComprehensiveValidationFramework as CoreComprehensiveValidationFramework,
+    )
+
     from .final_validation_system import FinalValidationSystem
     from .integration_bridge import IntegrationBridge
     from .memory_security_integration import MemorySecurityIntegration
     from .module_governance_system import ModuleGovernanceSystem
+    from .performance_monitor import PerformanceMonitor
+    from .security_middleware import SecurityMiddleware
     from .validation_framework import ComprehensiveValidationFramework
-    from stillme_core.security_middleware import SecurityMiddleware as CoreSecurityMiddleware
-    from stillme_core.performance_monitor import PerformanceMonitor as CorePerformanceMonitor
-    from stillme_core.final_validation_system import FinalValidationSystem as CoreFinalValidationSystem
-    from stillme_core.integration_bridge import IntegrationBridge as CoreIntegrationBridge
-    from stillme_core.memory_security_integration import MemorySecurityIntegration as CoreMemorySecurityIntegration
-    from stillme_core.module_governance_system import ModuleGovernanceSystem as CoreModuleGovernanceSystem
-    from stillme_core.validation_framework import ComprehensiveValidationFramework as CoreComprehensiveValidationFramework
 
 # Runtime imports with fallback
 try:
@@ -63,27 +78,42 @@ except ImportError:
     ComprehensiveValidationFramework = None
 
 try:
-    from stillme_core.security_middleware import SecurityMiddleware as CoreSecurityMiddleware
+    from stillme_core.security_middleware import (
+        SecurityMiddleware as CoreSecurityMiddleware,
+    )
 except ImportError:
     CoreSecurityMiddleware = None
 
 try:
-    from stillme_core.performance_monitor import PerformanceMonitor as CorePerformanceMonitor
+    from stillme_core.performance_monitor import (
+        PerformanceMonitor as CorePerformanceMonitor,
+    )
 except ImportError:
     CorePerformanceMonitor = None
 
 try:
-    from stillme_core.final_validation_system import FinalValidationSystem as CoreFinalValidationSystem
-    from stillme_core.integration_bridge import IntegrationBridge as CoreIntegrationBridge
-    from stillme_core.memory_security_integration import MemorySecurityIntegration as CoreMemorySecurityIntegration
-    from stillme_core.module_governance_system import ModuleGovernanceSystem as CoreModuleGovernanceSystem
-    from stillme_core.validation_framework import ComprehensiveValidationFramework as CoreComprehensiveValidationFramework
+    from stillme_core.final_validation_system import (
+        FinalValidationSystem as CoreFinalValidationSystem,
+    )
+    from stillme_core.integration_bridge import (
+        IntegrationBridge as CoreIntegrationBridge,
+    )
+    from stillme_core.memory_security_integration import (
+        MemorySecurityIntegration as CoreMemorySecurityIntegration,
+    )
+    from stillme_core.module_governance_system import (
+        ModuleGovernanceSystem as CoreModuleGovernanceSystem,
+    )
+    from stillme_core.validation_framework import (
+        ComprehensiveValidationFramework as CoreComprehensiveValidationFramework,
+    )
 except ImportError:
     CoreFinalValidationSystem = None
     CoreIntegrationBridge = None
     CoreMemorySecurityIntegration = None
     CoreModuleGovernanceSystem = None
     CoreComprehensiveValidationFramework = None
+
 
 # Create mock classes for testing with proper typing
 class SecurityMiddleware:
@@ -93,6 +123,7 @@ class SecurityMiddleware:
     def get_security_report(self) -> dict[str, Any]:
         return {"security_score": 100}
 
+
 class PerformanceMonitor:
     def __init__(self) -> None:
         pass
@@ -100,12 +131,16 @@ class PerformanceMonitor:
     def get_performance_summary(self) -> dict[str, Any]:
         return {"status": "healthy"}
 
+
 class IntegrationBridge:
     def __init__(self) -> None:
         pass
 
-    def register_endpoint(self, method: str, path: str, handler: Any, auth_required: bool = False) -> None:
+    def register_endpoint(
+        self, method: str, path: str, handler: Any, auth_required: bool = False
+    ) -> None:
         pass
+
 
 class MemorySecurityIntegration:
     def __init__(self) -> None:
@@ -114,6 +149,7 @@ class MemorySecurityIntegration:
     def get_memory_statistics(self) -> dict[str, Any]:
         return {"access_logs_count": 0}
 
+
 class ModuleGovernanceSystem:
     def __init__(self) -> None:
         pass
@@ -121,12 +157,14 @@ class ModuleGovernanceSystem:
     def get_governance_status(self) -> dict[str, Any]:
         return {"status": "success", "data": {}}
 
+
 class ComprehensiveValidationFramework:
     def __init__(self) -> None:
         pass
 
     def get_validation_status(self) -> dict[str, Any]:
         return {"status": "success", "data": {}}
+
 
 class FinalValidationSystem:
     def __init__(self) -> None:

@@ -14,13 +14,7 @@ def find_entrypoints() -> list[Path]:
     entrypoints = []
 
     # Main entrypoints
-    main_files = [
-        "app.py",
-        "main.py",
-        "run.py",
-        "server.py",
-        "gateway.py"
-    ]
+    main_files = ["app.py", "main.py", "run.py", "server.py", "gateway.py"]
 
     for file_name in main_files:
         if Path(file_name).exists():
@@ -42,13 +36,14 @@ def find_entrypoints() -> list[Path]:
 
     return entrypoints
 
+
 def check_policy_imports(file_path: Path) -> set[str]:
     """Check if file imports required policies"""
 
     found_imports = set()
 
     try:
-        with open(file_path, encoding='utf-8') as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
 
         tree = ast.parse(content, filename=str(file_path))
@@ -56,10 +51,10 @@ def check_policy_imports(file_path: Path) -> set[str]:
         for node in ast.walk(tree):
             if isinstance(node, ast.Import):
                 for alias in node.names:
-                    if alias.name.startswith('runtime.'):
-                        found_imports.add(alias.name.split('.')[-1])
+                    if alias.name.startswith("runtime."):
+                        found_imports.add(alias.name.split(".")[-1])
             elif isinstance(node, ast.ImportFrom):
-                if node.module and 'runtime' in node.module:
+                if node.module and "runtime" in node.module:
                     for alias in node.names:
                         found_imports.add(alias.name)
 
@@ -69,10 +64,11 @@ def check_policy_imports(file_path: Path) -> set[str]:
 
     return found_imports
 
+
 def check_policy_usage(file_path: Path) -> bool:
     """Check if file actually uses policy functions"""
     try:
-        with open(file_path, encoding='utf-8') as f:
+        with open(file_path, encoding="utf-8") as f:
             content = f.read()
 
         # Check for policy function calls
@@ -81,7 +77,7 @@ def check_policy_usage(file_path: Path) -> bool:
             "get_interaction_policy()",
             "load_file_policy()",
             "assert_protected_files()",
-            "diagnose_on_skip()"
+            "diagnose_on_skip()",
         ]
 
         for call in policy_calls:
@@ -93,6 +89,7 @@ def check_policy_usage(file_path: Path) -> bool:
     except Exception as e:
         print(f"Error reading {file_path}: {e}")
         return False
+
 
 def main():
     """Main compliance check"""
@@ -121,13 +118,18 @@ def main():
         for violation in violations:
             print(f"  - {violation}")
         print("\nRequired imports:")
-        print("  from runtime.interaction_policy import load_interaction_policy, get_interaction_policy")
-        print("  from runtime.file_policy import load_file_policy, assert_protected_files")
+        print(
+            "  from runtime.interaction_policy import load_interaction_policy, get_interaction_policy"
+        )
+        print(
+            "  from runtime.file_policy import load_file_policy, assert_protected_files"
+        )
         print("  from runtime.skip_diagnose import diagnose_on_skip")
         sys.exit(1)
     else:
         print("✅ All entrypoints comply with policy loading requirements")
         sys.exit(0)
+
 
 if __name__ == "__main__":
     main()

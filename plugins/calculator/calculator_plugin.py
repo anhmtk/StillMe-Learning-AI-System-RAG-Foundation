@@ -26,7 +26,7 @@ class CalculatorPlugin(ModuleBase):
 
     def __init__(self, config: Optional[dict[str, Any]] = None):
         super().__init__(config)
-        self.supported_operations = ['+', '-', '*', '/', '(', ')']
+        self.supported_operations = ["+", "-", "*", "/", "(", ")"]
         self.max_expression_length = self.config.get("max_expression_length", 100)
         self.precision = self.config.get("precision", 10)
 
@@ -41,8 +41,8 @@ class CalculatorPlugin(ModuleBase):
             dependencies=["re"],
             config_schema={
                 "max_expression_length": {"type": "int", "default": 100},
-                "precision": {"type": "int", "default": 10}
-            }
+                "precision": {"type": "int", "default": 10},
+            },
         )
 
     async def initialize(self) -> bool:
@@ -66,7 +66,7 @@ class CalculatorPlugin(ModuleBase):
             else:
                 return {
                     "error": "Invalid input format",
-                    "expected": "string or dict with 'expression' key"
+                    "expected": "string or dict with 'expression' key",
                 }
 
             # Validate expression
@@ -74,7 +74,7 @@ class CalculatorPlugin(ModuleBase):
             if not validation_result["valid"]:
                 return {
                     "error": "Invalid expression",
-                    "details": validation_result["errors"]
+                    "details": validation_result["errors"],
                 }
 
             # Calculate result
@@ -84,15 +84,12 @@ class CalculatorPlugin(ModuleBase):
                 "success": True,
                 "expression": expression,
                 "result": result,
-                "formatted_result": f"{expression} = {result}"
+                "formatted_result": f"{expression} = {result}",
             }
 
         except Exception as e:
             logger.error(f"Calculator processing error: {e}")
-            return {
-                "error": "Calculation failed",
-                "details": str(e)
-            }
+            return {"error": "Calculation failed", "details": str(e)}
 
     async def cleanup(self) -> None:
         """Cleanup calculator plugin"""
@@ -105,7 +102,9 @@ class CalculatorPlugin(ModuleBase):
 
         # Check length
         if len(expression) > self.max_expression_length:
-            errors.append(f"Expression too long (max {self.max_expression_length} characters)")
+            errors.append(
+                f"Expression too long (max {self.max_expression_length} characters)"
+            )
 
         # Check for empty expression
         if not expression:
@@ -126,21 +125,18 @@ class CalculatorPlugin(ModuleBase):
             errors.append("Division by zero detected")
 
         # Check for consecutive operators
-        if re.search(r'[+\-*/]{2,}', expression):
+        if re.search(r"[+\-*/]{2,}", expression):
             errors.append("Consecutive operators not allowed")
 
-        return {
-            "valid": len(errors) == 0,
-            "errors": errors
-        }
+        return {"valid": len(errors) == 0, "errors": errors}
 
     def _check_balanced_parentheses(self, expression: str) -> bool:
         """Check if parentheses are balanced"""
         count = 0
         for char in expression:
-            if char == '(':
+            if char == "(":
                 count += 1
-            elif char == ')':
+            elif char == ")":
                 count -= 1
                 if count < 0:
                     return False
@@ -223,7 +219,7 @@ if __name__ == "__main__":
             "(10 - 2) * 3",
             "15 / 3",
             "2 * (3 + 4)",
-            "invalid expression"
+            "invalid expression",
         ]
 
         for expr in test_expressions:

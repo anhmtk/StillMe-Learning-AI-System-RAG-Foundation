@@ -52,5 +52,5 @@ class PlatformConfig:
             "mobile_app_debug": self.mobile_app_debug,
             "mobile_app_api_url": self.mobile_app_api_url,
             "websocket_enabled": self.websocket_enabled,
-            "websocket_port": self.websocket_port
+            "websocket_port": self.websocket_port,
         }

@@ -16,7 +16,7 @@ import time
 import unittest
 
 # Add project root to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 try:
     from stillme_core.modules.api_provider_manager import (
@@ -24,7 +24,9 @@ try:
         UnifiedAPIManager,
     )
 except ImportError:
-    print("‚ö†Ô∏è Could not import UnifiedAPIManager. Make sure you're in the project root.")
+    print(
+        "‚ö†Ô∏è Could not import UnifiedAPIManager. Make sure you're in the project root."
+    )
     sys.exit(1)
 
 
@@ -44,13 +46,15 @@ class TestComplexityAnalyzer(unittest.TestCase):
             "th·ªß ƒë√¥ Vi·ªát Nam l√† g√¨?",
             "hello",
             "how are you?",
-            "what time is it?"
+            "what time is it?",
         ]
 
         for prompt in simple_prompts:
             with self.subTest(prompt=prompt):
                 score, _ = self.analyzer.analyze_complexity(prompt)
-                self.assertLess(score, 0.4, f"Simple prompt '{prompt}' got high complexity: {score}")
+                self.assertLess(
+                    score, 0.4, f"Simple prompt '{prompt}' got high complexity: {score}"
+                )
 
     def test_complex_prompts(self):
         """Test complex prompts should get high complexity scores."""
@@ -58,13 +62,15 @@ class TestComplexityAnalyzer(unittest.TestCase):
             "Gi·∫£i th√≠ch ƒë·ªãnh l√Ω b·∫•t to√†n c·ªßa G√∂del v√† t√°c ƒë·ªông c·ªßa n√≥ ƒë·∫øn to√°n h·ªçc hi·ªán ƒë·∫°i",
             "Ph√¢n t√≠ch m·ªëi quan h·ªá gi·ªØa tri·∫øt h·ªçc v√† khoa h·ªçc trong vi·ªác hi·ªÉu b·∫£n ch·∫•t c·ªßa th·ª±c t·∫°i",
             "So s√°nh v√† ƒë√°nh gi√° c√°c ph∆∞∆°ng ph√°p h·ªçc m√°y kh√°c nhau trong vi·ªác x·ª≠ l√Ω ng√¥n ng·ªØ t·ª± nhi√™n",
-            "T·∫°i sao c√°c h·ªá th·ªëng ph·ª©c t·∫°p l·∫°i c√≥ xu h∆∞·ªõng t·ª± t·ªï ch·ª©c v√† ph√°t tri·ªÉn theo quy lu·∫≠t n√†o?"
+            "T·∫°i sao c√°c h·ªá th·ªëng ph·ª©c t·∫°p l·∫°i c√≥ xu h∆∞·ªõng t·ª± t·ªï ch·ª©c v√† ph√°t tri·ªÉn theo quy lu·∫≠t n√†o?",
         ]
 
         for prompt in complex_prompts:
             with self.subTest(prompt=prompt):
                 score, _ = self.analyzer.analyze_complexity(prompt)
-                self.assertGreater(score, 0.7, f"Complex prompt '{prompt}' got low complexity: {score}")
+                self.assertGreater(
+                    score, 0.7, f"Complex prompt '{prompt}' got low complexity: {score}"
+                )
 
     def test_coding_prompts(self):
         """Test coding prompts should get medium complexity scores."""
@@ -72,14 +78,22 @@ class TestComplexityAnalyzer(unittest.TestCase):
             "vi·∫øt code Python t√≠nh giai th·ª´a",
             "t·∫°o function JavaScript ƒë·ªÉ validate email",
             "debug l·ªói trong thu·∫≠t to√°n s·∫Øp x·∫øp",
-            "t·ªëi ∆∞u h√≥a performance c·ªßa database query"
+            "t·ªëi ∆∞u h√≥a performance c·ªßa database query",
         ]
 
         for prompt in coding_prompts:
             with self.subTest(prompt=prompt):
                 score, _ = self.analyzer.analyze_complexity(prompt)
-                self.assertGreaterEqual(score, 0.3, f"Coding prompt '{prompt}' got too low complexity: {score}")
-                self.assertLessEqual(score, 0.8, f"Coding prompt '{prompt}' got too high complexity: {score}")
+                self.assertGreaterEqual(
+                    score,
+                    0.3,
+                    f"Coding prompt '{prompt}' got too low complexity: {score}",
+                )
+                self.assertLessEqual(
+                    score,
+                    0.8,
+                    f"Coding prompt '{prompt}' got too high complexity: {score}",
+                )
 
     def test_performance(self):
         """Test that complexity analysis is fast (< 5ms)."""
@@ -94,7 +108,9 @@ class TestComplexityAnalyzer(unittest.TestCase):
             times.append(elapsed)
 
         avg_time = sum(times) / len(times)
-        self.assertLess(avg_time, 5.0, f"Complexity analysis too slow: {avg_time:.2f}ms")
+        self.assertLess(
+            avg_time, 5.0, f"Complexity analysis too slow: {avg_time:.2f}ms"
+        )
 
     def test_fallback_detection(self):
         """Test fallback trigger detection."""
@@ -105,7 +121,7 @@ class TestComplexityAnalyzer(unittest.TestCase):
             "kh√¥ng hi·ªÉu",
             "???",
             "kh√¥ng ph·∫£i",
-            "ch∆∞a ƒë√∫ng"
+            "ch∆∞a ƒë√∫ng",
         ]
 
         for feedback in negative_feedback:
@@ -113,7 +129,10 @@ class TestComplexityAnalyzer(unittest.TestCase):
                 should_fallback = self.analyzer.should_trigger_fallback(
                     feedback, "test prompt", "gemma2:2b"
                 )
-                self.assertTrue(should_fallback, f"Negative feedback '{feedback}' should trigger fallback")
+                self.assertTrue(
+                    should_fallback,
+                    f"Negative feedback '{feedback}' should trigger fallback",
+                )
 
         # Positive feedback should not trigger fallback
         positive_feedback = [
@@ -121,7 +140,7 @@ class TestComplexityAnalyzer(unittest.TestCase):
             "c·∫£m ∆°n",
             "t·ªët l·∫Øm",
             "hi·ªÉu r·ªìi",
-            "ok"
+            "ok",
         ]
 
         for feedback in positive_feedback:
@@ -129,7 +148,10 @@ class TestComplexityAnalyzer(unittest.TestCase):
                 should_fallback = self.analyzer.should_trigger_fallback(
                     feedback, "test prompt", "gemma2:2b"
                 )
-                self.assertFalse(should_fallback, f"Positive feedback '{feedback}' should not trigger fallback")
+                self.assertFalse(
+                    should_fallback,
+                    f"Positive feedback '{feedback}' should not trigger fallback",
+                )
 
 
 class TestUnifiedAPIManager(unittest.TestCase):
@@ -147,14 +169,17 @@ class TestUnifiedAPIManager(unittest.TestCase):
             ("2+2 b·∫±ng m·∫•y?", "gemma2:2b"),
             ("th·ªß ƒë√¥ Vi·ªát Nam l√† g√¨?", "gemma2:2b"),
             ("hello", "gemma2:2b"),
-            ("how are you?", "gemma2:2b")
+            ("how are you?", "gemma2:2b"),
         ]
 
         for prompt, expected_model in test_cases:
             with self.subTest(prompt=prompt):
                 selected_model = self.api_manager.choose_model(prompt)
-                self.assertEqual(selected_model, expected_model,
-                               f"Prompt '{prompt}' should route to {expected_model}, got {selected_model}")
+                self.assertEqual(
+                    selected_model,
+                    expected_model,
+                    f"Prompt '{prompt}' should route to {expected_model}, got {selected_model}",
+                )
 
     def test_coding_routing(self):
         """Test routing for coding prompts."""
@@ -163,37 +188,52 @@ class TestUnifiedAPIManager(unittest.TestCase):
             ("l·∫≠p tr√¨nh JavaScript", "deepseek-coder:6.7b"),
             ("debug l·ªói", "deepseek-coder:6.7b"),
             ("t·∫°o function", "deepseek-coder:6.7b"),
-            ("vi·∫øt code", "deepseek-coder:6.7b")
+            ("vi·∫øt code", "deepseek-coder:6.7b"),
         ]
 
         for prompt, expected_model in test_cases:
             with self.subTest(prompt=prompt):
                 selected_model = self.api_manager.choose_model(prompt)
-                self.assertEqual(selected_model, expected_model,
-                               f"Prompt '{prompt}' should route to {expected_model}, got {selected_model}")
+                self.assertEqual(
+                    selected_model,
+                    expected_model,
+                    f"Prompt '{prompt}' should route to {expected_model}, got {selected_model}",
+                )
 
     def test_complex_routing(self):
         """Test routing for complex prompts."""
         test_cases = [
             ("Gi·∫£i th√≠ch ƒë·ªãnh l√Ω b·∫•t to√†n c·ªßa G√∂del", "deepseek-chat"),
-            ("Ph√¢n t√≠ch m·ªëi quan h·ªá gi·ªØa tri·∫øt h·ªçc v√† khoa h·ªçc", "deepseek-chat"),
+            (
+                "Ph√¢n t√≠ch m·ªëi quan h·ªá gi·ªØa tri·∫øt h·ªçc v√† khoa h·ªçc",
+                "deepseek-chat",
+            ),
             ("So s√°nh c√°c ph∆∞∆°ng ph√°p h·ªçc m√°y", "deepseek-chat"),
-            ("T·∫°i sao c√°c h·ªá th·ªëng ph·ª©c t·∫°p l·∫°i t·ª± t·ªï ch·ª©c?", "deepseek-chat")
+            (
+                "T·∫°i sao c√°c h·ªá th·ªëng ph·ª©c t·∫°p l·∫°i t·ª± t·ªï ch·ª©c?",
+                "deepseek-chat",
+            ),
         ]
 
         for prompt, expected_model in test_cases:
             with self.subTest(prompt=prompt):
                 selected_model = self.api_manager.choose_model(prompt)
-                self.assertEqual(selected_model, expected_model,
-                               f"Prompt '{prompt}' should route to {expected_model}, got {selected_model}")
+                self.assertEqual(
+                    selected_model,
+                    expected_model,
+                    f"Prompt '{prompt}' should route to {expected_model}, got {selected_model}",
+                )
 
     def test_long_prompt_routing(self):
         """Test routing for very long prompts."""
         long_prompt = "A" * 4000  # Very long prompt
 
         selected_model = self.api_manager.choose_model(long_prompt)
-        self.assertIn(selected_model, ["deepseek-coder:6.7b", "gemma2:2b"],
-                     f"Long prompt should route to local model, got {selected_model}")
+        self.assertIn(
+            selected_model,
+            ["deepseek-coder:6.7b", "gemma2:2b"],
+            f"Long prompt should route to local model, got {selected_model}",
+        )
 
     def test_debug_mode(self):
         """Test debug mode provides detailed information."""
@@ -224,7 +264,7 @@ class TestUnifiedAPIManager(unittest.TestCase):
         test_prompts = [
             "ch√†o b·∫°n",
             "vi·∫øt code Python",
-            "Gi·∫£i th√≠ch ƒë·ªãnh l√Ω b·∫•t to√†n c·ªßa G√∂del"
+            "Gi·∫£i th√≠ch ƒë·ªãnh l√Ω b·∫•t to√†n c·ªßa G√∂del",
         ]
 
         for prompt in test_prompts:
@@ -234,16 +274,16 @@ class TestUnifiedAPIManager(unittest.TestCase):
         stats = self.api_manager.get_analyzer_stats()
 
         # Verify stats structure
-        self.assertIn('performance', stats)
-        self.assertIn('fallback', stats)
-        self.assertIn('weights', stats)
-        self.assertIn('thresholds', stats)
+        self.assertIn("performance", stats)
+        self.assertIn("fallback", stats)
+        self.assertIn("weights", stats)
+        self.assertIn("thresholds", stats)
 
         # Verify performance stats
-        perf_stats = stats['performance']
-        self.assertIn('avg_time_ms', perf_stats)
-        self.assertIn('total_analyses', perf_stats)
-        self.assertGreater(perf_stats['total_analyses'], 0)
+        perf_stats = stats["performance"]
+        self.assertIn("avg_time_ms", perf_stats)
+        self.assertIn("total_analyses", perf_stats)
+        self.assertGreater(perf_stats["total_analyses"], 0)
 
 
 class TestRouterIntegration(unittest.TestCase):
@@ -259,10 +299,18 @@ class TestRouterIntegration(unittest.TestCase):
             # (prompt, expected_model_category, expected_complexity_range)
             ("ch√†o b·∫°n", "simple", (0.0, 0.4)),
             ("vi·∫øt code Python", "coding", (0.3, 0.8)),
-            ("Gi·∫£i th√≠ch ƒë·ªãnh l√Ω b·∫•t to√†n c·ªßa G√∂del", "complex", (0.7, 1.0)),
+            (
+                "Gi·∫£i th√≠ch ƒë·ªãnh l√Ω b·∫•t to√†n c·ªßa G√∂del",
+                "complex",
+                (0.7, 1.0),
+            ),
             ("GDP l√† g√¨?", "simple", (0.0, 0.4)),
-            ("Ph√¢n t√≠ch t√°c ƒë·ªông c·ªßa AI ƒë·∫øn x√£ h·ªôi", "complex", (0.7, 1.0)),
-            ("t·∫°o function t√≠nh t·ªïng", "coding", (0.3, 0.8))
+            (
+                "Ph√¢n t√≠ch t√°c ƒë·ªông c·ªßa AI ƒë·∫øn x√£ h·ªôi",
+                "complex",
+                (0.7, 1.0),
+            ),
+            ("t·∫°o function t√≠nh t·ªïng", "coding", (0.3, 0.8)),
         ]
 
         for prompt, category, complexity_range in test_cases:
@@ -271,13 +319,21 @@ class TestRouterIntegration(unittest.TestCase):
                 selected_model = self.api_manager.choose_model(prompt)
 
                 # Test complexity analysis
-                complexity_score, detailed_scores = self.api_manager.complexity_analyzer.analyze_complexity(prompt)
+                complexity_score, detailed_scores = (
+                    self.api_manager.complexity_analyzer.analyze_complexity(prompt)
+                )
 
                 # Verify complexity score is in expected range
-                self.assertGreaterEqual(complexity_score, complexity_range[0],
-                                      f"Prompt '{prompt}' complexity too low: {complexity_score}")
-                self.assertLessEqual(complexity_score, complexity_range[1],
-                                   f"Prompt '{prompt}' complexity too high: {complexity_score}")
+                self.assertGreaterEqual(
+                    complexity_score,
+                    complexity_range[0],
+                    f"Prompt '{prompt}' complexity too low: {complexity_score}",
+                )
+                self.assertLessEqual(
+                    complexity_score,
+                    complexity_range[1],
+                    f"Prompt '{prompt}' complexity too high: {complexity_score}",
+                )
 
                 # Verify model selection makes sense
                 if category == "simple":
@@ -292,28 +348,35 @@ class TestRouterIntegration(unittest.TestCase):
         # Create test results
         test_results = [
             {
-                'prompt': 'ch√†o b·∫°n',
-                'expected_complexity': 0.1,
-                'actual_complexity': 0.15,
-                'expected_model': 'gemma2:2b',
-                'actual_model': 'gemma2:2b'
+                "prompt": "ch√†o b·∫°n",
+                "expected_complexity": 0.1,
+                "actual_complexity": 0.15,
+                "expected_model": "gemma2:2b",
+                "actual_model": "gemma2:2b",
             },
             {
-                'prompt': 'Gi·∫£i th√≠ch ƒë·ªãnh l√Ω b·∫•t to√†n c·ªßa G√∂del',
-                'expected_complexity': 0.9,
-                'actual_complexity': 0.85,
-                'expected_model': 'deepseek-chat',
-                'actual_model': 'deepseek-chat'
-            }
+                "prompt": "Gi·∫£i th√≠ch ƒë·ªãnh l√Ω b·∫•t to√†n c·ªßa G√∂del",
+                "expected_complexity": 0.9,
+                "actual_complexity": 0.85,
+                "expected_model": "deepseek-chat",
+                "actual_model": "deepseek-chat",
+            },
         ]
 
         # Test calibration
-        new_weights = self.api_manager.complexity_analyzer.calibrate_weights(test_results)
+        new_weights = self.api_manager.complexity_analyzer.calibrate_weights(
+            test_results
+        )
 
         # Verify weights structure
         expected_weight_keys = [
-            'length', 'complex_indicators', 'academic_terms', 'abstract_concepts',
-            'multi_part', 'conditional', 'domain_specific'
+            "length",
+            "complex_indicators",
+            "academic_terms",
+            "abstract_concepts",
+            "multi_part",
+            "conditional",
+            "domain_specific",
         ]
 
         for key in expected_weight_keys:
@@ -335,7 +398,7 @@ def run_performance_benchmark():
         "vi·∫øt code Python t√≠nh giai th·ª´a",
         "Gi·∫£i th√≠ch ƒë·ªãnh l√Ω b·∫•t to√†n c·ªßa G√∂del v√† t√°c ƒë·ªông c·ªßa n√≥ ƒë·∫øn to√°n h·ªçc hi·ªán ƒë·∫°i",
         "Ph√¢n t√≠ch m·ªëi quan h·ªá gi·ªØa tri·∫øt h·ªçc v√† khoa h·ªçc trong vi·ªác hi·ªÉu b·∫£n ch·∫•t c·ªßa th·ª±c t·∫°i",
-        "So s√°nh v√† ƒë√°nh gi√° c√°c ph∆∞∆°ng ph√°p h·ªçc m√°y kh√°c nhau trong vi·ªác x·ª≠ l√Ω ng√¥n ng·ªØ t·ª± nhi√™n"
+        "So s√°nh v√† ƒë√°nh gi√° c√°c ph∆∞∆°ng ph√°p h·ªçc m√°y kh√°c nhau trong vi·ªác x·ª≠ l√Ω ng√¥n ng·ªØ t·ª± nhi√™n",
     ]
 
     total_time = 0
@@ -348,7 +411,9 @@ def run_performance_benchmark():
         selected_model = api_manager.choose_model(prompt)
 
         # Test complexity analysis
-        complexity_score, detailed_scores = api_manager.complexity_analyzer.analyze_complexity(prompt)
+        complexity_score, detailed_scores = (
+            api_manager.complexity_analyzer.analyze_complexity(prompt)
+        )
 
         elapsed = (time.time() - start_time) * 1000  # Convert to ms
         total_time += elapsed
@@ -390,7 +455,6 @@ def run_accuracy_test():
         ("how are you?", "gemma2:2b", "simple"),
         ("GDP l√† g√¨?", "gemma2:2b", "simple"),
         ("n∆∞·ªõc n√†o l·ªõn nh·∫•t th·∫ø gi·ªõi?", "gemma2:2b", "simple"),
-
         # Coding prompts (should go to deepseek-coder:6.7b)
         ("vi·∫øt code Python", "deepseek-coder:6.7b", "coding"),
         ("l·∫≠p tr√¨nh JavaScript", "deepseek-coder:6.7b", "coding"),
@@ -400,21 +464,47 @@ def run_accuracy_test():
         ("t·ªëi ∆∞u thu·∫≠t to√°n", "deepseek-coder:6.7b", "coding"),
         ("s·ª≠a l·ªói code", "deepseek-coder:6.7b", "coding"),
         ("t·∫°o class Python", "deepseek-coder:6.7b", "coding"),
-
         # Complex prompts (should go to deepseek-chat)
-        ("Gi·∫£i th√≠ch ƒë·ªãnh l√Ω b·∫•t to√†n c·ªßa G√∂del", "deepseek-chat", "complex"),
-        ("Ph√¢n t√≠ch m·ªëi quan h·ªá gi·ªØa tri·∫øt h·ªçc v√† khoa h·ªçc", "deepseek-chat", "complex"),
+        (
+            "Gi·∫£i th√≠ch ƒë·ªãnh l√Ω b·∫•t to√†n c·ªßa G√∂del",
+            "deepseek-chat",
+            "complex",
+        ),
+        (
+            "Ph√¢n t√≠ch m·ªëi quan h·ªá gi·ªØa tri·∫øt h·ªçc v√† khoa h·ªçc",
+            "deepseek-chat",
+            "complex",
+        ),
         ("So s√°nh c√°c ph∆∞∆°ng ph√°p h·ªçc m√°y", "deepseek-chat", "complex"),
-        ("T·∫°i sao c√°c h·ªá th·ªëng ph·ª©c t·∫°p l·∫°i t·ª± t·ªï ch·ª©c?", "deepseek-chat", "complex"),
+        (
+            "T·∫°i sao c√°c h·ªá th·ªëng ph·ª©c t·∫°p l·∫°i t·ª± t·ªï ch·ª©c?",
+            "deepseek-chat",
+            "complex",
+        ),
         ("√ù nghƒ©a c·ªßa cu·ªôc s·ªëng l√† g√¨?", "deepseek-chat", "complex"),
         ("B·∫£n ch·∫•t c·ªßa th·ª±c t·∫°i l√† g√¨?", "deepseek-chat", "complex"),
         ("T√°c ƒë·ªông c·ªßa AI ƒë·∫øn x√£ h·ªôi", "deepseek-chat", "complex"),
-        ("Ph√¢n t√≠ch xu h∆∞·ªõng ph√°t tri·ªÉn c√¥ng ngh·ªá", "deepseek-chat", "complex"),
-
+        (
+            "Ph√¢n t√≠ch xu h∆∞·ªõng ph√°t tri·ªÉn c√¥ng ngh·ªá",
+            "deepseek-chat",
+            "complex",
+        ),
         # Edge cases
-        ("n·∫øu t√¥i mu·ªën h·ªçc l·∫≠p tr√¨nh th√¨ n√™n b·∫Øt ƒë·∫ßu t·ª´ ƒë√¢u?", "deepseek-coder:6.7b", "coding"),
-        ("gi·∫£ s·ª≠ t√¥i c√≥ m·ªôt b√†i to√°n ph·ª©c t·∫°p, l√†m th·∫ø n√†o ƒë·ªÉ gi·∫£i quy·∫øt?", "deepseek-chat", "complex"),
-        ("trong tr∆∞·ªùng h·ª£p n√†o th√¨ n√™n s·ª≠ d·ª•ng AI?", "deepseek-chat", "complex"),
+        (
+            "n·∫øu t√¥i mu·ªën h·ªçc l·∫≠p tr√¨nh th√¨ n√™n b·∫Øt ƒë·∫ßu t·ª´ ƒë√¢u?",
+            "deepseek-coder:6.7b",
+            "coding",
+        ),
+        (
+            "gi·∫£ s·ª≠ t√¥i c√≥ m·ªôt b√†i to√°n ph·ª©c t·∫°p, l√†m th·∫ø n√†o ƒë·ªÉ gi·∫£i quy·∫øt?",
+            "deepseek-chat",
+            "complex",
+        ),
+        (
+            "trong tr∆∞·ªùng h·ª£p n√†o th√¨ n√™n s·ª≠ d·ª•ng AI?",
+            "deepseek-chat",
+            "complex",
+        ),
     ]
 
     correct_predictions = 0
@@ -449,7 +539,7 @@ def main():
 
     # Run unit tests
     print("\nüìã Running Unit Tests...")
-    unittest.main(argv=[''], exit=False, verbosity=2)
+    unittest.main(argv=[""], exit=False, verbosity=2)
 
     # Run performance benchmark
     performance_ok = run_performance_benchmark()

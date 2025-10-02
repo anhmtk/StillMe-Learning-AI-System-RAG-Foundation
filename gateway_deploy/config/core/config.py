@@ -52,5 +52,5 @@ class CoreConfig:
             "repo_root": self.repo_root,
             "sandbox_dir": self.sandbox_dir,
             "git_user": self.git_user,
-            "git_email": self.git_email
+            "git_email": self.git_email,
         }

@@ -28,5 +28,5 @@ __all__ = [
     "XSSDetector",
     "SyntaxDetector",
     "MultipleFunctionsDetector",
-    "ImageDetector"
+    "ImageDetector",
 ]

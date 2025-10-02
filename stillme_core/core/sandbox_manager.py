@@ -49,7 +49,9 @@ class DockerSandboxManager:
             ["docker", "pull", self.docker_image], timeout=60
         )
         if result is None or result.returncode != 0:
-            logger.error(f"Failed to pull Docker image: {result.stderr if result else 'unknown error'}")
+            logger.error(
+                f"Failed to pull Docker image: {result.stderr if result else 'unknown error'}"
+            )
             return False
 
         # Run the container, mounting the project directory

@@ -16,6 +16,7 @@ class KillSwitchRequest(BaseModel):
     actor: str
     reason: Optional[str] = None
 
+
 class KillSwitchResponse(BaseModel):
     success: bool
     message: str
@@ -25,6 +26,7 @@ class KillSwitchResponse(BaseModel):
     armed_by: Optional[str] = None
     fired_by: Optional[str] = None
     reason: Optional[str] = None
+
 
 class KillSwitchStatus(BaseModel):
     state: str
@@ -39,18 +41,22 @@ class KillSwitchStatus(BaseModel):
     is_fired: bool
     is_safe: bool
 
+
 class AuditLogEntry(BaseModel):
     timestamp: str
     level: str
     data: Optional[dict] = None
     message: Optional[str] = None
 
+
 # Create router
 router = APIRouter(prefix="/kill-switch", tags=["kill-switch"])
+
 
 def get_manager() -> KillSwitchManager:
     """Dependency to get kill switch manager."""
     return get_kill_switch()
+
 
 @router.get("/status", response_model=KillSwitchStatus)
 async def get_status(manager: KillSwitchManager = Depends(get_manager)):
@@ -61,10 +67,10 @@ async def get_status(manager: KillSwitchManager = Depends(get_manager)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to get status: {str(e)}")
 
+
 @router.post("/arm", response_model=KillSwitchResponse)
 async def arm_kill_switch(
-    request: KillSwitchRequest,
-    manager: KillSwitchManager = Depends(get_manager)
+    request: KillSwitchRequest, manager: KillSwitchManager = Depends(get_manager)
 ):
     """Arm the kill switch."""
     try:
@@ -77,12 +83,14 @@ async def arm_kill_switch(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to arm kill switch: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to arm kill switch: {str(e)}"
+        )
+
 
 @router.post("/fire", response_model=KillSwitchResponse)
 async def fire_kill_switch(
-    request: KillSwitchRequest,
-    manager: KillSwitchManager = Depends(get_manager)
+    request: KillSwitchRequest, manager: KillSwitchManager = Depends(get_manager)
 ):
     """Fire the kill switch (emergency stop)."""
     try:
@@ -95,12 +103,14 @@ async def fire_kill_switch(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to fire kill switch: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to fire kill switch: {str(e)}"
+        )
+
 
 @router.post("/disarm", response_model=KillSwitchResponse)
 async def disarm_kill_switch(
-    request: KillSwitchRequest,
-    manager: KillSwitchManager = Depends(get_manager)
+    request: KillSwitchRequest, manager: KillSwitchManager = Depends(get_manager)
 ):
     """Disarm the kill switch."""
     try:
@@ -113,19 +123,24 @@ async def disarm_kill_switch(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to disarm kill switch: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to disarm kill switch: {str(e)}"
+        )
+
 
 @router.get("/audit", response_model=list[AuditLogEntry])
 async def get_audit_log(
-    limit: int = 100,
-    manager: KillSwitchManager = Depends(get_manager)
+    limit: int = 100, manager: KillSwitchManager = Depends(get_manager)
 ):
     """Get kill switch audit log."""
     try:
         entries = manager.get_audit_log(limit)
         return [AuditLogEntry(**entry) for entry in entries]
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get audit log: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to get audit log: {str(e)}"
+        )
+
 
 @router.get("/health")
 async def health_check(manager: KillSwitchManager = Depends(get_manager)):
@@ -135,10 +150,13 @@ async def health_check(manager: KillSwitchManager = Depends(get_manager)):
         return {
             "healthy": status["is_safe"],
             "state": status["state"],
-            "message": "System is safe" if status["is_safe"] else f"System is {status['state']}"
+            "message": "System is safe"
+            if status["is_safe"]
+            else f"System is {status['state']}",
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Health check failed: {str(e)}")
+
 
 # Middleware to check kill switch status
 async def kill_switch_middleware(request, call_next):
@@ -159,8 +177,8 @@ async def kill_switch_middleware(request, call_next):
                     "error": "System not available",
                     "state": status["state"],
                     "reason": status.get("reason"),
-                    "message": "Kill switch is armed or fired"
-                }
+                    "message": "Kill switch is armed or fired",
+                },
             )
     except Exception:
         # If we can't check kill switch, allow request to proceed

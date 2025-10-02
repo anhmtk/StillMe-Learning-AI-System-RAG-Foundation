@@ -8,6 +8,7 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+
 class EthicalPrinciple(Enum):
     BENEFICENCE = "beneficence"
     NON_MALEFICENCE = "non_maleficence"
@@ -16,15 +17,18 @@ class EthicalPrinciple(Enum):
     TRANSPARENCY = "transparency"
     ACCOUNTABILITY = "accountability"
 
+
 class ViolationSeverity(Enum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
 
+
 @dataclass
 class EthicalViolation:
     """Ethical violation record"""
+
     violation_id: str
     principle: EthicalPrinciple
     severity: ViolationSeverity
@@ -38,6 +42,7 @@ class EthicalViolation:
         if self.metadata is None:
             self.metadata = {}
 
+
 class EthicalGuardrails:
     """Ethical guardrails for StillMe Framework"""
 
@@ -47,10 +52,9 @@ class EthicalGuardrails:
         self.principles = list(EthicalPrinciple)
         self.logger.info("✅ EthicalGuardrails initialized")
 
-    def check_ethical_compliance(self,
-                               content: str,
-                               context: str = "",
-                               metadata: dict[str, Any] = None) -> list[EthicalViolation]:
+    def check_ethical_compliance(
+        self, content: str, context: str = "", metadata: dict[str, Any] = None
+    ) -> list[EthicalViolation]:
         """Check ethical compliance of content"""
         try:
             violations = []
@@ -65,7 +69,7 @@ class EthicalGuardrails:
                     context=context,
                     timestamp=datetime.now(),
                     suggested_action="Review and sanitize content",
-                    metadata=metadata or {}
+                    metadata=metadata or {},
                 )
                 violations.append(violation)
 
@@ -79,7 +83,7 @@ class EthicalGuardrails:
                     context=context,
                     timestamp=datetime.now(),
                     suggested_action="Review for bias and use inclusive language",
-                    metadata=metadata or {}
+                    metadata=metadata or {},
                 )
                 violations.append(violation)
 
@@ -93,14 +97,16 @@ class EthicalGuardrails:
                     context=context,
                     timestamp=datetime.now(),
                     suggested_action="Remove or anonymize PII",
-                    metadata=metadata or {}
+                    metadata=metadata or {},
                 )
                 violations.append(violation)
 
             # Record violations
             for violation in violations:
                 self.violations.append(violation)
-                self.logger.warning(f"⚠️ Ethical violation detected: {violation.principle.value} - {violation.description}")
+                self.logger.warning(
+                    f"⚠️ Ethical violation detected: {violation.principle.value} - {violation.description}"
+                )
 
             return violations
 
@@ -111,8 +117,16 @@ class EthicalGuardrails:
     def _contains_harmful_content(self, content: str) -> bool:
         """Check if content contains harmful material"""
         harmful_keywords = [
-            "violence", "harm", "danger", "threat", "attack",
-            "illegal", "criminal", "fraud", "scam", "deception"
+            "violence",
+            "harm",
+            "danger",
+            "threat",
+            "attack",
+            "illegal",
+            "criminal",
+            "fraud",
+            "scam",
+            "deception",
         ]
 
         content_lower = content.lower()
@@ -121,8 +135,17 @@ class EthicalGuardrails:
     def _contains_bias(self, content: str) -> bool:
         """Check if content contains biased language"""
         bias_keywords = [
-            "always", "never", "all", "none", "everyone", "nobody",
-            "typical", "normal", "abnormal", "weird", "strange"
+            "always",
+            "never",
+            "all",
+            "none",
+            "everyone",
+            "nobody",
+            "typical",
+            "normal",
+            "abnormal",
+            "weird",
+            "strange",
         ]
 
         content_lower = content.lower()
@@ -133,27 +156,31 @@ class EthicalGuardrails:
         import re
 
         # Email pattern
-        email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b'
+        email_pattern = r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b"
         if re.search(email_pattern, content):
             return True
 
         # Phone pattern
-        phone_pattern = r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b'
+        phone_pattern = r"\b\d{3}[-.]?\d{3}[-.]?\d{4}\b"
         if re.search(phone_pattern, content):
             return True
 
         # SSN pattern
-        ssn_pattern = r'\b\d{3}-\d{2}-\d{4}\b'
+        ssn_pattern = r"\b\d{3}-\d{2}-\d{4}\b"
         if re.search(ssn_pattern, content):
             return True
 
         return False
 
-    def get_violations_by_principle(self, principle: EthicalPrinciple) -> list[EthicalViolation]:
+    def get_violations_by_principle(
+        self, principle: EthicalPrinciple
+    ) -> list[EthicalViolation]:
         """Get violations by ethical principle"""
         return [v for v in self.violations if v.principle == principle]
 
-    def get_violations_by_severity(self, severity: ViolationSeverity) -> list[EthicalViolation]:
+    def get_violations_by_severity(
+        self, severity: ViolationSeverity
+    ) -> list[EthicalViolation]:
         """Get violations by severity"""
         return [v for v in self.violations if v.severity == severity]
 
@@ -168,17 +195,21 @@ class EthicalGuardrails:
             for violation in self.violations:
                 # By principle
                 principle_key = violation.principle.value
-                violations_by_principle[principle_key] = violations_by_principle.get(principle_key, 0) + 1
+                violations_by_principle[principle_key] = (
+                    violations_by_principle.get(principle_key, 0) + 1
+                )
 
                 # By severity
                 severity_key = violation.severity.value
-                violations_by_severity[severity_key] = violations_by_severity.get(severity_key, 0) + 1
+                violations_by_severity[severity_key] = (
+                    violations_by_severity.get(severity_key, 0) + 1
+                )
 
             return {
                 "total_violations": total_violations,
                 "violations_by_principle": violations_by_principle,
                 "violations_by_severity": violations_by_severity,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
         except Exception as e:

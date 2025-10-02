@@ -420,7 +420,9 @@ def display_review_results(result: dict):
         color = (
             "green"
             if rating == "Good"
-            else "yellow" if rating == "Acceptable" else "red"
+            else "yellow"
+            if rating == "Acceptable"
+            else "red"
         )
         quality_table.add_row(
             aspect.replace("_", " ").title(), f"[{color}]{rating}[/{color}]"

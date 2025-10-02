@@ -12,11 +12,18 @@ from typing import Any, Optional
 
 log = logging.getLogger(__name__)
 
+
 class RationaleSignal:
     """Represents a signal used in decision making."""
 
-    def __init__(self, name: str, value: Any, weight: float = 1.0,
-                 source: Optional[str] = None, confidence: float = 1.0):
+    def __init__(
+        self,
+        name: str,
+        value: Any,
+        weight: float = 1.0,
+        source: Optional[str] = None,
+        confidence: float = 1.0,
+    ):
         self.name = name
         self.value = value
         self.weight = weight
@@ -29,8 +36,9 @@ class RationaleSignal:
             "value": self.value,
             "weight": self.weight,
             "source": self.source,
-            "confidence": self.confidence
+            "confidence": self.confidence,
         }
+
 
 class RationaleExplanation:
     """Represents an explanation for a decision."""
@@ -44,15 +52,21 @@ class RationaleExplanation:
         return {
             "type": self.type,
             "content": self.content,
-            "confidence": self.confidence
+            "confidence": self.confidence,
         }
+
 
 class RationaleCitation:
     """Represents a citation or source for information."""
 
-    def __init__(self, source: str, url: Optional[str] = None,
-                 date: Optional[str] = None, confidence: float = 1.0,
-                 excerpt: Optional[str] = None):
+    def __init__(
+        self,
+        source: str,
+        url: Optional[str] = None,
+        date: Optional[str] = None,
+        confidence: float = 1.0,
+        excerpt: Optional[str] = None,
+    ):
         self.source = source
         self.url = url
         self.date = date
@@ -65,21 +79,26 @@ class RationaleCitation:
             "url": self.url,
             "date": self.date,
             "confidence": self.confidence,
-            "excerpt": self.excerpt
+            "excerpt": self.excerpt,
         }
+
 
 class RationaleEntry:
     """Complete rationale entry for a decision."""
 
-    def __init__(self, decision_id: str, policy: str,
-                 signals: list[RationaleSignal],
-                 final_action: Any,
-                 explanations: list[RationaleExplanation],
-                 citations: list[RationaleCitation],
-                 trace_id: str,
-                 timestamp: Optional[str] = None,
-                 context: Optional[dict] = None,
-                 metadata: Optional[dict] = None):
+    def __init__(
+        self,
+        decision_id: str,
+        policy: str,
+        signals: list[RationaleSignal],
+        final_action: Any,
+        explanations: list[RationaleExplanation],
+        citations: list[RationaleCitation],
+        trace_id: str,
+        timestamp: Optional[str] = None,
+        context: Optional[dict] = None,
+        metadata: Optional[dict] = None,
+    ):
         self.decision_id = decision_id
         self.policy = policy
         self.signals = signals
@@ -102,8 +121,9 @@ class RationaleEntry:
             "trace_id": self.trace_id,
             "timestamp": self.timestamp,
             "context": self.context,
-            "metadata": self.metadata
+            "metadata": self.metadata,
         }
+
 
 class RationaleLogger:
     """Logger for rationale entries."""
@@ -132,7 +152,7 @@ class RationaleLogger:
         log_file = self.log_dir / f"{today}.jsonl"
 
         handler = logging.FileHandler(log_file)
-        formatter = logging.Formatter('%(message)s')
+        formatter = logging.Formatter("%(message)s")
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
 
@@ -152,9 +172,12 @@ class RationaleLogger:
         except Exception as e:
             log.error(f"Failed to log rationale: {e}")
 
-    def get_decisions(self, date: Optional[str] = None,
-                     policy: Optional[str] = None,
-                     trace_id: Optional[str] = None) -> list[dict]:
+    def get_decisions(
+        self,
+        date: Optional[str] = None,
+        policy: Optional[str] = None,
+        trace_id: Optional[str] = None,
+    ) -> list[dict]:
         """Retrieve rationale entries."""
         if date is None:
             date = datetime.now().strftime("%Y%m%d")
@@ -166,7 +189,7 @@ class RationaleLogger:
 
         entries = []
         try:
-            with open(log_file, encoding='utf-8') as f:
+            with open(log_file, encoding="utf-8") as f:
                 for line in f:
                     try:
                         entry = json.loads(line.strip())
@@ -187,8 +210,10 @@ class RationaleLogger:
 
         return entries
 
+
 # Global rationale logger instance
 _rationale_logger = None
+
 
 def get_rationale_logger() -> RationaleLogger:
     """Get global rationale logger instance."""
@@ -196,6 +221,7 @@ def get_rationale_logger() -> RationaleLogger:
     if _rationale_logger is None:
         _rationale_logger = RationaleLogger()
     return _rationale_logger
+
 
 def log_decision_rationale(
     policy: str,
@@ -205,7 +231,7 @@ def log_decision_rationale(
     citations: list[RationaleCitation],
     trace_id: Optional[str] = None,
     context: Optional[dict] = None,
-    metadata: Optional[dict] = None
+    metadata: Optional[dict] = None,
 ) -> str:
     """Log a decision with rationale and return decision ID."""
 
@@ -226,7 +252,7 @@ def log_decision_rationale(
         citations=citations,
         trace_id=trace_id,
         context=context,
-        metadata=metadata
+        metadata=metadata,
     )
 
     # Log the entry
@@ -235,9 +261,11 @@ def log_decision_rationale(
 
     return decision_id
 
+
 # Decorator for automatic rationale logging
 def with_rationale(policy: str, enable_in_careful_mode: bool = True):
     """Decorator to automatically log rationale for function calls."""
+
     def decorator(func):
         def wrapper(*args, **kwargs):
             # Check if we should log rationale
@@ -245,7 +273,9 @@ def with_rationale(policy: str, enable_in_careful_mode: bool = True):
             if enable_in_careful_mode:
                 # Check if we're in careful mode
                 # This could be from environment variable or config
-                careful_mode = os.getenv("STILLME_CAREFUL_MODE", "false").lower() == "true"
+                careful_mode = (
+                    os.getenv("STILLME_CAREFUL_MODE", "false").lower() == "true"
+                )
                 should_log = careful_mode
 
             if not should_log:
@@ -258,13 +288,15 @@ def with_rationale(policy: str, enable_in_careful_mode: bool = True):
             signals = [
                 RationaleSignal("function_name", func.__name__, 1.0, "decorator"),
                 RationaleSignal("args_count", len(args), 1.0, "decorator"),
-                RationaleSignal("kwargs_count", len(kwargs), 1.0, "decorator")
+                RationaleSignal("kwargs_count", len(kwargs), 1.0, "decorator"),
             ]
 
             # Add input signals if they're simple types
             for i, arg in enumerate(args[:3]):  # Limit to first 3 args
                 if isinstance(arg, (str, int, float, bool)):
-                    signals.append(RationaleSignal(f"arg_{i}", str(arg)[:100], 0.8, "input"))
+                    signals.append(
+                        RationaleSignal(f"arg_{i}", str(arg)[:100], 0.8, "input")
+                    )
 
             try:
                 # Execute function
@@ -275,17 +307,12 @@ def with_rationale(policy: str, enable_in_careful_mode: bool = True):
                     RationaleExplanation(
                         "reasoning",
                         f"Function {func.__name__} executed successfully",
-                        1.0
+                        1.0,
                     )
                 ]
 
                 # Create citations
-                citations = [
-                    RationaleCitation(
-                        source="function_call",
-                        confidence=1.0
-                    )
-                ]
+                citations = [RationaleCitation(source="function_call", confidence=1.0)]
 
                 # Log rationale
                 log_decision_rationale(
@@ -296,7 +323,7 @@ def with_rationale(policy: str, enable_in_careful_mode: bool = True):
                     citations=citations,
                     trace_id=trace_id,
                     context={"function": func.__name__},
-                    metadata={"decorated": True}
+                    metadata={"decorated": True},
                 )
 
                 return result
@@ -307,7 +334,7 @@ def with_rationale(policy: str, enable_in_careful_mode: bool = True):
                     RationaleExplanation(
                         "reasoning",
                         f"Function {func.__name__} failed with error: {str(e)}",
-                        1.0
+                        1.0,
                     )
                 ]
 
@@ -319,29 +346,45 @@ def with_rationale(policy: str, enable_in_careful_mode: bool = True):
                     citations=[],
                     trace_id=trace_id,
                     context={"function": func.__name__, "error": str(e)},
-                    metadata={"decorated": True, "error": True}
+                    metadata={"decorated": True, "error": True},
                 )
 
                 raise
 
         return wrapper
+
     return decorator
 
+
 # Utility functions for common rationale patterns
-def create_signal(name: str, value: Any, weight: float = 1.0,
-                 source: Optional[str] = None, confidence: float = 1.0) -> RationaleSignal:
+def create_signal(
+    name: str,
+    value: Any,
+    weight: float = 1.0,
+    source: Optional[str] = None,
+    confidence: float = 1.0,
+) -> RationaleSignal:
     """Create a rationale signal."""
     return RationaleSignal(name, value, weight, source, confidence)
 
-def create_explanation(type: str, content: str, confidence: float = 1.0) -> RationaleExplanation:
+
+def create_explanation(
+    type: str, content: str, confidence: float = 1.0
+) -> RationaleExplanation:
     """Create a rationale explanation."""
     return RationaleExplanation(type, content, confidence)
 
-def create_citation(source: str, url: Optional[str] = None,
-                   date: Optional[str] = None, confidence: float = 1.0,
-                   excerpt: Optional[str] = None) -> RationaleCitation:
+
+def create_citation(
+    source: str,
+    url: Optional[str] = None,
+    date: Optional[str] = None,
+    confidence: float = 1.0,
+    excerpt: Optional[str] = None,
+) -> RationaleCitation:
     """Create a rationale citation."""
     return RationaleCitation(source, url, date, confidence, excerpt)
+
 
 # Import os for environment variable check
 import os

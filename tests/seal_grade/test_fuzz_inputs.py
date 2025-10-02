@@ -22,27 +22,35 @@ class TestFuzzInputs:
         """Create state store for testing"""
         return LayeredMemoryV1()
 
-    @given(
-        unicode_input=st.text(min_size=1, max_size=100)
+    @given(unicode_input=st.text(min_size=1, max_size=100))
+    @settings(
+        max_examples=20,
+        deadline=5000,
+        suppress_health_check=[HealthCheck.function_scoped_fixture],
     )
-    @settings(max_examples=20, deadline=5000, suppress_health_check=[HealthCheck.function_scoped_fixture])
     def test_unicode_handling(self, state_store, unicode_input):
         """Test Unicode input handling"""
         try:
-            job = asyncio.run(state_store.create_job("test_job", unicode_input, unicode_input))
+            job = asyncio.run(
+                state_store.create_job("test_job", unicode_input, unicode_input)
+            )
             assert job is not None
         except Exception as e:
             # Should handle Unicode gracefully
             assert isinstance(e, (ValueError, TypeError, UnicodeError, AttributeError))
 
-    @given(
-        large_input=st.text(min_size=1000, max_size=10000)
+    @given(large_input=st.text(min_size=1000, max_size=10000))
+    @settings(
+        max_examples=20,
+        deadline=10000,
+        suppress_health_check=[HealthCheck.function_scoped_fixture],
     )
-    @settings(max_examples=20, deadline=10000, suppress_health_check=[HealthCheck.function_scoped_fixture])
     def test_large_input_handling(self, state_store, large_input):
         """Test large input handling"""
         try:
-            job = asyncio.run(state_store.create_job("test_job", large_input, large_input))
+            job = asyncio.run(
+                state_store.create_job("test_job", large_input, large_input)
+            )
             assert job is not None
         except Exception as e:
             # Should handle large inputs gracefully
@@ -54,10 +62,14 @@ class TestFuzzInputs:
             st.floats(),
             st.booleans(),
             st.lists(st.text()),
-            st.dictionaries(st.text(), st.text())
+            st.dictionaries(st.text(), st.text()),
         )
     )
-    @settings(max_examples=50, deadline=5000, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(
+        max_examples=50,
+        deadline=5000,
+        suppress_health_check=[HealthCheck.function_scoped_fixture],
+    )
     def test_invalid_type_handling(self, state_store, invalid_types):
         """Test invalid type handling"""
         try:
@@ -69,10 +81,12 @@ class TestFuzzInputs:
             # Should handle invalid types gracefully
             assert isinstance(e, (ValueError, TypeError, Exception, AttributeError))
 
-    @given(
-        malformed_json=st.text(min_size=1, max_size=100)
+    @given(malformed_json=st.text(min_size=1, max_size=100))
+    @settings(
+        max_examples=50,
+        deadline=5000,
+        suppress_health_check=[HealthCheck.function_scoped_fixture],
     )
-    @settings(max_examples=50, deadline=5000, suppress_health_check=[HealthCheck.function_scoped_fixture])
     def test_malformed_data_handling(self, state_store, malformed_json):
         """Test malformed data handling"""
         try:
@@ -102,40 +116,62 @@ class TestFuzzInputs:
             st.just("<"),
             st.just(">"),
             st.just('"'),
-            st.just("'")
+            st.just("'"),
         )
     )
-    @settings(max_examples=50, deadline=5000, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(
+        max_examples=50,
+        deadline=5000,
+        suppress_health_check=[HealthCheck.function_scoped_fixture],
+    )
     def test_boundary_value_handling(self, state_store, boundary_values):
         """Test boundary value handling"""
         try:
-            job = asyncio.run(state_store.create_job(boundary_values, boundary_values, boundary_values))
+            job = asyncio.run(
+                state_store.create_job(
+                    boundary_values, boundary_values, boundary_values
+                )
+            )
             assert job is not None
         except Exception as e:
             # Should handle boundary values gracefully
             assert isinstance(e, (ValueError, TypeError, Exception, AttributeError))
 
     @given(
-        special_chars=st.text(min_size=1, max_size=50, alphabet=st.characters(whitelist_categories=('P', 'S', 'C')))
+        special_chars=st.text(
+            min_size=1,
+            max_size=50,
+            alphabet=st.characters(whitelist_categories=("P", "S", "C")),
+        )
     )
-    @settings(max_examples=50, deadline=5000, suppress_health_check=[HealthCheck.function_scoped_fixture])
+    @settings(
+        max_examples=50,
+        deadline=5000,
+        suppress_health_check=[HealthCheck.function_scoped_fixture],
+    )
     def test_special_character_handling(self, state_store, special_chars):
         """Test special character handling"""
         try:
-            job = asyncio.run(state_store.create_job(special_chars, special_chars, special_chars))
+            job = asyncio.run(
+                state_store.create_job(special_chars, special_chars, special_chars)
+            )
             assert job is not None
         except Exception as e:
             # Should handle special characters gracefully
             assert isinstance(e, (ValueError, TypeError, Exception, AttributeError))
 
-    @given(
-        mixed_content=st.text(min_size=1, max_size=200)
+    @given(mixed_content=st.text(min_size=1, max_size=200))
+    @settings(
+        max_examples=30,
+        deadline=5000,
+        suppress_health_check=[HealthCheck.function_scoped_fixture],
     )
-    @settings(max_examples=30, deadline=5000, suppress_health_check=[HealthCheck.function_scoped_fixture])
     def test_mixed_content_handling(self, state_store, mixed_content):
         """Test mixed content handling"""
         try:
-            job = asyncio.run(state_store.create_job("mixed_test", mixed_content, mixed_content))
+            job = asyncio.run(
+                state_store.create_job("mixed_test", mixed_content, mixed_content)
+            )
             assert job is not None
         except Exception as e:
             # Should handle mixed content gracefully

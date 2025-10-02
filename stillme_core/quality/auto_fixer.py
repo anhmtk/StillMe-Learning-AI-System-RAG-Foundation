@@ -8,6 +8,7 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+
 class FixType(Enum):
     STYLE = "style"
     COMPLEXITY = "complexity"
@@ -16,15 +17,18 @@ class FixType(Enum):
     MAINTAINABILITY = "maintainability"
     TESTABILITY = "testability"
 
+
 class FixStatus(Enum):
     PENDING = "pending"
     APPLIED = "applied"
     FAILED = "failed"
     SKIPPED = "skipped"
 
+
 @dataclass
 class AutoFix:
     """Auto fix record"""
+
     fix_id: str
     fix_type: FixType
     status: FixStatus
@@ -40,6 +44,7 @@ class AutoFix:
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
+
 
 class AutoFixer:
     """Auto fixer for StillMe Framework"""
@@ -57,39 +62,38 @@ class AutoFixer:
                 "remove_trailing_whitespace",
                 "fix_line_length",
                 "add_missing_docstring",
-                "remove_unused_imports"
+                "remove_unused_imports",
             ],
             FixType.COMPLEXITY: [
                 "reduce_nesting",
                 "extract_method",
-                "simplify_condition"
+                "simplify_condition",
             ],
             FixType.SECURITY: [
                 "sanitize_input",
                 "use_secure_functions",
-                "add_validation"
+                "add_validation",
             ],
             FixType.PERFORMANCE: [
                 "optimize_loops",
                 "cache_results",
-                "reduce_complexity"
+                "reduce_complexity",
             ],
             FixType.MAINTAINABILITY: [
                 "extract_constants",
                 "improve_naming",
-                "reduce_duplication"
+                "reduce_duplication",
             ],
             FixType.TESTABILITY: [
                 "add_docstrings",
                 "reduce_dependencies",
-                "improve_modularity"
-            ]
+                "improve_modularity",
+            ],
         }
 
-    def suggest_fixes(self,
-                     file_path: str,
-                     code_content: str,
-                     quality_violations: list[Any] = None) -> list[AutoFix]:
+    def suggest_fixes(
+        self, file_path: str, code_content: str, quality_violations: list[Any] = None
+    ) -> list[AutoFix]:
         """Suggest auto fixes for code"""
         try:
             fixes = []
@@ -111,7 +115,9 @@ class AutoFixer:
             fixes.extend(performance_fixes)
 
             # Maintainability fixes
-            maintainability_fixes = self._suggest_maintainability_fixes(file_path, code_content)
+            maintainability_fixes = self._suggest_maintainability_fixes(
+                file_path, code_content
+            )
             fixes.extend(maintainability_fixes)
 
             # Testability fixes
@@ -121,7 +127,9 @@ class AutoFixer:
             # Record fixes
             for fix in fixes:
                 self.fixes.append(fix)
-                self.logger.info(f"🔧 Auto fix suggested: {fix.fix_type.value} - {fix.description}")
+                self.logger.info(
+                    f"🔧 Auto fix suggested: {fix.fix_type.value} - {fix.description}"
+                )
 
             return fixes
 
@@ -132,7 +140,7 @@ class AutoFixer:
     def _suggest_style_fixes(self, file_path: str, code_content: str) -> list[AutoFix]:
         """Suggest style fixes"""
         fixes = []
-        lines = code_content.split('\n')
+        lines = code_content.split("\n")
 
         for i, line in enumerate(lines, 1):
             # Fix trailing whitespace
@@ -147,15 +155,15 @@ class AutoFixer:
                     fixed_code=line.rstrip(),
                     description="Remove trailing whitespace",
                     confidence=1.0,
-                    timestamp=datetime.now()
+                    timestamp=datetime.now(),
                 )
                 fixes.append(fix)
 
             # Fix line length
             if len(line) > 120:
                 # Simple fix: break at spaces
-                if ' ' in line:
-                    words = line.split(' ')
+                if " " in line:
+                    words = line.split(" ")
                     fixed_line = ""
                     current_line = ""
 
@@ -185,28 +193,30 @@ class AutoFixer:
                         fixed_code=fixed_line,
                         description="Break long line into multiple lines",
                         confidence=0.8,
-                        timestamp=datetime.now()
+                        timestamp=datetime.now(),
                     )
                     fixes.append(fix)
 
         return fixes
 
-    def _suggest_complexity_fixes(self, file_path: str, code_content: str) -> list[AutoFix]:
+    def _suggest_complexity_fixes(
+        self, file_path: str, code_content: str
+    ) -> list[AutoFix]:
         """Suggest complexity fixes"""
         fixes = []
 
         # Check for high nesting
-        lines = code_content.split('\n')
+        lines = code_content.split("\n")
         max_nesting = 0
         current_nesting = 0
 
         for _i, line in enumerate(lines, 1):
             stripped = line.strip()
-            if stripped.startswith(('if ', 'for ', 'while ', 'try:', 'with ')):
+            if stripped.startswith(("if ", "for ", "while ", "try:", "with ")):
                 current_nesting += 1
                 max_nesting = max(max_nesting, current_nesting)
-            elif stripped and not stripped.startswith('#'):
-                if current_nesting > 0 and not stripped.startswith((' ', '\t')):
+            elif stripped and not stripped.startswith("#"):
+                if current_nesting > 0 and not stripped.startswith((" ", "\t")):
                     current_nesting -= 1
 
         if max_nesting > 4:
@@ -220,18 +230,23 @@ class AutoFixer:
                 fixed_code="Extract methods to reduce nesting",
                 description="Refactor to reduce nesting depth",
                 confidence=0.6,
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
             fixes.append(fix)
 
         return fixes
 
-    def _suggest_security_fixes(self, file_path: str, code_content: str) -> list[AutoFix]:
+    def _suggest_security_fixes(
+        self, file_path: str, code_content: str
+    ) -> list[AutoFix]:
         """Suggest security fixes"""
         fixes = []
 
         # Check for hardcoded secrets
-        if any(keyword in code_content.lower() for keyword in ['password', 'secret', 'key', 'token']):
+        if any(
+            keyword in code_content.lower()
+            for keyword in ["password", "secret", "key", "token"]
+        ):
             fix = AutoFix(
                 fix_id=f"security_{len(self.fixes) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
                 fix_type=FixType.SECURITY,
@@ -242,18 +257,20 @@ class AutoFixer:
                 fixed_code="Use environment variable or secure config",
                 description="Replace hardcoded secrets with secure alternatives",
                 confidence=0.9,
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
             fixes.append(fix)
 
         return fixes
 
-    def _suggest_performance_fixes(self, file_path: str, code_content: str) -> list[AutoFix]:
+    def _suggest_performance_fixes(
+        self, file_path: str, code_content: str
+    ) -> list[AutoFix]:
         """Suggest performance fixes"""
         fixes = []
 
         # Check for inefficient patterns
-        if 'for i in range(len(' in code_content:
+        if "for i in range(len(" in code_content:
             fix = AutoFix(
                 fix_id=f"performance_{len(self.fixes) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
                 fix_type=FixType.PERFORMANCE,
@@ -264,19 +281,22 @@ class AutoFixer:
                 fixed_code="for item in collection:",
                 description="Use direct iteration instead of range(len())",
                 confidence=0.8,
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
             fixes.append(fix)
 
         return fixes
 
-    def _suggest_maintainability_fixes(self, file_path: str, code_content: str) -> list[AutoFix]:
+    def _suggest_maintainability_fixes(
+        self, file_path: str, code_content: str
+    ) -> list[AutoFix]:
         """Suggest maintainability fixes"""
         fixes = []
 
         # Check for magic numbers
         import re
-        magic_numbers = re.findall(r'\b\d{3,}\b', code_content)
+
+        magic_numbers = re.findall(r"\b\d{3,}\b", code_content)
         if magic_numbers:
             fix = AutoFix(
                 fix_id=f"maintainability_{len(self.fixes) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
@@ -288,29 +308,33 @@ class AutoFixer:
                 fixed_code="Define constants for magic numbers",
                 description="Replace magic numbers with named constants",
                 confidence=0.7,
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
             fixes.append(fix)
 
         return fixes
 
-    def _suggest_testability_fixes(self, file_path: str, code_content: str) -> list[AutoFix]:
+    def _suggest_testability_fixes(
+        self, file_path: str, code_content: str
+    ) -> list[AutoFix]:
         """Suggest testability fixes"""
         fixes = []
 
         # Check for missing docstrings
-        lines = code_content.split('\n')
+        lines = code_content.split("\n")
         in_function = False
         function_line = 0
 
         for i, line in enumerate(lines, 1):
             stripped = line.strip()
-            if stripped.startswith('def '):
+            if stripped.startswith("def "):
                 in_function = True
                 function_line = i
-            elif stripped and not stripped.startswith('#'):
+            elif stripped and not stripped.startswith("#"):
                 if in_function:
-                    if not stripped.startswith('"""') and not stripped.startswith("'''"):
+                    if not stripped.startswith('"""') and not stripped.startswith(
+                        "'''"
+                    ):
                         fix = AutoFix(
                             fix_id=f"testability_{len(self.fixes) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
                             fix_type=FixType.TESTABILITY,
@@ -321,7 +345,7 @@ class AutoFixer:
                             fixed_code='"""Add function docstring here"""',
                             description="Add docstring to function",
                             confidence=0.9,
-                            timestamp=datetime.now()
+                            timestamp=datetime.now(),
                         )
                         fixes.append(fix)
                     in_function = False
@@ -374,7 +398,7 @@ class AutoFixer:
                 "total_fixes": total_fixes,
                 "fixes_by_type": fixes_by_type,
                 "fixes_by_status": fixes_by_status,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
         except Exception as e:

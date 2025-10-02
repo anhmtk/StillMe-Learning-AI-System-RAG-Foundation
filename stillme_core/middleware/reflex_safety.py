@@ -21,21 +21,16 @@ DANGEROUS_PATTERNS = [
     r"(?i)(ignore|forget|disregard).*(previous|instructions|rules|guidelines)",
     r"(?i)(act as|pretend to be|roleplay as).*(jailbreak|hack|exploit)",
     r"(?i)(system|admin|root).*(access|privilege|escalation)",
-
     # Base64 encoded content (potential obfuscation)
     r"(?i)(base64|b64).*[A-Za-z0-9+/]{20,}={0,2}",
-
     # Homoglyph attacks (basic detection)
     r"[а-яё].*[a-z]|[a-z].*[а-яё]",  # Cyrillic mixed with Latin
-
     # Command injection patterns
     r"(?i)(rm\s+-rf|del\s+/s|format\s+c:|shutdown|reboot)",
     r"(?i)(eval|exec|system|shell_exec|passthru)",
     r"(?i)(delete\s+all\s+files|remove\s+everything)",
-
     # SQL injection patterns
     r"(?i)(union\s+select|drop\s+table|delete\s+from|insert\s+into)",
-
     # XSS patterns
     r"<script[^>]*>.*</script>",
     r"javascript:",
@@ -44,15 +39,18 @@ DANGEROUS_PATTERNS = [
 
 # Circuit breaker configuration
 CIRCUIT_BREAKER_THRESHOLD = 5  # failures before opening
-CIRCUIT_BREAKER_TIMEOUT = 30   # seconds before half-open
-DEEP_CHECK_TIMEOUT = 5.0       # seconds for deep check timeout
+CIRCUIT_BREAKER_TIMEOUT = 30  # seconds before half-open
+DEEP_CHECK_TIMEOUT = 5.0  # seconds for deep check timeout
 
 
 class CircuitBreaker:
     """Simple circuit breaker for deep safety checks."""
 
-    def __init__(self, failure_threshold: int = CIRCUIT_BREAKER_THRESHOLD,
-                 timeout: int = CIRCUIT_BREAKER_TIMEOUT):
+    def __init__(
+        self,
+        failure_threshold: int = CIRCUIT_BREAKER_THRESHOLD,
+        timeout: int = CIRCUIT_BREAKER_TIMEOUT,
+    ):
         self.failure_threshold = failure_threshold
         self.timeout = timeout
         self.failure_count = 0
@@ -137,7 +135,9 @@ class ReflexSafety:
 
         return True, "safe"
 
-    async def deep_check(self, text: str, intended_action: str | None = None) -> tuple[bool, str]:
+    async def deep_check(
+        self, text: str, intended_action: str | None = None
+    ) -> tuple[bool, str]:
         """
         Deeper, asynchronous safety check with timeout and circuit breaker.
 
@@ -161,7 +161,7 @@ class ReflexSafety:
             # Simulate deep check with timeout
             result = await asyncio.wait_for(
                 self._perform_deep_check(text, intended_action),
-                timeout=DEEP_CHECK_TIMEOUT
+                timeout=DEEP_CHECK_TIMEOUT,
             )
 
             if result[0]:  # is_safe
@@ -182,7 +182,9 @@ class ReflexSafety:
             self.circuit_breaker.on_failure()
             return False, f"deep_check_error: {str(e)}"
 
-    async def _perform_deep_check(self, text: str, intended_action: str | None = None) -> tuple[bool, str]:
+    async def _perform_deep_check(
+        self, text: str, intended_action: str | None = None
+    ) -> tuple[bool, str]:
         """
         Simulate deep safety check (placeholder for EthicsGuard integration).
 
@@ -206,8 +208,12 @@ class ReflexSafety:
 
         return True, "deep_check_passed"
 
-    def safety_gate(self, text: str, intended_action: str | None = None,
-                   scores: dict[str, float] | None = None) -> dict[str, Any]:
+    def safety_gate(
+        self,
+        text: str,
+        intended_action: str | None = None,
+        scores: dict[str, float] | None = None,
+    ) -> dict[str, Any]:
         """
         Main safety gate that combines fast and deep checks.
 
@@ -230,7 +236,7 @@ class ReflexSafety:
                 "reason": fast_reason,
                 "check_type": "fast",
                 "processing_time_ms": (time.time() - start_time) * 1000,
-                "stats": self.stats.copy()
+                "stats": self.stats.copy(),
             }
 
         # Deep check (asynchronous) - in real implementation, this would be awaited
@@ -247,21 +253,30 @@ class ReflexSafety:
             "processing_time_ms": (time.time() - start_time) * 1000,
             "fast_check": {"safe": fast_safe, "reason": fast_reason},
             "deep_check": {"safe": deep_safe, "reason": deep_reason},
-            "stats": self.stats.copy()
+            "stats": self.stats.copy(),
         }
 
     def _normalize_for_safety(self, text: str) -> str:
         """Normalize text for safety pattern matching."""
         # Remove extra whitespace
-        text = re.sub(r'\s+', ' ', text.strip())
+        text = re.sub(r"\s+", " ", text.strip())
 
         # Convert to lowercase for case-insensitive matching
         text = text.lower()
 
         # Basic homoglyph normalization
         homoglyph_map = {
-            'а': 'a', 'е': 'e', 'о': 'o', 'р': 'p', 'с': 'c', 'х': 'x',
-            'у': 'y', 'к': 'k', 'м': 'm', 'т': 't', 'н': 'h'
+            "а": "a",
+            "е": "e",
+            "о": "o",
+            "р": "p",
+            "с": "c",
+            "х": "x",
+            "у": "y",
+            "к": "k",
+            "м": "m",
+            "т": "t",
+            "н": "h",
         }
         for cyrillic, latin in homoglyph_map.items():
             text = text.replace(cyrillic, latin)
@@ -283,6 +298,7 @@ class ReflexSafety:
 
         # Calculate entropy using Shannon entropy formula
         import math
+
         entropy = 0
         text_len = len(text)
         for count in char_counts.values():
@@ -303,17 +319,15 @@ class ReflexSafety:
             "circuit_breaker": {
                 "state": self.circuit_breaker.state,
                 "failure_count": self.circuit_breaker.failure_count,
-                "last_failure_time": self.circuit_breaker.last_failure_time
+                "last_failure_time": self.circuit_breaker.last_failure_time,
             },
             "config": {
                 "fast_check_enabled": self.fast_check_enabled,
-                "deep_check_enabled": self.deep_check_enabled
-            }
+                "deep_check_enabled": self.deep_check_enabled,
+            },
         }
 
     def reset_stats(self):
         """Reset safety statistics."""
         self.stats = dict.fromkeys(self.stats, 0)
         self.circuit_breaker = CircuitBreaker()
-
-

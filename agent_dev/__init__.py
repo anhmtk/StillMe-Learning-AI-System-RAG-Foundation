@@ -19,7 +19,4 @@ __description__ = "Intelligent Development Assistant for StillMe AI"
 from .core.agent_mode import AgentMode
 from .core.agentdev import AgentDev
 
-__all__ = [
-    "AgentDev",
-    "AgentMode"
-]
+__all__ = ["AgentDev", "AgentMode"]

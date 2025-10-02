@@ -15,10 +15,10 @@ Version: 1.0.0
 Date: 2025-09-30
 """
 
+import logging
 import subprocess
 import threading
 import time
-import logging
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
@@ -34,6 +34,7 @@ class AgentMode:
     SENIOR = "senior"
     SIMPLE = "simple"
 
+
 # Import AgentDev Unified
 try:
     from agentdev import AgentDev
@@ -42,23 +43,29 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+
 class MonitorStatus(Enum):
     """Trạng thái monitor"""
+
     ACTIVE = "active"
     INACTIVE = "inactive"
     ERROR = "error"
     MAINTENANCE = "maintenance"
 
+
 class AlertLevel(Enum):
     """Mức độ cảnh báo"""
+
     INFO = "info"
     WARNING = "warning"
     ERROR = "error"
     CRITICAL = "critical"
 
+
 @dataclass
 class CodeQualityMetrics:
     """Metrics về code quality"""
+
     total_files: int
     files_with_errors: int
     total_errors: int
@@ -68,9 +75,11 @@ class CodeQualityMetrics:
     last_scan_time: datetime
     scan_duration_ms: float
 
+
 @dataclass
 class Alert:
     """Alert về code quality issues"""
+
     id: str
     level: AlertLevel
     title: str
@@ -80,6 +89,7 @@ class Alert:
     line_number: Optional[int] = None
     error_type: Optional[str] = None
     auto_fixable: bool = False
+
 
 class AutomatedMonitor:
     """Hệ thống giám sát tự động cho AgentDev"""
@@ -113,15 +123,11 @@ class AutomatedMonitor:
             "alert_thresholds": {
                 "max_errors_per_file": 10,
                 "max_total_errors": 50,
-                "max_syntax_errors": 5
+                "max_syntax_errors": 5,
             },
             "auto_fix_enabled": True,
             "auto_fix_safe_only": True,
-            "notifications": {
-                "email": False,
-                "slack": False,
-                "console": True
-            },
+            "notifications": {"email": False, "slack": False, "console": True},
             "exclude_patterns": [
                 "**/__pycache__/**",
                 "**/node_modules/**",
@@ -130,8 +136,8 @@ class AutomatedMonitor:
                 "**/site-packages/**",
                 "**/dist-packages/**",
                 "**/backup_legacy/**",
-                "**/tests/fixtures/**"
-            ]
+                "**/tests/fixtures/**",
+            ],
         }
 
     def _setup_logging(self):
@@ -143,11 +149,8 @@ class AutomatedMonitor:
 
         logging.basicConfig(
             level=logging.INFO,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-            handlers=[
-                logging.FileHandler(log_file),
-                logging.StreamHandler()
-            ]
+            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            handlers=[logging.FileHandler(log_file), logging.StreamHandler()],
         )
 
     def _initialize_agentdev(self):
@@ -172,9 +175,7 @@ class AutomatedMonitor:
         )
 
         # Daily maintenance
-        schedule.every().day.at("02:00").do(
-            self._scheduled_maintenance
-        )
+        schedule.every().day.at("02:00").do(self._scheduled_maintenance)
 
         logger.info("📅 Monitoring schedules configured")
 
@@ -193,21 +194,22 @@ class AutomatedMonitor:
 
         # Start monitoring thread
         self.monitoring_thread = threading.Thread(
-            target=self._monitoring_loop,
-            daemon=True
+            target=self._monitoring_loop, daemon=True
         )
         self.monitoring_thread.start()
 
         logger.info("🚀 Automated monitoring started")
 
         # Send startup alert
-        self._send_alert(Alert(
-            id=f"startup_{int(time.time())}",
-            level=AlertLevel.INFO,
-            title="AgentDev Monitor Started",
-            message="Automated code quality monitoring is now active",
-            timestamp=datetime.now()
-        ))
+        self._send_alert(
+            Alert(
+                id=f"startup_{int(time.time())}",
+                level=AlertLevel.INFO,
+                title="AgentDev Monitor Started",
+                message="Automated code quality monitoring is now active",
+                timestamp=datetime.now(),
+            )
+        )
 
     def stop_monitoring(self):
         """Stop automated monitoring"""
@@ -261,17 +263,21 @@ class AutomatedMonitor:
             self._check_quality_thresholds(metrics)
 
             logger.info(f"✅ Quality scan completed in {scan_duration:.1f}ms")
-            logger.info(f"📊 Found {metrics.total_errors} errors in {metrics.files_with_errors} files")
+            logger.info(
+                f"📊 Found {metrics.total_errors} errors in {metrics.files_with_errors} files"
+            )
 
         except Exception as e:
             logger.error(f"❌ Error in quality scan: {e}")
-            self._send_alert(Alert(
-                id=f"scan_error_{int(time.time())}",
-                level=AlertLevel.ERROR,
-                title="Quality Scan Failed",
-                message=f"Error during quality scan: {str(e)}",
-                timestamp=datetime.now()
-            ))
+            self._send_alert(
+                Alert(
+                    id=f"scan_error_{int(time.time())}",
+                    level=AlertLevel.ERROR,
+                    title="Quality Scan Failed",
+                    message=f"Error during quality scan: {str(e)}",
+                    timestamp=datetime.now(),
+                )
+            )
 
     def _scheduled_deep_scan(self):
         """Scheduled deep scan with AgentDev analysis"""
@@ -280,20 +286,22 @@ class AutomatedMonitor:
         try:
             # Run comprehensive analysis
             task = "analyze code quality and identify critical issues"
-            if self.agentdev and hasattr(self.agentdev, 'execute_task'):
+            if self.agentdev and hasattr(self.agentdev, "execute_task"):
                 result = self.agentdev.execute_task(task, AgentMode.SENIOR)
             else:
                 result = "AgentDev not available"
 
             # Parse result and create alerts if needed
             if "❌" in result or "error" in result.lower():
-                self._send_alert(Alert(
-                    id=f"deep_scan_{int(time.time())}",
-                    level=AlertLevel.WARNING,
-                    title="Deep Scan Issues Found",
-                    message=f"AgentDev found issues: {result[:200]}...",
-                    timestamp=datetime.now()
-                ))
+                self._send_alert(
+                    Alert(
+                        id=f"deep_scan_{int(time.time())}",
+                        level=AlertLevel.WARNING,
+                        title="Deep Scan Issues Found",
+                        message=f"AgentDev found issues: {result[:200]}...",
+                        timestamp=datetime.now(),
+                    )
+                )
 
             logger.info("✅ Deep scan completed")
 
@@ -307,7 +315,7 @@ class AutomatedMonitor:
         try:
             # Run cleanup tasks
             cleanup_task = "perform automated cleanup and optimization"
-            if self.agentdev and hasattr(self.agentdev, 'execute_task'):
+            if self.agentdev and hasattr(self.agentdev, "execute_task"):
                 self.agentdev.execute_task(cleanup_task, AgentMode.SENIOR)
 
             # Clean up old metrics
@@ -331,32 +339,36 @@ class AutomatedMonitor:
             import_errors=0,
             undefined_names=0,
             last_scan_time=datetime.now(),
-            scan_duration_ms=0
+            scan_duration_ms=0,
         )
 
         try:
             # Run flake8 to scan for errors
             result = subprocess.run(
                 [
-                    "python", "-m", "flake8",
-                    "--count", "--select=E9,F63,F7,F82",
-                    "--show-source", "--statistics",
-                    str(self.project_root)
+                    "python",
+                    "-m",
+                    "flake8",
+                    "--count",
+                    "--select=E9,F63,F7,F82",
+                    "--show-source",
+                    "--statistics",
+                    str(self.project_root),
                 ],
                 capture_output=True,
                 text=True,
-                timeout=60
+                timeout=60,
             )
 
             # Parse results
             if result.returncode != 0:
-                output_lines = result.stdout.split('\n')
+                output_lines = result.stdout.split("\n")
                 for line in output_lines:
-                    if ':' in line and ('E999' in line or 'F821' in line):
+                    if ":" in line and ("E999" in line or "F821" in line):
                         metrics.total_errors += 1
-                        if 'E999' in line:
+                        if "E999" in line:
                             metrics.syntax_errors += 1
-                        elif 'F821' in line:
+                        elif "F821" in line:
                             metrics.undefined_names += 1
 
             # Count files
@@ -365,10 +377,13 @@ class AutomatedMonitor:
 
             # Count files with errors
             if metrics.total_errors > 0:
-                metrics.files_with_errors = len({
-                    line.split(':')[0] for line in result.stdout.split('\n')
-                    if ':' in line and ('E999' in line or 'F821' in line)
-                })
+                metrics.files_with_errors = len(
+                    {
+                        line.split(":")[0]
+                        for line in result.stdout.split("\n")
+                        if ":" in line and ("E999" in line or "F821" in line)
+                    }
+                )
 
         except Exception as e:
             logger.error(f"❌ Error scanning code quality: {e}")
@@ -381,38 +396,44 @@ class AutomatedMonitor:
 
         # Check total errors
         if metrics.total_errors > thresholds["max_total_errors"]:
-            self._send_alert(Alert(
-                id=f"total_errors_{int(time.time())}",
-                level=AlertLevel.CRITICAL,
-                title="High Error Count",
-                message=f"Total errors ({metrics.total_errors}) exceeds threshold ({thresholds['max_total_errors']})",
-                timestamp=datetime.now(),
-                error_type="total_errors"
-            ))
+            self._send_alert(
+                Alert(
+                    id=f"total_errors_{int(time.time())}",
+                    level=AlertLevel.CRITICAL,
+                    title="High Error Count",
+                    message=f"Total errors ({metrics.total_errors}) exceeds threshold ({thresholds['max_total_errors']})",
+                    timestamp=datetime.now(),
+                    error_type="total_errors",
+                )
+            )
 
         # Check syntax errors
         if metrics.syntax_errors > thresholds["max_syntax_errors"]:
-            self._send_alert(Alert(
-                id=f"syntax_errors_{int(time.time())}",
-                level=AlertLevel.ERROR,
-                title="High Syntax Error Count",
-                message=f"Syntax errors ({metrics.syntax_errors}) exceeds threshold ({thresholds['max_syntax_errors']})",
-                timestamp=datetime.now(),
-                error_type="syntax_errors"
-            ))
+            self._send_alert(
+                Alert(
+                    id=f"syntax_errors_{int(time.time())}",
+                    level=AlertLevel.ERROR,
+                    title="High Syntax Error Count",
+                    message=f"Syntax errors ({metrics.syntax_errors}) exceeds threshold ({thresholds['max_syntax_errors']})",
+                    timestamp=datetime.now(),
+                    error_type="syntax_errors",
+                )
+            )
 
         # Check files with errors
         if metrics.files_with_errors > 0:
             avg_errors_per_file = metrics.total_errors / metrics.files_with_errors
             if avg_errors_per_file > thresholds["max_errors_per_file"]:
-                self._send_alert(Alert(
-                    id=f"errors_per_file_{int(time.time())}",
-                    level=AlertLevel.WARNING,
-                    title="High Errors Per File",
-                    message=f"Average errors per file ({avg_errors_per_file:.1f}) exceeds threshold ({thresholds['max_errors_per_file']})",
-                    timestamp=datetime.now(),
-                    error_type="errors_per_file"
-                ))
+                self._send_alert(
+                    Alert(
+                        id=f"errors_per_file_{int(time.time())}",
+                        level=AlertLevel.WARNING,
+                        title="High Errors Per File",
+                        message=f"Average errors per file ({avg_errors_per_file:.1f}) exceeds threshold ({thresholds['max_errors_per_file']})",
+                        timestamp=datetime.now(),
+                        error_type="errors_per_file",
+                    )
+                )
 
     def _check_system_health(self):
         """Check system health"""
@@ -420,24 +441,28 @@ class AutomatedMonitor:
             # Check CPU usage
             cpu_percent = psutil.cpu_percent(interval=1)
             if cpu_percent > 90:
-                self._send_alert(Alert(
-                    id=f"high_cpu_{int(time.time())}",
-                    level=AlertLevel.WARNING,
-                    title="High CPU Usage",
-                    message=f"CPU usage is {cpu_percent}%",
-                    timestamp=datetime.now()
-                ))
+                self._send_alert(
+                    Alert(
+                        id=f"high_cpu_{int(time.time())}",
+                        level=AlertLevel.WARNING,
+                        title="High CPU Usage",
+                        message=f"CPU usage is {cpu_percent}%",
+                        timestamp=datetime.now(),
+                    )
+                )
 
             # Check memory usage
             memory = psutil.virtual_memory()
             if memory.percent > 90:
-                self._send_alert(Alert(
-                    id=f"high_memory_{int(time.time())}",
-                    level=AlertLevel.WARNING,
-                    title="High Memory Usage",
-                    message=f"Memory usage is {memory.percent}%",
-                    timestamp=datetime.now()
-                ))
+                self._send_alert(
+                    Alert(
+                        id=f"high_memory_{int(time.time())}",
+                        level=AlertLevel.WARNING,
+                        title="High Memory Usage",
+                        message=f"Memory usage is {memory.percent}%",
+                        timestamp=datetime.now(),
+                    )
+                )
 
         except Exception as e:
             logger.error(f"❌ Error checking system health: {e}")
@@ -452,7 +477,7 @@ class AutomatedMonitor:
                 AlertLevel.INFO: "ℹ️",
                 AlertLevel.WARNING: "⚠️",
                 AlertLevel.ERROR: "❌",
-                AlertLevel.CRITICAL: "🚨"
+                AlertLevel.CRITICAL: "🚨",
             }
 
             print(f"{level_emoji[alert.level]} {alert.title}: {alert.message}")
@@ -461,9 +486,11 @@ class AutomatedMonitor:
         logger.info(f"Alert sent: {alert.title} - {alert.message}")
 
         # Auto-fix if enabled and fixable
-        if (self.config["auto_fix_enabled"] and
-            alert.auto_fixable and
-            alert.level in [AlertLevel.WARNING, AlertLevel.ERROR]):
+        if (
+            self.config["auto_fix_enabled"]
+            and alert.auto_fixable
+            and alert.level in [AlertLevel.WARNING, AlertLevel.ERROR]
+        ):
             self._attempt_auto_fix(alert)
 
     def _attempt_auto_fix(self, alert: Alert):
@@ -471,7 +498,7 @@ class AutomatedMonitor:
         try:
             if alert.error_type == "syntax_errors":
                 task = "fix critical syntax errors in the codebase"
-                if self.agentdev and hasattr(self.agentdev, 'execute_task'):
+                if self.agentdev and hasattr(self.agentdev, "execute_task"):
                     result = self.agentdev.execute_task(task, AgentMode.SENIOR)
                 else:
                     result = "AgentDev not available"
@@ -488,17 +515,13 @@ class AutomatedMonitor:
         """Clean up old metrics data"""
         cutoff_time = datetime.now() - timedelta(days=7)
         self.metrics_history = [
-            m for m in self.metrics_history
-            if m.last_scan_time > cutoff_time
+            m for m in self.metrics_history if m.last_scan_time > cutoff_time
         ]
 
     def _cleanup_old_alerts(self):
         """Clean up old alerts"""
         cutoff_time = datetime.now() - timedelta(days=3)
-        self.alerts = [
-            a for a in self.alerts
-            if a.timestamp > cutoff_time
-        ]
+        self.alerts = [a for a in self.alerts if a.timestamp > cutoff_time]
 
     def get_status(self) -> dict[str, Any]:
         """Get current monitor status"""
@@ -506,9 +529,17 @@ class AutomatedMonitor:
             "status": self.status.value,
             "agentdev_available": self.agentdev is not None,
             "total_alerts": len(self.alerts),
-            "recent_alerts": len([a for a in self.alerts if a.timestamp > datetime.now() - timedelta(hours=1)]),
+            "recent_alerts": len(
+                [
+                    a
+                    for a in self.alerts
+                    if a.timestamp > datetime.now() - timedelta(hours=1)
+                ]
+            ),
             "metrics_count": len(self.metrics_history),
-            "last_scan": self.metrics_history[-1].last_scan_time.isoformat() if self.metrics_history else None
+            "last_scan": self.metrics_history[-1].last_scan_time.isoformat()
+            if self.metrics_history
+            else None,
         }
 
     def get_recent_alerts(self, hours: int = 24) -> list[dict]:
@@ -527,11 +558,15 @@ class AutomatedMonitor:
         return {
             "total_scans": len(self.metrics_history),
             "recent_scans": len(recent_metrics),
-            "avg_errors": sum(m.total_errors for m in recent_metrics) / len(recent_metrics),
-            "avg_files_with_errors": sum(m.files_with_errors for m in recent_metrics) / len(recent_metrics),
-            "avg_scan_duration_ms": sum(m.scan_duration_ms for m in recent_metrics) / len(recent_metrics),
-            "last_scan": recent_metrics[-1].last_scan_time.isoformat()
+            "avg_errors": sum(m.total_errors for m in recent_metrics)
+            / len(recent_metrics),
+            "avg_files_with_errors": sum(m.files_with_errors for m in recent_metrics)
+            / len(recent_metrics),
+            "avg_scan_duration_ms": sum(m.scan_duration_ms for m in recent_metrics)
+            / len(recent_metrics),
+            "last_scan": recent_metrics[-1].last_scan_time.isoformat(),
         }
+
 
 # Example usage
 if __name__ == "__main__":

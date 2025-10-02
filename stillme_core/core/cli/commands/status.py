@@ -169,7 +169,9 @@ def performance():
         status_icon = (
             "✅"
             if metric["status"] == "good"
-            else "⚠️" if metric["status"] == "warning" else "❌"
+            else "⚠️"
+            if metric["status"] == "warning"
+            else "❌"
         )
         table.add_row(
             metric["name"], metric["value"], f"{status_icon} {metric['status']}"
@@ -437,7 +439,9 @@ def get_performance_info():
                 "status": (
                     "good"
                     if cpu_percent < 80
-                    else "warning" if cpu_percent < 95 else "critical"
+                    else "warning"
+                    if cpu_percent < 95
+                    else "critical"
                 ),
             },
             {
@@ -446,7 +450,9 @@ def get_performance_info():
                 "status": (
                     "good"
                     if memory.percent < 80
-                    else "warning" if memory.percent < 95 else "critical"
+                    else "warning"
+                    if memory.percent < 95
+                    else "critical"
                 ),
             },
             {
@@ -455,7 +461,9 @@ def get_performance_info():
                 "status": (
                     "good"
                     if disk.percent < 80
-                    else "warning" if disk.percent < 95 else "critical"
+                    else "warning"
+                    if disk.percent < 95
+                    else "critical"
                 ),
             },
             {

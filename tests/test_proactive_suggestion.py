@@ -21,9 +21,15 @@ class TestProactiveSuggestion:
         config = {
             "enabled": True,
             "max_suggestions": 3,
-            "categories": ["performance", "security", "ux", "scalability", "maintainability"],
+            "categories": [
+                "performance",
+                "security",
+                "ux",
+                "scalability",
+                "maintainability",
+            ],
             "confidence_threshold": 0.6,
-            "learning_enabled": True
+            "learning_enabled": True,
         }
         return ProactiveSuggestion(config)
 
@@ -104,7 +110,7 @@ class TestProactiveSuggestion:
         context = {
             "project_context": {
                 "files": ["app.js", "style.css", "index.html"],
-                "extensions": [".js", ".css", ".html"]
+                "extensions": [".js", ".css", ".html"],
             }
         }
         suggestions = proactive_suggestion._get_context_suggestions(context)
@@ -118,7 +124,7 @@ class TestProactiveSuggestion:
         context = {
             "project_context": {
                 "files": ["main.py", "utils.py", "test.py"],
-                "extensions": [".py"]
+                "extensions": [".py"],
             }
         }
         suggestions = proactive_suggestion._get_context_suggestions(context)
@@ -133,7 +139,7 @@ class TestProactiveSuggestion:
         context = {
             "project_context": {
                 "files": ["schema.sql", "queries.sql", "migrations.sql"],
-                "extensions": [".sql"]
+                "extensions": [".sql"],
             }
         }
         suggestions = proactive_suggestion._get_context_suggestions(context)
@@ -148,7 +154,7 @@ class TestProactiveSuggestion:
             "conversation_history": [
                 {"content": "I'm getting errors in my code"},
                 {"content": "The application is crashing"},
-                {"content": "Need to fix bugs"}
+                {"content": "Need to fix bugs"},
             ]
         }
         suggestions = proactive_suggestion._get_context_suggestions(context)
@@ -164,7 +170,9 @@ class TestProactiveSuggestion:
 
     def test_get_learned_suggestions_no_preferences(self, proactive_suggestion):
         """Test learned suggestions with no user preferences"""
-        suggestions = proactive_suggestion._get_learned_suggestions("new_user", "performance")
+        suggestions = proactive_suggestion._get_learned_suggestions(
+            "new_user", "performance"
+        )
         assert len(suggestions) == 0
 
     def test_get_learned_suggestions_with_preferences(self, proactive_suggestion):
@@ -173,7 +181,9 @@ class TestProactiveSuggestion:
         proactive_suggestion.user_preferences["test_user"]["performance"] = 5
         proactive_suggestion.user_preferences["test_user"]["security"] = 3
 
-        suggestions = proactive_suggestion._get_learned_suggestions("test_user", "performance")
+        suggestions = proactive_suggestion._get_learned_suggestions(
+            "test_user", "performance"
+        )
         assert len(suggestions) > 0
         assert len(suggestions) <= 2  # Limited by implementation
 
@@ -214,11 +224,8 @@ class TestProactiveSuggestion:
         """Test suggestion generation with context"""
         text = "I want to improve my application"
         context = {
-            "project_context": {
-                "files": ["app.py"],
-                "extensions": [".py"]
-            },
-            "user_id": "test_user"
+            "project_context": {"files": ["app.py"], "extensions": [".py"]},
+            "user_id": "test_user",
         }
         result = proactive_suggestion._generate_suggestions(text, context)
 
@@ -244,22 +251,30 @@ class TestProactiveSuggestion:
         category = "performance"
 
         # Record successful usage
-        proactive_suggestion.record_suggestion_usage(user_id, suggestion, category, success=True)
+        proactive_suggestion.record_suggestion_usage(
+            user_id, suggestion, category, success=True
+        )
 
         assert proactive_suggestion.user_preferences[user_id][category] == 1
         assert len(proactive_suggestion.suggestion_history) == 1
 
         # Record failed usage
-        proactive_suggestion.record_suggestion_usage(user_id, suggestion, category, success=False)
+        proactive_suggestion.record_suggestion_usage(
+            user_id, suggestion, category, success=False
+        )
 
-        assert proactive_suggestion.user_preferences[user_id][category] == 1  # Should not increment
+        assert (
+            proactive_suggestion.user_preferences[user_id][category] == 1
+        )  # Should not increment
         assert len(proactive_suggestion.suggestion_history) == 2
 
     def test_record_suggestion_usage_learning_disabled(self, proactive_suggestion):
         """Test recording suggestion usage with learning disabled"""
         proactive_suggestion.learning_enabled = False
 
-        proactive_suggestion.record_suggestion_usage("test_user", "test", "performance", True)
+        proactive_suggestion.record_suggestion_usage(
+            "test_user", "test", "performance", True
+        )
 
         assert len(proactive_suggestion.user_preferences) == 0
         assert len(proactive_suggestion.suggestion_history) == 0
@@ -267,15 +282,21 @@ class TestProactiveSuggestion:
     def test_get_suggestion_stats(self, proactive_suggestion):
         """Test getting suggestion statistics"""
         # Add some test data
-        proactive_suggestion.record_suggestion_usage("user1", "suggestion1", "performance", True)
-        proactive_suggestion.record_suggestion_usage("user1", "suggestion2", "security", False)
-        proactive_suggestion.record_suggestion_usage("user2", "suggestion3", "performance", True)
+        proactive_suggestion.record_suggestion_usage(
+            "user1", "suggestion1", "performance", True
+        )
+        proactive_suggestion.record_suggestion_usage(
+            "user1", "suggestion2", "security", False
+        )
+        proactive_suggestion.record_suggestion_usage(
+            "user2", "suggestion3", "performance", True
+        )
 
         stats = proactive_suggestion.get_suggestion_stats()
 
         assert stats["total_suggestions"] == 3
         assert stats["successful_suggestions"] == 2
-        assert stats["success_rate"] == 2/3
+        assert stats["success_rate"] == 2 / 3
         assert stats["active_users"] == 2
         assert stats["learning_enabled"] is True
         assert "performance" in stats["category_distribution"]
@@ -284,7 +305,9 @@ class TestProactiveSuggestion:
     def test_clear_learning_data(self, proactive_suggestion):
         """Test clearing learning data"""
         # Add some test data
-        proactive_suggestion.record_suggestion_usage("user1", "suggestion1", "performance", True)
+        proactive_suggestion.record_suggestion_usage(
+            "user1", "suggestion1", "performance", True
+        )
         proactive_suggestion.user_preferences["user1"]["performance"] = 5
         proactive_suggestion.pattern_learning["test_pattern"] = 10
 
@@ -318,6 +341,7 @@ class TestProactiveSuggestion:
         assert len(result.suggestions) == 0
         assert "error" in result.reasoning.lower()
 
+
 class TestProactiveSuggestionIntegration:
     """Integration tests for proactive suggestions"""
 
@@ -327,9 +351,15 @@ class TestProactiveSuggestionIntegration:
         config = {
             "enabled": True,
             "max_suggestions": 3,
-            "categories": ["performance", "security", "ux", "scalability", "maintainability"],
+            "categories": [
+                "performance",
+                "security",
+                "ux",
+                "scalability",
+                "maintainability",
+            ],
             "confidence_threshold": 0.5,  # Lower threshold for testing
-            "learning_enabled": True
+            "learning_enabled": True,
         }
         return ProactiveSuggestion(config)
 
@@ -382,7 +412,9 @@ class TestProactiveSuggestionIntegration:
         assert user_prefs["security"] == 1
 
         # Test suggestion generation with learned preferences
-        result = full_suggestion_system.suggest("I want to improve my app", {"user_id": user_id})
+        result = full_suggestion_system.suggest(
+            "I want to improve my app", {"user_id": user_id}
+        )
         assert len(result.suggestions) > 0
 
     def test_suggestion_history_management(self, full_suggestion_system):
@@ -408,14 +440,23 @@ class TestProactiveSuggestionIntegration:
 
     def test_performance_large_input(self, full_suggestion_system):
         """Test performance with large input"""
-        large_text = "optimize performance security ux scalability maintainability " * 100
+        large_text = (
+            "optimize performance security ux scalability maintainability " * 100
+        )
 
         import time
+
         start_time = time.time()
         result = full_suggestion_system.suggest(large_text)
         end_time = time.time()
 
         # Should complete within reasonable time
         assert (end_time - start_time) < 2.0  # 2 seconds max
-        assert result.category in ["performance", "security", "ux", "scalability", "maintainability"]
+        assert result.category in [
+            "performance",
+            "security",
+            "ux",
+            "scalability",
+            "maintainability",
+        ]
         assert len(result.suggestions) > 0

@@ -26,6 +26,7 @@ from typing import Optional
 
 class LearningType(Enum):
     """Loại học hỏi"""
+
     SUCCESS_PATTERN = "success_pattern"
     FAILURE_PATTERN = "failure_pattern"
     ERROR_PATTERN = "error_pattern"
@@ -35,16 +36,20 @@ class LearningType(Enum):
     CODE_PATTERN = "code_pattern"
     ARCHITECTURE_PATTERN = "architecture_pattern"
 
+
 class LearningConfidence(Enum):
     """Mức độ tin cậy của học hỏi"""
-    HIGH = "high"           # Cao
-    MEDIUM = "medium"       # Trung bình
-    LOW = "low"             # Thấp
+
+    HIGH = "high"  # Cao
+    MEDIUM = "medium"  # Trung bình
+    LOW = "low"  # Thấp
     EXPERIMENTAL = "experimental"  # Thử nghiệm
+
 
 @dataclass
 class Experience:
     """Kinh nghiệm"""
+
     experience_id: str
     learning_type: LearningType
     context: str
@@ -58,9 +63,11 @@ class Experience:
     frequency: int = 1
     last_used: Optional[datetime] = None
 
+
 @dataclass
 class LearningPattern:
     """Pattern học hỏi"""
+
     pattern_id: str
     pattern_type: LearningType
     description: str
@@ -74,9 +81,11 @@ class LearningPattern:
     last_updated: datetime
     usage_count: int = 0
 
+
 @dataclass
 class LearningInsight:
     """Insight từ học hỏi"""
+
     insight_id: str
     title: str
     description: str
@@ -87,9 +96,11 @@ class LearningInsight:
     impact_score: float
     created_at: datetime
 
+
 @dataclass
 class ExperienceLearningResult:
     """Kết quả học hỏi kinh nghiệm"""
+
     total_experiences: int
     learning_patterns: list[LearningPattern]
     insights: list[LearningInsight]
@@ -98,6 +109,7 @@ class ExperienceLearningResult:
     recommendations: list[str]
     learning_score: float
     analysis_time: float
+
 
 class ExperienceLearner:
     """Senior Developer Experience Learner"""
@@ -127,14 +139,16 @@ class ExperienceLearner:
             return []
 
         try:
-            with open(self.experience_db, encoding='utf-8') as f:
+            with open(self.experience_db, encoding="utf-8") as f:
                 data = json.load(f)
 
             experiences = []
             for exp_data in data:
-                exp_data['timestamp'] = datetime.fromisoformat(exp_data['timestamp'])
-                if exp_data.get('last_used'):
-                    exp_data['last_used'] = datetime.fromisoformat(exp_data['last_used'])
+                exp_data["timestamp"] = datetime.fromisoformat(exp_data["timestamp"])
+                if exp_data.get("last_used"):
+                    exp_data["last_used"] = datetime.fromisoformat(
+                        exp_data["last_used"]
+                    )
                 experiences.append(Experience(**exp_data))
 
             return experiences
@@ -148,13 +162,17 @@ class ExperienceLearner:
             return []
 
         try:
-            with open(self.patterns_db, encoding='utf-8') as f:
+            with open(self.patterns_db, encoding="utf-8") as f:
                 data = json.load(f)
 
             patterns = []
             for pattern_data in data:
-                pattern_data['created_at'] = datetime.fromisoformat(pattern_data['created_at'])
-                pattern_data['last_updated'] = datetime.fromisoformat(pattern_data['last_updated'])
+                pattern_data["created_at"] = datetime.fromisoformat(
+                    pattern_data["created_at"]
+                )
+                pattern_data["last_updated"] = datetime.fromisoformat(
+                    pattern_data["last_updated"]
+                )
                 patterns.append(LearningPattern(**pattern_data))
 
             return patterns
@@ -168,12 +186,14 @@ class ExperienceLearner:
             return []
 
         try:
-            with open(self.insights_db, encoding='utf-8') as f:
+            with open(self.insights_db, encoding="utf-8") as f:
                 data = json.load(f)
 
             insights = []
             for insight_data in data:
-                insight_data['created_at'] = datetime.fromisoformat(insight_data['created_at'])
+                insight_data["created_at"] = datetime.fromisoformat(
+                    insight_data["created_at"]
+                )
                 insights.append(LearningInsight(**insight_data))
 
             return insights
@@ -187,12 +207,12 @@ class ExperienceLearner:
             data = []
             for exp in self.experiences:
                 exp_dict = asdict(exp)
-                exp_dict['timestamp'] = exp.timestamp.isoformat()
+                exp_dict["timestamp"] = exp.timestamp.isoformat()
                 if exp.last_used:
-                    exp_dict['last_used'] = exp.last_used.isoformat()
+                    exp_dict["last_used"] = exp.last_used.isoformat()
                 data.append(exp_dict)
 
-            with open(self.experience_db, 'w', encoding='utf-8') as f:
+            with open(self.experience_db, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
         except Exception as e:
             print(f"Error saving experiences: {e}")
@@ -203,11 +223,11 @@ class ExperienceLearner:
             data = []
             for pattern in self.patterns:
                 pattern_dict = asdict(pattern)
-                pattern_dict['created_at'] = pattern.created_at.isoformat()
-                pattern_dict['last_updated'] = pattern.last_updated.isoformat()
+                pattern_dict["created_at"] = pattern.created_at.isoformat()
+                pattern_dict["last_updated"] = pattern.last_updated.isoformat()
                 data.append(pattern_dict)
 
-            with open(self.patterns_db, 'w', encoding='utf-8') as f:
+            with open(self.patterns_db, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
         except Exception as e:
             print(f"Error saving patterns: {e}")
@@ -218,29 +238,41 @@ class ExperienceLearner:
             data = []
             for insight in self.insights:
                 insight_dict = asdict(insight)
-                insight_dict['created_at'] = insight.created_at.isoformat()
+                insight_dict["created_at"] = insight.created_at.isoformat()
                 data.append(insight_dict)
 
-            with open(self.insights_db, 'w', encoding='utf-8') as f:
+            with open(self.insights_db, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
         except Exception as e:
             print(f"Error saving insights: {e}")
 
-    def record_experience(self, context: str, action: str, result: str,
-                         success: bool, performance_metrics: dict[str, float] = None,
-                         learning_type: LearningType = LearningType.SUCCESS_PATTERN) -> str:
+    def record_experience(
+        self,
+        context: str,
+        action: str,
+        result: str,
+        success: bool,
+        performance_metrics: dict[str, float] = None,
+        learning_type: LearningType = LearningType.SUCCESS_PATTERN,
+    ) -> str:
         """Record a new experience"""
         if performance_metrics is None:
             performance_metrics = {}
 
         # Generate experience ID
-        experience_id = hashlib.md5(f"{context}_{action}_{result}".encode()).hexdigest()[:12]
+        experience_id = hashlib.md5(
+            f"{context}_{action}_{result}".encode()
+        ).hexdigest()[:12]
 
         # Check if similar experience exists
         existing_exp = None
         for exp in self.experiences:
-            if (exp.context == context and exp.action == action and
-                exp.result == result and exp.success == success):
+            if (
+                exp.context == context
+                and exp.action == action
+                and exp.result == result
+                and exp.success == success
+            ):
                 existing_exp = exp
                 break
 
@@ -264,7 +296,7 @@ class ExperienceLearner:
                 confidence=LearningConfidence.MEDIUM,
                 timestamp=datetime.now(),
                 frequency=1,
-                last_used=datetime.now()
+                last_used=datetime.now(),
             )
             self.experiences.append(experience)
 
@@ -316,7 +348,7 @@ class ExperienceLearner:
                 examples=[f"{exp.action} -> {exp.result}" for exp in exps[:5]],
                 created_at=datetime.now(),
                 last_updated=datetime.now(),
-                usage_count=len(exps)
+                usage_count=len(exps),
             )
             patterns.append(pattern)
 
@@ -335,14 +367,16 @@ class ExperienceLearner:
                 description=f"Analyzed {len(success_experiences)} successful experiences",
                 learning_type=LearningType.SUCCESS_PATTERN,
                 confidence=LearningConfidence.HIGH,
-                evidence=[f"Success rate: {len(success_experiences)/len(self.experiences)*100:.1f}%"],
+                evidence=[
+                    f"Success rate: {len(success_experiences)/len(self.experiences)*100:.1f}%"
+                ],
                 recommendations=[
                     "Continue using successful patterns",
                     "Document best practices",
-                    "Share knowledge with team"
+                    "Share knowledge with team",
                 ],
                 impact_score=0.8,
-                created_at=datetime.now()
+                created_at=datetime.now(),
             )
             insights.append(insight)
 
@@ -355,14 +389,16 @@ class ExperienceLearner:
                 description=f"Analyzed {len(failure_experiences)} failed experiences",
                 learning_type=LearningType.FAILURE_PATTERN,
                 confidence=LearningConfidence.HIGH,
-                evidence=[f"Failure rate: {len(failure_experiences)/len(self.experiences)*100:.1f}%"],
+                evidence=[
+                    f"Failure rate: {len(failure_experiences)/len(self.experiences)*100:.1f}%"
+                ],
                 recommendations=[
                     "Avoid repeating failed patterns",
                     "Investigate root causes",
-                    "Implement preventive measures"
+                    "Implement preventive measures",
                 ],
                 impact_score=0.7,
-                created_at=datetime.now()
+                created_at=datetime.now(),
             )
             insights.append(insight)
 
@@ -385,7 +421,9 @@ class ExperienceLearner:
         # Generate recommendations
         recommendations = []
         if success_patterns:
-            recommendations.append(f"Continue using {len(success_patterns)} successful patterns")
+            recommendations.append(
+                f"Continue using {len(success_patterns)} successful patterns"
+            )
         if failure_patterns:
             recommendations.append(f"Avoid {len(failure_patterns)} failure patterns")
         if insights:
@@ -408,7 +446,7 @@ class ExperienceLearner:
             failure_patterns=failure_patterns,
             recommendations=recommendations,
             learning_score=learning_score,
-            analysis_time=time.time() - start_time
+            analysis_time=time.time() - start_time,
         )
 
     def get_recommendations(self, context: str) -> list[str]:
@@ -418,7 +456,9 @@ class ExperienceLearner:
         # Find relevant patterns
         relevant_patterns = []
         for pattern in self.patterns:
-            if any(context.lower() in condition.lower() for condition in pattern.conditions):
+            if any(
+                context.lower() in condition.lower() for condition in pattern.conditions
+            ):
                 relevant_patterns.append(pattern)
 
         # Generate recommendations
@@ -430,6 +470,7 @@ class ExperienceLearner:
 
         return recommendations
 
+
 # Test function
 if __name__ == "__main__":
     learner = ExperienceLearner()
@@ -440,7 +481,7 @@ if __name__ == "__main__":
         action="Used auto-resolve strategy",
         result="Successfully resolved 2/3 conflicts",
         success=True,
-        performance_metrics={"time_taken": 30, "success_rate": 0.67}
+        performance_metrics={"time_taken": 30, "success_rate": 0.67},
     )
 
     learner.record_experience(
@@ -448,7 +489,7 @@ if __name__ == "__main__":
         action="Implemented security recommendations",
         result="Security score improved to 0.85",
         success=True,
-        performance_metrics={"security_score": 0.85, "time_taken": 45}
+        performance_metrics={"security_score": 0.85, "time_taken": 45},
     )
 
     # Learn from experiences

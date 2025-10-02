@@ -73,8 +73,18 @@ class SQLiDetector(BaseDetector):
 
         # Check for SQL-like keywords
         sql_keywords = [
-            "SELECT", "FROM", "WHERE", "INSERT", "UPDATE", "DELETE",
-            "DROP", "CREATE", "ALTER", "UNION", "OR", "AND"
+            "SELECT",
+            "FROM",
+            "WHERE",
+            "INSERT",
+            "UPDATE",
+            "DELETE",
+            "DROP",
+            "CREATE",
+            "ALTER",
+            "UNION",
+            "OR",
+            "AND",
         ]
 
         sql_keyword_count = 0
@@ -112,6 +122,6 @@ class SQLiDetector(BaseDetector):
                 "test_sqli_found": test_sqli_found,
                 "sql_keyword_count": sql_keyword_count,
                 "suspicious_concatenation": suspicious_concatenation,
-                "total_sqli_matches": len(sqli_matches)
-            }
+                "total_sqli_matches": len(sqli_matches),
+            },
         }

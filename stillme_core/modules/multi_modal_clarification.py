@@ -23,9 +23,11 @@ from PIL import Image
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class MultiModalResult:
     """Result of multi-modal clarification analysis"""
+
     needs_clarification: bool
     input_type: str  # "text", "code", "image", "mixed"
     question: Optional[str]
@@ -39,6 +41,7 @@ class MultiModalResult:
     max_rounds: int = 2
     trace_id: Optional[str] = None
 
+
 class VisualClarifier:
     """
     Handles image analysis and clarification for visual inputs.
@@ -48,7 +51,9 @@ class VisualClarifier:
     def __init__(self, config: dict[str, Any]):
         self.config = config
         self.max_size_mb = config.get("max_image_size_mb", 10)
-        self.supported_formats = config.get("supported_image_formats", ["jpg", "jpeg", "png", "gif", "webp"])
+        self.supported_formats = config.get(
+            "supported_image_formats", ["jpg", "jpeg", "png", "gif", "webp"]
+        )
         self.analysis_mode = config.get("image_analysis", "stub")
 
     def _validate_image(self, image_data: Union[bytes, str]) -> dict[str, Any]:
@@ -63,7 +68,10 @@ class VisualClarifier:
             # Check size
             size_mb = len(image_bytes) / (1024 * 1024)
             if size_mb > self.max_size_mb:
-                return {"valid": False, "error": f"Image too large: {size_mb:.1f}MB > {self.max_size_mb}MB"}
+                return {
+                    "valid": False,
+                    "error": f"Image too large: {size_mb:.1f}MB > {self.max_size_mb}MB",
+                }
 
             # Try to open with PIL
             image = Image.open(io.BytesIO(image_bytes))
@@ -78,7 +86,7 @@ class VisualClarifier:
                 "size": image.size,
                 "mode": image.mode,
                 "size_mb": size_mb,
-                "hash": hashlib.sha256(image_bytes).hexdigest()[:16]
+                "hash": hashlib.sha256(image_bytes).hexdigest()[:16],
             }
         except Exception as e:
             return {"valid": False, "error": f"Invalid image data: {str(e)}"}
@@ -93,31 +101,56 @@ class VisualClarifier:
             # Wide image - likely diagram or chart
             return {
                 "question": "I see a wide diagram or chart. What specific aspect would you like me to focus on?",
-                "options": ["Data analysis", "Layout optimization", "Content explanation", "Design improvement"],
+                "options": [
+                    "Data analysis",
+                    "Layout optimization",
+                    "Content explanation",
+                    "Design improvement",
+                ],
                 "confidence": 0.7,
                 "detected_objects": ["diagram", "chart", "wide_layout"],
-                "suggestions": ["Analyze the data", "Improve the layout", "Explain the content"]
+                "suggestions": [
+                    "Analyze the data",
+                    "Improve the layout",
+                    "Explain the content",
+                ],
             }
         elif aspect_ratio < 0.5:
             # Tall image - likely document or code
             return {
                 "question": "I see a tall document or code snippet. What would you like me to help with?",
-                "options": ["Code review", "Documentation", "Bug fixing", "Optimization"],
+                "options": [
+                    "Code review",
+                    "Documentation",
+                    "Bug fixing",
+                    "Optimization",
+                ],
                 "confidence": 0.8,
                 "detected_objects": ["document", "code", "text"],
-                "suggestions": ["Review the code", "Improve documentation", "Fix bugs"]
+                "suggestions": ["Review the code", "Improve documentation", "Fix bugs"],
             }
         else:
             # Square-ish image - likely UI or general content
             return {
                 "question": "I see an image. What specific area would you like me to analyze?",
-                "options": ["UI/UX review", "Content analysis", "Design feedback", "Accessibility check"],
+                "options": [
+                    "UI/UX review",
+                    "Content analysis",
+                    "Design feedback",
+                    "Accessibility check",
+                ],
                 "confidence": 0.6,
                 "detected_objects": ["ui", "content", "design"],
-                "suggestions": ["Review UI/UX", "Analyze content", "Check accessibility"]
+                "suggestions": [
+                    "Review UI/UX",
+                    "Analyze content",
+                    "Check accessibility",
+                ],
             }
 
-    def analyze(self, image_data: Union[bytes, str], context: dict[str, Any] = None) -> MultiModalResult:
+    def analyze(
+        self, image_data: Union[bytes, str], context: dict[str, Any] = None
+    ) -> MultiModalResult:
         """
         Analyze image and generate clarification questions
 
@@ -136,10 +169,14 @@ class VisualClarifier:
                     needs_clarification=True,
                     input_type="image",
                     question=f"Image validation failed: {validation['error']}. Would you like to try a different image?",
-                    options=["Try different image", "Describe the image", "Skip image analysis"],
+                    options=[
+                        "Try different image",
+                        "Describe the image",
+                        "Skip image analysis",
+                    ],
                     confidence=0.9,
                     reasoning="Image validation failed",
-                    metadata={"validation_error": validation["error"]}
+                    metadata={"validation_error": validation["error"]},
                 )
 
             # Perform analysis based on mode
@@ -159,10 +196,10 @@ class VisualClarifier:
                 metadata={
                     "image_metadata": validation,
                     "analysis_result": analysis_result,
-                    "analysis_mode": self.analysis_mode
+                    "analysis_mode": self.analysis_mode,
                 },
                 suggestions=analysis_result.get("suggestions"),
-                domain="visual"
+                domain="visual",
             )
 
         except Exception as e:
@@ -171,11 +208,16 @@ class VisualClarifier:
                 needs_clarification=True,
                 input_type="image",
                 question="I encountered an error analyzing the image. Could you describe what you'd like me to help with?",
-                options=["Describe the image", "Try different image", "Skip image analysis"],
+                options=[
+                    "Describe the image",
+                    "Try different image",
+                    "Skip image analysis",
+                ],
                 confidence=0.5,
                 reasoning=f"Analysis error: {str(e)}",
-                metadata={"error": str(e)}
+                metadata={"error": str(e)},
             )
+
 
 class CodeClarifier:
     """
@@ -185,36 +227,74 @@ class CodeClarifier:
     def __init__(self, config: dict[str, Any]):
         self.config = config
         self.analysis_mode = config.get("code_analysis", "ast")
-        self.supported_languages = config.get("code_languages", ["python", "javascript", "typescript", "java", "cpp", "go", "rust"])
+        self.supported_languages = config.get(
+            "code_languages",
+            ["python", "javascript", "typescript", "java", "cpp", "go", "rust"],
+        )
 
     def _detect_language(self, code: str) -> str:
         """Detect programming language from code snippet"""
         code_lower = code.lower().strip()
 
         # Python indicators
-        if any(keyword in code_lower for keyword in ["def ", "import ", "from ", "class ", "if __name__"]):
+        if any(
+            keyword in code_lower
+            for keyword in ["def ", "import ", "from ", "class ", "if __name__"]
+        ):
             return "python"
 
         # JavaScript/TypeScript indicators
-        if any(keyword in code_lower for keyword in ["function", "const ", "let ", "var ", "=>", "interface", "type "]):
+        if any(
+            keyword in code_lower
+            for keyword in [
+                "function",
+                "const ",
+                "let ",
+                "var ",
+                "=>",
+                "interface",
+                "type ",
+            ]
+        ):
             if "interface " in code_lower or "type " in code_lower:
                 return "typescript"
             return "javascript"
 
         # Java indicators
-        if any(keyword in code_lower for keyword in ["public class", "private ", "public ", "import java"]):
+        if any(
+            keyword in code_lower
+            for keyword in ["public class", "private ", "public ", "import java"]
+        ):
             return "java"
 
         # C++ indicators
-        if any(keyword in code_lower for keyword in ["#include", "std::", "namespace ", "class "]) and "def " not in code_lower:
+        if (
+            any(
+                keyword in code_lower
+                for keyword in ["#include", "std::", "namespace ", "class "]
+            )
+            and "def " not in code_lower
+        ):
             return "cpp"
 
         # Go indicators
-        if any(keyword in code_lower for keyword in ["package ", "func ", "import (", "var "]) and "def " not in code_lower:
+        if (
+            any(
+                keyword in code_lower
+                for keyword in ["package ", "func ", "import (", "var "]
+            )
+            and "def " not in code_lower
+        ):
             return "go"
 
         # Rust indicators
-        if any(keyword in code_lower for keyword in ["fn ", "let ", "use ", "mod ", "struct "]) and "def " not in code_lower:
+        if (
+            any(
+                keyword in code_lower
+                for keyword in ["fn ", "let ", "use ", "mod ", "struct "]
+            )
+            and "def " not in code_lower
+        ):
             return "rust"
 
         return "unknown"
@@ -232,20 +312,24 @@ class CodeClarifier:
 
             for node in ast.walk(tree):
                 if isinstance(node, ast.FunctionDef):
-                    functions.append({
-                        "name": node.name,
-                        "args": [arg.arg for arg in node.args.args],
-                        "line": node.lineno
-                    })
+                    functions.append(
+                        {
+                            "name": node.name,
+                            "args": [arg.arg for arg in node.args.args],
+                            "line": node.lineno,
+                        }
+                    )
                 elif isinstance(node, ast.ClassDef):
-                    classes.append({
-                        "name": node.name,
-                        "line": node.lineno
-                    })
+                    classes.append({"name": node.name, "line": node.lineno})
                 elif isinstance(node, ast.Import):
                     imports.extend([alias.name for alias in node.names])
                 elif isinstance(node, ast.ImportFrom):
-                    imports.extend([f"{node.module}.{alias.name}" if node.module else alias.name for alias in node.names])
+                    imports.extend(
+                        [
+                            f"{node.module}.{alias.name}" if node.module else alias.name
+                            for alias in node.names
+                        ]
+                    )
                 elif isinstance(node, ast.Assign):
                     for target in node.targets:
                         if isinstance(target, ast.Name):
@@ -256,28 +340,36 @@ class CodeClarifier:
                 "classes": classes,
                 "imports": imports,
                 "variables": variables,
-                "valid": True
+                "valid": True,
             }
         except SyntaxError as e:
             return {
                 "valid": False,
                 "error": f"Syntax error: {str(e)}",
-                "line": getattr(e, 'lineno', None)
+                "line": getattr(e, "lineno", None),
             }
         except Exception as e:
-            return {
-                "valid": False,
-                "error": f"Analysis error: {str(e)}"
-            }
+            return {"valid": False, "error": f"Analysis error: {str(e)}"}
 
-    def _generate_code_question(self, analysis: dict[str, Any], language: str) -> dict[str, Any]:
+    def _generate_code_question(
+        self, analysis: dict[str, Any], language: str
+    ) -> dict[str, Any]:
         """Generate clarification question based on code analysis"""
         if not analysis.get("valid", False):
             return {
                 "question": f"Your {language} code has a syntax error. Would you like me to help fix it first?",
-                "options": ["Fix syntax error", "Explain the error", "Rewrite the code", "Skip this code"],
+                "options": [
+                    "Fix syntax error",
+                    "Explain the error",
+                    "Rewrite the code",
+                    "Skip this code",
+                ],
                 "confidence": 0.9,
-                "suggestions": ["Fix the syntax", "Explain the error", "Provide alternative"]
+                "suggestions": [
+                    "Fix the syntax",
+                    "Explain the error",
+                    "Provide alternative",
+                ],
             }
 
         functions = analysis.get("functions", [])
@@ -287,39 +379,72 @@ class CodeClarifier:
         if functions and classes:
             return {
                 "question": f"I see {len(functions)} functions and {len(classes)} classes. What would you like me to focus on?",
-                "options": [f"Function: {f['name']}" for f in functions[:3]] + [f"Class: {c['name']}" for c in classes[:2]],
+                "options": [f"Function: {f['name']}" for f in functions[:3]]
+                + [f"Class: {c['name']}" for c in classes[:2]],
                 "confidence": 0.8,
-                "suggestions": ["Review functions", "Analyze classes", "Check imports", "Optimize code"]
+                "suggestions": [
+                    "Review functions",
+                    "Analyze classes",
+                    "Check imports",
+                    "Optimize code",
+                ],
             }
         elif functions:
             if len(functions) == 1:
                 func = functions[0]
                 return {
                     "question": f"I see the function '{func['name']}'. What would you like me to help with?",
-                    "options": ["Review the function", "Optimize performance", "Add error handling", "Write tests"],
+                    "options": [
+                        "Review the function",
+                        "Optimize performance",
+                        "Add error handling",
+                        "Write tests",
+                    ],
                     "confidence": 0.8,
-                    "suggestions": ["Code review", "Performance optimization", "Add tests"]
+                    "suggestions": [
+                        "Code review",
+                        "Performance optimization",
+                        "Add tests",
+                    ],
                 }
             else:
                 return {
                     "question": f"I see {len(functions)} functions. Which one would you like me to focus on?",
                     "options": [f["name"] for f in functions[:4]],
                     "confidence": 0.7,
-                    "suggestions": ["Review all functions", "Focus on specific function", "Check function interactions"]
+                    "suggestions": [
+                        "Review all functions",
+                        "Focus on specific function",
+                        "Check function interactions",
+                    ],
                 }
         elif classes:
             return {
                 "question": f"I see {len(classes)} classes. What would you like me to help with?",
-                "options": [f"Class: {c['name']}" for c in classes[:3]] + ["Class relationships", "Design patterns"],
+                "options": [f"Class: {c['name']}" for c in classes[:3]]
+                + ["Class relationships", "Design patterns"],
                 "confidence": 0.7,
-                "suggestions": ["Review class design", "Check inheritance", "Optimize structure"]
+                "suggestions": [
+                    "Review class design",
+                    "Check inheritance",
+                    "Optimize structure",
+                ],
             }
         else:
             return {
                 "question": "I see some code but couldn't identify specific functions or classes. What would you like me to help with?",
-                "options": ["Code review", "Add functionality", "Fix bugs", "Optimize performance"],
+                "options": [
+                    "Code review",
+                    "Add functionality",
+                    "Fix bugs",
+                    "Optimize performance",
+                ],
                 "confidence": 0.6,
-                "suggestions": ["General code review", "Add features", "Performance optimization"]
+                "suggestions": [
+                    "General code review",
+                    "Add features",
+                    "Performance optimization",
+                ],
             }
 
     def analyze(self, code: str, context: dict[str, Any] = None) -> MultiModalResult:
@@ -345,8 +470,8 @@ class CodeClarifier:
                 analysis = {
                     "valid": True,
                     "language": language,
-                    "lines": len(code.split('\n')),
-                    "characters": len(code)
+                    "lines": len(code.split("\n")),
+                    "characters": len(code),
                 }
 
             # Generate question
@@ -362,10 +487,10 @@ class CodeClarifier:
                 metadata={
                     "language": language,
                     "analysis": analysis,
-                    "analysis_mode": self.analysis_mode
+                    "analysis_mode": self.analysis_mode,
                 },
                 suggestions=question_data.get("suggestions"),
-                domain="code"
+                domain="code",
             )
 
         except Exception as e:
@@ -374,11 +499,17 @@ class CodeClarifier:
                 needs_clarification=True,
                 input_type="code",
                 question="I encountered an error analyzing the code. Could you tell me what you'd like me to help with?",
-                options=["Code review", "Bug fixing", "Add features", "Optimize performance"],
+                options=[
+                    "Code review",
+                    "Bug fixing",
+                    "Add features",
+                    "Optimize performance",
+                ],
                 confidence=0.5,
                 reasoning=f"Analysis error: {str(e)}",
-                metadata={"error": str(e)}
+                metadata={"error": str(e)},
             )
+
 
 class TextClarifier:
     """
@@ -391,18 +522,63 @@ class TextClarifier:
         self.analysis_mode = config.get("text_analysis", "enhanced")
         self.context_aware_clarifier = context_aware_clarifier
 
-    def _enhanced_text_analysis(self, text: str, context: dict[str, Any] = None) -> dict[str, Any]:
+    def _enhanced_text_analysis(
+        self, text: str, context: dict[str, Any] = None
+    ) -> dict[str, Any]:
         """Enhanced text analysis with domain detection and intent classification"""
         text_lower = text.lower()
 
         # Domain detection
         domain_indicators = {
-            "web": ["website", "app", "frontend", "backend", "api", "react", "vue", "angular"],
-            "data": ["data", "csv", "json", "database", "sql", "analysis", "visualization"],
-            "ml": ["model", "ai", "machine learning", "neural", "training", "prediction"],
-            "devops": ["deploy", "docker", "kubernetes", "ci/cd", "infrastructure", "cloud"],
-            "security": ["security", "auth", "encryption", "vulnerability", "penetration"],
-            "performance": ["optimize", "performance", "speed", "efficiency", "scalability"]
+            "web": [
+                "website",
+                "app",
+                "frontend",
+                "backend",
+                "api",
+                "react",
+                "vue",
+                "angular",
+            ],
+            "data": [
+                "data",
+                "csv",
+                "json",
+                "database",
+                "sql",
+                "analysis",
+                "visualization",
+            ],
+            "ml": [
+                "model",
+                "ai",
+                "machine learning",
+                "neural",
+                "training",
+                "prediction",
+            ],
+            "devops": [
+                "deploy",
+                "docker",
+                "kubernetes",
+                "ci/cd",
+                "infrastructure",
+                "cloud",
+            ],
+            "security": [
+                "security",
+                "auth",
+                "encryption",
+                "vulnerability",
+                "penetration",
+            ],
+            "performance": [
+                "optimize",
+                "performance",
+                "speed",
+                "efficiency",
+                "scalability",
+            ],
         }
 
         detected_domains = []
@@ -416,7 +592,7 @@ class TextClarifier:
             "fix": ["fix", "debug", "error", "bug", "issue", "problem"],
             "optimize": ["optimize", "improve", "enhance", "better", "faster"],
             "explain": ["explain", "how", "what", "why", "understand"],
-            "review": ["review", "check", "analyze", "evaluate", "assess"]
+            "review": ["review", "check", "analyze", "evaluate", "assess"],
         }
 
         detected_intents = []
@@ -429,7 +605,10 @@ class TextClarifier:
             "intents": detected_intents,
             "length": len(text),
             "word_count": len(text.split()),
-            "has_technical_terms": any(term in text_lower for term in ["api", "database", "algorithm", "framework", "library"])
+            "has_technical_terms": any(
+                term in text_lower
+                for term in ["api", "database", "algorithm", "framework", "library"]
+            ),
         }
 
     def analyze(self, text: str, context: dict[str, Any] = None) -> MultiModalResult:
@@ -467,9 +646,9 @@ class TextClarifier:
                         metadata={
                             "analysis": analysis,
                             "context_aware": True,
-                            "source": result.get("source", "enhanced")
+                            "source": result.get("source", "enhanced"),
                         },
-                        domain=result.get("domain")
+                        domain=result.get("domain"),
                     )
                 except Exception as e:
                     logger.warning(f"Context-aware clarification failed: {e}")
@@ -486,12 +665,16 @@ class TextClarifier:
                 options = [
                     f"{primary_intent.title()} {primary_domain} component",
                     f"{primary_intent.title()} {primary_domain} architecture",
-                    f"{primary_intent.title()} {primary_domain} performance"
+                    f"{primary_intent.title()} {primary_domain} performance",
                 ]
                 confidence = 0.7
             else:
                 question = "Could you provide more details about what you'd like me to help with?"
-                options = ["Provide more context", "Give specific examples", "Clarify the goal"]
+                options = [
+                    "Provide more context",
+                    "Give specific examples",
+                    "Clarify the goal",
+                ]
                 confidence = 0.5
 
             return MultiModalResult(
@@ -502,7 +685,7 @@ class TextClarifier:
                 confidence=confidence,
                 reasoning=f"Enhanced text analysis: domains={domains}, intents={intents}",
                 metadata={"analysis": analysis, "context_aware": False},
-                domain=domains[0] if domains else "generic"
+                domain=domains[0] if domains else "generic",
             )
 
         except Exception as e:
@@ -511,11 +694,16 @@ class TextClarifier:
                 needs_clarification=True,
                 input_type="text",
                 question="I need more information to help you effectively. Could you provide more details?",
-                options=["Provide more context", "Give specific examples", "Clarify the goal"],
+                options=[
+                    "Provide more context",
+                    "Give specific examples",
+                    "Clarify the goal",
+                ],
                 confidence=0.5,
                 reasoning=f"Analysis error: {str(e)}",
-                metadata={"error": str(e)}
+                metadata={"error": str(e)},
             )
+
 
 class MultiModalClarifier:
     """
@@ -534,16 +722,16 @@ class MultiModalClarifier:
 
         # Input detection patterns
         self.code_patterns = [
-            r'```[\w]*\n.*?\n```',  # Code blocks
-            r'def\s+\w+\s*\(',      # Python functions
-            r'function\s+\w+\s*\(', # JavaScript functions
-            r'class\s+\w+',         # Classes
-            r'import\s+\w+',        # Imports
+            r"```[\w]*\n.*?\n```",  # Code blocks
+            r"def\s+\w+\s*\(",  # Python functions
+            r"function\s+\w+\s*\(",  # JavaScript functions
+            r"class\s+\w+",  # Classes
+            r"import\s+\w+",  # Imports
         ]
 
         self.image_patterns = [
-            r'data:image/[^;]+;base64,',  # Base64 images
-            r'\.(jpg|jpeg|png|gif|webp)', # Image file extensions
+            r"data:image/[^;]+;base64,",  # Base64 images
+            r"\.(jpg|jpeg|png|gif|webp)",  # Image file extensions
         ]
 
     def _detect_input_type(self, content: str) -> str:
@@ -559,8 +747,14 @@ class MultiModalClarifier:
                 return "image"
 
         # Check for mixed content
-        has_code = any(re.search(pattern, content, re.DOTALL | re.IGNORECASE) for pattern in self.code_patterns)
-        has_image = any(re.search(pattern, content, re.IGNORECASE) for pattern in self.image_patterns)
+        has_code = any(
+            re.search(pattern, content, re.DOTALL | re.IGNORECASE)
+            for pattern in self.code_patterns
+        )
+        has_image = any(
+            re.search(pattern, content, re.IGNORECASE)
+            for pattern in self.image_patterns
+        )
 
         if has_code and has_image:
             return "mixed"
@@ -575,7 +769,7 @@ class MultiModalClarifier:
         """Extract code blocks from mixed content"""
         code_blocks = []
         # Extract ```code``` blocks
-        pattern = r'```[\w]*\n(.*?)\n```'
+        pattern = r"```[\w]*\n(.*?)\n```"
         matches = re.findall(pattern, content, re.DOTALL)
         code_blocks.extend(matches)
 
@@ -590,12 +784,12 @@ class MultiModalClarifier:
         """Extract image data from mixed content"""
         images = []
         # Extract base64 images
-        pattern = r'data:image/[^;]+;base64,([A-Za-z0-9+/=]+)'
+        pattern = r"data:image/[^;]+;base64,([A-Za-z0-9+/=]+)"
         matches = re.findall(pattern, content)
         images.extend(matches)
 
         # Extract image file references
-        pattern = r'[^\s]+\.(jpg|jpeg|png|gif|webp)'
+        pattern = r"[^\s]+\.(jpg|jpeg|png|gif|webp)"
         matches = re.findall(pattern, content, re.IGNORECASE)
         images.extend(matches)
 
@@ -620,7 +814,7 @@ class MultiModalClarifier:
                 options=None,
                 confidence=1.0,
                 reasoning="Multi-modal clarification disabled",
-                metadata={"disabled": True}
+                metadata={"disabled": True},
             )
 
         try:
@@ -659,15 +853,24 @@ class MultiModalClarifier:
                         needs_clarification=True,
                         input_type="mixed",
                         question="I see both code and images. What would you like me to focus on?",
-                        options=["Analyze the code", "Analyze the images", "Analyze both together", "Focus on specific part"],
+                        options=[
+                            "Analyze the code",
+                            "Analyze the images",
+                            "Analyze both together",
+                            "Focus on specific part",
+                        ],
                         confidence=0.8,
                         reasoning="Mixed content detected: code and images",
                         metadata={
                             "code_blocks": len(code_blocks),
                             "images": len(image_data),
-                            "mixed_content": True
+                            "mixed_content": True,
                         },
-                        suggestions=["Code analysis", "Image analysis", "Combined analysis"]
+                        suggestions=[
+                            "Code analysis",
+                            "Image analysis",
+                            "Combined analysis",
+                        ],
                     )
                 elif code_blocks:
                     return self.code_clarifier.analyze(code_blocks[0], context)
@@ -686,8 +889,12 @@ class MultiModalClarifier:
                 needs_clarification=True,
                 input_type="unknown",
                 question="I encountered an error analyzing your input. Could you provide more details?",
-                options=["Provide more context", "Try different format", "Describe what you need"],
+                options=[
+                    "Provide more context",
+                    "Try different format",
+                    "Describe what you need",
+                ],
                 confidence=0.5,
                 reasoning=f"Analysis error: {str(e)}",
-                metadata={"error": str(e)}
+                metadata={"error": str(e)},
             )

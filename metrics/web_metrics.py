@@ -8,9 +8,11 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class WebRequest:
     """Web request data"""
+
     url: str
     method: str
     status_code: int
@@ -19,9 +21,11 @@ class WebRequest:
     user_agent: Optional[str] = None
     ip_address: Optional[str] = None
 
+
 @dataclass
 class WebMetrics:
     """Web metrics data"""
+
     total_requests: int = 0
     successful_requests: int = 0
     failed_requests: int = 0
@@ -30,6 +34,7 @@ class WebMetrics:
     max_response_time: float = 0.0
     requests_per_minute: float = 0.0
     error_rate: float = 0.0
+
 
 class WebMetricsCollector:
     """Web metrics collector for monitoring web traffic and performance"""
@@ -41,9 +46,15 @@ class WebMetricsCollector:
         self.cache_timestamp = 0
         self.cache_duration = 60  # Cache for 1 minute
 
-    def record_request(self, url: str, method: str, status_code: int,
-                      response_time: float, user_agent: str = None,
-                      ip_address: str = None) -> None:
+    def record_request(
+        self,
+        url: str,
+        method: str,
+        status_code: int,
+        response_time: float,
+        user_agent: str = None,
+        ip_address: str = None,
+    ) -> None:
         """Record a web request"""
         request = WebRequest(
             url=url,
@@ -52,11 +63,13 @@ class WebMetricsCollector:
             response_time=response_time,
             timestamp=datetime.now().isoformat(),
             user_agent=user_agent,
-            ip_address=ip_address
+            ip_address=ip_address,
         )
 
         self.requests.append(request)
-        self.logger.debug(f"Recorded request: {method} {url} - {status_code} ({response_time:.3f}s)")
+        self.logger.debug(
+            f"Recorded request: {method} {url} - {status_code} ({response_time:.3f}s)"
+        )
 
         # Invalidate cache
         self.metrics_cache = None
@@ -66,9 +79,11 @@ class WebMetricsCollector:
         current_time = time.time()
 
         # Return cached metrics if still valid
-        if (not force_refresh and
-            self.metrics_cache and
-            current_time - self.cache_timestamp < self.cache_duration):
+        if (
+            not force_refresh
+            and self.metrics_cache
+            and current_time - self.cache_timestamp < self.cache_duration
+        ):
             return self.metrics_cache
 
         # Calculate fresh metrics
@@ -76,7 +91,9 @@ class WebMetricsCollector:
             return WebMetrics()
 
         total_requests = len(self.requests)
-        successful_requests = len([r for r in self.requests if 200 <= r.status_code < 300])
+        successful_requests = len(
+            [r for r in self.requests if 200 <= r.status_code < 300]
+        )
         failed_requests = total_requests - successful_requests
 
         response_times = [r.response_time for r in self.requests]
@@ -85,11 +102,16 @@ class WebMetricsCollector:
         max_response_time = max(response_times)
 
         # Calculate requests per minute (last 60 seconds)
-        recent_requests = [r for r in self.requests
-                          if (datetime.now() - datetime.fromisoformat(r.timestamp)).seconds < 60]
+        recent_requests = [
+            r
+            for r in self.requests
+            if (datetime.now() - datetime.fromisoformat(r.timestamp)).seconds < 60
+        ]
         requests_per_minute = len(recent_requests)
 
-        error_rate = (failed_requests / total_requests) * 100 if total_requests > 0 else 0.0
+        error_rate = (
+            (failed_requests / total_requests) * 100 if total_requests > 0 else 0.0
+        )
 
         self.metrics_cache = WebMetrics(
             total_requests=total_requests,
@@ -99,7 +121,7 @@ class WebMetricsCollector:
             min_response_time=round(min_response_time, 3),
             max_response_time=round(max_response_time, 3),
             requests_per_minute=requests_per_minute,
-            error_rate=round(error_rate, 2)
+            error_rate=round(error_rate, 2),
         )
 
         self.cache_timestamp = current_time
@@ -161,7 +183,7 @@ class WebMetricsCollector:
                 "error_rate": metrics.error_rate,
                 "popular_endpoints": self.get_popular_endpoints(5),
                 "slow_requests_count": len(self.get_slow_requests()),
-                "error_requests_count": len(self.get_error_requests())
+                "error_requests_count": len(self.get_error_requests()),
             }
         else:
             return {"error": f"Unsupported format: {format}"}
@@ -178,34 +200,50 @@ class WebMetricsCollector:
         cutoff_time = datetime.now().timestamp() - (max_age_hours * 3600)
 
         initial_count = len(self.requests)
-        self.requests = [r for r in self.requests
-                        if datetime.fromisoformat(r.timestamp).timestamp() > cutoff_time]
+        self.requests = [
+            r
+            for r in self.requests
+            if datetime.fromisoformat(r.timestamp).timestamp() > cutoff_time
+        ]
 
         removed_count = initial_count - len(self.requests)
         if removed_count > 0:
             self.logger.info(f"Cleaned up {removed_count} old requests")
             self.metrics_cache = None  # Invalidate cache
 
+
 # Global instance for backward compatibility
 _global_collector = WebMetricsCollector()
+
 
 def web_metrics() -> WebMetrics:
     """Get current web metrics (global function)"""
     return _global_collector.get_metrics()
 
-def record_request(url: str, method: str, status_code: int,
-                  response_time: float, user_agent: str = None,
-                  ip_address: str = None) -> None:
+
+def record_request(
+    url: str,
+    method: str,
+    status_code: int,
+    response_time: float,
+    user_agent: str = None,
+    ip_address: str = None,
+) -> None:
     """Record a web request (global function)"""
-    _global_collector.record_request(url, method, status_code, response_time, user_agent, ip_address)
+    _global_collector.record_request(
+        url, method, status_code, response_time, user_agent, ip_address
+    )
+
 
 def get_web_metrics() -> WebMetrics:
     """Alias for web_metrics()"""
     return web_metrics()
 
+
 def reset_web_metrics() -> None:
     """Reset global web metrics"""
     _global_collector.reset_metrics()
+
 
 def export_web_metrics(format: str = "dict") -> dict[str, Any]:
     """Export global web metrics"""

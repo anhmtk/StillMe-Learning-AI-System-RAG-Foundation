@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 class PolicyLevel(Enum):
     """Policy levels for controlling AI behavior."""
+
     STRICT = "strict"
     BALANCED = "balanced"
     CREATIVE = "creative"
@@ -21,6 +22,7 @@ class PolicyLevel(Enum):
 @dataclass
 class PolicyConfig:
     """Configuration for policy control."""
+
     level: PolicyLevel
     max_clarification_rounds: int
     confidence_threshold: float
@@ -48,7 +50,7 @@ class PolicyController:
                 abuse_detection_enabled=True,
                 proactive_suggestions_enabled=False,
                 dry_run=False,
-                custom_rules={}
+                custom_rules={},
             ),
             PolicyLevel.BALANCED: PolicyConfig(
                 level=PolicyLevel.BALANCED,
@@ -57,7 +59,7 @@ class PolicyController:
                 abuse_detection_enabled=True,
                 proactive_suggestions_enabled=True,
                 dry_run=False,
-                custom_rules={}
+                custom_rules={},
             ),
             PolicyLevel.CREATIVE: PolicyConfig(
                 level=PolicyLevel.CREATIVE,
@@ -66,8 +68,8 @@ class PolicyController:
                 abuse_detection_enabled=False,
                 proactive_suggestions_enabled=True,
                 dry_run=False,
-                custom_rules={}
-            )
+                custom_rules={},
+            ),
         }
 
         # Apply custom rules
@@ -149,14 +151,16 @@ class PolicyController:
             "errors": [],
             "warnings": [],
             "policy_level": self.policy_level.value,
-            "dry_run": self.dry_run
+            "dry_run": self.dry_run,
         }
 
         # Check if request is too long (basic validation)
         if "prompt" in request:
             prompt_length = len(request["prompt"])
             if prompt_length > 10000:  # 10k character limit
-                validation_result["errors"].append("Prompt too long (max 10000 characters)")
+                validation_result["errors"].append(
+                    "Prompt too long (max 10000 characters)"
+                )
                 validation_result["valid"] = False
 
         # Check for required fields
@@ -168,7 +172,9 @@ class PolicyController:
         if self.policy_level == PolicyLevel.STRICT:
             # Strict validations
             if "prompt" in request and len(request["prompt"].strip()) < 10:
-                validation_result["warnings"].append("Prompt is very short, consider providing more context")
+                validation_result["warnings"].append(
+                    "Prompt is very short, consider providing more context"
+                )
 
         elif self.policy_level == PolicyLevel.CREATIVE:
             # Creative validations (more lenient)
@@ -186,7 +192,7 @@ class PolicyController:
             "abuse_detection_enabled": config.abuse_detection_enabled,
             "proactive_suggestions_enabled": config.proactive_suggestions_enabled,
             "dry_run": self.dry_run,
-            "custom_rules": self.custom_rules
+            "custom_rules": self.custom_rules,
         }
 
 

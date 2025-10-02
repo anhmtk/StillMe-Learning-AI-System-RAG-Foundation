@@ -21,6 +21,7 @@ from pathlib import Path
 @dataclass
 class QualityGate:
     """Quality gate definition"""
+
     name: str
     description: str
     threshold: float
@@ -32,6 +33,7 @@ class QualityGate:
 @dataclass
 class QualityReport:
     """Quality report data structure"""
+
     overall_status: str
     total_gates: int
     passed_gates: int
@@ -59,7 +61,7 @@ class QualityGates:
                 threshold=85.0,
                 current_value=0.0,
                 status="UNKNOWN",
-                weight=0.2
+                weight=0.2,
             ),
             QualityGate(
                 name="test_pass_rate",
@@ -67,7 +69,7 @@ class QualityGates:
                 threshold=90.0,
                 current_value=0.0,
                 status="UNKNOWN",
-                weight=0.15
+                weight=0.15,
             ),
             QualityGate(
                 name="security_score",
@@ -75,7 +77,7 @@ class QualityGates:
                 threshold=75.0,
                 current_value=0.0,
                 status="UNKNOWN",
-                weight=0.25
+                weight=0.25,
             ),
             QualityGate(
                 name="performance_p95",
@@ -83,7 +85,7 @@ class QualityGates:
                 threshold=1000.0,
                 current_value=0.0,
                 status="UNKNOWN",
-                weight=0.15
+                weight=0.15,
             ),
             QualityGate(
                 name="error_rate",
@@ -91,7 +93,7 @@ class QualityGates:
                 threshold=5.0,
                 current_value=0.0,
                 status="UNKNOWN",
-                weight=0.1
+                weight=0.1,
             ),
             QualityGate(
                 name="ethics_compliance",
@@ -99,8 +101,8 @@ class QualityGates:
                 threshold=95.0,
                 current_value=0.0,
                 status="UNKNOWN",
-                weight=0.15
-            )
+                weight=0.15,
+            ),
         ]
 
     def evaluate_gates(self, input_dir: str = "artifacts") -> QualityReport:
@@ -130,7 +132,7 @@ class QualityGates:
             warning_gates=len([g for g in self.gates if g.status == "WARNING"]),
             quality_score=quality_score,
             gates=self.gates,
-            recommendations=recommendations
+            recommendations=recommendations,
         )
 
     def _load_metrics_from_artifacts(self, input_dir: str) -> dict[str, float]:
@@ -148,8 +150,10 @@ class QualityGates:
             try:
                 with open(coverage_file) as f:
                     data = json.load(f)
-                if 'totals' in data:
-                    metrics['test_coverage'] = data['totals'].get('percent_covered', 0.0)
+                if "totals" in data:
+                    metrics["test_coverage"] = data["totals"].get(
+                        "percent_covered", 0.0
+                    )
                 break
             except Exception as e:
                 print(f"⚠️ Error reading coverage file {coverage_file}: {e}")
@@ -160,11 +164,11 @@ class QualityGates:
             try:
                 with open(test_file) as f:
                     data = json.load(f)
-                if 'tests' in data and 'passed' in data:
-                    total_tests = data['tests']
-                    passed_tests = data['passed']
+                if "tests" in data and "passed" in data:
+                    total_tests = data["tests"]
+                    passed_tests = data["passed"]
                     if total_tests > 0:
-                        metrics['test_pass_rate'] = (passed_tests / total_tests) * 100
+                        metrics["test_pass_rate"] = (passed_tests / total_tests) * 100
                 break
             except Exception as e:
                 print(f"⚠️ Error reading test file {test_file}: {e}")
@@ -175,19 +179,21 @@ class QualityGates:
             try:
                 with open(security_file) as f:
                     data = json.load(f)
-                if 'security_score' in data:
-                    metrics['security_score'] = data['security_score']
-                elif 'vulnerabilities' in data:
+                if "security_score" in data:
+                    metrics["security_score"] = data["security_score"]
+                elif "vulnerabilities" in data:
                     # Calculate security score from vulnerabilities
-                    vulns = data['vulnerabilities']
-                    critical = vulns.get('critical', 0)
-                    high = vulns.get('high', 0)
-                    medium = vulns.get('medium', 0)
-                    low = vulns.get('low', 0)
+                    vulns = data["vulnerabilities"]
+                    critical = vulns.get("critical", 0)
+                    high = vulns.get("high", 0)
+                    medium = vulns.get("medium", 0)
+                    low = vulns.get("low", 0)
 
                     # Simple scoring: start at 100, subtract based on severity
-                    score = 100 - (critical * 20) - (high * 10) - (medium * 5) - (low * 1)
-                    metrics['security_score'] = max(0, score)
+                    score = (
+                        100 - (critical * 20) - (high * 10) - (medium * 5) - (low * 1)
+                    )
+                    metrics["security_score"] = max(0, score)
                 break
             except Exception as e:
                 print(f"⚠️ Error reading security file {security_file}: {e}")
@@ -198,10 +204,12 @@ class QualityGates:
             try:
                 with open(perf_file) as f:
                     data = json.load(f)
-                if 'metrics' in data:
-                    metrics_data = data['metrics']
-                    metrics['performance_p95'] = metrics_data.get('p95_response_time', 0.0)
-                    metrics['error_rate'] = metrics_data.get('error_rate', 0.0)
+                if "metrics" in data:
+                    metrics_data = data["metrics"]
+                    metrics["performance_p95"] = metrics_data.get(
+                        "p95_response_time", 0.0
+                    )
+                    metrics["error_rate"] = metrics_data.get("error_rate", 0.0)
                 break
             except Exception as e:
                 print(f"⚠️ Error reading performance file {perf_file}: {e}")
@@ -212,11 +220,13 @@ class QualityGates:
             try:
                 with open(ethics_file) as f:
                     data = json.load(f)
-                if 'pass_rate' in data:
-                    metrics['ethics_compliance'] = data['pass_rate']
-                elif 'passed' in data and 'total' in data:
-                    if data['total'] > 0:
-                        metrics['ethics_compliance'] = (data['passed'] / data['total']) * 100
+                if "pass_rate" in data:
+                    metrics["ethics_compliance"] = data["pass_rate"]
+                elif "passed" in data and "total" in data:
+                    if data["total"] > 0:
+                        metrics["ethics_compliance"] = (
+                            data["passed"] / data["total"]
+                        ) * 100
                 break
             except Exception as e:
                 print(f"⚠️ Error reading ethics file {ethics_file}: {e}")
@@ -280,32 +290,54 @@ class QualityGates:
 
         # Critical issues (failed gates)
         if failed_gates:
-            recommendations.append("🔴 CRITICAL: Address failed quality gates immediately")
+            recommendations.append(
+                "🔴 CRITICAL: Address failed quality gates immediately"
+            )
             for gate in failed_gates:
                 if gate.name == "test_coverage":
-                    recommendations.append(f"   - Increase test coverage from {gate.current_value:.1f}% to {gate.threshold}%")
+                    recommendations.append(
+                        f"   - Increase test coverage from {gate.current_value:.1f}% to {gate.threshold}%"
+                    )
                 elif gate.name == "test_pass_rate":
-                    recommendations.append(f"   - Fix failing tests to achieve {gate.threshold}% pass rate")
+                    recommendations.append(
+                        f"   - Fix failing tests to achieve {gate.threshold}% pass rate"
+                    )
                 elif gate.name == "security_score":
-                    recommendations.append(f"   - Address security vulnerabilities (current: {gate.current_value:.1f}/100)")
+                    recommendations.append(
+                        f"   - Address security vulnerabilities (current: {gate.current_value:.1f}/100)"
+                    )
                 elif gate.name == "performance_p95":
-                    recommendations.append(f"   - Optimize performance (P95: {gate.current_value:.0f}ms > {gate.threshold}ms)")
+                    recommendations.append(
+                        f"   - Optimize performance (P95: {gate.current_value:.0f}ms > {gate.threshold}ms)"
+                    )
                 elif gate.name == "error_rate":
-                    recommendations.append(f"   - Reduce error rate from {gate.current_value:.1f}% to {gate.threshold}%")
+                    recommendations.append(
+                        f"   - Reduce error rate from {gate.current_value:.1f}% to {gate.threshold}%"
+                    )
                 elif gate.name == "ethics_compliance":
-                    recommendations.append(f"   - Fix ethics test failures (current: {gate.current_value:.1f}%)")
+                    recommendations.append(
+                        f"   - Fix ethics test failures (current: {gate.current_value:.1f}%)"
+                    )
 
         # Warning issues
         if warning_gates:
-            recommendations.append("🟡 WARNING: Monitor and improve warning quality gates")
+            recommendations.append(
+                "🟡 WARNING: Monitor and improve warning quality gates"
+            )
             for gate in warning_gates:
-                recommendations.append(f"   - {gate.description}: {gate.current_value:.1f} (target: {gate.threshold})")
+                recommendations.append(
+                    f"   - {gate.description}: {gate.current_value:.1f} (target: {gate.threshold})"
+                )
 
         # General recommendations
         if not failed_gates and not warning_gates:
-            recommendations.append("✅ All quality gates passed! Maintain current standards.")
+            recommendations.append(
+                "✅ All quality gates passed! Maintain current standards."
+            )
         else:
-            recommendations.append("📊 Implement continuous monitoring to prevent regression")
+            recommendations.append(
+                "📊 Implement continuous monitoring to prevent regression"
+            )
             recommendations.append("🔄 Add automated quality checks to CI/CD pipeline")
             recommendations.append("📚 Provide team training on quality standards")
 
@@ -329,8 +361,16 @@ Generated: {self._get_current_timestamp()}
 """
 
         for gate in report.gates:
-            status_icon = "✅" if gate.status == "PASS" else "⚠️" if gate.status == "WARNING" else "❌"
-            report_content += f"### {status_icon} {gate.name.replace('_', ' ').title()}\n"
+            status_icon = (
+                "✅"
+                if gate.status == "PASS"
+                else "⚠️"
+                if gate.status == "WARNING"
+                else "❌"
+            )
+            report_content += (
+                f"### {status_icon} {gate.name.replace('_', ' ').title()}\n"
+            )
             report_content += f"- **Description**: {gate.description}\n"
             report_content += f"- **Current Value**: {gate.current_value:.1f}\n"
             report_content += f"- **Threshold**: {gate.threshold:.1f}\n"
@@ -379,14 +419,19 @@ Generated: {self._get_current_timestamp()}
     def _get_current_timestamp(self) -> str:
         """Get current timestamp"""
         from datetime import datetime
+
         return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    def save_report(self, report_content: str, output_file: str = "artifacts/quality_gates_report.md"):
+    def save_report(
+        self,
+        report_content: str,
+        output_file: str = "artifacts/quality_gates_report.md",
+    ):
         """Save quality gates report to file"""
         output_path = self.project_root / output_file
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             f.write(report_content)
 
         print(f"📄 Quality gates report saved to: {output_path}")
@@ -412,13 +457,17 @@ Generated: {self._get_current_timestamp()}
             print(f"   Failed Gates: {report.failed_gates}")
             for gate in report.gates:
                 if gate.status == "FAIL":
-                    print(f"     - {gate.name}: {gate.current_value:.1f} (target: {gate.threshold:.1f})")
+                    print(
+                        f"     - {gate.name}: {gate.current_value:.1f} (target: {gate.threshold:.1f})"
+                    )
 
         if report.warning_gates > 0:
             print(f"   Warning Gates: {report.warning_gates}")
             for gate in report.gates:
                 if gate.status == "WARNING":
-                    print(f"     - {gate.name}: {gate.current_value:.1f} (target: {gate.threshold:.1f})")
+                    print(
+                        f"     - {gate.name}: {gate.current_value:.1f} (target: {gate.threshold:.1f})"
+                    )
 
         # Return pass/fail status
         return report.overall_status == "PASS"
@@ -426,14 +475,42 @@ Generated: {self._get_current_timestamp()}
 
 def main():
     """Main function"""
-    parser = argparse.ArgumentParser(description="Quality Gates for StillMe AI Framework")
-    parser.add_argument("--coverage-threshold", type=float, default=85.0, help="Test coverage threshold")
-    parser.add_argument("--security-threshold", type=float, default=75.0, help="Security score threshold")
-    parser.add_argument("--performance-threshold", type=float, default=1000.0, help="Performance P95 threshold")
-    parser.add_argument("--ethics-threshold", type=float, default=95.0, help="Ethics compliance threshold")
-    parser.add_argument("--input", type=str, default="artifacts", help="Input directory for metrics")
-    parser.add_argument("--output", type=str, default="artifacts/quality_gates_report.md", help="Output report file")
-    parser.add_argument("--project-root", type=str, default=".", help="Project root directory")
+    parser = argparse.ArgumentParser(
+        description="Quality Gates for StillMe AI Framework"
+    )
+    parser.add_argument(
+        "--coverage-threshold", type=float, default=85.0, help="Test coverage threshold"
+    )
+    parser.add_argument(
+        "--security-threshold",
+        type=float,
+        default=75.0,
+        help="Security score threshold",
+    )
+    parser.add_argument(
+        "--performance-threshold",
+        type=float,
+        default=1000.0,
+        help="Performance P95 threshold",
+    )
+    parser.add_argument(
+        "--ethics-threshold",
+        type=float,
+        default=95.0,
+        help="Ethics compliance threshold",
+    )
+    parser.add_argument(
+        "--input", type=str, default="artifacts", help="Input directory for metrics"
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default="artifacts/quality_gates_report.md",
+        help="Output report file",
+    )
+    parser.add_argument(
+        "--project-root", type=str, default=".", help="Project root directory"
+    )
 
     args = parser.parse_args()
 

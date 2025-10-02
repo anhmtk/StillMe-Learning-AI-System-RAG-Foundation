@@ -19,8 +19,11 @@ from stillme_core.learning.proposals_manager import ProposalsManager
 from stillme_core.learning.scheduler import StillMeScheduler
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
+
 
 class RealLearningSystem:
     def __init__(self):
@@ -28,9 +31,7 @@ class RealLearningSystem:
         self.proposals_manager = ProposalsManager()
         self.alerting_system = AlertingSystem()
         self.automation_service = AutomationService(
-            self.scheduler,
-            self.proposals_manager,
-            self.alerting_system
+            self.scheduler, self.proposals_manager, self.alerting_system
         )
 
     def start(self):
@@ -55,7 +56,7 @@ class RealLearningSystem:
             self.alerting_system.send_alert(
                 "Real Learning System Activated",
                 "StillMe IPC is now ready to learn new knowledge automatically! 🧠✨",
-                "info"
+                "info",
             )
             logger.info("✅ Alerting system tested successfully.")
 
@@ -88,20 +89,25 @@ class RealLearningSystem:
                     "Master Python decorators and their applications",
                     "Understand generators and memory efficiency",
                     "Learn async/await programming patterns",
-                    "Explore metaprogramming techniques"
+                    "Explore metaprogramming techniques",
                 ],
                 prerequisites=["Python basics", "Object-oriented programming"],
                 expected_outcomes=[
                     "Advanced Python proficiency",
                     "Ability to write efficient, scalable code",
-                    "Understanding of modern Python patterns"
+                    "Understanding of modern Python patterns",
                 ],
                 estimated_duration=300,
                 quality_score=0.95,
                 source="ai_generated",
                 priority="high",
-                risk_assessment={"complexity": "high", "time_commitment": "high", "prerequisites": "medium", "practical_value": "very_high"},
-                created_by="real_learning_system"
+                risk_assessment={
+                    "complexity": "high",
+                    "time_commitment": "high",
+                    "prerequisites": "medium",
+                    "practical_value": "very_high",
+                },
+                created_by="real_learning_system",
             )
 
             logger.info(f"✅ Initial proposal created: {proposal.title}")
@@ -114,7 +120,7 @@ class RealLearningSystem:
                 f"Duration: {proposal.estimated_duration} minutes\n"
                 f"Priority: {proposal.priority}\n\n"
                 f"Please review and approve in the dashboard!",
-                "info"
+                "info",
             )
 
         except Exception as e:
@@ -129,6 +135,7 @@ class RealLearningSystem:
             logger.info("✅ Real Learning System shut down successfully.")
         except Exception as e:
             logger.error(f"❌ Error during shutdown: {e}")
+
 
 def main():
     """Main function"""
@@ -155,6 +162,7 @@ def main():
         logger.error(f"❌ Unexpected error: {e}")
         learning_system.shutdown()
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

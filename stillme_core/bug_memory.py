@@ -7,9 +7,11 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class BugRecord:
     """Bug record in memory"""
+
     id: str
     description: str
     severity: str
@@ -21,6 +23,7 @@ class BugRecord:
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
+
 
 class BugMemory:
     """Bug memory system for tracking and learning from bugs"""
@@ -40,7 +43,7 @@ class BugMemory:
                 severity=severity,
                 status="open",
                 created_at=now,
-                updated_at=now
+                updated_at=now,
             )
             self.bugs[bug_id] = bug
             self.logger.info(f"🐛 Bug added: {bug_id}")
@@ -79,7 +82,9 @@ class BugMemory:
         """Record a bug/error for AgentDev compatibility"""
         try:
             bug_id = f"{file}_{test_name or 'unknown'}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-            description = f"File: {file}, Test: {test_name or 'N/A'}, Message: {message[:200]}"
+            description = (
+                f"File: {file}, Test: {test_name or 'N/A'}, Message: {message[:200]}"
+            )
             return self.add_bug(bug_id, description, "medium")
         except Exception as e:
             self.logger.error(f"❌ Failed to record bug: {e}")

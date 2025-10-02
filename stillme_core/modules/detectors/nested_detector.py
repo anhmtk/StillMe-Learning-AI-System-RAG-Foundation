@@ -32,13 +32,14 @@ class NestedCodeBlockDetector(BaseDetector):
 
         # Specific function names from test cases
         self.test_function_names = [
-            "outer_function", "inner_function", "deep_function", "another_function"
+            "outer_function",
+            "inner_function",
+            "deep_function",
+            "another_function",
         ]
 
         # Specific return values from test cases
-        self.test_return_values = [
-            "deep", "nested", "else", "end"
-        ]
+        self.test_return_values = ["deep", "nested", "else", "end"]
 
     def detect(self, text: str) -> dict[str, Any]:
         """Detect nested code structures"""
@@ -92,6 +93,6 @@ class NestedCodeBlockDetector(BaseDetector):
                 "test_functions": test_functions_found,
                 "test_returns": test_returns_found,
                 "function_count": function_count,
-                "complexity_score": complexity_score
-            }
+                "complexity_score": complexity_score,
+            },
         }

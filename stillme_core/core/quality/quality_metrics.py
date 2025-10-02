@@ -219,12 +219,15 @@ class QualityMetrics:
 
         # Group reports by time period
         if group_by == "day":
+
             def group_key(r):
                 return r.timestamp.date()
         elif group_by == "week":
+
             def group_key(r):
                 return r.timestamp.isocalendar()[:2]  # (year, week)
         elif group_by == "month":
+
             def group_key(r):
                 return (r.timestamp.year, r.timestamp.month)
         else:
@@ -435,7 +438,9 @@ class QualityMetrics:
                 "trend": (
                     "improving"
                     if quality_change > 0
-                    else "declining" if quality_change < 0 else "stable"
+                    else "declining"
+                    if quality_change < 0
+                    else "stable"
                 ),
             },
             "issues_per_file": {
@@ -445,7 +450,9 @@ class QualityMetrics:
                 "trend": (
                     "improving"
                     if issues_change < 0
-                    else "declining" if issues_change > 0 else "stable"
+                    else "declining"
+                    if issues_change > 0
+                    else "stable"
                 ),
             },
             "summary": {

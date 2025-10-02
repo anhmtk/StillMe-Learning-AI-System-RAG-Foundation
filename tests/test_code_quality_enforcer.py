@@ -1,4 +1,3 @@
-
 from stillme_core import QualityIssue, QualityReport
 
 """

@@ -16,7 +16,7 @@ def check_policy_files():
         "policies/network_allowlist.yaml",
         "policies/niche_weights.yaml",
         "policies/niche_radar_security.yaml",
-        "config/staging.yaml"
+        "config/staging.yaml",
     ]
 
     missing_policies = []
@@ -31,13 +31,18 @@ def check_policy_files():
     print("✅ All required policy files exist")
     return True
 
+
 def validate_policy_content():
     """Validate policy file content"""
     policies = {
         "policies/network_allowlist.yaml": ["allowed_domains", "security"],
         "policies/niche_weights.yaml": ["weights", "stillme_capabilities"],
-        "policies/niche_radar_security.yaml": ["data_collection", "pii_protection", "tos_compliance"],
-        "config/staging.yaml": ["web_search", "cache", "tool_gate"]
+        "policies/niche_radar_security.yaml": [
+            "data_collection",
+            "pii_protection",
+            "tos_compliance",
+        ],
+        "config/staging.yaml": ["web_search", "cache", "tool_gate"],
     }
 
     for policy_file, required_sections in policies.items():
@@ -61,6 +66,7 @@ def validate_policy_content():
 
     return True
 
+
 def check_policy_loading():
     """Check if policies are properly loaded in code"""
     # Check if policy loading is implemented in key files
@@ -68,7 +74,7 @@ def check_policy_loading():
         "app.py",
         "niche_radar/collectors.py",
         "niche_radar/scoring.py",
-        "policy/tool_gate.py"
+        "policy/tool_gate.py",
     ]
 
     for file_path in key_files:
@@ -92,12 +98,13 @@ def check_policy_loading():
 
     return True
 
+
 def check_security_compliance():
     """Check security compliance"""
     security_checks = [
         ("policies/network_allowlist.yaml", "require_https", True),
         ("policies/niche_radar_security.yaml", "pii_protection", True),
-        ("policies/niche_radar_security.yaml", "tos_compliance", True)
+        ("policies/niche_radar_security.yaml", "tos_compliance", True),
     ]
 
     for file_path, setting, expected_value in security_checks:
@@ -111,7 +118,9 @@ def check_security_compliance():
                 if actual_value == expected_value:
                     print(f"✅ {file_path}: {setting} = {actual_value}")
                 else:
-                    print(f"❌ {file_path}: {setting} = {actual_value} (expected {expected_value})")
+                    print(
+                        f"❌ {file_path}: {setting} = {actual_value} (expected {expected_value})"
+                    )
                     return False
             else:
                 print(f"❌ {file_path}: Missing setting {setting}")
@@ -123,6 +132,7 @@ def check_security_compliance():
 
     return True
 
+
 def main():
     """Main compliance check function"""
     print("🔍 Checking policy compliance...")
@@ -131,7 +141,7 @@ def main():
         ("Policy Files", check_policy_files),
         ("Policy Content", validate_policy_content),
         ("Policy Loading", check_policy_loading),
-        ("Security Compliance", check_security_compliance)
+        ("Security Compliance", check_security_compliance),
     ]
 
     all_passed = True
@@ -146,6 +156,7 @@ def main():
     else:
         print("\n❌ Some policy compliance checks failed!")
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

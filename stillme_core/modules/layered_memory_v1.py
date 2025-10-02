@@ -20,9 +20,11 @@ from typing import Any, Optional
 # Initialize logger
 logger = logging.getLogger("StillMe.LayeredMemory")
 
+
 @dataclass
 class MemoryItem:
     """Simple memory item structure"""
+
     id: str
     content: str
     timestamp: float
@@ -36,6 +38,7 @@ class MemoryItem:
             self.tags = []
         if self.last_accessed == 0.0:
             self.last_accessed = self.timestamp
+
 
 class LayeredMemoryV1:
     """Simple layered memory system with intelligent forgetting"""
@@ -56,7 +59,7 @@ class LayeredMemoryV1:
             "mid_term_count": 0,
             "long_term_count": 0,
             "forgotten_count": 0,
-            "consolidated_count": 0
+            "consolidated_count": 0,
         }
 
         self.logger.info("✅ LayeredMemoryV1 initialized (simple mode)")
@@ -68,13 +71,15 @@ class LayeredMemoryV1:
             "mid_term_capacity": 500,
             "long_term_capacity": 2000,
             "short_term_ttl": 3600,  # 1 hour
-            "mid_term_ttl": 86400,   # 1 day
+            "mid_term_ttl": 86400,  # 1 day
             "consolidation_threshold": 0.7,
             "forgetting_threshold": 0.3,
-            "importance_decay_rate": 0.1
+            "importance_decay_rate": 0.1,
         }
 
-    def store(self, content: str, importance: float = 0.5, tags: Optional[list[str]] = None) -> str:
+    def store(
+        self, content: str, importance: float = 0.5, tags: Optional[list[str]] = None
+    ) -> str:
         """Store a new memory item"""
         try:
             memory_id = f"mem_{int(time.time() * 1000)}"
@@ -85,7 +90,7 @@ class LayeredMemoryV1:
                 content=content,
                 timestamp=timestamp,
                 importance=importance,
-                tags=tags or []
+                tags=tags or [],
             )
 
             # Store in short-term memory first
@@ -118,10 +123,12 @@ class LayeredMemoryV1:
                     results.append(memory)
 
             # Sort by relevance (importance + recency)
-            results.sort(key=lambda x: (
-                x.importance * 0.7 +
-                (1.0 / (time.time() - x.timestamp + 1)) * 0.3
-            ), reverse=True)
+            results.sort(
+                key=lambda x: (
+                    x.importance * 0.7 + (1.0 / (time.time() - x.timestamp + 1)) * 0.3
+                ),
+                reverse=True,
+            )
 
             return results[:limit]
 
@@ -227,7 +234,9 @@ class LayeredMemoryV1:
             "current_short_term": len(self.short_term),
             "current_mid_term": len(self.mid_term),
             "current_long_term": len(self.long_term),
-            "total_current": len(self.short_term) + len(self.mid_term) + len(self.long_term)
+            "total_current": len(self.short_term)
+            + len(self.mid_term)
+            + len(self.long_term),
         }
 
     def clear_all(self):
@@ -241,7 +250,7 @@ class LayeredMemoryV1:
             "mid_term_count": 0,
             "long_term_count": 0,
             "forgotten_count": 0,
-            "consolidated_count": 0
+            "consolidated_count": 0,
         }
         self.logger.info("🗑️ All memories cleared")
 
@@ -252,7 +261,7 @@ class LayeredMemoryV1:
             "mid_term": [asdict(memory) for memory in self.mid_term],
             "long_term": [asdict(memory) for memory in self.long_term],
             "stats": self.stats,
-            "export_timestamp": time.time()
+            "export_timestamp": time.time(),
         }
 
     def import_memories(self, data: dict[str, Any]):

@@ -537,12 +537,14 @@ class SecureHttpClient(AsyncHttpClient):
         if config.default_headers is None:
             config.default_headers = {}
 
-        config.default_headers.update({
-            "X-Content-Type-Options": "nosniff",
-            "X-Frame-Options": "DENY",
-            "X-XSS-Protection": "1; mode=block",
-            "Strict-Transport-Security": "max-age=31536000; includeSubDomains"
-        })
+        config.default_headers.update(
+            {
+                "X-Content-Type-Options": "nosniff",
+                "X-Frame-Options": "DENY",
+                "X-XSS-Protection": "1; mode=block",
+                "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+            }
+        )
 
         super().__init__(config)
         logger.info("Secure HTTP client initialized with security headers")

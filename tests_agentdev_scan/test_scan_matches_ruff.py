@@ -26,9 +26,9 @@ def test_scan_matches_ruff():
             ["ruff", "check", ".", "--output-format", "json"],
             capture_output=True,
             text=True,
-            encoding='utf-8',
-            errors='replace',
-            timeout=120
+            encoding="utf-8",
+            errors="replace",
+            timeout=120,
         )
 
         if result.returncode != 0:
@@ -37,8 +37,12 @@ def test_scan_matches_ruff():
             errors = agentdev.scan_errors()
 
             # Should have system error indicating ruff failed
-            assert len(errors) > 0, "AgentDev should report system error when ruff fails"
-            assert any(e.rule == "RUFF_FAILED" for e in errors), "Should have RUFF_FAILED error"
+            assert (
+                len(errors) > 0
+            ), "AgentDev should report system error when ruff fails"
+            assert any(
+                e.rule == "RUFF_FAILED" for e in errors
+            ), "Should have RUFF_FAILED error"
             print("PASS: AgentDev correctly reports ruff failure")
             return
 
@@ -54,8 +58,12 @@ def test_scan_matches_ruff():
         agentdev = AgentDev()
         errors = agentdev.scan_errors()
 
-        assert len(errors) > 0, "AgentDev should report system error when ruff command fails"
-        assert any(e.rule in ["RUFF_FAILED", "TIMEOUT", "EXCEPTION"] for e in errors), "Should have system error"
+        assert (
+            len(errors) > 0
+        ), "AgentDev should report system error when ruff command fails"
+        assert any(
+            e.rule in ["RUFF_FAILED", "TIMEOUT", "EXCEPTION"] for e in errors
+        ), "Should have system error"
         print("PASS: AgentDev correctly reports ruff command failure")
         return
 
@@ -64,11 +72,17 @@ def test_scan_matches_ruff():
     agentdev_errors = agentdev.scan_errors()
 
     # Filter out system errors for count comparison
-    real_errors = [e for e in agentdev_errors if not e.rule.startswith("SYSTEM_") and e.rule != "RUFF_FAILED"]
+    real_errors = [
+        e
+        for e in agentdev_errors
+        if not e.rule.startswith("SYSTEM_") and e.rule != "RUFF_FAILED"
+    ]
     agentdev_count = len(real_errors)
 
     # Assert counts match
-    assert agentdev_count == ruff_count, f"AgentDev count ({agentdev_count}) != ruff count ({ruff_count})"
+    assert (
+        agentdev_count == ruff_count
+    ), f"AgentDev count ({agentdev_count}) != ruff count ({ruff_count})"
 
     print(f"PASS: AgentDev count ({agentdev_count}) matches ruff count ({ruff_count})")
 

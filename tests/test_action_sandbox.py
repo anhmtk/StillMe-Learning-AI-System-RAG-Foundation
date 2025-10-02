@@ -71,7 +71,7 @@ class TestActionSandbox:
         result = sandbox.execute(
             action="log_message",
             params={"message": "Hello world"},
-            trace_id="test-trace-1"
+            trace_id="test-trace-1",
         )
 
         assert result["ok"] is True
@@ -85,9 +85,7 @@ class TestActionSandbox:
         sandbox = ActionSandbox({"dry_run": False, "side_effect_blocking": True})
 
         result = sandbox.execute(
-            action="file_delete",
-            params={"path": "/tmp/test"},
-            trace_id="test-trace-1"
+            action="file_delete", params={"path": "/tmp/test"}, trace_id="test-trace-1"
         )
 
         assert result["ok"] is False
@@ -101,7 +99,7 @@ class TestActionSandbox:
         result = sandbox.execute(
             action="user_data_access",
             params={"user_id": "123"},
-            trace_id="test-trace-1"
+            trace_id="test-trace-1",
         )
 
         assert result["ok"] is False
@@ -114,7 +112,7 @@ class TestActionSandbox:
         result = sandbox.execute(
             action="file_write",
             params={"path": "/tmp/test", "content": "data"},
-            trace_id="test-trace-1"
+            trace_id="test-trace-1",
         )
 
         assert result["ok"] is True
@@ -131,7 +129,7 @@ class TestActionSandbox:
             action="file_write",
             params={"path": "/tmp/test"},
             trace_id="test-trace-1",
-            dry_run=True
+            dry_run=True,
         )
 
         assert result["dry_run"] is True
@@ -143,16 +141,12 @@ class TestActionSandbox:
 
         # First execution
         result1 = sandbox.execute(
-            action="log_message",
-            params={"message": "Hello"},
-            trace_id="test-trace-1"
+            action="log_message", params={"message": "Hello"}, trace_id="test-trace-1"
         )
 
         # Second identical execution
         result2 = sandbox.execute(
-            action="log_message",
-            params={"message": "Hello"},
-            trace_id="test-trace-1"
+            action="log_message", params={"message": "Hello"}, trace_id="test-trace-1"
         )
 
         assert result1["ok"] is True
@@ -165,15 +159,11 @@ class TestActionSandbox:
         sandbox = ActionSandbox({"dry_run": False, "idempotency_enabled": True})
 
         result1 = sandbox.execute(
-            action="log_message",
-            params={"message": "Hello"},
-            trace_id="test-trace-1"
+            action="log_message", params={"message": "Hello"}, trace_id="test-trace-1"
         )
 
         result2 = sandbox.execute(
-            action="log_message",
-            params={"message": "World"},
-            trace_id="test-trace-1"
+            action="log_message", params={"message": "World"}, trace_id="test-trace-1"
         )
 
         assert result1["ok"] is True
@@ -186,15 +176,11 @@ class TestActionSandbox:
         sandbox = ActionSandbox({"dry_run": False, "idempotency_enabled": False})
 
         result1 = sandbox.execute(
-            action="log_message",
-            params={"message": "Hello"},
-            trace_id="test-trace-1"
+            action="log_message", params={"message": "Hello"}, trace_id="test-trace-1"
         )
 
         result2 = sandbox.execute(
-            action="log_message",
-            params={"message": "Hello"},
-            trace_id="test-trace-1"
+            action="log_message", params={"message": "Hello"}, trace_id="test-trace-1"
         )
 
         assert result1["ok"] is True
@@ -209,7 +195,7 @@ class TestActionSandbox:
         result = sandbox.execute(
             action="log_message",
             params="invalid",  # Should be dict
-            trace_id="test-trace-1"
+            trace_id="test-trace-1",
         )
 
         assert result["ok"] is False
@@ -222,7 +208,7 @@ class TestActionSandbox:
         result = sandbox.execute(
             action="log_message",
             params={"message": "<script>alert('xss')</script>"},
-            trace_id="test-trace-1"
+            trace_id="test-trace-1",
         )
 
         assert result["ok"] is False
@@ -297,12 +283,10 @@ class TestActionSandboxIntegration:
             ("log_message", {"msg": "test"}, True),
             ("update_cache", {"key": "value"}, True),
             ("validate_input", {"text": "hello"}, True),
-
             # Dangerous actions (should be blocked)
             ("file_write", {"path": "/tmp/test"}, False),
             ("system_command", {"cmd": "ls"}, False),
             ("database_drop", {"table": "users"}, False),
-
             # Restricted actions (should be blocked)
             ("user_data_access", {"user_id": "123"}, False),
             ("payment_process", {"amount": 100}, False),
@@ -323,7 +307,9 @@ class TestActionSandboxIntegration:
         elapsed_ms = (time.time() - start_time) * 1000
 
         # Should be fast (< 100ms for 100 executions)
-        assert elapsed_ms < 100, f"Sandbox too slow: {elapsed_ms:.2f}ms for 100 executions"
+        assert (
+            elapsed_ms < 100
+        ), f"Sandbox too slow: {elapsed_ms:.2f}ms for 100 executions"
 
     def test_idempotency_key_generation(self):
         """Test idempotency key generation consistency."""
@@ -331,7 +317,9 @@ class TestActionSandboxIntegration:
 
         # Same parameters should generate same key
         key1 = sandbox._generate_idempotency_key("action", {"a": 1, "b": 2}, "trace")
-        key2 = sandbox._generate_idempotency_key("action", {"b": 2, "a": 1}, "trace")  # Different order
+        key2 = sandbox._generate_idempotency_key(
+            "action", {"b": 2, "a": 1}, "trace"
+        )  # Different order
         assert key1 == key2  # Should be same due to sorting
 
         # Different parameters should generate different keys
@@ -343,7 +331,9 @@ class TestActionSandboxIntegration:
         sandbox = ActionSandbox()
 
         # Test with invalid action that might cause exceptions
-        with patch.object(sandbox, '_execute_real', side_effect=Exception("Test error")):
+        with patch.object(
+            sandbox, "_execute_real", side_effect=Exception("Test error")
+        ):
             result = sandbox.execute("test_action", {}, "trace-1", dry_run=False)
 
             assert result["ok"] is False

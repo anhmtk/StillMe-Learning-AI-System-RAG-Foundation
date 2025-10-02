@@ -512,9 +512,12 @@ class EthicalCoreSystem:
 
         try:
             # 1. Kiểm tra an toàn input
-            is_input_safe, input_violation_type, input_severity, input_reason = (
-                await self.ethics_guard.check_input_safety(user_input)
-            )
+            (
+                is_input_safe,
+                input_violation_type,
+                input_severity,
+                input_reason,
+            ) = await self.ethics_guard.check_input_safety(user_input)
             if not is_input_safe:
                 violation_message = input_reason
                 is_compliant = False
@@ -542,9 +545,10 @@ class EthicalCoreSystem:
                 )
 
             # 2. Đánh giá người dùng dễ bị tổn thương
-            is_vulnerable, vulnerability_reason = (
-                await self.ethics_guard.assess_vulnerability(user_input)
-            )
+            (
+                is_vulnerable,
+                vulnerability_reason,
+            ) = await self.ethics_guard.assess_vulnerability(user_input)
             if is_vulnerable:
                 violation_message += (
                     f"Người dùng có dấu hiệu dễ bị tổn thương: {vulnerability_reason}. "
@@ -560,9 +564,12 @@ class EthicalCoreSystem:
                 )
 
             # 3. Kiểm tra an toàn output
-            is_output_safe, output_violation_type, output_severity, output_reason = (
-                await self.ethics_guard.check_output_safety(original_ai_response)
-            )
+            (
+                is_output_safe,
+                output_violation_type,
+                output_severity,
+                output_reason,
+            ) = await self.ethics_guard.check_output_safety(original_ai_response)
             if not is_output_safe:
                 violation_message += f"Phản hồi AI vi phạm an toàn: {output_reason}. "
                 is_compliant = False
@@ -585,10 +592,12 @@ class EthicalCoreSystem:
                 final_response = adjusted_response
 
                 # Kiểm tra lại tính tuân thủ của phản hồi đã điều chỉnh
-                is_adjusted_compliant, _, adjusted_reason = (
-                    await self.conscience_core.evaluate_ethical_compliance(
-                        user_input, final_response
-                    )
+                (
+                    is_adjusted_compliant,
+                    _,
+                    adjusted_reason,
+                ) = await self.conscience_core.evaluate_ethical_compliance(
+                    user_input, final_response
                 )
                 if not is_adjusted_compliant:
                     violation_message += f"Phản hồi đã điều chỉnh vẫn không tuân thủ: {adjusted_reason}. "
@@ -628,10 +637,12 @@ class EthicalCoreSystem:
 
             # 4. Đánh giá tuân thủ đạo đức tổng thể (nếu chưa bị chặn)
             if is_compliant:  # Chỉ đánh giá nếu chưa có vi phạm nghiêm trọng
-                is_overall_compliant, compliance_score, compliance_reason = (
-                    await self.conscience_core.evaluate_ethical_compliance(
-                        user_input, final_response
-                    )
+                (
+                    is_overall_compliant,
+                    compliance_score,
+                    compliance_reason,
+                ) = await self.conscience_core.evaluate_ethical_compliance(
+                    user_input, final_response
                 )
                 if not is_overall_compliant:
                     violation_message += f"Phản hồi không tuân thủ đạo đức tổng thể: {compliance_reason}. "

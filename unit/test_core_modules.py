@@ -9,7 +9,9 @@ import sys
 import pytest
 
 # Add agent_dev path to sys.path
-agent_dev_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'agent_dev', 'core')
+agent_dev_path = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "agent_dev", "core"
+)
 if agent_dev_path not in sys.path:
     sys.path.insert(0, agent_dev_path)
 
@@ -36,10 +38,10 @@ class TestImpactAnalyzer:
 
             # Assertions
             assert result is not None
-            assert hasattr(result, 'dependencies')
-            assert hasattr(result, 'performance')
-            assert hasattr(result, 'security_risks')
-            assert hasattr(result, 'overall_risk_level')
+            assert hasattr(result, "dependencies")
+            assert hasattr(result, "performance")
+            assert hasattr(result, "security_risks")
+            assert hasattr(result, "overall_risk_level")
 
             # Cleanup
             TestFixtures.cleanup_temp_project(temp_project)
@@ -67,6 +69,7 @@ class TestImpactAnalyzer:
         except ImportError:
             pytest.skip("ImpactAnalyzer not available")
 
+
 class TestBusinessAnalyzer:
     """Test Business Analysis module"""
 
@@ -83,9 +86,9 @@ class TestBusinessAnalyzer:
 
             # Assertions
             assert result is not None
-            assert hasattr(result, 'roi_analysis')
-            assert hasattr(result, 'business_score')
-            assert hasattr(result, 'priority')
+            assert hasattr(result, "roi_analysis")
+            assert hasattr(result, "business_score")
+            assert hasattr(result, "priority")
 
             # ROI should be between 0 and 1
             assert 0 <= result.roi_analysis.estimated_roi <= 1
@@ -105,10 +108,11 @@ class TestBusinessAnalyzer:
             result = analyzer.analyze_business_value(high_priority_task)
 
             # Should be high priority
-            assert result.priority.value in ['HIGH', 'CRITICAL']
+            assert result.priority.value in ["HIGH", "CRITICAL"]
 
         except ImportError:
             pytest.skip("BusinessAnalyzer not available")
+
 
 class TestSecurityAnalyzer:
     """Test Security Analysis module"""
@@ -126,9 +130,9 @@ class TestSecurityAnalyzer:
 
             # Assertions
             assert result is not None
-            assert hasattr(result, 'vulnerabilities')
-            assert hasattr(result, 'security_level')
-            assert hasattr(result, 'overall_security_score')
+            assert hasattr(result, "vulnerabilities")
+            assert hasattr(result, "security_level")
+            assert hasattr(result, "overall_security_score")
 
             # Should detect security issues
             assert len(result.vulnerabilities) > 0
@@ -153,6 +157,7 @@ class TestSecurityAnalyzer:
         except ImportError:
             pytest.skip("SecurityAnalyzer not available")
 
+
 class TestConflictResolver:
     """Test Conflict Resolution module"""
 
@@ -169,9 +174,9 @@ class TestConflictResolver:
 
             # Assertions
             assert result is not None
-            assert hasattr(result, 'conflicts')
-            assert hasattr(result, 'conflict_count')
-            assert hasattr(result, 'recommendations')
+            assert hasattr(result, "conflicts")
+            assert hasattr(result, "conflict_count")
+            assert hasattr(result, "recommendations")
 
             TestFixtures.cleanup_temp_project(temp_project)
 
@@ -200,6 +205,7 @@ class TestConflictResolver:
         except ImportError:
             pytest.skip("ConflictResolver not available")
 
+
 class TestAgentDev:
     """Test AgentDev main class"""
 
@@ -214,9 +220,9 @@ class TestAgentDev:
             # Assertions
             assert agentdev is not None
             assert agentdev.mode == "critical-first"
-            assert hasattr(agentdev, 'impact_analyzer')
-            assert hasattr(agentdev, 'business_analyzer')
-            assert hasattr(agentdev, 'security_analyzer')
+            assert hasattr(agentdev, "impact_analyzer")
+            assert hasattr(agentdev, "business_analyzer")
+            assert hasattr(agentdev, "security_analyzer")
 
             TestFixtures.cleanup_temp_project(temp_project)
 
@@ -264,6 +270,7 @@ class TestAgentDev:
         except ImportError:
             pytest.skip("AgentDev not available")
 
+
 class TestExperienceLearner:
     """Test Experience Learning module"""
 
@@ -280,13 +287,14 @@ class TestExperienceLearner:
 
             # Assertions
             assert result is not None
-            assert hasattr(result, 'insights')
-            assert hasattr(result, 'patterns')
+            assert hasattr(result, "insights")
+            assert hasattr(result, "patterns")
 
             TestFixtures.cleanup_temp_project(temp_project)
 
         except ImportError:
             pytest.skip("ExperienceLearner not available")
+
 
 class TestAdaptiveStrategy:
     """Test Adaptive Strategy module"""
@@ -305,13 +313,14 @@ class TestAdaptiveStrategy:
 
             # Assertions
             assert result is not None
-            assert hasattr(result, 'selected_strategy')
-            assert hasattr(result, 'confidence_score')
+            assert hasattr(result, "selected_strategy")
+            assert hasattr(result, "confidence_score")
 
             TestFixtures.cleanup_temp_project(temp_project)
 
         except ImportError:
             pytest.skip("AdaptiveStrategy not available")
+
 
 # Performance tests
 class TestPerformance:
@@ -335,7 +344,9 @@ class TestPerformance:
             execution_time = (end_time - start_time) * 1000  # Convert to ms
 
             # Should complete within 2000ms
-            assert execution_time <= 2000, f"Operation took {execution_time}ms, expected ≤ 2000ms"
+            assert (
+                execution_time <= 2000
+            ), f"Operation took {execution_time}ms, expected ≤ 2000ms"
 
             TestFixtures.cleanup_temp_project(temp_project)
 
@@ -361,13 +372,18 @@ class TestPerformance:
 
             with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
                 futures = [executor.submit(execute_task, i) for i in range(10)]
-                results = [future.result() for future in concurrent.futures.as_completed(futures)]
+                results = [
+                    future.result()
+                    for future in concurrent.futures.as_completed(futures)
+                ]
 
             end_time = time.time()
             execution_time = end_time - start_time
 
             # Should complete within 5 seconds
-            assert execution_time <= 5, f"Concurrent operations took {execution_time}s, expected ≤ 5s"
+            assert (
+                execution_time <= 5
+            ), f"Concurrent operations took {execution_time}s, expected ≤ 5s"
             assert len(results) == 10
 
             TestFixtures.cleanup_temp_project(temp_project)

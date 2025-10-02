@@ -16,14 +16,14 @@ class TestSubprocessDecode:
     def test_safe_decode_utf8(self):
         """Test safe decode with UTF-8"""
         text = "Hello, World! 🌍"
-        data = text.encode('utf-8')
+        data = text.encode("utf-8")
         result = safe_decode(data)
         assert result == text
 
     def test_safe_decode_cp1252(self):
         """Test safe decode with CP1252"""
         text = "Hello, World!"
-        data = text.encode('cp1252')
+        data = text.encode("cp1252")
         result = safe_decode(data)
         assert result == text
 
@@ -63,7 +63,7 @@ class TestSubprocessDecode:
         ]
 
         for text in test_cases:
-            data = text.encode('utf-8')
+            data = text.encode("utf-8")
             result = safe_decode(data)
             assert result == text
 
@@ -126,7 +126,7 @@ class TestSubprocessDecode:
         text = safe_decode(corrupted_lines)
 
         # Should not crash when splitting lines
-        lines = text.split('\n')
+        lines = text.split("\n")
         assert len(lines) >= 2
         assert "file1.py:10:5: F821" in lines[0]
         assert "file2.py:20:15: W293" in lines[1]

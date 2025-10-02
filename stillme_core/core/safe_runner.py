@@ -8,6 +8,7 @@ from typing import Any, Callable, Optional
 
 logger = logging.getLogger(__name__)
 
+
 class RunStatus(Enum):
     PENDING = "pending"
     RUNNING = "running"
@@ -16,15 +17,18 @@ class RunStatus(Enum):
     TIMEOUT = "timeout"
     CANCELLED = "cancelled"
 
+
 class SafetyLevel(Enum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
 
+
 @dataclass
 class SafeRun:
     """Safe run record"""
+
     run_id: str
     function_name: str
     status: RunStatus
@@ -40,6 +44,7 @@ class SafeRun:
         if self.metadata is None:
             self.metadata = {}
 
+
 class SafeRunner:
     """Safe runner for StillMe Framework"""
 
@@ -52,15 +57,12 @@ class SafeRunner:
     def _initialize_safety_checks(self) -> dict[SafetyLevel, list[str]]:
         """Initialize safety checks for different levels"""
         return {
-            SafetyLevel.LOW: [
-                "basic_input_validation",
-                "output_sanitization"
-            ],
+            SafetyLevel.LOW: ["basic_input_validation", "output_sanitization"],
             SafetyLevel.MEDIUM: [
                 "basic_input_validation",
                 "output_sanitization",
                 "resource_limits",
-                "timeout_checks"
+                "timeout_checks",
             ],
             SafetyLevel.HIGH: [
                 "basic_input_validation",
@@ -68,7 +70,7 @@ class SafeRunner:
                 "resource_limits",
                 "timeout_checks",
                 "sandbox_execution",
-                "audit_logging"
+                "audit_logging",
             ],
             SafetyLevel.CRITICAL: [
                 "basic_input_validation",
@@ -78,19 +80,24 @@ class SafeRunner:
                 "sandbox_execution",
                 "audit_logging",
                 "approval_required",
-                "rollback_capability"
-            ]
+                "rollback_capability",
+            ],
         }
 
-    def run_safely(self,
-                   function: Callable,
-                   function_name: str,
-                   safety_level: SafetyLevel = SafetyLevel.MEDIUM,
-                   timeout: float = 30.0,
-                   *args, **kwargs) -> SafeRun:
+    def run_safely(
+        self,
+        function: Callable,
+        function_name: str,
+        safety_level: SafetyLevel = SafetyLevel.MEDIUM,
+        timeout: float = 30.0,
+        *args,
+        **kwargs,
+    ) -> SafeRun:
         """Run a function safely with specified safety level"""
         try:
-            run_id = f"run_{len(self.runs) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            run_id = (
+                f"run_{len(self.runs) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            )
             start_time = datetime.now()
 
             # Create run record
@@ -100,11 +107,7 @@ class SafeRunner:
                 status=RunStatus.PENDING,
                 safety_level=safety_level,
                 start_time=start_time,
-                metadata={
-                    "args": str(args),
-                    "kwargs": str(kwargs),
-                    "timeout": timeout
-                }
+                metadata={"args": str(args), "kwargs": str(kwargs), "timeout": timeout},
             )
 
             self.runs.append(run)
@@ -121,7 +124,9 @@ class SafeRunner:
 
             # Execute function with safety measures
             run.status = RunStatus.RUNNING
-            result = self._execute_with_safety(function, safety_level, timeout, *args, **kwargs)
+            result = self._execute_with_safety(
+                function, safety_level, timeout, *args, **kwargs
+            )
 
             # Update run record
             run.status = RunStatus.COMPLETED
@@ -129,21 +134,25 @@ class SafeRunner:
             run.end_time = datetime.now()
             run.duration = (run.end_time - run.start_time).total_seconds()
 
-            self.logger.info(f"✅ Safe run completed: {function_name} (ID: {run_id}) in {run.duration:.2f}s")
+            self.logger.info(
+                f"✅ Safe run completed: {function_name} (ID: {run_id}) in {run.duration:.2f}s"
+            )
             return run
 
         except Exception as e:
             # Update run record with error
-            if 'run' in locals():
+            if "run" in locals():
                 run.status = RunStatus.FAILED
                 run.error = str(e)
                 run.end_time = datetime.now()
                 run.duration = (run.end_time - run.start_time).total_seconds()
 
             self.logger.error(f"❌ Safe run failed: {function_name} - {e}")
-            return run if 'run' in locals() else None
+            return run if "run" in locals() else None
 
-    def _perform_safety_checks(self, safety_level: SafetyLevel, function: Callable, args: tuple, kwargs: dict) -> bool:
+    def _perform_safety_checks(
+        self, safety_level: SafetyLevel, function: Callable, args: tuple, kwargs: dict
+    ) -> bool:
         """Perform safety checks based on safety level"""
         try:
             checks = self.safety_checks.get(safety_level, [])
@@ -153,14 +162,18 @@ class SafeRunner:
                     self.logger.warning(f"⚠️ Safety check failed: {check}")
                     return False
 
-            self.logger.info(f"✅ All safety checks passed for level: {safety_level.value}")
+            self.logger.info(
+                f"✅ All safety checks passed for level: {safety_level.value}"
+            )
             return True
 
         except Exception as e:
             self.logger.error(f"❌ Safety check error: {e}")
             return False
 
-    def _execute_safety_check(self, check_name: str, function: Callable, args: tuple, kwargs: dict) -> bool:
+    def _execute_safety_check(
+        self, check_name: str, function: Callable, args: tuple, kwargs: dict
+    ) -> bool:
         """Execute a specific safety check"""
         try:
             if check_name == "basic_input_validation":
@@ -191,18 +204,22 @@ class SafeRunner:
         """Check basic input validation"""
         try:
             # Check for dangerous inputs
-            dangerous_patterns = ['<script>', 'javascript:', 'eval(', 'exec(']
+            dangerous_patterns = ["<script>", "javascript:", "eval(", "exec("]
 
             for arg in args:
                 if isinstance(arg, str):
                     if any(pattern in arg.lower() for pattern in dangerous_patterns):
-                        self.logger.warning("⚠️ Dangerous input pattern detected in args")
+                        self.logger.warning(
+                            "⚠️ Dangerous input pattern detected in args"
+                        )
                         return False
 
             for _key, value in kwargs.items():
                 if isinstance(value, str):
                     if any(pattern in value.lower() for pattern in dangerous_patterns):
-                        self.logger.warning("⚠️ Dangerous input pattern detected in kwargs")
+                        self.logger.warning(
+                            "⚠️ Dangerous input pattern detected in kwargs"
+                        )
                         return False
 
             return True
@@ -288,7 +305,14 @@ class SafeRunner:
             self.logger.error(f"❌ Rollback capability check error: {e}")
             return False
 
-    def _execute_with_safety(self, function: Callable, safety_level: SafetyLevel, timeout: float, *args, **kwargs) -> Any:
+    def _execute_with_safety(
+        self,
+        function: Callable,
+        safety_level: SafetyLevel,
+        timeout: float,
+        *args,
+        **kwargs,
+    ) -> Any:
         """Execute function with safety measures"""
         try:
             # In a real implementation, this would:
@@ -331,7 +355,9 @@ class SafeRunner:
 
                 # By safety level
                 safety_key = run.safety_level.value
-                runs_by_safety_level[safety_key] = runs_by_safety_level.get(safety_key, 0) + 1
+                runs_by_safety_level[safety_key] = (
+                    runs_by_safety_level.get(safety_key, 0) + 1
+                )
 
                 # Count successful/failed runs
                 if run.status == RunStatus.COMPLETED:
@@ -349,7 +375,7 @@ class SafeRunner:
                 "success_rate": success_rate,
                 "runs_by_status": runs_by_status,
                 "runs_by_safety_level": runs_by_safety_level,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
         except Exception as e:

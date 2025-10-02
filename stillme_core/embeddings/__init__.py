@@ -13,5 +13,5 @@ __all__ = [
     "SentenceTransformerBackend",
     "FakeBackend",
     "EmbeddingWorker",
-    "EmbeddingRuntimeError"
+    "EmbeddingRuntimeError",
 ]

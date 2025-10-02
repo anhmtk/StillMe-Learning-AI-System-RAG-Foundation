@@ -70,7 +70,7 @@ def test_config():
     """Load test configuration from YAML file."""
     config_path = Path("config/test_defaults.yaml")
     if config_path.exists():
-        with open(config_path, encoding='utf-8') as f:
+        with open(config_path, encoding="utf-8") as f:
             return yaml.safe_load(f)
     else:
         # Default configuration if file doesn't exist
@@ -80,28 +80,28 @@ def test_config():
                 "gateway_p95_threshold": 500,
                 "error_rate_threshold": 0.01,
                 "recovery_time_threshold": 5,
-                "ethics_violation_threshold": 0.001
+                "ethics_violation_threshold": 0.001,
             },
             "coverage": {
                 "lines_minimum": 90,
                 "branches_minimum": 80,
-                "mutation_minimum": 70
+                "mutation_minimum": 70,
             },
             "load_testing": {
                 "concurrent_users": 500,
                 "requests_per_hour": 10000,
-                "soak_duration_hours": 2
+                "soak_duration_hours": 2,
             },
             "security": {
                 "injection_test_cases": 50,
                 "jailbreak_test_cases": 30,
-                "pii_redaction_cases": 25
+                "pii_redaction_cases": 25,
             },
             "chaos": {
                 "network_delay_ms": 1000,
                 "network_drop_percent": 10,
-                "api_timeout_seconds": 30
-            }
+                "api_timeout_seconds": 30,
+            },
         }
 
 
@@ -113,20 +113,20 @@ def test_datasets():
     # Load ambiguous prompts
     ambiguous_path = Path("datasets/ambiguous_prompts.json")
     if ambiguous_path.exists():
-        with open(ambiguous_path, encoding='utf-8') as f:
-            datasets['ambiguous_prompts'] = json.load(f)
+        with open(ambiguous_path, encoding="utf-8") as f:
+            datasets["ambiguous_prompts"] = json.load(f)
 
     # Load red team prompts
     redteam_path = Path("datasets/redteam_prompts.json")
     if redteam_path.exists():
-        with open(redteam_path, encoding='utf-8') as f:
-            datasets['redteam_prompts'] = json.load(f)
+        with open(redteam_path, encoding="utf-8") as f:
+            datasets["redteam_prompts"] = json.load(f)
 
     # Load PII samples
     pii_path = Path("datasets/pii_samples.json")
     if pii_path.exists():
-        with open(pii_path, encoding='utf-8') as f:
-            datasets['pii_samples'] = json.load(f)
+        with open(pii_path, encoding="utf-8") as f:
+            datasets["pii_samples"] = json.load(f)
 
     return datasets
 
@@ -192,7 +192,9 @@ def mock_ethics_system():
 def mock_content_filter():
     """Mock content integrity filter for testing."""
     filter_mock = Mock(spec=ContentIntegrityFilter)
-    filter_mock.filter = Mock(return_value={"is_safe": True, "filtered_content": "test"})
+    filter_mock.filter = Mock(
+        return_value={"is_safe": True, "filtered_content": "test"}
+    )
     filter_mock.detect_harmful = Mock(return_value=False)
     filter_mock.sanitize = Mock(return_value="sanitized_content")
     return filter_mock
@@ -223,7 +225,9 @@ def mock_emotion_sense():
     """Mock emotion sense for testing."""
     emotion = Mock(spec=EmotionSenseV1)
     emotion.detect_emotion = Mock(return_value={"emotion": "happy", "confidence": 0.8})
-    emotion.analyze_sentiment = Mock(return_value={"sentiment": "positive", "score": 0.7})
+    emotion.analyze_sentiment = Mock(
+        return_value={"sentiment": "positive", "score": 0.7}
+    )
     return emotion
 
 
@@ -231,7 +235,9 @@ def mock_emotion_sense():
 def mock_token_optimizer():
     """Mock token optimizer for testing."""
     optimizer = Mock(spec=TokenOptimizer)
-    optimizer.optimize = Mock(return_value={"optimized_text": "test", "tokens_saved": 10})
+    optimizer.optimize = Mock(
+        return_value={"optimized_text": "test", "tokens_saved": 10}
+    )
     optimizer.estimate_tokens = Mock(return_value=100)
     optimizer.cache_similar = Mock(return_value=True)
     return optimizer
@@ -241,7 +247,9 @@ def mock_token_optimizer():
 def mock_self_improvement():
     """Mock self improvement manager for testing."""
     improvement = Mock(spec=SelfImprovementManager)
-    improvement.analyze_performance = Mock(return_value={"score": 0.8, "suggestions": []})
+    improvement.analyze_performance = Mock(
+        return_value={"score": 0.8, "suggestions": []}
+    )
     improvement.improve = Mock(return_value={"improved": True, "changes": []})
     improvement.get_metrics = Mock(return_value={"accuracy": 0.9, "speed": 0.8})
     return improvement
@@ -272,7 +280,9 @@ def mock_metrics():
     """Mock framework metrics for testing."""
     metrics = Mock(spec=FrameworkMetrics)
     metrics.record_metric = Mock(return_value=True)
-    metrics.get_summary = Mock(return_value={"total_requests": 1000, "avg_response_time": 100})
+    metrics.get_summary = Mock(
+        return_value={"total_requests": 1000, "avg_response_time": 100}
+    )
     metrics.export_report = Mock(return_value={"report": "generated"})
     return metrics
 
@@ -311,7 +321,9 @@ def mock_prediction_engine():
 def mock_market_intel():
     """Mock market intelligence for testing."""
     market = Mock(spec=MarketIntelligence)
-    market.analyze_trends = Mock(return_value={"trends": ["AI", "ML"], "confidence": 0.8})
+    market.analyze_trends = Mock(
+        return_value={"trends": ["AI", "ML"], "confidence": 0.8}
+    )
     market.get_insights = Mock(return_value={"insights": "test insights"})
     market.update_data = Mock(return_value=True)
     return market
@@ -385,17 +397,19 @@ class TestUtils:
     @staticmethod
     def load_json_fixture(file_path: str) -> dict[str, Any]:
         """Load JSON fixture file."""
-        with open(file_path, encoding='utf-8') as f:
+        with open(file_path, encoding="utf-8") as f:
             return json.load(f)
 
     @staticmethod
     def save_json_fixture(data: dict[str, Any], file_path: str) -> None:
         """Save data as JSON fixture."""
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
 
     @staticmethod
-    def create_mock_response(status_code: int = 200, data: dict[str, Any] = None) -> Mock:
+    def create_mock_response(
+        status_code: int = 200, data: dict[str, Any] = None
+    ) -> Mock:
         """Create mock HTTP response."""
         response = Mock()
         response.status_code = status_code
@@ -406,13 +420,17 @@ class TestUtils:
     @staticmethod
     def assert_response_time(response_time: float, threshold: float) -> None:
         """Assert response time is within threshold."""
-        assert response_time <= threshold, f"Response time {response_time}ms exceeds threshold {threshold}ms"
+        assert (
+            response_time <= threshold
+        ), f"Response time {response_time}ms exceeds threshold {threshold}ms"
 
     @staticmethod
     def assert_error_rate(errors: int, total: int, threshold: float) -> None:
         """Assert error rate is within threshold."""
         error_rate = errors / total if total > 0 else 0
-        assert error_rate <= threshold, f"Error rate {error_rate:.2%} exceeds threshold {threshold:.2%}"
+        assert (
+            error_rate <= threshold
+        ), f"Error rate {error_rate:.2%} exceeds threshold {threshold:.2%}"
 
 
 @pytest.fixture(scope="session")

@@ -41,7 +41,7 @@ def test_decision_high_pattern_score(policy_balanced):
         "pattern_score": 0.9,
         "context_score": 0.7,
         "history_score": 0.5,
-        "abuse_score": 0.0
+        "abuse_score": 0.0,
     }
 
     decision, confidence = policy_balanced.decide(scores)
@@ -56,7 +56,7 @@ def test_decision_low_scores(policy_balanced):
         "pattern_score": 0.2,
         "context_score": 0.3,
         "history_score": 0.1,
-        "abuse_score": 0.0
+        "abuse_score": 0.0,
     }
 
     decision, confidence = policy_balanced.decide(scores)
@@ -71,7 +71,7 @@ def test_abuse_penalty(policy_balanced):
         "pattern_score": 0.9,
         "context_score": 0.8,
         "history_score": 0.7,
-        "abuse_score": 0.5  # High abuse score
+        "abuse_score": 0.5,  # High abuse score
     }
 
     decision, confidence = policy_balanced.decide(scores)
@@ -91,7 +91,7 @@ def test_policy_levels_comparison():
         "pattern_score": 0.7,
         "context_score": 0.6,
         "history_score": 0.5,
-        "abuse_score": 0.0
+        "abuse_score": 0.0,
     }
 
     strict_decision, _ = strict_policy.decide(scores)
@@ -125,14 +125,8 @@ def test_context_score_calculation(policy_balanced):
 @pytest.mark.unit
 def test_history_score_calculation(policy_balanced):
     """Test history score calculation"""
-    context_high_freq = {
-        "cue_frequency": 15,
-        "cue_recency_hours": 2
-    }
-    context_low_freq = {
-        "cue_frequency": 2,
-        "cue_recency_hours": 200
-    }
+    context_high_freq = {"cue_frequency": 15, "cue_recency_hours": 2}
+    context_low_freq = {"cue_frequency": 2, "cue_recency_hours": 200}
 
     scores = {"pattern_score": 0.7}
 
@@ -150,7 +144,7 @@ def test_breakdown_analysis(policy_balanced):
         "pattern_score": 0.8,
         "context_score": 0.6,
         "history_score": 0.4,
-        "abuse_score": 0.1
+        "abuse_score": 0.1,
     }
 
     breakdown = policy_balanced.get_breakdown(scores)
@@ -217,7 +211,7 @@ def test_matrix_policy_scores():
             "pattern_score": pattern,
             "context_score": context,
             "history_score": history,
-            "abuse_score": abuse
+            "abuse_score": abuse,
         }
 
         decision, confidence = policy.decide(scores)
@@ -241,7 +235,7 @@ def test_confidence_calculation():
         "pattern_score": 0.9,
         "context_score": 0.8,
         "history_score": 0.7,
-        "abuse_score": 0.0
+        "abuse_score": 0.0,
     }
 
     decision, confidence = policy.decide(high_scores)
@@ -252,7 +246,7 @@ def test_confidence_calculation():
         "pattern_score": 0.3,
         "context_score": 0.2,
         "history_score": 0.1,
-        "abuse_score": 0.0
+        "abuse_score": 0.0,
     }
 
     decision, confidence = policy.decide(low_scores)
@@ -276,7 +270,7 @@ def test_missing_scores_handling(policy_balanced):
         "pattern_score": 0.8,
         "context_score": None,
         "history_score": None,
-        "abuse_score": None
+        "abuse_score": None,
     }
 
     decision, confidence = policy_balanced.decide(scores_with_none)

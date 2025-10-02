@@ -25,11 +25,12 @@ def load_interaction_policy() -> dict[str, Any]:
         sys.exit(1)
 
     try:
-        with open(policy_path, encoding='utf-8') as f:
+        with open(policy_path, encoding="utf-8") as f:
             return yaml.safe_load(f)
     except Exception as e:
         print(f"❌ Failed to load policy: {e}")
         sys.exit(1)
+
 
 def find_skip_handlers() -> list[tuple[str, int, str]]:
     """Find all Skip button handlers in code"""
@@ -37,40 +38,46 @@ def find_skip_handlers() -> list[tuple[str, int, str]]:
 
     # Search patterns for Skip handlers
     patterns = [
-        r'onSkip\s*[:=]\s*',
-        r'on_skip\s*[:=]\s*',
-        r'handleSkip\s*[:=]\s*',
-        r'handle_skip\s*[:=]\s*',
-        r'@skip\s*',
-        r'@on_skip\s*',
-        r'Skip\s*[:=]\s*',
-        r'skip\s*[:=]\s*'
+        r"onSkip\s*[:=]\s*",
+        r"on_skip\s*[:=]\s*",
+        r"handleSkip\s*[:=]\s*",
+        r"handle_skip\s*[:=]\s*",
+        r"@skip\s*",
+        r"@on_skip\s*",
+        r"Skip\s*[:=]\s*",
+        r"skip\s*[:=]\s*",
     ]
 
     # File extensions to search
-    extensions = ['.py', '.ts', '.tsx', '.js', '.jsx', '.dart']
+    extensions = [".py", ".ts", ".tsx", ".js", ".jsx", ".dart"]
 
-    for root, _dirs, files in os.walk('.'):
+    for root, _dirs, files in os.walk("."):
         # Skip certain directories
-        if any(skip_dir in root for skip_dir in ['.git', '__pycache__', 'node_modules', '.venv']):
+        if any(
+            skip_dir in root
+            for skip_dir in [".git", "__pycache__", "node_modules", ".venv"]
+        ):
             continue
 
         for file in files:
             if any(file.endswith(ext) for ext in extensions):
                 file_path = os.path.join(root, file)
                 try:
-                    with open(file_path, encoding='utf-8') as f:
+                    with open(file_path, encoding="utf-8") as f:
                         lines = f.readlines()
 
                     for line_num, line in enumerate(lines, 1):
                         for pattern in patterns:
                             if re.search(pattern, line, re.IGNORECASE):
-                                skip_handlers.append((file_path, line_num, line.strip()))
+                                skip_handlers.append(
+                                    (file_path, line_num, line.strip())
+                                )
 
                 except Exception:
                     continue  # Skip files that can't be read
 
     return skip_handlers
+
 
 def find_cancel_calls() -> list[tuple[str, int, str]]:
     """Find all cancel() calls in code"""
@@ -78,27 +85,30 @@ def find_cancel_calls() -> list[tuple[str, int, str]]:
 
     # Search patterns for cancel calls
     patterns = [
-        r'\.cancel\s*\(',
-        r'cancel\s*\(',
-        r'\.abort\s*\(',
-        r'abort\s*\(',
-        r'\.stop\s*\(',
-        r'stop\s*\('
+        r"\.cancel\s*\(",
+        r"cancel\s*\(",
+        r"\.abort\s*\(",
+        r"abort\s*\(",
+        r"\.stop\s*\(",
+        r"stop\s*\(",
     ]
 
     # File extensions to search
-    extensions = ['.py', '.ts', '.tsx', '.js', '.jsx', '.dart']
+    extensions = [".py", ".ts", ".tsx", ".js", ".jsx", ".dart"]
 
-    for root, _dirs, files in os.walk('.'):
+    for root, _dirs, files in os.walk("."):
         # Skip certain directories
-        if any(skip_dir in root for skip_dir in ['.git', '__pycache__', 'node_modules', '.venv']):
+        if any(
+            skip_dir in root
+            for skip_dir in [".git", "__pycache__", "node_modules", ".venv"]
+        ):
             continue
 
         for file in files:
             if any(file.endswith(ext) for ext in extensions):
                 file_path = os.path.join(root, file)
                 try:
-                    with open(file_path, encoding='utf-8') as f:
+                    with open(file_path, encoding="utf-8") as f:
                         lines = f.readlines()
 
                     for line_num, line in enumerate(lines, 1):
@@ -111,12 +121,10 @@ def find_cancel_calls() -> list[tuple[str, int, str]]:
 
     return cancel_calls
 
+
 def check_skip_diagnose_implementation() -> bool:
     """Check if skip diagnose functions are implemented"""
-    required_files = [
-        'runtime/skip_diagnose.py',
-        'runtime/skip_diagnose.ts'
-    ]
+    required_files = ["runtime/skip_diagnose.py", "runtime/skip_diagnose.ts"]
 
     found_files = []
     for file_path in required_files:
@@ -131,25 +139,26 @@ def check_skip_diagnose_implementation() -> bool:
     print(f"✅ Skip diagnose functions found: {', '.join(found_files)}")
     return True
 
+
 def check_policy_compliance(policy: dict[str, Any]) -> bool:
     """Check if policy is compliant"""
-    skip_config = policy.get('skip', {})
+    skip_config = policy.get("skip", {})
 
     # Check skip semantics
-    if skip_config.get('semantics') != 'diagnose':
+    if skip_config.get("semantics") != "diagnose":
         print(f"❌ Invalid skip semantics: {skip_config.get('semantics')}")
         print("💡 Should be 'diagnose'")
         return False
 
     # Check cancel_on_skip
-    if skip_config.get('cancel_on_skip') is not False:
+    if skip_config.get("cancel_on_skip") is not False:
         print(f"❌ Invalid cancel_on_skip: {skip_config.get('cancel_on_skip')}")
         print("💡 Should be false")
         return False
 
     # Check required outputs
-    required_outputs = ['COMPLETED', 'RUNNING', 'STALLED', 'UNKNOWN']
-    outputs = skip_config.get('outputs', [])
+    required_outputs = ["COMPLETED", "RUNNING", "STALLED", "UNKNOWN"]
+    outputs = skip_config.get("outputs", [])
     for output in required_outputs:
         if output not in outputs:
             print(f"❌ Missing required skip output: {output}")
@@ -157,6 +166,7 @@ def check_policy_compliance(policy: dict[str, Any]) -> bool:
 
     print("✅ Policy is compliant")
     return True
+
 
 def analyze_skip_handlers(skip_handlers: list[tuple[str, int, str]]) -> bool:
     """Analyze Skip handlers for compliance"""
@@ -171,7 +181,7 @@ def analyze_skip_handlers(skip_handlers: list[tuple[str, int, str]]) -> bool:
         print(f"  - {file_path}:{line_num} - {line}")
 
         # Check if handler calls cancel()
-        if any(call in line.lower() for call in ['cancel(', 'abort(', 'stop(']):
+        if any(call in line.lower() for call in ["cancel(", "abort(", "stop("]):
             violations.append((file_path, line_num, line))
 
     if violations:
@@ -183,6 +193,7 @@ def analyze_skip_handlers(skip_handlers: list[tuple[str, int, str]]) -> bool:
 
     print("✅ Skip handlers are compliant")
     return True
+
 
 def analyze_cancel_calls(cancel_calls: list[tuple[str, int, str]]) -> bool:
     """Analyze cancel calls for context"""
@@ -207,6 +218,7 @@ def analyze_cancel_calls(cancel_calls: list[tuple[str, int, str]]) -> bool:
     print("\n💡 These calls should be in Cancel/Abort handlers, not Skip handlers")
     return True
 
+
 def main():
     """Main CI check function"""
     print("🔍 StillMe CI Check - Skip Not Cancel")
@@ -227,7 +239,7 @@ def main():
         ("Policy compliance", lambda: check_policy_compliance(policy)),
         ("Skip diagnose implementation", check_skip_diagnose_implementation),
         ("Skip handlers analysis", lambda: analyze_skip_handlers(find_skip_handlers())),
-        ("Cancel calls analysis", lambda: analyze_cancel_calls(find_cancel_calls()))
+        ("Cancel calls analysis", lambda: analyze_cancel_calls(find_cancel_calls())),
     ]
 
     passed = 0
@@ -252,6 +264,7 @@ def main():
         print("❌ Some checks failed!")
         print("💡 Fix Skip handlers to use diagnose instead of cancel")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

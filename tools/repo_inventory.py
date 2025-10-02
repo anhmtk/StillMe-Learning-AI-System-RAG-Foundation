@@ -20,7 +20,9 @@ from pathlib import Path
 from typing import Any
 
 
-def process_file_batch(file_paths: list[Path], repo_root: Path, with_hash: bool = False) -> list[dict[str, Any]]:
+def process_file_batch(
+    file_paths: list[Path], repo_root: Path, with_hash: bool = False
+) -> list[dict[str, Any]]:
     """Process a batch of files in parallel"""
     results = []
 
@@ -37,7 +39,7 @@ def process_file_batch(file_paths: list[Path], repo_root: Path, with_hash: bool 
             file_hash = None
             if with_hash and stat.st_size < 64 * 1024 * 1024:  # 64MB limit
                 try:
-                    with open(file_path, 'rb') as f:
+                    with open(file_path, "rb") as f:
                         file_hash = hashlib.sha256(f.read()).hexdigest()[:16]
                 except (OSError, FileNotFoundError):
                     pass
@@ -45,60 +47,140 @@ def process_file_batch(file_paths: list[Path], repo_root: Path, with_hash: bool 
             # Get git info
             git_info = get_git_info(file_path, repo_root)
 
-            results.append({
-                "path": str(relative_path),
-                "size": stat.st_size,
-                "type": file_type,
-                "last_commit": git_info["last_commit"],
-                "last_author": git_info["last_author"],
-                "last_date": git_info["last_date"],
-                "ref_count": 0,  # Will be calculated separately
-                "bin_guess": is_binary_file(file_path),
-                "hash": file_hash
-            })
+            results.append(
+                {
+                    "path": str(relative_path),
+                    "size": stat.st_size,
+                    "type": file_type,
+                    "last_commit": git_info["last_commit"],
+                    "last_author": git_info["last_author"],
+                    "last_date": git_info["last_date"],
+                    "ref_count": 0,  # Will be calculated separately
+                    "bin_guess": is_binary_file(file_path),
+                    "hash": file_hash,
+                }
+            )
 
         except (OSError, FileNotFoundError, PermissionError):
             continue
 
     return results
 
+
 def get_file_type(file_path: Path) -> str:
     """Phân loại file theo extension và path"""
     file_str = str(file_path)
 
     # Check for test files
-    if any(test_pattern in file_str.lower() for test_pattern in ["test_", "_test", ".test.", ".spec.", ".test.", "tests/"]):
+    if any(
+        test_pattern in file_str.lower()
+        for test_pattern in ["test_", "_test", ".test.", ".spec.", ".test.", "tests/"]
+    ):
         return "test"
 
     # Check by extension
     suffix = file_path.suffix.lower()
-    if suffix in {".py", ".js", ".ts", ".dart", ".java", ".cpp", ".c", ".h", ".hpp", ".go", ".rs", ".php", ".rb", ".swift", ".kt"}:
+    if suffix in {
+        ".py",
+        ".js",
+        ".ts",
+        ".dart",
+        ".java",
+        ".cpp",
+        ".c",
+        ".h",
+        ".hpp",
+        ".go",
+        ".rs",
+        ".php",
+        ".rb",
+        ".swift",
+        ".kt",
+    }:
         return "code"
     elif suffix in {".md", ".rst", ".txt", ".doc", ".docx", ".pdf", ".rtf"}:
         return "doc"
-    elif suffix in {".json", ".yaml", ".yml", ".toml", ".ini", ".cfg", ".conf", ".xml", ".properties"}:
+    elif suffix in {
+        ".json",
+        ".yaml",
+        ".yml",
+        ".toml",
+        ".ini",
+        ".cfg",
+        ".conf",
+        ".xml",
+        ".properties",
+    }:
         return "config"
-    elif suffix in {".exe", ".dll", ".so", ".dylib", ".bin", ".app", ".apk", ".ipa", ".deb", ".rpm"}:
+    elif suffix in {
+        ".exe",
+        ".dll",
+        ".so",
+        ".dylib",
+        ".bin",
+        ".app",
+        ".apk",
+        ".ipa",
+        ".deb",
+        ".rpm",
+    }:
         return "bin"
-    elif suffix in {".csv", ".tsv", ".json", ".xml", ".sql", ".db", ".sqlite", ".parquet"}:
+    elif suffix in {
+        ".csv",
+        ".tsv",
+        ".json",
+        ".xml",
+        ".sql",
+        ".db",
+        ".sqlite",
+        ".parquet",
+    }:
         return "data"
-    elif suffix in {".jpg", ".jpeg", ".png", ".gif", ".svg", ".mp4", ".mp3", ".wav", ".avi", ".mov"}:
+    elif suffix in {
+        ".jpg",
+        ".jpeg",
+        ".png",
+        ".gif",
+        ".svg",
+        ".mp4",
+        ".mp3",
+        ".wav",
+        ".avi",
+        ".mov",
+    }:
         return "media"
-    elif suffix in {".zip", ".tar", ".gz", ".bz2", ".7z", ".rar", ".tar.gz", ".tar.bz2"}:
+    elif suffix in {
+        ".zip",
+        ".tar",
+        ".gz",
+        ".bz2",
+        ".7z",
+        ".rar",
+        ".tar.gz",
+        ".tar.bz2",
+    }:
         return "archive"
     else:
         return "other"
+
 
 def get_git_info(file_path: Path, repo_root: Path) -> dict[str, Any]:
     """Lấy thông tin Git cho file"""
     try:
         # Get last commit info
         result = subprocess.run(
-            ["git", "log", "-1", "--format=%H|%an|%ae|%ad", "--date=iso", str(file_path)],
+            [
+                "git",
+                "log",
+                "-1",
+                "--format=%H|%an|%ae|%ad",
+                "--date=iso",
+                str(file_path),
+            ],
             cwd=repo_root,
             capture_output=True,
             text=True,
-            timeout=10
+            timeout=10,
         )
 
         if result.returncode == 0 and result.stdout.strip():
@@ -106,35 +188,39 @@ def get_git_info(file_path: Path, repo_root: Path) -> dict[str, Any]:
             return {
                 "last_commit": commit_hash[:8],
                 "last_author": author,
-                "last_date": date
+                "last_date": date,
             }
     except (subprocess.TimeoutExpired, subprocess.CalledProcessError, ValueError):
         pass
 
-    return {
-        "last_commit": "unknown",
-        "last_author": "unknown",
-        "last_date": "unknown"
-    }
+    return {"last_commit": "unknown", "last_author": "unknown", "last_date": "unknown"}
+
 
 def is_binary_file(file_path: Path) -> bool:
     """Kiểm tra xem file có phải binary không"""
     try:
         mime_type, _ = mimetypes.guess_type(str(file_path))
-        if mime_type and mime_type.startswith('text/'):
+        if mime_type and mime_type.startswith("text/"):
             return False
 
         # Check first 1024 bytes for null bytes
-        with open(file_path, 'rb') as f:
+        with open(file_path, "rb") as f:
             chunk = f.read(1024)
-            return b'\x00' in chunk
+            return b"\x00" in chunk
     except (OSError, FileNotFoundError):
         return False
 
+
 class RepoInventory:
-    def __init__(self, repo_root: str = ".", mode: str = "primary",
-                 exclude_dirs: set[str] = None, include_exts: set[str] = None,
-                 workers: int = None, with_hash: bool = False):
+    def __init__(
+        self,
+        repo_root: str = ".",
+        mode: str = "primary",
+        exclude_dirs: set[str] = None,
+        include_exts: set[str] = None,
+        workers: int = None,
+        with_hash: bool = False,
+    ):
         self.repo_root = Path(repo_root).resolve()
         self.reports_dir = self.repo_root / "reports"
         self.reports_dir.mkdir(exist_ok=True)
@@ -145,23 +231,70 @@ class RepoInventory:
 
         # Default exclude directories (artifacts and dependencies)
         self.exclude_dirs = exclude_dirs or {
-            "node_modules", ".venv", "__pycache__", "dist", "build", "logs", "reports",
-            ".next", ".turbo", ".pytest_cache", ".cache", "coverage", "*.egg-info",
-            ".gradle", ".idea", ".parcel-cache", ".git", ".vscode", ".vs"
+            "node_modules",
+            ".venv",
+            "__pycache__",
+            "dist",
+            "build",
+            "logs",
+            "reports",
+            ".next",
+            ".turbo",
+            ".pytest_cache",
+            ".cache",
+            "coverage",
+            "*.egg-info",
+            ".gradle",
+            ".idea",
+            ".parcel-cache",
+            ".git",
+            ".vscode",
+            ".vs",
         }
 
         # Default include extensions (production files)
         self.include_exts = include_exts or {
-            ".py", ".ts", ".tsx", ".js", ".json", ".md", ".toml", ".yaml", ".yml",
-            ".ini", ".sh", ".ps1", ".bat", ".kt", ".java", ".sql", ".go", ".rs",
-            ".php", ".rb", ".swift", ".cpp", ".c", ".h", ".hpp"
+            ".py",
+            ".ts",
+            ".tsx",
+            ".js",
+            ".json",
+            ".md",
+            ".toml",
+            ".yaml",
+            ".yml",
+            ".ini",
+            ".sh",
+            ".ps1",
+            ".bat",
+            ".kt",
+            ".java",
+            ".sql",
+            ".go",
+            ".rs",
+            ".php",
+            ".rb",
+            ".swift",
+            ".cpp",
+            ".c",
+            ".h",
+            ".hpp",
         }
 
         # Protected directories (không được đụng)
         self.protected_dirs = {
-            ".env", ".env.local", ".env.prod", ".env.dev",
-            "policies", "models", "weights", "checkpoints",
-            "data", "deploy", ".github", "sandbox"
+            ".env",
+            ".env.local",
+            ".env.prod",
+            ".env.dev",
+            "policies",
+            "models",
+            "weights",
+            "checkpoints",
+            "data",
+            "deploy",
+            ".github",
+            "sandbox",
         }
 
     def should_include_file(self, file_path: Path) -> bool:
@@ -212,13 +345,19 @@ class RepoInventory:
             root_path = Path(root)
 
             # Skip hidden directories
-            dirs[:] = [d for d in dirs if not d.startswith('.') or d in {'.git', '.github'}]
+            dirs[:] = [
+                d for d in dirs if not d.startswith(".") or d in {".git", ".github"}
+            ]
 
             for filename in filenames:
                 file_path = root_path / filename
 
                 # Skip hidden files
-                if filename.startswith('.') and filename not in {'.gitignore', '.env.example', '.env.template'}:
+                if filename.startswith(".") and filename not in {
+                    ".gitignore",
+                    ".env.example",
+                    ".env.template",
+                }:
                     continue
 
                 # Check if file should be included
@@ -229,7 +368,10 @@ class RepoInventory:
                     if self.should_include_excluded_file(file_path):
                         files.append(file_path)
                 elif self.mode == "all":
-                    if not any(protected in str(file_path.relative_to(self.repo_root)) for protected in self.protected_dirs):
+                    if not any(
+                        protected in str(file_path.relative_to(self.repo_root))
+                        for protected in self.protected_dirs
+                    ):
                         files.append(file_path)
 
         print(f"📄 Found {len(files)} files to process")
@@ -247,7 +389,7 @@ class RepoInventory:
 
         # Split files into batches
         batch_size = 256
-        batches = [files[i:i + batch_size] for i in range(0, len(files), batch_size)]
+        batches = [files[i : i + batch_size] for i in range(0, len(files), batch_size)]
 
         inventory = []
         start_time = time.time()
@@ -255,7 +397,9 @@ class RepoInventory:
         with ProcessPoolExecutor(max_workers=self.workers) as executor:
             # Submit all batches
             future_to_batch = {
-                executor.submit(process_file_batch, batch, self.repo_root, self.with_hash): batch
+                executor.submit(
+                    process_file_batch, batch, self.repo_root, self.with_hash
+                ): batch
                 for batch in batches
             }
 
@@ -270,14 +414,18 @@ class RepoInventory:
                     if processed % 1000 == 0:
                         elapsed = time.time() - start_time
                         rate = processed / elapsed if elapsed > 0 else 0
-                        print(f"  📊 Processed {processed}/{len(files)} files ({rate:.1f} files/sec)")
+                        print(
+                            f"  📊 Processed {processed}/{len(files)} files ({rate:.1f} files/sec)"
+                        )
 
                 except Exception as e:
                     print(f"❌ Error processing batch: {e}")
 
         elapsed = time.time() - start_time
         rate = len(inventory) / elapsed if elapsed > 0 else 0
-        print(f"✅ Processed {len(inventory)} files in {elapsed:.1f}s ({rate:.1f} files/sec)")
+        print(
+            f"✅ Processed {len(inventory)} files in {elapsed:.1f}s ({rate:.1f} files/sec)"
+        )
 
         return inventory
 
@@ -286,18 +434,22 @@ class RepoInventory:
         large_files = sorted(inventory, key=lambda x: x["size"], reverse=True)[:1000]
 
         csv_path = self.reports_dir / f"{self.mode}_large_files.csv"
-        with open(csv_path, 'w', newline='', encoding='utf-8') as f:
-            writer = csv.DictWriter(f, fieldnames=["path", "size", "type", "last_commit", "ref_count"])
+        with open(csv_path, "w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(
+                f, fieldnames=["path", "size", "type", "last_commit", "ref_count"]
+            )
             writer.writeheader()
 
             for item in large_files:
-                writer.writerow({
-                    "path": item["path"],
-                    "size": item["size"],
-                    "type": item["type"],
-                    "last_commit": item["last_commit"],
-                    "ref_count": item["ref_count"]
-                })
+                writer.writerow(
+                    {
+                        "path": item["path"],
+                        "size": item["size"],
+                        "type": item["type"],
+                        "last_commit": item["last_commit"],
+                        "ref_count": item["ref_count"],
+                    }
+                )
 
         print(f"📊 Large files report: {csv_path}")
 
@@ -312,22 +464,24 @@ class RepoInventory:
             "metadata": {
                 "generated_at": datetime.now().isoformat(),
                 "total_files": len(inventory),
-                "mode": self.mode
-            }
+                "mode": self.mode,
+            },
         }
 
         # Add nodes (files)
         for item in inventory:
             if item["type"] in ["code", "config"]:
-                dep_graph["nodes"].append({
-                    "id": item["path"],
-                    "type": item["type"],
-                    "size": item["size"],
-                    "ref_count": item["ref_count"]
-                })
+                dep_graph["nodes"].append(
+                    {
+                        "id": item["path"],
+                        "type": item["type"],
+                        "size": item["size"],
+                        "ref_count": item["ref_count"],
+                    }
+                )
 
         json_path = self.reports_dir / f"{self.mode}_dep_graph.json"
-        with open(json_path, 'w', encoding='utf-8') as f:
+        with open(json_path, "w", encoding="utf-8") as f:
             json.dump(dep_graph, f, indent=2, ensure_ascii=False)
 
         print(f"🕸️  Dependency graph: {json_path}")
@@ -336,21 +490,31 @@ class RepoInventory:
         """Tạo CSV inventory chính"""
         csv_path = self.reports_dir / f"{self.mode}_inventory.csv"
 
-        with open(csv_path, 'w', newline='', encoding='utf-8') as f:
-            fieldnames = ["path", "size", "type", "last_commit", "ref_count", "bin_guess", "hash"]
+        with open(csv_path, "w", newline="", encoding="utf-8") as f:
+            fieldnames = [
+                "path",
+                "size",
+                "type",
+                "last_commit",
+                "ref_count",
+                "bin_guess",
+                "hash",
+            ]
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
 
             for item in inventory:
-                writer.writerow({
-                    "path": item["path"],
-                    "size": item["size"],
-                    "type": item["type"],
-                    "last_commit": item["last_commit"],
-                    "ref_count": item["ref_count"],
-                    "bin_guess": item["bin_guess"],
-                    "hash": item["hash"]
-                })
+                writer.writerow(
+                    {
+                        "path": item["path"],
+                        "size": item["size"],
+                        "type": item["type"],
+                        "last_commit": item["last_commit"],
+                        "ref_count": item["ref_count"],
+                        "bin_guess": item["bin_guess"],
+                        "hash": item["hash"],
+                    }
+                )
 
         print(f"📋 Main inventory: {csv_path}")
 
@@ -362,13 +526,13 @@ class RepoInventory:
             "total_size": sum(item["size"] for item in inventory),
             "by_type": {},
             "by_size_range": {
-                "small": 0,    # < 1KB
-                "medium": 0,   # 1KB - 1MB
-                "large": 0,    # 1MB - 10MB
-                "huge": 0      # > 10MB
+                "small": 0,  # < 1KB
+                "medium": 0,  # 1KB - 1MB
+                "large": 0,  # 1MB - 10MB
+                "huge": 0,  # > 10MB
             },
             "unreferenced_files": 0,
-            "binary_files": 0
+            "binary_files": 0,
         }
 
         # Count by type
@@ -397,15 +561,15 @@ class RepoInventory:
 
         # Save summary
         summary_path = self.reports_dir / f"{self.mode}_summary.json"
-        with open(summary_path, 'w', encoding='utf-8') as f:
+        with open(summary_path, "w", encoding="utf-8") as f:
             json.dump(summary, f, indent=2, ensure_ascii=False)
 
         print(f"📊 Summary report: {summary_path}")
 
         # Print summary to console
-        print("\n" + "="*60)
+        print("\n" + "=" * 60)
         print(f"📊 REPOSITORY INVENTORY SUMMARY ({self.mode.upper()})")
-        print("="*60)
+        print("=" * 60)
         print(f"Total files: {summary['total_files']:,}")
         print(f"Total size: {summary['total_size'] / (1024*1024):.1f} MB")
         print(f"Unreferenced files: {summary['unreferenced_files']:,}")
@@ -441,15 +605,28 @@ class RepoInventory:
         print(f"\n✅ Repository inventory ({self.mode}) completed!")
         return inventory
 
+
 def main():
-    parser = argparse.ArgumentParser(description="Repository Inventory Tool - Two-Phase Approach")
+    parser = argparse.ArgumentParser(
+        description="Repository Inventory Tool - Two-Phase Approach"
+    )
     parser.add_argument("--base-dir", default=".", help="Base directory to scan")
-    parser.add_argument("--mode", choices=["primary", "excluded", "all"], default="primary",
-                       help="Scan mode: primary (production files), excluded (artifacts), all (everything)")
-    parser.add_argument("--exclude", help="Comma-separated list of directories to exclude")
-    parser.add_argument("--include-ext", help="Comma-separated list of file extensions to include")
+    parser.add_argument(
+        "--mode",
+        choices=["primary", "excluded", "all"],
+        default="primary",
+        help="Scan mode: primary (production files), excluded (artifacts), all (everything)",
+    )
+    parser.add_argument(
+        "--exclude", help="Comma-separated list of directories to exclude"
+    )
+    parser.add_argument(
+        "--include-ext", help="Comma-separated list of file extensions to include"
+    )
     parser.add_argument("--workers", type=int, help="Number of worker processes")
-    parser.add_argument("--with-hash", action="store_true", help="Calculate file hashes (slower)")
+    parser.add_argument(
+        "--with-hash", action="store_true", help="Calculate file hashes (slower)"
+    )
 
     args = parser.parse_args()
 
@@ -470,11 +647,12 @@ def main():
         exclude_dirs=exclude_dirs,
         include_exts=include_exts,
         workers=args.workers,
-        with_hash=args.with_hash
+        with_hash=args.with_hash,
     )
 
     # Run inventory
     inventory.run()
+
 
 if __name__ == "__main__":
     main()

@@ -18,6 +18,7 @@ import aiofiles
 
 class EventType(Enum):
     """Event types for AgentDev system"""
+
     # Task events
     TASK_CREATED = "task.created"
     TASK_STARTED = "task.started"
@@ -57,9 +58,11 @@ class EventType(Enum):
     USER_ACTION = "user.action"
     USER_FEEDBACK = "user.feedback"
 
+
 @dataclass
 class Event:
     """Base event class"""
+
     event_id: str
     event_type: EventType
     timestamp: float
@@ -69,14 +72,17 @@ class Event:
     causation_id: Optional[str] = None
     metadata: Optional[dict[str, Any]] = None
 
+
 @dataclass
 class EventHandler:
     """Event handler definition"""
+
     handler_id: str
     event_types: list[EventType]
     handler_func: Callable[[Event], None]
     priority: int = 0
     async_handler: bool = False
+
 
 class EventBus:
     """Enterprise event bus with persistence and replay capabilities"""
@@ -85,9 +91,13 @@ class EventBus:
         self.handlers: dict[EventType, list[EventHandler]] = {}
         self.event_store: list[Event] = []
         self.config = self._load_config(config_path)
-        self.persistence_enabled = self.config.get('persistence', {}).get('enabled', True)
-        self.event_store_file = Path(self.config.get('persistence', {}).get('file', '.agentdev/events.json'))
-        self.max_events = self.config.get('max_events', 10000)
+        self.persistence_enabled = self.config.get("persistence", {}).get(
+            "enabled", True
+        )
+        self.event_store_file = Path(
+            self.config.get("persistence", {}).get("file", ".agentdev/events.json")
+        )
+        self.max_events = self.config.get("max_events", 10000)
         self.running = False
 
     def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
@@ -99,23 +109,24 @@ class EventBus:
 
         if config_file.exists():
             import yaml
+
             with open(config_file) as f:
                 return yaml.safe_load(f)
         else:
             return {
-                'persistence': {
-                    'enabled': True,
-                    'file': '.agentdev/events.json'
-                },
-                'max_events': 10000,
-                'replay_enabled': True
+                "persistence": {"enabled": True, "file": ".agentdev/events.json"},
+                "max_events": 10000,
+                "replay_enabled": True,
             }
 
-    def subscribe(self, event_types: list[EventType],
-                 handler_func: Callable[[Event], None],
-                 handler_id: Optional[str] = None,
-                 priority: int = 0,
-                 async_handler: bool = False) -> str:
+    def subscribe(
+        self,
+        event_types: list[EventType],
+        handler_func: Callable[[Event], None],
+        handler_id: Optional[str] = None,
+        priority: int = 0,
+        async_handler: bool = False,
+    ) -> str:
         """Subscribe to events"""
         if handler_id is None:
             handler_id = f"handler_{uuid.uuid4().hex[:8]}"
@@ -125,7 +136,7 @@ class EventBus:
             event_types=event_types,
             handler_func=handler_func,
             priority=priority,
-            async_handler=async_handler
+            async_handler=async_handler,
         )
 
         for event_type in event_types:
@@ -136,7 +147,9 @@ class EventBus:
             # Sort by priority (higher priority first)
             self.handlers[event_type].sort(key=lambda h: h.priority, reverse=True)
 
-        print(f"✅ Event handler registered: {handler_id} for {[et.value for et in event_types]}")
+        print(
+            f"✅ Event handler registered: {handler_id} for {[et.value for et in event_types]}"
+        )
         return handler_id
 
     def unsubscribe(self, handler_id: str) -> bool:
@@ -145,7 +158,9 @@ class EventBus:
 
         for event_type, handlers in self.handlers.items():
             original_count = len(handlers)
-            self.handlers[event_type] = [h for h in handlers if h.handler_id != handler_id]
+            self.handlers[event_type] = [
+                h for h in handlers if h.handler_id != handler_id
+            ]
 
             if len(self.handlers[event_type]) < original_count:
                 removed = True
@@ -155,10 +170,15 @@ class EventBus:
 
         return removed
 
-    async def publish(self, event_type: EventType, data: dict[str, Any],
-                     source: str, correlation_id: Optional[str] = None,
-                     causation_id: Optional[str] = None,
-                     metadata: Optional[dict[str, Any]] = None) -> str:
+    async def publish(
+        self,
+        event_type: EventType,
+        data: dict[str, Any],
+        source: str,
+        correlation_id: Optional[str] = None,
+        causation_id: Optional[str] = None,
+        metadata: Optional[dict[str, Any]] = None,
+    ) -> str:
         """Publish an event"""
         event = Event(
             event_id=str(uuid.uuid4()),
@@ -168,7 +188,7 @@ class EventBus:
             data=data,
             correlation_id=correlation_id,
             causation_id=causation_id,
-            metadata=metadata or {}
+            metadata=metadata or {},
         )
 
         # Store event
@@ -180,7 +200,7 @@ class EventBus:
 
         # Cleanup old events
         if len(self.event_store) > self.max_events:
-            self.event_store = self.event_store[-self.max_events:]
+            self.event_store = self.event_store[-self.max_events :]
 
         # Notify handlers
         await self._notify_handlers(event)
@@ -207,21 +227,21 @@ class EventBus:
             self.event_store_file.parent.mkdir(parents=True, exist_ok=True)
 
             # Convert event to serializable format
-            event_data = {
-                **asdict(event),
-                'event_type': event.event_type.value
-            }
+            event_data = {**asdict(event), "event_type": event.event_type.value}
 
             # Append to file
-            async with aiofiles.open(self.event_store_file, 'a') as f:
-                await f.write(json.dumps(event_data) + '\n')
+            async with aiofiles.open(self.event_store_file, "a") as f:
+                await f.write(json.dumps(event_data) + "\n")
 
         except Exception as e:
             print(f"⚠️ Failed to persist event: {e}")
 
-    async def replay_events(self, event_types: Optional[list[EventType]] = None,
-                          from_timestamp: Optional[float] = None,
-                          to_timestamp: Optional[float] = None) -> list[Event]:
+    async def replay_events(
+        self,
+        event_types: Optional[list[EventType]] = None,
+        from_timestamp: Optional[float] = None,
+        to_timestamp: Optional[float] = None,
+    ) -> list[Event]:
         """Replay events from store"""
         events = []
 
@@ -253,14 +273,14 @@ class EventBus:
                         event_data = json.loads(line)
 
                         event = Event(
-                            event_id=event_data['event_id'],
-                            event_type=EventType(event_data['event_type']),
-                            timestamp=event_data['timestamp'],
-                            source=event_data['source'],
-                            data=event_data['data'],
-                            correlation_id=event_data.get('correlation_id'),
-                            causation_id=event_data.get('causation_id'),
-                            metadata=event_data.get('metadata', {})
+                            event_id=event_data["event_id"],
+                            event_type=EventType(event_data["event_type"]),
+                            timestamp=event_data["timestamp"],
+                            source=event_data["source"],
+                            data=event_data["data"],
+                            correlation_id=event_data.get("correlation_id"),
+                            causation_id=event_data.get("causation_id"),
+                            metadata=event_data.get("metadata", {}),
                         )
 
                         self.event_store.append(event)
@@ -278,12 +298,18 @@ class EventBus:
             event_counts[event_type] = event_counts.get(event_type, 0) + 1
 
         return {
-            'total_events': len(self.event_store),
-            'event_types': len({e.event_type for e in self.event_store}),
-            'event_counts': event_counts,
-            'handlers_registered': sum(len(handlers) for handlers in self.handlers.values()),
-            'oldest_event': min(e.timestamp for e in self.event_store) if self.event_store else None,
-            'newest_event': max(e.timestamp for e in self.event_store) if self.event_store else None
+            "total_events": len(self.event_store),
+            "event_types": len({e.event_type for e in self.event_store}),
+            "event_counts": event_counts,
+            "handlers_registered": sum(
+                len(handlers) for handlers in self.handlers.values()
+            ),
+            "oldest_event": min(e.timestamp for e in self.event_store)
+            if self.event_store
+            else None,
+            "newest_event": max(e.timestamp for e in self.event_store)
+            if self.event_store
+            else None,
         }
 
     async def start(self):
@@ -303,57 +329,72 @@ class EventBus:
         self.running = False
         print("🛑 Event Bus stopped")
 
+
 # Global event bus instance
 event_bus = EventBus()
 
+
 # Convenience functions
-async def publish_task_event(event_type: EventType, task_id: str,
-                           data: dict[str, Any], correlation_id: Optional[str] = None) -> str:
+async def publish_task_event(
+    event_type: EventType,
+    task_id: str,
+    data: dict[str, Any],
+    correlation_id: Optional[str] = None,
+) -> str:
     """Publish task-related event"""
     return await event_bus.publish(
         event_type=event_type,
-        data={**data, 'task_id': task_id},
+        data={**data, "task_id": task_id},
         source="agentdev-task",
-        correlation_id=correlation_id
+        correlation_id=correlation_id,
     )
 
-async def publish_security_event(event_type: EventType,
-                               data: dict[str, Any],
-                               correlation_id: Optional[str] = None) -> str:
+
+async def publish_security_event(
+    event_type: EventType, data: dict[str, Any], correlation_id: Optional[str] = None
+) -> str:
     """Publish security-related event"""
     return await event_bus.publish(
         event_type=event_type,
         data=data,
         source="agentdev-security",
-        correlation_id=correlation_id
+        correlation_id=correlation_id,
     )
 
-async def publish_system_event(event_type: EventType,
-                             data: dict[str, Any],
-                             correlation_id: Optional[str] = None) -> str:
+
+async def publish_system_event(
+    event_type: EventType, data: dict[str, Any], correlation_id: Optional[str] = None
+) -> str:
     """Publish system-related event"""
     return await event_bus.publish(
         event_type=event_type,
         data=data,
         source="agentdev-system",
-        correlation_id=correlation_id
+        correlation_id=correlation_id,
     )
 
+
 # Event decorators
-def event_handler(event_types: list[EventType], priority: int = 0, async_handler: bool = False):
+def event_handler(
+    event_types: list[EventType], priority: int = 0, async_handler: bool = False
+):
     """Decorator for event handlers"""
+
     def decorator(func):
         handler_id = event_bus.subscribe(
             event_types=event_types,
             handler_func=func,
             priority=priority,
-            async_handler=async_handler
+            async_handler=async_handler,
         )
         func._event_handler_id = handler_id
         return func
+
     return decorator
 
+
 if __name__ == "__main__":
+
     async def main():
         # Example usage
         bus = EventBus()
@@ -372,12 +413,12 @@ if __name__ == "__main__":
         await publish_task_event(
             EventType.TASK_CREATED,
             "task_123",
-            {"task_type": "deploy_edge", "user": "developer"}
+            {"task_type": "deploy_edge", "user": "developer"},
         )
 
         await publish_security_event(
             EventType.SECURITY_VIOLATION_DETECTED,
-            {"violation_type": "hardcoded_secret", "file": "config.py"}
+            {"violation_type": "hardcoded_secret", "file": "config.py"},
         )
 
         # Get statistics

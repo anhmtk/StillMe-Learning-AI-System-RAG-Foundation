@@ -3,6 +3,7 @@
 StillMe Content Integrity Filter
 Lọc và sanitize nội dung từ internet để đảm bảo an toàn
 """
+
 import json
 import logging
 import re
@@ -11,6 +12,7 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+
 class ContentIntegrityFilter:
     """Filter để đảm bảo tính toàn vẹn nội dung"""
 
@@ -18,91 +20,82 @@ class ContentIntegrityFilter:
         # Dangerous patterns
         self.dangerous_patterns = [
             # Script tags
-            r'<script[^>]*>.*?</script>',
-            r'<script[^>]*/>',
-
+            r"<script[^>]*>.*?</script>",
+            r"<script[^>]*/>",
             # JavaScript protocols
-            r'javascript:',
-            r'vbscript:',
-            r'data:text/html',
-            r'data:application/javascript',
-
+            r"javascript:",
+            r"vbscript:",
+            r"data:text/html",
+            r"data:application/javascript",
             # Event handlers
-            r'onload\s*=',
-            r'onerror\s*=',
-            r'onclick\s*=',
-            r'onmouseover\s*=',
-            r'onfocus\s*=',
-            r'onblur\s*=',
-            r'onchange\s*=',
-            r'onsubmit\s*=',
-            r'onreset\s*=',
-            r'onselect\s*=',
-            r'onkeydown\s*=',
-            r'onkeyup\s*=',
-            r'onkeypress\s*=',
-
+            r"onload\s*=",
+            r"onerror\s*=",
+            r"onclick\s*=",
+            r"onmouseover\s*=",
+            r"onfocus\s*=",
+            r"onblur\s*=",
+            r"onchange\s*=",
+            r"onsubmit\s*=",
+            r"onreset\s*=",
+            r"onselect\s*=",
+            r"onkeydown\s*=",
+            r"onkeyup\s*=",
+            r"onkeypress\s*=",
             # Dangerous functions
-            r'eval\s*\(',
-            r'expression\s*\(',
-            r'url\s*\(',
-            r'@import',
-            r'@charset',
-
+            r"eval\s*\(",
+            r"expression\s*\(",
+            r"url\s*\(",
+            r"@import",
+            r"@charset",
             # Dangerous HTML elements
-            r'<iframe[^>]*>',
-            r'<object[^>]*>',
-            r'<embed[^>]*>',
-            r'<applet[^>]*>',
-            r'<form[^>]*>',
-            r'<input[^>]*>',
-            r'<button[^>]*>',
-            r'<select[^>]*>',
-            r'<textarea[^>]*>',
-
+            r"<iframe[^>]*>",
+            r"<object[^>]*>",
+            r"<embed[^>]*>",
+            r"<applet[^>]*>",
+            r"<form[^>]*>",
+            r"<input[^>]*>",
+            r"<button[^>]*>",
+            r"<select[^>]*>",
+            r"<textarea[^>]*>",
             # Meta tags that could be dangerous
-            r'<meta[^>]*http-equiv[^>]*>',
-            r'<meta[^>]*content[^>]*>',
-
+            r"<meta[^>]*http-equiv[^>]*>",
+            r"<meta[^>]*content[^>]*>",
             # Link tags
-            r'<link[^>]*>',
-
+            r"<link[^>]*>",
             # Style tags with expressions
-            r'<style[^>]*>.*?expression\s*\(.*?</style>',
-
+            r"<style[^>]*>.*?expression\s*\(.*?</style>",
             # Base64 encoded content
-            r'data:image/[^;]+;base64,',
-            r'data:application/[^;]+;base64,',
-
+            r"data:image/[^;]+;base64,",
+            r"data:application/[^;]+;base64,",
             # File protocols
-            r'file://',
-            r'ftp://',
-
+            r"file://",
+            r"ftp://",
             # SQL injection patterns
-            r'union\s+select',
-            r'drop\s+table',
-            r'delete\s+from',
-            r'insert\s+into',
-            r'update\s+set',
-
+            r"union\s+select",
+            r"drop\s+table",
+            r"delete\s+from",
+            r"insert\s+into",
+            r"update\s+set",
             # Command injection
-            r';\s*rm\s+',
-            r';\s*cat\s+',
-            r';\s*ls\s+',
-            r';\s*whoami',
-            r';\s*id\s+',
-            r';\s*ps\s+',
-            r';\s*kill\s+',
-
+            r";\s*rm\s+",
+            r";\s*cat\s+",
+            r";\s*ls\s+",
+            r";\s*whoami",
+            r";\s*id\s+",
+            r";\s*ps\s+",
+            r";\s*kill\s+",
             # Path traversal
-            r'\.\./',
-            r'\.\.\\',
-            r'%2e%2e%2f',
-            r'%2e%2e%5c',
+            r"\.\./",
+            r"\.\.\\",
+            r"%2e%2e%2f",
+            r"%2e%2e%5c",
         ]
 
         # Compile patterns for better performance
-        self.compiled_patterns = [re.compile(pattern, re.IGNORECASE | re.DOTALL) for pattern in self.dangerous_patterns]
+        self.compiled_patterns = [
+            re.compile(pattern, re.IGNORECASE | re.DOTALL)
+            for pattern in self.dangerous_patterns
+        ]
 
         # Log file
         self.log_file = Path("logs/content_filter.log")
@@ -113,7 +106,7 @@ class ContentIntegrityFilter:
             "total_processed": 0,
             "blocked_content": 0,
             "sanitized_content": 0,
-            "clean_content": 0
+            "clean_content": 0,
         }
 
     def filter_content(self, content: str, source: str = "unknown") -> dict[str, Any]:
@@ -127,7 +120,7 @@ class ContentIntegrityFilter:
                     "success": True,
                     "filtered": False,
                     "content": content,
-                    "warnings": []
+                    "warnings": [],
                 }
 
             # Detect dangerous patterns
@@ -137,12 +130,16 @@ class ContentIntegrityFilter:
             for i, pattern in enumerate(self.compiled_patterns):
                 matches = pattern.findall(content)
                 if matches:
-                    blocked_patterns.append({
-                        "pattern_index": i,
-                        "pattern": self.dangerous_patterns[i],
-                        "matches": len(matches)
-                    })
-                    warnings.append(f"Blocked dangerous pattern: {self.dangerous_patterns[i]}")
+                    blocked_patterns.append(
+                        {
+                            "pattern_index": i,
+                            "pattern": self.dangerous_patterns[i],
+                            "matches": len(matches),
+                        }
+                    )
+                    warnings.append(
+                        f"Blocked dangerous pattern: {self.dangerous_patterns[i]}"
+                    )
 
             # If dangerous patterns found, sanitize content
             if blocked_patterns:
@@ -150,14 +147,16 @@ class ContentIntegrityFilter:
                 sanitized_content = self._sanitize_content(content)
 
                 # Log the filtering
-                self._log_filtering(source, blocked_patterns, content[:200], sanitized_content[:200])
+                self._log_filtering(
+                    source, blocked_patterns, content[:200], sanitized_content[:200]
+                )
 
                 return {
                     "success": True,
                     "filtered": True,
                     "content": sanitized_content,
                     "warnings": warnings,
-                    "blocked_patterns": blocked_patterns
+                    "blocked_patterns": blocked_patterns,
                 }
             else:
                 self.stats["clean_content"] += 1
@@ -165,7 +164,7 @@ class ContentIntegrityFilter:
                     "success": True,
                     "filtered": False,
                     "content": content,
-                    "warnings": []
+                    "warnings": [],
                 }
 
         except Exception as e:
@@ -174,7 +173,7 @@ class ContentIntegrityFilter:
                 "success": False,
                 "error": f"Content filtering failed: {str(e)}",
                 "content": content,
-                "filtered": False
+                "filtered": False,
             }
 
     def _sanitize_content(self, content: str) -> str:
@@ -184,21 +183,33 @@ class ContentIntegrityFilter:
 
             # Remove dangerous patterns
             for pattern in self.compiled_patterns:
-                sanitized = pattern.sub('', sanitized)
+                sanitized = pattern.sub("", sanitized)
 
             # Additional cleaning
             # Remove excessive whitespace
-            sanitized = re.sub(r'\s+', ' ', sanitized)
+            sanitized = re.sub(r"\s+", " ", sanitized)
 
             # Remove empty tags
-            sanitized = re.sub(r'<[^>]*>\s*</[^>]*>', '', sanitized)
+            sanitized = re.sub(r"<[^>]*>\s*</[^>]*>", "", sanitized)
 
             # Remove suspicious attributes
-            sanitized = re.sub(r'\s+on\w+\s*=\s*["\'][^"\']*["\']', '', sanitized, flags=re.IGNORECASE)
+            sanitized = re.sub(
+                r'\s+on\w+\s*=\s*["\'][^"\']*["\']', "", sanitized, flags=re.IGNORECASE
+            )
 
             # Remove javascript: and data: URLs
-            sanitized = re.sub(r'href\s*=\s*["\']javascript:[^"\']*["\']', 'href="#"', sanitized, flags=re.IGNORECASE)
-            sanitized = re.sub(r'src\s*=\s*["\']data:[^"\']*["\']', 'src=""', sanitized, flags=re.IGNORECASE)
+            sanitized = re.sub(
+                r'href\s*=\s*["\']javascript:[^"\']*["\']',
+                'href="#"',
+                sanitized,
+                flags=re.IGNORECASE,
+            )
+            sanitized = re.sub(
+                r'src\s*=\s*["\']data:[^"\']*["\']',
+                'src=""',
+                sanitized,
+                flags=re.IGNORECASE,
+            )
 
             self.stats["sanitized_content"] += 1
 
@@ -208,7 +219,13 @@ class ContentIntegrityFilter:
             logger.error(f"❌ Content sanitization error: {e}")
             return content  # Return original if sanitization fails
 
-    def _log_filtering(self, source: str, blocked_patterns: list[dict], original_preview: str, sanitized_preview: str):
+    def _log_filtering(
+        self,
+        source: str,
+        blocked_patterns: list[dict],
+        original_preview: str,
+        sanitized_preview: str,
+    ):
         """Log filtering activity"""
         try:
             log_entry = {
@@ -216,7 +233,7 @@ class ContentIntegrityFilter:
                 "source": source,
                 "blocked_patterns": blocked_patterns,
                 "original_preview": original_preview,
-                "sanitized_preview": sanitized_preview
+                "sanitized_preview": sanitized_preview,
             }
 
             with open(self.log_file, "a", encoding="utf-8") as f:
@@ -228,9 +245,12 @@ class ContentIntegrityFilter:
     def _get_timestamp(self) -> str:
         """Get current timestamp"""
         from datetime import datetime
+
         return datetime.now().isoformat()
 
-    def filter_json_response(self, response_data: dict[str, Any], source: str = "unknown") -> dict[str, Any]:
+    def filter_json_response(
+        self, response_data: dict[str, Any], source: str = "unknown"
+    ) -> dict[str, Any]:
         """Filter JSON response data"""
         try:
             if not isinstance(response_data, dict):
@@ -257,7 +277,9 @@ class ContentIntegrityFilter:
                             if result["warnings"]:
                                 warnings.extend(result["warnings"])
                         elif isinstance(item, dict):
-                            result = self.filter_json_response(item, f"{source}.{key}[{i}]")
+                            result = self.filter_json_response(
+                                item, f"{source}.{key}[{i}]"
+                            )
                             filtered_list.append(result["content"])
                             if result["warnings"]:
                                 warnings.extend(result["warnings"])
@@ -280,7 +302,7 @@ class ContentIntegrityFilter:
                 "success": True,
                 "content": filtered_data,
                 "warnings": warnings,
-                "filtered": len(warnings) > 0
+                "filtered": len(warnings) > 0,
             }
 
         except Exception as e:
@@ -289,7 +311,7 @@ class ContentIntegrityFilter:
                 "success": False,
                 "error": f"JSON filtering failed: {str(e)}",
                 "content": response_data,
-                "filtered": False
+                "filtered": False,
             }
 
     def get_stats(self) -> dict[str, Any]:
@@ -299,7 +321,10 @@ class ContentIntegrityFilter:
             "blocked_content": self.stats["blocked_content"],
             "sanitized_content": self.stats["sanitized_content"],
             "clean_content": self.stats["clean_content"],
-            "block_rate": (self.stats["blocked_content"] / max(self.stats["total_processed"], 1)) * 100
+            "block_rate": (
+                self.stats["blocked_content"] / max(self.stats["total_processed"], 1)
+            )
+            * 100,
         }
 
     def reset_stats(self):
@@ -308,19 +333,23 @@ class ContentIntegrityFilter:
             "total_processed": 0,
             "blocked_content": 0,
             "sanitized_content": 0,
-            "clean_content": 0
+            "clean_content": 0,
         }
+
 
 # Global instance
 content_filter = ContentIntegrityFilter()
+
 
 def filter_web_content(content: str, source: str = "unknown") -> dict[str, Any]:
     """Convenience function để filter content"""
     return content_filter.filter_content(content, source)
 
+
 def filter_web_json(data: dict[str, Any], source: str = "unknown") -> dict[str, Any]:
     """Convenience function để filter JSON data"""
     return content_filter.filter_json_response(data, source)
+
 
 if __name__ == "__main__":
     # Test content filtering
@@ -349,8 +378,8 @@ if __name__ == "__main__":
         "url": "https://example.com",
         "articles": [
             {"title": "Safe article", "content": "Clean content"},
-            {"title": "Dangerous article", "content": "<script>alert('XSS')</script>"}
-        ]
+            {"title": "Dangerous article", "content": "<script>alert('XSS')</script>"},
+        ],
     }
     result = content_filter.filter_json_response(json_data, "test")
     print(f"JSON filtering: {result['success']}, filtered: {result['filtered']}")

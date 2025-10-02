@@ -12,24 +12,32 @@ from typing import Optional
 
 log = logging.getLogger(__name__)
 
+
 class KillSwitchState(Enum):
     """Kill switch states."""
+
     DISARMED = "disarmed"
     ARMED = "armed"
     FIRED = "fired"
 
+
 class KillSwitchAction(Enum):
     """Kill switch actions."""
+
     ARM = "arm"
     FIRE = "fire"
     DISARM = "disarm"
     STATUS = "status"
 
+
 class KillSwitchManager:
     """Manages kill switch state and audit logging."""
 
-    def __init__(self, state_file: str = "logs/kill_switch_state.json",
-                 audit_file: str = "logs/audit/kill_switch.log"):
+    def __init__(
+        self,
+        state_file: str = "logs/kill_switch_state.json",
+        audit_file: str = "logs/audit/kill_switch.log",
+    ):
         self.state_file = Path(state_file)
         self.audit_file = Path(audit_file)
 
@@ -61,14 +69,14 @@ class KillSwitchManager:
             "fired_by": None,
             "reason": None,
             "created_at": datetime.now().isoformat(),
-            "last_updated": datetime.now().isoformat()
+            "last_updated": datetime.now().isoformat(),
         }
 
     def _save_state(self):
         """Save kill switch state to file."""
         try:
             self._state["last_updated"] = datetime.now().isoformat()
-            with open(self.state_file, 'w') as f:
+            with open(self.state_file, "w") as f:
                 json.dump(self._state, f, indent=2)
         except Exception as e:
             log.error(f"Failed to save kill switch state: {e}")
@@ -84,9 +92,7 @@ class KillSwitchManager:
 
         # Add file handler
         handler = logging.FileHandler(self.audit_file)
-        formatter = logging.Formatter(
-            '%(asctime)s | %(levelname)s | %(message)s'
-        )
+        formatter = logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
         handler.setFormatter(formatter)
         audit_logger.addHandler(handler)
 
@@ -95,8 +101,13 @@ class KillSwitchManager:
 
         self.audit_logger = audit_logger
 
-    def _log_action(self, action: KillSwitchAction, actor: str,
-                   reason: Optional[str] = None, result: str = "SUCCESS"):
+    def _log_action(
+        self,
+        action: KillSwitchAction,
+        actor: str,
+        reason: Optional[str] = None,
+        result: str = "SUCCESS",
+    ):
         """Log kill switch action to audit log."""
         log_entry = {
             "action": action.value,
@@ -105,7 +116,7 @@ class KillSwitchManager:
             "result": result,
             "timestamp": datetime.now().isoformat(),
             "state_before": self._state["state"],
-            "state_after": self._state["state"]
+            "state_after": self._state["state"],
         }
 
         self.audit_logger.info(json.dumps(log_entry))
@@ -116,19 +127,23 @@ class KillSwitchManager:
         current_state = KillSwitchState(self._state["state"])
 
         if current_state == KillSwitchState.FIRED:
-            self._log_action(KillSwitchAction.ARM, actor, reason, "FAILED - Already fired")
+            self._log_action(
+                KillSwitchAction.ARM, actor, reason, "FAILED - Already fired"
+            )
             return {
                 "success": False,
                 "message": "Cannot arm kill switch - already fired",
-                "current_state": current_state.value
+                "current_state": current_state.value,
             }
 
-        self._state.update({
-            "state": KillSwitchState.ARMED.value,
-            "armed_at": datetime.now().isoformat(),
-            "armed_by": actor,
-            "reason": reason
-        })
+        self._state.update(
+            {
+                "state": KillSwitchState.ARMED.value,
+                "armed_at": datetime.now().isoformat(),
+                "armed_by": actor,
+                "reason": reason,
+            }
+        )
 
         self._save_state()
         self._log_action(KillSwitchAction.ARM, actor, reason, "SUCCESS")
@@ -139,7 +154,7 @@ class KillSwitchManager:
             "state": KillSwitchState.ARMED.value,
             "armed_at": self._state["armed_at"],
             "armed_by": actor,
-            "reason": reason
+            "reason": reason,
         }
 
     def fire(self, actor: str, reason: Optional[str] = None) -> dict:
@@ -147,25 +162,31 @@ class KillSwitchManager:
         current_state = KillSwitchState(self._state["state"])
 
         if current_state == KillSwitchState.FIRED:
-            self._log_action(KillSwitchAction.FIRE, actor, reason, "FAILED - Already fired")
+            self._log_action(
+                KillSwitchAction.FIRE, actor, reason, "FAILED - Already fired"
+            )
             return {
                 "success": False,
                 "message": "Kill switch already fired",
-                "current_state": current_state.value
+                "current_state": current_state.value,
             }
 
-        self._state.update({
-            "state": KillSwitchState.FIRED.value,
-            "fired_at": datetime.now().isoformat(),
-            "fired_by": actor,
-            "reason": reason
-        })
+        self._state.update(
+            {
+                "state": KillSwitchState.FIRED.value,
+                "fired_at": datetime.now().isoformat(),
+                "fired_by": actor,
+                "reason": reason,
+            }
+        )
 
         self._save_state()
         self._log_action(KillSwitchAction.FIRE, actor, reason, "SUCCESS")
 
         # Log critical alert
-        log.critical(f"🚨 KILL SWITCH FIRED by {actor}: {reason or 'No reason provided'}")
+        log.critical(
+            f"🚨 KILL SWITCH FIRED by {actor}: {reason or 'No reason provided'}"
+        )
 
         return {
             "success": True,
@@ -173,7 +194,7 @@ class KillSwitchManager:
             "state": KillSwitchState.FIRED.value,
             "fired_at": self._state["fired_at"],
             "fired_by": actor,
-            "reason": reason
+            "reason": reason,
         }
 
     def disarm(self, actor: str, reason: Optional[str] = None) -> dict:
@@ -181,19 +202,26 @@ class KillSwitchManager:
         current_state = KillSwitchState(self._state["state"])
 
         if current_state == KillSwitchState.FIRED:
-            self._log_action(KillSwitchAction.DISARM, actor, reason, "FAILED - Cannot disarm fired switch")
+            self._log_action(
+                KillSwitchAction.DISARM,
+                actor,
+                reason,
+                "FAILED - Cannot disarm fired switch",
+            )
             return {
                 "success": False,
                 "message": "Cannot disarm fired kill switch - manual intervention required",
-                "current_state": current_state.value
+                "current_state": current_state.value,
             }
 
-        self._state.update({
-            "state": KillSwitchState.DISARMED.value,
-            "armed_at": None,
-            "armed_by": None,
-            "reason": None
-        })
+        self._state.update(
+            {
+                "state": KillSwitchState.DISARMED.value,
+                "armed_at": None,
+                "armed_by": None,
+                "reason": None,
+            }
+        )
 
         self._save_state()
         self._log_action(KillSwitchAction.DISARM, actor, reason, "SUCCESS")
@@ -204,7 +232,7 @@ class KillSwitchManager:
             "state": KillSwitchState.DISARMED.value,
             "disarmed_at": datetime.now().isoformat(),
             "disarmed_by": actor,
-            "reason": reason
+            "reason": reason,
         }
 
     def status(self) -> dict:
@@ -222,7 +250,7 @@ class KillSwitchManager:
             "last_updated": self._state.get("last_updated"),
             "is_armed": current_state == KillSwitchState.ARMED,
             "is_fired": current_state == KillSwitchState.FIRED,
-            "is_safe": current_state == KillSwitchState.DISARMED
+            "is_safe": current_state == KillSwitchState.DISARMED,
         }
 
     def is_safe(self) -> bool:
@@ -251,26 +279,26 @@ class KillSwitchManager:
             for line in lines[-limit:]:
                 try:
                     # Parse log entry
-                    parts = line.strip().split(' | ')
+                    parts = line.strip().split(" | ")
                     if len(parts) >= 3:
                         timestamp = parts[0]
                         level = parts[1]
-                        message = ' | '.join(parts[2:])
+                        message = " | ".join(parts[2:])
 
                         # Try to parse JSON message
                         try:
                             data = json.loads(message)
-                            entries.append({
-                                "timestamp": timestamp,
-                                "level": level,
-                                "data": data
-                            })
+                            entries.append(
+                                {"timestamp": timestamp, "level": level, "data": data}
+                            )
                         except:
-                            entries.append({
-                                "timestamp": timestamp,
-                                "level": level,
-                                "message": message
-                            })
+                            entries.append(
+                                {
+                                    "timestamp": timestamp,
+                                    "level": level,
+                                    "message": message,
+                                }
+                            )
                 except:
                     continue
 
@@ -279,8 +307,10 @@ class KillSwitchManager:
             log.error(f"Failed to read audit log: {e}")
             return []
 
+
 # Global kill switch instance
 _kill_switch = None
+
 
 def get_kill_switch() -> KillSwitchManager:
     """Get global kill switch instance."""
@@ -289,14 +319,20 @@ def get_kill_switch() -> KillSwitchManager:
         _kill_switch = KillSwitchManager()
     return _kill_switch
 
+
 def check_kill_switch() -> bool:
     """Check if system is safe to operate (kill switch not fired)."""
     return get_kill_switch().is_safe()
 
+
 def require_safe_state(func):
     """Decorator to require safe kill switch state."""
+
     def wrapper(*args, **kwargs):
         if not check_kill_switch():
-            raise RuntimeError("System is not in safe state - kill switch is armed or fired")
+            raise RuntimeError(
+                "System is not in safe state - kill switch is armed or fired"
+            )
         return func(*args, **kwargs)
+
     return wrapper

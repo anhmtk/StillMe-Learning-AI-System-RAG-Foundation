@@ -31,7 +31,11 @@ class TestLayeredMemoryV1:
     def test_memory_store_retrieve(self, mock_memory_system):
         """Test memory store and retrieve operations."""
         # Test store operation
-        test_data = {"id": "test_1", "content": "test content", "timestamp": time.time()}
+        test_data = {
+            "id": "test_1",
+            "content": "test content",
+            "timestamp": time.time(),
+        }
         mock_memory_system.store.return_value = True
         result = mock_memory_system.store("test_1", test_data)
         assert result is True
@@ -47,7 +51,7 @@ class TestLayeredMemoryV1:
         # Test search with query
         mock_results = [
             {"id": "1", "content": "test content 1", "score": 0.9},
-            {"id": "2", "content": "test content 2", "score": 0.8}
+            {"id": "2", "content": "test content 2", "score": 0.8},
         ]
         mock_memory_system.search.return_value = mock_results
 
@@ -128,7 +132,7 @@ class TestEthicalCoreSystem:
         """Test ethics validation with unsafe content."""
         unsafe_response = {
             "is_safe": False,
-            "violations": ["harmful_content", "violence"]
+            "violations": ["harmful_content", "violence"],
         }
         mock_ethics_system.validate.return_value = unsafe_response
 
@@ -231,7 +235,7 @@ class TestConversationalCore:
         responses = [
             {"response": "Hello!"},
             {"response": "How are you?"},
-            {"response": "Good to hear!"}
+            {"response": "Good to hear!"},
         ]
         mock_conversational_core.process_message.side_effect = responses
 
@@ -325,7 +329,7 @@ class TestTokenOptimizer:
             "optimized_text": "optimized text",
             "tokens_saved": 10,
             "original_tokens": 100,
-            "optimized_tokens": 90
+            "optimized_tokens": 90,
         }
         mock_token_optimizer.optimize.return_value = optimization_response
 
@@ -359,7 +363,7 @@ class TestSelfImprovementManager:
         analysis_response = {
             "score": 0.8,
             "suggestions": ["improve accuracy", "reduce latency"],
-            "metrics": {"accuracy": 0.9, "speed": 0.8}
+            "metrics": {"accuracy": 0.9, "speed": 0.8},
         }
         mock_self_improvement.analyze_performance.return_value = analysis_response
 
@@ -373,7 +377,7 @@ class TestSelfImprovementManager:
         improvement_response = {
             "improved": True,
             "changes": ["updated algorithm", "optimized parameters"],
-            "impact": "positive"
+            "impact": "positive",
         }
         mock_self_improvement.improve.return_value = improvement_response
 
@@ -472,7 +476,7 @@ class TestFrameworkMetrics:
             "total_requests": 1000,
             "avg_response_time": 100,
             "error_rate": 0.01,
-            "uptime": 3600
+            "uptime": 3600,
         }
         mock_metrics.get_summary.return_value = summary_response
 
@@ -483,7 +487,11 @@ class TestFrameworkMetrics:
     @pytest.mark.unit
     def test_report_generation(self, mock_metrics):
         """Test report generation."""
-        report_response = {"report": "generated", "format": "html", "path": "/reports/metrics.html"}
+        report_response = {
+            "report": "generated",
+            "format": "html",
+            "path": "/reports/metrics.html",
+        }
         mock_metrics.export_report.return_value = report_response
 
         result = mock_metrics.export_report()
@@ -530,7 +538,7 @@ class TestInputSketcher:
         sketch_response = {
             "sketch": "test sketch",
             "confidence": 0.8,
-            "features": ["intent", "entities"]
+            "features": ["intent", "entities"],
         }
         mock_input_sketcher.sketch.return_value = sketch_response
 
@@ -567,7 +575,7 @@ class TestPredictionEngine:
         prediction_response = {
             "prediction": "test prediction",
             "confidence": 0.8,
-            "probability": 0.75
+            "probability": 0.75,
         }
         mock_prediction_engine.predict.return_value = prediction_response
 
@@ -603,7 +611,7 @@ class TestMarketIntelligence:
         trend_response = {
             "trends": ["AI", "ML", "automation"],
             "confidence": 0.8,
-            "timeframe": "30_days"
+            "timeframe": "30_days",
         }
         mock_market_intel.analyze_trends.return_value = trend_response
 
@@ -617,7 +625,7 @@ class TestMarketIntelligence:
         insights_response = {
             "insights": "Market is trending towards AI adoption",
             "confidence": 0.9,
-            "sources": ["news", "social_media", "reports"]
+            "sources": ["news", "social_media", "reports"],
         }
         mock_market_intel.get_insights.return_value = insights_response
 
@@ -644,7 +652,7 @@ class TestDailyLearningManager:
             "completed": True,
             "score": 0.8,
             "cases_processed": 5,
-            "improvements": ["accuracy", "speed"]
+            "improvements": ["accuracy", "speed"],
         }
         mock_daily_learning.run_session.return_value = session_response
 
@@ -659,7 +667,7 @@ class TestDailyLearningManager:
             "sessions": 10,
             "avg_score": 0.75,
             "total_cases": 50,
-            "improvement_rate": 0.1
+            "improvement_rate": 0.1,
         }
         mock_daily_learning.get_progress.return_value = progress_response
 
@@ -685,7 +693,7 @@ class TestPersonaMorph:
         morph_response = {
             "new_persona": "friendly",
             "confidence": 0.8,
-            "changes": ["tone", "style"]
+            "changes": ["tone", "style"],
         }
         mock_persona_morph.morph.return_value = morph_response
 
@@ -729,7 +737,7 @@ class TestFrameworkIntegration:
         request_response = {
             "response": "Test response",
             "status": "success",
-            "modules_used": ["conversational", "memory"]
+            "modules_used": ["conversational", "memory"],
         }
         mock_framework.process_request.return_value = request_response
 
@@ -745,8 +753,8 @@ class TestFrameworkIntegration:
             "modules": {
                 "memory": "healthy",
                 "ethics": "healthy",
-                "conversational": "healthy"
-            }
+                "conversational": "healthy",
+            },
         }
         mock_framework.get_health_status.return_value = health_response
 

@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ValidationResult:
     """Result of a validation check"""
+
     component: str
     check_type: str
     passed: bool
@@ -51,23 +52,23 @@ class FinalValidationSystem:
             "validation": {
                 "security": {
                     "enabled": True,
-                    "checks": ["input_validation", "rate_limiting", "headers"]
+                    "checks": ["input_validation", "rate_limiting", "headers"],
                 },
                 "performance": {
                     "enabled": True,
                     "max_response_time": 5.0,
-                    "max_memory_usage": 1024
+                    "max_memory_usage": 1024,
                 },
                 "integration": {
                     "enabled": True,
-                    "required_components": ["security", "memory", "governance"]
-                }
+                    "required_components": ["security", "memory", "governance"],
+                },
             }
         }
 
         try:
             if os.path.exists(config_path):
-                with open(config_path, encoding='utf-8') as f:
+                with open(config_path, encoding="utf-8") as f:
                     config = json.load(f)
                     # Merge with defaults
                     for key, value in default_config.items():
@@ -85,6 +86,7 @@ class FinalValidationSystem:
             # Try to import security middleware
             try:
                 from .security_middleware import SecurityMiddleware
+
                 self.security_middleware = SecurityMiddleware()
                 logger.info("✅ Security middleware initialized")
             except ImportError:
@@ -93,6 +95,7 @@ class FinalValidationSystem:
             # Try to import performance monitor
             try:
                 from .performance_monitor import PerformanceMonitor
+
                 self.performance_monitor = PerformanceMonitor()
                 logger.info("✅ Performance monitor initialized")
             except ImportError:
@@ -101,6 +104,7 @@ class FinalValidationSystem:
             # Try to import integration bridge
             try:
                 from .integration_bridge import IntegrationBridge
+
                 self.integration_bridge = IntegrationBridge()
                 logger.info("✅ Integration bridge initialized")
             except ImportError:
@@ -109,6 +113,7 @@ class FinalValidationSystem:
             # Try to import memory security integration
             try:
                 from ..memory_security_integration import MemorySecurityIntegration
+
                 self.memory_security_integration = MemorySecurityIntegration()
                 logger.info("✅ Memory security integration initialized")
             except ImportError:
@@ -117,6 +122,7 @@ class FinalValidationSystem:
             # Try to import module governance system
             try:
                 from ..module_governance_system import ModuleGovernanceSystem
+
                 self.module_governance_system = ModuleGovernanceSystem()
                 logger.info("✅ Module governance system initialized")
             except ImportError:
@@ -134,14 +140,16 @@ class FinalValidationSystem:
 
         # Check if security middleware is available
         if self.security_middleware is None:
-            results.append(ValidationResult(
-                component="security_middleware",
-                check_type="availability",
-                passed=False,
-                message="Security middleware not available",
-                details={"error": "Import failed"},
-                timestamp=datetime.now()
-            ))
+            results.append(
+                ValidationResult(
+                    component="security_middleware",
+                    check_type="availability",
+                    passed=False,
+                    message="Security middleware not available",
+                    details={"error": "Import failed"},
+                    timestamp=datetime.now(),
+                )
+            )
             return results
 
         # Test input validation
@@ -149,26 +157,28 @@ class FinalValidationSystem:
             test_inputs = [
                 ("valid_input", "Hello world", True),
                 ("xss_attempt", "<script>alert('xss')</script>", False),
-                ("sql_injection", "'; DROP TABLE users; --", False)
+                ("sql_injection", "'; DROP TABLE users; --", False),
             ]
 
             for test_name, test_input, expected_valid in test_inputs:
                 result = self.security_middleware.validate_input(test_input)
                 passed = result["is_valid"] == expected_valid
 
-                results.append(ValidationResult(
-                    component="security_middleware",
-                    check_type="input_validation",
-                    passed=passed,
-                    message=f"Input validation test: {test_name}",
-                    details={
-                        "input": test_input,
-                        "expected_valid": expected_valid,
-                        "actual_valid": result["is_valid"],
-                        "threats_detected": result["threats_detected"]
-                    },
-                    timestamp=datetime.now()
-                ))
+                results.append(
+                    ValidationResult(
+                        component="security_middleware",
+                        check_type="input_validation",
+                        passed=passed,
+                        message=f"Input validation test: {test_name}",
+                        details={
+                            "input": test_input,
+                            "expected_valid": expected_valid,
+                            "actual_valid": result["is_valid"],
+                            "threats_detected": result["threats_detected"],
+                        },
+                        timestamp=datetime.now(),
+                    )
+                )
 
         return results
 
@@ -181,14 +191,16 @@ class FinalValidationSystem:
 
         # Check if performance monitor is available
         if self.performance_monitor is None:
-            results.append(ValidationResult(
-                component="performance_monitor",
-                check_type="availability",
-                passed=False,
-                message="Performance monitor not available",
-                details={"error": "Import failed"},
-                timestamp=datetime.now()
-            ))
+            results.append(
+                ValidationResult(
+                    component="performance_monitor",
+                    check_type="availability",
+                    passed=False,
+                    message="Performance monitor not available",
+                    details={"error": "Import failed"},
+                    timestamp=datetime.now(),
+                )
+            )
             return results
 
         return results
@@ -200,7 +212,9 @@ class FinalValidationSystem:
         if not self.config["validation"]["integration"]["enabled"]:
             return results
 
-        required_components = self.config["validation"]["integration"]["required_components"]
+        required_components = self.config["validation"]["integration"][
+            "required_components"
+        ]
 
         for component in required_components:
             component_available = False
@@ -209,20 +223,21 @@ class FinalValidationSystem:
                 component_available = True
             elif component == "memory" and self.memory_security_integration is not None:
                 component_available = True
-            elif component == "governance" and self.module_governance_system is not None:
+            elif (
+                component == "governance" and self.module_governance_system is not None
+            ):
                 component_available = True
 
-            results.append(ValidationResult(
-                component=component,
-                check_type="integration",
-                passed=component_available,
-                message=f"Integration check: {component}",
-                details={
-                    "required": True,
-                    "available": component_available
-                },
-                timestamp=datetime.now()
-            ))
+            results.append(
+                ValidationResult(
+                    component=component,
+                    check_type="integration",
+                    passed=component_available,
+                    message=f"Integration check: {component}",
+                    details={"required": True, "available": component_available},
+                    timestamp=datetime.now(),
+                )
+            )
 
         return results
 
@@ -251,7 +266,9 @@ class FinalValidationSystem:
             "total_checks": total_checks,
             "passed_checks": passed_checks,
             "failed_checks": failed_checks,
-            "success_rate": (passed_checks / total_checks * 100) if total_checks > 0 else 0,
+            "success_rate": (passed_checks / total_checks * 100)
+            if total_checks > 0
+            else 0,
             "validation_timestamp": datetime.now().isoformat(),
             "results": [
                 {
@@ -260,13 +277,15 @@ class FinalValidationSystem:
                     "passed": r.passed,
                     "message": r.message,
                     "details": r.details,
-                    "timestamp": r.timestamp.isoformat()
+                    "timestamp": r.timestamp.isoformat(),
                 }
                 for r in all_results
-            ]
+            ],
         }
 
-        logger.info(f"✅ Validation complete: {passed_checks}/{total_checks} checks passed")
+        logger.info(
+            f"✅ Validation complete: {passed_checks}/{total_checks} checks passed"
+        )
 
         return summary
 

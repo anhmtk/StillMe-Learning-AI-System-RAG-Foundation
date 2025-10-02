@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class SecurityEvent:
     """Security event log entry"""
+
     timestamp: datetime
     event_type: str
     severity: str
@@ -54,14 +55,14 @@ class SecurityMiddleware:
                 "rate_limiting": {
                     "enabled": True,
                     "requests_per_minute": 60,
-                    "requests_per_hour": 1000
+                    "requests_per_hour": 1000,
                 },
                 "headers": {
                     "X-Content-Type-Options": "nosniff",
                     "X-Frame-Options": "DENY",
                     "X-XSS-Protection": "1; mode=block",
                     "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
-                    "Content-Security-Policy": "default-src 'self'"
+                    "Content-Security-Policy": "default-src 'self'",
                 },
                 "input_validation": {
                     "enabled": True,
@@ -71,20 +72,20 @@ class SecurityMiddleware:
                         r"javascript:",
                         r"on\w+\s*=",
                         r"eval\s*\(",
-                        r"expression\s*\("
-                    ]
+                        r"expression\s*\(",
+                    ],
                 },
                 "logging": {
                     "enabled": True,
                     "log_file": "logs/security.log",
-                    "max_events": 10000
-                }
+                    "max_events": 10000,
+                },
             }
         }
 
         try:
             if os.path.exists(config_path):
-                with open(config_path, encoding='utf-8') as f:
+                with open(config_path, encoding="utf-8") as f:
                     config = json.load(f)
                     # Merge with defaults
                     for key, value in default_config.items():
@@ -110,7 +111,8 @@ class SecurityMiddleware:
         # Clean old requests
         cutoff_time = now - timedelta(minutes=1)
         self.rate_limit_tracker[key] = [
-            req_time for req_time in self.rate_limit_tracker[key]
+            req_time
+            for req_time in self.rate_limit_tracker[key]
             if req_time > cutoff_time
         ]
 
@@ -123,7 +125,7 @@ class SecurityMiddleware:
                 client_ip,
                 "unknown",
                 {"endpoint": endpoint, "requests": len(self.rate_limit_tracker[key])},
-                "blocked"
+                "blocked",
             )
             return False
 
@@ -146,7 +148,9 @@ class SecurityMiddleware:
             return result
 
         # Check for blocked patterns
-        blocked_patterns = self.config["security"]["input_validation"]["blocked_patterns"]
+        blocked_patterns = self.config["security"]["input_validation"][
+            "blocked_patterns"
+        ]
         for pattern in blocked_patterns:
             if re.search(pattern, data, re.IGNORECASE):
                 result["is_valid"] = False
@@ -162,17 +166,17 @@ class SecurityMiddleware:
     def _sanitize_input(self, data: str) -> str:
         """Basic input sanitization"""
         # Remove null bytes
-        data = data.replace('\x00', '')
+        data = data.replace("\x00", "")
 
         # Remove control characters except newlines and tabs
-        data = ''.join(char for char in data if ord(char) >= 32 or char in '\n\t')
+        data = "".join(char for char in data if ord(char) >= 32 or char in "\n\t")
 
         # Escape HTML entities
-        data = data.replace('&', '&amp;')
-        data = data.replace('<', '&lt;')
-        data = data.replace('>', '&gt;')
-        data = data.replace('"', '&quot;')
-        data = data.replace("'", '&#x27;')
+        data = data.replace("&", "&amp;")
+        data = data.replace("<", "&lt;")
+        data = data.replace(">", "&gt;")
+        data = data.replace('"', "&quot;")
+        data = data.replace("'", "&#x27;")
 
         return data
 
@@ -189,7 +193,7 @@ class SecurityMiddleware:
         source_ip: str,
         user_agent: str,
         details: dict[str, Any],
-        action_taken: str
+        action_taken: str,
     ):
         """Log security event"""
         event = SecurityEvent(
@@ -199,7 +203,7 @@ class SecurityMiddleware:
             source_ip=source_ip,
             user_agent=user_agent,
             details=details,
-            action_taken=action_taken
+            action_taken=action_taken,
         )
 
         self.security_events.append(event)
@@ -223,8 +227,10 @@ class SecurityMiddleware:
             log_file = self.config["security"]["logging"]["log_file"]
             os.makedirs(os.path.dirname(log_file), exist_ok=True)
 
-            with open(log_file, 'a', encoding='utf-8') as f:
-                f.write(f"{event.timestamp.isoformat()} | {event.event_type} | {event.severity} | {event.source_ip} | {event.action_taken}\n")
+            with open(log_file, "a", encoding="utf-8") as f:
+                f.write(
+                    f"{event.timestamp.isoformat()} | {event.event_type} | {event.severity} | {event.source_ip} | {event.action_taken}\n"
+                )
         except Exception as e:
             logger.error(f"Error writing security log: {e}")
 
@@ -243,12 +249,7 @@ class SecurityMiddleware:
         """Block IP address"""
         self.blocked_ips.add(client_ip)
         self._log_security_event(
-            "ip_blocked",
-            "high",
-            client_ip,
-            "unknown",
-            {"reason": reason},
-            "blocked"
+            "ip_blocked", "high", client_ip, "unknown", {"reason": reason}, "blocked"
         )
 
     def generate_csrf_token(self) -> str:
@@ -262,14 +263,18 @@ class SecurityMiddleware:
     def hash_password(self, password: str) -> str:
         """Hash password securely"""
         salt = secrets.token_hex(32)
-        password_hash = hashlib.pbkdf2_hmac('sha256', password.encode(), salt.encode(), 100000)
+        password_hash = hashlib.pbkdf2_hmac(
+            "sha256", password.encode(), salt.encode(), 100000
+        )
         return f"{salt}:{password_hash.hex()}"
 
     def verify_password(self, password: str, password_hash: str) -> bool:
         """Verify password against hash"""
         try:
-            salt, hash_hex = password_hash.split(':')
-            password_hash_bytes = hashlib.pbkdf2_hmac('sha256', password.encode(), salt.encode(), 100000)
+            salt, hash_hex = password_hash.split(":")
+            password_hash_bytes = hashlib.pbkdf2_hmac(
+                "sha256", password.encode(), salt.encode(), 100000
+            )
             return password_hash_bytes.hex() == hash_hex
         except Exception:
             return False
@@ -286,7 +291,7 @@ class SecurityMiddleware:
             "recent_events_24h": len(recent_events),
             "blocked_ips": len(self.blocked_ips),
             "security_score": self._calculate_security_score(),
-            "last_updated": now.isoformat()
+            "last_updated": now.isoformat(),
         }
 
     def _calculate_security_score(self) -> float:
@@ -330,7 +335,7 @@ def main():
         "Hello world",
         "<script>alert('xss')</script>",
         "javascript:alert('xss')",
-        "A" * 10001
+        "A" * 10001,
     ]
 
     for test_input in test_inputs:

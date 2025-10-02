@@ -38,7 +38,7 @@ class AmbiguityExtremesTestSuite:
             ("Emotional Vague", self.test_emotional_vague),
             ("Time-based Vague", self.test_time_based_vague),
             ("Location Vague", self.test_location_vague),
-            ("Quantity Vague", self.test_quantity_vague)
+            ("Quantity Vague", self.test_quantity_vague),
         ]
 
         passed = 0
@@ -57,28 +57,23 @@ class AmbiguityExtremesTestSuite:
                     print(f"❌ {test_name} - FAILED ({duration:.3f}s)")
                     failed += 1
 
-                self.test_results.append({
-                    "test": test_name,
-                    "passed": result,
-                    "duration": duration
-                })
+                self.test_results.append(
+                    {"test": test_name, "passed": result, "duration": duration}
+                )
 
             except Exception as e:
                 print(f"💥 {test_name} - ERROR: {e}")
                 failed += 1
-                self.test_results.append({
-                    "test": test_name,
-                    "passed": False,
-                    "duration": 0,
-                    "error": str(e)
-                })
+                self.test_results.append(
+                    {"test": test_name, "passed": False, "duration": 0, "error": str(e)}
+                )
 
         summary = {
             "total": len(tests),
             "passed": passed,
             "failed": failed,
             "pass_rate": (passed / len(tests)) * 100,
-            "results": self.test_results
+            "results": self.test_results,
         }
 
         print("\n📊 Ambiguity Extremes Summary:")
@@ -97,8 +92,8 @@ class AmbiguityExtremesTestSuite:
             result = self.handler.detect_ambiguity(input_text)
             # Should not crash, should return a valid result
             assert result is not None
-            assert hasattr(result, 'needs_clarification')
-            assert hasattr(result, 'confidence')
+            assert hasattr(result, "needs_clarification")
+            assert hasattr(result, "confidence")
 
         return True
 
@@ -106,7 +101,7 @@ class AmbiguityExtremesTestSuite:
         """Test: Empty string → must handle gracefully"""
         result = self.handler.detect_ambiguity("")
         assert result is not None
-        assert hasattr(result, 'needs_clarification')
+        assert hasattr(result, "needs_clarification")
         # Empty string should be considered ambiguous
         assert result.needs_clarification is True
 
@@ -119,7 +114,7 @@ class AmbiguityExtremesTestSuite:
         for input_text in inputs:
             result = self.handler.detect_ambiguity(input_text)
             assert result is not None
-            assert hasattr(result, 'needs_clarification')
+            assert hasattr(result, "needs_clarification")
             # Whitespace-only should be considered ambiguous
             assert result.needs_clarification is True
 
@@ -140,10 +135,12 @@ class AmbiguityExtremesTestSuite:
         for input_text in inputs:
             result = self.handler.detect_ambiguity(input_text)
             assert result is not None
-            assert hasattr(result, 'needs_clarification')
+            assert hasattr(result, "needs_clarification")
             # Unicode chaos should be considered ambiguous
             if not result.needs_clarification:
-                print(f"DEBUG: Unicode input '{input_text}' not detected as ambiguous: confidence={result.confidence}")
+                print(
+                    f"DEBUG: Unicode input '{input_text}' not detected as ambiguous: confidence={result.confidence}"
+                )
             assert result.needs_clarification is True
 
         return True
@@ -179,7 +176,7 @@ class AmbiguityExtremesTestSuite:
             "Delete them",
             "Move it over there",
             "Change this to that",
-            "Replace it with something else"
+            "Replace it with something else",
         ]
 
         for input_text in inputs:
@@ -197,13 +194,13 @@ class AmbiguityExtremesTestSuite:
             "Optimize the algorithm for performance and also add error handling",
             "Refactor the code to be cleaner and also add unit tests",
             "Update the documentation and also fix the broken links",
-            "Deploy to production and also monitor the logs"
+            "Deploy to production and also monitor the logs",
         ]
 
         for input_text in inputs:
             result = self.handler.detect_ambiguity(input_text)
             assert result is not None
-            assert hasattr(result, 'needs_clarification')
+            assert hasattr(result, "needs_clarification")
             # Context switching should be considered ambiguous
             assert result.needs_clarification is True
 
@@ -218,13 +215,13 @@ class AmbiguityExtremesTestSuite:
             "Deploy to production 部署到生产环境",
             "Test the functionality 测试功能",
             "Code review 代码审查",
-            "Bug fix 错误修复"
+            "Bug fix 错误修复",
         ]
 
         for input_text in inputs:
             result = self.handler.detect_ambiguity(input_text)
             assert result is not None
-            assert hasattr(result, 'needs_clarification')
+            assert hasattr(result, "needs_clarification")
             # Mixed languages should be considered ambiguous
             assert result.needs_clarification is True
 
@@ -242,13 +239,13 @@ class AmbiguityExtremesTestSuite:
             "Make it pop",
             "It's giving main character energy",
             "That's a vibe",
-            "Make it aesthetic"
+            "Make it aesthetic",
         ]
 
         for input_text in inputs:
             result = self.handler.detect_ambiguity(input_text)
             assert result is not None
-            assert hasattr(result, 'needs_clarification')
+            assert hasattr(result, "needs_clarification")
             # Slang should be considered ambiguous
             assert result.needs_clarification is True
 
@@ -264,13 +261,13 @@ class AmbiguityExtremesTestSuite:
             "Improve the core being",
             "Enhance the fundamental nature",
             "Make it more profound",
-            "Improve the intrinsic value"
+            "Improve the intrinsic value",
         ]
 
         for input_text in inputs:
             result = self.handler.detect_ambiguity(input_text)
             assert result is not None
-            assert hasattr(result, 'needs_clarification')
+            assert hasattr(result, "needs_clarification")
             # Philosophical vague should be considered ambiguous
             assert result.needs_clarification is True
 
@@ -286,13 +283,13 @@ class AmbiguityExtremesTestSuite:
             "Improve the modularity",
             "Enhance the extensibility",
             "Make it more performant",
-            "Improve the reliability"
+            "Improve the reliability",
         ]
 
         for input_text in inputs:
             result = self.handler.detect_ambiguity(input_text)
             assert result is not None
-            assert hasattr(result, 'needs_clarification')
+            assert hasattr(result, "needs_clarification")
             # Technical jargon vague should be considered ambiguous
             assert result.needs_clarification is True
 
@@ -308,13 +305,13 @@ class AmbiguityExtremesTestSuite:
             "Make it more engaging",
             "Improve the satisfaction",
             "Make it more delightful",
-            "Enhance the joy factor"
+            "Enhance the joy factor",
         ]
 
         for input_text in inputs:
             result = self.handler.detect_ambiguity(input_text)
             assert result is not None
-            assert hasattr(result, 'needs_clarification')
+            assert hasattr(result, "needs_clarification")
             # Emotional vague should be considered ambiguous
             assert result.needs_clarification is True
 
@@ -330,13 +327,13 @@ class AmbiguityExtremesTestSuite:
             "Improve the performance",
             "Make it quicker",
             "Enhance the throughput",
-            "Make it more responsive"
+            "Make it more responsive",
         ]
 
         for input_text in inputs:
             result = self.handler.detect_ambiguity(input_text)
             assert result is not None
-            assert hasattr(result, 'needs_clarification')
+            assert hasattr(result, "needs_clarification")
             # Time-based vague should be considered ambiguous
             assert result.needs_clarification is True
 
@@ -352,13 +349,13 @@ class AmbiguityExtremesTestSuite:
             "Put it in the right spot",
             "Relocate it properly",
             "Move it to the center",
-            "Put it in the corner"
+            "Put it in the corner",
         ]
 
         for input_text in inputs:
             result = self.handler.detect_ambiguity(input_text)
             assert result is not None
-            assert hasattr(result, 'needs_clarification')
+            assert hasattr(result, "needs_clarification")
             # Location vague should be considered ambiguous
             assert result.needs_clarification is True
 
@@ -374,17 +371,18 @@ class AmbiguityExtremesTestSuite:
             "Add plenty of features",
             "Include lots of options",
             "Add a bunch of stuff",
-            "Include several more things"
+            "Include several more things",
         ]
 
         for input_text in inputs:
             result = self.handler.detect_ambiguity(input_text)
             assert result is not None
-            assert hasattr(result, 'needs_clarification')
+            assert hasattr(result, "needs_clarification")
             # Quantity vague should be considered ambiguous
             assert result.needs_clarification is True
 
         return True
+
 
 def main():
     """Run the ambiguity extremes test suite"""
@@ -398,14 +396,15 @@ def main():
     print("\n🎯 Ambiguity Extremes Test Suite Complete!")
     print(f"   Pass Rate: {results['pass_rate']:.1f}%")
 
-    if results['pass_rate'] >= 90:
+    if results["pass_rate"] >= 90:
         print("🎉 System handles ambiguity extremes excellently!")
-    elif results['pass_rate'] >= 75:
+    elif results["pass_rate"] >= 75:
         print("✅ System handles ambiguity extremes well!")
     else:
         print("⚠️ System needs improvement for ambiguity extremes")
 
-    return results['pass_rate'] >= 75
+    return results["pass_rate"] >= 75
+
 
 if __name__ == "__main__":
     main()

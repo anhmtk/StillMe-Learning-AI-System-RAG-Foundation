@@ -21,23 +21,27 @@ from enum import Enum
 # Thiết lập logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
+    format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.FileHandler('agentdev_validation.log', encoding='utf-8'),
-        logging.StreamHandler()
-    ]
+        logging.FileHandler("agentdev_validation.log", encoding="utf-8"),
+        logging.StreamHandler(),
+    ],
 )
 logger = logging.getLogger(__name__)
 
+
 class ErrorSeverity(Enum):
     """Phân loại mức độ nghiêm trọng của lỗi"""
-    CRITICAL_ERROR = "critical_error"      # Code không chạy được
-    WARNING = "warning"                    # Code chạy được nhưng có vấn đề tiềm ẩn
+
+    CRITICAL_ERROR = "critical_error"  # Code không chạy được
+    WARNING = "warning"  # Code chạy được nhưng có vấn đề tiềm ẩn
     STYLE_SUGGESTION = "style_suggestion"  # Về mặt thẩm mỹ và chuẩn coding
+
 
 @dataclass
 class ValidationResult:
     """Kết quả validation"""
+
     before_errors: int
     after_errors: int
     errors_fixed: int
@@ -48,6 +52,7 @@ class ValidationResult:
     success: bool
     evidence_files: list[str]
     error_details: list[dict]
+
 
 class AgentDevValidator:
     """Hệ thống validation cho AgentDev"""
@@ -65,7 +70,7 @@ class AgentDevValidator:
                 capture_output=True,
                 text=True,
                 cwd=self.project_root,
-                timeout=60
+                timeout=60,
             )
 
             # Parse output để lấy số lỗi
@@ -74,7 +79,9 @@ class AgentDevValidator:
             error_details = []
 
             # Tìm số lỗi từ output
-            error_match = re.search(r'(\d+) errors?, (\d+) warnings?, (\d+) informations?', output)
+            error_match = re.search(
+                r"(\d+) errors?, (\d+) warnings?, (\d+) informations?", output
+            )
             if error_match:
                 error_count = int(error_match.group(1))
                 warnings = int(error_match.group(2))
@@ -83,7 +90,9 @@ class AgentDevValidator:
                 # Phân loại lỗi
                 error_details = self._classify_pyright_errors(output)
 
-            logger.info(f"📊 Pyright: {error_count} errors, {warnings} warnings, {infos} infos")
+            logger.info(
+                f"📊 Pyright: {error_count} errors, {warnings} warnings, {infos} infos"
+            )
             return error_count, error_details
 
         except subprocess.TimeoutExpired:
@@ -102,7 +111,7 @@ class AgentDevValidator:
                 capture_output=True,
                 text=True,
                 cwd=self.project_root,
-                timeout=30
+                timeout=30,
             )
 
             output = result.stdout
@@ -111,7 +120,7 @@ class AgentDevValidator:
 
             # Parse output để lấy số lỗi
             if output and "Found" in output:
-                error_match = re.search(r'Found (\d+) errors?', output)
+                error_match = re.search(r"Found (\d+) errors?", output)
                 if error_match:
                     error_count = int(error_match.group(1))
                     error_details = self._classify_ruff_errors(output)
@@ -129,48 +138,44 @@ class AgentDevValidator:
     def _classify_pyright_errors(self, output: str) -> list[dict]:
         """Phân loại lỗi pyright theo mức độ nghiêm trọng"""
         errors = []
-        lines = output.split('\n')
+        lines = output.split("\n")
 
         for line in lines:
-            if 'error:' in line.lower():
+            if "error:" in line.lower():
                 severity = ErrorSeverity.CRITICAL_ERROR
-            elif 'warning:' in line.lower():
+            elif "warning:" in line.lower():
                 severity = ErrorSeverity.WARNING
-            elif 'information:' in line.lower():
+            elif "information:" in line.lower():
                 severity = ErrorSeverity.STYLE_SUGGESTION
             else:
                 continue
 
-            errors.append({
-                'severity': severity.value,
-                'message': line.strip(),
-                'type': 'pyright'
-            })
+            errors.append(
+                {"severity": severity.value, "message": line.strip(), "type": "pyright"}
+            )
 
         return errors
 
     def _classify_ruff_errors(self, output: str) -> list[dict]:
         """Phân loại lỗi ruff theo mức độ nghiêm trọng"""
         errors = []
-        lines = output.split('\n')
+        lines = output.split("\n")
 
         for line in lines:
-            if not line.strip() or 'Found' in line:
+            if not line.strip() or "Found" in line:
                 continue
 
             # Phân loại theo mã lỗi
-            if any(code in line for code in ['F', 'E9']):  # Fatal errors
+            if any(code in line for code in ["F", "E9"]):  # Fatal errors
                 severity = ErrorSeverity.CRITICAL_ERROR
-            elif any(code in line for code in ['E', 'W']):  # Errors và Warnings
+            elif any(code in line for code in ["E", "W"]):  # Errors và Warnings
                 severity = ErrorSeverity.WARNING
             else:  # Style suggestions
                 severity = ErrorSeverity.STYLE_SUGGESTION
 
-            errors.append({
-                'severity': severity.value,
-                'message': line.strip(),
-                'type': 'ruff'
-            })
+            errors.append(
+                {"severity": severity.value, "message": line.strip(), "type": "ruff"}
+            )
 
         return errors
 
@@ -182,8 +187,16 @@ class AgentDevValidator:
             # Test import các module chính
             test_commands = [
                 ["python", "-c", "import framework; print('Framework OK')"],
-                ["python", "-c", "import modules.market_intel; print('Market Intel OK')"],
-                ["python", "-c", "import modules.emotionsense_v1; print('EmotionSense OK')"]
+                [
+                    "python",
+                    "-c",
+                    "import modules.market_intel; print('Market Intel OK')",
+                ],
+                [
+                    "python",
+                    "-c",
+                    "import modules.emotionsense_v1; print('EmotionSense OK')",
+                ],
             ]
 
             for cmd in test_commands:
@@ -192,7 +205,7 @@ class AgentDevValidator:
                     capture_output=True,
                     text=True,
                     cwd=self.project_root,
-                    timeout=10
+                    timeout=10,
                 )
                 if result.returncode != 0:
                     logger.error(f"❌ Test failed: {' '.join(cmd)}")
@@ -219,27 +232,27 @@ class AgentDevValidator:
         # Tạo bằng chứng
         evidence_file = f"validation_before_{int(time.time())}.json"
         evidence_data = {
-            'timestamp': time.time(),
-            'pyright_errors': pyright_errors,
-            'ruff_errors': ruff_errors,
-            'test_passed': test_passed,
-            'pyright_details': pyright_details,
-            'ruff_details': ruff_details,
-            'total_errors': pyright_errors + ruff_errors
+            "timestamp": time.time(),
+            "pyright_errors": pyright_errors,
+            "ruff_errors": ruff_errors,
+            "test_passed": test_passed,
+            "pyright_details": pyright_details,
+            "ruff_details": ruff_details,
+            "total_errors": pyright_errors + ruff_errors,
         }
 
-        with open(evidence_file, 'w', encoding='utf-8') as f:
+        with open(evidence_file, "w", encoding="utf-8") as f:
             json.dump(evidence_data, f, indent=2, ensure_ascii=False)
 
         logger.info(f"💾 Bằng chứng trước khi sửa: {evidence_file}")
 
         return {
-            'evidence_file': evidence_file,
-            'pyright_errors': pyright_errors,
-            'ruff_errors': ruff_errors,
-            'total_errors': pyright_errors + ruff_errors,
-            'test_passed': test_passed,
-            'execution_time': time.time() - start_time
+            "evidence_file": evidence_file,
+            "pyright_errors": pyright_errors,
+            "ruff_errors": ruff_errors,
+            "total_errors": pyright_errors + ruff_errors,
+            "test_passed": test_passed,
+            "execution_time": time.time() - start_time,
         }
 
     def validate_after_fix(self, before_data: dict) -> ValidationResult:
@@ -254,42 +267,63 @@ class AgentDevValidator:
         test_passed = self.run_quick_test()
 
         # Tính toán kết quả
-        total_before = before_data['total_errors']
+        total_before = before_data["total_errors"]
         total_after = pyright_errors + ruff_errors
         errors_fixed = total_before - total_after
 
         # Phân loại lỗi
         all_details = pyright_details + ruff_details
-        critical_errors = len([e for e in all_details if e['severity'] == ErrorSeverity.CRITICAL_ERROR.value])
-        warnings = len([e for e in all_details if e['severity'] == ErrorSeverity.WARNING.value])
-        style_suggestions = len([e for e in all_details if e['severity'] == ErrorSeverity.STYLE_SUGGESTION.value])
+        critical_errors = len(
+            [
+                e
+                for e in all_details
+                if e["severity"] == ErrorSeverity.CRITICAL_ERROR.value
+            ]
+        )
+        warnings = len(
+            [e for e in all_details if e["severity"] == ErrorSeverity.WARNING.value]
+        )
+        style_suggestions = len(
+            [
+                e
+                for e in all_details
+                if e["severity"] == ErrorSeverity.STYLE_SUGGESTION.value
+            ]
+        )
 
         # Tạo bằng chứng
         evidence_file = f"validation_after_{int(time.time())}.json"
         evidence_data = {
-            'timestamp': time.time(),
-            'before_data': before_data,
-            'pyright_errors': pyright_errors,
-            'ruff_errors': ruff_errors,
-            'test_passed': test_passed,
-            'pyright_details': pyright_details,
-            'ruff_details': ruff_details,
-            'total_errors': total_after,
-            'errors_fixed': errors_fixed,
-            'critical_errors': critical_errors,
-            'warnings': warnings,
-            'style_suggestions': style_suggestions
+            "timestamp": time.time(),
+            "before_data": before_data,
+            "pyright_errors": pyright_errors,
+            "ruff_errors": ruff_errors,
+            "test_passed": test_passed,
+            "pyright_details": pyright_details,
+            "ruff_details": ruff_details,
+            "total_errors": total_after,
+            "errors_fixed": errors_fixed,
+            "critical_errors": critical_errors,
+            "warnings": warnings,
+            "style_suggestions": style_suggestions,
         }
 
-        with open(evidence_file, 'w', encoding='utf-8') as f:
+        with open(evidence_file, "w", encoding="utf-8") as f:
             json.dump(evidence_data, f, indent=2, ensure_ascii=False)
 
         # Đánh giá thành công
         success = (
-            errors_fixed > 0 and  # Có sửa được lỗi
-            test_passed and       # Code vẫn chạy được
-            (critical_errors == 0 or critical_errors < before_data.get('critical_errors', 0))  # Giảm lỗi nghiêm trọng
-        ) if total_before > 0 else True  # Nếu không có lỗi ban đầu thì coi như thành công
+            (
+                errors_fixed > 0  # Có sửa được lỗi
+                and test_passed  # Code vẫn chạy được
+                and (
+                    critical_errors == 0
+                    or critical_errors < before_data.get("critical_errors", 0)
+                )  # Giảm lỗi nghiêm trọng
+            )
+            if total_before > 0
+            else True
+        )  # Nếu không có lỗi ban đầu thì coi như thành công
 
         result = ValidationResult(
             before_errors=total_before,
@@ -300,8 +334,8 @@ class AgentDevValidator:
             style_suggestions=style_suggestions,
             execution_time=time.time() - start_time,
             success=success,
-            evidence_files=[before_data['evidence_file'], evidence_file],
-            error_details=all_details
+            evidence_files=[before_data["evidence_file"], evidence_file],
+            error_details=all_details,
         )
 
         logger.info(f"💾 Bằng chứng sau khi sửa: {evidence_file}")
@@ -326,10 +360,9 @@ class AgentDevValidator:
         logger.info("=" * 60)
 
         # Lưu vào log file
-        self.validation_log.append({
-            'timestamp': time.time(),
-            'result': result.__dict__
-        })
+        self.validation_log.append(
+            {"timestamp": time.time(), "result": result.__dict__}
+        )
 
     def get_quality_score(self, result: ValidationResult) -> float:
         """Tính điểm chất lượng dựa trên quy tắc: 1 lỗi quan trọng > 100 lỗi vặt"""
@@ -391,6 +424,7 @@ class AgentDevValidator:
 
         return report
 
+
 def main():
     """Hàm main để test hệ thống validation"""
     validator = AgentDevValidator()
@@ -413,8 +447,9 @@ def main():
     print(report)
 
     # Lưu báo cáo
-    with open(f"validation_report_{int(time.time())}.md", 'w', encoding='utf-8') as f:
+    with open(f"validation_report_{int(time.time())}.md", "w", encoding="utf-8") as f:
         f.write(report)
+
 
 if __name__ == "__main__":
     main()

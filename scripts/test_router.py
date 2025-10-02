@@ -19,7 +19,7 @@ import time
 import unittest
 
 # Add stillme_core to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "stillme_core"))
 
 from stillme_core.modules.api_provider_manager import (
     ComplexityAnalyzer,
@@ -43,13 +43,15 @@ class TestComplexityAnalyzer(unittest.TestCase):
             "tên bạn là gì?",
             "bạn có thể giúp gì?",
             "cảm ơn",
-            "tạm biệt"
+            "tạm biệt",
         ]
 
         for prompt in simple_prompts:
             with self.subTest(prompt=prompt):
                 score, _ = self.analyzer.analyze_complexity(prompt)
-                self.assertLess(score, 0.4, f"Simple prompt '{prompt}' got high complexity: {score}")
+                self.assertLess(
+                    score, 0.4, f"Simple prompt '{prompt}' got high complexity: {score}"
+                )
 
     def test_coding_prompts(self):
         """Test that coding prompts get medium complexity scores"""
@@ -68,14 +70,22 @@ class TestComplexityAnalyzer(unittest.TestCase):
             "sửa lỗi trong thuật toán sắp xếp",
             "tạo function JavaScript để validate email",
             "debug lỗi trong code Python",
-            "tối ưu hóa memory usage"
+            "tối ưu hóa memory usage",
         ]
 
         for prompt in coding_prompts:
             with self.subTest(prompt=prompt):
                 score, _ = self.analyzer.analyze_complexity(prompt)
-                self.assertGreaterEqual(score, 0.3, f"Coding prompt '{prompt}' got too low complexity: {score}")
-                self.assertLess(score, 0.7, f"Coding prompt '{prompt}' got too high complexity: {score}")
+                self.assertGreaterEqual(
+                    score,
+                    0.3,
+                    f"Coding prompt '{prompt}' got too low complexity: {score}",
+                )
+                self.assertLess(
+                    score,
+                    0.7,
+                    f"Coding prompt '{prompt}' got too high complexity: {score}",
+                )
 
     def test_complex_prompts(self):
         """Test that complex prompts get high complexity scores"""
@@ -94,13 +104,15 @@ class TestComplexityAnalyzer(unittest.TestCase):
             "Phân tích mối quan hệ giữa triết học và khoa học trong việc hiểu bản chất của thực tại",
             "So sánh và đánh giá các phương pháp học máy khác nhau trong việc xử lý ngôn ngữ tự nhiên",
             "Tại sao các hệ thống phức tạp lại có xu hướng tự tổ chức và phát triển theo quy luật nào?",
-            "Phân tích tác động của trí tuệ nhân tạo đến xã hội và tương lai của nhân loại"
+            "Phân tích tác động của trí tuệ nhân tạo đến xã hội và tương lai của nhân loại",
         ]
 
         for prompt in complex_prompts:
             with self.subTest(prompt=prompt):
                 score, _ = self.analyzer.analyze_complexity(prompt)
-                self.assertGreater(score, 0.7, f"Complex prompt '{prompt}' got low complexity: {score}")
+                self.assertGreater(
+                    score, 0.7, f"Complex prompt '{prompt}' got low complexity: {score}"
+                )
 
     def test_fallback_detection(self):
         """Test fallback mechanism detection"""
@@ -120,13 +132,18 @@ class TestComplexityAnalyzer(unittest.TestCase):
             "thiếu",
             "không rõ",
             "mơ hồ",
-            "không chính xác"
+            "không chính xác",
         ]
 
         for feedback in fallback_triggers:
             with self.subTest(feedback=feedback):
-                should_fallback = self.analyzer.should_trigger_fallback(feedback, "original prompt", "gemma2:2b")
-                self.assertTrue(should_fallback, f"Negative feedback '{feedback}' should trigger fallback")
+                should_fallback = self.analyzer.should_trigger_fallback(
+                    feedback, "original prompt", "gemma2:2b"
+                )
+                self.assertTrue(
+                    should_fallback,
+                    f"Negative feedback '{feedback}' should trigger fallback",
+                )
 
         # Test cases that should NOT trigger fallback
         no_fallback_triggers = [
@@ -144,23 +161,32 @@ class TestComplexityAnalyzer(unittest.TestCase):
             "được",
             "ổn",
             "tốt rồi",
-            "cảm ơn nhiều"
+            "cảm ơn nhiều",
         ]
 
         for feedback in no_fallback_triggers:
             with self.subTest(feedback=feedback):
-                should_fallback = self.analyzer.should_trigger_fallback(feedback, "original prompt", "gemma2:2b")
-                self.assertFalse(should_fallback, f"Positive feedback '{feedback}' should not trigger fallback")
+                should_fallback = self.analyzer.should_trigger_fallback(
+                    feedback, "original prompt", "gemma2:2b"
+                )
+                self.assertFalse(
+                    should_fallback,
+                    f"Positive feedback '{feedback}' should not trigger fallback",
+                )
 
     def test_performance(self):
         """Test that complexity analysis is fast"""
         start_time = time.time()
         for _ in range(100):
-            self.analyzer.analyze_complexity("This is a simple test prompt to check performance.")
+            self.analyzer.analyze_complexity(
+                "This is a simple test prompt to check performance."
+            )
         end_time = time.time()
 
         elapsed_ms = (end_time - start_time) * 1000 / 100
-        self.assertLess(elapsed_ms, 5, f"Average analysis time {elapsed_ms:.2f}ms, expected < 5ms")
+        self.assertLess(
+            elapsed_ms, 5, f"Average analysis time {elapsed_ms:.2f}ms, expected < 5ms"
+        )
 
     def test_edge_cases(self):
         """Test edge cases"""
@@ -181,11 +207,18 @@ class TestComplexityAnalyzer(unittest.TestCase):
         score, _ = self.analyzer.analyze_complexity("!@#$%^&*()")
         self.assertLess(score, 0.4, "Special characters should be simple")
 
+
 class TestUnifiedAPIManager(unittest.TestCase):
     def setUp(self):
         # Mock the API calls to prevent actual network requests
-        self.patcher_ollama = unittest.mock.patch.object(UnifiedAPIManager, 'call_ollama_api', return_value="Mock Ollama Response")
-        self.patcher_deepseek = unittest.mock.patch.object(UnifiedAPIManager, 'call_deepseek_api', return_value="Mock DeepSeek Response")
+        self.patcher_ollama = unittest.mock.patch.object(
+            UnifiedAPIManager, "call_ollama_api", return_value="Mock Ollama Response"
+        )
+        self.patcher_deepseek = unittest.mock.patch.object(
+            UnifiedAPIManager,
+            "call_deepseek_api",
+            return_value="Mock DeepSeek Response",
+        )
         self.mock_ollama = self.patcher_ollama.start()
         self.mock_deepseek = self.patcher_deepseek.start()
         self.addCleanup(self.patcher_ollama.stop)
@@ -205,13 +238,17 @@ class TestUnifiedAPIManager(unittest.TestCase):
             "tên bạn là gì?",
             "bạn có thể giúp gì?",
             "cảm ơn",
-            "tạm biệt"
+            "tạm biệt",
         ]
 
         for prompt in simple_prompts:
             with self.subTest(prompt=prompt):
                 selected_model = self.manager.choose_model(prompt)
-                self.assertEqual(selected_model, "gemma2:2b", f"Prompt '{prompt}' should route to gemma2:2b, got {selected_model}")
+                self.assertEqual(
+                    selected_model,
+                    "gemma2:2b",
+                    f"Prompt '{prompt}' should route to gemma2:2b, got {selected_model}",
+                )
 
     def test_coding_routing(self):
         """Test that coding prompts route to deepseek-coder:6.7b"""
@@ -230,13 +267,17 @@ class TestUnifiedAPIManager(unittest.TestCase):
             "sửa lỗi trong thuật toán sắp xếp",
             "tạo function JavaScript để validate email",
             "debug lỗi trong code Python",
-            "tối ưu hóa memory usage"
+            "tối ưu hóa memory usage",
         ]
 
         for prompt in coding_prompts:
             with self.subTest(prompt=prompt):
                 selected_model = self.manager.choose_model(prompt)
-                self.assertEqual(selected_model, "deepseek-coder:6.7b", f"Prompt '{prompt}' should route to deepseek-coder:6.7b, got {selected_model}")
+                self.assertEqual(
+                    selected_model,
+                    "deepseek-coder:6.7b",
+                    f"Prompt '{prompt}' should route to deepseek-coder:6.7b, got {selected_model}",
+                )
 
     def test_complex_routing(self):
         """Test that complex prompts route to deepseek-chat"""
@@ -255,13 +296,17 @@ class TestUnifiedAPIManager(unittest.TestCase):
             "Phân tích mối quan hệ giữa triết học và khoa học trong việc hiểu bản chất của thực tại",
             "So sánh và đánh giá các phương pháp học máy khác nhau trong việc xử lý ngôn ngữ tự nhiên",
             "Tại sao các hệ thống phức tạp lại có xu hướng tự tổ chức và phát triển theo quy luật nào?",
-            "Phân tích tác động của trí tuệ nhân tạo đến xã hội và tương lai của nhân loại"
+            "Phân tích tác động của trí tuệ nhân tạo đến xã hội và tương lai của nhân loại",
         ]
 
         for prompt in complex_prompts:
             with self.subTest(prompt=prompt):
                 selected_model = self.manager.choose_model(prompt)
-                self.assertEqual(selected_model, "deepseek-chat", f"Prompt '{prompt}' should route to deepseek-chat, got {selected_model}")
+                self.assertEqual(
+                    selected_model,
+                    "deepseek-chat",
+                    f"Prompt '{prompt}' should route to deepseek-chat, got {selected_model}",
+                )
 
     def test_model_preferences(self):
         """Test that model preferences are respected"""
@@ -273,12 +318,22 @@ class TestUnifiedAPIManager(unittest.TestCase):
     def test_fallback_handling(self):
         """Test fallback mechanism"""
         # Test that fallback is triggered for negative feedback
-        fallback_triggered = self.manager.handle_fallback("sai rồi", "original prompt", "gemma2:2b")
-        self.assertTrue(fallback_triggered, "Fallback should be triggered for negative feedback")
+        fallback_triggered = self.manager.handle_fallback(
+            "sai rồi", "original prompt", "gemma2:2b"
+        )
+        self.assertTrue(
+            fallback_triggered, "Fallback should be triggered for negative feedback"
+        )
 
         # Test that fallback is not triggered for positive feedback
-        fallback_not_triggered = self.manager.handle_fallback("đúng rồi", "original prompt", "gemma2:2b")
-        self.assertFalse(fallback_not_triggered, "Fallback should not be triggered for positive feedback")
+        fallback_not_triggered = self.manager.handle_fallback(
+            "đúng rồi", "original prompt", "gemma2:2b"
+        )
+        self.assertFalse(
+            fallback_not_triggered,
+            "Fallback should not be triggered for positive feedback",
+        )
+
 
 class TestIntegration(unittest.TestCase):
     def setUp(self):
@@ -290,7 +345,7 @@ class TestIntegration(unittest.TestCase):
         test_cases = [
             ("chào bạn", "gemma2:2b"),
             ("viết code Python", "deepseek-coder:6.7b"),
-            ("Giải thích định lý bất toàn của Gödel", "deepseek-chat")
+            ("Giải thích định lý bất toàn của Gödel", "deepseek-chat"),
         ]
 
         for prompt, expected_model in test_cases:
@@ -302,14 +357,18 @@ class TestIntegration(unittest.TestCase):
                 selected_model = self.manager.choose_model(prompt)
 
                 # Verify routing
-                self.assertEqual(selected_model, expected_model, f"Prompt '{prompt}' should route to {expected_model}, got {selected_model}")
+                self.assertEqual(
+                    selected_model,
+                    expected_model,
+                    f"Prompt '{prompt}' should route to {expected_model}, got {selected_model}",
+                )
 
     def test_performance_under_load(self):
         """Test performance under load"""
         test_prompts = [
             "chào bạn",
             "viết code Python",
-            "Giải thích định lý bất toàn của Gödel"
+            "Giải thích định lý bất toàn của Gödel",
         ]
 
         start_time = time.time()
@@ -319,7 +378,9 @@ class TestIntegration(unittest.TestCase):
         end_time = time.time()
 
         avg_time = (end_time - start_time) / (100 * len(test_prompts))
-        self.assertLess(avg_time, 0.01, f"Average routing time {avg_time:.4f}s, expected < 0.01s")
+        self.assertLess(
+            avg_time, 0.01, f"Average routing time {avg_time:.4f}s, expected < 0.01s"
+        )
 
     def test_consistency(self):
         """Test that routing is consistent"""
@@ -332,7 +393,10 @@ class TestIntegration(unittest.TestCase):
             results.append(selected_model)
 
         # All results should be the same
-        self.assertTrue(all(r == results[0] for r in results), f"Routing inconsistent: {results}")
+        self.assertTrue(
+            all(r == results[0] for r in results), f"Routing inconsistent: {results}"
+        )
+
 
 class RouterTestSuite:
     def __init__(self):
@@ -357,14 +421,19 @@ class RouterTestSuite:
 
         # Compile results
         test_results = {
-            'tests_run': result.testsRun,
-            'failures': len(result.failures),
-            'errors': len(result.errors),
-            'success_rate': (result.testsRun - len(result.failures) - len(result.errors)) / result.testsRun if result.testsRun > 0 else 0,
-            'details': {
-                'failures': [str(f[1]) for f in result.failures],
-                'errors': [str(e[1]) for e in result.errors]
-            }
+            "tests_run": result.testsRun,
+            "failures": len(result.failures),
+            "errors": len(result.errors),
+            "success_rate": (
+                result.testsRun - len(result.failures) - len(result.errors)
+            )
+            / result.testsRun
+            if result.testsRun > 0
+            else 0,
+            "details": {
+                "failures": [str(f[1]) for f in result.failures],
+                "errors": [str(e[1]) for e in result.errors],
+            },
         }
 
         print("\n📊 Unit Test Results:")
@@ -393,14 +462,19 @@ class RouterTestSuite:
 
         # Compile results
         test_results = {
-            'tests_run': result.testsRun,
-            'failures': len(result.failures),
-            'errors': len(result.errors),
-            'success_rate': (result.testsRun - len(result.failures) - len(result.errors)) / result.testsRun if result.testsRun > 0 else 0,
-            'details': {
-                'failures': [str(f[1]) for f in result.failures],
-                'errors': [str(e[1]) for e in result.errors]
-            }
+            "tests_run": result.testsRun,
+            "failures": len(result.failures),
+            "errors": len(result.errors),
+            "success_rate": (
+                result.testsRun - len(result.failures) - len(result.errors)
+            )
+            / result.testsRun
+            if result.testsRun > 0
+            else 0,
+            "details": {
+                "failures": [str(f[1]) for f in result.failures],
+                "errors": [str(e[1]) for e in result.errors],
+            },
         }
 
         print("\n📊 Integration Test Results:")
@@ -423,7 +497,7 @@ class RouterTestSuite:
         test_prompts = [
             "chào bạn",
             "viết code Python tính giai thừa",
-            "Giải thích định lý bất toàn của Gödel"
+            "Giải thích định lý bất toàn của Gödel",
         ]
 
         # Test complexity analysis performance
@@ -448,10 +522,12 @@ class RouterTestSuite:
 
         # Compile results
         test_results = {
-            'complexity_analysis_time': analysis_time,
-            'model_selection_time': selection_time,
-            'total_time': analysis_time + selection_time,
-            'performance_grade': self._get_performance_grade(analysis_time + selection_time)
+            "complexity_analysis_time": analysis_time,
+            "model_selection_time": selection_time,
+            "total_time": analysis_time + selection_time,
+            "performance_grade": self._get_performance_grade(
+                analysis_time + selection_time
+            ),
         }
 
         print("\n📊 Performance Test Results:")
@@ -491,29 +567,35 @@ class RouterTestSuite:
 
         # Compile overall results
         overall_results = {
-            'unit_tests': unit_results,
-            'integration_tests': integration_results,
-            'performance_tests': performance_results,
-            'total_time': end_time - start_time,
-            'timestamp': time.strftime('%Y-%m-%d %H:%M:%S')
+            "unit_tests": unit_results,
+            "integration_tests": integration_results,
+            "performance_tests": performance_results,
+            "total_time": end_time - start_time,
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
         }
 
         # Print summary
         print("\n📊 Full Test Suite Summary")
         print("=" * 60)
         print(f"Unit tests: {unit_results['success_rate']:.1%} success rate")
-        print(f"Integration tests: {integration_results['success_rate']:.1%} success rate")
+        print(
+            f"Integration tests: {integration_results['success_rate']:.1%} success rate"
+        )
         print(f"Performance: {performance_results['performance_grade']}")
         print(f"Total test time: {overall_results['total_time']:.2f}s")
 
         # Overall status
-        if (unit_results['success_rate'] >= 0.9 and
-            integration_results['success_rate'] >= 0.9 and
-            performance_results['performance_grade'].startswith('A')):
+        if (
+            unit_results["success_rate"] >= 0.9
+            and integration_results["success_rate"] >= 0.9
+            and performance_results["performance_grade"].startswith("A")
+        ):
             overall_status = "PASS"
-        elif (unit_results['success_rate'] >= 0.8 and
-              integration_results['success_rate'] >= 0.8 and
-              performance_results['performance_grade'].startswith('B')):
+        elif (
+            unit_results["success_rate"] >= 0.8
+            and integration_results["success_rate"] >= 0.8
+            and performance_results["performance_grade"].startswith("B")
+        ):
             overall_status = "WARN"
         else:
             overall_status = "FAIL"
@@ -522,12 +604,17 @@ class RouterTestSuite:
 
         return overall_results
 
+
 def main():
-    parser = argparse.ArgumentParser(description='AI Router Test Script')
-    parser.add_argument('--unit', action='store_true', help='Run unit tests')
-    parser.add_argument('--integration', action='store_true', help='Run integration tests')
-    parser.add_argument('--performance', action='store_true', help='Run performance tests')
-    parser.add_argument('--all', action='store_true', help='Run all tests')
+    parser = argparse.ArgumentParser(description="AI Router Test Script")
+    parser.add_argument("--unit", action="store_true", help="Run unit tests")
+    parser.add_argument(
+        "--integration", action="store_true", help="Run integration tests"
+    )
+    parser.add_argument(
+        "--performance", action="store_true", help="Run performance tests"
+    )
+    parser.add_argument("--all", action="store_true", help="Run all tests")
 
     args = parser.parse_args()
 
@@ -547,18 +634,19 @@ def main():
         return
 
     # Exit with appropriate code
-    if 'success_rate' in results:
-        if results['success_rate'] >= 0.9:
+    if "success_rate" in results:
+        if results["success_rate"] >= 0.9:
             sys.exit(0)  # Success
         else:
             sys.exit(1)  # Failure
-    elif 'performance_grade' in results:
-        if results['performance_grade'].startswith('A'):
+    elif "performance_grade" in results:
+        if results["performance_grade"].startswith("A"):
             sys.exit(0)  # Success
         else:
             sys.exit(1)  # Failure
     else:
         sys.exit(0)  # Success
+
 
 if __name__ == "__main__":
     main()

@@ -20,7 +20,9 @@ class AgentDevConfig:
     """AgentDev system configuration"""
 
     # Validation settings
-    validation_enabled: bool = os.getenv("AGENTDEV_VALIDATION_ENABLED", "true").lower() == "true"
+    validation_enabled: bool = (
+        os.getenv("AGENTDEV_VALIDATION_ENABLED", "true").lower() == "true"
+    )
     validation_timeout: int = int(os.getenv("AGENTDEV_VALIDATION_TIMEOUT", "60"))
 
     # Quality thresholds
@@ -29,7 +31,9 @@ class AgentDevConfig:
 
     # Behavior settings
     honest_mode: bool = os.getenv("AGENTDEV_HONEST_MODE", "true").lower() == "true"
-    evidence_required: bool = os.getenv("AGENTDEV_EVIDENCE_REQUIRED", "true").lower() == "true"
+    evidence_required: bool = (
+        os.getenv("AGENTDEV_EVIDENCE_REQUIRED", "true").lower() == "true"
+    )
 
     # Performance settings
     max_fixes_per_session: int = int(os.getenv("AGENTDEV_MAX_FIXES_PER_SESSION", "50"))
@@ -50,5 +54,5 @@ class AgentDevConfig:
             "honest_mode": self.honest_mode,
             "evidence_required": self.evidence_required,
             "max_fixes_per_session": self.max_fixes_per_session,
-            "fix_timeout": self.fix_timeout
+            "fix_timeout": self.fix_timeout,
         }

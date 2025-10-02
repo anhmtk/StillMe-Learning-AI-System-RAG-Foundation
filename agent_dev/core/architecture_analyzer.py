@@ -27,6 +27,7 @@ import networkx as nx
 
 class DesignPattern(Enum):
     """Design Patterns"""
+
     SINGLETON = "singleton"
     FACTORY = "factory"
     OBSERVER = "observer"
@@ -38,32 +39,40 @@ class DesignPattern(Enum):
     COMMAND = "command"
     STATE = "state"
 
+
 class CouplingLevel(Enum):
     """Coupling Levels"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     VERY_HIGH = "very_high"
 
+
 class ComplexityLevel(Enum):
     """Complexity Levels"""
+
     SIMPLE = "simple"
     MODERATE = "moderate"
     COMPLEX = "complex"
     VERY_COMPLEX = "very_complex"
 
+
 @dataclass
 class DependencyInfo:
     """Dependency Information"""
+
     source: str
     target: str
     dependency_type: str  # "import", "inheritance", "composition"
     line_number: int
     strength: float  # 0.0 to 1.0
 
+
 @dataclass
 class DesignPatternMatch:
     """Design Pattern Match"""
+
     pattern: DesignPattern
     file_path: str
     line_number: int
@@ -71,9 +80,11 @@ class DesignPatternMatch:
     description: str
     code_snippet: str
 
+
 @dataclass
 class RefactoringSuggestion:
     """Refactoring Suggestion"""
+
     suggestion_id: str
     file_path: str
     line_number: int
@@ -86,9 +97,11 @@ class RefactoringSuggestion:
     code_after: str
     benefits: list[str]
 
+
 @dataclass
 class TechnicalDebtItem:
     """Technical Debt Item"""
+
     debt_id: str
     file_path: str
     line_number: int
@@ -99,9 +112,11 @@ class TechnicalDebtItem:
     impact: str
     suggested_fix: str
 
+
 @dataclass
 class ArchitectureMetrics:
     """Architecture Metrics"""
+
     total_files: int
     total_classes: int
     total_functions: int
@@ -113,9 +128,11 @@ class ArchitectureMetrics:
     refactoring_suggestions: list[RefactoringSuggestion]
     technical_debt: list[TechnicalDebtItem]
 
+
 @dataclass
 class ArchitectureReport:
     """Architecture Report"""
+
     analysis_timestamp: datetime
     metrics: ArchitectureMetrics
     dependency_graph: dict[str, list[str]]
@@ -123,6 +140,7 @@ class ArchitectureReport:
     complexity_analysis: dict[str, ComplexityLevel]
     recommendations: list[str]
     analysis_time: float
+
 
 class ArchitectureAnalyzer:
     """Architecture Analyzer - Phân tích kiến trúc toàn diện"""
@@ -154,51 +172,51 @@ class ArchitectureAnalyzer:
         """Load design pattern recognition rules"""
         return {
             DesignPattern.SINGLETON: {
-                'patterns': [
-                    r'class\s+\w+.*:\s*\n.*__instance\s*=.*None',
-                    r'def\s+__new__\s*\(.*cls.*\):',
-                    r'if\s+.*__instance\s+is\s+None:',
-                    r'__instance\s*=\s*.*\(\)'
+                "patterns": [
+                    r"class\s+\w+.*:\s*\n.*__instance\s*=.*None",
+                    r"def\s+__new__\s*\(.*cls.*\):",
+                    r"if\s+.*__instance\s+is\s+None:",
+                    r"__instance\s*=\s*.*\(\)",
                 ],
-                'confidence_threshold': 0.7
+                "confidence_threshold": 0.7,
             },
             DesignPattern.FACTORY: {
-                'patterns': [
-                    r'class\s+\w*Factory\w*.*:',
-                    r'def\s+create_\w+\s*\(',
-                    r'def\s+get_\w+\s*\(',
-                    r'return\s+\w+\(.*\)'
+                "patterns": [
+                    r"class\s+\w*Factory\w*.*:",
+                    r"def\s+create_\w+\s*\(",
+                    r"def\s+get_\w+\s*\(",
+                    r"return\s+\w+\(.*\)",
                 ],
-                'confidence_threshold': 0.6
+                "confidence_threshold": 0.6,
             },
             DesignPattern.OBSERVER: {
-                'patterns': [
-                    r'def\s+attach\s*\(',
-                    r'def\s+detach\s*\(',
-                    r'def\s+notify\s*\(',
-                    r'observers\s*=\s*\[\]',
-                    r'for\s+observer\s+in\s+.*observers'
+                "patterns": [
+                    r"def\s+attach\s*\(",
+                    r"def\s+detach\s*\(",
+                    r"def\s+notify\s*\(",
+                    r"observers\s*=\s*\[\]",
+                    r"for\s+observer\s+in\s+.*observers",
                 ],
-                'confidence_threshold': 0.6
+                "confidence_threshold": 0.6,
             },
             DesignPattern.STRATEGY: {
-                'patterns': [
-                    r'class\s+\w*Strategy\w*.*:',
-                    r'def\s+execute\s*\(',
-                    r'def\s+algorithm\s*\(',
-                    r'strategy\s*=\s*\w+'
+                "patterns": [
+                    r"class\s+\w*Strategy\w*.*:",
+                    r"def\s+execute\s*\(",
+                    r"def\s+algorithm\s*\(",
+                    r"strategy\s*=\s*\w+",
                 ],
-                'confidence_threshold': 0.6
+                "confidence_threshold": 0.6,
             },
             DesignPattern.DECORATOR: {
-                'patterns': [
-                    r'def\s+\w*decorator\w*\s*\(',
-                    r'@\w+',
-                    r'def\s+wrapper\s*\(',
-                    r'return\s+wrapper'
+                "patterns": [
+                    r"def\s+\w*decorator\w*\s*\(",
+                    r"@\w+",
+                    r"def\s+wrapper\s*\(",
+                    r"return\s+wrapper",
                 ],
-                'confidence_threshold': 0.7
-            }
+                "confidence_threshold": 0.7,
+            },
         }
 
     def analyze_architecture(self) -> ArchitectureReport:
@@ -209,9 +227,12 @@ class ArchitectureAnalyzer:
         python_files = list(self.project_root.rglob("*.py"))
 
         # Filter out test files and __pycache__ (but allow test files in temp projects)
-        python_files = [f for f in python_files
-                       if "__pycache__" not in str(f) and
-                       not (str(f).endswith("test_") and "temp" not in str(f))]
+        python_files = [
+            f
+            for f in python_files
+            if "__pycache__" not in str(f)
+            and not (str(f).endswith("test_") and "temp" not in str(f))
+        ]
 
         # Analyze each file
         for file_path in python_files:
@@ -228,7 +249,9 @@ class ArchitectureAnalyzer:
         complexity_analysis = self._analyze_complexity()
 
         # Generate recommendations
-        recommendations = self._generate_recommendations(metrics, coupling_analysis, complexity_analysis)
+        recommendations = self._generate_recommendations(
+            metrics, coupling_analysis, complexity_analysis
+        )
 
         analysis_time = time.time() - start_time
 
@@ -239,13 +262,13 @@ class ArchitectureAnalyzer:
             coupling_analysis=coupling_analysis,
             complexity_analysis=complexity_analysis,
             recommendations=recommendations,
-            analysis_time=analysis_time
+            analysis_time=analysis_time,
         )
 
     def _analyze_file(self, file_path: Path):
         """Analyze individual file"""
         try:
-            with open(file_path, encoding='utf-8') as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
 
             # Parse AST
@@ -278,7 +301,7 @@ class ArchitectureAnalyzer:
                         target=alias.name,
                         dependency_type="import",
                         line_number=node.lineno,
-                        strength=1.0
+                        strength=1.0,
                     )
                     self.dependencies.append(dep)
                     self.dependency_graph.add_edge(file_name, alias.name)
@@ -290,7 +313,7 @@ class ArchitectureAnalyzer:
                         target=node.module,
                         dependency_type="import",
                         line_number=node.lineno,
-                        strength=1.0
+                        strength=1.0,
                     )
                     self.dependencies.append(dep)
                     self.dependency_graph.add_edge(file_name, node.module)
@@ -304,30 +327,30 @@ class ArchitectureAnalyzer:
                             target=base.id,
                             dependency_type="inheritance",
                             line_number=node.lineno,
-                            strength=0.8
+                            strength=0.8,
                         )
                         self.dependencies.append(dep)
                         self.dependency_graph.add_edge(file_name, base.id)
 
     def _detect_design_patterns(self, file_path: Path, content: str):
         """Detect design patterns in code"""
-        lines = content.split('\n')
+        lines = content.split("\n")
 
         for pattern_type, rules in self.pattern_rules.items():
             matches = 0
-            total_patterns = len(rules['patterns'])
+            total_patterns = len(rules["patterns"])
 
-            for pattern in rules['patterns']:
+            for pattern in rules["patterns"]:
                 if re.search(pattern, content, re.MULTILINE | re.DOTALL):
                     matches += 1
 
             confidence = matches / total_patterns if total_patterns > 0 else 0
 
-            if confidence >= rules['confidence_threshold']:
+            if confidence >= rules["confidence_threshold"]:
                 # Find line number for the pattern
                 line_number = 1
                 for i, line in enumerate(lines):
-                    if re.search(rules['patterns'][0], line):
+                    if re.search(rules["patterns"][0], line):
                         line_number = i + 1
                         break
 
@@ -337,14 +360,18 @@ class ArchitectureAnalyzer:
                     line_number=line_number,
                     confidence=confidence,
                     description=f"{pattern_type.value.title()} pattern detected",
-                    code_snippet=lines[line_number-1] if line_number <= len(lines) else ""
+                    code_snippet=lines[line_number - 1]
+                    if line_number <= len(lines)
+                    else "",
                 )
 
                 self.design_patterns.append(pattern_match)
 
-    def _identify_refactoring_opportunities(self, file_path: Path, tree: ast.AST, content: str):
+    def _identify_refactoring_opportunities(
+        self, file_path: Path, tree: ast.AST, content: str
+    ):
         """Identify refactoring opportunities"""
-        lines = content.split('\n')
+        lines = content.split("\n")
 
         # Check for long functions
         for node in ast.walk(tree):
@@ -359,9 +386,15 @@ class ArchitectureAnalyzer:
                         priority="medium",
                         impact="medium",
                         effort="medium",
-                        code_before=lines[node.lineno-1] if node.lineno <= len(lines) else "",
+                        code_before=lines[node.lineno - 1]
+                        if node.lineno <= len(lines)
+                        else "",
                         code_after="# Extract smaller methods from this function",
-                        benefits=["Improved readability", "Better testability", "Reduced complexity"]
+                        benefits=[
+                            "Improved readability",
+                            "Better testability",
+                            "Reduced complexity",
+                        ],
                     )
                     self.refactoring_suggestions.append(suggestion)
 
@@ -376,9 +409,11 @@ class ArchitectureAnalyzer:
                         priority="low",
                         impact="low",
                         effort="low",
-                        code_before=lines[node.lineno-1] if node.lineno <= len(lines) else "",
+                        code_before=lines[node.lineno - 1]
+                        if node.lineno <= len(lines)
+                        else "",
                         code_after="# Simplify complex conditions",
-                        benefits=["Improved readability", "Easier maintenance"]
+                        benefits=["Improved readability", "Easier maintenance"],
                     )
                     self.refactoring_suggestions.append(suggestion)
 
@@ -402,12 +437,15 @@ class ArchitectureAnalyzer:
 
     def _detect_duplicate_code(self, file_path: Path, content: str):
         """Detect duplicate code patterns"""
-        lines = content.split('\n')
+        lines = content.split("\n")
 
         # Simple duplicate detection (can be enhanced)
         line_counts = Counter(lines)
-        duplicates = [(line, count) for line, count in line_counts.items()
-                     if count > 3 and line.strip() and not line.strip().startswith('#')]
+        duplicates = [
+            (line, count)
+            for line, count in line_counts.items()
+            if count > 3 and line.strip() and not line.strip().startswith("#")
+        ]
 
         for line, count in duplicates:
             line_number = lines.index(line) + 1
@@ -422,27 +460,27 @@ class ArchitectureAnalyzer:
                 effort="low",
                 code_before=line,
                 code_after="# Extract to common function or constant",
-                benefits=["Reduced duplication", "Easier maintenance"]
+                benefits=["Reduced duplication", "Easier maintenance"],
             )
             self.refactoring_suggestions.append(suggestion)
 
     def _identify_technical_debt(self, file_path: Path, tree: ast.AST, content: str):
         """Identify technical debt"""
-        lines = content.split('\n')
+        lines = content.split("\n")
 
         # Check for TODO comments
         for i, line in enumerate(lines):
-            if 'TODO' in line.upper() or 'FIXME' in line.upper():
+            if "TODO" in line.upper() or "FIXME" in line.upper():
                 debt = TechnicalDebtItem(
                     debt_id=f"todo_{file_path.stem}_{i+1}",
                     file_path=str(file_path.relative_to(self.project_root)),
-                    line_number=i+1,
+                    line_number=i + 1,
                     debt_type="todo_comment",
                     description=f"TODO/FIXME comment: {line.strip()}",
                     severity="low",
                     estimated_cost=1.0,
                     impact="low",
-                    suggested_fix="Implement the TODO item or remove if obsolete"
+                    suggested_fix="Implement the TODO item or remove if obsolete",
                 )
                 self.technical_debt.append(debt)
 
@@ -459,7 +497,7 @@ class ArchitectureAnalyzer:
                         severity="medium",
                         estimated_cost=2.0,
                         impact="medium",
-                        suggested_fix="Use data classes or configuration objects"
+                        suggested_fix="Use data classes or configuration objects",
                     )
                     self.technical_debt.append(debt)
 
@@ -475,7 +513,7 @@ class ArchitectureAnalyzer:
                 severity="medium",
                 estimated_cost=3.0,
                 impact="medium",
-                suggested_fix="Extract methods to reduce nesting"
+                suggested_fix="Extract methods to reduce nesting",
             )
             self.technical_debt.append(debt)
 
@@ -510,11 +548,11 @@ class ArchitectureAnalyzer:
 
         for file_path in python_files:
             try:
-                with open(file_path, encoding='utf-8') as f:
+                with open(file_path, encoding="utf-8") as f:
                     content = f.read()
 
                 tree = ast.parse(content)
-                total_lines += len(content.split('\n'))
+                total_lines += len(content.split("\n"))
 
                 for node in ast.walk(tree):
                     if isinstance(node, ast.ClassDef):
@@ -544,7 +582,7 @@ class ArchitectureAnalyzer:
             cohesion_metrics=cohesion_metrics,
             design_patterns_found=self.design_patterns,
             refactoring_suggestions=self.refactoring_suggestions,
-            technical_debt=self.technical_debt
+            technical_debt=self.technical_debt,
         )
 
     def _calculate_cyclomatic_complexity(self, python_files: list[Path]) -> float:
@@ -554,7 +592,7 @@ class ArchitectureAnalyzer:
 
         for file_path in python_files:
             try:
-                with open(file_path, encoding='utf-8') as f:
+                with open(file_path, encoding="utf-8") as f:
                     content = f.read()
 
                 tree = ast.parse(content)
@@ -564,7 +602,9 @@ class ArchitectureAnalyzer:
                         complexity = 1  # Base complexity
 
                         for child in ast.walk(node):
-                            if isinstance(child, (ast.If, ast.While, ast.For, ast.ExceptHandler)):
+                            if isinstance(
+                                child, (ast.If, ast.While, ast.For, ast.ExceptHandler)
+                            ):
                                 complexity += 1
                             elif isinstance(child, ast.BoolOp):
                                 complexity += len(child.values) - 1
@@ -586,20 +626,34 @@ class ArchitectureAnalyzer:
         metrics = {}
 
         # Average degree
-        degrees = [self.dependency_graph.degree(node) for node in self.dependency_graph.nodes()]
-        metrics['average_degree'] = sum(degrees) / len(degrees) if degrees else 0
+        degrees = [
+            self.dependency_graph.degree(node) for node in self.dependency_graph.nodes()
+        ]
+        metrics["average_degree"] = sum(degrees) / len(degrees) if degrees else 0
 
         # In-degree and out-degree
-        in_degrees = [self.dependency_graph.in_degree(node) for node in self.dependency_graph.nodes()]
-        out_degrees = [self.dependency_graph.out_degree(node) for node in self.dependency_graph.nodes()]
+        in_degrees = [
+            self.dependency_graph.in_degree(node)
+            for node in self.dependency_graph.nodes()
+        ]
+        out_degrees = [
+            self.dependency_graph.out_degree(node)
+            for node in self.dependency_graph.nodes()
+        ]
 
-        metrics['average_in_degree'] = sum(in_degrees) / len(in_degrees) if in_degrees else 0
-        metrics['average_out_degree'] = sum(out_degrees) / len(out_degrees) if out_degrees else 0
+        metrics["average_in_degree"] = (
+            sum(in_degrees) / len(in_degrees) if in_degrees else 0
+        )
+        metrics["average_out_degree"] = (
+            sum(out_degrees) / len(out_degrees) if out_degrees else 0
+        )
 
         # Coupling ratio
         total_edges = self.dependency_graph.number_of_edges()
         total_nodes = self.dependency_graph.number_of_nodes()
-        metrics['coupling_ratio'] = total_edges / (total_nodes * (total_nodes - 1)) if total_nodes > 1 else 0
+        metrics["coupling_ratio"] = (
+            total_edges / (total_nodes * (total_nodes - 1)) if total_nodes > 1 else 0
+        )
 
         return metrics
 
@@ -609,8 +663,14 @@ class ArchitectureAnalyzer:
         metrics = {}
 
         # LCOM (Lack of Cohesion of Methods) - simplified
-        total_classes = len([p for p in self.design_patterns if p.pattern == DesignPattern.SINGLETON])
-        metrics['lcom'] = 1.0 - (total_classes / len(self.design_patterns)) if self.design_patterns else 0
+        total_classes = len(
+            [p for p in self.design_patterns if p.pattern == DesignPattern.SINGLETON]
+        )
+        metrics["lcom"] = (
+            1.0 - (total_classes / len(self.design_patterns))
+            if self.design_patterns
+            else 0
+        )
 
         return metrics
 
@@ -640,20 +700,28 @@ class ArchitectureAnalyzer:
         for file_path in self.project_root.rglob("*.py"):
             if "__pycache__" not in str(file_path):
                 try:
-                    with open(file_path, encoding='utf-8') as f:
+                    with open(file_path, encoding="utf-8") as f:
                         content = f.read()
 
                     tree = ast.parse(content)
                     complexity = self._calculate_file_complexity(tree)
 
                     if complexity <= 5:
-                        complexity_analysis[str(file_path.relative_to(self.project_root))] = ComplexityLevel.SIMPLE
+                        complexity_analysis[
+                            str(file_path.relative_to(self.project_root))
+                        ] = ComplexityLevel.SIMPLE
                     elif complexity <= 15:
-                        complexity_analysis[str(file_path.relative_to(self.project_root))] = ComplexityLevel.MODERATE
+                        complexity_analysis[
+                            str(file_path.relative_to(self.project_root))
+                        ] = ComplexityLevel.MODERATE
                     elif complexity <= 30:
-                        complexity_analysis[str(file_path.relative_to(self.project_root))] = ComplexityLevel.COMPLEX
+                        complexity_analysis[
+                            str(file_path.relative_to(self.project_root))
+                        ] = ComplexityLevel.COMPLEX
                     else:
-                        complexity_analysis[str(file_path.relative_to(self.project_root))] = ComplexityLevel.VERY_COMPLEX
+                        complexity_analysis[
+                            str(file_path.relative_to(self.project_root))
+                        ] = ComplexityLevel.VERY_COMPLEX
 
                 except Exception:
                     continue
@@ -672,42 +740,64 @@ class ArchitectureAnalyzer:
 
         return complexity
 
-    def _generate_recommendations(self, metrics: ArchitectureMetrics,
-                                coupling_analysis: dict[str, CouplingLevel],
-                                complexity_analysis: dict[str, ComplexityLevel]) -> list[str]:
+    def _generate_recommendations(
+        self,
+        metrics: ArchitectureMetrics,
+        coupling_analysis: dict[str, CouplingLevel],
+        complexity_analysis: dict[str, ComplexityLevel],
+    ) -> list[str]:
         """Generate architecture recommendations"""
         recommendations = []
 
         # Complexity recommendations
         if metrics.cyclomatic_complexity > 10:
-            recommendations.append("Reduce cyclomatic complexity by breaking down complex functions")
+            recommendations.append(
+                "Reduce cyclomatic complexity by breaking down complex functions"
+            )
 
         # Coupling recommendations
-        high_coupling_files = [f for f, level in coupling_analysis.items()
-                              if level in [CouplingLevel.HIGH, CouplingLevel.VERY_HIGH]]
+        high_coupling_files = [
+            f
+            for f, level in coupling_analysis.items()
+            if level in [CouplingLevel.HIGH, CouplingLevel.VERY_HIGH]
+        ]
         if high_coupling_files:
-            recommendations.append(f"Reduce coupling in {len(high_coupling_files)} files")
+            recommendations.append(
+                f"Reduce coupling in {len(high_coupling_files)} files"
+            )
 
         # Complexity recommendations
-        complex_files = [f for f, level in complexity_analysis.items()
-                        if level in [ComplexityLevel.COMPLEX, ComplexityLevel.VERY_COMPLEX]]
+        complex_files = [
+            f
+            for f, level in complexity_analysis.items()
+            if level in [ComplexityLevel.COMPLEX, ComplexityLevel.VERY_COMPLEX]
+        ]
         if complex_files:
             recommendations.append(f"Simplify {len(complex_files)} complex files")
 
         # Design pattern recommendations
         if len(metrics.design_patterns_found) < 3:
-            recommendations.append("Consider implementing more design patterns for better code organization")
+            recommendations.append(
+                "Consider implementing more design patterns for better code organization"
+            )
 
         # Refactoring recommendations
-        high_priority_refactoring = [r for r in metrics.refactoring_suggestions
-                                   if r.priority in ["high", "critical"]]
+        high_priority_refactoring = [
+            r
+            for r in metrics.refactoring_suggestions
+            if r.priority in ["high", "critical"]
+        ]
         if high_priority_refactoring:
-            recommendations.append(f"Address {len(high_priority_refactoring)} high-priority refactoring items")
+            recommendations.append(
+                f"Address {len(high_priority_refactoring)} high-priority refactoring items"
+            )
 
         # Technical debt recommendations
         critical_debt = [d for d in metrics.technical_debt if d.severity == "critical"]
         if critical_debt:
-            recommendations.append(f"Address {len(critical_debt)} critical technical debt items")
+            recommendations.append(
+                f"Address {len(critical_debt)} critical technical debt items"
+            )
 
         return recommendations
 
@@ -718,7 +808,7 @@ class ArchitectureAnalyzer:
         # Save detailed refactoring suggestions
         refactor_file = self.refactor_dir / f"refactoring_suggestions_{timestamp}.md"
 
-        with open(refactor_file, 'w', encoding='utf-8') as f:
+        with open(refactor_file, "w", encoding="utf-8") as f:
             f.write("# Refactoring Suggestions Report\n\n")
             f.write(f"**Generated**: {timestamp}\n\n")
 
@@ -733,7 +823,9 @@ class ArchitectureAnalyzer:
 
                     for suggestion in by_priority[priority]:
                         f.write(f"### {suggestion.description}\n")
-                        f.write(f"**File**: {suggestion.file_path}:{suggestion.line_number}\n")
+                        f.write(
+                            f"**File**: {suggestion.file_path}:{suggestion.line_number}\n"
+                        )
                         f.write(f"**Type**: {suggestion.suggestion_type}\n")
                         f.write(f"**Impact**: {suggestion.impact}\n")
                         f.write(f"**Effort**: {suggestion.effort}\n\n")
@@ -749,13 +841,16 @@ class ArchitectureAnalyzer:
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
         # Save JSON report
-        json_path = self.project_root / "artifacts" / f"architecture_report_{timestamp}.json"
+        json_path = (
+            self.project_root / "artifacts" / f"architecture_report_{timestamp}.json"
+        )
         json_path.parent.mkdir(exist_ok=True)
 
-        with open(json_path, 'w', encoding='utf-8') as f:
+        with open(json_path, "w", encoding="utf-8") as f:
             json.dump(asdict(report), f, indent=2, default=str)
 
         return str(json_path)
+
 
 def main():
     """Main function for testing"""
@@ -773,6 +868,7 @@ def main():
     print(f"Total files analyzed: {report.metrics.total_files}")
     print(f"Design patterns found: {len(report.metrics.design_patterns_found)}")
     print(f"Refactoring suggestions: {len(report.metrics.refactoring_suggestions)}")
+
 
 if __name__ == "__main__":
     main()

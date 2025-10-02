@@ -25,9 +25,11 @@ from .collectors import NicheRecord
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class NicheScore:
     """Niche score with detailed breakdown"""
+
     topic: str
     total_score: float
     confidence: float
@@ -39,6 +41,7 @@ class NicheScore:
     competition_proxy: float
     key_signals: list[str]
     recommendations: list[str]
+
 
 class NicheScorer:
     """Main scoring engine for niche opportunities"""
@@ -53,10 +56,12 @@ class NicheScorer:
         try:
             weights_path = Path(self.weights_file)
             if not weights_path.exists():
-                self.logger.warning(f"⚠️ Weights file not found: {self.weights_file}, using defaults")
+                self.logger.warning(
+                    f"⚠️ Weights file not found: {self.weights_file}, using defaults"
+                )
                 return self._get_default_weights()
 
-            with open(weights_path, encoding='utf-8') as f:
+            with open(weights_path, encoding="utf-8") as f:
                 weights = yaml.safe_load(f)
 
             self.logger.info(f"✅ Loaded scoring weights from {self.weights_file}")
@@ -76,23 +81,40 @@ class NicheScorer:
                 "news_delta": 0.10,
                 "reddit_engagement": 0.05,
                 "competition_proxy": 0.15,
-                "feasibility_fit": 0.25
+                "feasibility_fit": 0.25,
             },
             "normalization": {
                 "github_velocity": {"mean": 5.0, "std": 10.0, "max_cap": 50.0},
                 "hackernews_heat": {"mean": 50.0, "std": 100.0, "max_cap": 500.0},
                 "news_delta": {"mean": 0.5, "std": 0.3, "max_cap": 1.0},
                 "reddit_engagement": {"mean": 25.0, "std": 50.0, "max_cap": 200.0},
-                "google_trends": {"mean": 50.0, "std": 25.0, "max_cap": 100.0}
+                "google_trends": {"mean": 50.0, "std": 25.0, "max_cap": 100.0},
             },
             "stillme_capabilities": {
-                "high_fit": ["ai_assistant", "nlp_processing", "translation", "content_generation"],
-                "medium_fit": ["web_scraping", "monitoring", "notification", "scheduling"],
-                "low_fit": ["mobile_app", "game_development", "graphics_design", "video_editing"]
-            }
+                "high_fit": [
+                    "ai_assistant",
+                    "nlp_processing",
+                    "translation",
+                    "content_generation",
+                ],
+                "medium_fit": [
+                    "web_scraping",
+                    "monitoring",
+                    "notification",
+                    "scheduling",
+                ],
+                "low_fit": [
+                    "mobile_app",
+                    "game_development",
+                    "graphics_design",
+                    "video_editing",
+                ],
+            },
         }
 
-    def normalize_signal(self, value: float, signal_type: str, method: str = "z_score") -> float:
+    def normalize_signal(
+        self, value: float, signal_type: str, method: str = "z_score"
+    ) -> float:
         """Normalize signal to [0,1] range"""
         try:
             if method == "z_score":
@@ -123,7 +145,9 @@ class NicheScorer:
             self.logger.error(f"❌ Signal normalization failed for {signal_type}: {e}")
             return 0.0
 
-    def calculate_feasibility_fit(self, topic: str, records: list[NicheRecord]) -> float:
+    def calculate_feasibility_fit(
+        self, topic: str, records: list[NicheRecord]
+    ) -> float:
         """Calculate how well the niche fits StillMe capabilities"""
         try:
             # Extract keywords from topic and records
@@ -169,7 +193,9 @@ class NicheScorer:
             self.logger.error(f"❌ Feasibility calculation failed: {e}")
             return 0.5
 
-    def calculate_competition_proxy(self, topic: str, records: list[NicheRecord]) -> float:
+    def calculate_competition_proxy(
+        self, topic: str, records: list[NicheRecord]
+    ) -> float:
         """Calculate competition proxy (higher = more competition)"""
         try:
             # Extract keywords
@@ -237,7 +263,11 @@ class NicheScorer:
                 age_hours = (now - record.timestamp).total_seconds() / 3600
                 freshness = max(0.0, 1.0 - (age_hours / 72.0))  # 72 hours max
                 freshness_scores.append(freshness)
-            data_freshness = sum(freshness_scores) / len(freshness_scores) if freshness_scores else 0.0
+            data_freshness = (
+                sum(freshness_scores) / len(freshness_scores)
+                if freshness_scores
+                else 0.0
+            )
 
             # Source credibility (0.1 weight)
             credibility_scores = []
@@ -247,17 +277,21 @@ class NicheScorer:
                     "Hacker News": 0.8,
                     "Google Trends": 0.9,
                     "Reddit": 0.6,
-                    "News": 0.7
+                    "News": 0.7,
                 }
                 credibility_scores.append(cred_map.get(record.source, 0.5))
-            source_credibility = sum(credibility_scores) / len(credibility_scores) if credibility_scores else 0.5
+            source_credibility = (
+                sum(credibility_scores) / len(credibility_scores)
+                if credibility_scores
+                else 0.5
+            )
 
             # Weighted confidence
             confidence = (
-                0.4 * source_coverage +
-                0.3 * consistency +
-                0.2 * data_freshness +
-                0.1 * source_credibility
+                0.4 * source_coverage
+                + 0.3 * consistency
+                + 0.2 * data_freshness
+                + 0.1 * source_credibility
             )
 
             return max(0.0, min(1.0, confidence))
@@ -283,7 +317,7 @@ class NicheScorer:
                     feasibility_fit=0.0,
                     competition_proxy=0.0,
                     key_signals=[],
-                    recommendations=[]
+                    recommendations=[],
                 )
 
             # Group records by source
@@ -300,40 +334,66 @@ class NicheScorer:
             trend_momentum = 0.0
             if "Google Trends" in source_groups:
                 trend_records = source_groups["Google Trends"]
-                momentum_scores = [r.metrics.get("momentum_score", 0.0) for r in trend_records]
-                trend_momentum = sum(momentum_scores) / len(momentum_scores) if momentum_scores else 0.0
+                momentum_scores = [
+                    r.metrics.get("momentum_score", 0.0) for r in trend_records
+                ]
+                trend_momentum = (
+                    sum(momentum_scores) / len(momentum_scores)
+                    if momentum_scores
+                    else 0.0
+                )
 
             # GitHub velocity
             github_velocity = 0.0
             if "GitHub" in source_groups:
                 github_records = source_groups["GitHub"]
-                velocity_scores = [r.metrics.get("trending_score", 0.0) for r in github_records]
-                github_velocity = sum(velocity_scores) / len(velocity_scores) if velocity_scores else 0.0
+                velocity_scores = [
+                    r.metrics.get("trending_score", 0.0) for r in github_records
+                ]
+                github_velocity = (
+                    sum(velocity_scores) / len(velocity_scores)
+                    if velocity_scores
+                    else 0.0
+                )
 
             # Hacker News heat
             hackernews_heat = 0.0
             if "Hacker News" in source_groups:
                 hn_records = source_groups["Hacker News"]
                 heat_scores = [r.metrics.get("heat_score", 0.0) for r in hn_records]
-                hackernews_heat = sum(heat_scores) / len(heat_scores) if heat_scores else 0.0
+                hackernews_heat = (
+                    sum(heat_scores) / len(heat_scores) if heat_scores else 0.0
+                )
 
             # News delta
             news_delta = 0.0
-            if "News" in source_groups or any("News" in source for source in source_groups.keys()):
+            if "News" in source_groups or any(
+                "News" in source for source in source_groups.keys()
+            ):
                 news_records = []
                 for source, records_list in source_groups.items():
                     if "News" in source:
                         news_records.extend(records_list)
                 if news_records:
-                    delta_scores = [r.metrics.get("delta_score", 0.0) for r in news_records]
-                    news_delta = sum(delta_scores) / len(delta_scores) if delta_scores else 0.0
+                    delta_scores = [
+                        r.metrics.get("delta_score", 0.0) for r in news_records
+                    ]
+                    news_delta = (
+                        sum(delta_scores) / len(delta_scores) if delta_scores else 0.0
+                    )
 
             # Reddit engagement
             reddit_engagement = 0.0
             if "Reddit" in source_groups:
                 reddit_records = source_groups["Reddit"]
-                engagement_scores = [r.metrics.get("engagement_score", 0.0) for r in reddit_records]
-                reddit_engagement = sum(engagement_scores) / len(engagement_scores) if engagement_scores else 0.0
+                engagement_scores = [
+                    r.metrics.get("engagement_score", 0.0) for r in reddit_records
+                ]
+                reddit_engagement = (
+                    sum(engagement_scores) / len(engagement_scores)
+                    if engagement_scores
+                    else 0.0
+                )
 
             # Calculate feasibility fit and competition proxy
             feasibility_fit = self.calculate_feasibility_fit(topic, records)
@@ -341,13 +401,13 @@ class NicheScorer:
 
             # Calculate total score using weighted formula
             total_score = (
-                scoring_weights.get("trend_momentum", 0.20) * trend_momentum +
-                scoring_weights.get("github_velocity", 0.15) * github_velocity +
-                scoring_weights.get("hackernews_heat", 0.10) * hackernews_heat +
-                scoring_weights.get("news_delta", 0.10) * news_delta +
-                scoring_weights.get("reddit_engagement", 0.05) * reddit_engagement +
-                scoring_weights.get("feasibility_fit", 0.25) * feasibility_fit -
-                scoring_weights.get("competition_proxy", 0.15) * competition_proxy
+                scoring_weights.get("trend_momentum", 0.20) * trend_momentum
+                + scoring_weights.get("github_velocity", 0.15) * github_velocity
+                + scoring_weights.get("hackernews_heat", 0.10) * hackernews_heat
+                + scoring_weights.get("news_delta", 0.10) * news_delta
+                + scoring_weights.get("reddit_engagement", 0.05) * reddit_engagement
+                + scoring_weights.get("feasibility_fit", 0.25) * feasibility_fit
+                - scoring_weights.get("competition_proxy", 0.15) * competition_proxy
             )
 
             # Ensure score is in [0,1] range
@@ -364,7 +424,7 @@ class NicheScorer:
                 "news_delta": news_delta,
                 "reddit_engagement": reddit_engagement,
                 "feasibility_fit": feasibility_fit,
-                "competition_proxy": competition_proxy
+                "competition_proxy": competition_proxy,
             }
 
             # Identify key signals
@@ -411,7 +471,7 @@ class NicheScorer:
                 feasibility_fit=feasibility_fit,
                 competition_proxy=competition_proxy,
                 key_signals=key_signals,
-                recommendations=recommendations
+                recommendations=recommendations,
             )
 
         except Exception as e:
@@ -427,13 +487,15 @@ class NicheScorer:
                 feasibility_fit=0.0,
                 competition_proxy=0.0,
                 key_signals=[],
-                recommendations=[]
+                recommendations=[],
             )
+
 
 def calculate_confidence(records: list[NicheRecord]) -> float:
     """Standalone confidence calculation function"""
     scorer = NicheScorer()
     return scorer.calculate_confidence(records)
+
 
 if __name__ == "__main__":
     # Test scoring
@@ -450,7 +512,7 @@ if __name__ == "__main__":
             raw={},
             topic="ai_assistant",
             category="development",
-            confidence=0.9
+            confidence=0.9,
         ),
         NicheRecord(
             source="Hacker News",
@@ -461,8 +523,8 @@ if __name__ == "__main__":
             raw={},
             topic="ai_assistant",
             category="tech_news",
-            confidence=0.8
-        )
+            confidence=0.8,
+        ),
     ]
 
     scorer = NicheScorer()

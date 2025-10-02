@@ -25,6 +25,7 @@ router = APIRouter(prefix="/api/v1/privacy", tags=["privacy"])
 
 class DataExportRequest(BaseModel):
     """Request model for data export"""
+
     user_id: str
     format: str = "json"  # json, csv, xml
     include_metadata: bool = True
@@ -32,6 +33,7 @@ class DataExportRequest(BaseModel):
 
 class DataDeletionRequest(BaseModel):
     """Request model for data deletion"""
+
     user_id: str
     confirmation_token: str
     delete_all: bool = True
@@ -39,6 +41,7 @@ class DataDeletionRequest(BaseModel):
 
 class ConsentRequest(BaseModel):
     """Request model for consent management"""
+
     user_id: str
     consent_type: str  # data_collection, analytics, marketing
     granted: bool
@@ -59,7 +62,9 @@ class PrivacyManager:
         # Audit log
         self.audit_log = self.data_dir / "audit.log"
 
-    def export_user_data(self, user_id: str, format: str = "json", include_metadata: bool = True) -> dict[str, Any]:
+    def export_user_data(
+        self, user_id: str, format: str = "json", include_metadata: bool = True
+    ) -> dict[str, Any]:
         """Export all user data"""
         try:
             # Validate user ID
@@ -75,11 +80,15 @@ class PrivacyManager:
                     "export_timestamp": datetime.now().isoformat(),
                     "export_format": format,
                     "data_retention_days": self.retention_days,
-                    "user_id_hash": hashlib.sha256(user_id.encode()).hexdigest()[:16]
+                    "user_id_hash": hashlib.sha256(user_id.encode()).hexdigest()[:16],
                 }
 
             # Log export request
-            self._log_audit_event("data_export", user_id, {"format": format, "include_metadata": include_metadata})
+            self._log_audit_event(
+                "data_export",
+                user_id,
+                {"format": format, "include_metadata": include_metadata},
+            )
 
             return user_data
 
@@ -87,7 +96,9 @@ class PrivacyManager:
             logger.error(f"Error exporting data for user {user_id}: {e}")
             raise HTTPException(status_code=500, detail=f"Data export failed: {str(e)}")
 
-    def delete_user_data(self, user_id: str, confirmation_token: str, delete_all: bool = True) -> dict[str, Any]:
+    def delete_user_data(
+        self, user_id: str, confirmation_token: str, delete_all: bool = True
+    ) -> dict[str, Any]:
         """Delete user data"""
         try:
             # Validate user ID
@@ -102,23 +113,32 @@ class PrivacyManager:
             deleted_count = self._delete_user_data(user_id, delete_all)
 
             # Log deletion request
-            self._log_audit_event("data_deletion", user_id, {
-                "delete_all": delete_all,
-                "deleted_count": deleted_count
-            })
+            self._log_audit_event(
+                "data_deletion",
+                user_id,
+                {"delete_all": delete_all, "deleted_count": deleted_count},
+            )
 
             return {
                 "success": True,
                 "user_id": user_id,
                 "deleted_count": deleted_count,
-                "deletion_timestamp": datetime.now().isoformat()
+                "deletion_timestamp": datetime.now().isoformat(),
             }
 
         except Exception as e:
             logger.error(f"Error deleting data for user {user_id}: {e}")
-            raise HTTPException(status_code=500, detail=f"Data deletion failed: {str(e)}")
+            raise HTTPException(
+                status_code=500, detail=f"Data deletion failed: {str(e)}"
+            )
 
-    def update_consent(self, user_id: str, consent_type: str, granted: bool, timestamp: Optional[datetime] = None) -> dict[str, Any]:
+    def update_consent(
+        self,
+        user_id: str,
+        consent_type: str,
+        granted: bool,
+        timestamp: Optional[datetime] = None,
+    ) -> dict[str, Any]:
         """Update user consent"""
         try:
             # Validate user ID
@@ -131,29 +151,32 @@ class PrivacyManager:
                 "consent_type": consent_type,
                 "granted": granted,
                 "timestamp": timestamp or datetime.now(),
-                "updated_at": datetime.now()
+                "updated_at": datetime.now(),
             }
 
             # Store consent
             self._store_consent(consent_data)
 
             # Log consent update
-            self._log_audit_event("consent_update", user_id, {
-                "consent_type": consent_type,
-                "granted": granted
-            })
+            self._log_audit_event(
+                "consent_update",
+                user_id,
+                {"consent_type": consent_type, "granted": granted},
+            )
 
             return {
                 "success": True,
                 "user_id": user_id,
                 "consent_type": consent_type,
                 "granted": granted,
-                "timestamp": consent_data["timestamp"].isoformat()
+                "timestamp": consent_data["timestamp"].isoformat(),
             }
 
         except Exception as e:
             logger.error(f"Error updating consent for user {user_id}: {e}")
-            raise HTTPException(status_code=500, detail=f"Consent update failed: {str(e)}")
+            raise HTTPException(
+                status_code=500, detail=f"Consent update failed: {str(e)}"
+            )
 
     def _validate_user_id(self, user_id: str) -> bool:
         """Validate user ID format"""
@@ -161,7 +184,9 @@ class PrivacyManager:
             return False
 
         # Basic validation - alphanumeric and common separators
-        allowed_chars = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.")
+        allowed_chars = set(
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_."
+        )
         return all(c in allowed_chars for c in user_id)
 
     def _validate_confirmation_token(self, user_id: str, token: str) -> bool:
@@ -176,7 +201,7 @@ class PrivacyManager:
         user_data = {
             "user_id": user_id,
             "collected_at": datetime.now().isoformat(),
-            "data_sources": []
+            "data_sources": [],
         }
 
         # Collect from different data sources
@@ -184,7 +209,7 @@ class PrivacyManager:
             ("conversation_history", self._get_conversation_history),
             ("preferences", self._get_user_preferences),
             ("analytics", self._get_analytics_data),
-            ("audit_logs", self._get_audit_logs)
+            ("audit_logs", self._get_audit_logs),
         ]
 
         for source_name, collector_func in data_sources:
@@ -194,7 +219,9 @@ class PrivacyManager:
                     user_data[source_name] = data
                     user_data["data_sources"].append(source_name)
             except Exception as e:
-                logger.warning(f"Failed to collect {source_name} for user {user_id}: {e}")
+                logger.warning(
+                    f"Failed to collect {source_name} for user {user_id}: {e}"
+                )
                 user_data[source_name] = None
 
         return user_data
@@ -206,13 +233,13 @@ class PrivacyManager:
             {
                 "timestamp": "2025-01-26T10:00:00Z",
                 "message": "Hello, how can I help you?",
-                "type": "assistant"
+                "type": "assistant",
             },
             {
                 "timestamp": "2025-01-26T10:01:00Z",
                 "message": "I need help with my project",
-                "type": "user"
-            }
+                "type": "user",
+            },
         ]
 
     def _get_user_preferences(self, user_id: str) -> Optional[dict[str, Any]]:
@@ -222,7 +249,7 @@ class PrivacyManager:
             "language": "en",
             "theme": "dark",
             "notifications": True,
-            "privacy_mode": "balanced"
+            "privacy_mode": "balanced",
         }
 
     def _get_analytics_data(self, user_id: str) -> Optional[dict[str, Any]]:
@@ -231,11 +258,7 @@ class PrivacyManager:
         return {
             "total_interactions": 42,
             "last_active": "2025-01-26T10:00:00Z",
-            "feature_usage": {
-                "clarification": 15,
-                "suggestions": 8,
-                "multi_modal": 3
-            }
+            "feature_usage": {"clarification": 15, "suggestions": 8, "multi_modal": 3},
         }
 
     def _get_audit_logs(self, user_id: str) -> Optional[list[dict[str, Any]]]:
@@ -246,7 +269,7 @@ class PrivacyManager:
                 "timestamp": "2025-01-26T09:00:00Z",
                 "action": "login",
                 "ip_address": "192.168.1.1",
-                "user_agent": "Mozilla/5.0..."
+                "user_agent": "Mozilla/5.0...",
             }
         ]
 
@@ -259,16 +282,20 @@ class PrivacyManager:
             ("conversation_history", self._delete_conversation_history),
             ("preferences", self._delete_user_preferences),
             ("analytics", self._delete_analytics_data),
-            ("audit_logs", self._delete_audit_logs)
+            ("audit_logs", self._delete_audit_logs),
         ]
 
         for source_name, deleter_func in deletion_sources:
             try:
                 count = deleter_func(user_id, delete_all)
                 deleted_count += count
-                logger.info(f"Deleted {count} records from {source_name} for user {user_id}")
+                logger.info(
+                    f"Deleted {count} records from {source_name} for user {user_id}"
+                )
             except Exception as e:
-                logger.warning(f"Failed to delete {source_name} for user {user_id}: {e}")
+                logger.warning(
+                    f"Failed to delete {source_name} for user {user_id}: {e}"
+                )
 
         return deleted_count
 
@@ -296,7 +323,7 @@ class PrivacyManager:
         """Store consent data"""
         consent_file = self.data_dir / f"consent_{consent_data['user_id']}.json"
         try:
-            with open(consent_file, 'w') as f:
+            with open(consent_file, "w") as f:
                 json.dump(consent_data, f, indent=2, default=str)
         except Exception as e:
             logger.error(f"Error storing consent: {e}")
@@ -308,12 +335,12 @@ class PrivacyManager:
             "timestamp": datetime.now().isoformat(),
             "event_type": event_type,
             "user_id": user_id,
-            "details": details
+            "details": details,
         }
 
         try:
-            with open(self.audit_log, 'a') as f:
-                f.write(json.dumps(audit_entry) + '\n')
+            with open(self.audit_log, "a") as f:
+                f.write(json.dumps(audit_entry) + "\n")
         except Exception as e:
             logger.error(f"Error writing audit log: {e}")
 
@@ -329,15 +356,17 @@ async def export_user_data(request: DataExportRequest):
         user_data = privacy_manager.export_user_data(
             user_id=request.user_id,
             format=request.format,
-            include_metadata=request.include_metadata
+            include_metadata=request.include_metadata,
         )
 
-        return JSONResponse(content={
-            "success": True,
-            "data": user_data,
-            "format": request.format,
-            "exported_at": datetime.now().isoformat()
-        })
+        return JSONResponse(
+            content={
+                "success": True,
+                "data": user_data,
+                "format": request.format,
+                "exported_at": datetime.now().isoformat(),
+            }
+        )
 
     except Exception as e:
         logger.error(f"Export endpoint error: {e}")
@@ -351,7 +380,7 @@ async def delete_user_data(request: DataDeletionRequest):
         result = privacy_manager.delete_user_data(
             user_id=request.user_id,
             confirmation_token=request.confirmation_token,
-            delete_all=request.delete_all
+            delete_all=request.delete_all,
         )
 
         return JSONResponse(content=result)
@@ -369,7 +398,7 @@ async def update_consent(request: ConsentRequest):
             user_id=request.user_id,
             consent_type=request.consent_type,
             granted=request.granted,
-            timestamp=request.timestamp
+            timestamp=request.timestamp,
         )
 
         return JSONResponse(content=result)
@@ -391,12 +420,14 @@ async def get_privacy_status(user_id: str):
             with open(consent_file) as f:
                 consent_status = json.load(f)
 
-        return JSONResponse(content={
-            "user_id": user_id,
-            "consent_status": consent_status,
-            "data_retention_days": privacy_manager.retention_days,
-            "last_updated": datetime.now().isoformat()
-        })
+        return JSONResponse(
+            content={
+                "user_id": user_id,
+                "consent_status": consent_status,
+                "data_retention_days": privacy_manager.retention_days,
+                "last_updated": datetime.now().isoformat(),
+            }
+        )
 
     except Exception as e:
         logger.error(f"Privacy status endpoint error: {e}")
@@ -406,9 +437,11 @@ async def get_privacy_status(user_id: str):
 @router.get("/health")
 async def privacy_health_check():
     """Health check for privacy endpoints"""
-    return JSONResponse(content={
-        "status": "healthy",
-        "service": "privacy-api",
-        "timestamp": datetime.now().isoformat(),
-        "version": "1.0.0"
-    })
+    return JSONResponse(
+        content={
+            "status": "healthy",
+            "service": "privacy-api",
+            "timestamp": datetime.now().isoformat(),
+            "version": "1.0.0",
+        }
+    )

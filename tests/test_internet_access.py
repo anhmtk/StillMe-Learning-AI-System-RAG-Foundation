@@ -3,6 +3,7 @@
 StillMe Internet Access Test Suite
 Test cases cho tính năng truy cập internet có kiểm soát
 """
+
 import asyncio
 import sys
 from pathlib import Path
@@ -57,7 +58,7 @@ class TestInternetAccess:
         allowed_urls = [
             "https://api.github.com/search/repositories",
             "https://newsapi.org/v2/everything",
-            "https://gnews.io/api/v4/search"
+            "https://gnews.io/api/v4/search",
         ]
 
         for url in allowed_urls:
@@ -68,7 +69,7 @@ class TestInternetAccess:
         # Test blocked domains
         blocked_urls = [
             "https://malicious-site.com/evil",
-            "https://phishing-site.net/steal"
+            "https://phishing-site.net/steal",
         ]
 
         for url in blocked_urls:
@@ -124,8 +125,11 @@ class TestInternetAccess:
             "url": "https://example.com",
             "articles": [
                 {"title": "Safe article", "content": "Clean content"},
-                {"title": "Dangerous article", "content": "<script>alert('XSS')</script>"}
-            ]
+                {
+                    "title": "Dangerous article",
+                    "content": "<script>alert('XSS')</script>",
+                },
+            ],
         }
         result = content_filter.filter_json_response(json_data, "test")
         assert result["success"]
@@ -149,9 +153,13 @@ class TestInternetAccess:
         if result["success"]:
             assert "data" in result
             assert "articles" in result["data"]
-            print(f"✅ News search successful: {len(result['data']['articles'])} articles")
+            print(
+                f"✅ News search successful: {len(result['data']['articles'])} articles"
+            )
         else:
-            print(f"ℹ️  News search failed (expected if no API keys): {result.get('error', 'Unknown error')}")
+            print(
+                f"ℹ️  News search failed (expected if no API keys): {result.get('error', 'Unknown error')}"
+            )
 
     @pytest.mark.asyncio
     async def test_market_intelligence_github(self):
@@ -168,9 +176,13 @@ class TestInternetAccess:
         if result["success"]:
             assert "data" in result
             assert "repositories" in result["data"]
-            print(f"✅ GitHub trending successful: {len(result['data']['repositories'])} repositories")
+            print(
+                f"✅ GitHub trending successful: {len(result['data']['repositories'])} repositories"
+            )
         else:
-            print(f"ℹ️  GitHub trending failed (expected if no API keys): {result.get('error', 'Unknown error')}")
+            print(
+                f"ℹ️  GitHub trending failed (expected if no API keys): {result.get('error', 'Unknown error')}"
+            )
 
     @pytest.mark.asyncio
     async def test_market_intelligence_hackernews(self):
@@ -187,9 +199,13 @@ class TestInternetAccess:
         if result["success"]:
             assert "data" in result
             assert "stories" in result["data"]
-            print(f"✅ Hacker News successful: {len(result['data']['stories'])} stories")
+            print(
+                f"✅ Hacker News successful: {len(result['data']['stories'])} stories"
+            )
         else:
-            print(f"ℹ️  Hacker News failed (expected if no API keys): {result.get('error', 'Unknown error')}")
+            print(
+                f"ℹ️  Hacker News failed (expected if no API keys): {result.get('error', 'Unknown error')}"
+            )
 
     @pytest.mark.asyncio
     async def test_web_request_processing(self):
@@ -200,7 +216,7 @@ class TestInternetAccess:
         test_cases = [
             ("news", "Tin tức AI hôm nay"),
             ("github_trending", "GitHub trending repositories"),
-            ("hackernews", "Hacker News trending")
+            ("hackernews", "Hacker News trending"),
         ]
 
         for request_type, query in test_cases:
@@ -226,13 +242,15 @@ class TestInternetAccess:
                         "name": "test-repo",
                         "description": "A test repository",
                         "stars": 100,
-                        "language": "Python"
+                        "language": "Python",
                     }
                 ]
             }
 
             # 3. Filter content
-            filtered_result = content_filter.filter_json_response(web_data, "integration_test")
+            filtered_result = content_filter.filter_json_response(
+                web_data, "integration_test"
+            )
             assert filtered_result["success"]
 
             print("✅ Integration flow test passed")
@@ -244,11 +262,7 @@ class TestInternetAccess:
         print("\n🧪 Testing error handling...")
 
         # Test with invalid URLs
-        invalid_urls = [
-            "not-a-url",
-            "ftp://malicious.com",
-            "javascript:alert('xss')"
-        ]
+        invalid_urls = ["not-a-url", "ftp://malicious.com", "javascript:alert('xss')"]
 
         for url in invalid_urls:
             result = sandbox_controller.is_egress_allowed(url)
@@ -285,6 +299,7 @@ class TestInternetAccess:
 
         print("✅ Statistics collection tests passed")
 
+
 def test_main():
     """Main test function"""
     print("🚀 StillMe Internet Access Test Suite")
@@ -300,7 +315,7 @@ def test_main():
         "test_content_integrity_filter",
         "test_integration_flow",
         "test_error_handling",
-        "test_statistics"
+        "test_statistics",
     ]
 
     for method_name in test_methods:
@@ -319,7 +334,7 @@ def test_main():
             "test_market_intelligence_news",
             "test_market_intelligence_github",
             "test_market_intelligence_hackernews",
-            "test_web_request_processing"
+            "test_web_request_processing",
         ]
 
         for method_name in async_methods:
@@ -338,6 +353,7 @@ def test_main():
     print("\n" + "=" * 60)
     print("🎉 All tests passed! Internet access is working correctly.")
     print("=" * 60)
+
 
 if __name__ == "__main__":
     test_main()

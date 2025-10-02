@@ -12,15 +12,18 @@ class PlanStatus(Enum):
     FAILED = "failed"
     CANCELLED = "cancelled"
 
+
 class PlanPriority(Enum):
     LOW = 1
     MEDIUM = 5
     HIGH = 8
     CRITICAL = 10
 
+
 @dataclass
 class PlanStep:
     """Single step in a plan"""
+
     id: str
     action: str
     parameters: dict[str, Any]
@@ -32,9 +35,11 @@ class PlanStep:
         if self.dependencies is None:
             self.dependencies = []
 
+
 @dataclass
 class PlanItem:
     """Complete plan item"""
+
     id: str
     title: str
     description: str
@@ -44,7 +49,7 @@ class PlanItem:
     created_at: Optional[str] = None
     updated_at: Optional[str] = None
     metadata: dict[str, Any] = None
-    
+
     # Additional attributes for AgentDev compatibility
     patch: Optional[str] = None
     action: Optional[str] = None
@@ -56,9 +61,11 @@ class PlanItem:
         if self.metadata is None:
             self.metadata = {}
 
+
 @dataclass
 class ExecutionResult:
     """Result of plan execution"""
+
     plan_id: str
     step_id: str
     success: bool

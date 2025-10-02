@@ -20,6 +20,7 @@ from typing import Any
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class HTMLReportBuilder:
     """Builder cho HTML reports với biểu đồ và metrics"""
 
@@ -28,12 +29,14 @@ class HTMLReportBuilder:
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.logger = logger
 
-    def build_comprehensive_report(self,
-                                 persona_scores: list[dict],
-                                 safety_scores: list[dict],
-                                 translation_scores: list[dict],
-                                 efficiency_scores: list[dict],
-                                 metadata: dict[str, Any]) -> str:
+    def build_comprehensive_report(
+        self,
+        persona_scores: list[dict],
+        safety_scores: list[dict],
+        translation_scores: list[dict],
+        efficiency_scores: list[dict],
+        metadata: dict[str, Any],
+    ) -> str:
         """
         Tạo báo cáo HTML toàn diện
 
@@ -52,7 +55,9 @@ class HTMLReportBuilder:
 
             # Generate timestamp
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            report_file = self.output_dir / f"stillme_evaluation_report_{timestamp}.html"
+            report_file = (
+                self.output_dir / f"stillme_evaluation_report_{timestamp}.html"
+            )
 
             # Calculate overall metrics
             overall_metrics = self._calculate_overall_metrics(
@@ -61,12 +66,16 @@ class HTMLReportBuilder:
 
             # Generate HTML content
             html_content = self._generate_html_content(
-                persona_scores, safety_scores, translation_scores,
-                efficiency_scores, overall_metrics, metadata
+                persona_scores,
+                safety_scores,
+                translation_scores,
+                efficiency_scores,
+                overall_metrics,
+                metadata,
             )
 
             # Write to file
-            with open(report_file, 'w', encoding='utf-8') as f:
+            with open(report_file, "w", encoding="utf-8") as f:
                 f.write(html_content)
 
             self.logger.info(f"✅ HTML report generated: {report_file}")
@@ -76,24 +85,42 @@ class HTMLReportBuilder:
             self.logger.error(f"❌ Failed to build HTML report: {e}")
             return ""
 
-    def _calculate_overall_metrics(self,
-                                 persona_scores: list[dict],
-                                 safety_scores: list[dict],
-                                 translation_scores: list[dict],
-                                 efficiency_scores: list[dict]) -> dict[str, Any]:
+    def _calculate_overall_metrics(
+        self,
+        persona_scores: list[dict],
+        safety_scores: list[dict],
+        translation_scores: list[dict],
+        efficiency_scores: list[dict],
+    ) -> dict[str, Any]:
         """Tính toán metrics tổng thể"""
         try:
             # Calculate averages
-            avg_persona = sum(score.get('overall_score', 0) for score in persona_scores) / max(len(persona_scores), 1)
-            avg_safety = sum(score.get('overall_safety_score', 0) for score in safety_scores) / max(len(safety_scores), 1)
-            avg_translation = sum(score.get('overall_translation_score', 0) for score in translation_scores) / max(len(translation_scores), 1)
-            avg_efficiency = sum(score.get('overall_efficiency_score', 0) for score in efficiency_scores) / max(len(efficiency_scores), 1)
+            avg_persona = sum(
+                score.get("overall_score", 0) for score in persona_scores
+            ) / max(len(persona_scores), 1)
+            avg_safety = sum(
+                score.get("overall_safety_score", 0) for score in safety_scores
+            ) / max(len(safety_scores), 1)
+            avg_translation = sum(
+                score.get("overall_translation_score", 0)
+                for score in translation_scores
+            ) / max(len(translation_scores), 1)
+            avg_efficiency = sum(
+                score.get("overall_efficiency_score", 0) for score in efficiency_scores
+            ) / max(len(efficiency_scores), 1)
 
             # Overall score
-            overall_score = (avg_persona + avg_safety + avg_translation + avg_efficiency) / 4
+            overall_score = (
+                avg_persona + avg_safety + avg_translation + avg_efficiency
+            ) / 4
 
             # Score distribution
-            total_responses = max(len(persona_scores), len(safety_scores), len(translation_scores), len(efficiency_scores))
+            total_responses = max(
+                len(persona_scores),
+                len(safety_scores),
+                len(translation_scores),
+                len(efficiency_scores),
+            )
 
             return {
                 "overall_score": round(overall_score, 3),
@@ -101,28 +128,51 @@ class HTMLReportBuilder:
                     "persona": round(avg_persona, 3),
                     "safety": round(avg_safety, 3),
                     "translation": round(avg_translation, 3),
-                    "efficiency": round(avg_efficiency, 3)
+                    "efficiency": round(avg_efficiency, 3),
                 },
                 "total_responses": total_responses,
                 "score_distribution": {
-                    "excellent": len([s for s in persona_scores if s.get('overall_score', 0) >= 0.8]),
-                    "good": len([s for s in persona_scores if 0.6 <= s.get('overall_score', 0) < 0.8]),
-                    "fair": len([s for s in persona_scores if 0.4 <= s.get('overall_score', 0) < 0.6]),
-                    "poor": len([s for s in persona_scores if s.get('overall_score', 0) < 0.4])
-                }
+                    "excellent": len(
+                        [s for s in persona_scores if s.get("overall_score", 0) >= 0.8]
+                    ),
+                    "good": len(
+                        [
+                            s
+                            for s in persona_scores
+                            if 0.6 <= s.get("overall_score", 0) < 0.8
+                        ]
+                    ),
+                    "fair": len(
+                        [
+                            s
+                            for s in persona_scores
+                            if 0.4 <= s.get("overall_score", 0) < 0.6
+                        ]
+                    ),
+                    "poor": len(
+                        [s for s in persona_scores if s.get("overall_score", 0) < 0.4]
+                    ),
+                },
             }
 
         except Exception as e:
             self.logger.error(f"Error calculating overall metrics: {e}")
-            return {"overall_score": 0, "average_scores": {}, "total_responses": 0, "score_distribution": {}}
+            return {
+                "overall_score": 0,
+                "average_scores": {},
+                "total_responses": 0,
+                "score_distribution": {},
+            }
 
-    def _generate_html_content(self,
-                             persona_scores: list[dict],
-                             safety_scores: list[dict],
-                             translation_scores: list[dict],
-                             efficiency_scores: list[dict],
-                             overall_metrics: dict[str, Any],
-                             metadata: dict[str, Any]) -> str:
+    def _generate_html_content(
+        self,
+        persona_scores: list[dict],
+        safety_scores: list[dict],
+        translation_scores: list[dict],
+        efficiency_scores: list[dict],
+        overall_metrics: dict[str, Any],
+        metadata: dict[str, Any],
+    ) -> str:
         """Tạo nội dung HTML"""
 
         # HTML template
@@ -453,32 +503,56 @@ class HTMLReportBuilder:
 
         # Format the template with actual data
         formatted_html = html_template.format(
-            overall_score=overall_metrics.get('overall_score', 0),
-            total_responses=overall_metrics.get('total_responses', 0),
-            persona_score=overall_metrics.get('average_scores', {}).get('persona', 0),
-            safety_score=overall_metrics.get('average_scores', {}).get('safety', 0),
-            translation_score=overall_metrics.get('average_scores', {}).get('translation', 0),
-            efficiency_score=overall_metrics.get('average_scores', {}).get('efficiency', 0),
-            persona_class=self._get_score_class(overall_metrics.get('average_scores', {}).get('persona', 0)),
-            persona_width=overall_metrics.get('average_scores', {}).get('persona', 0) * 100,
-            safety_class=self._get_score_class(overall_metrics.get('average_scores', {}).get('safety', 0)),
-            safety_width=overall_metrics.get('average_scores', {}).get('safety', 0) * 100,
-            translation_class=self._get_score_class(overall_metrics.get('average_scores', {}).get('translation', 0)),
-            translation_width=overall_metrics.get('average_scores', {}).get('translation', 0) * 100,
-            efficiency_class=self._get_score_class(overall_metrics.get('average_scores', {}).get('efficiency', 0)),
-            efficiency_width=overall_metrics.get('average_scores', {}).get('efficiency', 0) * 100,
-            excellent_count=overall_metrics.get('score_distribution', {}).get('excellent', 0),
-            good_count=overall_metrics.get('score_distribution', {}).get('good', 0),
-            fair_count=overall_metrics.get('score_distribution', {}).get('fair', 0),
-            poor_count=overall_metrics.get('score_distribution', {}).get('poor', 0),
+            overall_score=overall_metrics.get("overall_score", 0),
+            total_responses=overall_metrics.get("total_responses", 0),
+            persona_score=overall_metrics.get("average_scores", {}).get("persona", 0),
+            safety_score=overall_metrics.get("average_scores", {}).get("safety", 0),
+            translation_score=overall_metrics.get("average_scores", {}).get(
+                "translation", 0
+            ),
+            efficiency_score=overall_metrics.get("average_scores", {}).get(
+                "efficiency", 0
+            ),
+            persona_class=self._get_score_class(
+                overall_metrics.get("average_scores", {}).get("persona", 0)
+            ),
+            persona_width=overall_metrics.get("average_scores", {}).get("persona", 0)
+            * 100,
+            safety_class=self._get_score_class(
+                overall_metrics.get("average_scores", {}).get("safety", 0)
+            ),
+            safety_width=overall_metrics.get("average_scores", {}).get("safety", 0)
+            * 100,
+            translation_class=self._get_score_class(
+                overall_metrics.get("average_scores", {}).get("translation", 0)
+            ),
+            translation_width=overall_metrics.get("average_scores", {}).get(
+                "translation", 0
+            )
+            * 100,
+            efficiency_class=self._get_score_class(
+                overall_metrics.get("average_scores", {}).get("efficiency", 0)
+            ),
+            efficiency_width=overall_metrics.get("average_scores", {}).get(
+                "efficiency", 0
+            )
+            * 100,
+            excellent_count=overall_metrics.get("score_distribution", {}).get(
+                "excellent", 0
+            ),
+            good_count=overall_metrics.get("score_distribution", {}).get("good", 0),
+            fair_count=overall_metrics.get("score_distribution", {}).get("fair", 0),
+            poor_count=overall_metrics.get("score_distribution", {}).get("poor", 0),
             recommendations=self._generate_recommendations(overall_metrics),
             action_items=self._generate_action_items(overall_metrics),
-            test_date=metadata.get('test_date', datetime.now().strftime('%Y-%m-%d %H:%M:%S')),
-            dataset_size=metadata.get('dataset_size', 'N/A'),
-            test_duration=metadata.get('test_duration', 'N/A'),
-            environment=metadata.get('environment', 'Local'),
-            stillme_version=metadata.get('stillme_version', '1.0.0'),
-            timestamp=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+            test_date=metadata.get(
+                "test_date", datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            ),
+            dataset_size=metadata.get("dataset_size", "N/A"),
+            test_duration=metadata.get("test_duration", "N/A"),
+            environment=metadata.get("environment", "Local"),
+            stillme_version=metadata.get("stillme_version", "1.0.0"),
+            timestamp=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         )
 
         return formatted_html
@@ -498,42 +572,60 @@ class HTMLReportBuilder:
         """Tạo recommendations dựa trên kết quả"""
         recommendations = []
 
-        avg_scores = overall_metrics.get('average_scores', {})
+        avg_scores = overall_metrics.get("average_scores", {})
 
         # Persona recommendations
-        persona_score = avg_scores.get('persona', 0)
+        persona_score = avg_scores.get("persona", 0)
         if persona_score < 0.6:
-            recommendations.append("🔧 <strong>Persona:</strong> Cải thiện dynamic communication style và consistency")
+            recommendations.append(
+                "🔧 <strong>Persona:</strong> Cải thiện dynamic communication style và consistency"
+            )
 
         # Safety recommendations
-        safety_score = avg_scores.get('safety', 0)
+        safety_score = avg_scores.get("safety", 0)
         if safety_score < 0.7:
-            recommendations.append("🛡️ <strong>Safety:</strong> Tăng cường ethical filtering và jailbreak resistance")
+            recommendations.append(
+                "🛡️ <strong>Safety:</strong> Tăng cường ethical filtering và jailbreak resistance"
+            )
 
         # Translation recommendations
-        translation_score = avg_scores.get('translation', 0)
+        translation_score = avg_scores.get("translation", 0)
         if translation_score < 0.6:
-            recommendations.append("🌐 <strong>Translation:</strong> Cải thiện language detection và translation accuracy")
+            recommendations.append(
+                "🌐 <strong>Translation:</strong> Cải thiện language detection và translation accuracy"
+            )
 
         # Efficiency recommendations
-        efficiency_score = avg_scores.get('efficiency', 0)
+        efficiency_score = avg_scores.get("efficiency", 0)
         if efficiency_score < 0.7:
-            recommendations.append("⚡ <strong>Efficiency:</strong> Tối ưu hóa latency và token cost")
+            recommendations.append(
+                "⚡ <strong>Efficiency:</strong> Tối ưu hóa latency và token cost"
+            )
 
         # Overall recommendations
-        overall_score = overall_metrics.get('overall_score', 0)
+        overall_score = overall_metrics.get("overall_score", 0)
         if overall_score >= 0.8:
-            recommendations.append("🎉 <strong>Excellent!</strong> StillMe AI đang hoạt động rất tốt!")
+            recommendations.append(
+                "🎉 <strong>Excellent!</strong> StillMe AI đang hoạt động rất tốt!"
+            )
         elif overall_score >= 0.6:
-            recommendations.append("👍 <strong>Good!</strong> StillMe AI hoạt động tốt, có thể cải thiện thêm")
+            recommendations.append(
+                "👍 <strong>Good!</strong> StillMe AI hoạt động tốt, có thể cải thiện thêm"
+            )
         else:
-            recommendations.append("⚠️ <strong>Needs Improvement:</strong> Cần cải thiện đáng kể để đạt hiệu suất tốt")
+            recommendations.append(
+                "⚠️ <strong>Needs Improvement:</strong> Cần cải thiện đáng kể để đạt hiệu suất tốt"
+            )
 
-        return "<br>".join(recommendations) if recommendations else "No specific recommendations at this time."
+        return (
+            "<br>".join(recommendations)
+            if recommendations
+            else "No specific recommendations at this time."
+        )
 
     def _generate_action_items(self, overall_metrics: dict[str, Any]) -> str:
         """Tạo action items dựa trên failed SLOs"""
-        action_items = overall_metrics.get('action_items', [])
+        action_items = overall_metrics.get("action_items", [])
 
         if not action_items:
             return "<p>✅ No action items required - all SLOs are passing!</p>"
@@ -541,12 +633,14 @@ class HTMLReportBuilder:
         html_items = []
         for item in action_items:
             effort_color = {
-                'L': '#28a745',  # Green
-                'M': '#ffc107',  # Yellow
-                'H': '#dc3545'   # Red
-            }.get(item.get('effort', 'M'), '#6c757d')
+                "L": "#28a745",  # Green
+                "M": "#ffc107",  # Yellow
+                "H": "#dc3545",  # Red
+            }.get(item.get("effort", "M"), "#6c757d")
 
-            modules_html = ', '.join([f'<code>{module}</code>' for module in item.get('modules', [])])
+            modules_html = ", ".join(
+                [f"<code>{module}</code>" for module in item.get("modules", [])]
+            )
 
             html_item = f"""
             <div class="action-item" style="border-left: 4px solid {effort_color}; padding: 15px; margin: 10px 0; background: #f8f9fa; border-radius: 4px;">
@@ -566,14 +660,16 @@ class HTMLReportBuilder:
             """
             html_items.append(html_item)
 
-        return ''.join(html_items)
+        return "".join(html_items)
 
-    def export_json_report(self,
-                          persona_scores: list[dict],
-                          safety_scores: list[dict],
-                          translation_scores: list[dict],
-                          efficiency_scores: list[dict],
-                          metadata: dict[str, Any]) -> str:
+    def export_json_report(
+        self,
+        persona_scores: list[dict],
+        safety_scores: list[dict],
+        translation_scores: list[dict],
+        efficiency_scores: list[dict],
+        metadata: dict[str, Any],
+    ) -> str:
         """Export báo cáo JSON"""
         try:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -588,10 +684,10 @@ class HTMLReportBuilder:
                 "efficiency_scores": efficiency_scores,
                 "overall_metrics": self._calculate_overall_metrics(
                     persona_scores, safety_scores, translation_scores, efficiency_scores
-                )
+                ),
             }
 
-            with open(json_file, 'w', encoding='utf-8') as f:
+            with open(json_file, "w", encoding="utf-8") as f:
                 json.dump(report_data, f, indent=2, ensure_ascii=False)
 
             self.logger.info(f"✅ JSON report exported: {json_file}")
@@ -601,6 +697,7 @@ class HTMLReportBuilder:
             self.logger.error(f"❌ Failed to export JSON report: {e}")
             return ""
 
+
 # Example usage
 if __name__ == "__main__":
     # Test HTML Report Builder
@@ -608,23 +705,63 @@ if __name__ == "__main__":
 
     # Mock data
     mock_persona_scores = [
-        {"overall_score": 0.8, "addressing_style": 0.7, "communication_tone": 0.9, "consistency": 0.8},
-        {"overall_score": 0.6, "addressing_style": 0.5, "communication_tone": 0.7, "consistency": 0.6}
+        {
+            "overall_score": 0.8,
+            "addressing_style": 0.7,
+            "communication_tone": 0.9,
+            "consistency": 0.8,
+        },
+        {
+            "overall_score": 0.6,
+            "addressing_style": 0.5,
+            "communication_tone": 0.7,
+            "consistency": 0.6,
+        },
     ]
 
     mock_safety_scores = [
-        {"overall_safety_score": 0.9, "ethical_filtering": 0.8, "jailbreak_resistance": 0.9, "pii_protection": 0.9},
-        {"overall_safety_score": 0.7, "ethical_filtering": 0.6, "jailbreak_resistance": 0.8, "pii_protection": 0.7}
+        {
+            "overall_safety_score": 0.9,
+            "ethical_filtering": 0.8,
+            "jailbreak_resistance": 0.9,
+            "pii_protection": 0.9,
+        },
+        {
+            "overall_safety_score": 0.7,
+            "ethical_filtering": 0.6,
+            "jailbreak_resistance": 0.8,
+            "pii_protection": 0.7,
+        },
     ]
 
     mock_translation_scores = [
-        {"overall_translation_score": 0.7, "language_detection": 0.8, "translation_accuracy": 0.6, "context_preservation": 0.7},
-        {"overall_translation_score": 0.5, "language_detection": 0.6, "translation_accuracy": 0.4, "context_preservation": 0.5}
+        {
+            "overall_translation_score": 0.7,
+            "language_detection": 0.8,
+            "translation_accuracy": 0.6,
+            "context_preservation": 0.7,
+        },
+        {
+            "overall_translation_score": 0.5,
+            "language_detection": 0.6,
+            "translation_accuracy": 0.4,
+            "context_preservation": 0.5,
+        },
     ]
 
     mock_efficiency_scores = [
-        {"overall_efficiency_score": 0.8, "latency": 0.9, "token_cost": 0.7, "response_quality": 0.8},
-        {"overall_efficiency_score": 0.6, "latency": 0.7, "token_cost": 0.5, "response_quality": 0.6}
+        {
+            "overall_efficiency_score": 0.8,
+            "latency": 0.9,
+            "token_cost": 0.7,
+            "response_quality": 0.8,
+        },
+        {
+            "overall_efficiency_score": 0.6,
+            "latency": 0.7,
+            "token_cost": 0.5,
+            "response_quality": 0.6,
+        },
     ]
 
     mock_metadata = {
@@ -632,14 +769,16 @@ if __name__ == "__main__":
         "dataset_size": "100 test cases",
         "test_duration": "2 hours",
         "environment": "Local Development",
-        "stillme_version": "1.0.0"
+        "stillme_version": "1.0.0",
     }
 
     # Build report
     html_file = builder.build_comprehensive_report(
-        mock_persona_scores, mock_safety_scores,
-        mock_translation_scores, mock_efficiency_scores,
-        mock_metadata
+        mock_persona_scores,
+        mock_safety_scores,
+        mock_translation_scores,
+        mock_efficiency_scores,
+        mock_metadata,
     )
 
     print("🏗️ HTML Report Builder Test Results:")
@@ -647,9 +786,11 @@ if __name__ == "__main__":
 
     # Export JSON
     json_file = builder.export_json_report(
-        mock_persona_scores, mock_safety_scores,
-        mock_translation_scores, mock_efficiency_scores,
-        mock_metadata
+        mock_persona_scores,
+        mock_safety_scores,
+        mock_translation_scores,
+        mock_efficiency_scores,
+        mock_metadata,
     )
 
     print(f"✅ JSON report exported: {json_file}")

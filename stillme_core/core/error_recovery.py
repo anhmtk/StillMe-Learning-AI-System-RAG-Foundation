@@ -135,7 +135,10 @@ class CircuitBreaker:
         self.failure_count += 1
         self.last_failure_time = time.time()
 
-        if self.state == CircuitState.HALF_OPEN or self.failure_count >= self.config.failure_threshold:
+        if (
+            self.state == CircuitState.HALF_OPEN
+            or self.failure_count >= self.config.failure_threshold
+        ):
             self.state = CircuitState.OPEN
             self.next_attempt_time = time.time() + self.config.recovery_timeout
             logger.warning(f"Circuit breaker {self.name} is now OPEN")

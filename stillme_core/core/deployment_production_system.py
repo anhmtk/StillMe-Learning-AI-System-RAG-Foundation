@@ -16,18 +16,27 @@ import time
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Optional
 
 # Import all Phase 2 modules with proper typing
 if TYPE_CHECKING:
+    from stillme_core.autonomous_management_system import (
+        AutonomousManagementSystem as CoreAutonomousManagementSystem,
+    )
+    from stillme_core.learning_optimization_engine import (
+        LearningOptimizationEngine as CoreLearningOptimizationEngine,
+    )
+    from stillme_core.phase2_integration_testing import (
+        Phase2IntegrationTesting as CorePhase2IntegrationTesting,
+    )
+    from stillme_core.security_compliance_system import (
+        SecurityComplianceSystem as CoreSecurityComplianceSystem,
+    )
+
     from .autonomous_management_system import AutonomousManagementSystem
     from .learning_optimization_engine import LearningOptimizationEngine
     from .phase2_integration_testing import Phase2IntegrationTesting
     from .security_compliance_system import SecurityComplianceSystem
-    from stillme_core.autonomous_management_system import AutonomousManagementSystem as CoreAutonomousManagementSystem
-    from stillme_core.learning_optimization_engine import LearningOptimizationEngine as CoreLearningOptimizationEngine
-    from stillme_core.phase2_integration_testing import Phase2IntegrationTesting as CorePhase2IntegrationTesting
-    from stillme_core.security_compliance_system import SecurityComplianceSystem as CoreSecurityComplianceSystem
 
 # Runtime imports with fallback
 try:
@@ -37,10 +46,18 @@ try:
     from .security_compliance_system import SecurityComplianceSystem
 except ImportError:
     try:
-        from stillme_core.autonomous_management_system import AutonomousManagementSystem as CoreAutonomousManagementSystem
-        from stillme_core.learning_optimization_engine import LearningOptimizationEngine as CoreLearningOptimizationEngine
-        from stillme_core.phase2_integration_testing import Phase2IntegrationTesting as CorePhase2IntegrationTesting
-        from stillme_core.security_compliance_system import SecurityComplianceSystem as CoreSecurityComplianceSystem
+        from stillme_core.autonomous_management_system import (
+            AutonomousManagementSystem as CoreAutonomousManagementSystem,
+        )
+        from stillme_core.learning_optimization_engine import (
+            LearningOptimizationEngine as CoreLearningOptimizationEngine,
+        )
+        from stillme_core.phase2_integration_testing import (
+            Phase2IntegrationTesting as CorePhase2IntegrationTesting,
+        )
+        from stillme_core.security_compliance_system import (
+            SecurityComplianceSystem as CoreSecurityComplianceSystem,
+        )
     except ImportError:
         # Create mock classes for testing with proper typing
         class AutonomousManagementSystem:

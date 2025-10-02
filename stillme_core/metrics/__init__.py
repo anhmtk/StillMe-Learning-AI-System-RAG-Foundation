@@ -29,21 +29,18 @@ from .registry import MetricDefinition, MetricsRegistry, get_metrics_registry
 
 __all__ = [
     # Core components
-    'MetricsEmitter',
-    'Metric',
-    'get_metrics_emitter',
-
+    "MetricsEmitter",
+    "Metric",
+    "get_metrics_emitter",
     # Registry
-    'MetricsRegistry',
-    'MetricDefinition',
-    'get_metrics_registry',
-
+    "MetricsRegistry",
+    "MetricDefinition",
+    "get_metrics_registry",
     # Privacy
-    'PrivacyManager',
-    'PIIRedactor',
-    'get_privacy_manager',
-
+    "PrivacyManager",
+    "PIIRedactor",
+    "get_privacy_manager",
     # Queries
-    'MetricsQueries',
-    'get_metrics_queries',
+    "MetricsQueries",
+    "get_metrics_queries",
 ]

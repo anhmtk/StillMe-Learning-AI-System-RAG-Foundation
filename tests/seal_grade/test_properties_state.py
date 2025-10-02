@@ -30,7 +30,7 @@ class StatePropertyTests:
     @pytest.fixture
     async def state_store(self):
         """Create a temporary state store for testing"""
-        temp_db = tempfile.NamedTemporaryFile(delete=False, suffix='.db')
+        temp_db = tempfile.NamedTemporaryFile(delete=False, suffix=".db")
         temp_db.close()
 
         store = StateStore(temp_db.name)
@@ -43,12 +43,18 @@ class StatePropertyTests:
         Path(temp_db.name).unlink(missing_ok=True)
 
     @given(
-        job_id=st.text(min_size=1, max_size=50, alphabet=st.characters(whitelist_categories=('Lu', 'Ll', 'Nd', '_'))),
+        job_id=st.text(
+            min_size=1,
+            max_size=50,
+            alphabet=st.characters(whitelist_categories=("Lu", "Ll", "Nd", "_")),
+        ),
         name=st.text(min_size=1, max_size=100),
-        description=st.text(max_size=500)
+        description=st.text(max_size=500),
     )
     @settings(max_examples=100, deadline=5000)
-    async def test_job_creation_idempotency(self, state_store, job_id, name, description):
+    async def test_job_creation_idempotency(
+        self, state_store, job_id, name, description
+    ):
         """Test that creating the same job multiple times is idempotent"""
         # Create job first time
         job1 = await state_store.create_job(job_id, name, description)
@@ -67,10 +73,14 @@ class StatePropertyTests:
         job_id=st.text(min_size=1, max_size=50),
         step_id=st.text(min_size=1, max_size=50),
         step_name=st.text(min_size=1, max_size=100),
-        step_type=st.sampled_from(['code_generation', 'testing', 'review', 'deployment'])
+        step_type=st.sampled_from(
+            ["code_generation", "testing", "review", "deployment"]
+        ),
     )
     @settings(max_examples=100, deadline=5000)
-    async def test_step_creation_idempotency(self, state_store, job_id, step_id, step_name, step_type):
+    async def test_step_creation_idempotency(
+        self, state_store, job_id, step_id, step_name, step_type
+    ):
         """Test that creating the same step multiple times is idempotent"""
         # Create job first
         await state_store.create_job(job_id, "Test Job", "Test Description")
@@ -91,19 +101,25 @@ class StatePropertyTests:
     @given(
         job_id=st.text(min_size=1, max_size=50),
         checkpoint_id=st.text(min_size=1, max_size=50),
-        checkpoint_name=st.text(min_size=1, max_size=100)
+        checkpoint_name=st.text(min_size=1, max_size=100),
     )
     @settings(max_examples=100, deadline=5000)
-    async def test_checkpoint_creation_idempotency(self, state_store, job_id, checkpoint_id, checkpoint_name):
+    async def test_checkpoint_creation_idempotency(
+        self, state_store, job_id, checkpoint_id, checkpoint_name
+    ):
         """Test that creating the same checkpoint multiple times is idempotent"""
         # Create job first
         await state_store.create_job(job_id, "Test Job", "Test Description")
 
         # Create checkpoint first time
-        checkpoint1 = await state_store.create_checkpoint(job_id, checkpoint_id, checkpoint_name)
+        checkpoint1 = await state_store.create_checkpoint(
+            job_id, checkpoint_id, checkpoint_name
+        )
 
         # Create same checkpoint again
-        checkpoint2 = await state_store.create_checkpoint(job_id, checkpoint_id, checkpoint_name)
+        checkpoint2 = await state_store.create_checkpoint(
+            job_id, checkpoint_id, checkpoint_name
+        )
 
         # Should be identical
         assert checkpoint1.checkpoint_id == checkpoint2.checkpoint_id
@@ -115,19 +131,25 @@ class StatePropertyTests:
         job_id=st.text(min_size=1, max_size=50),
         artifact_id=st.text(min_size=1, max_size=50),
         artifact_name=st.text(min_size=1, max_size=100),
-        artifact_type=st.sampled_from(['file', 'directory', 'url', 'data'])
+        artifact_type=st.sampled_from(["file", "directory", "url", "data"]),
     )
     @settings(max_examples=100, deadline=5000)
-    async def test_artifact_creation_idempotency(self, state_store, job_id, artifact_id, artifact_name, artifact_type):
+    async def test_artifact_creation_idempotency(
+        self, state_store, job_id, artifact_id, artifact_name, artifact_type
+    ):
         """Test that creating the same artifact multiple times is idempotent"""
         # Create job first
         await state_store.create_job(job_id, "Test Job", "Test Description")
 
         # Create artifact first time
-        artifact1 = await state_store.store_artifact(job_id, artifact_id, artifact_name, artifact_type, "test_path")
+        artifact1 = await state_store.store_artifact(
+            job_id, artifact_id, artifact_name, artifact_type, "test_path"
+        )
 
         # Create same artifact again
-        artifact2 = await state_store.store_artifact(job_id, artifact_id, artifact_name, artifact_type, "test_path")
+        artifact2 = await state_store.store_artifact(
+            job_id, artifact_id, artifact_name, artifact_type, "test_path"
+        )
 
         # Should be identical
         assert artifact1.artifact_id == artifact2.artifact_id
@@ -138,7 +160,7 @@ class StatePropertyTests:
 
     @given(
         job_ids=st.lists(st.text(min_size=1, max_size=50), min_size=1, max_size=10),
-        names=st.lists(st.text(min_size=1, max_size=100), min_size=1, max_size=10)
+        names=st.lists(st.text(min_size=1, max_size=100), min_size=1, max_size=10),
     )
     @settings(max_examples=50, deadline=10000)
     async def test_bulk_job_creation_commutativity(self, state_store, job_ids, names):
@@ -165,10 +187,16 @@ class StatePropertyTests:
     @given(
         job_id=st.text(min_size=1, max_size=50),
         step_count=st.integers(min_value=1, max_value=20),
-        step_types=st.lists(st.sampled_from(['code_generation', 'testing', 'review', 'deployment']), min_size=1, max_size=20)
+        step_types=st.lists(
+            st.sampled_from(["code_generation", "testing", "review", "deployment"]),
+            min_size=1,
+            max_size=20,
+        ),
     )
     @settings(max_examples=50, deadline=10000)
-    async def test_step_ordering_consistency(self, state_store, job_id, step_count, step_types):
+    async def test_step_ordering_consistency(
+        self, state_store, job_id, step_count, step_types
+    ):
         """Test that step ordering is consistent regardless of creation order"""
         # Create job
         await state_store.create_job(job_id, "Test Job", "Test Description")
@@ -177,14 +205,18 @@ class StatePropertyTests:
         steps_forward = []
         for i in range(step_count):
             step_type = step_types[i % len(step_types)]
-            step = await state_store.create_job_step(job_id, f"step_{i}", f"Step {i}", step_type)
+            step = await state_store.create_job_step(
+                job_id, f"step_{i}", f"Step {i}", step_type
+            )
             steps_forward.append(step)
 
         # Create steps in reverse order
         steps_reverse = []
         for i in reversed(range(step_count)):
             step_type = step_types[i % len(step_types)]
-            step = await state_store.create_job_step(job_id, f"step_{i}", f"Step {i}", step_type)
+            step = await state_store.create_job_step(
+                job_id, f"step_{i}", f"Step {i}", step_type
+            )
             steps_reverse.append(step)
 
         # Results should be identical
@@ -197,12 +229,22 @@ class StatePropertyTests:
     @given(
         job_id=st.text(min_size=1, max_size=50),
         status_transitions=st.lists(
-            st.sampled_from([JobStatus.PENDING, JobStatus.RUNNING, JobStatus.COMPLETED, JobStatus.FAILED]),
-            min_size=1, max_size=10
-        )
+            st.sampled_from(
+                [
+                    JobStatus.PENDING,
+                    JobStatus.RUNNING,
+                    JobStatus.COMPLETED,
+                    JobStatus.FAILED,
+                ]
+            ),
+            min_size=1,
+            max_size=10,
+        ),
     )
     @settings(max_examples=50, deadline=5000)
-    async def test_status_transition_consistency(self, state_store, job_id, status_transitions):
+    async def test_status_transition_consistency(
+        self, state_store, job_id, status_transitions
+    ):
         """Test that status transitions are consistent and valid"""
         # Create job
         await state_store.create_job(job_id, "Test Job", "Test Description")
@@ -220,10 +262,12 @@ class StatePropertyTests:
     @given(
         job_id=st.text(min_size=1, max_size=50),
         step_id=st.text(min_size=1, max_size=50),
-        error_messages=st.lists(st.text(max_size=200), min_size=1, max_size=5)
+        error_messages=st.lists(st.text(max_size=200), min_size=1, max_size=5),
     )
     @settings(max_examples=50, deadline=5000)
-    async def test_error_handling_consistency(self, state_store, job_id, step_id, error_messages):
+    async def test_error_handling_consistency(
+        self, state_store, job_id, step_id, error_messages
+    ):
         """Test that error handling is consistent"""
         # Create job and step
         await state_store.create_job(job_id, "Test Job", "Test Description")
@@ -231,7 +275,9 @@ class StatePropertyTests:
 
         # Apply multiple error messages
         for error_msg in error_messages:
-            await state_store.complete_job_step(job_id, step_id, success=False, error_message=error_msg)
+            await state_store.complete_job_step(
+                job_id, step_id, success=False, error_message=error_msg
+            )
             step = await state_store.get_job_step(job_id, step_id)
             assert step.status == StepStatus.FAILED
             assert step.error_message == error_msg
@@ -242,10 +288,12 @@ class StatePropertyTests:
 
     @given(
         job_id=st.text(min_size=1, max_size=50),
-        checkpoint_count=st.integers(min_value=1, max_value=10)
+        checkpoint_count=st.integers(min_value=1, max_value=10),
     )
     @settings(max_examples=50, deadline=5000)
-    async def test_checkpoint_ordering_consistency(self, state_store, job_id, checkpoint_count):
+    async def test_checkpoint_ordering_consistency(
+        self, state_store, job_id, checkpoint_count
+    ):
         """Test that checkpoint ordering is consistent"""
         # Create job
         await state_store.create_job(job_id, "Test Job", "Test Description")
@@ -253,7 +301,9 @@ class StatePropertyTests:
         # Create checkpoints
         checkpoints = []
         for i in range(checkpoint_count):
-            checkpoint = await state_store.create_checkpoint(job_id, f"checkpoint_{i}", f"Checkpoint {i}")
+            checkpoint = await state_store.create_checkpoint(
+                job_id, f"checkpoint_{i}", f"Checkpoint {i}"
+            )
             checkpoints.append(checkpoint)
 
         # Get all checkpoints for job
@@ -268,10 +318,16 @@ class StatePropertyTests:
     @given(
         job_id=st.text(min_size=1, max_size=50),
         artifact_count=st.integers(min_value=1, max_value=10),
-        artifact_types=st.lists(st.sampled_from(['file', 'directory', 'url', 'data']), min_size=1, max_size=10)
+        artifact_types=st.lists(
+            st.sampled_from(["file", "directory", "url", "data"]),
+            min_size=1,
+            max_size=10,
+        ),
     )
     @settings(max_examples=50, deadline=5000)
-    async def test_artifact_ordering_consistency(self, state_store, job_id, artifact_count, artifact_types):
+    async def test_artifact_ordering_consistency(
+        self, state_store, job_id, artifact_count, artifact_types
+    ):
         """Test that artifact ordering is consistent"""
         # Create job
         await state_store.create_job(job_id, "Test Job", "Test Description")
@@ -280,7 +336,9 @@ class StatePropertyTests:
         artifacts = []
         for i in range(artifact_count):
             artifact_type = artifact_types[i % len(artifact_types)]
-            artifact = await state_store.store_artifact(job_id, f"artifact_{i}", f"Artifact {i}", artifact_type, f"path_{i}")
+            artifact = await state_store.store_artifact(
+                job_id, f"artifact_{i}", f"Artifact {i}", artifact_type, f"path_{i}"
+            )
             artifacts.append(artifact)
 
         # Get all artifacts for job
@@ -296,10 +354,12 @@ class StatePropertyTests:
     @given(
         job_id=st.text(min_size=1, max_size=50),
         step_id=st.text(min_size=1, max_size=50),
-        execution_time=st.floats(min_value=0.001, max_value=10.0)
+        execution_time=st.floats(min_value=0.001, max_value=10.0),
     )
     @settings(max_examples=50, deadline=5000)
-    async def test_performance_consistency(self, state_store, job_id, step_id, execution_time):
+    async def test_performance_consistency(
+        self, state_store, job_id, step_id, execution_time
+    ):
         """Test that performance metrics are consistent"""
         # Create job and step
         await state_store.create_job(job_id, "Test Job", "Test Description")
@@ -307,7 +367,9 @@ class StatePropertyTests:
 
         # Complete step with execution time
         start_time = time.time()
-        await state_store.complete_job_step(job_id, step_id, success=True, execution_time=execution_time)
+        await state_store.complete_job_step(
+            job_id, step_id, success=True, execution_time=execution_time
+        )
         end_time = time.time()
 
         # Get step and verify metrics
@@ -323,7 +385,7 @@ class StatePropertyTests:
     @given(
         job_id=st.text(min_size=1, max_size=50),
         step_id=st.text(min_size=1, max_size=50),
-        retry_count=st.integers(min_value=0, max_value=5)
+        retry_count=st.integers(min_value=0, max_value=5),
     )
     @settings(max_examples=50, deadline=5000)
     async def test_retry_consistency(self, state_store, job_id, step_id, retry_count):
@@ -334,8 +396,12 @@ class StatePropertyTests:
 
         # Simulate retries
         for i in range(retry_count):
-            await state_store.complete_job_step(job_id, step_id, success=False, error_message=f"Retry {i}")
-            await state_store.update_job_step_status(job_id, step_id, StepStatus.PENDING)
+            await state_store.complete_job_step(
+                job_id, step_id, success=False, error_message=f"Retry {i}"
+            )
+            await state_store.update_job_step_status(
+                job_id, step_id, StepStatus.PENDING
+            )
 
         # Final completion
         await state_store.complete_job_step(job_id, step_id, success=True)
@@ -349,8 +415,10 @@ class StatePropertyTests:
         job_id=st.text(min_size=1, max_size=50),
         metadata=st.dictionaries(
             keys=st.text(min_size=1, max_size=20),
-            values=st.one_of(st.text(max_size=100), st.integers(), st.floats(), st.booleans())
-        )
+            values=st.one_of(
+                st.text(max_size=100), st.integers(), st.floats(), st.booleans()
+            ),
+        ),
     )
     @settings(max_examples=50, deadline=5000)
     async def test_metadata_consistency(self, state_store, job_id, metadata):
@@ -377,14 +445,14 @@ class StatePropertyTests:
 class StateMachineTests(RuleBasedStateMachine):
     """State machine tests for complex state transitions"""
 
-    jobs = Bundle('jobs')
-    steps = Bundle('steps')
-    checkpoints = Bundle('checkpoints')
-    artifacts = Bundle('artifacts')
+    jobs = Bundle("jobs")
+    steps = Bundle("steps")
+    checkpoints = Bundle("checkpoints")
+    artifacts = Bundle("artifacts")
 
     def __init__(self):
         super().__init__()
-        self.temp_db = tempfile.NamedTemporaryFile(delete=False, suffix='.db')
+        self.temp_db = tempfile.NamedTemporaryFile(delete=False, suffix=".db")
         self.temp_db.close()
         self.state_store = None
 
@@ -402,28 +470,50 @@ class StateMachineTests(RuleBasedStateMachine):
     @rule(target=jobs, job_id=st.text(min_size=1, max_size=50))
     async def create_job(self, job_id):
         """Create a job"""
-        job = await self.state_store.create_job(job_id, f"Job {job_id}", f"Description {job_id}")
+        job = await self.state_store.create_job(
+            job_id, f"Job {job_id}", f"Description {job_id}"
+        )
         return job
 
     @rule(job=jobs, step_id=st.text(min_size=1, max_size=50))
     async def create_step(self, job, step_id):
         """Create a step for a job"""
-        step = await self.state_store.create_job_step(job.job_id, step_id, f"Step {step_id}", "testing")
+        step = await self.state_store.create_job_step(
+            job.job_id, step_id, f"Step {step_id}", "testing"
+        )
         return step
 
     @rule(job=jobs, checkpoint_id=st.text(min_size=1, max_size=50))
     async def create_checkpoint(self, job, checkpoint_id):
         """Create a checkpoint for a job"""
-        checkpoint = await self.state_store.create_checkpoint(job.job_id, checkpoint_id, f"Checkpoint {checkpoint_id}")
+        checkpoint = await self.state_store.create_checkpoint(
+            job.job_id, checkpoint_id, f"Checkpoint {checkpoint_id}"
+        )
         return checkpoint
 
     @rule(job=jobs, artifact_id=st.text(min_size=1, max_size=50))
     async def create_artifact(self, job, artifact_id):
         """Create an artifact for a job"""
-        artifact = await self.state_store.store_artifact(job.job_id, artifact_id, f"Artifact {artifact_id}", "file", f"path_{artifact_id}")
+        artifact = await self.state_store.store_artifact(
+            job.job_id,
+            artifact_id,
+            f"Artifact {artifact_id}",
+            "file",
+            f"path_{artifact_id}",
+        )
         return artifact
 
-    @rule(job=jobs, status=st.sampled_from([JobStatus.PENDING, JobStatus.RUNNING, JobStatus.COMPLETED, JobStatus.FAILED]))
+    @rule(
+        job=jobs,
+        status=st.sampled_from(
+            [
+                JobStatus.PENDING,
+                JobStatus.RUNNING,
+                JobStatus.COMPLETED,
+                JobStatus.FAILED,
+            ]
+        ),
+    )
     async def update_job_status(self, job, status):
         """Update job status"""
         await self.state_store.update_job_status(job.job_id, status)
@@ -437,7 +527,9 @@ class StateMachineTests(RuleBasedStateMachine):
         try:
             await self.state_store.get_job_step(job.job_id, step_id)
         except:
-            await self.state_store.create_job_step(job.job_id, step_id, f"Step {step_id}", "testing")
+            await self.state_store.create_job_step(
+                job.job_id, step_id, f"Step {step_id}", "testing"
+            )
 
         # Complete step
         await self.state_store.complete_job_step(job.job_id, step_id, success=success)
@@ -448,7 +540,12 @@ class StateMachineTests(RuleBasedStateMachine):
         else:
             assert updated_step.status == StepStatus.FAILED
 
-    @rule(job=jobs, metadata=st.dictionaries(keys=st.text(max_size=10), values=st.text(max_size=50)))
+    @rule(
+        job=jobs,
+        metadata=st.dictionaries(
+            keys=st.text(max_size=10), values=st.text(max_size=50)
+        ),
+    )
     async def update_metadata(self, job, metadata):
         """Update job metadata"""
         await self.state_store.update_job_metadata(job.job_id, metadata)

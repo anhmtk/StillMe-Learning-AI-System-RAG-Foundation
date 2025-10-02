@@ -25,14 +25,14 @@ class PolicyLoader:
             "policies/FILE_PROTECTION.yaml",
             "policies/SECURITY_POLICY.yaml",
             "policies/CODE_QUALITY.yaml",
-            "policies/INTERACTION_POLICY.yaml"
+            "policies/INTERACTION_POLICY.yaml",
         ]
 
         for policy_file in policy_files:
             try:
                 policy_path = self.base_path / policy_file
                 if policy_path.exists():
-                    with open(policy_path, encoding='utf-8') as f:
+                    with open(policy_path, encoding="utf-8") as f:
                         policy_data = yaml.safe_load(f)
                         policy_name = policy_path.stem
                         self.policies[policy_name] = policy_data
@@ -90,8 +90,10 @@ class PolicyLoader:
         """Get code quality rules"""
         return self.get_policy("CODE_QUALITY") or {}
 
+
 # Global policy loader instance
 _policy_loader = None
+
 
 def load_policies() -> PolicyLoader:
     """Load all policies (singleton pattern)"""
@@ -103,20 +105,24 @@ def load_policies() -> PolicyLoader:
             raise RuntimeError("Policy validation failed")
     return _policy_loader
 
+
 def get_policy(policy_name: str) -> Optional[dict[str, Any]]:
     """Get specific policy"""
     loader = load_policies()
     return loader.get_policy(policy_name)
+
 
 def check_file_protection(file_path: str) -> bool:
     """Check if file is protected"""
     loader = load_policies()
     return loader.check_file_protection(file_path)
 
+
 def check_security_policy(action: str, context: dict[str, Any]) -> bool:
     """Check security policy compliance"""
     loader = load_policies()
     return loader.check_security_policy(action, context)
+
 
 # Test function
 if __name__ == "__main__":

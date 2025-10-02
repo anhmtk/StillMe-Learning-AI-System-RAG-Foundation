@@ -13,11 +13,13 @@ class ApprovalStatus(Enum):
     APPROVED = "approved"
     REJECTED = "rejected"
 
+
 class ApprovalPriority(Enum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
+
 
 class ContentType(Enum):
     TEXT = "text"
@@ -25,23 +27,28 @@ class ContentType(Enum):
     CONFIG = "config"
     DOCUMENTATION = "documentation"
 
+
 @dataclass
 class ApprovalConfig:
     """Approval configuration"""
+
     auto_approve_threshold: float = 0.9
     require_human_approval: bool = True
     max_pending_requests: int = 100
     approval_timeout_hours: int = 24
 
+
 @dataclass
 class ApprovalRequest:
     """Approval request"""
+
     id: str
     content: str
     content_type: ContentType
     priority: ApprovalPriority
     status: ApprovalStatus = ApprovalStatus.PENDING
     metadata: dict[str, Any] = None
+
 
 class ApprovalSystem:
     """Approval system stub implementation"""
@@ -55,7 +62,7 @@ class ApprovalSystem:
         content: str,
         content_type: ContentType = ContentType.TEXT,
         priority: ApprovalPriority = ApprovalPriority.MEDIUM,
-        metadata: dict[str, Any] = None
+        metadata: dict[str, Any] = None,
     ) -> str:
         """Submit content for approval"""
         request_id = f"req_{len(self.requests)}"
@@ -64,7 +71,7 @@ class ApprovalSystem:
             content=content,
             content_type=content_type,
             priority=priority,
-            metadata=metadata or {}
+            metadata=metadata or {},
         )
         self.requests.append(request)
         return request_id
@@ -102,7 +109,7 @@ class ApprovalSystem:
             "total": len(self.requests),
             "pending": 0,
             "approved": 0,
-            "rejected": 0
+            "rejected": 0,
         }
         for req in self.requests:
             if req.status == ApprovalStatus.PENDING:
@@ -113,8 +120,10 @@ class ApprovalSystem:
                 stats["rejected"] += 1
         return stats
 
+
 # Global instance
 _approval_system = None
+
 
 def get_approval_system() -> ApprovalSystem:
     """Get approval system instance"""
@@ -123,12 +132,13 @@ def get_approval_system() -> ApprovalSystem:
         _approval_system = ApprovalSystem()
     return _approval_system
 
+
 __all__ = [
-    'ApprovalStatus',
-    'ApprovalPriority',
-    'ContentType',
-    'ApprovalConfig',
-    'ApprovalRequest',
-    'ApprovalSystem',
-    'get_approval_system'
+    "ApprovalStatus",
+    "ApprovalPriority",
+    "ContentType",
+    "ApprovalConfig",
+    "ApprovalRequest",
+    "ApprovalSystem",
+    "get_approval_system",
 ]

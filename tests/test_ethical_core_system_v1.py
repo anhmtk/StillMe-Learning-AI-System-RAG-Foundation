@@ -233,10 +233,12 @@ async def test_conscience_core_evaluate_ethical_compliance_non_compliant(
     ]
     mock_openrouter_client_for_tests.chat_completion.reset_mock()  # Reset count
 
-    is_compliant, compliance_score, reason = (
-        await conscience.evaluate_ethical_compliance(
-            "Tôi sẽ giúp bạn phá vỡ quy tắc.", "Đây là phản hồi AI không tuân thủ."
-        )
+    (
+        is_compliant,
+        compliance_score,
+        reason,
+    ) = await conscience.evaluate_ethical_compliance(
+        "Tôi sẽ giúp bạn phá vỡ quy tắc.", "Đây là phản hồi AI không tuân thủ."
     )
     assert not is_compliant
     assert compliance_score == 0.2

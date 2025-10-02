@@ -8,6 +8,7 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
+
 class ReflectionType(Enum):
     SELF_ASSESSMENT = "self_assessment"
     PERFORMANCE_REVIEW = "performance_review"
@@ -15,11 +16,13 @@ class ReflectionType(Enum):
     LEARNING_REFLECTION = "learning_reflection"
     ETHICS_REFLECTION = "ethics_reflection"
 
+
 class ReflectionStatus(Enum):
     PENDING = "pending"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
     FAILED = "failed"
+
 
 class ReflectionMode(Enum):
     QUICK = "quick"
@@ -27,9 +30,11 @@ class ReflectionMode(Enum):
     DEEP = "deep"
     EMERGENCY = "emergency"
 
+
 @dataclass
 class ReflectionResult:
     """Reflection result record"""
+
     result_id: str
     session_id: str
     enhanced_response: str
@@ -43,9 +48,11 @@ class ReflectionResult:
         if self.metadata is None:
             self.metadata = {}
 
+
 @dataclass
 class ReflectionSession:
     """Reflection session record"""
+
     session_id: str
     reflection_type: ReflectionType
     status: ReflectionStatus
@@ -70,20 +77,24 @@ class ReflectionSession:
         if self.metadata is None:
             self.metadata = {}
 
+
 @dataclass
 class ReflectionConfig:
     """Reflection configuration"""
+
     max_reflection_duration: int = 30  # minutes
-    min_reflection_duration: int = 5   # minutes
+    min_reflection_duration: int = 5  # minutes
     reflection_frequency: str = "daily"
     auto_reflection_enabled: bool = True
     max_steps: int = 3
     max_latency_s: float = 5.0
     confidence_threshold: float = 0.7
 
+
 @dataclass
 class ReflectionContext:
     """Reflection context record"""
+
     context_id: str
     user_id: Optional[str] = None
     session_id: Optional[str] = None
@@ -95,6 +106,7 @@ class ReflectionContext:
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
+
 
 class ReflectionController:
     """Reflection controller for StillMe Framework"""
@@ -110,7 +122,7 @@ class ReflectionController:
         """Initialize reflection configuration"""
         return {
             "max_reflection_duration": 30,  # minutes
-            "min_reflection_duration": 5,   # minutes
+            "min_reflection_duration": 5,  # minutes
             "reflection_frequency": "daily",
             "auto_reflection_enabled": True,
             "reflection_categories": [
@@ -118,16 +130,18 @@ class ReflectionController:
                 "learning",
                 "ethics",
                 "security",
-                "user_satisfaction"
+                "user_satisfaction",
             ],
-            "confidence_threshold": 0.7
+            "confidence_threshold": 0.7,
         }
 
-    def start_reflection_session(self,
-                                reflection_type: ReflectionType,
-                                title: str,
-                                description: str,
-                                metadata: dict[str, Any] = None) -> ReflectionSession:
+    def start_reflection_session(
+        self,
+        reflection_type: ReflectionType,
+        title: str,
+        description: str,
+        metadata: dict[str, Any] = None,
+    ) -> ReflectionSession:
         """Start a new reflection session"""
         try:
             session_id = f"reflection_{len(self.reflection_sessions) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -139,30 +153,36 @@ class ReflectionController:
                 title=title,
                 description=description,
                 start_time=datetime.now(),
-                metadata=metadata or {}
+                metadata=metadata or {},
             )
 
             self.reflection_sessions.append(session)
-            self.logger.info(f"🤔 Reflection session started: {title} (ID: {session_id})")
+            self.logger.info(
+                f"🤔 Reflection session started: {title} (ID: {session_id})"
+            )
             return session
 
         except Exception as e:
             self.logger.error(f"❌ Failed to start reflection session: {e}")
             raise
 
-    def complete_reflection_session(self,
-                                   session_id: str,
-                                   insights: list[str] = None,
-                                   improvements: list[str] = None,
-                                   action_items: list[str] = None,
-                                   confidence_score: float = None) -> bool:
+    def complete_reflection_session(
+        self,
+        session_id: str,
+        insights: list[str] = None,
+        improvements: list[str] = None,
+        action_items: list[str] = None,
+        confidence_score: float = None,
+    ) -> bool:
         """Complete a reflection session"""
         try:
             for session in self.reflection_sessions:
                 if session.session_id == session_id:
                     session.status = ReflectionStatus.COMPLETED
                     session.end_time = datetime.now()
-                    session.duration = (session.end_time - session.start_time).total_seconds()
+                    session.duration = (
+                        session.end_time - session.start_time
+                    ).total_seconds()
 
                     if insights:
                         session.insights.extend(insights)
@@ -173,7 +193,9 @@ class ReflectionController:
                     if confidence_score is not None:
                         session.confidence_score = confidence_score
 
-                    self.logger.info(f"✅ Reflection session completed: {session.title} (ID: {session_id})")
+                    self.logger.info(
+                        f"✅ Reflection session completed: {session.title} (ID: {session_id})"
+                    )
                     return True
 
             self.logger.warning(f"⚠️ Reflection session not found: {session_id}")
@@ -190,10 +212,14 @@ class ReflectionController:
                 if session.session_id == session_id:
                     session.status = ReflectionStatus.FAILED
                     session.end_time = datetime.now()
-                    session.duration = (session.end_time - session.start_time).total_seconds()
+                    session.duration = (
+                        session.end_time - session.start_time
+                    ).total_seconds()
                     session.metadata["error_message"] = error_message
 
-                    self.logger.error(f"❌ Reflection session failed: {session.title} (ID: {session_id}) - {error_message}")
+                    self.logger.error(
+                        f"❌ Reflection session failed: {session.title} (ID: {session_id}) - {error_message}"
+                    )
                     return True
 
             self.logger.warning(f"⚠️ Reflection session not found: {session_id}")
@@ -203,21 +229,35 @@ class ReflectionController:
             self.logger.error(f"❌ Failed to fail reflection session: {e}")
             return False
 
-    def get_reflection_sessions_by_type(self, reflection_type: ReflectionType) -> list[ReflectionSession]:
+    def get_reflection_sessions_by_type(
+        self, reflection_type: ReflectionType
+    ) -> list[ReflectionSession]:
         """Get reflection sessions by type"""
-        return [s for s in self.reflection_sessions if s.reflection_type == reflection_type]
+        return [
+            s for s in self.reflection_sessions if s.reflection_type == reflection_type
+        ]
 
-    def get_reflection_sessions_by_status(self, status: ReflectionStatus) -> list[ReflectionSession]:
+    def get_reflection_sessions_by_status(
+        self, status: ReflectionStatus
+    ) -> list[ReflectionSession]:
         """Get reflection sessions by status"""
         return [s for s in self.reflection_sessions if s.status == status]
 
     def get_active_reflection_sessions(self) -> list[ReflectionSession]:
         """Get active reflection sessions"""
-        return [s for s in self.reflection_sessions if s.status == ReflectionStatus.IN_PROGRESS]
+        return [
+            s
+            for s in self.reflection_sessions
+            if s.status == ReflectionStatus.IN_PROGRESS
+        ]
 
     def get_completed_reflection_sessions(self) -> list[ReflectionSession]:
         """Get completed reflection sessions"""
-        return [s for s in self.reflection_sessions if s.status == ReflectionStatus.COMPLETED]
+        return [
+            s
+            for s in self.reflection_sessions
+            if s.status == ReflectionStatus.COMPLETED
+        ]
 
     def get_reflection_insights(self, limit: int = 10) -> list[str]:
         """Get recent reflection insights"""
@@ -270,7 +310,9 @@ class ReflectionController:
             total_sessions = len(self.reflection_sessions)
             completed_sessions = len(self.get_completed_reflection_sessions())
             active_sessions = len(self.get_active_reflection_sessions())
-            failed_sessions = len(self.get_reflection_sessions_by_status(ReflectionStatus.FAILED))
+            failed_sessions = len(
+                self.get_reflection_sessions_by_status(ReflectionStatus.FAILED)
+            )
 
             sessions_by_type = {}
             sessions_by_status = {}
@@ -282,13 +324,25 @@ class ReflectionController:
 
                 # By status
                 status_key = session.status.value
-                sessions_by_status[status_key] = sessions_by_status.get(status_key, 0) + 1
+                sessions_by_status[status_key] = (
+                    sessions_by_status.get(status_key, 0) + 1
+                )
 
             # Calculate average confidence score
-            completed_with_confidence = [s for s in self.reflection_sessions
-                                       if s.status == ReflectionStatus.COMPLETED and s.confidence_score is not None]
-            avg_confidence = (sum(s.confidence_score for s in completed_with_confidence) /
-                            len(completed_with_confidence)) if completed_with_confidence else 0.0
+            completed_with_confidence = [
+                s
+                for s in self.reflection_sessions
+                if s.status == ReflectionStatus.COMPLETED
+                and s.confidence_score is not None
+            ]
+            avg_confidence = (
+                (
+                    sum(s.confidence_score for s in completed_with_confidence)
+                    / len(completed_with_confidence)
+                )
+                if completed_with_confidence
+                else 0.0
+            )
 
             return {
                 "total_sessions": total_sessions,
@@ -299,17 +353,19 @@ class ReflectionController:
                 "sessions_by_status": sessions_by_status,
                 "average_confidence": avg_confidence,
                 "reflection_config": self.reflection_config,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
         except Exception as e:
             self.logger.error(f"❌ Failed to get reflection summary: {e}")
             return {"error": str(e)}
 
-    def enhance_response(self,
-                        response: str,
-                        mode: ReflectionMode = ReflectionMode.STANDARD,
-                        timeout: float = None) -> ReflectionResult:
+    def enhance_response(
+        self,
+        response: str,
+        mode: ReflectionMode = ReflectionMode.STANDARD,
+        timeout: float = None,
+    ) -> ReflectionResult:
         """Enhance response through reflection"""
         try:
             if timeout is None:
@@ -354,11 +410,13 @@ class ReflectionController:
                 metadata={
                     "original_response": response,
                     "mode": mode.value,
-                    "timeout": timeout
-                }
+                    "timeout": timeout,
+                },
             )
 
-            self.logger.info(f"✅ Response enhanced: {mode.value} mode, {processing_time:.3f}s")
+            self.logger.info(
+                f"✅ Response enhanced: {mode.value} mode, {processing_time:.3f}s"
+            )
             return result
 
         except Exception as e:
@@ -370,8 +428,10 @@ class ReflectionController:
         self.reflection_sessions.clear()
         self.logger.info("🧹 All reflection data cleared")
 
+
 # Global reflection controller instance
 _reflection_controller_instance = None
+
 
 def get_default_controller() -> ReflectionController:
     """Get default reflection controller instance"""

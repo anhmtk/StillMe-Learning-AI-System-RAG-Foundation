@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 class TransparencyLevel(Enum):
     """Levels of transparency logging."""
+
     NONE = "none"
     BASIC = "basic"
     DETAILED = "detailed"
@@ -25,6 +26,7 @@ class TransparencyLevel(Enum):
 @dataclass
 class TransparencyEvent:
     """Represents a transparency logging event."""
+
     event_id: str
     timestamp: datetime
     event_type: str
@@ -55,7 +57,7 @@ class TransparencyLogger:
         if self.enabled:
             handler = logging.StreamHandler()
             formatter = logging.Formatter(
-                '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
             )
             handler.setFormatter(formatter)
             self._logger.addHandler(handler)
@@ -73,7 +75,7 @@ class TransparencyLogger:
         metadata: Optional[dict[str, Any]] = None,
         trace_id: Optional[str] = None,
         user_id: Optional[str] = None,
-        session_id: Optional[str] = None
+        session_id: Optional[str] = None,
     ) -> str:
         """Log a decision event with full transparency."""
         if not self.enabled:
@@ -93,7 +95,7 @@ class TransparencyLogger:
             metadata=metadata or {},
             trace_id=trace_id,
             user_id=user_id,
-            session_id=session_id
+            session_id=session_id,
         )
 
         # Log based on transparency level
@@ -114,7 +116,7 @@ class TransparencyLogger:
             "event_type": event.event_type,
             "module": event.module,
             "confidence_scores": event.confidence_scores,
-            "reasoning": event.reasoning
+            "reasoning": event.reasoning,
         }
 
         if event.trace_id:
@@ -134,7 +136,7 @@ class TransparencyLogger:
             "decision_factors": event.decision_factors,
             "confidence_scores": event.confidence_scores,
             "reasoning": event.reasoning,
-            "metadata": event.metadata
+            "metadata": event.metadata,
         }
 
         if event.trace_id:
@@ -162,13 +164,18 @@ class TransparencyLogger:
         if isinstance(data, str):
             # Remove potential API keys, tokens, etc.
             import re
+
             # Remove API keys (sk-*, pk-*, etc.)
-            data = re.sub(r'sk-[a-zA-Z0-9]{20,}', '[REDACTED:API_KEY]', data)
-            data = re.sub(r'pk-[a-zA-Z0-9]{20,}', '[REDACTED:API_KEY]', data)
+            data = re.sub(r"sk-[a-zA-Z0-9]{20,}", "[REDACTED:API_KEY]", data)
+            data = re.sub(r"pk-[a-zA-Z0-9]{20,}", "[REDACTED:API_KEY]", data)
             # Remove email addresses
-            data = re.sub(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', '[REDACTED:EMAIL]', data)
+            data = re.sub(
+                r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b",
+                "[REDACTED:EMAIL]",
+                data,
+            )
             # Remove phone numbers
-            data = re.sub(r'\b\d{3}-\d{3}-\d{4}\b', '[REDACTED:PHONE]', data)
+            data = re.sub(r"\b\d{3}-\d{3}-\d{4}\b", "[REDACTED:PHONE]", data)
             return data
         elif isinstance(data, dict):
             return {k: self._sanitize_data(v) for k, v in data.items()}
@@ -193,7 +200,7 @@ class TransparencyLogger:
         log_data = {
             "timestamp": datetime.now().isoformat(),
             "type": "rationale",
-            "rationale": rationale
+            "rationale": rationale,
         }
 
         if trace_id:

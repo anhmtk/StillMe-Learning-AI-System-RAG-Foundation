@@ -332,7 +332,12 @@ class AgentDevQualityIntegration:
                 r
                 for r in reports
                 if r.target_path == target_path
-                and datetime.fromisoformat(r.timestamp.isoformat() if hasattr(r.timestamp, "isoformat") else str(r.timestamp)) >= cutoff_date
+                and datetime.fromisoformat(
+                    r.timestamp.isoformat()
+                    if hasattr(r.timestamp, "isoformat")
+                    else str(r.timestamp)
+                )
+                >= cutoff_date
             ]
 
             # Prepare export data

@@ -19,7 +19,7 @@ import time
 from datetime import datetime
 
 # Add stillme_core to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "stillme_core"))
 
 from modules.api_provider_manager import ComplexityAnalyzer, UnifiedAPIManager
 
@@ -29,10 +29,10 @@ class RouterDashboard:
         self.manager = UnifiedAPIManager()
         self.analyzer = ComplexityAnalyzer()
         self.session_data = {
-            'prompts': [],
-            'routing_decisions': [],
-            'performance_metrics': [],
-            'start_time': datetime.now()
+            "prompts": [],
+            "routing_decisions": [],
+            "performance_metrics": [],
+            "start_time": datetime.now(),
         }
         self.running = False
 
@@ -60,7 +60,7 @@ class RouterDashboard:
     def _update_dashboard(self):
         """Update dashboard display"""
         # Clear screen (works on most terminals)
-        os.system('cls' if os.name == 'nt' else 'clear')
+        os.system("cls" if os.name == "nt" else "clear")
 
         print("🔴 AI Router Live Dashboard")
         print("=" * 60)
@@ -84,7 +84,7 @@ class RouterDashboard:
 
     def _get_uptime(self) -> str:
         """Get dashboard uptime"""
-        uptime = datetime.now() - self.session_data['start_time']
+        uptime = datetime.now() - self.session_data["start_time"]
         hours, remainder = divmod(uptime.total_seconds(), 3600)
         minutes, seconds = divmod(remainder, 60)
         return f"{int(hours):02d}:{int(minutes):02d}:{int(seconds):02d}"
@@ -98,7 +98,9 @@ class RouterDashboard:
             stats = self.analyzer.get_stats()
             print("  🧠 Complexity Analyzer: ✅ Active")
             print(f"  📈 Total Analyses: {stats['performance']['total_analyses']}")
-            print(f"  ⚡ Avg Analysis Time: {stats['performance']['avg_time_ms']:.2f}ms")
+            print(
+                f"  ⚡ Avg Analysis Time: {stats['performance']['avg_time_ms']:.2f}ms"
+            )
         except Exception as e:
             print(f"  🧠 Complexity Analyzer: ❌ Error - {e}")
 
@@ -114,10 +116,14 @@ class RouterDashboard:
         """Print performance metrics"""
         print("\n⚡ Performance Metrics:")
 
-        if self.session_data['performance_metrics']:
-            recent_metrics = self.session_data['performance_metrics'][-10:]
-            avg_time = sum(m['analysis_time'] for m in recent_metrics) / len(recent_metrics)
-            avg_score = sum(m['complexity_score'] for m in recent_metrics) / len(recent_metrics)
+        if self.session_data["performance_metrics"]:
+            recent_metrics = self.session_data["performance_metrics"][-10:]
+            avg_time = sum(m["analysis_time"] for m in recent_metrics) / len(
+                recent_metrics
+            )
+            avg_score = sum(m["complexity_score"] for m in recent_metrics) / len(
+                recent_metrics
+            )
 
             print(f"  📊 Recent Avg Analysis Time: {avg_time*1000:.2f}ms")
             print(f"  🧠 Recent Avg Complexity Score: {avg_score:.3f}")
@@ -129,13 +135,17 @@ class RouterDashboard:
         """Print recent routing decisions"""
         print("\n🎯 Recent Routing Decisions:")
 
-        if self.session_data['routing_decisions']:
-            recent_decisions = self.session_data['routing_decisions'][-5:]
+        if self.session_data["routing_decisions"]:
+            recent_decisions = self.session_data["routing_decisions"][-5:]
             for decision in recent_decisions:
-                timestamp = decision['timestamp'].strftime('%H:%M:%S')
-                prompt = decision['prompt'][:30] + "..." if len(decision['prompt']) > 30 else decision['prompt']
-                model = decision['selected_model']
-                score = decision['complexity_score']
+                timestamp = decision["timestamp"].strftime("%H:%M:%S")
+                prompt = (
+                    decision["prompt"][:30] + "..."
+                    if len(decision["prompt"]) > 30
+                    else decision["prompt"]
+                )
+                model = decision["selected_model"]
+                score = decision["complexity_score"]
 
                 print(f"  {timestamp} | {prompt} → {model} (score: {score:.3f})")
         else:
@@ -145,37 +155,37 @@ class RouterDashboard:
         """Print statistics"""
         print("\n📈 Statistics:")
 
-        if self.session_data['routing_decisions']:
+        if self.session_data["routing_decisions"]:
             # Model distribution
             model_counts = {}
-            for decision in self.session_data['routing_decisions']:
-                model = decision['selected_model']
+            for decision in self.session_data["routing_decisions"]:
+                model = decision["selected_model"]
                 model_counts[model] = model_counts.get(model, 0) + 1
 
             print("  🤖 Model Distribution:")
             for model, count in model_counts.items():
-                percentage = (count / len(self.session_data['routing_decisions'])) * 100
+                percentage = (count / len(self.session_data["routing_decisions"])) * 100
                 print(f"    {model}: {count} ({percentage:.1f}%)")
 
             # Complexity distribution
             complexity_ranges = {
-                'Simple (<0.4)': 0,
-                'Medium (0.4-0.7)': 0,
-                'Complex (≥0.7)': 0
+                "Simple (<0.4)": 0,
+                "Medium (0.4-0.7)": 0,
+                "Complex (≥0.7)": 0,
             }
 
-            for decision in self.session_data['routing_decisions']:
-                score = decision['complexity_score']
+            for decision in self.session_data["routing_decisions"]:
+                score = decision["complexity_score"]
                 if score < 0.4:
-                    complexity_ranges['Simple (<0.4)'] += 1
+                    complexity_ranges["Simple (<0.4)"] += 1
                 elif score < 0.7:
-                    complexity_ranges['Medium (0.4-0.7)'] += 1
+                    complexity_ranges["Medium (0.4-0.7)"] += 1
                 else:
-                    complexity_ranges['Complex (≥0.7)'] += 1
+                    complexity_ranges["Complex (≥0.7)"] += 1
 
             print("  🧠 Complexity Distribution:")
             for range_name, count in complexity_ranges.items():
-                percentage = (count / len(self.session_data['routing_decisions'])) * 100
+                percentage = (count / len(self.session_data["routing_decisions"])) * 100
                 print(f"    {range_name}: {count} ({percentage:.1f}%)")
         else:
             print("  📊 No statistics available yet")
@@ -185,18 +195,20 @@ class RouterDashboard:
         print("\n📊 Final Summary")
         print("=" * 60)
 
-        if self.session_data['routing_decisions']:
-            total_prompts = len(self.session_data['routing_decisions'])
-            uptime = datetime.now() - self.session_data['start_time']
+        if self.session_data["routing_decisions"]:
+            total_prompts = len(self.session_data["routing_decisions"])
+            uptime = datetime.now() - self.session_data["start_time"]
 
             print(f"Total Prompts Processed: {total_prompts}")
             print(f"Total Uptime: {uptime}")
-            print(f"Average Prompts/Minute: {total_prompts / (uptime.total_seconds() / 60):.1f}")
+            print(
+                f"Average Prompts/Minute: {total_prompts / (uptime.total_seconds() / 60):.1f}"
+            )
 
             # Model distribution
             model_counts = {}
-            for decision in self.session_data['routing_decisions']:
-                model = decision['selected_model']
+            for decision in self.session_data["routing_decisions"]:
+                model = decision["selected_model"]
                 model_counts[model] = model_counts.get(model, 0) + 1
 
             print("\nFinal Model Distribution:")
@@ -205,9 +217,14 @@ class RouterDashboard:
                 print(f"  {model}: {count} ({percentage:.1f}%)")
 
             # Performance summary
-            if self.session_data['performance_metrics']:
-                avg_time = sum(m['analysis_time'] for m in self.session_data['performance_metrics']) / len(self.session_data['performance_metrics'])
-                avg_score = sum(m['complexity_score'] for m in self.session_data['performance_metrics']) / len(self.session_data['performance_metrics'])
+            if self.session_data["performance_metrics"]:
+                avg_time = sum(
+                    m["analysis_time"] for m in self.session_data["performance_metrics"]
+                ) / len(self.session_data["performance_metrics"])
+                avg_score = sum(
+                    m["complexity_score"]
+                    for m in self.session_data["performance_metrics"]
+                ) / len(self.session_data["performance_metrics"])
 
                 print("\nPerformance Summary:")
                 print(f"  Average Analysis Time: {avg_time*1000:.2f}ms")
@@ -225,7 +242,9 @@ class RouterDashboard:
             stats = self.analyzer.get_stats()
             print("🧠 Complexity Analyzer Stats:")
             print(f"  Total Analyses: {stats['performance']['total_analyses']}")
-            print(f"  Average Analysis Time: {stats['performance']['avg_time_ms']:.2f}ms")
+            print(
+                f"  Average Analysis Time: {stats['performance']['avg_time_ms']:.2f}ms"
+            )
             print(f"  Fallback Triggers: {stats['fallback']['total_triggers']}")
 
             print("\n⚙️  Current Configuration:")
@@ -269,18 +288,20 @@ class RouterDashboard:
         print("\n📊 Collected Data Summary")
         print("=" * 60)
 
-        if self.session_data['routing_decisions']:
-            total_prompts = len(self.session_data['routing_decisions'])
-            uptime = datetime.now() - self.session_data['start_time']
+        if self.session_data["routing_decisions"]:
+            total_prompts = len(self.session_data["routing_decisions"])
+            uptime = datetime.now() - self.session_data["start_time"]
 
             print(f"Total Prompts Processed: {total_prompts}")
             print(f"Total Uptime: {uptime}")
-            print(f"Average Prompts/Minute: {total_prompts / (uptime.total_seconds() / 60):.1f}")
+            print(
+                f"Average Prompts/Minute: {total_prompts / (uptime.total_seconds() / 60):.1f}"
+            )
 
             # Model distribution
             model_counts = {}
-            for decision in self.session_data['routing_decisions']:
-                model = decision['selected_model']
+            for decision in self.session_data["routing_decisions"]:
+                model = decision["selected_model"]
                 model_counts[model] = model_counts.get(model, 0) + 1
 
             print("\nModel Distribution:")
@@ -290,19 +311,19 @@ class RouterDashboard:
 
             # Complexity distribution
             complexity_ranges = {
-                'Simple (<0.4)': 0,
-                'Medium (0.4-0.7)': 0,
-                'Complex (≥0.7)': 0
+                "Simple (<0.4)": 0,
+                "Medium (0.4-0.7)": 0,
+                "Complex (≥0.7)": 0,
             }
 
-            for decision in self.session_data['routing_decisions']:
-                score = decision['complexity_score']
+            for decision in self.session_data["routing_decisions"]:
+                score = decision["complexity_score"]
                 if score < 0.4:
-                    complexity_ranges['Simple (<0.4)'] += 1
+                    complexity_ranges["Simple (<0.4)"] += 1
                 elif score < 0.7:
-                    complexity_ranges['Medium (0.4-0.7)'] += 1
+                    complexity_ranges["Medium (0.4-0.7)"] += 1
                 else:
-                    complexity_ranges['Complex (≥0.7)'] += 1
+                    complexity_ranges["Complex (≥0.7)"] += 1
 
             print("\nComplexity Distribution:")
             for range_name, count in complexity_ranges.items():
@@ -310,9 +331,14 @@ class RouterDashboard:
                 print(f"  {range_name}: {count} ({percentage:.1f}%)")
 
             # Performance summary
-            if self.session_data['performance_metrics']:
-                avg_time = sum(m['analysis_time'] for m in self.session_data['performance_metrics']) / len(self.session_data['performance_metrics'])
-                avg_score = sum(m['complexity_score'] for m in self.session_data['performance_metrics']) / len(self.session_data['performance_metrics'])
+            if self.session_data["performance_metrics"]:
+                avg_time = sum(
+                    m["analysis_time"] for m in self.session_data["performance_metrics"]
+                ) / len(self.session_data["performance_metrics"])
+                avg_score = sum(
+                    m["complexity_score"]
+                    for m in self.session_data["performance_metrics"]
+                ) / len(self.session_data["performance_metrics"])
 
                 print("\nPerformance Summary:")
                 print(f"  Average Analysis Time: {avg_time*1000:.2f}ms")
@@ -323,24 +349,24 @@ class RouterDashboard:
     def export_data(self, filename: str):
         """Export collected data to JSON file"""
         export_data = {
-            'session_info': {
-                'start_time': self.session_data['start_time'].isoformat(),
-                'end_time': datetime.now().isoformat(),
-                'total_prompts': len(self.session_data['routing_decisions'])
+            "session_info": {
+                "start_time": self.session_data["start_time"].isoformat(),
+                "end_time": datetime.now().isoformat(),
+                "total_prompts": len(self.session_data["routing_decisions"]),
             },
-            'routing_decisions': [
+            "routing_decisions": [
                 {
-                    'timestamp': decision['timestamp'].isoformat(),
-                    'prompt': decision['prompt'],
-                    'complexity_score': decision['complexity_score'],
-                    'selected_model': decision['selected_model']
+                    "timestamp": decision["timestamp"].isoformat(),
+                    "prompt": decision["prompt"],
+                    "complexity_score": decision["complexity_score"],
+                    "selected_model": decision["selected_model"],
                 }
-                for decision in self.session_data['routing_decisions']
+                for decision in self.session_data["routing_decisions"]
             ],
-            'performance_metrics': self.session_data['performance_metrics']
+            "performance_metrics": self.session_data["performance_metrics"],
         }
 
-        with open(filename, 'w', encoding='utf-8') as f:
+        with open(filename, "w", encoding="utf-8") as f:
             json.dump(export_data, f, indent=2, ensure_ascii=False)
 
         print(f"✅ Data exported to {filename}")
@@ -360,33 +386,34 @@ class RouterDashboard:
 
         # Store data
         decision = {
-            'timestamp': datetime.now(),
-            'prompt': prompt,
-            'complexity_score': complexity_score,
-            'selected_model': selected_model,
-            'breakdown': breakdown
+            "timestamp": datetime.now(),
+            "prompt": prompt,
+            "complexity_score": complexity_score,
+            "selected_model": selected_model,
+            "breakdown": breakdown,
         }
 
-        self.session_data['routing_decisions'].append(decision)
-        self.session_data['prompts'].append(prompt)
+        self.session_data["routing_decisions"].append(decision)
+        self.session_data["prompts"].append(prompt)
 
         metric = {
-            'timestamp': datetime.now(),
-            'analysis_time': analysis_time,
-            'complexity_score': complexity_score
+            "timestamp": datetime.now(),
+            "analysis_time": analysis_time,
+            "complexity_score": complexity_score,
         }
 
-        self.session_data['performance_metrics'].append(metric)
+        self.session_data["performance_metrics"].append(metric)
 
         return decision
 
+
 def main():
-    parser = argparse.ArgumentParser(description='AI Router Dashboard')
-    parser.add_argument('--live', action='store_true', help='Start live dashboard')
-    parser.add_argument('--stats', action='store_true', help='Show current statistics')
-    parser.add_argument('--monitor', action='store_true', help='Start monitoring mode')
-    parser.add_argument('--duration', type=int, default=300, help='Duration in seconds')
-    parser.add_argument('--export', type=str, help='Export data to JSON file')
+    parser = argparse.ArgumentParser(description="AI Router Dashboard")
+    parser.add_argument("--live", action="store_true", help="Start live dashboard")
+    parser.add_argument("--stats", action="store_true", help="Show current statistics")
+    parser.add_argument("--monitor", action="store_true", help="Start monitoring mode")
+    parser.add_argument("--duration", type=int, default=300, help="Duration in seconds")
+    parser.add_argument("--export", type=str, help="Export data to JSON file")
 
     args = parser.parse_args()
 
@@ -405,6 +432,7 @@ def main():
 
     if args.export:
         dashboard.export_data(args.export)
+
 
 if __name__ == "__main__":
     main()

@@ -14,9 +14,11 @@ import requests
 # Skip all tests in this file due to missing server
 pytest.skip("No server running for integration tests", allow_module_level=True)
 
+
 def test_health():
     """Test health endpoint"""
     import pytest
+
     pytest.skip("No server running on localhost:8080", allow_module_level=False)
 
     try:
@@ -25,6 +27,7 @@ def test_health():
         return response.json()
     except requests.exceptions.RequestException as e:
         raise Exception(f"Health check failed: {e}")
+
 
 def test_chat(base_url):
     """Test chat endpoint"""
@@ -36,19 +39,20 @@ def test_chat(base_url):
                 "persona": "assistant",
                 "language": "en",
                 "debug": True,
-            }
+            },
         }
 
         response = requests.post(
             f"{base_url}/chat",
             json=payload,
             timeout=30,
-            headers={"Content-Type": "application/json"}
+            headers={"Content-Type": "application/json"},
         )
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
         raise Exception(f"Chat request failed: {e}")
+
 
 def main():
     base_url = sys.argv[1] if len(sys.argv) > 1 else "http://160.191.89.99:21568"
@@ -71,7 +75,9 @@ def main():
         chat_response = test_chat(base_url)
 
         # Extract response text
-        response_text = chat_response.get('response', chat_response.get('text', 'No response'))
+        response_text = chat_response.get(
+            "response", chat_response.get("text", "No response")
+        )
         print(f"✅ Chat response: {response_text[:50]}...")
         print()
 
@@ -80,27 +86,27 @@ def main():
         print(f"  - Model: {chat_response.get('model', 'N/A')}")
         print(f"  - Latency: {chat_response.get('latency_ms', 'N/A')}ms")
 
-        usage = chat_response.get('usage', {})
+        usage = chat_response.get("usage", {})
         if usage:
             print(f"  - Prompt Tokens: {usage.get('prompt_tokens', 'N/A')}")
             print(f"  - Completion Tokens: {usage.get('completion_tokens', 'N/A')}")
             print(f"  - Total Tokens: {usage.get('total_tokens', 'N/A')}")
 
-        cost = chat_response.get('cost_estimate_usd')
+        cost = chat_response.get("cost_estimate_usd")
         if cost is not None:
             print(f"  - Cost: ${cost:.4f}")
 
-        routing = chat_response.get('routing', {})
+        routing = chat_response.get("routing", {})
         if routing:
             print(f"  - Selected Model: {routing.get('selected', 'N/A')}")
-            candidates = routing.get('candidates', [])
+            candidates = routing.get("candidates", [])
             if candidates:
                 print(f"  - Available Models: {', '.join(candidates)}")
 
-        safety = chat_response.get('safety', {})
+        safety = chat_response.get("safety", {})
         if safety:
-            filtered = safety.get('filtered', False)
-            flags = safety.get('flags', [])
+            filtered = safety.get("filtered", False)
+            flags = safety.get("flags", [])
             print(f"  - Filtered: {filtered}")
             if flags:
                 print(f"  - Safety Flags: {', '.join(flags)}")
@@ -111,6 +117,7 @@ def main():
     except Exception as e:
         print(f"❌ Test failed: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

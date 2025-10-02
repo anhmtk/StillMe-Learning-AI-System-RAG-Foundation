@@ -21,15 +21,16 @@ from typing import Any, Optional
 from ..privacy.pii_redactor import PIIRedactor
 
 # Context variables for request tracking
-request_id_var: ContextVar[str] = ContextVar('request_id')
-user_id_var: ContextVar[str] = ContextVar('user_id')
-trace_id_var: ContextVar[str] = ContextVar('trace_id')
-span_id_var: ContextVar[str] = ContextVar('span_id')
+request_id_var: ContextVar[str] = ContextVar("request_id")
+user_id_var: ContextVar[str] = ContextVar("user_id")
+trace_id_var: ContextVar[str] = ContextVar("trace_id")
+span_id_var: ContextVar[str] = ContextVar("span_id")
 
 
 @dataclass
 class LogEntry:
     """Structured log entry with all required fields"""
+
     timestamp: str
     level: str
     trace_id: str
@@ -61,33 +62,33 @@ class StructuredLogger:
         """Initialize structured logger"""
         self.name = name
         self.config = config or {}
-        self.pii_redactor = PIIRedactor(self.config.get('pii_config', {}))
+        self.pii_redactor = PIIRedactor(self.config.get("pii_config", {}))
         self.logger = logging.getLogger(name)
 
         # Configure logging level
-        log_level = self.config.get('log_level', 'INFO')
+        log_level = self.config.get("log_level", "INFO")
         self.logger.setLevel(getattr(logging, log_level.upper()))
 
         # Add console handler if not exists
         if not self.logger.handlers:
             handler = logging.StreamHandler()
-            formatter = logging.Formatter('%(message)s')
+            formatter = logging.Formatter("%(message)s")
             handler.setFormatter(formatter)
             self.logger.addHandler(handler)
 
     def _get_context(self) -> dict[str, str]:
         """Get current request context"""
         return {
-            'request_id': request_id_var.get(''),
-            'user_id': user_id_var.get(''),
-            'trace_id': trace_id_var.get(''),
-            'span_id': span_id_var.get(''),
+            "request_id": request_id_var.get(""),
+            "user_id": user_id_var.get(""),
+            "trace_id": trace_id_var.get(""),
+            "span_id": span_id_var.get(""),
         }
 
     def _hash_user_id(self, user_id: str) -> str:
         """Hash user ID for privacy"""
         if not user_id:
-            return ''
+            return ""
         return hashlib.sha256(user_id.encode()).hexdigest()[:16]
 
     def _redact_content(self, content: str) -> tuple[str, bool]:
@@ -107,7 +108,7 @@ class StructuredLogger:
         metadata: Optional[dict[str, Any]] = None,
         duration_ms: Optional[float] = None,
         status_code: Optional[int] = None,
-        error: Optional[str] = None
+        error: Optional[str] = None,
     ) -> LogEntry:
         """Create structured log entry"""
         context = self._get_context()
@@ -134,16 +135,16 @@ class StructuredLogger:
         return LogEntry(
             timestamp=datetime.now(timezone.utc).isoformat(),
             level=level,
-            trace_id=context['trace_id'],
-            span_id=context['span_id'],
-            user_id_hash=self._hash_user_id(context['user_id']),
+            trace_id=context["trace_id"],
+            span_id=context["span_id"],
+            user_id_hash=self._hash_user_id(context["user_id"]),
             event=event,
             pii_redacted=pii_redacted,
             message=redacted_message,
             metadata=redacted_metadata,
             duration_ms=duration_ms,
             status_code=status_code,
-            error=redacted_error
+            error=redacted_error,
         )
 
     def _log(self, log_entry: LogEntry):
@@ -156,22 +157,22 @@ class StructuredLogger:
 
     def info(self, event: str, message: str, **kwargs):
         """Log info level message"""
-        log_entry = self._create_log_entry('INFO', event, message, **kwargs)
+        log_entry = self._create_log_entry("INFO", event, message, **kwargs)
         self._log(log_entry)
 
     def warning(self, event: str, message: str, **kwargs):
         """Log warning level message"""
-        log_entry = self._create_log_entry('WARNING', event, message, **kwargs)
+        log_entry = self._create_log_entry("WARNING", event, message, **kwargs)
         self._log(log_entry)
 
     def error(self, event: str, message: str, **kwargs):
         """Log error level message"""
-        log_entry = self._create_log_entry('ERROR', event, message, **kwargs)
+        log_entry = self._create_log_entry("ERROR", event, message, **kwargs)
         self._log(log_entry)
 
     def debug(self, event: str, message: str, **kwargs):
         """Log debug level message"""
-        log_entry = self._create_log_entry('DEBUG', event, message, **kwargs)
+        log_entry = self._create_log_entry("DEBUG", event, message, **kwargs)
         self._log(log_entry)
 
 
@@ -190,8 +191,8 @@ class LoggingMiddleware:
     def __init__(self, config: Optional[dict] = None):
         """Initialize logging middleware"""
         self.config = config or {}
-        self.logger = StructuredLogger('gateway.middleware', config)
-        self.pii_redactor = PIIRedactor(self.config.get('pii_config', {}))
+        self.logger = StructuredLogger("gateway.middleware", config)
+        self.pii_redactor = PIIRedactor(self.config.get("pii_config", {}))
 
     def _generate_correlation_ids(self) -> dict[str, str]:
         """Generate correlation IDs for request tracking"""
@@ -199,11 +200,7 @@ class LoggingMiddleware:
         span_id = str(uuid.uuid4())[:8]
         request_id = str(uuid.uuid4())
 
-        return {
-            'trace_id': trace_id,
-            'span_id': span_id,
-            'request_id': request_id
-        }
+        return {"trace_id": trace_id, "span_id": span_id, "request_id": request_id}
 
     def _redact_query_params(self, query_params: dict[str, Any]) -> dict[str, Any]:
         """Redact PII from query parameters"""
@@ -239,7 +236,7 @@ class LoggingMiddleware:
         query_params: Optional[dict[str, Any]] = None,
         headers: Optional[dict[str, str]] = None,
         body: Optional[str] = None,
-        user_id: Optional[str] = None
+        user_id: Optional[str] = None,
     ) -> str:
         """
         Log incoming request and return request ID
@@ -259,34 +256,32 @@ class LoggingMiddleware:
         ids = self._generate_correlation_ids()
 
         # Set context variables
-        request_id_var.set(ids['request_id'])
-        trace_id_var.set(ids['trace_id'])
-        span_id_var.set(ids['span_id'])
+        request_id_var.set(ids["request_id"])
+        trace_id_var.set(ids["trace_id"])
+        span_id_var.set(ids["span_id"])
         if user_id:
             user_id_var.set(user_id)
 
         # Redact sensitive data
         redacted_query = self._redact_query_params(query_params or {})
-        redacted_body = self._redact_request_body(body or '')
+        redacted_body = self._redact_request_body(body or "")
 
         # Prepare metadata
         metadata = {
-            'method': method,
-            'path': path,
-            'query_params': redacted_query,
-            'headers': headers or {},
-            'body': redacted_body,
-            'body_size': len(body or ''),
+            "method": method,
+            "path": path,
+            "query_params": redacted_query,
+            "headers": headers or {},
+            "body": redacted_body,
+            "body_size": len(body or ""),
         }
 
         # Log request
         self.logger.info(
-            event='request_received',
-            message=f'{method} {path}',
-            metadata=metadata
+            event="request_received", message=f"{method} {path}", metadata=metadata
         )
 
-        return ids['request_id']
+        return ids["request_id"]
 
     def log_response(
         self,
@@ -295,7 +290,7 @@ class LoggingMiddleware:
         headers: Optional[dict[str, str]] = None,
         body: Optional[str] = None,
         duration_ms: Optional[float] = None,
-        error: Optional[str] = None
+        error: Optional[str] = None,
     ):
         """
         Log outgoing response
@@ -309,33 +304,33 @@ class LoggingMiddleware:
             error: Error message if any
         """
         # Redact sensitive data
-        redacted_body = self._redact_response_body(body or '')
+        redacted_body = self._redact_response_body(body or "")
 
         # Prepare metadata
         metadata = {
-            'status_code': status_code,
-            'headers': headers or {},
-            'body': redacted_body,
-            'body_size': len(body or ''),
+            "status_code": status_code,
+            "headers": headers or {},
+            "body": redacted_body,
+            "body_size": len(body or ""),
         }
 
         # Determine log level
         if status_code >= 500:
-            level = 'error'
+            level = "error"
         elif status_code >= 400:
-            level = 'warning'
+            level = "warning"
         else:
-            level = 'info'
+            level = "info"
 
         # Log response
         log_method = getattr(self.logger, level)
         log_method(
-            event='response_sent',
-            message=f'Response {status_code}',
+            event="response_sent",
+            message=f"Response {status_code}",
             metadata=metadata,
             duration_ms=duration_ms,
             status_code=status_code,
-            error=error
+            error=error,
         )
 
     def log_access(
@@ -346,7 +341,7 @@ class LoggingMiddleware:
         user_id: Optional[str] = None,
         duration_ms: Optional[float] = None,
         query_params: Optional[dict[str, Any]] = None,
-        error: Optional[str] = None
+        error: Optional[str] = None,
     ):
         """
         Log access event (simplified version for high-volume logging)
@@ -369,28 +364,28 @@ class LoggingMiddleware:
 
         # Prepare metadata
         metadata = {
-            'method': method,
-            'path': path,
-            'query_params': redacted_query,
+            "method": method,
+            "path": path,
+            "query_params": redacted_query,
         }
 
         # Determine log level
         if status_code >= 500:
-            level = 'error'
+            level = "error"
         elif status_code >= 400:
-            level = 'warning'
+            level = "warning"
         else:
-            level = 'info'
+            level = "info"
 
         # Log access
         log_method = getattr(self.logger, level)
         log_method(
-            event='access',
-            message=f'{method} {path} -> {status_code}',
+            event="access",
+            message=f"{method} {path} -> {status_code}",
             metadata=metadata,
             duration_ms=duration_ms,
             status_code=status_code,
-            error=error
+            error=error,
         )
 
 
@@ -399,10 +394,7 @@ default_middleware = LoggingMiddleware()
 
 
 def set_request_context(
-    request_id: str,
-    trace_id: str,
-    span_id: str,
-    user_id: Optional[str] = None
+    request_id: str, trace_id: str, span_id: str, user_id: Optional[str] = None
 ):
     """Set request context for logging"""
     request_id_var.set(request_id)
@@ -415,8 +407,8 @@ def set_request_context(
 def get_request_context() -> dict[str, str]:
     """Get current request context"""
     return {
-        'request_id': request_id_var.get(''),
-        'trace_id': trace_id_var.get(''),
-        'span_id': span_id_var.get(''),
-        'user_id': user_id_var.get(''),
+        "request_id": request_id_var.get(""),
+        "trace_id": trace_id_var.get(""),
+        "span_id": span_id_var.get(""),
+        "user_id": user_id_var.get(""),
     }

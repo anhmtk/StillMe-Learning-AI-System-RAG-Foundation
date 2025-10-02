@@ -6,12 +6,12 @@ from agent_dev.core.agentdev import AgentDev
 
 agentdev = AgentDev()
 errors = agentdev.scan_errors()
-f821_errors = [e for e in errors if e.rule == 'F821']
+f821_errors = [e for e in errors if e.rule == "F821"]
 
 symbols = []
 for e in f821_errors:
-    if '`' in e.msg:
-        parts = e.msg.split('`')
+    if "`" in e.msg:
+        parts = e.msg.split("`")
         if len(parts) >= 2:
             symbols.append(parts[1])
 

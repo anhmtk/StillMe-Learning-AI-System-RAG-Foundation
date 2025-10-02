@@ -16,17 +16,16 @@ def temp_dir() -> Generator[Path, None, None]:
     with tempfile.TemporaryDirectory() as tmp_dir:
         yield Path(tmp_dir)
 
+
 @pytest.fixture
 def test_config() -> dict[str, Any]:
     """Test configuration for testing"""
     return {
         "id": "test_config",
         "name": "Test Configuration",
-        "settings": {
-            "debug": True,
-            "verbose": False
-        }
+        "settings": {"debug": True, "verbose": False},
     }
+
 
 @pytest.fixture
 def sample_config() -> dict[str, Any]:
@@ -34,44 +33,39 @@ def sample_config() -> dict[str, Any]:
     return {
         "id": "sample_config",
         "name": "Sample Configuration",
-        "settings": {
-            "debug": True,
-            "timeout": 30,
-            "retries": 3
-        }
+        "settings": {"debug": True, "timeout": 30, "retries": 3},
     }
+
 
 @pytest.fixture
 def test_datasets():
     """Test datasets for testing"""
-    return {
-        "small": [1, 2, 3],
-        "medium": list(range(10)),
-        "large": list(range(100))
-    }
+    return {"small": [1, 2, 3], "medium": list(range(10)), "large": list(range(100))}
+
 
 @pytest.fixture
 def sample_data() -> dict[str, Any]:
     """Sample data for testing"""
     return {
         "text": "This is a test message",
-        "metadata": {
-            "source": "test",
-            "timestamp": "2025-09-27T16:00:00Z"
-        }
+        "metadata": {"source": "test", "timestamp": "2025-09-27T16:00:00Z"},
     }
+
 
 @pytest.fixture
 def mock_logger():
     """Mock logger for testing"""
     import logging
+
     logger = logging.getLogger("test")
     logger.setLevel(logging.DEBUG)
     return logger
 
+
 @pytest.fixture
 def mock_ethics_system():
     """Mock ethics system for testing"""
+
     class MockEthicsSystem:
         def __init__(self):
             self.violations = []
@@ -91,9 +85,11 @@ def mock_ethics_system():
 
     return MockEthicsSystem()
 
+
 @pytest.fixture
 def mock_content_filter():
     """Mock content filter for testing"""
+
     class MockContentFilter:
         def __init__(self):
             self.filtered_content = []
@@ -115,9 +111,11 @@ def mock_content_filter():
 
     return MockContentFilter()
 
+
 @pytest.fixture
 def mock_secure_memory():
     """Mock secure memory for testing"""
+
     class MockSecureMemory:
         def __init__(self):
             self.memory = {}
@@ -144,9 +142,11 @@ def mock_secure_memory():
 
     return MockSecureMemory()
 
+
 @pytest.fixture
 def mock_conversational_core():
     """Mock conversational core for testing"""
+
     class MockConversationalCore:
         def __init__(self):
             self.conversations = []
@@ -171,16 +171,20 @@ def mock_conversational_core():
 
     return MockConversationalCore()
 
+
 @pytest.fixture
 def mock_api_manager():
     """Mock API manager for testing"""
+
     class MockAPIManager:
         def __init__(self):
             self.requests = []
             self.responses = []
             self.errors = []
 
-        def make_request(self, endpoint: str, data: dict[str, Any] = None) -> dict[str, Any]:
+        def make_request(
+            self, endpoint: str, data: dict[str, Any] = None
+        ) -> dict[str, Any]:
             """Mock API request"""
             self.requests.append({"endpoint": endpoint, "data": data})
             response = {"status": "success", "data": f"Mock response for {endpoint}"}
@@ -203,9 +207,11 @@ def mock_api_manager():
 
     return MockAPIManager()
 
+
 @pytest.fixture
 def test_utils():
     """Test utilities for testing"""
+
     class TestUtils:
         @staticmethod
         def create_test_data(size: int = 10) -> list[dict[str, Any]]:
@@ -225,9 +231,11 @@ def test_utils():
 
     return TestUtils()
 
+
 @pytest.fixture
 def mock_framework():
     """Mock framework for testing"""
+
     class MockFramework:
         def __init__(self):
             self.initialized = False
@@ -258,9 +266,11 @@ def mock_framework():
 
     return MockFramework()
 
+
 @pytest.fixture
 def mock_memory_system():
     """Mock memory system for testing"""
+
     class MockMemorySystem:
         def __init__(self):
             self.memories = {}
@@ -289,14 +299,16 @@ def mock_memory_system():
             return {
                 "total_memories": len(self.memories),
                 "retrievals": self.retrievals,
-                "storages": self.storages
+                "storages": self.storages,
             }
 
     return MockMemorySystem()
 
+
 @pytest.fixture
 def mock_emotion_sense():
     """Mock emotion sense for testing"""
+
     class MockEmotionSense:
         def __init__(self):
             self.emotions_detected = []
@@ -317,11 +329,7 @@ def mock_emotion_sense():
                 emotion = "angry"
                 confidence = 0.9
 
-            result = {
-                "emotion": emotion,
-                "confidence": confidence,
-                "text": text
-            }
+            result = {"emotion": emotion, "confidence": confidence, "text": text}
 
             self.emotions_detected.append(emotion)
             self.confidence_scores.append(confidence)
@@ -342,9 +350,11 @@ def mock_emotion_sense():
 
     return MockEmotionSense()
 
+
 @pytest.fixture
 def mock_token_optimizer():
     """Mock token optimizer for testing"""
+
     class MockTokenOptimizer:
         def __init__(self):
             self.optimizations = []
@@ -357,10 +367,12 @@ def mock_token_optimizer():
 
             result = {
                 "original_text": text,
-                "optimized_text": text[:len(text)//2] + "...",  # Mock truncation
+                "optimized_text": text[: len(text) // 2] + "...",  # Mock truncation
                 "original_tokens": original_tokens,
                 "optimized_tokens": optimized_tokens,
-                "reduction_percentage": (original_tokens - optimized_tokens) / original_tokens * 100
+                "reduction_percentage": (original_tokens - optimized_tokens)
+                / original_tokens
+                * 100,
             }
 
             self.optimizations.append(result)
@@ -382,9 +394,11 @@ def mock_token_optimizer():
 
     return MockTokenOptimizer()
 
+
 @pytest.fixture
 def mock_self_improvement():
     """Mock self improvement system for testing"""
+
     class MockSelfImprovement:
         def __init__(self):
             self.improvements = []
@@ -399,7 +413,7 @@ def mock_self_improvement():
                 "performance_score": score,
                 "improvements": improvements,
                 "analysis_date": "2025-09-27T16:00:00Z",
-                "data_analyzed": data
+                "data_analyzed": data,
             }
 
             self.improvements.append(improvements)
@@ -425,9 +439,11 @@ def mock_self_improvement():
 
     return MockSelfImprovement()
 
+
 @pytest.fixture
 def mock_scheduler():
     """Mock scheduler for testing"""
+
     class MockScheduler:
         def __init__(self):
             self.tasks = []
@@ -442,7 +458,7 @@ def mock_scheduler():
                 "name": task_name,
                 "delay": delay,
                 "status": "scheduled",
-                "created_at": "2025-09-27T16:00:00Z"
+                "created_at": "2025-09-27T16:00:00Z",
             }
             self.tasks.append(task)
             return task_id
@@ -487,22 +503,26 @@ def mock_scheduler():
 
     return MockScheduler()
 
+
 @pytest.fixture
 def mock_telemetry():
     """Mock telemetry system for testing"""
+
     class MockTelemetry:
         def __init__(self):
             self.metrics = []
             self.events = []
             self.alerts = []
 
-        def record_metric(self, name: str, value: float, tags: dict[str, str] = None) -> bool:
+        def record_metric(
+            self, name: str, value: float, tags: dict[str, str] = None
+        ) -> bool:
             """Mock metric recording"""
             metric = {
                 "name": name,
                 "value": value,
                 "tags": tags or {},
-                "timestamp": "2025-09-27T16:00:00Z"
+                "timestamp": "2025-09-27T16:00:00Z",
             }
             self.metrics.append(metric)
             return True
@@ -512,18 +532,20 @@ def mock_telemetry():
             event = {
                 "name": event_name,
                 "data": data or {},
-                "timestamp": "2025-09-27T16:00:00Z"
+                "timestamp": "2025-09-27T16:00:00Z",
             }
             self.events.append(event)
             return True
 
-        def create_alert(self, alert_type: str, message: str, severity: str = "medium") -> bool:
+        def create_alert(
+            self, alert_type: str, message: str, severity: str = "medium"
+        ) -> bool:
             """Mock alert creation"""
             alert = {
                 "type": alert_type,
                 "message": message,
                 "severity": severity,
-                "timestamp": "2025-09-27T16:00:00Z"
+                "timestamp": "2025-09-27T16:00:00Z",
             }
             self.alerts.append(alert)
             return True
@@ -554,9 +576,11 @@ def mock_telemetry():
 
     return MockTelemetry()
 
+
 @pytest.fixture
 def mock_metrics():
     """Mock metrics system for testing"""
+
     class MockMetrics:
         def __init__(self):
             self.counters = {}
@@ -564,23 +588,31 @@ def mock_metrics():
             self.timers = {}
             self.histograms = {}
 
-        def increment(self, metric_name: str, value: int = 1, tags: dict[str, str] = None) -> None:
+        def increment(
+            self, metric_name: str, value: int = 1, tags: dict[str, str] = None
+        ) -> None:
             """Mock counter increment"""
             if metric_name not in self.counters:
                 self.counters[metric_name] = 0
             self.counters[metric_name] += value
 
-        def gauge(self, metric_name: str, value: float, tags: dict[str, str] = None) -> None:
+        def gauge(
+            self, metric_name: str, value: float, tags: dict[str, str] = None
+        ) -> None:
             """Mock gauge recording"""
             self.gauges[metric_name] = value
 
-        def timer(self, metric_name: str, value: float, tags: dict[str, str] = None) -> None:
+        def timer(
+            self, metric_name: str, value: float, tags: dict[str, str] = None
+        ) -> None:
             """Mock timer recording"""
             if metric_name not in self.timers:
                 self.timers[metric_name] = []
             self.timers[metric_name].append(value)
 
-        def histogram(self, metric_name: str, value: float, tags: dict[str, str] = None) -> None:
+        def histogram(
+            self, metric_name: str, value: float, tags: dict[str, str] = None
+        ) -> None:
             """Mock histogram recording"""
             if metric_name not in self.histograms:
                 self.histograms[metric_name] = []
@@ -611,9 +643,11 @@ def mock_metrics():
 
     return MockMetrics()
 
+
 @pytest.fixture
 def mock_communication_style():
     """Mock communication style for testing"""
+
     class MockCommunicationStyle:
         def __init__(self):
             self.style = "default"
@@ -623,7 +657,14 @@ def mock_communication_style():
 
         def set_style(self, style: str) -> bool:
             """Set communication style"""
-            valid_styles = ["formal", "casual", "technical", "friendly", "professional", "default"]
+            valid_styles = [
+                "formal",
+                "casual",
+                "technical",
+                "friendly",
+                "professional",
+                "default",
+            ]
             if style in valid_styles:
                 self.style = style
                 self.styles_applied.append(style)
@@ -632,7 +673,13 @@ def mock_communication_style():
 
         def set_tone(self, tone: str) -> bool:
             """Set communication tone"""
-            valid_tones = ["positive", "neutral", "empathetic", "assertive", "diplomatic"]
+            valid_tones = [
+                "positive",
+                "neutral",
+                "empathetic",
+                "assertive",
+                "diplomatic",
+            ]
             if tone in valid_tones:
                 self.tone = tone
                 return True
@@ -669,11 +716,7 @@ def mock_communication_style():
 
         def get_current_style(self) -> dict[str, str]:
             """Get current style settings"""
-            return {
-                "style": self.style,
-                "tone": self.tone,
-                "formality": self.formality
-            }
+            return {"style": self.style, "tone": self.tone, "formality": self.formality}
 
         def get_style_history(self) -> list[str]:
             """Get history of applied styles"""
@@ -688,9 +731,11 @@ def mock_communication_style():
 
     return MockCommunicationStyle()
 
+
 @pytest.fixture
 def mock_input_sketcher():
     """Mock input sketcher for testing"""
+
     class MockInputSketcher:
         def __init__(self):
             self.sketches = []
@@ -705,8 +750,10 @@ def mock_input_sketcher():
             sketch = {
                 "type": type(input_data).__name__,
                 "size": len(str(input_data)),
-                "content": str(input_data)[:100] + "..." if len(str(input_data)) > 100 else str(input_data),
-                "timestamp": "2025-09-27T16:00:00Z"
+                "content": str(input_data)[:100] + "..."
+                if len(str(input_data)) > 100
+                else str(input_data),
+                "timestamp": "2025-09-27T16:00:00Z",
             }
 
             self.sketches.append(sketch)
@@ -716,11 +763,12 @@ def mock_input_sketcher():
             """Analyze the structure of input data"""
             analysis = {
                 "data_type": type(input_data).__name__,
-                "is_iterable": hasattr(input_data, '__iter__') and not isinstance(input_data, (str, bytes)),
-                "is_dict_like": hasattr(input_data, 'keys'),
+                "is_iterable": hasattr(input_data, "__iter__")
+                and not isinstance(input_data, (str, bytes)),
+                "is_dict_like": hasattr(input_data, "keys"),
                 "is_numeric": isinstance(input_data, (int, float)),
                 "is_string": isinstance(input_data, str),
-                "complexity": "simple"
+                "complexity": "simple",
             }
 
             # Determine complexity
@@ -749,7 +797,9 @@ def mock_input_sketcher():
                     patterns.append({"type": "url", "confidence": 0.9})
                 if input_data.isdigit():
                     patterns.append({"type": "numeric", "confidence": 1.0})
-                if any(char.isdigit() for char in input_data) and any(char.isalpha() for char in input_data):
+                if any(char.isdigit() for char in input_data) and any(
+                    char.isalpha() for char in input_data
+                ):
                     patterns.append({"type": "mixed_alphanumeric", "confidence": 0.7})
 
             elif isinstance(input_data, (list, tuple)):
@@ -796,9 +846,11 @@ def mock_input_sketcher():
 
     return MockInputSketcher()
 
+
 @pytest.fixture
 def mock_prediction_engine():
     """Mock prediction engine for testing"""
+
     class MockPredictionEngine:
         def __init__(self):
             self.models = {}
@@ -806,7 +858,9 @@ def mock_prediction_engine():
             self.training_data = {}
             self.metrics = {}
 
-        def train_model(self, model_name: str, training_data: list[dict[str, Any]]) -> bool:
+        def train_model(
+            self, model_name: str, training_data: list[dict[str, Any]]
+        ) -> bool:
             """Train a prediction model"""
             if not training_data:
                 return False
@@ -814,19 +868,24 @@ def mock_prediction_engine():
             self.training_data[model_name] = training_data
             self.models[model_name] = {
                 "trained": True,
-                "accuracy": 0.85 + len(training_data) * 0.001,  # Mock accuracy based on data size
+                "accuracy": 0.85
+                + len(training_data) * 0.001,  # Mock accuracy based on data size
                 "training_size": len(training_data),
-                "created_at": "2025-09-27T16:00:00Z"
+                "created_at": "2025-09-27T16:00:00Z",
             }
             return True
 
-        def predict(self, model_name: str, input_data: dict[str, Any]) -> dict[str, Any]:
+        def predict(
+            self, model_name: str, input_data: dict[str, Any]
+        ) -> dict[str, Any]:
             """Make a prediction using the specified model"""
             if model_name not in self.models:
                 return {"error": f"Model {model_name} not found"}
 
             # Simple prediction logic
-            confidence = 0.7 + hash(str(input_data)) % 30 / 100  # Mock confidence 0.7-0.99
+            confidence = (
+                0.7 + hash(str(input_data)) % 30 / 100
+            )  # Mock confidence 0.7-0.99
             prediction_value = hash(str(input_data)) % 100  # Mock prediction 0-99
 
             prediction = {
@@ -834,13 +893,15 @@ def mock_prediction_engine():
                 "input": input_data,
                 "prediction": prediction_value,
                 "confidence": round(confidence, 2),
-                "timestamp": "2025-09-27T16:00:00Z"
+                "timestamp": "2025-09-27T16:00:00Z",
             }
 
             self.predictions.append(prediction)
             return prediction
 
-        def evaluate_model(self, model_name: str, test_data: list[dict[str, Any]]) -> dict[str, Any]:
+        def evaluate_model(
+            self, model_name: str, test_data: list[dict[str, Any]]
+        ) -> dict[str, Any]:
             """Evaluate model performance"""
             if model_name not in self.models:
                 return {"error": f"Model {model_name} not found"}
@@ -853,7 +914,7 @@ def mock_prediction_engine():
                 "precision": self.models[model_name]["accuracy"] * 0.95,
                 "recall": self.models[model_name]["accuracy"] * 0.92,
                 "f1_score": self.models[model_name]["accuracy"] * 0.93,
-                "evaluated_at": "2025-09-27T16:00:00Z"
+                "evaluated_at": "2025-09-27T16:00:00Z",
             }
 
             self.metrics[model_name] = evaluation
@@ -870,7 +931,9 @@ def mock_prediction_engine():
             """Get information about all models"""
             return self.models.copy()
 
-        def get_prediction_history(self, model_name: str = None) -> list[dict[str, Any]]:
+        def get_prediction_history(
+            self, model_name: str = None
+        ) -> list[dict[str, Any]]:
             """Get prediction history"""
             if model_name:
                 return [p for p in self.predictions if p["model"] == model_name]
@@ -891,7 +954,9 @@ def mock_prediction_engine():
                 if model_name in self.metrics:
                     del self.metrics[model_name]
                 # Remove predictions for this model
-                self.predictions = [p for p in self.predictions if p["model"] != model_name]
+                self.predictions = [
+                    p for p in self.predictions if p["model"] != model_name
+                ]
                 return True
             return False
 
@@ -904,9 +969,11 @@ def mock_prediction_engine():
 
     return MockPredictionEngine()
 
+
 @pytest.fixture
 def mock_market_intel():
     """Mock market intelligence for testing"""
+
     class MockMarketIntel:
         def __init__(self):
             self.data_sources = []
@@ -915,14 +982,16 @@ def mock_market_intel():
             self.competitors = {}
             self.last_update = None
 
-        def add_data_source(self, source_name: str, source_url: str, api_key: str = None) -> bool:
+        def add_data_source(
+            self, source_name: str, source_url: str, api_key: str = None
+        ) -> bool:
             """Add a new data source"""
             source = {
                 "name": source_name,
                 "url": source_url,
                 "api_key": api_key,
                 "active": True,
-                "added_at": "2025-09-27T16:00:00Z"
+                "added_at": "2025-09-27T16:00:00Z",
             }
             self.data_sources.append(source)
             return True
@@ -935,11 +1004,11 @@ def mock_market_intel():
                 "trends": {
                     "ai": {"growth": 15.3, "sentiment": "positive"},
                     "technology": {"growth": 8.7, "sentiment": "positive"},
-                    "market": {"growth": 3.2, "sentiment": "neutral"}
+                    "market": {"growth": 3.2, "sentiment": "neutral"},
                 },
                 "competitors": ["CompetitorA", "CompetitorB", "CompetitorC"],
                 "market_size": 125000000,  # Mock market size in USD
-                "collected_at": "2025-09-27T16:00:00Z"
+                "collected_at": "2025-09-27T16:00:00Z",
             }
 
             self.last_update = market_data["collected_at"]
@@ -951,19 +1020,19 @@ def mock_market_intel():
             trends = {
                 "timeframe": timeframe,
                 "top_trends": [
-                    {"keyword": "artificial intelligence", "growth": 25.6, "volume": 1500000},
+                    {
+                        "keyword": "artificial intelligence",
+                        "growth": 25.6,
+                        "volume": 1500000,
+                    },
                     {"keyword": "machine learning", "growth": 18.2, "volume": 980000},
-                    {"keyword": "data science", "growth": 12.4, "volume": 750000}
+                    {"keyword": "data science", "growth": 12.4, "volume": 750000},
                 ],
                 "declining_trends": [
                     {"keyword": "old_tech", "growth": -5.2, "volume": 200000}
                 ],
-                "sentiment": {
-                    "positive": 65.4,
-                    "neutral": 25.8,
-                    "negative": 8.8
-                },
-                "analyzed_at": "2025-09-27T16:00:00Z"
+                "sentiment": {"positive": 65.4, "neutral": 25.8, "negative": 8.8},
+                "analyzed_at": "2025-09-27T16:00:00Z",
             }
 
             self.trends[timeframe] = trends
@@ -978,15 +1047,15 @@ def mock_market_intel():
                     "insight": f"Market shows strong growth in {category} sector",
                     "confidence": 0.85,
                     "impact": "high",
-                    "recommendation": f"Consider investing more in {category} related initiatives"
+                    "recommendation": f"Consider investing more in {category} related initiatives",
                 },
                 {
                     "category": category,
                     "insight": f"Emerging opportunities in {category} automation",
                     "confidence": 0.72,
                     "impact": "medium",
-                    "recommendation": f"Monitor {category} automation trends closely"
-                }
+                    "recommendation": f"Monitor {category} automation trends closely",
+                },
             ]
 
             self.insights.extend(insights)
@@ -1000,9 +1069,13 @@ def mock_market_intel():
                 competitor_data[name] = {
                     "market_share": hash(name) % 25 + 5,  # Mock market share 5-30%
                     "growth_rate": (hash(name) % 20) - 10,  # Mock growth -10% to +10%
-                    "strength": ["technology", "marketing", "customer_service"][hash(name) % 3],
-                    "weakness": ["pricing", "innovation", "market_reach"][hash(name) % 3],
-                    "last_updated": "2025-09-27T16:00:00Z"
+                    "strength": ["technology", "marketing", "customer_service"][
+                        hash(name) % 3
+                    ],
+                    "weakness": ["pricing", "innovation", "market_reach"][
+                        hash(name) % 3
+                    ],
+                    "last_updated": "2025-09-27T16:00:00Z",
                 }
 
             self.competitors.update(competitor_data)
@@ -1016,7 +1089,7 @@ def mock_market_intel():
                 "trends_analyzed": len(self.trends),
                 "competitors_tracked": len(self.competitors),
                 "last_update": self.last_update,
-                "status": "active" if self.data_sources else "inactive"
+                "status": "active" if self.data_sources else "inactive",
             }
 
         def export_report(self, format: str = "summary") -> dict[str, Any]:
@@ -1024,9 +1097,13 @@ def mock_market_intel():
             if format == "summary":
                 return {
                     "summary": self.get_market_summary(),
-                    "recent_trends": list(self.trends.values())[-3:] if self.trends else [],
+                    "recent_trends": list(self.trends.values())[-3:]
+                    if self.trends
+                    else [],
                     "key_insights": self.insights[-5:] if self.insights else [],
-                    "top_competitors": dict(list(self.competitors.items())[:5]) if self.competitors else {}
+                    "top_competitors": dict(list(self.competitors.items())[:5])
+                    if self.competitors
+                    else {},
                 }
             elif format == "detailed":
                 return {
@@ -1034,7 +1111,7 @@ def mock_market_intel():
                     "trends": self.trends,
                     "insights": self.insights,
                     "competitors": self.competitors,
-                    "summary": self.get_market_summary()
+                    "summary": self.get_market_summary(),
                 }
             else:
                 return {"error": f"Unsupported format: {format}"}
@@ -1049,9 +1126,11 @@ def mock_market_intel():
 
     return MockMarketIntel()
 
+
 @pytest.fixture
 def mock_daily_learning():
     """Mock daily learning system for testing"""
+
     class MockDailyLearning:
         def __init__(self):
             self.sessions = []
@@ -1069,7 +1148,7 @@ def mock_daily_learning():
                 "started_at": "2025-09-27T16:00:00Z",
                 "status": "active",
                 "lessons_learned": 0,
-                "insights_generated": 0
+                "insights_generated": 0,
             }
 
             self.sessions.append(session)
@@ -1079,7 +1158,9 @@ def mock_daily_learning():
         def end_session(self, session_id: str = None) -> dict[str, Any]:
             """End a learning session"""
             if session_id:
-                session = next((s for s in self.sessions if s["id"] == session_id), None)
+                session = next(
+                    (s for s in self.sessions if s["id"] == session_id), None
+                )
             else:
                 session = self.current_session
 
@@ -1107,10 +1188,10 @@ def mock_daily_learning():
                 "content": interaction,
                 "insights": [
                     f"User prefers {interaction.get('style', 'unknown')} communication",
-                    f"Common topic: {interaction.get('topic', 'general')}"
+                    f"Common topic: {interaction.get('topic', 'general')}",
                 ],
                 "confidence": 0.75,
-                "learned_at": "2025-09-27T16:00:00Z"
+                "learned_at": "2025-09-27T16:00:00Z",
             }
 
             self.lessons.append(lesson)
@@ -1132,10 +1213,10 @@ def mock_daily_learning():
                 "content": feedback,
                 "insights": [
                     f"Feedback rating: {feedback.get('rating', 'unknown')}",
-                    f"Improvement area: {feedback.get('area', 'general')}"
+                    f"Improvement area: {feedback.get('area', 'general')}",
                 ],
                 "confidence": 0.85,
-                "learned_at": "2025-09-27T16:00:00Z"
+                "learned_at": "2025-09-27T16:00:00Z",
             }
 
             self.lessons.append(lesson)
@@ -1161,7 +1242,9 @@ def mock_daily_learning():
         def get_learning_progress(self) -> dict[str, Any]:
             """Get overall learning progress"""
             total_lessons = len(self.lessons)
-            interaction_lessons = len([l for l in self.lessons if l["type"] == "interaction"])
+            interaction_lessons = len(
+                [l for l in self.lessons if l["type"] == "interaction"]
+            )
             feedback_lessons = len([l for l in self.lessons if l["type"] == "feedback"])
 
             return {
@@ -1169,9 +1252,11 @@ def mock_daily_learning():
                 "interaction_lessons": interaction_lessons,
                 "feedback_lessons": feedback_lessons,
                 "total_sessions": len(self.sessions),
-                "active_sessions": len([s for s in self.sessions if s["status"] == "active"]),
+                "active_sessions": len(
+                    [s for s in self.sessions if s["status"] == "active"]
+                ),
                 "learning_enabled": self.learning_enabled,
-                "avg_confidence": 0.8 if self.lessons else 0.0
+                "avg_confidence": 0.8 if self.lessons else 0.0,
             }
 
         def get_session_history(self) -> list[dict[str, Any]]:
@@ -1189,13 +1274,13 @@ def mock_daily_learning():
                 return {
                     "total_lessons": len(self.lessons),
                     "recent_lessons": self.lessons[-10:] if self.lessons else [],
-                    "progress": self.get_learning_progress()
+                    "progress": self.get_learning_progress(),
                 }
             elif format == "detailed":
                 return {
                     "sessions": self.sessions,
                     "lessons": self.lessons,
-                    "progress": self.get_learning_progress()
+                    "progress": self.get_learning_progress(),
                 }
             else:
                 return {"error": f"Unsupported format: {format}"}
@@ -1209,9 +1294,11 @@ def mock_daily_learning():
 
     return MockDailyLearning()
 
+
 @pytest.fixture
 def mock_persona_morph():
     """Mock persona morphing system for testing"""
+
     class MockPersonaMorph:
         def __init__(self):
             self.personas = {}
@@ -1230,11 +1317,13 @@ def mock_persona_morph():
                 "traits": traits.copy(),
                 "created_at": "2025-09-27T16:00:00Z",
                 "usage_count": 0,
-                "active": True
+                "active": True,
             }
             return True
 
-        def morph_to_persona(self, persona_id: str, context: dict[str, Any] = None) -> dict[str, Any]:
+        def morph_to_persona(
+            self, persona_id: str, context: dict[str, Any] = None
+        ) -> dict[str, Any]:
             """Morph to a specific persona"""
             if persona_id not in self.personas:
                 return {"error": f"Persona {persona_id} not found"}
@@ -1248,7 +1337,7 @@ def mock_persona_morph():
                 "to_persona": persona_id,
                 "context": context or {},
                 "timestamp": "2025-09-27T16:00:00Z",
-                "success": True
+                "success": True,
             }
             self.morph_history.append(morph_record)
 
@@ -1259,7 +1348,7 @@ def mock_persona_morph():
                 "previous_persona": previous_persona,
                 "current_persona": persona_id,
                 "traits": self.personas[persona_id]["traits"],
-                "morph_successful": True
+                "morph_successful": True,
             }
 
         def adapt_traits(self, trait_adjustments: dict[str, Any]) -> dict[str, Any]:
@@ -1277,7 +1366,7 @@ def mock_persona_morph():
                 "original_traits": current_traits.copy(),
                 "adjustments": trait_adjustments,
                 "final_traits": adapted_traits,
-                "adapted_at": "2025-09-27T16:00:00Z"
+                "adapted_at": "2025-09-27T16:00:00Z",
             }
 
             self.personas[self.current_persona]["traits"] = adapted_traits
@@ -1291,7 +1380,9 @@ def mock_persona_morph():
 
             return self.personas[self.current_persona].copy()
 
-        def get_persona_suggestions(self, context: dict[str, Any]) -> list[dict[str, Any]]:
+        def get_persona_suggestions(
+            self, context: dict[str, Any]
+        ) -> list[dict[str, Any]]:
             """Get persona suggestions based on context"""
             suggestions = []
 
@@ -1318,12 +1409,14 @@ def mock_persona_morph():
                 elif user_mood == "excited" and "enthusiastic" in persona["traits"]:
                     compatibility += 0.2
 
-                suggestions.append({
-                    "persona_id": persona_id,
-                    "compatibility_score": round(compatibility, 2),
-                    "reason": f"Good match for {context_type} context with {user_mood} mood",
-                    "traits": persona["traits"]
-                })
+                suggestions.append(
+                    {
+                        "persona_id": persona_id,
+                        "compatibility_score": round(compatibility, 2),
+                        "reason": f"Good match for {context_type} context with {user_mood} mood",
+                        "traits": persona["traits"],
+                    }
+                )
 
             # Sort by compatibility score
             suggestions.sort(key=lambda x: x["compatibility_score"], reverse=True)
@@ -1351,9 +1444,11 @@ def mock_persona_morph():
             return {
                 "total_morphs": len(self.morph_history),
                 "morph_counts": morph_counts,
-                "most_used_persona": max(morph_counts, key=morph_counts.get) if morph_counts else None,
+                "most_used_persona": max(morph_counts, key=morph_counts.get)
+                if morph_counts
+                else None,
                 "context_patterns": context_patterns,
-                "avg_morphs_per_hour": len(self.morph_history) / 24  # Mock calculation
+                "avg_morphs_per_hour": len(self.morph_history) / 24,  # Mock calculation
             }
 
         def get_all_personas(self) -> dict[str, dict[str, Any]]:
@@ -1379,17 +1474,19 @@ def mock_persona_morph():
             if format == "summary":
                 return {
                     "total_personas": len(self.personas),
-                    "active_personas": len([p for p in self.personas.values() if p["active"]]),
+                    "active_personas": len(
+                        [p for p in self.personas.values() if p["active"]]
+                    ),
                     "current_persona": self.current_persona,
                     "total_morphs": len(self.morph_history),
-                    "morph_patterns": self.analyze_morph_patterns()
+                    "morph_patterns": self.analyze_morph_patterns(),
                 }
             elif format == "detailed":
                 return {
                     "personas": self.personas,
                     "current_persona": self.current_persona,
                     "morph_history": self.morph_history,
-                    "analysis": self.analyze_morph_patterns()
+                    "analysis": self.analyze_morph_patterns(),
                 }
             else:
                 return {"error": f"Unsupported format: {format}"}
@@ -1403,14 +1500,18 @@ def mock_persona_morph():
             self.contexts.clear()
 
             # Create default persona
-            self.create_persona("default", {
-                "communication_style": "balanced",
-                "formality": "medium",
-                "empathy": "moderate",
-                "technical_depth": "adaptive"
-            })
+            self.create_persona(
+                "default",
+                {
+                    "communication_style": "balanced",
+                    "formality": "medium",
+                    "empathy": "moderate",
+                    "technical_depth": "adaptive",
+                },
+            )
 
     return MockPersonaMorph()
+
 
 @pytest.fixture
 def clean_environment():
@@ -1419,11 +1520,7 @@ def clean_environment():
     original_env = os.environ.copy()
 
     # Clean up test environment
-    test_env_vars = [
-        "STILLME_ROUTER_MODE",
-        "STILLME_DEBUG",
-        "STILLME_LOG_LEVEL"
-    ]
+    test_env_vars = ["STILLME_ROUTER_MODE", "STILLME_DEBUG", "STILLME_LOG_LEVEL"]
 
     for var in test_env_vars:
         if var in os.environ:

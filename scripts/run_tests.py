@@ -19,7 +19,9 @@ def run_command(command, description):
     print("-" * 50)
 
     try:
-        result = subprocess.run(command, shell=False, check=True, capture_output=True, text=True)
+        result = subprocess.run(
+            command, shell=False, check=True, capture_output=True, text=True
+        )
         print("✅ Success")
         if result.stdout:
             print("Output:", result.stdout)
@@ -28,6 +30,7 @@ def run_command(command, description):
         print("❌ Failed")
         print("Error:", e.stderr)
         return False
+
 
 def check_prerequisites():
     """Check if prerequisites are met"""
@@ -53,7 +56,7 @@ def check_prerequisites():
         "config/staging.yaml",
         "policies/network_allowlist.yaml",
         "policies/niche_weights.yaml",
-        "pytest.ini"
+        "pytest.ini",
     ]
     for file_path in required_files:
         if not Path(file_path).exists():
@@ -63,33 +66,37 @@ def check_prerequisites():
     print("✅ All prerequisites met")
     return True
 
+
 def run_unit_tests():
     """Run unit tests"""
     return run_command(
-        "pytest -q tests/test_niche_units.py -m unit",
-        "Running unit tests"
+        "pytest -q tests/test_niche_units.py -m unit", "Running unit tests"
     )
+
 
 def run_integration_tests():
     """Run integration tests"""
     return run_command(
         "pytest -q tests/test_niche_integration.py -m integration",
-        "Running integration tests"
+        "Running integration tests",
     )
+
 
 def run_all_tests_with_reports():
     """Run all tests with HTML report and coverage"""
     return run_command(
         "pytest -q --maxfail=1 --disable-warnings --cov=stillme --cov=niche_radar --cov=policy --cov=security --cov=cache --cov=metrics --cov-report=html:reports/coverage --cov-report=term-missing --cov-report=xml:reports/coverage.xml --html=reports/test_report.html --self-contained-html --junitxml=reports/junit.xml",
-        "Running all tests with comprehensive reporting"
+        "Running all tests with comprehensive reporting",
     )
+
 
 def run_e2e_tests():
     """Run E2E UI tests with Playwright"""
     return run_command(
         "npx playwright test e2e/test_niche_ui.spec.ts --headed",
-        "Running E2E UI tests with Playwright"
+        "Running E2E UI tests with Playwright",
     )
+
 
 def generate_test_summary():
     """Generate test summary report"""
@@ -100,13 +107,13 @@ def generate_test_summary():
         "reports/test_report.html",
         "reports/coverage/index.html",
         "reports/junit.xml",
-        "reports/coverage.xml"
+        "reports/coverage.xml",
     ]
 
     summary = {
         "timestamp": datetime.now().isoformat(),
         "reports_generated": [],
-        "reports_missing": []
+        "reports_missing": [],
     }
 
     for report_file in report_files:
@@ -119,22 +126,30 @@ def generate_test_summary():
 
     # Save summary
     summary_path = "reports/test_summary.json"
-    with open(summary_path, 'w') as f:
+    with open(summary_path, "w") as f:
         import json
+
         json.dump(summary, f, indent=2)
 
     print(f"📋 Test summary saved to {summary_path}")
     return summary
 
+
 def main():
     """Main test runner function"""
     parser = argparse.ArgumentParser(description="Run NicheRadar v1.5 tests")
     parser.add_argument("--unit", action="store_true", help="Run unit tests only")
-    parser.add_argument("--integration", action="store_true", help="Run integration tests only")
+    parser.add_argument(
+        "--integration", action="store_true", help="Run integration tests only"
+    )
     parser.add_argument("--e2e", action="store_true", help="Run E2E tests only")
     parser.add_argument("--all", action="store_true", help="Run all tests with reports")
-    parser.add_argument("--quick", action="store_true", help="Run quick tests (unit + integration)")
-    parser.add_argument("--skip-prereq", action="store_true", help="Skip prerequisite checks")
+    parser.add_argument(
+        "--quick", action="store_true", help="Run quick tests (unit + integration)"
+    )
+    parser.add_argument(
+        "--skip-prereq", action="store_true", help="Skip prerequisite checks"
+    )
 
     args = parser.parse_args()
 
@@ -179,6 +194,7 @@ def main():
     else:
         print("❌ Some tests failed. Check the output above.")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

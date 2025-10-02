@@ -340,7 +340,6 @@ class DependencyResolver:
                 if (dep.source_module == module1 and dep.target_module == module2) or (
                     dep.source_module == module2 and dep.target_module == module1
                 ):
-
                     # Convert to lazy import
                     if self._convert_to_lazy_import(dep):
                         return True

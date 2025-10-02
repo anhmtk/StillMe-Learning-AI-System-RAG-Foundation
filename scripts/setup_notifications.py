@@ -71,6 +71,7 @@ def setup_email():
         print("3. Generate password for 'Mail'")
         return False
 
+
 def setup_telegram():
     """Setup Telegram notifications"""
     print("\n📱 Setting up Telegram Notifications")
@@ -116,6 +117,7 @@ def setup_telegram():
         print("3. Find 'chat':{'id': YOUR_CHAT_ID}")
         return False
 
+
 def main():
     """Main setup function"""
     print("🧠 StillMe IPC Notification Setup")
@@ -132,7 +134,9 @@ def main():
     print("\n🎉 Setup Complete!")
     print("==================")
     print(f"📧 Email notifications: {'✅ Enabled' if email_success else '❌ Disabled'}")
-    print(f"📱 Telegram notifications: {'✅ Enabled' if telegram_success else '❌ Disabled'}")
+    print(
+        f"📱 Telegram notifications: {'✅ Enabled' if telegram_success else '❌ Disabled'}"
+    )
 
     if email_success or telegram_success:
         print("\n💡 Next steps:")
@@ -142,6 +146,7 @@ def main():
     else:
         print("\n⚠️ No notifications configured.")
         print("StillMe will only show desktop notifications.")
+
 
 if __name__ == "__main__":
     main()

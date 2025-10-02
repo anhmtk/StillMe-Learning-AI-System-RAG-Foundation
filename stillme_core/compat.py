@@ -151,27 +151,35 @@ except ImportError:
 # Override controller with function from __init__.py
 
 # Ensure functions are available
-if 'health' not in globals():
+if "health" not in globals():
+
     def health():
         """Stub health function"""
         return {"ollama_up": True, "model_present": True, "tiny_generate_ok": True}
 
-if 'set_mode' not in globals():
+
+if "set_mode" not in globals():
+
     def set_mode(mode):
         """Stub set_mode function"""
         return True
 
-if 'warmup' not in globals():
+
+if "warmup" not in globals():
+
     def warmup(model=None):
         """Stub warmup function"""
         return {"status": "warmed_up", "model": model}
 
-if 'dev_agent' not in globals():
+
+if "dev_agent" not in globals():
+
     def dev_agent(task, mode="fast", **params):
         """Stub dev_agent function"""
         return f"Stub response for: {task}"
 
-if 'controller' not in globals():
+
+if "controller" not in globals():
     controller = None
 
 # Re-export missing implementations
@@ -194,60 +202,77 @@ except ImportError:
     DAGExecutor = None
     RBACManager = None
 
+
 # SessionManager stub
 class SessionManager:
     """Session manager stub implementation"""
+
     def __init__(self):
         pass
+
 
 # Define __all__ for clean imports
 __all__ = [
     # Semantic search
     "SearchResult",
-
     # Ethical guardrails
-    "EthicalPrinciple", "ViolationSeverity",
-
+    "EthicalPrinciple",
+    "ViolationSeverity",
     # Security simulator
-    "SimulationStatus", "AttackCategory", "AttackSeverity",
-
+    "SimulationStatus",
+    "AttackCategory",
+    "AttackSeverity",
     # Memory
-    "MemoryItem", "LongTermMemory",
-
+    "MemoryItem",
+    "LongTermMemory",
     # Quality
-    "QualityIssue", "QualityReport",
-
+    "QualityIssue",
+    "QualityReport",
     # Infrastructure
-    "RedisEventBus", "DAGExecutor", "RBACManager",
-
+    "RedisEventBus",
+    "DAGExecutor",
+    "RBACManager",
     # Guard
-    "apply_policies", "safe_reply", "classify", "sanitize", "redact_output", "CANARY",
-
+    "apply_policies",
+    "safe_reply",
+    "classify",
+    "sanitize",
+    "redact_output",
+    "CANARY",
     # Logging
-    "AgentDevLogger", "log_step",
-
+    "AgentDevLogger",
+    "log_step",
     # Core status
-    "JobStatus", "StepStatus",
-
+    "JobStatus",
+    "StepStatus",
     # Core statestore
     "StateStore",
-
     # Core wrap_content
     "wrap_content",
-
     # Core proactiveabuseguard
     "ProactiveAbuseGuard",
-
     # Modules for F821 error resolution
-    "ModuleProactiveAbuseGuard", "AuditLogger", "PIIRedactor", "HealthChecker", "SecurityGate", "SessionManager",
-
+    "ModuleProactiveAbuseGuard",
+    "AuditLogger",
+    "PIIRedactor",
+    "HealthChecker",
+    "SecurityGate",
+    "SessionManager",
     # Privacy manager
-    "PIIType", "PrivacyManager",
-
+    "PIIType",
+    "PrivacyManager",
     # AI Manager
-    "health", "set_mode", "warmup", "dev_agent", "controller",
-
+    "health",
+    "set_mode",
+    "warmup",
+    "dev_agent",
+    "controller",
     # Missing implementations
-    "NodeType", "ImpactLevel", "MatchType",
-    "SemanticSearchEngine", "RedisEventBus", "DAGExecutor", "RBACManager"
+    "NodeType",
+    "ImpactLevel",
+    "MatchType",
+    "SemanticSearchEngine",
+    "RedisEventBus",
+    "DAGExecutor",
+    "RBACManager",
 ]

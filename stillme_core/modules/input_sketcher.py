@@ -80,7 +80,9 @@ def guess_lang(text: str) -> str:
     return (
         "vi"
         if any(ch in t for ch in VI_CHARS)
-        else "en" if re.fullmatch(r"[ -~]+", t or "") else "mix"
+        else "en"
+        if re.fullmatch(r"[ -~]+", t or "")
+        else "mix"
     )
 
 

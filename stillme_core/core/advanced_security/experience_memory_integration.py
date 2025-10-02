@@ -49,6 +49,7 @@ except ImportError as e:
 
 class ExperienceType(Enum):
     """Loại kinh nghiệm"""
+
     ATTACK_PATTERN = "attack_pattern"
     DEFENSE_STRATEGY = "defense_strategy"
     VULNERABILITY = "vulnerability"
@@ -60,6 +61,7 @@ class ExperienceType(Enum):
 
 class LearningCategory(Enum):
     """Danh mục học tập"""
+
     RED_TEAM = "red_team"
     BLUE_TEAM = "blue_team"
     COORDINATION = "coordination"
@@ -70,6 +72,7 @@ class LearningCategory(Enum):
 @dataclass
 class SecurityExperience:
     """Kinh nghiệm bảo mật"""
+
     id: str
     experience_type: ExperienceType
     category: LearningCategory
@@ -89,6 +92,7 @@ class SecurityExperience:
 @dataclass
 class LearningPattern:
     """Pattern học tập"""
+
     id: str
     pattern_type: str
     description: str
@@ -133,23 +137,24 @@ class ExperienceMemoryIntegration:
 
         # Circuit breaker for resilience
         self.circuit_breaker = SafeCircuitBreaker(
-            failure_threshold=5,
-            recovery_timeout=60,
-            expected_exception=Exception
+            failure_threshold=5, recovery_timeout=60, expected_exception=Exception
         )
 
         # Statistics
         self.stats = {
-            'total_experiences': 0,
-            'stored_experiences': 0,
-            'retrieved_experiences': 0,
-            'learning_patterns': 0,
-            'prediction_accuracy': 0.0
+            "total_experiences": 0,
+            "stored_experiences": 0,
+            "retrieved_experiences": 0,
+            "learning_patterns": 0,
+            "prediction_accuracy": 0.0,
         }
 
-    def set_security_engines(self, red_team: RedTeamEngine = None,
-                           blue_team: BlueTeamEngine = None,
-                           orchestrator: SecurityOrchestrator = None):
+    def set_security_engines(
+        self,
+        red_team: RedTeamEngine = None,
+        blue_team: BlueTeamEngine = None,
+        orchestrator: SecurityOrchestrator = None,
+    ):
         """Thiết lập security engines"""
         self.red_team_engine = red_team
         self.blue_team_engine = blue_team
@@ -170,18 +175,18 @@ class ExperienceMemoryIntegration:
                     "payload": attack_result.payload,
                     "response": attack_result.response,
                     "execution_time": attack_result.execution_time,
-                    "effectiveness": attack_result.effectiveness_score
+                    "effectiveness": attack_result.effectiveness_score,
                 },
                 metadata={
                     "target": attack_result.target,
                     "timestamp": attack_result.timestamp.isoformat(),
-                    "environment": attack_result.environment
+                    "environment": attack_result.environment,
                 },
                 effectiveness_score=attack_result.effectiveness_score,
                 confidence_level=0.8,
                 tags=["attack", "red_team", attack_result.attack_type.value],
                 created_at=datetime.now(),
-                updated_at=datetime.now()
+                updated_at=datetime.now(),
             )
 
             return await self._store_experience(experience)
@@ -203,17 +208,17 @@ class ExperienceMemoryIntegration:
                     "action": defense_result.action.value,
                     "status": defense_result.status,
                     "effectiveness_score": defense_result.effectiveness_score,
-                    "details": defense_result.details
+                    "details": defense_result.details,
                 },
                 metadata={
                     "rule_id": defense_result.rule_id,
-                    "timestamp": defense_result.timestamp.isoformat()
+                    "timestamp": defense_result.timestamp.isoformat(),
                 },
                 effectiveness_score=defense_result.effectiveness_score,
                 confidence_level=0.8,
                 tags=["defense", "blue_team", defense_result.action.value],
                 created_at=datetime.now(),
-                updated_at=datetime.now()
+                updated_at=datetime.now(),
             )
 
             return await self._store_experience(experience)
@@ -235,18 +240,18 @@ class ExperienceMemoryIntegration:
                     "anomaly_type": anomaly.anomaly_type.value,
                     "threat_level": anomaly.threat_level.value,
                     "indicators": anomaly.indicators,
-                    "confidence": anomaly.confidence
+                    "confidence": anomaly.confidence,
                 },
                 metadata={
                     "source": anomaly.source,
                     "timestamp": anomaly.timestamp.isoformat(),
-                    "metadata": anomaly.metadata
+                    "metadata": anomaly.metadata,
                 },
                 effectiveness_score=anomaly.confidence,
                 confidence_level=anomaly.confidence,
                 tags=["anomaly", "detection", anomaly.anomaly_type.value],
                 created_at=datetime.now(),
-                updated_at=datetime.now()
+                updated_at=datetime.now(),
             )
 
             return await self._store_experience(experience)
@@ -269,19 +274,19 @@ class ExperienceMemoryIntegration:
                     "status": exercise_result.status.value,
                     "recommendations": exercise_result.recommendations,
                     "red_team_results": len(exercise_result.red_team_results),
-                    "blue_team_results": len(exercise_result.blue_team_results)
+                    "blue_team_results": len(exercise_result.blue_team_results),
                 },
                 metadata={
                     "exercise_id": exercise_result.exercise_id,
                     "start_time": exercise_result.start_time.isoformat(),
                     "end_time": exercise_result.end_time.isoformat(),
-                    "metadata": exercise_result.metadata
+                    "metadata": exercise_result.metadata,
                 },
                 effectiveness_score=exercise_result.overall_score,
                 confidence_level=0.9,
                 tags=["exercise", "coordination", "red_team", "blue_team"],
                 created_at=datetime.now(),
-                updated_at=datetime.now()
+                updated_at=datetime.now(),
             )
 
             return await self._store_experience(experience)
@@ -299,14 +304,14 @@ class ExperienceMemoryIntegration:
             # Store in layered memory
             if self.memory_manager:
                 await self.memory_manager.store_experience(
-                    experience_type='SECURITY_TESTING',
+                    experience_type="SECURITY_TESTING",
                     data=asdict(experience),
-                    tags=experience.tags
+                    tags=experience.tags,
                 )
 
             # Update statistics
-            self.stats['total_experiences'] += 1
-            self.stats['stored_experiences'] += 1
+            self.stats["total_experiences"] += 1
+            self.stats["stored_experiences"] += 1
 
             # Extract learning patterns
             await self._extract_learning_patterns(experience)
@@ -318,12 +323,14 @@ class ExperienceMemoryIntegration:
             self.logger.error(f"Error storing experience: {e}")
             return False
 
-    async def retrieve_experiences(self,
-                                 experience_type: ExperienceType = None,
-                                 category: LearningCategory = None,
-                                 tags: list[str] = None,
-                                 min_effectiveness: float = 0.0,
-                                 limit: int = 100) -> list[SecurityExperience]:
+    async def retrieve_experiences(
+        self,
+        experience_type: ExperienceType = None,
+        category: LearningCategory = None,
+        tags: list[str] = None,
+        min_effectiveness: float = 0.0,
+        limit: int = 100,
+    ) -> list[SecurityExperience]:
         """Truy xuất kinh nghiệm"""
         try:
             experiences = []
@@ -342,7 +349,9 @@ class ExperienceMemoryIntegration:
                 experiences.append(exp)
 
             # Sort by effectiveness and recency
-            experiences.sort(key=lambda x: (x.effectiveness_score, x.created_at), reverse=True)
+            experiences.sort(
+                key=lambda x: (x.effectiveness_score, x.created_at), reverse=True
+            )
 
             # Limit results
             experiences = experiences[:limit]
@@ -352,7 +361,7 @@ class ExperienceMemoryIntegration:
                 exp.access_count += 1
 
             # Update statistics
-            self.stats['retrieved_experiences'] += len(experiences)
+            self.stats["retrieved_experiences"] += len(experiences)
 
             return experiences
 
@@ -374,12 +383,12 @@ class ExperienceMemoryIntegration:
                         id=pattern_id,
                         pattern_type="attack",
                         description=f"Attack pattern: {data.get('attack_type', 'unknown')}",
-                        conditions={"attack_type": data.get('attack_type')},
-                        outcomes={"effectiveness": data.get('effectiveness', 0.0)},
+                        conditions={"attack_type": data.get("attack_type")},
+                        outcomes={"effectiveness": data.get("effectiveness", 0.0)},
                         confidence=0.5,
                         frequency=1,
                         last_seen=datetime.now(),
-                        tags=["attack", "pattern"]
+                        tags=["attack", "pattern"],
                     )
                 else:
                     pattern = self.learning_patterns[pattern_id]
@@ -395,12 +404,14 @@ class ExperienceMemoryIntegration:
                         id=pattern_id,
                         pattern_type="defense",
                         description=f"Defense pattern: {data.get('action', 'unknown')}",
-                        conditions={"action": data.get('action')},
-                        outcomes={"effectiveness": data.get('effectiveness_score', 0.0)},
+                        conditions={"action": data.get("action")},
+                        outcomes={
+                            "effectiveness": data.get("effectiveness_score", 0.0)
+                        },
                         confidence=0.5,
                         frequency=1,
                         last_seen=datetime.now(),
-                        tags=["defense", "pattern"]
+                        tags=["defense", "pattern"],
                     )
                 else:
                     pattern = self.learning_patterns[pattern_id]
@@ -410,12 +421,14 @@ class ExperienceMemoryIntegration:
 
             # Update pattern frequency
             self.pattern_frequency[pattern_id] += 1
-            self.stats['learning_patterns'] = len(self.learning_patterns)
+            self.stats["learning_patterns"] = len(self.learning_patterns)
 
         except Exception as e:
             self.logger.error(f"Error extracting learning patterns: {e}")
 
-    async def predict_threat_likelihood(self, context: dict[str, Any]) -> dict[str, float]:
+    async def predict_threat_likelihood(
+        self, context: dict[str, Any]
+    ) -> dict[str, float]:
         """Dự đoán khả năng đe dọa"""
         try:
             if not self.prediction_engine:
@@ -423,8 +436,7 @@ class ExperienceMemoryIntegration:
 
             # Get relevant experiences
             experiences = await self.retrieve_experiences(
-                experience_type=ExperienceType.THREAT_INTELLIGENCE,
-                limit=50
+                experience_type=ExperienceType.THREAT_INTELLIGENCE, limit=50
             )
 
             # Analyze patterns
@@ -432,8 +444,8 @@ class ExperienceMemoryIntegration:
 
             for exp in experiences:
                 data = exp.data
-                anomaly_type = data.get('anomaly_type', 'unknown')
-                confidence = data.get('confidence', 0.0)
+                anomaly_type = data.get("anomaly_type", "unknown")
+                confidence = data.get("confidence", 0.0)
 
                 if anomaly_type not in threat_scores:
                     threat_scores[anomaly_type] = []
@@ -450,7 +462,9 @@ class ExperienceMemoryIntegration:
             self.logger.error(f"Error predicting threat likelihood: {e}")
             return {"unknown": 0.5}
 
-    async def recommend_attack_strategy(self, target: str, context: dict[str, Any]) -> list[dict[str, Any]]:
+    async def recommend_attack_strategy(
+        self, target: str, context: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """Khuyến nghị chiến lược tấn công"""
         try:
             # Get successful attack experiences
@@ -458,24 +472,26 @@ class ExperienceMemoryIntegration:
                 experience_type=ExperienceType.ATTACK_PATTERN,
                 category=LearningCategory.RED_TEAM,
                 min_effectiveness=0.7,
-                limit=20
+                limit=20,
             )
 
             recommendations = []
 
             for exp in experiences:
                 data = exp.data
-                if data.get('effectiveness', 0.0) > 0.7:
-                    recommendations.append({
-                        "attack_type": data.get('attack_type'),
-                        "effectiveness": data.get('effectiveness'),
-                        "confidence": exp.confidence_level,
-                        "description": exp.description,
-                        "tags": exp.tags
-                    })
+                if data.get("effectiveness", 0.0) > 0.7:
+                    recommendations.append(
+                        {
+                            "attack_type": data.get("attack_type"),
+                            "effectiveness": data.get("effectiveness"),
+                            "confidence": exp.confidence_level,
+                            "description": exp.description,
+                            "tags": exp.tags,
+                        }
+                    )
 
             # Sort by effectiveness
-            recommendations.sort(key=lambda x: x['effectiveness'], reverse=True)
+            recommendations.sort(key=lambda x: x["effectiveness"], reverse=True)
 
             return recommendations[:5]  # Top 5 recommendations
 
@@ -483,7 +499,9 @@ class ExperienceMemoryIntegration:
             self.logger.error(f"Error recommending attack strategy: {e}")
             return []
 
-    async def recommend_defense_strategy(self, threat_type: str, context: dict[str, Any]) -> list[dict[str, Any]]:
+    async def recommend_defense_strategy(
+        self, threat_type: str, context: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """Khuyến nghị chiến lược phòng thủ"""
         try:
             # Get successful defense experiences
@@ -491,24 +509,26 @@ class ExperienceMemoryIntegration:
                 experience_type=ExperienceType.DEFENSE_STRATEGY,
                 category=LearningCategory.BLUE_TEAM,
                 min_effectiveness=0.7,
-                limit=20
+                limit=20,
             )
 
             recommendations = []
 
             for exp in experiences:
                 data = exp.data
-                if data.get('effectiveness_score', 0.0) > 0.7:
-                    recommendations.append({
-                        "action": data.get('action'),
-                        "effectiveness": data.get('effectiveness_score'),
-                        "confidence": exp.confidence_level,
-                        "description": exp.description,
-                        "tags": exp.tags
-                    })
+                if data.get("effectiveness_score", 0.0) > 0.7:
+                    recommendations.append(
+                        {
+                            "action": data.get("action"),
+                            "effectiveness": data.get("effectiveness_score"),
+                            "confidence": exp.confidence_level,
+                            "description": exp.description,
+                            "tags": exp.tags,
+                        }
+                    )
 
             # Sort by effectiveness
-            recommendations.sort(key=lambda x: x['effectiveness'], reverse=True)
+            recommendations.sort(key=lambda x: x["effectiveness"], reverse=True)
 
             return recommendations[:5]  # Top 5 recommendations
 
@@ -520,7 +540,7 @@ class ExperienceMemoryIntegration:
         """Tạo ID cho kinh nghiệm"""
         try:
             # Create hash from object data
-            obj_str = str(obj.__dict__) if hasattr(obj, '__dict__') else str(obj)
+            obj_str = str(obj.__dict__) if hasattr(obj, "__dict__") else str(obj)
             obj_hash = hashlib.sha256(obj_str.encode()).hexdigest()[:12]
             timestamp = int(time.time())
             return f"exp_{timestamp}_{obj_hash}"
@@ -530,25 +550,27 @@ class ExperienceMemoryIntegration:
     def get_learning_statistics(self) -> dict[str, Any]:
         """Lấy thống kê học tập"""
         return {
-            'stats': self.stats.copy(),
-            'cached_experiences': len(self.experience_cache),
-            'learning_patterns': len(self.learning_patterns),
-            'pattern_frequency': dict(self.pattern_frequency),
-            'memory_available': self.memory_manager is not None,
-            'prediction_available': self.prediction_engine is not None
+            "stats": self.stats.copy(),
+            "cached_experiences": len(self.experience_cache),
+            "learning_patterns": len(self.learning_patterns),
+            "pattern_frequency": dict(self.pattern_frequency),
+            "memory_available": self.memory_manager is not None,
+            "prediction_available": self.prediction_engine is not None,
         }
 
     async def export_experiences(self, file_path: str) -> bool:
         """Xuất kinh nghiệm ra file"""
         try:
             export_data = {
-                'experiences': [asdict(exp) for exp in self.experience_cache.values()],
-                'patterns': [asdict(pattern) for pattern in self.learning_patterns.values()],
-                'statistics': self.stats,
-                'exported_at': datetime.now().isoformat()
+                "experiences": [asdict(exp) for exp in self.experience_cache.values()],
+                "patterns": [
+                    asdict(pattern) for pattern in self.learning_patterns.values()
+                ],
+                "statistics": self.stats,
+                "exported_at": datetime.now().isoformat(),
             }
 
-            with open(file_path, 'w', encoding='utf-8') as f:
+            with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(export_data, f, indent=2, ensure_ascii=False, default=str)
 
             self.logger.info(f"Exported experiences to: {file_path}")
@@ -561,16 +583,16 @@ class ExperienceMemoryIntegration:
     async def import_experiences(self, file_path: str) -> bool:
         """Nhập kinh nghiệm từ file"""
         try:
-            with open(file_path, encoding='utf-8') as f:
+            with open(file_path, encoding="utf-8") as f:
                 import_data = json.load(f)
 
             # Import experiences
-            for exp_data in import_data.get('experiences', []):
+            for exp_data in import_data.get("experiences", []):
                 experience = SecurityExperience(**exp_data)
                 self.experience_cache[experience.id] = experience
 
             # Import patterns
-            for pattern_data in import_data.get('patterns', []):
+            for pattern_data in import_data.get("patterns", []):
                 pattern = LearningPattern(**pattern_data)
                 self.learning_patterns[pattern.id] = pattern
 
@@ -589,11 +611,7 @@ async def demo_experience_memory_integration():
     print("=" * 50)
 
     # Initialize integration
-    config = {
-        'cache_size': 1000,
-        'pattern_threshold': 0.7,
-        'learning_rate': 0.1
-    }
+    config = {"cache_size": 1000, "pattern_threshold": 0.7, "learning_rate": 0.1}
 
     integration = ExperienceMemoryIntegration(config)
 
@@ -603,8 +621,8 @@ async def demo_experience_memory_integration():
     # Mock attack result
     class MockAttackResult:
         def __init__(self):
-            self.attack_type = type('AttackType', (), {'value': 'sql_injection'})()
-            self.status = type('Status', (), {'value': 'success'})()
+            self.attack_type = type("AttackType", (), {"value": "sql_injection"})()
+            self.status = type("Status", (), {"value": "success"})()
             self.payload = "SELECT * FROM users"
             self.response = "200 OK"
             self.execution_time = 1.5
@@ -616,7 +634,7 @@ async def demo_experience_memory_integration():
     # Mock defense result
     class MockDefenseResult:
         def __init__(self):
-            self.action = type('Action', (), {'value': 'block_ip'})()
+            self.action = type("Action", (), {"value": "block_ip"})()
             self.status = "success"
             self.effectiveness_score = 0.9
             self.details = {"blocked_ip": "192.168.1.100"}

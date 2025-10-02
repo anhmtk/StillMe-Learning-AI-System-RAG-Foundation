@@ -4,10 +4,10 @@ from .decision_engine import DecisionEngine, DecisionStatus, DecisionType, RiskL
 from .ethical_guardrails import EthicalGuardrails, EthicalViolation
 
 __all__ = [
-    'DecisionEngine',
-    'DecisionStatus',
-    'DecisionType',
-    'RiskLevel',
-    'EthicalGuardrails',
-    'EthicalViolation'
+    "DecisionEngine",
+    "DecisionStatus",
+    "DecisionType",
+    "RiskLevel",
+    "EthicalGuardrails",
+    "EthicalViolation",
 ]

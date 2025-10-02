@@ -2,7 +2,4 @@
 
 from .safe_attack_simulator import AttackType, SafeAttackSimulator
 
-__all__ = [
-    'SafeAttackSimulator',
-    'AttackType'
-]
+__all__ = ["SafeAttackSimulator", "AttackType"]

@@ -17,10 +17,12 @@ from typing import Any, Optional, TypeVar
 
 import aiofiles
 
-T = TypeVar('T')
+T = TypeVar("T")
+
 
 class StateType(Enum):
     """State types for different AgentDev components"""
+
     TASK_STATE = "task_state"
     EXECUTION_STATE = "execution_state"
     PLAN_STATE = "plan_state"
@@ -29,9 +31,11 @@ class StateType(Enum):
     USER_SESSION = "user_session"
     SYSTEM_STATE = "system_state"
 
+
 @dataclass
 class StateSnapshot:
     """State snapshot for checkpointing"""
+
     snapshot_id: str
     state_type: StateType
     entity_id: str
@@ -40,9 +44,11 @@ class StateSnapshot:
     version: int
     metadata: Optional[dict[str, Any]] = None
 
+
 @dataclass
 class StateTransition:
     """State transition record"""
+
     transition_id: str
     entity_id: str
     from_state: Optional[str]
@@ -50,6 +56,7 @@ class StateTransition:
     timestamp: float
     reason: str
     data: Optional[dict[str, Any]] = None
+
 
 class StateManager:
     """Enterprise state manager with persistence, recovery, and versioning"""
@@ -59,10 +66,16 @@ class StateManager:
         self.snapshots: dict[str, list[StateSnapshot]] = {}
         self.transitions: dict[str, list[StateTransition]] = {}
         self.config = self._load_config(config_path)
-        self.persistence_enabled = self.config.get('persistence', {}).get('enabled', True)
-        self.state_dir = Path(self.config.get('persistence', {}).get('directory', '.agentdev/state'))
-        self.max_snapshots = self.config.get('max_snapshots', 100)
-        self.auto_checkpoint_interval = self.config.get('auto_checkpoint_interval', 300)  # 5 minutes
+        self.persistence_enabled = self.config.get("persistence", {}).get(
+            "enabled", True
+        )
+        self.state_dir = Path(
+            self.config.get("persistence", {}).get("directory", ".agentdev/state")
+        )
+        self.max_snapshots = self.config.get("max_snapshots", 100)
+        self.auto_checkpoint_interval = self.config.get(
+            "auto_checkpoint_interval", 300
+        )  # 5 minutes
         self.lock = threading.RLock()
         self.executor = ThreadPoolExecutor(max_workers=4)
         self.running = False
@@ -76,28 +89,36 @@ class StateManager:
 
         if config_file.exists():
             import yaml
+
             with open(config_file) as f:
                 return yaml.safe_load(f)
         else:
             return {
-                'persistence': {
-                    'enabled': True,
-                    'directory': '.agentdev/state',
-                    'format': 'json'  # json or pickle
+                "persistence": {
+                    "enabled": True,
+                    "directory": ".agentdev/state",
+                    "format": "json",  # json or pickle
                 },
-                'max_snapshots': 100,
-                'auto_checkpoint_interval': 300,
-                'compression': True
+                "max_snapshots": 100,
+                "auto_checkpoint_interval": 300,
+                "compression": True,
             }
 
-    def get_state(self, entity_id: str, state_type: StateType) -> Optional[dict[str, Any]]:
+    def get_state(
+        self, entity_id: str, state_type: StateType
+    ) -> Optional[dict[str, Any]]:
         """Get current state for an entity"""
         with self.lock:
             state_key = f"{state_type.value}:{entity_id}"
             return self.states.get(state_key, {}).copy()
 
-    def set_state(self, entity_id: str, state_type: StateType,
-                 state_data: dict[str, Any], reason: str = "manual_update") -> bool:
+    def set_state(
+        self,
+        entity_id: str,
+        state_type: StateType,
+        state_data: dict[str, Any],
+        reason: str = "manual_update",
+    ) -> bool:
         """Set state for an entity"""
         with self.lock:
             state_key = f"{state_type.value}:{entity_id}"
@@ -107,11 +128,11 @@ class StateManager:
             transition = StateTransition(
                 transition_id=str(uuid.uuid4()),
                 entity_id=entity_id,
-                from_state=old_state.get('current_state'),
-                to_state=state_data.get('current_state', 'unknown'),
+                from_state=old_state.get("current_state"),
+                to_state=state_data.get("current_state", "unknown"),
                 timestamp=time.time(),
                 reason=reason,
-                data=state_data
+                data=state_data,
             )
 
             if entity_id not in self.transitions:
@@ -121,15 +142,19 @@ class StateManager:
             # Update state
             self.states[state_key] = {
                 **state_data,
-                'last_updated': time.time(),
-                'version': old_state.get('version', 0) + 1
+                "last_updated": time.time(),
+                "version": old_state.get("version", 0) + 1,
             }
 
             print(f"📝 State updated: {entity_id} ({state_type.value}) - {reason}")
             return True
 
-    def create_checkpoint(self, entity_id: str, state_type: StateType,
-                         metadata: Optional[dict[str, Any]] = None) -> str:
+    def create_checkpoint(
+        self,
+        entity_id: str,
+        state_type: StateType,
+        metadata: Optional[dict[str, Any]] = None,
+    ) -> str:
         """Create a checkpoint/snapshot of current state"""
         with self.lock:
             state_key = f"{state_type.value}:{entity_id}"
@@ -144,8 +169,8 @@ class StateManager:
                 entity_id=entity_id,
                 data=current_state.copy(),
                 timestamp=time.time(),
-                version=current_state.get('version', 0),
-                metadata=metadata
+                version=current_state.get("version", 0),
+                metadata=metadata,
             )
 
             if entity_id not in self.snapshots:
@@ -155,9 +180,13 @@ class StateManager:
 
             # Limit snapshots
             if len(self.snapshots[entity_id]) > self.max_snapshots:
-                self.snapshots[entity_id] = self.snapshots[entity_id][-self.max_snapshots:]
+                self.snapshots[entity_id] = self.snapshots[entity_id][
+                    -self.max_snapshots :
+                ]
 
-            print(f"💾 Checkpoint created: {entity_id} (snapshot: {snapshot.snapshot_id})")
+            print(
+                f"💾 Checkpoint created: {entity_id} (snapshot: {snapshot.snapshot_id})"
+            )
             return snapshot.snapshot_id
 
     def restore_from_checkpoint(self, entity_id: str, snapshot_id: str) -> bool:
@@ -208,21 +237,23 @@ class StateManager:
 
             # Persist state
             state_file = self.state_dir / f"{state_key}.json"
-            async with aiofiles.open(state_file, 'w') as f:
+            async with aiofiles.open(state_file, "w") as f:
                 await f.write(json.dumps(state_data, indent=2))
 
             # Persist snapshots
             if entity_id in self.snapshots:
                 snapshots_file = self.state_dir / f"{entity_id}_snapshots.json"
                 snapshots_data = [asdict(snap) for snap in self.snapshots[entity_id]]
-                async with aiofiles.open(snapshots_file, 'w') as f:
+                async with aiofiles.open(snapshots_file, "w") as f:
                     await f.write(json.dumps(snapshots_data, indent=2))
 
             # Persist transitions
             if entity_id in self.transitions:
                 transitions_file = self.state_dir / f"{entity_id}_transitions.json"
-                transitions_data = [asdict(trans) for trans in self.transitions[entity_id]]
-                async with aiofiles.open(transitions_file, 'w') as f:
+                transitions_data = [
+                    asdict(trans) for trans in self.transitions[entity_id]
+                ]
+                async with aiofiles.open(transitions_file, "w") as f:
                     await f.write(json.dumps(transitions_data, indent=2))
 
         except Exception as e:
@@ -284,8 +315,11 @@ class StateManager:
                 # Create checkpoints for all active states
                 with self.lock:
                     for state_key, state_data in self.states.items():
-                        if time.time() - state_data.get('last_updated', 0) < self.auto_checkpoint_interval:
-                            state_type_str, entity_id = state_key.split(':', 1)
+                        if (
+                            time.time() - state_data.get("last_updated", 0)
+                            < self.auto_checkpoint_interval
+                        ):
+                            state_type_str, entity_id = state_key.split(":", 1)
                             state_type = StateType(state_type_str)
 
                             # Create checkpoint in background
@@ -300,9 +334,7 @@ class StateManager:
         """Create checkpoint asynchronously"""
         try:
             self.create_checkpoint(
-                entity_id,
-                state_type,
-                metadata={"auto_checkpoint": True}
+                entity_id, state_type, metadata={"auto_checkpoint": True}
             )
             await self.persist_state(entity_id, state_type)
         except Exception as e:
@@ -312,21 +344,25 @@ class StateManager:
         """Get state manager statistics"""
         with self.lock:
             total_states = len(self.states)
-            total_snapshots = sum(len(snapshots) for snapshots in self.snapshots.values())
-            total_transitions = sum(len(transitions) for transitions in self.transitions.values())
+            total_snapshots = sum(
+                len(snapshots) for snapshots in self.snapshots.values()
+            )
+            total_transitions = sum(
+                len(transitions) for transitions in self.transitions.values()
+            )
 
             state_types = {}
             for state_key in self.states.keys():
-                state_type = state_key.split(':', 1)[0]
+                state_type = state_key.split(":", 1)[0]
                 state_types[state_type] = state_types.get(state_type, 0) + 1
 
             return {
-                'total_states': total_states,
-                'total_snapshots': total_snapshots,
-                'total_transitions': total_transitions,
-                'state_types': state_types,
-                'entities_with_snapshots': len(self.snapshots),
-                'entities_with_transitions': len(self.transitions)
+                "total_states": total_states,
+                "total_snapshots": total_snapshots,
+                "total_transitions": total_transitions,
+                "state_types": state_types,
+                "entities_with_snapshots": len(self.snapshots),
+                "entities_with_transitions": len(self.transitions),
             }
 
     async def start(self):
@@ -347,14 +383,16 @@ class StateManager:
 
         # Persist all states
         for state_key in self.states.keys():
-            state_type_str, entity_id = state_key.split(':', 1)
+            state_type_str, entity_id = state_key.split(":", 1)
             state_type = StateType(state_type_str)
             await self.persist_state(entity_id, state_type)
 
         print("🛑 State Manager stopped")
 
+
 # Global state manager instance
 state_manager = StateManager()
+
 
 # Convenience functions for common state operations
 class TaskState:
@@ -367,18 +405,20 @@ class TaskState:
             entity_id=task_id,
             state_type=StateType.TASK_STATE,
             state_data={
-                'current_state': 'created',
-                'task_type': task_type,
-                'config': config,
-                'created_at': time.time(),
-                'steps_completed': 0,
-                'total_steps': 0
+                "current_state": "created",
+                "task_type": task_type,
+                "config": config,
+                "created_at": time.time(),
+                "steps_completed": 0,
+                "total_steps": 0,
             },
-            reason="task_created"
+            reason="task_created",
         )
 
     @staticmethod
-    def update_task_status(task_id: str, status: str, progress: Optional[dict[str, Any]] = None) -> bool:
+    def update_task_status(
+        task_id: str, status: str, progress: Optional[dict[str, Any]] = None
+    ) -> bool:
         """Update task status"""
         current_state = state_manager.get_state(task_id, StateType.TASK_STATE)
         if not current_state:
@@ -389,11 +429,11 @@ class TaskState:
             state_type=StateType.TASK_STATE,
             state_data={
                 **current_state,
-                'current_state': status,
-                'progress': progress or current_state.get('progress', {}),
-                'last_status_update': time.time()
+                "current_state": status,
+                "progress": progress or current_state.get("progress", {}),
+                "last_status_update": time.time(),
             },
-            reason=f"status_changed_to_{status}"
+            reason=f"status_changed_to_{status}",
         )
 
     @staticmethod
@@ -402,8 +442,9 @@ class TaskState:
         return state_manager.create_checkpoint(
             entity_id=task_id,
             state_type=StateType.TASK_STATE,
-            metadata={"checkpoint_type": "task_milestone"}
+            metadata={"checkpoint_type": "task_milestone"},
         )
+
 
 class ExecutionState:
     """Execution state management"""
@@ -415,15 +456,15 @@ class ExecutionState:
             entity_id=execution_id,
             state_type=StateType.EXECUTION_STATE,
             state_data={
-                'current_state': 'running',
-                'task_id': task_id,
-                'plan_id': plan_id,
-                'started_at': time.time(),
-                'current_step': 0,
-                'steps': [],
-                'errors': []
+                "current_state": "running",
+                "task_id": task_id,
+                "plan_id": plan_id,
+                "started_at": time.time(),
+                "current_step": 0,
+                "steps": [],
+                "errors": [],
             },
-            reason="execution_started"
+            reason="execution_started",
         )
 
     @staticmethod
@@ -433,25 +474,21 @@ class ExecutionState:
         if not current_state:
             return False
 
-        steps = current_state.get('steps', [])
-        steps.append({
-            **step_data,
-            'timestamp': time.time(),
-            'step_number': len(steps) + 1
-        })
+        steps = current_state.get("steps", [])
+        steps.append(
+            {**step_data, "timestamp": time.time(), "step_number": len(steps) + 1}
+        )
 
         return state_manager.set_state(
             entity_id=execution_id,
             state_type=StateType.EXECUTION_STATE,
-            state_data={
-                **current_state,
-                'steps': steps,
-                'current_step': len(steps)
-            },
-            reason="step_added"
+            state_data={**current_state, "steps": steps, "current_step": len(steps)},
+            reason="step_added",
         )
 
+
 if __name__ == "__main__":
+
     async def main():
         # Example usage
         manager = StateManager()
@@ -471,11 +508,10 @@ if __name__ == "__main__":
         ExecutionState.start_execution("exec_456", "task_123", "plan_789")
 
         # Add execution step
-        ExecutionState.add_execution_step("exec_456", {
-            "action": "validate_config",
-            "status": "completed",
-            "duration": 1.5
-        })
+        ExecutionState.add_execution_step(
+            "exec_456",
+            {"action": "validate_config", "status": "completed", "duration": 1.5},
+        )
 
         # Get statistics
         stats = manager.get_state_statistics()

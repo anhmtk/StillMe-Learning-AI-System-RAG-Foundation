@@ -1,6 +1,7 @@
 """
 Observability - Metrics, Logging, and Shadow Evaluation
 """
+
 import json
 import logging
 import threading
@@ -11,9 +12,11 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class ReflexMetrics:
     """Metrics for reflex engine performance"""
+
     reflex_hits: int = 0
     reflex_misses: int = 0
     safety_fails: int = 0
@@ -37,7 +40,11 @@ class ReflexMetrics:
     def recall(self) -> float:
         """Calculate recall: TP / (TP + FN)"""
         total_actual_positive = self.true_positives + self.false_negatives
-        return self.true_positives / total_actual_positive if total_actual_positive > 0 else 0.0
+        return (
+            self.true_positives / total_actual_positive
+            if total_actual_positive > 0
+            else 0.0
+        )
 
     def f1_score(self) -> float:
         """Calculate F1 score: 2 * (precision * recall) / (precision + recall)"""
@@ -49,6 +56,7 @@ class ReflexMetrics:
         """Calculate false positive rate: FP / (FP + TN)"""
         total_negative = self.false_positives + self.true_negatives
         return self.false_positives / total_negative if total_negative > 0 else 0.0
+
 
 class ProcessingTimeTracker:
     """Track processing times for percentile calculations"""
@@ -79,13 +87,16 @@ class ProcessingTimeTracker:
         with self.lock:
             return sum(self.times) / len(self.times) if self.times else 0.0
 
+
 class ShadowEvaluator:
     """Evaluate reflex engine performance in shadow mode"""
 
     def __init__(self, config: Optional[dict[str, Any]] = None):
         self.config = config or {}
         self.evaluation_window_hours = self.config.get("evaluation_window_hours", 24)
-        self.min_samples_for_evaluation = self.config.get("min_samples_for_evaluation", 100)
+        self.min_samples_for_evaluation = self.config.get(
+            "min_samples_for_evaluation", 100
+        )
 
         # Store evaluation samples
         self.samples: deque = deque(maxlen=10000)  # Keep last 10k samples
@@ -97,9 +108,15 @@ class ShadowEvaluator:
         self.fp_rate_threshold = self.config.get("fp_rate_threshold", 0.05)
         self.max_processing_time_ms = self.config.get("max_processing_time_ms", 10.0)
 
-    def add_sample(self, reflex_decision: str, reasoning_decision: str,
-                   processing_time_ms: float, scores: dict[str, float],
-                   trace_id: str, timestamp: Optional[float] = None):
+    def add_sample(
+        self,
+        reflex_decision: str,
+        reasoning_decision: str,
+        processing_time_ms: float,
+        scores: dict[str, float],
+        trace_id: str,
+        timestamp: Optional[float] = None,
+    ):
         """Add a shadow evaluation sample"""
         if timestamp is None:
             timestamp = time.time()
@@ -111,7 +128,7 @@ class ShadowEvaluator:
             "reasoning_decision": reasoning_decision,
             "processing_time_ms": processing_time_ms,
             "scores": scores.copy(),
-            "reflex_correct": reflex_decision == reasoning_decision
+            "reflex_correct": reflex_decision == reasoning_decision,
         }
 
         with self.lock:
@@ -136,7 +153,7 @@ class ShadowEvaluator:
                 "evaluation_ready": False,
                 "sample_count": len(recent_samples),
                 "min_samples_required": self.min_samples_for_evaluation,
-                "message": "Insufficient samples for evaluation"
+                "message": "Insufficient samples for evaluation",
             }
 
         # Calculate metrics
@@ -163,16 +180,18 @@ class ShadowEvaluator:
         processing_times = [s["processing_time_ms"] for s in recent_samples]
         if processing_times:
             sorted_times = sorted(processing_times)
-            metrics.avg_processing_time_ms = sum(processing_times) / len(processing_times)
+            metrics.avg_processing_time_ms = sum(processing_times) / len(
+                processing_times
+            )
             metrics.p95_processing_time_ms = sorted_times[int(0.95 * len(sorted_times))]
             metrics.p99_processing_time_ms = sorted_times[int(0.99 * len(sorted_times))]
 
         # Check if ready for production
         ready_for_production = (
-            metrics.precision() >= self.precision_threshold and
-            metrics.recall() >= self.recall_threshold and
-            metrics.fp_rate() <= self.fp_rate_threshold and
-            metrics.p95_processing_time_ms <= self.max_processing_time_ms
+            metrics.precision() >= self.precision_threshold
+            and metrics.recall() >= self.recall_threshold
+            and metrics.fp_rate() <= self.fp_rate_threshold
+            and metrics.p95_processing_time_ms <= self.max_processing_time_ms
         )
 
         return {
@@ -186,16 +205,16 @@ class ShadowEvaluator:
                 "fp_rate": metrics.fp_rate(),
                 "avg_processing_time_ms": metrics.avg_processing_time_ms,
                 "p95_processing_time_ms": metrics.p95_processing_time_ms,
-                "p99_processing_time_ms": metrics.p99_processing_time_ms
+                "p99_processing_time_ms": metrics.p99_processing_time_ms,
             },
             "thresholds": {
                 "precision_threshold": self.precision_threshold,
                 "recall_threshold": self.recall_threshold,
                 "fp_rate_threshold": self.fp_rate_threshold,
-                "max_processing_time_ms": self.max_processing_time_ms
+                "max_processing_time_ms": self.max_processing_time_ms,
             },
             "ready_for_production": ready_for_production,
-            "evaluation_window_hours": hours or self.evaluation_window_hours
+            "evaluation_window_hours": hours or self.evaluation_window_hours,
         }
 
     def generate_report(self, hours: Optional[int] = None) -> str:
@@ -217,7 +236,11 @@ class ShadowEvaluator:
         thresholds = evaluation["thresholds"]
 
         # Determine status
-        status = "✅ READY FOR PRODUCTION" if evaluation["ready_for_production"] else "⚠️ NOT READY"
+        status = (
+            "✅ READY FOR PRODUCTION"
+            if evaluation["ready_for_production"]
+            else "⚠️ NOT READY"
+        )
 
         return f"""# Reflex Engine Shadow Evaluation Report
 
@@ -264,6 +287,7 @@ class ShadowEvaluator:
 Generated: {time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime())}
 """
 
+
 class ObservabilityManager:
     """Central observability manager for reflex engine"""
 
@@ -271,14 +295,18 @@ class ObservabilityManager:
         self.config = config or {}
         self.metrics = ReflexMetrics()
         self.processing_tracker = ProcessingTimeTracker()
-        self.shadow_evaluator = ShadowEvaluator(self.config.get("shadow_evaluation", {}))
+        self.shadow_evaluator = ShadowEvaluator(
+            self.config.get("shadow_evaluation", {})
+        )
         self.lock = threading.Lock()
 
         # Logging configuration
         self.log_level = self.config.get("log_level", "INFO")
         self.log_format = self.config.get("log_format", "json")
         self.enable_metrics = self.config.get("enable_metrics", True)
-        self.enable_shadow_evaluation = self.config.get("enable_shadow_evaluation", True)
+        self.enable_shadow_evaluation = self.config.get(
+            "enable_shadow_evaluation", True
+        )
 
         # Setup structured logging
         self._setup_logging()
@@ -288,12 +316,12 @@ class ObservabilityManager:
         if self.log_format == "json":
             # JSON formatter for structured logs
             formatter = logging.Formatter(
-                '%(message)s'  # Just the message, assuming it's already JSON
+                "%(message)s"  # Just the message, assuming it's already JSON
             )
         else:
             # Standard formatter
             formatter = logging.Formatter(
-                '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+                "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
             )
 
         # Setup handler
@@ -301,15 +329,23 @@ class ObservabilityManager:
         handler.setFormatter(formatter)
 
         # Setup logger
-        obs_logger = logging.getLogger('stillme.observability')
+        obs_logger = logging.getLogger("stillme.observability")
         obs_logger.setLevel(getattr(logging, self.log_level.upper()))
         obs_logger.addHandler(handler)
         obs_logger.propagate = False  # Don't propagate to root logger
 
-    def log_reflex_decision(self, trace_id: str, decision: str, confidence: float,
-                           processing_time_ms: float, scores: dict[str, float],
-                           why_reflex: dict[str, Any], user_id: Optional[str] = None,
-                           tenant_id: Optional[str] = None, shadow_mode: bool = True):
+    def log_reflex_decision(
+        self,
+        trace_id: str,
+        decision: str,
+        confidence: float,
+        processing_time_ms: float,
+        scores: dict[str, float],
+        why_reflex: dict[str, Any],
+        user_id: Optional[str] = None,
+        tenant_id: Optional[str] = None,
+        shadow_mode: bool = True,
+    ):
         """Log a reflex decision with full context"""
 
         log_entry = {
@@ -323,24 +359,33 @@ class ObservabilityManager:
             "processing_time_ms": processing_time_ms,
             "shadow_mode": shadow_mode,
             "scores": scores,
-            "why_reflex": why_reflex
+            "why_reflex": why_reflex,
         }
 
         # Log to structured logger
-        obs_logger = logging.getLogger('stillme.observability')
+        obs_logger = logging.getLogger("stillme.observability")
         obs_logger.info(json.dumps(log_entry, ensure_ascii=False))
 
         # Update metrics
         if self.enable_metrics:
             self._update_metrics(decision, processing_time_ms)
 
-    def log_shadow_evaluation(self, trace_id: str, reflex_decision: str,
-                             reasoning_decision: str, processing_time_ms: float,
-                             scores: dict[str, float]):
+    def log_shadow_evaluation(
+        self,
+        trace_id: str,
+        reflex_decision: str,
+        reasoning_decision: str,
+        processing_time_ms: float,
+        scores: dict[str, float],
+    ):
         """Log shadow evaluation sample"""
         if self.enable_shadow_evaluation:
             self.shadow_evaluator.add_sample(
-                reflex_decision, reasoning_decision, processing_time_ms, scores, trace_id
+                reflex_decision,
+                reasoning_decision,
+                processing_time_ms,
+                scores,
+                trace_id,
             )
 
     def _update_metrics(self, decision: str, processing_time_ms: float):
@@ -355,8 +400,12 @@ class ObservabilityManager:
 
             self.processing_tracker.add_time(processing_time_ms)
             self.metrics.avg_processing_time_ms = self.processing_tracker.get_average()
-            self.metrics.p95_processing_time_ms = self.processing_tracker.get_percentile(95)
-            self.metrics.p99_processing_time_ms = self.processing_tracker.get_percentile(99)
+            self.metrics.p95_processing_time_ms = (
+                self.processing_tracker.get_percentile(95)
+            )
+            self.metrics.p99_processing_time_ms = (
+                self.processing_tracker.get_percentile(99)
+            )
 
     def get_metrics(self) -> dict[str, Any]:
         """Get current metrics"""
@@ -376,4 +425,6 @@ class ObservabilityManager:
         with self.lock:
             self.metrics = ReflexMetrics()
             self.processing_tracker = ProcessingTimeTracker()
-            self.shadow_evaluator = ShadowEvaluator(self.config.get("shadow_evaluation", {}))
+            self.shadow_evaluator = ShadowEvaluator(
+                self.config.get("shadow_evaluation", {})
+            )

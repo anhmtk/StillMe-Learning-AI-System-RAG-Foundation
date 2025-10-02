@@ -19,7 +19,7 @@ def create_zip():
         print(f"🗑️ Removed existing {zip_path}")
 
     # Create ZIP file
-    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
         # Add all files from deployment_package
         for root, _dirs, files in os.walk("deployment_package"):
             for file in files:
@@ -34,6 +34,7 @@ def create_zip():
 
     print(f"🎉 ZIP created successfully: {zip_path} ({size_mb:.1f} MB)")
     return True
+
 
 if __name__ == "__main__":
     create_zip()

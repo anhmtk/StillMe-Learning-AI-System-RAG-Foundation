@@ -33,9 +33,11 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class Metric:
     """Single metric record"""
+
     name: str
     value: float
     unit: str = ""
@@ -43,9 +45,11 @@ class Metric:
     ts: Optional[datetime] = None
     metadata: Optional[dict[str, Any]] = None
 
+
 @dataclass
 class Event:
     """Event record for JSONL logging"""
+
     ts: datetime
     session_id: str
     stage: str
@@ -53,6 +57,7 @@ class Event:
     event: str
     meta: dict[str, Any]
     metrics: dict[str, Any]
+
 
 class MetricsEmitter:
     """
@@ -62,11 +67,13 @@ class MetricsEmitter:
     và privacy protection cho learning dashboard.
     """
 
-    def __init__(self,
-                 db_path: str = "data/metrics/metrics.db",
-                 events_dir: str = "data/metrics/events",
-                 batch_size: int = 100,
-                 flush_interval: float = 5.0):
+    def __init__(
+        self,
+        db_path: str = "data/metrics/metrics.db",
+        events_dir: str = "data/metrics/events",
+        batch_size: int = 100,
+        flush_interval: float = 5.0,
+    ):
         self.db_path = db_path
         self.events_dir = Path(events_dir)
         self.events_dir.mkdir(parents=True, exist_ok=True)
@@ -159,8 +166,12 @@ class MetricsEmitter:
         """)
 
         # Indexes
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_runs_session_id ON runs(session_id)")
-        cursor.execute("CREATE INDEX IF NOT EXISTS idx_metrics_run_id ON metrics(run_id)")
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_runs_session_id ON runs(session_id)"
+        )
+        cursor.execute(
+            "CREATE INDEX IF NOT EXISTS idx_metrics_run_id ON metrics(run_id)"
+        )
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_metrics_name ON metrics(name)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_metrics_ts ON metrics(ts)")
         cursor.execute("CREATE INDEX IF NOT EXISTS idx_rollups_date ON rollups(date)")
@@ -170,11 +181,9 @@ class MetricsEmitter:
 
         logger.info("Metrics database schema initialized")
 
-    def start_session(self,
-                     stage: str,
-                     notes: str = "",
-                     version: str = "",
-                     git_sha: str = "") -> str:
+    def start_session(
+        self, stage: str, notes: str = "", version: str = "", git_sha: str = ""
+    ) -> str:
         """Bắt đầu session mới"""
         with self._lock:
             self.session_id = f"sess_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:4]}"
@@ -184,28 +193,33 @@ class MetricsEmitter:
             # Insert into database
             conn = sqlite3.connect(self.db_path)
             cursor = conn.cursor()
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO runs (session_id, started_at, git_sha, version, stage, notes)
                 VALUES (?, ?, ?, ?, ?, ?)
-            """, (
-                self.session_id,
-                self.session_start.isoformat(),
-                git_sha,
-                version,
-                stage,
-                notes
-            ))
+            """,
+                (
+                    self.session_id,
+                    self.session_start.isoformat(),
+                    git_sha,
+                    version,
+                    stage,
+                    notes,
+                ),
+            )
             conn.commit()
             conn.close()
 
             logger.info(f"Session started: {self.session_id} ({stage})")
             return self.session_id
 
-    def log_event(self,
-                  event: str,
-                  component: str,
-                  metrics: Optional[Mapping[str, Any]] = None,
-                  meta: Optional[Mapping[str, Any]] = None):
+    def log_event(
+        self,
+        event: str,
+        component: str,
+        metrics: Optional[Mapping[str, Any]] = None,
+        meta: Optional[Mapping[str, Any]] = None,
+    ):
         """Ghi event vào buffer"""
         if not self.session_id:
             logger.warning("No active session, creating default session")
@@ -218,7 +232,7 @@ class MetricsEmitter:
             component=component,
             event=event,
             meta=dict(meta) if meta else {},
-            metrics=dict(metrics) if metrics else {}
+            metrics=dict(metrics) if metrics else {},
         )
 
         with self._lock:
@@ -254,15 +268,15 @@ class MetricsEmitter:
             self.event_buffer.clear()
 
         # Write to JSONL
-        today = datetime.now().strftime('%Y-%m-%d')
+        today = datetime.now().strftime("%Y-%m-%d")
         jsonl_file = self.events_dir / f"{today}.jsonl"
 
         try:
-            with open(jsonl_file, 'a', encoding='utf-8') as f:
+            with open(jsonl_file, "a", encoding="utf-8") as f:
                 for event in events_to_flush:
                     event_dict = asdict(event)
-                    event_dict['ts'] = event.ts.isoformat()
-                    f.write(json.dumps(event_dict, ensure_ascii=False) + '\n')
+                    event_dict["ts"] = event.ts.isoformat()
+                    f.write(json.dumps(event_dict, ensure_ascii=False) + "\n")
 
             logger.debug(f"Flushed {len(events_to_flush)} events to {jsonl_file}")
         except Exception as e:
@@ -282,7 +296,9 @@ class MetricsEmitter:
             cursor = conn.cursor()
 
             # Get run_id for current session
-            cursor.execute("SELECT id FROM runs WHERE session_id = ?", (self.session_id,))
+            cursor.execute(
+                "SELECT id FROM runs WHERE session_id = ?", (self.session_id,)
+            )
             run_id = cursor.fetchone()
             if not run_id:
                 logger.error(f"No run found for session {self.session_id}")
@@ -292,18 +308,21 @@ class MetricsEmitter:
 
             # Insert metrics
             for metric in metrics_to_flush:
-                cursor.execute("""
+                cursor.execute(
+                    """
                     INSERT INTO metrics (run_id, name, value, unit, tag, ts, metadata)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
-                """, (
-                    run_id,
-                    metric.name,
-                    metric.value,
-                    metric.unit,
-                    metric.tag,
-                    metric.ts.isoformat(),
-                    json.dumps(metric.metadata) if metric.metadata else None
-                ))
+                """,
+                    (
+                        run_id,
+                        metric.name,
+                        metric.value,
+                        metric.unit,
+                        metric.tag,
+                        metric.ts.isoformat(),
+                        json.dumps(metric.metadata) if metric.metadata else None,
+                    ),
+                )
 
             conn.commit()
             conn.close()
@@ -358,16 +377,21 @@ class MetricsEmitter:
 
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
-        cursor.execute("""
+        cursor.execute(
+            """
             UPDATE runs
             SET ended_at = ?, success = ?, notes = ?
             WHERE session_id = ?
-        """, (end_time.isoformat(), success, notes, self.session_id))
+        """,
+            (end_time.isoformat(), success, notes, self.session_id),
+        )
         conn.commit()
         conn.close()
 
         duration = end_time - self.session_start if self.session_start else timedelta(0)
-        logger.info(f"Session ended: {self.session_id} (success={success}, duration={duration})")
+        logger.info(
+            f"Session ended: {self.session_id} (success={success}, duration={duration})"
+        )
 
         # Reset session
         self.session_id = None
@@ -387,11 +411,17 @@ class MetricsEmitter:
         cursor.fetchone()
 
         # Get metrics count
-        cursor.execute("SELECT COUNT(*) FROM metrics WHERE run_id = (SELECT id FROM runs WHERE session_id = ?)", (self.session_id,))
+        cursor.execute(
+            "SELECT COUNT(*) FROM metrics WHERE run_id = (SELECT id FROM runs WHERE session_id = ?)",
+            (self.session_id,),
+        )
         metrics_count = cursor.fetchone()[0]
 
         # Get errors count
-        cursor.execute("SELECT COUNT(*) FROM errors WHERE run_id = (SELECT id FROM runs WHERE session_id = ?)", (self.session_id,))
+        cursor.execute(
+            "SELECT COUNT(*) FROM errors WHERE run_id = (SELECT id FROM runs WHERE session_id = ?)",
+            (self.session_id,),
+        )
         errors_count = cursor.fetchone()[0]
 
         conn.close()
@@ -399,14 +429,18 @@ class MetricsEmitter:
         return {
             "session_id": self.session_id,
             "stage": self.current_stage,
-            "started_at": self.session_start.isoformat() if self.session_start else None,
+            "started_at": self.session_start.isoformat()
+            if self.session_start
+            else None,
             "metrics_count": metrics_count,
             "errors_count": errors_count,
-            "buffer_size": len(self.event_buffer) + len(self.metric_buffer)
+            "buffer_size": len(self.event_buffer) + len(self.metric_buffer),
         }
+
 
 # Global instance
 _metrics_emitter_instance: Optional[MetricsEmitter] = None
+
 
 def get_metrics_emitter() -> MetricsEmitter:
     """Get global metrics emitter instance"""
@@ -415,7 +449,10 @@ def get_metrics_emitter() -> MetricsEmitter:
         _metrics_emitter_instance = MetricsEmitter()
     return _metrics_emitter_instance
 
-def initialize_metrics_emitter(config: Optional[dict[str, Any]] = None) -> MetricsEmitter:
+
+def initialize_metrics_emitter(
+    config: Optional[dict[str, Any]] = None,
+) -> MetricsEmitter:
     """Initialize global metrics emitter with config"""
     global _metrics_emitter_instance
     if config:

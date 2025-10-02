@@ -8,7 +8,9 @@ from enum import Enum
 
 class AgentMode(Enum):
     """Agent mode enum - MINIMAL CONTRACT derived from tests/usages"""
+
     SIMPLE = "simple"
     SENIOR = "senior"
+
 
 __all__ = ["AgentMode"]

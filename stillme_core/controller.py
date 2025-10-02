@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class AgentConfig:
     """Agent configuration"""
+
     name: str = "default_agent"
     max_iterations: int = 10
     timeout: float = 30.0
@@ -32,7 +33,9 @@ class AgentController:
         """Initialize Agent Controller"""
         self.config = config or AgentConfig()
         self.is_running = False
-        logger.warning("AgentController: Using stub implementation - not for production")
+        logger.warning(
+            "AgentController: Using stub implementation - not for production"
+        )
 
     async def start(self) -> bool:
         """Start agent"""
@@ -59,7 +62,7 @@ class AgentController:
                 "total_steps": 0,
                 "passed_steps": 0,
                 "total_duration_s": 0.0,
-                "goal": task
+                "goal": task,
             }
         # Check if task is about multiple steps
         elif "multiple" in task.lower():
@@ -73,7 +76,7 @@ class AgentController:
                         "duration_s": 0.1,
                         "action": "run_tests",
                         "exec_ok": True,
-                        "stdout_tail": "1 passed"
+                        "stdout_tail": "1 passed",
                     },
                     {
                         "id": 2,
@@ -82,14 +85,14 @@ class AgentController:
                         "duration_s": 0.1,
                         "action": "run_tests",
                         "exec_ok": False,
-                        "stdout_tail": "Test failed"
-                    }
+                        "stdout_tail": "Test failed",
+                    },
                 ],
                 "pass_rate": 0.5,
                 "total_steps": 2,
                 "passed_steps": 1,
                 "total_duration_s": 0.2,
-                "goal": task
+                "goal": task,
             }
         # Check if task is about no plan
         elif "no plan" in task.lower():
@@ -100,7 +103,7 @@ class AgentController:
                 "total_steps": 0,
                 "passed_steps": 0,
                 "total_duration_s": 0.0,
-                "goal": task
+                "goal": task,
             }
         # Check if task is about failing tests
         elif "failing" in task.lower():
@@ -114,14 +117,14 @@ class AgentController:
                         "duration_s": 0.1,
                         "action": "run_tests",
                         "exec_ok": False,
-                        "stdout_tail": "Test failed"
+                        "stdout_tail": "Test failed",
                     }
                 ],
                 "pass_rate": 0.0,
                 "total_steps": 1,
                 "passed_steps": 0,
                 "total_duration_s": 0.1,
-                "goal": task
+                "goal": task,
             }
         else:
             return {
@@ -134,14 +137,14 @@ class AgentController:
                         "duration_s": 0.1,
                         "action": "run_tests",
                         "exec_ok": True,
-                        "stdout_tail": "1 passed"
+                        "stdout_tail": "1 passed",
                     }
                 ],
                 "pass_rate": 1.0,
                 "total_steps": 1,
                 "passed_steps": 1,
                 "total_duration_s": 0.1,
-                "goal": task
+                "goal": task,
             }
 
     def get_status(self) -> dict[str, Any]:
@@ -149,7 +152,7 @@ class AgentController:
         return {
             "is_running": self.is_running,
             "config": self.config.__dict__,
-            "status": "stub"
+            "status": "stub",
         }
 
 
@@ -167,6 +170,7 @@ async def run_agent(task: str, config: Optional[AgentConfig] = None) -> dict[str
     finally:
         await controller.stop()
 
+
 def respond(request: str, context: Optional[dict[str, Any]] = None) -> str:
     """Global respond function for backward compatibility"""
     if not request:
@@ -177,12 +181,15 @@ def respond(request: str, context: Optional[dict[str, Any]] = None) -> str:
     logger.info(f"Generated response for request: {request[:30]}...")
     return response
 
+
 def answer(question: str, context: Optional[dict[str, Any]] = None) -> str:
     """Global answer function for backward compatibility"""
     if not question:
         return "No question provided"
 
     # Simple answer generation
-    answer = f"Answer: Based on your question '{question[:30]}...', here is the response..."
+    answer = (
+        f"Answer: Based on your question '{question[:30]}...', here is the response..."
+    )
     logger.info(f"Generated answer for question: {question[:30]}...")
     return answer

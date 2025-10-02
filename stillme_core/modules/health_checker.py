@@ -77,6 +77,7 @@ logger = logging.getLogger(__name__)
 
 class HealthStatus(Enum):
     """Health status enumeration"""
+
     HEALTHY = "healthy"
     WARNING = "warning"
     CRITICAL = "critical"
@@ -85,6 +86,7 @@ class HealthStatus(Enum):
 
 class CheckType(Enum):
     """Health check type enumeration"""
+
     SYSTEM = "system"
     MEMORY = "memory"
     CPU = "cpu"
@@ -96,6 +98,7 @@ class CheckType(Enum):
 @dataclass
 class HealthCheck:
     """Health check result"""
+
     check_type: CheckType
     status: HealthStatus
     message: str
@@ -113,6 +116,7 @@ class HealthCheck:
 @dataclass
 class HealthConfig:
     """Configuration for HealthChecker"""
+
     enabled: bool = True
     check_interval: int = 60  # seconds
     warning_thresholds: dict[str, float] = None
@@ -124,13 +128,13 @@ class HealthConfig:
             self.warning_thresholds = {
                 "cpu_percent": 80.0,
                 "memory_percent": 85.0,
-                "disk_percent": 90.0
+                "disk_percent": 90.0,
             }
         if self.critical_thresholds is None:
             self.critical_thresholds = {
                 "cpu_percent": 95.0,
                 "memory_percent": 95.0,
-                "disk_percent": 95.0
+                "disk_percent": 95.0,
             }
 
 
@@ -161,7 +165,7 @@ class HealthChecker:
                 self._check_cpu_health(),
                 self._check_memory_health(),
                 self._check_disk_health(),
-                self._check_network_health()
+                self._check_network_health(),
             ]
 
             # Determine overall status
@@ -200,7 +204,7 @@ class HealthChecker:
                 status=status,
                 message=message,
                 timestamp=datetime.now().isoformat(),
-                metrics={"cpu_percent": cpu_percent}
+                metrics={"cpu_percent": cpu_percent},
             )
 
         except Exception as e:
@@ -231,8 +235,8 @@ class HealthChecker:
                 metrics={
                     "memory_percent": memory_percent,
                     "memory_available": memory.available,
-                    "memory_total": memory.total
-                }
+                    "memory_total": memory.total,
+                },
             )
 
         except Exception as e:
@@ -242,7 +246,7 @@ class HealthChecker:
     def _check_disk_health(self) -> Optional[HealthCheck]:
         """Check disk health"""
         try:
-            disk = psutil.disk_usage('/')
+            disk = psutil.disk_usage("/")
             disk_percent = (disk.used / disk.total) * 100
 
             if disk_percent >= self.config.critical_thresholds["disk_percent"]:
@@ -264,8 +268,8 @@ class HealthChecker:
                     "disk_percent": disk_percent,
                     "disk_used": disk.used,
                     "disk_free": disk.free,
-                    "disk_total": disk.total
-                }
+                    "disk_total": disk.total,
+                },
             )
 
         except Exception as e:
@@ -295,8 +299,8 @@ class HealthChecker:
                     "bytes_sent": network_io.bytes_sent,
                     "bytes_recv": network_io.bytes_recv,
                     "packets_sent": network_io.packets_sent,
-                    "packets_recv": network_io.packets_recv
-                }
+                    "packets_recv": network_io.packets_recv,
+                },
             )
 
         except Exception as e:
@@ -322,8 +326,8 @@ class HealthChecker:
                     "healthy": 0,
                     "warning": 0,
                     "critical": 0,
-                    "unknown": 0
-                }
+                    "unknown": 0,
+                },
             }
 
             # Perform all checks
@@ -331,18 +335,20 @@ class HealthChecker:
                 self._check_cpu_health(),
                 self._check_memory_health(),
                 self._check_disk_health(),
-                self._check_network_health()
+                self._check_network_health(),
             ]
 
             for check in checks:
                 if check:
-                    report["checks"].append({
-                        "type": check.check_type.value,
-                        "status": check.status.value,
-                        "message": check.message,
-                        "timestamp": check.timestamp,
-                        "metrics": check.metrics
-                    })
+                    report["checks"].append(
+                        {
+                            "type": check.check_type.value,
+                            "status": check.status.value,
+                            "message": check.message,
+                            "timestamp": check.timestamp,
+                            "metrics": check.metrics,
+                        }
+                    )
 
                     # Update summary
                     report["summary"]["total_checks"] += 1
@@ -355,7 +361,7 @@ class HealthChecker:
             return {
                 "overall_status": "unknown",
                 "timestamp": datetime.now().isoformat(),
-                "error": str(e)
+                "error": str(e),
             }
 
     def is_healthy(self) -> bool:
@@ -378,7 +384,9 @@ class HealthChecker:
                 self.logger.info("📋 Health monitoring disabled")
                 return False
 
-            self.logger.info(f"🏥 Starting health monitoring (interval: {self.config.check_interval}s)")
+            self.logger.info(
+                f"🏥 Starting health monitoring (interval: {self.config.check_interval}s)"
+            )
             # In a real implementation, this would start a background thread
             return True
 
@@ -423,10 +431,4 @@ class HealthChecker:
 
 
 # Export main class
-__all__ = [
-    "HealthChecker",
-    "HealthCheck",
-    "HealthStatus",
-    "CheckType",
-    "HealthConfig"
-]
+__all__ = ["HealthChecker", "HealthCheck", "HealthStatus", "CheckType", "HealthConfig"]

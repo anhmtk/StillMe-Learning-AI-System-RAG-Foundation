@@ -28,6 +28,7 @@ from typing import Any, Optional
 
 class DebugLevel(Enum):
     """Mức độ debug"""
+
     CRITICAL = "critical"
     ERROR = "error"
     WARNING = "warning"
@@ -35,8 +36,10 @@ class DebugLevel(Enum):
     DEBUG = "debug"
     TRACE = "trace"
 
+
 class ErrorType(Enum):
     """Loại lỗi"""
+
     SYNTAX_ERROR = "syntax_error"
     RUNTIME_ERROR = "runtime_error"
     LOGIC_ERROR = "logic_error"
@@ -46,17 +49,21 @@ class ErrorType(Enum):
     DATA_ERROR = "data_error"
     CONFIGURATION_ERROR = "configuration_error"
 
+
 class DebugSessionStatus(Enum):
     """Trạng thái debug session"""
+
     ACTIVE = "active"
     PAUSED = "paused"
     COMPLETED = "completed"
     FAILED = "failed"
     TIMEOUT = "timeout"
 
+
 @dataclass
 class ErrorPattern:
     """Pattern lỗi"""
+
     pattern_id: str
     error_type: ErrorType
     pattern_regex: str
@@ -67,9 +74,11 @@ class ErrorPattern:
     solutions: list[str]
     last_seen: datetime
 
+
 @dataclass
 class DebugSession:
     """Debug session"""
+
     session_id: str
     start_time: datetime
     end_time: Optional[datetime]
@@ -82,9 +91,11 @@ class DebugSession:
     resolution: Optional[str]
     duration: Optional[float]
 
+
 @dataclass
 class LogEntry:
     """Log entry"""
+
     timestamp: datetime
     level: DebugLevel
     message: str
@@ -95,9 +106,11 @@ class LogEntry:
     session_id: Optional[str]
     metadata: dict[str, Any]
 
+
 @dataclass
 class RootCauseAnalysis:
     """Phân tích root cause"""
+
     analysis_id: str
     error_patterns: list[ErrorPattern]
     timeline: list[LogEntry]
@@ -106,9 +119,11 @@ class RootCauseAnalysis:
     recommendations: list[str]
     analysis_time: float
 
+
 @dataclass
 class DebuggingReport:
     """Báo cáo debugging"""
+
     total_sessions: int
     active_sessions: int
     error_patterns_found: int
@@ -117,6 +132,7 @@ class DebuggingReport:
     security_issues: list[str]
     recommendations: list[str]
     analysis_time: float
+
 
 class AdvancedDebuggingSystem:
     """Advanced Debugging System - Hệ thống debug nâng cao"""
@@ -142,25 +158,30 @@ class AdvancedDebuggingSystem:
 
         # Log queue for real-time processing
         self.log_queue = queue.Queue()
-        self.log_processor_thread = threading.Thread(target=self._process_logs, daemon=True)
+        self.log_processor_thread = threading.Thread(
+            target=self._process_logs, daemon=True
+        )
         self.log_processor_thread.start()
 
     def _ensure_directories(self):
         """Đảm bảo thư mục cần thiết tồn tại"""
-        for dir_path in [self.logs_dir, self.debug_sessions_dir, self.troubleshooting_dir]:
+        for dir_path in [
+            self.logs_dir,
+            self.debug_sessions_dir,
+            self.troubleshooting_dir,
+        ]:
             dir_path.mkdir(parents=True, exist_ok=True)
 
     def _setup_logging(self):
         """Setup logging system"""
-        log_file = self.logs_dir / f"agentdev_debug_{datetime.now().strftime('%Y%m%d')}.log"
+        log_file = (
+            self.logs_dir / f"agentdev_debug_{datetime.now().strftime('%Y%m%d')}.log"
+        )
 
         logging.basicConfig(
             level=logging.DEBUG,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-            handlers=[
-                logging.FileHandler(log_file),
-                logging.StreamHandler()
-            ]
+            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            handlers=[logging.FileHandler(log_file), logging.StreamHandler()],
         )
 
         self.logger = logging.getLogger("AgentDevDebug")
@@ -179,15 +200,15 @@ class AdvancedDebuggingSystem:
                     "Missing colon after if/for/while statements",
                     "Incorrect indentation",
                     "Missing parentheses or brackets",
-                    "Invalid variable names"
+                    "Invalid variable names",
                 ],
                 solutions=[
                     "Check syntax with Python linter",
                     "Verify indentation consistency",
                     "Use IDE with syntax highlighting",
-                    "Run code through syntax checker"
+                    "Run code through syntax checker",
                 ],
-                last_seen=datetime.now()
+                last_seen=datetime.now(),
             ),
             "import_error": ErrorPattern(
                 pattern_id="import_error",
@@ -200,15 +221,15 @@ class AdvancedDebuggingSystem:
                     "Missing dependencies",
                     "Incorrect module path",
                     "Virtual environment not activated",
-                    "Package not installed"
+                    "Package not installed",
                 ],
                 solutions=[
                     "Install missing packages",
                     "Check PYTHONPATH",
                     "Activate virtual environment",
-                    "Verify package installation"
+                    "Verify package installation",
                 ],
-                last_seen=datetime.now()
+                last_seen=datetime.now(),
             ),
             "attribute_error": ErrorPattern(
                 pattern_id="attribute_error",
@@ -221,15 +242,15 @@ class AdvancedDebuggingSystem:
                     "Object doesn't have the attribute",
                     "Typo in attribute name",
                     "Object is None",
-                    "Wrong object type"
+                    "Wrong object type",
                 ],
                 solutions=[
                     "Check object type and attributes",
                     "Verify attribute name spelling",
                     "Add null checks",
-                    "Use hasattr() before access"
+                    "Use hasattr() before access",
                 ],
-                last_seen=datetime.now()
+                last_seen=datetime.now(),
             ),
             "key_error": ErrorPattern(
                 pattern_id="key_error",
@@ -242,15 +263,15 @@ class AdvancedDebuggingSystem:
                     "Key doesn't exist in dictionary",
                     "Typo in key name",
                     "Dictionary is empty",
-                    "Key was deleted"
+                    "Key was deleted",
                 ],
                 solutions=[
                     "Check if key exists before access",
                     "Use dict.get() with default value",
                     "Verify key spelling",
-                    "Add key existence checks"
+                    "Add key existence checks",
                 ],
-                last_seen=datetime.now()
+                last_seen=datetime.now(),
             ),
             "timeout_error": ErrorPattern(
                 pattern_id="timeout_error",
@@ -263,15 +284,15 @@ class AdvancedDebuggingSystem:
                     "Network connectivity issues",
                     "Server overload",
                     "Insufficient resources",
-                    "Long-running operations"
+                    "Long-running operations",
                 ],
                 solutions=[
                     "Increase timeout values",
                     "Optimize operation performance",
                     "Add retry mechanisms",
-                    "Check resource availability"
+                    "Check resource availability",
                 ],
-                last_seen=datetime.now()
+                last_seen=datetime.now(),
             ),
             "memory_error": ErrorPattern(
                 pattern_id="memory_error",
@@ -284,16 +305,16 @@ class AdvancedDebuggingSystem:
                     "Insufficient system memory",
                     "Memory leaks",
                     "Large data processing",
-                    "Inefficient memory usage"
+                    "Inefficient memory usage",
                 ],
                 solutions=[
                     "Optimize memory usage",
                     "Use generators for large datasets",
                     "Implement memory monitoring",
-                    "Add garbage collection"
+                    "Add garbage collection",
                 ],
-                last_seen=datetime.now()
-            )
+                last_seen=datetime.now(),
+            ),
         }
 
         return patterns
@@ -317,7 +338,7 @@ class AdvancedDebuggingSystem:
             error_patterns=[],
             root_cause=None,
             resolution=None,
-            duration=None
+            duration=None,
         )
 
         self.active_sessions[session_id] = session
@@ -325,7 +346,9 @@ class AdvancedDebuggingSystem:
         self.logger.info(f"Started debug session: {session_id}")
         return session_id
 
-    def end_debug_session(self, session_id: str, resolution: str = None) -> DebugSession:
+    def end_debug_session(
+        self, session_id: str, resolution: str = None
+    ) -> DebugSession:
         """Kết thúc debug session"""
         if session_id not in self.active_sessions:
             raise ValueError(f"Debug session {session_id} not found")
@@ -342,12 +365,21 @@ class AdvancedDebuggingSystem:
         # Remove from active sessions
         del self.active_sessions[session_id]
 
-        self.logger.info(f"Ended debug session: {session_id}, duration: {session.duration:.2f}s")
+        self.logger.info(
+            f"Ended debug session: {session_id}, duration: {session.duration:.2f}s"
+        )
         return session
 
-    def log_debug_event(self, level: DebugLevel, message: str, module: str = "",
-                       function: str = "", line_number: int = 0, session_id: str = None,
-                       metadata: dict[str, Any] = None) -> LogEntry:
+    def log_debug_event(
+        self,
+        level: DebugLevel,
+        message: str,
+        module: str = "",
+        function: str = "",
+        line_number: int = 0,
+        session_id: str = None,
+        metadata: dict[str, Any] = None,
+    ) -> LogEntry:
         """Log debug event"""
         if metadata is None:
             metadata = {}
@@ -361,7 +393,7 @@ class AdvancedDebuggingSystem:
             line_number=line_number,
             thread_id=threading.current_thread().ident,
             session_id=session_id,
-            metadata=metadata
+            metadata=metadata,
         )
 
         # Add to queue for processing
@@ -390,7 +422,7 @@ class AdvancedDebuggingSystem:
                 # Write to log file
                 self.logger.log(
                     getattr(logging, log_entry.level.value.upper()),
-                    f"[{log_entry.module}:{log_entry.function}:{log_entry.line_number}] {log_entry.message}"
+                    f"[{log_entry.module}:{log_entry.function}:{log_entry.line_number}] {log_entry.message}",
                 )
 
                 self.log_queue.task_done()
@@ -409,10 +441,17 @@ class AdvancedDebuggingSystem:
                 pattern.last_seen = log_entry.timestamp
 
                 # Add to session if active
-                if log_entry.session_id and log_entry.session_id in self.active_sessions:
-                    self.active_sessions[log_entry.session_id].error_patterns.append(pattern)
+                if (
+                    log_entry.session_id
+                    and log_entry.session_id in self.active_sessions
+                ):
+                    self.active_sessions[log_entry.session_id].error_patterns.append(
+                        pattern
+                    )
 
-                self.logger.warning(f"Error pattern detected: {pattern_id} - {log_entry.message}")
+                self.logger.warning(
+                    f"Error pattern detected: {pattern_id} - {log_entry.message}"
+                )
 
     def analyze_root_cause(self, session_id: str) -> RootCauseAnalysis:
         """Phân tích root cause cho debug session"""
@@ -433,10 +472,10 @@ class AdvancedDebuggingSystem:
         # Find probable causes
         probable_causes = []
         for pattern in error_patterns:
-            if hasattr(pattern, 'common_causes'):
+            if hasattr(pattern, "common_causes"):
                 probable_causes.extend(pattern.common_causes)
-            elif isinstance(pattern, dict) and 'common_causes' in pattern:
-                probable_causes.extend(pattern['common_causes'])
+            elif isinstance(pattern, dict) and "common_causes" in pattern:
+                probable_causes.extend(pattern["common_causes"])
 
         # Remove duplicates
         probable_causes = list(set(probable_causes))
@@ -447,10 +486,10 @@ class AdvancedDebuggingSystem:
         # Generate recommendations
         recommendations = []
         for pattern in error_patterns:
-            if hasattr(pattern, 'solutions'):
+            if hasattr(pattern, "solutions"):
                 recommendations.extend(pattern.solutions)
-            elif isinstance(pattern, dict) and 'solutions' in pattern:
-                recommendations.extend(pattern['solutions'])
+            elif isinstance(pattern, dict) and "solutions" in pattern:
+                recommendations.extend(pattern["solutions"])
 
         # Remove duplicates
         recommendations = list(set(recommendations))
@@ -464,14 +503,16 @@ class AdvancedDebuggingSystem:
             probable_causes=probable_causes,
             confidence_score=confidence_score,
             recommendations=recommendations,
-            analysis_time=analysis_time
+            analysis_time=analysis_time,
         )
 
         return analysis
 
     def create_troubleshooting_guide(self, error_type: ErrorType) -> str:
         """Tạo troubleshooting guide cho loại lỗi"""
-        patterns = [p for p in self.error_patterns.values() if p.error_type == error_type]
+        patterns = [
+            p for p in self.error_patterns.values() if p.error_type == error_type
+        ]
 
         if not patterns:
             return ""
@@ -544,7 +585,7 @@ This guide helps troubleshoot {error_type.value.replace('_', ' ')} issues in Age
         filename = f"troubleshooting_{error_type.value}.md"
         file_path = self.troubleshooting_dir / filename
 
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(content)
 
         return str(file_path)
@@ -554,7 +595,7 @@ This guide helps troubleshoot {error_type.value.replace('_', ' ')} issues in Age
         filename = f"session_{session.session_id}.json"
         file_path = self.debug_sessions_dir / filename
 
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             json.dump(asdict(session), f, indent=2, default=str)
 
     def _load_debug_session(self, session_id: str) -> Optional[DebugSession]:
@@ -566,7 +607,7 @@ This guide helps troubleshoot {error_type.value.replace('_', ' ')} issues in Age
             return None
 
         try:
-            with open(file_path, encoding='utf-8') as f:
+            with open(file_path, encoding="utf-8") as f:
                 data = json.load(f)
 
             # Convert back to DebugSession
@@ -591,11 +632,11 @@ This guide helps troubleshoot {error_type.value.replace('_', ' ')} issues in Age
 
         for session_file in session_files:
             try:
-                with open(session_file, encoding='utf-8') as f:
+                with open(session_file, encoding="utf-8") as f:
                     data = json.load(f)
 
-                for pattern_data in data.get('error_patterns', []):
-                    error_counts[pattern_data['pattern_id']] += 1
+                for pattern_data in data.get("error_patterns", []):
+                    error_counts[pattern_data["pattern_id"]] += 1
             except Exception as e:
                 self.logger.error(f"Error analyzing session {session_file}: {e}")
 
@@ -607,18 +648,28 @@ This guide helps troubleshoot {error_type.value.replace('_', ' ')} issues in Age
 
         for _pattern_id, pattern in self.error_patterns.items():
             if pattern.error_type == ErrorType.PERFORMANCE_ERROR:
-                performance_issues.append(f"{pattern.description}: {pattern.frequency} occurrences")
+                performance_issues.append(
+                    f"{pattern.description}: {pattern.frequency} occurrences"
+                )
             elif pattern.error_type == ErrorType.SECURITY_ERROR:
-                security_issues.append(f"{pattern.description}: {pattern.frequency} occurrences")
+                security_issues.append(
+                    f"{pattern.description}: {pattern.frequency} occurrences"
+                )
 
         # Generate recommendations
         recommendations = []
         if total_sessions > 0:
-            recommendations.append("Review common error patterns and implement preventive measures")
+            recommendations.append(
+                "Review common error patterns and implement preventive measures"
+            )
         if performance_issues:
-            recommendations.append("Address performance issues to improve system stability")
+            recommendations.append(
+                "Address performance issues to improve system stability"
+            )
         if security_issues:
-            recommendations.append("Investigate and resolve security-related errors immediately")
+            recommendations.append(
+                "Investigate and resolve security-related errors immediately"
+            )
 
         analysis_time = time.time() - start_time
 
@@ -630,7 +681,7 @@ This guide helps troubleshoot {error_type.value.replace('_', ' ')} issues in Age
             performance_issues=performance_issues,
             security_issues=security_issues,
             recommendations=recommendations,
-            analysis_time=analysis_time
+            analysis_time=analysis_time,
         )
 
     def save_debugging_report(self, report: DebuggingReport) -> str:
@@ -638,13 +689,16 @@ This guide helps troubleshoot {error_type.value.replace('_', ' ')} issues in Age
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
         # Save JSON report
-        json_path = self.project_root / "artifacts" / f"debugging_report_{timestamp}.json"
+        json_path = (
+            self.project_root / "artifacts" / f"debugging_report_{timestamp}.json"
+        )
         json_path.parent.mkdir(exist_ok=True)
 
-        with open(json_path, 'w', encoding='utf-8') as f:
+        with open(json_path, "w", encoding="utf-8") as f:
             json.dump(asdict(report), f, indent=2, default=str)
 
         return str(json_path)
+
 
 def main():
     """Main function for testing"""
@@ -655,11 +709,21 @@ def main():
 
     # Log some events
     debug_system.log_debug_event(
-        DebugLevel.INFO, "Test info message", "test_module", "test_function", 10, session_id
+        DebugLevel.INFO,
+        "Test info message",
+        "test_module",
+        "test_function",
+        10,
+        session_id,
     )
 
     debug_system.log_debug_event(
-        DebugLevel.ERROR, "Test error: AttributeError", "test_module", "test_function", 15, session_id
+        DebugLevel.ERROR,
+        "Test error: AttributeError",
+        "test_module",
+        "test_function",
+        15,
+        session_id,
     )
 
     # End session
@@ -672,6 +736,7 @@ def main():
     print(f"Debugging report generated: {json_path}")
     print(f"Total sessions: {report.total_sessions}")
     print(f"Error patterns found: {report.error_patterns_found}")
+
 
 if __name__ == "__main__":
     main()

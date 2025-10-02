@@ -25,6 +25,7 @@ from typing import Optional
 
 class DocType(Enum):
     """Loại documentation"""
+
     MODULE = "module"
     FUNCTION = "function"
     CLASS = "class"
@@ -32,17 +33,21 @@ class DocType(Enum):
     KNOWLEDGE = "knowledge"
     BEST_PRACTICE = "best_practice"
 
+
 class DocQuality(Enum):
     """Chất lượng documentation"""
+
     EXCELLENT = "excellent"
     GOOD = "good"
     FAIR = "fair"
     POOR = "poor"
     MISSING = "missing"
 
+
 @dataclass
 class DocMetadata:
     """Metadata của documentation"""
+
     doc_type: DocType
     file_path: str
     line_number: int
@@ -54,9 +59,11 @@ class DocMetadata:
     quality_score: float
     last_updated: datetime
 
+
 @dataclass
 class DocumentationReport:
     """Báo cáo documentation"""
+
     total_files: int
     documented_files: int
     documentation_coverage: float
@@ -65,6 +72,7 @@ class DocumentationReport:
     recommendations: list[str]
     generated_docs: list[DocMetadata]
     analysis_time: float
+
 
 class DocumentationGenerator:
     """Documentation Generator - Tự động tạo documentation"""
@@ -85,7 +93,12 @@ class DocumentationGenerator:
 
     def _ensure_docs_directories(self):
         """Đảm bảo thư mục docs tồn tại"""
-        for dir_path in [self.docs_dir, self.knowledge_base_dir, self.troubleshooting_dir, self.best_practices_dir]:
+        for dir_path in [
+            self.docs_dir,
+            self.knowledge_base_dir,
+            self.troubleshooting_dir,
+            self.best_practices_dir,
+        ]:
             dir_path.mkdir(parents=True, exist_ok=True)
 
     def _load_doc_templates(self) -> dict[str, str]:
@@ -156,7 +169,7 @@ Examples:
 Status Codes:
 {status_codes_doc}
 """
-'''
+''',
         }
 
     def _load_best_practices(self) -> dict[str, list[str]]:
@@ -172,7 +185,7 @@ Status Codes:
                 "Use list/dict comprehensions for simple transformations",
                 "Prefer f-strings over .format() or % formatting",
                 "Use context managers (with statements) for resource management",
-                "Write unit tests for all public functions"
+                "Write unit tests for all public functions",
             ],
             "security": [
                 "Never hardcode secrets or API keys in code",
@@ -184,7 +197,7 @@ Status Codes:
                 "Sanitize user input before displaying",
                 "Keep dependencies updated",
                 "Use secure random number generators",
-                "Implement proper logging without sensitive data"
+                "Implement proper logging without sensitive data",
             ],
             "performance": [
                 "Use appropriate data structures for the use case",
@@ -196,7 +209,7 @@ Status Codes:
                 "Avoid deep recursion",
                 "Use generators for large datasets",
                 "Implement connection pooling",
-                "Monitor memory usage"
+                "Monitor memory usage",
             ],
             "testing": [
                 "Write tests before writing code (TDD)",
@@ -208,14 +221,14 @@ Status Codes:
                 "Test both success and failure scenarios",
                 "Maintain high test coverage (aim for 80%+)",
                 "Use property-based testing for complex logic",
-                "Automate test execution in CI/CD"
-            ]
+                "Automate test execution in CI/CD",
+            ],
         }
 
     def generate_module_documentation(self, file_path: str) -> DocMetadata:
         """Tạo documentation cho module"""
         try:
-            with open(file_path, encoding='utf-8') as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
 
             # Parse AST
@@ -226,34 +239,42 @@ Status Codes:
             docstring = ast.get_docstring(tree)
 
             # Analyze functions and classes
-            functions = [node for node in tree.body if isinstance(node, ast.FunctionDef)]
+            functions = [
+                node for node in tree.body if isinstance(node, ast.FunctionDef)
+            ]
             classes = [node for node in tree.body if isinstance(node, ast.ClassDef)]
 
             # Generate description
             if docstring:
-                description = docstring.split('\n')[0]
+                description = docstring.split("\n")[0]
             else:
                 description = f"Module {module_name} - Auto-generated documentation"
 
             # Generate features list
             features = []
             for func in functions:
-                if not func.name.startswith('_'):
-                    features.append(f"- {func.name}(): {ast.get_docstring(func) or 'Function'}")
+                if not func.name.startswith("_"):
+                    features.append(
+                        f"- {func.name}(): {ast.get_docstring(func) or 'Function'}"
+                    )
 
             for cls in classes:
-                if not cls.name.startswith('_'):
-                    features.append(f"- {cls.name}: {ast.get_docstring(cls) or 'Class'}")
+                if not cls.name.startswith("_"):
+                    features.append(
+                        f"- {cls.name}: {ast.get_docstring(cls) or 'Class'}"
+                    )
 
             # Generate usage examples
             usage_examples = [
                 f"from {module_name} import {', '.join([f.name for f in functions[:3] if not f.name.startswith('_')])}",
                 "# Example usage:",
-                f"# result = {functions[0].name if functions else 'function_name'}()"
+                f"# result = {functions[0].name if functions else 'function_name'}()",
             ]
 
             # Calculate quality score
-            quality_score = self._calculate_doc_quality(docstring, len(functions), len(classes))
+            quality_score = self._calculate_doc_quality(
+                docstring, len(functions), len(classes)
+            )
 
             return DocMetadata(
                 doc_type=DocType.MODULE,
@@ -265,7 +286,7 @@ Status Codes:
                 return_type="",
                 examples=usage_examples,
                 quality_score=quality_score,
-                last_updated=datetime.now()
+                last_updated=datetime.now(),
             )
 
         except Exception as e:
@@ -279,10 +300,12 @@ Status Codes:
                 return_type="",
                 examples=[],
                 quality_score=0.0,
-                last_updated=datetime.now()
+                last_updated=datetime.now(),
             )
 
-    def generate_function_documentation(self, file_path: str, function_node: ast.FunctionDef) -> DocMetadata:
+    def generate_function_documentation(
+        self, file_path: str, function_node: ast.FunctionDef
+    ) -> DocMetadata:
         """Tạo documentation cho function"""
         try:
             # Extract function info
@@ -295,20 +318,20 @@ Status Codes:
                 param_info = {
                     "name": arg.arg,
                     "type": "Any",  # Could be enhanced with type hints
-                    "description": f"Parameter {arg.arg}"
+                    "description": f"Parameter {arg.arg}",
                 }
                 parameters.append(param_info)
 
             # Generate description
             if docstring:
-                description = docstring.split('\n')[0]
+                description = docstring.split("\n")[0]
             else:
                 description = f"Function {func_name}"
 
             # Generate examples
             examples = [
                 "# Example usage:",
-                f"# result = {func_name}({', '.join([p['name'] for p in parameters[:3]])})"
+                f"# result = {func_name}({', '.join([p['name'] for p in parameters[:3]])})",
             ]
 
             # Calculate quality score
@@ -324,7 +347,7 @@ Status Codes:
                 return_type="Any",
                 examples=examples,
                 quality_score=quality_score,
-                last_updated=datetime.now()
+                last_updated=datetime.now(),
             )
 
         except Exception as e:
@@ -338,10 +361,12 @@ Status Codes:
                 return_type="",
                 examples=[],
                 quality_score=0.0,
-                last_updated=datetime.now()
+                last_updated=datetime.now(),
             )
 
-    def _calculate_doc_quality(self, docstring: Optional[str], func_count: int, class_count: int) -> float:
+    def _calculate_doc_quality(
+        self, docstring: Optional[str], func_count: int, class_count: int
+    ) -> float:
         """Tính điểm chất lượng documentation"""
         score = 0.0
 
@@ -361,43 +386,48 @@ Status Codes:
     def generate_code_comments(self, file_path: str) -> str:
         """Tạo comments cho code"""
         try:
-            with open(file_path, encoding='utf-8') as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
 
             # Parse AST
             ast.parse(content)
 
             # Add comments to functions without docstrings
-            lines = content.split('\n')
+            lines = content.split("\n")
             new_lines = []
 
             for i, line in enumerate(lines):
                 new_lines.append(line)
 
                 # Check if this is a function definition without docstring
-                if re.match(r'^\s*def\s+\w+', line):
+                if re.match(r"^\s*def\s+\w+", line):
                     # Look ahead to see if there's a docstring
                     has_docstring = False
                     for j in range(i + 1, min(i + 5, len(lines))):
                         if '"""' in lines[j] or "'''" in lines[j]:
                             has_docstring = True
                             break
-                        if lines[j].strip() and not lines[j].startswith(' '):
+                        if lines[j].strip() and not lines[j].startswith(" "):
                             break
 
                     if not has_docstring:
                         # Add a comment
-                        func_name = re.search(r'def\s+(\w+)', line).group(1)
+                        func_name = re.search(r"def\s+(\w+)", line).group(1)
                         indent = len(line) - len(line.lstrip())
-                        comment = ' ' * (indent + 4) + f"# TODO: Add docstring for {func_name}()"
+                        comment = (
+                            " " * (indent + 4)
+                            + f"# TODO: Add docstring for {func_name}()"
+                        )
                         new_lines.append(comment)
 
-            return '\n'.join(new_lines)
+            return "\n".join(new_lines)
 
         except Exception as e:
             return f"# Error generating comments: {e}\n{content}"
 
-    def create_knowledge_base_entry(self, topic: str, content: str, category: str = "general") -> str:
+    def create_knowledge_base_entry(
+        self, topic: str, content: str, category: str = "general"
+    ) -> str:
         """Tạo entry trong knowledge base"""
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -426,7 +456,7 @@ Status Codes:
         filename = f"{topic.lower().replace(' ', '_')}.md"
         file_path = self.knowledge_base_dir / filename
 
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(entry_content)
 
         return str(file_path)
@@ -474,7 +504,7 @@ This guide contains best practices for {language} development, automatically gen
         filename = f"{language}_best_practices.md"
         file_path = self.best_practices_dir / filename
 
-        with open(file_path, 'w', encoding='utf-8') as f:
+        with open(file_path, "w", encoding="utf-8") as f:
             f.write(content)
 
         return str(file_path)
@@ -509,22 +539,28 @@ This guide contains best practices for {language} development, automatically gen
                 quality_scores["modules"].append(module_doc.quality_score)
 
                 # Parse file for functions and classes
-                with open(file_path, encoding='utf-8') as f:
+                with open(file_path, encoding="utf-8") as f:
                     content = f.read()
 
                 tree = ast.parse(content)
 
                 # Generate function documentation
                 for node in tree.body:
-                    if isinstance(node, ast.FunctionDef) and not node.name.startswith('_'):
-                        func_doc = self.generate_function_documentation(str(file_path), node)
+                    if isinstance(node, ast.FunctionDef) and not node.name.startswith(
+                        "_"
+                    ):
+                        func_doc = self.generate_function_documentation(
+                            str(file_path), node
+                        )
                         generated_docs.append(func_doc)
                         quality_scores["functions"].append(func_doc.quality_score)
 
                 # Generate class documentation
                 for node in tree.body:
-                    if isinstance(node, ast.ClassDef) and not node.name.startswith('_'):
-                        class_doc = self.generate_module_documentation(str(file_path))  # Simplified
+                    if isinstance(node, ast.ClassDef) and not node.name.startswith("_"):
+                        class_doc = self.generate_module_documentation(
+                            str(file_path)
+                        )  # Simplified
                         generated_docs.append(class_doc)
                         quality_scores["classes"].append(class_doc.quality_score)
 
@@ -532,7 +568,9 @@ This guide contains best practices for {language} development, automatically gen
                 missing_docs.append(f"{file_path}: {e}")
 
         # Calculate coverage
-        documentation_coverage = (documented_files / total_files * 100) if total_files > 0 else 0
+        documentation_coverage = (
+            (documented_files / total_files * 100) if total_files > 0 else 0
+        )
 
         # Calculate average quality scores
         avg_quality_scores = {}
@@ -558,7 +596,7 @@ This guide contains best practices for {language} development, automatically gen
             missing_docs=missing_docs,
             recommendations=recommendations,
             generated_docs=generated_docs,
-            analysis_time=analysis_time
+            analysis_time=analysis_time,
         )
 
     def save_documentation_report(self, report: DocumentationReport) -> str:
@@ -566,14 +604,18 @@ This guide contains best practices for {language} development, automatically gen
         timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
         # Save JSON report
-        json_path = self.project_root / "artifacts" / f"documentation_report_{timestamp}.json"
+        json_path = (
+            self.project_root / "artifacts" / f"documentation_report_{timestamp}.json"
+        )
         json_path.parent.mkdir(exist_ok=True)
 
-        with open(json_path, 'w', encoding='utf-8') as f:
+        with open(json_path, "w", encoding="utf-8") as f:
             json.dump(asdict(report), f, indent=2, default=str)
 
         # Save HTML report
-        html_path = self.project_root / "artifacts" / f"documentation_report_{timestamp}.html"
+        html_path = (
+            self.project_root / "artifacts" / f"documentation_report_{timestamp}.html"
+        )
 
         html_content = f"""<!DOCTYPE html>
 <html>
@@ -632,10 +674,11 @@ This guide contains best practices for {language} development, automatically gen
 </body>
 </html>"""
 
-        with open(html_path, 'w', encoding='utf-8') as f:
+        with open(html_path, "w", encoding="utf-8") as f:
             f.write(html_content)
 
         return str(html_path)
+
 
 def main():
     """Main function for testing"""
@@ -650,6 +693,7 @@ def main():
     print(f"Documentation report generated: {html_path}")
     print(f"Coverage: {report.documentation_coverage:.1f}%")
     print(f"Documented files: {report.documented_files}/{report.total_files}")
+
 
 if __name__ == "__main__":
     main()

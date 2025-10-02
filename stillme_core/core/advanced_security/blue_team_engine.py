@@ -46,16 +46,18 @@ except ImportError as e:
 
 class AnomalyType(Enum):
     """Loại bất thường được phát hiện"""
-    BEHAVIORAL = "behavioral"           # Hành vi bất thường
-    PERFORMANCE = "performance"         # Hiệu suất bất thường
-    SECURITY = "security"              # Bảo mật bất thường
-    NETWORK = "network"                # Mạng bất thường
-    RESOURCE = "resource"              # Tài nguyên bất thường
-    LOG_PATTERN = "log_pattern"        # Pattern log bất thường
+
+    BEHAVIORAL = "behavioral"  # Hành vi bất thường
+    PERFORMANCE = "performance"  # Hiệu suất bất thường
+    SECURITY = "security"  # Bảo mật bất thường
+    NETWORK = "network"  # Mạng bất thường
+    RESOURCE = "resource"  # Tài nguyên bất thường
+    LOG_PATTERN = "log_pattern"  # Pattern log bất thường
 
 
 class ThreatLevel(Enum):
     """Mức độ đe dọa"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -64,6 +66,7 @@ class ThreatLevel(Enum):
 
 class DefenseAction(Enum):
     """Hành động phòng thủ"""
+
     BLOCK_IP = "block_ip"
     RATE_LIMIT = "rate_limit"
     ISOLATE_SERVICE = "isolate_service"
@@ -77,6 +80,7 @@ class DefenseAction(Enum):
 @dataclass
 class AnomalyDetection:
     """Kết quả phát hiện bất thường"""
+
     id: str
     timestamp: datetime
     anomaly_type: AnomalyType
@@ -92,6 +96,7 @@ class AnomalyDetection:
 @dataclass
 class DefenseRule:
     """Quy tắc phòng thủ"""
+
     id: str
     name: str
     description: str
@@ -106,6 +111,7 @@ class DefenseRule:
 @dataclass
 class DefenseResult:
     """Kết quả thực hiện phòng thủ"""
+
     id: str
     rule_id: str
     action: DefenseAction
@@ -127,15 +133,17 @@ class AnomalyDetector:
 
         # Thresholds for anomaly detection
         self.thresholds = {
-            'cpu_usage': 0.8,
-            'memory_usage': 0.85,
-            'response_time': 2.0,
-            'error_rate': 0.05,
-            'request_frequency': 100,  # requests per minute
-            'unusual_patterns': 0.7
+            "cpu_usage": 0.8,
+            "memory_usage": 0.85,
+            "response_time": 2.0,
+            "error_rate": 0.05,
+            "request_frequency": 100,  # requests per minute
+            "unusual_patterns": 0.7,
         }
 
-    def detect_behavioral_anomalies(self, logs: list[dict[str, Any]]) -> list[AnomalyDetection]:
+    def detect_behavioral_anomalies(
+        self, logs: list[dict[str, Any]]
+    ) -> list[AnomalyDetection]:
         """Phát hiện bất thường về hành vi"""
         anomalies = []
 
@@ -143,7 +151,7 @@ class AnomalyDetector:
         patterns = self._analyze_log_patterns(logs)
 
         for pattern, frequency in patterns.items():
-            if frequency > self.thresholds['unusual_patterns']:
+            if frequency > self.thresholds["unusual_patterns"]:
                 anomaly = AnomalyDetection(
                     id=f"behavioral_{int(time.time())}",
                     timestamp=datetime.now(),
@@ -154,18 +162,23 @@ class AnomalyDetector:
                     confidence=frequency,
                     source="log_analysis",
                     metadata={"pattern": pattern, "frequency": frequency},
-                    recommended_actions=[DefenseAction.ENHANCE_LOGGING, DefenseAction.ALERT_ADMIN]
+                    recommended_actions=[
+                        DefenseAction.ENHANCE_LOGGING,
+                        DefenseAction.ALERT_ADMIN,
+                    ],
                 )
                 anomalies.append(anomaly)
 
         return anomalies
 
-    def detect_performance_anomalies(self, metrics: dict[str, float]) -> list[AnomalyDetection]:
+    def detect_performance_anomalies(
+        self, metrics: dict[str, float]
+    ) -> list[AnomalyDetection]:
         """Phát hiện bất thường về hiệu suất"""
         anomalies = []
 
         # Kiểm tra CPU usage
-        if metrics.get('cpu_usage', 0) > self.thresholds['cpu_usage']:
+        if metrics.get("cpu_usage", 0) > self.thresholds["cpu_usage"]:
             anomaly = AnomalyDetection(
                 id=f"perf_cpu_{int(time.time())}",
                 timestamp=datetime.now(),
@@ -173,15 +186,18 @@ class AnomalyDetector:
                 threat_level=ThreatLevel.HIGH,
                 description=f"High CPU usage: {metrics['cpu_usage']:.2%}",
                 indicators=["high_cpu_usage"],
-                confidence=metrics['cpu_usage'],
+                confidence=metrics["cpu_usage"],
                 source="system_metrics",
                 metadata=metrics,
-                recommended_actions=[DefenseAction.RATE_LIMIT, DefenseAction.ALERT_ADMIN]
+                recommended_actions=[
+                    DefenseAction.RATE_LIMIT,
+                    DefenseAction.ALERT_ADMIN,
+                ],
             )
             anomalies.append(anomaly)
 
         # Kiểm tra memory usage
-        if metrics.get('memory_usage', 0) > self.thresholds['memory_usage']:
+        if metrics.get("memory_usage", 0) > self.thresholds["memory_usage"]:
             anomaly = AnomalyDetection(
                 id=f"perf_memory_{int(time.time())}",
                 timestamp=datetime.now(),
@@ -189,21 +205,28 @@ class AnomalyDetector:
                 threat_level=ThreatLevel.HIGH,
                 description=f"High memory usage: {metrics['memory_usage']:.2%}",
                 indicators=["high_memory_usage"],
-                confidence=metrics['memory_usage'],
+                confidence=metrics["memory_usage"],
                 source="system_metrics",
                 metadata=metrics,
-                recommended_actions=[DefenseAction.ISOLATE_SERVICE, DefenseAction.ALERT_ADMIN]
+                recommended_actions=[
+                    DefenseAction.ISOLATE_SERVICE,
+                    DefenseAction.ALERT_ADMIN,
+                ],
             )
             anomalies.append(anomaly)
 
         return anomalies
 
-    def detect_security_anomalies(self, security_events: list[dict[str, Any]]) -> list[AnomalyDetection]:
+    def detect_security_anomalies(
+        self, security_events: list[dict[str, Any]]
+    ) -> list[AnomalyDetection]:
         """Phát hiện bất thường về bảo mật"""
         anomalies = []
 
         # Phân tích failed login attempts
-        failed_logins = [event for event in security_events if event.get('type') == 'failed_login']
+        failed_logins = [
+            event for event in security_events if event.get("type") == "failed_login"
+        ]
         if len(failed_logins) > 10:  # Threshold for brute force
             anomaly = AnomalyDetection(
                 id=f"sec_bruteforce_{int(time.time())}",
@@ -215,7 +238,7 @@ class AnomalyDetector:
                 confidence=min(len(failed_logins) / 20, 1.0),
                 source="security_events",
                 metadata={"failed_logins": len(failed_logins)},
-                recommended_actions=[DefenseAction.BLOCK_IP, DefenseAction.RATE_LIMIT]
+                recommended_actions=[DefenseAction.BLOCK_IP, DefenseAction.RATE_LIMIT],
             )
             anomalies.append(anomaly)
 
@@ -233,7 +256,10 @@ class AnomalyDetector:
                     confidence=min(count / 10, 1.0),
                     source="network_analysis",
                     metadata={"ip": ip, "activity_count": count},
-                    recommended_actions=[DefenseAction.BLOCK_IP, DefenseAction.ENHANCE_LOGGING]
+                    recommended_actions=[
+                        DefenseAction.BLOCK_IP,
+                        DefenseAction.ENHANCE_LOGGING,
+                    ],
                 )
                 anomalies.append(anomaly)
 
@@ -244,14 +270,14 @@ class AnomalyDetector:
         patterns = defaultdict(int)
 
         for log in logs:
-            message = log.get('message', '')
+            message = log.get("message", "")
             # Đếm các pattern phổ biến
-            if 'error' in message.lower():
-                patterns['error_pattern'] += 1
-            if 'warning' in message.lower():
-                patterns['warning_pattern'] += 1
-            if 'exception' in message.lower():
-                patterns['exception_pattern'] += 1
+            if "error" in message.lower():
+                patterns["error_pattern"] += 1
+            if "warning" in message.lower():
+                patterns["warning_pattern"] += 1
+            if "exception" in message.lower():
+                patterns["exception_pattern"] += 1
 
         # Normalize frequencies
         total_logs = len(logs)
@@ -261,12 +287,14 @@ class AnomalyDetector:
 
         return dict(patterns)
 
-    def _detect_suspicious_ips(self, security_events: list[dict[str, Any]]) -> dict[str, int]:
+    def _detect_suspicious_ips(
+        self, security_events: list[dict[str, Any]]
+    ) -> dict[str, int]:
         """Phát hiện IP đáng ngờ"""
         ip_counts = defaultdict(int)
 
         for event in security_events:
-            ip = event.get('source_ip')
+            ip = event.get("source_ip")
             if ip:
                 ip_counts[ip] += 1
 
@@ -298,7 +326,7 @@ class DefenseEngine:
                 priority=1,
                 enabled=True,
                 created_at=datetime.now(),
-                updated_at=datetime.now()
+                updated_at=datetime.now(),
             ),
             DefenseRule(
                 id="rule_002",
@@ -309,7 +337,7 @@ class DefenseEngine:
                 priority=1,
                 enabled=True,
                 created_at=datetime.now(),
-                updated_at=datetime.now()
+                updated_at=datetime.now(),
             ),
             DefenseRule(
                 id="rule_003",
@@ -320,8 +348,8 @@ class DefenseEngine:
                 priority=1,
                 enabled=True,
                 created_at=datetime.now(),
-                updated_at=datetime.now()
-            )
+                updated_at=datetime.now(),
+            ),
         ]
 
         for rule in default_rules:
@@ -342,30 +370,34 @@ class DefenseEngine:
         applicable_rules.sort(key=lambda r: r.priority, reverse=True)
         return applicable_rules
 
-    def _rule_matches_anomaly(self, rule: DefenseRule, anomaly: AnomalyDetection) -> bool:
+    def _rule_matches_anomaly(
+        self, rule: DefenseRule, anomaly: AnomalyDetection
+    ) -> bool:
         """Kiểm tra quy tắc có phù hợp với bất thường không"""
         conditions = rule.conditions
 
         # Kiểm tra anomaly type
-        if 'anomaly_type' in conditions:
-            if conditions['anomaly_type'] != anomaly.anomaly_type.value:
+        if "anomaly_type" in conditions:
+            if conditions["anomaly_type"] != anomaly.anomaly_type.value:
                 return False
 
         # Kiểm tra threat level
-        if 'threat_level' in conditions:
-            if conditions['threat_level'] != anomaly.threat_level.value:
+        if "threat_level" in conditions:
+            if conditions["threat_level"] != anomaly.threat_level.value:
                 return False
 
         # Kiểm tra confidence
-        if 'confidence' in conditions:
-            confidence_condition = conditions['confidence']
-            if 'gt' in confidence_condition:
-                if anomaly.confidence <= confidence_condition['gt']:
+        if "confidence" in conditions:
+            confidence_condition = conditions["confidence"]
+            if "gt" in confidence_condition:
+                if anomaly.confidence <= confidence_condition["gt"]:
                     return False
 
         return True
 
-    async def execute_defense_action(self, action: DefenseAction, anomaly: AnomalyDetection) -> DefenseResult:
+    async def execute_defense_action(
+        self, action: DefenseAction, anomaly: AnomalyDetection
+    ) -> DefenseResult:
         """Thực hiện hành động phòng thủ"""
         result_id = f"defense_{int(time.time())}_{action.value}"
 
@@ -394,7 +426,7 @@ class DefenseEngine:
                     status="failed",
                     timestamp=datetime.now(),
                     details={"error": "Unknown action"},
-                    effectiveness_score=0.0
+                    effectiveness_score=0.0,
                 )
 
             self.defense_history.append(result)
@@ -409,13 +441,13 @@ class DefenseEngine:
                 status="failed",
                 timestamp=datetime.now(),
                 details={"error": str(e)},
-                effectiveness_score=0.0
+                effectiveness_score=0.0,
             )
 
     async def _block_ip(self, anomaly: AnomalyDetection) -> DefenseResult:
         """Chặn IP đáng ngờ"""
         # Simulate IP blocking
-        ip = anomaly.metadata.get('ip', 'unknown')
+        ip = anomaly.metadata.get("ip", "unknown")
 
         self.logger.info(f"Blocking IP: {ip}")
 
@@ -426,7 +458,7 @@ class DefenseEngine:
             status="success",
             timestamp=datetime.now(),
             details={"blocked_ip": ip},
-            effectiveness_score=0.9
+            effectiveness_score=0.9,
         )
 
     async def _rate_limit(self, anomaly: AnomalyDetection) -> DefenseResult:
@@ -440,7 +472,7 @@ class DefenseEngine:
             status="success",
             timestamp=datetime.now(),
             details={"rate_limit_applied": True},
-            effectiveness_score=0.8
+            effectiveness_score=0.8,
         )
 
     async def _isolate_service(self, anomaly: AnomalyDetection) -> DefenseResult:
@@ -454,7 +486,7 @@ class DefenseEngine:
             status="success",
             timestamp=datetime.now(),
             details={"service_isolated": True},
-            effectiveness_score=0.95
+            effectiveness_score=0.95,
         )
 
     async def _alert_admin(self, anomaly: AnomalyDetection) -> DefenseResult:
@@ -468,7 +500,7 @@ class DefenseEngine:
             status="success",
             timestamp=datetime.now(),
             details={"alert_sent": True},
-            effectiveness_score=0.7
+            effectiveness_score=0.7,
         )
 
     async def _auto_patch(self, anomaly: AnomalyDetection) -> DefenseResult:
@@ -482,7 +514,7 @@ class DefenseEngine:
             status="success",
             timestamp=datetime.now(),
             details={"patch_applied": True},
-            effectiveness_score=0.85
+            effectiveness_score=0.85,
         )
 
     async def _quarantine(self, anomaly: AnomalyDetection) -> DefenseResult:
@@ -496,7 +528,7 @@ class DefenseEngine:
             status="success",
             timestamp=datetime.now(),
             details={"quarantined": True},
-            effectiveness_score=0.9
+            effectiveness_score=0.9,
         )
 
     async def _enhance_logging(self, anomaly: AnomalyDetection) -> DefenseResult:
@@ -510,7 +542,7 @@ class DefenseEngine:
             status="success",
             timestamp=datetime.now(),
             details={"logging_enhanced": True},
-            effectiveness_score=0.6
+            effectiveness_score=0.6,
         )
 
     async def _update_firewall(self, anomaly: AnomalyDetection) -> DefenseResult:
@@ -524,7 +556,7 @@ class DefenseEngine:
             status="success",
             timestamp=datetime.now(),
             details={"firewall_updated": True},
-            effectiveness_score=0.8
+            effectiveness_score=0.8,
         )
 
 
@@ -551,24 +583,24 @@ class BlueTeamEngine:
 
         # Circuit breaker for resilience
         self.circuit_breaker = SafeCircuitBreaker(
-            failure_threshold=5,
-            recovery_timeout=60,
-            expected_exception=Exception
+            failure_threshold=5, recovery_timeout=60, expected_exception=Exception
         )
 
         # Statistics
         self.stats = {
-            'anomalies_detected': 0,
-            'defenses_triggered': 0,
-            'successful_defenses': 0,
-            'failed_defenses': 0,
-            'false_positives': 0
+            "anomalies_detected": 0,
+            "defenses_triggered": 0,
+            "successful_defenses": 0,
+            "failed_defenses": 0,
+            "false_positives": 0,
         }
 
-    async def analyze_system_state(self,
-                                 logs: list[dict[str, Any]] = None,
-                                 metrics: dict[str, float] = None,
-                                 security_events: list[dict[str, Any]] = None) -> list[AnomalyDetection]:
+    async def analyze_system_state(
+        self,
+        logs: list[dict[str, Any]] = None,
+        metrics: dict[str, float] = None,
+        security_events: list[dict[str, Any]] = None,
+    ) -> list[AnomalyDetection]:
         """Phân tích trạng thái hệ thống và phát hiện bất thường"""
 
         anomalies = []
@@ -576,21 +608,27 @@ class BlueTeamEngine:
         try:
             # Phát hiện bất thường về hành vi
             if logs:
-                behavioral_anomalies = self.anomaly_detector.detect_behavioral_anomalies(logs)
+                behavioral_anomalies = (
+                    self.anomaly_detector.detect_behavioral_anomalies(logs)
+                )
                 anomalies.extend(behavioral_anomalies)
 
             # Phát hiện bất thường về hiệu suất
             if metrics:
-                performance_anomalies = self.anomaly_detector.detect_performance_anomalies(metrics)
+                performance_anomalies = (
+                    self.anomaly_detector.detect_performance_anomalies(metrics)
+                )
                 anomalies.extend(performance_anomalies)
 
             # Phát hiện bất thường về bảo mật
             if security_events:
-                security_anomalies = self.anomaly_detector.detect_security_anomalies(security_events)
+                security_anomalies = self.anomaly_detector.detect_security_anomalies(
+                    security_events
+                )
                 anomalies.extend(security_anomalies)
 
             # Cập nhật thống kê
-            self.stats['anomalies_detected'] += len(anomalies)
+            self.stats["anomalies_detected"] += len(anomalies)
 
             # Lưu vào memory nếu có
             if self.memory_manager and anomalies:
@@ -602,7 +640,9 @@ class BlueTeamEngine:
             self.logger.error(f"Error analyzing system state: {e}")
             return []
 
-    async def execute_defense_strategy(self, anomalies: list[AnomalyDetection]) -> list[DefenseResult]:
+    async def execute_defense_strategy(
+        self, anomalies: list[AnomalyDetection]
+    ) -> list[DefenseResult]:
         """Thực hiện chiến lược phòng thủ"""
         defense_results = []
 
@@ -614,29 +654,35 @@ class BlueTeamEngine:
                 for rule in applicable_rules:
                     # Thực hiện các hành động phòng thủ
                     for action in rule.actions:
-                        result = await self.defense_engine.execute_defense_action(action, anomaly)
+                        result = await self.defense_engine.execute_defense_action(
+                            action, anomaly
+                        )
                         defense_results.append(result)
 
                         # Cập nhật thống kê
                         if result.status == "success":
-                            self.stats['successful_defenses'] += 1
+                            self.stats["successful_defenses"] += 1
                         else:
-                            self.stats['failed_defenses'] += 1
+                            self.stats["failed_defenses"] += 1
 
-                        self.stats['defenses_triggered'] += 1
+                        self.stats["defenses_triggered"] += 1
 
             except Exception as e:
-                self.logger.error(f"Error executing defense strategy for anomaly {anomaly.id}: {e}")
+                self.logger.error(
+                    f"Error executing defense strategy for anomaly {anomaly.id}: {e}"
+                )
 
         return defense_results
 
-    async def verify_defense_effectiveness(self, defense_results: list[DefenseResult]) -> dict[str, float]:
+    async def verify_defense_effectiveness(
+        self, defense_results: list[DefenseResult]
+    ) -> dict[str, float]:
         """Kiểm tra hiệu quả của các biện pháp phòng thủ"""
         effectiveness_metrics = {
-            'overall_effectiveness': 0.0,
-            'success_rate': 0.0,
-            'average_response_time': 0.0,
-            'threat_mitigation_rate': 0.0
+            "overall_effectiveness": 0.0,
+            "success_rate": 0.0,
+            "average_response_time": 0.0,
+            "threat_mitigation_rate": 0.0,
         }
 
         if not defense_results:
@@ -644,21 +690,27 @@ class BlueTeamEngine:
 
         # Tính success rate
         successful_defenses = [r for r in defense_results if r.status == "success"]
-        effectiveness_metrics['success_rate'] = len(successful_defenses) / len(defense_results)
+        effectiveness_metrics["success_rate"] = len(successful_defenses) / len(
+            defense_results
+        )
 
         # Tính overall effectiveness
         if successful_defenses:
-            avg_effectiveness = statistics.mean([r.effectiveness_score for r in successful_defenses])
-            effectiveness_metrics['overall_effectiveness'] = avg_effectiveness
+            avg_effectiveness = statistics.mean(
+                [r.effectiveness_score for r in successful_defenses]
+            )
+            effectiveness_metrics["overall_effectiveness"] = avg_effectiveness
 
         # Tính average response time
         response_times = []
         for result in defense_results:
-            if 'response_time' in result.details:
-                response_times.append(result.details['response_time'])
+            if "response_time" in result.details:
+                response_times.append(result.details["response_time"])
 
         if response_times:
-            effectiveness_metrics['average_response_time'] = statistics.mean(response_times)
+            effectiveness_metrics["average_response_time"] = statistics.mean(
+                response_times
+            )
 
         return effectiveness_metrics
 
@@ -667,20 +719,20 @@ class BlueTeamEngine:
         try:
             for anomaly in anomalies:
                 memory_data = {
-                    'type': 'SECURITY_ANOMALY',
-                    'anomaly_id': anomaly.id,
-                    'anomaly_type': anomaly.anomaly_type.value,
-                    'threat_level': anomaly.threat_level.value,
-                    'description': anomaly.description,
-                    'confidence': anomaly.confidence,
-                    'timestamp': anomaly.timestamp.isoformat(),
-                    'metadata': anomaly.metadata
+                    "type": "SECURITY_ANOMALY",
+                    "anomaly_id": anomaly.id,
+                    "anomaly_type": anomaly.anomaly_type.value,
+                    "threat_level": anomaly.threat_level.value,
+                    "description": anomaly.description,
+                    "confidence": anomaly.confidence,
+                    "timestamp": anomaly.timestamp.isoformat(),
+                    "metadata": anomaly.metadata,
                 }
 
                 await self.memory_manager.store_experience(
-                    experience_type='SECURITY_TESTING',
+                    experience_type="SECURITY_TESTING",
                     data=memory_data,
-                    tags=['anomaly', 'security', 'defense']
+                    tags=["anomaly", "security", "defense"],
                 )
         except Exception as e:
             self.logger.error(f"Error storing anomalies in memory: {e}")
@@ -688,11 +740,13 @@ class BlueTeamEngine:
     def get_defense_statistics(self) -> dict[str, Any]:
         """Lấy thống kê phòng thủ"""
         return {
-            'stats': self.stats.copy(),
-            'active_defenses': len(self.defense_engine.active_defenses),
-            'defense_rules': len(self.defense_engine.defense_rules),
-            'enabled_rules': len([r for r in self.defense_engine.defense_rules.values() if r.enabled]),
-            'recent_defenses': len(self.defense_engine.defense_history)
+            "stats": self.stats.copy(),
+            "active_defenses": len(self.defense_engine.active_defenses),
+            "defense_rules": len(self.defense_engine.defense_rules),
+            "enabled_rules": len(
+                [r for r in self.defense_engine.defense_rules.values() if r.enabled]
+            ),
+            "recent_defenses": len(self.defense_engine.defense_history),
         }
 
     async def run_continuous_monitoring(self, interval: int = 60):
@@ -707,15 +761,21 @@ class BlueTeamEngine:
                 security_events = await self._collect_security_events()
 
                 # Phân tích và phòng thủ
-                anomalies = await self.analyze_system_state(logs, metrics, security_events)
+                anomalies = await self.analyze_system_state(
+                    logs, metrics, security_events
+                )
 
                 if anomalies:
                     self.logger.info(f"Detected {len(anomalies)} anomalies")
                     defense_results = await self.execute_defense_strategy(anomalies)
 
                     if defense_results:
-                        effectiveness = await self.verify_defense_effectiveness(defense_results)
-                        self.logger.info(f"Defense effectiveness: {effectiveness['overall_effectiveness']:.2f}")
+                        effectiveness = await self.verify_defense_effectiveness(
+                            defense_results
+                        )
+                        self.logger.info(
+                            f"Defense effectiveness: {effectiveness['overall_effectiveness']:.2f}"
+                        )
 
                 # Chờ interval
                 await asyncio.sleep(interval)
@@ -728,27 +788,47 @@ class BlueTeamEngine:
         """Thu thập system logs"""
         # Simulate log collection
         return [
-            {"timestamp": datetime.now(), "level": "INFO", "message": "System running normally"},
-            {"timestamp": datetime.now(), "level": "WARNING", "message": "High memory usage detected"},
-            {"timestamp": datetime.now(), "level": "ERROR", "message": "Connection timeout"}
+            {
+                "timestamp": datetime.now(),
+                "level": "INFO",
+                "message": "System running normally",
+            },
+            {
+                "timestamp": datetime.now(),
+                "level": "WARNING",
+                "message": "High memory usage detected",
+            },
+            {
+                "timestamp": datetime.now(),
+                "level": "ERROR",
+                "message": "Connection timeout",
+            },
         ]
 
     async def _collect_system_metrics(self) -> dict[str, float]:
         """Thu thập system metrics"""
         # Simulate metrics collection
         return {
-            'cpu_usage': 0.75,
-            'memory_usage': 0.82,
-            'response_time': 1.5,
-            'error_rate': 0.02
+            "cpu_usage": 0.75,
+            "memory_usage": 0.82,
+            "response_time": 1.5,
+            "error_rate": 0.02,
         }
 
     async def _collect_security_events(self) -> list[dict[str, Any]]:
         """Thu thập security events"""
         # Simulate security events
         return [
-            {"type": "failed_login", "source_ip": "192.168.1.100", "timestamp": datetime.now()},
-            {"type": "suspicious_request", "source_ip": "10.0.0.50", "timestamp": datetime.now()}
+            {
+                "type": "failed_login",
+                "source_ip": "192.168.1.100",
+                "timestamp": datetime.now(),
+            },
+            {
+                "type": "suspicious_request",
+                "source_ip": "10.0.0.50",
+                "timestamp": datetime.now(),
+            },
         ]
 
 
@@ -759,33 +839,57 @@ async def demo_blue_team_engine():
     print("=" * 50)
 
     # Initialize engine
-    config = {
-        'monitoring_interval': 30,
-        'alert_threshold': 0.8,
-        'auto_response': True
-    }
+    config = {"monitoring_interval": 30, "alert_threshold": 0.8, "auto_response": True}
 
     engine = BlueTeamEngine(config)
 
     # Simulate system data
     logs = [
-        {"timestamp": datetime.now(), "level": "ERROR", "message": "Multiple failed login attempts"},
-        {"timestamp": datetime.now(), "level": "WARNING", "message": "Unusual network activity"},
-        {"timestamp": datetime.now(), "level": "INFO", "message": "System performance degraded"}
+        {
+            "timestamp": datetime.now(),
+            "level": "ERROR",
+            "message": "Multiple failed login attempts",
+        },
+        {
+            "timestamp": datetime.now(),
+            "level": "WARNING",
+            "message": "Unusual network activity",
+        },
+        {
+            "timestamp": datetime.now(),
+            "level": "INFO",
+            "message": "System performance degraded",
+        },
     ]
 
     metrics = {
-        'cpu_usage': 0.95,
-        'memory_usage': 0.88,
-        'response_time': 3.2,
-        'error_rate': 0.15
+        "cpu_usage": 0.95,
+        "memory_usage": 0.88,
+        "response_time": 3.2,
+        "error_rate": 0.15,
     }
 
     security_events = [
-        {"type": "failed_login", "source_ip": "192.168.1.100", "timestamp": datetime.now()},
-        {"type": "failed_login", "source_ip": "192.168.1.100", "timestamp": datetime.now()},
-        {"type": "failed_login", "source_ip": "192.168.1.100", "timestamp": datetime.now()},
-        {"type": "suspicious_request", "source_ip": "10.0.0.50", "timestamp": datetime.now()}
+        {
+            "type": "failed_login",
+            "source_ip": "192.168.1.100",
+            "timestamp": datetime.now(),
+        },
+        {
+            "type": "failed_login",
+            "source_ip": "192.168.1.100",
+            "timestamp": datetime.now(),
+        },
+        {
+            "type": "failed_login",
+            "source_ip": "192.168.1.100",
+            "timestamp": datetime.now(),
+        },
+        {
+            "type": "suspicious_request",
+            "source_ip": "10.0.0.50",
+            "timestamp": datetime.now(),
+        },
     ]
 
     # Analyze system state
@@ -794,7 +898,9 @@ async def demo_blue_team_engine():
 
     print(f"📊 Detected {len(anomalies)} anomalies:")
     for anomaly in anomalies:
-        print(f"  - {anomaly.anomaly_type.value}: {anomaly.description} (confidence: {anomaly.confidence:.2f})")
+        print(
+            f"  - {anomaly.anomaly_type.value}: {anomaly.description} (confidence: {anomaly.confidence:.2f})"
+        )
 
     # Execute defense strategy
     if anomalies:
@@ -803,11 +909,15 @@ async def demo_blue_team_engine():
 
         print(f"⚔️ Executed {len(defense_results)} defense actions:")
         for result in defense_results:
-            print(f"  - {result.action.value}: {result.status} (effectiveness: {result.effectiveness_score:.2f})")
+            print(
+                f"  - {result.action.value}: {result.status} (effectiveness: {result.effectiveness_score:.2f})"
+            )
 
         # Verify effectiveness
         effectiveness = await engine.verify_defense_effectiveness(defense_results)
-        print(f"\n📈 Defense effectiveness: {effectiveness['overall_effectiveness']:.2f}")
+        print(
+            f"\n📈 Defense effectiveness: {effectiveness['overall_effectiveness']:.2f}"
+        )
         print(f"📈 Success rate: {effectiveness['success_rate']:.2f}")
 
     # Show statistics

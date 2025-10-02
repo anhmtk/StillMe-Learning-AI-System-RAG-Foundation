@@ -93,8 +93,8 @@ def test_injection_en():
     ).startswith("policy_block")
 
     # Check blocked
-    assert (
-        result.get("blocked", False)
+    assert result.get(
+        "blocked", False
     ), f"Expected blocked=True, got: {result.get('blocked')}"
 
 

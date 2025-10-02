@@ -19,8 +19,11 @@ from stillme_core.alerting.alerting_system import AlertingSystem  # noqa: E402
 from stillme_core.learning.proposals_manager import ProposalsManager  # noqa: E402
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
+
 
 class ManualKnowledgeInput:
     def __init__(self):
@@ -41,13 +44,13 @@ class ManualKnowledgeInput:
                 learning_objectives=[
                     f"Understand {title} concepts",
                     "Apply knowledge in practical scenarios",
-                    "Integrate with existing knowledge base"
+                    "Integrate with existing knowledge base",
                 ],
                 prerequisites=["Basic understanding of the topic"],
                 expected_outcomes=[
                     f"Mastery of {title}",
                     "Practical application skills",
-                    "Enhanced knowledge base"
+                    "Enhanced knowledge base",
                 ],
                 estimated_duration=120,  # 2 hours default
                 quality_score=0.90,  # High quality for manual input
@@ -57,9 +60,9 @@ class ManualKnowledgeInput:
                     "complexity": "medium",
                     "time_commitment": "medium",
                     "prerequisites": "low",
-                    "practical_value": "high"
+                    "practical_value": "high",
                 },
-                created_by="manual_input"
+                created_by="manual_input",
             )
 
             logger.info(f"✅ Knowledge proposal created: {proposal.title}")
@@ -76,7 +79,7 @@ class ManualKnowledgeInput:
                 f"⚡ **Priority:** {priority}\n"
                 f"🆔 **Proposal ID:** {proposal.id[:8]}...\n\n"
                 f"Please review and approve in the dashboard!",
-                "info"
+                "info",
             )
 
             # Lưu thông tin vào file
@@ -108,7 +111,7 @@ class ManualKnowledgeInput:
                 "description": proposal.description,
                 "source_url": source_url,
                 "created_at": datetime.now().isoformat(),
-                "created_by": "manual_input"
+                "created_by": "manual_input",
             }
 
             # Lưu vào artifacts
@@ -118,13 +121,14 @@ class ManualKnowledgeInput:
             filename = f"knowledge_{proposal.id[:8]}.json"
             filepath = artifacts_dir / filename
 
-            with open(filepath, 'w', encoding='utf-8') as f:
+            with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(knowledge_info, f, indent=4, ensure_ascii=False)
 
             logger.info(f"📄 Knowledge info saved to: {filepath}")
 
         except Exception as e:
             logger.error(f"❌ Failed to save knowledge info: {e}")
+
 
 def main():
     """Main function - Interactive mode"""
@@ -174,6 +178,7 @@ def main():
         print("📊 Check dashboard to approve: http://localhost:8506")
     else:
         print("\n❌ Failed to add knowledge. Please try again.")
+
 
 if __name__ == "__main__":
     main()

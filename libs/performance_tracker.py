@@ -3,6 +3,7 @@
 StillMe Performance Tracker
 Tracks model performance metrics including tokens, latency, and model info
 """
+
 import time
 from datetime import datetime
 from typing import Any, Optional
@@ -11,13 +12,15 @@ from typing import Any, Optional
 class PerformanceMetrics:
     """Container for performance metrics"""
 
-    def __init__(self,
-                 model: str,
-                 engine: str,
-                 tokens_in: int = 0,
-                 tokens_out: int = 0,
-                 latency_ms: float = 0.0,
-                 timestamp: Optional[datetime] = None):
+    def __init__(
+        self,
+        model: str,
+        engine: str,
+        tokens_in: int = 0,
+        tokens_out: int = 0,
+        latency_ms: float = 0.0,
+        timestamp: Optional[datetime] = None,
+    ):
         self.model = model
         self.engine = engine
         self.tokens_in = tokens_in
@@ -33,7 +36,7 @@ class PerformanceMetrics:
             "tokens_in": self.tokens_in,
             "tokens_out": self.tokens_out,
             "latency_ms": self.latency_ms,
-            "timestamp": self.timestamp.isoformat()
+            "timestamp": self.timestamp.isoformat(),
         }
 
     def get_display_text(self) -> str:
@@ -50,6 +53,7 @@ class PerformanceMetrics:
 - Total Tokens: {self.tokens_in + self.tokens_out}
 - Latency: {self.latency_ms:.1f}ms
 - Timestamp: {self.timestamp.strftime('%Y-%m-%d %H:%M:%S')}"""
+
 
 class PerformanceTracker:
     """Tracks and manages performance metrics"""
@@ -73,13 +77,15 @@ class PerformanceTracker:
         # Rough estimation: 1 token ≈ 4 characters for English, 2-3 for other languages
         return max(1, len(text) // 3)
 
-    def create_metrics(self,
-                      model: str,
-                      engine: str,
-                      input_text: str,
-                      output_text: str,
-                      latency_ms: float,
-                      session_id: str = "default") -> PerformanceMetrics:
+    def create_metrics(
+        self,
+        model: str,
+        engine: str,
+        input_text: str,
+        output_text: str,
+        latency_ms: float,
+        session_id: str = "default",
+    ) -> PerformanceMetrics:
         """Create performance metrics from request data"""
 
         tokens_in = self.estimate_tokens(input_text)
@@ -90,7 +96,7 @@ class PerformanceTracker:
             engine=engine,
             tokens_in=tokens_in,
             tokens_out=tokens_out,
-            latency_ms=latency_ms
+            latency_ms=latency_ms,
         )
 
         # Store in history
@@ -111,7 +117,7 @@ class PerformanceTracker:
                 "total_tokens": 0,
                 "total_latency": 0.0,
                 "average_latency": 0.0,
-                "models_used": []
+                "models_used": [],
             }
 
         metrics = self.session_metrics[session_id]
@@ -126,12 +132,13 @@ class PerformanceTracker:
             "total_tokens": total_tokens,
             "total_latency": total_latency,
             "average_latency": average_latency,
-            "models_used": models_used
+            "models_used": models_used,
         }
 
     def get_recent_metrics(self, count: int = 10) -> list[PerformanceMetrics]:
         """Get recent performance metrics"""
         return self.metrics_history[-count:] if self.metrics_history else []
+
 
 # Global instance
 performance_tracker = PerformanceTracker()

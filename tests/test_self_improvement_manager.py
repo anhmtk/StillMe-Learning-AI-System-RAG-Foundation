@@ -1,4 +1,3 @@
-
 """
 Unit tests cho SelfImprovementManager
 
@@ -633,6 +632,7 @@ class TestProposedChange:
         )
 
         from dataclasses import asdict
+
         change_dict = asdict(change)
 
         assert isinstance(change_dict, dict)

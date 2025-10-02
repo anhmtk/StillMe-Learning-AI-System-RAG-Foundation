@@ -19,6 +19,7 @@ import yaml
 
 class NodeStatus(Enum):
     """DAG node status"""
+
     PENDING = "pending"
     READY = "ready"
     RUNNING = "running"
@@ -27,8 +28,10 @@ class NodeStatus(Enum):
     SKIPPED = "skipped"
     CANCELLED = "cancelled"
 
+
 class DAGStatus(Enum):
     """DAG execution status"""
+
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -36,15 +39,19 @@ class DAGStatus(Enum):
     CANCELLED = "cancelled"
     PAUSED = "paused"
 
+
 class ExecutionStrategy(Enum):
     """Execution strategies"""
+
     SEQUENTIAL = "sequential"
     PARALLEL = "parallel"
     ADAPTIVE = "adaptive"
 
+
 @dataclass
 class DAGNode:
     """DAG node definition"""
+
     node_id: str
     name: str
     description: str
@@ -62,9 +69,11 @@ class DAGNode:
     resources: dict[str, Any]
     metadata: dict[str, Any]
 
+
 @dataclass
 class DAGExecution:
     """DAG execution instance"""
+
     execution_id: str
     dag_id: str
     status: DAGStatus
@@ -78,9 +87,11 @@ class DAGExecution:
     variables: dict[str, Any]
     context: dict[str, Any]
 
+
 @dataclass
 class ExecutionResult:
     """Node execution result"""
+
     node_id: str
     status: NodeStatus
     start_time: float
@@ -90,6 +101,7 @@ class ExecutionResult:
     error: Optional[str]
     retry_count: int
     resources_used: dict[str, Any]
+
 
 class DAGEngine:
     """Enterprise DAG execution engine"""
@@ -114,26 +126,26 @@ class DAGEngine:
                 return yaml.safe_load(f)
         else:
             return {
-                'max_concurrent_nodes': 10,
-                'default_timeout': 3600,
-                'default_retry_count': 3,
-                'execution_strategy': 'adaptive',
-                'resource_management': {
-                    'enabled': True,
-                    'cpu_limit': 4,
-                    'memory_limit': '8GB',
-                    'disk_limit': '100GB'
+                "max_concurrent_nodes": 10,
+                "default_timeout": 3600,
+                "default_retry_count": 3,
+                "execution_strategy": "adaptive",
+                "resource_management": {
+                    "enabled": True,
+                    "cpu_limit": 4,
+                    "memory_limit": "8GB",
+                    "disk_limit": "100GB",
                 },
-                'monitoring': {
-                    'enabled': True,
-                    'metrics_interval': 30,
-                    'log_level': 'INFO'
+                "monitoring": {
+                    "enabled": True,
+                    "metrics_interval": 30,
+                    "log_level": "INFO",
                 },
-                'persistence': {
-                    'enabled': True,
-                    'checkpoint_interval': 60,
-                    'max_execution_history': 1000
-                }
+                "persistence": {
+                    "enabled": True,
+                    "checkpoint_interval": 60,
+                    "max_execution_history": 1000,
+                },
             }
 
     def load_dag(self, dag_file: str) -> str:
@@ -147,36 +159,38 @@ class DAGEngine:
             with open(dag_path) as f:
                 dag_data = yaml.safe_load(f)
 
-            dag_id = dag_data['id']
+            dag_id = dag_data["id"]
             dag_graph = nx.DiGraph()
 
             # Add nodes
-            for node_data in dag_data.get('nodes', []):
+            for node_data in dag_data.get("nodes", []):
                 node = DAGNode(
-                    node_id=node_data['id'],
-                    name=node_data['name'],
-                    description=node_data.get('description', ''),
-                    task_type=node_data.get('task_type', 'command'),
-                    command=node_data['command'],
-                    working_directory=node_data.get('working_directory'),
-                    environment=node_data.get('environment', {}),
-                    dependencies=node_data.get('dependencies', []),
-                    retry_count=node_data.get('retry_count', self.config['default_retry_count']),
-                    timeout=node_data.get('timeout', self.config['default_timeout']),
-                    priority=node_data.get('priority', 0),
-                    condition=node_data.get('condition'),
-                    on_success=node_data.get('on_success'),
-                    on_failure=node_data.get('on_failure'),
-                    resources=node_data.get('resources', {}),
-                    metadata=node_data.get('metadata', {})
+                    node_id=node_data["id"],
+                    name=node_data["name"],
+                    description=node_data.get("description", ""),
+                    task_type=node_data.get("task_type", "command"),
+                    command=node_data["command"],
+                    working_directory=node_data.get("working_directory"),
+                    environment=node_data.get("environment", {}),
+                    dependencies=node_data.get("dependencies", []),
+                    retry_count=node_data.get(
+                        "retry_count", self.config["default_retry_count"]
+                    ),
+                    timeout=node_data.get("timeout", self.config["default_timeout"]),
+                    priority=node_data.get("priority", 0),
+                    condition=node_data.get("condition"),
+                    on_success=node_data.get("on_success"),
+                    on_failure=node_data.get("on_failure"),
+                    resources=node_data.get("resources", {}),
+                    metadata=node_data.get("metadata", {}),
                 )
 
                 dag_graph.add_node(node.node_id, node=node)
 
             # Add edges based on dependencies
-            for node_data in dag_data.get('nodes', []):
-                node_id = node_data['id']
-                for dep in node_data.get('dependencies', []):
+            for node_data in dag_data.get("nodes", []):
+                node_id = node_data["id"]
+                for dep in node_data.get("dependencies", []):
                     if dep in dag_graph.nodes:
                         dag_graph.add_edge(dep, node_id)
 
@@ -197,8 +211,12 @@ class DAGEngine:
         self.node_handlers[task_type] = handler
         print(f"✅ Node handler registered: {task_type}")
 
-    def execute_dag(self, dag_id: str, variables: Optional[dict[str, Any]] = None,
-                   context: Optional[dict[str, Any]] = None) -> str:
+    def execute_dag(
+        self,
+        dag_id: str,
+        variables: Optional[dict[str, Any]] = None,
+        context: Optional[dict[str, Any]] = None,
+    ) -> str:
         """Execute a DAG"""
         if dag_id not in self.dags:
             raise ValueError(f"DAG not found: {dag_id}")
@@ -219,7 +237,7 @@ class DAGEngine:
             nodes_errors={},
             execution_log=[],
             variables=variables or {},
-            context=context or {}
+            context=context or {},
         )
 
         self.executions[execution_id] = execution
@@ -237,7 +255,9 @@ class DAGEngine:
             dag_graph = self.dags[execution.dag_id]
 
             # Get execution strategy
-            strategy = ExecutionStrategy(self.config.get('execution_strategy', 'adaptive'))
+            strategy = ExecutionStrategy(
+                self.config.get("execution_strategy", "adaptive")
+            )
 
             if strategy == ExecutionStrategy.SEQUENTIAL:
                 await self._execute_sequential(execution, dag_graph)
@@ -247,7 +267,10 @@ class DAGEngine:
                 await self._execute_adaptive(execution, dag_graph)
 
             # Determine final status
-            if any(status == NodeStatus.FAILED for status in execution.nodes_status.values()):
+            if any(
+                status == NodeStatus.FAILED
+                for status in execution.nodes_status.values()
+            ):
                 execution.status = DAGStatus.FAILED
             else:
                 execution.status = DAGStatus.COMPLETED
@@ -263,7 +286,9 @@ class DAGEngine:
             # Save execution
             await self._save_execution(execution)
 
-            print(f"🏁 DAG execution completed: {execution.execution_id} - {execution.status.value}")
+            print(
+                f"🏁 DAG execution completed: {execution.execution_id} - {execution.status.value}"
+            )
 
     async def _execute_sequential(self, execution: DAGExecution, dag_graph: nx.DiGraph):
         """Execute DAG nodes sequentially"""
@@ -277,7 +302,7 @@ class DAGEngine:
             if execution.status == DAGStatus.CANCELLED:
                 break
 
-            node = dag_graph.nodes[node_id]['node']
+            node = dag_graph.nodes[node_id]["node"]
             await self._execute_node(execution, node)
 
     async def _execute_parallel(self, execution: DAGExecution, dag_graph: nx.DiGraph):
@@ -289,10 +314,11 @@ class DAGEngine:
             # Find ready nodes
             ready_nodes = []
             for node_id in dag_graph.nodes:
-                if (node_id not in completed_nodes and
-                    node_id not in running_tasks and
-                    execution.nodes_status[node_id] == NodeStatus.PENDING):
-
+                if (
+                    node_id not in completed_nodes
+                    and node_id not in running_tasks
+                    and execution.nodes_status[node_id] == NodeStatus.PENDING
+                ):
                     # Check if all dependencies are completed
                     dependencies = list(dag_graph.predecessors(node_id))
                     if all(dep in completed_nodes for dep in dependencies):
@@ -300,18 +326,17 @@ class DAGEngine:
 
             # Execute ready nodes
             for node_id in ready_nodes:
-                if len(running_tasks) >= self.config['max_concurrent_nodes']:
+                if len(running_tasks) >= self.config["max_concurrent_nodes"]:
                     break
 
-                node = dag_graph.nodes[node_id]['node']
+                node = dag_graph.nodes[node_id]["node"]
                 task = asyncio.create_task(self._execute_node(execution, node))
                 running_tasks[node_id] = task
 
             # Wait for at least one task to complete
             if running_tasks:
                 done, pending = await asyncio.wait(
-                    running_tasks.values(),
-                    return_when=asyncio.FIRST_COMPLETED
+                    running_tasks.values(), return_when=asyncio.FIRST_COMPLETED
                 )
 
                 # Update completed nodes
@@ -323,7 +348,10 @@ class DAGEngine:
                             break
 
             # Check for failures
-            if any(status == NodeStatus.FAILED for status in execution.nodes_status.values()):
+            if any(
+                status == NodeStatus.FAILED
+                for status in execution.nodes_status.values()
+            ):
                 break
 
     async def _execute_adaptive(self, execution: DAGExecution, dag_graph: nx.DiGraph):
@@ -332,10 +360,14 @@ class DAGEngine:
         try:
             await self._execute_parallel(execution, dag_graph)
         except Exception as e:
-            self._log_execution(execution, f"Parallel execution failed, falling back to sequential: {e}")
+            self._log_execution(
+                execution, f"Parallel execution failed, falling back to sequential: {e}"
+            )
             await self._execute_sequential(execution, dag_graph)
 
-    async def _execute_node(self, execution: DAGExecution, node: DAGNode) -> ExecutionResult:
+    async def _execute_node(
+        self, execution: DAGExecution, node: DAGNode
+    ) -> ExecutionResult:
         """Execute a single DAG node"""
         start_time = time.time()
         execution.nodes_status[node.node_id] = NodeStatus.RUNNING
@@ -344,9 +376,13 @@ class DAGEngine:
 
         try:
             # Check condition
-            if node.condition and not self._evaluate_condition(node.condition, execution):
+            if node.condition and not self._evaluate_condition(
+                node.condition, execution
+            ):
                 execution.nodes_status[node.node_id] = NodeStatus.SKIPPED
-                self._log_execution(execution, f"Node skipped due to condition: {node.name}")
+                self._log_execution(
+                    execution, f"Node skipped due to condition: {node.name}"
+                )
                 return ExecutionResult(
                     node_id=node.node_id,
                     status=NodeStatus.SKIPPED,
@@ -356,7 +392,7 @@ class DAGEngine:
                     output=None,
                     error=None,
                     retry_count=0,
-                    resources_used={}
+                    resources_used={},
                 )
 
             # Execute node
@@ -373,7 +409,9 @@ class DAGEngine:
             else:
                 execution.nodes_status[node.node_id] = NodeStatus.FAILED
                 execution.nodes_errors[node.node_id] = result.error or "Unknown error"
-                self._log_execution(execution, f"Node failed: {node.name} - {result.error}")
+                self._log_execution(
+                    execution, f"Node failed: {node.name} - {result.error}"
+                )
 
                 # Execute on_failure action
                 if node.on_failure:
@@ -395,10 +433,12 @@ class DAGEngine:
                 output=None,
                 error=str(e),
                 retry_count=0,
-                resources_used={}
+                resources_used={},
             )
 
-    async def _run_node_task(self, execution: DAGExecution, node: DAGNode) -> ExecutionResult:
+    async def _run_node_task(
+        self, execution: DAGExecution, node: DAGNode
+    ) -> ExecutionResult:
         """Run the actual task for a node"""
         start_time = time.time()
 
@@ -416,7 +456,7 @@ class DAGEngine:
                     output=output,
                     error=None,
                     retry_count=0,
-                    resources_used={}
+                    resources_used={},
                 )
             except Exception as e:
                 return ExecutionResult(
@@ -428,7 +468,7 @@ class DAGEngine:
                     output=None,
                     error=str(e),
                     retry_count=0,
-                    resources_used={}
+                    resources_used={},
                 )
 
         # Default command execution
@@ -445,19 +485,18 @@ class DAGEngine:
                 cwd=cwd,
                 env=env,
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+                stderr=asyncio.subprocess.PIPE,
             )
 
             try:
                 stdout, stderr = await asyncio.wait_for(
-                    process.communicate(),
-                    timeout=node.timeout
+                    process.communicate(), timeout=node.timeout
                 )
 
                 output = {
-                    'stdout': stdout.decode() if stdout else '',
-                    'stderr': stderr.decode() if stderr else '',
-                    'return_code': process.returncode
+                    "stdout": stdout.decode() if stdout else "",
+                    "stderr": stderr.decode() if stderr else "",
+                    "return_code": process.returncode,
                 }
 
                 if process.returncode == 0:
@@ -470,7 +509,7 @@ class DAGEngine:
                         output=output,
                         error=None,
                         retry_count=0,
-                        resources_used={}
+                        resources_used={},
                     )
                 else:
                     return ExecutionResult(
@@ -482,7 +521,7 @@ class DAGEngine:
                         output=output,
                         error=f"Command failed with return code {process.returncode}",
                         retry_count=0,
-                        resources_used={}
+                        resources_used={},
                     )
 
             except asyncio.TimeoutError:
@@ -496,7 +535,7 @@ class DAGEngine:
                     output=None,
                     error=f"Command timed out after {node.timeout}s",
                     retry_count=0,
-                    resources_used={}
+                    resources_used={},
                 )
 
         except Exception as e:
@@ -509,7 +548,7 @@ class DAGEngine:
                 output=None,
                 error=str(e),
                 retry_count=0,
-                resources_used={}
+                resources_used={},
             )
 
     def _evaluate_condition(self, condition: str, execution: DAGExecution) -> bool:
@@ -518,9 +557,9 @@ class DAGEngine:
             # Simple condition evaluation
             # In a real implementation, you'd use a proper expression evaluator
             context = {
-                'execution': execution,
-                'variables': execution.variables,
-                'context': execution.context
+                "execution": execution,
+                "variables": execution.variables,
+                "context": execution.context,
             }
             return eval(condition, {"__builtins__": {}}, context)
         except Exception as e:
@@ -538,32 +577,30 @@ class DAGEngine:
 
     def _log_execution(self, execution: DAGExecution, message: str):
         """Log execution message"""
-        log_entry = {
-            'timestamp': time.time(),
-            'message': message
-        }
+        log_entry = {"timestamp": time.time(), "message": message}
         execution.execution_log.append(log_entry)
         print(f"[{execution.execution_id}] {message}")
 
     async def _save_execution(self, execution: DAGExecution):
         """Save execution to disk"""
         try:
-            if not self.config['persistence']['enabled']:
+            if not self.config["persistence"]["enabled"]:
                 return
 
-            executions_dir = Path('.agentdev/executions')
+            executions_dir = Path(".agentdev/executions")
             executions_dir.mkdir(parents=True, exist_ok=True)
 
             execution_file = executions_dir / f"{execution.execution_id}.json"
 
             # Convert to serializable format
             execution_data = asdict(execution)
-            execution_data['status'] = execution.status.value
-            execution_data['nodes_status'] = {
-                node_id: status.value for node_id, status in execution.nodes_status.items()
+            execution_data["status"] = execution.status.value
+            execution_data["nodes_status"] = {
+                node_id: status.value
+                for node_id, status in execution.nodes_status.items()
             }
 
-            with open(execution_file, 'w') as f:
+            with open(execution_file, "w") as f:
                 json.dump(execution_data, f, indent=2)
 
         except Exception as e:
@@ -595,16 +632,22 @@ class DAGEngine:
             return None
 
         return {
-            'execution_id': execution.execution_id,
-            'dag_id': execution.dag_id,
-            'status': execution.status.value,
-            'start_time': execution.start_time,
-            'end_time': execution.end_time,
-            'duration': execution.duration,
-            'nodes_status': {node_id: status.value for node_id, status in execution.nodes_status.items()},
-            'progress': self._calculate_progress(execution),
-            'failed_nodes': [node_id for node_id, status in execution.nodes_status.items()
-                           if status == NodeStatus.FAILED]
+            "execution_id": execution.execution_id,
+            "dag_id": execution.dag_id,
+            "status": execution.status.value,
+            "start_time": execution.start_time,
+            "end_time": execution.end_time,
+            "duration": execution.duration,
+            "nodes_status": {
+                node_id: status.value
+                for node_id, status in execution.nodes_status.items()
+            },
+            "progress": self._calculate_progress(execution),
+            "failed_nodes": [
+                node_id
+                for node_id, status in execution.nodes_status.items()
+                if status == NodeStatus.FAILED
+            ],
         }
 
     def _calculate_progress(self, execution: DAGExecution) -> float:
@@ -613,8 +656,13 @@ class DAGEngine:
         if total_nodes == 0:
             return 0.0
 
-        completed_nodes = len([status for status in execution.nodes_status.values()
-                             if status in [NodeStatus.COMPLETED, NodeStatus.SKIPPED]])
+        completed_nodes = len(
+            [
+                status
+                for status in execution.nodes_status.values()
+                if status in [NodeStatus.COMPLETED, NodeStatus.SKIPPED]
+            ]
+        )
 
         return completed_nodes / total_nodes
 
@@ -628,52 +676,64 @@ class DAGEngine:
 
         # Calculate statistics
         total_executions = len(executions)
-        successful_executions = len([e for e in executions if e.status == DAGStatus.COMPLETED])
+        successful_executions = len(
+            [e for e in executions if e.status == DAGStatus.COMPLETED]
+        )
         failed_executions = len([e for e in executions if e.status == DAGStatus.FAILED])
 
-        success_rate = successful_executions / total_executions if total_executions > 0 else 0
+        success_rate = (
+            successful_executions / total_executions if total_executions > 0 else 0
+        )
 
         # Get recent executions
-        recent_executions = sorted(executions, key=lambda x: x.start_time, reverse=True)[:5]
+        recent_executions = sorted(
+            executions, key=lambda x: x.start_time, reverse=True
+        )[:5]
 
         return {
-            'dag_id': dag_id,
-            'node_count': len(dag_graph.nodes),
-            'edge_count': len(dag_graph.edges),
-            'total_executions': total_executions,
-            'successful_executions': successful_executions,
-            'failed_executions': failed_executions,
-            'success_rate': success_rate,
-            'recent_executions': [
+            "dag_id": dag_id,
+            "node_count": len(dag_graph.nodes),
+            "edge_count": len(dag_graph.edges),
+            "total_executions": total_executions,
+            "successful_executions": successful_executions,
+            "failed_executions": failed_executions,
+            "success_rate": success_rate,
+            "recent_executions": [
                 {
-                    'execution_id': e.execution_id,
-                    'status': e.status.value,
-                    'start_time': e.start_time,
-                    'duration': e.duration
+                    "execution_id": e.execution_id,
+                    "status": e.status.value,
+                    "start_time": e.start_time,
+                    "duration": e.duration,
                 }
                 for e in recent_executions
-            ]
+            ],
         }
+
 
 # Global DAG engine instance
 dag_engine = DAGEngine()
+
 
 # Convenience functions
 def load_dag(dag_file: str) -> str:
     """Load DAG from file"""
     return dag_engine.load_dag(dag_file)
 
+
 def execute_dag(dag_id: str, variables: Optional[dict[str, Any]] = None) -> str:
     """Execute DAG"""
     return dag_engine.execute_dag(dag_id, variables)
+
 
 def get_execution_status(execution_id: str) -> Optional[dict[str, Any]]:
     """Get execution status"""
     return dag_engine.get_execution_status(execution_id)
 
+
 def cancel_execution(execution_id: str) -> bool:
     """Cancel execution"""
     return dag_engine.cancel_execution(execution_id)
+
 
 # Example DAG definition
 EXAMPLE_DAG = """
@@ -747,13 +807,14 @@ nodes:
 """
 
 if __name__ == "__main__":
+
     async def main():
         # Example usage
         engine = DAGEngine()
 
         # Create example DAG file
         dag_file = Path("example_dag.yaml")
-        with open(dag_file, 'w') as f:
+        with open(dag_file, "w") as f:
             f.write(EXAMPLE_DAG)
 
         try:
@@ -767,9 +828,11 @@ if __name__ == "__main__":
             while True:
                 status = engine.get_execution_status(execution_id)
                 if status:
-                    print(f"Progress: {status['progress']:.1%} - Status: {status['status']}")
+                    print(
+                        f"Progress: {status['progress']:.1%} - Status: {status['status']}"
+                    )
 
-                    if status['status'] in ['completed', 'failed', 'cancelled']:
+                    if status["status"] in ["completed", "failed", "cancelled"]:
                         break
 
                 await asyncio.sleep(5)

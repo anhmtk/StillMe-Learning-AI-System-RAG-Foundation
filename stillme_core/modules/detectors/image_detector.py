@@ -51,10 +51,21 @@ class ImageDetector(BaseDetector):
                 # Try to decode base64
                 decoded = base64.b64decode(base64_data)
                 # Check if it's a valid image format
-                if decoded.startswith(b'\x89PNG') or decoded.startswith(b'\xff\xd8\xff'):
-                    base64_validation_results.append({"valid": True, "format": "PNG" if decoded.startswith(b'\x89PNG') else "JPEG"})
+                if decoded.startswith(b"\x89PNG") or decoded.startswith(
+                    b"\xff\xd8\xff"
+                ):
+                    base64_validation_results.append(
+                        {
+                            "valid": True,
+                            "format": "PNG"
+                            if decoded.startswith(b"\x89PNG")
+                            else "JPEG",
+                        }
+                    )
                 else:
-                    base64_validation_results.append({"valid": False, "format": "unknown"})
+                    base64_validation_results.append(
+                        {"valid": False, "format": "unknown"}
+                    )
             except Exception as e:
                 base64_validation_results.append({"valid": False, "error": str(e)})
 
@@ -65,7 +76,7 @@ class ImageDetector(BaseDetector):
             for base64_data in base64_matches:
                 if len(base64_data) < 100:  # Very short base64 data
                     corrupted_indicators.append("truncated_base64")
-                if base64_data.endswith('='):  # Padding indicates potential truncation
+                if base64_data.endswith("="):  # Padding indicates potential truncation
                     corrupted_indicators.append("padded_base64")
 
         # Calculate confidence score
@@ -78,7 +89,11 @@ class ImageDetector(BaseDetector):
             confidence += 0.4
 
         if base64_validation_results:
-            invalid_count = sum(1 for result in base64_validation_results if not result.get("valid", True))
+            invalid_count = sum(
+                1
+                for result in base64_validation_results
+                if not result.get("valid", True)
+            )
             if invalid_count > 0:
                 confidence += 0.3
 
@@ -97,6 +112,6 @@ class ImageDetector(BaseDetector):
                 "base64_matches_count": len(base64_matches),
                 "test_corrupted_found": test_corrupted_found,
                 "base64_validation_results": base64_validation_results,
-                "corrupted_indicators": corrupted_indicators
-            }
+                "corrupted_indicators": corrupted_indicators,
+            },
         }

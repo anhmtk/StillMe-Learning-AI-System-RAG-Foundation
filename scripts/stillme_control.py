@@ -18,7 +18,9 @@ def main():
     subparsers.add_parser("start", help="Start real learning system")
 
     # Start background service
-    subparsers.add_parser("background", help="Start background service (auto-discovery)")
+    subparsers.add_parser(
+        "background", help="Start background service (auto-discovery)"
+    )
 
     # Discover knowledge
     subparsers.add_parser("discover", help="Discover new knowledge")
@@ -27,16 +29,24 @@ def main():
     add_parser = subparsers.add_parser("add", help="Add manual knowledge")
     add_parser.add_argument("title", help="Knowledge title")
     add_parser.add_argument("description", help="Knowledge description")
-    add_parser.add_argument("--priority", choices=["low", "medium", "high", "critical"],
-                           default="medium", help="Priority level")
+    add_parser.add_argument(
+        "--priority",
+        choices=["low", "medium", "high", "critical"],
+        default="medium",
+        help="Priority level",
+    )
     add_parser.add_argument("--url", help="Source URL (optional)")
 
     # Quick add knowledge
     quick_parser = subparsers.add_parser("quick", help="Quick add knowledge")
     quick_parser.add_argument("title", help="Knowledge title")
     quick_parser.add_argument("description", help="Knowledge description")
-    quick_parser.add_argument("--priority", choices=["low", "medium", "high", "critical"],
-                             default="medium", help="Priority level")
+    quick_parser.add_argument(
+        "--priority",
+        choices=["low", "medium", "high", "critical"],
+        default="medium",
+        help="Priority level",
+    )
     quick_parser.add_argument("--url", help="Source URL (optional)")
 
     # Start automation
@@ -44,22 +54,35 @@ def main():
 
     # Launch dashboard
     dashboard_parser = subparsers.add_parser("dashboard", help="Launch dashboard")
-    dashboard_parser.add_argument("--port", type=int, default=8506, help="Dashboard port")
+    dashboard_parser.add_argument(
+        "--port", type=int, default=8506, help="Dashboard port"
+    )
 
     # Setup notifications
-    subparsers.add_parser("setup-notifications", help="Setup email and Telegram notifications")
+    subparsers.add_parser(
+        "setup-notifications", help="Setup email and Telegram notifications"
+    )
 
     # Windows Service management
     service_parser = subparsers.add_parser("service", help="Manage Windows Service")
-    service_parser.add_argument("action", choices=["install", "uninstall", "start", "stop", "restart", "status"],
-                               help="Service action")
+    service_parser.add_argument(
+        "action",
+        choices=["install", "uninstall", "start", "stop", "restart", "status"],
+        help="Service action",
+    )
 
     # Founder knowledge input
-    founder_parser = subparsers.add_parser("founder", help="Add founder knowledge (auto-approved)")
+    founder_parser = subparsers.add_parser(
+        "founder", help="Add founder knowledge (auto-approved)"
+    )
     founder_parser.add_argument("title", help="Knowledge title")
     founder_parser.add_argument("description", help="Knowledge description")
-    founder_parser.add_argument("--priority", choices=["low", "medium", "high", "critical"],
-                                default="high", help="Priority level")
+    founder_parser.add_argument(
+        "--priority",
+        choices=["low", "medium", "high", "critical"],
+        default="high",
+        help="Priority level",
+    )
     founder_parser.add_argument("--url", help="Source URL (optional)")
 
     args = parser.parse_args()
@@ -83,21 +106,33 @@ def main():
 
     elif args.command == "add":
         print("📚 Adding manual knowledge...")
-        subprocess.run([
-            sys.executable, "scripts/add_manual_knowledge.py",
-            "--title", args.title,
-            "--description", args.description,
-            "--priority", args.priority
-        ] + (["--url", args.url] if args.url else []))
+        subprocess.run(
+            [
+                sys.executable,
+                "scripts/add_manual_knowledge.py",
+                "--title",
+                args.title,
+                "--description",
+                args.description,
+                "--priority",
+                args.priority,
+            ]
+            + (["--url", args.url] if args.url else [])
+        )
 
     elif args.command == "quick":
         print("⚡ Quick adding knowledge...")
-        subprocess.run([
-            sys.executable, "scripts/quick_add_knowledge.py",
-            args.title,
-            args.description,
-            "--priority", args.priority
-        ] + (["--url", args.url] if args.url else []))
+        subprocess.run(
+            [
+                sys.executable,
+                "scripts/quick_add_knowledge.py",
+                args.title,
+                args.description,
+                "--priority",
+                args.priority,
+            ]
+            + (["--url", args.url] if args.url else [])
+        )
 
     elif args.command == "automation":
         print("🤖 Starting smart automation...")
@@ -105,21 +140,35 @@ def main():
 
     elif args.command == "dashboard":
         print(f"📊 Launching dashboard on port {args.port}...")
-        subprocess.run([
-            sys.executable, "-m", "streamlit", "run",
-            "dashboards/streamlit/simple_app.py",
-            "--server.port", str(args.port),
-            "--browser.gatherUsageStats", "false"
-        ])
+        subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "streamlit",
+                "run",
+                "dashboards/streamlit/simple_app.py",
+                "--server.port",
+                str(args.port),
+                "--browser.gatherUsageStats",
+                "false",
+            ]
+        )
 
     elif args.command == "founder":
         print("👑 Adding founder knowledge (auto-approved)...")
-        subprocess.run([
-            sys.executable, "scripts/founder_knowledge_input.py",
-            "--title", args.title,
-            "--description", args.description,
-            "--priority", args.priority
-        ] + (["--url", args.url] if args.url else []))
+        subprocess.run(
+            [
+                sys.executable,
+                "scripts/founder_knowledge_input.py",
+                "--title",
+                args.title,
+                "--description",
+                args.description,
+                "--priority",
+                args.priority,
+            ]
+            + (["--url", args.url] if args.url else [])
+        )
 
     elif args.command == "setup-notifications":
         print("📧📱 Setting up notifications...")
@@ -127,7 +176,10 @@ def main():
 
     elif args.command == "service":
         print(f"🪟 Managing Windows Service: {args.action}")
-        subprocess.run([sys.executable, "scripts/install_windows_service.py", args.action])
+        subprocess.run(
+            [sys.executable, "scripts/install_windows_service.py", args.action]
+        )
+
 
 if __name__ == "__main__":
     main()

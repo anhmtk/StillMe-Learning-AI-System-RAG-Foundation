@@ -19,22 +19,27 @@ import yaml
 
 class WorkflowStatus(Enum):
     """GitHub Actions workflow status"""
+
     QUEUED = "queued"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
     CANCELLED = "cancelled"
     FAILED = "failed"
+
 
 class JobStatus(Enum):
     """GitHub Actions job status"""
+
     QUEUED = "queued"
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
     CANCELLED = "cancelled"
     FAILED = "failed"
 
+
 class EventType(Enum):
     """GitHub webhook event types"""
+
     PUSH = "push"
     PULL_REQUEST = "pull_request"
     ISSUE = "issue"
@@ -42,9 +47,11 @@ class EventType(Enum):
     CHECK_RUN = "check_run"
     DEPLOYMENT = "deployment"
 
+
 @dataclass
 class GitHubWorkflow:
     """GitHub Actions workflow definition"""
+
     workflow_id: str
     name: str
     path: str
@@ -55,9 +62,11 @@ class GitHubWorkflow:
     html_url: str
     badge_url: str
 
+
 @dataclass
 class WorkflowRun:
     """GitHub Actions workflow run"""
+
     run_id: int
     workflow_id: int
     status: WorkflowStatus
@@ -78,9 +87,11 @@ class WorkflowRun:
     repository: dict[str, Any]
     head_repository: dict[str, Any]
 
+
 @dataclass
 class Job:
     """GitHub Actions job"""
+
     job_id: int
     run_id: int
     name: str
@@ -96,15 +107,16 @@ class Job:
     runner_group_id: int
     runner_group_name: str
 
+
 class GitHubActionsIntegration:
     """Enterprise GitHub Actions integration"""
 
     def __init__(self, config_path: Optional[str] = None):
         self.config = self._load_config(config_path)
-        self.github_token = self.config.get('github_token')
-        self.webhook_secret = self.config.get('webhook_secret')
-        self.repository = self.config.get('repository')
-        self.owner = self.config.get('owner')
+        self.github_token = self.config.get("github_token")
+        self.webhook_secret = self.config.get("webhook_secret")
+        self.repository = self.config.get("repository")
+        self.owner = self.config.get("owner")
         self.base_url = "https://api.github.com"
         self.webhook_handlers: dict[EventType, list[Callable]] = {}
         self.session: Optional[aiohttp.ClientSession] = None
@@ -121,46 +133,40 @@ class GitHubActionsIntegration:
                 return yaml.safe_load(f)
         else:
             return {
-                'github_token': None,
-                'webhook_secret': None,
-                'repository': 'stillme_ai',
-                'owner': 'your_username',
-                'workflows': {
-                    'agentdev_deploy': {
-                        'enabled': True,
-                        'trigger_on': ['push', 'pull_request'],
-                        'branches': ['main', 'develop']
+                "github_token": None,
+                "webhook_secret": None,
+                "repository": "stillme_ai",
+                "owner": "your_username",
+                "workflows": {
+                    "agentdev_deploy": {
+                        "enabled": True,
+                        "trigger_on": ["push", "pull_request"],
+                        "branches": ["main", "develop"],
                     },
-                    'agentdev_test': {
-                        'enabled': True,
-                        'trigger_on': ['push', 'pull_request'],
-                        'branches': ['*']
+                    "agentdev_test": {
+                        "enabled": True,
+                        "trigger_on": ["push", "pull_request"],
+                        "branches": ["*"],
                     },
-                    'agentdev_security_scan': {
-                        'enabled': True,
-                        'trigger_on': ['push'],
-                        'branches': ['main']
-                    }
+                    "agentdev_security_scan": {
+                        "enabled": True,
+                        "trigger_on": ["push"],
+                        "branches": ["main"],
+                    },
                 },
-                'notifications': {
-                    'slack': {
-                        'enabled': False,
-                        'webhook_url': None
-                    },
-                    'email': {
-                        'enabled': False,
-                        'recipients': []
-                    }
-                }
+                "notifications": {
+                    "slack": {"enabled": False, "webhook_url": None},
+                    "email": {"enabled": False, "recipients": []},
+                },
             }
 
     async def _get_session(self) -> aiohttp.ClientSession:
         """Get or create HTTP session"""
         if not self.session:
             headers = {
-                'Authorization': f'token {self.github_token}',
-                'Accept': 'application/vnd.github.v3+json',
-                'User-Agent': 'StillMe-AgentDev/1.0'
+                "Authorization": f"token {self.github_token}",
+                "Accept": "application/vnd.github.v3+json",
+                "User-Agent": "StillMe-AgentDev/1.0",
             }
             self.session = aiohttp.ClientSession(headers=headers)
         return self.session
@@ -181,17 +187,17 @@ class GitHubActionsIntegration:
                 data = await response.json()
 
                 workflows = []
-                for workflow_data in data.get('workflows', []):
+                for workflow_data in data.get("workflows", []):
                     workflow = GitHubWorkflow(
-                        workflow_id=workflow_data['id'],
-                        name=workflow_data['name'],
-                        path=workflow_data['path'],
-                        state=workflow_data['state'],
-                        created_at=workflow_data['created_at'],
-                        updated_at=workflow_data['updated_at'],
-                        url=workflow_data['url'],
-                        html_url=workflow_data['html_url'],
-                        badge_url=workflow_data['badge_url']
+                        workflow_id=workflow_data["id"],
+                        name=workflow_data["name"],
+                        path=workflow_data["path"],
+                        state=workflow_data["state"],
+                        created_at=workflow_data["created_at"],
+                        updated_at=workflow_data["updated_at"],
+                        url=workflow_data["url"],
+                        html_url=workflow_data["html_url"],
+                        badge_url=workflow_data["badge_url"],
                     )
                     workflows.append(workflow)
 
@@ -201,16 +207,16 @@ class GitHubActionsIntegration:
             print(f"⚠️ Failed to get workflows: {e}")
             return []
 
-    async def get_workflow_runs(self, workflow_id: str,
-                              status: Optional[WorkflowStatus] = None,
-                              limit: int = 10) -> list[WorkflowRun]:
+    async def get_workflow_runs(
+        self, workflow_id: str, status: Optional[WorkflowStatus] = None, limit: int = 10
+    ) -> list[WorkflowRun]:
         """Get workflow runs"""
         session = await self._get_session()
         url = f"{self.base_url}/repos/{self.owner}/{self.repository}/actions/workflows/{workflow_id}/runs"
 
-        params = {'per_page': limit}
+        params = {"per_page": limit}
         if status:
-            params['status'] = status.value
+            params["status"] = status.value
 
         try:
             async with session.get(url, params=params) as response:
@@ -218,27 +224,27 @@ class GitHubActionsIntegration:
                 data = await response.json()
 
                 runs = []
-                for run_data in data.get('workflow_runs', []):
+                for run_data in data.get("workflow_runs", []):
                     run = WorkflowRun(
-                        run_id=run_data['id'],
-                        workflow_id=run_data['workflow_id'],
-                        status=WorkflowStatus(run_data['status']),
-                        conclusion=run_data.get('conclusion'),
-                        head_branch=run_data['head_branch'],
-                        head_sha=run_data['head_sha'],
-                        created_at=run_data['created_at'],
-                        updated_at=run_data['updated_at'],
-                        run_started_at=run_data['run_started_at'],
-                        jobs_url=run_data['jobs_url'],
-                        logs_url=run_data['logs_url'],
-                        check_suite_url=run_data['check_suite_url'],
-                        artifacts_url=run_data['artifacts_url'],
-                        cancel_url=run_data['cancel_url'],
-                        rerun_url=run_data['rerun_url'],
-                        workflow_url=run_data['workflow_url'],
-                        head_commit=run_data['head_commit'],
-                        repository=run_data['repository'],
-                        head_repository=run_data['head_repository']
+                        run_id=run_data["id"],
+                        workflow_id=run_data["workflow_id"],
+                        status=WorkflowStatus(run_data["status"]),
+                        conclusion=run_data.get("conclusion"),
+                        head_branch=run_data["head_branch"],
+                        head_sha=run_data["head_sha"],
+                        created_at=run_data["created_at"],
+                        updated_at=run_data["updated_at"],
+                        run_started_at=run_data["run_started_at"],
+                        jobs_url=run_data["jobs_url"],
+                        logs_url=run_data["logs_url"],
+                        check_suite_url=run_data["check_suite_url"],
+                        artifacts_url=run_data["artifacts_url"],
+                        cancel_url=run_data["cancel_url"],
+                        rerun_url=run_data["rerun_url"],
+                        workflow_url=run_data["workflow_url"],
+                        head_commit=run_data["head_commit"],
+                        repository=run_data["repository"],
+                        head_repository=run_data["head_repository"],
                     )
                     runs.append(run)
 
@@ -259,22 +265,22 @@ class GitHubActionsIntegration:
                 data = await response.json()
 
                 jobs = []
-                for job_data in data.get('jobs', []):
+                for job_data in data.get("jobs", []):
                     job = Job(
-                        job_id=job_data['id'],
-                        run_id=job_data['run_id'],
-                        name=job_data['name'],
-                        status=JobStatus(job_data['status']),
-                        conclusion=job_data.get('conclusion'),
-                        started_at=job_data['started_at'],
-                        completed_at=job_data.get('completed_at'),
-                        steps=job_data.get('steps', []),
-                        check_run_url=job_data['check_run_url'],
-                        labels=job_data.get('labels', []),
-                        runner_id=job_data['runner_id'],
-                        runner_name=job_data['runner_name'],
-                        runner_group_id=job_data['runner_group_id'],
-                        runner_group_name=job_data['runner_group_name']
+                        job_id=job_data["id"],
+                        run_id=job_data["run_id"],
+                        name=job_data["name"],
+                        status=JobStatus(job_data["status"]),
+                        conclusion=job_data.get("conclusion"),
+                        started_at=job_data["started_at"],
+                        completed_at=job_data.get("completed_at"),
+                        steps=job_data.get("steps", []),
+                        check_run_url=job_data["check_run_url"],
+                        labels=job_data.get("labels", []),
+                        runner_id=job_data["runner_id"],
+                        runner_name=job_data["runner_name"],
+                        runner_group_id=job_data["runner_group_id"],
+                        runner_group_name=job_data["runner_group_name"],
                     )
                     jobs.append(job)
 
@@ -284,17 +290,17 @@ class GitHubActionsIntegration:
             print(f"⚠️ Failed to get jobs: {e}")
             return []
 
-    async def trigger_workflow(self, workflow_id: str,
-                             ref: str = "main",
-                             inputs: Optional[dict[str, Any]] = None) -> bool:
+    async def trigger_workflow(
+        self,
+        workflow_id: str,
+        ref: str = "main",
+        inputs: Optional[dict[str, Any]] = None,
+    ) -> bool:
         """Trigger a workflow run"""
         session = await self._get_session()
         url = f"{self.base_url}/repos/{self.owner}/{self.repository}/actions/workflows/{workflow_id}/dispatches"
 
-        payload = {
-            'ref': ref,
-            'inputs': inputs or {}
-        }
+        payload = {"ref": ref, "inputs": inputs or {}}
 
         try:
             async with session.post(url, json=payload) as response:
@@ -374,16 +380,18 @@ class GitHubActionsIntegration:
         if not self.webhook_secret:
             return False
 
-        expected_signature = 'sha256=' + hmac.new(
-            self.webhook_secret.encode(),
-            payload.encode(),
-            hashlib.sha256
-        ).hexdigest()
+        expected_signature = (
+            "sha256="
+            + hmac.new(
+                self.webhook_secret.encode(), payload.encode(), hashlib.sha256
+            ).hexdigest()
+        )
 
         return hmac.compare_digest(signature, expected_signature)
 
-    async def handle_webhook(self, event_type: str, payload: dict[str, Any],
-                           signature: Optional[str] = None) -> bool:
+    async def handle_webhook(
+        self, event_type: str, payload: dict[str, Any], signature: Optional[str] = None
+    ) -> bool:
         """Handle GitHub webhook event"""
         # Verify signature if provided
         if signature:
@@ -409,14 +417,15 @@ class GitHubActionsIntegration:
 
         return True
 
-    async def create_agentdev_workflow(self, workflow_name: str,
-                                     workflow_content: str) -> bool:
+    async def create_agentdev_workflow(
+        self, workflow_name: str, workflow_content: str
+    ) -> bool:
         """Create AgentDev workflow file"""
         workflow_path = Path(f".github/workflows/{workflow_name}.yml")
         workflow_path.parent.mkdir(parents=True, exist_ok=True)
 
         try:
-            with open(workflow_path, 'w') as f:
+            with open(workflow_path, "w") as f:
                 f.write(workflow_content)
 
             print(f"✅ Created workflow: {workflow_path}")
@@ -431,12 +440,12 @@ class GitHubActionsIntegration:
         workflows = await self.get_workflows()
 
         summary = {
-            'total_workflows': len(workflows),
-            'active_workflows': len([w for w in workflows if w.state == 'active']),
-            'workflow_status': {},
-            'recent_runs': {},
-            'failed_runs': 0,
-            'success_rate': 0.0
+            "total_workflows": len(workflows),
+            "active_workflows": len([w for w in workflows if w.state == "active"]),
+            "workflow_status": {},
+            "recent_runs": {},
+            "failed_runs": 0,
+            "success_rate": 0.0,
         }
 
         total_runs = 0
@@ -444,40 +453,47 @@ class GitHubActionsIntegration:
 
         for workflow in workflows:
             runs = await self.get_workflow_runs(workflow.workflow_id, limit=5)
-            summary['recent_runs'][workflow.name] = len(runs)
+            summary["recent_runs"][workflow.name] = len(runs)
 
             for run in runs:
                 total_runs += 1
-                if run.status == WorkflowStatus.COMPLETED and run.conclusion == 'success':
+                if (
+                    run.status == WorkflowStatus.COMPLETED
+                    and run.conclusion == "success"
+                ):
                     successful_runs += 1
-                elif run.status == WorkflowStatus.FAILED or run.conclusion == 'failure':
-                    summary['failed_runs'] += 1
+                elif run.status == WorkflowStatus.FAILED or run.conclusion == "failure":
+                    summary["failed_runs"] += 1
 
             # Get workflow status
             if runs:
                 latest_run = runs[0]
-                summary['workflow_status'][workflow.name] = {
-                    'status': latest_run.status.value,
-                    'conclusion': latest_run.conclusion,
-                    'last_run': latest_run.created_at
+                summary["workflow_status"][workflow.name] = {
+                    "status": latest_run.status.value,
+                    "conclusion": latest_run.conclusion,
+                    "last_run": latest_run.created_at,
                 }
 
         if total_runs > 0:
-            summary['success_rate'] = successful_runs / total_runs
+            summary["success_rate"] = successful_runs / total_runs
 
         return summary
+
 
 # Global GitHub Actions integration instance
 github_actions = GitHubActionsIntegration()
 
+
 # Convenience functions
-async def trigger_agentdev_workflow(workflow_name: str, inputs: Optional[dict[str, Any]] = None) -> bool:
+async def trigger_agentdev_workflow(
+    workflow_name: str, inputs: Optional[dict[str, Any]] = None
+) -> bool:
     """Trigger AgentDev workflow"""
     # Map workflow names to IDs (this would need to be configured)
     workflow_mapping = {
-        'deploy': 'agentdev_deploy.yml',
-        'test': 'agentdev_test.yml',
-        'security_scan': 'agentdev_security_scan.yml'
+        "deploy": "agentdev_deploy.yml",
+        "test": "agentdev_test.yml",
+        "security_scan": "agentdev_security_scan.yml",
     }
 
     workflow_id = workflow_mapping.get(workflow_name)
@@ -487,13 +503,16 @@ async def trigger_agentdev_workflow(workflow_name: str, inputs: Optional[dict[st
 
     return await github_actions.trigger_workflow(workflow_id, inputs=inputs)
 
+
 async def get_ci_status() -> dict[str, Any]:
     """Get CI/CD status summary"""
     return await github_actions.get_workflow_status_summary()
 
+
 def register_ci_webhook_handler(event_type: EventType, handler: Callable):
     """Register CI/CD webhook handler"""
     github_actions.register_webhook_handler(event_type, handler)
+
 
 # Example workflow templates
 AGENTDEV_DEPLOY_WORKFLOW = """
@@ -619,6 +638,7 @@ jobs:
 """
 
 if __name__ == "__main__":
+
     async def main():
         # Example usage
         github = GitHubActionsIntegration()
@@ -632,9 +652,13 @@ if __name__ == "__main__":
         print(f"CI Status: {status}")
 
         # Create example workflows
-        await github.create_agentdev_workflow("agentdev_deploy", AGENTDEV_DEPLOY_WORKFLOW)
+        await github.create_agentdev_workflow(
+            "agentdev_deploy", AGENTDEV_DEPLOY_WORKFLOW
+        )
         await github.create_agentdev_workflow("agentdev_test", AGENTDEV_TEST_WORKFLOW)
-        await github.create_agentdev_workflow("agentdev_security", AGENTDEV_SECURITY_WORKFLOW)
+        await github.create_agentdev_workflow(
+            "agentdev_security", AGENTDEV_SECURITY_WORKFLOW
+        )
 
         await github.close()
 

@@ -40,7 +40,7 @@ class EscalationManager:
             "incidents_found": len(incidents),
             "escalations_sent": 0,
             "auto_fixes_applied": 0,
-            "actions": []
+            "actions": [],
         }
 
         for incident in incidents:
@@ -54,7 +54,9 @@ class EscalationManager:
 
         return escalation_result
 
-    def _analyze_patrol_results(self, patrol_result: dict[str, Any]) -> list[dict[str, Any]]:
+    def _analyze_patrol_results(
+        self, patrol_result: dict[str, Any]
+    ) -> list[dict[str, Any]]:
         """Analyze patrol results and identify incidents"""
         incidents = []
 
@@ -65,33 +67,39 @@ class EscalationManager:
 
             for severity, issues in classified.items():
                 if issues:
-                    incidents.append({
-                        "type": "code_quality",
-                        "severity": severity,
-                        "issues": issues,
-                        "count": len(issues)
-                    })
+                    incidents.append(
+                        {
+                            "type": "code_quality",
+                            "severity": severity,
+                            "issues": issues,
+                            "count": len(issues),
+                        }
+                    )
 
         # Analyze pytest status
         pytest_status = patrol_result.get("pytest_status", "unknown")
         if pytest_status != "passed":
-            incidents.append({
-                "type": "test_failure",
-                "severity": IssueSeverity.MAJOR.value,
-                "status": pytest_status,
-                "count": 1
-            })
+            incidents.append(
+                {
+                    "type": "test_failure",
+                    "severity": IssueSeverity.MAJOR.value,
+                    "status": pytest_status,
+                    "count": 1,
+                }
+            )
 
         # Analyze red-team results
         red_team_status = patrol_result.get("red_team_status", "not_available")
         if red_team_status == "high_risk":
             risk_score = patrol_result.get("red_team_risk_score", 0.0)
-            incidents.append({
-                "type": "security_risk",
-                "severity": IssueSeverity.SECURITY.value,
-                "risk_score": risk_score,
-                "count": 1
-            })
+            incidents.append(
+                {
+                    "type": "security_risk",
+                    "severity": IssueSeverity.SECURITY.value,
+                    "risk_score": risk_score,
+                    "count": 1,
+                }
+            )
 
         return incidents
 
@@ -105,7 +113,7 @@ class EscalationManager:
             "severity": severity,
             "escalated": False,
             "auto_fixed": False,
-            "channels_used": []
+            "channels_used": [],
         }
 
         # Determine if escalation is needed
@@ -116,11 +124,15 @@ class EscalationManager:
             title, details, remediation = self._generate_incident_report(incident)
 
             # Send via email
-            if self.email_notifier.send_incident_report(severity, title, details, remediation):
+            if self.email_notifier.send_incident_report(
+                severity, title, details, remediation
+            ):
                 action["channels_used"].append("email")
 
             # Send via Telegram
-            if self.telegram_notifier.send_incident_report(severity, title, details, remediation):
+            if self.telegram_notifier.send_incident_report(
+                severity, title, details, remediation
+            ):
                 action["channels_used"].append("telegram")
 
         # Handle auto-fix for minor issues
@@ -129,7 +141,9 @@ class EscalationManager:
 
         return action
 
-    def _generate_incident_report(self, incident: dict[str, Any]) -> tuple[str, str, str]:
+    def _generate_incident_report(
+        self, incident: dict[str, Any]
+    ) -> tuple[str, str, str]:
         """Generate incident report in Vietnamese"""
         incident_type = incident["type"]
         incident["severity"]
@@ -175,11 +189,12 @@ class EscalationManager:
 
             # Apply ruff auto-fix
             import subprocess
+
             result = subprocess.run(
                 ["ruff", "check", "--fix", "stillme_ai", "tests"],
                 capture_output=True,
                 text=False,  # Capture raw bytes
-                timeout=30
+                timeout=30,
             )
 
             if result.returncode == 0:
@@ -188,6 +203,7 @@ class EscalationManager:
             else:
                 # Use safe decoding for stderr
                 from stillme_core.utils.io_safe import safe_decode
+
                 stderr_text = safe_decode(result.stderr) if result.stderr else ""
                 logger.warning(f"Auto-fix failed: {stderr_text}")
                 return False

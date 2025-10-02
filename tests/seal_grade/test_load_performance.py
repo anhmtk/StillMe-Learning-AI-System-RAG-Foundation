@@ -29,6 +29,7 @@ from stillme_core import StateStore
 # from agentdev.dag.dag_executor import DAGExecutor  # Not implemented yet
 # from agentdev.authz.rbac import RBACManager  # Not implemented yet
 
+
 class TestLoadPerformance:
     """Load and performance tests"""
 
@@ -36,10 +37,10 @@ class TestLoadPerformance:
     def state_store(self):
         """Create temporary state store"""
         # Check if StateStore has required methods
-        if not hasattr(StateStore, 'create_job') or not hasattr(StateStore, 'close'):
+        if not hasattr(StateStore, "create_job") or not hasattr(StateStore, "close"):
             pytest.skip("StateStore missing required methods (create_job, close)")
 
-        temp_db = tempfile.NamedTemporaryFile(delete=False, suffix='.db')
+        temp_db = tempfile.NamedTemporaryFile(delete=False, suffix=".db")
         temp_db.close()
 
         store = StateStore(temp_db.name)
@@ -47,10 +48,9 @@ class TestLoadPerformance:
         yield store
 
         # Check if close method exists before calling
-        if hasattr(store, 'close'):
+        if hasattr(store, "close"):
             asyncio.run(store.close())
         Path(temp_db.name).unlink(missing_ok=True)
-
 
     def test_baseline_performance(self, state_store):
         """Test baseline performance without optimizations"""
@@ -60,14 +60,24 @@ class TestLoadPerformance:
         # Create multiple jobs
         jobs = []
         for i in range(100):
-            job = asyncio.run(state_store.create_job(f"job_{i}", f"Job {i}", f"Description {i}"))
+            job = asyncio.run(
+                state_store.create_job(f"job_{i}", f"Job {i}", f"Description {i}")
+            )
             jobs.append(job)
 
         # Create steps for each job
         for job in jobs:
             for j in range(5):
-                step = asyncio.run(state_store.create_job_step(job.job_id, f"step_{j}", f"Step {j}", "testing"))
-                asyncio.run(state_store.complete_job_step(job.job_id, step.step_id, success=True))
+                step = asyncio.run(
+                    state_store.create_job_step(
+                        job.job_id, f"step_{j}", f"Step {j}", "testing"
+                    )
+                )
+                asyncio.run(
+                    state_store.complete_job_step(
+                        job.job_id, step.step_id, success=True
+                    )
+                )
 
         end_time = time.time()
         duration = end_time - start_time
@@ -82,7 +92,6 @@ class TestLoadPerformance:
         # Throughput should be reasonable
         assert throughput > 50, f"Baseline throughput too low: {throughput} ops/s"
 
-
     def test_with_cache_performance(self, state_store):
         """Test performance with caching enabled"""
         # Enable caching (simulated)
@@ -93,7 +102,11 @@ class TestLoadPerformance:
         # Create jobs with caching
         jobs = []
         for i in range(100):
-            job = asyncio.run(state_store.create_job(f"cached_job_{i}", f"Cached Job {i}", f"Description {i}"))
+            job = asyncio.run(
+                state_store.create_job(
+                    f"cached_job_{i}", f"Cached Job {i}", f"Description {i}"
+                )
+            )
             jobs.append(job)
 
             # Simulate cache hit
@@ -113,7 +126,6 @@ class TestLoadPerformance:
         # Cache should improve throughput
         assert throughput > 100, f"Cache throughput too low: {throughput} ops/s"
 
-
     def test_with_egress_guard_performance(self, state_store):
         """Test performance with egress guard enabled"""
         # Simulate egress guard
@@ -128,7 +140,11 @@ class TestLoadPerformance:
             if egress_guard_enabled:
                 asyncio.run(asyncio.sleep(0.002))  # Simulate guard check
 
-            job = asyncio.run(state_store.create_job(f"guarded_job_{i}", f"Guarded Job {i}", f"Description {i}"))
+            job = asyncio.run(
+                state_store.create_job(
+                    f"guarded_job_{i}", f"Guarded Job {i}", f"Description {i}"
+                )
+            )
             jobs.append(job)
 
         end_time = time.time()
@@ -144,14 +160,20 @@ class TestLoadPerformance:
         # Egress guard should still allow reasonable throughput
         assert throughput > 60, f"Egress guard throughput too low: {throughput} ops/s"
 
-
     def test_concurrent_load(self, state_store):
         """Test concurrent load handling"""
+
         # Test concurrent job creation
         def create_job_batch(batch_id, count):
             jobs = []
             for i in range(count):
-                job = asyncio.run(state_store.create_job(f"concurrent_job_{batch_id}_{i}", f"Concurrent Job {batch_id}_{i}", f"Description {batch_id}_{i}"))
+                job = asyncio.run(
+                    state_store.create_job(
+                        f"concurrent_job_{batch_id}_{i}",
+                        f"Concurrent Job {batch_id}_{i}",
+                        f"Description {batch_id}_{i}",
+                    )
+                )
                 jobs.append(job)
             return jobs
 
@@ -171,7 +193,6 @@ class TestLoadPerformance:
         total_jobs = sum(len(batch) for batch in results)
         assert total_jobs == 100, f"Expected 100 jobs, got {total_jobs}"
 
-
     def test_memory_usage(self, state_store):
         """Test memory usage under load"""
         # Get initial memory usage
@@ -181,7 +202,11 @@ class TestLoadPerformance:
         # Create large number of jobs
         jobs = []
         for i in range(1000):
-            job = asyncio.run(state_store.create_job(f"memory_job_{i}", f"Memory Job {i}", f"Description {i}"))
+            job = asyncio.run(
+                state_store.create_job(
+                    f"memory_job_{i}", f"Memory Job {i}", f"Description {i}"
+                )
+            )
             jobs.append(job)
 
         # Get memory usage after load
@@ -195,7 +220,6 @@ class TestLoadPerformance:
         memory_per_job = memory_increase / 1000
         assert memory_per_job < 0.1, f"Memory per job too high: {memory_per_job}MB"
 
-
     def test_response_time(self, state_store):
         """Test response time under load"""
         response_times = []
@@ -203,7 +227,11 @@ class TestLoadPerformance:
         # Measure response times
         for i in range(100):
             start_time = time.time()
-            asyncio.run(state_store.create_job(f"response_job_{i}", f"Response Job {i}", f"Description {i}"))
+            asyncio.run(
+                state_store.create_job(
+                    f"response_job_{i}", f"Response Job {i}", f"Description {i}"
+                )
+            )
             end_time = time.time()
 
             response_time = end_time - start_time
@@ -215,10 +243,15 @@ class TestLoadPerformance:
         p99_response_time = sorted(response_times)[int(0.99 * len(response_times))]
 
         # Response times should be reasonable
-        assert avg_response_time < 0.1, f"Average response time too high: {avg_response_time}s"
-        assert p95_response_time < 0.2, f"P95 response time too high: {p95_response_time}s"
-        assert p99_response_time < 0.5, f"P99 response time too high: {p99_response_time}s"
-
+        assert (
+            avg_response_time < 0.1
+        ), f"Average response time too high: {avg_response_time}s"
+        assert (
+            p95_response_time < 0.2
+        ), f"P95 response time too high: {p95_response_time}s"
+        assert (
+            p99_response_time < 0.5
+        ), f"P99 response time too high: {p99_response_time}s"
 
     def test_throughput(self, state_store):
         """Test throughput under load"""
@@ -228,7 +261,11 @@ class TestLoadPerformance:
         # Create jobs as fast as possible
         jobs = []
         for i in range(500):
-            job = asyncio.run(state_store.create_job(f"throughput_job_{i}", f"Throughput Job {i}", f"Description {i}"))
+            job = asyncio.run(
+                state_store.create_job(
+                    f"throughput_job_{i}", f"Throughput Job {i}", f"Description {i}"
+                )
+            )
             jobs.append(job)
 
         end_time = time.time()
@@ -241,8 +278,9 @@ class TestLoadPerformance:
         assert throughput > 100, f"Throughput too low: {throughput} ops/s"
 
         # Throughput should be consistent
-        assert throughput < 1000, f"Throughput too high (unrealistic): {throughput} ops/s"
-
+        assert (
+            throughput < 1000
+        ), f"Throughput too high (unrealistic): {throughput} ops/s"
 
     def test_stress_testing(self, state_store):
         """Test system under stress"""
@@ -253,7 +291,11 @@ class TestLoadPerformance:
         jobs = []
         for i in range(1000):
             try:
-                job = asyncio.run(state_store.create_job(f"stress_job_{i}", f"Stress Job {i}", f"Description {i}"))
+                job = asyncio.run(
+                    state_store.create_job(
+                        f"stress_job_{i}", f"Stress Job {i}", f"Description {i}"
+                    )
+                )
                 jobs.append(job)
             except Exception:
                 # Some failures are expected under stress
@@ -269,7 +311,6 @@ class TestLoadPerformance:
         success_rate = len(jobs) / 1000
         assert success_rate > 0.8, f"Success rate too low: {success_rate}"
 
-
     def test_scalability(self, state_store):
         """Test system scalability"""
         # Test with different load levels
@@ -282,7 +323,13 @@ class TestLoadPerformance:
             # Create jobs at this load level
             jobs = []
             for i in range(load):
-                job = asyncio.run(state_store.create_job(f"scale_job_{load}_{i}", f"Scale Job {load}_{i}", f"Description {load}_{i}"))
+                job = asyncio.run(
+                    state_store.create_job(
+                        f"scale_job_{load}_{i}",
+                        f"Scale Job {load}_{i}",
+                        f"Description {load}_{i}",
+                    )
+                )
                 jobs.append(job)
 
             end_time = time.time()
@@ -294,8 +341,9 @@ class TestLoadPerformance:
 
         # Throughput should scale reasonably
         for load, throughput in results:
-            assert throughput > 10, f"Throughput too low for load {load}: {throughput} ops/s"
-
+            assert (
+                throughput > 10
+            ), f"Throughput too low for load {load}: {throughput} ops/s"
 
     def test_resource_usage(self, state_store):
         """Test resource usage under load"""
@@ -309,7 +357,11 @@ class TestLoadPerformance:
         # Create load
         jobs = []
         for i in range(500):
-            job = asyncio.run(state_store.create_job(f"resource_job_{i}", f"Resource Job {i}", f"Description {i}"))
+            job = asyncio.run(
+                state_store.create_job(
+                    f"resource_job_{i}", f"Resource Job {i}", f"Description {i}"
+                )
+            )
             jobs.append(job)
 
         # Get final resource usage
@@ -323,15 +375,17 @@ class TestLoadPerformance:
         assert cpu_increase < 50, f"CPU usage too high: {cpu_increase}%"
         assert memory_increase < 50, f"Memory usage too high: {memory_increase}MB"
 
-
     def test_performance_regression(self, state_store):
         """Test for performance regression"""
         # Baseline performance
         baseline_start = time.time()
 
         for i in range(100):
-            asyncio.run(state_store.create_job(f"baseline_job_{i}", f"Baseline Job {i}", f"Description {i}")
-        )
+            asyncio.run(
+                state_store.create_job(
+                    f"baseline_job_{i}", f"Baseline Job {i}", f"Description {i}"
+                )
+            )
         baseline_end = time.time()
         baseline_duration = baseline_end - baseline_start
 
@@ -339,33 +393,56 @@ class TestLoadPerformance:
         current_start = time.time()
 
         for i in range(100):
-            asyncio.run(state_store.create_job(f"current_job_{i}", f"Current Job {i}", f"Description {i}")
-        )
+            asyncio.run(
+                state_store.create_job(
+                    f"current_job_{i}", f"Current Job {i}", f"Description {i}"
+                )
+            )
         current_end = time.time()
         current_duration = current_end - current_start
 
         # Current performance should not be significantly worse than baseline
         performance_ratio = current_duration / baseline_duration
-        assert performance_ratio < 2.0, f"Performance regression detected: {performance_ratio}x slower"
-
+        assert (
+            performance_ratio < 2.0
+        ), f"Performance regression detected: {performance_ratio}x slower"
 
     def test_load_balancing(self, state_store):
         """Test load balancing capabilities"""
+
         # Simulate load balancing across multiple operations
         def balanced_operation(operation_id):
             # Simulate different types of operations
             if operation_id % 3 == 0:
                 # Job creation
-                job = asyncio.run(state_store.create_job(f"balanced_job_{operation_id}", f"Balanced Job {operation_id}", f"Description {operation_id}"))
+                job = asyncio.run(
+                    state_store.create_job(
+                        f"balanced_job_{operation_id}",
+                        f"Balanced Job {operation_id}",
+                        f"Description {operation_id}",
+                    )
+                )
                 return job
             elif operation_id % 3 == 1:
                 # Job update
-                job = asyncio.run(state_store.create_job(f"update_job_{operation_id}", f"Update Job {operation_id}", f"Description {operation_id}"))
+                job = asyncio.run(
+                    state_store.create_job(
+                        f"update_job_{operation_id}",
+                        f"Update Job {operation_id}",
+                        f"Description {operation_id}",
+                    )
+                )
                 asyncio.run(state_store.update_job_status(job.job_id, "completed"))
                 return job
             else:
                 # Job query
-                job = asyncio.run(state_store.create_job(f"query_job_{operation_id}", f"Query Job {operation_id}", f"Description {operation_id}"))
+                job = asyncio.run(
+                    state_store.create_job(
+                        f"query_job_{operation_id}",
+                        f"Query Job {operation_id}",
+                        f"Description {operation_id}",
+                    )
+                )
                 retrieved_job = asyncio.run(state_store.get_job(job.job_id))
                 return retrieved_job
 
@@ -373,8 +450,7 @@ class TestLoadPerformance:
         start_time = time.time()
 
         tasks = [balanced_operation(i) for i in range(100)]
-        results = asyncio.run(asyncio.gather(*tasks)
-        )
+        results = asyncio.run(asyncio.gather(*tasks))
         end_time = time.time()
         duration = end_time - start_time
 

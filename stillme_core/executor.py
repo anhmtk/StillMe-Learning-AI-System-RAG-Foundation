@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ExecutionConfig:
     """Execution configuration"""
+
     timeout: float = 30.0
     max_memory: int = 512  # MB
     allowed_languages: Optional[list[str]] = None
@@ -42,12 +43,15 @@ class PatchExecutor:
         """Execute code safely"""
         logger.warning(f"PatchExecutor.execute_code({language}): Stub implementation")
 
-        if self.config.allowed_languages and language not in self.config.allowed_languages:
+        if (
+            self.config.allowed_languages
+            and language not in self.config.allowed_languages
+        ):
             return {
                 "success": False,
                 "error": f"Language {language} not allowed",
                 "output": "",
-                "execution_time": 0
+                "execution_time": 0,
             }
 
         # Basic stub execution
@@ -56,7 +60,7 @@ class PatchExecutor:
             "output": f"Stub execution of {language} code",
             "execution_time": 0.1,
             "memory_used": 0,
-            "warnings": ["Stub implementation - no real execution"]
+            "warnings": ["Stub implementation - no real execution"],
         }
 
     def execute_patch(self, patch: str) -> dict[str, Any]:
@@ -66,7 +70,7 @@ class PatchExecutor:
             "success": True,
             "output": "Patch executed in stub mode",
             "changes": [],
-            "warnings": ["Stub implementation - no real patch execution"]
+            "warnings": ["Stub implementation - no real patch execution"],
         }
 
     # Additional methods for AgentDev compatibility
@@ -100,14 +104,16 @@ class PatchExecutor:
         logger.warning("PatchExecutor.push_branch(): Stub implementation")
         return True
 
-    def create_pull_request(self, title: str, body: str, base: str, remote: str, draft: bool = False) -> dict[str, Any]:
+    def create_pull_request(
+        self, title: str, body: str, base: str, remote: str, draft: bool = False
+    ) -> dict[str, Any]:
         """Create pull request - Stub implementation"""
         logger.warning("PatchExecutor.create_pull_request(): Stub implementation")
         return {
             "ok": True,
             "url": "https://github.com/stub/pr/1",
             "number": 1,
-            "provider": "stub"
+            "provider": "stub",
         }
 
     def validate_code(self, code: str, language: str = "python") -> dict[str, Any]:
@@ -116,7 +122,7 @@ class PatchExecutor:
         return {
             "valid": True,
             "errors": [],
-            "warnings": ["Stub implementation - no real validation"]
+            "warnings": ["Stub implementation - no real validation"],
         }
 
     def get_execution_stats(self) -> dict[str, Any]:
@@ -125,7 +131,7 @@ class PatchExecutor:
             "config": self.config.__dict__,
             "status": "stub",
             "executions": 0,
-            "success_rate": 0.0
+            "success_rate": 0.0,
         }
 
 
@@ -148,10 +154,12 @@ class SafeExecutor:
             "success": True,
             "output": "Code executed in stub sandbox",
             "sandbox_id": "stub_sandbox",
-            "execution_time": 0.1
+            "execution_time": 0.1,
         }
 
     def cleanup_sandbox(self, sandbox_id: str) -> bool:
         """Cleanup sandbox"""
-        logger.warning(f"SafeExecutor.cleanup_sandbox({sandbox_id}): Stub implementation")
+        logger.warning(
+            f"SafeExecutor.cleanup_sandbox({sandbox_id}): Stub implementation"
+        )
         return True

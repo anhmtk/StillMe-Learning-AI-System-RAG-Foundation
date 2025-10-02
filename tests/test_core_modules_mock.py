@@ -26,7 +26,10 @@ class TestStillMeFrameworkMock:
         framework = Mock()
         framework.config = {
             "framework": {"name": "StillMe", "version": "1.0.0", "debug": True},
-            "logging": {"level": "INFO", "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"}
+            "logging": {
+                "level": "INFO",
+                "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+            },
         }
         framework.initialize_modules = AsyncMock(return_value=True)
         framework.cleanup_modules = AsyncMock(return_value=True)
@@ -70,15 +73,23 @@ class TestLearningMetricsCollectorMock:
         collector = Mock()
         collector.logger = Mock()
         collector.artifacts_path = Path("artifacts")
-        collector._load_benchmark_dataset = AsyncMock(return_value=[
-            {"input": "test input", "expected_output": "test output", "category": "test"}
-        ])
-        collector.validate_learning_effectiveness = AsyncMock(return_value=Mock(
-            session_id="test_session_123",
-            success_rate=0.95,
-            overall_accuracy_delta=0.1,
-            safety_violation_rate=0.02
-        ))
+        collector._load_benchmark_dataset = AsyncMock(
+            return_value=[
+                {
+                    "input": "test input",
+                    "expected_output": "test output",
+                    "category": "test",
+                }
+            ]
+        )
+        collector.validate_learning_effectiveness = AsyncMock(
+            return_value=Mock(
+                session_id="test_session_123",
+                success_rate=0.95,
+                overall_accuracy_delta=0.1,
+                safety_violation_rate=0.02,
+            )
+        )
         collector.measure_accuracy = AsyncMock(return_value=1.0)
         collector.detect_error_types = AsyncMock(return_value={"syntax": 2, "logic": 1})
         return collector
@@ -86,16 +97,18 @@ class TestLearningMetricsCollectorMock:
     def test_metrics_collector_initialization(self, mock_metrics_collector):
         """Test metrics collector initialization"""
         assert mock_metrics_collector is not None
-        assert hasattr(mock_metrics_collector, 'logger')
-        assert hasattr(mock_metrics_collector, 'artifacts_path')
+        assert hasattr(mock_metrics_collector, "logger")
+        assert hasattr(mock_metrics_collector, "artifacts_path")
 
     @pytest.mark.asyncio
     async def test_validate_learning_effectiveness(self, mock_metrics_collector):
         """Test learning effectiveness validation"""
         session_id = "test_session_123"
-        result = await mock_metrics_collector.validate_learning_effectiveness(session_id)
+        result = await mock_metrics_collector.validate_learning_effectiveness(
+            session_id
+        )
         assert result is not None
-        assert hasattr(result, 'session_id')
+        assert hasattr(result, "session_id")
         assert result.session_id == session_id
 
     @pytest.mark.asyncio
@@ -103,7 +116,7 @@ class TestLearningMetricsCollectorMock:
         """Test accuracy measurement"""
         test_cases = [
             {"input": "test1", "expected": "output1", "actual": "output1"},
-            {"input": "test2", "expected": "output2", "actual": "output2"}
+            {"input": "test2", "expected": "output2", "actual": "output2"},
         ]
         accuracy = await mock_metrics_collector.measure_accuracy(test_cases)
         assert accuracy == 1.0  # 100% accuracy
@@ -114,7 +127,7 @@ class TestLearningMetricsCollectorMock:
         errors = [
             {"type": "syntax", "message": "Syntax error"},
             {"type": "logic", "message": "Logic error"},
-            {"type": "syntax", "message": "Another syntax error"}
+            {"type": "syntax", "message": "Another syntax error"},
         ]
         error_types = await mock_metrics_collector.detect_error_types(errors)
         assert "syntax" in error_types
@@ -134,26 +147,30 @@ class TestRewardManagerMock:
         manager.reward_history = []
         manager.penalty_history = []
         manager.start_learning_session = AsyncMock(return_value=True)
-        manager.award_reward = AsyncMock(return_value=Mock(
-            session_id="test_session_123",
-            reward_type="SUCCESSFUL_FIX",
-            value=1.0,
-            timestamp="2025-09-26T10:00:00Z"
-        ))
-        manager.apply_penalty = AsyncMock(return_value=Mock(
-            session_id="test_session_123",
-            penalty_type="FAILED_FIX",
-            value=-1.0,
-            timestamp="2025-09-26T10:00:00Z"
-        ))
+        manager.award_reward = AsyncMock(
+            return_value=Mock(
+                session_id="test_session_123",
+                reward_type="SUCCESSFUL_FIX",
+                value=1.0,
+                timestamp="2025-09-26T10:00:00Z",
+            )
+        )
+        manager.apply_penalty = AsyncMock(
+            return_value=Mock(
+                session_id="test_session_123",
+                penalty_type="FAILED_FIX",
+                value=-1.0,
+                timestamp="2025-09-26T10:00:00Z",
+            )
+        )
         return manager
 
     def test_reward_manager_initialization(self, mock_reward_manager):
         """Test reward manager initialization"""
         assert mock_reward_manager is not None
-        assert hasattr(mock_reward_manager, 'sessions')
-        assert hasattr(mock_reward_manager, 'reward_history')
-        assert hasattr(mock_reward_manager, 'penalty_history')
+        assert hasattr(mock_reward_manager, "sessions")
+        assert hasattr(mock_reward_manager, "reward_history")
+        assert hasattr(mock_reward_manager, "penalty_history")
 
     @pytest.mark.asyncio
     async def test_start_learning_session(self, mock_reward_manager):
@@ -162,7 +179,9 @@ class TestRewardManagerMock:
         user_id = "user_123"
         result = await mock_reward_manager.start_learning_session(session_id, user_id)
         assert result is True
-        mock_reward_manager.start_learning_session.assert_called_once_with(session_id, user_id)
+        mock_reward_manager.start_learning_session.assert_called_once_with(
+            session_id, user_id
+        )
 
     @pytest.mark.asyncio
     async def test_award_reward(self, mock_reward_manager):
@@ -172,7 +191,7 @@ class TestRewardManagerMock:
             session_id=session_id,
             reward_type="SUCCESSFUL_FIX",
             context={"fix_type": "bug_fix"},
-            rationale="Successfully fixed a bug"
+            rationale="Successfully fixed a bug",
         )
         assert reward is not None
         assert reward.session_id == session_id
@@ -186,7 +205,7 @@ class TestRewardManagerMock:
             session_id=session_id,
             penalty_type="FAILED_FIX",
             context={"error": "fix_failed"},
-            rationale="Failed to fix a bug"
+            rationale="Failed to fix a bug",
         )
         assert penalty is not None
         assert penalty.session_id == session_id
@@ -203,18 +222,20 @@ class TestMetaLearningManagerMock:
         manager.learning_sessions = {}
         manager.adaptive_config = Mock()
         manager.record_learning_session = AsyncMock(return_value=True)
-        manager.analyze_learning_patterns = AsyncMock(return_value={
-            "success_rate": 0.85,
-            "error_patterns": {"syntax": 0.3, "logic": 0.2},
-            "improvement_trend": "positive"
-        })
+        manager.analyze_learning_patterns = AsyncMock(
+            return_value={
+                "success_rate": 0.85,
+                "error_patterns": {"syntax": 0.3, "logic": 0.2},
+                "improvement_trend": "positive",
+            }
+        )
         return manager
 
     def test_meta_learning_manager_initialization(self, mock_meta_learning_manager):
         """Test meta learning manager initialization"""
         assert mock_meta_learning_manager is not None
-        assert hasattr(mock_meta_learning_manager, 'learning_sessions')
-        assert hasattr(mock_meta_learning_manager, 'adaptive_config')
+        assert hasattr(mock_meta_learning_manager, "learning_sessions")
+        assert hasattr(mock_meta_learning_manager, "adaptive_config")
 
     @pytest.mark.asyncio
     async def test_record_learning_session(self, mock_meta_learning_manager):
@@ -231,16 +252,20 @@ class TestMetaLearningManagerMock:
             "penalty_score": -1.0,
             "accuracy_improvement": 0.1,
             "error_types": {"syntax": 1, "logic": 1},
-            "safety_violations": 0
+            "safety_violations": 0,
         }
-        result = await mock_meta_learning_manager.record_learning_session(**session_data)
+        result = await mock_meta_learning_manager.record_learning_session(
+            **session_data
+        )
         assert result is True
         mock_meta_learning_manager.record_learning_session.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_analyze_learning_patterns(self, mock_meta_learning_manager):
         """Test learning pattern analysis"""
-        patterns = await mock_meta_learning_manager.analyze_learning_patterns("user_123")
+        patterns = await mock_meta_learning_manager.analyze_learning_patterns(
+            "user_123"
+        )
         assert patterns is not None
         assert "success_rate" in patterns
         assert "error_patterns" in patterns
@@ -256,27 +281,30 @@ class TestCollaborativeLearningMock:
         collab = Mock()
         collab.datasets = {}
         collab.validation_results = {}
-        collab.ingest_dataset = AsyncMock(return_value={
-            "status": "approved",
-            "validation_score": 0.9,
-            "ethics_score": 0.95
-        })
-        collab.merge_dataset = AsyncMock(return_value={
-            "merged": True,
-            "dataset_id": "test_dataset"
-        })
+        collab.ingest_dataset = AsyncMock(
+            return_value={
+                "status": "approved",
+                "validation_score": 0.9,
+                "ethics_score": 0.95,
+            }
+        )
+        collab.merge_dataset = AsyncMock(
+            return_value={"merged": True, "dataset_id": "test_dataset"}
+        )
         return collab
 
     def test_collab_learning_initialization(self, mock_collab_learning):
         """Test collaborative learning initialization"""
         assert mock_collab_learning is not None
-        assert hasattr(mock_collab_learning, 'datasets')
-        assert hasattr(mock_collab_learning, 'validation_results')
+        assert hasattr(mock_collab_learning, "datasets")
+        assert hasattr(mock_collab_learning, "validation_results")
 
     @pytest.mark.asyncio
     async def test_ingest_dataset(self, mock_collab_learning):
         """Test dataset ingestion"""
-        result = await mock_collab_learning.ingest_dataset("test_file.jsonl", "test_dataset")
+        result = await mock_collab_learning.ingest_dataset(
+            "test_file.jsonl", "test_dataset"
+        )
         assert result is not None
         assert result["status"] == "approved"
         assert result["validation_score"] == 0.9
@@ -300,22 +328,23 @@ class TestLearningRollbackMock:
         rollback = Mock()
         rollback.snapshots = {}
         rollback.rollback_history = []
-        rollback.create_snapshot = AsyncMock(return_value=Mock(
-            version_id="v20250926_123456_abc123",
-            session_id="test_session_123",
-            timestamp="2025-09-26T10:00:00Z"
-        ))
-        rollback.rollback_to_version = AsyncMock(return_value={
-            "success": True,
-            "version_id": "v20250926_123456_abc123"
-        })
+        rollback.create_snapshot = AsyncMock(
+            return_value=Mock(
+                version_id="v20250926_123456_abc123",
+                session_id="test_session_123",
+                timestamp="2025-09-26T10:00:00Z",
+            )
+        )
+        rollback.rollback_to_version = AsyncMock(
+            return_value={"success": True, "version_id": "v20250926_123456_abc123"}
+        )
         return rollback
 
     def test_learning_rollback_initialization(self, mock_learning_rollback):
         """Test learning rollback initialization"""
         assert mock_learning_rollback is not None
-        assert hasattr(mock_learning_rollback, 'snapshots')
-        assert hasattr(mock_learning_rollback, 'rollback_history')
+        assert hasattr(mock_learning_rollback, "snapshots")
+        assert hasattr(mock_learning_rollback, "rollback_history")
 
     @pytest.mark.asyncio
     async def test_create_snapshot(self, mock_learning_rollback):
@@ -324,7 +353,7 @@ class TestLearningRollbackMock:
             "session_id": "test_session_123",
             "user_id": "user_123",
             "knowledge_state": {"facts": ["fact1", "fact2"]},
-            "metadata": {"version": "1.0.0"}
+            "metadata": {"version": "1.0.0"},
         }
         snapshot = await mock_learning_rollback.create_snapshot(snapshot_data)
         assert snapshot is not None
@@ -393,18 +422,16 @@ class TestPolicyControllerMock:
         controller.policy_levels = ["strict", "balanced", "creative"]
         controller.set_policy_level = Mock(return_value=True)
         controller.get_policy_level = Mock(return_value="balanced")
-        controller.validate_policy_compliance = Mock(return_value={
-            "compliant": True,
-            "violations": [],
-            "score": 0.95
-        })
+        controller.validate_policy_compliance = Mock(
+            return_value={"compliant": True, "violations": [], "score": 0.95}
+        )
         return controller
 
     def test_policy_controller_initialization(self, mock_policy_controller):
         """Test policy controller initialization"""
         assert mock_policy_controller is not None
-        assert hasattr(mock_policy_controller, 'current_policy')
-        assert hasattr(mock_policy_controller, 'policy_levels')
+        assert hasattr(mock_policy_controller, "current_policy")
+        assert hasattr(mock_policy_controller, "policy_levels")
 
     def test_set_policy_level(self, mock_policy_controller):
         """Test setting policy level"""
@@ -419,10 +446,12 @@ class TestPolicyControllerMock:
 
     def test_validate_policy_compliance(self, mock_policy_controller):
         """Test policy compliance validation"""
-        result = mock_policy_controller.validate_policy_compliance({
-            "action": "code_generation",
-            "content": "def hello(): print('Hello World')"
-        })
+        result = mock_policy_controller.validate_policy_compliance(
+            {
+                "action": "code_generation",
+                "content": "def hello(): print('Hello World')",
+            }
+        )
         assert result is not None
         assert "compliant" in result
         assert result["compliant"] is True
@@ -456,7 +485,7 @@ class TestTransparencyLoggerMock:
             "decision_factors": [{"factor": "test", "value": 1.0}],
             "confidence_scores": {"overall": 0.9},
             "reasoning": "Test decision",
-            "metadata": {"test": True}
+            "metadata": {"test": True},
         }
         trace_id = mock_transparency_logger.log_decision(**decision_data)
         assert trace_id is not None
@@ -474,22 +503,23 @@ class TestPrivacyManagerMock:
         manager.privacy_mode = "balanced"
         manager.data_retention_days = 365
         manager.set_privacy_mode = Mock(return_value=True)
-        manager.export_user_data = Mock(return_value={
-            "user_id": "user_123",
-            "data": "user_data_here",
-            "timestamp": "2025-09-26T10:00:00Z"
-        })
-        manager.delete_user_data = Mock(return_value={
-            "deleted": True,
-            "user_id": "user_123"
-        })
+        manager.export_user_data = Mock(
+            return_value={
+                "user_id": "user_123",
+                "data": "user_data_here",
+                "timestamp": "2025-09-26T10:00:00Z",
+            }
+        )
+        manager.delete_user_data = Mock(
+            return_value={"deleted": True, "user_id": "user_123"}
+        )
         return manager
 
     def test_privacy_manager_initialization(self, mock_privacy_manager):
         """Test privacy manager initialization"""
         assert mock_privacy_manager is not None
-        assert hasattr(mock_privacy_manager, 'privacy_mode')
-        assert hasattr(mock_privacy_manager, 'data_retention_days')
+        assert hasattr(mock_privacy_manager, "privacy_mode")
+        assert hasattr(mock_privacy_manager, "data_retention_days")
 
     def test_set_privacy_mode(self, mock_privacy_manager):
         """Test setting privacy mode"""
@@ -524,7 +554,7 @@ class TestSecurityManagerMock:
             "security": {
                 "enabled": True,
                 "encryption": {"algorithm": "AES-256-GCM"},
-                "rate_limiting": {"requests_per_minute": 60}
+                "rate_limiting": {"requests_per_minute": 60},
             }
         }
         manager.validate_input = Mock(return_value={"safe": True, "threats": []})
@@ -535,7 +565,7 @@ class TestSecurityManagerMock:
     def test_security_manager_initialization(self, mock_security_manager):
         """Test security manager initialization"""
         assert mock_security_manager is not None
-        assert hasattr(mock_security_manager, 'config')
+        assert hasattr(mock_security_manager, "config")
         assert mock_security_manager.config["security"]["enabled"]
 
     def test_validate_input(self, mock_security_manager):
@@ -576,10 +606,11 @@ class TestIntegrationScenariosMock:
         # Mock methods
         reward_manager.start_learning_session = AsyncMock(return_value=True)
         meta_learning_manager.record_learning_session = AsyncMock(return_value=True)
-        reward_manager.award_reward = AsyncMock(return_value=Mock(
-            session_id="test_session_123",
-            reward_type="SUCCESSFUL_FIX"
-        ))
+        reward_manager.award_reward = AsyncMock(
+            return_value=Mock(
+                session_id="test_session_123", reward_type="SUCCESSFUL_FIX"
+            )
+        )
 
         # Test workflow
         session_id = "integration_test_session"
@@ -598,14 +629,14 @@ class TestIntegrationScenariosMock:
             penalty_score=-1.0,
             accuracy_improvement=0.1,
             error_types={"syntax": 1},
-            safety_violations=0
+            safety_violations=0,
         )
 
         reward = await reward_manager.award_reward(
             session_id=session_id,
             reward_type="SUCCESSFUL_FIX",
             context={"fix_type": "integration_test"},
-            rationale="Integration test successful"
+            rationale="Integration test successful",
         )
 
         assert reward is not None
@@ -619,10 +650,9 @@ class TestIntegrationScenariosMock:
 
         # Mock methods
         security_manager.encrypt_data = Mock(return_value="encrypted_data")
-        privacy_manager.export_user_data = Mock(return_value={
-            "user_id": "user_123",
-            "data": "encrypted_user_data"
-        })
+        privacy_manager.export_user_data = Mock(
+            return_value={"user_id": "user_123", "data": "encrypted_user_data"}
+        )
 
         # Test data flow
         user_data = {"user_id": "user_123", "data": "sensitive information"}
@@ -669,7 +699,11 @@ class TestPerformanceMock:
 
         # Test with large dataset
         large_dataset = [
-            {"input": f"test input {i}", "expected_output": f"test output {i}", "category": "test"}
+            {
+                "input": f"test input {i}",
+                "expected_output": f"test output {i}",
+                "category": "test",
+            }
             for i in range(1000)
         ]
 
@@ -735,7 +769,7 @@ class TestErrorHandlingMock:
                 session_id="nonexistent_session",
                 reward_type="SUCCESSFUL_FIX",
                 context={},
-                rationale="Test"
+                rationale="Test",
             )
 
     def test_kill_switch_error_handling(self):
@@ -755,5 +789,5 @@ pytestmark = [
     pytest.mark.performance,
     pytest.mark.security,
     pytest.mark.learning,
-    pytest.mark.mock
+    pytest.mark.mock,
 ]

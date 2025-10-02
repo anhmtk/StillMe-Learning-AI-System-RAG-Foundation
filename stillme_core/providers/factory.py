@@ -46,7 +46,9 @@ class ProviderFactory:
                 providers.append(provider)
                 logger.info(f"Created provider: {config.name}")
             except Exception as e:
-                logger.error(f"Failed to create provider from config {config_dict}: {e}")
+                logger.error(
+                    f"Failed to create provider from config {config_dict}: {e}"
+                )
 
         return providers
 

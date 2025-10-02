@@ -9,6 +9,7 @@ from collections import defaultdict
 JUNIT = "reports/junit.xml"
 OUT = "docs/metrics.json"
 
+
 def cat_from_name(name: str, classname: str, file: str):
     """Categorize test based on name, classname, and file path."""
     s = (name or "") + " " + (classname or "") + " " + (file or "")
@@ -21,15 +22,44 @@ def cat_from_name(name: str, classname: str, file: str):
         return "safety"
     return "other"
 
+
 def main():
     """Extract metrics from JUnit XML and save to JSON."""
     if not os.path.exists(JUNIT):
         print(f"Warning: {JUNIT} not found, creating empty metrics")
         stats = {
-            "ethics": {"total": 0, "pass": 0, "fail": 0, "error": 0, "skip": 0, "pass_rate": 0.0},
-            "security": {"total": 0, "pass": 0, "fail": 0, "error": 0, "skip": 0, "pass_rate": 0.0},
-            "safety": {"total": 0, "pass": 0, "fail": 0, "error": 0, "skip": 0, "pass_rate": 0.0},
-            "other": {"total": 0, "pass": 0, "fail": 0, "error": 0, "skip": 0, "pass_rate": 0.0}
+            "ethics": {
+                "total": 0,
+                "pass": 0,
+                "fail": 0,
+                "error": 0,
+                "skip": 0,
+                "pass_rate": 0.0,
+            },
+            "security": {
+                "total": 0,
+                "pass": 0,
+                "fail": 0,
+                "error": 0,
+                "skip": 0,
+                "pass_rate": 0.0,
+            },
+            "safety": {
+                "total": 0,
+                "pass": 0,
+                "fail": 0,
+                "error": 0,
+                "skip": 0,
+                "pass_rate": 0.0,
+            },
+            "other": {
+                "total": 0,
+                "pass": 0,
+                "fail": 0,
+                "error": 0,
+                "skip": 0,
+                "pass_rate": 0.0,
+            },
         }
     else:
         tree = ET.parse(JUNIT)
@@ -54,12 +84,21 @@ def main():
         for _c, v in stats.items():
             passed = v["total"] - v["fail"] - v["error"]
             v["pass"] = passed
-            v["pass_rate"] = round(100.0 * passed / v["total"], 1) if v["total"] else 0.0
+            v["pass_rate"] = (
+                round(100.0 * passed / v["total"], 1) if v["total"] else 0.0
+            )
 
     # Ensure all categories exist
     for cat in ["ethics", "security", "safety", "other"]:
         if cat not in stats:
-            stats[cat] = {"total": 0, "pass": 0, "fail": 0, "error": 0, "skip": 0, "pass_rate": 0.0}
+            stats[cat] = {
+                "total": 0,
+                "pass": 0,
+                "fail": 0,
+                "error": 0,
+                "skip": 0,
+                "pass_rate": 0.0,
+            }
 
     # Create output directory
     os.makedirs(os.path.dirname(OUT), exist_ok=True)
@@ -69,6 +108,7 @@ def main():
         json.dump(stats, f, indent=2)
 
     print(json.dumps(stats, indent=2))
+
 
 if __name__ == "__main__":
     main()

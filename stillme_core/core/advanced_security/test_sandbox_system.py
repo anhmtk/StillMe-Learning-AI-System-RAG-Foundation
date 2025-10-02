@@ -58,7 +58,7 @@ class TestSandboxController(unittest.TestCase):
         config = SandboxConfig(
             sandbox_id="test_sandbox",
             name="Test Sandbox",
-            sandbox_type=SandboxType.SECURITY_TEST
+            sandbox_type=SandboxType.SECURITY_TEST,
         )
 
         self.assertEqual(config.sandbox_id, "test_sandbox")
@@ -74,7 +74,7 @@ class TestSandboxController(unittest.TestCase):
         self.assertEqual(SECURITY_METRICS["max_execution_time"], 900)
         self.assertEqual(SECURITY_METRICS["network_egress_limit"], 0)
 
-    @patch('docker.from_env')
+    @patch("docker.from_env")
     def test_sandbox_controller_initialization(self, mock_docker):
         """Test sandbox controller initialization"""
         mock_client = Mock()
@@ -92,7 +92,7 @@ class TestSandboxController(unittest.TestCase):
         config = SandboxConfig(
             sandbox_id="test_instance",
             name="Test Instance",
-            sandbox_type=SandboxType.CODE_EXECUTION
+            sandbox_type=SandboxType.CODE_EXECUTION,
         )
 
         instance = SandboxInstance(config=config)
@@ -103,8 +103,8 @@ class TestSandboxController(unittest.TestCase):
         self.assertEqual(len(instance.logs), 0)
         self.assertEqual(len(instance.security_violations), 0)
 
-    @patch('psutil.cpu_percent')
-    @patch('psutil.virtual_memory')
+    @patch("psutil.cpu_percent")
+    @patch("psutil.virtual_memory")
     async def test_resource_check_success(self, mock_memory, mock_cpu):
         """Test successful resource check"""
         mock_cpu.return_value = 50.0  # 50% CPU usage
@@ -114,8 +114,8 @@ class TestSandboxController(unittest.TestCase):
 
         self.assertTrue(result)
 
-    @patch('psutil.cpu_percent')
-    @patch('psutil.virtual_memory')
+    @patch("psutil.cpu_percent")
+    @patch("psutil.virtual_memory")
     async def test_resource_check_failure_high_cpu(self, mock_memory, mock_cpu):
         """Test resource check failure due to high CPU"""
         mock_cpu.return_value = 80.0  # 80% CPU usage (exceeds limit)
@@ -125,12 +125,14 @@ class TestSandboxController(unittest.TestCase):
 
         self.assertFalse(result)
 
-    @patch('psutil.cpu_percent')
-    @patch('psutil.virtual_memory')
+    @patch("psutil.cpu_percent")
+    @patch("psutil.virtual_memory")
     async def test_resource_check_failure_high_memory(self, mock_memory, mock_cpu):
         """Test resource check failure due to high memory"""
         mock_cpu.return_value = 50.0
-        mock_memory.return_value = Mock(percent=85.0)  # 85% memory usage (exceeds limit)
+        mock_memory.return_value = Mock(
+            percent=85.0
+        )  # 85% memory usage (exceeds limit)
 
         result = await self.sandbox_controller._check_system_resources()
 
@@ -160,7 +162,7 @@ class TestSandboxController(unittest.TestCase):
             name="Test Policy",
             sandbox_type=SandboxType.SECURITY_TEST,
             memory_limit=256,  # Within limits
-            timeout=600  # Within limits
+            timeout=600,  # Within limits
         )
 
         instance = SandboxInstance(config=config)
@@ -176,7 +178,7 @@ class TestSandboxController(unittest.TestCase):
             name="Test Policy Fail",
             sandbox_type=SandboxType.SECURITY_TEST,
             memory_limit=1024,  # Exceeds limit (512MB)
-            timeout=600
+            timeout=600,
         )
 
         instance = SandboxInstance(config=config)
@@ -193,7 +195,7 @@ class TestSandboxController(unittest.TestCase):
             name="Test Policy Fail",
             sandbox_type=SandboxType.SECURITY_TEST,
             memory_limit=256,
-            timeout=1200  # Exceeds limit (900s)
+            timeout=1200,  # Exceeds limit (900s)
         )
 
         instance = SandboxInstance(config=config)
@@ -208,7 +210,7 @@ class TestSandboxController(unittest.TestCase):
         config = SandboxConfig(
             sandbox_id="test_status",
             name="Test Status",
-            sandbox_type=SandboxType.SECURITY_TEST
+            sandbox_type=SandboxType.SECURITY_TEST,
         )
 
         instance = SandboxInstance(config=config)
@@ -286,8 +288,7 @@ class TestIntegration(unittest.TestCase):
         try:
             # Create sandbox
             sandbox = await controller.create_sandbox(
-                name="integration_test",
-                sandbox_type=SandboxType.SECURITY_TEST
+                name="integration_test", sandbox_type=SandboxType.SECURITY_TEST
             )
 
             self.assertIsNotNone(sandbox)
@@ -295,8 +296,7 @@ class TestIntegration(unittest.TestCase):
 
             # Execute command
             result = await controller.execute_in_sandbox(
-                sandbox.config.sandbox_id,
-                ["echo", "Hello from sandbox"]
+                sandbox.config.sandbox_id, ["echo", "Hello from sandbox"]
             )
 
             self.assertEqual(result["exit_code"], 0)
@@ -328,8 +328,7 @@ class TestIntegration(unittest.TestCase):
         try:
             # Create sandbox
             sandbox = await controller.create_sandbox(
-                name="resource_test",
-                sandbox_type=SandboxType.SECURITY_TEST
+                name="resource_test", sandbox_type=SandboxType.SECURITY_TEST
             )
 
             # Wait for monitoring to collect data
@@ -360,14 +359,17 @@ class TestIntegration(unittest.TestCase):
         try:
             # Create sandbox with network isolation
             sandbox = await controller.create_sandbox(
-                name="network_test",
-                sandbox_type=SandboxType.SECURITY_TEST
+                name="network_test", sandbox_type=SandboxType.SECURITY_TEST
             )
 
             # Try to access external network (should fail)
             result = await controller.execute_in_sandbox(
                 sandbox.config.sandbox_id,
-                ["python", "-c", "import requests; requests.get('http://google.com', timeout=5)"]
+                [
+                    "python",
+                    "-c",
+                    "import requests; requests.get('http://google.com', timeout=5)",
+                ],
             )
 
             # Should fail due to network isolation
@@ -402,7 +404,7 @@ class TestSecurityValidation(unittest.TestCase):
         config = SandboxConfig(
             sandbox_id="security_test",
             name="Security Test",
-            sandbox_type=SandboxType.SECURITY_TEST
+            sandbox_type=SandboxType.SECURITY_TEST,
         )
 
         # Check secure defaults
@@ -437,7 +439,7 @@ def run_performance_tests():
         config = SandboxConfig(
             sandbox_id=f"perf_test_{i}",
             name=f"Performance Test {i}",
-            sandbox_type=SandboxType.SECURITY_TEST
+            sandbox_type=SandboxType.SECURITY_TEST,
         )
         SandboxInstance(config=config)
 
@@ -449,7 +451,7 @@ def run_performance_tests():
 
     # Performance assertions
     assert creation_time < 1.0, "Sandbox creation is too slow"
-    assert creation_time/10 < 0.1, "Individual sandbox creation is too slow"
+    assert creation_time / 10 < 0.1, "Individual sandbox creation is too slow"
 
 
 def run_security_tests():
@@ -459,8 +461,12 @@ def run_security_tests():
     # Test 1: Security metrics validation
     assert SECURITY_METRICS["max_cpu_usage"] <= 70, "CPU limit too high"
     assert SECURITY_METRICS["max_memory_usage"] <= 512, "Memory limit too high"
-    assert SECURITY_METRICS["max_execution_time"] <= 900, "Execution time limit too high"
-    assert SECURITY_METRICS["network_egress_limit"] == 0, "Network access should be blocked"
+    assert (
+        SECURITY_METRICS["max_execution_time"] <= 900
+    ), "Execution time limit too high"
+    assert (
+        SECURITY_METRICS["network_egress_limit"] == 0
+    ), "Network access should be blocked"
 
     print("✅ Security metrics validation passed")
 
@@ -468,8 +474,12 @@ def run_security_tests():
     controller = SandboxController()
     policies = controller.security_policies
 
-    assert policies["network_isolation"]["enabled"], "Network isolation should be enabled"
-    assert policies["resource_limits"]["enforcement"], "Resource limits should be enforced"
+    assert policies["network_isolation"][
+        "enabled"
+    ], "Network isolation should be enabled"
+    assert policies["resource_limits"][
+        "enforcement"
+    ], "Resource limits should be enforced"
     assert policies["data_protection"]["no_real_data"], "Real data should be prohibited"
 
     print("✅ Default security policies validation passed")
@@ -485,7 +495,7 @@ def main():
 
     # Run unit tests
     print("\n🔬 Running Unit Tests...")
-    unittest.main(argv=[''], exit=False, verbosity=2)
+    unittest.main(argv=[""], exit=False, verbosity=2)
 
     # Run performance tests
     print("\n⚡ Running Performance Tests...")

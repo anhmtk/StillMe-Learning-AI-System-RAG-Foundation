@@ -15,12 +15,14 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))
 
+
 def create_auto_proposal():
     """Tạo learning proposal tự động"""
     print("📝 Creating automatic learning proposal...")
 
     try:
         from stillme_core.learning.proposals_manager import ProposalsManager
+
         manager = ProposalsManager()
 
         # Create an automatic proposal
@@ -31,18 +33,18 @@ def create_auto_proposal():
                 "Understand machine learning concepts and terminology",
                 "Learn about different types of ML algorithms",
                 "Practice with real datasets",
-                "Implement basic ML models"
+                "Implement basic ML models",
             ],
             "prerequisites": [
                 "Basic Python knowledge",
                 "Understanding of statistics",
-                "Familiarity with data analysis"
+                "Familiarity with data analysis",
             ],
             "expected_outcomes": [
                 "Build and evaluate ML models",
                 "Understand model performance metrics",
                 "Apply ML to real-world problems",
-                "Choose appropriate algorithms"
+                "Choose appropriate algorithms",
             ],
             "estimated_duration": 180,  # 3 hours
             "quality_score": 0.91,
@@ -52,8 +54,8 @@ def create_auto_proposal():
                 "complexity": "medium",
                 "time_commitment": "medium",
                 "prerequisites": "medium",
-                "practical_value": "high"
-            }
+                "practical_value": "high",
+            },
         }
 
         proposal = manager.create_proposal(**proposal_data)
@@ -67,6 +69,7 @@ def create_auto_proposal():
     except Exception as e:
         print(f"❌ Failed to create auto proposal: {e}")
         return None
+
 
 def main():
     """Main function"""
@@ -94,19 +97,20 @@ def main():
             "proposal_id": proposal.id,
             "title": proposal.title,
             "quality_score": proposal.quality_score,
-            "estimated_duration": proposal.estimated_duration
+            "estimated_duration": proposal.estimated_duration,
         }
 
         info_file = project_root / "artifacts" / "latest_proposal.json"
         info_file.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(info_file, 'w') as f:
+        with open(info_file, "w") as f:
             json.dump(proposal_info, f, indent=2)
 
         print(f"📄 Proposal info saved to: {info_file}")
     else:
         print("\n❌ Failed to create proposal.")
         print("Please check the error messages above and try again.")
+
 
 if __name__ == "__main__":
     main()

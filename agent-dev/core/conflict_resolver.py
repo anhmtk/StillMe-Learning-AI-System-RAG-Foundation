@@ -21,7 +21,7 @@ class ConflictResolver:
             "conflicts_by_severity": {},
             "risk_assessment": "low",
             "estimated_total_time": "0 hours",
-            "recommendations": ["No conflicts found"]
+            "recommendations": ["No conflicts found"],
         }
 
     def suggest_resolution(self, conflict: dict[str, Any]) -> str:

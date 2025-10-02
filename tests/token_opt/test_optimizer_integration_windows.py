@@ -23,12 +23,14 @@ class TestTokenOptimizerIntegration:
             embedding_model="sentence-transformers/all-MiniLM-L6-v2",
             max_cache_size=100,
             semantic_threshold=0.8,
-            token_limit=1000
+            token_limit=1000,
         )
 
     def test_worker_success(self, config):
         """Test successful worker execution"""
-        with patch('stillme_core.modules.token_optimizer_v1.SentenceTransformerBackend') as mock_backend:
+        with patch(
+            "stillme_core.modules.token_optimizer_v1.SentenceTransformerBackend"
+        ) as mock_backend:
             # Mock successful worker
             mock_instance = Mock()
             mock_instance.embed.return_value = [[0.1, 0.2, 0.3], [0.4, 0.5, 0.6]]
@@ -46,7 +48,9 @@ class TestTokenOptimizerIntegration:
 
     def test_worker_failure_fallback(self, config):
         """Test worker failure with fallback to fake backend"""
-        with patch('stillme_core.modules.token_optimizer_v1.SentenceTransformerBackend') as mock_backend:
+        with patch(
+            "stillme_core.modules.token_optimizer_v1.SentenceTransformerBackend"
+        ) as mock_backend:
             # Mock worker failure
             mock_instance = Mock()
             mock_instance.embed.side_effect = EmbeddingRuntimeError("Worker failed")
@@ -63,7 +67,9 @@ class TestTokenOptimizerIntegration:
 
     def test_worker_timeout_handling(self, config):
         """Test worker timeout handling"""
-        with patch('stillme_core.modules.token_optimizer_v1.SentenceTransformerBackend') as mock_backend:
+        with patch(
+            "stillme_core.modules.token_optimizer_v1.SentenceTransformerBackend"
+        ) as mock_backend:
             # Mock timeout
             mock_instance = Mock()
             mock_instance.embed.side_effect = EmbeddingRuntimeError("Worker timeout")
@@ -80,10 +86,14 @@ class TestTokenOptimizerIntegration:
 
     def test_worker_json_error_handling(self, config):
         """Test worker JSON parsing error handling"""
-        with patch('stillme_core.modules.token_optimizer_v1.SentenceTransformerBackend') as mock_backend:
+        with patch(
+            "stillme_core.modules.token_optimizer_v1.SentenceTransformerBackend"
+        ) as mock_backend:
             # Mock JSON error
             mock_instance = Mock()
-            mock_instance.embed.side_effect = EmbeddingRuntimeError("Invalid JSON output")
+            mock_instance.embed.side_effect = EmbeddingRuntimeError(
+                "Invalid JSON output"
+            )
             mock_backend.return_value = mock_instance
 
             optimizer = TokenOptimizer(config)
@@ -97,7 +107,9 @@ class TestTokenOptimizerIntegration:
 
     def test_worker_subprocess_error(self, config):
         """Test subprocess execution error handling"""
-        with patch('stillme_core.modules.token_optimizer_v1.SentenceTransformerBackend') as mock_backend:
+        with patch(
+            "stillme_core.modules.token_optimizer_v1.SentenceTransformerBackend"
+        ) as mock_backend:
             # Mock subprocess error
             mock_instance = Mock()
             mock_instance.embed.side_effect = EmbeddingRuntimeError("Subprocess failed")
@@ -114,10 +126,14 @@ class TestTokenOptimizerIntegration:
 
     def test_optimizer_degraded_mode(self, config):
         """Test optimizer in degraded mode"""
-        with patch('stillme_core.modules.token_optimizer_v1.SentenceTransformerBackend') as mock_backend:
+        with patch(
+            "stillme_core.modules.token_optimizer_v1.SentenceTransformerBackend"
+        ) as mock_backend:
             # Mock degraded mode
             mock_instance = Mock()
-            mock_instance.embed.side_effect = EmbeddingRuntimeError("All backends failed")
+            mock_instance.embed.side_effect = EmbeddingRuntimeError(
+                "All backends failed"
+            )
             mock_backend.return_value = mock_instance
 
             optimizer = TokenOptimizer(config)
@@ -137,11 +153,13 @@ class TestTokenOptimizerIntegration:
             EmbeddingRuntimeError("Timeout"),
             EmbeddingRuntimeError("JSON error"),
             EmbeddingRuntimeError("Subprocess error"),
-            Exception("Unexpected error")
+            Exception("Unexpected error"),
         ]
 
         for failure in failure_modes:
-            with patch('stillme_core.modules.token_optimizer_v1.SentenceTransformerBackend') as mock_backend:
+            with patch(
+                "stillme_core.modules.token_optimizer_v1.SentenceTransformerBackend"
+            ) as mock_backend:
                 mock_instance = Mock()
                 mock_instance.embed.side_effect = failure
                 mock_backend.return_value = mock_instance
@@ -160,10 +178,14 @@ class TestTokenOptimizerIntegration:
 
     def test_optimizer_deterministic_fallback(self, config):
         """Test that fallback produces deterministic results"""
-        with patch('stillme_core.modules.token_optimizer_v1.SentenceTransformerBackend') as mock_backend:
+        with patch(
+            "stillme_core.modules.token_optimizer_v1.SentenceTransformerBackend"
+        ) as mock_backend:
             # Mock consistent failure
             mock_instance = Mock()
-            mock_instance.embed.side_effect = EmbeddingRuntimeError("Consistent failure")
+            mock_instance.embed.side_effect = EmbeddingRuntimeError(
+                "Consistent failure"
+            )
             mock_backend.return_value = mock_instance
 
             optimizer = TokenOptimizer(config)
@@ -179,7 +201,9 @@ class TestTokenOptimizerIntegration:
 
     def test_optimizer_performance_under_failure(self, config):
         """Test optimizer performance under failure conditions"""
-        with patch('stillme_core.modules.token_optimizer_v1.SentenceTransformerBackend') as mock_backend:
+        with patch(
+            "stillme_core.modules.token_optimizer_v1.SentenceTransformerBackend"
+        ) as mock_backend:
             # Mock slow failure
             mock_instance = Mock()
             mock_instance.embed.side_effect = EmbeddingRuntimeError("Slow failure")
@@ -189,6 +213,7 @@ class TestTokenOptimizerIntegration:
 
             # Should still be reasonably fast
             import time
+
             start_time = time.time()
 
             for i in range(10):
@@ -202,7 +227,9 @@ class TestTokenOptimizerIntegration:
 
     def test_optimizer_memory_usage_under_failure(self, config):
         """Test optimizer memory usage under failure conditions"""
-        with patch('stillme_core.modules.token_optimizer_v1.SentenceTransformerBackend') as mock_backend:
+        with patch(
+            "stillme_core.modules.token_optimizer_v1.SentenceTransformerBackend"
+        ) as mock_backend:
             # Mock memory-intensive failure
             mock_instance = Mock()
             mock_instance.embed.side_effect = EmbeddingRuntimeError("Memory failure")
@@ -221,4 +248,6 @@ class TestTokenOptimizerIntegration:
             assert len(optimizer.cache.cache) <= config.max_cache_size
 
             # Should not grow indefinitely
-            assert len(optimizer.cache.cache) <= initial_cache_size + config.max_cache_size
+            assert (
+                len(optimizer.cache.cache) <= initial_cache_size + config.max_cache_size
+            )

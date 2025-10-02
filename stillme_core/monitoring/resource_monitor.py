@@ -32,6 +32,7 @@ from typing import Any, Callable, Optional
 
 try:
     import psutil
+
     PSUTIL_AVAILABLE = True
 except ImportError:
     PSUTIL_AVAILABLE = False
@@ -39,9 +40,11 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class ResourceThresholds:
     """Resource thresholds for monitoring"""
+
     cpu_percent: float = 70.0
     memory_percent: float = 80.0
     memory_mb: int = 1024
@@ -52,9 +55,11 @@ class ResourceThresholds:
     learning_session_duration_minutes: int = 30
     max_concurrent_sessions: int = 1
 
+
 @dataclass
 class ResourceMetrics:
     """Current resource metrics"""
+
     timestamp: datetime
     cpu_percent: float
     memory_percent: float
@@ -74,18 +79,21 @@ class ResourceMetrics:
     learning_sessions_active: int
     learning_sessions_total: int
 
+
 @dataclass
 class ResourceAlert:
     """Resource alert"""
+
     alert_id: str
     timestamp: datetime
     alert_type: str  # cpu_high, memory_high, disk_full, token_low, etc.
-    severity: str    # low, medium, high, critical
+    severity: str  # low, medium, high, critical
     message: str
     current_value: float
     threshold_value: float
     recommendation: str
     resolved: bool = False
+
 
 class TokenBudgetManager:
     """Token budget management for AGI learning"""
@@ -130,24 +138,31 @@ class TokenBudgetManager:
         self.reset_if_needed()
 
         with self.lock:
-            if (self.daily_usage + tokens <= self.daily_budget and
-                self.hourly_usage + tokens <= self.hourly_budget):
-
+            if (
+                self.daily_usage + tokens <= self.daily_budget
+                and self.hourly_usage + tokens <= self.hourly_budget
+            ):
                 self.daily_usage += tokens
                 self.hourly_usage += tokens
 
                 # Record usage
-                self.usage_history.append({
-                    'timestamp': datetime.now(),
-                    'tokens': tokens,
-                    'daily_usage': self.daily_usage,
-                    'hourly_usage': self.hourly_usage
-                })
+                self.usage_history.append(
+                    {
+                        "timestamp": datetime.now(),
+                        "tokens": tokens,
+                        "daily_usage": self.daily_usage,
+                        "hourly_usage": self.hourly_usage,
+                    }
+                )
 
-                logger.debug(f"Consumed {tokens} tokens. Daily: {self.daily_usage}/{self.daily_budget}, Hourly: {self.hourly_usage}/{self.hourly_budget}")
+                logger.debug(
+                    f"Consumed {tokens} tokens. Daily: {self.daily_usage}/{self.daily_budget}, Hourly: {self.hourly_usage}/{self.hourly_budget}"
+                )
                 return True
             else:
-                logger.warning(f"Token budget exceeded. Requested: {tokens}, Daily: {self.daily_usage}/{self.daily_budget}, Hourly: {self.hourly_usage}/{self.hourly_budget}")
+                logger.warning(
+                    f"Token budget exceeded. Requested: {tokens}, Daily: {self.daily_usage}/{self.daily_budget}, Hourly: {self.hourly_usage}/{self.hourly_budget}"
+                )
                 return False
 
     def get_remaining_tokens(self) -> tuple[int, int]:
@@ -157,7 +172,7 @@ class TokenBudgetManager:
         with self.lock:
             return (
                 max(0, self.daily_budget - self.daily_usage),
-                max(0, self.hourly_budget - self.hourly_usage)
+                max(0, self.hourly_budget - self.hourly_usage),
             )
 
     def get_usage_stats(self) -> dict[str, Any]:
@@ -166,16 +181,17 @@ class TokenBudgetManager:
 
         with self.lock:
             return {
-                'daily_budget': self.daily_budget,
-                'hourly_budget': self.hourly_budget,
-                'daily_usage': self.daily_usage,
-                'hourly_usage': self.hourly_usage,
-                'daily_remaining': max(0, self.daily_budget - self.daily_usage),
-                'hourly_remaining': max(0, self.hourly_budget - self.hourly_usage),
-                'daily_usage_percent': (self.daily_usage / self.daily_budget) * 100,
-                'hourly_usage_percent': (self.hourly_usage / self.hourly_budget) * 100,
-                'usage_history_count': len(self.usage_history)
+                "daily_budget": self.daily_budget,
+                "hourly_budget": self.hourly_budget,
+                "daily_usage": self.daily_usage,
+                "hourly_usage": self.hourly_usage,
+                "daily_remaining": max(0, self.daily_budget - self.daily_usage),
+                "hourly_remaining": max(0, self.hourly_budget - self.hourly_usage),
+                "daily_usage_percent": (self.daily_usage / self.daily_budget) * 100,
+                "hourly_usage_percent": (self.hourly_usage / self.hourly_budget) * 100,
+                "usage_history_count": len(self.usage_history),
             }
+
 
 class ResourceMonitor:
     """
@@ -188,8 +204,7 @@ class ResourceMonitor:
 
         # Token budget manager
         self.token_manager = TokenBudgetManager(
-            self.thresholds.token_budget_daily,
-            self.thresholds.token_budget_hourly
+            self.thresholds.token_budget_daily, self.thresholds.token_budget_hourly
         )
 
         # Monitoring state
@@ -212,7 +227,9 @@ class ResourceMonitor:
         self.process_start_times = {}
 
         if not PSUTIL_AVAILABLE:
-            self.logger.warning("psutil not available. Resource monitoring will be limited.")
+            self.logger.warning(
+                "psutil not available. Resource monitoring will be limited."
+            )
 
     async def start_monitoring(self, interval: int = 10):
         """
@@ -291,13 +308,13 @@ class ResourceMonitor:
                 token_remaining_daily=self.token_manager.get_remaining_tokens()[0],
                 token_remaining_hourly=self.token_manager.get_remaining_tokens()[1],
                 learning_sessions_active=len(self.learning_processes),
-                learning_sessions_total=len(self.process_start_times)
+                learning_sessions_total=len(self.process_start_times),
             )
 
         # Collect system metrics
         cpu_percent = psutil.cpu_percent(interval=1)
         memory = psutil.virtual_memory()
-        disk = psutil.disk_usage('/')
+        disk = psutil.disk_usage("/")
 
         # Network metrics
         network = psutil.net_io_counters()
@@ -309,8 +326,8 @@ class ResourceMonitor:
         if self.last_network_check:
             time_diff = time.time() - self.last_network_check
             if time_diff > 0:
-                sent_diff = network_sent_mb - getattr(self, '_last_sent_mb', 0)
-                recv_diff = network_recv_mb - getattr(self, '_last_recv_mb', 0)
+                sent_diff = network_sent_mb - getattr(self, "_last_sent_mb", 0)
+                recv_diff = network_recv_mb - getattr(self, "_last_recv_mb", 0)
                 total_diff = sent_diff + recv_diff
                 network_speed_mbps = (total_diff * 8) / time_diff  # Convert to Mbps
 
@@ -348,7 +365,7 @@ class ResourceMonitor:
             token_remaining_daily=daily_remaining,
             token_remaining_hourly=hourly_remaining,
             learning_sessions_active=len(self.learning_processes),
-            learning_sessions_total=len(self.process_start_times)
+            learning_sessions_total=len(self.process_start_times),
         )
 
     async def _check_thresholds(self, metrics: ResourceMetrics):
@@ -357,67 +374,81 @@ class ResourceMonitor:
 
         # CPU threshold
         if metrics.cpu_percent > self.thresholds.cpu_percent:
-            alerts.append(ResourceAlert(
-                alert_id=f"cpu_high_{int(time.time())}",
-                timestamp=datetime.now(),
-                alert_type="cpu_high",
-                severity="high" if metrics.cpu_percent > 90 else "medium",
-                message=f"High CPU usage: {metrics.cpu_percent:.1f}%",
-                current_value=metrics.cpu_percent,
-                threshold_value=self.thresholds.cpu_percent,
-                recommendation="Consider reducing concurrent learning sessions or optimizing algorithms"
-            ))
+            alerts.append(
+                ResourceAlert(
+                    alert_id=f"cpu_high_{int(time.time())}",
+                    timestamp=datetime.now(),
+                    alert_type="cpu_high",
+                    severity="high" if metrics.cpu_percent > 90 else "medium",
+                    message=f"High CPU usage: {metrics.cpu_percent:.1f}%",
+                    current_value=metrics.cpu_percent,
+                    threshold_value=self.thresholds.cpu_percent,
+                    recommendation="Consider reducing concurrent learning sessions or optimizing algorithms",
+                )
+            )
 
         # Memory threshold
         if metrics.memory_percent > self.thresholds.memory_percent:
-            alerts.append(ResourceAlert(
-                alert_id=f"memory_high_{int(time.time())}",
-                timestamp=datetime.now(),
-                alert_type="memory_high",
-                severity="critical" if metrics.memory_percent > 95 else "high",
-                message=f"High memory usage: {metrics.memory_percent:.1f}% ({metrics.memory_used_mb:.1f}MB)",
-                current_value=metrics.memory_percent,
-                threshold_value=self.thresholds.memory_percent,
-                recommendation="Consider freeing memory or reducing batch sizes"
-            ))
+            alerts.append(
+                ResourceAlert(
+                    alert_id=f"memory_high_{int(time.time())}",
+                    timestamp=datetime.now(),
+                    alert_type="memory_high",
+                    severity="critical" if metrics.memory_percent > 95 else "high",
+                    message=f"High memory usage: {metrics.memory_percent:.1f}% ({metrics.memory_used_mb:.1f}MB)",
+                    current_value=metrics.memory_percent,
+                    threshold_value=self.thresholds.memory_percent,
+                    recommendation="Consider freeing memory or reducing batch sizes",
+                )
+            )
 
         # Disk threshold
         if metrics.disk_percent > self.thresholds.disk_percent:
-            alerts.append(ResourceAlert(
-                alert_id=f"disk_high_{int(time.time())}",
-                timestamp=datetime.now(),
-                alert_type="disk_high",
-                severity="critical",
-                message=f"High disk usage: {metrics.disk_percent:.1f}% ({metrics.disk_free_gb:.1f}GB free)",
-                current_value=metrics.disk_percent,
-                threshold_value=self.thresholds.disk_percent,
-                recommendation="Clean up temporary files or expand storage"
-            ))
+            alerts.append(
+                ResourceAlert(
+                    alert_id=f"disk_high_{int(time.time())}",
+                    timestamp=datetime.now(),
+                    alert_type="disk_high",
+                    severity="critical",
+                    message=f"High disk usage: {metrics.disk_percent:.1f}% ({metrics.disk_free_gb:.1f}GB free)",
+                    current_value=metrics.disk_percent,
+                    threshold_value=self.thresholds.disk_percent,
+                    recommendation="Clean up temporary files or expand storage",
+                )
+            )
 
         # Token budget
-        if metrics.token_remaining_daily < self.thresholds.token_budget_daily * 0.1:  # Less than 10% remaining
-            alerts.append(ResourceAlert(
-                alert_id=f"token_low_daily_{int(time.time())}",
-                timestamp=datetime.now(),
-                alert_type="token_low_daily",
-                severity="high",
-                message=f"Low daily token budget: {metrics.token_remaining_daily} remaining",
-                current_value=metrics.token_remaining_daily,
-                threshold_value=self.thresholds.token_budget_daily * 0.1,
-                recommendation="Consider reducing learning frequency or increasing budget"
-            ))
+        if (
+            metrics.token_remaining_daily < self.thresholds.token_budget_daily * 0.1
+        ):  # Less than 10% remaining
+            alerts.append(
+                ResourceAlert(
+                    alert_id=f"token_low_daily_{int(time.time())}",
+                    timestamp=datetime.now(),
+                    alert_type="token_low_daily",
+                    severity="high",
+                    message=f"Low daily token budget: {metrics.token_remaining_daily} remaining",
+                    current_value=metrics.token_remaining_daily,
+                    threshold_value=self.thresholds.token_budget_daily * 0.1,
+                    recommendation="Consider reducing learning frequency or increasing budget",
+                )
+            )
 
-        if metrics.token_remaining_hourly < self.thresholds.token_budget_hourly * 0.1:  # Less than 10% remaining
-            alerts.append(ResourceAlert(
-                alert_id=f"token_low_hourly_{int(time.time())}",
-                timestamp=datetime.now(),
-                alert_type="token_low_hourly",
-                severity="medium",
-                message=f"Low hourly token budget: {metrics.token_remaining_hourly} remaining",
-                current_value=metrics.token_remaining_hourly,
-                threshold_value=self.thresholds.token_budget_hourly * 0.1,
-                recommendation="Wait for hourly reset or reduce learning intensity"
-            ))
+        if (
+            metrics.token_remaining_hourly < self.thresholds.token_budget_hourly * 0.1
+        ):  # Less than 10% remaining
+            alerts.append(
+                ResourceAlert(
+                    alert_id=f"token_low_hourly_{int(time.time())}",
+                    timestamp=datetime.now(),
+                    alert_type="token_low_hourly",
+                    severity="medium",
+                    message=f"Low hourly token budget: {metrics.token_remaining_hourly} remaining",
+                    current_value=metrics.token_remaining_hourly,
+                    threshold_value=self.thresholds.token_budget_hourly * 0.1,
+                    recommendation="Wait for hourly reset or reduce learning intensity",
+                )
+            )
 
         # Add alerts and notify callbacks
         for alert in alerts:
@@ -432,28 +463,29 @@ class ResourceMonitor:
         """Update performance baseline for degradation detection"""
         if not self.performance_baseline:
             self.performance_baseline = {
-                'cpu_percent': metrics.cpu_percent,
-                'memory_percent': metrics.memory_percent,
-                'response_time': 1.0,  # Placeholder
-                'timestamp': metrics.timestamp
+                "cpu_percent": metrics.cpu_percent,
+                "memory_percent": metrics.memory_percent,
+                "response_time": 1.0,  # Placeholder
+                "timestamp": metrics.timestamp,
             }
         else:
             # Update baseline with exponential moving average
             alpha = 0.1  # Smoothing factor
-            self.performance_baseline['cpu_percent'] = (
-                alpha * metrics.cpu_percent +
-                (1 - alpha) * self.performance_baseline['cpu_percent']
+            self.performance_baseline["cpu_percent"] = (
+                alpha * metrics.cpu_percent
+                + (1 - alpha) * self.performance_baseline["cpu_percent"]
             )
-            self.performance_baseline['memory_percent'] = (
-                alpha * metrics.memory_percent +
-                (1 - alpha) * self.performance_baseline['memory_percent']
+            self.performance_baseline["memory_percent"] = (
+                alpha * metrics.memory_percent
+                + (1 - alpha) * self.performance_baseline["memory_percent"]
             )
 
     def _cleanup_old_alerts(self):
         """Clean up old resolved alerts"""
         cutoff_time = datetime.now() - timedelta(hours=24)
         self.alerts = [
-            alert for alert in self.alerts
+            alert
+            for alert in self.alerts
             if not alert.resolved or alert.timestamp > cutoff_time
         ]
 
@@ -479,23 +511,41 @@ class ResourceMonitor:
         latest_metrics = self.metrics_history[-1]
 
         # Check concurrent sessions
-        if latest_metrics.learning_sessions_active >= self.thresholds.max_concurrent_sessions:
-            return False, f"Maximum concurrent sessions reached ({self.thresholds.max_concurrent_sessions})"
+        if (
+            latest_metrics.learning_sessions_active
+            >= self.thresholds.max_concurrent_sessions
+        ):
+            return (
+                False,
+                f"Maximum concurrent sessions reached ({self.thresholds.max_concurrent_sessions})",
+            )
 
         # Check CPU usage
         if latest_metrics.cpu_percent > self.thresholds.cpu_percent:
-            return False, f"CPU usage too high: {latest_metrics.cpu_percent:.1f}% > {self.thresholds.cpu_percent}%"
+            return (
+                False,
+                f"CPU usage too high: {latest_metrics.cpu_percent:.1f}% > {self.thresholds.cpu_percent}%",
+            )
 
         # Check memory usage
         if latest_metrics.memory_percent > self.thresholds.memory_percent:
-            return False, f"Memory usage too high: {latest_metrics.memory_percent:.1f}% > {self.thresholds.memory_percent}%"
+            return (
+                False,
+                f"Memory usage too high: {latest_metrics.memory_percent:.1f}% > {self.thresholds.memory_percent}%",
+            )
 
         # Check token budget
         if latest_metrics.token_remaining_daily < 100:  # Minimum tokens needed
-            return False, f"Insufficient daily token budget: {latest_metrics.token_remaining_daily}"
+            return (
+                False,
+                f"Insufficient daily token budget: {latest_metrics.token_remaining_daily}",
+            )
 
         if latest_metrics.token_remaining_hourly < 50:  # Minimum tokens needed
-            return False, f"Insufficient hourly token budget: {latest_metrics.token_remaining_hourly}"
+            return (
+                False,
+                f"Insufficient hourly token budget: {latest_metrics.token_remaining_hourly}",
+            )
 
         return True, "All checks passed"
 
@@ -513,7 +563,9 @@ class ResourceMonitor:
             if session_id in self.process_start_times:
                 duration = datetime.now() - self.process_start_times[session_id]
                 del self.process_start_times[session_id]
-                self.logger.info(f"Ended tracking learning session: {session_id} (duration: {duration})")
+                self.logger.info(
+                    f"Ended tracking learning session: {session_id} (duration: {duration})"
+                )
             return True
         return False
 
@@ -536,37 +588,39 @@ class ResourceMonitor:
         avg_memory = sum(m.memory_percent for m in recent_metrics) / len(recent_metrics)
 
         return {
-            'current': asdict(latest),
-            'averages': {
-                'cpu_percent': avg_cpu,
-                'memory_percent': avg_memory,
-                'samples': len(recent_metrics)
+            "current": asdict(latest),
+            "averages": {
+                "cpu_percent": avg_cpu,
+                "memory_percent": avg_memory,
+                "samples": len(recent_metrics),
             },
-            'token_budget': self.token_manager.get_usage_stats(),
-            'alerts_count': len([a for a in self.alerts if not a.resolved]),
-            'learning_sessions': {
-                'active': len(self.learning_processes),
-                'total_tracked': len(self.process_start_times)
+            "token_budget": self.token_manager.get_usage_stats(),
+            "alerts_count": len([a for a in self.alerts if not a.resolved]),
+            "learning_sessions": {
+                "active": len(self.learning_processes),
+                "total_tracked": len(self.process_start_times),
             },
-            'monitoring_status': {
-                'is_monitoring': self.is_monitoring,
-                'metrics_count': len(self.metrics_history),
-                'thresholds': asdict(self.thresholds)
-            }
+            "monitoring_status": {
+                "is_monitoring": self.is_monitoring,
+                "metrics_count": len(self.metrics_history),
+                "thresholds": asdict(self.thresholds),
+            },
         }
 
     def export_metrics(self, file_path: str):
         """Export metrics to JSON file"""
         try:
             export_data = {
-                'export_timestamp': datetime.now().isoformat(),
-                'metrics_summary': self.get_metrics_summary(),
-                'recent_metrics': [asdict(m) for m in list(self.metrics_history)[-100:]],  # Last 100
-                'active_alerts': [asdict(a) for a in self.alerts if not a.resolved],
-                'thresholds': asdict(self.thresholds)
+                "export_timestamp": datetime.now().isoformat(),
+                "metrics_summary": self.get_metrics_summary(),
+                "recent_metrics": [
+                    asdict(m) for m in list(self.metrics_history)[-100:]
+                ],  # Last 100
+                "active_alerts": [asdict(a) for a in self.alerts if not a.resolved],
+                "thresholds": asdict(self.thresholds),
             }
 
-            with open(file_path, 'w', encoding='utf-8') as f:
+            with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(export_data, f, indent=2, ensure_ascii=False, default=str)
 
             self.logger.info(f"Metrics exported to {file_path}")
@@ -574,8 +628,10 @@ class ResourceMonitor:
         except Exception as e:
             self.logger.error(f"Failed to export metrics: {e}")
 
+
 # Global resource monitor instance
 _resource_monitor_instance: Optional[ResourceMonitor] = None
+
 
 def get_resource_monitor(thresholds: ResourceThresholds = None) -> ResourceMonitor:
     """Get global resource monitor instance"""
@@ -584,7 +640,10 @@ def get_resource_monitor(thresholds: ResourceThresholds = None) -> ResourceMonit
         _resource_monitor_instance = ResourceMonitor(thresholds)
     return _resource_monitor_instance
 
-async def initialize_resource_monitoring(thresholds: ResourceThresholds = None, interval: int = 10) -> ResourceMonitor:
+
+async def initialize_resource_monitoring(
+    thresholds: ResourceThresholds = None, interval: int = 10
+) -> ResourceMonitor:
     """Initialize and start resource monitoring"""
     monitor = get_resource_monitor(thresholds)
     await monitor.start_monitoring(interval)

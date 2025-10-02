@@ -1,5 +1,6 @@
 # NOTE: AI Reminder: framework.py is sacred. Only modify if 100% sure.
 import asyncio
+import datetime as _dt
 import json
 import logging
 import os
@@ -7,20 +8,22 @@ import shutil
 import sys
 from datetime import datetime
 from pathlib import Path
+from pathlib import Path as _Path
 from typing import Any, Optional
 
 from dotenv import load_dotenv
 from jsonschema import validate
-import datetime as _dt
-from pathlib import Path as _Path
+
 from stillme_core.ai_manager import AIManager as _AIManager
 from stillme_core.bug_memory import BugMemory as _BugMemory
+from stillme_core.core.planner import Planner as _Planner
 from stillme_core.executor import PatchExecutor as _PatchExecutor
 from stillme_core.plan_types import PlanItem as _PlanItem
-from stillme_core.core.planner import Planner as _Planner
 
 # Ensure local modules path
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "modules")))
+sys.path.append(
+    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "modules"))
+)
 
 from stillme_core.core.git_manager import GitManager
 from stillme_core.core.planner import Planner
@@ -34,13 +37,19 @@ try:
     from stillme_core.core.agent_dev_bridge import (
         DevAgentBridge as _RealDevAgentBridge,
     )
+
     DevAgentBridge = _RealDevAgentBridge
 except Exception:
+
     class _DevAgentBridgeStub:
         def __init__(self, *args, **kwargs):
             pass
+
         async def ask(self, *args, **kwargs):
-            raise RuntimeError("DevAgentBridge unavailable. Ensure stillme_core/agent_dev_bridge.py exists.")
+            raise RuntimeError(
+                "DevAgentBridge unavailable. Ensure stillme_core/agent_dev_bridge.py exists."
+            )
+
     DevAgentBridge = _DevAgentBridgeStub
 
 
@@ -52,16 +61,21 @@ if Path("framework.py").exists():
     shutil.copy("framework.py", backup_dir / f"framework_backup_{timestamp}.py")
 
 # Logging
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger("AgentDev-SafeMode")
 
 # Self-reflection logger
 reflection_log_path = Path("agent_logs")
 reflection_log_path.mkdir(exist_ok=True)
+
+
 def log_reflection(data: dict):
     ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     with open(reflection_log_path / "self_reflection.log", "a", encoding="utf-8") as f:
         f.write(f"[{ts}] {json.dumps(data, ensure_ascii=False)}\n")
+
 
 # Load env
 load_dotenv()
@@ -84,28 +98,42 @@ AI_PLAN_SCHEMA = {
                     "action": {
                         "type": "string",
                         "enum": [
-                            "modify_code", "run_pylint", "add_test", "run_tests",
-                            "review_diff", "check_imports", "install_deps", "resolve_conflict"
-                        ]
+                            "modify_code",
+                            "run_pylint",
+                            "add_test",
+                            "run_tests",
+                            "review_diff",
+                            "check_imports",
+                            "install_deps",
+                            "resolve_conflict",
+                        ],
                     },
-                    "file": {"type": "string", "pattern": "^(modules/|tests/|framework.py|requirements.txt)"},
+                    "file": {
+                        "type": "string",
+                        "pattern": "^(modules/|tests/|framework.py|requirements.txt)",
+                    },
                     "description": {"type": "string"},
-                    "code_to_apply": {"type": "string", "nullable": True}
+                    "code_to_apply": {"type": "string", "nullable": True},
                 },
-                "required": ["action", "description"]
-            }
-        }
+                "required": ["action", "description"],
+            },
+        },
     },
-    "required": ["root_cause", "fix_strategy_summary", "plan"]
+    "required": ["root_cause", "fix_strategy_summary", "plan"],
 }
 
 # Add missing method to EthicsChecker if not exists
 if not hasattr(EthicsChecker, "assess_framework_safety"):
+
     def _assess_framework_safety_stub(self, old_code: str, new_code: str) -> bool:
         # very light safeguard example; customize later
-        danger = ("subprocess.run(  # SECURITY: Replaced with safe alternative" in new_code) or ("subprocess.Popen(" in new_code)
+        danger = (
+            "subprocess.run(  # SECURITY: Replaced with safe alternative" in new_code
+        ) or ("subprocess.Popen(" in new_code)
         return not danger
+
     # EthicsChecker.assess_framework_safety = _assess_framework_safety_stub
+
 
 class AgentDev:
     def __init__(self, problem_description: str, problem_file: str):
@@ -149,7 +177,13 @@ class AgentDev:
         return True
 
     # --------------------- Bridge planning (FAST) --------------------------
-    def _build_plan_prompt(self, problem_description: str, problem_file: str, current_attempt: int, previous_feedback: str) -> str:
+    def _build_plan_prompt(
+        self,
+        problem_description: str,
+        problem_file: str,
+        current_attempt: int,
+        previous_feedback: str,
+    ) -> str:
         schema_str = json.dumps(AI_PLAN_SCHEMA, ensure_ascii=False)
         return f"""
 You are StillMe Dev Agent. Generate a FIX PLAN as strict JSON (no markdown, no backticks).
@@ -179,10 +213,20 @@ JSON_SCHEMA:
     async def _bridge_safe_async(self, prompt: str) -> dict[str, Any]:
         return await self.bridge.ask(prompt=prompt, mode="safe", provider="auto")
 
-    def _plan_with_bridge(self, problem_description: str, problem_file: str, current_attempt: int, previous_feedback: str) -> Optional[dict[str, Any]]:
-        prompt = self._build_plan_prompt(problem_description, problem_file, current_attempt, previous_feedback)
+    def _plan_with_bridge(
+        self,
+        problem_description: str,
+        problem_file: str,
+        current_attempt: int,
+        previous_feedback: str,
+    ) -> Optional[dict[str, Any]]:
+        prompt = self._build_plan_prompt(
+            problem_description, problem_file, current_attempt, previous_feedback
+        )
         try:
-            res = asyncio.run(self.bridge.ask(prompt=prompt, mode="fast", provider="ollama"))
+            res = asyncio.run(
+                self.bridge.ask(prompt=prompt, mode="fast", provider="ollama")
+            )
 
         except Exception as e:
             logger.warning(f"Bridge FAST call failed: {e}")
@@ -202,7 +246,9 @@ JSON_SCHEMA:
             logger.info("Plan via Bridge (FAST) → JSON schema VALID.")
             return data
         except Exception as e:
-            logger.warning(f"Plan via Bridge INVALID JSON/schema: {e}. Raw: {text[:400]}...")
+            logger.warning(
+                f"Plan via Bridge INVALID JSON/schema: {e}. Raw: {text[:400]}..."
+            )
             self.previous_plan_feedback = f"Your last plan was invalid JSON or schema. Error: {e}. Return strict JSON only."
             return None
 
@@ -210,26 +256,44 @@ JSON_SCHEMA:
     def _run_tests(self) -> dict[str, Any]:
         logger.info("Running tests...")
         result = self.sandbox.run_command(["python", "-m", "pytest", "tests/"])
-        return {"success": result.returncode == 0, "stdout": result.stdout, "stderr": result.stderr}
+        return {
+            "success": result.returncode == 0,
+            "stdout": result.stdout,
+            "stderr": result.stderr,
+        }
 
     def _run_pylint(self, file_path: str) -> dict[str, Any]:
         logger.info(f"Running Pylint on {file_path}...")
         result = self.sandbox.run_command(["pylint", file_path])
-        return {"success": result.returncode == 0, "stdout": result.stdout, "stderr": result.stderr}
+        return {
+            "success": result.returncode == 0,
+            "stdout": result.stdout,
+            "stderr": result.stderr,
+        }
 
     def _apply_code_changes(self, file_path: str, code_to_apply: str) -> bool:
         old_code = self._read_file(file_path)
 
         if file_path == "framework.py":
-            removed_lines = [ln for ln in old_code.splitlines() if ln.strip() and ln.strip() not in code_to_apply]
+            removed_lines = [
+                ln
+                for ln in old_code.splitlines()
+                if ln.strip() and ln.strip() not in code_to_apply
+            ]
             if len(removed_lines) > 50:
-                logger.warning("⚠️ Attempt to remove too many lines from framework.py. Aborting patch.")
+                logger.warning(
+                    "⚠️ Attempt to remove too many lines from framework.py. Aborting patch."
+                )
                 log_reflection({"file": file_path, "reason": "too_many_lines_removed"})
                 return False
             ok = True
             if hasattr(self.ethics_checker, "assess_framework_safety"):
                 try:
-                    ok = bool(self.ethics_checker.assess_framework_safety(old_code, code_to_apply))
+                    ok = bool(
+                        self.ethics_checker.assess_framework_safety(
+                            old_code, code_to_apply
+                        )
+                    )
                 except Exception:
                     ok = True
             if not ok:
@@ -258,16 +322,27 @@ JSON_SCHEMA:
 
     def _check_imports(self, file_path: str) -> dict[str, Any]:
         logger.info(f"Checking imports in {file_path}...")
-        result = self.sandbox.run_command([
-            "python", "-c",
-            f"import ast; f='{file_path}'; import sys; print('Syntax OK') if ast.parse(open(f,'r',encoding='utf-8').read()) is not None else sys.exit(1)"
-        ])
-        return {"success": result.returncode == 0, "stdout": result.stdout, "stderr": result.stderr}
+        result = self.sandbox.run_command(
+            [
+                "python",
+                "-c",
+                f"import ast; f='{file_path}'; import sys; print('Syntax OK') if ast.parse(open(f,'r',encoding='utf-8').read()) is not None else sys.exit(1)",
+            ]
+        )
+        return {
+            "success": result.returncode == 0,
+            "stdout": result.stdout,
+            "stderr": result.stderr,
+        }
 
     def _install_deps(self) -> dict[str, Any]:
         logger.info("Installing dependencies from requirements.txt...")
         result = self.sandbox.run_command(["pip", "install", "-r", "requirements.txt"])
-        return {"success": result.returncode == 0, "stdout": result.stdout, "stderr": result.stderr}
+        return {
+            "success": result.returncode == 0,
+            "stdout": result.stdout,
+            "stderr": result.stderr,
+        }
 
     def _resolve_conflict(self, file_path: str, code_to_apply: Optional[str]) -> bool:
         logger.info(f"Attempting to resolve conflict for {file_path}...")
@@ -275,12 +350,16 @@ JSON_SCHEMA:
             logger.info(f"Applying specific code to resolve conflict in {file_path}...")
             return self._apply_code_changes(file_path, code_to_apply)
         else:
-            logger.warning("resolve_conflict action requires file and code_to_apply or more explicit handling.")
+            logger.warning(
+                "resolve_conflict action requires file and code_to_apply or more explicit handling."
+            )
             return False
 
     # --------------------------- Main loop -------------------------------
     def run(self):
-        logger.info(f"AgentDev started for problem: '{self.problem_description}' in file: '{self.problem_file}'")
+        logger.info(
+            f"AgentDev started for problem: '{self.problem_description}' in file: '{self.problem_file}'"
+        )
 
         # 1) Git branch
         self.git_manager.create_and_checkout_branch(self.fix_branch_name)
@@ -302,26 +381,32 @@ JSON_SCHEMA:
                     problem_description=self.problem_description,
                     problem_file=self.problem_file,
                     current_attempt=self.current_attempt,
-                    previous_feedback=self.previous_plan_feedback or ""
+                    previous_feedback=self.previous_plan_feedback or "",
                 )
 
                 if plan_json is None:
-                    logger.info("Bridge planning failed or invalid. Falling back to Planner.plan()...")
+                    logger.info(
+                        "Bridge planning failed or invalid. Falling back to Planner.plan()..."
+                    )
                     plan_json = self.planner.plan(
                         problem_description=self.problem_description,
                         problem_file=self.problem_file,
                         current_attempt=self.current_attempt,
-                        previous_plan_feedback=self.previous_plan_feedback
+                        previous_plan_feedback=self.previous_plan_feedback,
                     )
 
                 if plan_json is None:
-                    logger.error("Planning failed: invalid JSON plan. Retrying with feedback.")
+                    logger.error(
+                        "Planning failed: invalid JSON plan. Retrying with feedback."
+                    )
                     self.previous_plan_feedback = "AI did not provide a valid JSON plan. Please adhere strictly to the AI_PLAN_SCHEMA."
                     continue
 
                 # Ethics check
                 if not self.ethics_checker.check_plan(plan_json):
-                    logger.warning("Ethics check failed for the generated plan. Retrying with feedback.")
+                    logger.warning(
+                        "Ethics check failed for the generated plan. Retrying with feedback."
+                    )
                     self.previous_plan_feedback = "The previous plan failed ethics check. Please provide an ethical solution."
                     continue
 
@@ -337,24 +422,45 @@ JSON_SCHEMA:
 
                     logger.info(f"Executing step: [{action}] - {description}")
                     step_success = False
-                    action_result = {"success": False, "message": "Action not executed or failed"}
+                    action_result = {
+                        "success": False,
+                        "message": "Action not executed or failed",
+                    }
 
                     if action == "modify_code":
                         if file_path and code_to_apply is not None:
-                            step_success = self._apply_code_changes(file_path, code_to_apply)
-                            action_result = {"success": step_success, "message": f"Modified {file_path}"}
+                            step_success = self._apply_code_changes(
+                                file_path, code_to_apply
+                            )
+                            action_result = {
+                                "success": step_success,
+                                "message": f"Modified {file_path}",
+                            }
                         else:
-                            logger.error("Missing file_path or code_to_apply for modify_code action.")
+                            logger.error(
+                                "Missing file_path or code_to_apply for modify_code action."
+                            )
                     elif action == "add_test":
                         if file_path and code_to_apply is not None:
-                            step_success = self._apply_code_changes(file_path, code_to_apply)
-                            action_result = {"success": step_success, "message": f"Added test to {file_path}"}
+                            step_success = self._apply_code_changes(
+                                file_path, code_to_apply
+                            )
+                            action_result = {
+                                "success": step_success,
+                                "message": f"Added test to {file_path}",
+                            }
                         else:
-                            logger.error("Missing file_path or code_to_apply for add_test action.")
+                            logger.error(
+                                "Missing file_path or code_to_apply for add_test action."
+                            )
                     elif action == "run_tests":
                         test_result = self._run_tests()
                         step_success = test_result["success"]
-                        action_result = {"success": step_success, "stdout": test_result["stdout"], "stderr": test_result["stderr"]}
+                        action_result = {
+                            "success": step_success,
+                            "stdout": test_result["stdout"],
+                            "stderr": test_result["stderr"],
+                        }
                         if step_success:
                             logger.info("Tests passed!")
                             test_passed_after_fix = True
@@ -365,31 +471,52 @@ JSON_SCHEMA:
                         if file_path:
                             pylint_result = self._run_pylint(file_path)
                             step_success = pylint_result["success"]
-                            action_result = {"success": step_success, "stdout": pylint_result["stdout"], "stderr": pylint_result["stderr"]}
+                            action_result = {
+                                "success": step_success,
+                                "stdout": pylint_result["stdout"],
+                                "stderr": pylint_result["stderr"],
+                            }
                             if not step_success:
-                                logger.warning(f"Pylint issues found in {file_path}:\n{pylint_result['stdout']}{pylint_result['stderr']}")
+                                logger.warning(
+                                    f"Pylint issues found in {file_path}:\n{pylint_result['stdout']}{pylint_result['stderr']}"
+                                )
                         else:
                             logger.error("Missing file_path for run_pylint action.")
                     elif action == "review_diff":
                         diff_result = self._review_diff()
                         step_success = diff_result["success"]
-                        action_result = {"success": step_success, "diff": diff_result.get("diff", "")}
+                        action_result = {
+                            "success": step_success,
+                            "diff": diff_result.get("diff", ""),
+                        }
                     elif action == "check_imports":
                         if file_path:
                             import_check_result = self._check_imports(file_path)
                             step_success = import_check_result["success"]
-                            action_result = {"success": step_success, "stdout": import_check_result["stdout"], "stderr": import_check_result["stderr"]}
+                            action_result = {
+                                "success": step_success,
+                                "stdout": import_check_result["stdout"],
+                                "stderr": import_check_result["stderr"],
+                            }
                         else:
                             logger.error("Missing file_path for check_imports action.")
                     elif action == "install_deps":
                         deps_result = self._install_deps()
                         step_success = deps_result["success"]
-                        action_result = {"success": step_success, "stdout": deps_result["stdout"], "stderr": deps_result["stderr"]}
+                        action_result = {
+                            "success": step_success,
+                            "stdout": deps_result["stdout"],
+                            "stderr": deps_result["stderr"],
+                        }
                     elif action == "resolve_conflict":
                         if file_path and code_to_apply is not None:
-                            step_success = self._resolve_conflict(file_path, code_to_apply)
+                            step_success = self._resolve_conflict(
+                                file_path, code_to_apply
+                            )
                         else:
-                            logger.warning("resolve_conflict action requires file and code_to_apply or more explicit handling.")
+                            logger.warning(
+                                "resolve_conflict action requires file and code_to_apply or more explicit handling."
+                            )
                             step_success = False
                     else:
                         logger.warning(f"Unknown action: {action}. Skipping.")
@@ -397,24 +524,36 @@ JSON_SCHEMA:
 
                     if not step_success:
                         all_steps_successful = False
-                        logger.error(f"Step '{action}' failed. Reason: {action_result.get('stderr') or action_result.get('message', 'Unknown error')}")
+                        logger.error(
+                            f"Step '{action}' failed. Reason: {action_result.get('stderr') or action_result.get('message', 'Unknown error')}"
+                        )
                         self.previous_plan_feedback = f"Previous step '{action}' failed: {description}. Result: {action_result}. Please re-evaluate your plan."
                         break
 
                 if all_steps_successful and test_passed_after_fix:
                     logger.info("Issue successfully fixed and all tests passed!")
-                    self.git_manager.commit_changes(f"Fix: {plan_json['fix_strategy_summary']}")
+                    self.git_manager.commit_changes(
+                        f"Fix: {plan_json['fix_strategy_summary']}"
+                    )
                     return
 
-            logger.error(f"Agent failed to fix the issue after {self.max_attempts} attempts. Manual intervention required.")
-            logger.info(f"Last known error: {self.previous_plan_feedback or 'AI failed to provide a valid plan conforming to schema.'}")
+            logger.error(
+                f"Agent failed to fix the issue after {self.max_attempts} attempts. Manual intervention required."
+            )
+            logger.info(
+                f"Last known error: {self.previous_plan_feedback or 'AI failed to provide a valid plan conforming to schema.'}"
+            )
 
         except Exception as e:
-            logger.critical(f"An unhandled error occurred during AgentDev execution: {e}", exc_info=True)
+            logger.critical(
+                f"An unhandled error occurred during AgentDev execution: {e}",
+                exc_info=True,
+            )
         finally:
             logger.info("Keeping agent branch for debugging.")
             self.sandbox.stop_container()
             logger.info("AgentDev process finished.")
+
 
 # -------------------------- Demo main -----------------------------------
 if __name__ == "__main__":
@@ -432,7 +571,9 @@ def some_function_in_module():
         f.write("# Initial test file for example_module\n")
 
     with open("requirements.txt", "w", encoding="utf-8") as f:
-        f.write("pytest\npylint\nopenai\nollama\ncryptography\njsonschema\ngitpython\nhttpx\n")
+        f.write(
+            "pytest\npylint\nopenai\nollama\ncryptography\njsonschema\ngitpython\nhttpx\n"
+        )
 
     problem_description = """
 Traceback (most recent call last):
@@ -456,9 +597,11 @@ def _ensure_log_file(log_dir: _Path) -> _Path:
     log_dir.mkdir(parents=True, exist_ok=True)
     today = _dt.datetime.now().strftime("%Y%m%d")
     base = log_dir / f"{today}.jsonl"
+
     # rotate if > 10MB
     def _size(p: _Path) -> int:
         return p.stat().st_size if p.exists() else 0
+
     if _size(base) <= 10 * 1024 * 1024:
         return base
     # find next index
@@ -522,10 +665,10 @@ def agentdev_run_once(
             if steps:
                 items = [
                     _PlanItem(
-                        id=str(steps[0].get("step_id", "1")), 
+                        id=str(steps[0].get("step_id", "1")),
                         title="auto-step",
                         description="Auto-generated step",
-                        steps=[]
+                        steps=[],
                     )
                 ]
             else:
@@ -544,6 +687,7 @@ def agentdev_run_once(
 
     # Apply patch & test
     import time as _t
+
     t_start = _t.perf_counter()
     branch_name = None
     # Create feature branch up front
@@ -577,16 +721,43 @@ def agentdev_run_once(
     ok = bool(exec_res.get("ok", False)) if isinstance(exec_res, dict) else False
     duration_ms = int((_t.perf_counter() - t0) * 1000)
     if ok:
-        _log_jsonl(log_dir, {"step": "apply", "item_id": chosen.id, "action": chosen.action, "ok": True, "branch": branch_name, "refined": False, "test_files": chosen.tests_to_run, "duration_ms": duration_ms})
+        _log_jsonl(
+            log_dir,
+            {
+                "step": "apply",
+                "item_id": chosen.id,
+                "action": chosen.action,
+                "ok": True,
+                "branch": branch_name,
+                "refined": False,
+                "test_files": chosen.tests_to_run,
+                "duration_ms": duration_ms,
+            },
+        )
         result_bool = True
     else:
         # Record bug memory once
         try:
             if hasattr(actual_bug_memory, "record"):
-                actual_bug_memory.record(file=chosen.target or "unknown", test_name=(chosen.tests_to_run or [None])[0], message=str(exec_res))
+                actual_bug_memory.record(
+                    file=chosen.target or "unknown",
+                    test_name=(chosen.tests_to_run or [None])[0],
+                    message=str(exec_res),
+                )
         except Exception:
             pass
-        _log_jsonl(log_dir, {"step": "apply", "item_id": chosen.id, "action": chosen.action, "ok": False, "error_summary": str(exec_res)[:500], "duration_ms": duration_ms, "branch": branch_name})
+        _log_jsonl(
+            log_dir,
+            {
+                "step": "apply",
+                "item_id": chosen.id,
+                "action": chosen.action,
+                "ok": False,
+                "error_summary": str(exec_res)[:500],
+                "duration_ms": duration_ms,
+                "branch": branch_name,
+            },
+        )
 
         # Try one refine (REFINE_MAX=1)
         try:
@@ -599,7 +770,9 @@ def agentdev_run_once(
             # Reuse PlanItem with updated diff_hint
             chosen.diff_hint = (diff or "") + "\n# refine based on test failures above"
             t1 = _t.perf_counter()
-            new_diff = ai.generate_patch(chosen, context=json.dumps(refine_prompt_context))
+            new_diff = ai.generate_patch(
+                chosen, context=json.dumps(refine_prompt_context)
+            )
             if new_diff:
                 if hasattr(actual_executor, "apply_patch_and_test"):
                     chosen.patch = new_diff
@@ -615,7 +788,17 @@ def agentdev_run_once(
             ok2 = False
         result_bool = True if ok2 else False
         duration2_ms = int((_t.perf_counter() - t1) * 1000)
-        _log_jsonl(log_dir, {"step": "refine", "item_id": getattr(chosen, "id", "?"), "refined": True, "ok": result_bool, "duration_ms": duration2_ms, "branch": branch_name})
+        _log_jsonl(
+            log_dir,
+            {
+                "step": "refine",
+                "item_id": getattr(chosen, "id", "?"),
+                "refined": True,
+                "ok": result_bool,
+                "duration_ms": duration2_ms,
+                "branch": branch_name,
+            },
+        )
 
     # Post-pass: run full suite if requested and apply passed
     fs_attempted = False
@@ -626,31 +809,80 @@ def agentdev_run_once(
     if result_bool and run_full_suite_after_pass:
         fs_attempted = True
         try:
-            ok_all, collected, failed, dur_ms_all, raw_path = actual_executor.run_pytest_all(tests_dir)
+            ok_all, collected, failed, dur_ms_all, raw_path = (
+                actual_executor.run_pytest_all(tests_dir)
+            )
             fs_ok = ok_all
             fs_col = collected
             fs_failed = failed
             fs_dur = dur_ms_all
-            _log_jsonl(log_dir, {"step": "full_suite", "ok": bool(ok_all), "branch": branch_name, "duration_ms": dur_ms_all, "collected": collected, "failed": failed})
+            _log_jsonl(
+                log_dir,
+                {
+                    "step": "full_suite",
+                    "ok": bool(ok_all),
+                    "branch": branch_name,
+                    "duration_ms": dur_ms_all,
+                    "collected": collected,
+                    "failed": failed,
+                },
+            )
             result_bool = result_bool and ok_all
         except Exception as e:
             fs_ok = False
             fs_failed = -1
-            _log_jsonl(log_dir, {"step": "full_suite", "ok": False, "branch": branch_name, "error_summary": str(e)[:500]})
+            _log_jsonl(
+                log_dir,
+                {
+                    "step": "full_suite",
+                    "ok": False,
+                    "branch": branch_name,
+                    "error_summary": str(e)[:500],
+                },
+            )
 
     # Optionally open PR
-    pr_summary = {"attempted": False, "ok": None, "url": None, "number": None, "provider": None, "error": None}
+    pr_summary = {
+        "attempted": False,
+        "ok": None,
+        "url": None,
+        "number": None,
+        "provider": None,
+        "error": None,
+    }
     if result_bool and open_pr_after_pass:
         # title/body defaults
-        title = pr_title or f"agentdev: {getattr(chosen, 'title', getattr(chosen, 'id', 'fix'))}"
+        title = (
+            pr_title
+            or f"agentdev: {getattr(chosen, 'title', getattr(chosen, 'id', 'fix'))}"
+        )
         body = pr_body or "Automated fix by AgentDev. See logs for details."
         try:
             # push branch first
             _ = actual_executor.push_branch(pr_remote)
-            pr_summary = actual_executor.create_pull_request(title=title, body=body, base=pr_base, remote=pr_remote, draft=pr_draft)
+            pr_summary = actual_executor.create_pull_request(
+                title=title, body=body, base=pr_base, remote=pr_remote, draft=pr_draft
+            )
         except Exception as e:
-            pr_summary = {"attempted": True, "ok": False, "url": None, "number": None, "provider": None, "error": str(e)}
-        _log_jsonl(log_dir, {"step": "pr_create", "ok": bool(pr_summary.get("ok")), "branch": branch_name, "pr_url": pr_summary.get("url"), "pr_number": pr_summary.get("number"), "error_summary": pr_summary.get("error")})
+            pr_summary = {
+                "attempted": True,
+                "ok": False,
+                "url": None,
+                "number": None,
+                "provider": None,
+                "error": str(e),
+            }
+        _log_jsonl(
+            log_dir,
+            {
+                "step": "pr_create",
+                "ok": bool(pr_summary.get("ok")),
+                "branch": branch_name,
+                "pr_url": pr_summary.get("url"),
+                "pr_number": pr_summary.get("number"),
+                "error_summary": pr_summary.get("error"),
+            },
+        )
 
     total_ms = int((_t.perf_counter() - t_start) * 1000)
     # Return structured summary for API layer

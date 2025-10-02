@@ -37,6 +37,7 @@ class TestErrorSeverity:
         assert ErrorSeverity.HIGH.value == "high"
         assert ErrorSeverity.CRITICAL.value == "critical"
 
+
 class TestErrorCategory:
     """Test ErrorCategory enum"""
 
@@ -50,6 +51,7 @@ class TestErrorCategory:
         assert ErrorCategory.LOGIC.value == "logic"
         assert ErrorCategory.SECURITY.value == "security"
         assert ErrorCategory.CONFIGURATION.value == "configuration"
+
 
 class TestRetryPolicy:
     """Test RetryPolicy"""
@@ -74,7 +76,7 @@ class TestRetryPolicy:
             base_delay=2.0,
             max_delay=120.0,
             strategy=RetryStrategy.FIXED,
-            jitter=False
+            jitter=False,
         )
 
         assert policy.max_attempts == 5
@@ -83,6 +85,7 @@ class TestRetryPolicy:
         assert policy.strategy == RetryStrategy.FIXED
         assert not policy.jitter
 
+
 class TestCircuitBreaker:
     """Test CircuitBreaker"""
 
@@ -90,9 +93,7 @@ class TestCircuitBreaker:
     def config(self):
         """Test circuit breaker config"""
         return CircuitBreakerConfig(
-            failure_threshold=3,
-            recovery_timeout=10.0,
-            half_open_max_calls=2
+            failure_threshold=3, recovery_timeout=10.0, half_open_max_calls=2
         )
 
     @pytest.fixture
@@ -110,6 +111,7 @@ class TestCircuitBreaker:
     @pytest.mark.asyncio
     async def test_successful_call(self, circuit_breaker):
         """Test successful call"""
+
         async def success_func():
             return "success"
 
@@ -121,6 +123,7 @@ class TestCircuitBreaker:
     @pytest.mark.asyncio
     async def test_failure_threshold(self, circuit_breaker):
         """Test failure threshold"""
+
         async def failing_func():
             raise ConnectionError("Connection failed")
 
@@ -154,11 +157,12 @@ class TestCircuitBreaker:
         """Test getting circuit breaker state"""
         state = circuit_breaker.get_state()
 
-        assert 'state' in state
-        assert 'failure_count' in state
-        assert 'last_failure_time' in state
-        assert 'half_open_calls' in state
-        assert state['state'] == CircuitBreakerState.CLOSED.value
+        assert "state" in state
+        assert "failure_count" in state
+        assert "last_failure_time" in state
+        assert "half_open_calls" in state
+        assert state["state"] == CircuitBreakerState.CLOSED.value
+
 
 class TestErrorHandler:
     """Test ErrorHandler"""
@@ -176,7 +180,11 @@ class TestErrorHandler:
         error_context = error_handler.classify_error(error, context)
 
         assert error_context.category == ErrorCategory.RESOURCE
-        assert error_context.severity in [ErrorSeverity.MEDIUM, ErrorSeverity.HIGH, ErrorSeverity.CRITICAL]
+        assert error_context.severity in [
+            ErrorSeverity.MEDIUM,
+            ErrorSeverity.HIGH,
+            ErrorSeverity.CRITICAL,
+        ]
         assert error_context.component == "learning_system"
         assert error_context.error_type == "MemoryError"
 
@@ -234,7 +242,12 @@ class TestErrorHandler:
 
     def test_calculate_delay_exponential(self, error_handler):
         """Test exponential delay calculation"""
-        policy = RetryPolicy(strategy=RetryStrategy.EXPONENTIAL, base_delay=1.0, backoff_multiplier=2.0, jitter=False)
+        policy = RetryPolicy(
+            strategy=RetryStrategy.EXPONENTIAL,
+            base_delay=1.0,
+            backoff_multiplier=2.0,
+            jitter=False,
+        )
 
         delay = error_handler._calculate_delay(0, policy)
         assert delay == 1.0
@@ -247,9 +260,13 @@ class TestErrorHandler:
 
     def test_calculate_delay_max_delay(self, error_handler):
         """Test max delay limit"""
-        policy = RetryPolicy(strategy=RetryStrategy.EXPONENTIAL, base_delay=1.0, max_delay=5.0)
+        policy = RetryPolicy(
+            strategy=RetryStrategy.EXPONENTIAL, base_delay=1.0, max_delay=5.0
+        )
 
-        delay = error_handler._calculate_delay(10, policy)  # Should be capped at max_delay
+        delay = error_handler._calculate_delay(
+            10, policy
+        )  # Should be capped at max_delay
         assert delay <= 5.0
 
     def test_register_retry_policy(self, error_handler):
@@ -284,11 +301,12 @@ class TestErrorHandler:
 
         stats = error_handler.get_error_statistics()
 
-        assert 'statistics' in stats
-        assert 'recent_errors' in stats
-        assert 'circuit_breakers' in stats
-        assert 'retry_policies' in stats
-        assert stats['statistics']['total_errors'] == 2
+        assert "statistics" in stats
+        assert "recent_errors" in stats
+        assert "circuit_breakers" in stats
+        assert "retry_policies" in stats
+        assert stats["statistics"]["total_errors"] == 2
+
 
 class TestResilienceManager:
     """Test ResilienceManager"""
@@ -300,7 +318,7 @@ class TestResilienceManager:
             level=ResilienceLevel.STANDARD,
             enable_prediction=True,
             enable_self_healing=True,
-            health_check_interval=1
+            health_check_interval=1,
         )
 
     @pytest.fixture
@@ -313,7 +331,7 @@ class TestResilienceManager:
         assert manager.current_health == SystemHealth.HEALTHY
         assert len(manager.component_states) > 0
         assert not manager.is_monitoring
-        assert manager.stats['total_failures'] == 0
+        assert manager.stats["total_failures"] == 0
 
     @pytest.mark.asyncio
     async def test_start_stop_monitoring(self, manager):
@@ -352,8 +370,8 @@ class TestResilienceManager:
 
     def test_calculate_recovery_rate_with_failures(self, manager):
         """Test recovery rate calculation with failures"""
-        manager.stats['total_failures'] = 10
-        manager.stats['successful_recoveries'] = 8
+        manager.stats["total_failures"] = 10
+        manager.stats["successful_recoveries"] = 8
 
         recovery_rate = manager._calculate_recovery_rate()
         assert recovery_rate == 0.8
@@ -383,7 +401,7 @@ class TestResilienceManager:
             error_rate=0.1,
             recovery_rate=0.9,
             uptime_percentage=0.95,
-            performance_degradation=0.05
+            performance_degradation=0.05,
         )
 
         assert 0.0 <= score <= 1.0
@@ -415,22 +433,23 @@ class TestResilienceManager:
 
         await manager.handle_component_failure("test_component", error, context)
 
-        assert manager.stats['total_failures'] == 1
-        assert manager.component_states['test_component'] == SystemHealth.FAILED
-        assert manager.stats['last_failure'] is not None
+        assert manager.stats["total_failures"] == 1
+        assert manager.component_states["test_component"] == SystemHealth.FAILED
+        assert manager.stats["last_failure"] is not None
 
     def test_get_resilience_status(self, manager):
         """Test resilience status"""
         status = manager.get_resilience_status()
 
-        assert 'config' in status
-        assert 'current_health' in status
-        assert 'component_states' in status
-        assert 'degradation_modes' in status
-        assert 'active_recoveries' in status
-        assert 'statistics' in status
-        assert 'recent_predictions' in status
-        assert 'monitoring_active' in status
+        assert "config" in status
+        assert "current_health" in status
+        assert "component_states" in status
+        assert "degradation_modes" in status
+        assert "active_recoveries" in status
+        assert "statistics" in status
+        assert "recent_predictions" in status
+        assert "monitoring_active" in status
+
 
 class TestDecorators:
     """Test error handling decorators"""
@@ -470,6 +489,7 @@ class TestDecorators:
 
         with pytest.raises(ValueError):
             await non_retryable_func()
+
 
 class TestIntegration:
     """Integration tests"""

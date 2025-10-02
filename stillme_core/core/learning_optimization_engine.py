@@ -23,93 +23,79 @@ from typing import Any, Optional
 
 # Import Phase 1 and 2.1 modules
 try:
-    from .autonomous_management_system import AutonomousManagementSystem  # type: ignore
-    from .final_validation_system import FinalValidationSystem  # type: ignore
-    from .integration_bridge import IntegrationBridge  # type: ignore
-    from .memory_security_integration import MemorySecurityIntegration  # type: ignore
-    from .module_governance_system import ModuleGovernanceSystem  # type: ignore
-    from .performance_monitor import PerformanceMonitor
-    from .security_middleware import SecurityMiddleware  # type: ignore
-    from .validation_framework import ComprehensiveValidationFramework  # type: ignore
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-    from stillme_core.autonomous_management_system import (
-        AutonomousManagementSystem,  # type: ignore
-    )
-    from stillme_core.final_validation_system import (
-        FinalValidationSystem,  # type: ignore
-    )
-    from stillme_core.integration_bridge import IntegrationBridge  # type: ignore
-    from stillme_core.memory_security_integration import (
-        MemorySecurityIntegration,  # type: ignore
-    )
-    from stillme_core.module_governance_system import (
-        ModuleGovernanceSystem,  # type: ignore
-    )
-    from stillme_core.validation_framework import (
-        ComprehensiveValidationFramework,  # type: ignore
-    )
+    from .autonomous_management_system import AutonomousManagementSystem as _AutonomousManagementSystem
+    from .integration_bridge import IntegrationBridge as _IntegrationBridge
+    from .memory_security_integration import MemorySecurityIntegration as _MemorySecurityIntegration
+    from .module_governance_system import ModuleGovernanceSystem as _ModuleGovernanceSystem
+    from .security_middleware import SecurityMiddleware as _SecurityMiddleware
+    from .validation.performance_monitor import PerformanceMonitor as _PerformanceMonitor
 except ImportError:
     # Create mock classes for testing
     class SecurityMiddleware:
-        def __init__(self):
+        def __init__(self) -> None:
             pass
 
-            def get_security_report(self):
-                return {"security_score": 100}
+        def get_security_report(self) -> dict[str, str]:
+            return {"security_score": "100"}
 
-        class PerformanceMonitor:
-            def __init__(self):
-                pass
+    class PerformanceMonitor:
+        def __init__(self) -> None:
+            pass
 
-            def get_performance_summary(self):
-                return {"status": "healthy"}
+        def get_performance_summary(self) -> dict[str, str]:
+            return {"status": "healthy"}
 
-        class IntegrationBridge:
-            def __init__(self):
-                pass
+    class IntegrationBridge:
+        def __init__(self) -> None:
+            pass
 
-            def register_endpoint(self, method, path, handler, auth_required=False):
-                pass
+        def register_endpoint(
+            self, method: str, path: str, handler: Any, auth_required: bool = False
+        ) -> None:
+            pass
 
-        class MemorySecurityIntegration:
-            def __init__(self):
-                pass
+    class MemorySecurityIntegration:
+        def __init__(self) -> None:
+            pass
 
-            def get_memory_statistics(self):
-                return {"access_logs_count": 0}
+        def get_memory_statistics(self) -> dict[str, int]:
+            return {"access_logs_count": 0}
 
-        class ModuleGovernanceSystem:
-            def __init__(self):
-                pass
+    class ModuleGovernanceSystem:
+        def __init__(self) -> None:
+            pass
 
-            def get_governance_status(self):
-                return {"status": "success", "data": {}}
+        def get_governance_status(self) -> dict[str, Any]:
+            return {"status": "success", "data": {}}
 
-        class ComprehensiveValidationFramework:
-            def __init__(self):
-                pass
+    class ComprehensiveValidationFramework:
+        def __init__(self) -> None:
+            pass
 
-            def get_validation_status(self):
-                return {"status": "success", "data": {}}
+        def get_validation_status(self) -> dict[str, Any]:
+            return {"status": "success", "data": {}}
 
-        class FinalValidationSystem:
-            def __init__(self):
-                pass
+    class FinalValidationSystem:
+        def __init__(self) -> None:
+            pass
 
-            def get_system_health(self):
-                return {"status": "success", "data": {}}
+        def get_system_health(self) -> dict[str, Any]:
+            return {"status": "success", "data": {}}
 
-        class AutonomousManagementSystem:
-            def __init__(self):
-                pass
+    class AutonomousManagementSystem:
+        def __init__(self) -> None:
+            pass
 
-            def get_autonomous_status(self):
-                return {"status": "success", "data": {}}
+        def get_autonomous_status(self) -> dict[str, Any]:
+            return {"status": "success", "data": {}}
+
+    # Assign aliases
+    _AutonomousManagementSystem = AutonomousManagementSystem
+    _IntegrationBridge = IntegrationBridge
+    _MemorySecurityIntegration = MemorySecurityIntegration
+    _ModuleGovernanceSystem = ModuleGovernanceSystem
+    _SecurityMiddleware = SecurityMiddleware
+    _PerformanceMonitor = PerformanceMonitor
 
 
 # Setup logging
@@ -209,14 +195,14 @@ class LearningOptimizationEngine:
         self.logger = self._setup_logging()
 
         # Initialize Phase 1 and 2.1 components
-        self.security_middleware = SecurityMiddleware()
-        self.performance_monitor = PerformanceMonitor()
-        self.integration_bridge = IntegrationBridge()
-        self.memory_integration = MemorySecurityIntegration()
-        self.governance_system = ModuleGovernanceSystem()
-        self.validation_framework = ComprehensiveValidationFramework()
-        self.final_validation = FinalValidationSystem()
-        self.autonomous_management = AutonomousManagementSystem()
+        self.security_middleware: Any = _SecurityMiddleware()
+        self.performance_monitor: Any = _PerformanceMonitor()
+        self.integration_bridge: Any = _IntegrationBridge()
+        self.memory_integration: Any = _MemorySecurityIntegration()
+        self.governance_system: Any = _ModuleGovernanceSystem()
+        self.validation_framework: Any = ComprehensiveValidationFramework()
+        self.final_validation: Any = FinalValidationSystem()
+        self.autonomous_management: Any = _AutonomousManagementSystem()
 
         # Learning and optimization state
         self.learning_entries: list[LearningEntry] = []
@@ -466,18 +452,18 @@ class LearningOptimizationEngine:
         try:
             # Register learning endpoints
             self.integration_bridge.register_endpoint(
-                "GET", "/learning/status", self._get_learning_status, auth_required=True
+                "GET", "/learning/status", self.get_learning_status, auth_required=True
             )
             self.integration_bridge.register_endpoint(
                 "GET",
                 "/learning/knowledge",
-                self._get_knowledge_base,
+                self.get_knowledge_base,
                 auth_required=True,
             )
             self.integration_bridge.register_endpoint(
                 "GET",
                 "/learning/optimization",
-                self._get_optimization_results,
+                self.get_optimization_results,
                 auth_required=True,
             )
             self.integration_bridge.register_endpoint(
@@ -489,7 +475,7 @@ class LearningOptimizationEngine:
             self.integration_bridge.register_endpoint(
                 "GET",
                 "/learning/insights",
-                self._get_learning_insights,
+                self.get_learning_insights,
                 auth_required=True,
             )
 
@@ -613,22 +599,22 @@ class LearningOptimizationEngine:
     def _analyze_patterns(self, entries: list[LearningEntry]) -> list[dict[str, Any]]:
         """Analyze patterns in learning entries"""
         try:
-            patterns = []
+            patterns: list[dict[str, Any]] = []
 
             # Analyze performance patterns
-            performance_values = []
+            performance_values: list[float] = []
             for entry in entries:
                 if "performance" in entry.input_data:
                     perf_data = entry.input_data["performance"]
                     if "status" in perf_data:
-                        performance_values.append(
+                        performance_values.append(  # type: ignore
                             1 if perf_data["status"] == "healthy" else 0
                         )
 
-            if len(performance_values) >= 10:
-                avg_performance = sum(performance_values) / len(performance_values)
+            if len(performance_values) >= 10:  # type: ignore
+                avg_performance = sum(performance_values) / len(performance_values)  # type: ignore
                 if avg_performance < 0.8:
-                    patterns.append(
+                    patterns.append(  # type: ignore
                         {
                             "type": "performance_degradation",
                             "confidence": 0.8,
@@ -638,7 +624,7 @@ class LearningOptimizationEngine:
                     )
 
             # Analyze security patterns
-            security_scores = []
+            security_scores: list[float] = []
             for entry in entries:
                 if "security" in entry.input_data:
                     sec_data = entry.input_data["security"]
@@ -694,12 +680,12 @@ class LearningOptimizationEngine:
     def _identify_optimization_opportunities(self) -> list[dict[str, Any]]:
         """Identify optimization opportunities"""
         try:
-            opportunities = []
+            opportunities: list[dict[str, Any]] = []
 
             # Check performance optimization opportunities
             if len(self.learning_entries) >= 20:
                 recent_entries = self.learning_entries[-20:]
-                performance_metrics = []
+                performance_metrics: list[int] = []
 
                 for entry in recent_entries:
                     if "performance" in entry.input_data:
@@ -863,7 +849,7 @@ class LearningOptimizationEngine:
         except Exception as e:
             self.logger.error(f"Error updating knowledge base: {e}")
 
-    async def _get_learning_status(self, data: dict[str, Any]) -> dict[str, Any]:
+    async def get_learning_status(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get learning status endpoint"""
         try:
             return {
@@ -900,10 +886,10 @@ class LearningOptimizationEngine:
                 "message": str(e),
             }
 
-    async def _get_knowledge_base(self, data: dict[str, Any]) -> dict[str, Any]:
+    async def get_knowledge_base(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get knowledge base endpoint"""
         try:
-            knowledge_data = []
+            knowledge_data: list[dict[str, Any]] = []
             for _knowledge_id, knowledge in self.knowledge_base.items():
                 knowledge_data.append(
                     {
@@ -939,10 +925,10 @@ class LearningOptimizationEngine:
                 "message": str(e),
             }
 
-    async def _get_optimization_results(self, data: dict[str, Any]) -> dict[str, Any]:
+    async def get_optimization_results(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get optimization results endpoint"""
         try:
-            results_data = []
+            results_data: list[dict[str, Any]] = []
             for result in self.optimization_results[-20:]:  # Last 20 results
                 results_data.append(
                     {
@@ -1018,10 +1004,10 @@ class LearningOptimizationEngine:
                 "message": str(e),
             }
 
-    async def _get_learning_insights(self, data: dict[str, Any]) -> dict[str, Any]:
+    async def get_learning_insights(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get learning insights endpoint"""
         try:
-            insights = []
+            insights: list[dict[str, Any]] = []
 
             # Performance insights
             if self.optimization_results:
@@ -1132,7 +1118,7 @@ class KnowledgeAccumulator:
     """Knowledge accumulator"""
 
     def __init__(self):
-        self.accumulated_knowledge = []
+        self.accumulated_knowledge: list[dict[str, Any]] = []
 
     def accumulate_knowledge(self, data: dict[str, Any]) -> str:
         """Accumulate knowledge from data"""
@@ -1169,20 +1155,20 @@ def main():
 
         # Test learning status
         print("📊 Testing learning status...")
-        status = await learning_engine._get_learning_status({})
+        status = await learning_engine.get_learning_status({})
         print(f"Learning status: {status['status']}")
         print(f"Learning enabled: {status['data']['learning_enabled']}")
         print(f"Optimization enabled: {status['data']['optimization_enabled']}")
 
         # Test knowledge base
         print("🧠 Testing knowledge base...")
-        knowledge = await learning_engine._get_knowledge_base({})
+        knowledge = await learning_engine.get_knowledge_base({})
         print(f"Knowledge base: {knowledge['data']['total_knowledge']} entries")
         print(f"Categories: {knowledge['data']['categories']}")
 
         # Test optimization results
         print("🔧 Testing optimization results...")
-        optimization = await learning_engine._get_optimization_results({})
+        optimization = await learning_engine.get_optimization_results({})
         print(f"Optimization results: {optimization['data']['total_results']}")
         print(
             f"Average improvement: {optimization['data']['average_improvement']:.1f}%"
@@ -1190,7 +1176,7 @@ def main():
 
         # Test learning insights
         print("💡 Testing learning insights...")
-        insights = await learning_engine._get_learning_insights({})
+        insights = await learning_engine.get_learning_insights({})
         print(f"Learning insights: {insights['data']['total_insights']}")
 
         # Wait for some learning cycles
@@ -1199,7 +1185,7 @@ def main():
 
         # Test again
         print("📊 Testing after learning...")
-        status = await learning_engine._get_learning_status({})
+        status = await learning_engine.get_learning_status({})
         print(f"Learning entries: {status['data']['learning_entries_count']}")
         print(f"Optimization results: {status['data']['optimization_results_count']}")
 

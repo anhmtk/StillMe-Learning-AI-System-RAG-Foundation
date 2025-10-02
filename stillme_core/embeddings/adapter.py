@@ -32,7 +32,7 @@ class FakeBackend:
             # Simple deterministic embedding based on text characteristics
             base_vector = [len(text) / 100.0] * self.dimension
             # Add some variation based on text content
-            for i, char in enumerate(text[:self.dimension]):
+            for i, char in enumerate(text[: self.dimension]):
                 base_vector[i] += ord(char) / 1000.0
             embeddings.append(base_vector)
         return embeddings
@@ -62,6 +62,7 @@ class SentenceTransformerBackend:
     def _init_direct_model(self):
         """Initialize model directly (Linux/macOS)"""
         from sentence_transformers import SentenceTransformer
+
         self._model = SentenceTransformer(self.model_name)
 
     def embed(self, texts: list[str]) -> list[list[float]]:

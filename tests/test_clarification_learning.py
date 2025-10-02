@@ -18,7 +18,8 @@ from stillme_core.modules.clarification_learning import (
 )
 
 # Configure pytest-asyncio
-pytest_plugins = ('pytest_asyncio',)
+pytest_plugins = ("pytest_asyncio",)
+
 
 class TestClarificationPatternStore:
     """Test ClarificationPatternStore functionality"""
@@ -97,7 +98,9 @@ class TestClarificationPatternStore:
         data_templates = store.top_templates("data", k=1)
         assert len(data_templates) == 1
         assert "CSV or JSON?" in data_templates[0]["template"]
-        assert data_templates[0]["confidence"] > 0.8  # High confidence due to 3 successes
+        assert (
+            data_templates[0]["confidence"] > 0.8
+        )  # High confidence due to 3 successes
 
     def test_pattern_persistence(self):
         """Test pattern persistence to file"""
@@ -130,11 +133,11 @@ class TestClarificationPatternStore:
                     "success": 2,
                     "failure": 1,
                     "updated_at": 1234567890.0,
-                    "total_attempts": 3
+                    "total_attempts": 3,
                 }
             }
 
-            with open(persistence_file, 'w') as f:
+            with open(persistence_file, "w") as f:
                 json.dump(test_data, f)
 
             # Load patterns
@@ -145,6 +148,7 @@ class TestClarificationPatternStore:
             assert stat.success == 2
             assert stat.failure == 1
             assert stat.total_attempts == 3
+
 
 class TestClarificationLearner:
     """Test ClarificationLearner functionality"""
@@ -160,18 +164,20 @@ class TestClarificationLearner:
         context = {
             "domain_hint": "web",
             "user_id": "test_user",
-            "conversation_history": []
+            "conversation_history": [],
         }
 
         # Use asyncio.run for async function
-        asyncio.run(learner.record_attempt(
-            prompt="Build an app",
-            question="Which framework? Flask or FastAPI?",
-            user_reply="FastAPI",
-            success=True,
-            context=context,
-            trace_id="test_trace_1"
-        ))
+        asyncio.run(
+            learner.record_attempt(
+                prompt="Build an app",
+                question="Which framework? Flask or FastAPI?",
+                user_reply="FastAPI",
+                success=True,
+                context=context,
+                trace_id="test_trace_1",
+            )
+        )
 
         # Verify attempt was recorded
         assert len(learner.attempts) == 1
@@ -190,19 +196,18 @@ class TestClarificationLearner:
 
     def test_record_attempt_failure(self, learner):
         """Test recording failed clarification attempt"""
-        context = {
-            "domain_hint": "data",
-            "user_id": "test_user"
-        }
+        context = {"domain_hint": "data", "user_id": "test_user"}
 
         # Use asyncio.run for async function
-        asyncio.run(learner.record_attempt(
-            prompt="Analyze this data",
-            question="What data source? CSV or JSON?",
-            user_reply="Database",
-            success=False,
-            context=context
-        ))
+        asyncio.run(
+            learner.record_attempt(
+                prompt="Analyze this data",
+                question="What data source? CSV or JSON?",
+                user_reply="Database",
+                success=False,
+                context=context,
+            )
+        )
 
         # Verify attempt was recorded
         assert len(learner.attempts) == 1
@@ -217,27 +222,28 @@ class TestClarificationLearner:
 
     def test_suggest_patterns_with_learning(self, learner):
         """Test suggesting patterns based on learning"""
-        context = {
-            "domain_hint": "web",
-            "user_id": "test_user"
-        }
+        context = {"domain_hint": "web", "user_id": "test_user"}
 
         # Record some successful attempts
-        asyncio.run(learner.record_attempt(
-            prompt="Build an app",
-            question="Which framework? Flask or FastAPI?",
-            user_reply="FastAPI",
-            success=True,
-            context=context
-        ))
+        asyncio.run(
+            learner.record_attempt(
+                prompt="Build an app",
+                question="Which framework? Flask or FastAPI?",
+                user_reply="FastAPI",
+                success=True,
+                context=context,
+            )
+        )
 
-        asyncio.run(learner.record_attempt(
-            prompt="Create a website",
-            question="Which framework? Flask or FastAPI?",
-            user_reply="Flask",
-            success=True,
-            context=context
-        ))
+        asyncio.run(
+            learner.record_attempt(
+                prompt="Create a website",
+                question="Which framework? Flask or FastAPI?",
+                user_reply="Flask",
+                success=True,
+                context=context,
+            )
+        )
 
         # Get suggestion
         suggestion = asyncio.run(learner.suggest_patterns("Build something", context))
@@ -250,10 +256,7 @@ class TestClarificationLearner:
 
     def test_suggest_patterns_no_learning(self, learner):
         """Test suggesting patterns when no learning data available"""
-        context = {
-            "domain_hint": "unknown_domain",
-            "user_id": "test_user"
-        }
+        context = {"domain_hint": "unknown_domain", "user_id": "test_user"}
 
         suggestion = asyncio.run(learner.suggest_patterns("Do something", context))
 
@@ -271,15 +274,15 @@ class TestClarificationLearner:
                 question="Test question 1",
                 user_reply="Test reply 1",
                 success=True,
-                context={}
+                context={},
             ),
             ClarificationAttempt(
                 prompt="Test prompt 2",
                 question="Test question 2",
                 user_reply="Test reply 2",
                 success=False,
-                context={}
-            )
+                context={},
+            ),
         ]
 
         stats = learner.get_learning_stats()
@@ -298,7 +301,7 @@ class TestClarificationLearner:
                 question="Test",
                 user_reply="Test",
                 success=True,
-                context={}
+                context={},
             )
         ]
         learner.store.update("test:pattern", success=True)
@@ -309,6 +312,7 @@ class TestClarificationLearner:
         # Verify data is cleared
         assert len(learner.attempts) == 0
         assert len(learner.store.store) == 0
+
 
 class TestPatternStat:
     """Test PatternStat dataclass"""
@@ -339,6 +343,7 @@ class TestPatternStat:
         confidence = stat.confidence_score
         assert confidence < 0.4  # Low confidence (adjusted threshold)
 
+
 # Integration tests
 class TestClarificationLearningIntegration:
     """Integration tests for clarification learning"""
@@ -352,36 +357,43 @@ class TestClarificationLearningIntegration:
 
         # Record multiple attempts for same pattern
         for i in range(5):
-            asyncio.run(learner.record_attempt(
-                prompt=f"Build app {i}",
-                question="Which framework? Flask or FastAPI?",
-                user_reply="FastAPI" if i % 2 == 0 else "Flask",
-                success=True,
-                context=context
-            ))
+            asyncio.run(
+                learner.record_attempt(
+                    prompt=f"Build app {i}",
+                    question="Which framework? Flask or FastAPI?",
+                    user_reply="FastAPI" if i % 2 == 0 else "Flask",
+                    success=True,
+                    context=context,
+                )
+            )
 
         # Record some failures
         for i in range(2):
-            asyncio.run(learner.record_attempt(
-                prompt=f"Create website {i}",
-                question="Which framework? Flask or FastAPI?",
-                user_reply="Django",  # Not in options
-                success=False,
-                context=context
-            ))
+            asyncio.run(
+                learner.record_attempt(
+                    prompt=f"Create website {i}",
+                    question="Which framework? Flask or FastAPI?",
+                    user_reply="Django",  # Not in options
+                    success=False,
+                    context=context,
+                )
+            )
 
         # Get suggestion - should be confident due to high success rate
         suggestion = asyncio.run(learner.suggest_patterns("Build something", context))
 
         # Due to decay logic, confidence might be lower, so adjust expectations
         assert suggestion["confidence"] >= 0.0  # Should have some confidence
-        assert suggestion["source"] in ["learned", "fallback"]  # Should be learned or fallback
+        assert suggestion["source"] in [
+            "learned",
+            "fallback",
+        ]  # Should be learned or fallback
 
         # Verify statistics
         stats = learner.get_learning_stats()
         assert stats["total_attempts"] == 7
         assert stats["successful_attempts"] == 5
-        assert stats["success_rate"] == 5/7
+        assert stats["success_rate"] == 5 / 7
 
     def test_domain_specific_learning(self):
         """Test learning specific to different domains"""
@@ -390,27 +402,35 @@ class TestClarificationLearningIntegration:
 
         # Learn web patterns
         web_context = {"domain_hint": "web", "user_id": "test_user"}
-        asyncio.run(learner.record_attempt(
-            prompt="Build web app",
-            question="Which framework? Flask or FastAPI?",
-            user_reply="FastAPI",
-            success=True,
-            context=web_context
-        ))
+        asyncio.run(
+            learner.record_attempt(
+                prompt="Build web app",
+                question="Which framework? Flask or FastAPI?",
+                user_reply="FastAPI",
+                success=True,
+                context=web_context,
+            )
+        )
 
         # Learn data patterns
         data_context = {"domain_hint": "data", "user_id": "test_user"}
-        asyncio.run(learner.record_attempt(
-            prompt="Analyze data",
-            question="What data source? CSV or JSON?",
-            user_reply="CSV",
-            success=True,
-            context=data_context
-        ))
+        asyncio.run(
+            learner.record_attempt(
+                prompt="Analyze data",
+                question="What data source? CSV or JSON?",
+                user_reply="CSV",
+                success=True,
+                context=data_context,
+            )
+        )
 
         # Test domain-specific suggestions
-        web_suggestion = asyncio.run(learner.suggest_patterns("Build something", web_context))
-        data_suggestion = asyncio.run(learner.suggest_patterns("Analyze something", data_context))
+        web_suggestion = asyncio.run(
+            learner.suggest_patterns("Build something", web_context)
+        )
+        data_suggestion = asyncio.run(
+            learner.suggest_patterns("Analyze something", data_context)
+        )
 
         # Should suggest domain-specific patterns
         assert "framework" in web_suggestion["template"].lower()
@@ -418,6 +438,7 @@ class TestClarificationLearningIntegration:
 
         # Should not cross-contaminate
         assert web_suggestion["template"] != data_suggestion["template"]
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

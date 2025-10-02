@@ -9,7 +9,4 @@ This module provides validation capabilities for AgentDev:
 from .integration import AgentDevIntegration
 from .validation_system import AgentDevValidator
 
-__all__ = [
-    "AgentDevValidator",
-    "AgentDevIntegration"
-]
+__all__ = ["AgentDevValidator", "AgentDevIntegration"]

@@ -23,8 +23,7 @@ class EnhancedSettings(BaseSettings):
 
     # Security
     SECRET_KEY: str = Field(
-        default="your-secret-key-here-change-in-production",
-        env="SECRET_KEY"
+        default="your-secret-key-here-change-in-production", env="SECRET_KEY"
     )
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
@@ -65,14 +64,12 @@ class EnhancedSettings(BaseSettings):
         env="ALLOWED_ORIGINS",
     )
     ALLOWED_HOSTS: list[str] = Field(
-        default=["localhost", "127.0.0.1"],
-        env="ALLOWED_HOSTS"
+        default=["localhost", "127.0.0.1"], env="ALLOWED_HOSTS"
     )
 
     # StillMe Integration
     STILLME_CORE_URL: str = Field(
-        default="http://localhost:8000",
-        env="STILLME_CORE_URL"
+        default="http://localhost:8000", env="STILLME_CORE_URL"
     )
     STILLME_API_KEY: Optional[str] = Field(default=None, env="STILLME_API_KEY")
     STILLME_TIMEOUT: int = 30
@@ -98,7 +95,7 @@ class EnhancedSettings(BaseSettings):
     CIRCUIT_BREAKER_EXPECTED_EXCEPTION: list[str] = [
         "ConnectionError",
         "TimeoutError",
-        "HTTPException"
+        "HTTPException",
     ]
 
     # Monitoring
@@ -143,8 +140,12 @@ class EnhancedSettings(BaseSettings):
 
     # Notifications
     FIREBASE_PROJECT_ID: Optional[str] = Field(default=None, env="FIREBASE_PROJECT_ID")
-    FIREBASE_PRIVATE_KEY: Optional[str] = Field(default=None, env="FIREBASE_PRIVATE_KEY")
-    FIREBASE_CLIENT_EMAIL: Optional[str] = Field(default=None, env="FIREBASE_CLIENT_EMAIL")
+    FIREBASE_PRIVATE_KEY: Optional[str] = Field(
+        default=None, env="FIREBASE_PRIVATE_KEY"
+    )
+    FIREBASE_CLIENT_EMAIL: Optional[str] = Field(
+        default=None, env="FIREBASE_CLIENT_EMAIL"
+    )
 
     # Email notifications
     SMTP_HOST: Optional[str] = Field(default=None, env="SMTP_HOST")

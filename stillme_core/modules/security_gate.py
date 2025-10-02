@@ -75,6 +75,7 @@ logger = logging.getLogger(__name__)
 
 class AccessLevel(Enum):
     """Access level enumeration"""
+
     READ = "read"
     WRITE = "write"
     ADMIN = "admin"
@@ -83,6 +84,7 @@ class AccessLevel(Enum):
 
 class SecurityLevel(Enum):
     """Security level enumeration"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -91,6 +93,7 @@ class SecurityLevel(Enum):
 
 class GateStatus(Enum):
     """Security gate status enumeration"""
+
     OPEN = "open"
     CLOSED = "closed"
     RESTRICTED = "restricted"
@@ -100,6 +103,7 @@ class GateStatus(Enum):
 @dataclass
 class SecurityPolicy:
     """Security policy definition"""
+
     policy_id: str
     name: str
     description: str
@@ -117,6 +121,7 @@ class SecurityPolicy:
 @dataclass
 class AccessRequest:
     """Access request data"""
+
     request_id: str
     user_id: str
     resource: str
@@ -133,6 +138,7 @@ class AccessRequest:
 @dataclass
 class SecurityConfig:
     """Configuration for SecurityGate"""
+
     enabled: bool = True
     default_access_level: AccessLevel = AccessLevel.READ
     max_failed_attempts: int = 3
@@ -159,11 +165,9 @@ class SecurityGate:
         self.logger = logging.getLogger(__name__)
         self.logger.info("🔒 SecurityGate initialized")
 
-    def check_access(self,
-                    user_id: str,
-                    resource: str,
-                    action: str,
-                    access_level: AccessLevel = None) -> bool:
+    def check_access(
+        self, user_id: str, resource: str, action: str, access_level: AccessLevel = None
+    ) -> bool:
         """
         Check if user has access to resource
 
@@ -184,7 +188,9 @@ class SecurityGate:
 
             # Check failed attempts
             if self.failed_attempts.get(user_id, 0) >= self.config.max_failed_attempts:
-                self.logger.warning(f"🚫 Access denied: Too many failed attempts for user {user_id}")
+                self.logger.warning(
+                    f"🚫 Access denied: Too many failed attempts for user {user_id}"
+                )
                 return False
 
             # Use default access level if not specified
@@ -196,7 +202,9 @@ class SecurityGate:
                 if not policy.enabled:
                     continue
 
-                if self._evaluate_policy(policy, user_id, resource, action, access_level):
+                if self._evaluate_policy(
+                    policy, user_id, resource, action, access_level
+                ):
                     self._log_access(user_id, resource, action, access_level, True)
                     return True
 
@@ -209,20 +217,31 @@ class SecurityGate:
             self.logger.error(f"❌ Error checking access: {e}")
             return False
 
-    def _evaluate_policy(self,
-                        policy: SecurityPolicy,
-                        user_id: str,
-                        resource: str,
-                        action: str,
-                        access_level: AccessLevel) -> bool:
+    def _evaluate_policy(
+        self,
+        policy: SecurityPolicy,
+        user_id: str,
+        resource: str,
+        action: str,
+        access_level: AccessLevel,
+    ) -> bool:
         """Evaluate security policy"""
         try:
             # Basic policy evaluation (stub implementation)
             if access_level.value in ["admin", "super_admin"]:
                 return True
-            elif access_level.value == "write" and policy.access_level.value in ["write", "admin", "super_admin"]:
+            elif access_level.value == "write" and policy.access_level.value in [
+                "write",
+                "admin",
+                "super_admin",
+            ]:
                 return True
-            elif access_level.value == "read" and policy.access_level.value in ["read", "write", "admin", "super_admin"]:
+            elif access_level.value == "read" and policy.access_level.value in [
+                "read",
+                "write",
+                "admin",
+                "super_admin",
+            ]:
                 return True
 
             return False
@@ -231,12 +250,14 @@ class SecurityGate:
             self.logger.error(f"❌ Error evaluating policy: {e}")
             return False
 
-    def _log_access(self,
-                   user_id: str,
-                   resource: str,
-                   action: str,
-                   access_level: AccessLevel,
-                   granted: bool):
+    def _log_access(
+        self,
+        user_id: str,
+        resource: str,
+        action: str,
+        access_level: AccessLevel,
+        granted: bool,
+    ):
         """Log access attempt"""
         try:
             request = AccessRequest(
@@ -246,7 +267,7 @@ class SecurityGate:
                 action=action,
                 access_level=access_level,
                 timestamp=datetime.now().isoformat(),
-                metadata={"granted": granted}
+                metadata={"granted": granted},
             )
 
             self.access_logs.append(request)
@@ -311,9 +332,9 @@ class SecurityGate:
             self.logger.error(f"❌ Error removing security policy: {e}")
             return False
 
-    def get_access_logs(self,
-                       user_id: Optional[str] = None,
-                       limit: int = 100) -> list[AccessRequest]:
+    def get_access_logs(
+        self, user_id: Optional[str] = None, limit: int = 100
+    ) -> list[AccessRequest]:
         """
         Get access logs with optional filtering
 
@@ -347,12 +368,14 @@ class SecurityGate:
             return {
                 "enabled": self.config.enabled,
                 "total_policies": len(self.policies),
-                "active_policies": len([p for p in self.policies.values() if p.enabled]),
+                "active_policies": len(
+                    [p for p in self.policies.values() if p.enabled]
+                ),
                 "blocked_users": len(self.blocked_users),
                 "total_access_logs": len(self.access_logs),
                 "failed_attempts": len(self.failed_attempts),
                 "gate_status": GateStatus.OPEN.value,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
         except Exception as e:
@@ -419,5 +442,5 @@ __all__ = [
     "AccessLevel",
     "SecurityLevel",
     "GateStatus",
-    "SecurityConfig"
+    "SecurityConfig",
 ]

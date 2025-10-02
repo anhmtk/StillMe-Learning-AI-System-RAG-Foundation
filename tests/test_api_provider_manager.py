@@ -93,7 +93,9 @@ def test_translation_confidence_evaluation():
         manager = UnifiedAPIManager()
 
         # Test high confidence (good length ratio)
-        confidence = manager._evaluate_translation_confidence("Hello", "Xin chào", "en", "vi")
+        confidence = manager._evaluate_translation_confidence(
+            "Hello", "Xin chào", "en", "vi"
+        )
         assert confidence > 0.5
 
         # Test low confidence (bad length ratio)
@@ -101,7 +103,9 @@ def test_translation_confidence_evaluation():
         assert confidence < 0.5
 
         # Test same text (should be low confidence for different languages)
-        confidence = manager._evaluate_translation_confidence("Hello", "Hello", "en", "vi")
+        confidence = manager._evaluate_translation_confidence(
+            "Hello", "Hello", "en", "vi"
+        )
         assert confidence == 0.2
 
     except ImportError:

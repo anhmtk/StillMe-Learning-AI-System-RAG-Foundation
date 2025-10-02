@@ -8,11 +8,13 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
+
 class SecurityLevel(Enum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
+
 
 class SecurityEvent(Enum):
     LOGIN_ATTEMPT = "login_attempt"
@@ -21,9 +23,11 @@ class SecurityEvent(Enum):
     DATA_BREACH = "data_breach"
     SYSTEM_COMPROMISE = "system_compromise"
 
+
 @dataclass
 class SecurityIncident:
     """Security incident record"""
+
     incident_id: str
     event_type: SecurityEvent
     security_level: SecurityLevel
@@ -40,6 +44,7 @@ class SecurityIncident:
             self.timestamp = datetime.now()
         if self.metadata is None:
             self.metadata = {}
+
 
 class SecurityManager:
     """Security manager for StillMe Framework"""
@@ -60,16 +65,18 @@ class SecurityManager:
             "require_2fa": False,
             "audit_logging": True,
             "encryption_required": True,
-            "data_retention_days": 90
+            "data_retention_days": 90,
         }
 
-    def log_security_event(self,
-                          event_type: SecurityEvent,
-                          description: str,
-                          security_level: SecurityLevel = SecurityLevel.MEDIUM,
-                          source_ip: Optional[str] = None,
-                          user_id: Optional[str] = None,
-                          metadata: dict[str, Any] = None) -> SecurityIncident:
+    def log_security_event(
+        self,
+        event_type: SecurityEvent,
+        description: str,
+        security_level: SecurityLevel = SecurityLevel.MEDIUM,
+        source_ip: Optional[str] = None,
+        user_id: Optional[str] = None,
+        metadata: dict[str, Any] = None,
+    ) -> SecurityIncident:
         """Log a security event"""
         try:
             incident_id = f"incident_{len(self.incidents) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -82,14 +89,16 @@ class SecurityManager:
                 source_ip=source_ip,
                 user_id=user_id,
                 timestamp=datetime.now(),
-                metadata=metadata or {}
+                metadata=metadata or {},
             )
 
             self.incidents.append(incident)
 
             # Log the incident
             level_icon = "🔒" if security_level == SecurityLevel.CRITICAL else "⚠️"
-            self.logger.warning(f"{level_icon} Security incident: {event_type.value} - {description}")
+            self.logger.warning(
+                f"{level_icon} Security incident: {event_type.value} - {description}"
+            )
 
             # Check if immediate action is required
             if security_level == SecurityLevel.CRITICAL:
@@ -104,7 +113,9 @@ class SecurityManager:
     def _handle_critical_incident(self, incident: SecurityIncident):
         """Handle critical security incidents"""
         try:
-            self.logger.critical(f"🚨 CRITICAL SECURITY INCIDENT: {incident.incident_id}")
+            self.logger.critical(
+                f"🚨 CRITICAL SECURITY INCIDENT: {incident.incident_id}"
+            )
 
             # In a real implementation, this would:
             # 1. Send alerts to security team
@@ -149,20 +160,28 @@ class SecurityManager:
             if policy_name in self.security_policies:
                 old_value = self.security_policies[policy_name]
                 self.security_policies[policy_name] = value
-                self.logger.info(f"📝 Security policy updated: {policy_name} = {value} (was {old_value})")
+                self.logger.info(
+                    f"📝 Security policy updated: {policy_name} = {value} (was {old_value})"
+                )
             else:
                 self.security_policies[policy_name] = value
-                self.logger.info(f"📝 New security policy added: {policy_name} = {value}")
+                self.logger.info(
+                    f"📝 New security policy added: {policy_name} = {value}"
+                )
 
         except Exception as e:
             self.logger.error(f"❌ Failed to update security policy: {e}")
             raise
 
-    def get_incidents_by_type(self, event_type: SecurityEvent) -> list[SecurityIncident]:
+    def get_incidents_by_type(
+        self, event_type: SecurityEvent
+    ) -> list[SecurityIncident]:
         """Get incidents by event type"""
         return [i for i in self.incidents if i.event_type == event_type]
 
-    def get_incidents_by_level(self, security_level: SecurityLevel) -> list[SecurityIncident]:
+    def get_incidents_by_level(
+        self, security_level: SecurityLevel
+    ) -> list[SecurityIncident]:
         """Get incidents by security level"""
         return [i for i in self.incidents if i.security_level == security_level]
 
@@ -217,7 +236,7 @@ class SecurityManager:
                 "incidents_by_type": incidents_by_type,
                 "incidents_by_level": incidents_by_level,
                 "security_policies": self.security_policies,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
         except Exception as e:

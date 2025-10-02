@@ -8,10 +8,13 @@ import httpx
 
 __all__ = ["DevAgentBridge"]
 
+
 class DevAgentBridge:
     def __init__(self, base: str | None = None, timeout: float = 60.0):
         # BRIDGE_BASE ví dụ: http://127.0.0.1:8000
-        self.base = (base or os.getenv("BRIDGE_BASE", "http://127.0.0.1:8000")).rstrip("/")
+        self.base = (base or os.getenv("BRIDGE_BASE", "http://127.0.0.1:8000")).rstrip(
+            "/"
+        )
         self.timeout = timeout
 
     async def ask(

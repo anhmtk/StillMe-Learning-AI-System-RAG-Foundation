@@ -3,6 +3,7 @@
 StillMe AI Backend - Local Development
 Simple backend for desktop/mobile app testing via LAN IP
 """
+
 import asyncio
 import json
 import logging
@@ -18,6 +19,7 @@ import requests
 # Load policies
 try:
     from runtime.policy_loader import load_policies
+
     load_policies()
     print("✅ Policies loaded successfully")
 except Exception as e:
@@ -69,17 +71,18 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 BACKEND_PORT = 1216
-OLLAMA_BASE_URL = 'http://127.0.0.1:11434'
+OLLAMA_BASE_URL = "http://127.0.0.1:11434"
 
 # AI Provider URLs and API Keys (from environment)
-DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions'
-OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions'
-OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions'
+DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions"
+OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
+OPENAI_API_URL = "https://api.openai.com/v1/chat/completions"
 
 # API Keys (set in environment variables)
-DEEPSEEK_API_KEY = os.getenv('DEEPSEEK_API_KEY')
-OPENROUTER_API_KEY = os.getenv('OPENROUTER_API_KEY')
-OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
+DEEPSEEK_API_KEY = os.getenv("DEEPSEEK_API_KEY")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+
 
 class SmartRouter:
     """Smart routing logic for AI models"""
@@ -88,7 +91,13 @@ class SmartRouter:
         self.ollama_url = OLLAMA_BASE_URL
         logger.info("🧠 Smart Router initialized")
 
-    def route_message(self, message: str, session_id: str = "default", system_prompt: Optional[str] = None, web_search_enabled: bool = True) -> dict[str, Any]:
+    def route_message(
+        self,
+        message: str,
+        session_id: str = "default",
+        system_prompt: Optional[str] = None,
+        web_search_enabled: bool = True,
+    ) -> dict[str, Any]:
         """Route message to appropriate AI model with StillMe persona enforcement"""
         try:
             # Check if this is a web request and web search is enabled
@@ -96,7 +105,9 @@ class SmartRouter:
                 web_result = self._check_web_request(message)
                 if web_result["is_web_request"]:
                     # Use Web Access v2 for enhanced security
-                    return self._handle_web_request_v2(web_result["request_type"], message)
+                    return self._handle_web_request_v2(
+                        web_result["request_type"], message
+                    )
 
             # Default StillMe system prompt if not provided
             if not system_prompt:
@@ -108,11 +119,15 @@ class SmartRouter:
                 if DEEPSEEK_API_KEY:
                     return self._call_deepseek_cloud(message, system_prompt)
                 else:
-                    return self._call_ollama("deepseek-coder:6.7b", message, system_prompt)
+                    return self._call_ollama(
+                        "deepseek-coder:6.7b", message, system_prompt
+                    )
             elif self._is_complex_question(message):
                 # Try GPT-5 via OpenRouter, fallback to local Gemma
                 if OPENROUTER_API_KEY:
-                    return self._call_openrouter("openai/gpt-4o", message, system_prompt)
+                    return self._call_openrouter(
+                        "openai/gpt-4o", message, system_prompt
+                    )
                 else:
                     return self._call_ollama("gemma2:2b", message, system_prompt)
             else:
@@ -125,23 +140,64 @@ class SmartRouter:
                 "model": "error",
                 "response": f"Xin lỗi, có lỗi xảy ra: {str(e)}",
                 "engine": "error",
-                "status": "error"
+                "status": "error",
             }
 
     def _is_simple_question(self, message: str) -> bool:
         """Check if message is a simple question"""
-        simple_keywords = ["xin chào", "hello", "hi", "cảm ơn", "thank you", "tạm biệt", "bye"]
+        simple_keywords = [
+            "xin chào",
+            "hello",
+            "hi",
+            "cảm ơn",
+            "thank you",
+            "tạm biệt",
+            "bye",
+        ]
         return any(keyword in message.lower() for keyword in simple_keywords)
 
     def _is_code_question(self, message: str) -> bool:
         """Check if message is about coding"""
-        code_keywords = ["code", "programming", "python", "javascript", "function", "class", "import", "def", "var", "let", "const", "debug", "error", "bug", "algorithm", "data structure"]
+        code_keywords = [
+            "code",
+            "programming",
+            "python",
+            "javascript",
+            "function",
+            "class",
+            "import",
+            "def",
+            "var",
+            "let",
+            "const",
+            "debug",
+            "error",
+            "bug",
+            "algorithm",
+            "data structure",
+        ]
         return any(keyword in message.lower() for keyword in code_keywords)
 
     def _is_complex_question(self, message: str) -> bool:
         """Check if message is complex and needs advanced AI"""
-        complex_keywords = ["analyze", "explain", "compare", "research", "strategy", "plan", "design", "architecture", "complex", "detailed", "comprehensive", "thorough"]
-        return any(keyword in message.lower() for keyword in complex_keywords) or len(message) > 200
+        complex_keywords = [
+            "analyze",
+            "explain",
+            "compare",
+            "research",
+            "strategy",
+            "plan",
+            "design",
+            "architecture",
+            "complex",
+            "detailed",
+            "comprehensive",
+            "thorough",
+        ]
+        return (
+            any(keyword in message.lower() for keyword in complex_keywords)
+            or len(message) > 200
+        )
 
     def _check_web_request(self, message: str) -> dict[str, Any]:
         """Check if message is a web request and handle it"""
@@ -149,14 +205,33 @@ class SmartRouter:
             message_lower = message.lower()
 
             # Check for NicheRadar intent first
-            niche_keywords = ["niche", "xu hướng", "đang hot", "sắp hot", "cơ hội", "market", "trending", "opportunity", "radar"]
+            niche_keywords = [
+                "niche",
+                "xu hướng",
+                "đang hot",
+                "sắp hot",
+                "cơ hội",
+                "market",
+                "trending",
+                "opportunity",
+                "radar",
+            ]
             if any(keyword in message_lower for keyword in niche_keywords):
                 return {"is_web_request": True, "request_type": "niche_radar"}
 
             # Check for specific keywords first (more specific)
             github_keywords = ["github", "repository", "repo", "code", "lập trình"]
             hackernews_keywords = ["hacker news", "hn", "tech news", "startup"]
-            news_keywords = ["tin tức", "news", "báo", "thời sự", "xu hướng", "trend", "cập nhật", "mới nhất"]
+            news_keywords = [
+                "tin tức",
+                "news",
+                "báo",
+                "thời sự",
+                "xu hướng",
+                "trend",
+                "cập nhật",
+                "mới nhất",
+            ]
 
             # Check for GitHub first (more specific)
             if any(keyword in message_lower for keyword in github_keywords):
@@ -182,7 +257,7 @@ class SmartRouter:
                     "model": "sandbox",
                     "response": "Hiện tại không thể truy cập internet.",
                     "engine": "sandbox",
-                    "status": "blocked"
+                    "status": "blocked",
                 }
 
             # Handle NicheRadar request
@@ -193,7 +268,7 @@ class SmartRouter:
             tool_mapping = {
                 "news": "web.search_news",
                 "github_trending": "web.github_trending",
-                "hackernews": "web.hackernews_top"
+                "hackernews": "web.hackernews_top",
             }
 
             tool_name = tool_mapping.get(request_type)
@@ -203,7 +278,7 @@ class SmartRouter:
                     "model": "web_error",
                     "response": "Loại yêu cầu web không được hỗ trợ.",
                     "engine": "error",
-                    "status": "error"
+                    "status": "error",
                 }
 
             # Prepare tool parameters
@@ -224,11 +299,13 @@ class SmartRouter:
                     "model": "tool_gate",
                     "response": f"Yêu cầu bị từ chối: {decision.reason}",
                     "engine": "gate",
-                    "status": "blocked"
+                    "status": "blocked",
                 }
 
             # Check cache first
-            cache_key = generate_cache_key(tool_name, **(decision.sanitized_params or {}))
+            cache_key = generate_cache_key(
+                tool_name, **(decision.sanitized_params or {})
+            )
             cached_data, cache_hit = get_cached_data(cache_key, request_type)
 
             if cache_hit:
@@ -236,11 +313,15 @@ class SmartRouter:
                 return {
                     "is_web_request": True,
                     "model": f"web_{request_type}",
-                    "response": cached_data.get("response", "Cached response") if cached_data else "Cached response",
+                    "response": cached_data.get("response", "Cached response")
+                    if cached_data
+                    else "Cached response",
                     "engine": "web",
                     "status": "success",
-                    "attribution": cached_data.get("attribution") if cached_data else None,
-                    "cache_hit": True
+                    "attribution": cached_data.get("attribution")
+                    if cached_data
+                    else None,
+                    "cache_hit": True,
                 }
 
             # Process web request with Web Access v2
@@ -249,24 +330,38 @@ class SmartRouter:
 
             try:
                 # Call web tool with sanitized parameters
-                result = loop.run_until_complete(web_tools.call_tool(tool_name, **(decision.sanitized_params or {})))
+                result = loop.run_until_complete(
+                    web_tools.call_tool(tool_name, **(decision.sanitized_params or {}))
+                )
 
                 if result.success:
                     # Format response
-                    formatted_response = self._format_web_response(request_type, result.data or {})
+                    formatted_response = self._format_web_response(
+                        request_type, result.data or {}
+                    )
 
                     # Cache the result
-                    cache_data(cache_key, {
-                        "response": formatted_response,
-                        "attribution": result.attribution,
-                        "data": result.data
-                    }, request_type)
+                    cache_data(
+                        cache_key,
+                        {
+                            "response": formatted_response,
+                            "attribution": result.attribution,
+                            "data": result.data,
+                        },
+                        request_type,
+                    )
 
                     # Record metrics
                     record_request(
-                        tool_name, True, result.latency_ms, False,
-                        result.attribution.get('domain', 'unknown') if result.attribution else 'unknown',
-                        None, len(formatted_response)
+                        tool_name,
+                        True,
+                        result.latency_ms,
+                        False,
+                        result.attribution.get("domain", "unknown")
+                        if result.attribution
+                        else "unknown",
+                        None,
+                        len(formatted_response),
                     )
 
                     return {
@@ -276,13 +371,12 @@ class SmartRouter:
                         "engine": "web",
                         "status": "success",
                         "attribution": result.attribution,
-                        "cache_hit": False
+                        "cache_hit": False,
                     }
                 else:
                     # Record failed metrics
                     record_request(
-                        tool_name, False, 0, False,
-                        "unknown", result.error, 0
+                        tool_name, False, 0, False, "unknown", result.error, 0
                     )
 
                     return {
@@ -290,7 +384,7 @@ class SmartRouter:
                         "model": "web_error",
                         "response": "Hiện tại không thể truy cập internet.",
                         "engine": "error",
-                        "status": "error"
+                        "status": "error",
                     }
             finally:
                 loop.close()
@@ -302,7 +396,7 @@ class SmartRouter:
                 "model": "web_error",
                 "response": "Hiện tại không thể truy cập internet.",
                 "engine": "error",
-                "status": "error"
+                "status": "error",
             }
 
     def _handle_niche_radar_request(self, message: str) -> dict[str, Any]:
@@ -355,7 +449,9 @@ class SmartRouter:
                     # Generate playbook for top niche if requested
                     if "playbook" in message.lower() or "kế hoạch" in message.lower():
                         playbook_generator = PlaybookGenerator()
-                        top_playbook = playbook_generator.generate_playbook(top_niches[0])
+                        top_playbook = playbook_generator.generate_playbook(
+                            top_niches[0]
+                        )
                         response += "\n\n📋 **EXECUTION PLAYBOOK FOR TOP NICHE:**\n"
                         response += f"**Product:** {top_playbook.product_brief.title}\n"
                         response += f"**MVP Development:** {top_playbook.mvp_spec.estimated_development_days} days\n"
@@ -372,9 +468,9 @@ class SmartRouter:
                             "source_name": "NicheRadar Analysis",
                             "url": "https://stillme.ai/niche-radar",
                             "retrieved_at": datetime.now().isoformat(),
-                            "domain": "stillme.ai"
+                            "domain": "stillme.ai",
                         },
-                        "niche_data": [asdict(niche) for niche in top_niches]
+                        "niche_data": [asdict(niche) for niche in top_niches],
                     }
                 else:
                     return {
@@ -382,7 +478,7 @@ class SmartRouter:
                         "model": "niche_radar",
                         "response": "Không tìm thấy cơ hội niche phù hợp. Hãy thử với từ khóa khác.",
                         "engine": "niche_radar",
-                        "status": "no_results"
+                        "status": "no_results",
                     }
 
             finally:
@@ -395,7 +491,7 @@ class SmartRouter:
                 "model": "niche_radar_error",
                 "response": f"Lỗi phân tích niche: {str(e)}",
                 "engine": "error",
-                "status": "error"
+                "status": "error",
             }
 
     def _extract_topics_from_message(self, message: str) -> list[str]:
@@ -452,7 +548,7 @@ class SmartRouter:
                     "model": "sandbox",
                     "response": "Hiện tại không thể truy cập internet.",
                     "engine": "sandbox",
-                    "status": "blocked"
+                    "status": "blocked",
                 }
 
             # Process web request
@@ -461,28 +557,38 @@ class SmartRouter:
 
             try:
                 if request_type == "news":
-                    result = loop.run_until_complete(market_intel.search_news(message, "vi"))
+                    result = loop.run_until_complete(
+                        market_intel.search_news(message, "vi")
+                    )
                 elif request_type == "github_trending":
-                    result = loop.run_until_complete(market_intel.get_github_trending("python"))
+                    result = loop.run_until_complete(
+                        market_intel.get_github_trending("python")
+                    )
                 elif request_type == "hackernews":
-                    result = loop.run_until_complete(market_intel.get_hackernews_trending())
+                    result = loop.run_until_complete(
+                        market_intel.get_hackernews_trending()
+                    )
                 else:
                     result = {"success": False, "error": "Unknown request type"}
 
                 if result["success"]:
                     # Filter content
-                    filtered_result = content_filter.filter_json_response(result["data"], f"web_{request_type}")
+                    filtered_result = content_filter.filter_json_response(
+                        result["data"], f"web_{request_type}"
+                    )
 
                     if filtered_result["success"]:
                         # Format response
-                        formatted_response = self._format_web_response(request_type, filtered_result["content"])
+                        formatted_response = self._format_web_response(
+                            request_type, filtered_result["content"]
+                        )
 
                         return {
                             "is_web_request": True,
                             "model": f"web_{request_type}",
                             "response": formatted_response,
                             "engine": "web",
-                            "status": "success"
+                            "status": "success",
                         }
                     else:
                         return {
@@ -490,7 +596,7 @@ class SmartRouter:
                             "model": "content_filter",
                             "response": "Nội dung không an toàn đã bị lọc.",
                             "engine": "filter",
-                            "status": "filtered"
+                            "status": "filtered",
                         }
                 else:
                     return {
@@ -498,7 +604,7 @@ class SmartRouter:
                         "model": "web_error",
                         "response": "Hiện tại không thể truy cập internet.",
                         "engine": "error",
-                        "status": "error"
+                        "status": "error",
                     }
 
             finally:
@@ -511,7 +617,7 @@ class SmartRouter:
                 "model": "web_error",
                 "response": "Hiện tại không thể truy cập internet.",
                 "engine": "error",
-                "status": "error"
+                "status": "error",
             }
 
     def _format_web_response(self, request_type: str, data: dict[str, Any]) -> str:
@@ -574,7 +680,9 @@ class SmartRouter:
             logger.error(f"❌ Web response formatting error: {e}")
             return "Lỗi khi định dạng dữ liệu web."
 
-    def _call_ollama(self, model: str, message: str, system_prompt: Optional[str] = None) -> dict[str, Any]:
+    def _call_ollama(
+        self, model: str, message: str, system_prompt: Optional[str] = None
+    ) -> dict[str, Any]:
         """Call Ollama API with system prompt"""
         try:
             # Use simple prompt format for better compatibility
@@ -586,16 +694,13 @@ class SmartRouter:
                 "model": model,
                 "prompt": full_prompt,
                 "stream": False,
-                "options": {
-                    "temperature": 0.7,
-                    "top_p": 0.9
-                }
+                "options": {"temperature": 0.7, "top_p": 0.9},
             }
 
             response = requests.post(
                 f"{self.ollama_url}/api/generate",
                 json=payload,
-                timeout=120  # 2 minutes timeout
+                timeout=120,  # 2 minutes timeout
             )
 
             if response.status_code == 200:
@@ -614,7 +719,7 @@ class SmartRouter:
                     "model": model,
                     "response": response_text,
                     "engine": "ollama",
-                    "status": "success"
+                    "status": "success",
                 }
             else:
                 logger.error(f"Ollama error: {response.status_code}")
@@ -622,7 +727,7 @@ class SmartRouter:
                     "model": model,
                     "response": "Xin lỗi, Ollama không phản hồi",
                     "engine": "error",
-                    "status": "error"
+                    "status": "error",
                 }
 
         except Exception as e:
@@ -631,15 +736,17 @@ class SmartRouter:
                 "model": model,
                 "response": f"Xin lỗi, không thể kết nối Ollama: {str(e)}",
                 "engine": "error",
-                "status": "error"
+                "status": "error",
             }
 
-    def _call_deepseek_cloud(self, message: str, system_prompt: Optional[str] = None) -> dict[str, Any]:
+    def _call_deepseek_cloud(
+        self, message: str, system_prompt: Optional[str] = None
+    ) -> dict[str, Any]:
         """Call DeepSeek Cloud API"""
         try:
             headers = {
                 "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
             }
 
             messages = []
@@ -651,10 +758,12 @@ class SmartRouter:
                 "model": "deepseek-chat",
                 "messages": messages,
                 "temperature": 0.7,
-                "max_tokens": 2000
+                "max_tokens": 2000,
             }
 
-            response = requests.post(DEEPSEEK_API_URL, json=payload, headers=headers, timeout=30)
+            response = requests.post(
+                DEEPSEEK_API_URL, json=payload, headers=headers, timeout=30
+            )
 
             if response.status_code == 200:
                 data = response.json()
@@ -662,24 +771,30 @@ class SmartRouter:
                     "model": "deepseek-chat",
                     "response": data["choices"][0]["message"]["content"],
                     "engine": "deepseek-cloud",
-                    "status": "success"
+                    "status": "success",
                 }
             else:
                 logger.error(f"DeepSeek Cloud error: {response.status_code}")
-                return self._call_ollama("deepseek-coder:6.7b", message, system_prompt)  # Fallback
+                return self._call_ollama(
+                    "deepseek-coder:6.7b", message, system_prompt
+                )  # Fallback
 
         except Exception as e:
             logger.error(f"DeepSeek Cloud call error: {e}")
-            return self._call_ollama("deepseek-coder:6.7b", message, system_prompt)  # Fallback
+            return self._call_ollama(
+                "deepseek-coder:6.7b", message, system_prompt
+            )  # Fallback
 
-    def _call_openrouter(self, model: str, message: str, system_prompt: Optional[str] = None) -> dict[str, Any]:
+    def _call_openrouter(
+        self, model: str, message: str, system_prompt: Optional[str] = None
+    ) -> dict[str, Any]:
         """Call OpenRouter API (GPT-5, Claude, etc.)"""
         try:
             headers = {
                 "Authorization": f"Bearer {OPENROUTER_API_KEY}",
                 "Content-Type": "application/json",
                 "HTTP-Referer": "https://stillme-ai.com",
-                "X-Title": "StillMe AI"
+                "X-Title": "StillMe AI",
             }
 
             messages = []
@@ -691,10 +806,12 @@ class SmartRouter:
                 "model": model,
                 "messages": messages,
                 "temperature": 0.7,
-                "max_tokens": 2000
+                "max_tokens": 2000,
             }
 
-            response = requests.post(OPENROUTER_API_URL, json=payload, headers=headers, timeout=30)
+            response = requests.post(
+                OPENROUTER_API_URL, json=payload, headers=headers, timeout=30
+            )
 
             if response.status_code == 200:
                 data = response.json()
@@ -702,59 +819,66 @@ class SmartRouter:
                     "model": model,
                     "response": data["choices"][0]["message"]["content"],
                     "engine": "openrouter",
-                    "status": "success"
+                    "status": "success",
                 }
             else:
                 logger.error(f"OpenRouter error: {response.status_code}")
-                return self._call_ollama("gemma2:2b", message, system_prompt)  # Fallback
+                return self._call_ollama(
+                    "gemma2:2b", message, system_prompt
+                )  # Fallback
 
         except Exception as e:
             logger.error(f"OpenRouter call error: {e}")
             return self._call_ollama("gemma2:2b", message, system_prompt)  # Fallback
 
+
 # Global router instance
 smart_router = SmartRouter()
+
 
 class StillMeHandler(BaseHTTPRequestHandler):
     """HTTP handler for StillMe Backend"""
 
     def do_GET(self):
         """Handle GET requests"""
-        if self.path == '/health':
-            self._send_json_response(200, {
-                "service": "StillMe AI Backend",
-                "status": "healthy",
-                "mode": "local-backend",
-                "routing": "smart",
-                "timestamp": datetime.now().isoformat()
-            })
-        elif self.path == '/':
-            self._send_json_response(200, {
-                "service": "StillMe AI Backend",
-                "status": "running",
-                "mode": "local-backend",
-                "endpoints": {
-                    "health": "GET /health",
-                    "chat": "POST /chat"
+        if self.path == "/health":
+            self._send_json_response(
+                200,
+                {
+                    "service": "StillMe AI Backend",
+                    "status": "healthy",
+                    "mode": "local-backend",
+                    "routing": "smart",
+                    "timestamp": datetime.now().isoformat(),
                 },
-                "usage": {
-                    "chat": {
-                        "method": "POST",
-                        "url": "/chat",
-                        "payload": {
-                            "message": "your message here",
-                            "session_id": "optional"
+            )
+        elif self.path == "/":
+            self._send_json_response(
+                200,
+                {
+                    "service": "StillMe AI Backend",
+                    "status": "running",
+                    "mode": "local-backend",
+                    "endpoints": {"health": "GET /health", "chat": "POST /chat"},
+                    "usage": {
+                        "chat": {
+                            "method": "POST",
+                            "url": "/chat",
+                            "payload": {
+                                "message": "your message here",
+                                "session_id": "optional",
+                            },
                         }
-                    }
+                    },
+                    "timestamp": datetime.now().isoformat(),
                 },
-                "timestamp": datetime.now().isoformat()
-            })
+            )
         else:
             self._send_json_response(404, {"error": "Not found"})
 
     def do_POST(self):
         """Handle POST requests"""
-        if self.path == '/chat' or self.path == '/inference':
+        if self.path == "/chat" or self.path == "/inference":
             self._handle_chat()
         else:
             self._send_json_response(404, {"error": "Not found"})
@@ -762,26 +886,32 @@ class StillMeHandler(BaseHTTPRequestHandler):
     def _handle_chat(self):
         """Handle chat requests"""
         try:
-            content_length = int(self.headers['Content-Length'])
+            content_length = int(self.headers["Content-Length"])
             post_data = self.rfile.read(content_length)
             try:
-                data = json.loads(post_data.decode('utf-8'))
+                data = json.loads(post_data.decode("utf-8"))
             except UnicodeDecodeError:
                 # Try with different encoding
-                data = json.loads(post_data.decode('latin-1'))
+                data = json.loads(post_data.decode("latin-1"))
 
-            message = data.get('message', '')
-            session_id = data.get('session_id', 'default')
-            user_id = data.get('user_id', 'anonymous')
-            data.get('language', 'vi')
-            system_prompt = data.get('system_prompt', None)  # Get system prompt from request
-            web_search_enabled = data.get('web_search', True)  # Get web search toggle from request
+            message = data.get("message", "")
+            session_id = data.get("session_id", "default")
+            user_id = data.get("user_id", "anonymous")
+            data.get("language", "vi")
+            system_prompt = data.get(
+                "system_prompt", None
+            )  # Get system prompt from request
+            web_search_enabled = data.get(
+                "web_search", True
+            )  # Get web search toggle from request
 
             if not message:
                 self._send_json_response(400, {"error": "Message is required"})
                 return
 
-            logger.info(f"Processing message from user {user_id}: message_length={len(message)}")
+            logger.info(
+                f"Processing message from user {user_id}: message_length={len(message)}"
+            )
 
             # Phase 2: Enhanced clarification with context and modes
             clarification_needed = False
@@ -794,15 +924,15 @@ class StillMeHandler(BaseHTTPRequestHandler):
                         "conversation_history": [],  # TODO: Implement conversation history
                         "project_context": {
                             "files": [],  # TODO: Implement project file detection
-                            "extensions": []
+                            "extensions": [],
                         },
                         "user_id": user_id,
-                        "session_id": session_id
+                        "session_id": session_id,
                     }
 
                     # Get clarification mode from request (default: careful)
-                    clarification_mode = data.get('clarification_mode', 'careful')
-                    round_number = data.get('clarification_round', 1)
+                    clarification_mode = data.get("clarification_mode", "careful")
+                    round_number = data.get("clarification_round", 1)
                     trace_id = f"{user_id}_{session_id}_{int(time.time())}"
 
                     # Detect ambiguity with Phase 2 features
@@ -811,13 +941,17 @@ class StillMeHandler(BaseHTTPRequestHandler):
                         context=context,
                         mode=clarification_mode,
                         round_number=round_number,
-                        trace_id=trace_id
+                        trace_id=trace_id,
                     )
 
                     if clarification_result.needs_clarification:
                         clarification_needed = True
-                        logger.info(f"Clarification needed: {clarification_result.category} - {clarification_result.reasoning}")
-                        logger.info(f"Mode: {clarification_mode}, Round: {round_number}, Domain: {clarification_result.domain}")
+                        logger.info(
+                            f"Clarification needed: {clarification_result.category} - {clarification_result.reasoning}"
+                        )
+                        logger.info(
+                            f"Mode: {clarification_mode}, Round: {round_number}, Domain: {clarification_result.domain}"
+                        )
                 except Exception as e:
                     logger.warning(f"Clarification check failed: {e}")
 
@@ -833,43 +967,45 @@ class StillMeHandler(BaseHTTPRequestHandler):
                     "max_rounds": clarification_result.max_rounds,
                     "trace_id": clarification_result.trace_id,
                     "timestamp": time.time(),
-                    "status": "awaiting_clarification"
+                    "status": "awaiting_clarification",
                 }
 
                 self._send_json_response(200, response_data)
                 return
 
             start_time = time.perf_counter()
-            result = smart_router.route_message(message, session_id, system_prompt, web_search_enabled)
+            result = smart_router.route_message(
+                message, session_id, system_prompt, web_search_enabled
+            )
             latency_ms = (time.perf_counter() - start_time) * 1000
 
             result["latency_ms"] = latency_ms
             result["timestamp"] = time.time()
 
-            logger.info(f"Response: engine={result.get('engine')}, latency={latency_ms:.1f}ms")
+            logger.info(
+                f"Response: engine={result.get('engine')}, latency={latency_ms:.1f}ms"
+            )
 
             self._send_json_response(200, result)
 
         except Exception as e:
             logger.error(f"Error processing request: {type(e).__name__}")
-            self._send_json_response(500, {
-                "error": str(e),
-                "status": "error"
-            })
+            self._send_json_response(500, {"error": str(e), "status": "error"})
 
     def _send_json_response(self, status_code: int, data: dict[str, Any]):
         """Send JSON response"""
         self.send_response(status_code)
-        self.send_header('Content-Type', 'application/json')
-        self.send_header('Access-Control-Allow-Origin', '*')
-        self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type')
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
-        self.wfile.write(json.dumps(data, ensure_ascii=False).encode('utf-8'))
+        self.wfile.write(json.dumps(data, ensure_ascii=False).encode("utf-8"))
 
     def log_message(self, format, *args):
         """Override log message to avoid verbose logging"""
         pass
+
 
 def main():
     logger.info("🚀 Starting StillMe AI Backend...")
@@ -899,14 +1035,17 @@ def main():
     logger.info("=" * 50)
 
     try:
-        server = HTTPServer(('0.0.0.0', BACKEND_PORT), StillMeHandler)
-        logger.info(f"✅ StillMe Backend started successfully on 0.0.0.0:{BACKEND_PORT}")
+        server = HTTPServer(("0.0.0.0", BACKEND_PORT), StillMeHandler)
+        logger.info(
+            f"✅ StillMe Backend started successfully on 0.0.0.0:{BACKEND_PORT}"
+        )
         logger.info("📱 Desktop/Mobile apps can connect via LAN IP")
         server.serve_forever()
     except KeyboardInterrupt:
         logger.info("🛑 StillMe Backend stopped by user")
     except Exception as e:
         logger.error(f"❌ StillMe Backend failed to start: {e}")
+
 
 if __name__ == "__main__":
     main()

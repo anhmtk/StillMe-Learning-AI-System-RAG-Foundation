@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 class SafetyLevel(Enum):
     """Safety levels"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -25,6 +26,7 @@ class SafetyLevel(Enum):
 @dataclass
 class SafetyConfig:
     """Safety configuration"""
+
     level: SafetyLevel = SafetyLevel.MEDIUM
     enable_checks: bool = True
     max_content_length: int = 10000
@@ -49,7 +51,7 @@ class SafetyGuard:
             "safe": True,
             "level": self.config.level.value,
             "issues": [],
-            "message": "Stub implementation - no real checks performed"
+            "message": "Stub implementation - no real checks performed",
         }
 
     def validate_input(self, input_data: Any) -> bool:
@@ -68,7 +70,7 @@ class SafetyGuard:
             "config": self.config.__dict__,
             "status": "stub",
             "checks_performed": 0,
-            "issues_found": 0
+            "issues_found": 0,
         }
 
 
@@ -97,7 +99,7 @@ def apply_policies(content: str, policies: Optional[dict] = None) -> dict:
     return {
         "safe": guard.validate_input(content),
         "sanitized": guard.sanitize_output(content),
-        "level": guard.config.level.value
+        "level": guard.config.level.value,
     }
 
 
@@ -105,26 +107,26 @@ def redact_output(output: str, sensitive_patterns: Optional[list] = None) -> str
     """Redact sensitive information from output"""
     if sensitive_patterns is None:
         sensitive_patterns = ["password", "token", "key", "secret"]
-    
+
     redacted = output
     for pattern in sensitive_patterns:
         redacted = redacted.replace(pattern, "***REDACTED***")
-    
+
     return redacted
 
 
 def safe_reply(content: str, context: Optional[dict] = None) -> str:
     """Generate safe reply with content filtering"""
     guard = SafetyGuard()
-    
+
     # Validate input
     if not guard.validate_input(content):
         return "Content blocked by safety guard"
-    
+
     # Sanitize output
     sanitized = guard.sanitize_output(content)
-    
+
     # Apply redaction
     redacted = redact_output(sanitized)
-    
+
     return redacted

@@ -38,37 +38,133 @@ class PromptGenerator:
             "secure": ["safe", "protected", "guarded", "shielded", "defended"],
             "reliable": ["dependable", "stable", "consistent", "trustworthy", "solid"],
             "scalable": ["expandable", "flexible", "adaptable", "growable", "elastic"],
-            "maintainable": ["manageable", "supportable", "sustainable", "upkeepable", "serviceable"],
-            "testable": ["verifiable", "checkable", "validatable", "provable", "confirmable"],
-            "readable": ["understandable", "clear", "comprehensible", "legible", "interpretable"],
-            "efficient": ["effective", "productive", "streamlined", "optimized", "performance"],
-            "flexible": ["adaptable", "versatile", "configurable", "customizable", "adjustable"],
+            "maintainable": [
+                "manageable",
+                "supportable",
+                "sustainable",
+                "upkeepable",
+                "serviceable",
+            ],
+            "testable": [
+                "verifiable",
+                "checkable",
+                "validatable",
+                "provable",
+                "confirmable",
+            ],
+            "readable": [
+                "understandable",
+                "clear",
+                "comprehensible",
+                "legible",
+                "interpretable",
+            ],
+            "efficient": [
+                "effective",
+                "productive",
+                "streamlined",
+                "optimized",
+                "performance",
+            ],
+            "flexible": [
+                "adaptable",
+                "versatile",
+                "configurable",
+                "customizable",
+                "adjustable",
+            ],
             "robust": ["strong", "resilient", "durable", "tough", "hardy"],
-            "portable": ["mobile", "transferable", "movable", "relocatable", "transportable"],
-            "compatible": ["interoperable", "cooperative", "harmonious", "matching", "suitable"],
-            "accessible": ["reachable", "available", "approachable", "attainable", "obtainable"],
-            "user-friendly": ["intuitive", "easy-to-use", "convenient", "simple", "straightforward"]
+            "portable": [
+                "mobile",
+                "transferable",
+                "movable",
+                "relocatable",
+                "transportable",
+            ],
+            "compatible": [
+                "interoperable",
+                "cooperative",
+                "harmonious",
+                "matching",
+                "suitable",
+            ],
+            "accessible": [
+                "reachable",
+                "available",
+                "approachable",
+                "attainable",
+                "obtainable",
+            ],
+            "user-friendly": [
+                "intuitive",
+                "easy-to-use",
+                "convenient",
+                "simple",
+                "straightforward",
+            ],
         }
 
         self.vague_phrases = [
-            "something", "anything", "whatever", "somehow", "somewhere",
-            "somewhat", "someway", "sometime", "somewhere", "somehow"
+            "something",
+            "anything",
+            "whatever",
+            "somehow",
+            "somewhere",
+            "somewhat",
+            "someway",
+            "sometime",
+            "somewhere",
+            "somehow",
         ]
 
         self.ambiguous_references = [
-            "it", "this", "that", "the thing", "the item", "the object",
-            "the stuff", "the data", "the file", "the code", "the app"
+            "it",
+            "this",
+            "that",
+            "the thing",
+            "the item",
+            "the object",
+            "the stuff",
+            "the data",
+            "the file",
+            "the code",
+            "the app",
         ]
 
         self.action_verbs = [
-            "make", "do", "create", "build", "write", "fix", "help",
-            "improve", "optimize", "enhance", "upgrade", "refine",
-            "change", "modify", "update", "adjust", "tune", "configure"
+            "make",
+            "do",
+            "create",
+            "build",
+            "write",
+            "fix",
+            "help",
+            "improve",
+            "optimize",
+            "enhance",
+            "upgrade",
+            "refine",
+            "change",
+            "modify",
+            "update",
+            "adjust",
+            "tune",
+            "configure",
         ]
 
         self.targets = [
-            "app", "website", "program", "code", "function", "class",
-            "database", "system", "tool", "script", "API", "dashboard"
+            "app",
+            "website",
+            "program",
+            "code",
+            "function",
+            "class",
+            "database",
+            "system",
+            "tool",
+            "script",
+            "API",
+            "dashboard",
         ]
 
     def generate_synonym_variations(self, prompt: str) -> list[str]:
@@ -79,7 +175,7 @@ class PromptGenerator:
         for i, word in enumerate(words):
             if word in self.synonyms:
                 for synonym in self.synonyms[word]:
-                    new_words = words[:i] + [synonym] + words[i+1:]
+                    new_words = words[:i] + [synonym] + words[i + 1 :]
                     variations.append(" ".join(new_words))
 
         return variations
@@ -126,7 +222,15 @@ class PromptGenerator:
         for action in self.action_verbs:
             # Replace action verbs
             for word in prompt.split():
-                if word.lower() in ["make", "do", "create", "build", "write", "fix", "help"]:
+                if word.lower() in [
+                    "make",
+                    "do",
+                    "create",
+                    "build",
+                    "write",
+                    "fix",
+                    "help",
+                ]:
                     new_prompt = prompt.replace(word, action)
                     variations.append(new_prompt)
 
@@ -137,11 +241,29 @@ class PromptGenerator:
         variations = []
 
         goals = [
-            "faster", "slower", "smaller", "bigger", "better", "worse",
-            "easier", "harder", "cheaper", "more expensive", "more secure",
-            "more reliable", "more scalable", "more maintainable", "more testable",
-            "more readable", "more efficient", "more flexible", "more robust",
-            "more portable", "more compatible", "more accessible", "more user-friendly"
+            "faster",
+            "slower",
+            "smaller",
+            "bigger",
+            "better",
+            "worse",
+            "easier",
+            "harder",
+            "cheaper",
+            "more expensive",
+            "more secure",
+            "more reliable",
+            "more scalable",
+            "more maintainable",
+            "more testable",
+            "more readable",
+            "more efficient",
+            "more flexible",
+            "more robust",
+            "more portable",
+            "more compatible",
+            "more accessible",
+            "more user-friendly",
         ]
 
         for goal in goals:
@@ -157,14 +279,30 @@ class PromptGenerator:
         variations = []
 
         dependency_phrases = [
-            "like before", "as usual", "the usual way", "like last time",
-            "same as before", "like the other one", "similar to that",
-            "like that thing", "same as that", "like the previous",
-            "as we did", "like we discussed", "as planned",
-            "according to plan", "per the spec", "as specified",
-            "per requirements", "as required", "per standard",
-            "as standard", "per protocol", "as protocol",
-            "per procedure", "as procedure"
+            "like before",
+            "as usual",
+            "the usual way",
+            "like last time",
+            "same as before",
+            "like the other one",
+            "similar to that",
+            "like that thing",
+            "same as that",
+            "like the previous",
+            "as we did",
+            "like we discussed",
+            "as planned",
+            "according to plan",
+            "per the spec",
+            "as specified",
+            "per requirements",
+            "as required",
+            "per standard",
+            "as standard",
+            "per protocol",
+            "as protocol",
+            "per procedure",
+            "as procedure",
         ]
 
         for phrase in dependency_phrases:
@@ -187,7 +325,7 @@ class PromptGenerator:
             "improve": "jazz up",
             "optimize": "tune up",
             "enhance": "beef up",
-            "upgrade": "level up"
+            "upgrade": "level up",
         }
 
         for formal, slang in slang_replacements.items():
@@ -197,10 +335,20 @@ class PromptGenerator:
 
         # Add slang phrases
         slang_phrases = [
-            "gimme some", "hook me up", "sort this out", "fix this mess",
-            "make it pop", "jazz it up", "spice it up", "beef it up",
-            "tweak it", "fiddle with it", "mess around with it",
-            "play with it", "toy with it", "fool around with it"
+            "gimme some",
+            "hook me up",
+            "sort this out",
+            "fix this mess",
+            "make it pop",
+            "jazz it up",
+            "spice it up",
+            "beef it up",
+            "tweak it",
+            "fiddle with it",
+            "mess around with it",
+            "play with it",
+            "toy with it",
+            "fool around with it",
         ]
 
         for phrase in slang_phrases:
@@ -213,11 +361,31 @@ class PromptGenerator:
         variations = []
 
         cross_domain_actions = [
-            "analyze", "process", "handle", "manage", "control",
-            "monitor", "track", "measure", "calculate", "compute",
-            "solve", "resolve", "address", "tackle", "approach",
-            "deal with", "work on", "focus on", "concentrate on",
-            "emphasize", "highlight", "spotlight", "feature", "showcase", "present"
+            "analyze",
+            "process",
+            "handle",
+            "manage",
+            "control",
+            "monitor",
+            "track",
+            "measure",
+            "calculate",
+            "compute",
+            "solve",
+            "resolve",
+            "address",
+            "tackle",
+            "approach",
+            "deal with",
+            "work on",
+            "focus on",
+            "concentrate on",
+            "emphasize",
+            "highlight",
+            "spotlight",
+            "feature",
+            "showcase",
+            "present",
         ]
 
         for action in cross_domain_actions:
@@ -243,21 +411,31 @@ class PromptGenerator:
             cross_domain_vars = self.generate_cross_domain_variations(prompt)
 
             # Combine all variations
-            all_vars = (synonym_vars + vague_vars + ambiguous_vars +
-                       action_vars + goal_vars + context_vars +
-                       slang_vars + cross_domain_vars)
+            all_vars = (
+                synonym_vars
+                + vague_vars
+                + ambiguous_vars
+                + action_vars
+                + goal_vars
+                + context_vars
+                + slang_vars
+                + cross_domain_vars
+            )
 
             # Remove duplicates and add to results
             unique_vars = list(set(all_vars))
             for var in unique_vars:
                 if var != prompt:  # Don't include the original
-                    all_variations.append({
-                        "prompt": var,
-                        "category": "generated_variation",
-                        "expected_behavior": "Should ask for clarification"
-                    })
+                    all_variations.append(
+                        {
+                            "prompt": var,
+                            "category": "generated_variation",
+                            "expected_behavior": "Should ask for clarification",
+                        }
+                    )
 
         return all_variations
+
 
 def main():
     """Generate additional test cases and append to CSV"""
@@ -279,7 +457,7 @@ def main():
         "Help me",
         "Design a system",
         "Process this data",
-        "Handle this request"
+        "Handle this request",
     ]
 
     # Generate variations
@@ -290,7 +468,7 @@ def main():
     existing_data = []
 
     if dataset_path.exists():
-        with open(dataset_path, encoding='utf-8') as f:
+        with open(dataset_path, encoding="utf-8") as f:
             reader = csv.DictReader(f)
             existing_data = list(reader)
 
@@ -300,16 +478,18 @@ def main():
     # Prepare new data
     new_data = []
     for i, variation in enumerate(variations):
-        new_data.append({
-            "id": str(next_id + i),
-            "category": variation["category"],
-            "prompt": variation["prompt"],
-            "expected_behavior": variation["expected_behavior"]
-        })
+        new_data.append(
+            {
+                "id": str(next_id + i),
+                "category": variation["category"],
+                "prompt": variation["prompt"],
+                "expected_behavior": variation["expected_behavior"],
+            }
+        )
 
     # Append to CSV
-    with open(dataset_path, 'a', newline='', encoding='utf-8') as f:
-        fieldnames = ['id', 'category', 'prompt', 'expected_behavior']
+    with open(dataset_path, "a", newline="", encoding="utf-8") as f:
+        fieldnames = ["id", "category", "prompt", "expected_behavior"]
         writer = csv.DictWriter(f, fieldnames=fieldnames)
 
         for row in new_data:
@@ -318,6 +498,7 @@ def main():
     print(f"✅ Generated {len(new_data)} additional test cases")
     print(f"📊 Total test cases: {len(existing_data) + len(new_data)}")
     print(f"📁 Dataset saved to: {dataset_path}")
+
 
 if __name__ == "__main__":
     main()

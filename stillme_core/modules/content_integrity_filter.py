@@ -600,9 +600,11 @@ class ContentIntegrityFilter:
         violation_reasons: list[str] = []
 
         # 1. Giai đoạn Lọc Nhanh (Pre-filtering)
-        pre_filter_safe, pre_filter_reason, pre_filter_severity = (
-            await self.pre_filter_content(content_text, source_url)
-        )
+        (
+            pre_filter_safe,
+            pre_filter_reason,
+            pre_filter_severity,
+        ) = await self.pre_filter_content(content_text, source_url)
         if not pre_filter_safe:
             violation_type = (
                 ContentViolationType.FORBIDDEN_KEYWORD

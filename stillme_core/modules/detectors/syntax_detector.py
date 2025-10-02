@@ -73,10 +73,27 @@ class SyntaxDetector(BaseDetector):
 
         # Check for common indentation issues
         indentation_issues = []
-        lines = text.split('\n')
+        lines = text.split("\n")
         for i, line in enumerate(lines):
-            if line.strip() and not line.startswith((' ', '\t')) and line.strip().startswith(('return', 'if', 'for', 'while', 'try', 'except', 'finally', 'with', 'class', 'def')):
-                if i > 0 and lines[i-1].strip().endswith(':'):
+            if (
+                line.strip()
+                and not line.startswith((" ", "\t"))
+                and line.strip().startswith(
+                    (
+                        "return",
+                        "if",
+                        "for",
+                        "while",
+                        "try",
+                        "except",
+                        "finally",
+                        "with",
+                        "class",
+                        "def",
+                    )
+                )
+            ):
+                if i > 0 and lines[i - 1].strip().endswith(":"):
                     indentation_issues.append(f"Line {i+1}: {line.strip()}")
 
         # Calculate confidence score
@@ -106,6 +123,6 @@ class SyntaxDetector(BaseDetector):
                 "syntax_error": syntax_error,
                 "syntax_patterns": syntax_matches,
                 "test_syntax_found": test_syntax_found,
-                "indentation_issues": indentation_issues
-            }
+                "indentation_issues": indentation_issues,
+            },
         }

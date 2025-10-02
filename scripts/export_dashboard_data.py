@@ -31,8 +31,11 @@ sys.path.append(str(project_root))
 # Import after path setup
 from stillme_core.learning.proposals_manager import ProposalsManager  # noqa: E402
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
+
 
 class DashboardDataExporter:
     """Export learning data for public dashboard"""
@@ -58,22 +61,32 @@ class DashboardDataExporter:
                     "title": proposal.title,
                     "description": proposal.description,
                     "status": proposal.status,
-                    "priority": proposal.priority.value if hasattr(proposal.priority, 'value') else str(proposal.priority),
-                    "source": proposal.source.value if hasattr(proposal.source, 'value') else str(proposal.source),
+                    "priority": proposal.priority.value
+                    if hasattr(proposal.priority, "value")
+                    else str(proposal.priority),
+                    "source": proposal.source.value
+                    if hasattr(proposal.source, "value")
+                    else str(proposal.source),
                     "quality_score": proposal.quality_score,
                     "estimated_duration": proposal.estimated_duration,
-                    "created_at": proposal.created_at.isoformat() if proposal.created_at else None,
-                    "approved_at": getattr(proposal, 'approved_at', None).isoformat() if getattr(proposal, 'approved_at', None) else None,
-                    "created_by": getattr(proposal, 'created_by', 'system')
+                    "created_at": proposal.created_at.isoformat()
+                    if proposal.created_at
+                    else None,
+                    "approved_at": getattr(proposal, "approved_at", None).isoformat()
+                    if getattr(proposal, "approved_at", None)
+                    else None,
+                    "created_by": getattr(proposal, "created_by", "system"),
                 }
                 proposals_data.append(proposal_dict)
 
             # Save to JSON file
             proposals_file = self.docs_dir / "proposals_data.json"
-            with open(proposals_file, 'w', encoding='utf-8') as f:
+            with open(proposals_file, "w", encoding="utf-8") as f:
                 json.dump(proposals_data, f, indent=2, ensure_ascii=False)
 
-            logger.info(f"✅ Exported {len(proposals_data)} proposals to {proposals_file}")
+            logger.info(
+                f"✅ Exported {len(proposals_data)} proposals to {proposals_file}"
+            )
             return proposals_data
 
         except Exception as e:
@@ -98,32 +111,43 @@ class DashboardDataExporter:
 
                 # Filter proposals for this date
                 daily_proposals = [
-                    p for p in proposals
-                    if p.created_at and p.created_at.date() == date
+                    p for p in proposals if p.created_at and p.created_at.date() == date
                 ]
 
                 # Calculate metrics
                 total_proposals = len(daily_proposals)
-                approved_proposals = len([p for p in daily_proposals if p.status == 'approved'])
-                completed_proposals = len([p for p in daily_proposals if p.status == 'completed'])
-                pending_proposals = len([p for p in daily_proposals if p.status == 'pending'])
+                approved_proposals = len(
+                    [p for p in daily_proposals if p.status == "approved"]
+                )
+                completed_proposals = len(
+                    [p for p in daily_proposals if p.status == "completed"]
+                )
+                pending_proposals = len(
+                    [p for p in daily_proposals if p.status == "pending"]
+                )
 
                 # Calculate quality score average
-                quality_scores = [p.quality_score for p in daily_proposals if p.quality_score]
-                avg_quality = sum(quality_scores) / len(quality_scores) if quality_scores else 0
+                quality_scores = [
+                    p.quality_score for p in daily_proposals if p.quality_score
+                ]
+                avg_quality = (
+                    sum(quality_scores) / len(quality_scores) if quality_scores else 0
+                )
 
-                metrics_data.append({
-                    "date": date_str,
-                    "total": total_proposals,
-                    "approved": approved_proposals,
-                    "completed": completed_proposals,
-                    "pending": pending_proposals,
-                    "avg_quality": round(avg_quality, 2)
-                })
+                metrics_data.append(
+                    {
+                        "date": date_str,
+                        "total": total_proposals,
+                        "approved": approved_proposals,
+                        "completed": completed_proposals,
+                        "pending": pending_proposals,
+                        "avg_quality": round(avg_quality, 2),
+                    }
+                )
 
             # Save to CSV file
             metrics_file = self.docs_dir / "learning_metrics.csv"
-            with open(metrics_file, 'w', newline='', encoding='utf-8') as f:
+            with open(metrics_file, "w", newline="", encoding="utf-8") as f:
                 if metrics_data:
                     writer = csv.DictWriter(f, fieldnames=metrics_data[0].keys())
                     writer.writeheader()
@@ -145,32 +169,49 @@ class DashboardDataExporter:
 
             # Load existing timeline
             if timeline_file.exists():
-                with open(timeline_file, encoding='utf-8') as f:
+                with open(timeline_file, encoding="utf-8") as f:
                     timeline_data = json.load(f)
             else:
                 timeline_data = {
                     "events": [],
                     "milestones": [],
                     "learning_sources": [],
-                    "current_stats": {}
+                    "current_stats": {},
                 }
 
             # Update current stats
             proposals = self.proposals_manager.get_all_proposals()
             timeline_data["current_stats"] = {
                 "total_proposals": len(proposals),
-                "approved_proposals": len([p for p in proposals if p.status == 'approved']),
-                "completed_learning": len([p for p in proposals if p.status == 'completed']),
-                "knowledge_sources": len({p.source.value if hasattr(p.source, 'value') else str(p.source) for p in proposals}),
-                "learning_sessions_today": len([p for p in proposals if p.created_at and p.created_at.date() == datetime.now().date()]),
-                "last_discovery": datetime.now().isoformat()
+                "approved_proposals": len(
+                    [p for p in proposals if p.status == "approved"]
+                ),
+                "completed_learning": len(
+                    [p for p in proposals if p.status == "completed"]
+                ),
+                "knowledge_sources": len(
+                    {
+                        p.source.value if hasattr(p.source, "value") else str(p.source)
+                        for p in proposals
+                    }
+                ),
+                "learning_sessions_today": len(
+                    [
+                        p
+                        for p in proposals
+                        if p.created_at and p.created_at.date() == datetime.now().date()
+                    ]
+                ),
+                "last_discovery": datetime.now().isoformat(),
             }
 
             # Save updated timeline
-            with open(timeline_file, 'w', encoding='utf-8') as f:
+            with open(timeline_file, "w", encoding="utf-8") as f:
                 json.dump(timeline_data, f, indent=2, ensure_ascii=False)
 
-            logger.info(f"✅ Updated evolution timeline: {timeline_data['current_stats']}")
+            logger.info(
+                f"✅ Updated evolution timeline: {timeline_data['current_stats']}"
+            )
             return timeline_data
 
         except Exception as e:
@@ -192,12 +233,12 @@ class DashboardDataExporter:
                 "export_timestamp": datetime.now().isoformat(),
                 "proposals_count": len(proposals_data),
                 "metrics_days": len(metrics_data),
-                "current_stats": timeline_data.get("current_stats", {})
+                "current_stats": timeline_data.get("current_stats", {}),
             }
 
             # Save summary
             summary_file = self.docs_dir / "export_summary.json"
-            with open(summary_file, 'w', encoding='utf-8') as f:
+            with open(summary_file, "w", encoding="utf-8") as f:
                 json.dump(summary, f, indent=2, ensure_ascii=False)
 
             logger.info("🎉 Dashboard data export completed!")
@@ -209,13 +250,18 @@ class DashboardDataExporter:
             logger.error(f"❌ Failed to export dashboard data: {e}")
             return {}
 
+
 def main():
     """Main function"""
     import argparse
 
     parser = argparse.ArgumentParser(description="Export StillMe IPC dashboard data")
-    parser.add_argument("--type", choices=["all", "proposals", "metrics", "timeline"],
-                       default="all", help="Type of data to export")
+    parser.add_argument(
+        "--type",
+        choices=["all", "proposals", "metrics", "timeline"],
+        default="all",
+        help="Type of data to export",
+    )
 
     args = parser.parse_args()
 
@@ -229,6 +275,7 @@ def main():
         exporter.export_metrics_data()
     elif args.type == "timeline":
         exporter.update_evolution_timeline()
+
 
 if __name__ == "__main__":
     main()

@@ -13,4 +13,5 @@ class ProactiveAbuseGuard:
         """Initialize Proactive Abuse Guard"""
         self.config = config
 
+
 __all__ = ["ProactiveAbuseGuard"]

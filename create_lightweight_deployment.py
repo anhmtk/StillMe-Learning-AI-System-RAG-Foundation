@@ -25,7 +25,7 @@ def create_lightweight_package():
         "real_stillme_gateway.py",
         "stable_ai_server.py",
         ".env",
-        "requirements.txt"
+        "requirements.txt",
     ]
 
     print("📋 Copying essential files...")
@@ -130,7 +130,7 @@ echo "🤖 AI Server: http://160.191.89.99:1216"
     if os.path.exists(zip_path):
         os.remove(zip_path)
 
-    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zipf:
         for root, _dirs, files in os.walk(temp_dir):
             for file in files:
                 file_path = os.path.join(root, file)
@@ -146,6 +146,7 @@ echo "🤖 AI Server: http://160.191.89.99:1216"
 
     print(f"🎉 Lightweight package created: {zip_path} ({size_mb:.1f} MB)")
     return True
+
 
 if __name__ == "__main__":
     create_lightweight_package()

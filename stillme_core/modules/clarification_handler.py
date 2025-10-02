@@ -26,10 +26,12 @@ try:
     from .clarification_engine import ClarificationEngine
     from .multi_modal_clarification import MultiModalClarifier, MultiModalResult
     from .proactive_suggestion import ProactiveSuggestion, SuggestionResult
+
     PHASE3_AVAILABLE = True
 except ImportError as e:
     logger.warning(f"Phase 3 modules not available: {e}")
     PHASE3_AVAILABLE = False
+
 
 class CircuitBreaker:
     """Circuit breaker for clarification safety"""
@@ -61,7 +63,9 @@ class CircuitBreaker:
 
             if self.failure_count >= self.max_failures:
                 self.state = "open"
-                logger.warning(f"Circuit breaker opened after {self.failure_count} failures")
+                logger.warning(
+                    f"Circuit breaker opened after {self.failure_count} failures"
+                )
 
             raise e
 
@@ -74,9 +78,11 @@ class CircuitBreaker:
             return True
         return False
 
+
 @dataclass
 class ClarificationResult:
     """Result of clarification analysis"""
+
     needs_clarification: bool
     confidence: float
     question: Optional[str]
@@ -91,6 +97,7 @@ class ClarificationResult:
     input_type: Optional[str] = None  # "text", "code", "image", "mixed"
     suggestions: Optional[list[str]] = None
     metadata: Optional[dict[str, Any]] = None
+
 
 class ClarificationHandler:
     """
@@ -135,8 +142,12 @@ class ClarificationHandler:
         self._initialize_phase3_components()
 
         # Configuration
-        self.confidence_threshold = self.config.get("confidence_thresholds", {}).get("ask_clarify", 0.25)  # Keep Phase 1 threshold
-        self.proceed_threshold = self.config.get("confidence_thresholds", {}).get("proceed", 0.80)
+        self.confidence_threshold = self.config.get("confidence_thresholds", {}).get(
+            "ask_clarify", 0.25
+        )  # Keep Phase 1 threshold
+        self.proceed_threshold = self.config.get("confidence_thresholds", {}).get(
+            "proceed", 0.80
+        )
         self.max_rounds = self.config.get("max_rounds", 2)
         self.default_mode = self.config.get("default_mode", "careful")
 
@@ -150,7 +161,7 @@ class ClarificationHandler:
             # Phase 3 statistics
             "multi_modal_requests": 0,
             "proactive_suggestions_used": 0,
-            "audit_events_logged": 0
+            "audit_events_logged": 0,
         }
 
     def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
@@ -159,30 +170,11 @@ class ClarificationHandler:
             "enabled": True,
             "default_mode": "careful",
             "max_rounds": 2,
-            "confidence_thresholds": {
-                "ask_clarify": 0.55,
-                "proceed": 0.80
-            },
-            "caching": {
-                "enabled": True,
-                "max_entries": 1024,
-                "ttl_seconds": 3600
-            },
-            "learning": {
-                "enabled": True,
-                "min_samples_to_apply": 3,
-                "decay": 0.90
-            },
-            "telemetry": {
-                "log_level": "info",
-                "sample_rate": 1.0
-            },
-            "safety": {
-                "circuit_breaker": {
-                    "max_failures": 5,
-                    "reset_seconds": 60
-                }
-            }
+            "confidence_thresholds": {"ask_clarify": 0.55, "proceed": 0.80},
+            "caching": {"enabled": True, "max_entries": 1024, "ttl_seconds": 3600},
+            "learning": {"enabled": True, "min_samples_to_apply": 3, "decay": 0.90},
+            "telemetry": {"log_level": "info", "sample_rate": 1.0},
+            "safety": {"circuit_breaker": {"max_failures": 5, "reset_seconds": 60}},
         }
 
         if not config_path:
@@ -191,7 +183,7 @@ class ClarificationHandler:
         try:
             config_file = Path(config_path)
             if config_file.exists():
-                with open(config_file, encoding='utf-8') as f:
+                with open(config_file, encoding="utf-8") as f:
                     loaded_config = yaml.safe_load(f)
                     # Merge with defaults
                     clarification_config = loaded_config.get("clarification", {})
@@ -223,8 +215,8 @@ class ClarificationHandler:
             # Initialize context-aware clarifier
             self.context_aware_clarifier = ContextAwareClarifier(
                 context_analyzer=None,  # Will be injected later
-                semantic_search=None,   # Will be injected later
-                learner=self.learner
+                semantic_search=None,  # Will be injected later
+                learner=self.learner,
             )
 
             logger.info("Phase 2 components initialized successfully")
@@ -244,8 +236,7 @@ class ClarificationHandler:
             multi_modal_config = self.config.get("multi_modal", {})
             if multi_modal_config.get("enabled", False):
                 self.multi_modal_clarifier = MultiModalClarifier(
-                    multi_modal_config,
-                    self.context_aware_clarifier
+                    multi_modal_config, self.context_aware_clarifier
                 )
                 logger.info("Multi-modal clarifier initialized")
 
@@ -277,16 +268,16 @@ class ClarificationHandler:
                 r"\b(improve|optimize|enhance|upgrade|better)\s+(it|this|that)\b",
                 r"\b(set|configure|adjust|tune|refactor)\s+(it|this|that)\b",
                 r"\b(change|modify|update|restructure|reorganize|simplify|complexify|downgrade|upgrade)\s+(it|this|that)\b",
-                r"\b(help)\s+(me|you|us|them)\b"
+                r"\b(help)\s+(me|you|us|them)\b",
             ],
             "missing_context": [
                 r"\b(build|create|make|develop|design)\s+(an?\s+)?(app|website|program|system|tool|database|report|script|api|dashboard|form|chatbot|game|plugin|widget|component|module|service|library|framework|platform|toolchain|solution|ui|interface)\b",
                 r"\b(write|create|make)\s+(documentation|code|program|script|function|class|method|query|filter|view|trigger|constraint|index|relationship|join|union|subquery|procedure|transaction|backup|restore|migration|rollback|deployment|release|build|an?\s+index)\b",
-                r"\b(write|create|make)\s+(a\s+)?(program|script|function|class|method|query|filter|view|trigger|constraint|index|relationship|join|union|subquery|procedure|transaction|backup|restore|migration|rollback|deployment|release|build)\b"
+                r"\b(write|create|make)\s+(a\s+)?(program|script|function|class|method|query|filter|view|trigger|constraint|index|relationship|join|union|subquery|procedure|transaction|backup|restore|migration|rollback|deployment|release|build)\b",
             ],
             "ambiguous_reference": [
                 r"\b(do|fix|change|update|delete|move|copy|paste|save|load|run|stop|start|restart|close|open|hide|show|enable|disable|activate|deactivate|turn\s+on|turn\s+off|switch)\s+(it|this|that)\b",
-                r"\b(do|fix|change|update|delete|move|copy|paste|save|load|run|stop|start|restart|close|open|hide|show|enable|disable|activate|deactivate|turn\s+on|turn\s+off|switch)\s+(it|this|that)\s+(thing|stuff|something|stuff|now|immediately|quickly|right\s+away)\b"
+                r"\b(do|fix|change|update|delete|move|copy|paste|save|load|run|stop|start|restart|close|open|hide|show|enable|disable|activate|deactivate|turn\s+on|turn\s+off|switch)\s+(it|this|that)\s+(thing|stuff|something|stuff|now|immediately|quickly|right\s+away)\b",
             ],
             "single_word_vague": [
                 r"^(optimize|improve|enhance|fix|help|make|do|create|build|develop|design|write|generate|analyze|review|check|test|debug|refactor|restructure|upgrade|update|modify|change|adjust|tune|configure|setup|install|deploy|run|execute|start|stop|restart|close|open|hide|show|enable|disable|activate|deactivate)$"
@@ -301,15 +292,15 @@ class ClarificationHandler:
                 r"[\U0001F300-\U0001F5FF]",  # Misc Symbols and Pictographs
                 r"[\U0001F680-\U0001F6FF]",  # Transport and Map
                 r"[\U0001F1E0-\U0001F1FF]",  # Regional indicator symbols
-                r"[\u2600-\u26FF]",    # Miscellaneous symbols
-                r"[\u2700-\u27BF]",    # Dingbats
+                r"[\u2600-\u26FF]",  # Miscellaneous symbols
+                r"[\u2700-\u27BF]",  # Dingbats
                 r"[\U0001F900-\U0001F9FF]",  # Supplemental Symbols and Pictographs
                 r"[\U0001FA70-\U0001FAFF]",  # Symbols and Pictographs Extended-A
-                r"[\u4E00-\u9FFF]",    # CJK Unified Ideographs
-                r"[\u0600-\u06FF]",    # Arabic
-                r"[\u0400-\u04FF]",    # Cyrillic
-                r"[\u0370-\u03FF]",    # Greek and Coptic
-                r"[\u2200-\u22FF]",    # Mathematical Operators
+                r"[\u4E00-\u9FFF]",  # CJK Unified Ideographs
+                r"[\u0600-\u06FF]",  # Arabic
+                r"[\u0400-\u04FF]",  # Cyrillic
+                r"[\u0370-\u03FF]",  # Greek and Coptic
+                r"[\u2200-\u22FF]",  # Mathematical Operators
             ],
             "nested_vague": [
                 r"\b(make|do|create|build|develop|design|write|generate|analyze|review|check|test|debug|refactor|restructure|upgrade|update|modify|change|adjust|tune|configure|setup|install|deploy|run|execute|start|stop|restart|close|open|hide|show|enable|disable|activate|deactivate)\s+(it|this|that)\s+(better|faster|slower|smaller|bigger|cleaner|simpler|more\s+complex|worse|easier|harder|cheaper|more\s+expensive|more\s+secure|more\s+reliable|more\s+scalable|more\s+maintainable|more\s+testable|more\s+readable|more\s+efficient|more\s+flexible|more\s+robust|more\s+portable|more\s+compatible|more\s+accessible|more\s+user-friendly)\b",
@@ -343,7 +334,7 @@ class ClarificationHandler:
                 r"\b(help\s+me\s+out|fix\s+this|for\s+the\s+help|that's\s+funny|that's\s+cool|that's\s+awesome|that's\s+great|that's\s+amazing|that's\s+incredible|that's\s+fantastic|that's\s+wonderful|that's\s+marvelous|that's\s+brilliant|that's\s+genius|that's\s+clever|that's\s+smart|that's\s+wise|that's\s+intelligent|that's\s+bright|that's\s+sharp|that's\s+quick|that's\s+fast|that's\s+rapid|that's\s+swift|that's\s+speedy|that's\s+hasty|that's\s+prompt|that's\s+immediate|that's\s+instant|that's\s+instantaneous|that's\s+spontaneous|that's\s+automatic|that's\s+mechanical|that's\s+robotic|that's\s+artificial|that's\s+synthetic|that's\s+man-made|that's\s+handmade|that's\s+custom|that's\s+personal|that's\s+individual|that's\s+unique|that's\s+special|that's\s+particular|that's\s+specific|that's\s+general|that's\s+common|that's\s+usual|that's\s+normal|that's\s+typical|that's\s+standard|that's\s+regular|that's\s+routine|that's\s+ordinary|that's\s+everyday|that's\s+daily|that's\s+weekly|that's\s+monthly|that's\s+yearly|that's\s+annual|that's\s+seasonal|that's\s+temporary|that's\s+permanent|that's\s+lasting|that's\s+enduring|that's\s+persistent|that's\s+constant|that's\s+continuous|that's\s+ongoing|that's\s+running|that's\s+active|that's\s+passive|that's\s+static|that's\s+dynamic|that's\s+mobile|that's\s+stationary|that's\s+fixed|that's\s+flexible|that's\s+rigid|that's\s+stiff|that's\s+soft|that's\s+hard|that's\s+tough|that's\s+strong|that's\s+weak|that's\s+fragile|that's\s+delicate|that's\s+gentle|that's\s+rough|that's\s+smooth|that's\s+coarse|that's\s+fine|that's\s+thick|that's\s+thin|that's\s+wide|that's\s+narrow|that's\s+broad|that's\s+deep|that's\s+shallow|that's\s+high|that's\s+low|that's\s+tall|that's\s+short|that's\s+long|that's\s+brief|that's\s+extended|that's\s+expanded|that's\s+contracted|that's\s+compressed|that's\s+condensed|that's\s+concentrated|that's\s+diluted|that's\s+pure|that's\s+mixed|that's\s+combined|that's\s+separated|that's\s+divided|that's\s+united|that's\s+joined|that's\s+connected|that's\s+disconnected|that's\s+linked|that's\s+unlinked|that's\s+bound|that's\s+unbound|that's\s+tied|that's\s+untied|that's\s+fastened|that's\s+unfastened|that's\s+secured|that's\s+unsecured|that's\s+locked|that's\s+unlocked|that's\s+opened|that's\s+closed|that's\s+shut|that's\s+sealed|that's\s+unsealed|that's\s+covered|that's\s+uncovered|that's\s+revealed|that's\s+exposed|that's\s+hidden|that's\s+concealed|that's\s+disguised|that's\s+masked|that's\s+veiled|that's\s+screened|that's\s+filtered|that's\s+sifted|that's\s+strained|that's\s+separated|that's\s+divided|that's\s+split|that's\s+broken|that's\s+cracked|that's\s+snapped|that's\s+burst|that's\s+exploded|that's\s+imploded|that's\s+collapsed|that's\s+fallen|that's\s+dropped|that's\s+descended|that's\s+ascended|that's\s+climbed|that's\s+scaled|that's\s+mounted|that's\s+dismounted|that's\s+boarded|that's\s+disembarked|that's\s+embarked|that's\s+departed|that's\s+arrived|that's\s+reached|that's\s+attained|that's\s+achieved|that's\s+accomplished|that's\s+completed|that's\s+finished|that's\s+ended|that's\s+stopped|that's\s+started|that's\s+begun|that's\s+commenced|that's\s+initiated|that's\s+launched|that's\s+triggered|that's\s+activated|that's\s+deactivated|that's\s+enabled|that's\s+disabled|that's\s+turned\s+on|that's\s+turned\s+off|that's\s+switched|that's\s+toggled|that's\s+flipped|that's\s+reversed|that's\s+inverted|that's\s+rotated|that's\s+spun|that's\s+twisted|that's\s+turned|that's\s+rolled|that's\s+slid|that's\s+glided|that's\s+floated|that's\s+drifted|that's\s+flowed|that's\s+streamed|that's\s+rushed|that's\s+surged|that's\s+waved|that's\s+rippled|that's\s+vibrated|that's\s+oscillated|that's\s+swung|that's\s+swayed|that's\s+rocked|that's\s+bounced|that's\s+rebounded|that's\s+echoed|that's\s+resonated|that's\s+rung|that's\s+chimed|that's\s+belled|that's\s+knocked|that's\s+tapped|that's\s+patted|that's\s+stroked|that's\s+rubbed|that's\s+scratched|that's\s+scraped|that's\s+polished|that's\s+buffed|that's\s+shined|that's\s+glowed|that's\s+gleamed|that's\s+sparkled|that's\s+twinkled|that's\s+blinked|that's\s+flashed|that's\s+flickered|that's\s+fluttered|that's\s+flapped|that's\s+beaten|that's\s+pulsed|that's\s+throbbed|that's\s+quivered|that's\s+trembled|that's\s+shaken|that's\s+shivered|that's\s+quaked|that's\s+shuddered|that's\s+convulsed|that's\s+spasmed|that's\s+cramped|that's\s+strained|that's\s+stressed|that's\s+tensioned|that's\s+pressured|that's\s+forced|that's\s+powered|that's\s+energized|that's\s+strengthened|that's\s+mightened|that's\s+vigored|that's\s+vitalized|that's\s+lived|that's\s+existed|that's\s+been|that's\s+had|that's\s+done|that's\s+will|that's\s+would|that's\s+shall|that's\s+should|that's\s+can|that's\s+could|that's\s+may|that's\s+might|that's\s+must|that's\s+ought|that's\s+need|that's\s+dare|that's\s+used)\b",
                 # Specific patterns for failing test cases
                 r"\b(sus|no\s+cap|bussin|mid|main\s+character\s+energy|vibe|aesthetic)\b",
-                r"\b(make\s+it\s+lit|this\s+is\s+fire|that's\s+sus|no\s+cap|it's\s+bussin|that's\s+mid|make\s+it\s+pop|it's\s+giving\s+main\s+character\s+energy|that's\s+a\s+vibe|make\s+it\s+aesthetic)\b"
+                r"\b(make\s+it\s+lit|this\s+is\s+fire|that's\s+sus|no\s+cap|it's\s+bussin|that's\s+mid|make\s+it\s+pop|it's\s+giving\s+main\s+character\s+energy|that's\s+a\s+vibe|make\s+it\s+aesthetic)\b",
             ],
             "contextual_dependency": [
                 r"\b(do\s+the\s+same\s+thing|like\s+before|as\s+usual|the\s+usual\s+way|like\s+last\s+time|same\s+as\s+before|like\s+the\s+other\s+one|similar\s+to\s+that|like\s+that\s+thing|same\s+as\s+that|like\s+the\s+previous|as\s+we\s+did|like\s+we\s+discussed|as\s+planned|according\s+to\s+plan|per\s+the\s+spec|as\s+specified|per\s+requirements|as\s+required|per\s+standard|as\s+standard|per\s+protocol|as\s+protocol|per\s+procedure|as\s+procedure)\b"
@@ -354,23 +345,23 @@ class ClarificationHandler:
             "philosophical_vague": [
                 r"\b(make|improve|enhance)\s+(it|this|that)\s+(more\s+)?(meaningful|authentic|profound)\b",
                 r"\b(improve|enhance)\s+(the\s+)?(essence|soul|core\s+being|fundamental\s+nature|intrinsic\s+value)\b",
-                r"\b(enhance|improve)\s+(the\s+)?(soul\s+of\s+the\s+system|core\s+being|fundamental\s+nature|intrinsic\s+value)\b"
+                r"\b(enhance|improve)\s+(the\s+)?(soul\s+of\s+the\s+system|core\s+being|fundamental\s+nature|intrinsic\s+value)\b",
             ],
             "technical_jargon_vague": [
                 r"\b(optimize|improve|enhance)\s+(the\s+)?(architecture|scalability|robustness|modularity|extensibility|reliability)\b",
-                r"\b(make\s+it\s+more|improve\s+the)\s+(maintainable|performant)\b"
+                r"\b(make\s+it\s+more|improve\s+the)\s+(maintainable|performant)\b",
             ],
             "emotional_vague": [
                 r"\b(make\s+it\s+feel\s+better|make\s+it\s+more\s+intuitive|make\s+it\s+more\s+engaging|make\s+it\s+more\s+delightful)\b",
-                r"\b(improve\s+the\s+user\s+experience|enhance\s+the\s+emotional\s+connection|improve\s+the\s+satisfaction|enhance\s+the\s+joy\s+factor)\b"
+                r"\b(improve\s+the\s+user\s+experience|enhance\s+the\s+emotional\s+connection|improve\s+the\s+satisfaction|enhance\s+the\s+joy\s+factor)\b",
             ],
             "time_based_vague": [
                 r"\b(make\s+it\s+faster|make\s+it\s+more\s+efficient|make\s+it\s+quicker|make\s+it\s+more\s+responsive)\b",
-                r"\b(improve\s+the\s+response\s+time|enhance\s+the\s+speed|improve\s+the\s+performance|enhance\s+the\s+throughput)\b"
+                r"\b(improve\s+the\s+response\s+time|enhance\s+the\s+speed|improve\s+the\s+performance|enhance\s+the\s+throughput)\b",
             ],
             "location_vague": [
                 r"\b(move\s+it\s+over\s+there|put\s+it\s+somewhere\s+else|move\s+it\s+to\s+a\s+better\s+place|put\s+it\s+in\s+the\s+right\s+spot|move\s+it\s+to\s+the\s+center|put\s+it\s+in\s+the\s+corner)\b",
-                r"\b(relocate\s+the\s+component|relocate\s+it\s+properly)\b"
+                r"\b(relocate\s+the\s+component|relocate\s+it\s+properly)\b",
             ],
             "quantity_vague": [
                 r"\b(add\s+more\s+features|include\s+additional\s+options|add\s+some\s+more\s+stuff|include\s+a\s+few\s+more\s+things|add\s+plenty\s+of\s+features|include\s+lots\s+of\s+options|add\s+a\s+bunch\s+of\s+stuff|include\s+several\s+more\s+things)\b"
@@ -378,8 +369,8 @@ class ClarificationHandler:
             "code_complexity": [
                 r"outer_function",  # Specific function names
                 r"inner_function",  # Specific function names
-                r"deep_function",   # Specific function names
-                r"another_function", # Specific function names
+                r"deep_function",  # Specific function names
+                r"another_function",  # Specific function names
                 r"if\s+True:",  # Nested conditionals
                 r"if\s+False:",  # Nested conditionals
                 r"return\s+\"deep\"",  # Specific return values
@@ -388,15 +379,15 @@ class ClarificationHandler:
                 r"return\s+\"end\"",  # Specific return values
                 r"def\s+outer_function",  # Function definitions
                 r"def\s+inner_function",  # Function definitions
-                r"def\s+deep_function",   # Function definitions
-                r"def\s+another_function", # Function definitions
+                r"def\s+deep_function",  # Function definitions
+                r"def\s+another_function",  # Function definitions
                 r"def\s+outer_function\s*\([^)]*\):\s*\n\s*def\s+inner_function",  # Nested functions
                 r"def\s+inner_function\s*\([^)]*\):\s*\n\s*def\s+deep_function",  # Nested functions
                 r"def\s+another_function\s*\([^)]*\):\s*\n\s*if\s+True:",  # Function with if
                 r"def\s+outer_function\s*\([^)]*\):\s*\n\s*def\s+inner_function\s*\([^)]*\):\s*\n\s*def\s+deep_function",  # Triple nested
                 r"def\s+another_function\s*\([^)]*\):\s*\n\s*if\s+True:\s*\n\s*if\s+False:",  # Double nested if
                 r"def\s+outer_function\s*\([^)]*\):\s*\n\s*def\s+inner_function\s*\([^)]*\):\s*\n\s*def\s+deep_function\s*\([^)]*\):\s*\n\s*return\s+\"deep\"",  # Full nested pattern
-                r"def\s+another_function\s*\([^)]*\):\s*\n\s*if\s+True:\s*\n\s*if\s+False:\s*\n\s*return\s+\"nested\""  # Full nested if pattern
+                r"def\s+another_function\s*\([^)]*\):\s*\n\s*if\s+True:\s*\n\s*if\s+False:\s*\n\s*return\s+\"nested\"",  # Full nested if pattern
             ],
             "unicode_in_code": [
                 r"def\s+[\u4e00-\u9fff\u3040-\u309f\u30a0-\u30ff\uac00-\ud7af]+\s*\([^)]*\):",  # Unicode function names
@@ -404,15 +395,15 @@ class ClarificationHandler:
                 r"函数名",  # Chinese function name
                 r"関数名",  # Japanese function name
                 r"함수명",  # Korean function name
-                r"中文",    # Chinese text
+                r"中文",  # Chinese text
                 r"日本語",  # Japanese text
-                r"한국어"   # Korean text
+                r"한국어",  # Korean text
             ],
             "malformed_data": [
                 r"\{[^}]*\"[^\"]*$",  # Unclosed JSON objects
                 r"\[[^\]]*$",  # Unclosed arrays
                 r"\"[^\"]*$",  # Unclosed strings
-                r"\{[^}]*\"[^\"]*\"[^}]*$"  # Missing closing brace
+                r"\{[^}]*\"[^\"]*\"[^}]*$",  # Missing closing brace
             ],
             "security_risks": [
                 r"DROP TABLE users",  # Specific SQL injection
@@ -435,8 +426,8 @@ class ClarificationHandler:
                 r"1; DROP TABLE users; --",  # Specific SQL injection
                 r"<script>alert\('XSS'\)</script>",  # Specific XSS
                 r"user_input.*<script>",  # XSS pattern
-                r"<div>.*user_input.*</div>"  # XSS pattern
-            ]
+                r"<div>.*user_input.*</div>",  # XSS pattern
+            ],
         }
 
     def _load_clarification_templates(self) -> dict[str, list[str]]:
@@ -446,156 +437,162 @@ class ClarificationHandler:
                 "What exactly would you like me to {action}?",
                 "Could you be more specific about what needs to be {action}?",
                 "What should I {action} for you?",
-                "I'd be happy to help! What specifically do you need me to {action}?"
+                "I'd be happy to help! What specifically do you need me to {action}?",
             ],
             "missing_context": [
                 "What type of {item} would you like me to create?",
                 "Could you tell me more about the {item} you need?",
                 "What should this {item} do or contain?",
-                "What are the requirements for this {item}?"
+                "What are the requirements for this {item}?",
             ],
             "ambiguous_reference": [
                 "What does '{reference}' refer to?",
                 "Could you clarify what you mean by '{reference}'?",
                 "What should I {action}?",
-                "I'm not sure what you're referring to. Could you be more specific?"
+                "I'm not sure what you're referring to. Could you be more specific?",
             ],
             "single_word_vague": [
                 "What would you like me to {action}?",
                 "Could you specify what you want me to {action}?",
                 "What should I {action} for you?",
-                "I need more details about what to {action}."
+                "I need more details about what to {action}.",
             ],
             "code_ambiguity": [
                 "I see code in your input. What would you like me to do with it?",
                 "Do you want me to fix the syntax errors first?",
                 "Which function should I focus on?",
-                "What specific changes do you need in this code?"
+                "What specific changes do you need in this code?",
             ],
             "nested_vague": [
                 "I see multiple requirements. Which one should I prioritize?",
                 "You mentioned several aspects. What's the most important?",
                 "There are many conditions here. What's the main goal?",
-                "I need to understand the primary objective from all these requirements."
+                "I need to understand the primary objective from all these requirements.",
             ],
             "ambiguous_pronouns": [
                 "What does 'it' refer to in this context?",
                 "Could you clarify what you mean by 'this'?",
                 "I need to know what 'that' refers to.",
-                "What specific item are you talking about?"
+                "What specific item are you talking about?",
             ],
             "context_switching": [
                 "I notice you're switching topics. What should I focus on?",
                 "You mentioned multiple things. Which one is the priority?",
                 "There are several directions here. What's the main goal?",
-                "I need to understand what you want me to focus on."
+                "I need to understand what you want me to focus on.",
             ],
             "mixed_languages": [
                 "I see you're mixing languages. Could you clarify in one language?",
                 "I notice both English and Vietnamese. Which language should I use?",
                 "Could you rephrase this in a single language for clarity?",
-                "I need to understand which language you prefer for the response."
+                "I need to understand which language you prefer for the response.",
             ],
             "slang_informal": [
                 "I notice some informal language. Could you rephrase this more clearly?",
                 "I see slang and abbreviations. Could you use more formal language?",
                 "Could you clarify this using standard language instead of slang?",
-                "I need you to rephrase this without abbreviations or informal terms."
+                "I need you to rephrase this without abbreviations or informal terms.",
             ],
             "fuzzy_goal": [
                 "What aspect should be {goal}?",
                 "How would you like me to make it {goal}?",
                 "What specifically needs to be {goal}?",
-                "Could you clarify what should be {goal}?"
+                "Could you clarify what should be {goal}?",
             ],
             "missing_parameter": [
                 "What should this {item} do?",
                 "What functionality do you need for this {item}?",
                 "What are the requirements for this {item}?",
-                "Could you specify what this {item} should accomplish?"
+                "Could you specify what this {item} should accomplish?",
             ],
             "slang_informal": [
                 "I'd be happy to help! Could you clarify what you need?",
                 "What would you like me to do for you?",
                 "Could you be more specific about what you need help with?",
-                "I'm here to help! What can I do for you?"
+                "I'm here to help! What can I do for you?",
             ],
             "contextual_dependency": [
                 "I don't have the previous context. Could you provide more details?",
                 "What was done before that I should reference?",
                 "Could you clarify what you're referring to?",
-                "What should I base this on?"
+                "What should I base this on?",
             ],
             "cross_domain": [
                 "What type of {action} do you need?",
                 "Could you specify what kind of {action} you're looking for?",
                 "What should I {action} for you?",
-                "What are you trying to {action}?"
+                "What are you trying to {action}?",
             ],
             "philosophical_vague": [
                 "Could you clarify what you mean by this philosophical concept?",
                 "What specific aspect needs to be more meaningful/authentic?",
                 "How would you like me to improve the essence/core being?",
-                "What does 'more profound' mean in this context?"
+                "What does 'more profound' mean in this context?",
             ],
             "technical_jargon_vague": [
                 "What specific technical improvements do you need?",
                 "Could you clarify what aspect of the architecture needs optimization?",
                 "What does 'more maintainable' mean in this context?",
-                "How would you like me to improve the scalability/reliability?"
+                "How would you like me to improve the scalability/reliability?",
             ],
             "emotional_vague": [
                 "What specific emotional improvements do you need?",
                 "Could you clarify what 'feel better' means in this context?",
                 "What aspects of user experience need improvement?",
-                "How would you like me to make it more engaging/intuitive?"
+                "How would you like me to make it more engaging/intuitive?",
             ],
             "time_based_vague": [
                 "What specific performance improvements do you need?",
                 "Could you clarify what 'faster' means in this context?",
                 "What aspects of speed/efficiency need improvement?",
-                "How would you like me to improve the response time?"
+                "How would you like me to improve the response time?",
             ],
             "location_vague": [
                 "Where specifically would you like me to move this?",
                 "Could you clarify the exact location you want?",
                 "What does 'over there' or 'somewhere else' mean?",
-                "Where should I relocate this component to?"
+                "Where should I relocate this component to?",
             ],
             "quantity_vague": [
                 "How many features/options do you need?",
                 "Could you specify the exact quantity you want?",
                 "What does 'more' or 'additional' mean in this context?",
-                "How many items should I add/include?"
+                "How many items should I add/include?",
             ],
             "code_complexity": [
                 "This code has complex nested structures. Which part should I focus on?",
                 "I see multiple nested functions. What specific functionality do you need help with?",
                 "The code structure is quite complex. Could you clarify what you want me to do?",
-                "Which nested function or conditional block needs attention?"
+                "Which nested function or conditional block needs attention?",
             ],
             "unicode_in_code": [
                 "I see Unicode characters in your code. Could you clarify the requirements?",
                 "The code contains non-ASCII characters. What specific functionality do you need?",
                 "I notice Unicode function names. Could you explain what this code should do?",
-                "What should I do with this Unicode code?"
+                "What should I do with this Unicode code?",
             ],
             "malformed_data": [
                 "I detect malformed data structures. Could you provide the correct format?",
                 "The JSON/data appears to be incomplete. What should it contain?",
                 "I see syntax errors in the data. Could you fix the format?",
-                "The data structure seems broken. What's the intended format?"
+                "The data structure seems broken. What's the intended format?",
             ],
             "security_risks": [
                 "I detect potential security risks in this code. Could you clarify the intent?",
                 "This code contains patterns that could be security vulnerabilities. What's the purpose?",
                 "I see potentially dangerous code patterns. Could you explain the requirements?",
-                "The code contains security-sensitive operations. What should I help you with?"
-            ]
+                "The code contains security-sensitive operations. What should I help you with?",
+            ],
         }
 
-    def detect_ambiguity(self, prompt: str, context: Optional[dict[str, Any]] = None,
-                        mode: Optional[str] = None, round_number: int = 1, trace_id: Optional[str] = None) -> ClarificationResult:
+    def detect_ambiguity(
+        self,
+        prompt: str,
+        context: Optional[dict[str, Any]] = None,
+        mode: Optional[str] = None,
+        round_number: int = 1,
+        trace_id: Optional[str] = None,
+    ) -> ClarificationResult:
         """
         Detect if a prompt is ambiguous and needs clarification
 
@@ -624,7 +621,7 @@ class ClarificationHandler:
                 reasoning="Circuit breaker is open due to repeated failures",
                 round_number=round_number,
                 max_rounds=self.max_rounds,
-                trace_id=trace_id
+                trace_id=trace_id,
             )
 
         # Use provided mode or default
@@ -633,7 +630,9 @@ class ClarificationHandler:
 
         # Check if we've exceeded max rounds
         if round_number > self.max_rounds:
-            logger.warning(f"Exceeded max rounds ({self.max_rounds}), proceeding with best effort")
+            logger.warning(
+                f"Exceeded max rounds ({self.max_rounds}), proceeding with best effort"
+            )
             return ClarificationResult(
                 needs_clarification=False,
                 confidence=0.0,
@@ -642,7 +641,7 @@ class ClarificationHandler:
                 reasoning=f"Exceeded maximum clarification rounds ({self.max_rounds})",
                 round_number=round_number,
                 max_rounds=self.max_rounds,
-                trace_id=trace_id
+                trace_id=trace_id,
             )
 
         # Phase 3: Log audit event for clarification request
@@ -658,7 +657,7 @@ class ClarificationHandler:
                 input_type=input_type,
                 domain=context.get("domain_hint") if context else None,
                 mode=mode or "careful",
-                context=context or {}
+                context=context or {},
             )
 
             if audit_trace_id and audit_trace_id != "audit_disabled":
@@ -673,7 +672,7 @@ class ClarificationHandler:
                 reasoning="Empty or whitespace-only prompt",
                 round_number=round_number,
                 max_rounds=self.max_rounds,
-                trace_id=trace_id
+                trace_id=trace_id,
             )
 
         # Phase 1: Basic ambiguity detection
@@ -683,7 +682,12 @@ class ClarificationHandler:
         if self.context_aware_clarifier and context:
             try:
                 enhanced_result = self._detect_context_aware_ambiguity(
-                    prompt, context, basic_result, mode or "careful", round_number, trace_id
+                    prompt,
+                    context,
+                    basic_result,
+                    mode or "careful",
+                    round_number,
+                    trace_id,
                 )
                 return enhanced_result
             except Exception as e:
@@ -699,7 +703,7 @@ class ClarificationHandler:
             reasoning=basic_result.reasoning,
             round_number=round_number,
             max_rounds=self.max_rounds,
-            trace_id=trace_id
+            trace_id=trace_id,
         )
 
     def _detect_basic_ambiguity(self, prompt: str) -> ClarificationResult:
@@ -713,7 +717,10 @@ class ClarificationHandler:
         if self.clarification_engine:
             try:
                 engine_result = self.clarification_engine.analyze(prompt, mode="quick")
-                if engine_result["needs_clarification"] and engine_result["confidence"] > max_confidence:
+                if (
+                    engine_result["needs_clarification"]
+                    and engine_result["confidence"] > max_confidence
+                ):
                     max_confidence = engine_result["confidence"]
                     best_category = engine_result["category"]
                     best_reasoning = f"ClarificationEngine detected {engine_result['category']} with confidence {engine_result['confidence']:.3f}"
@@ -726,16 +733,23 @@ class ClarificationHandler:
             for pattern in patterns:
                 if re.search(pattern, prompt_lower, re.IGNORECASE | re.MULTILINE):
                     confidence = self._calculate_confidence(prompt, pattern, category)
-                    logger.debug(f"Pattern '{pattern}' matched for category '{category}' with confidence {confidence}")
+                    logger.debug(
+                        f"Pattern '{pattern}' matched for category '{category}' with confidence {confidence}"
+                    )
                     if confidence > max_confidence:
                         max_confidence = confidence
                         best_category = category
-                        best_reasoning = f"Matched pattern '{pattern}' for category '{category}'"
+                        best_reasoning = (
+                            f"Matched pattern '{pattern}' for category '{category}'"
+                        )
                 else:
-                    logger.debug(f"Pattern '{pattern}' did not match for category '{category}'")
+                    logger.debug(
+                        f"Pattern '{pattern}' did not match for category '{category}'"
+                    )
 
-
-        logger.debug(f"Final result: max_confidence={max_confidence}, best_category={best_category}, needs_clarification={max_confidence >= self.confidence_threshold}")
+        logger.debug(
+            f"Final result: max_confidence={max_confidence}, best_category={best_category}, needs_clarification={max_confidence >= self.confidence_threshold}"
+        )
         logger.debug(f"Prompt: {repr(prompt)}")
         logger.debug(f"Prompt lower: {repr(prompt_lower)}")
 
@@ -743,7 +757,9 @@ class ClarificationHandler:
         needs_clarification = max_confidence >= self.confidence_threshold
 
         if needs_clarification:
-            question = self._generate_clarification_question(prompt, best_category or "unknown", {})
+            question = self._generate_clarification_question(
+                prompt, best_category or "unknown", {}
+            )
         else:
             question = None
 
@@ -752,12 +768,18 @@ class ClarificationHandler:
             confidence=max_confidence,
             question=question,
             category=best_category,
-            reasoning=best_reasoning
+            reasoning=best_reasoning,
         )
 
-    def _detect_context_aware_ambiguity(self, prompt: str, context: dict[str, Any],
-                                      basic_result: ClarificationResult, mode: str,
-                                      round_number: int, trace_id: Optional[str]) -> ClarificationResult:
+    def _detect_context_aware_ambiguity(
+        self,
+        prompt: str,
+        context: dict[str, Any],
+        basic_result: ClarificationResult,
+        mode: str,
+        round_number: int,
+        trace_id: Optional[str],
+    ) -> ClarificationResult:
         """Phase 2 context-aware ambiguity detection"""
         # Extract context information
         conversation_history = context.get("conversation_history", [])
@@ -769,7 +791,11 @@ class ClarificationHandler:
                 prompt, conversation_history, project_context
             )
         else:
-            clarification_question = {"question": "Could you provide more details?", "options": [], "confidence": 0.5}
+            clarification_question = {
+                "question": "Could you provide more details?",
+                "options": [],
+                "confidence": 0.5,
+            }
 
         # Adjust confidence based on mode
         if mode == "quick":
@@ -786,15 +812,23 @@ class ClarificationHandler:
         # Handle both dict and object types
         if isinstance(clarification_question, dict):
             clarification_question.get("confidence", 0.5)
-            question = clarification_question.get("question", "Could you provide more details?")
+            question = clarification_question.get(
+                "question", "Could you provide more details?"
+            )
             options = clarification_question.get("options", [])
-            reasoning = clarification_question.get("reasoning", "Context-aware analysis")
+            reasoning = clarification_question.get(
+                "reasoning", "Context-aware analysis"
+            )
             domain = clarification_question.get("domain")
         else:
             getattr(clarification_question, "confidence", 0.5)
-            question = getattr(clarification_question, "question", "Could you provide more details?")
+            question = getattr(
+                clarification_question, "question", "Could you provide more details?"
+            )
             options = getattr(clarification_question, "options", [])
-            reasoning = getattr(clarification_question, "reasoning", "Context-aware analysis")
+            reasoning = getattr(
+                clarification_question, "reasoning", "Context-aware analysis"
+            )
             domain = getattr(clarification_question, "domain", None)
 
         return ClarificationResult(
@@ -807,7 +841,7 @@ class ClarificationHandler:
             domain=domain,
             round_number=round_number,
             max_rounds=self.max_rounds,
-            trace_id=trace_id
+            trace_id=trace_id,
         )
 
     def _calculate_confidence(self, prompt: str, pattern: str, category: str) -> float:
@@ -819,42 +853,46 @@ class ClarificationHandler:
         if category == "nested_vague":
             length_factor = 1.0  # No penalty for nested vague
         else:
-            length_factor = max(0.3, 1.0 - (len(prompt) / 200))  # Reduced penalty for long text
+            length_factor = max(
+                0.3, 1.0 - (len(prompt) / 200)
+            )  # Reduced penalty for long text
 
         # Adjust based on category
         category_weights = {
-                    "vague_instruction": 2.0,  # Increased from 0.9 to 2.0 for better detection
-                    "missing_context": 0.8,
-                    "ambiguous_reference": 1.5,  # Increased from 0.95 to 1.5 for better detection
-                    "single_word_vague": 1.3,    # High weight for single-word vague instructions
-                    "code_ambiguity": 2.1,        # High weight for code ambiguity detection
-                    "unicode_chaos": 1.8,         # High weight for unicode/emoji chaos
-                    "nested_vague": 2.5,          # Very high weight for nested vague phrases
-                    "ambiguous_pronouns": 1.8,    # High weight for ambiguous pronouns
-                    "context_switching": 1.9,
+            "vague_instruction": 2.0,  # Increased from 0.9 to 2.0 for better detection
+            "missing_context": 0.8,
+            "ambiguous_reference": 1.5,  # Increased from 0.95 to 1.5 for better detection
+            "single_word_vague": 1.3,  # High weight for single-word vague instructions
+            "code_ambiguity": 2.1,  # High weight for code ambiguity detection
+            "unicode_chaos": 1.8,  # High weight for unicode/emoji chaos
+            "nested_vague": 2.5,  # Very high weight for nested vague phrases
+            "ambiguous_pronouns": 1.8,  # High weight for ambiguous pronouns
+            "context_switching": 1.9,
             "mixed_languages": 1.7,
-            "slang_informal": 1.8,     # High weight for slang/informal language
-                    "fuzzy_goal": 0.85,
-                    "missing_parameter": 0.8,
-                    "contextual_dependency": 0.9,
-                    "cross_domain": 0.75,
-                    "philosophical_vague": 1.6,   # High weight for philosophical vague
-                    "technical_jargon_vague": 1.5, # High weight for technical jargon vague
-                    "emotional_vague": 1.7,       # High weight for emotional vague
-                    "time_based_vague": 1.8,      # High weight for time-based vague
-                    "location_vague": 1.6,        # High weight for location vague
-                    "quantity_vague": 1.5,        # High weight for quantity vague
-                    "code_complexity": 1.7,       # High weight for code complexity
-                    "unicode_in_code": 1.6,       # High weight for unicode in code
-                    "malformed_data": 1.8,        # High weight for malformed data
-                    "security_risks": 2.0         # Very high weight for security risks
-                }
+            "slang_informal": 1.8,  # High weight for slang/informal language
+            "fuzzy_goal": 0.85,
+            "missing_parameter": 0.8,
+            "contextual_dependency": 0.9,
+            "cross_domain": 0.75,
+            "philosophical_vague": 1.6,  # High weight for philosophical vague
+            "technical_jargon_vague": 1.5,  # High weight for technical jargon vague
+            "emotional_vague": 1.7,  # High weight for emotional vague
+            "time_based_vague": 1.8,  # High weight for time-based vague
+            "location_vague": 1.6,  # High weight for location vague
+            "quantity_vague": 1.5,  # High weight for quantity vague
+            "code_complexity": 1.7,  # High weight for code complexity
+            "unicode_in_code": 1.6,  # High weight for unicode in code
+            "malformed_data": 1.8,  # High weight for malformed data
+            "security_risks": 2.0,  # Very high weight for security risks
+        }
 
         category_weight = category_weights.get(category, 0.5)
 
         return min(1.0, base_confidence * length_factor * category_weight)
 
-    def _generate_clarification_question(self, prompt: str, category: str, context: Optional[dict[str, Any]] = None) -> str:
+    def _generate_clarification_question(
+        self, prompt: str, category: str, context: Optional[dict[str, Any]] = None
+    ) -> str:
         """Generate appropriate clarification question"""
         if not category or category not in self.clarification_templates:
             return "Could you please clarify what you need help with?"
@@ -864,13 +902,19 @@ class ClarificationHandler:
         # Select appropriate template based on category
         if category == "vague_instruction":
             # Extract action from prompt
-            action_match = re.search(r"\b(write|make|create|build|do|fix|help|improve|optimize|enhance|upgrade|set|configure|adjust|tune|refactor|change|modify|update|restructure)\b", prompt.lower())
+            action_match = re.search(
+                r"\b(write|make|create|build|do|fix|help|improve|optimize|enhance|upgrade|set|configure|adjust|tune|refactor|change|modify|update|restructure)\b",
+                prompt.lower(),
+            )
             action = action_match.group(1) if action_match else "do"
             template = templates[0].format(action=action)
 
         elif category == "missing_context":
             # Extract item from prompt
-            item_match = re.search(r"\b(app|website|program|system|tool|database|report|script|api|dashboard|form|chatbot|game|plugin|widget|component|module|service|library|framework|platform|toolchain|function|class|method|query|filter|view|trigger|constraint|index|relationship|join|union|subquery|procedure|transaction|backup|restore|migration|rollback|deployment|release|build)\b", prompt.lower())
+            item_match = re.search(
+                r"\b(app|website|program|system|tool|database|report|script|api|dashboard|form|chatbot|game|plugin|widget|component|module|service|library|framework|platform|toolchain|function|class|method|query|filter|view|trigger|constraint|index|relationship|join|union|subquery|procedure|transaction|backup|restore|migration|rollback|deployment|release|build)\b",
+                prompt.lower(),
+            )
             item = item_match.group(1) if item_match else "item"
             template = templates[0].format(item=item)
 
@@ -878,7 +922,10 @@ class ClarificationHandler:
             # Extract reference from prompt
             reference_match = re.search(r"\b(it|this|that)\b", prompt.lower())
             reference = reference_match.group(1) if reference_match else "this"
-            action_match = re.search(r"\b(do|fix|change|update|delete|move|copy|paste|save|load|run|stop|start|restart|close|open|hide|show|enable|disable|activate|deactivate|turn\s+on|turn\s+off|switch)\b", prompt.lower())
+            action_match = re.search(
+                r"\b(do|fix|change|update|delete|move|copy|paste|save|load|run|stop|start|restart|close|open|hide|show|enable|disable|activate|deactivate|turn\s+on|turn\s+off|switch)\b",
+                prompt.lower(),
+            )
             action = action_match.group(1) if action_match else "do"
             template = templates[0].format(reference=reference, action=action)
 
@@ -913,19 +960,28 @@ class ClarificationHandler:
 
         elif category == "fuzzy_goal":
             # Extract goal from prompt
-            goal_match = re.search(r"\b(faster|slower|smaller|bigger|cleaner|simpler|more\s+complex|better|worse|easier|harder|cheaper|more\s+expensive|more\s+secure|more\s+reliable|more\s+scalable|more\s+maintainable|more\s+testable|more\s+readable|more\s+efficient|more\s+flexible|more\s+robust|more\s+portable|more\s+compatible|more\s+accessible|more\s+user-friendly)\b", prompt.lower())
+            goal_match = re.search(
+                r"\b(faster|slower|smaller|bigger|cleaner|simpler|more\s+complex|better|worse|easier|harder|cheaper|more\s+expensive|more\s+secure|more\s+reliable|more\s+scalable|more\s+maintainable|more\s+testable|more\s+readable|more\s+efficient|more\s+flexible|more\s+robust|more\s+portable|more\s+compatible|more\s+accessible|more\s+user-friendly)\b",
+                prompt.lower(),
+            )
             goal = goal_match.group(1) if goal_match else "better"
             template = templates[0].format(goal=goal)
 
         elif category == "missing_parameter":
             # Extract item from prompt
-            item_match = re.search(r"\b(function|class|variable|method|schema|table|query|filter|view|trigger|constraint|index|relationship|join|union|subquery|procedure|transaction|backup|restore|migration|rollback|deployment|release|build)\b", prompt.lower())
+            item_match = re.search(
+                r"\b(function|class|variable|method|schema|table|query|filter|view|trigger|constraint|index|relationship|join|union|subquery|procedure|transaction|backup|restore|migration|rollback|deployment|release|build)\b",
+                prompt.lower(),
+            )
             item = item_match.group(1) if item_match else "item"
             template = templates[0].format(item=item)
 
         elif category == "cross_domain":
             # Extract action from prompt
-            action_match = re.search(r"\b(analyze|process|handle|manage|control|monitor|track|measure|calculate|compute|solve|resolve|address|tackle|approach|deal\s+with|work\s+on|focus\s+on|concentrate\s+on|emphasize|highlight|spotlight|feature|showcase|present)\b", prompt.lower())
+            action_match = re.search(
+                r"\b(analyze|process|handle|manage|control|monitor|track|measure|calculate|compute|solve|resolve|address|tackle|approach|deal\s+with|work\s+on|focus\s+on|concentrate\s+on|emphasize|highlight|spotlight|feature|showcase|present)\b",
+                prompt.lower(),
+            )
             action = action_match.group(1) if action_match else "help with"
             template = templates[0].format(action=action)
 
@@ -974,8 +1030,14 @@ class ClarificationHandler:
 
         return template or "Could you please clarify what you need help with?"
 
-    def generate_clarification(self, prompt: str, context: Optional[dict[str, Any]] = None,
-                             mode: Optional[str] = None, round_number: int = 1, trace_id: Optional[str] = None) -> Optional[str]:
+    def generate_clarification(
+        self,
+        prompt: str,
+        context: Optional[dict[str, Any]] = None,
+        mode: Optional[str] = None,
+        round_number: int = 1,
+        trace_id: Optional[str] = None,
+    ) -> Optional[str]:
         """
         Generate clarification question for ambiguous prompt
 
@@ -992,9 +1054,15 @@ class ClarificationHandler:
         result = self.detect_ambiguity(prompt, context, mode, round_number, trace_id)
         return result.question if result.needs_clarification else None
 
-    async def record_clarification_feedback(self, prompt: str, question: str, user_reply: Optional[str],
-                                          success: bool, context: Optional[dict[str, Any]] = None,
-                                          trace_id: Optional[str] = None):
+    async def record_clarification_feedback(
+        self,
+        prompt: str,
+        question: str,
+        user_reply: Optional[str],
+        success: bool,
+        context: Optional[dict[str, Any]] = None,
+        trace_id: Optional[str] = None,
+    ):
         """
         Record feedback from clarification attempt
 
@@ -1017,7 +1085,7 @@ class ClarificationHandler:
                 user_reply=user_reply,
                 success=success,
                 context=context or {},
-                trace_id=trace_id
+                trace_id=trace_id,
             )
 
             # Update statistics
@@ -1026,21 +1094,28 @@ class ClarificationHandler:
             else:
                 self.stats["failed_clarifications"] += 1
 
-            logger.info(f"Recorded clarification feedback: success={success}, trace_id={trace_id}")
+            logger.info(
+                f"Recorded clarification feedback: success={success}, trace_id={trace_id}"
+            )
         except Exception as e:
             logger.error(f"Failed to record clarification feedback: {e}")
 
     def get_clarification_stats(self) -> dict[str, Any]:
         """Get clarification handler statistics"""
         base_stats = {
-            "patterns_loaded": sum(len(patterns) for patterns in self.ambiguity_patterns.values()),
+            "patterns_loaded": sum(
+                len(patterns) for patterns in self.ambiguity_patterns.values()
+            ),
             "categories": list(self.ambiguity_patterns.keys()),
-            "templates_loaded": sum(len(templates) for templates in self.clarification_templates.values()),
+            "templates_loaded": sum(
+                len(templates) for templates in self.clarification_templates.values()
+            ),
             "confidence_threshold": self.confidence_threshold,
             "proceed_threshold": self.proceed_threshold,
             "max_rounds": self.max_rounds,
             "default_mode": self.default_mode,
-            "phase2_enabled": self.context_aware_clarifier is not None and self.learner is not None
+            "phase2_enabled": self.context_aware_clarifier is not None
+            and self.learner is not None,
         }
 
         # Add Phase 2 statistics
@@ -1058,7 +1133,7 @@ class ClarificationHandler:
         base_stats["circuit_breaker"] = {
             "is_open": self.circuit_breaker.is_open(),
             "failure_count": self.circuit_breaker.failure_count,
-            "state": self.circuit_breaker.state
+            "state": self.circuit_breaker.state,
         }
 
         return base_stats
@@ -1084,6 +1159,7 @@ class ClarificationHandler:
             self.learner.clear_learning_data()
             logger.info("Learning data cleared")
 
+
 # Example usage and testing
 if __name__ == "__main__":
     handler = ClarificationHandler()
@@ -1097,7 +1173,7 @@ if __name__ == "__main__":
         "Create a function",
         "gimme some code",
         "do the same thing",
-        "analyze this"
+        "analyze this",
     ]
 
     print("Clarification Handler Test Results:")

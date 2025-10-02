@@ -41,23 +41,22 @@ from .learning_alerts import (
 
 __all__ = [
     # Alert Manager
-    'AlertManager',
-    'Alert',
-    'AlertChannel',
-    'AlertTemplate',
-    'EmailNotifier',
-    'DesktopNotifier',
-    'TelegramNotifier',
-    'SMSNotifier',
-    'WebhookNotifier',
-    'get_alert_manager',
-    'send_alert',
-
+    "AlertManager",
+    "Alert",
+    "AlertChannel",
+    "AlertTemplate",
+    "EmailNotifier",
+    "DesktopNotifier",
+    "TelegramNotifier",
+    "SMSNotifier",
+    "WebhookNotifier",
+    "get_alert_manager",
+    "send_alert",
     # Learning Alerts
-    'LearningAlertManager',
-    'LearningMetrics',
-    'get_learning_alert_manager',
-    'check_learning_alerts'
+    "LearningAlertManager",
+    "LearningMetrics",
+    "get_learning_alert_manager",
+    "check_learning_alerts",
 ]
 
 __version__ = "2.0.0"

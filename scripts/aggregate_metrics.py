@@ -38,6 +38,7 @@ from stillme_core.metrics.queries import MetricsQueries
 
 logger = logging.getLogger(__name__)
 
+
 class MetricsAggregator:
     """
     Metrics aggregation system
@@ -46,10 +47,12 @@ class MetricsAggregator:
     cho dashboard và reporting.
     """
 
-    def __init__(self,
-                 db_path: str = "data/metrics/metrics.db",
-                 events_dir: str = "data/metrics/events",
-                 output_dir: str = "artifacts/metrics"):
+    def __init__(
+        self,
+        db_path: str = "data/metrics/metrics.db",
+        events_dir: str = "data/metrics/events",
+        output_dir: str = "artifacts/metrics",
+    ):
         self.db_path = db_path
         self.events_dir = Path(events_dir)
         self.output_dir = Path(output_dir)
@@ -62,7 +65,7 @@ class MetricsAggregator:
     def aggregate_daily_metrics(self, date: Optional[str] = None) -> dict[str, Any]:
         """Aggregate daily metrics"""
         if date is None:
-            date = datetime.now().strftime('%Y-%m-%d')
+            date = datetime.now().strftime("%Y-%m-%d")
 
         logger.info(f"Aggregating daily metrics for {date}")
 
@@ -88,14 +91,14 @@ class MetricsAggregator:
         approval_metrics = self.queries.get_approval_metrics(1)
 
         aggregated_data = {
-            'date': date,
-            'summary': daily_summary,
-            'learning_curve': learning_curve,
-            'performance': performance,
-            'ingest_volume': ingest_volume,
-            'token_usage': token_usage,
-            'error_analysis': error_analysis,
-            'approval_metrics': approval_metrics
+            "date": date,
+            "summary": daily_summary,
+            "learning_curve": learning_curve,
+            "performance": performance,
+            "ingest_volume": ingest_volume,
+            "token_usage": token_usage,
+            "error_analysis": error_analysis,
+            "approval_metrics": approval_metrics,
         }
 
         return aggregated_data
@@ -103,45 +106,59 @@ class MetricsAggregator:
     def create_daily_summary_csv(self, date: Optional[str] = None) -> str:
         """Create daily summary CSV"""
         if date is None:
-            date = datetime.now().strftime('%Y-%m-%d')
+            date = datetime.now().strftime("%Y-%m-%d")
 
         aggregated_data = self.aggregate_daily_metrics(date)
-        summary = aggregated_data['summary']
+        summary = aggregated_data["summary"]
 
         csv_path = self.output_dir / f"daily_summary_{date}.csv"
 
-        with open(csv_path, 'w', newline='', encoding='utf-8') as csvfile:
+        with open(csv_path, "w", newline="", encoding="utf-8") as csvfile:
             writer = csv.writer(csvfile)
 
             # Header
-            writer.writerow([
-                'date', 'total_runs', 'successful_runs', 'success_rate',
-                'total_errors', 'pass_rate', 'accuracy', 'self_assessment',
-                'avg_latency_ms', 'max_latency_ms', 'avg_memory_mb', 'max_memory_mb',
-                'total_tokens', 'ingested_items'
-            ])
+            writer.writerow(
+                [
+                    "date",
+                    "total_runs",
+                    "successful_runs",
+                    "success_rate",
+                    "total_errors",
+                    "pass_rate",
+                    "accuracy",
+                    "self_assessment",
+                    "avg_latency_ms",
+                    "max_latency_ms",
+                    "avg_memory_mb",
+                    "max_memory_mb",
+                    "total_tokens",
+                    "ingested_items",
+                ]
+            )
 
             # Data row
-            metrics = summary.get('metrics', {})
-            runs = summary.get('runs', {})
-            errors = summary.get('errors', {})
+            metrics = summary.get("metrics", {})
+            runs = summary.get("runs", {})
+            errors = summary.get("errors", {})
 
-            writer.writerow([
-                date,
-                runs.get('total', 0),
-                runs.get('successful', 0),
-                runs.get('success_rate', 0.0),
-                errors.get('total', 0),
-                metrics.get('learning_pass_rate', {}).get('avg', 0.0),
-                metrics.get('learning_accuracy', {}).get('avg', 0.0),
-                metrics.get('self_assessment_score', {}).get('avg', 0.0),
-                metrics.get('latency_ms', {}).get('avg', 0.0),
-                metrics.get('latency_ms', {}).get('max', 0.0),
-                metrics.get('memory_usage_mb', {}).get('avg', 0.0),
-                metrics.get('memory_usage_mb', {}).get('max', 0.0),
-                metrics.get('tokens_used', {}).get('avg', 0.0),
-                metrics.get('ingested_items', {}).get('avg', 0.0)
-            ])
+            writer.writerow(
+                [
+                    date,
+                    runs.get("total", 0),
+                    runs.get("successful", 0),
+                    runs.get("success_rate", 0.0),
+                    errors.get("total", 0),
+                    metrics.get("learning_pass_rate", {}).get("avg", 0.0),
+                    metrics.get("learning_accuracy", {}).get("avg", 0.0),
+                    metrics.get("self_assessment_score", {}).get("avg", 0.0),
+                    metrics.get("latency_ms", {}).get("avg", 0.0),
+                    metrics.get("latency_ms", {}).get("max", 0.0),
+                    metrics.get("memory_usage_mb", {}).get("avg", 0.0),
+                    metrics.get("memory_usage_mb", {}).get("max", 0.0),
+                    metrics.get("tokens_used", {}).get("avg", 0.0),
+                    metrics.get("ingested_items", {}).get("avg", 0.0),
+                ]
+            )
 
         logger.info(f"Created daily summary CSV: {csv_path}")
         return str(csv_path)
@@ -152,17 +169,19 @@ class MetricsAggregator:
 
         csv_path = self.output_dir / f"by_source_{days}d.csv"
 
-        with open(csv_path, 'w', newline='', encoding='utf-8') as csvfile:
+        with open(csv_path, "w", newline="", encoding="utf-8") as csvfile:
             writer = csv.writer(csvfile)
-            writer.writerow(['date', 'source', 'total_items', 'pass_rate'])
+            writer.writerow(["date", "source", "total_items", "pass_rate"])
 
             for item in ingest_volume:
-                writer.writerow([
-                    item['date'],
-                    item['source'],
-                    item['total_items'],
-                    0.0  # TODO: Calculate pass rate by source
-                ])
+                writer.writerow(
+                    [
+                        item["date"],
+                        item["source"],
+                        item["total_items"],
+                        0.0,  # TODO: Calculate pass rate by source
+                    ]
+                )
 
         logger.info(f"Created by-source CSV: {csv_path}")
         return str(csv_path)
@@ -173,17 +192,19 @@ class MetricsAggregator:
 
         csv_path = self.output_dir / f"learning_curve_{days}d.csv"
 
-        with open(csv_path, 'w', newline='', encoding='utf-8') as csvfile:
+        with open(csv_path, "w", newline="", encoding="utf-8") as csvfile:
             writer = csv.writer(csvfile)
-            writer.writerow(['date', 'pass_rate', 'accuracy', 'self_assessment'])
+            writer.writerow(["date", "pass_rate", "accuracy", "self_assessment"])
 
             for day in learning_curve:
-                writer.writerow([
-                    day['date'],
-                    day['pass_rate'],
-                    day['accuracy'],
-                    day['self_assessment']
-                ])
+                writer.writerow(
+                    [
+                        day["date"],
+                        day["pass_rate"],
+                        day["accuracy"],
+                        day["self_assessment"],
+                    ]
+                )
 
         logger.info(f"Created learning curve CSV: {csv_path}")
         return str(csv_path)
@@ -194,41 +215,47 @@ class MetricsAggregator:
 
         csv_path = self.output_dir / f"performance_{days}d.csv"
 
-        with open(csv_path, 'w', newline='', encoding='utf-8') as csvfile:
+        with open(csv_path, "w", newline="", encoding="utf-8") as csvfile:
             writer = csv.writer(csvfile)
-            writer.writerow([
-                'metric', 'operation', 'avg_value', 'min_value', 'max_value'
-            ])
+            writer.writerow(
+                ["metric", "operation", "avg_value", "min_value", "max_value"]
+            )
 
             # Latency metrics
-            for operation, metrics in performance.get('latency', {}).items():
-                writer.writerow([
-                    'latency_ms',
-                    operation,
-                    metrics.get('avg', 0.0),
-                    metrics.get('min', 0.0),
-                    metrics.get('max', 0.0)
-                ])
+            for operation, metrics in performance.get("latency", {}).items():
+                writer.writerow(
+                    [
+                        "latency_ms",
+                        operation,
+                        metrics.get("avg", 0.0),
+                        metrics.get("min", 0.0),
+                        metrics.get("max", 0.0),
+                    ]
+                )
 
             # Memory metrics
-            memory = performance.get('memory', {})
-            writer.writerow([
-                'memory_usage_mb',
-                'system',
-                memory.get('avg_mb', 0.0),
-                memory.get('avg_mb', 0.0),
-                memory.get('max_mb', 0.0)
-            ])
+            memory = performance.get("memory", {})
+            writer.writerow(
+                [
+                    "memory_usage_mb",
+                    "system",
+                    memory.get("avg_mb", 0.0),
+                    memory.get("avg_mb", 0.0),
+                    memory.get("max_mb", 0.0),
+                ]
+            )
 
             # CPU metrics
-            cpu = performance.get('cpu', {})
-            writer.writerow([
-                'cpu_usage_percent',
-                'system',
-                cpu.get('avg_percent', 0.0),
-                cpu.get('avg_percent', 0.0),
-                cpu.get('max_percent', 0.0)
-            ])
+            cpu = performance.get("cpu", {})
+            writer.writerow(
+                [
+                    "cpu_usage_percent",
+                    "system",
+                    cpu.get("avg_percent", 0.0),
+                    cpu.get("avg_percent", 0.0),
+                    cpu.get("max_percent", 0.0),
+                ]
+            )
 
         logger.info(f"Created performance CSV: {csv_path}")
         return str(csv_path)
@@ -239,17 +266,13 @@ class MetricsAggregator:
 
         csv_path = self.output_dir / f"error_analysis_{days}d.csv"
 
-        with open(csv_path, 'w', newline='', encoding='utf-8') as csvfile:
+        with open(csv_path, "w", newline="", encoding="utf-8") as csvfile:
             writer = csv.writer(csvfile)
-            writer.writerow(['error_type', 'date', 'count'])
+            writer.writerow(["error_type", "date", "count"])
 
-            for error_type, error_data in error_analysis.get('by_type', {}).items():
+            for error_type, error_data in error_analysis.get("by_type", {}).items():
                 for day_data in error_data:
-                    writer.writerow([
-                        error_type,
-                        day_data['date'],
-                        day_data['count']
-                    ])
+                    writer.writerow([error_type, day_data["date"], day_data["count"]])
 
         logger.info(f"Created error analysis CSV: {csv_path}")
         return str(csv_path)
@@ -260,12 +283,12 @@ class MetricsAggregator:
 
         for event_file in self.events_dir.glob("*.jsonl"):
             try:
-                file_date = datetime.strptime(event_file.stem, '%Y-%m-%d')
+                file_date = datetime.strptime(event_file.stem, "%Y-%m-%d")
                 if file_date < cutoff_date:
                     # Compress file
-                    compressed_file = event_file.with_suffix('.jsonl.gz')
-                    with open(event_file, 'rb') as f_in:
-                        with gzip.open(compressed_file, 'wb') as f_out:
+                    compressed_file = event_file.with_suffix(".jsonl.gz")
+                    with open(event_file, "rb") as f_in:
+                        with gzip.open(compressed_file, "wb") as f_out:
                             shutil.copyfileobj(f_in, f_out)
 
                     # Remove original
@@ -305,37 +328,54 @@ class MetricsAggregator:
     def create_metrics_summary(self) -> dict[str, Any]:
         """Create overall metrics summary"""
         summary = {
-            'generated_at': datetime.now().isoformat(),
-            'database_path': self.db_path,
-            'output_directory': str(self.output_dir),
-            'reports': []
+            "generated_at": datetime.now().isoformat(),
+            "database_path": self.db_path,
+            "output_directory": str(self.output_dir),
+            "reports": [],
         }
 
         # List generated reports
         for csv_file in self.output_dir.glob("*.csv"):
-            summary['reports'].append({
-                'filename': csv_file.name,
-                'size_bytes': csv_file.stat().st_size,
-                'modified': datetime.fromtimestamp(csv_file.stat().st_mtime).isoformat()
-            })
+            summary["reports"].append(
+                {
+                    "filename": csv_file.name,
+                    "size_bytes": csv_file.stat().st_size,
+                    "modified": datetime.fromtimestamp(
+                        csv_file.stat().st_mtime
+                    ).isoformat(),
+                }
+            )
 
         # Save summary
         summary_path = self.output_dir / "metrics_summary.json"
-        with open(summary_path, 'w', encoding='utf-8') as f:
+        with open(summary_path, "w", encoding="utf-8") as f:
             json.dump(summary, f, indent=2, ensure_ascii=False)
 
         logger.info(f"Created metrics summary: {summary_path}")
         return summary
 
+
 async def main():
     """Main function"""
     parser = argparse.ArgumentParser(description="StillMe Metrics Aggregator")
-    parser.add_argument("--days", type=int, default=7, help="Number of days to aggregate")
-    parser.add_argument("--date", type=str, help="Specific date to aggregate (YYYY-MM-DD)")
-    parser.add_argument("--output-dir", type=str, default="artifacts/metrics", help="Output directory")
-    parser.add_argument("--db-path", type=str, default="data/metrics/metrics.db", help="Database path")
-    parser.add_argument("--events-dir", type=str, default="data/metrics/events", help="Events directory")
-    parser.add_argument("--compress-days", type=int, default=90, help="Days to keep before compressing")
+    parser.add_argument(
+        "--days", type=int, default=7, help="Number of days to aggregate"
+    )
+    parser.add_argument(
+        "--date", type=str, help="Specific date to aggregate (YYYY-MM-DD)"
+    )
+    parser.add_argument(
+        "--output-dir", type=str, default="artifacts/metrics", help="Output directory"
+    )
+    parser.add_argument(
+        "--db-path", type=str, default="data/metrics/metrics.db", help="Database path"
+    )
+    parser.add_argument(
+        "--events-dir", type=str, default="data/metrics/events", help="Events directory"
+    )
+    parser.add_argument(
+        "--compress-days", type=int, default=90, help="Days to keep before compressing"
+    )
     parser.add_argument("--verbose", "-v", action="store_true", help="Verbose logging")
 
     args = parser.parse_args()
@@ -343,15 +383,12 @@ async def main():
     # Setup logging
     log_level = logging.DEBUG if args.verbose else logging.INFO
     logging.basicConfig(
-        level=log_level,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        level=log_level, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     )
 
     # Initialize aggregator
     aggregator = MetricsAggregator(
-        db_path=args.db_path,
-        events_dir=args.events_dir,
-        output_dir=args.output_dir
+        db_path=args.db_path, events_dir=args.events_dir, output_dir=args.output_dir
     )
 
     try:
@@ -376,6 +413,7 @@ async def main():
         return 1
 
     return 0
+
 
 if __name__ == "__main__":
     exit(asyncio.run(main()))

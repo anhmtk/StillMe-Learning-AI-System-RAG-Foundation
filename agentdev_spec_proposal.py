@@ -14,26 +14,20 @@ def create_spec_proposal():
             "name": "execute_task",
             "params": ["task", "mode=None"],
             "returns": "dict",
-            "description": "Execute a task with optional mode parameter"
+            "description": "Execute a task with optional mode parameter",
         },
         {
             "name": "run_session",
             "params": ["mode='critical-first'"],
             "returns": "dict",
-            "description": "Run a complete AgentDev session"
-        }
+            "description": "Run a complete AgentDev session",
+        },
     ]
 
-    helper_modules = [
-        "advanced_fixer",
-        "pattern_fixes",
-        "symbol_index"
-    ]
+    helper_modules = ["advanced_fixer", "pattern_fixes", "symbol_index"]
 
-    return {
-        "spec_methods": spec_methods,
-        "helper_modules": helper_modules
-    }
+    return {"spec_methods": spec_methods, "helper_modules": helper_modules}
+
 
 if __name__ == "__main__":
     result = create_spec_proposal()

@@ -4,6 +4,7 @@ import os
 
 log = logging.getLogger(__name__)
 
+
 def load_router():
     """Load the appropriate router implementation.
 
@@ -19,6 +20,7 @@ def load_router():
 
     if mode == "stub":
         from plugins.private_stub.plugin import StubRouter
+
         log.warning("Using StubRouter due to STILLME_ROUTER_MODE=stub")
         return StubRouter()
 
@@ -29,8 +31,11 @@ def load_router():
             log.info("Using ProRouter due to STILLME_ROUTER_MODE=pro")
             return ProRouter()
         except Exception as e:
-            log.error(f"ProRouter requested but not available: {e}; falling back to Stub.")
+            log.error(
+                f"ProRouter requested but not available: {e}; falling back to Stub."
+            )
             from plugins.private_stub.plugin import StubRouter
+
             return StubRouter()
 
     # Auto-detect: prefer Pro, else Stub
@@ -41,5 +46,6 @@ def load_router():
         return ProRouter()
     except Exception as e:
         from plugins.private_stub.plugin import StubRouter
+
         log.warning(f"ProRouter not found ({e}) → Using StubRouter (OSS mode).")
         return StubRouter()

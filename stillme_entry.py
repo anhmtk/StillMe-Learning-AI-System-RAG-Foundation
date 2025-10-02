@@ -10,6 +10,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 logger = logging.getLogger(__name__)
 
+
 class StillMeEntry:
     """StillMe Entry Point"""
 
@@ -132,8 +133,10 @@ class StillMeEntry:
         except Exception as e:
             self.logger.error(f"❌ Failed to shutdown StillMe: {e}")
 
+
 # Global StillMe instance
 _stillme_instance = None
+
 
 def get_stillme() -> StillMeEntry:
     """Get global StillMe instance"""
@@ -142,21 +145,26 @@ def get_stillme() -> StillMeEntry:
         _stillme_instance = StillMeEntry()
     return _stillme_instance
 
+
 def initialize_stillme(config: dict[str, Any] = None) -> bool:
     """Initialize StillMe system"""
     return get_stillme().initialize(config)
+
 
 def process_request(request: str, context: dict[str, Any] = None) -> str:
     """Process a request"""
     return get_stillme().process_request(request, context)
 
+
 def generate(prompt: str, context: dict[str, Any] = None) -> str:
     """Generate response for prompt"""
     return get_stillme().process_request(prompt, context)
 
+
 def shutdown_stillme():
     """Shutdown StillMe system"""
     get_stillme().shutdown()
+
 
 if __name__ == "__main__":
     # Initialize StillMe

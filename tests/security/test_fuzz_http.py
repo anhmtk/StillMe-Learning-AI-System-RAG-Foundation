@@ -33,15 +33,10 @@ class HTTPFuzzTester:
             "admin'--",
             "admin'/*",
             "' OR 1=1#",
-            "' OR 'x'='x"
+            "' OR 'x'='x",
         ]
 
-        test_endpoints = [
-            "/api/users",
-            "/api/login",
-            "/api/search",
-            "/api/data"
-        ]
+        test_endpoints = ["/api/users", "/api/login", "/api/search", "/api/data"]
 
         for endpoint in test_endpoints:
             for payload in sql_payloads:
@@ -50,35 +45,39 @@ class HTTPFuzzTester:
                     response = requests.get(
                         f"{self.base_url}{endpoint}",
                         params={"q": payload, "id": payload},
-                        timeout=5
+                        timeout=5,
                     )
 
                     if self._check_sql_injection_response(response, payload):
-                        findings.append({
-                            "type": "sql_injection",
-                            "endpoint": endpoint,
-                            "payload": payload,
-                            "method": "GET",
-                            "status_code": response.status_code,
-                            "severity": "HIGH"
-                        })
+                        findings.append(
+                            {
+                                "type": "sql_injection",
+                                "endpoint": endpoint,
+                                "payload": payload,
+                                "method": "GET",
+                                "status_code": response.status_code,
+                                "severity": "HIGH",
+                            }
+                        )
 
                     # Test POST request
                     response = requests.post(
                         f"{self.base_url}{endpoint}",
                         json={"query": payload, "id": payload},
-                        timeout=5
+                        timeout=5,
                     )
 
                     if self._check_sql_injection_response(response, payload):
-                        findings.append({
-                            "type": "sql_injection",
-                            "endpoint": endpoint,
-                            "payload": payload,
-                            "method": "POST",
-                            "status_code": response.status_code,
-                            "severity": "HIGH"
-                        })
+                        findings.append(
+                            {
+                                "type": "sql_injection",
+                                "endpoint": endpoint,
+                                "payload": payload,
+                                "method": "POST",
+                                "status_code": response.status_code,
+                                "severity": "HIGH",
+                            }
+                        )
 
                 except requests.exceptions.RequestException:
                     continue
@@ -96,15 +95,10 @@ class HTTPFuzzTester:
             "';alert('XSS');//",
             "\"><script>alert('XSS')</script>",
             "<iframe src=javascript:alert('XSS')>",
-            "<body onload=alert('XSS')>"
+            "<body onload=alert('XSS')>",
         ]
 
-        test_endpoints = [
-            "/api/search",
-            "/api/comment",
-            "/api/feedback",
-            "/api/user"
-        ]
+        test_endpoints = ["/api/search", "/api/comment", "/api/feedback", "/api/user"]
 
         for endpoint in test_endpoints:
             for payload in xss_payloads:
@@ -112,18 +106,20 @@ class HTTPFuzzTester:
                     response = requests.get(
                         f"{self.base_url}{endpoint}",
                         params={"q": payload, "comment": payload},
-                        timeout=5
+                        timeout=5,
                     )
 
                     if self._check_xss_response(response, payload):
-                        findings.append({
-                            "type": "xss_injection",
-                            "endpoint": endpoint,
-                            "payload": payload,
-                            "method": "GET",
-                            "status_code": response.status_code,
-                            "severity": "MEDIUM"
-                        })
+                        findings.append(
+                            {
+                                "type": "xss_injection",
+                                "endpoint": endpoint,
+                                "payload": payload,
+                                "method": "GET",
+                                "status_code": response.status_code,
+                                "severity": "MEDIUM",
+                            }
+                        )
 
                 except requests.exceptions.RequestException:
                     continue
@@ -139,15 +135,10 @@ class HTTPFuzzTester:
             "....//....//....//etc/passwd",
             "%2e%2e%2f%2e%2e%2f%2e%2e%2fetc%2fpasswd",
             "..%252f..%252f..%252fetc%252fpasswd",
-            "..%c0%af..%c0%af..%c0%afetc%c0%afpasswd"
+            "..%c0%af..%c0%af..%c0%afetc%c0%afpasswd",
         ]
 
-        test_endpoints = [
-            "/api/file",
-            "/api/download",
-            "/api/read",
-            "/api/view"
-        ]
+        test_endpoints = ["/api/file", "/api/download", "/api/read", "/api/view"]
 
         for endpoint in test_endpoints:
             for payload in path_payloads:
@@ -155,18 +146,20 @@ class HTTPFuzzTester:
                     response = requests.get(
                         f"{self.base_url}{endpoint}",
                         params={"file": payload, "path": payload},
-                        timeout=5
+                        timeout=5,
                     )
 
                     if self._check_path_traversal_response(response, payload):
-                        findings.append({
-                            "type": "path_traversal",
-                            "endpoint": endpoint,
-                            "payload": payload,
-                            "method": "GET",
-                            "status_code": response.status_code,
-                            "severity": "HIGH"
-                        })
+                        findings.append(
+                            {
+                                "type": "path_traversal",
+                                "endpoint": endpoint,
+                                "payload": payload,
+                                "method": "GET",
+                                "status_code": response.status_code,
+                                "severity": "HIGH",
+                            }
+                        )
 
                 except requests.exceptions.RequestException:
                     continue
@@ -183,15 +176,10 @@ class HTTPFuzzTester:
             "` id `",
             "$(whoami)",
             "; cat /etc/passwd",
-            "| type C:\\Windows\\System32\\drivers\\etc\\hosts"
+            "| type C:\\Windows\\System32\\drivers\\etc\\hosts",
         ]
 
-        test_endpoints = [
-            "/api/exec",
-            "/api/run",
-            "/api/command",
-            "/api/system"
-        ]
+        test_endpoints = ["/api/exec", "/api/run", "/api/command", "/api/system"]
 
         for endpoint in test_endpoints:
             for payload in command_payloads:
@@ -199,18 +187,20 @@ class HTTPFuzzTester:
                     response = requests.post(
                         f"{self.base_url}{endpoint}",
                         json={"command": payload, "input": payload},
-                        timeout=5
+                        timeout=5,
                     )
 
                     if self._check_command_injection_response(response, payload):
-                        findings.append({
-                            "type": "command_injection",
-                            "endpoint": endpoint,
-                            "payload": payload,
-                            "method": "POST",
-                            "status_code": response.status_code,
-                            "severity": "CRITICAL"
-                        })
+                        findings.append(
+                            {
+                                "type": "command_injection",
+                                "endpoint": endpoint,
+                                "payload": payload,
+                                "method": "POST",
+                                "status_code": response.status_code,
+                                "severity": "CRITICAL",
+                            }
+                        )
 
                 except requests.exceptions.RequestException:
                     continue
@@ -227,12 +217,14 @@ class HTTPFuzzTester:
             missing_headers = self._check_missing_security_headers(response)
 
             if missing_headers:
-                findings.append({
-                    "type": "missing_security_headers",
-                    "endpoint": "/",
-                    "missing_headers": missing_headers,
-                    "severity": "MEDIUM"
-                })
+                findings.append(
+                    {
+                        "type": "missing_security_headers",
+                        "endpoint": "/",
+                        "missing_headers": missing_headers,
+                        "severity": "MEDIUM",
+                    }
+                )
 
         except requests.exceptions.RequestException:
             pass
@@ -241,7 +233,7 @@ class HTTPFuzzTester:
         header_payloads = [
             "test\r\nX-Injected: malicious",
             "test%0d%0aX-Injected: malicious",
-            "test\nX-Injected: malicious"
+            "test\nX-Injected: malicious",
         ]
 
         for payload in header_payloads:
@@ -249,15 +241,17 @@ class HTTPFuzzTester:
                 response = requests.get(
                     f"{self.base_url}/api/test",
                     headers={"User-Agent": payload},
-                    timeout=5
+                    timeout=5,
                 )
 
                 if "X-Injected" in response.headers:
-                    findings.append({
-                        "type": "header_injection",
-                        "payload": payload,
-                        "severity": "HIGH"
-                    })
+                    findings.append(
+                        {
+                            "type": "header_injection",
+                            "payload": payload,
+                            "severity": "HIGH",
+                        }
+                    )
 
             except requests.exceptions.RequestException:
                 continue
@@ -279,12 +273,14 @@ class HTTPFuzzTester:
                     break
                 elif i == 149:
                     # No rate limiting detected
-                    findings.append({
-                        "type": "rate_limit_bypass",
-                        "endpoint": "/api/test",
-                        "requests_sent": 150,
-                        "severity": "MEDIUM"
-                    })
+                    findings.append(
+                        {
+                            "type": "rate_limit_bypass",
+                            "endpoint": "/api/test",
+                            "requests_sent": 150,
+                            "severity": "MEDIUM",
+                        }
+                    )
 
         except requests.exceptions.RequestException:
             pass
@@ -319,13 +315,11 @@ class HTTPFuzzTester:
         # Generate summary
         summary = self._generate_summary(all_findings)
 
-        return {
-            "findings": all_findings,
-            "summary": summary,
-            "timestamp": time.time()
-        }
+        return {"findings": all_findings, "summary": summary, "timestamp": time.time()}
 
-    def _check_sql_injection_response(self, response: requests.Response, payload: str) -> bool:
+    def _check_sql_injection_response(
+        self, response: requests.Response, payload: str
+    ) -> bool:
         """Check if response indicates SQL injection vulnerability"""
         if response.status_code == 500:
             return True
@@ -338,7 +332,7 @@ class HTTPFuzzTester:
             "sqlite error",
             "database error",
             "syntax error",
-            "query failed"
+            "query failed",
         ]
 
         return any(indicator in response_text for indicator in sql_error_indicators)
@@ -347,7 +341,9 @@ class HTTPFuzzTester:
         """Check if response indicates XSS vulnerability"""
         return payload in response.text
 
-    def _check_path_traversal_response(self, response: requests.Response, payload: str) -> bool:
+    def _check_path_traversal_response(
+        self, response: requests.Response, payload: str
+    ) -> bool:
         """Check if response indicates path traversal vulnerability"""
         if response.status_code == 200:
             response_text = response.text.lower()
@@ -357,14 +353,18 @@ class HTTPFuzzTester:
                 "daemon:",
                 "127.0.0.1",
                 "localhost",
-                "windows system32"
+                "windows system32",
             ]
 
-            return any(indicator in response_text for indicator in path_traversal_indicators)
+            return any(
+                indicator in response_text for indicator in path_traversal_indicators
+            )
 
         return False
 
-    def _check_command_injection_response(self, response: requests.Response, payload: str) -> bool:
+    def _check_command_injection_response(
+        self, response: requests.Response, payload: str
+    ) -> bool:
         """Check if response indicates command injection vulnerability"""
         if response.status_code == 200:
             response_text = response.text.lower()
@@ -374,7 +374,7 @@ class HTTPFuzzTester:
                 "groups=",
                 "total ",
                 "drwx",
-                "volume in drive"
+                "volume in drive",
             ]
 
             return any(indicator in response_text for indicator in command_indicators)
@@ -388,7 +388,7 @@ class HTTPFuzzTester:
             "Strict-Transport-Security",
             "X-Content-Type-Options",
             "X-Frame-Options",
-            "Referrer-Policy"
+            "Referrer-Policy",
         ]
 
         missing_headers = []
@@ -414,8 +414,9 @@ class HTTPFuzzTester:
             "total_findings": len(findings),
             "severity_counts": severity_counts,
             "type_counts": type_counts,
-            "high_risk_findings": severity_counts["HIGH"] + severity_counts["CRITICAL"]
+            "high_risk_findings": severity_counts["HIGH"] + severity_counts["CRITICAL"],
         }
+
 
 def main():
     """Main function to run fuzz tests"""
@@ -446,6 +447,7 @@ def main():
     else:
         print("\n✅ No high-risk findings detected")
         return 0
+
 
 if __name__ == "__main__":
     exit(main())

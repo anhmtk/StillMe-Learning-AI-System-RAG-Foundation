@@ -1,6 +1,7 @@
 """
 Habit Store - Opt-in habit learning with privacy and decay
 """
+
 import hashlib
 import logging
 import threading
@@ -10,9 +11,11 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class HabitEntry:
     """Single habit entry with metadata"""
+
     cue_hash: str  # Hashed cue for privacy
     action: str
     confidence: float  # 0.0-1.0
@@ -26,15 +29,18 @@ class HabitEntry:
         if self.metadata is None:
             self.metadata = {}
 
+
 @dataclass
 class HabitStats:
     """Statistics for habit store"""
+
     total_habits: int = 0
     active_habits: int = 0  # Non-decayed habits
     total_observations: int = 0
     avg_confidence: float = 0.0
     oldest_habit_days: float = 0.0
     newest_habit_days: float = 0.0
+
 
 class HabitStore:
     """
@@ -46,17 +52,29 @@ class HabitStore:
 
         # Privacy settings
         self.privacy_enabled = self.config.get("privacy", {}).get("enabled", True)
-        self.habits_opt_in = self.config.get("privacy", {}).get("habits_opt_in", False)  # Default: opt-out
-        self.ttl_days = self.config.get("privacy", {}).get("ttl_days", 90)  # 90 days retention
+        self.habits_opt_in = self.config.get("privacy", {}).get(
+            "habits_opt_in", False
+        )  # Default: opt-out
+        self.ttl_days = self.config.get("privacy", {}).get(
+            "ttl_days", 90
+        )  # 90 days retention
         self.hash_cues = self.config.get("privacy", {}).get("hash_cues", True)
 
         # Quorum settings
-        self.quorum_threshold = self.config.get("quorum", {}).get("threshold", 3)  # Min 3 observations
-        self.quorum_window_days = self.config.get("quorum", {}).get("window_days", 7)  # Within 7 days
+        self.quorum_threshold = self.config.get("quorum", {}).get(
+            "threshold", 3
+        )  # Min 3 observations
+        self.quorum_window_days = self.config.get("quorum", {}).get(
+            "window_days", 7
+        )  # Within 7 days
 
         # Decay settings
-        self.decay_half_life_days = self.config.get("decay", {}).get("half_life_days", 30)  # 30 days half-life
-        self.decay_min_threshold = self.config.get("decay", {}).get("min_threshold", 0.1)  # Remove below 0.1
+        self.decay_half_life_days = self.config.get("decay", {}).get(
+            "half_life_days", 30
+        )  # 30 days half-life
+        self.decay_min_threshold = self.config.get("decay", {}).get(
+            "min_threshold", 0.1
+        )  # Remove below 0.1
 
         # Storage
         self.habits: dict[str, HabitEntry] = {}  # cue_hash -> HabitEntry
@@ -67,7 +85,9 @@ class HabitStore:
         self.stats = HabitStats()
         self._update_stats()
 
-        logger.info(f"HabitStore initialized: opt_in={self.habits_opt_in}, ttl={self.ttl_days}d, quorum={self.quorum_threshold}")
+        logger.info(
+            f"HabitStore initialized: opt_in={self.habits_opt_in}, ttl={self.ttl_days}d, quorum={self.quorum_threshold}"
+        )
 
     def is_enabled(self) -> bool:
         """Check if habit learning is enabled (opt-in)"""
@@ -77,7 +97,9 @@ class HabitStore:
         """Hash cue for privacy (if enabled)"""
         if not self.hash_cues:
             return cue
-        return hashlib.sha256(cue.encode('utf-8')).hexdigest()[:16]  # 16 chars for readability
+        return hashlib.sha256(cue.encode("utf-8")).hexdigest()[
+            :16
+        ]  # 16 chars for readability
 
     def _is_quorum_met(self, cue_hash: str) -> bool:
         """Check if quorum is met for a cue"""
@@ -88,7 +110,9 @@ class HabitStore:
         window_start = now - (self.quorum_window_days * 24 * 3600)
 
         # Count observations within window
-        recent_observations = [ts for ts in self.observations[cue_hash] if ts >= window_start]
+        recent_observations = [
+            ts for ts in self.observations[cue_hash] if ts >= window_start
+        ]
         return len(recent_observations) >= self.quorum_threshold
 
     def _calculate_decay(self, habit: HabitEntry) -> float:
@@ -112,7 +136,10 @@ class HabitStore:
         # Remove expired habits
         expired_habits = []
         for cue_hash, habit in self.habits.items():
-            if habit.last_seen < cutoff_time or habit.decay_factor < self.decay_min_threshold:
+            if (
+                habit.last_seen < cutoff_time
+                or habit.decay_factor < self.decay_min_threshold
+            ):
                 expired_habits.append(cue_hash)
 
         for cue_hash in expired_habits:
@@ -122,7 +149,9 @@ class HabitStore:
 
         # Clean up old observations
         for cue_hash in list(self.observations.keys()):
-            self.observations[cue_hash] = [ts for ts in self.observations[cue_hash] if ts >= cutoff_time]
+            self.observations[cue_hash] = [
+                ts for ts in self.observations[cue_hash] if ts >= cutoff_time
+            ]
             if not self.observations[cue_hash]:
                 del self.observations[cue_hash]
 
@@ -133,8 +162,14 @@ class HabitStore:
         """Public method to trigger cleanup (for testing)"""
         self._cleanup_expired()
 
-    def observe_cue(self, cue: str, action: str, confidence: float = 1.0,
-                   user_id: Optional[str] = None, tenant_id: Optional[str] = None) -> bool:
+    def observe_cue(
+        self,
+        cue: str,
+        action: str,
+        confidence: float = 1.0,
+        user_id: Optional[str] = None,
+        tenant_id: Optional[str] = None,
+    ) -> bool:
         """
         Observe a cue-action pair. Returns True if habit was created/updated.
         """
@@ -154,7 +189,9 @@ class HabitStore:
 
             # Check again after adding observation
             if not self._is_quorum_met(cue_hash):
-                logger.debug(f"Quorum not met for cue_hash {cue_hash[:8]}... (need {self.quorum_threshold} in {self.quorum_window_days}d)")
+                logger.debug(
+                    f"Quorum not met for cue_hash {cue_hash[:8]}... (need {self.quorum_threshold} in {self.quorum_window_days}d)"
+                )
                 return False
         else:
             # Record observation
@@ -168,14 +205,18 @@ class HabitStore:
             habit = self.habits[cue_hash]
             habit.frequency += 1
             habit.last_seen = now
-            habit.confidence = max(habit.confidence, confidence)  # Keep highest confidence
+            habit.confidence = max(
+                habit.confidence, confidence
+            )  # Keep highest confidence
             habit.action = action  # Update action to latest
-            habit.metadata.update({
-                "last_action": action,
-                "last_confidence": confidence,
-                "last_user": user_id,
-                "last_tenant": tenant_id
-            })
+            habit.metadata.update(
+                {
+                    "last_action": action,
+                    "last_confidence": confidence,
+                    "last_user": user_id,
+                    "last_tenant": tenant_id,
+                }
+            )
         else:
             # Create new habit
             habit = HabitEntry(
@@ -194,8 +235,8 @@ class HabitStore:
                     "last_action": action,
                     "last_confidence": confidence,
                     "last_user": user_id,
-                    "last_tenant": tenant_id
-                }
+                    "last_tenant": tenant_id,
+                },
             )
             self.habits[cue_hash] = habit
 
@@ -206,7 +247,9 @@ class HabitStore:
         self._cleanup_expired()
         self._update_stats()
 
-        logger.info(f"Habit {'updated' if cue_hash in self.habits else 'created'}: {cue_hash[:8]}... -> {action} (conf={confidence:.2f}, freq={habit.frequency})")
+        logger.info(
+            f"Habit {'updated' if cue_hash in self.habits else 'created'}: {cue_hash[:8]}... -> {action} (conf={confidence:.2f}, freq={habit.frequency})"
+        )
         return True
 
     def get_habit_score(self, cue: str) -> tuple[float, Optional[str]]:
@@ -241,7 +284,9 @@ class HabitStore:
 
             return score, habit.action
 
-    def get_all_habits(self, user_id: Optional[str] = None, tenant_id: Optional[str] = None) -> list[dict[str, Any]]:
+    def get_all_habits(
+        self, user_id: Optional[str] = None, tenant_id: Optional[str] = None
+    ) -> list[dict[str, Any]]:
         """Get all habits (for export/debugging)"""
         if not self.is_enabled():
             return []
@@ -256,12 +301,18 @@ class HabitStore:
                     continue
 
                 habit_dict = asdict(habit)
-                habit_dict["days_since_last"] = (time.time() - habit.last_seen) / (24 * 3600)
+                habit_dict["days_since_last"] = (time.time() - habit.last_seen) / (
+                    24 * 3600
+                )
                 habits.append(habit_dict)
 
-            return sorted(habits, key=lambda h: h["confidence"] * h["decay_factor"], reverse=True)
+            return sorted(
+                habits, key=lambda h: h["confidence"] * h["decay_factor"], reverse=True
+            )
 
-    def delete_habits(self, user_id: Optional[str] = None, tenant_id: Optional[str] = None) -> int:
+    def delete_habits(
+        self, user_id: Optional[str] = None, tenant_id: Optional[str] = None
+    ) -> int:
         """Delete habits for a user/tenant (for privacy compliance)"""
         if not self.is_enabled():
             return 0
@@ -285,13 +336,20 @@ class HabitStore:
                 deleted_count += 1
 
             self._update_stats()
-            logger.info(f"Deleted {deleted_count} habits for user={user_id}, tenant={tenant_id}")
+            logger.info(
+                f"Deleted {deleted_count} habits for user={user_id}, tenant={tenant_id}"
+            )
             return deleted_count
 
-    def export_habits(self, user_id: Optional[str] = None, tenant_id: Optional[str] = None) -> dict[str, Any]:
+    def export_habits(
+        self, user_id: Optional[str] = None, tenant_id: Optional[str] = None
+    ) -> dict[str, Any]:
         """Export habits data (for GDPR compliance)"""
         if not self.is_enabled():
-            return {"habits": [], "metadata": {"export_time": time.time(), "opt_in": False}}
+            return {
+                "habits": [],
+                "metadata": {"export_time": time.time(), "opt_in": False},
+            }
 
         with self.lock:
             habits = self.get_all_habits(user_id, tenant_id)
@@ -308,9 +366,9 @@ class HabitStore:
                         "ttl_days": self.ttl_days,
                         "quorum_threshold": self.quorum_threshold,
                         "quorum_window_days": self.quorum_window_days,
-                        "decay_half_life_days": self.decay_half_life_days
-                    }
-                }
+                        "decay_half_life_days": self.decay_half_life_days,
+                    },
+                },
             }
 
     def _update_stats(self):
@@ -318,8 +376,14 @@ class HabitStore:
         now = time.time()
 
         self.stats.total_habits = len(self.habits)
-        self.stats.active_habits = sum(1 for h in self.habits.values() if h.decay_factor >= self.decay_min_threshold)
-        self.stats.total_observations = sum(len(obs) for obs in self.observations.values())
+        self.stats.active_habits = sum(
+            1
+            for h in self.habits.values()
+            if h.decay_factor >= self.decay_min_threshold
+        )
+        self.stats.total_observations = sum(
+            len(obs) for obs in self.observations.values()
+        )
 
         if self.habits:
             confidences = [h.confidence for h in self.habits.values()]

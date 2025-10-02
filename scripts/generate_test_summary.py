@@ -21,6 +21,7 @@ from typing import Optional
 @dataclass
 class TestResult:
     """Test result data structure"""
+
     test_type: str
     total_tests: int
     passed_tests: int
@@ -34,6 +35,7 @@ class TestResult:
 @dataclass
 class TestSummary:
     """Test summary data structure"""
+
     overall_status: str
     total_tests: int
     total_passed: int
@@ -66,8 +68,14 @@ class TestSummaryGenerator:
         total_passed = sum(result.passed_tests for result in test_results)
         total_failed = sum(result.failed_tests for result in test_results)
         total_skipped = sum(result.skipped_tests for result in test_results)
-        overall_pass_rate = (total_passed / total_tests * 100) if total_tests > 0 else 0.0
-        overall_coverage = sum(result.coverage for result in test_results) / len(test_results) if test_results else 0.0
+        overall_pass_rate = (
+            (total_passed / total_tests * 100) if total_tests > 0 else 0.0
+        )
+        overall_coverage = (
+            sum(result.coverage for result in test_results) / len(test_results)
+            if test_results
+            else 0.0
+        )
         test_duration = sum(result.duration for result in test_results)
 
         # Determine overall status
@@ -90,7 +98,7 @@ class TestSummaryGenerator:
             test_duration=test_duration,
             test_results=test_results,
             critical_issues=critical_issues,
-            recommendations=recommendations
+            recommendations=recommendations,
         )
 
     def _load_test_results(self, input_dir: str) -> list[TestResult]:
@@ -108,7 +116,9 @@ class TestSummaryGenerator:
             test_results.append(unit_results)
 
         # Load integration test results
-        integration_results = self._load_test_type_results(artifacts_path, "integration")
+        integration_results = self._load_test_type_results(
+            artifacts_path, "integration"
+        )
         if integration_results:
             test_results.append(integration_results)
 
@@ -123,19 +133,23 @@ class TestSummaryGenerator:
             test_results.append(ethics_results)
 
         # Load performance test results
-        performance_results = self._load_test_type_results(artifacts_path, "performance")
+        performance_results = self._load_test_type_results(
+            artifacts_path, "performance"
+        )
         if performance_results:
             test_results.append(performance_results)
 
         return test_results
 
-    def _load_test_type_results(self, artifacts_path: Path, test_type: str) -> Optional[TestResult]:
+    def _load_test_type_results(
+        self, artifacts_path: Path, test_type: str
+    ) -> Optional[TestResult]:
         """Load results for a specific test type"""
         # Look for test result files
         pattern_files = [
             f"*{test_type}*.json",
             f"junit-{test_type}.xml",
-            f"coverage-{test_type}.json"
+            f"coverage-{test_type}.json",
         ]
 
         test_files = []
@@ -154,50 +168,51 @@ class TestSummaryGenerator:
 
         # Parse JSON files
         for test_file in test_files:
-            if test_file.suffix == '.json':
+            if test_file.suffix == ".json":
                 try:
                     with open(test_file) as f:
                         data = json.load(f)
 
                     # Extract test metrics
-                    if 'tests' in data:
-                        total_tests += data['tests']
-                    if 'passed' in data:
-                        passed_tests += data['passed']
-                    if 'failed' in data:
-                        failed_tests += data['failed']
-                    if 'skipped' in data:
-                        skipped_tests += data['skipped']
-                    if 'duration' in data:
-                        duration += data['duration']
-                    if 'coverage' in data:
-                        coverage = max(coverage, data['coverage'])
-                    elif 'totals' in data and 'percent_covered' in data['totals']:
-                        coverage = max(coverage, data['totals']['percent_covered'])
+                    if "tests" in data:
+                        total_tests += data["tests"]
+                    if "passed" in data:
+                        passed_tests += data["passed"]
+                    if "failed" in data:
+                        failed_tests += data["failed"]
+                    if "skipped" in data:
+                        skipped_tests += data["skipped"]
+                    if "duration" in data:
+                        duration += data["duration"]
+                    if "coverage" in data:
+                        coverage = max(coverage, data["coverage"])
+                    elif "totals" in data and "percent_covered" in data["totals"]:
+                        coverage = max(coverage, data["totals"]["percent_covered"])
                 except Exception as e:
                     print(f"⚠️ Error reading {test_file}: {e}")
 
         # Parse XML files (simplified)
         for test_file in test_files:
-            if test_file.suffix == '.xml':
+            if test_file.suffix == ".xml":
                 try:
                     # Simple XML parsing for JUnit format
                     with open(test_file) as f:
                         content = f.read()
 
                     # Extract basic metrics from XML
-                    if 'tests=' in content:
+                    if "tests=" in content:
                         import re
+
                         tests_match = re.search(r'tests="(\d+)"', content)
                         if tests_match:
                             total_tests = int(tests_match.group(1))
 
-                    if 'failures=' in content:
+                    if "failures=" in content:
                         failures_match = re.search(r'failures="(\d+)"', content)
                         if failures_match:
                             failed_tests = int(failures_match.group(1))
 
-                    if 'skipped=' in content:
+                    if "skipped=" in content:
                         skipped_match = re.search(r'skipped="(\d+)"', content)
                         if skipped_match:
                             skipped_tests = int(skipped_match.group(1))
@@ -219,7 +234,7 @@ class TestSummaryGenerator:
             skipped_tests=skipped_tests,
             duration=duration,
             pass_rate=pass_rate,
-            coverage=coverage
+            coverage=coverage,
         )
 
     def _determine_overall_status(self, test_results: list[TestResult]) -> str:
@@ -245,16 +260,24 @@ class TestSummaryGenerator:
 
         for result in test_results:
             if result.pass_rate < 70:
-                issues.append(f"Critical: {result.test_type} tests have {result.pass_rate:.1f}% pass rate")
+                issues.append(
+                    f"Critical: {result.test_type} tests have {result.pass_rate:.1f}% pass rate"
+                )
             elif result.pass_rate < 90:
-                issues.append(f"Warning: {result.test_type} tests have {result.pass_rate:.1f}% pass rate")
+                issues.append(
+                    f"Warning: {result.test_type} tests have {result.pass_rate:.1f}% pass rate"
+                )
 
             if result.coverage < 80:
-                issues.append(f"Low coverage: {result.test_type} tests have {result.coverage:.1f}% coverage")
+                issues.append(
+                    f"Low coverage: {result.test_type} tests have {result.coverage:.1f}% coverage"
+                )
 
         return issues
 
-    def _generate_recommendations(self, test_results: list[TestResult], overall_status: str) -> list[str]:
+    def _generate_recommendations(
+        self, test_results: list[TestResult], overall_status: str
+    ) -> list[str]:
         """Generate improvement recommendations"""
         recommendations = []
 
@@ -276,7 +299,9 @@ class TestSummaryGenerator:
             if result.pass_rate < 90:
                 recommendations.append(f"   - Fix {result.test_type} test failures")
             if result.coverage < 80:
-                recommendations.append(f"   - Increase {result.test_type} test coverage")
+                recommendations.append(
+                    f"   - Increase {result.test_type} test coverage"
+                )
 
         # General recommendations
         recommendations.append("📊 Implement continuous testing in CI/CD")
@@ -304,7 +329,13 @@ Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 """
 
         for result in summary.test_results:
-            status_icon = "✅" if result.pass_rate >= 90 else "⚠️" if result.pass_rate >= 70 else "❌"
+            status_icon = (
+                "✅"
+                if result.pass_rate >= 90
+                else "⚠️"
+                if result.pass_rate >= 70
+                else "❌"
+            )
             report_content += f"### {status_icon} {result.test_type.title()} Tests\n"
             report_content += f"- **Total Tests**: {result.total_tests:,}\n"
             report_content += f"- **Passed**: {result.passed_tests:,}\n"
@@ -370,12 +401,14 @@ Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
         return report_content
 
-    def save_report(self, report_content: str, output_file: str = "artifacts/test_summary.md"):
+    def save_report(
+        self, report_content: str, output_file: str = "artifacts/test_summary.md"
+    ):
         """Save test summary report to file"""
         output_path = self.project_root / output_file
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             f.write(report_content)
 
         print(f"📄 Test summary saved to: {output_path}")
@@ -383,10 +416,24 @@ Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
 def main():
     """Main function"""
-    parser = argparse.ArgumentParser(description="Generate test summary for StillMe AI Framework")
-    parser.add_argument("--input", type=str, default="artifacts", help="Input directory for test artifacts")
-    parser.add_argument("--output", type=str, default="artifacts/test_summary.md", help="Output report file")
-    parser.add_argument("--project-root", type=str, default=".", help="Project root directory")
+    parser = argparse.ArgumentParser(
+        description="Generate test summary for StillMe AI Framework"
+    )
+    parser.add_argument(
+        "--input",
+        type=str,
+        default="artifacts",
+        help="Input directory for test artifacts",
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default="artifacts/test_summary.md",
+        help="Output report file",
+    )
+    parser.add_argument(
+        "--project-root", type=str, default=".", help="Project root directory"
+    )
 
     args = parser.parse_args()
 

@@ -27,9 +27,11 @@ from .interaction_policy import (
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class SkipDiagnosisResult:
     """Result of skip diagnosis"""
+
     state: str  # 'COMPLETED' | 'RUNNING' | 'STALLED' | 'UNKNOWN'
     details: str
     confidence: float  # 0-1
@@ -38,15 +40,18 @@ class SkipDiagnosisResult:
     heartbeat_status: Optional[bool] = None
     pid_status: Optional[bool] = None
 
+
 @dataclass
 class SkipDiagnoseOptions:
     """Options for skip diagnosis"""
+
     log_path: Optional[str] = None
     pid: Optional[int] = None
     heartbeat_path: Optional[str] = None
     diagnose_ms: Optional[int] = None
     process_name: Optional[str] = None
     working_directory: Optional[str] = None
+
 
 def diagnose_on_skip(opts: SkipDiagnoseOptions = None) -> SkipDiagnosisResult:
     """
@@ -68,7 +73,7 @@ def diagnose_on_skip(opts: SkipDiagnoseOptions = None) -> SkipDiagnosisResult:
 
     # Set defaults
     if opts.diagnose_ms is None:
-        opts.diagnose_ms = policy['skip']['timeouts']['diagnose_ms']
+        opts.diagnose_ms = policy["skip"]["timeouts"]["diagnose_ms"]
     if opts.working_directory is None:
         opts.working_directory = os.getcwd()
 
@@ -78,15 +83,14 @@ def diagnose_on_skip(opts: SkipDiagnoseOptions = None) -> SkipDiagnosisResult:
     try:
         # Parallel diagnosis tasks
         log_analysis = _analyze_logs(opts.log_path, log_config, opts.working_directory)
-        heartbeat_status = _check_heartbeat(opts.heartbeat_path, heartbeat_config, opts.working_directory)
+        heartbeat_status = _check_heartbeat(
+            opts.heartbeat_path, heartbeat_config, opts.working_directory
+        )
         pid_status = _check_pid(opts.pid, pid_config, opts.working_directory)
 
         # Combine results
         result = _combine_diagnosis_results(
-            log_analysis,
-            heartbeat_status,
-            pid_status,
-            opts.diagnose_ms
+            log_analysis, heartbeat_status, pid_status, opts.diagnose_ms
         )
 
         logger.info(f"📊 Diagnosis result: {result.state}")
@@ -98,25 +102,24 @@ def diagnose_on_skip(opts: SkipDiagnoseOptions = None) -> SkipDiagnosisResult:
     except Exception as error:
         logger.error(f"❌ Diagnosis failed: {error}")
         return SkipDiagnosisResult(
-            state='UNKNOWN',
+            state="UNKNOWN",
             details=f"Diagnosis failed: {error}",
             confidence=0,
-            recommendations=['Check logs manually', 'Restart task if needed']
+            recommendations=["Check logs manually", "Restart task if needed"],
         )
 
+
 def _analyze_logs(
-    log_path: Optional[str],
-    log_config: dict[str, Any],
-    working_directory: str
+    log_path: Optional[str], log_config: dict[str, Any], working_directory: str
 ) -> dict[str, Any]:
     """Analyze log files for task status"""
     log_files = [log_path] if log_path else _find_log_files(working_directory)
 
     if not log_files:
-        return {'state': 'UNKNOWN', 'snippet': 'No log files found', 'confidence': 0}
+        return {"state": "UNKNOWN", "snippet": "No log files found", "confidence": 0}
 
     # Find the most recent log file
-    latest_log = ''
+    latest_log = ""
     latest_size = 0
 
     for log_file in log_files:
@@ -130,29 +133,38 @@ def _analyze_logs(
             continue
 
     if not latest_log:
-        return {'state': 'UNKNOWN', 'snippet': 'No accessible log files', 'confidence': 0}
+        return {
+            "state": "UNKNOWN",
+            "snippet": "No accessible log files",
+            "confidence": 0,
+        }
 
     try:
         # Read last N lines
-        lines = _tail_file(latest_log, log_config['default_lines'])
-        snippet = '\n'.join(lines)
+        lines = _tail_file(latest_log, log_config["default_lines"])
+        snippet = "\n".join(lines)
 
         # Analyze patterns
-        state = _analyze_log_patterns(lines, log_config['patterns'])
-        confidence = _calculate_log_confidence(lines, log_config['patterns'])
+        state = _analyze_log_patterns(lines, log_config["patterns"])
+        confidence = _calculate_log_confidence(lines, log_config["patterns"])
 
-        return {'state': state, 'snippet': snippet, 'confidence': confidence}
+        return {"state": state, "snippet": snippet, "confidence": confidence}
 
     except Exception as error:
-        return {'state': 'UNKNOWN', 'snippet': f'Log analysis failed: {error}', 'confidence': 0}
+        return {
+            "state": "UNKNOWN",
+            "snippet": f"Log analysis failed: {error}",
+            "confidence": 0,
+        }
+
 
 def _check_heartbeat(
     heartbeat_path: Optional[str],
     heartbeat_config: dict[str, Any],
-    working_directory: str
+    working_directory: str,
 ) -> bool:
     """Check heartbeat status"""
-    heartbeat_files = [heartbeat_path] if heartbeat_path else heartbeat_config['files']
+    heartbeat_files = [heartbeat_path] if heartbeat_path else heartbeat_config["files"]
 
     for heartbeat_file in heartbeat_files:
         full_path = os.path.join(working_directory, heartbeat_file)
@@ -163,7 +175,7 @@ def _check_heartbeat(
                 age = time.time() - stats.st_mtime
 
                 # Check if heartbeat is recent
-                if age < (heartbeat_config['timeout_ms'] / 1000):
+                if age < (heartbeat_config["timeout_ms"] / 1000):
                     return True
         except OSError:
             # Continue to next file
@@ -171,17 +183,16 @@ def _check_heartbeat(
 
     return False
 
+
 def _check_pid(
-    pid: Optional[int],
-    pid_config: dict[str, Any],
-    working_directory: str
+    pid: Optional[int], pid_config: dict[str, Any], working_directory: str
 ) -> bool:
     """Check PID status"""
     if pid is not None:
         return _is_process_running(pid)
 
     # Check PID files
-    for pid_file in pid_config['files']:
+    for pid_file in pid_config["files"]:
         full_path = os.path.join(working_directory, pid_file)
 
         try:
@@ -198,17 +209,18 @@ def _check_pid(
 
     return False
 
+
 def _find_log_files(working_directory: str) -> list[str]:
     """Find log files in working directory"""
     log_files = []
     common_log_paths = [
-        'logs/app.log',
-        'logs/error.log',
-        'logs/debug.log',
-        'runtime/current.log',
-        'app.log',
-        'error.log',
-        'debug.log'
+        "logs/app.log",
+        "logs/error.log",
+        "logs/debug.log",
+        "runtime/current.log",
+        "app.log",
+        "error.log",
+        "debug.log",
     ]
 
     for log_path in common_log_paths:
@@ -218,59 +230,64 @@ def _find_log_files(working_directory: str) -> list[str]:
 
     return log_files
 
+
 def _tail_file(file_path: str, lines: int) -> list[str]:
     """Tail file to get last N lines"""
     try:
         # Use tail command if available
         result = subprocess.run(
-            ['tail', '-n', str(lines), file_path],
+            ["tail", "-n", str(lines), file_path],
             capture_output=True,
             text=True,
-            timeout=5
+            timeout=5,
         )
         if result.returncode == 0:
-            return result.stdout.strip().split('\n')
+            return result.stdout.strip().split("\n")
     except (subprocess.TimeoutExpired, FileNotFoundError):
         pass
 
     # Fallback: read file and get last N lines
     try:
-        with open(file_path, encoding='utf-8') as f:
+        with open(file_path, encoding="utf-8") as f:
             all_lines = f.readlines()
             return [line.strip() for line in all_lines[-lines:]]
     except Exception:
         return []
 
+
 def _analyze_log_patterns(lines: list[str], patterns: dict[str, list[str]]) -> str:
     """Analyze log patterns to determine state"""
-    text = '\n'.join(lines).lower()
+    text = "\n".join(lines).lower()
 
     # Check for completion patterns
-    for pattern in patterns['completed']:
+    for pattern in patterns["completed"]:
         if pattern.lower() in text:
-            return 'COMPLETED'
+            return "COMPLETED"
 
     # Check for error patterns
-    for pattern in patterns['error']:
+    for pattern in patterns["error"]:
         if pattern.lower() in text:
-            return 'STALLED'
+            return "STALLED"
 
     # Check for running patterns
-    for pattern in patterns['running']:
+    for pattern in patterns["running"]:
         if pattern.lower() in text:
-            return 'RUNNING'
+            return "RUNNING"
 
-    return 'UNKNOWN'
+    return "UNKNOWN"
 
-def _calculate_log_confidence(lines: list[str], patterns: dict[str, list[str]]) -> float:
+
+def _calculate_log_confidence(
+    lines: list[str], patterns: dict[str, list[str]]
+) -> float:
     """Calculate confidence based on log analysis"""
     confidence = 0.0
-    text = '\n'.join(lines).lower()
+    text = "\n".join(lines).lower()
 
     # Higher confidence for multiple matching patterns
-    completed_matches = sum(1 for p in patterns['completed'] if p.lower() in text)
-    error_matches = sum(1 for p in patterns['error'] if p.lower() in text)
-    running_matches = sum(1 for p in patterns['running'] if p.lower() in text)
+    completed_matches = sum(1 for p in patterns["completed"] if p.lower() in text)
+    error_matches = sum(1 for p in patterns["error"] if p.lower() in text)
+    running_matches = sum(1 for p in patterns["running"] if p.lower() in text)
 
     # Calculate confidence based on pattern matches
     total_matches = completed_matches + error_matches + running_matches
@@ -283,6 +300,7 @@ def _calculate_log_confidence(lines: list[str], patterns: dict[str, list[str]]) 
 
     return min(1.0, confidence)
 
+
 def _is_process_running(pid: int) -> bool:
     """Check if process is running"""
     try:
@@ -290,61 +308,69 @@ def _is_process_running(pid: int) -> bool:
     except Exception:
         return False
 
+
 def _combine_diagnosis_results(
     log_analysis: dict[str, Any],
     heartbeat_status: bool,
     pid_status: bool,
-    diagnose_ms: int
+    diagnose_ms: int,
 ) -> SkipDiagnosisResult:
     """Combine diagnosis results"""
-    state = log_analysis.get('state', 'UNKNOWN')
-    confidence = log_analysis.get('confidence', 0.0)
+    state = log_analysis.get("state", "UNKNOWN")
+    confidence = log_analysis.get("confidence", 0.0)
     details = f"Log analysis: {state}"
     recommendations = []
 
     # Adjust based on heartbeat and PID
     if heartbeat_status and pid_status:
-        if state == 'UNKNOWN':
-            state = 'RUNNING'
+        if state == "UNKNOWN":
+            state = "RUNNING"
             confidence = max(confidence, 0.7)
         details += ", Heartbeat: ✅, PID: ✅"
     elif pid_status:
-        if state == 'UNKNOWN':
-            state = 'STALLED'
+        if state == "UNKNOWN":
+            state = "STALLED"
             confidence = max(confidence, 0.5)
         details += ", Heartbeat: ❌, PID: ✅"
     else:
-        if state == 'UNKNOWN':
-            state = 'COMPLETED'
+        if state == "UNKNOWN":
+            state = "COMPLETED"
             confidence = max(confidence, 0.6)
         details += ", Heartbeat: ❌, PID: ❌"
 
     # Generate recommendations
-    if state == 'COMPLETED':
-        recommendations = ['Task completed successfully']
-    elif state == 'RUNNING':
-        recommendations = ['Wait for completion', 'Move to background', 'Monitor progress']
-    elif state == 'STALLED':
-        recommendations = ['Resume task', 'Retry task', 'Kill and restart']
+    if state == "COMPLETED":
+        recommendations = ["Task completed successfully"]
+    elif state == "RUNNING":
+        recommendations = [
+            "Wait for completion",
+            "Move to background",
+            "Monitor progress",
+        ]
+    elif state == "STALLED":
+        recommendations = ["Resume task", "Retry task", "Kill and restart"]
     else:  # UNKNOWN
-        recommendations = ['Check logs manually', 'Restart task', 'Contact support']
+        recommendations = ["Check logs manually", "Restart task", "Contact support"]
 
     return SkipDiagnosisResult(
         state=state,
         details=details,
         confidence=confidence,
         recommendations=recommendations,
-        log_snippet=log_analysis.get('snippet'),
+        log_snippet=log_analysis.get("snippet"),
         heartbeat_status=heartbeat_status,
-        pid_status=pid_status
+        pid_status=pid_status,
     )
 
-def get_diagnosis_prompt(result: SkipDiagnosisResult, language: str = 'en') -> str:
+
+def get_diagnosis_prompt(result: SkipDiagnosisResult, language: str = "en") -> str:
     """Get user-friendly prompt for diagnosis result"""
     from .interaction_policy import get_skip_prompt
+
     return get_skip_prompt(result.state, language)
 
-def format_diagnosis_result(result: SkipDiagnosisResult, language: str = 'en') -> str:
+
+def format_diagnosis_result(result: SkipDiagnosisResult, language: str = "en") -> str:
     """Format diagnosis result for display"""
     prompt = get_diagnosis_prompt(result, language)
     confidence = f"{result.confidence * 100:.1f}"
@@ -366,11 +392,12 @@ def format_diagnosis_result(result: SkipDiagnosisResult, language: str = 'en') -
 
     return output
 
+
 # Export for easy import
 __all__ = [
-    'diagnose_on_skip',
-    'get_diagnosis_prompt',
-    'format_diagnosis_result',
-    'SkipDiagnosisResult',
-    'SkipDiagnoseOptions'
+    "diagnose_on_skip",
+    "get_diagnosis_prompt",
+    "format_diagnosis_result",
+    "SkipDiagnosisResult",
+    "SkipDiagnoseOptions",
 ]

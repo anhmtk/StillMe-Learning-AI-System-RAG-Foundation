@@ -22,24 +22,30 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
+
 class LearningUpdateType(Enum):
     """Types of learning updates"""
+
     KNOWLEDGE_BASE_UPDATE = "knowledge_base_update"
     PATTERN_LEARNING = "pattern_learning"
     BEHAVIOR_ADJUSTMENT = "behavior_adjustment"
     SKILL_ACQUISITION = "skill_acquisition"
     PREFERENCE_UPDATE = "preference_update"
 
+
 class RollbackStatus(Enum):
     """Status of rollback operations"""
+
     SUCCESS = "success"
     FAILED = "failed"
     PARTIAL = "partial"
     NOT_NEEDED = "not_needed"
 
+
 @dataclass
 class LearningSnapshot:
     """Snapshot of learning state at a point in time"""
+
     version_id: str
     timestamp: str
     update_type: str
@@ -49,15 +55,18 @@ class LearningSnapshot:
     dependencies: list[str]
     rollback_data: dict[str, Any]
 
+
 @dataclass
 class RollbackResult:
     """Result of a rollback operation"""
+
     version_id: str
     status: str
     timestamp: str
     changes_reverted: list[str]
     errors: list[str]
     rollback_duration: float
+
 
 class LearningRollback:
     """
@@ -86,7 +95,7 @@ class LearningRollback:
 
         # Safety settings
         self.max_rollback_depth = 10  # Maximum versions to rollback
-        self.rollback_timeout = 300   # 5 minutes timeout for rollback
+        self.rollback_timeout = 300  # 5 minutes timeout for rollback
 
         # Load existing snapshots
         self._load_snapshots()
@@ -98,7 +107,7 @@ class LearningRollback:
         update_type: LearningUpdateType,
         description: str,
         changes: dict[str, Any],
-        dependencies: Optional[list[str]] = None
+        dependencies: Optional[list[str]] = None,
     ) -> LearningSnapshot:
         """
         Create a snapshot of current learning state.
@@ -130,7 +139,7 @@ class LearningRollback:
             state_hash=state_hash,
             changes=changes,
             dependencies=dependencies or [],
-            rollback_data=rollback_data
+            rollback_data=rollback_data,
         )
 
         # Store snapshot
@@ -145,9 +154,7 @@ class LearningRollback:
         return snapshot
 
     async def rollback_to_version(
-        self,
-        target_version_id: str,
-        force: bool = False
+        self, target_version_id: str, force: bool = False
     ) -> RollbackResult:
         """
         Rollback learning state to a specific version.
@@ -168,7 +175,7 @@ class LearningRollback:
                 timestamp=datetime.now().isoformat(),
                 changes_reverted=[],
                 errors=[f"Version {target_version_id} not found"],
-                rollback_duration=0.0
+                rollback_duration=0.0,
             )
 
         # Check if rollback is needed
@@ -179,7 +186,7 @@ class LearningRollback:
                 timestamp=datetime.now().isoformat(),
                 changes_reverted=[],
                 errors=[],
-                rollback_duration=0.0
+                rollback_duration=0.0,
             )
 
         # Validate rollback safety
@@ -192,7 +199,7 @@ class LearningRollback:
                     timestamp=datetime.now().isoformat(),
                     changes_reverted=[],
                     errors=safety_check["errors"],
-                    rollback_duration=0.0
+                    rollback_duration=0.0,
                 )
 
         # Perform rollback
@@ -210,13 +217,15 @@ class LearningRollback:
                 timestamp=datetime.now().isoformat(),
                 changes_reverted=changes_reverted,
                 errors=[],
-                rollback_duration=rollback_duration
+                rollback_duration=rollback_duration,
             )
 
             self.rollback_history.append(result)
             await self._save_snapshots()
 
-            self.logger.info(f"⏪ Rollback to version {target_version_id} completed successfully")
+            self.logger.info(
+                f"⏪ Rollback to version {target_version_id} completed successfully"
+            )
 
             return result
 
@@ -228,7 +237,7 @@ class LearningRollback:
                 timestamp=datetime.now().isoformat(),
                 changes_reverted=[],
                 errors=[str(e)],
-                rollback_duration=rollback_duration
+                rollback_duration=rollback_duration,
             )
 
             self.rollback_history.append(result)
@@ -244,14 +253,16 @@ class LearningRollback:
             # Check if version is rollback-able
             can_rollback = await self._can_rollback_to_version(version_id)
 
-            candidates.append({
-                "version_id": version_id,
-                "timestamp": snapshot.timestamp,
-                "description": snapshot.description,
-                "update_type": snapshot.update_type,
-                "can_rollback": can_rollback,
-                "dependencies": snapshot.dependencies
-            })
+            candidates.append(
+                {
+                    "version_id": version_id,
+                    "timestamp": snapshot.timestamp,
+                    "description": snapshot.description,
+                    "update_type": snapshot.update_type,
+                    "can_rollback": can_rollback,
+                    "dependencies": snapshot.dependencies,
+                }
+            )
 
         # Sort by timestamp (newest first)
         candidates.sort(key=lambda x: x["timestamp"], reverse=True)
@@ -263,14 +274,16 @@ class LearningRollback:
         history = []
 
         for version_id, snapshot in list(self.snapshots.items())[-limit:]:
-            history.append({
-                "version_id": version_id,
-                "timestamp": snapshot.timestamp,
-                "description": snapshot.description,
-                "update_type": snapshot.update_type,
-                "state_hash": snapshot.state_hash,
-                "is_current": version_id == self.current_version
-            })
+            history.append(
+                {
+                    "version_id": version_id,
+                    "timestamp": snapshot.timestamp,
+                    "description": snapshot.description,
+                    "update_type": snapshot.update_type,
+                    "state_hash": snapshot.state_hash,
+                    "is_current": version_id == self.current_version,
+                }
+            )
 
         return history
 
@@ -296,7 +309,7 @@ class LearningRollback:
             rollback_data[key] = {
                 "previous_value": f"previous_{key}",
                 "change_type": "update",
-                "revert_function": f"revert_{key}"
+                "revert_function": f"revert_{key}",
             }
 
         return rollback_data
@@ -313,12 +326,15 @@ class LearningRollback:
         # Check for dependent versions
         self.snapshots[target_version_id]
         dependent_versions = [
-            vid for vid, snapshot in self.snapshots.items()
+            vid
+            for vid, snapshot in self.snapshots.items()
             if target_version_id in snapshot.dependencies
         ]
 
         if dependent_versions:
-            errors.append(f"Cannot rollback: {len(dependent_versions)} dependent versions exist")
+            errors.append(
+                f"Cannot rollback: {len(dependent_versions)} dependent versions exist"
+            )
             return {"safe": False, "errors": errors}
 
         # Check rollback depth
@@ -328,7 +344,9 @@ class LearningRollback:
             rollback_depth = current_index - target_index
 
             if rollback_depth > self.max_rollback_depth:
-                errors.append(f"Rollback depth {rollback_depth} exceeds maximum {self.max_rollback_depth}")
+                errors.append(
+                    f"Rollback depth {rollback_depth} exceeds maximum {self.max_rollback_depth}"
+                )
                 return {"safe": False, "errors": errors}
 
         return {"safe": True, "errors": []}
@@ -365,13 +383,15 @@ class LearningRollback:
     async def _save_snapshots(self):
         """Save snapshots to persistent storage"""
         data = {
-            "snapshots": {vid: asdict(snapshot) for vid, snapshot in self.snapshots.items()},
+            "snapshots": {
+                vid: asdict(snapshot) for vid, snapshot in self.snapshots.items()
+            },
             "current_version": self.current_version,
             "rollback_history": [asdict(result) for result in self.rollback_history],
-            "last_updated": datetime.now().isoformat()
+            "last_updated": datetime.now().isoformat(),
         }
 
-        with open(self.snapshots_path, 'w', encoding='utf-8') as f:
+        with open(self.snapshots_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
 
         self.logger.debug(f"💾 Snapshots saved to {self.snapshots_path}")
@@ -383,7 +403,7 @@ class LearningRollback:
             return
 
         try:
-            with open(self.snapshots_path, encoding='utf-8') as f:
+            with open(self.snapshots_path, encoding="utf-8") as f:
                 data = json.load(f)
 
             # Load snapshots

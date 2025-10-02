@@ -13,13 +13,16 @@ class ApprovalStatus(Enum):
     APPROVED = "approved"
     REJECTED = "rejected"
 
+
 @dataclass
 class ApprovalRequest:
     """Approval request stub"""
+
     id: str
     content: str
     status: ApprovalStatus = ApprovalStatus.PENDING
     metadata: dict[str, Any] = None
+
 
 class ApprovalQueue:
     """Approval queue stub implementation"""
@@ -31,9 +34,7 @@ class ApprovalQueue:
         """Add approval request"""
         request_id = f"req_{len(self.requests)}"
         request = ApprovalRequest(
-            id=request_id,
-            content=content,
-            metadata=metadata or {}
+            id=request_id, content=content, metadata=metadata or {}
         )
         self.requests.append(request)
         return request_id
@@ -65,13 +66,16 @@ class ApprovalQueue:
                 return req
         return None
 
+
 class ApprovalQueueManager:
     """Approval queue manager stub implementation"""
 
     def __init__(self):
         self.queue = ApprovalQueue()
 
-    async def add_approval_request(self, content: str, metadata: dict[str, Any] = None) -> str:
+    async def add_approval_request(
+        self, content: str, metadata: dict[str, Any] = None
+    ) -> str:
         """Add approval request"""
         return self.queue.add_request(content, metadata)
 
@@ -91,8 +95,10 @@ class ApprovalQueueManager:
         """Get request by ID"""
         return self.queue.get_request(request_id)
 
+
 # Global instance
 _approval_queue_manager = None
+
 
 def get_approval_queue_manager() -> ApprovalQueueManager:
     """Get approval queue manager instance"""
@@ -101,10 +107,11 @@ def get_approval_queue_manager() -> ApprovalQueueManager:
         _approval_queue_manager = ApprovalQueueManager()
     return _approval_queue_manager
 
+
 __all__ = [
-    'ApprovalStatus',
-    'ApprovalRequest',
-    'ApprovalQueue',
-    'ApprovalQueueManager',
-    'get_approval_queue_manager'
+    "ApprovalStatus",
+    "ApprovalRequest",
+    "ApprovalQueue",
+    "ApprovalQueueManager",
+    "get_approval_queue_manager",
 ]

@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 class KillSwitchState(Enum):
     """Kill switch states"""
+
     ACTIVE = "active"
     INACTIVE = "inactive"
     EMERGENCY = "emergency"
@@ -25,9 +26,10 @@ class KillSwitchState(Enum):
 @dataclass
 class KillSwitchConfig:
     """Configuration for kill switch"""
+
     enabled: bool = True
     emergency_threshold: int = 5  # Number of critical errors before emergency mode
-    cooldown_seconds: int = 300   # 5 minutes cooldown
+    cooldown_seconds: int = 300  # 5 minutes cooldown
     auto_recovery: bool = True
     notification_enabled: bool = True
 
@@ -94,7 +96,9 @@ class KillSwitch:
                         self.state = KillSwitchState.EMERGENCY
                         self.kill_reason = "Emergency kill switch activated"
                         self.kill_timestamp = os.path.getmtime(kill_file)
-                        self._logger.critical("Emergency kill switch detected from file")
+                        self._logger.critical(
+                            "Emergency kill switch detected from file"
+                        )
             except Exception as e:
                 self._logger.error(f"Error reading kill switch file: {e}")
 
@@ -176,11 +180,15 @@ class KillSwitch:
         self.error_count += 1
         self.last_error_time = time.time()
 
-        self._logger.warning(f"Error recorded: {error_type} (count: {self.error_count})")
+        self._logger.warning(
+            f"Error recorded: {error_type} (count: {self.error_count})"
+        )
 
         # Check for emergency threshold
         if self.error_count >= self.config.emergency_threshold:
-            self.emergency_kill(f"Emergency threshold reached: {self.error_count} errors")
+            self.emergency_kill(
+                f"Emergency threshold reached: {self.error_count} errors"
+            )
 
     def reset_errors(self):
         """Reset error count"""
@@ -202,7 +210,7 @@ class KillSwitch:
         """Write kill switch state to file"""
         kill_file = os.getenv("STILLME_KILL_FILE", "/tmp/stillme_kill_switch")
         try:
-            with open(kill_file, 'w') as f:
+            with open(kill_file, "w") as f:
                 f.write(kill_type)
                 f.write(f"\n{self.kill_reason}\n")
                 f.write(f"{self.kill_timestamp}\n")
@@ -238,8 +246,12 @@ class KillSwitch:
             "last_error_time": self.last_error_time,
             "kill_reason": self.kill_reason,
             "kill_timestamp": self.kill_timestamp,
-            "cooldown_remaining": max(0, self.config.cooldown_seconds - (time.time() - self.kill_timestamp)) if self.kill_timestamp > 0 else 0,
-            "auto_recovery": self.config.auto_recovery
+            "cooldown_remaining": max(
+                0, self.config.cooldown_seconds - (time.time() - self.kill_timestamp)
+            )
+            if self.kill_timestamp > 0
+            else 0,
+            "auto_recovery": self.config.auto_recovery,
         }
 
     def manual_activate(self):

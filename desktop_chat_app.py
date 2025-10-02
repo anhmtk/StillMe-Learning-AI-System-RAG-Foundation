@@ -2,6 +2,7 @@
 """
 StillMe Desktop Chat App - Giao diện chat như DeepSeek
 """
+
 import threading
 import tkinter as tk
 from datetime import datetime
@@ -39,7 +40,7 @@ class StillMeChatApp:
             font=("Segoe UI", 11),
             wrap=tk.WORD,
             state=tk.DISABLED,
-            height=20
+            height=20,
         )
         self.chat_display.pack(fill=tk.BOTH, expand=True, pady=(0, 10))
 
@@ -54,7 +55,7 @@ class StillMeChatApp:
             fg="#ffffff",
             font=("Segoe UI", 11),
             height=3,
-            wrap=tk.WORD
+            wrap=tk.WORD,
         )
         self.message_input.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 10))
 
@@ -66,7 +67,7 @@ class StillMeChatApp:
             fg="#ffffff",
             font=("Segoe UI", 11, "bold"),
             command=self.send_message,
-            width=10
+            width=10,
         )
         self.send_button.pack(side=tk.RIGHT)
 
@@ -77,7 +78,7 @@ class StillMeChatApp:
             bg="#444444",
             fg="#ffffff",
             font=("Segoe UI", 9),
-            command=self.open_settings
+            command=self.open_settings,
         )
         settings_button.pack(fill=tk.X, pady=(0, 5))
 
@@ -89,7 +90,7 @@ class StillMeChatApp:
             textvariable=self.status_var,
             bg="#1a1a1a",
             fg="#888888",
-            font=("Segoe UI", 9)
+            font=("Segoe UI", 9),
         )
         status_bar.pack(fill=tk.X)
 
@@ -97,7 +98,9 @@ class StillMeChatApp:
         self.message_input.bind("<Control-Return>", lambda e: self.send_message())
 
         # Welcome message
-        self.add_message("StillMe AI", "Xin chào! Tôi là StillMe AI. Bạn cần giúp gì?", "assistant")
+        self.add_message(
+            "StillMe AI", "Xin chào! Tôi là StillMe AI. Bạn cần giúp gì?", "assistant"
+        )
 
     def add_message(self, sender, message, role):
         """Thêm message vào chat"""
@@ -121,7 +124,9 @@ class StillMeChatApp:
 
         # Configure tags
         self.chat_display.tag_configure("timestamp", foreground="#888888")
-        self.chat_display.tag_configure("sender", foreground=sender_color, font=("Segoe UI", 11, "bold"))
+        self.chat_display.tag_configure(
+            "sender", foreground=sender_color, font=("Segoe UI", 11, "bold")
+        )
         self.chat_display.tag_configure("message", foreground=message_color)
 
         self.chat_display.config(state=tk.DISABLED)
@@ -151,16 +156,9 @@ class StillMeChatApp:
     def send_to_api(self, message):
         """Gửi message đến API"""
         try:
-            payload = {
-                "message": message,
-                "session_id": "desktop_chat"
-            }
+            payload = {"message": message, "session_id": "desktop_chat"}
 
-            response = requests.post(
-                self.api_url,
-                json=payload,
-                timeout=120
-            )
+            response = requests.post(self.api_url, json=payload, timeout=120)
 
             if response.status_code == 200:
                 data = response.json()
@@ -177,7 +175,9 @@ class StillMeChatApp:
         except requests.exceptions.Timeout:
             self.root.after(0, self.handle_error, "Timeout - Vui lòng thử lại")
         except requests.exceptions.ConnectionError:
-            self.root.after(0, self.handle_error, "Không thể kết nối đến StillMe Backend")
+            self.root.after(
+                0, self.handle_error, "Không thể kết nối đến StillMe Backend"
+            )
         except Exception as e:
             self.root.after(0, self.handle_error, f"Lỗi: {str(e)}")
 
@@ -204,13 +204,25 @@ class StillMeChatApp:
         settings_window.configure(bg="#1a1a1a")
 
         # API URL setting
-        tk.Label(settings_window, text="API URL:", bg="#1a1a1a", fg="#ffffff", font=("Segoe UI", 11)).pack(pady=10)
+        tk.Label(
+            settings_window,
+            text="API URL:",
+            bg="#1a1a1a",
+            fg="#ffffff",
+            font=("Segoe UI", 11),
+        ).pack(pady=10)
 
         url_frame = tk.Frame(settings_window, bg="#1a1a1a")
         url_frame.pack(fill=tk.X, padx=20)
 
         self.url_var = tk.StringVar(value=self.api_url)
-        url_entry = tk.Entry(url_frame, textvariable=self.url_var, bg="#2d2d2d", fg="#ffffff", font=("Segoe UI", 11))
+        url_entry = tk.Entry(
+            url_frame,
+            textvariable=self.url_var,
+            bg="#2d2d2d",
+            fg="#ffffff",
+            font=("Segoe UI", 11),
+        )
         url_entry.pack(fill=tk.X, pady=5)
 
         # Help text
@@ -220,7 +232,7 @@ class StillMeChatApp:
             bg="#1a1a1a",
             fg="#888888",
             font=("Segoe UI", 9),
-            justify=tk.LEFT
+            justify=tk.LEFT,
         )
         help_text.pack(pady=10)
 
@@ -233,13 +245,23 @@ class StillMeChatApp:
             settings_window.destroy()
             self.add_message("System", f"✅ API URL updated: {self.api_url}", "system")
 
-        tk.Button(button_frame, text="Save", command=save_settings, bg="#007acc", fg="#ffffff").pack(side=tk.LEFT, padx=5)
-        tk.Button(button_frame, text="Cancel", command=settings_window.destroy, bg="#444444", fg="#ffffff").pack(side=tk.LEFT, padx=5)
+        tk.Button(
+            button_frame, text="Save", command=save_settings, bg="#007acc", fg="#ffffff"
+        ).pack(side=tk.LEFT, padx=5)
+        tk.Button(
+            button_frame,
+            text="Cancel",
+            command=settings_window.destroy,
+            bg="#444444",
+            fg="#ffffff",
+        ).pack(side=tk.LEFT, padx=5)
+
 
 def main():
     root = tk.Tk()
     StillMeChatApp(root)
     root.mainloop()
+
 
 if __name__ == "__main__":
     main()

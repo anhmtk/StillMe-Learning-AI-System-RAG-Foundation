@@ -18,7 +18,7 @@ import sys
 import time
 
 # Add stillme_core to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "stillme_core"))
 
 from modules.api_provider_manager import ComplexityAnalyzer, UnifiedAPIManager
 
@@ -35,91 +35,104 @@ class RouterValidator:
         print("-" * 40)
 
         results = {
-            'weights': {},
-            'thresholds': {},
-            'environment': {},
-            'overall': 'PASS'
+            "weights": {},
+            "thresholds": {},
+            "environment": {},
+            "overall": "PASS",
         }
 
         # Check weights
         required_weights = [
-            'length', 'complex_indicators', 'academic_terms',
-            'abstract_concepts', 'multi_part', 'conditional', 'domain_specific'
+            "length",
+            "complex_indicators",
+            "academic_terms",
+            "abstract_concepts",
+            "multi_part",
+            "conditional",
+            "domain_specific",
         ]
 
         stats = self.analyzer.get_stats()
-        weights = stats['weights']
+        weights = stats["weights"]
 
         for weight in required_weights:
             if weight in weights:
                 value = weights[weight]
                 if 0.0 <= value <= 1.0:
-                    results['weights'][weight] = 'PASS'
+                    results["weights"][weight] = "PASS"
                 else:
-                    results['weights'][weight] = f'FAIL (value: {value}, expected: 0.0-1.0)'
-                    results['overall'] = 'FAIL'
+                    results["weights"][weight] = (
+                        f"FAIL (value: {value}, expected: 0.0-1.0)"
+                    )
+                    results["overall"] = "FAIL"
             else:
-                results['weights'][weight] = 'FAIL (missing)'
-                results['overall'] = 'FAIL'
+                results["weights"][weight] = "FAIL (missing)"
+                results["overall"] = "FAIL"
 
         # Check thresholds
-        thresholds = stats['thresholds']
-        if 'simple' in thresholds and 'medium' in thresholds:
-            simple = thresholds['simple']
-            medium = thresholds['medium']
+        thresholds = stats["thresholds"]
+        if "simple" in thresholds and "medium" in thresholds:
+            simple = thresholds["simple"]
+            medium = thresholds["medium"]
 
             if 0.0 <= simple <= 1.0:
-                results['thresholds']['simple'] = 'PASS'
+                results["thresholds"]["simple"] = "PASS"
             else:
-                results['thresholds']['simple'] = f'FAIL (value: {simple}, expected: 0.0-1.0)'
-                results['overall'] = 'FAIL'
+                results["thresholds"]["simple"] = (
+                    f"FAIL (value: {simple}, expected: 0.0-1.0)"
+                )
+                results["overall"] = "FAIL"
 
             if 0.0 <= medium <= 1.0:
-                results['thresholds']['medium'] = 'PASS'
+                results["thresholds"]["medium"] = "PASS"
             else:
-                results['thresholds']['medium'] = f'FAIL (value: {medium}, expected: 0.0-1.0)'
-                results['overall'] = 'FAIL'
+                results["thresholds"]["medium"] = (
+                    f"FAIL (value: {medium}, expected: 0.0-1.0)"
+                )
+                results["overall"] = "FAIL"
 
             if simple >= medium:
-                results['thresholds']['order'] = f'FAIL (simple: {simple} >= medium: {medium})'
-                results['overall'] = 'FAIL'
+                results["thresholds"]["order"] = (
+                    f"FAIL (simple: {simple} >= medium: {medium})"
+                )
+                results["overall"] = "FAIL"
             else:
-                results['thresholds']['order'] = 'PASS'
+                results["thresholds"]["order"] = "PASS"
         else:
-            results['thresholds']['simple'] = 'FAIL (missing)'
-            results['thresholds']['medium'] = 'FAIL (missing)'
-            results['overall'] = 'FAIL'
+            results["thresholds"]["simple"] = "FAIL (missing)"
+            results["thresholds"]["medium"] = "FAIL (missing)"
+            results["overall"] = "FAIL"
 
         # Check environment variables
         env_vars = [
-            'COMPLEXITY_WEIGHT_LENGTH',
-            'COMPLEXITY_WEIGHT_COMPLEX_INDICATORS',
-            'COMPLEXITY_WEIGHT_ACADEMIC_TERMS',
-            'COMPLEXITY_WEIGHT_ABSTRACT_CONCEPTS',
-            'COMPLEXITY_WEIGHT_MULTI_PART',
-            'COMPLEXITY_WEIGHT_CONDITIONAL',
-            'COMPLEXITY_WEIGHT_DOMAIN_SPECIFIC',
-            'COMPLEXITY_THRESHOLD_SIMPLE',
-            'COMPLEXITY_THRESHOLD_MEDIUM'
+            "COMPLEXITY_WEIGHT_LENGTH",
+            "COMPLEXITY_WEIGHT_COMPLEX_INDICATORS",
+            "COMPLEXITY_WEIGHT_ACADEMIC_TERMS",
+            "COMPLEXITY_WEIGHT_ABSTRACT_CONCEPTS",
+            "COMPLEXITY_WEIGHT_MULTI_PART",
+            "COMPLEXITY_WEIGHT_CONDITIONAL",
+            "COMPLEXITY_WEIGHT_DOMAIN_SPECIFIC",
+            "COMPLEXITY_THRESHOLD_SIMPLE",
+            "COMPLEXITY_THRESHOLD_MEDIUM",
         ]
 
         for var in env_vars:
             if os.getenv(var):
-                results['environment'][var] = 'PASS'
+                results["environment"][var] = "PASS"
             else:
-                results['environment'][var] = 'WARN (not set, using default)'
+                results["environment"][var] = "WARN (not set, using default)"
 
         # Print results
         print("Weights validation:")
-        for weight, status in results['weights'].items():
+        for weight, status in results["weights"].items():
             print(f"  {weight}: {status}")
 
         print("\nThresholds validation:")
-        for threshold, status in results['thresholds'].items():
+        for threshold, status in results["thresholds"].items():
             print(f"  {threshold}: {status}")
 
         print("\nEnvironment variables:")
-        for var, status in results['environment'].items():
+        for var, status in results["environment"].items():
             print(f"  {var}: {status}")
 
         print(f"\nConfiguration validation: {results['overall']}")
@@ -131,11 +144,7 @@ class RouterValidator:
         print("\n⚡ Validating Performance")
         print("-" * 40)
 
-        results = {
-            'analysis_time': {},
-            'memory_usage': {},
-            'overall': 'PASS'
-        }
+        results = {"analysis_time": {}, "memory_usage": {}, "overall": "PASS"}
 
         # Test analysis time
         test_prompts = [
@@ -143,7 +152,7 @@ class RouterValidator:
             "viết code Python tính giai thừa",
             "Giải thích định lý bất toàn của Gödel",
             "Phân tích mối quan hệ giữa triết học và khoa học",
-            "tối ưu hóa performance của database query"
+            "tối ưu hóa performance của database query",
         ]
 
         times = []
@@ -157,31 +166,40 @@ class RouterValidator:
         max_time = max(times)
 
         if avg_time < 0.005:  # < 5ms
-            results['analysis_time']['average'] = 'PASS'
+            results["analysis_time"]["average"] = "PASS"
         else:
-            results['analysis_time']['average'] = f'FAIL (avg: {avg_time*1000:.2f}ms, expected: <5ms)'
-            results['overall'] = 'FAIL'
+            results["analysis_time"]["average"] = (
+                f"FAIL (avg: {avg_time*1000:.2f}ms, expected: <5ms)"
+            )
+            results["overall"] = "FAIL"
 
         if max_time < 0.01:  # < 10ms
-            results['analysis_time']['maximum'] = 'PASS'
+            results["analysis_time"]["maximum"] = "PASS"
         else:
-            results['analysis_time']['maximum'] = f'FAIL (max: {max_time*1000:.2f}ms, expected: <10ms)'
-            results['overall'] = 'FAIL'
+            results["analysis_time"]["maximum"] = (
+                f"FAIL (max: {max_time*1000:.2f}ms, expected: <10ms)"
+            )
+            results["overall"] = "FAIL"
 
         # Memory usage (basic check)
         import psutil
+
         process = psutil.Process()
         memory_mb = process.memory_info().rss / 1024 / 1024
 
         if memory_mb < 100:  # < 100MB
-            results['memory_usage']['current'] = 'PASS'
+            results["memory_usage"]["current"] = "PASS"
         else:
-            results['memory_usage']['current'] = f'WARN (current: {memory_mb:.1f}MB)'
+            results["memory_usage"]["current"] = f"WARN (current: {memory_mb:.1f}MB)"
 
         # Print results
         print("Analysis time:")
-        print(f"  Average: {avg_time*1000:.2f}ms ({results['analysis_time']['average']})")
-        print(f"  Maximum: {max_time*1000:.2f}ms ({results['analysis_time']['maximum']})")
+        print(
+            f"  Average: {avg_time*1000:.2f}ms ({results['analysis_time']['average']})"
+        )
+        print(
+            f"  Maximum: {max_time*1000:.2f}ms ({results['analysis_time']['maximum']})"
+        )
 
         print("\nMemory usage:")
         print(f"  Current: {memory_mb:.1f}MB ({results['memory_usage']['current']})")
@@ -204,7 +222,6 @@ class RouterValidator:
             ("thủ đô Việt Nam là gì?", "gemma2:2b", 0.0),
             ("hello", "gemma2:2b", 0.0),
             ("how are you?", "gemma2:2b", 0.0),
-
             # Coding prompts
             ("viết code Python", "deepseek-coder:6.7b", 0.3),
             ("lập trình JavaScript", "deepseek-coder:6.7b", 0.3),
@@ -215,8 +232,11 @@ class RouterValidator:
             ("sửa lỗi code", "deepseek-coder:6.7b", 0.3),
             ("tạo class Python", "deepseek-coder:6.7b", 0.3),
             ("viết code Python tính giai thừa", "deepseek-coder:6.7b", 0.3),
-            ("nếu tôi muốn học lập trình thì nên bắt đầu từ đâu?", "deepseek-coder:6.7b", 0.3),
-
+            (
+                "nếu tôi muốn học lập trình thì nên bắt đầu từ đâu?",
+                "deepseek-coder:6.7b",
+                0.3,
+            ),
             # Complex prompts
             ("Giải thích định lý bất toàn của Gödel", "deepseek-chat", 0.7),
             ("Phân tích mối quan hệ giữa triết học và khoa học", "deepseek-chat", 0.7),
@@ -226,15 +246,19 @@ class RouterValidator:
             ("Bản chất của thực tại là gì?", "deepseek-chat", 0.7),
             ("Tác động của AI đến xã hội", "deepseek-chat", 0.7),
             ("Phân tích xu hướng phát triển công nghệ", "deepseek-chat", 0.7),
-            ("giả sử tôi có một bài toán phức tạp, làm thế nào để giải quyết nó?", "deepseek-chat", 0.7),
+            (
+                "giả sử tôi có một bài toán phức tạp, làm thế nào để giải quyết nó?",
+                "deepseek-chat",
+                0.7,
+            ),
             ("trong trường hợp nào thì nên sử dụng AI?", "deepseek-chat", 0.7),
         ]
 
         results = {
-            'simple': {'correct': 0, 'total': 0, 'accuracy': 0.0},
-            'coding': {'correct': 0, 'total': 0, 'accuracy': 0.0},
-            'complex': {'correct': 0, 'total': 0, 'accuracy': 0.0},
-            'overall': {'correct': 0, 'total': 0, 'accuracy': 0.0}
+            "simple": {"correct": 0, "total": 0, "accuracy": 0.0},
+            "coding": {"correct": 0, "total": 0, "accuracy": 0.0},
+            "complex": {"correct": 0, "total": 0, "accuracy": 0.0},
+            "overall": {"correct": 0, "total": 0, "accuracy": 0.0},
         }
 
         # Categorize test cases
@@ -243,7 +267,11 @@ class RouterValidator:
         complex_cases = test_cases[16:]
 
         # Test each category
-        for category, cases in [('simple', simple_cases), ('coding', coding_cases), ('complex', complex_cases)]:
+        for category, cases in [
+            ("simple", simple_cases),
+            ("coding", coding_cases),
+            ("complex", complex_cases),
+        ]:
             correct = 0
             total = len(cases)
 
@@ -266,36 +294,42 @@ class RouterValidator:
                     correct += 1
 
                 status = "✅" if is_correct else "❌"
-                print(f"  {status} {prompt[:50]}... → {actual_model} (score: {actual_score:.3f})")
+                print(
+                    f"  {status} {prompt[:50]}... → {actual_model} (score: {actual_score:.3f})"
+                )
 
                 if not is_correct:
                     print(f"    Expected: {expected_model}, Got: {actual_model}")
 
             accuracy = correct / total
-            results[category]['correct'] = correct
-            results[category]['total'] = total
-            results[category]['accuracy'] = accuracy
+            results[category]["correct"] = correct
+            results[category]["total"] = total
+            results[category]["accuracy"] = accuracy
 
             print(f"  📊 {category} accuracy: {accuracy:.1%} ({correct}/{total})")
 
         # Overall accuracy
-        total_correct = sum(results[cat]['correct'] for cat in ['simple', 'coding', 'complex'])
-        total_tests = sum(results[cat]['total'] for cat in ['simple', 'coding', 'complex'])
+        total_correct = sum(
+            results[cat]["correct"] for cat in ["simple", "coding", "complex"]
+        )
+        total_tests = sum(
+            results[cat]["total"] for cat in ["simple", "coding", "complex"]
+        )
         overall_accuracy = total_correct / total_tests
 
-        results['overall']['correct'] = total_correct
-        results['overall']['total'] = total_tests
-        results['overall']['accuracy'] = overall_accuracy
+        results["overall"]["correct"] = total_correct
+        results["overall"]["total"] = total_tests
+        results["overall"]["accuracy"] = overall_accuracy
 
         print(f"\n🎯 Overall accuracy: {overall_accuracy:.1%}")
 
         # Determine overall status
         if overall_accuracy >= 0.8:
-            results['overall']['status'] = 'PASS'
+            results["overall"]["status"] = "PASS"
         elif overall_accuracy >= 0.6:
-            results['overall']['status'] = 'WARN'
+            results["overall"]["status"] = "WARN"
         else:
-            results['overall']['status'] = 'FAIL'
+            results["overall"]["status"] = "FAIL"
 
         return results
 
@@ -305,49 +339,74 @@ class RouterValidator:
         print("-" * 40)
 
         results = {
-            'negative_feedback': {},
-            'confusion_markers': {},
-            'short_responses': {},
-            'overall': 'PASS'
+            "negative_feedback": {},
+            "confusion_markers": {},
+            "short_responses": {},
+            "overall": "PASS",
         }
 
         # Test negative feedback detection
         negative_feedback = [
-            "sai rồi", "không đúng", "???", "không đúng ý mình",
-            "chưa chính xác", "thiếu thông tin", "không hiểu", "??", "sai"
+            "sai rồi",
+            "không đúng",
+            "???",
+            "không đúng ý mình",
+            "chưa chính xác",
+            "thiếu thông tin",
+            "không hiểu",
+            "??",
+            "sai",
         ]
 
         correct_negative = 0
         for feedback in negative_feedback:
-            should_fallback = self.analyzer.should_trigger_fallback(feedback, "original prompt", "gemma2:2b")
+            should_fallback = self.analyzer.should_trigger_fallback(
+                feedback, "original prompt", "gemma2:2b"
+            )
             if should_fallback:
                 correct_negative += 1
 
-        results['negative_feedback']['correct'] = correct_negative
-        results['negative_feedback']['total'] = len(negative_feedback)
-        results['negative_feedback']['accuracy'] = correct_negative / len(negative_feedback)
+        results["negative_feedback"]["correct"] = correct_negative
+        results["negative_feedback"]["total"] = len(negative_feedback)
+        results["negative_feedback"]["accuracy"] = correct_negative / len(
+            negative_feedback
+        )
 
         # Test positive feedback (should NOT trigger fallback)
         positive_feedback = [
-            "đúng rồi", "ok", "cảm ơn", "tốt lắm", "tuyệt vời", "cảm ơn bạn", "rất hay"
+            "đúng rồi",
+            "ok",
+            "cảm ơn",
+            "tốt lắm",
+            "tuyệt vời",
+            "cảm ơn bạn",
+            "rất hay",
         ]
 
         correct_positive = 0
         for feedback in positive_feedback:
-            should_fallback = self.analyzer.should_trigger_fallback(feedback, "original prompt", "gemma2:2b")
+            should_fallback = self.analyzer.should_trigger_fallback(
+                feedback, "original prompt", "gemma2:2b"
+            )
             if not should_fallback:
                 correct_positive += 1
 
-        results['confusion_markers']['correct'] = correct_positive
-        results['confusion_markers']['total'] = len(positive_feedback)
-        results['confusion_markers']['accuracy'] = correct_positive / len(positive_feedback)
+        results["confusion_markers"]["correct"] = correct_positive
+        results["confusion_markers"]["total"] = len(positive_feedback)
+        results["confusion_markers"]["accuracy"] = correct_positive / len(
+            positive_feedback
+        )
 
         # Print results
         print("Negative feedback detection:")
-        print(f"  Correct: {correct_negative}/{len(negative_feedback)} ({results['negative_feedback']['accuracy']:.1%})")
+        print(
+            f"  Correct: {correct_negative}/{len(negative_feedback)} ({results['negative_feedback']['accuracy']:.1%})"
+        )
 
         print("\nPositive feedback detection:")
-        print(f"  Correct: {correct_positive}/{len(positive_feedback)} ({results['confusion_markers']['accuracy']:.1%})")
+        print(
+            f"  Correct: {correct_positive}/{len(positive_feedback)} ({results['confusion_markers']['accuracy']:.1%})"
+        )
 
         # Overall fallback validation
         total_correct = correct_negative + correct_positive
@@ -355,11 +414,11 @@ class RouterValidator:
         overall_accuracy = total_correct / total_tests
 
         if overall_accuracy >= 0.9:
-            results['overall'] = 'PASS'
+            results["overall"] = "PASS"
         elif overall_accuracy >= 0.7:
-            results['overall'] = 'WARN'
+            results["overall"] = "WARN"
         else:
-            results['overall'] = 'FAIL'
+            results["overall"] = "FAIL"
 
         print(f"\nFallback validation: {results['overall']} ({overall_accuracy:.1%})")
 
@@ -382,34 +441,40 @@ class RouterValidator:
 
         # Compile overall results
         overall_results = {
-            'configuration': config_results,
-            'performance': performance_results,
-            'accuracy': accuracy_results,
-            'fallback': fallback_results,
-            'total_time': end_time - start_time
+            "configuration": config_results,
+            "performance": performance_results,
+            "accuracy": accuracy_results,
+            "fallback": fallback_results,
+            "total_time": end_time - start_time,
         }
 
         # Determine overall status
-        overall_status = 'PASS'
-        if (config_results['overall'] == 'FAIL' or
-            performance_results['overall'] == 'FAIL' or
-            accuracy_results['overall']['status'] == 'FAIL' or
-            fallback_results['overall'] == 'FAIL'):
-            overall_status = 'FAIL'
-        elif (config_results['overall'] == 'WARN' or
-              performance_results['overall'] == 'WARN' or
-              accuracy_results['overall']['status'] == 'WARN' or
-              fallback_results['overall'] == 'WARN'):
-            overall_status = 'WARN'
+        overall_status = "PASS"
+        if (
+            config_results["overall"] == "FAIL"
+            or performance_results["overall"] == "FAIL"
+            or accuracy_results["overall"]["status"] == "FAIL"
+            or fallback_results["overall"] == "FAIL"
+        ):
+            overall_status = "FAIL"
+        elif (
+            config_results["overall"] == "WARN"
+            or performance_results["overall"] == "WARN"
+            or accuracy_results["overall"]["status"] == "WARN"
+            or fallback_results["overall"] == "WARN"
+        ):
+            overall_status = "WARN"
 
-        overall_results['overall_status'] = overall_status
+        overall_results["overall_status"] = overall_status
 
         # Print summary
         print("\n📊 Validation Summary")
         print("=" * 40)
         print(f"Configuration: {config_results['overall']}")
         print(f"Performance: {performance_results['overall']}")
-        print(f"Accuracy: {accuracy_results['overall']['status']} ({accuracy_results['overall']['accuracy']:.1%})")
+        print(
+            f"Accuracy: {accuracy_results['overall']['status']} ({accuracy_results['overall']['accuracy']:.1%})"
+        )
         print(f"Fallback: {fallback_results['overall']}")
         print(f"Total time: {overall_results['total_time']:.2f}s")
         print(f"\n🎯 Overall Status: {overall_status}")
@@ -431,21 +496,25 @@ class RouterValidator:
 
         # Compile results
         results = {
-            'configuration': config_results,
-            'performance': performance_results,
-            'total_time': end_time - start_time
+            "configuration": config_results,
+            "performance": performance_results,
+            "total_time": end_time - start_time,
         }
 
         # Determine overall status
-        overall_status = 'PASS'
-        if (config_results['overall'] == 'FAIL' or
-            performance_results['overall'] == 'FAIL'):
-            overall_status = 'FAIL'
-        elif (config_results['overall'] == 'WARN' or
-              performance_results['overall'] == 'WARN'):
-            overall_status = 'WARN'
+        overall_status = "PASS"
+        if (
+            config_results["overall"] == "FAIL"
+            or performance_results["overall"] == "FAIL"
+        ):
+            overall_status = "FAIL"
+        elif (
+            config_results["overall"] == "WARN"
+            or performance_results["overall"] == "WARN"
+        ):
+            overall_status = "WARN"
 
-        results['overall_status'] = overall_status
+        results["overall_status"] = overall_status
 
         # Print summary
         print("\n📊 Quick Validation Summary")
@@ -459,17 +528,20 @@ class RouterValidator:
 
     def export_results(self, results: dict, filename: str):
         """Export validation results to JSON file"""
-        with open(filename, 'w', encoding='utf-8') as f:
+        with open(filename, "w", encoding="utf-8") as f:
             json.dump(results, f, indent=2, ensure_ascii=False)
 
         print(f"✅ Validation results exported to {filename}")
 
+
 def main():
-    parser = argparse.ArgumentParser(description='AI Router Validation Script')
-    parser.add_argument('--full', action='store_true', help='Run full validation suite')
-    parser.add_argument('--quick', action='store_true', help='Run quick validation')
-    parser.add_argument('--performance', action='store_true', help='Run performance validation only')
-    parser.add_argument('--export', type=str, help='Export results to JSON file')
+    parser = argparse.ArgumentParser(description="AI Router Validation Script")
+    parser.add_argument("--full", action="store_true", help="Run full validation suite")
+    parser.add_argument("--quick", action="store_true", help="Run quick validation")
+    parser.add_argument(
+        "--performance", action="store_true", help="Run performance validation only"
+    )
+    parser.add_argument("--export", type=str, help="Export results to JSON file")
 
     args = parser.parse_args()
 
@@ -480,7 +552,7 @@ def main():
     elif args.quick:
         results = validator.run_quick_validation()
     elif args.performance:
-        results = {'performance': validator.validate_performance()}
+        results = {"performance": validator.validate_performance()}
     else:
         print("Please specify --full, --quick, or --performance")
         print("Use --help for more information")
@@ -488,6 +560,7 @@ def main():
 
     if args.export:
         validator.export_results(results, args.export)
+
 
 if __name__ == "__main__":
     main()

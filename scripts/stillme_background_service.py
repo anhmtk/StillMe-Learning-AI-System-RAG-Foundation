@@ -23,13 +23,14 @@ from stillme_core.learning.proposals_manager import ProposalsManager
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
+    format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[
-        logging.FileHandler('artifacts/stillme_service.log'),
-        logging.StreamHandler()
-    ]
+        logging.FileHandler("artifacts/stillme_service.log"),
+        logging.StreamHandler(),
+    ],
 )
 logger = logging.getLogger(__name__)
+
 
 class StillMeBackgroundService:
     def __init__(self):
@@ -48,7 +49,7 @@ class StillMeBackgroundService:
             "notification_enabled": True,
             "last_discovery_time": None,
             "discovery_count_today": 0,
-            "max_discoveries_per_day": 8  # Tối đa 8 lần quét/ngày
+            "max_discoveries_per_day": 8,  # Tối đa 8 lần quét/ngày
         }
 
         if self.config_file.exists():
@@ -56,9 +57,13 @@ class StillMeBackgroundService:
                 with open(self.config_file) as f:
                     self.config = json.load(f)
                 # Reset daily counter if new day
-                if self.config.get("last_discovery_date") != datetime.now().strftime("%Y-%m-%d"):
+                if self.config.get("last_discovery_date") != datetime.now().strftime(
+                    "%Y-%m-%d"
+                ):
                     self.config["discovery_count_today"] = 0
-                    self.config["last_discovery_date"] = datetime.now().strftime("%Y-%m-%d")
+                    self.config["last_discovery_date"] = datetime.now().strftime(
+                        "%Y-%m-%d"
+                    )
             except:
                 self.config = default_config
         else:
@@ -69,7 +74,7 @@ class StillMeBackgroundService:
     def save_config(self):
         """Save background service configuration"""
         self.config_file.parent.mkdir(parents=True, exist_ok=True)
-        with open(self.config_file, 'w') as f:
+        with open(self.config_file, "w") as f:
             json.dump(self.config, f, indent=2)
 
     def discover_knowledge(self):
@@ -78,8 +83,13 @@ class StillMeBackgroundService:
             logger.info("🔴 Background service is disabled")
             return
 
-        if self.config["discovery_count_today"] >= self.config["max_discoveries_per_day"]:
-            logger.info(f"📊 Daily discovery limit reached: {self.config['discovery_count_today']}/{self.config['max_discoveries_per_day']}")
+        if (
+            self.config["discovery_count_today"]
+            >= self.config["max_discoveries_per_day"]
+        ):
+            logger.info(
+                f"📊 Daily discovery limit reached: {self.config['discovery_count_today']}/{self.config['max_discoveries_per_day']}"
+            )
             return
 
         logger.info("🔍 Starting knowledge discovery...")
@@ -105,7 +115,7 @@ class StillMeBackgroundService:
                         f"🔍 Discovery time: {datetime.now().strftime('%H:%M:%S')}\n"
                         f"📊 Total discoveries today: {self.config['discovery_count_today']}\n\n"
                         f"Please check the dashboard to review new proposals!",
-                        "info"
+                        "info",
                     )
             else:
                 logger.info("ℹ️ No new knowledge discovered this time")
@@ -122,9 +132,13 @@ class StillMeBackgroundService:
             export_script = project_root / "scripts" / "export_dashboard_data.py"
             if export_script.exists():
                 import subprocess
-                result = subprocess.run([
-                    sys.executable, str(export_script)
-                ], capture_output=True, text=True, cwd=project_root)
+
+                result = subprocess.run(
+                    [sys.executable, str(export_script)],
+                    capture_output=True,
+                    text=True,
+                    cwd=project_root,
+                )
 
                 if result.returncode == 0:
                     logger.info("✅ Dashboard data exported successfully")
@@ -149,10 +163,16 @@ class StillMeBackgroundService:
         # Schedule dashboard data export (every 6 hours)
         schedule.every(6).hours.do(self._export_dashboard_data)
 
-        logger.info(f"⏰ Scheduled knowledge discovery every {discovery_interval} hours")
-        logger.info(f"📊 Max discoveries per day: {self.config['max_discoveries_per_day']}")
+        logger.info(
+            f"⏰ Scheduled knowledge discovery every {discovery_interval} hours"
+        )
+        logger.info(
+            f"📊 Max discoveries per day: {self.config['max_discoveries_per_day']}"
+        )
         logger.info("📊 Dashboard data export every 6 hours")
-        logger.info(f"🔔 Notifications: {'Enabled' if self.config['notification_enabled'] else 'Disabled'}")
+        logger.info(
+            f"🔔 Notifications: {'Enabled' if self.config['notification_enabled'] else 'Disabled'}"
+        )
 
         # Run initial discovery
         logger.info("🔍 Running initial knowledge discovery...")
@@ -176,6 +196,7 @@ class StillMeBackgroundService:
         self.save_config()
         logger.info("🛑 Background service stopped")
 
+
 def main():
     """Main function"""
     service = StillMeBackgroundService()
@@ -185,6 +206,7 @@ def main():
     except Exception as e:
         logger.error(f"❌ Background service failed: {e}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

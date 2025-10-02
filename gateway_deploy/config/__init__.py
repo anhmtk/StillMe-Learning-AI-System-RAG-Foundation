@@ -19,9 +19,4 @@ from .core.config import CoreConfig
 from .platform.config import PlatformConfig
 from .shared.config import SharedConfig
 
-__all__ = [
-    "SharedConfig",
-    "CoreConfig",
-    "AgentDevConfig",
-    "PlatformConfig"
-]
+__all__ = ["SharedConfig", "CoreConfig", "AgentDevConfig", "PlatformConfig"]

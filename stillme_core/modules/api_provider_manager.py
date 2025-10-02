@@ -20,6 +20,7 @@ from typing import Any, Optional
 # Initialize logger
 logger = logging.getLogger("StillMe.APIProvider")
 
+
 class UnifiedAPIManager:
     """Simple API provider manager with fallback responses"""
 
@@ -28,7 +29,9 @@ class UnifiedAPIManager:
         self.model_preferences = ["gemma2:2b", "deepseek-coder:6.7b", "deepseek-chat"]
         self.translation_core_lang = os.getenv("TRANSLATION_CORE_LANG", "en")
         self.translator_priority = os.getenv("TRANSLATOR_PRIORITY", "gemma,nllb")
-        self.nllb_model_name = os.getenv("NLLB_MODEL_NAME", "facebook/nllb-200-distilled-600M")
+        self.nllb_model_name = os.getenv(
+            "NLLB_MODEL_NAME", "facebook/nllb-200-distilled-600M"
+        )
 
         # Initialize complexity analyzer
         self.complexity_analyzer = ComplexityAnalyzer()
@@ -45,7 +48,9 @@ class UnifiedAPIManager:
 
     def handle_fallback(self, feedback: str, original_prompt: str, model: str) -> bool:
         """Handle fallback mechanism"""
-        return self.complexity_analyzer.should_trigger_fallback(feedback, original_prompt, model)
+        return self.complexity_analyzer.should_trigger_fallback(
+            feedback, original_prompt, model
+        )
 
     def get_response(self, prompt: str, model: Optional[str] = None) -> str:
         """Get AI response from appropriate model"""
@@ -126,7 +131,10 @@ class UnifiedAPIManager:
         if any(word in prompt_lower for word in ["phân tích", "so sánh", "đánh giá"]):
             return "Đây là phân tích chi tiết từ StillMe AI. Tôi sẽ cung cấp câu trả lời sâu sắc và toàn diện cho câu hỏi của bạn."
 
-        elif any(word in prompt_lower for word in ["ai", "trí tuệ nhân tạo", "machine learning"]):
+        elif any(
+            word in prompt_lower
+            for word in ["ai", "trí tuệ nhân tạo", "machine learning"]
+        ):
             return "StillMe AI có thể giải thích về trí tuệ nhân tạo, machine learning, và các công nghệ AI tiên tiến."
 
         else:
@@ -136,7 +144,13 @@ class UnifiedAPIManager:
         """Generate fallback response when all else fails"""
         return f"Xin lỗi, tôi đang gặp khó khăn trong việc xử lý câu hỏi: '{prompt}'. Vui lòng thử lại sau."
 
-    def translate(self, text: str, src_lang: str, tgt_lang: str, quality_hint: Optional[str] = None) -> dict[str, Any]:
+    def translate(
+        self,
+        text: str,
+        src_lang: str,
+        tgt_lang: str,
+        quality_hint: Optional[str] = None,
+    ) -> dict[str, Any]:
         """Simple translation with fallback"""
         try:
             # Simple translation logic
@@ -161,6 +175,7 @@ class UnifiedAPIManager:
         """Get complexity analyzer statistics"""
         return self.complexity_analyzer.get_stats()
 
+
 class ComplexityAnalyzer:
     """Simple complexity analyzer"""
 
@@ -170,22 +185,57 @@ class ComplexityAnalyzer:
 
         # Simple keyword sets
         self.complex_indicators = {
-            "tại sao", "như thế nào", "phân tích", "so sánh", "đánh giá",
-            "giải thích", "mối quan hệ", "tác động", "ảnh hưởng", "nguyên nhân",
-            "học máy", " trí tuệ nhân tạo", "công nghệ", "xã hội",
-            "ý nghĩa", "bản chất", "cuộc sống", "thực tại", "phức tạp",
-            " trường hợp"
+            "tại sao",
+            "như thế nào",
+            "phân tích",
+            "so sánh",
+            "đánh giá",
+            "giải thích",
+            "mối quan hệ",
+            "tác động",
+            "ảnh hưởng",
+            "nguyên nhân",
+            "học máy",
+            " trí tuệ nhân tạo",
+            "công nghệ",
+            "xã hội",
+            "ý nghĩa",
+            "bản chất",
+            "cuộc sống",
+            "thực tại",
+            "phức tạp",
+            " trường hợp",
         }
 
         self.coding_keywords = {
-            "code", "lập trình", "programming", "python", "javascript",
-            "function", "class", "variable", "algorithm", "debug",
-            "viết code", "tạo function", "tối ưu", "sửa lỗi", "tạo class"
+            "code",
+            "lập trình",
+            "programming",
+            "python",
+            "javascript",
+            "function",
+            "class",
+            "variable",
+            "algorithm",
+            "debug",
+            "viết code",
+            "tạo function",
+            "tối ưu",
+            "sửa lỗi",
+            "tạo class",
         }
 
         self.academic_terms = {
-            "định luật", "định lý", "bất toàn", "gödel", "toán học",
-            "triết học", "khoa học", "vật lý", "hóa học", "sinh học"
+            "định luật",
+            "định lý",
+            "bất toàn",
+            "gödel",
+            "toán học",
+            "triết học",
+            "khoa học",
+            "vật lý",
+            "hóa học",
+            "sinh học",
         }
 
     def analyze_complexity(self, prompt: str) -> tuple[float, str]:
@@ -203,17 +253,23 @@ class ComplexityAnalyzer:
                 score += 0.1
 
             # Complex indicators
-            complex_count = sum(1 for keyword in self.complex_indicators if keyword in prompt_lower)
+            complex_count = sum(
+                1 for keyword in self.complex_indicators if keyword in prompt_lower
+            )
             if complex_count > 0:
                 score += 0.6 + min(complex_count * 0.12, 0.25)  # Base 0.6 for complex
 
             # Coding keywords
-            coding_count = sum(1 for keyword in self.coding_keywords if keyword in prompt_lower)
+            coding_count = sum(
+                1 for keyword in self.coding_keywords if keyword in prompt_lower
+            )
             if coding_count > 0:
                 score += 0.3 + min(coding_count * 0.005, 0.02)  # Base 0.3 for coding
 
             # Academic terms
-            academic_count = sum(1 for keyword in self.academic_terms if keyword in prompt_lower)
+            academic_count = sum(
+                1 for keyword in self.academic_terms if keyword in prompt_lower
+            )
             if academic_count > 0:
                 score += 0.4 + min(academic_count * 0.15, 0.3)  # Base 0.4 for academic
 
@@ -222,7 +278,10 @@ class ComplexityAnalyzer:
                 score += 0.1
 
             # Conditional questions
-            if any(word in prompt_lower for word in ["nếu", "khi", "trong trường hợp", "if", "when", "case"]):
+            if any(
+                word in prompt_lower
+                for word in ["nếu", "khi", "trong trường hợp", "if", "when", "case"]
+            ):
                 score += 0.1
 
             # Normalize to 0.0-1.0 range
@@ -246,13 +305,27 @@ class ComplexityAnalyzer:
             logger.error(f"❌ Complexity analysis failed: {e}")
             return 0.5, "medium"  # Default medium complexity
 
-    def should_trigger_fallback(self, feedback: str, original_prompt: str, model: str) -> bool:
+    def should_trigger_fallback(
+        self, feedback: str, original_prompt: str, model: str
+    ) -> bool:
         """Check if feedback indicates fallback should be triggered"""
         feedback_lower = feedback.lower()
         fallback_indicators = {
-            "sai", "không đúng", "???", "không đúng ý", "chưa chính xác",
-            "thiếu thông tin", "không hiểu", "??", "chưa đúng", "thiếu",
-            "không rõ", "mơ hồ", "không chính xác", "sai rồi", "không đúng ý mình"
+            "sai",
+            "không đúng",
+            "???",
+            "không đúng ý",
+            "chưa chính xác",
+            "thiếu thông tin",
+            "không hiểu",
+            "??",
+            "chưa đúng",
+            "thiếu",
+            "không rõ",
+            "mơ hồ",
+            "không chính xác",
+            "sai rồi",
+            "không đúng ý mình",
         }
         return any(indicator in feedback_lower for indicator in fallback_indicators)
 
@@ -260,6 +333,10 @@ class ComplexityAnalyzer:
         """Get analyzer statistics"""
         return {
             "total_analyses": len(self.analysis_times),
-            "avg_analysis_time_ms": sum(self.analysis_times) / len(self.analysis_times) * 1000 if self.analysis_times else 0,
-            "fallback_count": len(self.fallback_log)
+            "avg_analysis_time_ms": sum(self.analysis_times)
+            / len(self.analysis_times)
+            * 1000
+            if self.analysis_times
+            else 0,
+            "fallback_count": len(self.fallback_log),
         }

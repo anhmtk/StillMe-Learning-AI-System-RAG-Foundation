@@ -14,8 +14,11 @@ from unittest.mock import patch
 import pytest
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
+
 
 class ChaosEngineeringTests:
     """
@@ -38,14 +41,15 @@ class ChaosEngineeringTests:
         failure_simulation = {
             "failure_type": "memory_corruption",
             "duration": 5000,  # 5 seconds
-            "severity": "high"
+            "severity": "high",
         }
 
         try:
             # Check if memory module exists
             try:
                 import stillme_core.memory
-                if not hasattr(stillme_core.memory, 'layered_memory_v1'):
+
+                if not hasattr(stillme_core.memory, "layered_memory_v1"):
                     raise ImportError("layered_memory_v1 not available")
             except ImportError:
                 # Skip test if memory module not available
@@ -54,14 +58,18 @@ class ChaosEngineeringTests:
                     "status": "SKIP",
                     "recovery_time": 0.0,
                     "recovery_success": True,
-                    "details": {"reason": "Memory module not available"}
+                    "details": {"reason": "Memory module not available"},
                 }
                 self.test_results.append(result)
-                logger.info("⏭️ Memory Failure Recovery: SKIP - Memory module not available")
+                logger.info(
+                    "⏭️ Memory Failure Recovery: SKIP - Memory module not available"
+                )
                 return result
 
             # Mock memory failure
-            with patch('stillme_core.memory.layered_memory_v1.LayeredMemoryV1') as mock_memory:
+            with patch(
+                "stillme_core.memory.layered_memory_v1.LayeredMemoryV1"
+            ) as mock_memory:
                 mock_memory.side_effect = Exception("Memory corruption detected")
 
                 # Test system behavior during failure
@@ -75,17 +83,21 @@ class ChaosEngineeringTests:
 
                 result = {
                     "test": "memory_failure_recovery",
-                    "status": "PASS" if recovery_success and recovery_time < 5.0 else "FAIL",
+                    "status": "PASS"
+                    if recovery_success and recovery_time < 5.0
+                    else "FAIL",
                     "recovery_time": recovery_time,
                     "recovery_success": recovery_success,
                     "details": {
                         "failure_simulation": failure_simulation,
-                        "response": response
-                    }
+                        "response": response,
+                    },
                 }
 
                 self.test_results.append(result)
-                logger.info(f"✅ Memory Failure Recovery: {result['status']} ({recovery_time:.2f}s)")
+                logger.info(
+                    f"✅ Memory Failure Recovery: {result['status']} ({recovery_time:.2f}s)"
+                )
                 return result
 
         except Exception as e:
@@ -93,7 +105,7 @@ class ChaosEngineeringTests:
                 "test": "memory_failure_recovery",
                 "status": "ERROR",
                 "error": str(e),
-                "recovery_time": time.time() - start_time
+                "recovery_time": time.time() - start_time,
             }
             self.test_results.append(result)
             logger.error(f"❌ Memory Failure Recovery: ERROR - {e}")
@@ -111,14 +123,15 @@ class ChaosEngineeringTests:
         failure_simulation = {
             "failure_type": "routing_error",
             "duration": 3000,  # 3 seconds
-            "severity": "medium"
+            "severity": "medium",
         }
 
         try:
             # Check if routing module exists
             try:
                 import stillme_core
-                if not hasattr(stillme_core, 'routing'):
+
+                if not hasattr(stillme_core, "routing"):
                     raise ImportError("routing module not available")
             except ImportError:
                 # Skip test if routing module not available
@@ -127,14 +140,16 @@ class ChaosEngineeringTests:
                     "status": "SKIP",
                     "recovery_time": 0.0,
                     "recovery_success": True,
-                    "details": {"reason": "Routing module not available"}
+                    "details": {"reason": "Routing module not available"},
                 }
                 self.test_results.append(result)
-                logger.info("⏭️ Router Failure Recovery: SKIP - Routing module not available")
+                logger.info(
+                    "⏭️ Router Failure Recovery: SKIP - Routing module not available"
+                )
                 return result
 
             # Mock router failure
-            with patch('stillme_core.routing.router.Router') as mock_router:
+            with patch("stillme_core.routing.router.Router") as mock_router:
                 mock_router.side_effect = Exception("Routing service unavailable")
 
                 # Test system behavior during failure
@@ -148,17 +163,21 @@ class ChaosEngineeringTests:
 
                 result = {
                     "test": "router_failure_recovery",
-                    "status": "PASS" if recovery_success and recovery_time < 3.0 else "FAIL",
+                    "status": "PASS"
+                    if recovery_success and recovery_time < 3.0
+                    else "FAIL",
                     "recovery_time": recovery_time,
                     "recovery_success": recovery_success,
                     "details": {
                         "failure_simulation": failure_simulation,
-                        "response": response
-                    }
+                        "response": response,
+                    },
                 }
 
                 self.test_results.append(result)
-                logger.info(f"✅ Router Failure Recovery: {result['status']} ({recovery_time:.2f}s)")
+                logger.info(
+                    f"✅ Router Failure Recovery: {result['status']} ({recovery_time:.2f}s)"
+                )
                 return result
 
         except Exception as e:
@@ -166,7 +185,7 @@ class ChaosEngineeringTests:
                 "test": "router_failure_recovery",
                 "status": "ERROR",
                 "error": str(e),
-                "recovery_time": time.time() - start_time
+                "recovery_time": time.time() - start_time,
             }
             self.test_results.append(result)
             logger.error(f"❌ Router Failure Recovery: ERROR - {e}")
@@ -184,12 +203,12 @@ class ChaosEngineeringTests:
         failure_simulation = {
             "failure_type": "code_execution_error",
             "duration": 4000,  # 4 seconds
-            "severity": "high"
+            "severity": "high",
         }
 
         try:
             # Mock AgentDev failure
-            with patch('agent_dev.AgentDev') as mock_agentdev:
+            with patch("agent_dev.AgentDev") as mock_agentdev:
                 mock_agentdev.side_effect = Exception("AgentDev execution failed")
 
                 # Test system behavior during failure
@@ -203,17 +222,21 @@ class ChaosEngineeringTests:
 
                 result = {
                     "test": "agentdev_failure_recovery",
-                    "status": "PASS" if recovery_success and recovery_time < 4.0 else "FAIL",
+                    "status": "PASS"
+                    if recovery_success and recovery_time < 4.0
+                    else "FAIL",
                     "recovery_time": recovery_time,
                     "recovery_success": recovery_success,
                     "details": {
                         "failure_simulation": failure_simulation,
-                        "response": response
-                    }
+                        "response": response,
+                    },
                 }
 
                 self.test_results.append(result)
-                logger.info(f"✅ AgentDev Failure Recovery: {result['status']} ({recovery_time:.2f}s)")
+                logger.info(
+                    f"✅ AgentDev Failure Recovery: {result['status']} ({recovery_time:.2f}s)"
+                )
                 return result
 
         except Exception as e:
@@ -221,7 +244,7 @@ class ChaosEngineeringTests:
                 "test": "agentdev_failure_recovery",
                 "status": "ERROR",
                 "error": str(e),
-                "recovery_time": time.time() - start_time
+                "recovery_time": time.time() - start_time,
             }
             self.test_results.append(result)
             logger.error(f"❌ AgentDev Failure Recovery: ERROR - {e}")
@@ -239,14 +262,15 @@ class ChaosEngineeringTests:
         failure_simulation = {
             "failure_type": "learning_corruption",
             "duration": 6000,  # 6 seconds
-            "severity": "critical"
+            "severity": "critical",
         }
 
         try:
             # Check if learning module exists
             try:
                 import stillme_core.learning
-                if not hasattr(stillme_core.learning, 'learning_metrics_collector'):
+
+                if not hasattr(stillme_core.learning, "learning_metrics_collector"):
                     raise ImportError("learning_metrics_collector not available")
             except ImportError:
                 # Skip test if learning module not available
@@ -255,14 +279,18 @@ class ChaosEngineeringTests:
                     "status": "SKIP",
                     "recovery_time": 0.0,
                     "recovery_success": True,
-                    "details": {"reason": "Learning module not available"}
+                    "details": {"reason": "Learning module not available"},
                 }
                 self.test_results.append(result)
-                logger.info("⏭️ Learning System Failure Recovery: SKIP - Learning module not available")
+                logger.info(
+                    "⏭️ Learning System Failure Recovery: SKIP - Learning module not available"
+                )
                 return result
 
             # Mock learning system failure
-            with patch('stillme_core.learning.learning_metrics_collector.LearningMetricsCollector') as mock_learning:
+            with patch(
+                "stillme_core.learning.learning_metrics_collector.LearningMetricsCollector"
+            ) as mock_learning:
                 mock_learning.side_effect = Exception("Learning system corrupted")
 
                 # Test system behavior during failure
@@ -276,17 +304,21 @@ class ChaosEngineeringTests:
 
                 result = {
                     "test": "learning_system_failure_recovery",
-                    "status": "PASS" if recovery_success and recovery_time < 6.0 else "FAIL",
+                    "status": "PASS"
+                    if recovery_success and recovery_time < 6.0
+                    else "FAIL",
                     "recovery_time": recovery_time,
                     "recovery_success": recovery_success,
                     "details": {
                         "failure_simulation": failure_simulation,
-                        "response": response
-                    }
+                        "response": response,
+                    },
                 }
 
                 self.test_results.append(result)
-                logger.info(f"✅ Learning System Failure Recovery: {result['status']} ({recovery_time:.2f}s)")
+                logger.info(
+                    f"✅ Learning System Failure Recovery: {result['status']} ({recovery_time:.2f}s)"
+                )
                 return result
 
         except Exception as e:
@@ -294,7 +326,7 @@ class ChaosEngineeringTests:
                 "test": "learning_system_failure_recovery",
                 "status": "ERROR",
                 "error": str(e),
-                "recovery_time": time.time() - start_time
+                "recovery_time": time.time() - start_time,
             }
             self.test_results.append(result)
             logger.error(f"❌ Learning System Failure Recovery: ERROR - {e}")
@@ -312,14 +344,15 @@ class ChaosEngineeringTests:
         failure_simulation = {
             "failure_type": "security_bypass",
             "duration": 2000,  # 2 seconds
-            "severity": "critical"
+            "severity": "critical",
         }
 
         try:
             # Check if security module exists
             try:
                 import stillme_core.core.advanced_security
-                if not hasattr(stillme_core.core.advanced_security, 'security_manager'):
+
+                if not hasattr(stillme_core.core.advanced_security, "security_manager"):
                     raise ImportError("security_manager not available")
             except ImportError:
                 # Skip test if security module not available
@@ -328,14 +361,18 @@ class ChaosEngineeringTests:
                     "status": "SKIP",
                     "recovery_time": 0.0,
                     "recovery_success": True,
-                    "details": {"reason": "Security module not available"}
+                    "details": {"reason": "Security module not available"},
                 }
                 self.test_results.append(result)
-                logger.info("⏭️ Security System Failure Recovery: SKIP - Security module not available")
+                logger.info(
+                    "⏭️ Security System Failure Recovery: SKIP - Security module not available"
+                )
                 return result
 
             # Mock security system failure
-            with patch('stillme_core.core.advanced_security.security_manager.SecurityManager') as mock_security:
+            with patch(
+                "stillme_core.core.advanced_security.security_manager.SecurityManager"
+            ) as mock_security:
                 mock_security.side_effect = Exception("Security system compromised")
 
                 # Test system behavior during failure
@@ -349,17 +386,21 @@ class ChaosEngineeringTests:
 
                 result = {
                     "test": "security_system_failure_recovery",
-                    "status": "PASS" if recovery_success and recovery_time < 2.0 else "FAIL",
+                    "status": "PASS"
+                    if recovery_success and recovery_time < 2.0
+                    else "FAIL",
                     "recovery_time": recovery_time,
                     "recovery_success": recovery_success,
                     "details": {
                         "failure_simulation": failure_simulation,
-                        "response": response
-                    }
+                        "response": response,
+                    },
                 }
 
                 self.test_results.append(result)
-                logger.info(f"✅ Security System Failure Recovery: {result['status']} ({recovery_time:.2f}s)")
+                logger.info(
+                    f"✅ Security System Failure Recovery: {result['status']} ({recovery_time:.2f}s)"
+                )
                 return result
 
         except Exception as e:
@@ -367,7 +408,7 @@ class ChaosEngineeringTests:
                 "test": "security_system_failure_recovery",
                 "status": "ERROR",
                 "error": str(e),
-                "recovery_time": time.time() - start_time
+                "recovery_time": time.time() - start_time,
             }
             self.test_results.append(result)
             logger.error(f"❌ Security System Failure Recovery: ERROR - {e}")
@@ -385,12 +426,14 @@ class ChaosEngineeringTests:
         failure_simulation = {
             "failure_type": "plugin_crash",
             "duration": 3000,  # 3 seconds
-            "severity": "medium"
+            "severity": "medium",
         }
 
         try:
             # Mock plugin system failure
-            with patch('plugins.calculator.calculator_plugin.CalculatorPlugin') as mock_plugin:
+            with patch(
+                "plugins.calculator.calculator_plugin.CalculatorPlugin"
+            ) as mock_plugin:
                 mock_plugin.side_effect = Exception("Plugin system crashed")
 
                 # Test system behavior during failure
@@ -404,17 +447,21 @@ class ChaosEngineeringTests:
 
                 result = {
                     "test": "plugin_system_failure_recovery",
-                    "status": "PASS" if recovery_success and recovery_time < 3.0 else "FAIL",
+                    "status": "PASS"
+                    if recovery_success and recovery_time < 3.0
+                    else "FAIL",
                     "recovery_time": recovery_time,
                     "recovery_success": recovery_success,
                     "details": {
                         "failure_simulation": failure_simulation,
-                        "response": response
-                    }
+                        "response": response,
+                    },
                 }
 
                 self.test_results.append(result)
-                logger.info(f"✅ Plugin System Failure Recovery: {result['status']} ({recovery_time:.2f}s)")
+                logger.info(
+                    f"✅ Plugin System Failure Recovery: {result['status']} ({recovery_time:.2f}s)"
+                )
                 return result
 
         except Exception as e:
@@ -422,66 +469,78 @@ class ChaosEngineeringTests:
                 "test": "plugin_system_failure_recovery",
                 "status": "ERROR",
                 "error": str(e),
-                "recovery_time": time.time() - start_time
+                "recovery_time": time.time() - start_time,
             }
             self.test_results.append(result)
             logger.error(f"❌ Plugin System Failure Recovery: ERROR - {e}")
             return result
 
     # Helper methods for failure simulation and recovery verification
-    async def _simulate_memory_failure(self, failure_simulation: dict[str, Any]) -> dict[str, Any]:
+    async def _simulate_memory_failure(
+        self, failure_simulation: dict[str, Any]
+    ) -> dict[str, Any]:
         """Simulate memory failure and return response"""
         # Mock implementation
         await asyncio.sleep(0.1)  # Simulate processing time
         return {
             "status": "memory_failure_simulated",
             "fallback_activated": True,
-            "recovery_initiated": True
+            "recovery_initiated": True,
         }
 
-    async def _simulate_router_failure(self, failure_simulation: dict[str, Any]) -> dict[str, Any]:
+    async def _simulate_router_failure(
+        self, failure_simulation: dict[str, Any]
+    ) -> dict[str, Any]:
         """Simulate router failure and return response"""
         await asyncio.sleep(0.1)
         return {
             "status": "router_failure_simulated",
             "fallback_activated": True,
-            "recovery_initiated": True
+            "recovery_initiated": True,
         }
 
-    async def _simulate_agentdev_failure(self, failure_simulation: dict[str, Any]) -> dict[str, Any]:
+    async def _simulate_agentdev_failure(
+        self, failure_simulation: dict[str, Any]
+    ) -> dict[str, Any]:
         """Simulate AgentDev failure and return response"""
         await asyncio.sleep(0.1)
         return {
             "status": "agentdev_failure_simulated",
             "fallback_activated": True,
-            "recovery_initiated": True
+            "recovery_initiated": True,
         }
 
-    async def _simulate_learning_failure(self, failure_simulation: dict[str, Any]) -> dict[str, Any]:
+    async def _simulate_learning_failure(
+        self, failure_simulation: dict[str, Any]
+    ) -> dict[str, Any]:
         """Simulate learning system failure and return response"""
         await asyncio.sleep(0.1)
         return {
             "status": "learning_failure_simulated",
             "fallback_activated": True,
-            "recovery_initiated": True
+            "recovery_initiated": True,
         }
 
-    async def _simulate_security_failure(self, failure_simulation: dict[str, Any]) -> dict[str, Any]:
+    async def _simulate_security_failure(
+        self, failure_simulation: dict[str, Any]
+    ) -> dict[str, Any]:
         """Simulate security system failure and return response"""
         await asyncio.sleep(0.1)
         return {
             "status": "security_failure_simulated",
             "fallback_activated": True,
-            "recovery_initiated": True
+            "recovery_initiated": True,
         }
 
-    async def _simulate_plugin_failure(self, failure_simulation: dict[str, Any]) -> dict[str, Any]:
+    async def _simulate_plugin_failure(
+        self, failure_simulation: dict[str, Any]
+    ) -> dict[str, Any]:
         """Simulate plugin system failure and return response"""
         await asyncio.sleep(0.1)
         return {
             "status": "plugin_failure_simulated",
             "fallback_activated": True,
-            "recovery_initiated": True
+            "recovery_initiated": True,
         }
 
     async def _verify_memory_recovery(self) -> bool:
@@ -529,7 +588,7 @@ class ChaosEngineeringTests:
             self.test_agentdev_failure_recovery(),
             self.test_learning_system_failure_recovery(),
             self.test_security_system_failure_recovery(),
-            self.test_plugin_system_failure_recovery()
+            self.test_plugin_system_failure_recovery(),
         ]
 
         await asyncio.gather(*tests, return_exceptions=True)
@@ -538,10 +597,10 @@ class ChaosEngineeringTests:
 
         # Calculate summary
         total_tests = len(self.test_results)
-        passed = len([r for r in self.test_results if r['status'] == 'PASS'])
-        failed = len([r for r in self.test_results if r['status'] == 'FAIL'])
-        errors = len([r for r in self.test_results if r['status'] == 'ERROR'])
-        skipped = len([r for r in self.test_results if r['status'] == 'SKIP'])
+        passed = len([r for r in self.test_results if r["status"] == "PASS"])
+        failed = len([r for r in self.test_results if r["status"] == "FAIL"])
+        errors = len([r for r in self.test_results if r["status"] == "ERROR"])
+        skipped = len([r for r in self.test_results if r["status"] == "SKIP"])
 
         # Calculate pass rate excluding skipped tests
         executed_tests = total_tests - skipped
@@ -557,13 +616,16 @@ class ChaosEngineeringTests:
             "skipped": skipped,
             "executed_tests": executed_tests,
             "pass_rate": pass_rate,
-            "results": self.test_results
+            "results": self.test_results,
         }
 
         logger.info(f"✅ Chaos Engineering Tests completed in {execution_time:.2f}s")
-        logger.info(f"📊 Results: {passed} passed, {failed} failed, {errors} errors, {skipped} skipped")
+        logger.info(
+            f"📊 Results: {passed} passed, {failed} failed, {errors} errors, {skipped} skipped"
+        )
 
         return summary
+
 
 # Pytest test functions
 @pytest.mark.asyncio
@@ -572,9 +634,10 @@ async def test_chaos_engineering_suite():
     chaos_tests = ChaosEngineeringTests()
     results = await chaos_tests.run_all_chaos_tests()
 
-    assert results['total_tests'] > 0
-    assert results['pass_rate'] >= 80.0  # Expect at least 80% pass rate
-    assert results['execution_time'] < 30.0  # Should complete within 30 seconds
+    assert results["total_tests"] > 0
+    assert results["pass_rate"] >= 80.0  # Expect at least 80% pass rate
+    assert results["execution_time"] < 30.0  # Should complete within 30 seconds
+
 
 @pytest.mark.asyncio
 async def test_memory_failure_recovery():
@@ -582,9 +645,10 @@ async def test_memory_failure_recovery():
     chaos_tests = ChaosEngineeringTests()
     result = await chaos_tests.test_memory_failure_recovery()
 
-    assert result['status'] in ['PASS', 'FAIL', 'ERROR', 'SKIP']
-    assert 'recovery_time' in result
-    assert 'recovery_success' in result
+    assert result["status"] in ["PASS", "FAIL", "ERROR", "SKIP"]
+    assert "recovery_time" in result
+    assert "recovery_success" in result
+
 
 @pytest.mark.asyncio
 async def test_router_failure_recovery():
@@ -592,9 +656,10 @@ async def test_router_failure_recovery():
     chaos_tests = ChaosEngineeringTests()
     result = await chaos_tests.test_router_failure_recovery()
 
-    assert result['status'] in ['PASS', 'FAIL', 'ERROR', 'SKIP']
-    assert 'recovery_time' in result
-    assert 'recovery_success' in result
+    assert result["status"] in ["PASS", "FAIL", "ERROR", "SKIP"]
+    assert "recovery_time" in result
+    assert "recovery_success" in result
+
 
 @pytest.mark.asyncio
 async def test_agentdev_failure_recovery():
@@ -602,9 +667,10 @@ async def test_agentdev_failure_recovery():
     chaos_tests = ChaosEngineeringTests()
     result = await chaos_tests.test_agentdev_failure_recovery()
 
-    assert result['status'] in ['PASS', 'FAIL', 'ERROR', 'SKIP']
-    assert 'recovery_time' in result
-    assert 'recovery_success' in result
+    assert result["status"] in ["PASS", "FAIL", "ERROR", "SKIP"]
+    assert "recovery_time" in result
+    assert "recovery_success" in result
+
 
 if __name__ == "__main__":
     # Run chaos engineering tests

@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class IntegrationEvent:
     """Represents an integration event"""
+
     event_type: str
     source: str
     target: str
@@ -61,7 +62,7 @@ class ValidationIntegrationHandler(IntegrationHandler):
             "status": "processed",
             "result": "validation_completed",
             "timestamp": datetime.now().isoformat(),
-            "details": event.data
+            "details": event.data,
         }
 
         return result
@@ -84,7 +85,7 @@ class SecurityIntegrationHandler(IntegrationHandler):
             "status": "processed",
             "result": "security_check_completed",
             "timestamp": datetime.now().isoformat(),
-            "details": event.data
+            "details": event.data,
         }
 
         return result
@@ -107,7 +108,7 @@ class PerformanceIntegrationHandler(IntegrationHandler):
             "status": "processed",
             "result": "performance_analysis_completed",
             "timestamp": datetime.now().isoformat(),
-            "details": event.data
+            "details": event.data,
         }
 
         return result
@@ -126,7 +127,7 @@ class IntegrationBridge:
             "total_events": 0,
             "processed_events": 0,
             "failed_events": 0,
-            "handler_counts": {}
+            "handler_counts": {},
         }
 
         # Register default handlers
@@ -137,7 +138,7 @@ class IntegrationBridge:
         default_handlers = [
             ValidationIntegrationHandler(),
             SecurityIntegrationHandler(),
-            PerformanceIntegrationHandler()
+            PerformanceIntegrationHandler(),
         ]
 
         for handler in default_handlers:
@@ -152,16 +153,20 @@ class IntegrationBridge:
         """Unregister an integration handler"""
         if handler in self.handlers:
             self.handlers.remove(handler)
-            logger.info(f"Unregistered integration handler: {handler.__class__.__name__}")
+            logger.info(
+                f"Unregistered integration handler: {handler.__class__.__name__}"
+            )
 
-    def send_event(self, event_type: str, source: str, target: str, data: dict[str, Any]) -> str:
+    def send_event(
+        self, event_type: str, source: str, target: str, data: dict[str, Any]
+    ) -> str:
         """Send an integration event"""
         event = IntegrationEvent(
             event_type=event_type,
             source=source,
             target=target,
             data=data,
-            timestamp=datetime.now()
+            timestamp=datetime.now(),
         )
 
         self.event_queue.append(event)
@@ -189,10 +194,14 @@ class IntegrationBridge:
 
                     # Update handler stats
                     handler_name = handler.__class__.__name__
-                    self.integration_stats["handler_counts"][handler_name] = \
-                        self.integration_stats["handler_counts"].get(handler_name, 0) + 1
+                    self.integration_stats["handler_counts"][handler_name] = (
+                        self.integration_stats["handler_counts"].get(handler_name, 0)
+                        + 1
+                    )
 
-                    logger.info(f"Processed event: {event.event_type} with {handler_name}")
+                    logger.info(
+                        f"Processed event: {event.event_type} with {handler_name}"
+                    )
                 else:
                     event.status = "failed"
                     self.processed_events.append(event)
@@ -213,7 +222,7 @@ class IntegrationBridge:
             "failed_count": failed_count,
             "remaining_events": len(self.event_queue),
             "total_processed": self.integration_stats["processed_events"],
-            "total_failed": self.integration_stats["failed_events"]
+            "total_failed": self.integration_stats["failed_events"],
         }
 
     def _find_handler(self, event_type: str) -> Optional[IntegrationHandler]:
@@ -230,8 +239,9 @@ class IntegrationBridge:
             "processed_events": self.integration_stats["processed_events"],
             "failed_events": self.integration_stats["failed_events"],
             "success_rate": (
-                self.integration_stats["processed_events"] /
-                max(self.integration_stats["total_events"], 1) * 100
+                self.integration_stats["processed_events"]
+                / max(self.integration_stats["total_events"], 1)
+                * 100
             ),
             "registered_handlers": len(self.handlers),
             "handler_types": [handler.__class__.__name__ for handler in self.handlers],
@@ -243,10 +253,10 @@ class IntegrationBridge:
                     "source": event.source,
                     "target": event.target,
                     "status": event.status,
-                    "timestamp": event.timestamp.isoformat()
+                    "timestamp": event.timestamp.isoformat(),
                 }
                 for event in self.processed_events[-10:]
-            ]
+            ],
         }
 
     def clear_old_events(self, hours: int = 24):
@@ -254,8 +264,7 @@ class IntegrationBridge:
         cutoff_time = datetime.now() - timedelta(hours=hours)
 
         self.processed_events = [
-            event for event in self.processed_events
-            if event.timestamp >= cutoff_time
+            event for event in self.processed_events if event.timestamp >= cutoff_time
         ]
 
         logger.info(f"Cleared events older than {hours} hours")
@@ -272,7 +281,7 @@ def main():
         ("validation_input", "user_input", "validation_engine", {"input": "test data"}),
         ("security_scan", "security_scanner", "security_engine", {"threats": []}),
         ("performance_metrics", "performance_monitor", "analytics_engine", {"cpu": 50}),
-        ("unknown_event", "unknown_source", "unknown_target", {"data": "test"})
+        ("unknown_event", "unknown_source", "unknown_target", {"data": "test"}),
     ]
 
     for event_type, source, target, data in test_events:

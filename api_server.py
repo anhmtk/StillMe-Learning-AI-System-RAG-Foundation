@@ -9,12 +9,14 @@ from pydantic import BaseModel
 # Import StillMeFramework from correct path
 try:
     from stillme_core.framework import StillMeFramework as _StillMeFramework
+
     StillMeFramework = _StillMeFramework
 except ImportError:
     # Fallback if framework not available
     class StillMeFramework:
         def __init__(self):
             pass
+
 
 try:
     from stillme_core.safety_guard import (

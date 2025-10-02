@@ -20,6 +20,7 @@ import psutil
 @dataclass
 class LoadTestResult:
     """Result of a load test"""
+
     test_name: str
     total_requests: int
     successful_requests: int
@@ -73,9 +74,9 @@ class PerformanceLoadTestSuite:
         success = time.time() % 1.0 < 0.95
 
         return {
-            'success': success,
-            'response_time': response_time,
-            'processing_time': processing_time
+            "success": success,
+            "response_time": response_time,
+            "processing_time": processing_time,
         }
 
     def test_memory_usage_simulation(self) -> bool:
@@ -106,9 +107,13 @@ class PerformanceLoadTestSuite:
 
                 if memory_delta <= test_config["max_memory_mb"]:
                     passed += 1
-                    print(f"PASSED: {test_config['requests']} requests - {memory_delta:.1f}MB memory delta")
+                    print(
+                        f"PASSED: {test_config['requests']} requests - {memory_delta:.1f}MB memory delta"
+                    )
                 else:
-                    print(f"FAILED: {test_config['requests']} requests - {memory_delta:.1f}MB memory delta (max {test_config['max_memory_mb']}MB)")
+                    print(
+                        f"FAILED: {test_config['requests']} requests - {memory_delta:.1f}MB memory delta (max {test_config['max_memory_mb']}MB)"
+                    )
 
             except Exception as e:
                 print(f"ERROR: Memory test failed - {e}")
@@ -116,12 +121,14 @@ class PerformanceLoadTestSuite:
         pass_rate = (passed / total) * 100 if total > 0 else 0
         print(f"Memory Usage Simulation: {passed}/{total} ({pass_rate:.1f}%)")
 
-        self.test_results.append({
-            'test': 'memory_usage_simulation',
-            'passed': passed,
-            'total': total,
-            'pass_rate': pass_rate
-        })
+        self.test_results.append(
+            {
+                "test": "memory_usage_simulation",
+                "passed": passed,
+                "total": total,
+                "pass_rate": pass_rate,
+            }
+        )
 
         return pass_rate >= 90.0
 
@@ -163,9 +170,13 @@ class PerformanceLoadTestSuite:
 
                 if max_cpu <= test_config["max_cpu_percent"]:
                     passed += 1
-                    print(f"PASSED: {test_config['requests']} requests - {max_cpu:.1f}% max CPU")
+                    print(
+                        f"PASSED: {test_config['requests']} requests - {max_cpu:.1f}% max CPU"
+                    )
                 else:
-                    print(f"FAILED: {test_config['requests']} requests - {max_cpu:.1f}% max CPU (max {test_config['max_cpu_percent']}%)")
+                    print(
+                        f"FAILED: {test_config['requests']} requests - {max_cpu:.1f}% max CPU (max {test_config['max_cpu_percent']}%)"
+                    )
 
             except Exception as e:
                 print(f"ERROR: CPU test failed - {e}")
@@ -173,12 +184,14 @@ class PerformanceLoadTestSuite:
         pass_rate = (passed / total) * 100 if total > 0 else 0
         print(f"CPU Usage Simulation: {passed}/{total} ({pass_rate:.1f}%)")
 
-        self.test_results.append({
-            'test': 'cpu_usage_simulation',
-            'passed': passed,
-            'total': total,
-            'pass_rate': pass_rate
-        })
+        self.test_results.append(
+            {
+                "test": "cpu_usage_simulation",
+                "passed": passed,
+                "total": total,
+                "pass_rate": pass_rate,
+            }
+        )
 
         return pass_rate >= 90.0
 
@@ -203,16 +216,23 @@ class PerformanceLoadTestSuite:
 
                 for _ in range(test_config["requests"]):
                     result = self._simulate_request(0.1)  # 100ms processing
-                    response_times.append(result['response_time'])
+                    response_times.append(result["response_time"])
 
                 p95 = self._percentile(response_times, 95)
                 p99 = self._percentile(response_times, 99)
 
-                if p95 <= test_config["expected_p95"] and p99 <= test_config["expected_p99"]:
+                if (
+                    p95 <= test_config["expected_p95"]
+                    and p99 <= test_config["expected_p99"]
+                ):
                     passed += 1
-                    print(f"PASSED: {test_config['requests']} requests - p95: {p95:.1f}ms, p99: {p99:.1f}ms")
+                    print(
+                        f"PASSED: {test_config['requests']} requests - p95: {p95:.1f}ms, p99: {p99:.1f}ms"
+                    )
                 else:
-                    print(f"FAILED: {test_config['requests']} requests - p95: {p95:.1f}ms, p99: {p99:.1f}ms")
+                    print(
+                        f"FAILED: {test_config['requests']} requests - p95: {p95:.1f}ms, p99: {p99:.1f}ms"
+                    )
 
             except Exception as e:
                 print(f"ERROR: Response time test failed - {e}")
@@ -220,12 +240,14 @@ class PerformanceLoadTestSuite:
         pass_rate = (passed / total) * 100 if total > 0 else 0
         print(f"Response Time Simulation: {passed}/{total} ({pass_rate:.1f}%)")
 
-        self.test_results.append({
-            'test': 'response_time_simulation',
-            'passed': passed,
-            'total': total,
-            'pass_rate': pass_rate
-        })
+        self.test_results.append(
+            {
+                "test": "response_time_simulation",
+                "passed": passed,
+                "total": total,
+                "pass_rate": pass_rate,
+            }
+        )
 
         return pass_rate >= 90.0
 
@@ -255,11 +277,17 @@ class PerformanceLoadTestSuite:
                 total_time = end_time - start_time
                 throughput = test_config["requests"] / total_time
 
-                if throughput >= test_config["expected_throughput"] * 0.8:  # 80% of expected
+                if (
+                    throughput >= test_config["expected_throughput"] * 0.8
+                ):  # 80% of expected
                     passed += 1
-                    print(f"PASSED: {test_config['requests']} requests - {throughput:.1f} req/s")
+                    print(
+                        f"PASSED: {test_config['requests']} requests - {throughput:.1f} req/s"
+                    )
                 else:
-                    print(f"FAILED: {test_config['requests']} requests - {throughput:.1f} req/s (expected {test_config['expected_throughput']})")
+                    print(
+                        f"FAILED: {test_config['requests']} requests - {throughput:.1f} req/s (expected {test_config['expected_throughput']})"
+                    )
 
             except Exception as e:
                 print(f"ERROR: Throughput test failed - {e}")
@@ -267,12 +295,14 @@ class PerformanceLoadTestSuite:
         pass_rate = (passed / total) * 100 if total > 0 else 0
         print(f"Throughput Simulation: {passed}/{total} ({pass_rate:.1f}%)")
 
-        self.test_results.append({
-            'test': 'throughput_simulation',
-            'passed': passed,
-            'total': total,
-            'pass_rate': pass_rate
-        })
+        self.test_results.append(
+            {
+                "test": "throughput_simulation",
+                "passed": passed,
+                "total": total,
+                "pass_rate": pass_rate,
+            }
+        )
 
         return pass_rate >= 90.0
 
@@ -316,20 +346,28 @@ class PerformanceLoadTestSuite:
         overall_pass_rate = (passed_tests / total_tests) * 100
 
         # Calculate detailed pass rate
-        total_passed = sum(result['passed'] for result in self.test_results)
-        total_cases = sum(result['total'] for result in self.test_results)
-        detailed_pass_rate = (total_passed / total_cases) * 100 if total_cases > 0 else 0
+        total_passed = sum(result["passed"] for result in self.test_results)
+        total_cases = sum(result["total"] for result in self.test_results)
+        detailed_pass_rate = (
+            (total_passed / total_cases) * 100 if total_cases > 0 else 0
+        )
 
         print("\n" + "=" * 60)
         print("📊 FIXED PERFORMANCE & LOAD TEST RESULTS")
         print("=" * 60)
-        print(f"Overall Pass Rate: {passed_tests}/{total_tests} ({overall_pass_rate:.1f}%)")
-        print(f"Detailed Pass Rate: {total_passed}/{total_cases} ({detailed_pass_rate:.1f}%)")
+        print(
+            f"Overall Pass Rate: {passed_tests}/{total_tests} ({overall_pass_rate:.1f}%)"
+        )
+        print(
+            f"Detailed Pass Rate: {total_passed}/{total_cases} ({detailed_pass_rate:.1f}%)"
+        )
         print(f"Total Duration: {total_duration:.2f}s")
 
         print("\n📋 Test Breakdown:")
         for result in self.test_results:
-            print(f"  {result['test']}: {result['passed']}/{result['total']} ({result['pass_rate']:.1f}%)")
+            print(
+                f"  {result['test']}: {result['passed']}/{result['total']} ({result['pass_rate']:.1f}%)"
+            )
 
         # Determine success
         success = overall_pass_rate >= 90.0 and detailed_pass_rate >= 90.0
@@ -338,15 +376,15 @@ class PerformanceLoadTestSuite:
         print(f"✅ Result: {'PASSED' if success else 'FAILED'}")
 
         return {
-            'overall_pass_rate': overall_pass_rate,
-            'detailed_pass_rate': detailed_pass_rate,
-            'passed_tests': passed_tests,
-            'total_tests': total_tests,
-            'total_passed': total_passed,
-            'total_cases': total_cases,
-            'duration': total_duration,
-            'success': success,
-            'test_results': self.test_results
+            "overall_pass_rate": overall_pass_rate,
+            "detailed_pass_rate": detailed_pass_rate,
+            "passed_tests": passed_tests,
+            "total_tests": total_tests,
+            "total_passed": total_passed,
+            "total_cases": total_cases,
+            "duration": total_duration,
+            "success": success,
+            "test_results": self.test_results,
         }
 
 
@@ -356,4 +394,4 @@ if __name__ == "__main__":
     results = test_suite.run_all_tests()
 
     # Exit with appropriate code
-    exit(0 if results['success'] else 1)
+    exit(0 if results["success"] else 1)

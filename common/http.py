@@ -3,6 +3,7 @@
 StillMe Secure HTTP Client
 AsyncHttpClient với các ràng buộc bảo mật nghiêm ngặt
 """
+
 import asyncio
 import json
 import logging
@@ -14,6 +15,7 @@ from urllib.parse import urlparse
 import httpx
 
 logger = logging.getLogger(__name__)
+
 
 class SecureHttpClient:
     """HTTP Client với bảo mật nghiêm ngặt"""
@@ -30,7 +32,7 @@ class SecureHttpClient:
             "text/plain",
             "text/html",
             "text/xml",
-            "text/csv"
+            "text/csv",
         ]
 
         # Domain allowlist
@@ -43,7 +45,7 @@ class SecureHttpClient:
             "reddit.com",
             "api.openrouter.ai",
             "api.deepseek.com",
-            "api.openai.com"
+            "api.openai.com",
         }
 
         # Log file cho web access
@@ -68,14 +70,11 @@ class SecureHttpClient:
         if not self._client:
             self._client = httpx.AsyncClient(
                 timeout=httpx.Timeout(self.timeout),
-                limits=httpx.Limits(
-                    max_keepalive_connections=5,
-                    max_connections=10
-                ),
+                limits=httpx.Limits(max_keepalive_connections=5, max_connections=10),
                 headers={
                     "User-Agent": "StillMe-IPC/2.1.1 (Secure HTTP Client)",
-                    "Accept": "application/json, text/*"
-                }
+                    "Accept": "application/json, text/*",
+                },
             )
 
     def _validate_url(self, url: str) -> bool:
@@ -102,7 +101,9 @@ class SecureHttpClient:
         try:
             content_type = response.headers.get("content-type", "").lower()
             if not any(mime in content_type for mime in self.allowed_mime_types):
-                logger.warning(f"🚫 Blocked response with disallowed content-type: {content_type}")
+                logger.warning(
+                    f"🚫 Blocked response with disallowed content-type: {content_type}"
+                )
                 return False
 
             content_length = response.headers.get("content-length")
@@ -120,32 +121,39 @@ class SecureHttpClient:
         import re
 
         dangerous_patterns = [
-            r'<script[^>]*>.*?</script>',
-            r'javascript:',
-            r'data:text/html',
-            r'vbscript:',
-            r'onload\s*=',
-            r'onerror\s*=',
-            r'onclick\s*=',
-            r'eval\s*\(',
-            r'expression\s*\(',
-            r'url\s*\(',
-            r'@import',
-            r'<iframe[^>]*>',
-            r'<object[^>]*>',
-            r'<embed[^>]*>',
-            r'<link[^>]*>',
-            r'<meta[^>]*>'
+            r"<script[^>]*>.*?</script>",
+            r"javascript:",
+            r"data:text/html",
+            r"vbscript:",
+            r"onload\s*=",
+            r"onerror\s*=",
+            r"onclick\s*=",
+            r"eval\s*\(",
+            r"expression\s*\(",
+            r"url\s*\(",
+            r"@import",
+            r"<iframe[^>]*>",
+            r"<object[^>]*>",
+            r"<embed[^>]*>",
+            r"<link[^>]*>",
+            r"<meta[^>]*>",
         ]
 
         sanitized = content
         for pattern in dangerous_patterns:
-            sanitized = re.sub(pattern, '', sanitized, flags=re.IGNORECASE | re.DOTALL)
+            sanitized = re.sub(pattern, "", sanitized, flags=re.IGNORECASE | re.DOTALL)
 
         return sanitized
 
-    async def _log_request(self, method: str, url: str, status_code: int,
-                          response_time: float, success: bool, error: str = None):
+    async def _log_request(
+        self,
+        method: str,
+        url: str,
+        status_code: int,
+        response_time: float,
+        success: bool,
+        error: str = None,
+    ):
         """Log web access request"""
         try:
             timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
@@ -156,7 +164,7 @@ class SecureHttpClient:
                 "status_code": status_code,
                 "response_time_ms": round(response_time * 1000, 2),
                 "success": success,
-                "error": error
+                "error": error,
             }
 
             with open(self.log_file, "a", encoding="utf-8") as f:
@@ -165,23 +173,41 @@ class SecureHttpClient:
         except Exception as e:
             logger.error(f"❌ Failed to log request: {e}")
 
-    async def get(self, url: str, headers: Optional[dict[str, str]] = None) -> dict[str, Any]:
+    async def get(
+        self, url: str, headers: Optional[dict[str, str]] = None
+    ) -> dict[str, Any]:
         """GET request với bảo mật"""
         return await self._make_request("GET", url, headers=headers)
 
-    async def post(self, url: str, data: Optional[dict[str, Any]] = None,
-                   headers: Optional[dict[str, str]] = None) -> dict[str, Any]:
+    async def post(
+        self,
+        url: str,
+        data: Optional[dict[str, Any]] = None,
+        headers: Optional[dict[str, str]] = None,
+    ) -> dict[str, Any]:
         """POST request với bảo mật"""
         return await self._make_request("POST", url, data=data, headers=headers)
 
-    async def _make_request(self, method: str, url: str, data: Optional[dict[str, Any]] = None,
-                           headers: Optional[dict[str, str]] = None) -> dict[str, Any]:
+    async def _make_request(
+        self,
+        method: str,
+        url: str,
+        data: Optional[dict[str, Any]] = None,
+        headers: Optional[dict[str, str]] = None,
+    ) -> dict[str, Any]:
         """Thực hiện HTTP request với bảo mật"""
         start_time = time.time()
 
         try:
             if not self._validate_url(url):
-                await self._log_request(method, url, 0, time.time() - start_time, False, "URL not in allowlist")
+                await self._log_request(
+                    method,
+                    url,
+                    0,
+                    time.time() - start_time,
+                    False,
+                    "URL not in allowlist",
+                )
                 return {"success": False, "error": "URL not allowed", "data": None}
 
             await self._ensure_client()
@@ -196,14 +222,26 @@ class SecureHttpClient:
                     if method.upper() == "GET":
                         response = await self._client.get(url, headers=request_headers)
                     elif method.upper() == "POST":
-                        response = await self._client.post(url, json=data, headers=request_headers)
+                        response = await self._client.post(
+                            url, json=data, headers=request_headers
+                        )
                     else:
                         raise ValueError(f"Unsupported HTTP method: {method}")
 
                     if not self._validate_response(response):
-                        await self._log_request(method, url, response.status_code,
-                                              time.time() - start_time, False, "Response validation failed")
-                        return {"success": False, "error": "Response validation failed", "data": None}
+                        await self._log_request(
+                            method,
+                            url,
+                            response.status_code,
+                            time.time() - start_time,
+                            False,
+                            "Response validation failed",
+                        )
+                        return {
+                            "success": False,
+                            "error": "Response validation failed",
+                            "data": None,
+                        }
 
                     content = response.text
                     sanitized_content = self._sanitize_content(content)
@@ -213,14 +251,19 @@ class SecureHttpClient:
                     except json.JSONDecodeError:
                         parsed_data = sanitized_content
 
-                    await self._log_request(method, url, response.status_code,
-                                          time.time() - start_time, True)
+                    await self._log_request(
+                        method,
+                        url,
+                        response.status_code,
+                        time.time() - start_time,
+                        True,
+                    )
 
                     return {
                         "success": True,
                         "data": parsed_data,
                         "status_code": response.status_code,
-                        "headers": dict(response.headers)
+                        "headers": dict(response.headers),
                     }
 
                 except httpx.TimeoutException:
@@ -237,24 +280,20 @@ class SecureHttpClient:
                     last_error = f"Unexpected error: {str(e)}"
                     break
 
-            await self._log_request(method, url, 0, time.time() - start_time, False, last_error)
+            await self._log_request(
+                method, url, 0, time.time() - start_time, False, last_error
+            )
 
-            return {
-                "success": False,
-                "error": last_error,
-                "data": None
-            }
+            return {"success": False, "error": last_error, "data": None}
 
         except Exception as e:
             error_msg = f"Critical error: {str(e)}"
-            await self._log_request(method, url, 0, time.time() - start_time, False, error_msg)
+            await self._log_request(
+                method, url, 0, time.time() - start_time, False, error_msg
+            )
             logger.error(f"❌ Critical error in HTTP request: {e}")
 
-            return {
-                "success": False,
-                "error": error_msg,
-                "data": None
-            }
+            return {"success": False, "error": error_msg, "data": None}
 
     def add_allowed_domain(self, domain: str):
         """Thêm domain vào allowlist"""
@@ -264,6 +303,7 @@ class SecureHttpClient:
     def get_allowed_domains(self) -> list[str]:
         """Lấy danh sách allowed domains"""
         return list(self.allowed_domains)
+
 
 # Global instance
 secure_http_client = SecureHttpClient()

@@ -11,15 +11,18 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class ClarificationQuestion:
     """Structured clarification question"""
+
     question: str
     options: list[str]
     confidence: float
     domain: str
     reasoning: str
     follow_up_hints: list[str] = None
+
 
 class ContextAwareClarifier:
     """
@@ -36,92 +39,210 @@ class ContextAwareClarifier:
         """Initialize domain-specific question banks"""
         return {
             "web": [
-                ("Which framework do you prefer? Flask or FastAPI?", ["Flask", "FastAPI"]),
+                (
+                    "Which framework do you prefer? Flask or FastAPI?",
+                    ["Flask", "FastAPI"],
+                ),
                 ("Backend or frontend focus?", ["Backend", "Frontend"]),
-                ("What type of web application? E-commerce, Blog, Dashboard, or API?",
-                 ["E-commerce", "Blog", "Dashboard", "API"]),
-                ("Which frontend framework? React, Vue, or Angular?", ["React", "Vue", "Angular"]),
+                (
+                    "What type of web application? E-commerce, Blog, Dashboard, or API?",
+                    ["E-commerce", "Blog", "Dashboard", "API"],
+                ),
+                (
+                    "Which frontend framework? React, Vue, or Angular?",
+                    ["React", "Vue", "Angular"],
+                ),
                 ("Database preference? SQL or NoSQL?", ["SQL", "NoSQL"]),
-                ("Deployment target? Cloud, VPS, or Local?", ["Cloud", "VPS", "Local"])
+                ("Deployment target? Cloud, VPS, or Local?", ["Cloud", "VPS", "Local"]),
             ],
             "data": [
-                ("What data source? CSV, JSON, Database, or API?", ["CSV", "JSON", "Database", "API"]),
-                ("What type of analysis? Descriptive, Predictive, or Prescriptive?",
-                 ["Descriptive", "Predictive", "Prescriptive"]),
-                ("Which visualization library? Matplotlib, Seaborn, or Plotly?",
-                 ["Matplotlib", "Seaborn", "Plotly"]),
-                ("Data size? Small (<1MB), Medium (1-100MB), or Large (>100MB)?",
-                 ["Small", "Medium", "Large"]),
-                ("Analysis goal? Exploration, Reporting, or Modeling?",
-                 ["Exploration", "Reporting", "Modeling"])
+                (
+                    "What data source? CSV, JSON, Database, or API?",
+                    ["CSV", "JSON", "Database", "API"],
+                ),
+                (
+                    "What type of analysis? Descriptive, Predictive, or Prescriptive?",
+                    ["Descriptive", "Predictive", "Prescriptive"],
+                ),
+                (
+                    "Which visualization library? Matplotlib, Seaborn, or Plotly?",
+                    ["Matplotlib", "Seaborn", "Plotly"],
+                ),
+                (
+                    "Data size? Small (<1MB), Medium (1-100MB), or Large (>100MB)?",
+                    ["Small", "Medium", "Large"],
+                ),
+                (
+                    "Analysis goal? Exploration, Reporting, or Modeling?",
+                    ["Exploration", "Reporting", "Modeling"],
+                ),
             ],
             "ml": [
-                ("Which model family? Linear, Tree-based, or Neural Network?",
-                 ["Linear", "Tree-based", "Neural Network"]),
-                ("Problem type? Classification, Regression, or Clustering?",
-                 ["Classification", "Regression", "Clustering"]),
-                ("Which ML framework? Scikit-learn, TensorFlow, or PyTorch?",
-                 ["Scikit-learn", "TensorFlow", "PyTorch"]),
-                ("Data size? Small (<1K samples), Medium (1K-100K), or Large (>100K)?",
-                 ["Small", "Medium", "Large"]),
-                ("Performance priority? Accuracy, Speed, or Interpretability?",
-                 ["Accuracy", "Speed", "Interpretability"])
+                (
+                    "Which model family? Linear, Tree-based, or Neural Network?",
+                    ["Linear", "Tree-based", "Neural Network"],
+                ),
+                (
+                    "Problem type? Classification, Regression, or Clustering?",
+                    ["Classification", "Regression", "Clustering"],
+                ),
+                (
+                    "Which ML framework? Scikit-learn, TensorFlow, or PyTorch?",
+                    ["Scikit-learn", "TensorFlow", "PyTorch"],
+                ),
+                (
+                    "Data size? Small (<1K samples), Medium (1K-100K), or Large (>100K)?",
+                    ["Small", "Medium", "Large"],
+                ),
+                (
+                    "Performance priority? Accuracy, Speed, or Interpretability?",
+                    ["Accuracy", "Speed", "Interpretability"],
+                ),
             ],
             "devops": [
-                ("Target environment? Docker, VM, or Serverless?", ["Docker", "VM", "Serverless"]),
+                (
+                    "Target environment? Docker, VM, or Serverless?",
+                    ["Docker", "VM", "Serverless"],
+                ),
                 ("Cloud provider? AWS, Azure, or GCP?", ["AWS", "Azure", "GCP"]),
-                ("Deployment type? Blue-Green, Rolling, or Canary?",
-                 ["Blue-Green", "Rolling", "Canary"]),
-                ("Monitoring needs? Basic, Advanced, or Enterprise?",
-                 ["Basic", "Advanced", "Enterprise"]),
-                ("Security level? Standard, Enhanced, or High?",
-                 ["Standard", "Enhanced", "High"])
+                (
+                    "Deployment type? Blue-Green, Rolling, or Canary?",
+                    ["Blue-Green", "Rolling", "Canary"],
+                ),
+                (
+                    "Monitoring needs? Basic, Advanced, or Enterprise?",
+                    ["Basic", "Advanced", "Enterprise"],
+                ),
+                (
+                    "Security level? Standard, Enhanced, or High?",
+                    ["Standard", "Enhanced", "High"],
+                ),
             ],
             "mobile": [
-                ("Platform? iOS, Android, or Cross-platform?", ["iOS", "Android", "Cross-platform"]),
+                (
+                    "Platform? iOS, Android, or Cross-platform?",
+                    ["iOS", "Android", "Cross-platform"],
+                ),
                 ("App type? Native, Hybrid, or PWA?", ["Native", "Hybrid", "PWA"]),
-                ("Framework? React Native, Flutter, or Xamarin?",
-                 ["React Native", "Flutter", "Xamarin"]),
-                ("Target audience? Consumer, Enterprise, or Internal?",
-                 ["Consumer", "Enterprise", "Internal"]),
-                ("Monetization? Free, Freemium, or Paid?", ["Free", "Freemium", "Paid"])
+                (
+                    "Framework? React Native, Flutter, or Xamarin?",
+                    ["React Native", "Flutter", "Xamarin"],
+                ),
+                (
+                    "Target audience? Consumer, Enterprise, or Internal?",
+                    ["Consumer", "Enterprise", "Internal"],
+                ),
+                (
+                    "Monetization? Free, Freemium, or Paid?",
+                    ["Free", "Freemium", "Paid"],
+                ),
             ],
             "programming": [
-                ("Which programming language? Python, JavaScript, Java, or C++?",
-                 ["Python", "JavaScript", "Java", "C++"]),
-                ("What type of program? Script, Application, or Library?",
-                 ["Script", "Application", "Library"]),
-                ("Complexity level? Beginner, Intermediate, or Advanced?",
-                 ["Beginner", "Intermediate", "Advanced"]),
-                ("Performance requirement? Low, Medium, or High?",
-                 ["Low", "Medium", "High"]),
-                ("Code style? Functional, Object-oriented, or Procedural?",
-                 ["Functional", "Object-oriented", "Procedural"])
+                (
+                    "Which programming language? Python, JavaScript, Java, or C++?",
+                    ["Python", "JavaScript", "Java", "C++"],
+                ),
+                (
+                    "What type of program? Script, Application, or Library?",
+                    ["Script", "Application", "Library"],
+                ),
+                (
+                    "Complexity level? Beginner, Intermediate, or Advanced?",
+                    ["Beginner", "Intermediate", "Advanced"],
+                ),
+                (
+                    "Performance requirement? Low, Medium, or High?",
+                    ["Low", "Medium", "High"],
+                ),
+                (
+                    "Code style? Functional, Object-oriented, or Procedural?",
+                    ["Functional", "Object-oriented", "Procedural"],
+                ),
             ],
             "generic": [
-                ("Could you specify the goal? Performance, Security, or Usability?",
-                 ["Performance", "Security", "Usability"]),
-                ("What's the priority? Speed, Quality, or Cost?", ["Speed", "Quality", "Cost"]),
-                ("Target audience? Beginner, Intermediate, or Expert?",
-                 ["Beginner", "Intermediate", "Expert"]),
-                ("Scope? Small, Medium, or Large project?", ["Small", "Medium", "Large"]),
-                ("Timeline? Urgent, Normal, or Flexible?", ["Urgent", "Normal", "Flexible"])
-            ]
+                (
+                    "Could you specify the goal? Performance, Security, or Usability?",
+                    ["Performance", "Security", "Usability"],
+                ),
+                (
+                    "What's the priority? Speed, Quality, or Cost?",
+                    ["Speed", "Quality", "Cost"],
+                ),
+                (
+                    "Target audience? Beginner, Intermediate, or Expert?",
+                    ["Beginner", "Intermediate", "Expert"],
+                ),
+                (
+                    "Scope? Small, Medium, or Large project?",
+                    ["Small", "Medium", "Large"],
+                ),
+                (
+                    "Timeline? Urgent, Normal, or Flexible?",
+                    ["Urgent", "Normal", "Flexible"],
+                ),
+            ],
         }
 
-    def _detect_domain_from_history(self, conversation_history: list[dict[str, Any]]) -> str:
+    def _detect_domain_from_history(
+        self, conversation_history: list[dict[str, Any]]
+    ) -> str:
         """Detect domain from conversation history"""
         if not conversation_history:
             return "generic"
 
         # Keywords for domain detection
         domain_keywords = {
-            "web": ["web", "website", "app", "frontend", "backend", "api", "flask", "fastapi", "react", "vue"],
-            "data": ["data", "analysis", "csv", "json", "database", "pandas", "numpy", "matplotlib"],
-            "ml": ["machine learning", "ml", "model", "training", "prediction", "tensorflow", "pytorch"],
-            "devops": ["deploy", "docker", "kubernetes", "aws", "azure", "gcp", "ci/cd", "pipeline"],
+            "web": [
+                "web",
+                "website",
+                "app",
+                "frontend",
+                "backend",
+                "api",
+                "flask",
+                "fastapi",
+                "react",
+                "vue",
+            ],
+            "data": [
+                "data",
+                "analysis",
+                "csv",
+                "json",
+                "database",
+                "pandas",
+                "numpy",
+                "matplotlib",
+            ],
+            "ml": [
+                "machine learning",
+                "ml",
+                "model",
+                "training",
+                "prediction",
+                "tensorflow",
+                "pytorch",
+            ],
+            "devops": [
+                "deploy",
+                "docker",
+                "kubernetes",
+                "aws",
+                "azure",
+                "gcp",
+                "ci/cd",
+                "pipeline",
+            ],
             "mobile": ["mobile", "ios", "android", "app", "react native", "flutter"],
-            "programming": ["code", "program", "function", "class", "python", "javascript", "java"]
+            "programming": [
+                "code",
+                "program",
+                "function",
+                "class",
+                "python",
+                "javascript",
+                "java",
+            ],
         }
 
         # Analyze recent messages
@@ -143,7 +264,9 @@ class ContextAwareClarifier:
 
         return "generic"
 
-    def _detect_domain_from_project_context(self, project_context: dict[str, Any]) -> str:
+    def _detect_domain_from_project_context(
+        self, project_context: dict[str, Any]
+    ) -> str:
         """Detect domain from project context"""
         if not project_context:
             return "generic"
@@ -153,21 +276,30 @@ class ContextAwareClarifier:
         file_extensions = project_context.get("extensions", [])
 
         # Web development indicators
-        if any(f in files for f in ["package.json", "requirements.txt", "app.py", "main.py"]):
+        if any(
+            f in files
+            for f in ["package.json", "requirements.txt", "app.py", "main.py"]
+        ):
             if any(ext in file_extensions for ext in [".js", ".jsx", ".ts", ".tsx"]):
                 return "web"
             elif any(ext in file_extensions for ext in [".py"]):
-                return "web" if "flask" in str(files).lower() or "fastapi" in str(files).lower() else "programming"
+                return (
+                    "web"
+                    if "flask" in str(files).lower() or "fastapi" in str(files).lower()
+                    else "programming"
+                )
 
         # Data science indicators
-        if any(f in files for f in ["requirements.txt", "environment.yml"]) and \
-           any(ext in file_extensions for ext in [".ipynb", ".py"]):
+        if any(f in files for f in ["requirements.txt", "environment.yml"]) and any(
+            ext in file_extensions for ext in [".ipynb", ".py"]
+        ):
             if "pandas" in str(files).lower() or "numpy" in str(files).lower():
                 return "data"
 
         # Mobile development indicators
-        if any(f in files for f in ["pubspec.yaml", "package.json"]) and \
-           any(ext in file_extensions for ext in [".dart", ".swift", ".kt"]):
+        if any(f in files for f in ["pubspec.yaml", "package.json"]) and any(
+            ext in file_extensions for ext in [".dart", ".swift", ".kt"]
+        ):
             return "mobile"
 
         return "generic"
@@ -175,15 +307,32 @@ class ContextAwareClarifier:
     def _extract_keywords_from_prompt(self, prompt: str) -> list[str]:
         """Extract relevant keywords from prompt"""
         # Simple keyword extraction
-        words = re.findall(r'\b\w+\b', prompt.lower())
+        words = re.findall(r"\b\w+\b", prompt.lower())
 
         # Filter out common words
-        stop_words = {"the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "of", "with", "by"}
+        stop_words = {
+            "the",
+            "a",
+            "an",
+            "and",
+            "or",
+            "but",
+            "in",
+            "on",
+            "at",
+            "to",
+            "for",
+            "of",
+            "with",
+            "by",
+        }
         keywords = [word for word in words if word not in stop_words and len(word) > 2]
 
         return keywords[:10]  # Top 10 keywords
 
-    def _get_semantic_suggestions(self, prompt: str, context: dict[str, Any]) -> list[str]:
+    def _get_semantic_suggestions(
+        self, prompt: str, context: dict[str, Any]
+    ) -> list[str]:
         """Get semantic suggestions from knowledge base"""
         if not self.semantic_search:
             return []
@@ -208,8 +357,12 @@ class ContextAwareClarifier:
             logger.warning(f"Semantic search failed: {e}")
             return []
 
-    def make_question(self, prompt: str, conversation_history: list[dict[str, Any]],
-                     project_context: dict[str, Any]) -> ClarificationQuestion:
+    def make_question(
+        self,
+        prompt: str,
+        conversation_history: list[dict[str, Any]],
+        project_context: dict[str, Any],
+    ) -> ClarificationQuestion:
         """
         Generate context-aware clarification question
 
@@ -246,7 +399,9 @@ class ContextAwareClarifier:
             reasoning = f"Learned pattern (success rate: {learned_suggestion.get('success_rate', 0):.2f})"
         else:
             # Use domain-specific question bank
-            question_bank = self.domain_question_banks.get(domain, self.domain_question_banks["generic"])
+            question_bank = self.domain_question_banks.get(
+                domain, self.domain_question_banks["generic"]
+            )
 
             # Select most appropriate question based on prompt content
             best_question = self._select_best_question(prompt, question_bank)
@@ -263,10 +418,12 @@ class ContextAwareClarifier:
             confidence=confidence,
             domain=domain,
             reasoning=reasoning,
-            follow_up_hints=follow_up_hints
+            follow_up_hints=follow_up_hints,
         )
 
-    def _select_best_question(self, prompt: str, question_bank: list[tuple[str, list[str]]]) -> tuple[str, list[str]]:
+    def _select_best_question(
+        self, prompt: str, question_bank: list[tuple[str, list[str]]]
+    ) -> tuple[str, list[str]]:
         """Select the most appropriate question from the bank based on prompt content"""
         if not question_bank:
             return "Could you please provide more details?", []
@@ -281,9 +438,9 @@ class ContextAwareClarifier:
             options_lower = " ".join(options).lower()
 
             # Count keyword matches
-            prompt_words = set(re.findall(r'\b\w+\b', prompt_lower))
-            question_words = set(re.findall(r'\b\w+\b', question_lower))
-            options_words = set(re.findall(r'\b\w+\b', options_lower))
+            prompt_words = set(re.findall(r"\b\w+\b", prompt_lower))
+            question_words = set(re.findall(r"\b\w+\b", question_lower))
+            options_words = set(re.findall(r"\b\w+\b", options_lower))
 
             # Calculate overlap score
             question_overlap = len(prompt_words.intersection(question_words))
@@ -301,7 +458,11 @@ class ContextAwareClarifier:
 
     def get_domain_stats(self) -> dict[str, int]:
         """Get statistics about domain usage"""
-        return {domain: len(questions) for domain, questions in self.domain_question_banks.items()}
+        return {
+            domain: len(questions)
+            for domain, questions in self.domain_question_banks.items()
+        }
+
 
 # Example usage and testing
 if __name__ == "__main__":
@@ -313,18 +474,17 @@ if __name__ == "__main__":
         {
             "prompt": "Write code for this",
             "history": [{"content": "I'm working on a web application with Flask"}],
-            "project": {"files": ["app.py", "requirements.txt"], "extensions": [".py"]}
+            "project": {"files": ["app.py", "requirements.txt"], "extensions": [".py"]},
         },
         {
             "prompt": "Build an app",
             "history": [{"content": "I need to analyze some data"}],
-            "project": {"files": ["data.csv", "analysis.py"], "extensions": [".py", ".csv"]}
+            "project": {
+                "files": ["data.csv", "analysis.py"],
+                "extensions": [".py", ".csv"],
+            },
         },
-        {
-            "prompt": "Create something",
-            "history": [],
-            "project": {}
-        }
+        {"prompt": "Create something", "history": [], "project": {}},
     ]
 
     for i, test_case in enumerate(test_cases):
@@ -332,9 +492,7 @@ if __name__ == "__main__":
         print(f"Prompt: {test_case['prompt']}")
 
         question = clarifier.make_question(
-            test_case["prompt"],
-            test_case["history"],
-            test_case["project"]
+            test_case["prompt"], test_case["history"], test_case["project"]
         )
 
         print(f"Domain: {question.domain}")

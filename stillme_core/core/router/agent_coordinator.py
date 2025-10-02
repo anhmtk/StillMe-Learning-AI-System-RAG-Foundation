@@ -34,6 +34,7 @@ try:
 except ImportError:
     # Fallback for standalone execution
     import sys
+
     sys.path.append(str(Path(__file__).parent.parent / "observability"))
 try:
     from stillme_core.observability.logger import get_logger
@@ -130,15 +131,17 @@ except NameError:
 
 class CoordinationStrategy(Enum):
     """Strategies for coordinating multiple agents"""
-    SEQUENTIAL = "sequential"        # Agents work one after another
-    PARALLEL = "parallel"           # Agents work simultaneously
-    PIPELINE = "pipeline"           # Agents work in a pipeline
-    HIERARCHICAL = "hierarchical"   # One agent coordinates others
-    COLLABORATIVE = "collaborative" # Agents collaborate on same task
+
+    SEQUENTIAL = "sequential"  # Agents work one after another
+    PARALLEL = "parallel"  # Agents work simultaneously
+    PIPELINE = "pipeline"  # Agents work in a pipeline
+    HIERARCHICAL = "hierarchical"  # One agent coordinates others
+    COLLABORATIVE = "collaborative"  # Agents collaborate on same task
 
 
 class AgentStatus(Enum):
     """Status of agents in the coordination system"""
+
     AVAILABLE = "available"
     BUSY = "busy"
     OFFLINE = "offline"
@@ -149,6 +152,7 @@ class AgentStatus(Enum):
 @dataclass
 class AgentInfo:
     """Information about an agent"""
+
     agent_type: AgentType
     agent_id: str
     status: AgentStatus
@@ -163,6 +167,7 @@ class AgentInfo:
 @dataclass
 class CoordinationPlan:
     """Plan for coordinating multiple agents"""
+
     plan_id: str
     strategy: CoordinationStrategy
     agent_assignments: dict[str, list[Subtask]]  # agent_id -> subtasks
@@ -176,6 +181,7 @@ class CoordinationPlan:
 @dataclass
 class CoordinationResult:
     """Result of agent coordination"""
+
     plan_id: str
     success: bool
     completed_subtasks: list[str]
@@ -212,7 +218,7 @@ class AgentCoordinator:
             "successful_coordinations": 0,
             "avg_coordination_time": 0.0,
             "agent_utilization": 0.0,
-            "task_completion_rate": 0.0
+            "task_completion_rate": 0.0,
         }
 
         # Initialize default agents
@@ -226,33 +232,39 @@ class AgentCoordinator:
             {
                 "agent_type": AgentType.AGENTDEV,
                 "agent_id": "agentdev_main",
-                "capabilities": ["code_review", "bug_fix", "feature_development", "testing", "documentation"],
-                "performance_score": 0.9
+                "capabilities": [
+                    "code_review",
+                    "bug_fix",
+                    "feature_development",
+                    "testing",
+                    "documentation",
+                ],
+                "performance_score": 0.9,
             },
             {
                 "agent_type": AgentType.CODE_REVIEWER,
                 "agent_id": "code_reviewer_1",
                 "capabilities": ["code_review", "analysis"],
-                "performance_score": 0.95
+                "performance_score": 0.95,
             },
             {
                 "agent_type": AgentType.TESTER,
                 "agent_id": "tester_1",
                 "capabilities": ["testing", "validation"],
-                "performance_score": 0.88
+                "performance_score": 0.88,
             },
             {
                 "agent_type": AgentType.DOCUMENTER,
                 "agent_id": "documenter_1",
                 "capabilities": ["documentation", "explanation"],
-                "performance_score": 0.85
+                "performance_score": 0.85,
             },
             {
                 "agent_type": AgentType.ANALYST,
                 "agent_id": "analyst_1",
                 "capabilities": ["analysis", "debugging", "investigation"],
-                "performance_score": 0.92
-            }
+                "performance_score": 0.92,
+            },
         ]
 
         for agent_config in default_agents:
@@ -265,13 +277,12 @@ class AgentCoordinator:
                 performance_score=agent_config["performance_score"],
                 last_activity=time.time(),
                 error_count=0,
-                success_count=0
+                success_count=0,
             )
             self.registered_agents[agent_config["agent_id"]] = agent_info
 
     async def coordinate_task_execution(
-        self,
-        decomposition: TaskDecomposition
+        self, decomposition: TaskDecomposition
     ) -> CoordinationResult:
         """
         Coordinate execution of a decomposed task across multiple agents
@@ -324,13 +335,11 @@ class AgentCoordinator:
                     total_duration=time.time() - start_time,
                     agent_performance={},
                     final_result=None,
-                    error_messages=[str(e)]
+                    error_messages=[str(e)],
                 )
 
     async def _create_coordination_plan(
-        self,
-        decomposition: TaskDecomposition,
-        plan_id: str
+        self, decomposition: TaskDecomposition, plan_id: str
     ) -> CoordinationPlan:
         """Create a coordination plan for the decomposed task"""
 
@@ -338,16 +347,22 @@ class AgentCoordinator:
         strategy = self._determine_coordination_strategy(decomposition)
 
         # Assign subtasks to agents
-        agent_assignments = await self._assign_subtasks_to_agents(decomposition.subtasks)
+        agent_assignments = await self._assign_subtasks_to_agents(
+            decomposition.subtasks
+        )
 
         # Calculate dependencies
         dependencies = self._calculate_subtask_dependencies(decomposition.subtasks)
 
         # Estimate completion time
-        estimated_time = self._estimate_coordination_time(agent_assignments, dependencies, strategy)
+        estimated_time = self._estimate_coordination_time(
+            agent_assignments, dependencies, strategy
+        )
 
         # Define resource requirements
-        resource_requirements = self._calculate_coordination_resources(agent_assignments)
+        resource_requirements = self._calculate_coordination_resources(
+            agent_assignments
+        )
 
         # Define success criteria
         success_criteria = decomposition.success_criteria.copy()
@@ -363,10 +378,12 @@ class AgentCoordinator:
             estimated_completion_time=estimated_time,
             resource_requirements=resource_requirements,
             success_criteria=success_criteria,
-            fallback_plans=fallback_plans
+            fallback_plans=fallback_plans,
         )
 
-    def _determine_coordination_strategy(self, decomposition: TaskDecomposition) -> CoordinationStrategy:
+    def _determine_coordination_strategy(
+        self, decomposition: TaskDecomposition
+    ) -> CoordinationStrategy:
         """Determine the best coordination strategy for the task"""
 
         # Simple heuristic based on task characteristics
@@ -389,8 +406,7 @@ class AgentCoordinator:
             return CoordinationStrategy.COLLABORATIVE
 
     async def _assign_subtasks_to_agents(
-        self,
-        subtasks: list[Subtask]
+        self, subtasks: list[Subtask]
     ) -> dict[str, list[Subtask]]:
         """Assign subtasks to available agents"""
         assignments = {}
@@ -415,7 +431,9 @@ class AgentCoordinator:
 
         return assignments
 
-    def _group_subtasks_by_characteristics(self, subtasks: list[Subtask]) -> dict[str, list[Subtask]]:
+    def _group_subtasks_by_characteristics(
+        self, subtasks: list[Subtask]
+    ) -> dict[str, list[Subtask]]:
         """Group subtasks by their characteristics"""
         groups = {}
 
@@ -430,9 +448,7 @@ class AgentCoordinator:
         return groups
 
     def _find_best_agent_for_group(
-        self,
-        group_type: str,
-        group_subtasks: list[Subtask]
+        self, group_type: str, group_subtasks: list[Subtask]
     ) -> Optional[str]:
         """Find the best agent for a group of subtasks"""
         best_agent = None
@@ -457,9 +473,7 @@ class AgentCoordinator:
         return best_agent
 
     def _calculate_agent_suitability(
-        self,
-        agent_info: AgentInfo,
-        subtasks: list[Subtask]
+        self, agent_info: AgentInfo, subtasks: list[Subtask]
     ) -> float:
         """Calculate how suitable an agent is for a group of subtasks"""
         if not subtasks:
@@ -478,12 +492,16 @@ class AgentCoordinator:
             required_skills.update(subtask.required_skills)
 
         agent_capabilities = set(agent_info.capabilities)
-        capability_match = len(required_skills.intersection(agent_capabilities)) / len(required_skills)
+        capability_match = len(required_skills.intersection(agent_capabilities)) / len(
+            required_skills
+        )
         score += capability_match * 0.4
 
         # Check task type specialization
         task_types = [s.task_type for s in subtasks]
-        type_specialization = self._calculate_type_specialization(agent_info.agent_type, task_types)
+        type_specialization = self._calculate_type_specialization(
+            agent_info.agent_type, task_types
+        )
         score += type_specialization * 0.2
 
         # Adjust for error rate
@@ -495,9 +513,7 @@ class AgentCoordinator:
         return max(0.0, min(1.0, score))
 
     def _calculate_type_specialization(
-        self,
-        agent_type: AgentType,
-        task_types: list[TaskType]
+        self, agent_type: AgentType, task_types: list[TaskType]
     ) -> float:
         """Calculate how well an agent type specializes in the given task types"""
         specialization_map = {
@@ -506,27 +522,24 @@ class AgentCoordinator:
                 TaskType.BUG_FIX: 0.9,
                 TaskType.CODE_REVIEW: 0.8,
                 TaskType.TESTING: 0.7,
-                TaskType.DOCUMENTATION: 0.6
+                TaskType.DOCUMENTATION: 0.6,
             },
             AgentType.CODE_REVIEWER: {
                 TaskType.CODE_REVIEW: 1.0,
                 TaskType.ANALYSIS: 0.9,
-                TaskType.BUG_FIX: 0.7
+                TaskType.BUG_FIX: 0.7,
             },
             AgentType.TESTER: {
                 TaskType.TESTING: 1.0,
                 TaskType.VALIDATION: 0.9,  # type: ignore
-                TaskType.BUG_FIX: 0.6
+                TaskType.BUG_FIX: 0.6,
             },
-            AgentType.DOCUMENTER: {
-                TaskType.DOCUMENTATION: 1.0,
-                TaskType.ANALYSIS: 0.7
-            },
+            AgentType.DOCUMENTER: {TaskType.DOCUMENTATION: 1.0, TaskType.ANALYSIS: 0.7},
             AgentType.ANALYST: {
                 TaskType.ANALYSIS: 1.0,
                 TaskType.BUG_FIX: 0.8,
-                TaskType.CODE_REVIEW: 0.7
-            }
+                TaskType.CODE_REVIEW: 0.7,
+            },
         }
 
         agent_specializations = specialization_map.get(agent_type, {})
@@ -536,12 +549,16 @@ class AgentCoordinator:
 
         total_specialization = 0.0
         for task_type in task_types:
-            specialization = agent_specializations.get(task_type, 0.3)  # Default low score
+            specialization = agent_specializations.get(
+                task_type, 0.3
+            )  # Default low score
             total_specialization += specialization
 
         return total_specialization / len(task_types)
 
-    def _calculate_subtask_dependencies(self, subtasks: list[Subtask]) -> dict[str, list[str]]:
+    def _calculate_subtask_dependencies(
+        self, subtasks: list[Subtask]
+    ) -> dict[str, list[str]]:
         """Calculate dependencies between subtasks"""
         dependencies = {}
 
@@ -554,7 +571,7 @@ class AgentCoordinator:
         self,
         agent_assignments: dict[str, list[Subtask]],
         dependencies: dict[str, list[str]],
-        strategy: CoordinationStrategy
+        strategy: CoordinationStrategy,
     ) -> float:
         """Estimate total coordination time"""
 
@@ -575,16 +592,26 @@ class AgentCoordinator:
 
         elif strategy == CoordinationStrategy.PIPELINE:
             # Pipeline time (simplified)
-            return sum(s.estimated_duration for subtasks in agent_assignments.values() for s in subtasks) * 0.7
+            return (
+                sum(
+                    s.estimated_duration
+                    for subtasks in agent_assignments.values()
+                    for s in subtasks
+                )
+                * 0.7
+            )
 
         else:  # HIERARCHICAL or COLLABORATIVE
             # Add coordination overhead
-            base_time = sum(s.estimated_duration for subtasks in agent_assignments.values() for s in subtasks)
+            base_time = sum(
+                s.estimated_duration
+                for subtasks in agent_assignments.values()
+                for s in subtasks
+            )
             return base_time * 1.2  # 20% overhead for coordination
 
     def _calculate_coordination_resources(
-        self,
-        agent_assignments: dict[str, list[Subtask]]
+        self, agent_assignments: dict[str, list[Subtask]]
     ) -> dict[str, Any]:
         """Calculate resource requirements for coordination"""
         resources = {
@@ -593,7 +620,9 @@ class AgentCoordinator:
             "network_required": False,
             "storage_required": False,
             "concurrent_agents": len(agent_assignments),
-            "total_subtasks": sum(len(subtasks) for subtasks in agent_assignments.values())
+            "total_subtasks": sum(
+                len(subtasks) for subtasks in agent_assignments.values()
+            ),
         }
 
         # Analyze resource requirements from subtasks
@@ -611,9 +640,7 @@ class AgentCoordinator:
         return resources
 
     def _create_fallback_plans(
-        self,
-        decomposition: TaskDecomposition,
-        strategy: CoordinationStrategy
+        self, decomposition: TaskDecomposition, strategy: CoordinationStrategy
     ) -> list[str]:
         """Create fallback plans for coordination"""
         fallback_plans = []
@@ -634,9 +661,7 @@ class AgentCoordinator:
         return fallback_plans
 
     async def _execute_coordination_plan(
-        self,
-        plan: CoordinationPlan,
-        decomposition: TaskDecomposition
+        self, plan: CoordinationPlan, decomposition: TaskDecomposition
     ) -> CoordinationResult:
         """Execute the coordination plan"""
 
@@ -647,13 +672,19 @@ class AgentCoordinator:
 
         try:
             if plan.strategy == CoordinationStrategy.SEQUENTIAL:
-                result = await self._execute_sequential_coordination(plan, decomposition)
+                result = await self._execute_sequential_coordination(
+                    plan, decomposition
+                )
             elif plan.strategy == CoordinationStrategy.PARALLEL:
                 result = await self._execute_parallel_coordination(plan, decomposition)
             elif plan.strategy == CoordinationStrategy.HIERARCHICAL:
-                result = await self._execute_hierarchical_coordination(plan, decomposition)
+                result = await self._execute_hierarchical_coordination(
+                    plan, decomposition
+                )
             else:  # COLLABORATIVE
-                result = await self._execute_collaborative_coordination(plan, decomposition)
+                result = await self._execute_collaborative_coordination(
+                    plan, decomposition
+                )
 
             completed_subtasks = result.completed_subtasks
             failed_subtasks = result.failed_subtasks
@@ -668,7 +699,9 @@ class AgentCoordinator:
         success = len(failed_subtasks) == 0 and len(completed_subtasks) > 0
 
         # Aggregate final result
-        final_result = self._aggregate_coordination_results(completed_subtasks, decomposition)
+        final_result = self._aggregate_coordination_results(
+            completed_subtasks, decomposition
+        )
 
         return CoordinationResult(
             plan_id=plan.plan_id,
@@ -678,13 +711,11 @@ class AgentCoordinator:
             total_duration=0.0,  # Will be set by caller
             agent_performance=agent_performance,
             final_result=final_result,
-            error_messages=error_messages
+            error_messages=error_messages,
         )
 
     async def _execute_sequential_coordination(
-        self,
-        plan: CoordinationPlan,
-        decomposition: TaskDecomposition
+        self, plan: CoordinationPlan, decomposition: TaskDecomposition
     ) -> CoordinationResult:
         """Execute coordination using sequential strategy"""
         completed_subtasks = []
@@ -732,12 +763,18 @@ class AgentCoordinator:
 
                         # Update agent performance
                         if assigned_agent not in agent_performance:
-                            agent_performance[assigned_agent] = {"completed": 0, "failed": 0}
+                            agent_performance[assigned_agent] = {
+                                "completed": 0,
+                                "failed": 0,
+                            }
                         agent_performance[assigned_agent]["completed"] += 1
                     else:
                         failed_subtasks.append(subtask.id)
                         if assigned_agent not in agent_performance:
-                            agent_performance[assigned_agent] = {"completed": 0, "failed": 0}
+                            agent_performance[assigned_agent] = {
+                                "completed": 0,
+                                "failed": 0,
+                            }
                         agent_performance[assigned_agent]["failed"] += 1
 
                     # Remove from remaining
@@ -745,7 +782,9 @@ class AgentCoordinator:
 
                 except Exception as e:
                     failed_subtasks.append(subtask.id)
-                    error_messages.append(f"Error executing subtask {subtask.id}: {str(e)}")
+                    error_messages.append(
+                        f"Error executing subtask {subtask.id}: {str(e)}"
+                    )
                     del remaining_subtasks[subtask.id]
 
         return CoordinationResult(
@@ -756,13 +795,11 @@ class AgentCoordinator:
             total_duration=0.0,
             agent_performance=agent_performance,
             final_result=None,
-            error_messages=error_messages
+            error_messages=error_messages,
         )
 
     async def _execute_parallel_coordination(
-        self,
-        plan: CoordinationPlan,
-        decomposition: TaskDecomposition
+        self, plan: CoordinationPlan, decomposition: TaskDecomposition
     ) -> CoordinationResult:
         """Execute coordination using parallel strategy"""
         completed_subtasks = []
@@ -780,13 +817,17 @@ class AgentCoordinator:
                 tasks.append((task, subtask.id, agent_id))
 
         # Wait for all tasks to complete
-        results = await asyncio.gather(*[task for task, _, _ in tasks], return_exceptions=True)
+        results = await asyncio.gather(
+            *[task for task, _, _ in tasks], return_exceptions=True
+        )
 
         # Process results
         for (task, subtask_id, agent_id), result in zip(tasks, results):
             if isinstance(result, Exception):
                 failed_subtasks.append(subtask_id)
-                error_messages.append(f"Error executing subtask {subtask_id}: {str(result)}")
+                error_messages.append(
+                    f"Error executing subtask {subtask_id}: {str(result)}"
+                )
             elif result:
                 completed_subtasks.append(subtask_id)
             else:
@@ -809,13 +850,11 @@ class AgentCoordinator:
             total_duration=0.0,
             agent_performance=agent_performance,
             final_result=None,
-            error_messages=error_messages
+            error_messages=error_messages,
         )
 
     async def _execute_hierarchical_coordination(
-        self,
-        plan: CoordinationPlan,
-        decomposition: TaskDecomposition
+        self, plan: CoordinationPlan, decomposition: TaskDecomposition
     ) -> CoordinationResult:
         """Execute coordination using hierarchical strategy"""
         # AgentDev acts as coordinator
@@ -835,11 +874,13 @@ class AgentCoordinator:
             dependency_type=None,  # type: ignore
             priority=1.0,
             status=SubtaskStatus.PENDING,
-            created_at=time.time()
+            created_at=time.time(),
         )
 
         # Execute analysis
-        analysis_success = await self._execute_subtask(analysis_subtask, coordinator_agent)
+        analysis_success = await self._execute_subtask(
+            analysis_subtask, coordinator_agent
+        )
 
         if not analysis_success:
             return CoordinationResult(
@@ -850,16 +891,14 @@ class AgentCoordinator:
                 total_duration=0.0,
                 agent_performance={},
                 final_result=None,
-                error_messages=["Hierarchical coordination analysis failed"]
+                error_messages=["Hierarchical coordination analysis failed"],
             )
 
         # Then execute other subtasks with coordination
         return await self._execute_sequential_coordination(plan, decomposition)
 
     async def _execute_collaborative_coordination(
-        self,
-        plan: CoordinationPlan,
-        decomposition: TaskDecomposition
+        self, plan: CoordinationPlan, decomposition: TaskDecomposition
     ) -> CoordinationResult:
         """Execute coordination using collaborative strategy"""
         # For collaborative strategy, we'll use a simplified approach
@@ -871,8 +910,12 @@ class AgentCoordinator:
         error_messages = []
 
         # Group subtasks by complexity
-        simple_subtasks = [s for s in decomposition.subtasks if s.complexity == TaskComplexity.SIMPLE]
-        complex_subtasks = [s for s in decomposition.subtasks if s.complexity != TaskComplexity.SIMPLE]
+        simple_subtasks = [
+            s for s in decomposition.subtasks if s.complexity == TaskComplexity.SIMPLE
+        ]
+        complex_subtasks = [
+            s for s in decomposition.subtasks if s.complexity != TaskComplexity.SIMPLE
+        ]
 
         # Handle simple subtasks in parallel
         if simple_subtasks:
@@ -885,7 +928,7 @@ class AgentCoordinator:
                     estimated_completion_time=0.0,
                     resource_requirements={},
                     success_criteria=[],
-                    fallback_plans=[]
+                    fallback_plans=[],
                 ),
                 TaskDecomposition(
                     task_id=decomposition.task_id,
@@ -899,8 +942,8 @@ class AgentCoordinator:
                     resource_requirements={},
                     success_criteria=[],
                     created_at=time.time(),
-                    status=SubtaskStatus.PENDING
-                )
+                    status=SubtaskStatus.PENDING,
+                ),
             )
 
             completed_subtasks.extend(simple_result.completed_subtasks)
@@ -920,7 +963,7 @@ class AgentCoordinator:
                     estimated_completion_time=0.0,
                     resource_requirements={},
                     success_criteria=[],
-                    fallback_plans=[]
+                    fallback_plans=[],
                 ),
                 TaskDecomposition(
                     task_id=decomposition.task_id,
@@ -934,8 +977,8 @@ class AgentCoordinator:
                     resource_requirements={},
                     success_criteria=[],
                     created_at=time.time(),
-                    status=SubtaskStatus.PENDING
-                )
+                    status=SubtaskStatus.PENDING,
+                ),
             )
 
             completed_subtasks.extend(complex_result.completed_subtasks)
@@ -951,15 +994,19 @@ class AgentCoordinator:
             total_duration=0.0,
             agent_performance=agent_performance,
             final_result=None,
-            error_messages=error_messages
+            error_messages=error_messages,
         )
 
-    async def _execute_subtask_with_agent(self, subtask: Subtask, agent_id: str) -> bool:
+    async def _execute_subtask_with_agent(
+        self, subtask: Subtask, agent_id: str
+    ) -> bool:
         """Execute a subtask with a specific agent"""
         try:
             return await self._execute_subtask(subtask, agent_id)
         except Exception as e:
-            self.logger.error(f"Error executing subtask {subtask.id} with agent {agent_id}: {e}")
+            self.logger.error(
+                f"Error executing subtask {subtask.id} with agent {agent_id}: {e}"
+            )
             return False
 
     async def _execute_subtask(self, subtask: Subtask, agent_id: str) -> bool:
@@ -972,12 +1019,16 @@ class AgentCoordinator:
 
             # Simulate subtask execution
             # In a real system, this would call the actual agent
-            await asyncio.sleep(min(subtask.estimated_duration / 10, 1.0))  # Simulate work
+            await asyncio.sleep(
+                min(subtask.estimated_duration / 10, 1.0)
+            )  # Simulate work
 
             # Simulate success/failure based on complexity and agent performance
             agent_info = self.registered_agents.get(agent_id)
             if agent_info:
-                success_probability = agent_info.performance_score * (1.0 - subtask.complexity.value.count('complex') * 0.2)
+                success_probability = agent_info.performance_score * (
+                    1.0 - subtask.complexity.value.count("complex") * 0.2
+                )
                 success = success_probability > 0.5
             else:
                 success = True  # Default to success for unknown agents
@@ -1003,16 +1054,16 @@ class AgentCoordinator:
             return False
 
     def _aggregate_coordination_results(
-        self,
-        completed_subtasks: list[str],
-        decomposition: TaskDecomposition
+        self, completed_subtasks: list[str], decomposition: TaskDecomposition
     ) -> dict[str, Any]:
         """Aggregate results from completed subtasks"""
         if not completed_subtasks:
             return {"status": "failed", "message": "No subtasks completed"}
 
         # Find completed subtask objects
-        completed_objects = [s for s in decomposition.subtasks if s.id in completed_subtasks]
+        completed_objects = [
+            s for s in decomposition.subtasks if s.id in completed_subtasks
+        ]
 
         # Aggregate basic information
         result = {
@@ -1022,32 +1073,34 @@ class AgentCoordinator:
             "completion_rate": len(completed_subtasks) / len(decomposition.subtasks),
             "task_type": decomposition.main_task_type.value,
             "complexity": decomposition.main_complexity.value,
-            "subtask_results": []
+            "subtask_results": [],
         }
 
         # Add individual subtask results
         for subtask in completed_objects:
-            result["subtask_results"].append({
-                "id": subtask.id,
-                "title": subtask.title,
-                "type": subtask.task_type.value,
-                "complexity": subtask.complexity.value,
-                "duration": subtask.estimated_duration
-            })
+            result["subtask_results"].append(
+                {
+                    "id": subtask.id,
+                    "title": subtask.title,
+                    "type": subtask.task_type.value,
+                    "complexity": subtask.complexity.value,
+                    "duration": subtask.estimated_duration,
+                }
+            )
 
         return result
 
-    def _record_coordination_metrics(
-        self,
-        result: CoordinationResult,
-        duration: float
-    ):
+    def _record_coordination_metrics(self, result: CoordinationResult, duration: float):
         """Record coordination performance metrics"""
         self.metrics.increment_counter("agent_coordinations_total")
         self.metrics.increment_counter(f"agent_coordinations_success_{result.success}")
         self.metrics.record_histogram("agent_coordination_duration_seconds", duration)
-        self.metrics.record_histogram("agent_coordination_subtasks_completed", len(result.completed_subtasks))
-        self.metrics.record_histogram("agent_coordination_subtasks_failed", len(result.failed_subtasks))
+        self.metrics.record_histogram(
+            "agent_coordination_subtasks_completed", len(result.completed_subtasks)
+        )
+        self.metrics.record_histogram(
+            "agent_coordination_subtasks_failed", len(result.failed_subtasks)
+        )
 
         # Update performance metrics
         self.performance_metrics["total_coordinations"] += 1
@@ -1058,19 +1111,17 @@ class AgentCoordinator:
         total_coordinations = self.performance_metrics["total_coordinations"]
         current_avg = self.performance_metrics["avg_coordination_time"]
         self.performance_metrics["avg_coordination_time"] = (
-            (current_avg * (total_coordinations - 1) + duration) / total_coordinations
-        )
+            current_avg * (total_coordinations - 1) + duration
+        ) / total_coordinations
 
         # Update task completion rate
         if result.completed_subtasks or result.failed_subtasks:
-            completion_rate = len(result.completed_subtasks) / (len(result.completed_subtasks) + len(result.failed_subtasks))
+            completion_rate = len(result.completed_subtasks) / (
+                len(result.completed_subtasks) + len(result.failed_subtasks)
+            )
             self.performance_metrics["task_completion_rate"] = completion_rate
 
-    def _log_coordination_result(
-        self,
-        result: CoordinationResult,
-        duration: float
-    ):
+    def _log_coordination_result(self, result: CoordinationResult, duration: float):
         """Log coordination result for debugging and analysis"""
         self.logger.info(
             "Agent coordination completed",
@@ -1081,8 +1132,8 @@ class AgentCoordinator:
                 "failed_subtasks": len(result.failed_subtasks),
                 "total_duration": duration,
                 "agent_count": len(result.agent_performance),
-                "error_count": len(result.error_messages)
-            }
+                "error_count": len(result.error_messages),
+            },
         )
 
     def register_agent(
@@ -1090,7 +1141,7 @@ class AgentCoordinator:
         agent_type: AgentType,
         agent_id: str,
         capabilities: list[str],
-        performance_score: float = 0.8
+        performance_score: float = 0.8,
     ):
         """Register a new agent in the coordination system"""
         agent_info = AgentInfo(
@@ -1102,7 +1153,7 @@ class AgentCoordinator:
             performance_score=performance_score,
             last_activity=time.time(),
             error_count=0,
-            success_count=0
+            success_count=0,
         )
 
         self.registered_agents[agent_id] = agent_info
@@ -1133,9 +1184,11 @@ class AgentCoordinator:
     def export_coordination_data(self) -> dict[str, Any]:
         """Export coordination data for analysis"""
         return {
-            "registered_agents": {k: asdict(v) for k, v in self.registered_agents.items()},
+            "registered_agents": {
+                k: asdict(v) for k, v in self.registered_agents.items()
+            },
             "performance_metrics": self.performance_metrics,
-            "recent_history": [asdict(r) for r in self.coordination_history[-50:]]
+            "recent_history": [asdict(r) for r in self.coordination_history[-50:]],
         }
 
 
@@ -1154,7 +1207,9 @@ def get_agent_coordinator(config: Optional[dict[str, Any]] = None) -> AgentCoord
 
 
 # Convenience functions for common operations
-async def coordinate_task_execution(decomposition: TaskDecomposition) -> CoordinationResult:
+async def coordinate_task_execution(
+    decomposition: TaskDecomposition,
+) -> CoordinationResult:
     """Convenience function to coordinate task execution"""
     coordinator = get_agent_coordinator()
     return await coordinator.coordinate_task_execution(decomposition)

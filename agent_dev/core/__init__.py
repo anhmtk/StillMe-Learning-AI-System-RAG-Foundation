@@ -8,7 +8,4 @@ This module contains the main AgentDev implementation:
 from .agent_mode import AgentMode
 from .agentdev import AgentDev
 
-__all__ = [
-    "AgentDev",
-    "AgentMode"
-]
+__all__ = ["AgentDev", "AgentMode"]

@@ -102,6 +102,6 @@ class JSONDetector(BaseDetector):
                 "json_error": json_error,
                 "malformed_patterns": malformed_matches,
                 "test_malformed_found": test_malformed_found,
-                "json_like_count": json_like_count
-            }
+                "json_like_count": json_like_count,
+            },
         }

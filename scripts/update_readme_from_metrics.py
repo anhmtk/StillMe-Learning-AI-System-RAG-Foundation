@@ -46,7 +46,7 @@ def main():
         r"(<!-- BEGIN:METRICS_TABLE -->)(.*?)(<!-- END:METRICS_TABLE -->)",
         r"\1\n" + table + r"\3",
         content,
-        flags=re.S
+        flags=re.S,
     )
 
     # Update Mermaid diagram
@@ -72,13 +72,14 @@ flowchart LR
         r"(<!-- BEGIN:MERMAID -->)(.*?)(<!-- END:MERMAID -->)",
         r"\1\n" + mermaid_content + r"\n\3",
         content,
-        flags=re.S
+        flags=re.S,
     )
 
     with open(README, "w", encoding="utf-8") as f:
         f.write(content)
 
     print("README updated with metrics.")
+
 
 if __name__ == "__main__":
     main()

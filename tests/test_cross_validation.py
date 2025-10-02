@@ -53,14 +53,11 @@ class TestCrossValidationManager:
                     "input": "Test question",
                     "expected_output": "Test answer",
                     "category": "test",
-                    "difficulty": "easy"
+                    "difficulty": "easy",
                 }
             ],
-            "evaluation_criteria": {
-                "exact_match": 0.5,
-                "semantic_similarity": 0.5
-            },
-            "pass_threshold": 0.8
+            "evaluation_criteria": {"exact_match": 0.5, "semantic_similarity": 0.5},
+            "pass_threshold": 0.8,
         }
 
     @pytest.fixture
@@ -68,7 +65,7 @@ class TestCrossValidationManager:
         """Create CrossValidationManager instance for testing"""
         return CrossValidationManager(
             benchmarks_dir=str(temp_benchmarks_dir),
-            artifacts_dir=str(temp_artifacts_dir)
+            artifacts_dir=str(temp_artifacts_dir),
         )
 
     def test_initialization(self, cross_validation_manager):
@@ -77,11 +74,13 @@ class TestCrossValidationManager:
         assert cross_validation_manager.artifacts_dir.exists()
         assert isinstance(cross_validation_manager.available_benchmarks, dict)
 
-    def test_load_available_benchmarks(self, cross_validation_manager, temp_benchmarks_dir, sample_benchmark_data):
+    def test_load_available_benchmarks(
+        self, cross_validation_manager, temp_benchmarks_dir, sample_benchmark_data
+    ):
         """Test loading available benchmarks"""
         # Create a benchmark file
         benchmark_file = temp_benchmarks_dir / "test_benchmark.json"
-        with open(benchmark_file, 'w') as f:
+        with open(benchmark_file, "w") as f:
             json.dump(sample_benchmark_data, f)
 
         # Reload benchmarks
@@ -91,15 +90,23 @@ class TestCrossValidationManager:
         assert benchmarks["test_benchmark"]["name"] == "Test Accuracy Benchmark"
 
     @pytest.mark.asyncio
-    async def test_validate_against_benchmark(self, cross_validation_manager, sample_benchmark_data):
+    async def test_validate_against_benchmark(
+        self, cross_validation_manager, sample_benchmark_data
+    ):
         """Test validation against a specific benchmark"""
         # Add benchmark
-        cross_validation_manager.available_benchmarks["test_benchmark"] = sample_benchmark_data
+        cross_validation_manager.available_benchmarks["test_benchmark"] = (
+            sample_benchmark_data
+        )
 
         # Mock model outputs
         model_outputs = [
             {"input": "Test question", "output": "Test answer", "confidence": 0.9},
-            {"input": "Another question", "output": "Another answer", "confidence": 0.8}
+            {
+                "input": "Another question",
+                "output": "Another answer",
+                "confidence": 0.8,
+            },
         ]
 
         result = await cross_validation_manager.validate_against_benchmark(
@@ -114,7 +121,9 @@ class TestCrossValidationManager:
         assert result.passed_cases + result.failed_cases == result.test_cases
 
     @pytest.mark.asyncio
-    async def test_validate_against_nonexistent_benchmark(self, cross_validation_manager):
+    async def test_validate_against_nonexistent_benchmark(
+        self, cross_validation_manager
+    ):
         """Test validation against non-existent benchmark"""
         model_outputs = [{"input": "test", "output": "test"}]
 
@@ -124,19 +133,23 @@ class TestCrossValidationManager:
             )
 
     @pytest.mark.asyncio
-    async def test_run_comprehensive_validation(self, cross_validation_manager, sample_benchmark_data):
+    async def test_run_comprehensive_validation(
+        self, cross_validation_manager, sample_benchmark_data
+    ):
         """Test comprehensive validation against multiple benchmarks"""
         # Add multiple benchmarks
-        cross_validation_manager.available_benchmarks["benchmark1"] = sample_benchmark_data
+        cross_validation_manager.available_benchmarks["benchmark1"] = (
+            sample_benchmark_data
+        )
         cross_validation_manager.available_benchmarks["benchmark2"] = {
             **sample_benchmark_data,
             "name": "Test Ethics Benchmark",
-            "type": "ethics"
+            "type": "ethics",
         }
 
         model_outputs = [
             {"input": "Test question 1", "output": "Test answer 1"},
-            {"input": "Test question 2", "output": "Test answer 2"}
+            {"input": "Test question 2", "output": "Test answer 2"},
         ]
 
         metrics = await cross_validation_manager.run_comprehensive_validation(
@@ -147,16 +160,29 @@ class TestCrossValidationManager:
         assert metrics.session_id == "test_session"
         assert 0 <= metrics.overall_score <= 1
         assert len(metrics.benchmark_results) == 2
-        assert metrics.validation_status in ["EXCELLENT", "GOOD", "ACCEPTABLE", "NEEDS_IMPROVEMENT"]
+        assert metrics.validation_status in [
+            "EXCELLENT",
+            "GOOD",
+            "ACCEPTABLE",
+            "NEEDS_IMPROVEMENT",
+        ]
         assert len(metrics.recommendations) > 0
 
     @pytest.mark.asyncio
-    async def test_run_comprehensive_validation_with_specific_benchmarks(self, cross_validation_manager, sample_benchmark_data):
+    async def test_run_comprehensive_validation_with_specific_benchmarks(
+        self, cross_validation_manager, sample_benchmark_data
+    ):
         """Test comprehensive validation with specific benchmarks"""
         # Add multiple benchmarks
-        cross_validation_manager.available_benchmarks["benchmark1"] = sample_benchmark_data
-        cross_validation_manager.available_benchmarks["benchmark2"] = sample_benchmark_data
-        cross_validation_manager.available_benchmarks["benchmark3"] = sample_benchmark_data
+        cross_validation_manager.available_benchmarks["benchmark1"] = (
+            sample_benchmark_data
+        )
+        cross_validation_manager.available_benchmarks["benchmark2"] = (
+            sample_benchmark_data
+        )
+        cross_validation_manager.available_benchmarks["benchmark3"] = (
+            sample_benchmark_data
+        )
 
         model_outputs = [{"input": "test", "output": "test"}]
 
@@ -166,7 +192,9 @@ class TestCrossValidationManager:
         )
 
         assert len(metrics.benchmark_results) == 2
-        benchmark_names = [result.benchmark_name for result in metrics.benchmark_results]
+        benchmark_names = [
+            result.benchmark_name for result in metrics.benchmark_results
+        ]
         assert "benchmark1" in benchmark_names
         assert "benchmark2" in benchmark_names
         assert "benchmark3" not in benchmark_names
@@ -176,16 +204,23 @@ class TestCrossValidationManager:
         benchmark_data = {
             "name": "New Test Benchmark",
             "type": "accuracy",
-            "description": "A new test benchmark"
+            "description": "A new test benchmark",
         }
 
-        success = cross_validation_manager.add_benchmark("new_benchmark", benchmark_data)
+        success = cross_validation_manager.add_benchmark(
+            "new_benchmark", benchmark_data
+        )
 
         assert success
         assert "new_benchmark" in cross_validation_manager.available_benchmarks
-        assert cross_validation_manager.available_benchmarks["new_benchmark"]["name"] == "New Test Benchmark"
+        assert (
+            cross_validation_manager.available_benchmarks["new_benchmark"]["name"]
+            == "New Test Benchmark"
+        )
 
-    def test_get_available_benchmarks(self, cross_validation_manager, sample_benchmark_data):
+    def test_get_available_benchmarks(
+        self, cross_validation_manager, sample_benchmark_data
+    ):
         """Test getting available benchmark names"""
         cross_validation_manager.available_benchmarks["test1"] = sample_benchmark_data
         cross_validation_manager.available_benchmarks["test2"] = sample_benchmark_data
@@ -198,7 +233,9 @@ class TestCrossValidationManager:
 
     def test_get_benchmark_info(self, cross_validation_manager, sample_benchmark_data):
         """Test getting benchmark information"""
-        cross_validation_manager.available_benchmarks["test_benchmark"] = sample_benchmark_data
+        cross_validation_manager.available_benchmarks["test_benchmark"] = (
+            sample_benchmark_data
+        )
 
         info = cross_validation_manager.get_benchmark_info("test_benchmark")
 
@@ -223,7 +260,7 @@ class TestCrossValidationManager:
                 passed_cases=6,
                 failed_cases=4,
                 details={},
-                timestamp="2025-09-26T10:00:00Z"
+                timestamp="2025-09-26T10:00:00Z",
             ),
             BenchmarkResult(
                 benchmark_name="test2",
@@ -235,11 +272,13 @@ class TestCrossValidationManager:
                 passed_cases=5,
                 failed_cases=5,
                 details={},
-                timestamp="2025-09-26T10:00:00Z"
-            )
+                timestamp="2025-09-26T10:00:00Z",
+            ),
         ]
 
-        recommendations = cross_validation_manager._generate_recommendations(results, 0.55)
+        recommendations = cross_validation_manager._generate_recommendations(
+            results, 0.55
+        )
 
         assert len(recommendations) > 0
         assert any("training data" in rec.lower() for rec in recommendations)
@@ -257,7 +296,7 @@ class TestCrossValidationManager:
             confidence_level=0.9,
             validation_status="GOOD",
             recommendations=["Test recommendation"],
-            timestamp="2025-09-26T10:00:00Z"
+            timestamp="2025-09-26T10:00:00Z",
         )
 
         await cross_validation_manager._export_metrics(metrics)
@@ -274,6 +313,7 @@ class TestCrossValidationManager:
         assert data["overall_score"] == 0.85
         assert data["validation_status"] == "GOOD"
 
+
 class TestBenchmarkResult:
     """Test cases for BenchmarkResult dataclass"""
 
@@ -289,7 +329,7 @@ class TestBenchmarkResult:
             passed_cases=17,
             failed_cases=3,
             details={"confidence": 0.9},
-            timestamp="2025-09-26T10:00:00Z"
+            timestamp="2025-09-26T10:00:00Z",
         )
 
         assert result.benchmark_name == "test_benchmark"
@@ -298,6 +338,7 @@ class TestBenchmarkResult:
         assert result.normalized_score == 0.85
         assert result.test_cases == 20
         assert result.passed_cases + result.failed_cases == result.test_cases
+
 
 class TestCrossValidationMetrics:
     """Test cases for CrossValidationMetrics dataclass"""
@@ -315,7 +356,7 @@ class TestCrossValidationMetrics:
                 passed_cases=8,
                 failed_cases=2,
                 details={},
-                timestamp="2025-09-26T10:00:00Z"
+                timestamp="2025-09-26T10:00:00Z",
             )
         ]
 
@@ -327,7 +368,7 @@ class TestCrossValidationMetrics:
             confidence_level=0.85,
             validation_status="GOOD",
             recommendations=["Test recommendation"],
-            timestamp="2025-09-26T10:00:00Z"
+            timestamp="2025-09-26T10:00:00Z",
         )
 
         assert metrics.session_id == "test_session"
@@ -335,6 +376,7 @@ class TestCrossValidationMetrics:
         assert len(metrics.benchmark_results) == 1
         assert metrics.validation_status == "GOOD"
         assert len(metrics.recommendations) == 1
+
 
 @pytest.mark.asyncio
 async def test_integration_workflow():
@@ -347,8 +389,7 @@ async def test_integration_workflow():
 
         # Create manager
         manager = CrossValidationManager(
-            benchmarks_dir=str(benchmarks_dir),
-            artifacts_dir=str(artifacts_dir)
+            benchmarks_dir=str(benchmarks_dir), artifacts_dir=str(artifacts_dir)
         )
 
         # Add a benchmark
@@ -359,14 +400,14 @@ async def test_integration_workflow():
             "version": "1.0.0",
             "test_cases": [],
             "evaluation_criteria": {},
-            "pass_threshold": 0.8
+            "pass_threshold": 0.8,
         }
         manager.add_benchmark("integration_test", benchmark_data)
 
         # Run validation
         model_outputs = [
             {"input": "test1", "output": "result1"},
-            {"input": "test2", "output": "result2"}
+            {"input": "test2", "output": "result2"},
         ]
 
         metrics = await manager.run_comprehensive_validation(

@@ -16,7 +16,9 @@ def run_command(command, description):
     print("-" * 50)
 
     try:
-        result = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
+        result = subprocess.run(
+            command, shell=True, check=True, capture_output=True, text=True
+        )
         print("✅ Success")
         if result.stdout:
             print("Output:", result.stdout)
@@ -26,12 +28,16 @@ def run_command(command, description):
         print("Error:", e.stderr)
         return False
 
+
 def install_python_dependencies():
     """Install Python dependencies"""
-    if not run_command("pip install -r requirements-test.txt", "Installing Python test dependencies"):
+    if not run_command(
+        "pip install -r requirements-test.txt", "Installing Python test dependencies"
+    ):
         return False
 
     return True
+
 
 def install_node_dependencies():
     """Install Node.js dependencies"""
@@ -40,12 +46,14 @@ def install_node_dependencies():
 
     return True
 
+
 def install_playwright():
     """Install Playwright browsers"""
     if not run_command("npx playwright install", "Installing Playwright browsers"):
         return False
 
     return True
+
 
 def create_directories():
     """Create necessary directories"""
@@ -54,7 +62,7 @@ def create_directories():
         "logs",
         "tests/cassettes",
         "reports/coverage",
-        "reports/playbooks"
+        "reports/playbooks",
     ]
 
     for dir_path in directories:
@@ -62,6 +70,7 @@ def create_directories():
         print(f"✅ Created directory: {dir_path}")
 
     return True
+
 
 def setup_git_hooks():
     """Setup Git hooks"""
@@ -71,10 +80,13 @@ def setup_git_hooks():
     if not run_command("pre-commit install", "Installing pre-commit hooks"):
         return False
 
-    if not run_command("pre-commit install --hook-type pre-push", "Installing pre-push hooks"):
+    if not run_command(
+        "pre-commit install --hook-type pre-push", "Installing pre-push hooks"
+    ):
         return False
 
     return True
+
 
 def setup_environment_variables():
     """Setup environment variables"""
@@ -90,6 +102,7 @@ PLAYWRIGHT_BROWSERS_PATH=0
 
     print("✅ Created .env.qa file")
     return True
+
 
 def setup_test_configuration():
     """Setup test configuration"""
@@ -122,6 +135,7 @@ timeout = 30000
 
     print("✅ Created test.ini file")
     return True
+
 
 def setup_ci_configuration():
     """Setup CI configuration"""
@@ -169,6 +183,7 @@ jobs:
     print("✅ Created CI configuration")
     return True
 
+
 def setup_documentation():
     """Setup documentation"""
     docs_dir = Path("docs")
@@ -204,6 +219,7 @@ See individual test files for specific troubleshooting information.
     print("✅ Created QA documentation")
     return True
 
+
 def verify_installation():
     """Verify installation"""
     print("\n🔍 Verifying installation...")
@@ -230,6 +246,7 @@ def verify_installation():
     print("✅ Installation verification passed")
     return True
 
+
 def main():
     """Main setup function"""
     print("🔧 Setting up QA environment for NicheRadar v1.5")
@@ -245,7 +262,7 @@ def main():
         ("Setup Test Configuration", setup_test_configuration),
         ("Setup CI Configuration", setup_ci_configuration),
         ("Setup Documentation", setup_documentation),
-        ("Verify Installation", verify_installation)
+        ("Verify Installation", verify_installation),
     ]
 
     all_passed = True
@@ -261,6 +278,7 @@ def main():
     else:
         print("\n❌ Some setup steps failed!")
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

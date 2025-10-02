@@ -76,6 +76,7 @@ logger = logging.getLogger(__name__)
 
 class ThreatLevel(Enum):
     """Threat level enumeration"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
@@ -84,6 +85,7 @@ class ThreatLevel(Enum):
 
 class AbusePattern(Enum):
     """Abuse pattern types"""
+
     RATE_LIMITING = "rate_limiting"
     CONTENT_ABUSE = "content_abuse"
     SYSTEM_ABUSE = "system_abuse"
@@ -93,6 +95,7 @@ class AbusePattern(Enum):
 @dataclass
 class AbuseEvent:
     """Abuse event data structure"""
+
     event_id: str
     pattern_type: AbusePattern
     threat_level: ThreatLevel
@@ -105,6 +108,7 @@ class AbuseEvent:
 @dataclass
 class GuardConfig:
     """Configuration for ProactiveAbuseGuard"""
+
     enabled: bool = True
     monitoring_interval: int = 60
     threat_threshold: ThreatLevel = ThreatLevel.MEDIUM
@@ -128,7 +132,7 @@ class ProactiveAbuseGuard:
             AbusePattern.RATE_LIMITING: ["rapid_requests", "burst_traffic"],
             AbusePattern.CONTENT_ABUSE: ["spam_content", "malicious_content"],
             AbusePattern.SYSTEM_ABUSE: ["resource_exhaustion", "system_manipulation"],
-            AbusePattern.DATA_ABUSE: ["data_extraction", "privacy_violation"]
+            AbusePattern.DATA_ABUSE: ["data_extraction", "privacy_violation"],
         }
         self.logger = logging.getLogger(__name__)
         self.logger.info("🛡️ ProactiveAbuseGuard initialized")
@@ -153,7 +157,7 @@ class ProactiveAbuseGuard:
                             pattern_type=pattern_type,
                             threat_level=ThreatLevel.MEDIUM,
                             timestamp=str(logging.time.time()),
-                            details=event_data
+                            details=event_data,
                         )
                         self.events.append(event)
                         self.logger.warning(f"🚨 Abuse detected: {pattern_type.value}")
@@ -201,10 +205,14 @@ class ProactiveAbuseGuard:
         try:
             # Stub implementation - basic response
             if self.config.auto_response:
-                self.logger.warning(f"🚨 Auto-response triggered for {event.pattern_type.value}")
+                self.logger.warning(
+                    f"🚨 Auto-response triggered for {event.pattern_type.value}"
+                )
                 return True
             else:
-                self.logger.info(f"📋 Manual response required for {event.pattern_type.value}")
+                self.logger.info(
+                    f"📋 Manual response required for {event.pattern_type.value}"
+                )
                 return False
 
         except Exception as e:
@@ -223,15 +231,19 @@ class ProactiveAbuseGuard:
                 "total_events": len(self.events),
                 "patterns_detected": {},
                 "threat_levels": {},
-                "recent_activity": len([e for e in self.events if e.timestamp])
+                "recent_activity": len([e for e in self.events if e.timestamp]),
             }
 
             for event in self.events:
                 pattern = event.pattern_type.value
                 threat = event.threat_level.value
 
-                stats["patterns_detected"][pattern] = stats["patterns_detected"].get(pattern, 0) + 1
-                stats["threat_levels"][threat] = stats["threat_levels"].get(threat, 0) + 1
+                stats["patterns_detected"][pattern] = (
+                    stats["patterns_detected"].get(pattern, 0) + 1
+                )
+                stats["threat_levels"][threat] = (
+                    stats["threat_levels"].get(threat, 0) + 1
+                )
 
             return stats
 
@@ -269,5 +281,5 @@ __all__ = [
     "AbuseEvent",
     "AbusePattern",
     "ThreatLevel",
-    "GuardConfig"
+    "GuardConfig",
 ]

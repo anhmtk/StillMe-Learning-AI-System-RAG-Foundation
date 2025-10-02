@@ -2,6 +2,7 @@
 """
 Generate Shadow Evaluation Report
 """
+
 import argparse
 import os
 import sys
@@ -16,9 +17,18 @@ from stillme_core.middleware.observability import ObservabilityManager  # noqa: 
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate Reflex Engine Shadow Evaluation Report")
-    parser.add_argument("--hours", type=int, default=24, help="Evaluation window in hours (default: 24)")
-    parser.add_argument("--output", type=str, default="docs/REFLEX_SHADOW_EVAL.md", help="Output file path")
+    parser = argparse.ArgumentParser(
+        description="Generate Reflex Engine Shadow Evaluation Report"
+    )
+    parser.add_argument(
+        "--hours", type=int, default=24, help="Evaluation window in hours (default: 24)"
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default="docs/REFLEX_SHADOW_EVAL.md",
+        help="Output file path",
+    )
     parser.add_argument("--config", type=str, help="Config file path (optional)")
 
     args = parser.parse_args()
@@ -27,6 +37,7 @@ def main():
     config = {}
     if args.config and os.path.exists(args.config):
         import yaml
+
         with open(args.config) as f:
             config = yaml.safe_load(f)
 
@@ -40,7 +51,7 @@ def main():
     output_path = Path(args.output)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(output_path, 'w', encoding='utf-8') as f:
+    with open(output_path, "w", encoding="utf-8") as f:
         f.write(report)
 
     print(f"Shadow evaluation report generated: {output_path}")
@@ -56,9 +67,14 @@ def main():
         print(f"  F1 Score: {performance['f1_score']:.3f}")
         print(f"  FP Rate: {performance['fp_rate']:.3f}")
         print(f"  P95 Processing Time: {performance['p95_processing_time_ms']:.2f} ms")
-        print(f"  Ready for Production: {'Yes' if evaluation['ready_for_production'] else 'No'}")
+        print(
+            f"  Ready for Production: {'Yes' if evaluation['ready_for_production'] else 'No'}"
+        )
     else:
-        print(f"\nInsufficient data for evaluation: {evaluation['sample_count']} samples")
+        print(
+            f"\nInsufficient data for evaluation: {evaluation['sample_count']} samples"
+        )
+
 
 if __name__ == "__main__":
     main()

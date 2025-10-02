@@ -9,7 +9,9 @@ import sys
 import pytest
 
 # Add agent_dev path to sys.path
-agent_dev_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'agent_dev', 'core')
+agent_dev_path = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "agent_dev", "core"
+)
 if agent_dev_path not in sys.path:
     sys.path.insert(0, agent_dev_path)
 
@@ -25,7 +27,6 @@ class TestWorkflows:
     def test_plan_evaluate_execute_flow(self):
         """Test workflow: Plan → Evaluate → Execute"""
         try:
-
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDev(str(temp_project))
 
@@ -48,7 +49,6 @@ class TestWorkflows:
     def test_learning_feedback_loop(self):
         """Test learning from experience feedback loop"""
         try:
-
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDev(str(temp_project))
 
@@ -56,7 +56,7 @@ class TestWorkflows:
             tasks = [
                 "Create user authentication module",
                 "Add input validation to forms",
-                "Implement error handling"
+                "Implement error handling",
             ]
 
             results = []
@@ -78,7 +78,6 @@ class TestWorkflows:
     def test_policy_levels_impact(self):
         """Test how policy levels affect decision making"""
         try:
-
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDev(str(temp_project))
 
@@ -105,7 +104,6 @@ class TestWorkflows:
     def test_error_handling_workflow(self):
         """Test error handling in workflows"""
         try:
-
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDev(str(temp_project))
 
@@ -115,7 +113,11 @@ class TestWorkflows:
 
             # Should handle gracefully
             assert result is not None
-            assert "❌" in result or "error" in result.lower() or "failed" in result.lower()
+            assert (
+                "❌" in result
+                or "error" in result.lower()
+                or "failed" in result.lower()
+            )
 
             TestFixtures.cleanup_temp_project(temp_project)
 
@@ -125,7 +127,6 @@ class TestWorkflows:
     def test_multi_module_integration(self):
         """Test integration between multiple modules"""
         try:
-
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDev(str(temp_project))
 
@@ -139,17 +140,27 @@ class TestWorkflows:
 
             # Should show evidence of multiple modules working
             log_messages = agentdev.log_messages
-            module_indicators = ["Impact", "Business", "Security", "Cleanup", "Conflict"]
+            module_indicators = [
+                "Impact",
+                "Business",
+                "Security",
+                "Cleanup",
+                "Conflict",
+            ]
 
             # At least some modules should be active
-            active_modules = sum(1 for indicator in module_indicators
-                               if any(indicator in msg for msg in log_messages))
+            active_modules = sum(
+                1
+                for indicator in module_indicators
+                if any(indicator in msg for msg in log_messages)
+            )
             assert active_modules > 0
 
             TestFixtures.cleanup_temp_project(temp_project)
 
         except ImportError:
             pytest.skip("AgentDev not available")
+
 
 class TestStillMeIntegration:
     """Test integration with StillMe Framework"""
@@ -158,7 +169,10 @@ class TestStillMeIntegration:
         """Test AgentDev integration with StillMe Framework"""
         try:
             # Add stillme_core path
-            stillme_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'stillme_core')
+            stillme_path = os.path.join(
+                os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+                "stillme_core",
+            )
             if stillme_path not in sys.path:
                 sys.path.insert(0, stillme_path)
 
@@ -166,9 +180,9 @@ class TestStillMeIntegration:
 
             # Initialize framework
             config = {
-                'modules_dir': 'modules',
-                'strict_mode': False,
-                'security_level': 'high'
+                "modules_dir": "modules",
+                "strict_mode": False,
+                "security_level": "high",
             }
 
             # This might fail due to memory issues, but we can test the integration
@@ -198,7 +212,6 @@ class TestStillMeIntegration:
     def test_agentdev_as_technical_manager(self):
         """Test AgentDev as Technical Manager of StillMe"""
         try:
-
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDev(str(temp_project))
 
@@ -207,7 +220,7 @@ class TestStillMeIntegration:
                 "Monitor system performance",
                 "Check for security vulnerabilities",
                 "Review code quality",
-                "Plan system improvements"
+                "Plan system improvements",
             ]
 
             results = []
@@ -225,6 +238,7 @@ class TestStillMeIntegration:
 
         except ImportError:
             pytest.skip("AgentDev not available")
+
 
 class TestDataPersistence:
     """Test data persistence and state management"""

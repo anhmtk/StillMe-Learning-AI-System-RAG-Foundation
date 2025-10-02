@@ -15,15 +15,19 @@ import psutil
 
 logger = logging.getLogger(__name__)
 
+
 class HealthStatus(Enum):
     """Health check status enumeration"""
+
     HEALTHY = "healthy"
     UNHEALTHY = "unhealthy"
     DEGRADED = "degraded"
 
+
 @dataclass
 class HealthCheck:
     """Individual health check result"""
+
     name: str
     status: HealthStatus
     message: str
@@ -31,9 +35,11 @@ class HealthCheck:
     timestamp: datetime
     details: Optional[dict[str, Any]] = None
 
+
 @dataclass
 class HealthResponse:
     """Overall health response"""
+
     status: HealthStatus
     timestamp: datetime
     version: str
@@ -42,14 +48,15 @@ class HealthResponse:
     checks: dict[str, HealthCheck]
     metrics: dict[str, Any]
 
+
 class HealthChecker:
     """Main health check orchestrator"""
 
     def __init__(self, config: Optional[dict[str, Any]] = None):
         self.config = config or {}
         self.start_time = time.time()
-        self._version = self.config.get('version', '1.0.0')
-        self.environment = self.config.get('environment', 'development')
+        self._version = self.config.get("version", "1.0.0")
+        self.environment = self.config.get("environment", "development")
         self.checks = {}
 
     @property
@@ -57,6 +64,7 @@ class HealthChecker:
         """Get version string - deterministic fallback"""
         try:
             import importlib.metadata
+
             return importlib.metadata.version("stillme_core")
         except Exception:
             return self._version or "0.1.0"
@@ -67,14 +75,14 @@ class HealthChecker:
             # Basic system checks without external dependencies
             components = {
                 "core": "ok",
-                "storage": "ok" if self._check_basic_storage() else "degraded"
+                "storage": "ok" if self._check_basic_storage() else "degraded",
             }
 
             return {
                 "status": "ok",
                 "components": components,
                 "version": self.version,
-                "timestamp": time.time()
+                "timestamp": time.time(),
             }
         except Exception as e:
             return {
@@ -82,7 +90,7 @@ class HealthChecker:
                 "components": {"core": "error"},
                 "version": self.version,
                 "error": str(e),
-                "timestamp": time.time()
+                "timestamp": time.time(),
             }
 
     def get_status(self) -> dict[str, Any]:
@@ -91,13 +99,14 @@ class HealthChecker:
         return {
             "status": health["status"],
             "version": health["version"],
-            "uptime": time.time() - self.start_time
+            "uptime": time.time() - self.start_time,
         }
 
     def _check_basic_storage(self) -> bool:
         """Basic storage check without external dependencies"""
         try:
             import tempfile
+
             # Try to create a temp file to check basic storage
             with tempfile.NamedTemporaryFile(delete=True) as f:
                 f.write(b"test")
@@ -111,7 +120,7 @@ class HealthChecker:
 
         try:
             # Check database connection
-            db_path = self.config.get('database', {}).get('path', './data/stillme.db')
+            db_path = self.config.get("database", {}).get("path", "./data/stillme.db")
             conn = sqlite3.connect(db_path, timeout=5.0)
             cursor = conn.cursor()
 
@@ -136,8 +145,8 @@ class HealthChecker:
                 details={
                     "db_path": db_path,
                     "db_count": len(db_info),
-                    "response_time_ms": duration_ms
-                }
+                    "response_time_ms": duration_ms,
+                },
             )
 
         except Exception as e:
@@ -150,7 +159,7 @@ class HealthChecker:
                 message=f"Database connection failed: {str(e)}",
                 duration_ms=duration_ms,
                 timestamp=datetime.now(),
-                details={"error": str(e)}
+                details={"error": str(e)},
             )
 
     def check_memory(self) -> HealthCheck:
@@ -191,8 +200,8 @@ class HealthChecker:
                 details={
                     "system_memory_percent": memory_usage_percent,
                     "process_memory_mb": process_memory_mb,
-                    "available_memory_gb": memory.available / 1024 / 1024 / 1024
-                }
+                    "available_memory_gb": memory.available / 1024 / 1024 / 1024,
+                },
             )
 
         except Exception as e:
@@ -205,7 +214,7 @@ class HealthChecker:
                 message=f"Memory check failed: {str(e)}",
                 duration_ms=duration_ms,
                 timestamp=datetime.now(),
-                details={"error": str(e)}
+                details={"error": str(e)},
             )
 
     def check_disk(self) -> HealthCheck:
@@ -213,7 +222,7 @@ class HealthChecker:
         start_time = time.time()
 
         try:
-            disk = psutil.disk_usage('/')
+            disk = psutil.disk_usage("/")
             disk_usage_percent = (disk.used / disk.total) * 100
 
             # Define threshold
@@ -237,8 +246,8 @@ class HealthChecker:
                 details={
                     "disk_usage_percent": disk_usage_percent,
                     "free_space_gb": disk.free / 1024 / 1024 / 1024,
-                    "total_space_gb": disk.total / 1024 / 1024 / 1024
-                }
+                    "total_space_gb": disk.total / 1024 / 1024 / 1024,
+                },
             )
 
         except Exception as e:
@@ -251,7 +260,7 @@ class HealthChecker:
                 message=f"Disk check failed: {str(e)}",
                 duration_ms=duration_ms,
                 timestamp=datetime.now(),
-                details={"error": str(e)}
+                details={"error": str(e)},
             )
 
     def check_agentdev(self) -> HealthCheck:
@@ -268,7 +277,10 @@ class HealthChecker:
             # Test basic functionality
             test_result = agentdev.execute_task("health check test")
 
-            if "success" in str(test_result).lower() or "completed" in str(test_result).lower():
+            if (
+                "success" in str(test_result).lower()
+                or "completed" in str(test_result).lower()
+            ):
                 status = HealthStatus.HEALTHY
                 message = "AgentDev system operational"
             else:
@@ -285,8 +297,8 @@ class HealthChecker:
                 timestamp=datetime.now(),
                 details={
                     "test_result": test_result[:100],  # Truncate for brevity
-                    "response_time_ms": duration_ms
-                }
+                    "response_time_ms": duration_ms,
+                },
             )
 
         except Exception as e:
@@ -299,7 +311,7 @@ class HealthChecker:
                 message=f"AgentDev system failed: {str(e)}",
                 duration_ms=duration_ms,
                 timestamp=datetime.now(),
-                details={"error": str(e)}
+                details={"error": str(e)},
             )
 
     def run_all_checks(self) -> HealthResponse:
@@ -313,8 +325,12 @@ class HealthChecker:
         checks["agentdev"] = self.check_agentdev()
 
         # Determine overall status
-        unhealthy_count = sum(1 for check in checks.values() if check.status == HealthStatus.UNHEALTHY)
-        degraded_count = sum(1 for check in checks.values() if check.status == HealthStatus.DEGRADED)
+        unhealthy_count = sum(
+            1 for check in checks.values() if check.status == HealthStatus.UNHEALTHY
+        )
+        degraded_count = sum(
+            1 for check in checks.values() if check.status == HealthStatus.DEGRADED
+        )
 
         if unhealthy_count > 0:
             overall_status = HealthStatus.UNHEALTHY
@@ -329,11 +345,13 @@ class HealthChecker:
 
         metrics = {
             "total_checks": len(checks),
-            "healthy_checks": sum(1 for check in checks.values() if check.status == HealthStatus.HEALTHY),
+            "healthy_checks": sum(
+                1 for check in checks.values() if check.status == HealthStatus.HEALTHY
+            ),
             "degraded_checks": degraded_count,
             "unhealthy_checks": unhealthy_count,
             "total_check_duration_ms": total_duration,
-            "uptime_seconds": uptime_seconds
+            "uptime_seconds": uptime_seconds,
         }
 
         return HealthResponse(
@@ -343,8 +361,9 @@ class HealthChecker:
             environment=self.environment,
             uptime_seconds=uptime_seconds,
             checks=checks,
-            metrics=metrics
+            metrics=metrics,
         )
+
 
 def create_health_endpoints(app, config: dict[str, Any]):
     """Create health check endpoints for the application"""
@@ -361,11 +380,14 @@ def create_health_endpoints(app, config: dict[str, Any]):
     health_result = register_health_endpoint(app, health_checker)
     metrics_result = register_metrics_endpoint(app, health_checker)
 
-    logger.info(f"Health endpoints registered: health={health_result['used_style']}, liveness={liveness_result['used_style']}, metrics={metrics_result['used_style']}")
+    logger.info(
+        f"Health endpoints registered: health={health_result['used_style']}, liveness={liveness_result['used_style']}, metrics={metrics_result['used_style']}"
+    )
 
     # Fallback: if adapter failed, use decorator style
-    if "failed" in health_result['used_style']:
-        @app.route('/healthz')
+    if "failed" in health_result["used_style"]:
+
+        @app.route("/healthz")
         def health_probe():
             """Health probe - comprehensive check"""
             try:
@@ -380,8 +402,9 @@ def create_health_endpoints(app, config: dict[str, Any]):
                 logger.error(f"Health probe failed: {e}")
                 return {"status": "error", "error": str(e)}, 503
 
-    if "failed" in liveness_result['used_style']:
-        @app.route('/readyz')
+    if "failed" in liveness_result["used_style"]:
+
+        @app.route("/readyz")
         def liveness_probe():
             """Liveness probe - simple check"""
             try:
@@ -390,7 +413,7 @@ def create_health_endpoints(app, config: dict[str, Any]):
                 logger.error(f"Liveness probe failed: {e}")
                 return {"status": "dead", "error": str(e)}, 503
 
-    @app.route('/metrics')
+    @app.route("/metrics")
     def metrics_endpoint():
         """Prometheus metrics endpoint"""
         try:
@@ -398,14 +421,22 @@ def create_health_endpoints(app, config: dict[str, Any]):
 
             # Convert to Prometheus format
             metrics = []
-            metrics.append(f"stillme_health_status{{environment=\"{health_response.environment}\"}} {1 if health_response.status == HealthStatus.HEALTHY else 0}")
+            metrics.append(
+                f'stillme_health_status{{environment="{health_response.environment}"}} {1 if health_response.status == HealthStatus.HEALTHY else 0}'
+            )
             metrics.append(f"stillme_uptime_seconds {health_response.uptime_seconds}")
-            metrics.append(f"stillme_version_info{{version=\"{health_response.version}\"}} 1")
+            metrics.append(
+                f'stillme_version_info{{version="{health_response.version}"}} 1'
+            )
 
             for check_name, check in health_response.checks.items():
                 status_value = 1 if check.status == HealthStatus.HEALTHY else 0
-                metrics.append(f"stillme_health_check_status{{check=\"{check_name}\"}} {status_value}")
-                metrics.append(f"stillme_health_check_duration_ms{{check=\"{check_name}\"}} {check.duration_ms}")
+                metrics.append(
+                    f'stillme_health_check_status{{check="{check_name}"}} {status_value}'
+                )
+                metrics.append(
+                    f'stillme_health_check_duration_ms{{check="{check_name}"}} {check.duration_ms}'
+                )
 
             return "\n".join(metrics), 200, {"Content-Type": "text/plain"}
 

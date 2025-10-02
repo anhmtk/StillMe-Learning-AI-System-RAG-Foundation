@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class PerformanceMetric:
     """Represents a performance metric"""
+
     name: str
     value: float
     unit: str
@@ -50,70 +51,92 @@ class PerformanceMonitor:
                 "cpu_count": psutil.cpu_count(),
                 "memory_total": psutil.virtual_memory().total,
                 "memory_available": psutil.virtual_memory().available,
-                "disk_total": psutil.disk_usage('/').total if hasattr(psutil, 'disk_usage') else 0,
+                "disk_total": psutil.disk_usage("/").total
+                if hasattr(psutil, "disk_usage")
+                else 0,
                 "platform": psutil.sys.platform,
-                "python_version": psutil.sys.version
+                "python_version": psutil.sys.version,
             }
         except Exception as e:
             logger.warning(f"Could not get system info: {e}")
             return {}
 
-    def record_metric(self, name: str, value: float, unit: str = "", tags: dict[str, str] = None):
+    def record_metric(
+        self, name: str, value: float, unit: str = "", tags: dict[str, str] = None
+    ):
         """Record a performance metric"""
         metric = PerformanceMetric(
-            name=name,
-            value=value,
-            unit=unit,
-            timestamp=datetime.now(),
-            tags=tags or {}
+            name=name, value=value, unit=unit, timestamp=datetime.now(), tags=tags or {}
         )
 
         self.metrics_history[name].append(metric)
         logger.debug(f"Recorded metric: {name} = {value} {unit}")
 
-    def record_execution_time(self, operation_name: str, execution_time: float, tags: dict[str, str] = None):
+    def record_execution_time(
+        self, operation_name: str, execution_time: float, tags: dict[str, str] = None
+    ):
         """Record execution time for an operation"""
-        self.record_metric(f"execution_time_{operation_name}", execution_time, "seconds", tags)
+        self.record_metric(
+            f"execution_time_{operation_name}", execution_time, "seconds", tags
+        )
 
         # Check for performance issues
         if execution_time > 5.0:  # 5 seconds threshold
-            self._log_performance_event("slow_operation", "WARNING", {
-                "operation": operation_name,
-                "execution_time": execution_time,
-                "tags": tags or {}
-            })
+            self._log_performance_event(
+                "slow_operation",
+                "WARNING",
+                {
+                    "operation": operation_name,
+                    "execution_time": execution_time,
+                    "tags": tags or {},
+                },
+            )
 
-    def record_memory_usage(self, operation_name: str, memory_mb: float, tags: dict[str, str] = None):
+    def record_memory_usage(
+        self, operation_name: str, memory_mb: float, tags: dict[str, str] = None
+    ):
         """Record memory usage for an operation"""
         self.record_metric(f"memory_usage_{operation_name}", memory_mb, "MB", tags)
 
         # Check for memory issues
         if memory_mb > 1000:  # 1GB threshold
-            self._log_performance_event("high_memory_usage", "WARNING", {
-                "operation": operation_name,
-                "memory_mb": memory_mb,
-                "tags": tags or {}
-            })
+            self._log_performance_event(
+                "high_memory_usage",
+                "WARNING",
+                {
+                    "operation": operation_name,
+                    "memory_mb": memory_mb,
+                    "tags": tags or {},
+                },
+            )
 
-    def record_cpu_usage(self, operation_name: str, cpu_percent: float, tags: dict[str, str] = None):
+    def record_cpu_usage(
+        self, operation_name: str, cpu_percent: float, tags: dict[str, str] = None
+    ):
         """Record CPU usage for an operation"""
         self.record_metric(f"cpu_usage_{operation_name}", cpu_percent, "percent", tags)
 
         # Check for CPU issues
         if cpu_percent > 80:  # 80% threshold
-            self._log_performance_event("high_cpu_usage", "WARNING", {
-                "operation": operation_name,
-                "cpu_percent": cpu_percent,
-                "tags": tags or {}
-            })
+            self._log_performance_event(
+                "high_cpu_usage",
+                "WARNING",
+                {
+                    "operation": operation_name,
+                    "cpu_percent": cpu_percent,
+                    "tags": tags or {},
+                },
+            )
 
-    def _log_performance_event(self, event_type: str, severity: str, details: dict[str, Any]):
+    def _log_performance_event(
+        self, event_type: str, severity: str, details: dict[str, Any]
+    ):
         """Log performance event"""
         event = {
             "event_type": event_type,
             "severity": severity,
             "details": details,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
         self.performance_events.append(event)
         logger.warning(f"Performance event: {event_type} - {severity} - {details}")
@@ -126,8 +149,7 @@ class PerformanceMonitor:
         # Filter by time window
         cutoff_time = datetime.now() - timedelta(hours=hours)
         recent_metrics = [
-            m for m in self.metrics_history[metric_name]
-            if m.timestamp >= cutoff_time
+            m for m in self.metrics_history[metric_name] if m.timestamp >= cutoff_time
         ]
 
         if not recent_metrics:
@@ -145,7 +167,7 @@ class PerformanceMonitor:
             "unit": recent_metrics[0].unit,
             "time_window_hours": hours,
             "first_timestamp": recent_metrics[0].timestamp.isoformat(),
-            "last_timestamp": recent_metrics[-1].timestamp.isoformat()
+            "last_timestamp": recent_metrics[-1].timestamp.isoformat(),
         }
 
     def get_performance_summary(self) -> dict[str, Any]:
@@ -156,11 +178,13 @@ class PerformanceMonitor:
         try:
             cpu_percent = psutil.cpu_percent(interval=1)
             memory = psutil.virtual_memory()
-            disk = psutil.disk_usage('/') if hasattr(psutil, 'disk_usage') else None
+            disk = psutil.disk_usage("/") if hasattr(psutil, "disk_usage") else None
         except Exception as e:
             logger.warning(f"Could not get system metrics: {e}")
             cpu_percent = 0
-            memory = type('obj', (object,), {'percent': 0, 'available': 0, 'total': 0})()
+            memory = type(
+                "obj", (object,), {"percent": 0, "available": 0, "total": 0}
+            )()
             disk = None
 
         # Count performance events by severity
@@ -178,16 +202,20 @@ class PerformanceMonitor:
                 "memory_available_mb": memory.available / (1024 * 1024),
                 "memory_total_mb": memory.total / (1024 * 1024),
                 "disk_usage_percent": (disk.percent if disk else 0),
-                "disk_free_gb": (disk.free / (1024 * 1024 * 1024) if disk else 0)
+                "disk_free_gb": (disk.free / (1024 * 1024 * 1024) if disk else 0),
             },
             "metrics_tracked": list(self.metrics_history.keys()),
-            "total_metrics_recorded": sum(len(history) for history in self.metrics_history.values()),
+            "total_metrics_recorded": sum(
+                len(history) for history in self.metrics_history.values()
+            ),
             "performance_events": {
                 "total": len(self.performance_events),
                 "by_severity": dict(event_counts),
-                "recent_events": self.performance_events[-10:] if self.performance_events else []
+                "recent_events": self.performance_events[-10:]
+                if self.performance_events
+                else [],
             },
-            "summary_timestamp": datetime.now().isoformat()
+            "summary_timestamp": datetime.now().isoformat(),
         }
 
     def get_top_metrics(self, limit: int = 10) -> list[dict[str, Any]]:
@@ -210,7 +238,8 @@ class PerformanceMonitor:
 
         # Remove old performance events
         self.performance_events = [
-            event for event in self.performance_events
+            event
+            for event in self.performance_events
             if datetime.fromisoformat(event["timestamp"]) >= cutoff_time
         ]
 
@@ -257,12 +286,14 @@ def main():
         print(f"  {metric['name']}: {metric['count']} records")
 
     # Get specific metric summary
-    if summary['metrics_tracked']:
-        first_metric = summary['metrics_tracked'][0]
+    if summary["metrics_tracked"]:
+        first_metric = summary["metrics_tracked"][0]
         metric_summary = monitor.get_metric_summary(first_metric)
         print(f"\n📊 Metric Summary for {first_metric}:")
         print(f"  Count: {metric_summary.get('count', 0)}")
-        print(f"  Average: {metric_summary.get('avg', 0):.2f} {metric_summary.get('unit', '')}")
+        print(
+            f"  Average: {metric_summary.get('avg', 0):.2f} {metric_summary.get('unit', '')}"
+        )
         print(f"  Min: {metric_summary.get('min', 0):.2f}")
         print(f"  Max: {metric_summary.get('max', 0):.2f}")
 

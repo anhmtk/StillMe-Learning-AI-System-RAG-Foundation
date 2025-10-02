@@ -20,7 +20,7 @@ import time
 from datetime import datetime
 
 # Add stillme_core to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "stillme_core"))
 
 from modules.api_provider_manager import ComplexityAnalyzer, UnifiedAPIManager
 
@@ -50,12 +50,12 @@ class RouterCLI:
 
         # Store in session history
         result = {
-            'timestamp': datetime.now(),
-            'prompt': prompt,
-            'complexity_score': complexity_score,
-            'breakdown': breakdown,
-            'selected_model': selected_model,
-            'analysis_time': analysis_time
+            "timestamp": datetime.now(),
+            "prompt": prompt,
+            "complexity_score": complexity_score,
+            "breakdown": breakdown,
+            "selected_model": selected_model,
+            "analysis_time": analysis_time,
         }
 
         self.session_history.append(result)
@@ -75,7 +75,9 @@ class RouterCLI:
             if complexity_score < 0.4:
                 routing_reason = "Simple prompt → Local lightweight model (gemma2:2b)"
             elif complexity_score < 0.7:
-                routing_reason = "Medium complexity → Local coding model (deepseek-coder:6.7b)"
+                routing_reason = (
+                    "Medium complexity → Local coding model (deepseek-coder:6.7b)"
+                )
             else:
                 routing_reason = "High complexity → Cloud model (deepseek-chat)"
 
@@ -94,22 +96,22 @@ class RouterCLI:
             try:
                 prompt = input("\n💬 Enter prompt: ").strip()
 
-                if prompt.lower() == 'quit':
+                if prompt.lower() == "quit":
                     break
-                elif prompt.lower() == 'help':
+                elif prompt.lower() == "help":
                     self._show_help()
                     continue
-                elif prompt.lower() == 'stats':
+                elif prompt.lower() == "stats":
                     self._show_session_stats()
                     continue
-                elif prompt.lower() == 'history':
+                elif prompt.lower() == "history":
                     self._show_history()
                     continue
-                elif prompt.lower() == 'clear':
+                elif prompt.lower() == "clear":
                     self.session_history.clear()
                     print("✅ Session history cleared")
                     continue
-                elif prompt.lower() == 'config':
+                elif prompt.lower() == "config":
                     self._show_config()
                     continue
                 elif not prompt:
@@ -151,8 +153,12 @@ class RouterCLI:
         print("=" * 40)
 
         total_prompts = len(self.session_history)
-        avg_complexity = sum(r['complexity_score'] for r in self.session_history) / total_prompts
-        avg_analysis_time = sum(r['analysis_time'] for r in self.session_history) / total_prompts
+        avg_complexity = (
+            sum(r["complexity_score"] for r in self.session_history) / total_prompts
+        )
+        avg_analysis_time = (
+            sum(r["analysis_time"] for r in self.session_history) / total_prompts
+        )
 
         print(f"Total Prompts: {total_prompts}")
         print(f"Average Complexity: {avg_complexity:.3f}")
@@ -161,7 +167,7 @@ class RouterCLI:
         # Model distribution
         model_counts = {}
         for result in self.session_history:
-            model = result['selected_model']
+            model = result["selected_model"]
             model_counts[model] = model_counts.get(model, 0) + 1
 
         print("\n🎯 Model Distribution:")
@@ -171,19 +177,19 @@ class RouterCLI:
 
         # Complexity distribution
         complexity_ranges = {
-            'Simple (<0.4)': 0,
-            'Medium (0.4-0.7)': 0,
-            'Complex (≥0.7)': 0
+            "Simple (<0.4)": 0,
+            "Medium (0.4-0.7)": 0,
+            "Complex (≥0.7)": 0,
         }
 
         for result in self.session_history:
-            score = result['complexity_score']
+            score = result["complexity_score"]
             if score < 0.4:
-                complexity_ranges['Simple (<0.4)'] += 1
+                complexity_ranges["Simple (<0.4)"] += 1
             elif score < 0.7:
-                complexity_ranges['Medium (0.4-0.7)'] += 1
+                complexity_ranges["Medium (0.4-0.7)"] += 1
             else:
-                complexity_ranges['Complex (≥0.7)'] += 1
+                complexity_ranges["Complex (≥0.7)"] += 1
 
         print("\n🧠 Complexity Distribution:")
         for range_name, count in complexity_ranges.items():
@@ -200,10 +206,14 @@ class RouterCLI:
         print("=" * 60)
 
         for i, result in enumerate(self.session_history, 1):
-            timestamp = result['timestamp'].strftime('%H:%M:%S')
-            prompt = result['prompt'][:50] + "..." if len(result['prompt']) > 50 else result['prompt']
-            model = result['selected_model']
-            score = result['complexity_score']
+            timestamp = result["timestamp"].strftime("%H:%M:%S")
+            prompt = (
+                result["prompt"][:50] + "..."
+                if len(result["prompt"]) > 50
+                else result["prompt"]
+            )
+            model = result["selected_model"]
+            score = result["complexity_score"]
 
             print(f"{i:2d}. {timestamp} | {prompt} → {model} (score: {score:.3f})")
 
@@ -216,15 +226,17 @@ class RouterCLI:
             stats = self.analyzer.get_stats()
             print("🧠 Complexity Analyzer:")
             print(f"  Total Analyses: {stats['performance']['total_analyses']}")
-            print(f"  Average Analysis Time: {stats['performance']['avg_time_ms']:.2f}ms")
+            print(
+                f"  Average Analysis Time: {stats['performance']['avg_time_ms']:.2f}ms"
+            )
             print(f"  Fallback Triggers: {stats['fallback']['total_triggers']}")
 
             print("\n⚙️  Weights:")
-            for key, value in stats['weights'].items():
+            for key, value in stats["weights"].items():
                 print(f"  {key}: {value}")
 
             print("\n🎯 Thresholds:")
-            for key, value in stats['thresholds'].items():
+            for key, value in stats["thresholds"].items():
                 print(f"  {key}: {value}")
 
             print("\n🤖 Available Models:")
@@ -242,7 +254,9 @@ class RouterCLI:
             stats = self.analyzer.get_stats()
             print("🧠 Complexity Analyzer Stats:")
             print(f"  Total Analyses: {stats['performance']['total_analyses']}")
-            print(f"  Average Analysis Time: {stats['performance']['avg_time_ms']:.2f}ms")
+            print(
+                f"  Average Analysis Time: {stats['performance']['avg_time_ms']:.2f}ms"
+            )
             print(f"  Fallback Triggers: {stats['fallback']['total_triggers']}")
 
             print("\n⚙️  Current Configuration:")
@@ -271,8 +285,8 @@ class RouterCLI:
         print("=" * 40)
 
         total_prompts = len(results)
-        avg_complexity = sum(r['complexity_score'] for r in results) / total_prompts
-        avg_analysis_time = sum(r['analysis_time'] for r in results) / total_prompts
+        avg_complexity = sum(r["complexity_score"] for r in results) / total_prompts
+        avg_analysis_time = sum(r["analysis_time"] for r in results) / total_prompts
 
         print(f"Total Prompts: {total_prompts}")
         print(f"Average Complexity: {avg_complexity:.3f}")
@@ -281,7 +295,7 @@ class RouterCLI:
         # Model distribution
         model_counts = {}
         for result in results:
-            model = result['selected_model']
+            model = result["selected_model"]
             model_counts[model] = model_counts.get(model, 0) + 1
 
         print("\n🎯 Model Distribution:")
@@ -294,24 +308,24 @@ class RouterCLI:
     def export_session(self, filename: str):
         """Export session data to JSON file"""
         export_data = {
-            'session_info': {
-                'timestamp': datetime.now().isoformat(),
-                'total_prompts': len(self.session_history)
+            "session_info": {
+                "timestamp": datetime.now().isoformat(),
+                "total_prompts": len(self.session_history),
             },
-            'prompts': [
+            "prompts": [
                 {
-                    'timestamp': result['timestamp'].isoformat(),
-                    'prompt': result['prompt'],
-                    'complexity_score': result['complexity_score'],
-                    'breakdown': result['breakdown'],
-                    'selected_model': result['selected_model'],
-                    'analysis_time': result['analysis_time']
+                    "timestamp": result["timestamp"].isoformat(),
+                    "prompt": result["prompt"],
+                    "complexity_score": result["complexity_score"],
+                    "breakdown": result["breakdown"],
+                    "selected_model": result["selected_model"],
+                    "analysis_time": result["analysis_time"],
                 }
                 for result in self.session_history
-            ]
+            ],
         }
 
-        with open(filename, 'w', encoding='utf-8') as f:
+        with open(filename, "w", encoding="utf-8") as f:
             json.dump(export_data, f, indent=2, ensure_ascii=False)
 
         print(f"✅ Session data exported to {filename}")
@@ -319,7 +333,7 @@ class RouterCLI:
     def load_prompts_from_file(self, filename: str) -> list[str]:
         """Load prompts from a text file"""
         try:
-            with open(filename, encoding='utf-8') as f:
+            with open(filename, encoding="utf-8") as f:
                 prompts = [line.strip() for line in f if line.strip()]
 
             print(f"✅ Loaded {len(prompts)} prompts from {filename}")
@@ -328,15 +342,20 @@ class RouterCLI:
             print(f"❌ Error loading prompts from file: {e}")
             return []
 
+
 def main():
-    parser = argparse.ArgumentParser(description='AI Router Command Line Interface')
-    parser.add_argument('--prompt', type=str, help='Process a single prompt')
-    parser.add_argument('--interactive', action='store_true', help='Start interactive mode')
-    parser.add_argument('--stats', action='store_true', help='Show current statistics')
-    parser.add_argument('--config', action='store_true', help='Show current configuration')
-    parser.add_argument('--batch', type=str, help='Process prompts from a file')
-    parser.add_argument('--export', type=str, help='Export session data to JSON file')
-    parser.add_argument('--verbose', action='store_true', help='Verbose output')
+    parser = argparse.ArgumentParser(description="AI Router Command Line Interface")
+    parser.add_argument("--prompt", type=str, help="Process a single prompt")
+    parser.add_argument(
+        "--interactive", action="store_true", help="Start interactive mode"
+    )
+    parser.add_argument("--stats", action="store_true", help="Show current statistics")
+    parser.add_argument(
+        "--config", action="store_true", help="Show current configuration"
+    )
+    parser.add_argument("--batch", type=str, help="Process prompts from a file")
+    parser.add_argument("--export", type=str, help="Export session data to JSON file")
+    parser.add_argument("--verbose", action="store_true", help="Verbose output")
 
     args = parser.parse_args()
 
@@ -367,6 +386,7 @@ def main():
 
     if args.export:
         cli.export_session(args.export)
+
 
 if __name__ == "__main__":
     main()

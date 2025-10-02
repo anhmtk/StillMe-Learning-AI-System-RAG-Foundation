@@ -20,20 +20,29 @@ logger = logging.getLogger(__name__)
 
 # Dangerous actions that should be blocked
 DANGEROUS_ACTIONS = {
-    "file_write", "file_delete", "system_command", "database_drop",
-    "network_request", "process_kill", "service_stop", "config_change"
+    "file_write",
+    "file_delete",
+    "system_command",
+    "database_drop",
+    "network_request",
+    "process_kill",
+    "service_stop",
+    "config_change",
 }
 
 # Safe actions that can be executed in dry-run mode
 SAFE_ACTIONS = {
-    "log_message", "update_cache", "send_notification", "validate_input",
-    "calculate_score", "format_response", "update_metrics"
+    "log_message",
+    "update_cache",
+    "send_notification",
+    "validate_input",
+    "calculate_score",
+    "format_response",
+    "update_metrics",
 }
 
 # Actions that require special handling
-RESTRICTED_ACTIONS = {
-    "user_data_access", "payment_process", "email_send", "sms_send"
-}
+RESTRICTED_ACTIONS = {"user_data_access", "payment_process", "email_send", "sms_send"}
 
 
 class IdempotencyStore:
@@ -68,7 +77,7 @@ class IdempotencyStore:
         self.store[key] = {
             **result,
             "stored_at": time.time(),
-            "ttl_seconds": ttl_seconds
+            "ttl_seconds": ttl_seconds,
         }
         self.access_times[key] = time.time()
 
@@ -88,7 +97,7 @@ class IdempotencyStore:
         # If still full, remove least recently accessed
         if len(self.store) >= self.max_size:
             sorted_keys = sorted(self.access_times.items(), key=lambda x: x[1])
-            for key, _ in sorted_keys[:len(self.store) // 2]:
+            for key, _ in sorted_keys[: len(self.store) // 2]:
                 self.store.pop(key, None)
                 self.access_times.pop(key, None)
 
@@ -121,8 +130,13 @@ class ActionSandbox:
             "restricted_executions": 0,
         }
 
-    def execute(self, action: str, params: dict[str, Any], trace_id: str,
-                dry_run: bool | None = None) -> dict[str, Any]:
+    def execute(
+        self,
+        action: str,
+        params: dict[str, Any],
+        trace_id: str,
+        dry_run: bool | None = None,
+    ) -> dict[str, Any]:
         """
         Execute an action safely with idempotency and side-effect guarding.
 
@@ -154,7 +168,7 @@ class ActionSandbox:
                 return {
                     **cached_result,
                     "idempotent": True,
-                    "processing_time_ms": (time.time() - start_time) * 1000
+                    "processing_time_ms": (time.time() - start_time) * 1000,
                 }
 
         # Validate action safety
@@ -168,7 +182,7 @@ class ActionSandbox:
                 "trace_id": trace_id,
                 "dry_run": is_dry_run,
                 "blocked": True,
-                "processing_time_ms": (time.time() - start_time) * 1000
+                "processing_time_ms": (time.time() - start_time) * 1000,
             }
 
         # Execute action
@@ -195,7 +209,7 @@ class ActionSandbox:
             return {
                 **result,
                 "idempotent": False,
-                "processing_time_ms": (time.time() - start_time) * 1000
+                "processing_time_ms": (time.time() - start_time) * 1000,
             }
 
         except Exception as e:
@@ -208,10 +222,12 @@ class ActionSandbox:
                 "action": action,
                 "trace_id": trace_id,
                 "dry_run": is_dry_run,
-                "processing_time_ms": (time.time() - start_time) * 1000
+                "processing_time_ms": (time.time() - start_time) * 1000,
             }
 
-    def _generate_idempotency_key(self, action: str, params: dict[str, Any], trace_id: str) -> str:
+    def _generate_idempotency_key(
+        self, action: str, params: dict[str, Any], trace_id: str
+    ) -> str:
         """Generate idempotency key from action, params, and trace_id."""
         # Sort params for consistent key generation
         sorted_params = json.dumps(params, sort_keys=True, default=str)
@@ -220,16 +236,15 @@ class ActionSandbox:
         key_data = f"{trace_id}:{action}:{sorted_params}"
         return hashlib.sha256(key_data.encode()).hexdigest()[:16]
 
-    def _validate_action_safety(self, action: str, params: dict[str, Any], is_dry_run: bool) -> dict[str, Any]:
+    def _validate_action_safety(
+        self, action: str, params: dict[str, Any], is_dry_run: bool
+    ) -> dict[str, Any]:
         """Validate if action is safe to execute."""
 
         # Check for dangerous actions
         if action in DANGEROUS_ACTIONS:
             if self.side_effect_blocking and not is_dry_run:
-                return {
-                    "safe": False,
-                    "reason": f"dangerous_action_blocked: {action}"
-                }
+                return {"safe": False, "reason": f"dangerous_action_blocked: {action}"}
 
         # Check for restricted actions
         if action in RESTRICTED_ACTIONS:
@@ -237,15 +252,12 @@ class ActionSandbox:
                 # In real implementation, would check permissions
                 return {
                     "safe": False,
-                    "reason": f"restricted_action_requires_permission: {action}"
+                    "reason": f"restricted_action_requires_permission: {action}",
                 }
 
         # Validate parameters
         if not self._validate_params(action, params):
-            return {
-                "safe": False,
-                "reason": "invalid_parameters"
-            }
+            return {"safe": False, "reason": "invalid_parameters"}
 
         return {"safe": True, "reason": "validated"}
 
@@ -259,12 +271,17 @@ class ActionSandbox:
         for _key, value in params.items():
             if isinstance(value, str):
                 # Check for potential injection attempts
-                if any(pattern in value.lower() for pattern in ["<script", "javascript:", "eval("]):
+                if any(
+                    pattern in value.lower()
+                    for pattern in ["<script", "javascript:", "eval("]
+                ):
                     return False
 
         return True
 
-    def _execute_dry_run(self, action: str, params: dict[str, Any], trace_id: str) -> dict[str, Any]:
+    def _execute_dry_run(
+        self, action: str, params: dict[str, Any], trace_id: str
+    ) -> dict[str, Any]:
         """Execute action in dry-run mode (no side effects)."""
         return {
             "ok": True,
@@ -272,10 +289,12 @@ class ActionSandbox:
             "trace_id": trace_id,
             "dry_run": True,
             "result": f"DRY_RUN: {action} would be executed with params: {list(params.keys())}",
-            "side_effects_blocked": True
+            "side_effects_blocked": True,
         }
 
-    def _execute_real(self, action: str, params: dict[str, Any], trace_id: str) -> dict[str, Any]:
+    def _execute_real(
+        self, action: str, params: dict[str, Any], trace_id: str
+    ) -> dict[str, Any]:
         """Execute action for real (with side effects)."""
         # In a real implementation, this would dispatch to appropriate handlers
         # For now, we'll simulate safe execution
@@ -289,7 +308,7 @@ class ActionSandbox:
                 "trace_id": trace_id,
                 "dry_run": False,
                 "result": f"EXECUTED: {action} completed successfully with params: {param_summary}",
-                "side_effects_blocked": False
+                "side_effects_blocked": False,
             }
         else:
             # For non-safe actions, we still block them in this implementation
@@ -299,11 +318,17 @@ class ActionSandbox:
                 "trace_id": trace_id,
                 "dry_run": False,
                 "error": f"action_not_implemented: {action}",
-                "side_effects_blocked": True
+                "side_effects_blocked": True,
             }
 
-    def _record_execution(self, action: str, params: dict[str, Any], trace_id: str,
-                         result: dict[str, Any], is_dry_run: bool):
+    def _record_execution(
+        self,
+        action: str,
+        params: dict[str, Any],
+        trace_id: str,
+        result: dict[str, Any],
+        is_dry_run: bool,
+    ):
         """Record execution in history for auditing."""
         execution_record = {
             "timestamp": time.time(),
@@ -312,14 +337,14 @@ class ActionSandbox:
             "dry_run": is_dry_run,
             "success": result.get("ok", False),
             "params_keys": list(params.keys()) if params else [],
-            "result_summary": str(result.get("result", ""))[:100]
+            "result_summary": str(result.get("result", ""))[:100],
         }
 
         self.execution_history.append(execution_record)
 
         # Trim history if too large
         if len(self.execution_history) > self.max_history_size:
-            self.execution_history = self.execution_history[-self.max_history_size:]
+            self.execution_history = self.execution_history[-self.max_history_size :]
 
     def get_execution_history(self, limit: int = 100) -> list[dict[str, Any]]:
         """Get recent execution history."""
@@ -332,10 +357,10 @@ class ActionSandbox:
             "config": {
                 "dry_run": self.dry_run,
                 "idempotency_enabled": self.idempotency_enabled,
-                "side_effect_blocking": self.side_effect_blocking
+                "side_effect_blocking": self.side_effect_blocking,
             },
             "idempotency_store_size": len(self.idempotency_store.store),
-            "execution_history_size": len(self.execution_history)
+            "execution_history_size": len(self.execution_history),
         }
 
     def reset_stats(self):
@@ -347,5 +372,3 @@ class ActionSandbox:
     def clear_idempotency_cache(self):
         """Clear idempotency cache."""
         self.idempotency_store = IdempotencyStore()
-
-

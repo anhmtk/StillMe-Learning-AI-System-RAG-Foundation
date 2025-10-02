@@ -20,8 +20,8 @@ def analyze_bandit_report(report_path: str):
 
         # Count by severity
         severity_counts = {}
-        for result in data.get('results', []):
-            severity = result.get('issue_severity', 'UNKNOWN')
+        for result in data.get("results", []):
+            severity = result.get("issue_severity", "UNKNOWN")
             severity_counts[severity] = severity_counts.get(severity, 0) + 1
 
         print(f"Total issues: {len(data.get('results', []))}")
@@ -29,11 +29,15 @@ def analyze_bandit_report(report_path: str):
             print(f"  {severity}: {count}")
 
         # Show high severity issues
-        high_severity = [r for r in data.get('results', []) if r.get('issue_severity') == 'HIGH']
+        high_severity = [
+            r for r in data.get("results", []) if r.get("issue_severity") == "HIGH"
+        ]
         if high_severity:
             print(f"\n🚨 High Severity Issues ({len(high_severity)}):")
             for issue in high_severity[:10]:  # Show first 10
-                print(f"  - {issue.get('filename', 'unknown')}:{issue.get('line_number', '?')}")
+                print(
+                    f"  - {issue.get('filename', 'unknown')}:{issue.get('line_number', '?')}"
+                )
                 print(f"    {issue.get('issue_text', 'No description')}")
                 print()
 
@@ -53,25 +57,31 @@ def analyze_semgrep_report(report_path: str):
         with open(report_path) as f:
             data = json.load(f)
 
-        results = data.get('results', [])
+        results = data.get("results", [])
         print(f"Total findings: {len(results)}")
 
         # Count by severity
         severity_counts = {}
         for result in results:
-            severity = result.get('extra', {}).get('severity', 'UNKNOWN')
+            severity = result.get("extra", {}).get("severity", "UNKNOWN")
             severity_counts[severity] = severity_counts.get(severity, 0) + 1
 
         for severity, count in sorted(severity_counts.items()):
             print(f"  {severity}: {count}")
 
         # Show high severity findings
-        high_severity = [r for r in results if r.get('extra', {}).get('severity') == 'ERROR']
+        high_severity = [
+            r for r in results if r.get("extra", {}).get("severity") == "ERROR"
+        ]
         if high_severity:
             print(f"\n🚨 High Severity Findings ({len(high_severity)}):")
             for finding in high_severity[:10]:  # Show first 10
-                print(f"  - {finding.get('path', 'unknown')}:{finding.get('start', {}).get('line', '?')}")
-                print(f"    {finding.get('extra', {}).get('message', 'No description')}")
+                print(
+                    f"  - {finding.get('path', 'unknown')}:{finding.get('start', {}).get('line', '?')}"
+                )
+                print(
+                    f"    {finding.get('extra', {}).get('message', 'No description')}"
+                )
                 print()
 
         return len(high_severity)
@@ -90,24 +100,28 @@ def analyze_pip_audit_report(report_path: str):
         with open(report_path) as f:
             data = json.load(f)
 
-        vulnerabilities = data.get('vulnerabilities', [])
+        vulnerabilities = data.get("vulnerabilities", [])
         print(f"Total vulnerabilities: {len(vulnerabilities)}")
 
         # Count by severity
         severity_counts = {}
         for vuln in vulnerabilities:
-            severity = vuln.get('severity', 'UNKNOWN')
+            severity = vuln.get("severity", "UNKNOWN")
             severity_counts[severity] = severity_counts.get(severity, 0) + 1
 
         for severity, count in sorted(severity_counts.items()):
             print(f"  {severity}: {count}")
 
         # Show high severity vulnerabilities
-        high_severity = [v for v in vulnerabilities if v.get('severity') in ['HIGH', 'CRITICAL']]
+        high_severity = [
+            v for v in vulnerabilities if v.get("severity") in ["HIGH", "CRITICAL"]
+        ]
         if high_severity:
             print(f"\n🚨 High/Critical Vulnerabilities ({len(high_severity)}):")
             for vuln in high_severity[:10]:  # Show first 10
-                print(f"  - {vuln.get('package', 'unknown')} {vuln.get('installed_version', '?')}")
+                print(
+                    f"  - {vuln.get('package', 'unknown')} {vuln.get('installed_version', '?')}"
+                )
                 print(f"    {vuln.get('description', 'No description')}")
                 print()
 

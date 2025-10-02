@@ -9,8 +9,11 @@ from pathlib import Path
 from typing import Any
 
 # Setup logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
+
 
 class AgentModuleTester:
     """Test và sửa lỗi các modules"""
@@ -30,7 +33,7 @@ class AgentModuleTester:
                 return {
                     "success": False,
                     "error": f"Module file not found: {module_path}",
-                    "fixed": False
+                    "fixed": False,
                 }
 
             # Load module với importlib.util
@@ -39,26 +42,18 @@ class AgentModuleTester:
                 return {
                     "success": False,
                     "error": f"Could not create spec for {module_name}",
-                    "fixed": False
+                    "fixed": False,
                 }
 
             module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(module)
 
             logger.info(f"✅ Module {module_name} loaded successfully")
-            return {
-                "success": True,
-                "error": None,
-                "fixed": False
-            }
+            return {"success": True, "error": None, "fixed": False}
 
         except Exception as e:
             logger.error(f"❌ Lỗi khi test module {module_name}: {e}")
-            return {
-                "success": False,
-                "error": str(e),
-                "fixed": False
-            }
+            return {"success": False, "error": str(e), "fixed": False}
 
     def fix_module_error(self, module_name: str, error: str) -> bool:
         """Sửa lỗi trong module"""
@@ -76,13 +71,7 @@ class AgentModuleTester:
 
     def test_all_modules(self) -> dict[str, Any]:
         """Test tất cả modules trong thư mục"""
-        results = {
-            "total": 0,
-            "passed": 0,
-            "failed": 0,
-            "fixed": 0,
-            "modules": {}
-        }
+        results = {"total": 0, "passed": 0, "failed": 0, "fixed": 0, "modules": {}}
 
         if not self.modules_dir.exists():
             logger.error(f"Modules directory not found: {self.modules_dir}")
@@ -141,6 +130,7 @@ Success rate: {(results['passed'] / results['total'] * 100):.1f}%
 
         return report
 
+
 def main():
     """Main function"""
     logger.info("🚀 Agent Module Tester bắt đầu...")
@@ -152,9 +142,12 @@ def main():
     print(report)
 
     # Log kết quả
-    logger.info(f"Test completed: {results['passed']}/{results['total']} modules passed")
+    logger.info(
+        f"Test completed: {results['passed']}/{results['total']} modules passed"
+    )
 
     return results
+
 
 if __name__ == "__main__":
     main()

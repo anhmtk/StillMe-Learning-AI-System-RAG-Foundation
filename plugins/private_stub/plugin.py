@@ -1,5 +1,3 @@
-
-
 class StubRouter:  # deliberately not inheriting to avoid hard dep
     """Public stub implementation for OSS mode.
 
@@ -26,11 +24,16 @@ class StubRouter:  # deliberately not inheriting to avoid hard dep
             return "deepseek-coder:6.7b"
 
         # Image-related prompts
-        if any(k in p for k in ("image", "photo", "png", "jpg", "jpeg", "picture", "visual")):
+        if any(
+            k in p
+            for k in ("image", "photo", "png", "jpg", "jpeg", "picture", "visual")
+        ):
             return "llava:7b"
 
         # Math/science prompts
-        if any(k in p for k in ("math", "calculate", "equation", "formula", "statistics")):
+        if any(
+            k in p for k in ("math", "calculate", "equation", "formula", "statistics")
+        ):
             return "deepseek-math:7b"
 
         # Default to general purpose model

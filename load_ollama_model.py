@@ -15,7 +15,7 @@ def load_model():
     payload = {
         "model": "gemma2:2b",
         "prompt": "Hello, I am StillMe. How can I help you?",
-        "stream": False
+        "stream": False,
     }
 
     try:
@@ -40,6 +40,7 @@ def load_model():
 
     except Exception as e:
         print(f"❌ Exception: {e}")
+
 
 if __name__ == "__main__":
     load_model()

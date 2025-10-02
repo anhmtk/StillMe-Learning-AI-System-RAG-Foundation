@@ -23,7 +23,11 @@ class TestRecovery:
         """Test recovery from database corruption"""
         try:
             # Create a job
-            job = asyncio.run(state_store.create_job("test_job", "Test Job", "Test database corruption recovery"))
+            job = asyncio.run(
+                state_store.create_job(
+                    "test_job", "Test Job", "Test database corruption recovery"
+                )
+            )
             assert job is not None
 
             # Simulate corruption by creating invalid data
@@ -32,13 +36,21 @@ class TestRecovery:
 
         except Exception as e:
             # Should handle corruption gracefully
-            assert "corrupt" in str(e).lower() or "database" in str(e).lower() or "attribute" in str(e).lower()
+            assert (
+                "corrupt" in str(e).lower()
+                or "database" in str(e).lower()
+                or "attribute" in str(e).lower()
+            )
 
     def test_process_kill_recovery(self, state_store):
         """Test recovery from process kill"""
         try:
             # Create job before process kill
-            job = asyncio.run(state_store.create_job("kill_job", "Kill Job", "Test process kill recovery"))
+            job = asyncio.run(
+                state_store.create_job(
+                    "kill_job", "Kill Job", "Test process kill recovery"
+                )
+            )
             assert job is not None
 
             # Simulate process kill by closing the store
@@ -62,7 +74,11 @@ class TestRecovery:
         try:
             # Create multiple jobs
             for i in range(10):
-                job = asyncio.run(state_store.create_job(f"job_{i}", f"Job {i}", f"Test memory corruption recovery {i}"))
+                job = asyncio.run(
+                    state_store.create_job(
+                        f"job_{i}", f"Job {i}", f"Test memory corruption recovery {i}"
+                    )
+                )
                 assert job is not None
 
             # Simulate memory pressure
@@ -77,7 +93,11 @@ class TestRecovery:
         """Test recovery from network failure"""
         try:
             # Create job
-            job = asyncio.run(state_store.create_job("network_job", "Network Job", "Test network failure recovery"))
+            job = asyncio.run(
+                state_store.create_job(
+                    "network_job", "Network Job", "Test network failure recovery"
+                )
+            )
             assert job is not None
 
             # Simulate network failure
@@ -86,13 +106,19 @@ class TestRecovery:
 
         except Exception as e:
             # Should handle network issues gracefully
-            assert isinstance(e, (ConnectionError, TimeoutError, Exception, AttributeError))
+            assert isinstance(
+                e, (ConnectionError, TimeoutError, Exception, AttributeError)
+            )
 
     def test_disk_full_recovery(self, state_store):
         """Test recovery from disk full scenario"""
         try:
             # Create job
-            job = asyncio.run(state_store.create_job("disk_job", "Disk Job", "Test disk full recovery"))
+            job = asyncio.run(
+                state_store.create_job(
+                    "disk_job", "Disk Job", "Test disk full recovery"
+                )
+            )
             assert job is not None
 
             # Simulate disk full
@@ -107,7 +133,13 @@ class TestRecovery:
         """Test recovery from concurrent access issues"""
         try:
             # Create job
-            job = asyncio.run(state_store.create_job("concurrent_job", "Concurrent Job", "Test concurrent access recovery"))
+            job = asyncio.run(
+                state_store.create_job(
+                    "concurrent_job",
+                    "Concurrent Job",
+                    "Test concurrent access recovery",
+                )
+            )
             assert job is not None
 
             # Simulate concurrent access
@@ -134,7 +166,11 @@ class TestRecovery:
         """Test recovery from timeout"""
         try:
             # Create job
-            job = asyncio.run(state_store.create_job("timeout_job", "Timeout Job", "Test timeout recovery"))
+            job = asyncio.run(
+                state_store.create_job(
+                    "timeout_job", "Timeout Job", "Test timeout recovery"
+                )
+            )
             assert job is not None
 
             # Simulate timeout
@@ -143,14 +179,22 @@ class TestRecovery:
 
         except Exception as e:
             # Should handle timeout gracefully
-            assert isinstance(e, (TimeoutError, asyncio.TimeoutError, Exception, AttributeError))
+            assert isinstance(
+                e, (TimeoutError, asyncio.TimeoutError, Exception, AttributeError)
+            )
 
     def test_resource_exhaustion_recovery(self, state_store):
         """Test recovery from resource exhaustion"""
         try:
             # Create many jobs to exhaust resources
             for i in range(100):
-                job = asyncio.run(state_store.create_job(f"resource_job_{i}", f"Resource Job {i}", f"Test resource exhaustion recovery {i}"))
+                job = asyncio.run(
+                    state_store.create_job(
+                        f"resource_job_{i}",
+                        f"Resource Job {i}",
+                        f"Test resource exhaustion recovery {i}",
+                    )
+                )
                 assert job is not None
 
         except Exception as e:
@@ -161,7 +205,11 @@ class TestRecovery:
         """Test recovery from graceful shutdown"""
         try:
             # Create job
-            job = asyncio.run(state_store.create_job("shutdown_job", "Shutdown Job", "Test graceful shutdown recovery"))
+            job = asyncio.run(
+                state_store.create_job(
+                    "shutdown_job", "Shutdown Job", "Test graceful shutdown recovery"
+                )
+            )
             assert job is not None
 
             # Simulate graceful shutdown

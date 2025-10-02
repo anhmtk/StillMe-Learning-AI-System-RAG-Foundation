@@ -13,28 +13,36 @@ from typing import Any
 # TODO: These are stub implementations for tests
 # Replace with real implementations when available
 
+
 class NodeType(Enum):
     """Node type for analysis"""
+
     ROOT = "root"
     LEAF = "leaf"
     BRANCH = "branch"
 
+
 class ImpactLevel(Enum):
     """Impact level for analysis"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
 
+
 class MatchType(Enum):
     """Match type for search"""
+
     EXACT = "exact"
     PARTIAL = "partial"
     FUZZY = "fuzzy"
 
+
 @dataclass
 class SemanticSearchEngine:
     """Stub for semantic search engine"""
+
     def __init__(self, *args, **kwargs):
         pass
 
@@ -46,9 +54,11 @@ class SemanticSearchEngine:
         """Stub index method"""
         pass
 
+
 @dataclass
 class RedisEventBus:
     """Stub for Redis event bus"""
+
     def __init__(self, *args, **kwargs):
         pass
 
@@ -60,9 +70,11 @@ class RedisEventBus:
         """Stub subscribe method"""
         pass
 
+
 @dataclass
 class DAGExecutor:
     """Stub for DAG executor"""
+
     def __init__(self, *args, **kwargs):
         pass
 
@@ -70,9 +82,11 @@ class DAGExecutor:
         """Stub execute method"""
         return None
 
+
 @dataclass
 class RBACManager:
     """Stub for RBAC manager"""
+
     def __init__(self, *args, **kwargs):
         pass
 
@@ -80,8 +94,14 @@ class RBACManager:
         """Stub permission check"""
         return True
 
+
 # Export all
 __all__ = [
-    "NodeType", "ImpactLevel", "MatchType",
-    "SemanticSearchEngine", "RedisEventBus", "DAGExecutor", "RBACManager"
+    "NodeType",
+    "ImpactLevel",
+    "MatchType",
+    "SemanticSearchEngine",
+    "RedisEventBus",
+    "DAGExecutor",
+    "RBACManager",
 ]

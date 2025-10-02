@@ -20,7 +20,11 @@ class TestSecurityHeaders:
 
     def test_content_security_policy_header(self, security_headers):
         """Test Content-Security-Policy header"""
-        headers = security_headers.get_security_headers() if hasattr(security_headers, 'get_security_headers') else {}
+        headers = (
+            security_headers.get_security_headers()
+            if hasattr(security_headers, "get_security_headers")
+            else {}
+        )
 
         assert "Content-Security-Policy" in headers
         csp = headers["Content-Security-Policy"]
@@ -34,7 +38,11 @@ class TestSecurityHeaders:
 
     def test_strict_transport_security_header(self, security_headers):
         """Test Strict-Transport-Security header"""
-        headers = security_headers.get_security_headers() if hasattr(security_headers, 'get_security_headers') else {}
+        headers = (
+            security_headers.get_security_headers()
+            if hasattr(security_headers, "get_security_headers")
+            else {}
+        )
 
         assert "Strict-Transport-Security" in headers
         hsts = headers["Strict-Transport-Security"]
@@ -46,35 +54,55 @@ class TestSecurityHeaders:
 
     def test_x_content_type_options_header(self, security_headers):
         """Test X-Content-Type-Options header"""
-        headers = security_headers.get_security_headers() if hasattr(security_headers, 'get_security_headers') else {}
+        headers = (
+            security_headers.get_security_headers()
+            if hasattr(security_headers, "get_security_headers")
+            else {}
+        )
 
         assert "X-Content-Type-Options" in headers
         assert headers["X-Content-Type-Options"] == "nosniff"
 
     def test_x_frame_options_header(self, security_headers):
         """Test X-Frame-Options header"""
-        headers = security_headers.get_security_headers() if hasattr(security_headers, 'get_security_headers') else {}
+        headers = (
+            security_headers.get_security_headers()
+            if hasattr(security_headers, "get_security_headers")
+            else {}
+        )
 
         assert "X-Frame-Options" in headers
         assert headers["X-Frame-Options"] == "DENY"
 
     def test_referrer_policy_header(self, security_headers):
         """Test Referrer-Policy header"""
-        headers = security_headers.get_security_headers() if hasattr(security_headers, 'get_security_headers') else {}
+        headers = (
+            security_headers.get_security_headers()
+            if hasattr(security_headers, "get_security_headers")
+            else {}
+        )
 
         assert "Referrer-Policy" in headers
         assert headers["Referrer-Policy"] == "strict-origin-when-cross-origin"
 
     def test_x_xss_protection_header(self, security_headers):
         """Test X-XSS-Protection header"""
-        headers = security_headers.get_security_headers() if hasattr(security_headers, 'get_security_headers') else {}
+        headers = (
+            security_headers.get_security_headers()
+            if hasattr(security_headers, "get_security_headers")
+            else {}
+        )
 
         assert "X-XSS-Protection" in headers
         assert headers["X-XSS-Protection"] == "1; mode=block"
 
     def test_permissions_policy_header(self, security_headers):
         """Test Permissions-Policy header"""
-        headers = security_headers.get_security_headers() if hasattr(security_headers, 'get_security_headers') else {}
+        headers = (
+            security_headers.get_security_headers()
+            if hasattr(security_headers, "get_security_headers")
+            else {}
+        )
 
         assert "Permissions-Policy" in headers
         permissions = headers["Permissions-Policy"]
@@ -109,6 +137,7 @@ class TestSecurityHeaders:
         # Should not include the disallowed origin
         assert headers["Access-Control-Allow-Origin"] != "https://malicious.com"
 
+
 class TestRateLimiting:
     """Test rate limiting implementation"""
 
@@ -120,7 +149,7 @@ class TestRateLimiting:
     def test_rate_limiter_initialization(self, rate_limiter):
         """Test rate limiter initialization"""
         assert rate_limiter is not None
-        assert hasattr(rate_limiter, 'check_rate_limit')
+        assert hasattr(rate_limiter, "check_rate_limit")
 
     def test_rate_limit_allowed(self, rate_limiter):
         """Test rate limit when within limits"""
@@ -151,7 +180,9 @@ class TestRateLimiting:
 
         # Exceed the rate limit
         for _i in range(11):
-            rate_limiter.check_rate_limit(client_id, limit=10, window=1)  # 1 second window
+            rate_limiter.check_rate_limit(
+                client_id, limit=10, window=1
+            )  # 1 second window
 
         # Wait for window to reset
         time.sleep(1.1)
@@ -188,6 +219,7 @@ class TestRateLimiting:
         assert headers["X-RateLimit-Limit"] == "10"
         assert headers["X-RateLimit-Remaining"] == str(result["remaining"])
 
+
 class TestSecurityIntegration:
     """Test security features integration"""
 
@@ -206,7 +238,7 @@ class TestSecurityIntegration:
             "X-Frame-Options",
             "Referrer-Policy",
             "X-XSS-Protection",
-            "Permissions-Policy"
+            "Permissions-Policy",
         ]
 
         for header in required_headers:
@@ -234,8 +266,8 @@ class TestSecurityIntegration:
 
         # Test middleware initialization
         assert middleware is not None
-        assert hasattr(middleware, 'process_request')
-        assert hasattr(middleware, 'process_response')
+        assert hasattr(middleware, "process_request")
+        assert hasattr(middleware, "process_response")
 
     def test_security_configuration(self):
         """Test security configuration"""
@@ -245,12 +277,13 @@ class TestSecurityIntegration:
 
         # Test configuration loading
         assert config is not None
-        assert hasattr(config, 'get_security_settings')
+        assert hasattr(config, "get_security_settings")
 
         settings = config.get_security_settings()
         assert "headers" in settings
         assert "rate_limiting" in settings
         assert "cors" in settings
+
 
 class TestSecurityCompliance:
     """Test OWASP ASVS compliance"""

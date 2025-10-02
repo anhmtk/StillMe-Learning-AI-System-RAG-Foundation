@@ -7,6 +7,7 @@ class Router(Protocol):
 
     Both Pro and Stub implementations must conform to this protocol.
     """
+
     def choose_model(self, prompt: str) -> str:
         """Choose the most appropriate model for the given prompt.
 

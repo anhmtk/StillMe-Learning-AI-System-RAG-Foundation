@@ -27,23 +27,29 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
+
 class SearchType(Enum):
     """Search type enumeration"""
+
     SIMILARITY = "similarity"
     PATTERN = "pattern"
     CONTEXT = "context"
     DEPENDENCY = "dependency"
 
+
 class MatchType(Enum):
     """Match type enumeration"""
+
     EXACT = "exact"
     SEMANTIC = "semantic"
     PATTERN = "pattern"
     CONTEXTUAL = "contextual"
 
+
 @dataclass
 class SearchResult:
     """Search result"""
+
     file_path: str
     line_number: int
     content: str
@@ -56,9 +62,11 @@ class SearchResult:
         if self.metadata is None:
             self.metadata = {}
 
+
 @dataclass
 class CodeEmbedding:
     """Code embedding representation"""
+
     file_path: str
     function_name: str
     embedding: list[float]
@@ -69,6 +77,7 @@ class CodeEmbedding:
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
+
 
 class SemanticSearchEngine:
     """SEAL-GRADE Semantic Search Engine"""
@@ -82,8 +91,9 @@ class SemanticSearchEngine:
         self.pattern_cache: dict[str, list[SearchResult]] = {}
         self._similarity_cache: dict[tuple[str, str], float] = {}
 
-    def build_index(self, include_patterns: list[str] = None,
-                   exclude_patterns: list[str] = None) -> dict[str, Any]:
+    def build_index(
+        self, include_patterns: list[str] = None, exclude_patterns: list[str] = None
+    ) -> dict[str, Any]:
         """Build semantic search index"""
         if include_patterns is None:
             include_patterns = ["*.py"]
@@ -114,22 +124,35 @@ class SemanticSearchEngine:
             "total_files": len(python_files),
             "total_embeddings": len(self.embeddings),
             "build_time": build_time,
-            "index_size_mb": self._calculate_index_size()
+            "index_size_mb": self._calculate_index_size(),
         }
 
-    def _find_python_files(self, include_patterns: list[str], exclude_patterns: list[str]) -> list[Path]:
+    def _find_python_files(
+        self, include_patterns: list[str], exclude_patterns: list[str]
+    ) -> list[Path]:
         """Find Python files matching patterns"""
         python_files = []
 
         for root, dirs, files in os.walk(self.project_root):
             # Skip excluded directories
-            dirs[:] = [d for d in dirs if not any(self._match_pattern(pattern, d) for pattern in exclude_patterns)]
+            dirs[:] = [
+                d
+                for d in dirs
+                if not any(
+                    self._match_pattern(pattern, d) for pattern in exclude_patterns
+                )
+            ]
 
             for file in files:
-                if file.endswith('.py'):
+                if file.endswith(".py"):
                     file_path = Path(root) / file
                     # Check if file should be included
-                    if any(self._match_pattern(pattern, str(file_path.relative_to(self.project_root))) for pattern in include_patterns):
+                    if any(
+                        self._match_pattern(
+                            pattern, str(file_path.relative_to(self.project_root))
+                        )
+                        for pattern in include_patterns
+                    ):
                         python_files.append(file_path)
 
         return python_files
@@ -138,9 +161,9 @@ class SemanticSearchEngine:
         """Match pattern with proper escaping"""
         try:
             # Convert glob pattern to regex
-            if '*' in pattern:
+            if "*" in pattern:
                 # Escape special regex characters except *
-                escaped = re.escape(pattern).replace(r'\*', '.*')
+                escaped = re.escape(pattern).replace(r"\*", ".*")
                 return bool(re.match(escaped, text))
             else:
                 return pattern == text
@@ -151,7 +174,7 @@ class SemanticSearchEngine:
     def _process_file(self, file_path: Path):
         """Process a single file for indexing"""
         try:
-            with open(file_path, encoding='utf-8') as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
 
             self.file_contents[str(file_path)] = content
@@ -162,7 +185,7 @@ class SemanticSearchEngine:
             # Store function information
             for func in functions:
                 func_id = f"{file_path}:{func['name']}"
-                self.function_index[func['name']].append(func_id)
+                self.function_index[func["name"]].append(func_id)
 
         except Exception as e:
             logger.error(f"Error processing {file_path}: {e}")
@@ -179,32 +202,44 @@ class SemanticSearchEngine:
             for node in ast.walk(tree):
                 if isinstance(node, ast.FunctionDef):
                     # Get function content
-                    lines = content.split('\n')
-                    func_lines = lines[node.lineno-1:node.end_lineno or node.lineno]
-                    func_content = '\n'.join(func_lines)
+                    lines = content.split("\n")
+                    func_lines = lines[node.lineno - 1 : node.end_lineno or node.lineno]
+                    func_content = "\n".join(func_lines)
 
-                    functions.append({
-                        'name': node.name,
-                        'line': node.lineno,
-                        'end_line': node.end_lineno or node.lineno,
-                        'content': func_content,
-                        'args': [arg.arg for arg in node.args.args],
-                        'decorators': [self._get_decorator_name(dec) for dec in node.decorator_list]
-                    })
+                    functions.append(
+                        {
+                            "name": node.name,
+                            "line": node.lineno,
+                            "end_line": node.end_lineno or node.lineno,
+                            "content": func_content,
+                            "args": [arg.arg for arg in node.args.args],
+                            "decorators": [
+                                self._get_decorator_name(dec)
+                                for dec in node.decorator_list
+                            ],
+                        }
+                    )
                 elif isinstance(node, ast.ClassDef):
                     # Get class content
-                    lines = content.split('\n')
-                    class_lines = lines[node.lineno-1:node.end_lineno or node.lineno]
-                    class_content = '\n'.join(class_lines)
+                    lines = content.split("\n")
+                    class_lines = lines[
+                        node.lineno - 1 : node.end_lineno or node.lineno
+                    ]
+                    class_content = "\n".join(class_lines)
 
-                    functions.append({
-                        'name': node.name,
-                        'line': node.lineno,
-                        'end_line': node.end_lineno or node.lineno,
-                        'content': class_content,
-                        'args': [],
-                        'decorators': [self._get_decorator_name(dec) for dec in node.decorator_list]
-                    })
+                    functions.append(
+                        {
+                            "name": node.name,
+                            "line": node.lineno,
+                            "end_line": node.end_lineno or node.lineno,
+                            "content": class_content,
+                            "args": [],
+                            "decorators": [
+                                self._get_decorator_name(dec)
+                                for dec in node.decorator_list
+                            ],
+                        }
+                    )
 
         except Exception as e:
             logger.warning(f"Failed to parse AST for {file_path}: {e}")
@@ -229,19 +264,19 @@ class SemanticSearchEngine:
                 func_id = f"{file_path}:{func['name']}"
 
                 # Create embedding from function content
-                embedding = self._create_embedding(func['content'])
+                embedding = self._create_embedding(func["content"])
 
                 self.embeddings[func_id] = CodeEmbedding(
                     file_path=file_path,
-                    function_name=func['name'],
+                    function_name=func["name"],
                     embedding=embedding,
-                    content=func['content'],
-                    line_number=func['line'],
+                    content=func["content"],
+                    line_number=func["line"],
                     metadata={
-                        'args': func['args'],
-                        'decorators': func['decorators'],
-                        'end_line': func['end_line']
-                    }
+                        "args": func["args"],
+                        "decorators": func["decorators"],
+                        "end_line": func["end_line"],
+                    },
                 )
 
     def _create_embedding(self, content: str) -> list[float]:
@@ -250,8 +285,8 @@ class SemanticSearchEngine:
         # This is a placeholder for a real embedding model
 
         # Normalize content
-        normalized = re.sub(r'\s+', ' ', content.lower())
-        normalized = re.sub(r'[^\w\s]', ' ', normalized)
+        normalized = re.sub(r"\s+", " ", content.lower())
+        normalized = re.sub(r"[^\w\s]", " ", normalized)
 
         # Create hash
         content_hash = hashlib.sha256(normalized.encode()).hexdigest()
@@ -259,14 +294,14 @@ class SemanticSearchEngine:
         # Convert hash to embedding vector
         embedding = []
         for i in range(0, len(content_hash), 2):
-            hex_pair = content_hash[i:i+2]
+            hex_pair = content_hash[i : i + 2]
             embedding.append(int(hex_pair, 16) / 255.0)
 
         # Pad or truncate to embedding_dim
         while len(embedding) < self.embedding_dim:
             embedding.append(0.0)
 
-        embedding = embedding[:self.embedding_dim]
+        embedding = embedding[: self.embedding_dim]
 
         # Normalize
         norm = np.linalg.norm(embedding)
@@ -290,11 +325,13 @@ class SemanticSearchEngine:
 
         # Calculate file contents size
         for content in self.file_contents.values():
-            total_size += len(content.encode('utf-8'))
+            total_size += len(content.encode("utf-8"))
 
         return total_size / (1024 * 1024)  # Convert to MB
 
-    def search_similar(self, query: str, limit: int = 10, threshold: float = 0.5) -> list[SearchResult]:
+    def search_similar(
+        self, query: str, limit: int = 10, threshold: float = 0.5
+    ) -> list[SearchResult]:
         """Search for similar code"""
         # Create embedding for query
         query_embedding = self._create_embedding(query)
@@ -317,15 +354,17 @@ class SemanticSearchEngine:
             # Get context
             context = self._get_context(embedding.file_path, embedding.line_number)
 
-            results.append(SearchResult(
-                file_path=embedding.file_path,
-                line_number=embedding.line_number,
-                content=embedding.content,
-                match_type=MatchType.SEMANTIC,
-                similarity_score=similarity,
-                context=context,
-                metadata=embedding.metadata
-            ))
+            results.append(
+                SearchResult(
+                    file_path=embedding.file_path,
+                    line_number=embedding.line_number,
+                    content=embedding.content,
+                    match_type=MatchType.SEMANTIC,
+                    similarity_score=similarity,
+                    context=context,
+                    metadata=embedding.metadata,
+                )
+            )
 
         return results
 
@@ -338,31 +377,35 @@ class SemanticSearchEngine:
         compiled_pattern = re.compile(pattern, re.IGNORECASE)
 
         for file_path, content in self.file_contents.items():
-            lines = content.split('\n')
+            lines = content.split("\n")
 
             for i, line in enumerate(lines):
                 if compiled_pattern.search(line):
                     # Get context
                     context_start = max(0, i - 2)
                     context_end = min(len(lines), i + 3)
-                    context = '\n'.join(lines[context_start:context_end])
+                    context = "\n".join(lines[context_start:context_end])
 
-                    results.append(SearchResult(
-                        file_path=file_path,
-                        line_number=i + 1,
-                        content=line.strip(),
-                        match_type=MatchType.PATTERN,
-                        similarity_score=1.0,
-                        context=context,
-                        metadata={'pattern': pattern}
-                    ))
+                    results.append(
+                        SearchResult(
+                            file_path=file_path,
+                            line_number=i + 1,
+                            content=line.strip(),
+                            match_type=MatchType.PATTERN,
+                            similarity_score=1.0,
+                            context=context,
+                            metadata={"pattern": pattern},
+                        )
+                    )
 
         # Cache results
         self.pattern_cache[pattern] = results
 
         return results[:limit]
 
-    def search_function(self, function_name: str, limit: int = 10) -> list[SearchResult]:
+    def search_function(
+        self, function_name: str, limit: int = 10
+    ) -> list[SearchResult]:
         """Search for specific function"""
         results = []
 
@@ -373,25 +416,33 @@ class SemanticSearchEngine:
                 # Get context
                 context = self._get_context(embedding.file_path, embedding.line_number)
 
-                results.append(SearchResult(
-                    file_path=embedding.file_path,
-                    line_number=embedding.line_number,
-                    content=embedding.content,
-                    match_type=MatchType.EXACT,
-                    similarity_score=1.0,
-                    context=context,
-                    metadata=embedding.metadata
-                ))
+                results.append(
+                    SearchResult(
+                        file_path=embedding.file_path,
+                        line_number=embedding.line_number,
+                        content=embedding.content,
+                        match_type=MatchType.EXACT,
+                        similarity_score=1.0,
+                        context=context,
+                        metadata=embedding.metadata,
+                    )
+                )
 
         return results[:limit]
 
-    def search_contextual(self, file_path: str, line_number: int, limit: int = 10) -> list[SearchResult]:
+    def search_contextual(
+        self, file_path: str, line_number: int, limit: int = 10
+    ) -> list[SearchResult]:
         """Search for contextually related code"""
         # Get the function at the given location
         target_func = None
         for _func_id, embedding in self.embeddings.items():
             if embedding.file_path == file_path:
-                if embedding.line_number <= line_number <= embedding.metadata.get('end_line', embedding.line_number):
+                if (
+                    embedding.line_number
+                    <= line_number
+                    <= embedding.metadata.get("end_line", embedding.line_number)
+                ):
                     target_func = embedding
                     break
 
@@ -402,7 +453,11 @@ class SemanticSearchEngine:
         similar_results = self.search_similar(target_func.content, limit=limit + 1)
 
         # Remove the target function itself
-        similar_results = [r for r in similar_results if r.file_path != file_path or r.line_number != line_number]
+        similar_results = [
+            r
+            for r in similar_results
+            if r.file_path != file_path or r.line_number != line_number
+        ]
 
         return similar_results[:limit]
 
@@ -420,12 +475,14 @@ class SemanticSearchEngine:
 
         return dot_product / (norm1 * norm2)
 
-    def _get_context(self, file_path: str, line_number: int, context_lines: int = 3) -> str:
+    def _get_context(
+        self, file_path: str, line_number: int, context_lines: int = 3
+    ) -> str:
         """Get context around a line"""
         if file_path not in self.file_contents:
             return ""
 
-        lines = self.file_contents[file_path].split('\n')
+        lines = self.file_contents[file_path].split("\n")
 
         start = max(0, line_number - context_lines - 1)
         end = min(len(lines), line_number + context_lines)
@@ -439,9 +496,11 @@ class SemanticSearchEngine:
             marker = ">>> " if actual_line == line_number else "    "
             numbered_context.append(f"{marker}{actual_line:4d}: {line}")
 
-        return '\n'.join(numbered_context)
+        return "\n".join(numbered_context)
 
-    def find_related_files(self, file_path: str, limit: int = 5) -> list[tuple[str, float]]:
+    def find_related_files(
+        self, file_path: str, limit: int = 5
+    ) -> list[tuple[str, float]]:
         """Find files related to the given file"""
         # Get all functions in the file
         file_functions = []
@@ -483,12 +542,14 @@ class SemanticSearchEngine:
         suggestions = []
         for result in similar_results:
             suggestion = {
-                'file_path': result.file_path,
-                'function_name': Path(result.file_path).stem,
-                'line_number': result.line_number,
-                'similarity': result.similarity_score,
-                'snippet': result.content[:200] + "..." if len(result.content) > 200 else result.content,
-                'context': result.context
+                "file_path": result.file_path,
+                "function_name": Path(result.file_path).stem,
+                "line_number": result.line_number,
+                "similarity": result.similarity_score,
+                "snippet": result.content[:200] + "..."
+                if len(result.content) > 200
+                else result.content,
+                "context": result.context,
             }
             suggestions.append(suggestion)
 
@@ -504,7 +565,7 @@ class SemanticSearchEngine:
                     "embedding": emb.embedding,
                     "content": emb.content,
                     "line_number": emb.line_number,
-                    "metadata": emb.metadata
+                    "metadata": emb.metadata,
                 }
                 for func_id, emb in self.embeddings.items()
             },
@@ -513,11 +574,11 @@ class SemanticSearchEngine:
                 "project_root": str(self.project_root),
                 "embedding_dim": self.embedding_dim,
                 "total_embeddings": len(self.embeddings),
-                "index_timestamp": time.time()
-            }
+                "index_timestamp": time.time(),
+            },
         }
 
-        with open(output_file, 'w') as f:
+        with open(output_file, "w") as f:
             json.dump(index_data, f, indent=2, default=str)
 
         logger.info(f"Semantic index exported to {output_file}")
@@ -531,5 +592,5 @@ class SemanticSearchEngine:
             "pattern_cache_size": len(self.pattern_cache),
             "similarity_cache_size": len(self._similarity_cache),
             "index_size_mb": self._calculate_index_size(),
-            "average_embedding_dim": self.embedding_dim
+            "average_embedding_dim": self.embedding_dim,
         }

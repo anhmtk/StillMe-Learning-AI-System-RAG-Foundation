@@ -9,13 +9,14 @@ import sys
 def check_file_for_null_bytes(file_path):
     """Check if file contains null bytes"""
     try:
-        with open(file_path, 'rb') as f:
+        with open(file_path, "rb") as f:
             content = f.read()
-            if b'\x00' in content:
+            if b"\x00" in content:
                 return True, "File contains null bytes"
         return False, "OK"
     except Exception as e:
         return True, f"Error reading file: {e}"
+
 
 def main():
     """Main check function"""
@@ -39,6 +40,7 @@ def main():
 
     print("✅ No null bytes found in test files")
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())

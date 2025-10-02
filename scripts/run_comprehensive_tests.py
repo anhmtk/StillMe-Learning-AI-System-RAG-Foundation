@@ -15,8 +15,11 @@ from pathlib import Path
 from typing import Any, Optional
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class TestResult:
@@ -30,6 +33,7 @@ class TestResult:
     coverage_percent: float
     details: Optional[dict[str, Any]] = None
 
+
 @dataclass
 class ComprehensiveTestReport:
     timestamp: str
@@ -38,6 +42,7 @@ class ComprehensiveTestReport:
     overall_status: str
     coverage_summary: dict[str, float]
     recommendations: list[str]
+
 
 class ComprehensiveTestRunner:
     """
@@ -65,7 +70,7 @@ class ComprehensiveTestRunner:
             ("Performance Tests", self._run_performance_tests),
             ("Chaos Engineering Tests", self._run_chaos_tests),
             ("Load Tests", self._run_load_tests),
-            ("API Tests", self._run_api_tests)
+            ("API Tests", self._run_api_tests),
         ]
 
         # Run all test suites
@@ -75,7 +80,9 @@ class ComprehensiveTestRunner:
                 result = await test_function()
                 result.test_suite = suite_name
                 self.test_results.append(result)
-                logger.info(f"✅ {suite_name}: {result.status} ({result.duration:.2f}s)")
+                logger.info(
+                    f"✅ {suite_name}: {result.status} ({result.duration:.2f}s)"
+                )
             except Exception as e:
                 logger.error(f"❌ {suite_name}: ERROR - {e}")
                 error_result = TestResult(
@@ -87,7 +94,7 @@ class ComprehensiveTestRunner:
                     tests_failed=0,
                     tests_errors=1,
                     coverage_percent=0.0,
-                    details={"error": str(e)}
+                    details={"error": str(e)},
                 )
                 self.test_results.append(error_result)
 
@@ -103,7 +110,7 @@ class ComprehensiveTestRunner:
             test_results=self.test_results,
             overall_status=overall_status,
             coverage_summary=coverage_summary,
-            recommendations=recommendations
+            recommendations=recommendations,
         )
 
         logger.info(f"✅ Comprehensive Test Suite completed in {total_duration:.2f}s")
@@ -117,14 +124,20 @@ class ComprehensiveTestRunner:
 
         try:
             # Run pytest with coverage
-            result = subprocess.run([
-                "pytest", "tests/",
-                "--cov=stillme_core",
-                "--cov-report=json",
-                "--cov-report=html",
-                "--junitxml=artifacts/pytest-report.xml",
-                "-v"
-            ], capture_output=True, text=True, timeout=300)
+            result = subprocess.run(
+                [
+                    "pytest",
+                    "tests/",
+                    "--cov=stillme_core",
+                    "--cov-report=json",
+                    "--cov-report=html",
+                    "--junitxml=artifacts/pytest-report.xml",
+                    "-v",
+                ],
+                capture_output=True,
+                text=True,
+                timeout=300,
+            )
 
             duration = time.time() - start_time
 
@@ -143,7 +156,7 @@ class ComprehensiveTestRunner:
                 tests_failed=tests_run["failed"],
                 tests_errors=tests_run["errors"],
                 coverage_percent=coverage_percent,
-                details={"returncode": result.returncode, "stdout": result.stdout}
+                details={"returncode": result.returncode, "stdout": result.stdout},
             )
 
         except subprocess.TimeoutExpired:
@@ -156,7 +169,7 @@ class ComprehensiveTestRunner:
                 tests_failed=0,
                 tests_errors=1,
                 coverage_percent=0.0,
-                details={"error": "Test timeout"}
+                details={"error": "Test timeout"},
             )
         except Exception as e:
             return TestResult(
@@ -168,7 +181,7 @@ class ComprehensiveTestRunner:
                 tests_failed=0,
                 tests_errors=1,
                 coverage_percent=0.0,
-                details={"error": str(e)}
+                details={"error": str(e)},
             )
 
     async def _run_integration_tests(self) -> TestResult:
@@ -190,7 +203,7 @@ class ComprehensiveTestRunner:
                 tests_failed=2,
                 tests_errors=0,
                 coverage_percent=88.5,
-                details={"integration_points": 15, "api_endpoints": 10}
+                details={"integration_points": 15, "api_endpoints": 10},
             )
 
         except Exception as e:
@@ -203,7 +216,7 @@ class ComprehensiveTestRunner:
                 tests_failed=0,
                 tests_errors=1,
                 coverage_percent=0.0,
-                details={"error": str(e)}
+                details={"error": str(e)},
             )
 
     async def _run_security_tests(self) -> TestResult:
@@ -212,9 +225,12 @@ class ComprehensiveTestRunner:
 
         try:
             # Run security tests
-            result = subprocess.run([
-                "python", "scripts/fix_critical_security.py"
-            ], capture_output=True, text=True, timeout=120)
+            result = subprocess.run(
+                ["python", "scripts/fix_critical_security.py"],
+                capture_output=True,
+                text=True,
+                timeout=120,
+            )
 
             duration = time.time() - start_time
 
@@ -230,7 +246,7 @@ class ComprehensiveTestRunner:
                 tests_failed=0 if status == "PASS" else 3,
                 tests_errors=0,
                 coverage_percent=95.0,
-                details={"security_score": 95, "vulnerabilities_fixed": 15}
+                details={"security_score": 95, "vulnerabilities_fixed": 15},
             )
 
         except Exception as e:
@@ -243,7 +259,7 @@ class ComprehensiveTestRunner:
                 tests_failed=0,
                 tests_errors=1,
                 coverage_percent=0.0,
-                details={"error": str(e)}
+                details={"error": str(e)},
             )
 
     async def _run_ethics_tests(self) -> TestResult:
@@ -252,9 +268,12 @@ class ComprehensiveTestRunner:
 
         try:
             # Run ethics test runner
-            result = subprocess.run([
-                "python", "ethics-tests/test_runner.py"
-            ], capture_output=True, text=True, timeout=180)
+            result = subprocess.run(
+                ["python", "ethics-tests/test_runner.py"],
+                capture_output=True,
+                text=True,
+                timeout=180,
+            )
 
             duration = time.time() - start_time
 
@@ -270,7 +289,7 @@ class ComprehensiveTestRunner:
                 tests_failed=0 if status == "PASS" else 5,
                 tests_errors=0,
                 coverage_percent=100.0,
-                details={"ethics_score": 98, "violations_detected": 0}
+                details={"ethics_score": 98, "violations_detected": 0},
             )
 
         except Exception as e:
@@ -283,7 +302,7 @@ class ComprehensiveTestRunner:
                 tests_failed=0,
                 tests_errors=1,
                 coverage_percent=0.0,
-                details={"error": str(e)}
+                details={"error": str(e)},
             )
 
     async def _run_performance_tests(self) -> TestResult:
@@ -292,9 +311,12 @@ class ComprehensiveTestRunner:
 
         try:
             # Run performance optimization
-            result = subprocess.run([
-                "python", "scripts/performance_optimization.py"
-            ], capture_output=True, text=True, timeout=120)
+            result = subprocess.run(
+                ["python", "scripts/performance_optimization.py"],
+                capture_output=True,
+                text=True,
+                timeout=120,
+            )
 
             duration = time.time() - start_time
 
@@ -309,7 +331,7 @@ class ComprehensiveTestRunner:
                 tests_failed=0 if status == "PASS" else 2,
                 tests_errors=0,
                 coverage_percent=85.0,
-                details={"optimization_score": 92, "bottlenecks_found": 3}
+                details={"optimization_score": 92, "bottlenecks_found": 3},
             )
 
         except Exception as e:
@@ -322,7 +344,7 @@ class ComprehensiveTestRunner:
                 tests_failed=0,
                 tests_errors=1,
                 coverage_percent=0.0,
-                details={"error": str(e)}
+                details={"error": str(e)},
             )
 
     async def _run_chaos_tests(self) -> TestResult:
@@ -331,9 +353,12 @@ class ComprehensiveTestRunner:
 
         try:
             # Run chaos engineering tests
-            result = subprocess.run([
-                "python", "tests/test_chaos_engineering.py"
-            ], capture_output=True, text=True, timeout=180)
+            result = subprocess.run(
+                ["python", "tests/test_chaos_engineering.py"],
+                capture_output=True,
+                text=True,
+                timeout=180,
+            )
 
             duration = time.time() - start_time
 
@@ -348,7 +373,7 @@ class ComprehensiveTestRunner:
                 tests_failed=0 if status == "PASS" else 1,
                 tests_errors=0,
                 coverage_percent=90.0,
-                details={"resilience_score": 95, "recovery_time_avg": 3.2}
+                details={"resilience_score": 95, "recovery_time_avg": 3.2},
             )
 
         except Exception as e:
@@ -361,7 +386,7 @@ class ComprehensiveTestRunner:
                 tests_failed=0,
                 tests_errors=1,
                 coverage_percent=0.0,
-                details={"error": str(e)}
+                details={"error": str(e)},
             )
 
     async def _run_load_tests(self) -> TestResult:
@@ -370,9 +395,12 @@ class ComprehensiveTestRunner:
 
         try:
             # Run k6 load tests
-            result = subprocess.run([
-                "k6", "run", "k6/performance-tests.js"
-            ], capture_output=True, text=True, timeout=600)
+            result = subprocess.run(
+                ["k6", "run", "k6/performance-tests.js"],
+                capture_output=True,
+                text=True,
+                timeout=600,
+            )
 
             duration = time.time() - start_time
 
@@ -387,7 +415,11 @@ class ComprehensiveTestRunner:
                 tests_failed=0 if status == "PASS" else 1,
                 tests_errors=0,
                 coverage_percent=0.0,  # Load tests don't have coverage
-                details={"max_users": 1000, "avg_response_time": 450, "error_rate": 0.2}
+                details={
+                    "max_users": 1000,
+                    "avg_response_time": 450,
+                    "error_rate": 0.2,
+                },
             )
 
         except Exception as e:
@@ -400,7 +432,7 @@ class ComprehensiveTestRunner:
                 tests_failed=0,
                 tests_errors=1,
                 coverage_percent=0.0,
-                details={"error": str(e)}
+                details={"error": str(e)},
             )
 
     async def _run_api_tests(self) -> TestResult:
@@ -422,7 +454,7 @@ class ComprehensiveTestRunner:
                 tests_failed=2,
                 tests_errors=0,
                 coverage_percent=92.0,
-                details={"endpoints_tested": 25, "response_time_avg": 180}
+                details={"endpoints_tested": 25, "response_time_avg": 180},
             )
 
         except Exception as e:
@@ -435,18 +467,13 @@ class ComprehensiveTestRunner:
                 tests_failed=0,
                 tests_errors=1,
                 coverage_percent=0.0,
-                details={"error": str(e)}
+                details={"error": str(e)},
             )
 
     def _parse_pytest_output(self, output: str) -> dict[str, int]:
         """Parse pytest output to extract test counts"""
         # Mock parsing - in real implementation, parse actual output
-        return {
-            "total": 150,
-            "passed": 145,
-            "failed": 3,
-            "errors": 2
-        }
+        return {"total": 150, "passed": 145, "failed": 3, "errors": 2}
 
     def _parse_coverage_json(self, coverage_file: str) -> float:
         """Parse coverage JSON to extract coverage percentage"""
@@ -454,7 +481,7 @@ class ComprehensiveTestRunner:
             if Path(coverage_file).exists():
                 with open(coverage_file) as f:
                     data = json.load(f)
-                    return data.get('totals', {}).get('percent_covered', 0.0)
+                    return data.get("totals", {}).get("percent_covered", 0.0)
             return 0.0
         except Exception:
             return 0.0
@@ -502,20 +529,28 @@ class ComprehensiveTestRunner:
             recommendations.append("Resolve test errors to ensure stability")
 
         if low_coverage:
-            recommendations.append("Increase test coverage for better quality assurance")
+            recommendations.append(
+                "Increase test coverage for better quality assurance"
+            )
 
         # General recommendations
-        recommendations.extend([
-            "Implement continuous integration for automated testing",
-            "Add more integration tests for complex workflows",
-            "Enhance performance testing with realistic scenarios",
-            "Expand security testing to cover edge cases",
-            "Add more chaos engineering tests for resilience"
-        ])
+        recommendations.extend(
+            [
+                "Implement continuous integration for automated testing",
+                "Add more integration tests for complex workflows",
+                "Enhance performance testing with realistic scenarios",
+                "Expand security testing to cover edge cases",
+                "Add more chaos engineering tests for resilience",
+            ]
+        )
 
         return recommendations
 
-    async def generate_comprehensive_report(self, report: ComprehensiveTestReport, output_file: str = "artifacts/comprehensive_test_report.json"):
+    async def generate_comprehensive_report(
+        self,
+        report: ComprehensiveTestReport,
+        output_file: str = "artifacts/comprehensive_test_report.json",
+    ):
         """Generate comprehensive test report"""
         report_data = {
             "comprehensive_test_report": asdict(report),
@@ -526,21 +561,22 @@ class ComprehensiveTestRunner:
                 "total_tests": sum(r.tests_run for r in report.test_results),
                 "total_passed": sum(r.tests_passed for r in report.test_results),
                 "total_failed": sum(r.tests_failed for r in report.test_results),
-                "total_errors": sum(r.tests_errors for r in report.test_results)
+                "total_errors": sum(r.tests_errors for r in report.test_results),
             },
             "test_suites": [asdict(result) for result in report.test_results],
             "coverage_summary": report.coverage_summary,
-            "recommendations": report.recommendations
+            "recommendations": report.recommendations,
         }
 
         # Create artifacts directory if it doesn't exist
         Path(output_file).parent.mkdir(parents=True, exist_ok=True)
 
-        with open(output_file, 'w', encoding='utf-8') as f:
+        with open(output_file, "w", encoding="utf-8") as f:
             json.dump(report_data, f, indent=2, ensure_ascii=False)
 
         logger.info(f"📋 Comprehensive test report generated: {output_file}")
         return report_data
+
 
 async def main():
     """Main function to run comprehensive tests"""
@@ -568,6 +604,7 @@ async def main():
     print("\n💡 RECOMMENDATIONS:")
     for i, rec in enumerate(report.recommendations[:5], 1):
         print(f"{i}. {rec}")
+
 
 if __name__ == "__main__":
     asyncio.run(main())

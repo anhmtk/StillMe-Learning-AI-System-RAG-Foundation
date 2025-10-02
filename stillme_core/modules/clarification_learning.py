@@ -14,9 +14,11 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class PatternStat:
     """Statistics for a clarification pattern"""
+
     success: int = 0
     failure: int = 0
     updated_at: float = time.time()
@@ -38,9 +40,11 @@ class PatternStat:
         attempt_bonus = min(0.2, self.total_attempts * 0.02)  # Max 20% bonus
         return min(1.0, base_confidence + attempt_bonus)
 
+
 @dataclass
 class ClarificationAttempt:
     """Record of a clarification attempt"""
+
     prompt: str
     question: str
     user_reply: Optional[str]
@@ -48,6 +52,7 @@ class ClarificationAttempt:
     context: dict[str, Any]
     timestamp: float = time.time()
     trace_id: Optional[str] = None
+
 
 class ClarificationPatternStore:
     """
@@ -66,11 +71,13 @@ class ClarificationPatternStore:
         try:
             persistence_path = Path(self.persistence_file)
             if persistence_path.exists():
-                with open(persistence_path, encoding='utf-8') as f:
+                with open(persistence_path, encoding="utf-8") as f:
                     data = json.load(f)
                     for key, stat_data in data.items():
                         self.store[key] = PatternStat(**stat_data)
-                logger.info(f"Loaded {len(self.store)} patterns from {self.persistence_file}")
+                logger.info(
+                    f"Loaded {len(self.store)} patterns from {self.persistence_file}"
+                )
         except Exception as e:
             logger.warning(f"Failed to load patterns from file: {e}")
 
@@ -81,7 +88,7 @@ class ClarificationPatternStore:
             persistence_path.parent.mkdir(parents=True, exist_ok=True)
 
             data = {key: asdict(stat) for key, stat in self.store.items()}
-            with open(persistence_path, 'w', encoding='utf-8') as f:
+            with open(persistence_path, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2)
             logger.debug(f"Saved {len(self.store)} patterns to {self.persistence_file}")
         except Exception as e:
@@ -125,7 +132,7 @@ class ClarificationPatternStore:
                 "template": k.split(":", 1)[1] if ":" in k else k,
                 "confidence": v.confidence_score,
                 "success_rate": v.success_rate,
-                "total_attempts": v.total_attempts
+                "total_attempts": v.total_attempts,
             }
             for k, v in items[:k]
         ]
@@ -143,10 +150,11 @@ class ClarificationPatternStore:
                 "success_rate": stat.success_rate,
                 "confidence": stat.confidence_score,
                 "total_attempts": stat.total_attempts,
-                "updated_at": stat.updated_at
+                "updated_at": stat.updated_at,
             }
             for key, stat in self.store.items()
         }
+
 
 class ClarificationLearner:
     """
@@ -158,8 +166,16 @@ class ClarificationLearner:
         self.memory = memory
         self.attempts: list[ClarificationAttempt] = []
 
-    async def record_attempt(self, *, prompt: str, question: str, user_reply: Optional[str],
-                           success: bool, context: dict[str, Any], trace_id: Optional[str] = None):
+    async def record_attempt(
+        self,
+        *,
+        prompt: str,
+        question: str,
+        user_reply: Optional[str],
+        success: bool,
+        context: dict[str, Any],
+        trace_id: Optional[str] = None,
+    ):
         """
         Record a clarification attempt and update patterns
 
@@ -178,7 +194,7 @@ class ClarificationLearner:
             user_reply=user_reply,
             success=success,
             context=context,
-            trace_id=trace_id
+            trace_id=trace_id,
         )
         self.attempts.append(attempt)
 
@@ -199,9 +215,13 @@ class ClarificationLearner:
                 logger.warning(f"Failed to store in memory: {e}")
 
         # Log the attempt
-        logger.info(f"Recorded clarification attempt: {template_key}, success={success}, trace_id={trace_id}")
+        logger.info(
+            f"Recorded clarification attempt: {template_key}, success={success}, trace_id={trace_id}"
+        )
 
-    async def suggest_patterns(self, prompt: str, context: dict[str, Any]) -> dict[str, Any]:
+    async def suggest_patterns(
+        self, prompt: str, context: dict[str, Any]
+    ) -> dict[str, Any]:
         """
         Suggest clarification patterns based on learning
 
@@ -224,16 +244,11 @@ class ClarificationLearner:
                 "confidence": template_info["confidence"],
                 "slots": {},
                 "source": "learned",
-                "success_rate": template_info["success_rate"]
+                "success_rate": template_info["success_rate"],
             }
 
         # Fallback to generic template
-        return {
-            "template": None,
-            "confidence": 0.0,
-            "slots": {},
-            "source": "fallback"
-        }
+        return {"template": None, "confidence": 0.0, "slots": {}, "source": "fallback"}
 
     def get_learning_stats(self) -> dict[str, Any]:
         """Get learning statistics"""
@@ -243,17 +258,21 @@ class ClarificationLearner:
         return {
             "total_attempts": total_attempts,
             "successful_attempts": successful_attempts,
-            "success_rate": successful_attempts / total_attempts if total_attempts > 0 else 0.0,
+            "success_rate": successful_attempts / total_attempts
+            if total_attempts > 0
+            else 0.0,
             "pattern_count": len(self.store.store),
             "recent_attempts": [
                 {
                     "prompt": a.prompt[:50] + "..." if len(a.prompt) > 50 else a.prompt,
-                    "question": a.question[:50] + "..." if len(a.question) > 50 else a.question,
+                    "question": a.question[:50] + "..."
+                    if len(a.question) > 50
+                    else a.question,
                     "success": a.success,
-                    "timestamp": a.timestamp
+                    "timestamp": a.timestamp,
                 }
                 for a in self.attempts[-10:]  # Last 10 attempts
-            ]
+            ],
         }
 
     def clear_learning_data(self):
@@ -261,6 +280,7 @@ class ClarificationLearner:
         self.attempts.clear()
         self.store.store.clear()
         logger.info("Cleared all learning data")
+
 
 # Example usage and testing
 if __name__ == "__main__":
@@ -278,7 +298,7 @@ if __name__ == "__main__":
             question="What exactly would you like me to write?",
             user_reply="A Python function to calculate factorial",
             success=True,
-            context={"domain_hint": "programming", "user_id": "test_user"}
+            context={"domain_hint": "programming", "user_id": "test_user"},
         )
 
         await learner.record_attempt(
@@ -286,13 +306,12 @@ if __name__ == "__main__":
             question="What type of app would you like me to create?",
             user_reply="A web application",
             success=True,
-            context={"domain_hint": "web", "user_id": "test_user"}
+            context={"domain_hint": "web", "user_id": "test_user"},
         )
 
         # Get suggestions
         suggestion = await learner.suggest_patterns(
-            "Create something",
-            {"domain_hint": "programming"}
+            "Create something", {"domain_hint": "programming"}
         )
         print(f"Suggestion: {suggestion}")
 

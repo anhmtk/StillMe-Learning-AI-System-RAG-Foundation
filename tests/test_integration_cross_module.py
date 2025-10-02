@@ -21,13 +21,15 @@ class TestCrossModuleCommunication:
     """Test suite for cross-module communication."""
 
     @pytest.mark.integration
-    def test_memory_to_conversational_integration(self, mock_memory_system, mock_conversational_core):
+    def test_memory_to_conversational_integration(
+        self, mock_memory_system, mock_conversational_core
+    ):
         """Test integration between memory system and conversational core."""
         # Setup memory system to return context
         context_data = {
             "user_id": "test_user",
             "conversation_history": ["Hello", "How are you?"],
-            "preferences": {"style": "friendly"}
+            "preferences": {"style": "friendly"},
         }
         mock_memory_system.retrieve.return_value = context_data
 
@@ -44,7 +46,9 @@ class TestCrossModuleCommunication:
         mock_conversational_core.process_message.assert_called_once()
 
     @pytest.mark.integration
-    def test_ethics_to_content_filter_integration(self, mock_ethics_system, mock_content_filter):
+    def test_ethics_to_content_filter_integration(
+        self, mock_ethics_system, mock_content_filter
+    ):
         """Test integration between ethics system and content filter."""
         # Setup ethics system to validate content
         ethics_response = {"is_safe": False, "violations": ["harmful_content"]}
@@ -66,7 +70,9 @@ class TestCrossModuleCommunication:
         mock_content_filter.filter.assert_called_once()
 
     @pytest.mark.integration
-    def test_api_manager_to_emotion_sense_integration(self, mock_api_manager, mock_emotion_sense):
+    def test_api_manager_to_emotion_sense_integration(
+        self, mock_api_manager, mock_emotion_sense
+    ):
         """Test integration between API manager and emotion sense."""
         # Setup API manager to return response
         api_response = {"response": "I'm feeling great today!", "status": "success"}
@@ -85,14 +91,16 @@ class TestCrossModuleCommunication:
         assert emotion_result["confidence"] >= 0.9
 
     @pytest.mark.integration
-    def test_token_optimizer_to_api_manager_integration(self, mock_token_optimizer, mock_api_manager):
+    def test_token_optimizer_to_api_manager_integration(
+        self, mock_token_optimizer, mock_api_manager
+    ):
         """Test integration between token optimizer and API manager."""
         # Setup token optimizer to optimize input
         optimization_response = {
             "optimized_text": "optimized prompt",
             "tokens_saved": 20,
             "original_tokens": 100,
-            "optimized_tokens": 80
+            "optimized_tokens": 80,
         }
         mock_token_optimizer.optimize.return_value = optimization_response
 
@@ -109,13 +117,15 @@ class TestCrossModuleCommunication:
         assert api_result["tokens_used"] == optimized["optimized_tokens"]
 
     @pytest.mark.integration
-    def test_self_improvement_to_metrics_integration(self, mock_self_improvement, mock_metrics):
+    def test_self_improvement_to_metrics_integration(
+        self, mock_self_improvement, mock_metrics
+    ):
         """Test integration between self improvement and metrics collection."""
         # Setup self improvement to analyze performance
         analysis_response = {
             "score": 0.8,
             "suggestions": ["improve accuracy", "reduce latency"],
-            "metrics": {"accuracy": 0.9, "speed": 0.8}
+            "metrics": {"accuracy": 0.9, "speed": 0.8},
         }
         mock_self_improvement.analyze_performance.return_value = analysis_response
 
@@ -133,18 +143,16 @@ class TestCrossModuleCommunication:
         assert mock_metrics.record_metric.call_count == len(analysis["metrics"])
 
     @pytest.mark.integration
-    def test_scheduler_to_daily_learning_integration(self, mock_scheduler, mock_daily_learning):
+    def test_scheduler_to_daily_learning_integration(
+        self, mock_scheduler, mock_daily_learning
+    ):
         """Test integration between scheduler and daily learning."""
         # Setup scheduler to run daily learning job
         execution_response = {"status": "completed", "duration": 30}
         mock_scheduler.run_job.return_value = execution_response
 
         # Setup daily learning to execute session
-        session_response = {
-            "completed": True,
-            "score": 0.8,
-            "cases_processed": 5
-        }
+        session_response = {"completed": True, "score": 0.8, "cases_processed": 5}
         mock_daily_learning.run_session.return_value = session_response
 
         # Test the integration
@@ -159,8 +167,13 @@ class TestSystemWideIntegration:
     """Test suite for system-wide integration scenarios."""
 
     @pytest.mark.integration
-    def test_complete_request_flow(self, mock_framework, mock_memory_system,
-                                 mock_ethics_system, mock_conversational_core):
+    def test_complete_request_flow(
+        self,
+        mock_framework,
+        mock_memory_system,
+        mock_ethics_system,
+        mock_conversational_core,
+    ):
         """Test complete request flow through multiple modules."""
         # Setup all modules for complete flow
         user_context = {"user_id": "test_user", "history": ["previous message"]}
@@ -175,7 +188,7 @@ class TestSystemWideIntegration:
         framework_response = {
             "response": "Hello! How can I help you?",
             "status": "success",
-            "modules_used": ["memory", "ethics", "conversational"]
+            "modules_used": ["memory", "ethics", "conversational"],
         }
         mock_framework.process_request.return_value = framework_response
 
@@ -200,8 +213,9 @@ class TestSystemWideIntegration:
         assert len(final_result["modules_used"]) >= 3
 
     @pytest.mark.integration
-    def test_multi_language_processing_flow(self, mock_conversational_core,
-                                          mock_emotion_sense, mock_communication_style):
+    def test_multi_language_processing_flow(
+        self, mock_conversational_core, mock_emotion_sense, mock_communication_style
+    ):
         """Test multi-language processing flow."""
         # Test Vietnamese input
         vietnamese_input = "Xin chào, hôm nay thế nào?"
@@ -215,7 +229,10 @@ class TestSystemWideIntegration:
         mock_communication_style.get_style.return_value = style_response
 
         # Setup conversational processing
-        conv_response = {"response": "Xin chào! Tôi khỏe, cảm ơn bạn!", "language": "vi"}
+        conv_response = {
+            "response": "Xin chào! Tôi khỏe, cảm ơn bạn!",
+            "language": "vi",
+        }
         mock_conversational_core.process_message.return_value = conv_response
 
         # Test the flow
@@ -228,15 +245,16 @@ class TestSystemWideIntegration:
         assert response["language"] == "vi"
 
     @pytest.mark.integration
-    def test_learning_and_improvement_cycle(self, mock_daily_learning,
-                                          mock_self_improvement, mock_metrics):
+    def test_learning_and_improvement_cycle(
+        self, mock_daily_learning, mock_self_improvement, mock_metrics
+    ):
         """Test learning and improvement cycle."""
         # Setup daily learning session
         learning_response = {
             "completed": True,
             "score": 0.75,
             "cases_processed": 10,
-            "improvements_needed": ["accuracy", "speed"]
+            "improvements_needed": ["accuracy", "speed"],
         }
         mock_daily_learning.run_session.return_value = learning_response
 
@@ -245,7 +263,7 @@ class TestSystemWideIntegration:
             "improved": True,
             "changes": ["updated algorithm", "optimized parameters"],
             "impact": "positive",
-            "new_score": 0.85
+            "new_score": 0.85,
         }
         mock_self_improvement.improve.return_value = improvement_response
 
@@ -262,7 +280,9 @@ class TestSystemWideIntegration:
 
             # Step 3: Record metrics
             mock_metrics.record_metric("learning_score", learning_result["score"])
-            mock_metrics.record_metric("improvement_score", improvement_result["new_score"])
+            mock_metrics.record_metric(
+                "improvement_score", improvement_result["new_score"]
+            )
 
         assert learning_result["completed"] is True
         assert improvement_result["improved"] is True
@@ -371,7 +391,7 @@ class TestChaosEngineering:
             framework_response = {
                 "response": "System temporarily unavailable",
                 "status": "error",
-                "fallback": True
+                "fallback": True,
             }
             mock_framework.process_request.return_value = framework_response
 
@@ -459,6 +479,7 @@ class TestFaultTolerance:
         """Test retry mechanism implementation."""
         # Setup API manager to fail first, then succeed
         call_count = 0
+
         def side_effect(*args, **kwargs):
             nonlocal call_count
             call_count += 1
@@ -482,8 +503,9 @@ class TestFaultTolerance:
         assert call_count == 3  # 2 failures + 1 success
 
     @pytest.mark.integration
-    def test_graceful_degradation(self, mock_framework, mock_ethics_system,
-                                mock_content_filter):
+    def test_graceful_degradation(
+        self, mock_framework, mock_ethics_system, mock_content_filter
+    ):
         """Test graceful degradation when modules fail."""
         # Simulate ethics system failure
         mock_ethics_system.validate.side_effect = Exception("Ethics system down")
@@ -497,7 +519,7 @@ class TestFaultTolerance:
             "response": "Response processed with degraded functionality",
             "status": "success",
             "degraded": True,
-            "modules_used": ["content_filter"]  # Ethics system unavailable
+            "modules_used": ["content_filter"],  # Ethics system unavailable
         }
         mock_framework.process_request.return_value = framework_response
 
@@ -551,8 +573,9 @@ class TestDataConsistency:
         assert secure_result == "encrypted_data"
 
     @pytest.mark.integration
-    def test_cross_module_state_sync(self, mock_conversational_core,
-                                   mock_communication_style, mock_persona_morph):
+    def test_cross_module_state_sync(
+        self, mock_conversational_core, mock_communication_style, mock_persona_morph
+    ):
         """Test state synchronization across modules."""
         # Update persona
         persona_response = {"new_persona": "professional", "confidence": 0.9}

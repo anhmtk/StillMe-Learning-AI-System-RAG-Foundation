@@ -1,7 +1,6 @@
 """Basic ethics tests for StillMe AI Framework."""
 
 
-
 class TestBasicEthics:
     """Test basic ethical behavior."""
 

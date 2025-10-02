@@ -25,8 +25,9 @@ app = FastAPI(
     title="StillMe Clarification Core API",
     description="Optimized API for high throughput testing",
     version="1.0.0",
-    default_response_class=ORJSONResponse
+    default_response_class=ORJSONResponse,
 )
+
 
 @app.on_event("startup")
 async def startup_event():
@@ -34,12 +35,10 @@ async def startup_event():
     global http_client
     http_client = httpx.AsyncClient(
         timeout=5.0,
-        limits=httpx.Limits(
-            max_connections=100,
-            max_keepalive_connections=50
-        )
+        limits=httpx.Limits(max_connections=100, max_keepalive_connections=50),
     )
     logger.info("🚀 StillMe Optimized API Server started")
+
 
 @app.on_event("shutdown")
 async def shutdown_event():
@@ -49,6 +48,7 @@ async def shutdown_event():
         await http_client.aclose()
     logger.info("🛑 StillMe API Server stopped")
 
+
 @app.get("/health")
 async def health():
     """Health check endpoint"""
@@ -56,8 +56,9 @@ async def health():
         "status": "ok",
         "message": "StillMe Optimized API is running",
         "service": "clarification_core",
-        "timestamp": time.time()
+        "timestamp": time.time(),
     }
+
 
 @app.post("/chat")
 async def chat(request: Request):
@@ -67,7 +68,7 @@ async def chat(request: Request):
     try:
         # Parse request body
         body = await request.json()
-        prompt = body.get('prompt', 'No prompt provided')
+        prompt = body.get("prompt", "No prompt provided")
 
         # Simulate clarification processing (replace with actual logic)
         await asyncio.sleep(0.001)  # Minimal processing time
@@ -80,7 +81,7 @@ async def chat(request: Request):
             "clarification": "Your message was processed successfully",
             "suggestion": "You can ask me anything!",
             "timestamp": time.time(),
-            "processing_time_ms": 1.0
+            "processing_time_ms": 1.0,
         }
 
         return response
@@ -92,18 +93,16 @@ async def chat(request: Request):
             content={
                 "error": "Internal server error",
                 "message": str(e),
-                "status": "error"
-            }
+                "status": "error",
+            },
         )
+
 
 @app.get("/metrics")
 async def metrics():
     """Basic metrics endpoint"""
-    return {
-        "uptime": time.time(),
-        "status": "healthy",
-        "version": "1.0.0"
-    }
+    return {"uptime": time.time(), "status": "healthy", "version": "1.0.0"}
+
 
 if __name__ == "__main__":
     # Optimized Uvicorn configuration
@@ -115,5 +114,5 @@ if __name__ == "__main__":
         loop="uvloop",  # Use uvloop for better performance
         http="httptools",  # Use httptools for better HTTP parsing
         access_log=False,  # Disable access logs for performance
-        log_level="warning"  # Reduce log verbosity
+        log_level="warning",  # Reduce log verbosity
     )

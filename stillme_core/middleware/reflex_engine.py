@@ -24,16 +24,21 @@ from typing import Any
 try:
     from .pattern_matcher import PatternMatcher
 except Exception:  # pragma: no cover - pattern matcher will be added in next prompts
+
     class PatternMatcher:  # type: ignore
         def __init__(self, config: dict[str, Any] | None = None):
             self.config = config or {}
 
-        def match(self, text: str, context: dict[str, Any] | None = None) -> dict[str, Any]:
+        def match(
+            self, text: str, context: dict[str, Any] | None = None
+        ) -> dict[str, Any]:
             return {"matches": [], "pattern_score": None}
+
 
 try:
     from .reflex_policy import ReflexPolicy
 except Exception:  # pragma: no cover
+
     class ReflexPolicy:  # type: ignore
         def __init__(self, policy_level: str = "balanced"):
             self.level = policy_level
@@ -42,9 +47,11 @@ except Exception:  # pragma: no cover
             # Return (decision, confidence). Shadow: always fallback
             return "fallback", 0.0
 
+
 try:
     from .reflex_safety import ReflexSafety
 except Exception:  # pragma: no cover
+
     class ReflexSafety:  # type: ignore
         def quick_check(self, text: str) -> bool:
             return True
@@ -52,25 +59,43 @@ except Exception:  # pragma: no cover
         async def deep_check(self, text: str) -> bool:
             return True
 
-        def safety_gate(self, text: str, intended_action: str | None = None,
-                       scores: dict[str, float] | None = None) -> dict[str, Any]:
+        def safety_gate(
+            self,
+            text: str,
+            intended_action: str | None = None,
+            scores: dict[str, float] | None = None,
+        ) -> dict[str, Any]:
             return {"safe": True, "reason": "stub_safety"}
+
 
 try:
     from .action_sandbox import ActionSandbox
 except Exception:  # pragma: no cover
+
     class ActionSandbox:  # type: ignore
         def __init__(self, config: dict[str, Any] | None = None):
             self.config = config or {}
             self.dry_run = self.config.get("dry_run", True)
 
-        def execute(self, action: str, params: dict[str, Any], trace_id: str,
-                   dry_run: bool | None = None) -> dict[str, Any]:
-            return {"ok": True, "dry_run": self.dry_run, "action": action, "params": params}
+        def execute(
+            self,
+            action: str,
+            params: dict[str, Any],
+            trace_id: str,
+            dry_run: bool | None = None,
+        ) -> dict[str, Any]:
+            return {
+                "ok": True,
+                "dry_run": self.dry_run,
+                "action": action,
+                "params": params,
+            }
+
 
 try:
     from .habit_store import HabitStore
 except Exception:  # pragma: no cover
+
     class HabitStore:  # type: ignore
         def __init__(self, config: dict[str, Any] | None = None):
             self.config = config or {}
@@ -81,26 +106,47 @@ except Exception:  # pragma: no cover
         def get_habit_score(self, cue: str) -> tuple[float, str | None]:
             return 0.0, None
 
-        def observe_cue(self, cue: str, action: str, confidence: float = 1.0,
-                       user_id: str | None = None, tenant_id: str | None = None) -> bool:
+        def observe_cue(
+            self,
+            cue: str,
+            action: str,
+            confidence: float = 1.0,
+            user_id: str | None = None,
+            tenant_id: str | None = None,
+        ) -> bool:
             return False
+
 
 try:
     from .observability import ObservabilityManager
 except Exception:  # pragma: no cover
+
     class ObservabilityManager:  # type: ignore
         def __init__(self, config: dict[str, Any] | None = None):
             self.config = config or {}
 
-        def log_reflex_decision(self, trace_id: str, decision: str, confidence: float,
-                               processing_time_ms: float, scores: dict[str, float],
-                               why_reflex: dict[str, Any], user_id: str | None = None,
-                               tenant_id: str | None = None, shadow_mode: bool = True):
+        def log_reflex_decision(
+            self,
+            trace_id: str,
+            decision: str,
+            confidence: float,
+            processing_time_ms: float,
+            scores: dict[str, float],
+            why_reflex: dict[str, Any],
+            user_id: str | None = None,
+            tenant_id: str | None = None,
+            shadow_mode: bool = True,
+        ):
             pass
 
-        def log_shadow_evaluation(self, trace_id: str, reflex_decision: str,
-                                 reasoning_decision: str, processing_time_ms: float,
-                                 scores: dict[str, float]):
+        def log_shadow_evaluation(
+            self,
+            trace_id: str,
+            reflex_decision: str,
+            reasoning_decision: str,
+            processing_time_ms: float,
+            scores: dict[str, float],
+        ):
             pass
 
 
@@ -169,7 +215,9 @@ class ReflexEngine:
             }
 
         # Step 1: Safety gate (fast + deep checks)
-        safety_result = self.safety.safety_gate(text, intended_action="reflex_decision", scores=None)
+        safety_result = self.safety.safety_gate(
+            text, intended_action="reflex_decision", scores=None
+        )
 
         # Step 2: pattern match (real implementation)
         match_result = self.matcher.match(text, context or {})
@@ -195,7 +243,7 @@ class ReflexEngine:
                 action="reflex_response",
                 params={"text": text, "scores": scores, "context": context},
                 trace_id=trace_id,
-                dry_run=True  # Always dry_run in shadow mode
+                dry_run=True,  # Always dry_run in shadow mode
             )
 
         # Shadow mode: enforce fallback, never act
@@ -233,7 +281,7 @@ class ReflexEngine:
             why_reflex=why_reflex,
             user_id=user_id,
             tenant_id=tenant_id,
-            shadow_mode=True
+            shadow_mode=True,
         )
 
         # Log shadow evaluation (compare reflex vs reasoning decision)
@@ -244,20 +292,22 @@ class ReflexEngine:
             reflex_decision=original_decision,
             reasoning_decision=reasoning_decision,
             processing_time_ms=processing_time_ms,
-            scores=scores
+            scores=scores,
         )
 
         # Learn from this interaction (if habit store enabled and decision was good)
-        if (self.habit_store.is_enabled() and
-            original_decision == "allow_reflex" and
-            safety_result.get("safe", False) and
-            confidence > 0.7):
+        if (
+            self.habit_store.is_enabled()
+            and original_decision == "allow_reflex"
+            and safety_result.get("safe", False)
+            and confidence > 0.7
+        ):
             self.habit_store.observe_cue(
                 cue=text,
                 action="reflex_response",
                 confidence=confidence,
                 user_id=user_id,
-                tenant_id=tenant_id
+                tenant_id=tenant_id,
             )
 
         return {
@@ -266,5 +316,3 @@ class ReflexEngine:
             "shadow": True,
             "why_reflex": why_reflex,
         }
-
-

@@ -77,10 +77,10 @@ def is_text_file(path: Path) -> bool:
     """
     try:
         # Try to read first 1KB
-        with open(path, 'rb') as f:
+        with open(path, "rb") as f:
             chunk = f.read(1024)
             # Check for null bytes (binary indicator)
-            return b'\x00' not in chunk
+            return b"\x00" not in chunk
     except Exception:
         return False
 
@@ -103,7 +103,7 @@ def safe_decode(data: bytes) -> str:
         locale.getpreferredencoding(False),
         "cp1252",
         "latin-1",
-        "utf-16"
+        "utf-16",
     ]
 
     # Remove duplicates while preserving order

@@ -32,6 +32,7 @@ try:
     from fastapi import FastAPI, WebSocket, WebSocketDisconnect
     from fastapi.responses import HTMLResponse, JSONResponse
     from fastapi.staticfiles import StaticFiles
+
     FASTAPI_AVAILABLE = True
 except ImportError:
     FASTAPI_AVAILABLE = False
@@ -41,6 +42,7 @@ from .performance_analyzer import PerformanceAnalyzer, get_performance_analyzer
 from .resource_monitor import ResourceMonitor, get_resource_monitor
 
 logger = logging.getLogger(__name__)
+
 
 class MonitoringDashboard:
     """
@@ -67,17 +69,19 @@ class MonitoringDashboard:
 
         # Dashboard data
         self.dashboard_data = {
-            'last_update': None,
-            'resource_metrics': None,
-            'performance_analysis': None,
-            'alerts': [],
-            'learning_sessions': [],
-            'evolution_milestones': [],
-            'system_status': 'unknown'
+            "last_update": None,
+            "resource_metrics": None,
+            "performance_analysis": None,
+            "alerts": [],
+            "learning_sessions": [],
+            "evolution_milestones": [],
+            "system_status": "unknown",
         }
 
         if not FASTAPI_AVAILABLE:
-            raise ImportError("FastAPI is required for dashboard. Install with: pip install fastapi uvicorn")
+            raise ImportError(
+                "FastAPI is required for dashboard. Install with: pip install fastapi uvicorn"
+            )
 
     async def initialize(self):
         """Initialize dashboard components"""
@@ -90,7 +94,7 @@ class MonitoringDashboard:
             self.app = FastAPI(
                 title="StillMe AGI Monitoring Dashboard",
                 description="Real-time monitoring for AGI learning automation",
-                version="2.0.0"
+                version="2.0.0",
             )
 
             # Setup routes
@@ -171,10 +175,7 @@ class MonitoringDashboard:
 
             # Start server
             config = uvicorn.Config(
-                self.app,
-                host=self.host,
-                port=self.port,
-                log_level="info"
+                self.app, host=self.host, port=self.port, log_level="info"
             )
             server = uvicorn.Server(config)
 
@@ -248,38 +249,49 @@ class MonitoringDashboard:
             if self.resource_monitor:
                 metrics = self.resource_monitor.get_current_metrics()
                 if metrics:
-                    self.dashboard_data['resource_metrics'] = asdict(metrics)
+                    self.dashboard_data["resource_metrics"] = asdict(metrics)
 
             # Performance analysis
             if self.performance_analyzer:
                 analysis = self.performance_analyzer.get_analysis_report()
-                self.dashboard_data['performance_analysis'] = analysis
+                self.dashboard_data["performance_analysis"] = analysis
 
             # Alerts
             if self.resource_monitor:
                 alerts = [a for a in self.resource_monitor.alerts if not a.resolved]
-                self.dashboard_data['alerts'] = [asdict(a) for a in alerts[-10:]]  # Last 10
+                self.dashboard_data["alerts"] = [
+                    asdict(a) for a in alerts[-10:]
+                ]  # Last 10
 
             # Learning sessions
             if self.resource_monitor:
                 sessions = list(self.resource_monitor.learning_processes)
-                self.dashboard_data['learning_sessions'] = [
+                self.dashboard_data["learning_sessions"] = [
                     {
-                        'session_id': session_id,
-                        'start_time': self.resource_monitor.process_start_times.get(session_id),
-                        'duration': str(datetime.now() - self.resource_monitor.process_start_times.get(session_id, datetime.now()))
+                        "session_id": session_id,
+                        "start_time": self.resource_monitor.process_start_times.get(
+                            session_id
+                        ),
+                        "duration": str(
+                            datetime.now()
+                            - self.resource_monitor.process_start_times.get(
+                                session_id, datetime.now()
+                            )
+                        ),
                     }
                     for session_id in sessions
                 ]
 
             # Evolution milestones
             if self.performance_analyzer:
-                milestones = self.performance_analyzer.evolution_milestones[-5:]  # Last 5
-                self.dashboard_data['evolution_milestones'] = milestones
+                milestones = self.performance_analyzer.evolution_milestones[
+                    -5:
+                ]  # Last 5
+                self.dashboard_data["evolution_milestones"] = milestones
 
             # System status
-            self.dashboard_data['system_status'] = self._determine_system_status()
-            self.dashboard_data['last_update'] = datetime.now().isoformat()
+            self.dashboard_data["system_status"] = self._determine_system_status()
+            self.dashboard_data["last_update"] = datetime.now().isoformat()
 
         except Exception as e:
             self.logger.error(f"Error updating dashboard data: {e}")
@@ -291,7 +303,8 @@ class MonitoringDashboard:
 
         # Check for critical alerts
         critical_alerts = [
-            a for a in self.resource_monitor.alerts
+            a
+            for a in self.resource_monitor.alerts
             if not a.resolved and a.severity == "critical"
         ]
 
@@ -300,7 +313,8 @@ class MonitoringDashboard:
 
         # Check for high severity alerts
         high_alerts = [
-            a for a in self.resource_monitor.alerts
+            a
+            for a in self.resource_monitor.alerts
             if not a.resolved and a.severity == "high"
         ]
 
@@ -310,9 +324,11 @@ class MonitoringDashboard:
         # Check resource usage
         metrics = self.resource_monitor.get_current_metrics()
         if metrics:
-            if (metrics.cpu_percent > 80 or
-                metrics.memory_percent > 80 or
-                metrics.disk_percent > 90):
+            if (
+                metrics.cpu_percent > 80
+                or metrics.memory_percent > 80
+                or metrics.disk_percent > 90
+            ):
                 return "warning"
 
         return "healthy"
@@ -320,13 +336,13 @@ class MonitoringDashboard:
     def _get_system_status(self) -> dict[str, Any]:
         """Get system status"""
         return {
-            'status': self.dashboard_data['system_status'],
-            'last_update': self.dashboard_data['last_update'],
-            'components': {
-                'resource_monitor': self.resource_monitor is not None,
-                'performance_analyzer': self.performance_analyzer is not None,
-                'dashboard': self.is_running
-            }
+            "status": self.dashboard_data["system_status"],
+            "last_update": self.dashboard_data["last_update"],
+            "components": {
+                "resource_monitor": self.resource_monitor is not None,
+                "performance_analyzer": self.performance_analyzer is not None,
+                "dashboard": self.is_running,
+            },
         }
 
     def _get_current_metrics(self) -> dict[str, Any]:
@@ -354,9 +370,16 @@ class MonitoringDashboard:
             sessions = list(self.resource_monitor.learning_processes)
             return [
                 {
-                    'session_id': session_id,
-                    'start_time': self.resource_monitor.process_start_times.get(session_id),
-                    'duration': str(datetime.now() - self.resource_monitor.process_start_times.get(session_id, datetime.now()))
+                    "session_id": session_id,
+                    "start_time": self.resource_monitor.process_start_times.get(
+                        session_id
+                    ),
+                    "duration": str(
+                        datetime.now()
+                        - self.resource_monitor.process_start_times.get(
+                            session_id, datetime.now()
+                        )
+                    ),
                 }
                 for session_id in sessions
             ]
@@ -685,17 +708,24 @@ class MonitoringDashboard:
 </html>
         """
 
+
 # Global dashboard instance
 _dashboard_instance: Optional[MonitoringDashboard] = None
 
-def get_monitoring_dashboard(port: int = 8080, host: str = "localhost") -> MonitoringDashboard:
+
+def get_monitoring_dashboard(
+    port: int = 8080, host: str = "localhost"
+) -> MonitoringDashboard:
     """Get global monitoring dashboard instance"""
     global _dashboard_instance
     if _dashboard_instance is None:
         _dashboard_instance = MonitoringDashboard(port, host)
     return _dashboard_instance
 
-async def start_monitoring_dashboard(port: int = 8080, host: str = "localhost") -> MonitoringDashboard:
+
+async def start_monitoring_dashboard(
+    port: int = 8080, host: str = "localhost"
+) -> MonitoringDashboard:
     """Start monitoring dashboard"""
     dashboard = get_monitoring_dashboard(port, host)
     await dashboard.start()

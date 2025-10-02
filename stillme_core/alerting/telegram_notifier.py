@@ -24,6 +24,7 @@ load_dotenv()
 
 logger = logging.getLogger(__name__)
 
+
 class TelegramNotifier:
     """Real Telegram notifier for StillMe IPC"""
 
@@ -35,10 +36,12 @@ class TelegramNotifier:
         """Load Telegram configuration from .env first, then config file"""
         # Load from .env first
         env_config = {
-            "enabled": bool(os.getenv("TELEGRAM_BOT_TOKEN") and os.getenv("TELEGRAM_CHAT_ID")),
+            "enabled": bool(
+                os.getenv("TELEGRAM_BOT_TOKEN") and os.getenv("TELEGRAM_CHAT_ID")
+            ),
             "bot_token": os.getenv("TELEGRAM_BOT_TOKEN", ""),
             "chat_id": os.getenv("TELEGRAM_CHAT_ID", ""),
-            "parse_mode": "HTML"
+            "parse_mode": "HTML",
         }
 
         # Load from config file if exists
@@ -57,16 +60,14 @@ class TelegramNotifier:
     def save_config(self):
         """Save Telegram configuration"""
         self.config_file.parent.mkdir(parents=True, exist_ok=True)
-        with open(self.config_file, 'w') as f:
+        with open(self.config_file, "w") as f:
             json.dump(self.config, f, indent=2)
 
     def setup_telegram(self, bot_token: str, chat_id: str):
         """Setup Telegram configuration"""
-        self.config.update({
-            "enabled": True,
-            "bot_token": bot_token,
-            "chat_id": chat_id
-        })
+        self.config.update(
+            {"enabled": True, "bot_token": bot_token, "chat_id": chat_id}
+        )
         self.save_config()
         logger.info("📱 Telegram configuration saved")
 
@@ -83,7 +84,7 @@ class TelegramNotifier:
                 "warning": "⚠️",
                 "error": "❌",
                 "success": "✅",
-                "critical": "🚨"
+                "critical": "🚨",
             }
 
             emoji = emoji_map.get(level, "ℹ️")
@@ -110,7 +111,7 @@ class TelegramNotifier:
                 "chat_id": self.config["chat_id"],
                 "text": telegram_message,
                 "parse_mode": self.config["parse_mode"],
-                "disable_web_page_preview": True
+                "disable_web_page_preview": True,
             }
 
             response = requests.post(url, data=data, timeout=10)
@@ -131,7 +132,7 @@ class TelegramNotifier:
         return self.send_alert(
             "Test Telegram",
             "This is a test message from StillMe IPC Learning System.\n\nIf you receive this, Telegram notifications are working correctly!",
-            "info"
+            "info",
         )
 
     def get_bot_info(self):

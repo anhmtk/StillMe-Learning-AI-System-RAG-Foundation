@@ -64,7 +64,9 @@ class StillMeProviderManager:
             logger.error(f"Failed to initialize provider manager: {e}")
             return False
 
-    async def generate(self, request: LLMRequest, preferred_provider: Optional[str] = None) -> LLMResponse:
+    async def generate(
+        self, request: LLMRequest, preferred_provider: Optional[str] = None
+    ) -> LLMResponse:
         """Generate a response using the best available provider."""
         if not self._initialized or not self._manager:
             raise RuntimeError("Provider manager not initialized")

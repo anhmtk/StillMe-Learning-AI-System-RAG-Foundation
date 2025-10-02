@@ -3,7 +3,7 @@
 Technical risk assessment and management module
 """
 
-from .risk_assessor import RiskAssessor, RiskLevel, RiskCategory
+from .risk_assessor import RiskAssessor, RiskCategory, RiskLevel
 
 try:
     from .technical_debt import TechnicalDebtAnalyzer

@@ -47,7 +47,7 @@ class TestSchedulerConfig:
             jitter_seconds=600,
             max_concurrent_sessions=2,
             cpu_threshold=80.0,
-            memory_threshold_mb=2048
+            memory_threshold_mb=2048,
         )
 
         assert config.enabled
@@ -57,6 +57,7 @@ class TestSchedulerConfig:
         assert config.max_concurrent_sessions == 2
         assert config.cpu_threshold == 80.0
         assert config.memory_threshold_mb == 2048
+
 
 class TestLearningScheduler:
     """Test LearningScheduler"""
@@ -68,19 +69,21 @@ class TestLearningScheduler:
             enabled=True,
             cron_expression="30 2 * * *",
             timezone="Asia/Ho_Chi_Minh",
-            jitter_seconds=300
+            jitter_seconds=300,
         )
 
     @pytest.fixture
     def scheduler(self, config):
         """Test scheduler instance"""
-        with patch('stillme_core.learning.scheduler.APSCHEDULER_AVAILABLE', True):
+        with patch("stillme_core.learning.scheduler.APSCHEDULER_AVAILABLE", True):
             return LearningScheduler(config)
 
     @pytest.mark.asyncio
     async def test_initialize(self, scheduler):
         """Test scheduler initialization"""
-        with patch('stillme_core.learning.scheduler.AsyncIOScheduler') as mock_scheduler_class:
+        with patch(
+            "stillme_core.learning.scheduler.AsyncIOScheduler"
+        ) as mock_scheduler_class:
             mock_scheduler = Mock()
             mock_scheduler_class.return_value = mock_scheduler
 
@@ -93,7 +96,9 @@ class TestLearningScheduler:
     @pytest.mark.asyncio
     async def test_start(self, scheduler):
         """Test scheduler start"""
-        with patch('stillme_core.learning.scheduler.AsyncIOScheduler') as mock_scheduler_class:
+        with patch(
+            "stillme_core.learning.scheduler.AsyncIOScheduler"
+        ) as mock_scheduler_class:
             mock_scheduler = Mock()
             mock_scheduler_class.return_value = mock_scheduler
 
@@ -107,7 +112,9 @@ class TestLearningScheduler:
     @pytest.mark.asyncio
     async def test_stop(self, scheduler):
         """Test scheduler stop"""
-        with patch('stillme_core.learning.scheduler.AsyncIOScheduler') as mock_scheduler_class:
+        with patch(
+            "stillme_core.learning.scheduler.AsyncIOScheduler"
+        ) as mock_scheduler_class:
             mock_scheduler = Mock()
             mock_scheduler_class.return_value = mock_scheduler
 
@@ -122,7 +129,9 @@ class TestLearningScheduler:
     @pytest.mark.asyncio
     async def test_schedule_daily_training(self, scheduler):
         """Test scheduling daily training"""
-        with patch('stillme_core.learning.scheduler.AsyncIOScheduler') as mock_scheduler_class:
+        with patch(
+            "stillme_core.learning.scheduler.AsyncIOScheduler"
+        ) as mock_scheduler_class:
             mock_scheduler = Mock()
             mock_job = Mock()
             mock_job.next_run_time = datetime.now() + timedelta(hours=1)
@@ -137,14 +146,14 @@ class TestLearningScheduler:
             result = await scheduler.schedule_daily_training(test_training)
 
             assert result
-            assert 'daily_training' in scheduler.scheduled_jobs
-            assert scheduler.stats['total_jobs'] == 1
+            assert "daily_training" in scheduler.scheduled_jobs
+            assert scheduler.stats["total_jobs"] == 1
             mock_scheduler.add_job.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_resource_check(self, scheduler):
         """Test resource checking"""
-        with patch('builtins.__import__') as mock_import:
+        with patch("builtins.__import__") as mock_import:
             # Mock psutil import
             mock_psutil = Mock()
             mock_psutil.cpu_percent.return_value = 50.0
@@ -153,7 +162,7 @@ class TestLearningScheduler:
             mock_psutil.virtual_memory.return_value = mock_memory
 
             def import_side_effect(name, *args, **kwargs):
-                if name == 'psutil':
+                if name == "psutil":
                     return mock_psutil
                 return __import__(name, *args, **kwargs)
 
@@ -168,7 +177,7 @@ class TestLearningScheduler:
     @pytest.mark.asyncio
     async def test_resource_check_high_cpu(self, scheduler):
         """Test resource check with high CPU"""
-        with patch('builtins.__import__') as mock_import:
+        with patch("builtins.__import__") as mock_import:
             # Mock psutil import with high CPU
             mock_psutil = Mock()
             mock_psutil.cpu_percent.return_value = 80.0
@@ -177,7 +186,7 @@ class TestLearningScheduler:
             mock_psutil.virtual_memory.return_value = mock_memory
 
             def import_side_effect(name, *args, **kwargs):
-                if name == 'psutil':
+                if name == "psutil":
                     return mock_psutil
                 return __import__(name, *args, **kwargs)
 
@@ -191,13 +200,14 @@ class TestLearningScheduler:
         """Test getting scheduler status"""
         status = scheduler.get_status()
 
-        assert 'enabled' in status
-        assert 'running' in status
-        assert 'timezone' in status
-        assert 'cron_expression' in status
-        assert 'scheduled_jobs' in status
-        assert 'statistics' in status
-        assert 'apscheduler_available' in status
+        assert "enabled" in status
+        assert "running" in status
+        assert "timezone" in status
+        assert "cron_expression" in status
+        assert "scheduled_jobs" in status
+        assert "statistics" in status
+        assert "apscheduler_available" in status
+
 
 class TestAutomationService:
     """Test LearningAutomationService"""
@@ -209,19 +219,23 @@ class TestAutomationService:
             enabled=True,
             health_check_interval=60,
             log_level="INFO",
-            enable_metrics=True
+            enable_metrics=True,
         )
 
     @pytest.fixture
     def service(self, service_config):
         """Test service instance"""
-        with patch('stillme_core.learning.automation_service.EvolutionaryLearningSystem'):
+        with patch(
+            "stillme_core.learning.automation_service.EvolutionaryLearningSystem"
+        ):
             return LearningAutomationService(service_config)
 
     @pytest.mark.asyncio
     async def test_initialize(self, service):
         """Test service initialization"""
-        with patch('stillme_core.learning.automation_service.get_learning_scheduler') as mock_get_scheduler:
+        with patch(
+            "stillme_core.learning.automation_service.get_learning_scheduler"
+        ) as mock_get_scheduler:
             mock_scheduler = Mock()
             mock_scheduler.initialize = AsyncMock(return_value=True)
             mock_scheduler.schedule_daily_training = AsyncMock(return_value=True)
@@ -236,7 +250,9 @@ class TestAutomationService:
     @pytest.mark.asyncio
     async def test_start(self, service):
         """Test service start"""
-        with patch('stillme_core.learning.automation_service.get_learning_scheduler') as mock_get_scheduler:
+        with patch(
+            "stillme_core.learning.automation_service.get_learning_scheduler"
+        ) as mock_get_scheduler:
             mock_scheduler = Mock()
             mock_scheduler.initialize = AsyncMock(return_value=True)
             mock_scheduler.start = AsyncMock(return_value=True)
@@ -253,7 +269,7 @@ class TestAutomationService:
     @pytest.mark.asyncio
     async def test_stop(self, service):
         """Test service stop"""
-        with patch('stillme_core.learning.automation_service.get_learning_scheduler'):
+        with patch("stillme_core.learning.automation_service.get_learning_scheduler"):
             mock_scheduler = Mock()
             mock_scheduler.stop = AsyncMock(return_value=True)
             service.scheduler = mock_scheduler
@@ -268,7 +284,9 @@ class TestAutomationService:
     @pytest.mark.asyncio
     async def test_run_training_session(self, service):
         """Test running training session"""
-        with patch('stillme_core.learning.automation_service.EvolutionaryLearningSystem') as mock_learning_class:
+        with patch(
+            "stillme_core.learning.automation_service.EvolutionaryLearningSystem"
+        ) as mock_learning_class:
             mock_learning = Mock()
             mock_session = Mock()
             mock_session.session_id = "test_session"
@@ -278,37 +296,42 @@ class TestAutomationService:
 
             result = await service._run_training_session()
 
-            assert result['status'] == 'success'
-            assert 'session_id' in result
-            assert 'duration' in result
-            assert service.stats['total_training_sessions'] == 1
-            assert service.stats['successful_sessions'] == 1
+            assert result["status"] == "success"
+            assert "session_id" in result
+            assert "duration" in result
+            assert service.stats["total_training_sessions"] == 1
+            assert service.stats["successful_sessions"] == 1
 
     @pytest.mark.asyncio
     async def test_run_training_session_failure(self, service):
         """Test training session failure"""
-        with patch('stillme_core.learning.automation_service.EvolutionaryLearningSystem') as mock_learning_class:
+        with patch(
+            "stillme_core.learning.automation_service.EvolutionaryLearningSystem"
+        ) as mock_learning_class:
             mock_learning = Mock()
-            mock_learning.daily_learning_session = AsyncMock(side_effect=Exception("Test error"))
+            mock_learning.daily_learning_session = AsyncMock(
+                side_effect=Exception("Test error")
+            )
             mock_learning_class.return_value = mock_learning
             service.learning_system = mock_learning
 
             result = await service._run_training_session()
 
-            assert result['status'] == 'failed'
-            assert 'error' in result
-            assert service.stats['total_training_sessions'] == 1
-            assert service.stats['failed_sessions'] == 1
+            assert result["status"] == "failed"
+            assert "error" in result
+            assert service.stats["total_training_sessions"] == 1
+            assert service.stats["failed_sessions"] == 1
 
     def test_get_status(self, service):
         """Test getting service status"""
         status = service.get_status()
 
-        assert 'service' in status
-        assert 'statistics' in status
-        assert 'scheduler' in status
-        assert 'learning_system' in status
-        assert 'config' in status
+        assert "service" in status
+        assert "statistics" in status
+        assert "scheduler" in status
+        assert "learning_system" in status
+        assert "config" in status
+
 
 class TestIntegration:
     """Integration tests"""
@@ -316,10 +339,15 @@ class TestIntegration:
     @pytest.mark.asyncio
     async def test_scheduler_with_learning_system(self):
         """Test scheduler integration with learning system"""
-        with patch('stillme_core.learning.scheduler.APSCHEDULER_AVAILABLE', True), \
-             patch('stillme_core.learning.scheduler.AsyncIOScheduler') as mock_scheduler_class, \
-             patch('stillme_core.learning.automation_service.EvolutionaryLearningSystem') as mock_learning_class:
-
+        with (
+            patch("stillme_core.learning.scheduler.APSCHEDULER_AVAILABLE", True),
+            patch(
+                "stillme_core.learning.scheduler.AsyncIOScheduler"
+            ) as mock_scheduler_class,
+            patch(
+                "stillme_core.learning.automation_service.EvolutionaryLearningSystem"
+            ) as mock_learning_class,
+        ):
             # Setup mocks
             mock_scheduler = Mock()
             mock_job = Mock()
@@ -344,15 +372,20 @@ class TestIntegration:
 
             # Test training session
             training_result = await service._run_training_session()
-            assert training_result['status'] == 'success'
+            assert training_result["status"] == "success"
 
     @pytest.mark.asyncio
     async def test_graceful_shutdown(self):
         """Test graceful shutdown"""
-        with patch('stillme_core.learning.scheduler.APSCHEDULER_AVAILABLE', True), \
-             patch('stillme_core.learning.scheduler.AsyncIOScheduler') as mock_scheduler_class, \
-             patch('stillme_core.learning.automation_service.EvolutionaryLearningSystem') as mock_learning_class:
-
+        with (
+            patch("stillme_core.learning.scheduler.APSCHEDULER_AVAILABLE", True),
+            patch(
+                "stillme_core.learning.scheduler.AsyncIOScheduler"
+            ) as mock_scheduler_class,
+            patch(
+                "stillme_core.learning.automation_service.EvolutionaryLearningSystem"
+            ) as mock_learning_class,
+        ):
             # Setup mocks
             mock_scheduler = Mock()
             mock_scheduler.shutdown = AsyncMock()

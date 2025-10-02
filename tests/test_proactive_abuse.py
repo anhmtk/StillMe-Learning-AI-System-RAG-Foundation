@@ -28,7 +28,7 @@ class ProactiveAbuseTestSuite:
         # Create guard with higher rate limits for testing
         config = {
             "rate_limit_window": 1,  # Very short window
-            "max_suggestions_per_window": 1000  # Very high limit for testing
+            "max_suggestions_per_window": 1000,  # Very high limit for testing
         }
         self.guard = ProactiveAbuseGuard(config)
         self.results = []
@@ -43,49 +43,133 @@ class ProactiveAbuseTestSuite:
         """Load test cases"""
         return [
             # Slang cases (should block)
-            {"text": "yo can u help me out? pls thx", "category": "slang", "expected": False},
+            {
+                "text": "yo can u help me out? pls thx",
+                "category": "slang",
+                "expected": False,
+            },
             {"text": "lol that's funny af", "category": "slang", "expected": False},
             {"text": "btw fyi imo this is sus", "category": "slang", "expected": False},
             {"text": "no cap this is fire", "category": "slang", "expected": False},
-            {"text": "it's giving main character energy", "category": "slang", "expected": False},
+            {
+                "text": "it's giving main character energy",
+                "category": "slang",
+                "expected": False,
+            },
             {"text": "that's a vibe fr", "category": "slang", "expected": False},
             {"text": "make it aesthetic", "category": "slang", "expected": False},
             {"text": "this is bussin", "category": "slang", "expected": False},
             {"text": "that's mid", "category": "slang", "expected": False},
             {"text": "make it pop", "category": "slang", "expected": False},
-
             # Keyword stuffing cases (should block)
-            {"text": "help help help help help help help help help help", "category": "keyword_stuffing", "expected": False},
-            {"text": "code code code code code code code code code code", "category": "keyword_stuffing", "expected": False},
-            {"text": "python python python python python python python python python python", "category": "keyword_stuffing", "expected": False},
-            {"text": "function function function function function function function function function function", "category": "keyword_stuffing", "expected": False},
-            {"text": "error error error error error error error error error error", "category": "keyword_stuffing", "expected": False},
-
+            {
+                "text": "help help help help help help help help help help",
+                "category": "keyword_stuffing",
+                "expected": False,
+            },
+            {
+                "text": "code code code code code code code code code code",
+                "category": "keyword_stuffing",
+                "expected": False,
+            },
+            {
+                "text": "python python python python python python python python python python",
+                "category": "keyword_stuffing",
+                "expected": False,
+            },
+            {
+                "text": "function function function function function function function function function function",
+                "category": "keyword_stuffing",
+                "expected": False,
+            },
+            {
+                "text": "error error error error error error error error error error",
+                "category": "keyword_stuffing",
+                "expected": False,
+            },
             # Emoji spam cases (should block)
-            {"text": "🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀", "category": "emoji_spam", "expected": False},
-            {"text": "😀😀😀😀😀😀😀😀😀😀", "category": "emoji_spam", "expected": False},
-            {"text": "🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥", "category": "emoji_spam", "expected": False},
-            {"text": "💯💯💯💯💯💯💯💯💯💯", "category": "emoji_spam", "expected": False},
-            {"text": "✨✨✨✨✨✨✨✨✨✨", "category": "emoji_spam", "expected": False},
-
+            {
+                "text": "🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀",
+                "category": "emoji_spam",
+                "expected": False,
+            },
+            {
+                "text": "😀😀😀😀😀😀😀😀😀😀",
+                "category": "emoji_spam",
+                "expected": False,
+            },
+            {
+                "text": "🔥🔥🔥🔥🔥🔥🔥🔥🔥🔥",
+                "category": "emoji_spam",
+                "expected": False,
+            },
+            {
+                "text": "💯💯💯💯💯💯💯💯💯💯",
+                "category": "emoji_spam",
+                "expected": False,
+            },
+            {
+                "text": "✨✨✨✨✨✨✨✨✨✨",
+                "category": "emoji_spam",
+                "expected": False,
+            },
             # Vague cases (should block)
             {"text": "help me", "category": "vague", "expected": False},
             {"text": "fix this", "category": "vague", "expected": False},
             {"text": "make it better", "category": "vague", "expected": False},
             {"text": "do something", "category": "vague", "expected": False},
             {"text": "what should I do", "category": "vague", "expected": False},
-
             # Clear cases (should allow)
-            {"text": "How can I implement a binary search algorithm in Python?", "category": "clear", "expected": True},
-            {"text": "What are the best practices for error handling in JavaScript?", "category": "clear", "expected": True},
-            {"text": "Can you explain the difference between REST and GraphQL APIs?", "category": "clear", "expected": True},
-            {"text": "How do I optimize database queries for better performance?", "category": "clear", "expected": True},
-            {"text": "What is the most efficient way to sort a large dataset?", "category": "clear", "expected": True},
-            {"text": "How can I implement authentication in a React application?", "category": "clear", "expected": True},
-            {"text": "What are the security considerations for handling user input?", "category": "clear", "expected": True},
-            {"text": "How do I deploy a Docker container to production?", "category": "clear", "expected": True},
-            {"text": "What is the difference between microservices and monolithic architecture?", "category": "clear", "expected": True},
-            {"text": "How can I implement caching in a web application?", "category": "clear", "expected": True},
+            {
+                "text": "How can I implement a binary search algorithm in Python?",
+                "category": "clear",
+                "expected": True,
+            },
+            {
+                "text": "What are the best practices for error handling in JavaScript?",
+                "category": "clear",
+                "expected": True,
+            },
+            {
+                "text": "Can you explain the difference between REST and GraphQL APIs?",
+                "category": "clear",
+                "expected": True,
+            },
+            {
+                "text": "How do I optimize database queries for better performance?",
+                "category": "clear",
+                "expected": True,
+            },
+            {
+                "text": "What is the most efficient way to sort a large dataset?",
+                "category": "clear",
+                "expected": True,
+            },
+            {
+                "text": "How can I implement authentication in a React application?",
+                "category": "clear",
+                "expected": True,
+            },
+            {
+                "text": "What are the security considerations for handling user input?",
+                "category": "clear",
+                "expected": True,
+            },
+            {
+                "text": "How do I deploy a Docker container to production?",
+                "category": "clear",
+                "expected": True,
+            },
+            {
+                "text": "What is the difference between microservices and monolithic architecture?",
+                "category": "clear",
+                "expected": True,
+            },
+            {
+                "text": "How can I implement caching in a web application?",
+                "category": "clear",
+                "expected": True,
+            },
         ]
 
     def _load_expected_results(self) -> dict:
@@ -95,13 +179,15 @@ class ProactiveAbuseTestSuite:
             "keyword_stuffing": False,
             "emoji_spam": False,
             "vague": False,
-            "clear": True
+            "clear": True,
         }
 
     def test_slang_detection(self) -> bool:
         """Test slang detection"""
         try:
-            slang_cases = [case for case in self.test_cases if case["category"] == "slang"]
+            slang_cases = [
+                case for case in self.test_cases if case["category"] == "slang"
+            ]
             passed = 0
 
             for case in slang_cases:
@@ -109,10 +195,14 @@ class ProactiveAbuseTestSuite:
                 if result.should_suggest == case["expected"]:
                     passed += 1
                 else:
-                    print(f"FAILED: '{case['text']}' - Expected: {case['expected']}, Got: {result.should_suggest}")
+                    print(
+                        f"FAILED: '{case['text']}' - Expected: {case['expected']}, Got: {result.should_suggest}"
+                    )
 
             pass_rate = passed / len(slang_cases) if slang_cases else 0
-            print(f"Slang detection: {passed}/{len(slang_cases)} passed ({pass_rate:.1%})")
+            print(
+                f"Slang detection: {passed}/{len(slang_cases)} passed ({pass_rate:.1%})"
+            )
             return pass_rate >= 0.9
 
         except Exception as e:
@@ -122,7 +212,11 @@ class ProactiveAbuseTestSuite:
     def test_keyword_stuffing_detection(self) -> bool:
         """Test keyword stuffing detection"""
         try:
-            keyword_cases = [case for case in self.test_cases if case["category"] == "keyword_stuffing"]
+            keyword_cases = [
+                case
+                for case in self.test_cases
+                if case["category"] == "keyword_stuffing"
+            ]
             passed = 0
 
             for case in keyword_cases:
@@ -130,10 +224,14 @@ class ProactiveAbuseTestSuite:
                 if result.should_suggest == case["expected"]:
                     passed += 1
                 else:
-                    print(f"FAILED: '{case['text']}' - Expected: {case['expected']}, Got: {result.should_suggest}")
+                    print(
+                        f"FAILED: '{case['text']}' - Expected: {case['expected']}, Got: {result.should_suggest}"
+                    )
 
             pass_rate = passed / len(keyword_cases) if keyword_cases else 0
-            print(f"Keyword stuffing detection: {passed}/{len(keyword_cases)} passed ({pass_rate:.1%})")
+            print(
+                f"Keyword stuffing detection: {passed}/{len(keyword_cases)} passed ({pass_rate:.1%})"
+            )
             return pass_rate >= 0.9
 
         except Exception as e:
@@ -143,7 +241,9 @@ class ProactiveAbuseTestSuite:
     def test_emoji_spam_detection(self) -> bool:
         """Test emoji spam detection"""
         try:
-            emoji_cases = [case for case in self.test_cases if case["category"] == "emoji_spam"]
+            emoji_cases = [
+                case for case in self.test_cases if case["category"] == "emoji_spam"
+            ]
             passed = 0
 
             for case in emoji_cases:
@@ -151,10 +251,14 @@ class ProactiveAbuseTestSuite:
                 if result.should_suggest == case["expected"]:
                     passed += 1
                 else:
-                    print(f"FAILED: '{case['text']}' - Expected: {case['expected']}, Got: {result.should_suggest}")
+                    print(
+                        f"FAILED: '{case['text']}' - Expected: {case['expected']}, Got: {result.should_suggest}"
+                    )
 
             pass_rate = passed / len(emoji_cases) if emoji_cases else 0
-            print(f"Emoji spam detection: {passed}/{len(emoji_cases)} passed ({pass_rate:.1%})")
+            print(
+                f"Emoji spam detection: {passed}/{len(emoji_cases)} passed ({pass_rate:.1%})"
+            )
             return pass_rate >= 0.9
 
         except Exception as e:
@@ -164,7 +268,9 @@ class ProactiveAbuseTestSuite:
     def test_vague_detection(self) -> bool:
         """Test vague content detection"""
         try:
-            vague_cases = [case for case in self.test_cases if case["category"] == "vague"]
+            vague_cases = [
+                case for case in self.test_cases if case["category"] == "vague"
+            ]
             passed = 0
 
             for case in vague_cases:
@@ -172,10 +278,14 @@ class ProactiveAbuseTestSuite:
                 if result.should_suggest == case["expected"]:
                     passed += 1
                 else:
-                    print(f"FAILED: '{case['text']}' - Expected: {case['expected']}, Got: {result.should_suggest}")
+                    print(
+                        f"FAILED: '{case['text']}' - Expected: {case['expected']}, Got: {result.should_suggest}"
+                    )
 
             pass_rate = passed / len(vague_cases) if vague_cases else 0
-            print(f"Vague detection: {passed}/{len(vague_cases)} passed ({pass_rate:.1%})")
+            print(
+                f"Vague detection: {passed}/{len(vague_cases)} passed ({pass_rate:.1%})"
+            )
             return pass_rate >= 0.9
 
         except Exception as e:
@@ -185,7 +295,9 @@ class ProactiveAbuseTestSuite:
     def test_clear_content_detection(self) -> bool:
         """Test clear content detection"""
         try:
-            clear_cases = [case for case in self.test_cases if case["category"] == "clear"]
+            clear_cases = [
+                case for case in self.test_cases if case["category"] == "clear"
+            ]
             passed = 0
 
             for case in clear_cases:
@@ -193,10 +305,14 @@ class ProactiveAbuseTestSuite:
                 if result.should_suggest == case["expected"]:
                     passed += 1
                 else:
-                    print(f"FAILED: '{case['text']}' - Expected: {case['expected']}, Got: {result.should_suggest}")
+                    print(
+                        f"FAILED: '{case['text']}' - Expected: {case['expected']}, Got: {result.should_suggest}"
+                    )
 
             pass_rate = passed / len(clear_cases) if clear_cases else 0
-            print(f"Clear content detection: {passed}/{len(clear_cases)} passed ({pass_rate:.1%})")
+            print(
+                f"Clear content detection: {passed}/{len(clear_cases)} passed ({pass_rate:.1%})"
+            )
             return pass_rate >= 0.9
 
         except Exception as e:
@@ -207,10 +323,7 @@ class ProactiveAbuseTestSuite:
         """Test rate limiting functionality"""
         try:
             # Create a new guard with strict rate limits for this test
-            strict_config = {
-                "rate_limit_window": 30,
-                "max_suggestions_per_window": 2
-            }
+            strict_config = {"rate_limit_window": 30, "max_suggestions_per_window": 2}
             strict_guard = ProactiveAbuseGuard(strict_config)
 
             session_id = "test_session"
@@ -257,7 +370,9 @@ class ProactiveAbuseTestSuite:
             avg_latency = sum(latencies) / len(latencies)
             max_latency = max(latencies)
 
-            print(f"Performance test - Average latency: {avg_latency:.2f}ms, Max latency: {max_latency:.2f}ms")
+            print(
+                f"Performance test - Average latency: {avg_latency:.2f}ms, Max latency: {max_latency:.2f}ms"
+            )
 
             # Check if latency is under 10ms
             if avg_latency > 10.0:
@@ -303,21 +418,25 @@ class ProactiveAbuseTestSuite:
                     print(f"❌ {test_name} - FAILED ({execution_time:.3f}s)")
                     failed += 1
 
-                results.append({
-                    "name": test_name,
-                    "passed": result,
-                    "execution_time": execution_time
-                })
+                results.append(
+                    {
+                        "name": test_name,
+                        "passed": result,
+                        "execution_time": execution_time,
+                    }
+                )
 
             except Exception as e:
                 print(f"❌ {test_name} - ERROR: {e}")
                 failed += 1
-                results.append({
-                    "name": test_name,
-                    "passed": False,
-                    "execution_time": 0,
-                    "error": str(e)
-                })
+                results.append(
+                    {
+                        "name": test_name,
+                        "passed": False,
+                        "execution_time": 0,
+                        "error": str(e),
+                    }
+                )
 
         total = passed + failed
         pass_rate = (passed / total) * 100 if total > 0 else 0
@@ -348,7 +467,7 @@ class ProactiveAbuseTestSuite:
             "precision": precision,
             "recall": recall,
             "results": results,
-            "guard_stats": guard_stats
+            "guard_stats": guard_stats,
         }
 
     def _calculate_precision_recall(self) -> tuple:
@@ -369,10 +488,19 @@ class ProactiveAbuseTestSuite:
             elif not predicted and actual:
                 false_negatives += 1
 
-        precision = true_positives / (true_positives + false_positives) if (true_positives + false_positives) > 0 else 0
-        recall = true_positives / (true_positives + false_negatives) if (true_positives + false_negatives) > 0 else 0
+        precision = (
+            true_positives / (true_positives + false_positives)
+            if (true_positives + false_positives) > 0
+            else 0
+        )
+        recall = (
+            true_positives / (true_positives + false_negatives)
+            if (true_positives + false_negatives) > 0
+            else 0
+        )
 
         return precision, recall
+
 
 if __name__ == "__main__":
     # Run test suite
@@ -393,6 +521,8 @@ if __name__ == "__main__":
     print(f"\n📄 Results saved to: {results_file}")
 
     if results["pass_rate"] >= 90:
-        print("🎉 Proactive Suggestion Abuse Guard tests passed! System is production-ready.")
+        print(
+            "🎉 Proactive Suggestion Abuse Guard tests passed! System is production-ready."
+        )
     else:
         print("⚠️  Some tests failed - review and fix issues")

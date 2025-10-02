@@ -1,7 +1,6 @@
 """User safety tests for StillMe AI Framework."""
 
 
-
 class TestUserSafety:
     """Test user safety features."""
 

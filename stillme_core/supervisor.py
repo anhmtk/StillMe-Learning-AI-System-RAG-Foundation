@@ -8,11 +8,13 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
+
 class SupervisorStatus(Enum):
     ACTIVE = "active"
     INACTIVE = "inactive"
     ERROR = "error"
     MAINTENANCE = "maintenance"
+
 
 class LessonStatus(Enum):
     PENDING = "pending"
@@ -21,9 +23,11 @@ class LessonStatus(Enum):
     IN_PROGRESS = "in_progress"
     COMPLETED = "completed"
 
+
 @dataclass
 class LessonProposal:
     """Lesson proposal record"""
+
     proposal_id: str
     title: str
     description: str
@@ -43,9 +47,11 @@ class LessonProposal:
         if self.metadata is None:
             self.metadata = {}
 
+
 @dataclass
 class DailySupervisor:
     """Daily supervisor record"""
+
     supervisor_id: str
     date: datetime
     status: SupervisorStatus
@@ -59,6 +65,7 @@ class DailySupervisor:
     def __post_init__(self):
         if self.metadata is None:
             self.metadata = {}
+
 
 class Supervisor:
     """Supervisor for StillMe Framework"""
@@ -84,19 +91,21 @@ class Supervisor:
                 "security",
                 "ethics",
                 "performance",
-                "maintenance"
-            ]
+                "maintenance",
+            ],
         }
 
-    def create_lesson_proposal(self,
-                              title: str,
-                              description: str,
-                              category: str,
-                              difficulty: str = "medium",
-                              estimated_duration: int = 30,
-                              prerequisites: Optional[list[str]] = None,
-                              learning_objectives: Optional[list[str]] = None,
-                              created_by: str = "system") -> LessonProposal:
+    def create_lesson_proposal(
+        self,
+        title: str,
+        description: str,
+        category: str,
+        difficulty: str = "medium",
+        estimated_duration: int = 30,
+        prerequisites: Optional[list[str]] = None,
+        learning_objectives: Optional[list[str]] = None,
+        created_by: str = "system",
+    ) -> LessonProposal:
         """Create a new lesson proposal"""
         try:
             proposal_id = f"lesson_{len(self.lesson_proposals) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -112,7 +121,7 @@ class Supervisor:
                 learning_objectives=learning_objectives or [],
                 status=LessonStatus.PENDING,
                 created_by=created_by,
-                created_at=datetime.now()
+                created_at=datetime.now(),
             )
 
             self.lesson_proposals.append(proposal)
@@ -132,7 +141,9 @@ class Supervisor:
                     proposal.approved_by = approved_by
                     proposal.approved_at = datetime.now()
 
-                    self.logger.info(f"✅ Lesson proposal approved: {proposal.title} (ID: {proposal_id})")
+                    self.logger.info(
+                        f"✅ Lesson proposal approved: {proposal.title} (ID: {proposal_id})"
+                    )
                     return True
 
             self.logger.warning(f"⚠️ Lesson proposal not found: {proposal_id}")
@@ -150,7 +161,9 @@ class Supervisor:
                     proposal.status = LessonStatus.REJECTED
                     proposal.metadata["rejection_reason"] = reason
 
-                    self.logger.info(f"❌ Lesson proposal rejected: {proposal.title} (ID: {proposal_id}) - {reason}")
+                    self.logger.info(
+                        f"❌ Lesson proposal rejected: {proposal.title} (ID: {proposal_id}) - {reason}"
+                    )
                     return True
 
             self.logger.warning(f"⚠️ Lesson proposal not found: {proposal_id}")
@@ -168,7 +181,9 @@ class Supervisor:
         """Get approved lesson proposals"""
         return [p for p in self.lesson_proposals if p.status == LessonStatus.APPROVED]
 
-    def create_daily_supervisor(self, date: Optional[datetime] = None) -> DailySupervisor:
+    def create_daily_supervisor(
+        self, date: Optional[datetime] = None
+    ) -> DailySupervisor:
         """Create daily supervisor record"""
         try:
             if date is None:
@@ -184,7 +199,7 @@ class Supervisor:
                 lessons_failed=0,
                 total_learning_time=0,
                 performance_score=0.0,
-                notes=[]
+                notes=[],
             )
 
             self.daily_supervisors.append(supervisor)
@@ -195,13 +210,15 @@ class Supervisor:
             self.logger.error(f"❌ Failed to create daily supervisor: {e}")
             raise
 
-    def update_daily_supervisor(self,
-                               supervisor_id: str,
-                               lessons_completed: Optional[int] = None,
-                               lessons_failed: Optional[int] = None,
-                               total_learning_time: Optional[int] = None,
-                               performance_score: Optional[float] = None,
-                               note: Optional[str] = None) -> bool:
+    def update_daily_supervisor(
+        self,
+        supervisor_id: str,
+        lessons_completed: Optional[int] = None,
+        lessons_failed: Optional[int] = None,
+        total_learning_time: Optional[int] = None,
+        performance_score: Optional[float] = None,
+        note: Optional[str] = None,
+    ) -> bool:
         """Update daily supervisor record"""
         try:
             for supervisor in self.daily_supervisors:
@@ -227,7 +244,9 @@ class Supervisor:
             self.logger.error(f"❌ Failed to update daily supervisor: {e}")
             return False
 
-    def get_daily_supervisor(self, date: Optional[datetime] = None) -> Optional[DailySupervisor]:
+    def get_daily_supervisor(
+        self, date: Optional[datetime] = None
+    ) -> Optional[DailySupervisor]:
         """Get daily supervisor for a specific date"""
         try:
             if date is None:
@@ -253,11 +272,19 @@ class Supervisor:
             approved_proposals = len(self.get_approved_lesson_proposals())
 
             total_supervisors = len(self.daily_supervisors)
-            active_supervisors = len([s for s in self.daily_supervisors if s.status == SupervisorStatus.ACTIVE])
+            active_supervisors = len(
+                [
+                    s
+                    for s in self.daily_supervisors
+                    if s.status == SupervisorStatus.ACTIVE
+                ]
+            )
 
             # Calculate average performance
             if self.daily_supervisors:
-                avg_performance = sum(s.performance_score for s in self.daily_supervisors) / len(self.daily_supervisors)
+                avg_performance = sum(
+                    s.performance_score for s in self.daily_supervisors
+                ) / len(self.daily_supervisors)
             else:
                 avg_performance = 0.0
 
@@ -269,7 +296,7 @@ class Supervisor:
                 "active_supervisors": active_supervisors,
                 "average_performance": avg_performance,
                 "supervisor_config": self.supervisor_config,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
         except Exception as e:

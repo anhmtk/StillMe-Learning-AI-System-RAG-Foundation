@@ -8,6 +8,7 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+
 class MetricType(Enum):
     PERFORMANCE = "performance"
     QUALITY = "quality"
@@ -15,9 +16,11 @@ class MetricType(Enum):
     ETHICS = "ethics"
     LEARNING = "learning"
 
+
 @dataclass
 class MetricRecord:
     """Metric record"""
+
     name: str
     value: float
     unit: str
@@ -29,6 +32,7 @@ class MetricRecord:
         if self.metadata is None:
             self.metadata = {}
 
+
 class AgentDevMetrics:
     """AgentDev metrics collector"""
 
@@ -38,12 +42,14 @@ class AgentDevMetrics:
         self.sessions: list[dict[str, Any]] = []
         self.logger.info("✅ AgentDevMetrics initialized")
 
-    def record_metric(self,
-                     name: str,
-                     value: float,
-                     unit: str,
-                     metric_type: MetricType,
-                     metadata: dict[str, Any] = None) -> MetricRecord:
+    def record_metric(
+        self,
+        name: str,
+        value: float,
+        unit: str,
+        metric_type: MetricType,
+        metadata: dict[str, Any] = None,
+    ) -> MetricRecord:
         """Record a metric"""
         try:
             metric = MetricRecord(
@@ -52,7 +58,7 @@ class AgentDevMetrics:
                 unit=unit,
                 metric_type=metric_type,
                 timestamp=datetime.now(),
-                metadata=metadata or {}
+                metadata=metadata or {},
             )
 
             self.metrics.append(metric)
@@ -67,8 +73,8 @@ class AgentDevMetrics:
         """Record a session"""
         try:
             session_id = f"session_{len(self.sessions) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-            session_data['session_id'] = session_id
-            session_data['timestamp'] = datetime.now().isoformat()
+            session_data["session_id"] = session_id
+            session_data["timestamp"] = datetime.now().isoformat()
 
             self.sessions.append(session_data)
             self.logger.info(f"📝 Session recorded: {session_id}")
@@ -97,7 +103,7 @@ class AgentDevMetrics:
                 "total_metrics": total_metrics,
                 "total_sessions": total_sessions,
                 "metrics_by_type": metrics_by_type,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
         except Exception as e:
@@ -110,8 +116,10 @@ class AgentDevMetrics:
         self.sessions.clear()
         self.logger.info("🧹 All metrics cleared")
 
+
 # Global metrics instance
 _metrics_instance = None
+
 
 def get_metrics() -> AgentDevMetrics:
     """Get global metrics instance"""
@@ -120,9 +128,11 @@ def get_metrics() -> AgentDevMetrics:
         _metrics_instance = AgentDevMetrics()
     return _metrics_instance
 
+
 def get_summary() -> dict[str, Any]:
     """Get metrics summary (convenience function)"""
     return get_metrics().get_summary()
+
 
 def record_session(session_data: dict[str, Any]) -> str:
     """Record a session (convenience function)"""

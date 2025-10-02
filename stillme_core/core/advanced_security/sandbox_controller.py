@@ -42,6 +42,7 @@ SECURITY_METRICS = {
 
 class SandboxStatus(Enum):
     """Sandbox status enumeration"""
+
     CREATING = "creating"
     RUNNING = "running"
     STOPPED = "stopped"
@@ -51,6 +52,7 @@ class SandboxStatus(Enum):
 
 class SandboxType(Enum):
     """Sandbox type enumeration"""
+
     SECURITY_TEST = "security_test"
     CODE_EXECUTION = "code_execution"
     NETWORK_SIMULATION = "network_simulation"
@@ -60,6 +62,7 @@ class SandboxType(Enum):
 @dataclass
 class SandboxConfig:
     """Sandbox configuration"""
+
     sandbox_id: str
     name: str
     sandbox_type: SandboxType
@@ -87,6 +90,7 @@ class SandboxConfig:
 @dataclass
 class SandboxInstance:
     """Sandbox instance representation"""
+
     config: SandboxConfig
     container_id: Optional[str] = None
     status: SandboxStatus = SandboxStatus.CREATING
@@ -135,6 +139,7 @@ class SandboxController:
             except Exception:
                 # Fallback to mock client when Docker is unavailable
                 from unittest.mock import Mock
+
                 self.docker_client = Mock()
                 self.docker_client.ping = Mock()
                 self.docker_client.containers = Mock()
@@ -154,7 +159,9 @@ class SandboxController:
         # Start monitoring
         self._start_monitoring()
 
-        logger.info(f"🚀 SandboxController initialized with isolation base: {self.isolation_base}")
+        logger.info(
+            f"🚀 SandboxController initialized with isolation base: {self.isolation_base}"
+        )
 
     def _initialize_security_policies(self):
         """Initialize security policies"""
@@ -163,24 +170,26 @@ class SandboxController:
                 "enabled": True,
                 "allowed_hosts": ["localhost", "127.0.0.1"],
                 "blocked_ports": [22, 23, 25, 53, 80, 443, 993, 995],
-                "monitoring": True
+                "monitoring": True,
             },
             "resource_limits": {
                 "max_cpu_percent": SECURITY_METRICS["max_cpu_usage"],
                 "max_memory_mb": SECURITY_METRICS["max_memory_usage"],
                 "max_disk_mb": SECURITY_METRICS["max_disk_usage"],
-                "enforcement": True
+                "enforcement": True,
             },
             "execution_limits": {
                 "max_execution_time": SECURITY_METRICS["max_execution_time"],
-                "max_concurrent_containers": SECURITY_METRICS["max_concurrent_containers"],
-                "auto_cleanup": True
+                "max_concurrent_containers": SECURITY_METRICS[
+                    "max_concurrent_containers"
+                ],
+                "auto_cleanup": True,
             },
             "data_protection": {
                 "no_real_data": True,
                 "encrypted_storage": True,
-                "automatic_cleanup": True
-            }
+                "automatic_cleanup": True,
+            },
         }
 
     async def create_sandbox(
@@ -188,7 +197,7 @@ class SandboxController:
         name: str,
         sandbox_type: SandboxType,
         image: str = "python:3.9-slim",
-        **kwargs
+        **kwargs,
     ) -> SandboxInstance:
         """
         Create a new sandbox instance
@@ -204,7 +213,9 @@ class SandboxController:
         """
         # Check concurrent container limit
         if len(self.active_sandboxes) >= SECURITY_METRICS["max_concurrent_containers"]:
-            raise RuntimeError(f"Maximum concurrent containers ({SECURITY_METRICS['max_concurrent_containers']}) reached")
+            raise RuntimeError(
+                f"Maximum concurrent containers ({SECURITY_METRICS['max_concurrent_containers']}) reached"
+            )
 
         # Generate unique sandbox ID
         sandbox_id = f"{name}_{uuid.uuid4().hex[:8]}"
@@ -215,7 +226,7 @@ class SandboxController:
             name=name,
             sandbox_type=sandbox_type,
             image=image,
-            **kwargs
+            **kwargs,
         )
 
         # Create sandbox instance
@@ -241,23 +252,29 @@ class SandboxController:
             self.active_sandboxes[sandbox_id] = sandbox
 
             # Log creation
-            sandbox.logs.append({
-                "timestamp": time.time(),
-                "level": "INFO",
-                "message": f"Sandbox {sandbox_id} created successfully",
-                "container_id": container.id
-            })
+            sandbox.logs.append(
+                {
+                    "timestamp": time.time(),
+                    "level": "INFO",
+                    "message": f"Sandbox {sandbox_id} created successfully",
+                    "container_id": container.id,
+                }
+            )
 
-            logger.info(f"✅ Sandbox {sandbox_id} created with container {container.id}")
+            logger.info(
+                f"✅ Sandbox {sandbox_id} created with container {container.id}"
+            )
             return sandbox
 
         except Exception as e:
             sandbox.status = SandboxStatus.FAILED
-            sandbox.logs.append({
-                "timestamp": time.time(),
-                "level": "ERROR",
-                "message": f"Failed to create sandbox: {str(e)}"
-            })
+            sandbox.logs.append(
+                {
+                    "timestamp": time.time(),
+                    "level": "ERROR",
+                    "message": f"Failed to create sandbox: {str(e)}",
+                }
+            )
             logger.error(f"❌ Failed to create sandbox {sandbox_id}: {e}")
             raise
 
@@ -267,7 +284,7 @@ class SandboxController:
             self._check_system_resources(),
             self._check_docker_availability(),
             self._check_security_policies(sandbox),
-            self._check_image_safety(sandbox.config.image)
+            self._check_image_safety(sandbox.config.image),
         ]
 
         results = await asyncio.gather(*checks, return_exceptions=True)
@@ -306,7 +323,9 @@ class SandboxController:
         """Check if sandbox configuration meets security policies"""
         # Check resource limits
         if sandbox.config.memory_limit > SECURITY_METRICS["max_memory_usage"]:
-            raise ValueError(f"Memory limit {sandbox.config.memory_limit}MB exceeds policy")
+            raise ValueError(
+                f"Memory limit {sandbox.config.memory_limit}MB exceeds policy"
+            )
 
         # Check timeout
         if sandbox.config.timeout > SECURITY_METRICS["max_execution_time"]:
@@ -324,9 +343,7 @@ class SandboxController:
         return True
 
     async def _create_secure_container(
-        self,
-        sandbox: SandboxInstance,
-        sandbox_dir: Path
+        self, sandbox: SandboxInstance, sandbox_dir: Path
     ) -> docker.models.containers.Container:
         """Create Docker container with security constraints"""
 
@@ -340,22 +357,18 @@ class SandboxController:
             "cpu_quota": int(sandbox.config.cpu_limit * 100000),
             "cpu_period": 100000,
             "environment": sandbox.config.environment_vars,
-            "volumes": {
-                str(sandbox_dir): {"bind": "/workspace", "mode": "rw"}
-            },
+            "volumes": {str(sandbox_dir): {"bind": "/workspace", "mode": "rw"}},
             "working_dir": "/workspace",
             "stdin_open": True,
             "tty": True,
             "security_opt": [
                 "no-new-privileges:true",
-                "seccomp:unconfined"  # Allow security testing
+                "seccomp:unconfined",  # Allow security testing
             ],
             "cap_drop": ["ALL"],
             "cap_add": [],  # No additional capabilities
             "read_only": False,  # Allow writing to workspace
-            "tmpfs": {
-                "/tmp": "size=50m,noexec,nosuid,nodev"
-            }
+            "tmpfs": {"/tmp": "size=50m,noexec,nosuid,nodev"},
         }
 
         # Create container
@@ -367,10 +380,7 @@ class SandboxController:
         return container
 
     async def execute_in_sandbox(
-        self,
-        sandbox_id: str,
-        command: list[str],
-        timeout: Optional[int] = None
+        self, sandbox_id: str, command: list[str], timeout: Optional[int] = None
     ) -> dict[str, Any]:
         """
         Execute command in sandbox
@@ -395,35 +405,35 @@ class SandboxController:
 
             # Execute command with timeout
             exec_timeout = timeout or sandbox.config.timeout
-            result = container.exec_run(
-                command,
-                timeout=exec_timeout,
-                demux=True
-            )
+            result = container.exec_run(command, timeout=exec_timeout, demux=True)
 
             # Log execution
-            sandbox.logs.append({
-                "timestamp": time.time(),
-                "level": "INFO",
-                "message": f"Executed command: {' '.join(command)}",
-                "exit_code": result.exit_code,
-                "stdout": result.output[0].decode() if result.output[0] else "",
-                "stderr": result.output[1].decode() if result.output[1] else ""
-            })
+            sandbox.logs.append(
+                {
+                    "timestamp": time.time(),
+                    "level": "INFO",
+                    "message": f"Executed command: {' '.join(command)}",
+                    "exit_code": result.exit_code,
+                    "stdout": result.output[0].decode() if result.output[0] else "",
+                    "stderr": result.output[1].decode() if result.output[1] else "",
+                }
+            )
 
             return {
                 "exit_code": result.exit_code,
                 "stdout": result.output[0].decode() if result.output[0] else "",
                 "stderr": result.output[1].decode() if result.output[1] else "",
-                "execution_time": time.time() - sandbox.started_at
+                "execution_time": time.time() - sandbox.started_at,
             }
 
         except Exception as e:
-            sandbox.logs.append({
-                "timestamp": time.time(),
-                "level": "ERROR",
-                "message": f"Command execution failed: {str(e)}"
-            })
+            sandbox.logs.append(
+                {
+                    "timestamp": time.time(),
+                    "level": "ERROR",
+                    "message": f"Command execution failed: {str(e)}",
+                }
+            )
             raise
 
     async def destroy_sandbox(self, sandbox_id: str) -> bool:
@@ -503,18 +513,22 @@ class SandboxController:
 
             if container.status != "running":
                 sandbox.status = SandboxStatus.STOPPED
-                sandbox.logs.append({
-                    "timestamp": time.time(),
-                    "level": "WARNING",
-                    "message": f"Container {sandbox.container_id} is not running"
-                })
+                sandbox.logs.append(
+                    {
+                        "timestamp": time.time(),
+                        "level": "WARNING",
+                        "message": f"Container {sandbox.container_id} is not running",
+                    }
+                )
 
         except Exception as e:
-            sandbox.logs.append({
-                "timestamp": time.time(),
-                "level": "ERROR",
-                "message": f"Health check failed: {str(e)}"
-            })
+            sandbox.logs.append(
+                {
+                    "timestamp": time.time(),
+                    "level": "ERROR",
+                    "message": f"Health check failed: {str(e)}",
+                }
+            )
 
     async def _check_resource_limits(self, sandbox: SandboxInstance):
         """Check resource usage limits"""
@@ -526,46 +540,60 @@ class SandboxController:
             stats = container.stats(stream=False)
 
             # Calculate CPU usage
-            cpu_delta = stats["cpu_stats"]["cpu_usage"]["total_usage"] - stats["precpu_stats"]["cpu_usage"]["total_usage"]
-            system_delta = stats["cpu_stats"]["system_cpu_usage"] - stats["precpu_stats"]["system_cpu_usage"]
+            cpu_delta = (
+                stats["cpu_stats"]["cpu_usage"]["total_usage"]
+                - stats["precpu_stats"]["cpu_usage"]["total_usage"]
+            )
+            system_delta = (
+                stats["cpu_stats"]["system_cpu_usage"]
+                - stats["precpu_stats"]["system_cpu_usage"]
+            )
             cpu_percent = (cpu_delta / system_delta) * 100.0 if system_delta > 0 else 0
 
             # Calculate memory usage
             memory_usage = stats["memory_stats"]["usage"]
             memory_limit = stats["memory_stats"]["limit"]
-            memory_percent = (memory_usage / memory_limit) * 100.0 if memory_limit > 0 else 0
+            memory_percent = (
+                (memory_usage / memory_limit) * 100.0 if memory_limit > 0 else 0
+            )
 
             # Update sandbox resource usage
             sandbox.resource_usage = {
                 "cpu_percent": cpu_percent,
                 "memory_usage_mb": memory_usage / (1024 * 1024),
                 "memory_percent": memory_percent,
-                "timestamp": time.time()
+                "timestamp": time.time(),
             }
 
             # Check for violations
             if cpu_percent > SECURITY_METRICS["max_cpu_usage"]:
-                sandbox.security_violations.append({
-                    "timestamp": time.time(),
-                    "type": "cpu_limit_exceeded",
-                    "value": cpu_percent,
-                    "limit": SECURITY_METRICS["max_cpu_usage"]
-                })
+                sandbox.security_violations.append(
+                    {
+                        "timestamp": time.time(),
+                        "type": "cpu_limit_exceeded",
+                        "value": cpu_percent,
+                        "limit": SECURITY_METRICS["max_cpu_usage"],
+                    }
+                )
 
             if memory_percent > 80:  # 80% memory threshold
-                sandbox.security_violations.append({
-                    "timestamp": time.time(),
-                    "type": "memory_limit_exceeded",
-                    "value": memory_percent,
-                    "limit": 80
-                })
+                sandbox.security_violations.append(
+                    {
+                        "timestamp": time.time(),
+                        "type": "memory_limit_exceeded",
+                        "value": memory_percent,
+                        "limit": 80,
+                    }
+                )
 
         except Exception as e:
-            sandbox.logs.append({
-                "timestamp": time.time(),
-                "level": "ERROR",
-                "message": f"Resource monitoring failed: {str(e)}"
-            })
+            sandbox.logs.append(
+                {
+                    "timestamp": time.time(),
+                    "level": "ERROR",
+                    "message": f"Resource monitoring failed: {str(e)}",
+                }
+            )
 
     async def _check_timeout(self, sandbox: SandboxInstance):
         """Check if sandbox has exceeded timeout"""
@@ -574,11 +602,13 @@ class SandboxController:
 
         elapsed_time = time.time() - sandbox.started_at
         if elapsed_time > sandbox.config.timeout:
-            sandbox.logs.append({
-                "timestamp": time.time(),
-                "level": "WARNING",
-                "message": f"Sandbox timeout exceeded: {elapsed_time}s > {sandbox.config.timeout}s"
-            })
+            sandbox.logs.append(
+                {
+                    "timestamp": time.time(),
+                    "level": "WARNING",
+                    "message": f"Sandbox timeout exceeded: {elapsed_time}s > {sandbox.config.timeout}s",
+                }
+            )
 
             # Auto-destroy timeout sandboxes
             await self.destroy_sandbox(sandbox.config.sandbox_id)
@@ -589,7 +619,10 @@ class SandboxController:
             sandbox = self.active_sandboxes[sandbox_id]
         else:
             # Check history
-            sandbox = next((s for s in self.sandbox_history if s.config.sandbox_id == sandbox_id), None)
+            sandbox = next(
+                (s for s in self.sandbox_history if s.config.sandbox_id == sandbox_id),
+                None,
+            )
 
         if not sandbox:
             return None
@@ -603,7 +636,7 @@ class SandboxController:
             "stopped_at": sandbox.stopped_at,
             "resource_usage": sandbox.resource_usage,
             "security_violations": sandbox.security_violations,
-            "logs_count": len(sandbox.logs)
+            "logs_count": len(sandbox.logs),
         }
 
     def get_all_sandboxes(self) -> list[dict[str, Any]]:
@@ -632,5 +665,5 @@ class SandboxController:
 
     def __del__(self):
         """Destructor to ensure cleanup"""
-        if hasattr(self, 'is_monitoring') and self.is_monitoring:
+        if hasattr(self, "is_monitoring") and self.is_monitoring:
             asyncio.create_task(self.cleanup_all())

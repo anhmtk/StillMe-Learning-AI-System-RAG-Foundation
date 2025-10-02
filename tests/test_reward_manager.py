@@ -47,7 +47,7 @@ class TestRewardManager:
     @pytest.fixture
     def reward_manager(self, temp_dir):
         """Create reward manager with temporary directory"""
-        with patch('stillme_core.learning.reward_manager.Path') as mock_path:
+        with patch("stillme_core.learning.reward_manager.Path") as mock_path:
             mock_path.return_value = Path(temp_dir)
             manager = RewardManager()
             return manager
@@ -56,8 +56,7 @@ class TestRewardManager:
     async def test_start_learning_session(self, reward_manager):
         """Test starting a learning session"""
         session = await reward_manager.start_learning_session(
-            session_id="test_session",
-            user_id="user_123"
+            session_id="test_session", user_id="user_123"
         )
 
         assert session.session_id == "test_session"
@@ -75,8 +74,7 @@ class TestRewardManager:
         """Test ending a learning session"""
         # Start session
         await reward_manager.start_learning_session(
-            session_id="test_session",
-            user_id="user_123"
+            session_id="test_session", user_id="user_123"
         )
 
         # Add some rewards and penalties
@@ -84,14 +82,14 @@ class TestRewardManager:
             session_id="test_session",
             reward_type=RewardType.FIX_SUCCESS,
             context={"fix": "test"},
-            rationale="Test reward"
+            rationale="Test reward",
         )
 
         await reward_manager.apply_penalty(
             session_id="test_session",
             penalty_type=PenaltyType.FIX_FAILURE,
             context={"error": "test"},
-            rationale="Test penalty"
+            rationale="Test penalty",
         )
 
         # End session
@@ -107,8 +105,7 @@ class TestRewardManager:
         """Test awarding a reward"""
         # Start session
         await reward_manager.start_learning_session(
-            session_id="test_session",
-            user_id="user_123"
+            session_id="test_session", user_id="user_123"
         )
 
         # Award reward
@@ -116,7 +113,7 @@ class TestRewardManager:
             session_id="test_session",
             reward_type=RewardType.FIX_SUCCESS,
             context={"fix": "test"},
-            rationale="Test reward"
+            rationale="Test reward",
         )
 
         assert reward.session_id == "test_session"
@@ -131,8 +128,7 @@ class TestRewardManager:
         """Test applying a penalty"""
         # Start session
         await reward_manager.start_learning_session(
-            session_id="test_session",
-            user_id="user_123"
+            session_id="test_session", user_id="user_123"
         )
 
         # Apply penalty
@@ -140,7 +136,7 @@ class TestRewardManager:
             session_id="test_session",
             penalty_type=PenaltyType.FIX_FAILURE,
             context={"error": "test"},
-            rationale="Test penalty"
+            rationale="Test penalty",
         )
 
         assert penalty.session_id == "test_session"
@@ -155,8 +151,7 @@ class TestRewardManager:
         """Test evaluating learning outcome"""
         # Start session
         await reward_manager.start_learning_session(
-            session_id="test_session",
-            user_id="user_123"
+            session_id="test_session", user_id="user_123"
         )
 
         # Evaluate learning outcome
@@ -170,7 +165,7 @@ class TestRewardManager:
             fix_result=fix_result,
             test_result=test_result,
             ethics_result=ethics_result,
-            security_result=security_result
+            security_result=security_result,
         )
 
         # Should have 4 rewards (one for each positive outcome)
@@ -189,8 +184,7 @@ class TestRewardManager:
         """Test evaluating learning outcome with failures"""
         # Start session
         await reward_manager.start_learning_session(
-            session_id="test_session",
-            user_id="user_123"
+            session_id="test_session", user_id="user_123"
         )
 
         # Evaluate learning outcome with failures
@@ -204,7 +198,7 @@ class TestRewardManager:
             fix_result=fix_result,
             test_result=test_result,
             ethics_result=ethics_result,
-            security_result=security_result
+            security_result=security_result,
         )
 
         # Should have 4 penalties (one for each failure)
@@ -221,24 +215,29 @@ class TestRewardManager:
     def test_get_session_summary(self, reward_manager):
         """Test getting session summary"""
         # Start session and add rewards/penalties
-        asyncio.run(reward_manager.start_learning_session(
-            session_id="test_session",
-            user_id="user_123"
-        ))
+        asyncio.run(
+            reward_manager.start_learning_session(
+                session_id="test_session", user_id="user_123"
+            )
+        )
 
-        asyncio.run(reward_manager.award_reward(
-            session_id="test_session",
-            reward_type=RewardType.FIX_SUCCESS,
-            context={"fix": "test"},
-            rationale="Test reward"
-        ))
+        asyncio.run(
+            reward_manager.award_reward(
+                session_id="test_session",
+                reward_type=RewardType.FIX_SUCCESS,
+                context={"fix": "test"},
+                rationale="Test reward",
+            )
+        )
 
-        asyncio.run(reward_manager.apply_penalty(
-            session_id="test_session",
-            penalty_type=PenaltyType.FIX_FAILURE,
-            context={"error": "test"},
-            rationale="Test penalty"
-        ))
+        asyncio.run(
+            reward_manager.apply_penalty(
+                session_id="test_session",
+                penalty_type=PenaltyType.FIX_FAILURE,
+                context={"error": "test"},
+                rationale="Test penalty",
+            )
+        )
 
         # End session
         asyncio.run(reward_manager.end_learning_session("test_session"))
@@ -264,12 +263,14 @@ class TestRewardManager:
             asyncio.run(reward_manager.start_learning_session(session_id, user_id))
 
             # Add some rewards
-            asyncio.run(reward_manager.award_reward(
-                session_id=session_id,
-                reward_type=RewardType.FIX_SUCCESS,
-                context={"fix": f"test_{i}"},
-                rationale=f"Test reward {i}"
-            ))
+            asyncio.run(
+                reward_manager.award_reward(
+                    session_id=session_id,
+                    reward_type=RewardType.FIX_SUCCESS,
+                    context={"fix": f"test_{i}"},
+                    rationale=f"Test reward {i}",
+                )
+            )
 
             asyncio.run(reward_manager.end_learning_session(session_id))
 
@@ -291,12 +292,12 @@ class TestRewardManager:
             session_id="test_session",
             reward_type=RewardType.FIX_SUCCESS,
             context={"fix": "test"},
-            rationale="Test reward"
+            rationale="Test reward",
         )
         await reward_manager.end_learning_session("test_session")
 
         # Generate chart
-        with patch('matplotlib.pyplot.savefig') as mock_savefig:
+        with patch("matplotlib.pyplot.savefig") as mock_savefig:
             await reward_manager.generate_rewards_chart("user_123")
 
             # Should attempt to save chart
@@ -321,7 +322,7 @@ class TestRewardManager:
             session_id="test_session",
             reward_type=RewardType.FIX_SUCCESS,
             context={"fix": "test"},
-            rationale="Test reward"
+            rationale="Test reward",
         )
         await reward_manager.end_learning_session("test_session")
 
@@ -353,7 +354,7 @@ class TestRewardManager:
                 session_id="nonexistent_session",
                 reward_type=RewardType.FIX_SUCCESS,
                 context={"fix": "test"},
-                rationale="Test reward"
+                rationale="Test reward",
             )
 
     @pytest.mark.asyncio

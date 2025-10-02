@@ -44,7 +44,7 @@ class TestResourceThresholds:
             memory_percent=85.0,
             memory_mb=2048,
             token_budget_daily=20000,
-            token_budget_hourly=2000
+            token_budget_hourly=2000,
         )
 
         assert thresholds.cpu_percent == 80.0
@@ -52,6 +52,7 @@ class TestResourceThresholds:
         assert thresholds.memory_mb == 2048
         assert thresholds.token_budget_daily == 20000
         assert thresholds.token_budget_hourly == 2000
+
 
 class TestTokenBudgetManager:
     """Test TokenBudgetManager"""
@@ -112,14 +113,15 @@ class TestTokenBudgetManager:
 
         stats = manager.get_usage_stats()
 
-        assert stats['daily_budget'] == 1000
-        assert stats['hourly_budget'] == 100
-        assert stats['daily_usage'] == 50
-        assert stats['hourly_usage'] == 50
-        assert stats['daily_remaining'] == 950
-        assert stats['hourly_remaining'] == 50
-        assert stats['daily_usage_percent'] == 5.0
-        assert stats['hourly_usage_percent'] == 50.0
+        assert stats["daily_budget"] == 1000
+        assert stats["hourly_budget"] == 100
+        assert stats["daily_usage"] == 50
+        assert stats["hourly_usage"] == 50
+        assert stats["daily_remaining"] == 950
+        assert stats["hourly_remaining"] == 50
+        assert stats["daily_usage_percent"] == 5.0
+        assert stats["hourly_usage_percent"] == 50.0
+
 
 class TestResourceMonitor:
     """Test ResourceMonitor"""
@@ -132,7 +134,7 @@ class TestResourceMonitor:
             memory_percent=80.0,
             memory_mb=1024,
             token_budget_daily=1000,
-            token_budget_hourly=100
+            token_budget_hourly=100,
         )
 
     @pytest.fixture
@@ -164,9 +166,10 @@ class TestResourceMonitor:
     @pytest.mark.asyncio
     async def test_collect_metrics_with_psutil(self, monitor):
         """Test collecting metrics with psutil available"""
-        with patch('stillme_core.monitoring.resource_monitor.PSUTIL_AVAILABLE', True), \
-             patch('stillme_core.monitoring.resource_monitor.psutil') as mock_psutil:
-
+        with (
+            patch("stillme_core.monitoring.resource_monitor.PSUTIL_AVAILABLE", True),
+            patch("stillme_core.monitoring.resource_monitor.psutil") as mock_psutil,
+        ):
             # Mock psutil responses
             mock_psutil.cpu_percent.return_value = 50.0
             mock_memory = Mock()
@@ -203,7 +206,7 @@ class TestResourceMonitor:
     @pytest.mark.asyncio
     async def test_collect_metrics_without_psutil(self, monitor):
         """Test collecting metrics without psutil"""
-        with patch('stillme_core.monitoring.resource_monitor.PSUTIL_AVAILABLE', False):
+        with patch("stillme_core.monitoring.resource_monitor.PSUTIL_AVAILABLE", False):
             metrics = await monitor._collect_metrics()
 
             assert isinstance(metrics, ResourceMetrics)
@@ -233,7 +236,7 @@ class TestResourceMonitor:
             token_remaining_daily=900,
             token_remaining_hourly=90,
             learning_sessions_active=0,
-            learning_sessions_total=0
+            learning_sessions_total=0,
         )
 
         await monitor._check_thresholds(metrics)
@@ -268,7 +271,7 @@ class TestResourceMonitor:
             token_remaining_daily=900,
             token_remaining_hourly=90,
             learning_sessions_active=0,
-            learning_sessions_total=0
+            learning_sessions_total=0,
         )
 
         await monitor._check_thresholds(metrics)
@@ -302,7 +305,7 @@ class TestResourceMonitor:
             token_remaining_daily=900,
             token_remaining_hourly=90,
             learning_sessions_active=0,
-            learning_sessions_total=0
+            learning_sessions_total=0,
         )
         monitor.metrics_history.append(metrics)
 
@@ -332,7 +335,7 @@ class TestResourceMonitor:
             token_remaining_daily=900,
             token_remaining_hourly=90,
             learning_sessions_active=0,
-            learning_sessions_total=0
+            learning_sessions_total=0,
         )
         monitor.metrics_history.append(metrics)
 
@@ -383,18 +386,19 @@ class TestResourceMonitor:
             token_remaining_daily=900,
             token_remaining_hourly=90,
             learning_sessions_active=0,
-            learning_sessions_total=0
+            learning_sessions_total=0,
         )
         monitor.metrics_history.append(metrics)
 
         summary = monitor.get_metrics_summary()
 
-        assert 'current' in summary
-        assert 'averages' in summary
-        assert 'token_budget' in summary
-        assert 'alerts_count' in summary
-        assert 'learning_sessions' in summary
-        assert 'monitoring_status' in summary
+        assert "current" in summary
+        assert "averages" in summary
+        assert "token_budget" in summary
+        assert "alerts_count" in summary
+        assert "learning_sessions" in summary
+        assert "monitoring_status" in summary
+
 
 class TestPerformanceAnalyzer:
     """Test PerformanceAnalyzer"""
@@ -440,7 +444,7 @@ class TestPerformanceAnalyzer:
             convergence_rate=0.5,
             error_rate=0.1,
             throughput_items_per_second=1.0,
-            efficiency_score=0.7
+            efficiency_score=0.7,
         )
 
         analyzer.add_performance_metrics(metrics)
@@ -499,22 +503,23 @@ class TestPerformanceAnalyzer:
             convergence_rate=0.5,
             error_rate=0.1,
             throughput_items_per_second=1.0,
-            efficiency_score=0.7
+            efficiency_score=0.7,
         )
         analyzer.add_performance_metrics(metrics)
 
         report = analyzer.get_analysis_report()
 
-        assert 'analysis_timestamp' in report
-        assert 'analysis_window_hours' in report
-        assert 'performance_summary' in report
-        assert 'patterns' in report
-        assert 'bottlenecks' in report
-        assert 'agi_recommendations' in report
-        assert 'evolution_milestones' in report
-        assert 'learning_curves' in report
-        assert 'baselines' in report
-        assert 'thresholds' in report
+        assert "analysis_timestamp" in report
+        assert "analysis_window_hours" in report
+        assert "performance_summary" in report
+        assert "patterns" in report
+        assert "bottlenecks" in report
+        assert "agi_recommendations" in report
+        assert "evolution_milestones" in report
+        assert "learning_curves" in report
+        assert "baselines" in report
+        assert "thresholds" in report
+
 
 class TestIntegration:
     """Integration tests"""
@@ -544,7 +549,7 @@ class TestIntegration:
             convergence_rate=0.5,
             error_rate=0.1,
             throughput_items_per_second=1.0,
-            efficiency_score=0.7
+            efficiency_score=0.7,
         )
         analyzer.add_performance_metrics(metrics)
 

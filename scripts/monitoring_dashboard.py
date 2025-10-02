@@ -24,6 +24,7 @@ from typing import Any
 @dataclass
 class MetricData:
     """Metric data structure"""
+
     name: str
     value: float
     unit: str
@@ -35,6 +36,7 @@ class MetricData:
 @dataclass
 class SystemHealth:
     """System health data structure"""
+
     overall_status: str
     uptime: float
     cpu_usage: float
@@ -48,6 +50,7 @@ class SystemHealth:
 @dataclass
 class TestMetrics:
     """Test metrics data structure"""
+
     total_tests: int
     passed_tests: int
     failed_tests: int
@@ -60,6 +63,7 @@ class TestMetrics:
 @dataclass
 class SecurityMetrics:
     """Security metrics data structure"""
+
     vulnerabilities_critical: int
     vulnerabilities_high: int
     vulnerabilities_medium: int
@@ -72,6 +76,7 @@ class SecurityMetrics:
 @dataclass
 class PerformanceMetrics:
     """Performance metrics data structure"""
+
     requests_per_second: float
     average_response_time: float
     p95_response_time: float
@@ -95,7 +100,7 @@ class MonitoringDashboard:
             "security_score": {"good": 90, "warning": 75, "critical": 50},
             "performance_p95": {"good": 500, "warning": 1000, "critical": 2000},
             "error_rate": {"good": 1, "warning": 5, "critical": 10},
-            "test_pass_rate": {"good": 95, "warning": 90, "critical": 85}
+            "test_pass_rate": {"good": 95, "warning": 90, "critical": 85},
         }
 
     def collect_system_health(self) -> SystemHealth:
@@ -117,7 +122,7 @@ class MonitoringDashboard:
                 disk_usage < 90,
                 network_latency < 100,
                 error_rate < 5,
-                response_time < 1000
+                response_time < 1000,
             ]
 
             if all(status_checks):
@@ -135,7 +140,7 @@ class MonitoringDashboard:
                 disk_usage=disk_usage,
                 network_latency=network_latency,
                 error_rate=error_rate,
-                response_time=response_time
+                response_time=response_time,
             )
         except Exception as e:
             print(f"⚠️ Error collecting system health: {e}")
@@ -147,7 +152,7 @@ class MonitoringDashboard:
                 disk_usage=0.0,
                 network_latency=0.0,
                 error_rate=0.0,
-                response_time=0.0
+                response_time=0.0,
             )
 
     def collect_test_metrics(self) -> TestMetrics:
@@ -167,18 +172,18 @@ class MonitoringDashboard:
                     with open(test_file) as f:
                         data = json.load(f)
 
-                    if 'tests' in data:
-                        total_tests += data['tests']
-                    if 'passed' in data:
-                        passed_tests += data['passed']
-                    if 'failed' in data:
-                        failed_tests += data['failed']
-                    if 'skipped' in data:
-                        skipped_tests += data['skipped']
-                    if 'coverage' in data:
-                        coverage_percentage = max(coverage_percentage, data['coverage'])
-                    if 'duration' in data:
-                        test_duration += data['duration']
+                    if "tests" in data:
+                        total_tests += data["tests"]
+                    if "passed" in data:
+                        passed_tests += data["passed"]
+                    if "failed" in data:
+                        failed_tests += data["failed"]
+                    if "skipped" in data:
+                        skipped_tests += data["skipped"]
+                    if "coverage" in data:
+                        coverage_percentage = max(coverage_percentage, data["coverage"])
+                    if "duration" in data:
+                        test_duration += data["duration"]
                 except Exception as e:
                     print(f"⚠️ Error reading {test_file}: {e}")
 
@@ -195,7 +200,7 @@ class MonitoringDashboard:
                 skipped_tests=skipped_tests,
                 coverage_percentage=coverage_percentage,
                 test_duration=test_duration,
-                pass_rate=pass_rate
+                pass_rate=pass_rate,
             )
         except Exception as e:
             print(f"⚠️ Error collecting test metrics: {e}")
@@ -219,21 +224,21 @@ class MonitoringDashboard:
                     with open(security_file) as f:
                         data = json.load(f)
 
-                    if 'vulnerabilities' in data:
-                        vulns = data['vulnerabilities']
-                        vulnerabilities_critical += vulns.get('critical', 0)
-                        vulnerabilities_high += vulns.get('high', 0)
-                        vulnerabilities_medium += vulns.get('medium', 0)
-                        vulnerabilities_low += vulns.get('low', 0)
+                    if "vulnerabilities" in data:
+                        vulns = data["vulnerabilities"]
+                        vulnerabilities_critical += vulns.get("critical", 0)
+                        vulnerabilities_high += vulns.get("high", 0)
+                        vulnerabilities_medium += vulns.get("medium", 0)
+                        vulnerabilities_low += vulns.get("low", 0)
 
-                    if 'security_score' in data:
-                        security_score = max(security_score, data['security_score'])
+                    if "security_score" in data:
+                        security_score = max(security_score, data["security_score"])
 
-                    if 'last_scan' in data:
-                        last_scan = data['last_scan']
+                    if "last_scan" in data:
+                        last_scan = data["last_scan"]
 
-                    if 'compliance_status' in data:
-                        compliance_status = data['compliance_status']
+                    if "compliance_status" in data:
+                        compliance_status = data["compliance_status"]
                 except Exception as e:
                     print(f"⚠️ Error reading {security_file}: {e}")
 
@@ -244,7 +249,7 @@ class MonitoringDashboard:
                 vulnerabilities_low=vulnerabilities_low,
                 security_score=security_score,
                 last_scan=last_scan,
-                compliance_status=compliance_status
+                compliance_status=compliance_status,
             )
         except Exception as e:
             print(f"⚠️ Error collecting security metrics: {e}")
@@ -267,14 +272,22 @@ class MonitoringDashboard:
                     with open(perf_file) as f:
                         data = json.load(f)
 
-                    if 'metrics' in data:
-                        metrics = data['metrics']
-                        requests_per_second = max(requests_per_second, metrics.get('rps', 0))
-                        average_response_time = max(average_response_time, metrics.get('avg_response_time', 0))
-                        p95_response_time = max(p95_response_time, metrics.get('p95_response_time', 0))
-                        p99_response_time = max(p99_response_time, metrics.get('p99_response_time', 0))
-                        error_rate = max(error_rate, metrics.get('error_rate', 0))
-                        throughput = max(throughput, metrics.get('throughput', 0))
+                    if "metrics" in data:
+                        metrics = data["metrics"]
+                        requests_per_second = max(
+                            requests_per_second, metrics.get("rps", 0)
+                        )
+                        average_response_time = max(
+                            average_response_time, metrics.get("avg_response_time", 0)
+                        )
+                        p95_response_time = max(
+                            p95_response_time, metrics.get("p95_response_time", 0)
+                        )
+                        p99_response_time = max(
+                            p99_response_time, metrics.get("p99_response_time", 0)
+                        )
+                        error_rate = max(error_rate, metrics.get("error_rate", 0))
+                        throughput = max(throughput, metrics.get("throughput", 0))
                 except Exception as e:
                     print(f"⚠️ Error reading {perf_file}: {e}")
 
@@ -284,7 +297,7 @@ class MonitoringDashboard:
                 p95_response_time=p95_response_time,
                 p99_response_time=p99_response_time,
                 error_rate=error_rate,
-                throughput=throughput
+                throughput=throughput,
             )
         except Exception as e:
             print(f"⚠️ Error collecting performance metrics: {e}")
@@ -293,13 +306,16 @@ class MonitoringDashboard:
     def _get_uptime(self) -> float:
         """Get system uptime in hours"""
         try:
-            if os.name == 'nt':  # Windows
-                subprocess.run(['wmic', 'os', 'get', 'lastbootuptime'],
-                                      capture_output=True, text=True)
+            if os.name == "nt":  # Windows
+                subprocess.run(
+                    ["wmic", "os", "get", "lastbootuptime"],
+                    capture_output=True,
+                    text=True,
+                )
                 # Parse Windows uptime (simplified)
                 return 24.0  # Mock value
             else:  # Unix-like
-                with open('/proc/uptime') as f:
+                with open("/proc/uptime") as f:
                     uptime_seconds = float(f.read().split()[0])
                 return uptime_seconds / 3600
         except:
@@ -308,13 +324,16 @@ class MonitoringDashboard:
     def _get_cpu_usage(self) -> float:
         """Get CPU usage percentage"""
         try:
-            if os.name == 'nt':  # Windows
-                subprocess.run(['wmic', 'cpu', 'get', 'loadpercentage'],
-                                      capture_output=True, text=True)
+            if os.name == "nt":  # Windows
+                subprocess.run(
+                    ["wmic", "cpu", "get", "loadpercentage"],
+                    capture_output=True,
+                    text=True,
+                )
                 # Parse Windows CPU usage (simplified)
                 return 25.0  # Mock value
             else:  # Unix-like
-                subprocess.run(['top', '-bn1'], capture_output=True, text=True)
+                subprocess.run(["top", "-bn1"], capture_output=True, text=True)
                 # Parse CPU usage (simplified)
                 return 30.0  # Mock value
         except:
@@ -323,13 +342,16 @@ class MonitoringDashboard:
     def _get_memory_usage(self) -> float:
         """Get memory usage percentage"""
         try:
-            if os.name == 'nt':  # Windows
-                subprocess.run(['wmic', 'OS', 'get', 'TotalVisibleMemorySize,FreePhysicalMemory'],
-                                      capture_output=True, text=True)
+            if os.name == "nt":  # Windows
+                subprocess.run(
+                    ["wmic", "OS", "get", "TotalVisibleMemorySize,FreePhysicalMemory"],
+                    capture_output=True,
+                    text=True,
+                )
                 # Parse Windows memory usage (simplified)
                 return 45.0  # Mock value
             else:  # Unix-like
-                subprocess.run(['free', '-m'], capture_output=True, text=True)
+                subprocess.run(["free", "-m"], capture_output=True, text=True)
                 # Parse memory usage (simplified)
                 return 50.0  # Mock value
         except:
@@ -338,13 +360,16 @@ class MonitoringDashboard:
     def _get_disk_usage(self) -> float:
         """Get disk usage percentage"""
         try:
-            if os.name == 'nt':  # Windows
-                subprocess.run(['wmic', 'logicaldisk', 'get', 'size,freespace'],
-                                      capture_output=True, text=True)
+            if os.name == "nt":  # Windows
+                subprocess.run(
+                    ["wmic", "logicaldisk", "get", "size,freespace"],
+                    capture_output=True,
+                    text=True,
+                )
                 # Parse Windows disk usage (simplified)
                 return 60.0  # Mock value
             else:  # Unix-like
-                subprocess.run(['df', '-h'], capture_output=True, text=True)
+                subprocess.run(["df", "-h"], capture_output=True, text=True)
                 # Parse disk usage (simplified)
                 return 65.0  # Mock value
         except:
@@ -353,8 +378,12 @@ class MonitoringDashboard:
     def _get_network_latency(self) -> float:
         """Get network latency in milliseconds"""
         try:
-            subprocess.run(['ping', '-c', '1', '8.8.8.8'],
-                                  capture_output=True, text=True, timeout=5)
+            subprocess.run(
+                ["ping", "-c", "1", "8.8.8.8"],
+                capture_output=True,
+                text=True,
+                timeout=5,
+            )
             # Parse ping output (simplified)
             return 25.0  # Mock value
         except:
@@ -370,8 +399,13 @@ class MonitoringDashboard:
         # Mock implementation
         return 150.0
 
-    def generate_dashboard_html(self, system_health: SystemHealth, test_metrics: TestMetrics,
-                              security_metrics: SecurityMetrics, performance_metrics: PerformanceMetrics) -> str:
+    def generate_dashboard_html(
+        self,
+        system_health: SystemHealth,
+        test_metrics: TestMetrics,
+        security_metrics: SecurityMetrics,
+        performance_metrics: PerformanceMetrics,
+    ) -> str:
         """Generate HTML dashboard"""
         html_content = f"""
 <!DOCTYPE html>
@@ -541,18 +575,25 @@ class MonitoringDashboard:
 """
         return html_content
 
-    def save_dashboard(self, html_content: str, output_file: str = "monitoring/dashboard.html"):
+    def save_dashboard(
+        self, html_content: str, output_file: str = "monitoring/dashboard.html"
+    ):
         """Save dashboard to file"""
         output_path = self.project_root / output_file
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             f.write(html_content)
 
         print(f"📊 Dashboard saved to: {output_path}")
 
-    def generate_json_report(self, system_health: SystemHealth, test_metrics: TestMetrics,
-                           security_metrics: SecurityMetrics, performance_metrics: PerformanceMetrics) -> dict[str, Any]:
+    def generate_json_report(
+        self,
+        system_health: SystemHealth,
+        test_metrics: TestMetrics,
+        security_metrics: SecurityMetrics,
+        performance_metrics: PerformanceMetrics,
+    ) -> dict[str, Any]:
         """Generate JSON report"""
         return {
             "timestamp": datetime.now().isoformat(),
@@ -560,11 +601,18 @@ class MonitoringDashboard:
             "test_metrics": asdict(test_metrics),
             "security_metrics": asdict(security_metrics),
             "performance_metrics": asdict(performance_metrics),
-            "overall_status": self._calculate_overall_status(system_health, test_metrics, security_metrics, performance_metrics)
+            "overall_status": self._calculate_overall_status(
+                system_health, test_metrics, security_metrics, performance_metrics
+            ),
         }
 
-    def _calculate_overall_status(self, system_health: SystemHealth, test_metrics: TestMetrics,
-                                security_metrics: SecurityMetrics, performance_metrics: PerformanceMetrics) -> str:
+    def _calculate_overall_status(
+        self,
+        system_health: SystemHealth,
+        test_metrics: TestMetrics,
+        security_metrics: SecurityMetrics,
+        performance_metrics: PerformanceMetrics,
+    ) -> str:
         """Calculate overall system status"""
         statuses = []
 
@@ -611,10 +659,24 @@ class MonitoringDashboard:
 
 def main():
     """Main function"""
-    parser = argparse.ArgumentParser(description="Monitoring Dashboard for StillMe AI Framework")
-    parser.add_argument("--output", type=str, default="monitoring/dashboard.html", help="Output HTML file")
-    parser.add_argument("--json-output", type=str, default="monitoring/metrics.json", help="Output JSON file")
-    parser.add_argument("--project-root", type=str, default=".", help="Project root directory")
+    parser = argparse.ArgumentParser(
+        description="Monitoring Dashboard for StillMe AI Framework"
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default="monitoring/dashboard.html",
+        help="Output HTML file",
+    )
+    parser.add_argument(
+        "--json-output",
+        type=str,
+        default="monitoring/metrics.json",
+        help="Output JSON file",
+    )
+    parser.add_argument(
+        "--project-root", type=str, default=".", help="Project root directory"
+    )
 
     args = parser.parse_args()
 
@@ -639,15 +701,19 @@ def main():
 
     # Generate dashboard
     print("📊 Generating dashboard...")
-    html_content = dashboard.generate_dashboard_html(system_health, test_metrics, security_metrics, performance_metrics)
+    html_content = dashboard.generate_dashboard_html(
+        system_health, test_metrics, security_metrics, performance_metrics
+    )
     dashboard.save_dashboard(html_content, args.output)
 
     # Generate JSON report
-    json_report = dashboard.generate_json_report(system_health, test_metrics, security_metrics, performance_metrics)
+    json_report = dashboard.generate_json_report(
+        system_health, test_metrics, security_metrics, performance_metrics
+    )
     json_path = dashboard.project_root / args.json_output
     json_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(json_path, 'w', encoding='utf-8') as f:
+    with open(json_path, "w", encoding="utf-8") as f:
         json.dump(json_report, f, indent=2, ensure_ascii=False)
 
     print(f"📄 JSON report saved to: {json_path}")

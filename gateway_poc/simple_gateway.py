@@ -2,6 +2,7 @@
 """
 Simple Gateway for StillMe - Quick Performance Test
 """
+
 import time
 
 import httpx
@@ -14,9 +15,11 @@ app = FastAPI(title="StillMe Simple Gateway")
 # HTTP client for upstream requests
 http_client = httpx.AsyncClient(timeout=30.0)
 
+
 @app.get("/health")
 async def health_check():
     return {"status": "ok", "message": "Simple Gateway is healthy"}
+
 
 @app.post("/chat")
 async def chat_proxy(request: Request):
@@ -28,7 +31,9 @@ async def chat_proxy(request: Request):
 
         # Forward to StillMe backend
         start_time = time.monotonic()
-        stillme_response = await http_client.post("http://localhost:1216/chat", json=body)
+        stillme_response = await http_client.post(
+            "http://localhost:1216/chat", json=body
+        )
         stillme_response.raise_for_status()
         response_data = stillme_response.json()
 
@@ -40,19 +45,17 @@ async def chat_proxy(request: Request):
     except httpx.RequestError as e:
         print(f"StillMe backend request failed: {e}")
         return JSONResponse(
-            {"error": "StillMe backend is unavailable"},
-            status_code=503
+            {"error": "StillMe backend is unavailable"}, status_code=503
         )
     except Exception as e:
         print(f"Gateway error: {e}")
-        return JSONResponse(
-            {"error": "Internal server error"},
-            status_code=500
-        )
+        return JSONResponse({"error": "Internal server error"}, status_code=500)
+
 
 @app.on_event("shutdown")
 async def shutdown_event():
     await http_client.aclose()
+
 
 if __name__ == "__main__":
     print("Starting StillMe Simple Gateway on port 8080...")

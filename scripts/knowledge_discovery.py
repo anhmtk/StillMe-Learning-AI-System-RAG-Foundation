@@ -17,8 +17,11 @@ from stillme_core.alerting.alerting_system import AlertingSystem
 from stillme_core.learning.proposals_manager import ProposalsManager
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
+
 
 class KnowledgeDiscovery:
     def __init__(self):
@@ -65,7 +68,7 @@ class KnowledgeDiscovery:
                     f"• AI/ML news\n"
                     f"• Programming trends\n\n"
                     f"Please review the new proposals in the dashboard!",
-                    "info"
+                    "info",
                 )
 
             return discovered_count
@@ -85,22 +88,22 @@ class KnowledgeDiscovery:
                 "description": "Learn the basics of quantum computing, quantum algorithms, and quantum programming with Qiskit",
                 "source": "tech_trends",
                 "priority": "high",
-                "quality_score": 0.92
+                "quality_score": 0.92,
             },
             {
                 "title": "Edge Computing and IoT",
                 "description": "Understanding edge computing architectures, IoT protocols, and real-time data processing",
                 "source": "tech_trends",
                 "priority": "medium",
-                "quality_score": 0.88
+                "quality_score": 0.88,
             },
             {
                 "title": "Blockchain Development",
                 "description": "Learn blockchain fundamentals, smart contracts, and decentralized applications (DApps)",
                 "source": "tech_trends",
                 "priority": "high",
-                "quality_score": 0.90
-            }
+                "quality_score": 0.90,
+            },
         ]
 
         return tech_trends
@@ -116,22 +119,22 @@ class KnowledgeDiscovery:
                 "description": "Deep dive into transformer architecture, attention mechanisms, and training large language models",
                 "source": "ai_news",
                 "priority": "critical",
-                "quality_score": 0.95
+                "quality_score": 0.95,
             },
             {
                 "title": "Computer Vision with Deep Learning",
                 "description": "Advanced computer vision techniques using CNNs, R-CNNs, and modern architectures like Vision Transformers",
                 "source": "ai_news",
                 "priority": "high",
-                "quality_score": 0.91
+                "quality_score": 0.91,
             },
             {
                 "title": "Reinforcement Learning Applications",
                 "description": "Practical applications of RL in robotics, gaming, and autonomous systems",
                 "source": "ai_news",
                 "priority": "medium",
-                "quality_score": 0.87
-            }
+                "quality_score": 0.87,
+            },
         ]
 
         return ai_topics
@@ -147,22 +150,22 @@ class KnowledgeDiscovery:
                 "description": "Learn Rust programming language for systems programming, memory safety, and performance",
                 "source": "programming_trends",
                 "priority": "high",
-                "quality_score": 0.93
+                "quality_score": 0.93,
             },
             {
                 "title": "WebAssembly (WASM) Development",
                 "description": "Building high-performance web applications using WebAssembly",
                 "source": "programming_trends",
                 "priority": "medium",
-                "quality_score": 0.89
+                "quality_score": 0.89,
             },
             {
                 "title": "Microservices Architecture",
                 "description": "Design and implement scalable microservices architectures with modern tools",
                 "source": "programming_trends",
                 "priority": "high",
-                "quality_score": 0.90
-            }
+                "quality_score": 0.90,
+            },
         ]
 
         return prog_topics
@@ -180,28 +183,32 @@ class KnowledgeDiscovery:
             learning_objectives = [
                 f"Understand {topic['title']} concepts and principles",
                 "Apply knowledge in practical scenarios",
-                "Build real-world projects using the technology"
+                "Build real-world projects using the technology",
             ]
 
             # Tạo prerequisites
             prerequisites = [
                 "Basic programming knowledge",
-                "Understanding of computer science fundamentals"
+                "Understanding of computer science fundamentals",
             ]
 
             # Tạo expected outcomes
             expected_outcomes = [
                 f"Mastery of {topic['title']}",
                 "Ability to implement practical solutions",
-                "Enhanced technical skills and knowledge"
+                "Enhanced technical skills and knowledge",
             ]
 
             # Tạo risk assessment
             risk_assessment = {
-                "complexity": "high" if topic["priority"] in ["high", "critical"] else "medium",
-                "time_commitment": "high" if topic["priority"] in ["high", "critical"] else "medium",
+                "complexity": "high"
+                if topic["priority"] in ["high", "critical"]
+                else "medium",
+                "time_commitment": "high"
+                if topic["priority"] in ["high", "critical"]
+                else "medium",
                 "prerequisites": "medium",
-                "practical_value": "high"
+                "practical_value": "high",
             }
 
             # Tạo proposal
@@ -216,7 +223,7 @@ class KnowledgeDiscovery:
                 source=topic["source"],
                 priority=topic["priority"],
                 risk_assessment=risk_assessment,
-                created_by="knowledge_discovery"
+                created_by="knowledge_discovery",
             )
 
             logger.info(f"✅ Created proposal: {proposal.title}")
@@ -225,6 +232,7 @@ class KnowledgeDiscovery:
         except Exception as e:
             logger.error(f"❌ Failed to create proposal for {topic['title']}: {e}")
             return False
+
 
 def main():
     """Main function"""
@@ -244,6 +252,7 @@ def main():
     except Exception as e:
         logger.error(f"❌ Knowledge discovery failed: {e}")
         print(f"\n❌ Knowledge discovery failed: {e}")
+
 
 if __name__ == "__main__":
     main()

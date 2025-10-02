@@ -27,7 +27,9 @@ def logger_capture():
 
 
 def test_shadow_enforced():
-    engine = ReflexEngine(ReflexConfig(enabled=True, shadow_mode=True, policy="balanced"))
+    engine = ReflexEngine(
+        ReflexConfig(enabled=True, shadow_mode=True, policy="balanced")
+    )
     result = engine.analyze(text="hello world", context={"session": "t"})
     assert result["shadow"] is True
     assert result["decision"] == "fallback"
@@ -35,12 +37,14 @@ def test_shadow_enforced():
 
 
 def test_log_contains_why_reflex(capsys):
-    engine = ReflexEngine(ReflexConfig(enabled=True, shadow_mode=True, policy="balanced"))
+    engine = ReflexEngine(
+        ReflexConfig(enabled=True, shadow_mode=True, policy="balanced")
+    )
     _ = engine.analyze(text="hi", context={})
 
     # Check stderr for log output
     captured = capsys.readouterr()
-    stderr_lines = captured.err.strip().split('\n')
+    stderr_lines = captured.err.strip().split("\n")
 
     # Find a log line that contains event reflex_decision
     found = False
@@ -55,7 +59,8 @@ def test_log_contains_why_reflex(capsys):
 
 
 def test_engine_bypass_when_disabled():
-    engine = ReflexEngine(ReflexConfig(enabled=False, shadow_mode=True, policy="balanced"))
+    engine = ReflexEngine(
+        ReflexConfig(enabled=False, shadow_mode=True, policy="balanced")
+    )
     result = engine.analyze(text="whatever")
     assert result["decision"] == "bypass"
-

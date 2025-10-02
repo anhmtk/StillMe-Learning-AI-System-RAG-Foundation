@@ -8,6 +8,7 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
+
 class ExperienceCategory(Enum):
     SUCCESS = "success"
     FAILURE = "failure"
@@ -15,6 +16,7 @@ class ExperienceCategory(Enum):
     FEEDBACK = "feedback"
     ERROR = "error"
     IMPROVEMENT = "improvement"
+
 
 class ExperienceType(Enum):
     TASK_COMPLETION = "task_completion"
@@ -24,9 +26,11 @@ class ExperienceType(Enum):
     SECURITY_INCIDENT = "security_incident"
     ETHICS_VIOLATION = "ethics_violation"
 
+
 @dataclass
 class ExperienceQuery:
     """Experience query parameters"""
+
     category: Optional[ExperienceCategory] = None
     experience_type: Optional[ExperienceType] = None
     start_date: Optional[datetime] = None
@@ -34,9 +38,11 @@ class ExperienceQuery:
     limit: int = 10
     metadata_filter: Optional[dict[str, Any]] = None
 
+
 @dataclass
 class Experience:
     """Experience record"""
+
     experience_id: str
     category: ExperienceCategory
     experience_type: ExperienceType
@@ -53,6 +59,7 @@ class Experience:
         if self.lessons_learned is None:
             self.lessons_learned = []
 
+
 class ExperienceMemory:
     """Experience memory system for StillMe Framework"""
 
@@ -61,14 +68,16 @@ class ExperienceMemory:
         self.experiences: list[Experience] = []
         self.logger.info("✅ ExperienceMemory initialized")
 
-    def add_experience(self,
-                      category: ExperienceCategory,
-                      experience_type: ExperienceType,
-                      title: str,
-                      description: str,
-                      outcome: str,
-                      lessons_learned: list[str] = None,
-                      metadata: dict[str, Any] = None) -> Experience:
+    def add_experience(
+        self,
+        category: ExperienceCategory,
+        experience_type: ExperienceType,
+        title: str,
+        description: str,
+        outcome: str,
+        lessons_learned: list[str] = None,
+        metadata: dict[str, Any] = None,
+    ) -> Experience:
         """Add a new experience"""
         try:
             experience_id = f"exp_{len(self.experiences) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -82,7 +91,7 @@ class ExperienceMemory:
                 outcome=outcome,
                 lessons_learned=lessons_learned or [],
                 timestamp=datetime.now(),
-                metadata=metadata or {}
+                metadata=metadata or {},
             )
 
             self.experiences.append(experience)
@@ -104,7 +113,11 @@ class ExperienceMemory:
 
             # Filter by experience type
             if query.experience_type:
-                results = [exp for exp in results if exp.experience_type == query.experience_type]
+                results = [
+                    exp
+                    for exp in results
+                    if exp.experience_type == query.experience_type
+                ]
 
             # Filter by date range
             if query.start_date:
@@ -131,7 +144,7 @@ class ExperienceMemory:
 
             # Apply limit
             if query.limit > 0:
-                results = results[:query.limit]
+                results = results[: query.limit]
 
             self.logger.info(f"🔍 Experience query returned {len(results)} results")
             return results
@@ -165,7 +178,9 @@ class ExperienceMemory:
             for experience in self.experiences:
                 # By category
                 category_key = experience.category.value
-                experiences_by_category[category_key] = experiences_by_category.get(category_key, 0) + 1
+                experiences_by_category[category_key] = (
+                    experiences_by_category.get(category_key, 0) + 1
+                )
 
                 # By type
                 type_key = experience.experience_type.value
@@ -175,7 +190,7 @@ class ExperienceMemory:
                 "total_experiences": total_experiences,
                 "experiences_by_category": experiences_by_category,
                 "experiences_by_type": experiences_by_type,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
         except Exception as e:

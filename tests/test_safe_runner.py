@@ -4,7 +4,6 @@ Test suite for SafeRunner module
 Tests the safe code execution functionality with various scenarios.
 """
 
-
 import pytest
 
 from stillme_core.core.safe_runner import SafeRunner
@@ -99,7 +98,7 @@ x = 1 / 0  # Division by zero
         config = {
             "timeout": 10,
             "max_memory_mb": 256,
-            "allowed_imports": ["math", "json"]
+            "allowed_imports": ["math", "json"],
         }
 
         runner = SafeRunner(config)

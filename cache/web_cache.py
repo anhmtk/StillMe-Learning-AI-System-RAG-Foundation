@@ -3,6 +3,7 @@
 Web Cache System - LRU + TTL for Short-term Caching
 Provides efficient caching for web requests with TTL and LRU eviction
 """
+
 import hashlib
 import json
 import logging
@@ -16,9 +17,11 @@ from typing import Any, Dict, List, Optional, Tuple
 # Setup logging
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class CacheEntry:
     """Cache entry with metadata"""
+
     key: str
     data: Any
     created_at: datetime
@@ -29,9 +32,11 @@ class CacheEntry:
     etag: Optional[str] = None
     last_modified: Optional[str] = None
 
+
 @dataclass
 class CacheStats:
     """Cache statistics"""
+
     total_requests: int
     cache_hits: int
     cache_misses: int
@@ -39,6 +44,7 @@ class CacheStats:
     total_size_bytes: int
     hit_ratio: float
     average_latency_ms: float
+
 
 class WebCache:
     """LRU + TTL cache for web requests"""
@@ -59,25 +65,31 @@ class WebCache:
             evictions=0,
             total_size_bytes=0,
             hit_ratio=0.0,
-            average_latency_ms=0.0
+            average_latency_ms=0.0,
         )
 
         # TTL configurations for different content types
         self.ttl_configs = {
-            'news': timedelta(seconds=120),      # 2 minutes
-            'hackernews': timedelta(seconds=60), # 1 minute
-            'github_trending': timedelta(seconds=300), # 5 minutes
-            'google_trends': timedelta(seconds=600),   # 10 minutes
-            'default': timedelta(seconds=180)    # 3 minutes
+            "news": timedelta(seconds=120),  # 2 minutes
+            "hackernews": timedelta(seconds=60),  # 1 minute
+            "github_trending": timedelta(seconds=300),  # 5 minutes
+            "google_trends": timedelta(seconds=600),  # 10 minutes
+            "default": timedelta(seconds=180),  # 3 minutes
         }
 
         # Start cleanup thread
-        self._cleanup_thread = threading.Thread(target=self._cleanup_expired, daemon=True)
+        self._cleanup_thread = threading.Thread(
+            target=self._cleanup_expired, daemon=True
+        )
         self._cleanup_thread.start()
 
-        logger.info(f"🗄️ Web Cache initialized: max_size={max_size}, max_memory={max_memory_mb}MB")
+        logger.info(
+            f"🗄️ Web Cache initialized: max_size={max_size}, max_memory={max_memory_mb}MB"
+        )
 
-    def get(self, key: str, content_type: str = "default") -> Tuple[Optional[Any], bool]:
+    def get(
+        self, key: str, content_type: str = "default"
+    ) -> Tuple[Optional[Any], bool]:
         """Get cached data with cache hit/miss indication"""
         with self._lock:
             self._stats.total_requests += 1
@@ -110,12 +122,18 @@ class WebCache:
             logger.debug(f"🗄️ Cache HIT for key: {key}")
             return entry.data, True
 
-    def put(self, key: str, data: Any, content_type: str = "default",
-            etag: Optional[str] = None, last_modified: Optional[str] = None) -> None:
+    def put(
+        self,
+        key: str,
+        data: Any,
+        content_type: str = "default",
+        etag: Optional[str] = None,
+        last_modified: Optional[str] = None,
+    ) -> None:
         """Store data in cache"""
         with self._lock:
             # Calculate TTL
-            ttl = self.ttl_configs.get(content_type, self.ttl_configs['default'])
+            ttl = self.ttl_configs.get(content_type, self.ttl_configs["default"])
             now = datetime.now()
 
             # Calculate data size
@@ -131,7 +149,7 @@ class WebCache:
                 last_accessed=now,
                 size_bytes=data_size,
                 etag=etag,
-                last_modified=last_modified
+                last_modified=last_modified,
             )
 
             # Remove existing entry if present
@@ -178,7 +196,7 @@ class WebCache:
                 evictions=self._stats.evictions,
                 total_size_bytes=self._stats.total_size_bytes,
                 hit_ratio=self._stats.hit_ratio,
-                average_latency_ms=self._stats.average_latency_ms
+                average_latency_ms=self._stats.average_latency_ms,
             )
 
     def _evict_if_needed(self) -> None:
@@ -227,7 +245,9 @@ class WebCache:
                         self._stats.evictions += 1
 
                     if expired_keys:
-                        logger.debug(f"🗄️ Cleaned up {len(expired_keys)} expired entries")
+                        logger.debug(
+                            f"🗄️ Cleaned up {len(expired_keys)} expired entries"
+                        )
 
             except Exception as e:
                 logger.error(f"❌ Cache cleanup error: {e}")
@@ -238,9 +258,9 @@ class WebCache:
             if isinstance(data, (str, bytes)):
                 return len(data)
             elif isinstance(data, (dict, list)):
-                return len(json.dumps(data, ensure_ascii=False).encode('utf-8'))
+                return len(json.dumps(data, ensure_ascii=False).encode("utf-8"))
             else:
-                return len(str(data).encode('utf-8'))
+                return len(str(data).encode("utf-8"))
         except Exception:
             return 1024  # Default size estimate
 
@@ -257,7 +277,7 @@ class WebCache:
 
         # Create hash
         key_data = f"{tool_name}:{param_str}"
-        return hashlib.sha256(key_data.encode('utf-8')).hexdigest()
+        return hashlib.sha256(key_data.encode("utf-8")).hexdigest()
 
     def get_cache_info(self, key: str) -> Optional[Dict[str, Any]]:
         """Get detailed cache entry information"""
@@ -275,7 +295,7 @@ class WebCache:
                 "size_bytes": entry.size_bytes,
                 "etag": entry.etag,
                 "last_modified": entry.last_modified,
-                "is_expired": datetime.now() > entry.expires_at
+                "is_expired": datetime.now() > entry.expires_at,
             }
 
     def get_all_keys(self) -> List[str]:
@@ -294,49 +314,65 @@ class WebCache:
                         "expires_at": entry.expires_at.isoformat(),
                         "access_count": entry.access_count,
                         "size_bytes": entry.size_bytes,
-                        "etag": entry.etag
+                        "etag": entry.etag,
                     }
                     for key, entry in self._cache.items()
                 },
                 "config": {
                     "max_size": self.max_size,
                     "max_memory_bytes": self.max_memory_bytes,
-                    "ttl_configs": {k: str(v) for k, v in self.ttl_configs.items()}
-                }
+                    "ttl_configs": {k: str(v) for k, v in self.ttl_configs.items()},
+                },
             }
+
 
 # Global cache instance
 web_cache = WebCache()
 
+
 # Export functions
-def get_cached_data(key: str, content_type: str = "default") -> Tuple[Optional[Any], bool]:
+def get_cached_data(
+    key: str, content_type: str = "default"
+) -> Tuple[Optional[Any], bool]:
     """Get cached data with cache hit/miss indication"""
     return web_cache.get(key, content_type)
 
-def cache_data(key: str, data: Any, content_type: str = "default",
-               etag: Optional[str] = None, last_modified: Optional[str] = None) -> None:
+
+def cache_data(
+    key: str,
+    data: Any,
+    content_type: str = "default",
+    etag: Optional[str] = None,
+    last_modified: Optional[str] = None,
+) -> None:
     """Cache data with TTL"""
     web_cache.put(key, data, content_type, etag, last_modified)
+
 
 def invalidate_cache(key: str) -> bool:
     """Invalidate cache entry"""
     return web_cache.invalidate(key)
 
+
 def clear_cache() -> None:
     """Clear all cache"""
     web_cache.clear()
+
 
 def get_cache_stats() -> CacheStats:
     """Get cache statistics"""
     return web_cache.get_stats()
 
+
 def generate_cache_key(tool_name: str, **params) -> str:
     """Generate cache key"""
     return web_cache.generate_cache_key(tool_name, **params)
 
+
 def get_cache_info(key: str) -> Optional[Dict[str, Any]]:
     """Get cache entry info"""
     return web_cache.get_cache_info(key)
+
 
 if __name__ == "__main__":
     # Test cache functionality
@@ -356,7 +392,9 @@ if __name__ == "__main__":
 
     # Test cache stats
     stats = get_cache_stats()
-    print(f"Cache stats: {stats.total_requests} requests, {stats.cache_hits} hits, {stats.hit_ratio:.2%} hit ratio")
+    print(
+        f"Cache stats: {stats.total_requests} requests, {stats.cache_hits} hits, {stats.hit_ratio:.2%} hit ratio"
+    )
 
     # Test cache info
     info = get_cache_info(key1)

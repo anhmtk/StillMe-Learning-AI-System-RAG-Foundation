@@ -2,9 +2,4 @@
 
 from .safe_runner import RunStatus, SafeRun, SafeRunner, SafetyLevel
 
-__all__ = [
-    'SafeRunner',
-    'SafeRun',
-    'RunStatus',
-    'SafetyLevel'
-]
+__all__ = ["SafeRunner", "SafeRun", "RunStatus", "SafetyLevel"]

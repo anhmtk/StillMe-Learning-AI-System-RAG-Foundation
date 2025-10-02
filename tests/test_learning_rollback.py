@@ -43,7 +43,7 @@ class TestLearningRollback:
     @pytest.fixture
     def rollback_system(self, temp_dir):
         """Create rollback system with temporary directory"""
-        with patch('stillme_core.control.learning_rollback.Path') as mock_path:
+        with patch("stillme_core.control.learning_rollback.Path") as mock_path:
             mock_path.return_value = Path(temp_dir)
             system = LearningRollback()
             return system
@@ -53,13 +53,13 @@ class TestLearningRollback:
         """Test creating a learning snapshot"""
         changes = {
             "knowledge_base": {"new_fact": "AI learns from data"},
-            "behavior": {"response_style": "more_helpful"}
+            "behavior": {"response_style": "more_helpful"},
         }
 
         snapshot = await rollback_system.create_snapshot(
             update_type=LearningUpdateType.KNOWLEDGE_BASE_UPDATE,
             description="Added new knowledge about AI learning",
-            changes=changes
+            changes=changes,
         )
 
         assert snapshot.version_id is not None
@@ -75,14 +75,14 @@ class TestLearningRollback:
         snapshot1 = await rollback_system.create_snapshot(
             update_type=LearningUpdateType.KNOWLEDGE_BASE_UPDATE,
             description="Initial state",
-            changes={"initial": "state"}
+            changes={"initial": "state"},
         )
 
         # Create second snapshot
         await rollback_system.create_snapshot(
             update_type=LearningUpdateType.PATTERN_LEARNING,
             description="Pattern learning update",
-            changes={"pattern": "learned"}
+            changes={"pattern": "learned"},
         )
 
         # Rollback to first version
@@ -99,7 +99,7 @@ class TestLearningRollback:
         snapshot = await rollback_system.create_snapshot(
             update_type=LearningUpdateType.KNOWLEDGE_BASE_UPDATE,
             description="Test snapshot",
-            changes={"test": "data"}
+            changes={"test": "data"},
         )
 
         result = await rollback_system.rollback_to_version(snapshot.version_id)
@@ -123,13 +123,13 @@ class TestLearningRollback:
         await rollback_system.create_snapshot(
             update_type=LearningUpdateType.KNOWLEDGE_BASE_UPDATE,
             description="Snapshot 1",
-            changes={"data": "1"}
+            changes={"data": "1"},
         )
 
         await rollback_system.create_snapshot(
             update_type=LearningUpdateType.PATTERN_LEARNING,
             description="Snapshot 2",
-            changes={"data": "2"}
+            changes={"data": "2"},
         )
 
         candidates = await rollback_system.get_rollback_candidates()
@@ -145,13 +145,13 @@ class TestLearningRollback:
         snapshot1 = await rollback_system.create_snapshot(
             update_type=LearningUpdateType.KNOWLEDGE_BASE_UPDATE,
             description="First snapshot",
-            changes={"data": "1"}
+            changes={"data": "1"},
         )
 
         snapshot2 = await rollback_system.create_snapshot(
             update_type=LearningUpdateType.PATTERN_LEARNING,
             description="Second snapshot",
-            changes={"data": "2"}
+            changes={"data": "2"},
         )
 
         history = await rollback_system.get_version_history(limit=10)
@@ -166,11 +166,13 @@ class TestLearningRollback:
         assert rollback_system.get_current_version() is None
 
         # After creating snapshot, should have current version
-        asyncio.run(rollback_system.create_snapshot(
-            update_type=LearningUpdateType.KNOWLEDGE_BASE_UPDATE,
-            description="Test",
-            changes={"test": "data"}
-        ))
+        asyncio.run(
+            rollback_system.create_snapshot(
+                update_type=LearningUpdateType.KNOWLEDGE_BASE_UPDATE,
+                description="Test",
+                changes={"test": "data"},
+            )
+        )
 
         assert rollback_system.get_current_version() is not None
 
@@ -178,11 +180,13 @@ class TestLearningRollback:
         """Test getting snapshot count"""
         assert rollback_system.get_snapshot_count() == 0
 
-        asyncio.run(rollback_system.create_snapshot(
-            update_type=LearningUpdateType.KNOWLEDGE_BASE_UPDATE,
-            description="Test",
-            changes={"test": "data"}
-        ))
+        asyncio.run(
+            rollback_system.create_snapshot(
+                update_type=LearningUpdateType.KNOWLEDGE_BASE_UPDATE,
+                description="Test",
+                changes={"test": "data"},
+            )
+        )
 
         assert rollback_system.get_snapshot_count() == 1
 
@@ -191,16 +195,20 @@ class TestLearningRollback:
         assert rollback_system.get_rollback_count() == 0
 
         # Perform a rollback to increment count
-        asyncio.run(rollback_system.create_snapshot(
-            update_type=LearningUpdateType.KNOWLEDGE_BASE_UPDATE,
-            description="Test",
-            changes={"test": "data"}
-        ))
+        asyncio.run(
+            rollback_system.create_snapshot(
+                update_type=LearningUpdateType.KNOWLEDGE_BASE_UPDATE,
+                description="Test",
+                changes={"test": "data"},
+            )
+        )
 
         # Rollback should increment count
-        asyncio.run(rollback_system.rollback_to_version(
-            list(rollback_system.snapshots.keys())[0]
-        ))
+        asyncio.run(
+            rollback_system.rollback_to_version(
+                list(rollback_system.snapshots.keys())[0]
+            )
+        )
 
         assert rollback_system.get_rollback_count() >= 0  # May be 0 if rollback failed
 
@@ -211,14 +219,14 @@ class TestLearningRollback:
         snapshot1 = await rollback_system.create_snapshot(
             update_type=LearningUpdateType.KNOWLEDGE_BASE_UPDATE,
             description="Base snapshot",
-            changes={"base": "data"}
+            changes={"base": "data"},
         )
 
         await rollback_system.create_snapshot(
             update_type=LearningUpdateType.PATTERN_LEARNING,
             description="Dependent snapshot",
             changes={"dependent": "data"},
-            dependencies=[snapshot1.version_id]
+            dependencies=[snapshot1.version_id],
         )
 
         # Try to rollback to first snapshot (should fail due to dependencies)
@@ -235,20 +243,19 @@ class TestLearningRollback:
         snapshot1 = await rollback_system.create_snapshot(
             update_type=LearningUpdateType.KNOWLEDGE_BASE_UPDATE,
             description="Base snapshot",
-            changes={"base": "data"}
+            changes={"base": "data"},
         )
 
         await rollback_system.create_snapshot(
             update_type=LearningUpdateType.PATTERN_LEARNING,
             description="Dependent snapshot",
             changes={"dependent": "data"},
-            dependencies=[snapshot1.version_id]
+            dependencies=[snapshot1.version_id],
         )
 
         # Force rollback to first snapshot
         result = await rollback_system.rollback_to_version(
-            snapshot1.version_id,
-            force=True
+            snapshot1.version_id, force=True
         )
 
         # Should succeed with force

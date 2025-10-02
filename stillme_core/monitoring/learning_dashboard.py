@@ -13,9 +13,11 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class DashboardMetrics:
     """Dashboard metrics data structure"""
+
     timestamp: str
     session_id: str
     success_rate: float
@@ -26,9 +28,11 @@ class DashboardMetrics:
     learning_progress: dict[str, Any]
     system_health: dict[str, Any]
 
+
 @dataclass
 class LearningSession:
     """Learning session data"""
+
     session_id: str
     start_time: str
     end_time: Optional[str]
@@ -39,6 +43,7 @@ class LearningSession:
     rollback_count: int
     ethics_violations: int
     performance_delta: float
+
 
 class LearningDashboard:
     """
@@ -66,7 +71,7 @@ class LearningDashboard:
         rollback_count: int,
         ethics_violations: int,
         performance_metrics: dict[str, float],
-        learning_progress: dict[str, Any]
+        learning_progress: dict[str, Any],
     ) -> DashboardMetrics:
         """
         Update dashboard with new metrics
@@ -98,7 +103,7 @@ class LearningDashboard:
             ethics_violations=ethics_violations,
             performance_metrics=performance_metrics,
             learning_progress=learning_progress,
-            system_health=system_health
+            system_health=system_health,
         )
 
         # Store metrics
@@ -110,7 +115,9 @@ class LearningDashboard:
         # Update session data
         await self._update_session_data(session_id, metrics)
 
-        logger.info(f"Dashboard updated for session {session_id}: success_rate={success_rate:.2f}")
+        logger.info(
+            f"Dashboard updated for session {session_id}: success_rate={success_rate:.2f}"
+        )
 
         return metrics
 
@@ -119,7 +126,7 @@ class LearningDashboard:
         success_rate: float,
         rollback_count: int,
         ethics_violations: int,
-        performance_metrics: dict[str, float]
+        performance_metrics: dict[str, float],
     ) -> dict[str, Any]:
         """Calculate overall system health"""
         health_score = 100.0
@@ -162,7 +169,8 @@ class LearningDashboard:
             "success_rate": success_rate,
             "rollback_count": rollback_count,
             "ethics_violations": ethics_violations,
-            "performance_impact": performance_metrics.get("latency", 0) > 1000 or performance_metrics.get("error_rate", 0) > 0.05
+            "performance_impact": performance_metrics.get("latency", 0) > 1000
+            or performance_metrics.get("error_rate", 0) > 0.05,
         }
 
     async def _check_alerts(self, metrics: DashboardMetrics):
@@ -171,39 +179,47 @@ class LearningDashboard:
 
         # Success rate alerts
         if metrics.success_rate < 0.5:
-            alerts.append({
-                "type": "critical",
-                "message": f"Low success rate: {metrics.success_rate:.2f}",
-                "timestamp": metrics.timestamp,
-                "session_id": metrics.session_id
-            })
+            alerts.append(
+                {
+                    "type": "critical",
+                    "message": f"Low success rate: {metrics.success_rate:.2f}",
+                    "timestamp": metrics.timestamp,
+                    "session_id": metrics.session_id,
+                }
+            )
 
         # Rollback alerts
         if metrics.rollback_count > 3:
-            alerts.append({
-                "type": "warning",
-                "message": f"High rollback count: {metrics.rollback_count}",
-                "timestamp": metrics.timestamp,
-                "session_id": metrics.session_id
-            })
+            alerts.append(
+                {
+                    "type": "warning",
+                    "message": f"High rollback count: {metrics.rollback_count}",
+                    "timestamp": metrics.timestamp,
+                    "session_id": metrics.session_id,
+                }
+            )
 
         # Ethics violation alerts
         if metrics.ethics_violations > 0:
-            alerts.append({
-                "type": "critical",
-                "message": f"Ethics violations detected: {metrics.ethics_violations}",
-                "timestamp": metrics.timestamp,
-                "session_id": metrics.session_id
-            })
+            alerts.append(
+                {
+                    "type": "critical",
+                    "message": f"Ethics violations detected: {metrics.ethics_violations}",
+                    "timestamp": metrics.timestamp,
+                    "session_id": metrics.session_id,
+                }
+            )
 
         # Performance alerts
         if metrics.performance_metrics.get("latency", 0) > 2000:  # 2 seconds
-            alerts.append({
-                "type": "warning",
-                "message": f"High latency: {metrics.performance_metrics['latency']}ms",
-                "timestamp": metrics.timestamp,
-                "session_id": metrics.session_id
-            })
+            alerts.append(
+                {
+                    "type": "warning",
+                    "message": f"High latency: {metrics.performance_metrics['latency']}ms",
+                    "timestamp": metrics.timestamp,
+                    "session_id": metrics.session_id,
+                }
+            )
 
         # Add alerts to history
         self.alerts.extend(alerts)
@@ -233,18 +249,24 @@ class LearningDashboard:
                 penalty_score=0.0,
                 rollback_count=metrics.rollback_count,
                 ethics_violations=metrics.ethics_violations,
-                performance_delta=metrics.performance_metrics.get("improvement", 0.0)
+                performance_delta=metrics.performance_metrics.get("improvement", 0.0),
             )
             self.sessions.append(session)
         else:
             # Update existing session
             session.success_rate = metrics.success_rate
-            session.reward_score = sum(metrics.reward_curve) if metrics.reward_curve else 0.0
+            session.reward_score = (
+                sum(metrics.reward_curve) if metrics.reward_curve else 0.0
+            )
             session.rollback_count = metrics.rollback_count
             session.ethics_violations = metrics.ethics_violations
-            session.performance_delta = metrics.performance_metrics.get("improvement", 0.0)
+            session.performance_delta = metrics.performance_metrics.get(
+                "improvement", 0.0
+            )
 
-    async def generate_dashboard_html(self, output_path: str = "artifacts/learning_dashboard.html") -> str:
+    async def generate_dashboard_html(
+        self, output_path: str = "artifacts/learning_dashboard.html"
+    ) -> str:
         """Generate HTML dashboard"""
         try:
             # Calculate dashboard statistics
@@ -254,7 +276,7 @@ class LearningDashboard:
             html_content = self._generate_html_content(stats)
 
             # Write to file
-            with open(output_path, 'w', encoding='utf-8') as f:
+            with open(output_path, "w", encoding="utf-8") as f:
                 f.write(html_content)
 
             logger.info(f"Dashboard HTML generated: {output_path}")
@@ -274,18 +296,24 @@ class LearningDashboard:
                 "total_ethics_violations": 0,
                 "system_health": "unknown",
                 "recent_trends": {},
-                "alerts_summary": {}
+                "alerts_summary": {},
             }
 
         # Basic statistics
         total_sessions = len(self.sessions)
-        avg_success_rate = statistics.mean([m.success_rate for m in self.metrics_history])
+        avg_success_rate = statistics.mean(
+            [m.success_rate for m in self.metrics_history]
+        )
         total_rollbacks = sum(m.rollback_count for m in self.metrics_history)
         total_ethics_violations = sum(m.ethics_violations for m in self.metrics_history)
 
         # System health
-        recent_health_scores = [m.system_health["overall_score"] for m in self.metrics_history[-10:]]
-        avg_health_score = statistics.mean(recent_health_scores) if recent_health_scores else 0.0
+        recent_health_scores = [
+            m.system_health["overall_score"] for m in self.metrics_history[-10:]
+        ]
+        avg_health_score = (
+            statistics.mean(recent_health_scores) if recent_health_scores else 0.0
+        )
 
         if avg_health_score >= 90:
             system_health = "excellent"
@@ -298,9 +326,15 @@ class LearningDashboard:
 
         # Recent trends
         recent_trends = {
-            "success_rate_trend": self._calculate_trend([m.success_rate for m in self.metrics_history[-10:]]),
-            "rollback_trend": self._calculate_trend([m.rollback_count for m in self.metrics_history[-10:]]),
-            "ethics_trend": self._calculate_trend([m.ethics_violations for m in self.metrics_history[-10:]])
+            "success_rate_trend": self._calculate_trend(
+                [m.success_rate for m in self.metrics_history[-10:]]
+            ),
+            "rollback_trend": self._calculate_trend(
+                [m.rollback_count for m in self.metrics_history[-10:]]
+            ),
+            "ethics_trend": self._calculate_trend(
+                [m.ethics_violations for m in self.metrics_history[-10:]]
+            ),
         }
 
         # Alerts summary
@@ -318,7 +352,7 @@ class LearningDashboard:
             "avg_health_score": avg_health_score,
             "recent_trends": recent_trends,
             "alerts_summary": alert_counts,
-            "last_updated": datetime.now().isoformat()
+            "last_updated": datetime.now().isoformat(),
         }
 
     def _calculate_trend(self, values: list[float]) -> str:
@@ -327,8 +361,8 @@ class LearningDashboard:
             return "stable"
 
         # Simple trend calculation
-        first_half = statistics.mean(values[:len(values)//2])
-        second_half = statistics.mean(values[len(values)//2:])
+        first_half = statistics.mean(values[: len(values) // 2])
+        second_half = statistics.mean(values[len(values) // 2 :])
 
         if second_half > first_half * 1.1:
             return "improving"
@@ -491,27 +525,39 @@ class LearningDashboard:
         """Get current dashboard data"""
         return {
             "sessions": [asdict(session) for session in self.sessions],
-            "metrics_history": [asdict(metrics) for metrics in self.metrics_history[-50:]],  # Last 50 metrics
+            "metrics_history": [
+                asdict(metrics) for metrics in self.metrics_history[-50:]
+            ],  # Last 50 metrics
             "alerts": self.alerts[-20:],  # Last 20 alerts
-            "statistics": asdict(DashboardMetrics(
-                timestamp=datetime.now().isoformat(),
-                session_id="dashboard",
-                success_rate=statistics.mean([m.success_rate for m in self.metrics_history]) if self.metrics_history else 0.0,
-                reward_curve=[],
-                rollback_count=sum(m.rollback_count for m in self.metrics_history),
-                ethics_violations=sum(m.ethics_violations for m in self.metrics_history),
-                performance_metrics={},
-                learning_progress={},
-                system_health={}
-            ))
+            "statistics": asdict(
+                DashboardMetrics(
+                    timestamp=datetime.now().isoformat(),
+                    session_id="dashboard",
+                    success_rate=statistics.mean(
+                        [m.success_rate for m in self.metrics_history]
+                    )
+                    if self.metrics_history
+                    else 0.0,
+                    reward_curve=[],
+                    rollback_count=sum(m.rollback_count for m in self.metrics_history),
+                    ethics_violations=sum(
+                        m.ethics_violations for m in self.metrics_history
+                    ),
+                    performance_metrics={},
+                    learning_progress={},
+                    system_health={},
+                )
+            ),
         }
 
-    async def export_metrics_json(self, output_path: str = "artifacts/learning_dashboard.json") -> str:
+    async def export_metrics_json(
+        self, output_path: str = "artifacts/learning_dashboard.json"
+    ) -> str:
         """Export dashboard metrics to JSON"""
         try:
             dashboard_data = self.get_dashboard_data()
 
-            with open(output_path, 'w', encoding='utf-8') as f:
+            with open(output_path, "w", encoding="utf-8") as f:
                 json.dump(dashboard_data, f, indent=2, ensure_ascii=False)
 
             logger.info(f"Dashboard metrics exported: {output_path}")
@@ -527,19 +573,22 @@ class LearningDashboard:
 
         # Clear old metrics
         self.metrics_history = [
-            m for m in self.metrics_history
+            m
+            for m in self.metrics_history
             if datetime.fromisoformat(m.timestamp) > cutoff_date
         ]
 
         # Clear old alerts
         self.alerts = [
-            a for a in self.alerts
-            if datetime.fromisoformat(a['timestamp']) > cutoff_date
+            a
+            for a in self.alerts
+            if datetime.fromisoformat(a["timestamp"]) > cutoff_date
         ]
 
         # Clear old sessions
         self.sessions = [
-            s for s in self.sessions
+            s
+            for s in self.sessions
             if datetime.fromisoformat(s.start_time) > cutoff_date
         ]
 

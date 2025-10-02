@@ -12,11 +12,13 @@ class SystemPromptManager:
         self.session_introduced = False
         self.session_id = None
 
-    def get_system_prompt(self,
-                         language_name: str,
-                         locale: str,
-                         session_id: str,
-                         is_first_message: bool = False) -> str:
+    def get_system_prompt(
+        self,
+        language_name: str,
+        locale: str,
+        session_id: str,
+        is_first_message: bool = False,
+    ) -> str:
         """Generate system prompt based on session state and language"""
 
         # Update session tracking
@@ -74,6 +76,7 @@ Current user message language: {language_name} ({locale})"""
     def mark_intro_shown(self):
         """Mark that intro has been shown for current session"""
         self.session_introduced = True
+
 
 # Global instance
 system_prompt_manager = SystemPromptManager()

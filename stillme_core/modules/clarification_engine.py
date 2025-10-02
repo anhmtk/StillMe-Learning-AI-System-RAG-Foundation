@@ -26,6 +26,7 @@ from .detectors.xss_detector import XSSDetector
 
 logger = logging.getLogger(__name__)
 
+
 class ClarificationEngine:
     """Main engine that coordinates all detectors"""
 
@@ -38,14 +39,14 @@ class ClarificationEngine:
             XSSDetector(),
             SyntaxDetector(),
             MultipleFunctionsDetector(),
-            ImageDetector()
+            ImageDetector(),
         ]
 
         # Performance tracking
         self.performance_stats = {
             "total_requests": 0,
             "total_latency_ms": 0.0,
-            "detector_stats": {}
+            "detector_stats": {},
         }
 
         # Initialize detector stats
@@ -54,7 +55,7 @@ class ClarificationEngine:
                 "requests": 0,
                 "total_latency_ms": 0.0,
                 "successes": 0,
-                "failures": 0
+                "failures": 0,
             }
 
     def analyze(self, text: str, mode: str = "quick") -> dict[str, Any]:
@@ -91,12 +92,14 @@ class ClarificationEngine:
                 detector_stats["failures"] += 1
 
                 # Add error result
-                results.append({
-                    "needs_clarification": False,
-                    "confidence": 0.0,
-                    "category": "error",
-                    "features": {"error": str(e), "detector": detector.name}
-                })
+                results.append(
+                    {
+                        "needs_clarification": False,
+                        "confidence": 0.0,
+                        "category": "error",
+                        "features": {"error": str(e), "detector": detector.name},
+                    }
+                )
 
         # Choose best result (highest confidence)
         best_result = max(results, key=lambda r: r.get("confidence", 0.0))
@@ -122,15 +125,17 @@ class ClarificationEngine:
                 "total_latency_ms": total_latency,
                 "mode": mode,
                 "performance_ok": performance_ok,
-                "max_latency_ms": max_latency
+                "max_latency_ms": max_latency,
             },
             "detector_results": results,
-            "best_detector": best_result.get("category", "unknown")
+            "best_detector": best_result.get("category", "unknown"),
         }
 
         # Log performance warning if needed
         if not performance_ok:
-            logger.warning(f"Performance threshold exceeded: {total_latency:.2f}ms > {max_latency}ms")
+            logger.warning(
+                f"Performance threshold exceeded: {total_latency:.2f}ms > {max_latency}ms"
+            )
 
         return final_result
 
@@ -139,13 +144,14 @@ class ClarificationEngine:
         total_requests = self.performance_stats["total_requests"]
         avg_latency = (
             self.performance_stats["total_latency_ms"] / total_requests
-            if total_requests > 0 else 0.0
+            if total_requests > 0
+            else 0.0
         )
 
         return {
             "total_requests": total_requests,
             "average_latency_ms": avg_latency,
-            "detector_stats": self.performance_stats["detector_stats"]
+            "detector_stats": self.performance_stats["detector_stats"],
         }
 
     def reset_stats(self):
@@ -153,7 +159,7 @@ class ClarificationEngine:
         self.performance_stats = {
             "total_requests": 0,
             "total_latency_ms": 0.0,
-            "detector_stats": {}
+            "detector_stats": {},
         }
 
         for detector in self.detectors:
@@ -161,7 +167,7 @@ class ClarificationEngine:
                 "requests": 0,
                 "total_latency_ms": 0.0,
                 "successes": 0,
-                "failures": 0
+                "failures": 0,
             }
 
     def get_detector_status(self) -> dict[str, Any]:

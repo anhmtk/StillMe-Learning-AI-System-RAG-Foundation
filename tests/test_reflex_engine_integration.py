@@ -1,6 +1,7 @@
 """
 Integration tests for Reflex Engine with Habit Store and Observability
 """
+
 from unittest.mock import MagicMock, patch
 
 from stillme_core.middleware.reflex_engine import ReflexConfig, ReflexEngine
@@ -18,7 +19,7 @@ class TestReflexEngineIntegration:
             text="Hello world",
             context={"mode": "test"},
             user_id="user1",
-            tenant_id="tenant1"
+            tenant_id="tenant1",
         )
 
         assert result["decision"] == "fallback"
@@ -33,7 +34,9 @@ class TestReflexEngineIntegration:
     def test_habit_store_integration_enabled(self):
         """Test habit store integration when enabled"""
         # Mock habit store to be enabled
-        with patch('stillme_core.middleware.reflex_engine.HabitStore') as mock_habit_store_class:
+        with patch(
+            "stillme_core.middleware.reflex_engine.HabitStore"
+        ) as mock_habit_store_class:
             mock_habit_store = MagicMock()
             mock_habit_store.is_enabled.return_value = True
             mock_habit_store.get_habit_score.return_value = (0.8, "test_action")
@@ -47,7 +50,7 @@ class TestReflexEngineIntegration:
                 text="Hello world",
                 context={"mode": "test"},
                 user_id="user1",
-                tenant_id="tenant1"
+                tenant_id="tenant1",
             )
 
             # Verify habit store was called
@@ -60,7 +63,9 @@ class TestReflexEngineIntegration:
 
     def test_observability_integration(self):
         """Test observability integration"""
-        with patch('stillme_core.middleware.reflex_engine.ObservabilityManager') as mock_obs_class:
+        with patch(
+            "stillme_core.middleware.reflex_engine.ObservabilityManager"
+        ) as mock_obs_class:
             mock_obs = MagicMock()
             mock_obs_class.return_value = mock_obs
 
@@ -71,7 +76,7 @@ class TestReflexEngineIntegration:
                 text="Hello world",
                 context={"mode": "test"},
                 user_id="user1",
-                tenant_id="tenant1"
+                tenant_id="tenant1",
             )
 
             # Verify observability methods were called
@@ -88,7 +93,9 @@ class TestReflexEngineIntegration:
 
     def test_habit_learning_trigger(self):
         """Test that habit learning is triggered under right conditions"""
-        with patch('stillme_core.middleware.reflex_engine.HabitStore') as mock_habit_store_class:
+        with patch(
+            "stillme_core.middleware.reflex_engine.HabitStore"
+        ) as mock_habit_store_class:
             mock_habit_store = MagicMock()
             mock_habit_store.is_enabled.return_value = True
             mock_habit_store.get_habit_score.return_value = (0.0, None)
@@ -96,16 +103,23 @@ class TestReflexEngineIntegration:
             mock_habit_store_class.return_value = mock_habit_store
 
             # Mock policy to return high confidence
-            with patch('stillme_core.middleware.reflex_engine.ReflexPolicy') as mock_policy_class:
+            with patch(
+                "stillme_core.middleware.reflex_engine.ReflexPolicy"
+            ) as mock_policy_class:
                 mock_policy = MagicMock()
                 mock_policy.decide.return_value = ("allow_reflex", 0.8)
                 mock_policy.get_breakdown.return_value = {"total_score": 0.8}
                 mock_policy_class.return_value = mock_policy
 
                 # Mock safety to return safe
-                with patch('stillme_core.middleware.reflex_engine.ReflexSafety') as mock_safety_class:
+                with patch(
+                    "stillme_core.middleware.reflex_engine.ReflexSafety"
+                ) as mock_safety_class:
                     mock_safety = MagicMock()
-                    mock_safety.safety_gate.return_value = {"safe": True, "reason": "safe"}
+                    mock_safety.safety_gate.return_value = {
+                        "safe": True,
+                        "reason": "safe",
+                    }
                     mock_safety_class.return_value = mock_safety
 
                     engine = ReflexEngine()
@@ -117,7 +131,7 @@ class TestReflexEngineIntegration:
                         text="Hello world",
                         context={"mode": "test"},
                         user_id="user1",
-                        tenant_id="tenant1"
+                        tenant_id="tenant1",
                     )
 
                     # Verify habit learning was triggered
@@ -126,28 +140,40 @@ class TestReflexEngineIntegration:
                         action="reflex_response",
                         confidence=0.8,
                         user_id="user1",
-                        tenant_id="tenant1"
+                        tenant_id="tenant1",
                     )
 
     def test_habit_learning_not_triggered_low_confidence(self):
         """Test that habit learning is not triggered with low confidence"""
-        with patch('stillme_core.middleware.reflex_engine.HabitStore') as mock_habit_store_class:
+        with patch(
+            "stillme_core.middleware.reflex_engine.HabitStore"
+        ) as mock_habit_store_class:
             mock_habit_store = MagicMock()
             mock_habit_store.is_enabled.return_value = True
             mock_habit_store.get_habit_score.return_value = (0.0, None)
             mock_habit_store_class.return_value = mock_habit_store
 
             # Mock policy to return low confidence
-            with patch('stillme_core.middleware.reflex_engine.ReflexPolicy') as mock_policy_class:
+            with patch(
+                "stillme_core.middleware.reflex_engine.ReflexPolicy"
+            ) as mock_policy_class:
                 mock_policy = MagicMock()
-                mock_policy.decide.return_value = ("allow_reflex", 0.5)  # Low confidence
+                mock_policy.decide.return_value = (
+                    "allow_reflex",
+                    0.5,
+                )  # Low confidence
                 mock_policy.get_breakdown.return_value = {"total_score": 0.5}
                 mock_policy_class.return_value = mock_policy
 
                 # Mock safety to return safe
-                with patch('stillme_core.middleware.reflex_engine.ReflexSafety') as mock_safety_class:
+                with patch(
+                    "stillme_core.middleware.reflex_engine.ReflexSafety"
+                ) as mock_safety_class:
                     mock_safety = MagicMock()
-                    mock_safety.safety_gate.return_value = {"safe": True, "reason": "safe"}
+                    mock_safety.safety_gate.return_value = {
+                        "safe": True,
+                        "reason": "safe",
+                    }
                     mock_safety_class.return_value = mock_safety
 
                     engine = ReflexEngine()
@@ -159,7 +185,7 @@ class TestReflexEngineIntegration:
                         text="Hello world",
                         context={"mode": "test"},
                         user_id="user1",
-                        tenant_id="tenant1"
+                        tenant_id="tenant1",
                     )
 
                     # Verify habit learning was NOT triggered
@@ -167,23 +193,32 @@ class TestReflexEngineIntegration:
 
     def test_habit_learning_not_triggered_unsafe(self):
         """Test that habit learning is not triggered for unsafe content"""
-        with patch('stillme_core.middleware.reflex_engine.HabitStore') as mock_habit_store_class:
+        with patch(
+            "stillme_core.middleware.reflex_engine.HabitStore"
+        ) as mock_habit_store_class:
             mock_habit_store = MagicMock()
             mock_habit_store.is_enabled.return_value = True
             mock_habit_store.get_habit_score.return_value = (0.0, None)
             mock_habit_store_class.return_value = mock_habit_store
 
             # Mock policy to return high confidence
-            with patch('stillme_core.middleware.reflex_engine.ReflexPolicy') as mock_policy_class:
+            with patch(
+                "stillme_core.middleware.reflex_engine.ReflexPolicy"
+            ) as mock_policy_class:
                 mock_policy = MagicMock()
                 mock_policy.decide.return_value = ("allow_reflex", 0.8)
                 mock_policy.get_breakdown.return_value = {"total_score": 0.8}
                 mock_policy_class.return_value = mock_policy
 
                 # Mock safety to return unsafe
-                with patch('stillme_core.middleware.reflex_engine.ReflexSafety') as mock_safety_class:
+                with patch(
+                    "stillme_core.middleware.reflex_engine.ReflexSafety"
+                ) as mock_safety_class:
                     mock_safety = MagicMock()
-                    mock_safety.safety_gate.return_value = {"safe": False, "reason": "unsafe"}
+                    mock_safety.safety_gate.return_value = {
+                        "safe": False,
+                        "reason": "unsafe",
+                    }
                     mock_safety_class.return_value = mock_safety
 
                     engine = ReflexEngine()
@@ -195,7 +230,7 @@ class TestReflexEngineIntegration:
                         text="Hello world",
                         context={"mode": "test"},
                         user_id="user1",
-                        tenant_id="tenant1"
+                        tenant_id="tenant1",
                     )
 
                     # Verify habit learning was NOT triggered
@@ -206,10 +241,7 @@ class TestReflexEngineIntegration:
         engine = ReflexEngine()
 
         # Test without mocking - just verify field exists
-        result = engine.analyze(
-            text="Hello world",
-            context={"mode": "test"}
-        )
+        result = engine.analyze(text="Hello world", context={"mode": "test"})
 
         why_reflex = result["why_reflex"]
         assert "processing_time_ms" in why_reflex
@@ -218,17 +250,16 @@ class TestReflexEngineIntegration:
 
     def test_shadow_evaluation_logging(self):
         """Test shadow evaluation logging"""
-        with patch('stillme_core.middleware.reflex_engine.ObservabilityManager') as mock_obs_class:
+        with patch(
+            "stillme_core.middleware.reflex_engine.ObservabilityManager"
+        ) as mock_obs_class:
             mock_obs = MagicMock()
             mock_obs_class.return_value = mock_obs
 
             engine = ReflexEngine()
             engine.observability = mock_obs
 
-            result = engine.analyze(
-                text="Hello world",
-                context={"mode": "test"}
-            )
+            result = engine.analyze(text="Hello world", context={"mode": "test"})
 
             # Verify shadow evaluation was logged
             mock_obs.log_shadow_evaluation.assert_called_once()
@@ -248,16 +279,27 @@ class TestReflexEngineIntegration:
             text="Hello world",
             context={"mode": "test"},
             user_id="user1",
-            tenant_id="tenant1"
+            tenant_id="tenant1",
         )
 
         why_reflex = result["why_reflex"]
 
         # Check all expected fields are present
         expected_fields = [
-            "scores", "matches", "pattern_hits", "pattern_score", "match_time_us",
-            "habit_score", "habit_action", "policy", "confidence", "breakdown",
-            "safety_result", "action_result", "original_decision", "processing_time_ms"
+            "scores",
+            "matches",
+            "pattern_hits",
+            "pattern_score",
+            "match_time_us",
+            "habit_score",
+            "habit_action",
+            "policy",
+            "confidence",
+            "breakdown",
+            "safety_result",
+            "action_result",
+            "original_decision",
+            "processing_time_ms",
         ]
 
         for field in expected_fields:
@@ -272,7 +314,7 @@ class TestReflexEngineIntegration:
             text="Hello world",
             context={"mode": "test"},
             user_id="user1",
-            tenant_id="tenant1"
+            tenant_id="tenant1",
         )
 
         assert result["mode"] == "disabled"

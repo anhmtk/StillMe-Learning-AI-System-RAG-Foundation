@@ -24,17 +24,17 @@ class RouterCLI:
     def __init__(self):
         self.script_dir = os.path.dirname(os.path.abspath(__file__))
         self.available_commands = {
-            'test': 'test_router.py',
-            'debug': 'debug_router.py',
-            'benchmark': 'benchmark_router.py',
-            'monitor': 'monitor_router.py',
-            'status': 'router_manager.py',
-            'config': 'router_manager.py',
-            'interactive': 'router_cli.py',
-            'validate': 'validate_router.py',
-            'calibrate': 'calibrate_router.py',
-            'dashboard': 'router_dashboard.py',
-            'tools': 'router_tools.py'
+            "test": "test_router.py",
+            "debug": "debug_router.py",
+            "benchmark": "benchmark_router.py",
+            "monitor": "monitor_router.py",
+            "status": "router_manager.py",
+            "config": "router_manager.py",
+            "interactive": "router_cli.py",
+            "validate": "validate_router.py",
+            "calibrate": "calibrate_router.py",
+            "dashboard": "router_dashboard.py",
+            "tools": "router_tools.py",
         }
 
     def run_command(self, command: str, args: list[str] = None):
@@ -55,31 +55,31 @@ class RouterCLI:
         cmd = [sys.executable, script_path]
 
         # Add command-specific arguments
-        if command == 'test':
-            cmd.append('--all')
-        elif command == 'debug' and args:
-            cmd.extend(['--prompt', args[0]])
-        elif command == 'benchmark':
-            cmd.append('--full')
-        elif command == 'monitor':
-            cmd.append('--live')
-        elif command == 'status':
-            cmd.append('--status')
-        elif command == 'config':
-            cmd.append('--config')
-        elif command == 'interactive':
-            cmd.append('--interactive')
-        elif command == 'validate':
-            cmd.append('--full')
-        elif command == 'calibrate':
-            cmd.append('--test-suite')
-        elif command == 'dashboard':
-            cmd.append('--live')
-        elif command == 'tools':
-            cmd.append('--test')
+        if command == "test":
+            cmd.append("--all")
+        elif command == "debug" and args:
+            cmd.extend(["--prompt", args[0]])
+        elif command == "benchmark":
+            cmd.append("--full")
+        elif command == "monitor":
+            cmd.append("--live")
+        elif command == "status":
+            cmd.append("--status")
+        elif command == "config":
+            cmd.append("--config")
+        elif command == "interactive":
+            cmd.append("--interactive")
+        elif command == "validate":
+            cmd.append("--full")
+        elif command == "calibrate":
+            cmd.append("--test-suite")
+        elif command == "dashboard":
+            cmd.append("--live")
+        elif command == "tools":
+            cmd.append("--test")
 
         # Add any additional arguments
-        if args and command != 'debug':
+        if args and command != "debug":
             cmd.extend(args)
 
         try:
@@ -116,7 +116,7 @@ class RouterCLI:
         print()
         print("Examples:")
         print("  python scripts/router.py test")
-        print("  python scripts/router.py debug \"viết code Python\"")
+        print('  python scripts/router.py debug "viết code Python"')
         print("  python scripts/router.py benchmark")
         print("  python scripts/router.py monitor")
         print("  python scripts/router.py status")
@@ -133,7 +133,9 @@ class RouterCLI:
         print("=" * 40)
 
         # Check if stillme_core is available
-        stillme_core_path = os.path.join(os.path.dirname(self.script_dir), 'stillme_core')
+        stillme_core_path = os.path.join(
+            os.path.dirname(self.script_dir), "stillme_core"
+        )
         if os.path.exists(stillme_core_path):
             print("✅ stillme_core: Available")
         else:
@@ -153,19 +155,21 @@ class RouterCLI:
 
         # Check environment
         env_vars = [
-            'COMPLEXITY_WEIGHT_LENGTH',
-            'COMPLEXITY_WEIGHT_COMPLEX_INDICATORS',
-            'COMPLEXITY_WEIGHT_ACADEMIC_TERMS',
-            'COMPLEXITY_WEIGHT_ABSTRACT_CONCEPTS',
-            'COMPLEXITY_WEIGHT_MULTI_PART',
-            'COMPLEXITY_WEIGHT_CONDITIONAL',
-            'COMPLEXITY_WEIGHT_DOMAIN_SPECIFIC',
-            'COMPLEXITY_THRESHOLD_SIMPLE',
-            'COMPLEXITY_THRESHOLD_MEDIUM'
+            "COMPLEXITY_WEIGHT_LENGTH",
+            "COMPLEXITY_WEIGHT_COMPLEX_INDICATORS",
+            "COMPLEXITY_WEIGHT_ACADEMIC_TERMS",
+            "COMPLEXITY_WEIGHT_ABSTRACT_CONCEPTS",
+            "COMPLEXITY_WEIGHT_MULTI_PART",
+            "COMPLEXITY_WEIGHT_CONDITIONAL",
+            "COMPLEXITY_WEIGHT_DOMAIN_SPECIFIC",
+            "COMPLEXITY_THRESHOLD_SIMPLE",
+            "COMPLEXITY_THRESHOLD_MEDIUM",
         ]
 
         configured_vars = [var for var in env_vars if os.getenv(var)]
-        print(f"⚙️  Environment: {len(configured_vars)}/{len(env_vars)} variables configured")
+        print(
+            f"⚙️  Environment: {len(configured_vars)}/{len(env_vars)} variables configured"
+        )
 
         if configured_vars:
             print("  Configured variables:")
@@ -181,9 +185,10 @@ class RouterCLI:
         print("  python scripts/router.py status      # Detailed status")
         print("  python scripts/router.py interactive # Interactive mode")
 
+
 def main():
     parser = argparse.ArgumentParser(
-        description='AI Router - Main Entry Point',
+        description="AI Router - Main Entry Point",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -198,12 +203,14 @@ For detailed help on a specific command:
   python scripts/router.py <command> --help
 
 For more information, see scripts/README.md
-        """
+        """,
     )
 
-    parser.add_argument('command', nargs='?', help='Command to run')
-    parser.add_argument('args', nargs='*', help='Command arguments')
-    parser.add_argument('--help-commands', action='store_true', help='Show available commands')
+    parser.add_argument("command", nargs="?", help="Command to run")
+    parser.add_argument("args", nargs="*", help="Command arguments")
+    parser.add_argument(
+        "--help-commands", action="store_true", help="Show available commands"
+    )
 
     args = parser.parse_args()
 
@@ -213,11 +220,11 @@ For more information, see scripts/README.md
         cli.show_help()
         return
 
-    if args.command == 'help':
+    if args.command == "help":
         cli.show_help()
         return
 
-    if args.command == 'status':
+    if args.command == "status":
         cli.show_status()
         return
 
@@ -226,6 +233,7 @@ For more information, see scripts/README.md
 
     if not success:
         sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

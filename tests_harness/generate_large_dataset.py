@@ -23,6 +23,7 @@ from scale_dataset import DatasetScaler
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 def main():
     """Main function để generate large dataset"""
     try:
@@ -43,13 +44,13 @@ def main():
 
         # Save statistics
         stats_file = scaler.output_dir / "dataset_statistics.json"
-        with open(stats_file, 'w', encoding='utf-8') as f:
+        with open(stats_file, "w", encoding="utf-8") as f:
             json.dump(stats, f, indent=2, ensure_ascii=False)
 
         # Print results
-        print("\n" + "="*80)
+        print("\n" + "=" * 80)
         print("🎉 LARGE DATASET GENERATION COMPLETED")
-        print("="*80)
+        print("=" * 80)
         print(f"📊 Total Cases Generated: {len(dataset)}")
         print(f"💾 Dataset File: {file_path}")
         print(f"📈 Statistics File: {stats_file}")
@@ -64,13 +65,14 @@ def main():
         print("   • Comprehensive evaluation")
         print("   • Performance benchmarking")
         print("   • CI/CD integration")
-        print("="*80)
+        print("=" * 80)
 
         return True
 
     except Exception as e:
         logger.error(f"❌ Large dataset generation failed: {e}")
         return False
+
 
 if __name__ == "__main__":
     success = main()

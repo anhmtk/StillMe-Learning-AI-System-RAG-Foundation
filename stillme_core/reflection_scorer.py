@@ -8,6 +8,7 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+
 class ScoringCriteria(Enum):
     RELEVANCE = "relevance"
     ACCURACY = "accuracy"
@@ -15,18 +16,22 @@ class ScoringCriteria(Enum):
     CLARITY = "clarity"
     USEFULNESS = "usefulness"
 
+
 @dataclass
 class Score:
     """Score record"""
+
     criteria: ScoringCriteria
     value: float
     weight: float
     explanation: str
     timestamp: datetime
 
+
 @dataclass
 class ReflectionScore:
     """Reflection score record"""
+
     score_id: str
     reflection_id: str
     overall_score: float
@@ -39,9 +44,11 @@ class ReflectionScore:
         if self.metadata is None:
             self.metadata = {}
 
+
 @dataclass
 class ScoringResult:
     """Scoring result record"""
+
     result_id: str
     reflection_id: str
     overall_score: float
@@ -56,6 +63,7 @@ class ScoringResult:
             self.metadata = {}
         if self.recommendations is None:
             self.recommendations = []
+
 
 class ReflectionScorer:
     """Reflection scorer for StillMe Framework"""
@@ -73,13 +81,12 @@ class ReflectionScorer:
             ScoringCriteria.ACCURACY: 0.30,
             ScoringCriteria.COMPLETENESS: 0.20,
             ScoringCriteria.CLARITY: 0.15,
-            ScoringCriteria.USEFULNESS: 0.10
+            ScoringCriteria.USEFULNESS: 0.10,
         }
 
-    def score_reflection(self,
-                        reflection_id: str,
-                        content: str,
-                        context: dict[str, Any] = None) -> ReflectionScore:
+    def score_reflection(
+        self, reflection_id: str, content: str, context: dict[str, Any] = None
+    ) -> ReflectionScore:
         """Score a reflection"""
         try:
             score_id = f"score_{len(self.scores) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -96,12 +103,14 @@ class ReflectionScorer:
                     value=score_value,
                     weight=weight,
                     explanation=explanation,
-                    timestamp=datetime.now()
+                    timestamp=datetime.now(),
                 )
                 individual_scores.append(score)
 
             # Calculate overall score
-            overall_score = sum(score.value * score.weight for score in individual_scores)
+            overall_score = sum(
+                score.value * score.weight for score in individual_scores
+            )
 
             # Calculate confidence
             confidence = self._calculate_confidence(individual_scores)
@@ -113,21 +122,22 @@ class ReflectionScorer:
                 individual_scores=individual_scores,
                 confidence=confidence,
                 timestamp=datetime.now(),
-                metadata={
-                    "content_length": len(content),
-                    "context": context or {}
-                }
+                metadata={"content_length": len(content), "context": context or {}},
             )
 
             self.scores.append(reflection_score)
-            self.logger.info(f"📊 Reflection scored: {overall_score:.2f} (confidence: {confidence:.2f})")
+            self.logger.info(
+                f"📊 Reflection scored: {overall_score:.2f} (confidence: {confidence:.2f})"
+            )
             return reflection_score
 
         except Exception as e:
             self.logger.error(f"❌ Failed to score reflection: {e}")
             raise
 
-    def _calculate_criteria_score(self, criteria: ScoringCriteria, content: str, context: dict[str, Any] = None) -> float:
+    def _calculate_criteria_score(
+        self, criteria: ScoringCriteria, content: str, context: dict[str, Any] = None
+    ) -> float:
         """Calculate score for specific criteria"""
         try:
             if criteria == ScoringCriteria.RELEVANCE:
@@ -141,25 +151,59 @@ class ReflectionScorer:
             elif criteria == ScoringCriteria.ACCURACY:
                 # Simple accuracy scoring (in real implementation, this would be more sophisticated)
                 accuracy_indicators = ["fact", "evidence", "research", "study", "data"]
-                accuracy_count = sum(1 for indicator in accuracy_indicators if indicator in content.lower())
+                accuracy_count = sum(
+                    1
+                    for indicator in accuracy_indicators
+                    if indicator in content.lower()
+                )
                 return min(1.0, accuracy_count * 0.2)
 
             elif criteria == ScoringCriteria.COMPLETENESS:
                 # Simple completeness scoring
-                completeness_indicators = ["because", "therefore", "however", "furthermore", "additionally"]
-                completeness_count = sum(1 for indicator in completeness_indicators if indicator in content.lower())
+                completeness_indicators = [
+                    "because",
+                    "therefore",
+                    "however",
+                    "furthermore",
+                    "additionally",
+                ]
+                completeness_count = sum(
+                    1
+                    for indicator in completeness_indicators
+                    if indicator in content.lower()
+                )
                 return min(1.0, completeness_count * 0.15 + 0.5)
 
             elif criteria == ScoringCriteria.CLARITY:
                 # Simple clarity scoring
-                clarity_indicators = ["clear", "obvious", "simple", "understand", "explain"]
-                clarity_count = sum(1 for indicator in clarity_indicators if indicator in content.lower())
+                clarity_indicators = [
+                    "clear",
+                    "obvious",
+                    "simple",
+                    "understand",
+                    "explain",
+                ]
+                clarity_count = sum(
+                    1
+                    for indicator in clarity_indicators
+                    if indicator in content.lower()
+                )
                 return min(1.0, clarity_count * 0.1 + 0.6)
 
             elif criteria == ScoringCriteria.USEFULNESS:
                 # Simple usefulness scoring
-                usefulness_indicators = ["help", "useful", "benefit", "improve", "solve"]
-                usefulness_count = sum(1 for indicator in usefulness_indicators if indicator in content.lower())
+                usefulness_indicators = [
+                    "help",
+                    "useful",
+                    "benefit",
+                    "improve",
+                    "solve",
+                ]
+                usefulness_count = sum(
+                    1
+                    for indicator in usefulness_indicators
+                    if indicator in content.lower()
+                )
                 return min(1.0, usefulness_count * 0.15 + 0.5)
 
             else:
@@ -169,7 +213,9 @@ class ReflectionScorer:
             self.logger.error(f"❌ Failed to calculate criteria score: {e}")
             return 0.0
 
-    def _get_score_explanation(self, criteria: ScoringCriteria, score_value: float) -> str:
+    def _get_score_explanation(
+        self, criteria: ScoringCriteria, score_value: float
+    ) -> str:
         """Get explanation for score"""
         if score_value >= 0.8:
             return f"Excellent {criteria.value}"
@@ -218,10 +264,16 @@ class ReflectionScorer:
                         if individual_score.criteria == criteria:
                             criteria_scores.append(individual_score.value)
 
-                return sum(criteria_scores) / len(criteria_scores) if criteria_scores else 0.0
+                return (
+                    sum(criteria_scores) / len(criteria_scores)
+                    if criteria_scores
+                    else 0.0
+                )
             else:
                 # Get overall average
-                return sum(score.overall_score for score in self.scores) / len(self.scores)
+                return sum(score.overall_score for score in self.scores) / len(
+                    self.scores
+                )
 
         except Exception as e:
             self.logger.error(f"❌ Failed to get average score: {e}")
@@ -238,12 +290,16 @@ class ReflectionScorer:
                     "average_overall_score": 0.0,
                     "average_confidence": 0.0,
                     "scores_by_criteria": {},
-                    "timestamp": datetime.now().isoformat()
+                    "timestamp": datetime.now().isoformat(),
                 }
 
             # Calculate averages
-            average_overall_score = sum(score.overall_score for score in self.scores) / total_scores
-            average_confidence = sum(score.confidence for score in self.scores) / total_scores
+            average_overall_score = (
+                sum(score.overall_score for score in self.scores) / total_scores
+            )
+            average_confidence = (
+                sum(score.confidence for score in self.scores) / total_scores
+            )
 
             # Calculate scores by criteria
             scores_by_criteria = {}
@@ -255,7 +311,9 @@ class ReflectionScorer:
                             criteria_scores.append(individual_score.value)
 
                 if criteria_scores:
-                    scores_by_criteria[criteria.value] = sum(criteria_scores) / len(criteria_scores)
+                    scores_by_criteria[criteria.value] = sum(criteria_scores) / len(
+                        criteria_scores
+                    )
                 else:
                     scores_by_criteria[criteria.value] = 0.0
 
@@ -264,18 +322,19 @@ class ReflectionScorer:
                 "average_overall_score": average_overall_score,
                 "average_confidence": average_confidence,
                 "scores_by_criteria": scores_by_criteria,
-                "scoring_weights": {k.value: v for k, v in self.scoring_weights.items()},
-                "timestamp": datetime.now().isoformat()
+                "scoring_weights": {
+                    k.value: v for k, v in self.scoring_weights.items()
+                },
+                "timestamp": datetime.now().isoformat(),
             }
 
         except Exception as e:
             self.logger.error(f"❌ Failed to get scoring summary: {e}")
             return {"error": str(e)}
 
-    def score_with_recommendations(self,
-                                  reflection_id: str,
-                                  content: str,
-                                  context: dict[str, Any] = None) -> ScoringResult:
+    def score_with_recommendations(
+        self, reflection_id: str, content: str, context: dict[str, Any] = None
+    ) -> ScoringResult:
         """Score reflection with recommendations"""
         try:
             # Get basic score
@@ -293,10 +352,12 @@ class ReflectionScorer:
                 confidence=reflection_score.confidence,
                 recommendations=recommendations,
                 timestamp=datetime.now(),
-                metadata=reflection_score.metadata
+                metadata=reflection_score.metadata,
             )
 
-            self.logger.info(f"📊 Scoring with recommendations completed: {len(recommendations)} recommendations")
+            self.logger.info(
+                f"📊 Scoring with recommendations completed: {len(recommendations)} recommendations"
+            )
             return result
 
         except Exception as e:
@@ -312,22 +373,36 @@ class ReflectionScorer:
             for score in reflection_score.individual_scores:
                 if score.value < 0.6:  # Low score
                     if score.criteria == ScoringCriteria.RELEVANCE:
-                        recommendations.append("Improve relevance by focusing more on the main topic")
+                        recommendations.append(
+                            "Improve relevance by focusing more on the main topic"
+                        )
                     elif score.criteria == ScoringCriteria.ACCURACY:
-                        recommendations.append("Add more factual evidence and research to support claims")
+                        recommendations.append(
+                            "Add more factual evidence and research to support claims"
+                        )
                     elif score.criteria == ScoringCriteria.COMPLETENESS:
-                        recommendations.append("Provide more comprehensive coverage of the topic")
+                        recommendations.append(
+                            "Provide more comprehensive coverage of the topic"
+                        )
                     elif score.criteria == ScoringCriteria.CLARITY:
-                        recommendations.append("Improve clarity by using simpler language and better structure")
+                        recommendations.append(
+                            "Improve clarity by using simpler language and better structure"
+                        )
                     elif score.criteria == ScoringCriteria.USEFULNESS:
-                        recommendations.append("Make the content more actionable and practical")
+                        recommendations.append(
+                            "Make the content more actionable and practical"
+                        )
 
             # Overall recommendations
             if reflection_score.overall_score < 0.7:
-                recommendations.append("Overall quality needs improvement - consider revising the content")
+                recommendations.append(
+                    "Overall quality needs improvement - consider revising the content"
+                )
 
             if reflection_score.confidence < 0.6:
-                recommendations.append("Scoring confidence is low - consider getting additional feedback")
+                recommendations.append(
+                    "Scoring confidence is low - consider getting additional feedback"
+                )
 
             return recommendations
 
@@ -340,8 +415,10 @@ class ReflectionScorer:
         self.scores.clear()
         self.logger.info("🧹 All reflection scores cleared")
 
+
 # Global reflection scorer instance
 _reflection_scorer_instance = None
+
 
 def get_default_scorer() -> ReflectionScorer:
     """Get default reflection scorer instance"""

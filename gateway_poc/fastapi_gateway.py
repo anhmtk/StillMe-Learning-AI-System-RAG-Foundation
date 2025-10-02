@@ -47,20 +47,24 @@ CONFIG = {
     "circuit_breaker_recovery_timeout": 60,
 }
 
+
 @dataclass
 class LatencyMetrics:
     """Latency metrics for monitoring"""
+
     endpoint: str
     request_time: float
     upstream_time: float
     cache_hit: bool
     timestamp: datetime
 
+
 class ChatRequest(BaseModel):
     message: str
     user_id: Optional[str] = "anonymous"
     session_id: Optional[str] = None
     use_cache: bool = True
+
 
 class ChatResponse(BaseModel):
     response: str
@@ -69,11 +73,13 @@ class ChatResponse(BaseModel):
     cache_hit: bool
     timestamp: datetime
 
+
 class HealthResponse(BaseModel):
     status: str
     timestamp: datetime
     services: dict[str, str]
     metrics: dict[str, Any]
+
 
 class StillMeGateway:
     """Ultra Low Latency API Gateway for StillMe"""
@@ -82,7 +88,7 @@ class StillMeGateway:
         self.app = FastAPI(
             title="StillMe API Gateway",
             description="Ultra Low Latency Gateway for StillMe Microservices",
-            version="1.0.0"
+            version="1.0.0",
         )
 
         # Initialize components
@@ -108,9 +114,9 @@ class StillMeGateway:
             self.http_client = httpx.AsyncClient(
                 limits=httpx.Limits(
                     max_keepalive_connections=CONFIG["max_connections"],
-                    max_connections=CONFIG["max_connections"]
+                    max_connections=CONFIG["max_connections"],
                 ),
-                timeout=CONFIG["timeout"]
+                timeout=CONFIG["timeout"],
             )
             logger.info("✅ HTTP client initialized")
 
@@ -160,16 +166,24 @@ class StillMeGateway:
             # Check StillMe backend
             try:
                 async with httpx.AsyncClient() as client:
-                    response = await client.get(f"{CONFIG['stillme_backend']}/health", timeout=5)
-                    services["stillme_backend"] = "healthy" if response.status_code == 200 else "unhealthy"
+                    response = await client.get(
+                        f"{CONFIG['stillme_backend']}/health", timeout=5
+                    )
+                    services["stillme_backend"] = (
+                        "healthy" if response.status_code == 200 else "unhealthy"
+                    )
             except:
                 services["stillme_backend"] = "unhealthy"
 
             # Check Ollama backend
             try:
                 async with httpx.AsyncClient() as client:
-                    response = await client.get(f"{CONFIG['ollama_backend']}/api/tags", timeout=5)
-                    services["ollama_backend"] = "healthy" if response.status_code == 200 else "unhealthy"
+                    response = await client.get(
+                        f"{CONFIG['ollama_backend']}/api/tags", timeout=5
+                    )
+                    services["ollama_backend"] = (
+                        "healthy" if response.status_code == 200 else "unhealthy"
+                    )
             except:
                 services["ollama_backend"] = "unhealthy"
 
@@ -184,42 +198,55 @@ class StillMeGateway:
                 services["redis"] = "unhealthy"
 
             return HealthResponse(
-                status="healthy" if all(s == "healthy" for s in services.values()) else "degraded",
+                status="healthy"
+                if all(s == "healthy" for s in services.values())
+                else "degraded",
                 timestamp=datetime.now(),
                 services=services,
                 metrics={
                     "total_requests": len(self.metrics),
-                    "avg_latency_ms": sum(m.request_time for m in self.metrics[-100:]) / min(100, len(self.metrics)) * 1000 if self.metrics else 0,
-                    "cache_hit_rate": sum(1 for m in self.metrics[-100:] if m.cache_hit) / min(100, len(self.metrics)) if self.metrics else 0
-                }
+                    "avg_latency_ms": sum(m.request_time for m in self.metrics[-100:])
+                    / min(100, len(self.metrics))
+                    * 1000
+                    if self.metrics
+                    else 0,
+                    "cache_hit_rate": sum(1 for m in self.metrics[-100:] if m.cache_hit)
+                    / min(100, len(self.metrics))
+                    if self.metrics
+                    else 0,
+                },
             )
 
         @self.app.post("/api/chat", response_model=ChatResponse)
-        async def chat_endpoint(request: ChatRequest, background_tasks: BackgroundTasks):
+        async def chat_endpoint(
+            request: ChatRequest, background_tasks: BackgroundTasks
+        ):
             """Chat endpoint with ultra low latency"""
             start_time = time.time()
 
             # Check cache first
-            cache_key = self._generate_cache_key(request.message, request.user_id or "anonymous")
+            cache_key = self._generate_cache_key(
+                request.message, request.user_id or "anonymous"
+            )
             cached_response = await self._get_from_cache(cache_key)
 
             if cached_response and request.use_cache:
                 latency = (time.time() - start_time) * 1000
-                background_tasks.add_task(self._record_metrics, "chat", latency, 0, True)
+                background_tasks.add_task(
+                    self._record_metrics, "chat", latency, 0, True
+                )
                 return ChatResponse(
                     response=cached_response["response"],
                     engine=cached_response["engine"],
                     latency_ms=latency,
                     cache_hit=True,
-                    timestamp=datetime.now()
+                    timestamp=datetime.now(),
                 )
 
             # Circuit breaker for StillMe backend
             try:
                 response = await self._call_with_circuit_breaker(
-                    "stillme_backend",
-                    self._call_stillme_backend,
-                    request
+                    "stillme_backend", self._call_stillme_backend, request
                 )
 
                 # Cache successful responses
@@ -227,14 +254,16 @@ class StillMeGateway:
                     await self._set_cache(cache_key, response, CONFIG["cache_ttl"])
 
                 latency = (time.time() - start_time) * 1000
-                background_tasks.add_task(self._record_metrics, "chat", latency, latency * 0.8, False)
+                background_tasks.add_task(
+                    self._record_metrics, "chat", latency, latency * 0.8, False
+                )
 
                 return ChatResponse(
                     response=response["response"],
                     engine=response["engine"],
                     latency_ms=latency,
                     cache_hit=False,
-                    timestamp=datetime.now()
+                    timestamp=datetime.now(),
                 )
 
             except Exception as e:
@@ -248,13 +277,13 @@ class StillMeGateway:
 
             try:
                 response = await self._call_with_circuit_breaker(
-                    "ollama_backend",
-                    self._call_ollama_backend,
-                    request
+                    "ollama_backend", self._call_ollama_backend, request
                 )
 
                 latency = (time.time() - start_time) * 1000
-                background_tasks.add_task(self._record_metrics, "ollama", latency, latency * 0.9, False)
+                background_tasks.add_task(
+                    self._record_metrics, "ollama", latency, latency * 0.9, False
+                )
 
                 return response
 
@@ -273,16 +302,31 @@ class StillMeGateway:
             return {
                 "total_requests": len(self.metrics),
                 "recent_requests": len(recent_metrics),
-                "avg_latency_ms": sum(m.request_time for m in recent_metrics) / len(recent_metrics) * 1000,
-                "avg_upstream_latency_ms": sum(m.upstream_time for m in recent_metrics) / len(recent_metrics) * 1000,
-                "cache_hit_rate": sum(1 for m in recent_metrics if m.cache_hit) / len(recent_metrics),
+                "avg_latency_ms": sum(m.request_time for m in recent_metrics)
+                / len(recent_metrics)
+                * 1000,
+                "avg_upstream_latency_ms": sum(m.upstream_time for m in recent_metrics)
+                / len(recent_metrics)
+                * 1000,
+                "cache_hit_rate": sum(1 for m in recent_metrics if m.cache_hit)
+                / len(recent_metrics),
                 "endpoints": {
                     endpoint: {
-                        "count": sum(1 for m in recent_metrics if m.endpoint == endpoint),
-                        "avg_latency_ms": sum(m.request_time for m in recent_metrics if m.endpoint == endpoint) / max(1, sum(1 for m in recent_metrics if m.endpoint == endpoint)) * 1000
+                        "count": sum(
+                            1 for m in recent_metrics if m.endpoint == endpoint
+                        ),
+                        "avg_latency_ms": sum(
+                            m.request_time
+                            for m in recent_metrics
+                            if m.endpoint == endpoint
+                        )
+                        / max(
+                            1, sum(1 for m in recent_metrics if m.endpoint == endpoint)
+                        )
+                        * 1000,
                     }
                     for endpoint in {m.endpoint for m in recent_metrics}
-                }
+                },
             }
 
     def _setup_circuit_breakers(self):
@@ -290,12 +334,12 @@ class StillMeGateway:
         self.circuit_breakers = {
             "stillme_backend": CircuitBreaker(
                 failure_threshold=CONFIG["circuit_breaker_failure_threshold"],
-                recovery_timeout=CONFIG["circuit_breaker_recovery_timeout"]
+                recovery_timeout=CONFIG["circuit_breaker_recovery_timeout"],
             ),
             "ollama_backend": CircuitBreaker(
                 failure_threshold=CONFIG["circuit_breaker_failure_threshold"],
-                recovery_timeout=CONFIG["circuit_breaker_recovery_timeout"]
-            )
+                recovery_timeout=CONFIG["circuit_breaker_recovery_timeout"],
+            ),
         }
 
     async def _call_with_circuit_breaker(self, service: str, func, *args, **kwargs):
@@ -311,14 +355,12 @@ class StillMeGateway:
         payload = {
             "message": request.message,
             "user_id": request.user_id,
-            "session_id": request.session_id
+            "session_id": request.session_id,
         }
 
         if self.http_client:
             response = await self.http_client.post(
-                f"{CONFIG['stillme_backend']}/chat",
-                json=payload,
-                timeout=10
+                f"{CONFIG['stillme_backend']}/chat", json=payload, timeout=10
             )
         else:
             raise Exception("HTTP client not initialized")
@@ -332,9 +374,7 @@ class StillMeGateway:
         """Call Ollama backend"""
         if self.http_client:
             response = await self.http_client.post(
-                f"{CONFIG['ollama_backend']}/api/generate",
-                json=request,
-                timeout=15
+                f"{CONFIG['ollama_backend']}/api/generate", json=request, timeout=15
             )
         else:
             raise Exception("HTTP client not initialized")
@@ -370,14 +410,16 @@ class StillMeGateway:
         except Exception as e:
             logger.warning(f"Cache set error: {e}")
 
-    async def _record_metrics(self, endpoint: str, request_time: float, upstream_time: float, cache_hit: bool):
+    async def _record_metrics(
+        self, endpoint: str, request_time: float, upstream_time: float, cache_hit: bool
+    ):
         """Record performance metrics"""
         metric = LatencyMetrics(
             endpoint=endpoint,
             request_time=request_time,
             upstream_time=upstream_time,
             cache_hit=cache_hit,
-            timestamp=datetime.now()
+            timestamp=datetime.now(),
         )
 
         self.metrics.append(metric)
@@ -386,18 +428,22 @@ class StillMeGateway:
         if len(self.metrics) > 1000:
             self.metrics = self.metrics[-1000:]
 
+
 # Create FastAPI app
 gateway = StillMeGateway()
 app = gateway.app
+
 
 # Add startup and shutdown events
 @app.on_event("startup")
 async def startup_event():
     await gateway.startup()
 
+
 @app.on_event("shutdown")
 async def shutdown_event():
     await gateway.shutdown()
+
 
 if __name__ == "__main__":
     uvicorn.run(
@@ -405,5 +451,5 @@ if __name__ == "__main__":
         host="0.0.0.0",
         port=8080,
         loop="asyncio",  # Use asyncio for Windows compatibility
-        log_level="info"
+        log_level="info",
     )

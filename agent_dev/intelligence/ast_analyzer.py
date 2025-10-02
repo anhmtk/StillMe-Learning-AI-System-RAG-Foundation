@@ -16,21 +16,26 @@ from typing import Any, Optional
 
 class CodeComplexity(Enum):
     """Code complexity levels"""
+
     SIMPLE = "simple"
     MODERATE = "moderate"
     COMPLEX = "complex"
     VERY_COMPLEX = "very_complex"
 
+
 class CodeQuality(Enum):
     """Code quality levels"""
+
     EXCELLENT = "excellent"
     GOOD = "good"
     FAIR = "fair"
     POOR = "poor"
     CRITICAL = "critical"
 
+
 class PatternType(Enum):
     """Code pattern types"""
+
     DESIGN_PATTERN = "design_pattern"
     ANTI_PATTERN = "anti_pattern"
     CODE_SMELL = "code_smell"
@@ -38,9 +43,11 @@ class PatternType(Enum):
     SECURITY_ISSUE = "security_issue"
     PERFORMANCE_ISSUE = "performance_issue"
 
+
 @dataclass
 class CodeMetric:
     """Code metric measurement"""
+
     metric_name: str
     value: float
     threshold: Optional[float]
@@ -48,9 +55,11 @@ class CodeMetric:
     description: str
     recommendations: list[str]
 
+
 @dataclass
 class CodePattern:
     """Code pattern detection"""
+
     pattern_type: PatternType
     name: str
     description: str
@@ -60,20 +69,24 @@ class CodePattern:
     suggestions: list[str]
     confidence: float
 
+
 @dataclass
 class ASTNode:
     """AST node representation"""
+
     node_type: str
     name: Optional[str]
     line_number: int
     column_number: int
-    children: list['ASTNode']
+    children: list["ASTNode"]
     attributes: dict[str, Any]
     complexity_score: float
+
 
 @dataclass
 class CodeAnalysis:
     """Complete code analysis result"""
+
     file_path: str
     file_hash: str
     analysis_timestamp: float
@@ -87,6 +100,7 @@ class CodeAnalysis:
     security_issues: list[CodePattern]
     performance_issues: list[CodePattern]
     recommendations: list[str]
+
 
 class ASTAnalyzer:
     """Enterprise AST-based code analyzer"""
@@ -106,127 +120,143 @@ class ASTAnalyzer:
 
         if config_file.exists():
             import yaml
+
             with open(config_file) as f:
                 return yaml.safe_load(f)
         else:
             return {
-                'complexity_thresholds': {
-                    'cyclomatic': 10,
-                    'cognitive': 15,
-                    'halstead': 20
+                "complexity_thresholds": {
+                    "cyclomatic": 10,
+                    "cognitive": 15,
+                    "halstead": 20,
                 },
-                'quality_thresholds': {
-                    'maintainability_index': 70,
-                    'technical_debt_ratio': 0.1
+                "quality_thresholds": {
+                    "maintainability_index": 70,
+                    "technical_debt_ratio": 0.1,
                 },
-                'pattern_detection': {
-                    'enabled': True,
-                    'confidence_threshold': 0.7
-                },
-                'cache_enabled': True,
-                'max_file_size': 1024 * 1024  # 1MB
+                "pattern_detection": {"enabled": True, "confidence_threshold": 0.7},
+                "cache_enabled": True,
+                "max_file_size": 1024 * 1024,  # 1MB
             }
 
     def _load_patterns(self) -> dict[str, dict[str, Any]]:
         """Load code pattern definitions"""
         return {
-            'security_patterns': {
-                'hardcoded_secrets': {
-                    'pattern': r'(api_key|password|secret|token)\s*=\s*["\'][^"\']+["\']',
-                    'severity': 'high',
-                    'description': 'Hardcoded secrets detected',
-                    'suggestions': ['Use environment variables', 'Use secure configuration management']
+            "security_patterns": {
+                "hardcoded_secrets": {
+                    "pattern": r'(api_key|password|secret|token)\s*=\s*["\'][^"\']+["\']',
+                    "severity": "high",
+                    "description": "Hardcoded secrets detected",
+                    "suggestions": [
+                        "Use environment variables",
+                        "Use secure configuration management",
+                    ],
                 },
-                'sql_injection': {
-                    'pattern': r'execute\s*\(\s*["\'].*%s.*["\']',
-                    'severity': 'critical',
-                    'description': 'Potential SQL injection vulnerability',
-                    'suggestions': ['Use parameterized queries', 'Validate input data']
+                "sql_injection": {
+                    "pattern": r'execute\s*\(\s*["\'].*%s.*["\']',
+                    "severity": "critical",
+                    "description": "Potential SQL injection vulnerability",
+                    "suggestions": ["Use parameterized queries", "Validate input data"],
                 },
-                'eval_usage': {
-                    'pattern': r'eval\s*\(',
-                    'severity': 'high',
-                    'description': 'Use of eval() function',
-                    'suggestions': ['Avoid eval()', 'Use safer alternatives like ast.literal_eval()']
-                }
+                "eval_usage": {
+                    "pattern": r"eval\s*\(",
+                    "severity": "high",
+                    "description": "Use of eval() function",
+                    "suggestions": [
+                        "Avoid eval()",
+                        "Use safer alternatives like ast.literal_eval()",
+                    ],
+                },
             },
-            'performance_patterns': {
-                'inefficient_loop': {
-                    'pattern': r'for\s+\w+\s+in\s+range\s*\(\s*len\s*\(',
-                    'severity': 'medium',
-                    'description': 'Inefficient loop pattern',
-                    'suggestions': ['Use enumerate()', 'Use direct iteration']
+            "performance_patterns": {
+                "inefficient_loop": {
+                    "pattern": r"for\s+\w+\s+in\s+range\s*\(\s*len\s*\(",
+                    "severity": "medium",
+                    "description": "Inefficient loop pattern",
+                    "suggestions": ["Use enumerate()", "Use direct iteration"],
                 },
-                'string_concatenation': {
-                    'pattern': r'(\w+\s*\+=\s*["\'][^"\']*["\']|["\'][^"\']*["\']\s*\+\s*\w+)',
-                    'severity': 'low',
-                    'description': 'String concatenation in loop',
-                    'suggestions': ['Use join() method', 'Use f-strings']
-                }
+                "string_concatenation": {
+                    "pattern": r'(\w+\s*\+=\s*["\'][^"\']*["\']|["\'][^"\']*["\']\s*\+\s*\w+)',
+                    "severity": "low",
+                    "description": "String concatenation in loop",
+                    "suggestions": ["Use join() method", "Use f-strings"],
+                },
             },
-            'design_patterns': {
-                'singleton': {
-                    'pattern': r'class\s+\w+.*:\s*\n\s*_instance\s*=\s*None',
-                    'severity': 'info',
-                    'description': 'Singleton pattern detected',
-                    'suggestions': ['Consider if singleton is necessary', 'Use dependency injection']
+            "design_patterns": {
+                "singleton": {
+                    "pattern": r"class\s+\w+.*:\s*\n\s*_instance\s*=\s*None",
+                    "severity": "info",
+                    "description": "Singleton pattern detected",
+                    "suggestions": [
+                        "Consider if singleton is necessary",
+                        "Use dependency injection",
+                    ],
                 },
-                'factory': {
-                    'pattern': r'def\s+create_\w+\s*\(',
-                    'severity': 'info',
-                    'description': 'Factory pattern detected',
-                    'suggestions': ['Good use of factory pattern', 'Consider abstract factory']
-                }
+                "factory": {
+                    "pattern": r"def\s+create_\w+\s*\(",
+                    "severity": "info",
+                    "description": "Factory pattern detected",
+                    "suggestions": [
+                        "Good use of factory pattern",
+                        "Consider abstract factory",
+                    ],
+                },
             },
-            'anti_patterns': {
-                'god_class': {
-                    'pattern': r'class\s+\w+.*:\s*\n(.*\n){50,}',
-                    'severity': 'medium',
-                    'description': 'Potential God class (too many lines)',
-                    'suggestions': ['Split into smaller classes', 'Apply Single Responsibility Principle']
+            "anti_patterns": {
+                "god_class": {
+                    "pattern": r"class\s+\w+.*:\s*\n(.*\n){50,}",
+                    "severity": "medium",
+                    "description": "Potential God class (too many lines)",
+                    "suggestions": [
+                        "Split into smaller classes",
+                        "Apply Single Responsibility Principle",
+                    ],
                 },
-                'long_method': {
-                    'pattern': r'def\s+\w+.*:\s*\n(.*\n){20,}',
-                    'severity': 'medium',
-                    'description': 'Long method detected',
-                    'suggestions': ['Break into smaller methods', 'Extract helper functions']
-                }
-            }
+                "long_method": {
+                    "pattern": r"def\s+\w+.*:\s*\n(.*\n){20,}",
+                    "severity": "medium",
+                    "description": "Long method detected",
+                    "suggestions": [
+                        "Break into smaller methods",
+                        "Extract helper functions",
+                    ],
+                },
+            },
         }
 
     def _load_metrics_config(self) -> dict[str, Any]:
         """Load metrics configuration"""
         return {
-            'cyclomatic_complexity': {
-                'description': 'Cyclomatic complexity of the code',
-                'threshold': 10,
-                'calculation': 'count_decision_points'
+            "cyclomatic_complexity": {
+                "description": "Cyclomatic complexity of the code",
+                "threshold": 10,
+                "calculation": "count_decision_points",
             },
-            'cognitive_complexity': {
-                'description': 'Cognitive complexity of the code',
-                'threshold': 15,
-                'calculation': 'count_nested_structures'
+            "cognitive_complexity": {
+                "description": "Cognitive complexity of the code",
+                "threshold": 15,
+                "calculation": "count_nested_structures",
             },
-            'halstead_complexity': {
-                'description': 'Halstead complexity measures',
-                'threshold': 20,
-                'calculation': 'halstead_metrics'
+            "halstead_complexity": {
+                "description": "Halstead complexity measures",
+                "threshold": 20,
+                "calculation": "halstead_metrics",
             },
-            'maintainability_index': {
-                'description': 'Code maintainability index',
-                'threshold': 70,
-                'calculation': 'mi_formula'
+            "maintainability_index": {
+                "description": "Code maintainability index",
+                "threshold": 70,
+                "calculation": "mi_formula",
             },
-            'lines_of_code': {
-                'description': 'Total lines of code',
-                'threshold': 1000,
-                'calculation': 'count_lines'
+            "lines_of_code": {
+                "description": "Total lines of code",
+                "threshold": 1000,
+                "calculation": "count_lines",
             },
-            'function_length': {
-                'description': 'Average function length',
-                'threshold': 20,
-                'calculation': 'avg_function_lines'
-            }
+            "function_length": {
+                "description": "Average function length",
+                "threshold": 20,
+                "calculation": "avg_function_lines",
+            },
         }
 
     def analyze_file(self, file_path: str) -> CodeAnalysis:
@@ -234,7 +264,7 @@ class ASTAnalyzer:
         file_path = Path(file_path)
 
         # Check cache
-        if self.config['cache_enabled']:
+        if self.config["cache_enabled"]:
             file_hash = self._calculate_file_hash(file_path)
             if file_hash in self.analysis_cache:
                 cached_analysis = self.analysis_cache[file_hash]
@@ -242,11 +272,11 @@ class ASTAnalyzer:
                     return cached_analysis
 
         # Check file size
-        if file_path.stat().st_size > self.config['max_file_size']:
+        if file_path.stat().st_size > self.config["max_file_size"]:
             raise ValueError(f"File too large: {file_path}")
 
         try:
-            with open(file_path, encoding='utf-8') as f:
+            with open(file_path, encoding="utf-8") as f:
                 source_code = f.read()
         except Exception as e:
             raise ValueError(f"Failed to read file: {e}")
@@ -260,14 +290,16 @@ class ASTAnalyzer:
         analysis = self._analyze_ast(tree, str(file_path), source_code)
 
         # Cache result
-        if self.config['cache_enabled']:
+        if self.config["cache_enabled"]:
             self.analysis_cache[file_hash] = analysis
 
         return analysis
 
-    def _analyze_ast(self, tree: ast.AST, file_path: str, source_code: str) -> CodeAnalysis:
+    def _analyze_ast(
+        self, tree: ast.AST, file_path: str, source_code: str
+    ) -> CodeAnalysis:
         """Analyze AST tree"""
-        lines = source_code.split('\n')
+        lines = source_code.split("\n")
         file_hash = hashlib.sha256(source_code.encode()).hexdigest()
 
         # Extract AST nodes
@@ -292,8 +324,12 @@ class ASTAnalyzer:
         technical_debt = self._calculate_technical_debt(metrics, patterns)
 
         # Filter security and performance issues
-        security_issues = [p for p in patterns if p.pattern_type == PatternType.SECURITY_ISSUE]
-        performance_issues = [p for p in patterns if p.pattern_type == PatternType.PERFORMANCE_ISSUE]
+        security_issues = [
+            p for p in patterns if p.pattern_type == PatternType.SECURITY_ISSUE
+        ]
+        performance_issues = [
+            p for p in patterns if p.pattern_type == PatternType.PERFORMANCE_ISSUE
+        ]
 
         # Generate recommendations
         recommendations = self._generate_recommendations(metrics, patterns)
@@ -311,7 +347,7 @@ class ASTAnalyzer:
             technical_debt=technical_debt,
             security_issues=security_issues,
             performance_issues=performance_issues,
-            recommendations=recommendations
+            recommendations=recommendations,
         )
 
     def _extract_ast_nodes(self, tree: ast.AST) -> list[ASTNode]:
@@ -322,11 +358,11 @@ class ASTAnalyzer:
             ast_node = ASTNode(
                 node_type=type(node).__name__,
                 name=self._get_node_name(node),
-                line_number=getattr(node, 'lineno', 0),
-                column_number=getattr(node, 'col_offset', 0),
+                line_number=getattr(node, "lineno", 0),
+                column_number=getattr(node, "col_offset", 0),
                 children=[],
                 attributes=self._get_node_attributes(node),
-                complexity_score=self._calculate_node_complexity(node)
+                complexity_score=self._calculate_node_complexity(node),
             )
             nodes.append(ast_node)
 
@@ -335,7 +371,7 @@ class ASTAnalyzer:
     def _get_node_name(self, node: ast.AST) -> Optional[str]:
         """Get node name if applicable"""
         if isinstance(node, (ast.FunctionDef, ast.ClassDef, ast.Name)):
-            return getattr(node, 'name', None)
+            return getattr(node, "name", None)
         elif isinstance(node, ast.Assign):
             if node.targets and isinstance(node.targets[0], ast.Name):
                 return node.targets[0].id
@@ -346,15 +382,21 @@ class ASTAnalyzer:
         attributes = {}
 
         if isinstance(node, ast.FunctionDef):
-            attributes['args_count'] = len(node.args.args)
-            attributes['decorators'] = [d.id if isinstance(d, ast.Name) else str(d) for d in node.decorator_list]
+            attributes["args_count"] = len(node.args.args)
+            attributes["decorators"] = [
+                d.id if isinstance(d, ast.Name) else str(d) for d in node.decorator_list
+            ]
         elif isinstance(node, ast.ClassDef):
-            attributes['bases'] = [b.id if isinstance(b, ast.Name) else str(b) for b in node.bases]
-            attributes['decorators'] = [d.id if isinstance(d, ast.Name) else str(d) for d in node.decorator_list]
+            attributes["bases"] = [
+                b.id if isinstance(b, ast.Name) else str(b) for b in node.bases
+            ]
+            attributes["decorators"] = [
+                d.id if isinstance(d, ast.Name) else str(d) for d in node.decorator_list
+            ]
         elif isinstance(node, ast.Call):
-            attributes['function_name'] = self._get_call_function_name(node)
-            attributes['args_count'] = len(node.args)
-            attributes['keywords_count'] = len(node.keywords)
+            attributes["function_name"] = self._get_call_function_name(node)
+            attributes["args_count"] = len(node.args)
+            attributes["keywords_count"] = len(node.keywords)
 
         return attributes
 
@@ -379,7 +421,7 @@ class ASTAnalyzer:
             complexity += 1
 
         # Nested structures
-        if hasattr(node, 'body'):
+        if hasattr(node, "body"):
             for child in node.body:
                 complexity += self._calculate_node_complexity(child)
 
@@ -391,47 +433,73 @@ class ASTAnalyzer:
 
         # Cyclomatic complexity
         cyclomatic = self._calculate_cyclomatic_complexity(tree)
-        metrics.append(CodeMetric(
-            metric_name='cyclomatic_complexity',
-            value=cyclomatic,
-            threshold=self.metrics_config['cyclomatic_complexity']['threshold'],
-            severity='high' if cyclomatic > 10 else 'medium' if cyclomatic > 5 else 'low',
-            description='Cyclomatic complexity of the code',
-            recommendations=['Reduce decision points', 'Extract methods', 'Use polymorphism']
-        ))
+        metrics.append(
+            CodeMetric(
+                metric_name="cyclomatic_complexity",
+                value=cyclomatic,
+                threshold=self.metrics_config["cyclomatic_complexity"]["threshold"],
+                severity="high"
+                if cyclomatic > 10
+                else "medium"
+                if cyclomatic > 5
+                else "low",
+                description="Cyclomatic complexity of the code",
+                recommendations=[
+                    "Reduce decision points",
+                    "Extract methods",
+                    "Use polymorphism",
+                ],
+            )
+        )
 
         # Lines of code
-        loc = len([line for line in lines if line.strip() and not line.strip().startswith('#')])
-        metrics.append(CodeMetric(
-            metric_name='lines_of_code',
-            value=loc,
-            threshold=self.metrics_config['lines_of_code']['threshold'],
-            severity='high' if loc > 1000 else 'medium' if loc > 500 else 'low',
-            description='Total lines of code',
-            recommendations=['Split into smaller files', 'Extract modules']
-        ))
+        loc = len(
+            [
+                line
+                for line in lines
+                if line.strip() and not line.strip().startswith("#")
+            ]
+        )
+        metrics.append(
+            CodeMetric(
+                metric_name="lines_of_code",
+                value=loc,
+                threshold=self.metrics_config["lines_of_code"]["threshold"],
+                severity="high" if loc > 1000 else "medium" if loc > 500 else "low",
+                description="Total lines of code",
+                recommendations=["Split into smaller files", "Extract modules"],
+            )
+        )
 
         # Function count
-        function_count = len([node for node in ast.walk(tree) if isinstance(node, ast.FunctionDef)])
-        metrics.append(CodeMetric(
-            metric_name='function_count',
-            value=function_count,
-            threshold=None,
-            severity='info',
-            description='Number of functions',
-            recommendations=[]
-        ))
+        function_count = len(
+            [node for node in ast.walk(tree) if isinstance(node, ast.FunctionDef)]
+        )
+        metrics.append(
+            CodeMetric(
+                metric_name="function_count",
+                value=function_count,
+                threshold=None,
+                severity="info",
+                description="Number of functions",
+                recommendations=[],
+            )
+        )
 
         # Class count
-        class_count = len([node for node in ast.walk(tree) if isinstance(node, ast.ClassDef)])
-        metrics.append(CodeMetric(
-            metric_name='class_count',
-            value=class_count,
-            threshold=None,
-            severity='info',
-            description='Number of classes',
-            recommendations=[]
-        ))
+        class_count = len(
+            [node for node in ast.walk(tree) if isinstance(node, ast.ClassDef)]
+        )
+        metrics.append(
+            CodeMetric(
+                metric_name="class_count",
+                value=class_count,
+                threshold=None,
+                severity="info",
+                description="Number of classes",
+                recommendations=[],
+            )
+        )
 
         return metrics
 
@@ -455,20 +523,24 @@ class ASTAnalyzer:
 
         for category, pattern_defs in self.patterns.items():
             for pattern_name, pattern_config in pattern_defs.items():
-                matches = re.finditer(pattern_config['pattern'], source_code, re.MULTILINE)
+                matches = re.finditer(
+                    pattern_config["pattern"], source_code, re.MULTILINE
+                )
 
                 for match in matches:
-                    line_number = source_code[:match.start()].count('\n') + 1
-                    code_snippet = lines[line_number - 1] if line_number <= len(lines) else ''
+                    line_number = source_code[: match.start()].count("\n") + 1
+                    code_snippet = (
+                        lines[line_number - 1] if line_number <= len(lines) else ""
+                    )
 
                     # Determine pattern type
-                    if category == 'security_patterns':
+                    if category == "security_patterns":
                         pattern_type = PatternType.SECURITY_ISSUE
-                    elif category == 'performance_patterns':
+                    elif category == "performance_patterns":
                         pattern_type = PatternType.PERFORMANCE_ISSUE
-                    elif category == 'design_patterns':
+                    elif category == "design_patterns":
                         pattern_type = PatternType.DESIGN_PATTERN
-                    elif category == 'anti_patterns':
+                    elif category == "anti_patterns":
                         pattern_type = PatternType.ANTI_PATTERN
                     else:
                         pattern_type = PatternType.CODE_SMELL
@@ -476,12 +548,12 @@ class ASTAnalyzer:
                     pattern = CodePattern(
                         pattern_type=pattern_type,
                         name=pattern_name,
-                        description=pattern_config['description'],
-                        severity=pattern_config['severity'],
+                        description=pattern_config["description"],
+                        severity=pattern_config["severity"],
                         line_number=line_number,
                         code_snippet=code_snippet.strip(),
-                        suggestions=pattern_config['suggestions'],
-                        confidence=0.8  # Default confidence
+                        suggestions=pattern_config["suggestions"],
+                        confidence=0.8,  # Default confidence
                     )
                     patterns.append(pattern)
 
@@ -489,16 +561,20 @@ class ASTAnalyzer:
 
     def _calculate_complexity_score(self, metrics: list[CodeMetric]) -> float:
         """Calculate overall complexity score"""
-        complexity_metrics = [m for m in metrics if 'complexity' in m.metric_name]
+        complexity_metrics = [m for m in metrics if "complexity" in m.metric_name]
         if not complexity_metrics:
             return 0.0
 
         total_complexity = sum(m.value for m in complexity_metrics)
         max_complexity = sum(m.threshold or 10 for m in complexity_metrics)
 
-        return min(total_complexity / max_complexity, 1.0) if max_complexity > 0 else 0.0
+        return (
+            min(total_complexity / max_complexity, 1.0) if max_complexity > 0 else 0.0
+        )
 
-    def _calculate_quality_score(self, metrics: list[CodeMetric], patterns: list[CodePattern]) -> float:
+    def _calculate_quality_score(
+        self, metrics: list[CodeMetric], patterns: list[CodePattern]
+    ) -> float:
         """Calculate code quality score"""
         score = 1.0
 
@@ -509,11 +585,11 @@ class ASTAnalyzer:
 
         # Deduct for issues
         for pattern in patterns:
-            if pattern.severity == 'critical':
+            if pattern.severity == "critical":
                 score -= 0.2
-            elif pattern.severity == 'high':
+            elif pattern.severity == "high":
                 score -= 0.1
-            elif pattern.severity == 'medium':
+            elif pattern.severity == "medium":
                 score -= 0.05
 
         return max(score, 0.0)
@@ -521,32 +597,48 @@ class ASTAnalyzer:
     def _calculate_maintainability_index(self, metrics: list[CodeMetric]) -> float:
         """Calculate maintainability index"""
         # Simplified maintainability index calculation
-        loc_metric = next((m for m in metrics if m.metric_name == 'lines_of_code'), None)
-        complexity_metric = next((m for m in metrics if m.metric_name == 'cyclomatic_complexity'), None)
+        loc_metric = next(
+            (m for m in metrics if m.metric_name == "lines_of_code"), None
+        )
+        complexity_metric = next(
+            (m for m in metrics if m.metric_name == "cyclomatic_complexity"), None
+        )
 
         if not loc_metric or not complexity_metric:
             return 50.0
 
         # MI = 171 - 5.2 * ln(aveV) - 0.23 * aveC - 16.2 * ln(aveLOC)
         import math
-        mi = 171 - 5.2 * math.log(complexity_metric.value) - 0.23 * complexity_metric.value - 16.2 * math.log(loc_metric.value)
+
+        mi = (
+            171
+            - 5.2 * math.log(complexity_metric.value)
+            - 0.23 * complexity_metric.value
+            - 16.2 * math.log(loc_metric.value)
+        )
         return max(mi, 0.0)
 
-    def _calculate_technical_debt(self, metrics: list[CodeMetric], patterns: list[CodePattern]) -> float:
+    def _calculate_technical_debt(
+        self, metrics: list[CodeMetric], patterns: list[CodePattern]
+    ) -> float:
         """Calculate technical debt ratio"""
         len(patterns)
-        critical_issues = len([p for p in patterns if p.severity == 'critical'])
-        high_issues = len([p for p in patterns if p.severity == 'high'])
+        critical_issues = len([p for p in patterns if p.severity == "critical"])
+        high_issues = len([p for p in patterns if p.severity == "high"])
 
         # Technical debt = (critical * 10 + high * 5 + medium * 2 + low * 1) / total_lines
-        loc_metric = next((m for m in metrics if m.metric_name == 'lines_of_code'), None)
+        loc_metric = next(
+            (m for m in metrics if m.metric_name == "lines_of_code"), None
+        )
         if not loc_metric or loc_metric.value == 0:
             return 0.0
 
         debt_score = critical_issues * 10 + high_issues * 5
         return debt_score / loc_metric.value
 
-    def _generate_recommendations(self, metrics: list[CodeMetric], patterns: list[CodePattern]) -> list[str]:
+    def _generate_recommendations(
+        self, metrics: list[CodeMetric], patterns: list[CodePattern]
+    ) -> list[str]:
         """Generate improvement recommendations"""
         recommendations = []
 
@@ -557,7 +649,7 @@ class ASTAnalyzer:
 
         # Pattern-based recommendations
         for pattern in patterns:
-            if pattern.severity in ['critical', 'high']:
+            if pattern.severity in ["critical", "high"]:
                 recommendations.extend(pattern.suggestions)
 
         # Remove duplicates
@@ -566,7 +658,7 @@ class ASTAnalyzer:
     def _calculate_file_hash(self, file_path: Path) -> str:
         """Calculate file hash for caching"""
         try:
-            with open(file_path, 'rb') as f:
+            with open(file_path, "rb") as f:
                 return hashlib.sha256(f.read()).hexdigest()
         except Exception:
             return str(file_path)
@@ -588,41 +680,58 @@ class ASTAnalyzer:
     def get_analysis_summary(self, analyses: dict[str, CodeAnalysis]) -> dict[str, Any]:
         """Get summary of multiple analyses"""
         total_files = len(analyses)
-        total_lines = sum(a.metrics[1].value for a in analyses.values() if len(a.metrics) > 1)
-        avg_complexity = sum(a.complexity_score for a in analyses.values()) / total_files if total_files > 0 else 0
-        avg_quality = sum(a.quality_score for a in analyses.values()) / total_files if total_files > 0 else 0
+        total_lines = sum(
+            a.metrics[1].value for a in analyses.values() if len(a.metrics) > 1
+        )
+        avg_complexity = (
+            sum(a.complexity_score for a in analyses.values()) / total_files
+            if total_files > 0
+            else 0
+        )
+        avg_quality = (
+            sum(a.quality_score for a in analyses.values()) / total_files
+            if total_files > 0
+            else 0
+        )
 
         # Count issues by severity
-        issue_counts = {'critical': 0, 'high': 0, 'medium': 0, 'low': 0}
+        issue_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
         for analysis in analyses.values():
             for pattern in analysis.patterns:
                 issue_counts[pattern.severity] += 1
 
         return {
-            'total_files': total_files,
-            'total_lines': total_lines,
-            'average_complexity': avg_complexity,
-            'average_quality': avg_quality,
-            'issue_counts': issue_counts,
-            'files_with_issues': len([a for a in analyses.values() if a.patterns]),
-            'recommendations_count': sum(len(a.recommendations) for a in analyses.values())
+            "total_files": total_files,
+            "total_lines": total_lines,
+            "average_complexity": avg_complexity,
+            "average_quality": avg_quality,
+            "issue_counts": issue_counts,
+            "files_with_issues": len([a for a in analyses.values() if a.patterns]),
+            "recommendations_count": sum(
+                len(a.recommendations) for a in analyses.values()
+            ),
         }
+
 
 # Global AST analyzer instance
 ast_analyzer = ASTAnalyzer()
+
 
 # Convenience functions
 def analyze_code_file(file_path: str) -> CodeAnalysis:
     """Analyze a single code file"""
     return ast_analyzer.analyze_file(file_path)
 
+
 def analyze_code_directory(directory_path: str) -> dict[str, CodeAnalysis]:
     """Analyze all Python files in directory"""
     return ast_analyzer.analyze_directory(directory_path)
 
+
 def get_code_quality_summary(analyses: dict[str, CodeAnalysis]) -> dict[str, Any]:
     """Get code quality summary"""
     return ast_analyzer.get_analysis_summary(analyses)
+
 
 if __name__ == "__main__":
     # Example usage

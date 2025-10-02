@@ -22,25 +22,31 @@ from typing import Any, Optional
 # Import StillMe core observability components safely.
 try:
     from stillme_core.observability.logger import get_logger  # type: ignore
+
     logger = get_logger(__name__)
 except ImportError:
     import logging
+
     logger = logging.getLogger(__name__)
 
 try:
     from stillme_core.observability.metrics import get_metrics_collector  # type: ignore
+
     metrics = get_metrics_collector()
 except ImportError:
     metrics = None
 
 try:
     from stillme_core.observability.tracer import get_tracer  # type: ignore
+
     tracer = get_tracer()
 except ImportError:
     tracer = None
 
 # Check if observability is enabled
-OBSERVABILITY_ENABLED = logger is not None and metrics is not None and tracer is not None
+OBSERVABILITY_ENABLED = (
+    logger is not None and metrics is not None and tracer is not None
+)
 
 
 # --- Core Enumerations (Enums) ---
@@ -316,7 +322,9 @@ class IntelligentRouter:
             processing_time = time.time() - start_time
             if self.observability_enabled and self.metrics:
                 self.metrics.increment_counter("router_requests_total")
-                self.metrics.record_histogram("router_processing_time_seconds", processing_time)
+                self.metrics.record_histogram(
+                    "router_processing_time_seconds", processing_time
+                )
 
             return decision
 
@@ -329,7 +337,9 @@ class IntelligentRouter:
             # Fallback to simple routing
             return self._fallback_routing(request, context)
 
-    def _simple_analyze_request(self, request: str, context: RequestContext) -> TaskAnalysis:
+    def _simple_analyze_request(
+        self, request: str, context: RequestContext
+    ) -> TaskAnalysis:
         """Simple request analysis"""
         # Simple task type identification
         request_lower = request.lower()
@@ -337,7 +347,9 @@ class IntelligentRouter:
             task_type = TaskType.CODE_REVIEW
         elif any(keyword in request_lower for keyword in ["fix", "bug", "error"]):
             task_type = TaskType.BUG_FIX
-        elif any(keyword in request_lower for keyword in ["create", "build", "develop"]):
+        elif any(
+            keyword in request_lower for keyword in ["create", "build", "develop"]
+        ):
             task_type = TaskType.FEATURE_DEVELOPMENT
         else:
             task_type = TaskType.GENERAL
@@ -359,10 +371,12 @@ class IntelligentRouter:
             priority_score=0.5,
             confidence=0.8,
             suggested_agents=[AgentType.AGENTDEV],
-            reasoning="Simple analysis based on keywords and length"
+            reasoning="Simple analysis based on keywords and length",
         )
 
-    def _simple_make_decision(self, analysis: TaskAnalysis, context: RequestContext) -> RoutingDecision:
+    def _simple_make_decision(
+        self, analysis: TaskAnalysis, context: RequestContext
+    ) -> RoutingDecision:
         """Simple routing decision"""
         return RoutingDecision(
             primary_agent=AgentType.AGENTDEV,
@@ -372,10 +386,12 @@ class IntelligentRouter:
             resource_requirements={"cpu_intensive": False, "memory_intensive": False},
             fallback_plan="Manual review",
             reasoning="Simple routing to AgentDev",
-            confidence=analysis.confidence
+            confidence=analysis.confidence,
         )
 
-    def _fallback_routing(self, request: str, context: RequestContext) -> RoutingDecision:
+    def _fallback_routing(
+        self, request: str, context: RequestContext
+    ) -> RoutingDecision:
         """Fallback routing when analysis fails"""
         return RoutingDecision(
             primary_agent=AgentType.AGENTDEV,
@@ -385,5 +401,5 @@ class IntelligentRouter:
             resource_requirements={"cpu_intensive": False, "memory_intensive": False},
             fallback_plan="Manual review and routing",
             reasoning="Fallback routing due to analysis error",
-            confidence=0.3
+            confidence=0.3,
         )

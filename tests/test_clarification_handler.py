@@ -30,12 +30,14 @@ class TestClarificationHandler:
     @pytest.fixture
     def test_dataset(self):
         """Load test dataset from CSV"""
-        dataset_path = Path(__file__).parent.parent / "datasets" / "clarification_prompts.csv"
+        dataset_path = (
+            Path(__file__).parent.parent / "datasets" / "clarification_prompts.csv"
+        )
         if not dataset_path.exists():
             pytest.skip("Test dataset not found")
 
         prompts = []
-        with open(dataset_path, encoding='utf-8') as f:
+        with open(dataset_path, encoding="utf-8") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 prompts.append(row)
@@ -73,12 +75,14 @@ class TestClarificationHandler:
             "Write a Python function to calculate the factorial of a number",
             "Create a REST API endpoint for user authentication",
             "Build a React component for displaying user profiles",
-            "Design a database schema for an e-commerce application"
+            "Design a database schema for an e-commerce application",
         ]
 
         for prompt in clear_prompts:
             result = handler.detect_ambiguity(prompt)
-            assert result.needs_clarification is False, f"Clear prompt '{prompt}' was flagged as ambiguous"
+            assert (
+                result.needs_clarification is False
+            ), f"Clear prompt '{prompt}' was flagged as ambiguous"
             assert result.confidence < handler.confidence_threshold
 
     def test_vague_instruction_detection(self, handler):
@@ -88,14 +92,19 @@ class TestClarificationHandler:
             "Make it better",
             "Fix this",
             "Help me",
-            "Create something"
+            "Create something",
         ]
 
         for prompt in vague_prompts:
             result = handler.detect_ambiguity(prompt)
-            assert result.needs_clarification is True, f"Vague prompt '{prompt}' was not flagged"
+            assert (
+                result.needs_clarification is True
+            ), f"Vague prompt '{prompt}' was not flagged"
             # Accept either vague_instruction or ambiguous_reference for these prompts
-            assert result.category in ["vague_instruction", "ambiguous_reference"], f"Unexpected category: {result.category}"
+            assert result.category in [
+                "vague_instruction",
+                "ambiguous_reference",
+            ], f"Unexpected category: {result.category}"
             assert result.question is not None
 
     def test_missing_context_detection(self, handler):
@@ -104,27 +113,26 @@ class TestClarificationHandler:
             "Build an app",
             "Create a website",
             "Write a program",
-            "Design a system"
+            "Design a system",
         ]
 
         for prompt in context_prompts:
             result = handler.detect_ambiguity(prompt)
-            assert result.needs_clarification is True, f"Missing context prompt '{prompt}' was not flagged"
+            assert (
+                result.needs_clarification is True
+            ), f"Missing context prompt '{prompt}' was not flagged"
             assert result.category == "missing_context"
             assert result.question is not None
 
     def test_ambiguous_reference_detection(self, handler):
         """Test ambiguous reference detection"""
-        reference_prompts = [
-            "Do it now",
-            "Fix that",
-            "Change this",
-            "Update it"
-        ]
+        reference_prompts = ["Do it now", "Fix that", "Change this", "Update it"]
 
         for prompt in reference_prompts:
             result = handler.detect_ambiguity(prompt)
-            assert result.needs_clarification is True, f"Ambiguous reference prompt '{prompt}' was not flagged"
+            assert (
+                result.needs_clarification is True
+            ), f"Ambiguous reference prompt '{prompt}' was not flagged"
             assert result.category == "ambiguous_reference"
             assert result.question is not None
 
@@ -134,14 +142,19 @@ class TestClarificationHandler:
             "Make it faster",
             "Make it smaller",
             "Make it better",
-            "Make it more secure"
+            "Make it more secure",
         ]
 
         for prompt in fuzzy_prompts:
             result = handler.detect_ambiguity(prompt)
-            assert result.needs_clarification is True, f"Fuzzy goal prompt '{prompt}' was not flagged"
+            assert (
+                result.needs_clarification is True
+            ), f"Fuzzy goal prompt '{prompt}' was not flagged"
             # Accept either fuzzy_goal or vague_instruction for these prompts
-            assert result.category in ["fuzzy_goal", "vague_instruction"], f"Unexpected category: {result.category}"
+            assert result.category in [
+                "fuzzy_goal",
+                "vague_instruction",
+            ], f"Unexpected category: {result.category}"
             assert result.question is not None
 
     def test_slang_informal_detection(self, handler):
@@ -150,14 +163,19 @@ class TestClarificationHandler:
             "gimme some code",
             "hook me up",
             "sort this out",
-            "make it pop"
+            "make it pop",
         ]
 
         for prompt in slang_prompts:
             result = handler.detect_ambiguity(prompt)
-            assert result.needs_clarification is True, f"Slang prompt '{prompt}' was not flagged"
+            assert (
+                result.needs_clarification is True
+            ), f"Slang prompt '{prompt}' was not flagged"
             # Accept either slang_informal or vague_instruction for these prompts
-            assert result.category in ["slang_informal", "vague_instruction"], f"Unexpected category: {result.category}"
+            assert result.category in [
+                "slang_informal",
+                "vague_instruction",
+            ], f"Unexpected category: {result.category}"
             assert result.question is not None
 
     def test_contextual_dependency_detection(self, handler):
@@ -166,12 +184,14 @@ class TestClarificationHandler:
             "do the same thing",
             "like before",
             "as usual",
-            "like last time"
+            "like last time",
         ]
 
         for prompt in dependency_prompts:
             result = handler.detect_ambiguity(prompt)
-            assert result.needs_clarification is True, f"Contextual dependency prompt '{prompt}' was not flagged"
+            assert (
+                result.needs_clarification is True
+            ), f"Contextual dependency prompt '{prompt}' was not flagged"
             assert result.category == "contextual_dependency"
             assert result.question is not None
 
@@ -181,23 +201,41 @@ class TestClarificationHandler:
             "analyze this",
             "process this",
             "handle this",
-            "manage this"
+            "manage this",
         ]
 
         for prompt in cross_domain_prompts:
             result = handler.detect_ambiguity(prompt)
-            assert result.needs_clarification is True, f"Cross-domain prompt '{prompt}' was not flagged"
+            assert (
+                result.needs_clarification is True
+            ), f"Cross-domain prompt '{prompt}' was not flagged"
             assert result.category == "cross_domain"
             assert result.question is not None
 
     def test_clarification_question_generation(self, handler):
         """Test clarification question generation"""
         test_cases = [
-            ("Write code for this", "vague_instruction", "What exactly would you like me to write?"),
-            ("Build an app", "missing_context", "What type of build|app would you like me to create?"),
+            (
+                "Write code for this",
+                "vague_instruction",
+                "What exactly would you like me to write?",
+            ),
+            (
+                "Build an app",
+                "missing_context",
+                "What type of build|app would you like me to create?",
+            ),
             ("Do it now", "ambiguous_reference", "What does 'it' refer to?"),
-            ("Make it faster", "fuzzy_goal", "What exactly would you like me to make|What aspect should be faster?"),
-            ("gimme some code", "slang_informal", "I'd be happy to help! Could you clarify what you need?")
+            (
+                "Make it faster",
+                "fuzzy_goal",
+                "What exactly would you like me to make|What aspect should be faster?",
+            ),
+            (
+                "gimme some code",
+                "slang_informal",
+                "I'd be happy to help! Could you clarify what you need?",
+            ),
         ]
 
         for prompt, expected_category, expected_question_start in test_cases:
@@ -205,16 +243,26 @@ class TestClarificationHandler:
             assert result.needs_clarification is True
             # Accept multiple categories for ambiguous cases
             if expected_category == "fuzzy_goal":
-                assert result.category in ["fuzzy_goal", "vague_instruction"], f"Unexpected category: {result.category}"
+                assert result.category in [
+                    "fuzzy_goal",
+                    "vague_instruction",
+                ], f"Unexpected category: {result.category}"
             else:
                 assert result.category == expected_category
             assert result.question is not None
             # Check if question contains expected text (more flexible)
             expected_texts = expected_question_start.split("|")
-            matches = [expected_text.lower() in result.question.lower() for expected_text in expected_texts]
+            matches = [
+                expected_text.lower() in result.question.lower()
+                for expected_text in expected_texts
+            ]
             if not any(matches):
-                print(f"DEBUG: Prompt='{prompt}', Question='{result.question}', Expected='{expected_question_start}', Matches={matches}")
-            assert any(matches), f"Question '{result.question}' does not contain any of: {expected_texts}"
+                print(
+                    f"DEBUG: Prompt='{prompt}', Question='{result.question}', Expected='{expected_question_start}', Matches={matches}"
+                )
+            assert any(
+                matches
+            ), f"Question '{result.question}' does not contain any of: {expected_texts}"
 
     def test_confidence_calculation(self, handler):
         """Test confidence score calculation"""
@@ -223,7 +271,7 @@ class TestClarificationHandler:
             "Write code for this",
             "Build an app",
             "Do it now",
-            "Make it better"
+            "Make it better",
         ]
 
         for prompt in test_prompts:
@@ -237,7 +285,7 @@ class TestClarificationHandler:
         # Test with context
         context = {
             "previous_messages": ["I need help with my project"],
-            "user_preferences": {"language": "Python"}
+            "user_preferences": {"language": "Python"},
         }
 
         result = handler.detect_ambiguity("Write code for this", context)
@@ -253,7 +301,9 @@ class TestClarificationHandler:
         assert len(question) > 0
 
         # Test clear prompt
-        question = handler.generate_clarification("Write a Python function to calculate factorial")
+        question = handler.generate_clarification(
+            "Write a Python function to calculate factorial"
+        )
         assert question is None
 
     def test_get_clarification_stats(self, handler):
@@ -306,7 +356,7 @@ class TestClarificationHandler:
         # Test exceeding max rounds
         result = handler.detect_ambiguity(
             "Write code for this",
-            round_number=3  # Exceeds max_rounds=2
+            round_number=3,  # Exceeds max_rounds=2
         )
 
         assert not result.needs_clarification
@@ -316,10 +366,7 @@ class TestClarificationHandler:
     def test_trace_id_support(self, handler):
         """Test trace ID support"""
         trace_id = "test_trace_123"
-        result = handler.detect_ambiguity(
-            "Write code for this",
-            trace_id=trace_id
-        )
+        result = handler.detect_ambiguity("Write code for this", trace_id=trace_id)
 
         assert result.trace_id == trace_id
         assert result.max_rounds == 2
@@ -345,14 +392,17 @@ class TestClarificationHandler:
 
         # Record feedback using asyncio.run
         import asyncio
-        asyncio.run(handler.record_clarification_feedback(
-            prompt="Build an app",
-            question="Which framework? Flask or FastAPI?",
-            user_reply="FastAPI",
-            success=True,
-            context={"domain_hint": "web"},
-            trace_id="test_trace"
-        ))
+
+        asyncio.run(
+            handler.record_clarification_feedback(
+                prompt="Build an app",
+                question="Which framework? Flask or FastAPI?",
+                user_reply="FastAPI",
+                success=True,
+                context={"domain_hint": "web"},
+                trace_id="test_trace",
+            )
+        )
 
         # Check statistics
         stats = handler.get_clarification_stats()
@@ -371,11 +421,17 @@ class TestClarificationHandler:
 
             # Check if clarification is needed based on expected behavior
             if "Should ask" in expected_behavior:
-                assert result.needs_clarification is True, f"Prompt '{prompt}' should need clarification"
-                assert result.question is not None, f"Prompt '{prompt}' should generate a question"
+                assert (
+                    result.needs_clarification is True
+                ), f"Prompt '{prompt}' should need clarification"
+                assert (
+                    result.question is not None
+                ), f"Prompt '{prompt}' should generate a question"
             else:
                 # For prompts that shouldn't need clarification
-                assert result.needs_clarification is False, f"Prompt '{prompt}' should not need clarification"
+                assert (
+                    result.needs_clarification is False
+                ), f"Prompt '{prompt}' should not need clarification"
 
     def test_performance(self, handler):
         """Test performance with multiple prompts"""
@@ -389,7 +445,7 @@ class TestClarificationHandler:
             "Create a function",
             "gimme some code",
             "do the same thing",
-            "analyze this"
+            "analyze this",
         ] * 10  # 80 prompts total
 
         start_time = time.time()
@@ -402,7 +458,9 @@ class TestClarificationHandler:
         duration = end_time - start_time
 
         # Should process 80 prompts in less than 1 second
-        assert duration < 1.0, f"Performance test failed: {duration:.3f}s for 80 prompts"
+        assert (
+            duration < 1.0
+        ), f"Performance test failed: {duration:.3f}s for 80 prompts"
 
     def test_edge_cases(self, handler):
         """Test edge cases"""
@@ -418,7 +476,11 @@ class TestClarificationHandler:
             result = handler.detect_ambiguity(prompt)
             assert result is not None
             assert 0.0 <= result.confidence <= 1.0
-            assert result.category is None or result.category in handler.ambiguity_patterns.keys()
+            assert (
+                result.category is None
+                or result.category in handler.ambiguity_patterns.keys()
+            )
+
 
 # Integration tests
 class TestClarificationIntegration:
@@ -433,10 +495,10 @@ class TestClarificationIntegration:
             "conversation_history": [
                 {"role": "user", "content": "I'm working on a web application"},
                 {"role": "assistant", "content": "What kind of web application?"},
-                {"role": "user", "content": "An e-commerce site"}
+                {"role": "user", "content": "An e-commerce site"},
             ],
             "current_topic": "web_development",
-            "user_preferences": {"language": "JavaScript", "framework": "React"}
+            "user_preferences": {"language": "JavaScript", "framework": "React"},
         }
 
         # Test contextual clarification
@@ -459,6 +521,7 @@ class TestClarificationIntegration:
         result = handler.detect_ambiguity("Write code for this", None)
         assert result.needs_clarification is True
         assert result.question is not None
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

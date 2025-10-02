@@ -8,7 +8,9 @@ import sys
 import time
 
 # Add current directory to path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(
+    0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+)
 
 from agentdev_validation_system import AgentDevValidator
 
@@ -54,6 +56,7 @@ def main():
     print(report)
 
     print("\n🎉 Test hoàn tất!")
+
 
 if __name__ == "__main__":
     main()

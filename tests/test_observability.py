@@ -1,6 +1,7 @@
 """
 Tests for Observability
 """
+
 import json
 import time
 from unittest.mock import MagicMock, patch
@@ -81,7 +82,9 @@ class TestReflexMetrics:
         metrics.false_positives = 2
         metrics.false_negatives = 2
         # precision = 0.8, recall = 0.8, f1 = 0.8
-        assert abs(metrics.f1_score() - 0.8) < 0.001  # Allow for floating point precision
+        assert (
+            abs(metrics.f1_score() - 0.8) < 0.001
+        )  # Allow for floating point precision
 
     def test_fp_rate_calculation(self):
         """Test false positive rate calculation"""
@@ -98,6 +101,7 @@ class TestReflexMetrics:
         metrics.false_positives = 2
         metrics.true_negatives = 8
         assert metrics.fp_rate() == 0.2
+
 
 class TestProcessingTimeTracker:
     """Test ProcessingTimeTracker functionality"""
@@ -163,6 +167,7 @@ class TestProcessingTimeTracker:
 
         assert tracker.get_average() == 20.0
 
+
 class TestShadowEvaluator:
     """Test ShadowEvaluator functionality"""
 
@@ -172,7 +177,7 @@ class TestShadowEvaluator:
             "evaluation_window_hours": 12,
             "min_samples_for_evaluation": 50,
             "precision_threshold": 0.9,
-            "recall_threshold": 0.8
+            "recall_threshold": 0.8,
         }
         evaluator = ShadowEvaluator(config)
 
@@ -191,7 +196,7 @@ class TestShadowEvaluator:
             reasoning_decision="allow_reflex",
             processing_time_ms=5.0,
             scores={"pattern_score": 0.8},
-            trace_id="test-trace-1"
+            trace_id="test-trace-1",
         )
 
         assert len(evaluator.samples) == 1
@@ -211,7 +216,7 @@ class TestShadowEvaluator:
                 reasoning_decision="allow_reflex",
                 processing_time_ms=5.0,
                 scores={"pattern_score": 0.8},
-                trace_id=f"test-trace-{i}"
+                trace_id=f"test-trace-{i}",
             )
 
         evaluation = evaluator.evaluate_performance()
@@ -232,7 +237,7 @@ class TestShadowEvaluator:
                 reasoning_decision=reasoning_decision,
                 processing_time_ms=5.0 + i,
                 scores={"pattern_score": 0.8},
-                trace_id=f"test-trace-{i}"
+                trace_id=f"test-trace-{i}",
             )
 
         evaluation = evaluator.evaluate_performance()
@@ -242,9 +247,13 @@ class TestShadowEvaluator:
         metrics = evaluation["metrics"]
         assert metrics["total_requests"] == 10
         assert metrics["true_positives"] == 6  # Both said allow_reflex
-        assert metrics["false_positives"] == 0  # Reflex said fallback, reasoning said allow_reflex
+        assert (
+            metrics["false_positives"] == 0
+        )  # Reflex said fallback, reasoning said allow_reflex
         assert metrics["true_negatives"] == 2  # Both said fallback
-        assert metrics["false_negatives"] == 2  # Reflex said allow_reflex, reasoning said fallback
+        assert (
+            metrics["false_negatives"] == 2
+        )  # Reflex said allow_reflex, reasoning said fallback
 
     def test_recent_samples_filtering(self):
         """Test filtering samples by time window"""
@@ -258,7 +267,7 @@ class TestShadowEvaluator:
             processing_time_ms=5.0,
             scores={"pattern_score": 0.8},
             trace_id="old-trace",
-            timestamp=old_time
+            timestamp=old_time,
         )
 
         # Add recent sample
@@ -269,7 +278,7 @@ class TestShadowEvaluator:
             processing_time_ms=5.0,
             scores={"pattern_score": 0.8},
             trace_id="recent-trace",
-            timestamp=recent_time
+            timestamp=recent_time,
         )
 
         # Get recent samples (last 30 minutes)
@@ -288,7 +297,7 @@ class TestShadowEvaluator:
                 reasoning_decision="allow_reflex",
                 processing_time_ms=5.0,
                 scores={"pattern_score": 0.8},
-                trace_id=f"test-trace-{i}"
+                trace_id=f"test-trace-{i}",
             )
 
         report = evaluator.generate_report()
@@ -297,6 +306,7 @@ class TestShadowEvaluator:
         assert "Recall" in report
         assert "F1 Score" in report
         assert "Confusion Matrix" in report
+
 
 class TestObservabilityManager:
     """Test ObservabilityManager functionality"""
@@ -307,7 +317,7 @@ class TestObservabilityManager:
             "log_level": "DEBUG",
             "log_format": "json",
             "enable_metrics": True,
-            "enable_shadow_evaluation": True
+            "enable_shadow_evaluation": True,
         }
         manager = ObservabilityManager(config)
 
@@ -321,7 +331,9 @@ class TestObservabilityManager:
         manager = ObservabilityManager()
 
         # Mock logger to capture log calls
-        with patch('stillme_core.middleware.observability.logging.getLogger') as mock_get_logger:
+        with patch(
+            "stillme_core.middleware.observability.logging.getLogger"
+        ) as mock_get_logger:
             mock_logger = MagicMock()
             mock_get_logger.return_value = mock_logger
 
@@ -334,7 +346,7 @@ class TestObservabilityManager:
                 why_reflex={"reason": "test"},
                 user_id="user1",
                 tenant_id="tenant1",
-                shadow_mode=True
+                shadow_mode=True,
             )
 
             # Verify log was called
@@ -356,7 +368,7 @@ class TestObservabilityManager:
             confidence=0.8,
             processing_time_ms=5.0,
             scores={"pattern_score": 0.8},
-            why_reflex={"reason": "test"}
+            why_reflex={"reason": "test"},
         )
 
         manager.log_reflex_decision(
@@ -365,7 +377,7 @@ class TestObservabilityManager:
             confidence=0.3,
             processing_time_ms=10.0,
             scores={"pattern_score": 0.3},
-            why_reflex={"reason": "test"}
+            why_reflex={"reason": "test"},
         )
 
         # Check metrics
@@ -385,7 +397,7 @@ class TestObservabilityManager:
             reflex_decision="allow_reflex",
             reasoning_decision="allow_reflex",
             processing_time_ms=5.0,
-            scores={"pattern_score": 0.8}
+            scores={"pattern_score": 0.8},
         )
 
         # Check evaluation
@@ -394,7 +406,9 @@ class TestObservabilityManager:
 
     def test_shadow_report_generation(self):
         """Test shadow report generation"""
-        manager = ObservabilityManager({"shadow_evaluation": {"min_samples_for_evaluation": 1}})
+        manager = ObservabilityManager(
+            {"shadow_evaluation": {"min_samples_for_evaluation": 1}}
+        )
 
         # Add sample
         manager.log_shadow_evaluation(
@@ -402,7 +416,7 @@ class TestObservabilityManager:
             reflex_decision="allow_reflex",
             reasoning_decision="allow_reflex",
             processing_time_ms=5.0,
-            scores={"pattern_score": 0.8}
+            scores={"pattern_score": 0.8},
         )
 
         # Generate report
@@ -420,7 +434,7 @@ class TestObservabilityManager:
             confidence=0.8,
             processing_time_ms=5.0,
             scores={"pattern_score": 0.8},
-            why_reflex={"reason": "test"}
+            why_reflex={"reason": "test"},
         )
 
         # Verify data exists

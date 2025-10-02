@@ -26,9 +26,11 @@ import yaml
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class FeedbackRecord:
     """Individual feedback record"""
+
     timestamp: datetime
     niche_topic: str
     niche_score: float
@@ -56,9 +58,11 @@ class FeedbackRecord:
     # Additional context
     notes: str = ""
 
+
 @dataclass
 class LearningWeights:
     """Learning weights suggestion"""
+
     original_weights: dict[str, float]
     suggested_weights: dict[str, float]
     changes: dict[str, float]
@@ -66,6 +70,7 @@ class LearningWeights:
     sample_size: int
     rationale: str
     timestamp: datetime
+
 
 class FeedbackTracker:
     """Track and analyze feedback for learning weights"""
@@ -82,14 +87,27 @@ class FeedbackTracker:
         """Initialize CSV file with headers if it doesn't exist"""
         if not self.feedback_file.exists():
             headers = [
-                "timestamp", "niche_topic", "niche_score", "confidence",
-                "feasibility_fit", "competition_proxy",
-                "impressions", "clicks", "signups", "trials", "paid_conversions", "revenue",
-                "time_to_first_value", "user_engagement_score", "support_tickets",
-                "traffic_source", "campaign_id", "notes"
+                "timestamp",
+                "niche_topic",
+                "niche_score",
+                "confidence",
+                "feasibility_fit",
+                "competition_proxy",
+                "impressions",
+                "clicks",
+                "signups",
+                "trials",
+                "paid_conversions",
+                "revenue",
+                "time_to_first_value",
+                "user_engagement_score",
+                "support_tickets",
+                "traffic_source",
+                "campaign_id",
+                "notes",
             ]
 
-            with open(self.feedback_file, 'w', newline='', encoding='utf-8') as f:
+            with open(self.feedback_file, "w", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
                 writer.writerow(headers)
 
@@ -98,28 +116,30 @@ class FeedbackTracker:
     def add_feedback(self, feedback: FeedbackRecord):
         """Add feedback record to CSV"""
         try:
-            with open(self.feedback_file, 'a', newline='', encoding='utf-8') as f:
+            with open(self.feedback_file, "a", newline="", encoding="utf-8") as f:
                 writer = csv.writer(f)
-                writer.writerow([
-                    feedback.timestamp.isoformat(),
-                    feedback.niche_topic,
-                    feedback.niche_score,
-                    feedback.confidence,
-                    feedback.feasibility_fit,
-                    feedback.competition_proxy,
-                    feedback.impressions,
-                    feedback.clicks,
-                    feedback.signups,
-                    feedback.trials,
-                    feedback.paid_conversions,
-                    feedback.revenue,
-                    feedback.time_to_first_value,
-                    feedback.user_engagement_score,
-                    feedback.support_tickets,
-                    feedback.traffic_source,
-                    feedback.campaign_id,
-                    feedback.notes
-                ])
+                writer.writerow(
+                    [
+                        feedback.timestamp.isoformat(),
+                        feedback.niche_topic,
+                        feedback.niche_score,
+                        feedback.confidence,
+                        feedback.feasibility_fit,
+                        feedback.competition_proxy,
+                        feedback.impressions,
+                        feedback.clicks,
+                        feedback.signups,
+                        feedback.trials,
+                        feedback.paid_conversions,
+                        feedback.revenue,
+                        feedback.time_to_first_value,
+                        feedback.user_engagement_score,
+                        feedback.support_tickets,
+                        feedback.traffic_source,
+                        feedback.campaign_id,
+                        feedback.notes,
+                    ]
+                )
 
             self.logger.info(f"✅ Added feedback for niche: {feedback.niche_topic}")
 
@@ -133,11 +153,11 @@ class FeedbackTracker:
                 return pd.DataFrame()
 
             df = pd.read_csv(self.feedback_file)
-            df['timestamp'] = pd.to_datetime(df['timestamp'])
+            df["timestamp"] = pd.to_datetime(df["timestamp"])
 
             # Filter by date range
             cutoff_date = datetime.now() - timedelta(days=days)
-            df = df[df['timestamp'] >= cutoff_date]
+            df = df[df["timestamp"] >= cutoff_date]
 
             return df
 
@@ -153,42 +173,54 @@ class FeedbackTracker:
         metrics = {}
 
         # Conversion metrics
-        total_impressions = df['impressions'].sum()
-        total_clicks = df['clicks'].sum()
-        total_signups = df['signups'].sum()
-        total_trials = df['trials'].sum()
-        total_paid = df['paid_conversions'].sum()
-        total_revenue = df['revenue'].sum()
+        total_impressions = df["impressions"].sum()
+        total_clicks = df["clicks"].sum()
+        total_signups = df["signups"].sum()
+        total_trials = df["trials"].sum()
+        total_paid = df["paid_conversions"].sum()
+        total_revenue = df["revenue"].sum()
 
-        metrics['conversion_rates'] = {
-            'impression_to_click': total_clicks / total_impressions if total_impressions > 0 else 0,
-            'click_to_signup': total_signups / total_clicks if total_clicks > 0 else 0,
-            'signup_to_trial': total_trials / total_signups if total_signups > 0 else 0,
-            'trial_to_paid': total_paid / total_trials if total_trials > 0 else 0,
-            'overall_conversion': total_paid / total_impressions if total_impressions > 0 else 0
+        metrics["conversion_rates"] = {
+            "impression_to_click": total_clicks / total_impressions
+            if total_impressions > 0
+            else 0,
+            "click_to_signup": total_signups / total_clicks if total_clicks > 0 else 0,
+            "signup_to_trial": total_trials / total_signups if total_signups > 0 else 0,
+            "trial_to_paid": total_paid / total_trials if total_trials > 0 else 0,
+            "overall_conversion": total_paid / total_impressions
+            if total_impressions > 0
+            else 0,
         }
 
         # Revenue metrics
-        metrics['revenue'] = {
-            'total_revenue': total_revenue,
-            'revenue_per_impression': total_revenue / total_impressions if total_impressions > 0 else 0,
-            'revenue_per_signup': total_revenue / total_signups if total_signups > 0 else 0,
-            'revenue_per_paid': total_revenue / total_paid if total_paid > 0 else 0
+        metrics["revenue"] = {
+            "total_revenue": total_revenue,
+            "revenue_per_impression": total_revenue / total_impressions
+            if total_impressions > 0
+            else 0,
+            "revenue_per_signup": total_revenue / total_signups
+            if total_signups > 0
+            else 0,
+            "revenue_per_paid": total_revenue / total_paid if total_paid > 0 else 0,
         }
 
         # Engagement metrics
-        metrics['engagement'] = {
-            'avg_time_to_value': df['time_to_first_value'].mean(),
-            'avg_engagement_score': df['user_engagement_score'].mean(),
-            'avg_support_tickets': df['support_tickets'].mean()
+        metrics["engagement"] = {
+            "avg_time_to_value": df["time_to_first_value"].mean(),
+            "avg_engagement_score": df["user_engagement_score"].mean(),
+            "avg_support_tickets": df["support_tickets"].mean(),
         }
 
         # Niche performance correlation
-        metrics['niche_correlations'] = {
-            'score_vs_conversion': df['niche_score'].corr(df['paid_conversions']),
-            'confidence_vs_engagement': df['confidence'].corr(df['user_engagement_score']),
-            'feasibility_vs_revenue': df['feasibility_fit'].corr(df['revenue']),
-            'competition_vs_conversion': df['competition_proxy'].corr(df['paid_conversions'])
+        metrics["niche_correlations"] = {
+            "score_vs_conversion": df["niche_score"].corr(df["paid_conversions"]),
+            "confidence_vs_engagement": df["confidence"].corr(
+                df["user_engagement_score"]
+            ),
+            "feasibility_vs_revenue": df["feasibility_fit"].corr(df["revenue"]),
+            "competition_vs_conversion": df["competition_proxy"].corr(
+                df["paid_conversions"]
+            ),
         }
 
         return metrics
@@ -199,8 +231,13 @@ class FeedbackTracker:
             return {}
 
         # Calculate correlation between each weight component and performance
-        performance_metrics = ['paid_conversions', 'revenue', 'user_engagement_score']
-        weight_components = ['niche_score', 'confidence', 'feasibility_fit', 'competition_proxy']
+        performance_metrics = ["paid_conversions", "revenue", "user_engagement_score"]
+        weight_components = [
+            "niche_score",
+            "confidence",
+            "feasibility_fit",
+            "competition_proxy",
+        ]
 
         effectiveness = {}
 
@@ -217,8 +254,9 @@ class FeedbackTracker:
 
         return effectiveness
 
-    def suggest_weight_adjustments(self, current_weights: dict[str, float],
-                                 days: int = 30) -> LearningWeights:
+    def suggest_weight_adjustments(
+        self, current_weights: dict[str, float], days: int = 30
+    ) -> LearningWeights:
         """Suggest weight adjustments based on feedback"""
         try:
             df = self.get_feedback_data(days)
@@ -231,7 +269,7 @@ class FeedbackTracker:
                     confidence=0.0,
                     sample_size=len(df),
                     rationale="Insufficient data for weight adjustments",
-                    timestamp=datetime.now()
+                    timestamp=datetime.now(),
                 )
 
             # Analyze effectiveness
@@ -244,13 +282,13 @@ class FeedbackTracker:
 
             # Map effectiveness to weight components
             weight_mapping = {
-                'trend_momentum': 'niche_score',
-                'github_velocity': 'niche_score',
-                'hackernews_heat': 'niche_score',
-                'news_delta': 'niche_score',
-                'reddit_engagement': 'niche_score',
-                'feasibility_fit': 'feasibility_fit',
-                'competition_proxy': 'competition_proxy'
+                "trend_momentum": "niche_score",
+                "github_velocity": "niche_score",
+                "hackernews_heat": "niche_score",
+                "news_delta": "niche_score",
+                "reddit_engagement": "niche_score",
+                "feasibility_fit": "feasibility_fit",
+                "competition_proxy": "competition_proxy",
             }
 
             # Adjust weights based on effectiveness
@@ -260,8 +298,12 @@ class FeedbackTracker:
 
                     # Adjust weight based on effectiveness
                     # Positive correlation = increase weight, negative = decrease
-                    adjustment_factor = 1.0 + (effectiveness_score * 0.1)  # Max 10% change
-                    adjustment_factor = max(0.5, min(1.5, adjustment_factor))  # Limit to 50%-150%
+                    adjustment_factor = 1.0 + (
+                        effectiveness_score * 0.1
+                    )  # Max 10% change
+                    adjustment_factor = max(
+                        0.5, min(1.5, adjustment_factor)
+                    )  # Limit to 50%-150%
 
                     old_weight = current_weights[weight_name]
                     new_weight = old_weight * adjustment_factor
@@ -285,13 +327,22 @@ class FeedbackTracker:
             if sample_size >= 10:
                 rationale_parts.append(f"Based on {sample_size} feedback samples")
 
-            if performance_metrics.get('conversion_rates', {}).get('overall_conversion', 0) > 0.05:
+            if (
+                performance_metrics.get("conversion_rates", {}).get(
+                    "overall_conversion", 0
+                )
+                > 0.05
+            ):
                 rationale_parts.append("Strong conversion performance observed")
 
             if any(abs(change) > 0.02 for change in changes.values()):
                 rationale_parts.append("Significant weight adjustments recommended")
 
-            rationale = ". ".join(rationale_parts) if rationale_parts else "Minimal adjustments based on limited data"
+            rationale = (
+                ". ".join(rationale_parts)
+                if rationale_parts
+                else "Minimal adjustments based on limited data"
+            )
 
             return LearningWeights(
                 original_weights=current_weights,
@@ -300,7 +351,7 @@ class FeedbackTracker:
                 confidence=confidence,
                 sample_size=sample_size,
                 rationale=rationale,
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
 
         except Exception as e:
@@ -312,11 +363,14 @@ class FeedbackTracker:
                 confidence=0.0,
                 sample_size=0,
                 rationale=f"Error in analysis: {str(e)}",
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
 
-    def export_suggested_weights(self, learning_weights: LearningWeights,
-                               output_file: str = "policies/niche_weights.yaml.suggested"):
+    def export_suggested_weights(
+        self,
+        learning_weights: LearningWeights,
+        output_file: str = "policies/niche_weights.yaml.suggested",
+    ):
         """Export suggested weights to YAML file"""
         try:
             output_path = Path(output_file)
@@ -325,7 +379,7 @@ class FeedbackTracker:
             # Load current weights structure
             current_weights_file = "policies/niche_weights.yaml"
             if Path(current_weights_file).exists():
-                with open(current_weights_file, encoding='utf-8') as f:
+                with open(current_weights_file, encoding="utf-8") as f:
                     weights_structure = yaml.safe_load(f)
             else:
                 weights_structure = {"scoring_weights": {}}
@@ -339,12 +393,14 @@ class FeedbackTracker:
                 "confidence": learning_weights.confidence,
                 "sample_size": learning_weights.sample_size,
                 "rationale": learning_weights.rationale,
-                "changes": learning_weights.changes
+                "changes": learning_weights.changes,
             }
 
             # Write suggested weights
-            with open(output_path, 'w', encoding='utf-8') as f:
-                yaml.dump(weights_structure, f, default_flow_style=False, allow_unicode=True)
+            with open(output_path, "w", encoding="utf-8") as f:
+                yaml.dump(
+                    weights_structure, f, default_flow_style=False, allow_unicode=True
+                )
 
             self.logger.info(f"✅ Exported suggested weights to: {output_path}")
 
@@ -359,18 +415,18 @@ class FeedbackTracker:
             return {
                 "status": "no_data",
                 "message": "No feedback data available",
-                "metrics": {}
+                "metrics": {},
             }
 
         metrics = self.calculate_performance_metrics(df)
 
         # Calculate trends
-        recent_df = df[df['timestamp'] >= datetime.now() - timedelta(days=7)]
-        older_df = df[df['timestamp'] < datetime.now() - timedelta(days=7)]
+        recent_df = df[df["timestamp"] >= datetime.now() - timedelta(days=7)]
+        older_df = df[df["timestamp"] < datetime.now() - timedelta(days=7)]
 
         trends = {}
         if not recent_df.empty and not older_df.empty:
-            for metric in ['impressions', 'clicks', 'signups', 'revenue']:
+            for metric in ["impressions", "clicks", "signups", "revenue"]:
                 if metric in df.columns:
                     recent_avg = recent_df[metric].mean()
                     older_avg = older_df[metric].mean()
@@ -383,18 +439,24 @@ class FeedbackTracker:
             "total_records": len(df),
             "metrics": metrics,
             "trends": trends,
-            "top_performing_niches": df.groupby('niche_topic')['revenue'].sum().nlargest(5).to_dict()
+            "top_performing_niches": df.groupby("niche_topic")["revenue"]
+            .sum()
+            .nlargest(5)
+            .to_dict(),
         }
 
-def update_weights_suggestion(feedback_file: str = "data/feedback.csv",
-                            weights_file: str = "policies/niche_weights.yaml",
-                            output_file: str = "policies/niche_weights.yaml.suggested") -> LearningWeights:
+
+def update_weights_suggestion(
+    feedback_file: str = "data/feedback.csv",
+    weights_file: str = "policies/niche_weights.yaml",
+    output_file: str = "policies/niche_weights.yaml.suggested",
+) -> LearningWeights:
     """Convenience function to update weight suggestions"""
     tracker = FeedbackTracker(feedback_file)
 
     # Load current weights
     try:
-        with open(weights_file, encoding='utf-8') as f:
+        with open(weights_file, encoding="utf-8") as f:
             weights_data = yaml.safe_load(f)
         current_weights = weights_data.get("scoring_weights", {})
     except:
@@ -407,6 +469,7 @@ def update_weights_suggestion(feedback_file: str = "data/feedback.csv",
     tracker.export_suggested_weights(learning_weights, output_file)
 
     return learning_weights
+
 
 if __name__ == "__main__":
     # Test feedback tracking
@@ -431,7 +494,7 @@ if __name__ == "__main__":
         support_tickets=1,
         traffic_source="google_ads",
         campaign_id="translation_001",
-        notes="Good initial performance"
+        notes="Good initial performance",
     )
 
     tracker.add_feedback(sample_feedback)
@@ -444,7 +507,7 @@ if __name__ == "__main__":
         "news_delta": 0.10,
         "reddit_engagement": 0.05,
         "competition_proxy": 0.15,
-        "feasibility_fit": 0.25
+        "feasibility_fit": 0.25,
     }
 
     learning_weights = tracker.suggest_weight_adjustments(current_weights)

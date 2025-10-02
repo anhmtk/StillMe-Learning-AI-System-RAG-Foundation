@@ -41,7 +41,7 @@ class TestSecurityComprehensive:
                 "enabled": True,
                 "encryption": {"algorithm": "AES-256-GCM"},
                 "rate_limiting": {"requests_per_minute": 60},
-                "input_validation": {"max_input_length": 10000}
+                "input_validation": {"max_input_length": 10000},
             }
         }
         return SecurityManager(config)
@@ -68,7 +68,7 @@ class TestSecurityComprehensive:
             "'; DROP TABLE users; --",
             "1' OR '1'='1",
             "admin'--",
-            "'; INSERT INTO users VALUES ('hacker', 'password'); --"
+            "'; INSERT INTO users VALUES ('hacker', 'password'); --",
         ]
 
         for malicious_input in malicious_inputs:
@@ -82,7 +82,7 @@ class TestSecurityComprehensive:
             "<script>alert('XSS')</script>",
             "javascript:alert('XSS')",
             "<img src=x onerror=alert('XSS')>",
-            "<iframe src='javascript:alert(\"XSS\")'></iframe>"
+            "<iframe src='javascript:alert(\"XSS\")'></iframe>",
         ]
 
         for malicious_input in malicious_inputs:
@@ -97,7 +97,7 @@ class TestSecurityComprehensive:
             "| cat /etc/passwd",
             "&& whoami",
             "`id`",
-            "$(whoami)"
+            "$(whoami)",
         ]
 
         for malicious_input in malicious_inputs:
@@ -111,7 +111,7 @@ class TestSecurityComprehensive:
             "../../../etc/passwd",
             "..\\..\\..\\windows\\system32\\config\\sam",
             "/etc/shadow",
-            "C:\\Windows\\System32\\config\\SAM"
+            "C:\\Windows\\System32\\config\\SAM",
         ]
 
         for malicious_input in malicious_inputs:
@@ -157,7 +157,9 @@ class TestSecurityComprehensive:
         assert session["active"]
 
         # Simulate timeout
-        with patch('time.time', return_value=time.time() + 3700):  # 1 hour + 100 seconds
+        with patch(
+            "time.time", return_value=time.time() + 3700
+        ):  # 1 hour + 100 seconds
             result = security_manager.validate_session(session["session_id"])
             assert not result["valid"]
             assert result["expired"]
@@ -231,15 +233,13 @@ class TestSecurityComprehensive:
         """Test CORS policy enforcement"""
         # Test allowed origin
         allowed_result = security_manager.validate_cors(
-            origin="https://stillme.ai",
-            method="GET"
+            origin="https://stillme.ai", method="GET"
         )
         assert allowed_result["allowed"]
 
         # Test disallowed origin
         disallowed_result = security_manager.validate_cors(
-            origin="https://malicious-site.com",
-            method="GET"
+            origin="https://malicious-site.com", method="GET"
         )
         assert not disallowed_result["allowed"]
 
@@ -275,7 +275,7 @@ class TestSecurityComprehensive:
     def test_code_vulnerability_scan(self, security_manager):
         """Test code vulnerability scanning"""
         # Create temporary file with vulnerable code
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
             f.write("""
 import os
 import subprocess
@@ -298,7 +298,7 @@ def vulnerable_function(user_input):
     def test_secrets_detection(self, security_manager):
         """Test secrets detection in code"""
         # Create temporary file with secrets
-        with tempfile.NamedTemporaryFile(mode='w', suffix='.py', delete=False) as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
             f.write("""
 # Hardcoded secrets (vulnerable)
 API_KEY = "sk-1234567890abcdef"
@@ -340,7 +340,7 @@ DATABASE_URL = "postgresql://user:password@localhost/db"
             "event_type": "authentication_failure",
             "user_id": "testuser",
             "ip_address": "192.168.1.100",
-            "timestamp": "2025-09-26T10:00:00Z"
+            "timestamp": "2025-09-26T10:00:00Z",
         }
 
         result = security_manager.log_security_event(event)
@@ -399,7 +399,7 @@ DATABASE_URL = "postgresql://user:password@localhost/db"
             "event_type": "data_processing",
             "user_id": "testuser",
             "data_type": "redacted_text",
-            "timestamp": "2025-09-26T10:00:00Z"
+            "timestamp": "2025-09-26T10:00:00Z",
         }
         audit_result = security_manager.log_security_event(audit_event)
         assert audit_result["logged"]
@@ -411,7 +411,7 @@ DATABASE_URL = "postgresql://user:password@localhost/db"
             "incident_type": "suspicious_activity",
             "severity": "high",
             "description": "Multiple failed login attempts",
-            "source_ip": "192.168.1.100"
+            "source_ip": "192.168.1.100",
         }
 
         # Test incident detection
@@ -426,11 +426,7 @@ DATABASE_URL = "postgresql://user:password@localhost/db"
 
 
 # Security Test Markers
-pytestmark = [
-    pytest.mark.security,
-    pytest.mark.comprehensive,
-    pytest.mark.integration
-]
+pytestmark = [pytest.mark.security, pytest.mark.comprehensive, pytest.mark.integration]
 
 
 # Test Configuration
@@ -445,7 +441,7 @@ class TestSecurityConfig:
             "max_concurrent_tests": 10,
             "security_scan_enabled": True,
             "compliance_check_enabled": True,
-            "vulnerability_scan_enabled": True
+            "vulnerability_scan_enabled": True,
         }
 
     @pytest.fixture(scope="session")
@@ -456,19 +452,19 @@ class TestSecurityConfig:
                 "<script>alert('XSS')</script>",
                 "'; DROP TABLE users; --",
                 "../../../etc/passwd",
-                "javascript:alert('XSS')"
+                "javascript:alert('XSS')",
             ],
             "pii_samples": [
                 "john.doe@example.com",
                 "555-123-4567",
                 "123-45-6789",
-                "4111-1111-1111-1111"
+                "4111-1111-1111-1111",
             ],
             "test_credentials": {
                 "valid_user": "testuser",
                 "valid_password": "TestPass123!",
-                "invalid_password": "wrongpassword"
-            }
+                "invalid_password": "wrongpassword",
+            },
         }
 
 

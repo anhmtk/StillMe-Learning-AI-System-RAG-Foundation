@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class AIManagerConfig:
     """AI Manager configuration"""
+
     model_preferences: Optional[dict[str, Any]] = None
     timeout: float = 30.0
     max_retries: int = 3
@@ -35,11 +36,7 @@ class AIManager:
 
     def health(self) -> dict[str, Any]:
         """Health check"""
-        return {
-            "ollama_up": True,
-            "model_present": True,
-            "tiny_generate_ok": True
-        }
+        return {"ollama_up": True, "model_present": True, "tiny_generate_ok": True}
 
     def set_mode(self, mode: str) -> bool:
         """Set AI mode"""
@@ -51,7 +48,7 @@ class AIManager:
         logger.warning(f"AIManager.compute_number({expression}): Stub implementation")
         try:
             # Basic safety check
-            if any(char in expression for char in ['import', 'exec', 'eval', '__']):
+            if any(char in expression for char in ["import", "exec", "eval", "__"]):
                 raise ValueError("Unsafe expression")
             return eval(expression)
         except Exception as e:

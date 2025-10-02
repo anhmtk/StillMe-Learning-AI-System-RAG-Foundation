@@ -3,6 +3,7 @@
 StillMe Sandbox Controller - Enhanced Security
 Kiểm soát truy cập internet với egress allowlist mạnh, redirect rules, và homoglyph protection
 """
+
 import logging
 import os
 import re
@@ -15,6 +16,7 @@ import idna  # For IDN/Punycode handling
 import yaml
 
 logger = logging.getLogger(__name__)
+
 
 class SandboxController:
     """Enhanced controller để kiểm soát sandbox và network access với bảo mật mạnh"""
@@ -42,10 +44,10 @@ class SandboxController:
 
         # Homoglyph detection patterns
         self.homoglyph_patterns = [
-            r'[а-я]',  # Cyrillic
-            r'[α-ω]',  # Greek
-            r'[０-９]',  # Full-width digits
-            r'[ａ-ｚ]',  # Full-width letters
+            r"[а-я]",  # Cyrillic
+            r"[α-ω]",  # Greek
+            r"[０-９]",  # Full-width digits
+            r"[ａ-ｚ]",  # Full-width letters
         ]
 
         # Statistics
@@ -57,17 +59,19 @@ class SandboxController:
             "scheme_blocked": 0,
             "homoglyph_blocked": 0,
             "redirect_blocked": 0,
-            "idn_blocked": 0
+            "idn_blocked": 0,
         }
 
     def _load_allowlist(self) -> set[str]:
         """Load allowlist from config file"""
         try:
             if self.config_file.exists():
-                with open(self.config_file, encoding='utf-8') as f:
+                with open(self.config_file, encoding="utf-8") as f:
                     config = yaml.safe_load(f)
-                    allowlist = set(config.get('allowed_domains', []))
-                    logger.info(f"✅ Loaded {len(allowlist)} domains from {self.config_file}")
+                    allowlist = set(config.get("allowed_domains", []))
+                    logger.info(
+                        f"✅ Loaded {len(allowlist)} domains from {self.config_file}"
+                    )
                     return allowlist
             else:
                 # Fallback to default allowlist
@@ -82,9 +86,11 @@ class SandboxController:
                     "api.deepseek.com",
                     "api.openai.com",
                     "localhost",
-                    "127.0.0.1"
+                    "127.0.0.1",
                 }
-                logger.warning(f"⚠️ Config file {self.config_file} not found, using default allowlist")
+                logger.warning(
+                    f"⚠️ Config file {self.config_file} not found, using default allowlist"
+                )
                 return default_allowlist
         except Exception as e:
             logger.error(f"❌ Failed to load allowlist: {e}")
@@ -94,7 +100,7 @@ class SandboxController:
         """Normalize domain to ASCII punycode"""
         try:
             # Convert IDN to punycode
-            normalized = idna.encode(domain).decode('ascii')
+            normalized = idna.encode(domain).decode("ascii")
             return normalized.lower()
         except Exception as e:
             logger.warning(f"⚠️ Failed to normalize domain {domain}: {e}")
@@ -131,7 +137,7 @@ class SandboxController:
                     "allowed": False,
                     "reason": f"Scheme {scheme} not allowed (only HTTPS)",
                     "domain": domain,
-                    "block_type": "scheme"
+                    "block_type": "scheme",
                 }
 
             # Check for homoglyph characters
@@ -144,7 +150,7 @@ class SandboxController:
                     "allowed": False,
                     "reason": f"Homoglyph characters detected in domain {domain}",
                     "domain": domain,
-                    "block_type": "homoglyph"
+                    "block_type": "homoglyph",
                 }
 
             # Normalize domain to ASCII
@@ -155,12 +161,14 @@ class SandboxController:
                 self.stats["blocked_requests"] += 1
                 self.blocked_domains.add(domain)
 
-                logger.warning(f"🚫 Egress blocked: {normalized_domain} not in allowlist")
+                logger.warning(
+                    f"🚫 Egress blocked: {normalized_domain} not in allowlist"
+                )
                 return {
                     "allowed": False,
                     "reason": f"Domain {normalized_domain} not in egress allowlist",
                     "domain": normalized_domain,
-                    "block_type": "allowlist"
+                    "block_type": "allowlist",
                 }
 
             # Check redirect limit
@@ -168,24 +176,31 @@ class SandboxController:
                 self.stats["blocked_requests"] += 1
                 self.stats["redirect_blocked"] += 1
 
-                logger.warning(f"🚫 Egress blocked: too many redirects ({redirect_count})")
+                logger.warning(
+                    f"🚫 Egress blocked: too many redirects ({redirect_count})"
+                )
                 return {
                     "allowed": False,
                     "reason": f"Too many redirects ({redirect_count} > {self.max_redirects})",
                     "domain": normalized_domain,
-                    "block_type": "redirect"
+                    "block_type": "redirect",
                 }
 
             # Check egress limit
-            if self.network_egress_limit > 0 and self.egress_count >= self.network_egress_limit:
+            if (
+                self.network_egress_limit > 0
+                and self.egress_count >= self.network_egress_limit
+            ):
                 self.stats["egress_limit_hit"] += 1
 
-                logger.warning(f"🚫 Egress blocked: limit reached ({self.egress_count}/{self.network_egress_limit})")
+                logger.warning(
+                    f"🚫 Egress blocked: limit reached ({self.egress_count}/{self.network_egress_limit})"
+                )
                 return {
                     "allowed": False,
                     "reason": f"Egress limit reached ({self.egress_count}/{self.network_egress_limit})",
                     "domain": normalized_domain,
-                    "block_type": "limit"
+                    "block_type": "limit",
                 }
 
             # Allow the request
@@ -197,7 +212,7 @@ class SandboxController:
                 "allowed": True,
                 "domain": normalized_domain,
                 "egress_count": self.egress_count,
-                "redirect_count": redirect_count
+                "redirect_count": redirect_count,
             }
 
         except Exception as e:
@@ -206,7 +221,7 @@ class SandboxController:
                 "allowed": False,
                 "reason": f"Egress check failed: {str(e)}",
                 "domain": "unknown",
-                "block_type": "error"
+                "block_type": "error",
             }
 
     def add_to_allowlist(self, domain: str) -> bool:
@@ -269,7 +284,7 @@ class SandboxController:
             "allowlist_size": len(self.egress_allowlist),
             "blocked_domains_count": len(self.blocked_domains),
             "max_redirects": self.max_redirects,
-            "allowed_schemes": list(self.allowed_schemes)
+            "allowed_schemes": list(self.allowed_schemes),
         }
 
     def validate_allowlist(self) -> dict[str, Any]:
@@ -278,7 +293,7 @@ class SandboxController:
             "valid": True,
             "errors": [],
             "warnings": [],
-            "domains_checked": len(self.egress_allowlist)
+            "domains_checked": len(self.egress_allowlist),
         }
 
         for domain in self.egress_allowlist:
@@ -288,14 +303,20 @@ class SandboxController:
 
                 # Check for homoglyphs
                 if self._detect_homoglyph(domain):
-                    validation_results["warnings"].append(f"Domain {domain} contains homoglyph characters")
+                    validation_results["warnings"].append(
+                        f"Domain {domain} contains homoglyph characters"
+                    )
 
                 # Check for suspicious patterns
-                if re.search(r'[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+', domain):
-                    validation_results["warnings"].append(f"Domain {domain} appears to be an IP address")
+                if re.search(r"[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+", domain):
+                    validation_results["warnings"].append(
+                        f"Domain {domain} appears to be an IP address"
+                    )
 
             except Exception as e:
-                validation_results["errors"].append(f"Domain {domain} validation failed: {e}")
+                validation_results["errors"].append(
+                    f"Domain {domain} validation failed: {e}"
+                )
                 validation_results["valid"] = False
 
         return validation_results
@@ -306,7 +327,9 @@ class SandboxController:
             old_allowlist = self.egress_allowlist.copy()
             self.egress_allowlist = self._load_allowlist()
 
-            logger.info(f"✅ Allowlist reloaded: {len(old_allowlist)} -> {len(self.egress_allowlist)} domains")
+            logger.info(
+                f"✅ Allowlist reloaded: {len(old_allowlist)} -> {len(self.egress_allowlist)} domains"
+            )
             return True
         except Exception as e:
             logger.error(f"❌ Failed to reload allowlist: {e}")
@@ -329,16 +352,16 @@ class SandboxController:
                 "egress_limit": self.network_egress_limit,
                 "current_count": self.egress_count,
                 "max_redirects": self.max_redirects,
-                "allowed_schemes": list(self.allowed_schemes)
+                "allowed_schemes": list(self.allowed_schemes),
             },
             "allowlist_status": {
                 "size": len(self.egress_allowlist),
                 "validation": validation,
-                "domains": sorted(self.egress_allowlist)
+                "domains": sorted(self.egress_allowlist),
             },
             "security_stats": stats,
             "blocked_domains": sorted(self.blocked_domains),
-            "recommendations": self._get_security_recommendations(stats)
+            "recommendations": self._get_security_recommendations(stats),
         }
 
     def _get_security_recommendations(self, stats: dict[str, Any]) -> list[str]:
@@ -349,10 +372,14 @@ class SandboxController:
             recommendations.append("Consider reviewing homoglyph detection patterns")
 
         if stats["scheme_blocked"] > 0:
-            recommendations.append("HTTP requests detected - ensure all traffic uses HTTPS")
+            recommendations.append(
+                "HTTP requests detected - ensure all traffic uses HTTPS"
+            )
 
         if stats["redirect_blocked"] > 0:
-            recommendations.append("Redirect chains detected - review redirect policies")
+            recommendations.append(
+                "Redirect chains detected - review redirect policies"
+            )
 
         if stats["blocked_requests"] > stats["allowed_requests"] * 0.5:
             recommendations.append("High block rate - review allowlist configuration")
@@ -381,19 +408,23 @@ class SandboxController:
             "current_count": self.egress_count,
             "allowlist": self.get_allowlist(),
             "blocked_domains": self.get_blocked_domains(),
-            "stats": self.get_stats()
+            "stats": self.get_stats(),
         }
+
 
 # Global instance
 sandbox_controller = SandboxController()
+
 
 def check_egress_permission(url: str) -> dict[str, Any]:
     """Convenience function để check egress permission"""
     return sandbox_controller.is_egress_allowed(url)
 
+
 def is_sandbox_enabled() -> bool:
     """Convenience function để check sandbox status"""
     return sandbox_controller.is_sandbox_enabled()
+
 
 if __name__ == "__main__":
     # Test sandbox controller
@@ -403,7 +434,7 @@ if __name__ == "__main__":
     allowed_urls = [
         "https://api.github.com/search/repositories",
         "https://newsapi.org/v2/everything",
-        "https://gnews.io/api/v4/search"
+        "https://gnews.io/api/v4/search",
     ]
 
     print("\n✅ Testing allowed URLs:")
@@ -415,7 +446,7 @@ if __name__ == "__main__":
     blocked_urls = [
         "https://malicious-site.com/evil",
         "https://phishing-site.net/steal",
-        "https://unknown-domain.org/data"
+        "https://unknown-domain.org/data",
     ]
 
     print("\n🚫 Testing blocked URLs:")
@@ -428,7 +459,9 @@ if __name__ == "__main__":
     sandbox_controller.set_egress_limit(2)
     for i in range(4):
         result = sandbox_controller.is_egress_allowed("https://api.github.com/test")
-        print(f"  Request {i+1}: {result['allowed']} (count: {result.get('egress_count', 'N/A')})")
+        print(
+            f"  Request {i+1}: {result['allowed']} (count: {result.get('egress_count', 'N/A')})"
+        )
 
     # Show stats
     stats = sandbox_controller.get_stats()

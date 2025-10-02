@@ -5,6 +5,7 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
+
 class ModelRouter:
     """Model router for AI request routing"""
 
@@ -17,9 +18,9 @@ class ModelRouter:
             "llama3": {"available": True, "load": 0.2},
         }
         self.request_count = 0
-        self.route_history = []
+        self.route_history: list[dict[str, Any]] = []
 
-    def get_ai_response(self, prompt: str, context: dict[str, Any] = None) -> str:
+    def get_ai_response(self, prompt: str, context: Optional[dict[str, Any]] = None) -> str:
         """Get AI response for the given prompt"""
         self.request_count += 1
 
@@ -28,11 +29,13 @@ class ModelRouter:
 
         # Simple routing logic based on prompt characteristics
         selected_model = self._select_model(prompt)
-        self.route_history.append({
-            "prompt_length": len(prompt),
-            "selected_model": selected_model,
-            "timestamp": "2025-09-27T16:00:00Z"
-        })
+        self.route_history.append(
+            {
+                "prompt_length": len(prompt),
+                "selected_model": selected_model,
+                "timestamp": "2025-09-27T16:00:00Z",
+            }
+        )
 
         # Mock response based on prompt
         if "code" in prompt.lower() or "programming" in prompt.lower():
@@ -40,11 +43,15 @@ class ModelRouter:
         elif "creative" in prompt.lower() or "story" in prompt.lower():
             response = f"[{selected_model}] Creative response: Once upon a time, {prompt[:30]}..."
         elif "analyze" in prompt.lower() or "explain" in prompt.lower():
-            response = f"[{selected_model}] Analysis: This request involves {prompt[:40]}..."
+            response = (
+                f"[{selected_model}] Analysis: This request involves {prompt[:40]}..."
+            )
         else:
             response = f"[{selected_model}] Standard response: I understand you're asking about {prompt[:40]}..."
 
-        self.logger.info(f"Generated response using {selected_model} for prompt length {len(prompt)}")
+        self.logger.info(
+            f"Generated response using {selected_model} for prompt length {len(prompt)}"
+        )
         return response
 
     def _select_model(self, prompt: str) -> str:
@@ -54,9 +61,14 @@ class ModelRouter:
         # Route based on prompt characteristics
         if len(prompt) > 2000:
             return "gpt-4"  # Use most capable model for long prompts
-        elif any(keyword in prompt_lower for keyword in ["code", "programming", "debug", "function"]):
+        elif any(
+            keyword in prompt_lower
+            for keyword in ["code", "programming", "debug", "function"]
+        ):
             return "gpt-4"  # Use best model for coding tasks
-        elif any(keyword in prompt_lower for keyword in ["creative", "story", "poem", "art"]):
+        elif any(
+            keyword in prompt_lower for keyword in ["creative", "story", "poem", "art"]
+        ):
             return "claude-3"  # Good for creative tasks
         elif any(keyword in prompt_lower for keyword in ["quick", "simple", "basic"]):
             return "gpt-3.5-turbo"  # Fast model for simple tasks
@@ -76,7 +88,7 @@ class ModelRouter:
         if not self.route_history:
             return {"total_requests": 0, "model_usage": {}}
 
-        model_usage = {}
+        model_usage: dict[str, int] = {}
         for route in self.route_history:
             model = route["selected_model"]
             model_usage[model] = model_usage.get(model, 0) + 1
@@ -84,7 +96,9 @@ class ModelRouter:
         return {
             "total_requests": len(self.route_history),
             "model_usage": model_usage,
-            "most_used_model": max(model_usage, key=model_usage.get) if model_usage else None
+            "most_used_model": max(model_usage.keys(), key=lambda k: model_usage[k])
+            if model_usage
+            else None,
         }
 
     def set_model_availability(self, model_name: str, available: bool):
@@ -102,13 +116,15 @@ class ModelRouter:
         self.request_count = 0
         self.route_history.clear()
 
+
 # Function aliases for backward compatibility
 def explain_last_route():
     """Global function to explain last route (for backward compatibility)"""
     router = ModelRouter()
     return router.explain_last_route()
 
-def route_request(prompt: str, context: dict[str, Any] = None) -> str:
+
+def route_request(prompt: str, context: Optional[dict[str, Any]] = None) -> str:
     """Global function to route request (for backward compatibility)"""
     router = ModelRouter()
     return router.get_ai_response(prompt, context)

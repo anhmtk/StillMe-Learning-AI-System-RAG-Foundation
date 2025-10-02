@@ -20,10 +20,12 @@ from typing import Any, Callable
 
 logger = logging.getLogger(__name__)
 
+
 class CircuitState(Enum):
-    CLOSED = "closed"      # Normal operation
-    OPEN = "open"          # Circuit is open, failing fast
+    CLOSED = "closed"  # Normal operation
+    OPEN = "open"  # Circuit is open, failing fast
     HALF_OPEN = "half_open"  # Testing if service is back
+
 
 @dataclass
 class CircuitBreakerConfig:
@@ -32,19 +34,22 @@ class CircuitBreakerConfig:
     expected_exception: type = Exception
     name: str = "circuit_breaker"
 
+
 class CircuitBreaker:
     """Circuit Breaker pattern implementation for fault tolerance"""
 
-    def __init__(self,
-                 failure_threshold: int = 5,
-                 recovery_timeout: int = 60,
-                 expected_exception: type = Exception,
-                 name: str = "circuit_breaker"):
+    def __init__(
+        self,
+        failure_threshold: int = 5,
+        recovery_timeout: int = 60,
+        expected_exception: type = Exception,
+        name: str = "circuit_breaker",
+    ):
         self.config = CircuitBreakerConfig(
             failure_threshold=failure_threshold,
             recovery_timeout=recovery_timeout,
             expected_exception=expected_exception,
-            name=name
+            name=name,
         )
 
         self.state = CircuitState.CLOSED
@@ -58,7 +63,9 @@ class CircuitBreaker:
         if self.state == CircuitState.OPEN:
             if self._should_attempt_reset():
                 self.state = CircuitState.HALF_OPEN
-                logger.info(f"Circuit breaker {self.config.name} entering HALF_OPEN state")
+                logger.info(
+                    f"Circuit breaker {self.config.name} entering HALF_OPEN state"
+                )
             else:
                 raise Exception(f"Circuit breaker {self.config.name} is OPEN")
 
@@ -111,12 +118,16 @@ class CircuitBreaker:
             # Failure in half-open state - go back to open
             self.state = CircuitState.OPEN
             self.success_count = 0
-            logger.warning(f"Circuit breaker {self.config.name} OPENED again after failure in HALF_OPEN")
+            logger.warning(
+                f"Circuit breaker {self.config.name} OPENED again after failure in HALF_OPEN"
+            )
 
         elif self.failure_count >= self.config.failure_threshold:
             # Too many failures - open the circuit
             self.state = CircuitState.OPEN
-            logger.warning(f"Circuit breaker {self.config.name} OPENED after {self.failure_count} failures")
+            logger.warning(
+                f"Circuit breaker {self.config.name} OPENED after {self.failure_count} failures"
+            )
 
     def get_state(self) -> dict:
         """Get current circuit breaker state"""
@@ -128,8 +139,8 @@ class CircuitBreaker:
             "config": {
                 "failure_threshold": self.config.failure_threshold,
                 "recovery_timeout": self.config.recovery_timeout,
-                "name": self.config.name
-            }
+                "name": self.config.name,
+            },
         }
 
     def reset(self):

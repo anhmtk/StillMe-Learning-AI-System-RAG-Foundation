@@ -44,7 +44,7 @@ class TestKillSwitch:
                 user_agent="malicious-bot",
                 request_path="/api/sensitive",
                 details={"risk_score": 0.8, "activity": "data_exfiltration"},
-                risk_score=0.8
+                risk_score=0.8,
             )
             audit_logger.log_security_event(event)
 
@@ -52,7 +52,9 @@ class TestKillSwitch:
         alerts = security_monitor.check_security_alerts()
 
         # Should have high-risk events alert
-        high_risk_alerts = [alert for alert in alerts if alert["type"] == "high_risk_events"]
+        high_risk_alerts = [
+            alert for alert in alerts if alert["type"] == "high_risk_events"
+        ]
         assert len(high_risk_alerts) > 0
         assert high_risk_alerts[0]["severity"] == "HIGH"
         assert high_risk_alerts[0]["count"] >= 10
@@ -73,7 +75,7 @@ class TestKillSwitch:
                 user_agent="aggressive-scanner",
                 request_path="/api/endpoint",
                 details={"rate_limit_result": {"limit": 100, "window": 60}},
-                risk_score=0.5
+                risk_score=0.5,
             )
             audit_logger.log_security_event(event)
 
@@ -81,7 +83,9 @@ class TestKillSwitch:
         alerts = security_monitor.check_security_alerts()
 
         # Should have rate limit violation alert
-        rate_limit_alerts = [alert for alert in alerts if alert["type"] == "rate_limit_violations"]
+        rate_limit_alerts = [
+            alert for alert in alerts if alert["type"] == "rate_limit_violations"
+        ]
         assert len(rate_limit_alerts) > 0
         assert rate_limit_alerts[0]["severity"] == "MEDIUM"
         assert rate_limit_alerts[0]["count"] >= 100
@@ -102,7 +106,7 @@ class TestKillSwitch:
                 user_agent="test-agent",
                 request_path="/test",
                 details={"test": True},
-                risk_score=0.5
+                risk_score=0.5,
             )
             audit_logger.log_security_event(event)
 
@@ -132,7 +136,9 @@ class TestKillSwitch:
         """Test kill switch threshold configuration"""
         # Test default thresholds
         assert security_monitor.alert_thresholds["high_risk_events_per_hour"] == 10
-        assert security_monitor.alert_thresholds["rate_limit_violations_per_hour"] == 100
+        assert (
+            security_monitor.alert_thresholds["rate_limit_violations_per_hour"] == 100
+        )
         assert security_monitor.alert_thresholds["failed_authentication_per_hour"] == 50
 
         # Test threshold modification
@@ -152,7 +158,7 @@ class TestKillSwitch:
             user_agent="normal-browser",
             request_path="/api/normal",
             details={"activity": "normal"},
-            risk_score=0.2
+            risk_score=0.2,
         )
 
         high_risk_event = SecurityEvent(
@@ -164,7 +170,7 @@ class TestKillSwitch:
             user_agent="malicious-bot",
             request_path="/api/sensitive",
             details={"activity": "data_exfiltration"},
-            risk_score=0.8
+            risk_score=0.8,
         )
 
         # Log events
@@ -193,7 +199,7 @@ class TestKillSwitch:
             user_agent="old-agent",
             request_path="/old",
             details={"old": True},
-            risk_score=0.5
+            risk_score=0.5,
         )
 
         recent_event = SecurityEvent(
@@ -205,7 +211,7 @@ class TestKillSwitch:
             user_agent="recent-agent",
             request_path="/recent",
             details={"recent": True},
-            risk_score=0.5
+            risk_score=0.5,
         )
 
         # Log events
@@ -243,7 +249,7 @@ class TestKillSwitch:
                 user_agent="malicious-bot",
                 request_path="/api/sensitive",
                 details={"risk_score": 0.8, "activity": "data_exfiltration"},
-                risk_score=0.8
+                risk_score=0.8,
             )
             audit_logger.log_security_event(event)
 
@@ -283,7 +289,7 @@ class TestKillSwitch:
                 user_agent="malicious-bot",
                 request_path="/api/sensitive",
                 details={"risk_score": 0.8},
-                risk_score=0.8
+                risk_score=0.8,
             )
             audit_logger.log_security_event(event)
 
@@ -298,7 +304,7 @@ class TestKillSwitch:
                 user_agent="aggressive-scanner",
                 request_path="/api/endpoint",
                 details={"rate_limit_result": {"limit": 100}},
-                risk_score=0.5
+                risk_score=0.5,
             )
             audit_logger.log_security_event(event)
 
@@ -310,8 +316,12 @@ class TestKillSwitch:
         assert "rate_limit_violations" in alert_types
 
         # Verify alert counts
-        high_risk_alert = next(alert for alert in alerts if alert["type"] == "high_risk_events")
-        rate_limit_alert = next(alert for alert in alerts if alert["type"] == "rate_limit_violations")
+        high_risk_alert = next(
+            alert for alert in alerts if alert["type"] == "high_risk_events"
+        )
+        rate_limit_alert = next(
+            alert for alert in alerts if alert["type"] == "rate_limit_violations"
+        )
 
         assert high_risk_alert["count"] >= 10
         assert rate_limit_alert["count"] >= 100
@@ -332,7 +342,7 @@ class TestKillSwitch:
                 user_agent="attack-bot",
                 request_path="/api/critical",
                 details={"risk_score": 0.9, "attack_type": "rce"},
-                risk_score=0.9
+                risk_score=0.9,
             )
             audit_logger.log_security_event(event)
 
@@ -340,7 +350,9 @@ class TestKillSwitch:
         alerts = security_monitor.check_security_alerts()
 
         # Should have high-risk events alert due to critical events
-        high_risk_alerts = [alert for alert in alerts if alert["type"] == "high_risk_events"]
+        high_risk_alerts = [
+            alert for alert in alerts if alert["type"] == "high_risk_events"
+        ]
         assert len(high_risk_alerts) > 0
         assert high_risk_alerts[0]["severity"] == "HIGH"
         assert high_risk_alerts[0]["count"] >= 5

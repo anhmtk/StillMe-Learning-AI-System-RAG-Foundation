@@ -52,13 +52,18 @@ class MultipleFunctionsDetector(BaseDetector):
                 test_functions_found.append(test_func)
 
         # Check for function names
-        function_names = [match.split('(')[0].replace('def ', '').strip() for match in function_matches]
+        function_names = [
+            match.split("(")[0].replace("def ", "").strip()
+            for match in function_matches
+        ]
 
         # Check for repetitive function patterns
         repetitive_patterns = []
         if function_count > 5:
             # Check if functions follow a pattern (like function_0, function_1, etc.)
-            numbered_functions = [name for name in function_names if re.match(r'function_\d+', name)]
+            numbered_functions = [
+                name for name in function_names if re.match(r"function_\d+", name)
+            ]
             if len(numbered_functions) > 3:
                 repetitive_patterns.append("numbered_functions")
 
@@ -92,6 +97,6 @@ class MultipleFunctionsDetector(BaseDetector):
                 "function_names": function_names[:10],  # Limit to first 10
                 "test_functions_found": test_functions_found,
                 "repetitive_patterns": repetitive_patterns,
-                "function_matches": function_matches[:5]  # Limit to first 5
-            }
+                "function_matches": function_matches[:5],  # Limit to first 5
+            },
         }

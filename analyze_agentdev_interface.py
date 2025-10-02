@@ -14,32 +14,49 @@ def analyze_agentdev_interface():
     python_files = []
     for root, dirs, files in os.walk("."):
         # Skip certain directories
-        dirs[:] = [d for d in dirs if d not in ['__pycache__', '.git', 'node_modules', 'venv', '.venv', 'env', 'artifacts', 'reports', 'dist', 'build', 'agentdev_backups']]
+        dirs[:] = [
+            d
+            for d in dirs
+            if d
+            not in [
+                "__pycache__",
+                ".git",
+                "node_modules",
+                "venv",
+                ".venv",
+                "env",
+                "artifacts",
+                "reports",
+                "dist",
+                "build",
+                "agentdev_backups",
+            ]
+        ]
 
         for file in files:
-            if file.endswith('.py'):
+            if file.endswith(".py"):
                 python_files.append(os.path.join(root, file))
 
     # Patterns để tìm AgentDev usages
     patterns = [
-        r'AgentDev\(',
-        r'\.execute_task\(',
-        r'\.run_session\(',
-        r'\.scan_errors\(',
-        r'\.apply_fixes\(',
-        r'\.schedule_job\(',
-        r'\.execute_workflow\(',
-        r'agentdev\.execute_task',
-        r'agentdev\.run_session',
-        r'agentdev\.scan_errors',
-        r'agentdev\.apply_fixes'
+        r"AgentDev\(",
+        r"\.execute_task\(",
+        r"\.run_session\(",
+        r"\.scan_errors\(",
+        r"\.apply_fixes\(",
+        r"\.schedule_job\(",
+        r"\.execute_workflow\(",
+        r"agentdev\.execute_task",
+        r"agentdev\.run_session",
+        r"agentdev\.scan_errors",
+        r"agentdev\.apply_fixes",
     ]
 
     usages = []
 
     for file_path in python_files:
         try:
-            with open(file_path, encoding='utf-8', errors='replace') as f:
+            with open(file_path, encoding="utf-8", errors="replace") as f:
                 lines = f.readlines()
 
             for line_num, line in enumerate(lines, 1):
@@ -56,14 +73,20 @@ def analyze_agentdev_interface():
                             context_lines.append(f"{prefix}{i+1}:{line_content}")
 
                         # Xác định symbol
-                        symbol = "AgentDev" if "AgentDev(" in line else pattern.replace(r'\.', '').replace(r'\(', '')
+                        symbol = (
+                            "AgentDev"
+                            if "AgentDev(" in line
+                            else pattern.replace(r"\.", "").replace(r"\(", "")
+                        )
 
-                        usages.append({
-                            "file": file_path,
-                            "line": line_num,
-                            "context": context_lines,
-                            "symbol": symbol
-                        })
+                        usages.append(
+                            {
+                                "file": file_path,
+                                "line": line_num,
+                                "context": context_lines,
+                                "symbol": symbol,
+                            }
+                        )
 
         except Exception:
             continue
@@ -87,7 +110,7 @@ def analyze_agentdev_interface():
         confidence = 0.5
 
         for usage in method_usages:
-            context_text = '\n'.join(usage["context"])
+            context_text = "\n".join(usage["context"])
 
             # Tìm params
             if "task" in context_text.lower():
@@ -118,21 +141,26 @@ def analyze_agentdev_interface():
         # Tăng confidence dựa trên số usage
         confidence = min(0.9, confidence + (len(method_usages) * 0.1))
 
-        spec_methods.append({
-            "name": method_name,
-            "params": params if params else ["..."],
-            "returns": returns,
-            "confidence": confidence
-        })
+        spec_methods.append(
+            {
+                "name": method_name,
+                "params": params if params else ["..."],
+                "returns": returns,
+                "confidence": confidence,
+            }
+        )
 
     # Tìm first blocker
     first_blocker = None
     for usage in usages:
-        if usage["symbol"] == "execute_task" and "integration/test_workflows.py" in usage["file"]:
+        if (
+            usage["symbol"] == "execute_task"
+            and "integration/test_workflows.py" in usage["file"]
+        ):
             first_blocker = {
                 "file": usage["file"],
                 "line": usage["line"],
-                "symbol": usage["symbol"]
+                "symbol": usage["symbol"],
             }
             break
 
@@ -144,12 +172,14 @@ def analyze_agentdev_interface():
         "spec_minimal": {
             "class": "AgentDev",
             "methods": spec_methods,
-            "confidence": total_confidence
+            "confidence": total_confidence,
         },
-        "first_blocker": first_blocker
+        "first_blocker": first_blocker,
     }
+
 
 if __name__ == "__main__":
     import json
+
     result = analyze_agentdev_interface()
     print(json.dumps(result, indent=2))

@@ -33,7 +33,9 @@ def main():
     print("📚 Building symbol index...")
     symbol_index = SymbolIndex(str(project_root))
     stats = symbol_index.build_index(force_rebuild=True)
-    print(f"✅ Symbol index built: {stats['files_scanned']} files, {stats['symbols_found']} symbols")
+    print(
+        f"✅ Symbol index built: {stats['files_scanned']} files, {stats['symbols_found']} symbols"
+    )
 
     # Scan for errors (only stillme_core/)
     print("🔍 Scanning for errors in stillme_core/...")
@@ -62,7 +64,7 @@ def main():
         total_failed = 0
 
         for i in range(0, len(f821_errors), batch_size):
-            batch = f821_errors[i:i + batch_size]
+            batch = f821_errors[i : i + batch_size]
             print(f"  Processing batch {i//batch_size + 1} ({len(batch)} errors)...")
 
             try:
@@ -76,11 +78,17 @@ def main():
                 total_fixed += fixed
                 total_failed += failed
 
-                print(f"    ✅ Fixed: {fixed}, ❌ Failed: {failed}, ⏭️ Skipped: {skipped}")
-                print(f"    Validation: {'✅ Valid' if validation['valid'] else '❌ Invalid'}")
+                print(
+                    f"    ✅ Fixed: {fixed}, ❌ Failed: {failed}, ⏭️ Skipped: {skipped}"
+                )
+                print(
+                    f"    Validation: {'✅ Valid' if validation['valid'] else '❌ Invalid'}"
+                )
 
-                if not validation['valid']:
-                    print(f"    ⚠️ Validation failed: {validation.get('errors', [])[:3]}")
+                if not validation["valid"]:
+                    print(
+                        f"    ⚠️ Validation failed: {validation.get('errors', [])[:3]}"
+                    )
                     break
 
             except Exception as e:
@@ -90,7 +98,11 @@ def main():
         print("\n📊 F821 Fix Summary:")
         print(f"  - Total fixed: {total_fixed}")
         print(f"  - Total failed: {total_failed}")
-        print(f"  - Success rate: {total_fixed/(total_fixed+total_failed)*100:.1f}%" if (total_fixed+total_failed) > 0 else "  - Success rate: N/A")
+        print(
+            f"  - Success rate: {total_fixed/(total_fixed+total_failed)*100:.1f}%"
+            if (total_fixed + total_failed) > 0
+            else "  - Success rate: N/A"
+        )
 
     # Final validation
     print("\n🔍 Final validation...")
@@ -99,14 +111,16 @@ def main():
 
     # Generate summary
     summary = {
-        "files_scanned": stats['files_scanned'],
-        "symbols_found": stats['symbols_found'],
+        "files_scanned": stats["files_scanned"],
+        "symbols_found": stats["symbols_found"],
         "errors_before": len(errors),
         "errors_after": len(final_errors),
-        "f821_fixed": total_fixed if 'total_fixed' in locals() else 0,
-        "f821_failed": total_failed if 'total_failed' in locals() else 0,
-        "fix_success_rate": f"{total_fixed/(total_fixed+total_failed)*100:.1f}%" if 'total_fixed' in locals() and (total_fixed+total_failed) > 0 else "N/A",
-        "improvement": len(errors) - len(final_errors)
+        "f821_fixed": total_fixed if "total_fixed" in locals() else 0,
+        "f821_failed": total_failed if "total_failed" in locals() else 0,
+        "fix_success_rate": f"{total_fixed/(total_fixed+total_failed)*100:.1f}%"
+        if "total_fixed" in locals() and (total_fixed + total_failed) > 0
+        else "N/A",
+        "improvement": len(errors) - len(final_errors),
     }
 
     print("\n📋 FINAL SUMMARY:")
@@ -123,6 +137,7 @@ def main():
             f.write("Remaining errors:\n")
             for error in final_errors[:10]:  # First 10 errors
                 f.write(f"  {error.file_path}:{error.line_number} - {error.message}\n")
+
 
 if __name__ == "__main__":
     main()

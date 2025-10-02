@@ -18,16 +18,19 @@ from symbol_index import SymbolIndex
 
 # Import will be done at runtime to avoid circular import
 
+
 # Stub types to avoid F821
 class FixResult:
     def __init__(self, success: bool, message: str = ""):
         self.success = success
         self.message = message
 
+
 class FixStatus:
     SUCCESS = "success"
     FAILED = "failed"
     SKIPPED = "skipped"
+
 
 class ErrorInfo:
     def __init__(self, file: str, line: int, col: int, rule: str, msg: str):
@@ -37,14 +40,18 @@ class ErrorInfo:
         self.rule = rule
         self.msg = msg
 
+
 logger = logging.getLogger(__name__)
+
 
 @dataclass
 class FixBatch:
     """Batch của các fixes"""
+
     files: list[str]
     fixes: list[Any]  # Will be FixResult at runtime
     timestamp: datetime
+
 
 class AdvancedFixer:
     """Advanced fixer với validation"""
@@ -66,20 +73,22 @@ class AdvancedFixer:
                     status=FixStatus.FAILED,
                     fix_applied="",
                     message="Could not extract symbol name",
-                    timestamp=datetime.now()
+                    timestamp=datetime.now(),
                 )
 
             symbol_name = match.group(1)
 
             # Tìm symbol trong index
-            import_stmt = self.symbol_index.get_import_for_symbol(symbol_name, error.file_path)
+            import_stmt = self.symbol_index.get_import_for_symbol(
+                symbol_name, error.file_path
+            )
             if not import_stmt:
                 return FixResult(
                     error=error,
                     status=FixStatus.SKIPPED,
                     fix_applied="",
                     message=f"Symbol '{symbol_name}' not found in index - manual fix required",
-                    timestamp=datetime.now()
+                    timestamp=datetime.now(),
                 )
 
             # Backup file trước khi fix
@@ -93,7 +102,7 @@ class AdvancedFixer:
                     status=FixStatus.FAILED,
                     fix_applied="",
                     message="Failed to add import to file",
-                    timestamp=datetime.now()
+                    timestamp=datetime.now(),
                 )
 
             # Validate fix
@@ -106,7 +115,7 @@ class AdvancedFixer:
                     status=FixStatus.FAILED,
                     fix_applied=import_stmt,
                     message=f"Fix validation failed: {validation_result['reason']}",
-                    timestamp=datetime.now()
+                    timestamp=datetime.now(),
                 )
 
             return FixResult(
@@ -114,7 +123,7 @@ class AdvancedFixer:
                 status=FixStatus.SUCCESS,
                 fix_applied=import_stmt,
                 message=f"Successfully fixed undefined name '{symbol_name}'",
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
 
         except Exception as e:
@@ -123,7 +132,7 @@ class AdvancedFixer:
                 status=FixStatus.FAILED,
                 fix_applied="",
                 message=f"Error fixing undefined name: {str(e)}",
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
 
     def fix_invalid_literal_int(self, error: ErrorInfo) -> FixResult:
@@ -137,7 +146,7 @@ class AdvancedFixer:
                     status=FixStatus.SKIPPED,
                     fix_applied="",
                     message="Invalid literal error appears to be from parser, not code",
-                    timestamp=datetime.now()
+                    timestamp=datetime.now(),
                 )
 
             # For actual code errors, we'd need to implement safe_int utility
@@ -146,7 +155,7 @@ class AdvancedFixer:
                 status=FixStatus.SKIPPED,
                 fix_applied="",
                 message="Invalid literal int errors require safe_int utility - not implemented yet",
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
 
         except Exception as e:
@@ -155,10 +164,12 @@ class AdvancedFixer:
                 status=FixStatus.FAILED,
                 fix_applied="",
                 message=f"Error fixing invalid literal: {str(e)}",
-                timestamp=datetime.now()
+                timestamp=datetime.now(),
             )
 
-    def fix_batch(self, errors: list[ErrorInfo], max_files: int = 20) -> tuple[list[FixResult], dict]:
+    def fix_batch(
+        self, errors: list[ErrorInfo], max_files: int = 20
+    ) -> tuple[list[FixResult], dict]:
         """Fix a batch of errors với validation"""
         results = []
 
@@ -192,7 +203,7 @@ class AdvancedFixer:
                             status=FixStatus.SKIPPED,
                             fix_applied="",
                             message="Error type not supported",
-                            timestamp=datetime.now()
+                            timestamp=datetime.now(),
                         )
                     results.append(result)
 
@@ -226,31 +237,31 @@ class AdvancedFixer:
         backup_name = f"{Path(file_path).name}_{timestamp}.bak"
         backup_path = self.backup_dir / backup_name
 
-        with open(file_path, encoding='utf-8') as src:
-            with open(backup_path, 'w', encoding='utf-8') as dst:
+        with open(file_path, encoding="utf-8") as src:
+            with open(backup_path, "w", encoding="utf-8") as dst:
                 dst.write(src.read())
 
         return str(backup_path)
 
     def _restore_file(self, file_path: str, backup_path: str):
         """Restore file from backup"""
-        with open(backup_path, encoding='utf-8') as src:
-            with open(file_path, 'w', encoding='utf-8') as dst:
+        with open(backup_path, encoding="utf-8") as src:
+            with open(file_path, "w", encoding="utf-8") as dst:
                 dst.write(src.read())
 
     def _add_import_to_file(self, file_path: str, import_line: str) -> bool:
         """Add import to file với PEP8 ordering"""
         try:
-            with open(file_path, encoding='utf-8') as f:
+            with open(file_path, encoding="utf-8") as f:
                 lines = f.readlines()
 
             # Find insertion point (after existing imports)
             insert_index = 0
             for i, line in enumerate(lines):
                 stripped = line.strip()
-                if stripped.startswith('import ') or stripped.startswith('from '):
+                if stripped.startswith("import ") or stripped.startswith("from "):
                     insert_index = i + 1
-                elif stripped and not stripped.startswith('#'):
+                elif stripped and not stripped.startswith("#"):
                     break
 
             # Check if import already exists
@@ -259,10 +270,10 @@ class AdvancedFixer:
                     return True  # Already exists
 
             # Insert import
-            lines.insert(insert_index, import_line + '\n')
+            lines.insert(insert_index, import_line + "\n")
 
             # Write back
-            with open(file_path, 'w', encoding='utf-8') as f:
+            with open(file_path, "w", encoding="utf-8") as f:
                 f.writelines(lines)
 
             return True
@@ -276,16 +287,16 @@ class AdvancedFixer:
         try:
             # Run syntax check
             result = subprocess.run(
-                ['python', '-m', 'py_compile', file_path],
+                ["python", "-m", "py_compile", file_path],
                 capture_output=True,
                 text=True,
-                timeout=10
+                timeout=10,
             )
 
             if result.returncode != 0:
                 return {
                     "valid": False,
-                    "reason": f"Syntax error after fix: {result.stderr}"
+                    "reason": f"Syntax error after fix: {result.stderr}",
                 }
 
             # Check if symbol is now accessible (basic check)
@@ -300,10 +311,7 @@ class AdvancedFixer:
         try:
             # Run flake8 on fixed files
             result = subprocess.run(
-                ['flake8'] + file_paths,
-                capture_output=True,
-                text=True,
-                timeout=30
+                ["flake8"] + file_paths, capture_output=True, text=True, timeout=30
             )
 
             # Count errors
@@ -312,14 +320,14 @@ class AdvancedFixer:
             return {
                 "valid": error_count == 0,
                 "error_count": error_count,
-                "errors": result.stdout.splitlines() if result.stdout else []
+                "errors": result.stdout.splitlines() if result.stdout else [],
             }
 
         except Exception as e:
             return {
                 "valid": False,
                 "error_count": -1,
-                "errors": [f"Validation error: {str(e)}"]
+                "errors": [f"Validation error: {str(e)}"],
             }
 
     def fix_error_with_context(self, error_info, symbol_index) -> bool:

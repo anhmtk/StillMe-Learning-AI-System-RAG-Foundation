@@ -1,7 +1,6 @@
 """Basic security tests for StillMe AI Framework."""
 
 
-
 class TestBasicSecurity:
     """Test basic security features."""
 

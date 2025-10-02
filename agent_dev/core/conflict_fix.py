@@ -17,6 +17,7 @@ def resolve_conflicts():
 
     return True
 
+
 if __name__ == "__main__":
     success = resolve_conflicts()
     if success:

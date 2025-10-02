@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 _policy: Optional[dict[str, Any]] = None
 _policy_loaded = False
 
+
 def load_interaction_policy(policy_path: Optional[str] = None) -> dict[str, Any]:
     """
     Load Interaction Policy từ YAML file
@@ -43,7 +44,7 @@ def load_interaction_policy(policy_path: Optional[str] = None) -> dict[str, Any]
 
     # Default path
     if policy_path is None:
-        policy_path = os.path.join(os.getcwd(), 'policies', 'INTERACTION_POLICY.yaml')
+        policy_path = os.path.join(os.getcwd(), "policies", "INTERACTION_POLICY.yaml")
 
     try:
         # Check if policy file exists
@@ -51,7 +52,7 @@ def load_interaction_policy(policy_path: Optional[str] = None) -> dict[str, Any]
             raise FileNotFoundError(f"Interaction Policy file not found: {policy_path}")
 
         # Read and parse YAML
-        with open(policy_path, encoding='utf-8') as file:
+        with open(policy_path, encoding="utf-8") as file:
             policy = yaml.safe_load(file)
 
         # Validate policy structure
@@ -73,6 +74,7 @@ def load_interaction_policy(policy_path: Optional[str] = None) -> dict[str, Any]
         logger.error(f"❌ {error_message}")
         raise ValueError(error_message)
 
+
 def _validate_policy(policy: dict[str, Any]) -> None:
     """
     Validate policy structure
@@ -84,8 +86,17 @@ def _validate_policy(policy: dict[str, Any]) -> None:
         ValueError: Nếu policy không hợp lệ
     """
     required_fields = [
-        'version', 'metadata', 'skip', 'cancel', 'abort', 'stop',
-        'heartbeat', 'logs', 'pid', 'ui', 'compliance'
+        "version",
+        "metadata",
+        "skip",
+        "cancel",
+        "abort",
+        "stop",
+        "heartbeat",
+        "logs",
+        "pid",
+        "ui",
+        "compliance",
     ]
 
     for field in required_fields:
@@ -93,18 +104,23 @@ def _validate_policy(policy: dict[str, Any]) -> None:
             raise ValueError(f"Missing required field in policy: {field}")
 
     # Validate skip semantics
-    if policy['skip']['semantics'] != 'diagnose':
-        raise ValueError(f"Invalid skip semantics: {policy['skip']['semantics']}. Must be 'diagnose'")
+    if policy["skip"]["semantics"] != "diagnose":
+        raise ValueError(
+            f"Invalid skip semantics: {policy['skip']['semantics']}. Must be 'diagnose'"
+        )
 
     # Validate cancel_on_skip
-    if policy['skip']['cancel_on_skip'] is not False:
-        raise ValueError(f"Invalid cancel_on_skip: {policy['skip']['cancel_on_skip']}. Must be false")
+    if policy["skip"]["cancel_on_skip"] is not False:
+        raise ValueError(
+            f"Invalid cancel_on_skip: {policy['skip']['cancel_on_skip']}. Must be false"
+        )
 
     # Validate required outputs
-    required_outputs = ['COMPLETED', 'RUNNING', 'STALLED', 'UNKNOWN']
+    required_outputs = ["COMPLETED", "RUNNING", "STALLED", "UNKNOWN"]
     for output in required_outputs:
-        if output not in policy['skip']['outputs']:
+        if output not in policy["skip"]["outputs"]:
             raise ValueError(f"Missing required skip output: {output}")
+
 
 def get_interaction_policy() -> dict[str, Any]:
     """
@@ -117,8 +133,11 @@ def get_interaction_policy() -> dict[str, Any]:
         ValueError: Nếu policy chưa được load
     """
     if not _policy_loaded or not _policy:
-        raise ValueError("Interaction Policy not loaded. Call load_interaction_policy() first.")
+        raise ValueError(
+            "Interaction Policy not loaded. Call load_interaction_policy() first."
+        )
     return _policy
+
 
 def is_policy_loaded() -> bool:
     """
@@ -129,6 +148,7 @@ def is_policy_loaded() -> bool:
     """
     return _policy_loaded and _policy is not None
 
+
 def reset_policy_cache() -> None:
     """
     Reset policy cache (for testing)
@@ -137,7 +157,8 @@ def reset_policy_cache() -> None:
     _policy = None
     _policy_loaded = False
 
-def get_skip_button_config(language: str = 'en') -> dict[str, Any]:
+
+def get_skip_button_config(language: str = "en") -> dict[str, Any]:
     """
     Get skip button configuration
 
@@ -148,17 +169,18 @@ def get_skip_button_config(language: str = 'en') -> dict[str, Any]:
         Dict[str, Any]: Skip button config
     """
     policy = get_interaction_policy()
-    button = policy['ui']['skip_button']
+    button = policy["ui"]["skip_button"]
 
     return {
-        'text': button[f'text_{language}'],
-        'tooltip': button[f'tooltip_{language}'],
-        'icon': button['icon'],
-        'semantics': policy['skip']['semantics'],
-        'cancel_on_skip': policy['skip']['cancel_on_skip']
+        "text": button[f"text_{language}"],
+        "tooltip": button[f"tooltip_{language}"],
+        "icon": button["icon"],
+        "semantics": policy["skip"]["semantics"],
+        "cancel_on_skip": policy["skip"]["cancel_on_skip"],
     }
 
-def get_cancel_button_config(language: str = 'en') -> dict[str, Any]:
+
+def get_cancel_button_config(language: str = "en") -> dict[str, Any]:
     """
     Get cancel button configuration
 
@@ -169,18 +191,19 @@ def get_cancel_button_config(language: str = 'en') -> dict[str, Any]:
         Dict[str, Any]: Cancel button config
     """
     policy = get_interaction_policy()
-    button = policy['ui']['cancel_button']
+    button = policy["ui"]["cancel_button"]
 
     return {
-        'text': button[f'text_{language}'],
-        'tooltip': button[f'tooltip_{language}'],
-        'icon': button['icon'],
-        'semantics': policy['cancel']['semantics'],
-        'require_confirmation': policy['cancel']['require_confirmation'],
-        'confirmation_message': button[f'confirmation_message_{language}']
+        "text": button[f"text_{language}"],
+        "tooltip": button[f"tooltip_{language}"],
+        "icon": button["icon"],
+        "semantics": policy["cancel"]["semantics"],
+        "require_confirmation": policy["cancel"]["require_confirmation"],
+        "confirmation_message": button[f"confirmation_message_{language}"],
     }
 
-def get_skip_prompt(state: str, language: str = 'en') -> str:
+
+def get_skip_prompt(state: str, language: str = "en") -> str:
     """
     Get prompt for skip diagnosis result
 
@@ -193,7 +216,8 @@ def get_skip_prompt(state: str, language: str = 'en') -> str:
     """
     policy = get_interaction_policy()
     key = f"{state.lower()}_{language}"
-    return policy['skip']['prompts'].get(key, f"Unknown state: {state}")
+    return policy["skip"]["prompts"].get(key, f"Unknown state: {state}")
+
 
 def get_log_tailing_config() -> dict[str, Any]:
     """
@@ -203,7 +227,8 @@ def get_log_tailing_config() -> dict[str, Any]:
         Dict[str, Any]: Log tailing config
     """
     policy = get_interaction_policy()
-    return policy['skip']['log_tailing']
+    return policy["skip"]["log_tailing"]
+
 
 def get_heartbeat_config() -> dict[str, Any]:
     """
@@ -213,7 +238,8 @@ def get_heartbeat_config() -> dict[str, Any]:
         Dict[str, Any]: Heartbeat config
     """
     policy = get_interaction_policy()
-    return policy['heartbeat']
+    return policy["heartbeat"]
+
 
 def get_pid_config() -> dict[str, Any]:
     """
@@ -223,7 +249,8 @@ def get_pid_config() -> dict[str, Any]:
         Dict[str, Any]: PID config
     """
     policy = get_interaction_policy()
-    return policy['pid']
+    return policy["pid"]
+
 
 def get_compliance_config() -> dict[str, Any]:
     """
@@ -233,7 +260,8 @@ def get_compliance_config() -> dict[str, Any]:
         Dict[str, Any]: Compliance config
     """
     policy = get_interaction_policy()
-    return policy['compliance']
+    return policy["compliance"]
+
 
 def ensure_policy_loaded() -> None:
     """
@@ -248,25 +276,28 @@ def ensure_policy_loaded() -> None:
         except Exception as e:
             raise ValueError(f"Failed to auto-load Interaction Policy: {e}")
 
+
 # Auto-load policy on module import
 try:
     load_interaction_policy()
 except Exception as e:
     logger.warning(f"⚠️ Could not auto-load Interaction Policy: {e}")
-    logger.warning("⚠️ Make sure to call load_interaction_policy() manually in your entrypoint")
+    logger.warning(
+        "⚠️ Make sure to call load_interaction_policy() manually in your entrypoint"
+    )
 
 # Export for easy import
 __all__ = [
-    'load_interaction_policy',
-    'get_interaction_policy',
-    'is_policy_loaded',
-    'reset_policy_cache',
-    'get_skip_button_config',
-    'get_cancel_button_config',
-    'get_skip_prompt',
-    'get_log_tailing_config',
-    'get_heartbeat_config',
-    'get_pid_config',
-    'get_compliance_config',
-    'ensure_policy_loaded'
+    "load_interaction_policy",
+    "get_interaction_policy",
+    "is_policy_loaded",
+    "reset_policy_cache",
+    "get_skip_button_config",
+    "get_cancel_button_config",
+    "get_skip_prompt",
+    "get_log_tailing_config",
+    "get_heartbeat_config",
+    "get_pid_config",
+    "get_compliance_config",
+    "ensure_policy_loaded",
 ]

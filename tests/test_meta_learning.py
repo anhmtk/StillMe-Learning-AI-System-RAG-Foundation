@@ -47,7 +47,7 @@ class TestMetaLearningManager:
     @pytest.fixture
     def meta_learning_manager(self, temp_dir):
         """Create meta learning manager with temporary directory"""
-        with patch('stillme_core.learning.meta_learning_manager.Path') as mock_path:
+        with patch("stillme_core.learning.meta_learning_manager.Path") as mock_path:
             mock_path.return_value = Path(temp_dir)
             manager = MetaLearningManager()
             return manager
@@ -67,7 +67,7 @@ class TestMetaLearningManager:
             penalty_score=-1.0,
             accuracy_improvement=0.15,
             error_types={"syntax": 2, "logic": 1},
-            safety_violations=0
+            safety_violations=0,
         )
 
         assert session_metadata.session_id == "test_session_1"
@@ -100,7 +100,7 @@ class TestMetaLearningManager:
                 penalty_score=-1.0,
                 accuracy_improvement=0.15,
                 error_types={"syntax": 2, "logic": 1},
-                safety_violations=0
+                safety_violations=0,
             )
 
         insights = await meta_learning_manager.analyze_learning_patterns()
@@ -121,12 +121,12 @@ class TestMetaLearningManager:
                 end_time=f"2025-01-27T{10+i}:30:00Z",
                 fix_attempts=5,
                 successful_fixes=2,  # Low success rate
-                rollback_count=3,   # High rollback count
+                rollback_count=3,  # High rollback count
                 reward_score=1.0,
                 penalty_score=-2.0,
                 accuracy_improvement=0.05,
                 error_types={"syntax": 3, "logic": 2},
-                safety_violations=0
+                safety_violations=0,
             )
 
         # Adapt strategy
@@ -137,7 +137,9 @@ class TestMetaLearningManager:
         assert new_rate < meta_learning_manager.adaptive_config.base_learning_rate
 
     @pytest.mark.asyncio
-    async def test_adapt_learning_strategy_high_performance(self, meta_learning_manager):
+    async def test_adapt_learning_strategy_high_performance(
+        self, meta_learning_manager
+    ):
         """Test adapting learning strategy for high performance"""
         # Create sessions with high performance
         for i in range(6):
@@ -148,12 +150,12 @@ class TestMetaLearningManager:
                 end_time=f"2025-01-27T{10+i}:30:00Z",
                 fix_attempts=5,
                 successful_fixes=5,  # High success rate
-                rollback_count=0,   # No rollbacks
+                rollback_count=0,  # No rollbacks
                 reward_score=5.0,
                 penalty_score=0.0,
                 accuracy_improvement=0.25,
                 error_types={"syntax": 0, "logic": 0},
-                safety_violations=0
+                safety_violations=0,
             )
 
         # Adapt strategy
@@ -175,15 +177,17 @@ class TestMetaLearningManager:
                 end_time=f"2025-01-27T{10+i}:30:00Z",
                 fix_attempts=5,
                 successful_fixes=2,  # Low success rate
-                rollback_count=2,   # High rollback rate
+                rollback_count=2,  # High rollback rate
                 reward_score=1.0,
                 penalty_score=-2.0,
                 accuracy_improvement=0.05,
                 error_types={"syntax": 3},
-                safety_violations=1  # Safety violation
+                safety_violations=1,  # Safety violation
             )
 
-        recommendations = await meta_learning_manager.get_learning_recommendations("user_123")
+        recommendations = await meta_learning_manager.get_learning_recommendations(
+            "user_123"
+        )
 
         assert isinstance(recommendations, list)
         assert len(recommendations) > 0
@@ -194,9 +198,13 @@ class TestMetaLearningManager:
         assert "safety_concern" in recommendation_types
 
     @pytest.mark.asyncio
-    async def test_get_learning_recommendations_insufficient_data(self, meta_learning_manager):
+    async def test_get_learning_recommendations_insufficient_data(
+        self, meta_learning_manager
+    ):
         """Test getting recommendations with insufficient data"""
-        recommendations = await meta_learning_manager.get_learning_recommendations("user_123")
+        recommendations = await meta_learning_manager.get_learning_recommendations(
+            "user_123"
+        )
 
         assert len(recommendations) == 1
         assert recommendations[0]["type"] == "insufficient_data"
@@ -225,20 +233,22 @@ class TestMetaLearningManager:
         assert "No learning sessions recorded" in stats["error"]
 
         # Add some sessions
-        asyncio.run(meta_learning_manager.record_learning_session(
-            session_id="test_session_1",
-            user_id="user_123",
-            start_time="2025-01-27T10:00:00Z",
-            end_time="2025-01-27T10:30:00Z",
-            fix_attempts=5,
-            successful_fixes=4,
-            rollback_count=1,
-            reward_score=3.0,
-            penalty_score=-1.0,
-            accuracy_improvement=0.15,
-            error_types={"syntax": 2},
-            safety_violations=0
-        ))
+        asyncio.run(
+            meta_learning_manager.record_learning_session(
+                session_id="test_session_1",
+                user_id="user_123",
+                start_time="2025-01-27T10:00:00Z",
+                end_time="2025-01-27T10:30:00Z",
+                fix_attempts=5,
+                successful_fixes=4,
+                rollback_count=1,
+                reward_score=3.0,
+                penalty_score=-1.0,
+                accuracy_improvement=0.15,
+                error_types={"syntax": 2},
+                safety_violations=0,
+            )
+        )
 
         stats = meta_learning_manager.get_learning_statistics()
 
@@ -255,7 +265,9 @@ class TestMetaLearningManager:
         assert stats["recent_sessions"] == 1
 
     @pytest.mark.asyncio
-    async def test_learning_strategy_adaptation_insufficient_data(self, meta_learning_manager):
+    async def test_learning_strategy_adaptation_insufficient_data(
+        self, meta_learning_manager
+    ):
         """Test strategy adaptation with insufficient data"""
         # Add only 3 sessions (less than required 5)
         for i in range(3):
@@ -271,7 +283,7 @@ class TestMetaLearningManager:
                 penalty_score=-1.0,
                 accuracy_improvement=0.15,
                 error_types={"syntax": 2},
-                safety_violations=0
+                safety_violations=0,
             )
 
         # Should not adapt due to insufficient data
@@ -297,7 +309,7 @@ class TestMetaLearningManager:
                 penalty_score=-1.0,
                 accuracy_improvement=0.15,
                 error_types={"syntax": 3, "logic": 1},  # Syntax errors most common
-                safety_violations=0
+                safety_violations=0,
             )
 
         insights = await meta_learning_manager.analyze_learning_patterns()
@@ -324,7 +336,7 @@ class TestMetaLearningManager:
                 penalty_score=-1.0,
                 accuracy_improvement=0.15 + i * 0.01,
                 error_types={"syntax": 2},
-                safety_violations=0
+                safety_violations=0,
             )
 
         insights = await meta_learning_manager.analyze_learning_patterns()
@@ -361,7 +373,7 @@ class TestMetaLearningManager:
             penalty_score=-1.0,
             accuracy_improvement=0.15,
             error_types={"syntax": 2},
-            safety_violations=0
+            safety_violations=0,
         )
 
         # Should have recorded learning events
@@ -369,7 +381,8 @@ class TestMetaLearningManager:
 
         # Check for session end event
         session_end_events = [
-            event for event in meta_learning_manager.learning_events
+            event
+            for event in meta_learning_manager.learning_events
             if event["event_type"] == MetaLearningEvent.SESSION_END.value
         ]
         assert len(session_end_events) == 1

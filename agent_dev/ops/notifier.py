@@ -21,15 +21,21 @@ class EmailNotifier:
 
     def __init__(self):
         self.config = {
-            "enabled": bool(os.getenv("SMTP_USERNAME") and os.getenv("SMTP_PASSWORD") and os.getenv("ALERT_EMAIL")),
+            "enabled": bool(
+                os.getenv("SMTP_USERNAME")
+                and os.getenv("SMTP_PASSWORD")
+                and os.getenv("ALERT_EMAIL")
+            ),
             "smtp_server": os.getenv("SMTP_HOST", "smtp.gmail.com"),
             "smtp_port": int(os.getenv("SMTP_PORT", "587")),
             "sender_email": os.getenv("SMTP_USERNAME", ""),
             "sender_password": os.getenv("SMTP_PASSWORD", ""),
-            "recipient_email": os.getenv("ALERT_EMAIL", "")
+            "recipient_email": os.getenv("ALERT_EMAIL", ""),
         }
 
-    def send_incident_report(self, severity: str, title: str, details: str, remediation: str) -> bool:
+    def send_incident_report(
+        self, severity: str, title: str, details: str, remediation: str
+    ) -> bool:
         """Send incident report via email"""
         if not self.config["enabled"]:
             logger.warning("Email notifier not configured")
@@ -37,9 +43,9 @@ class EmailNotifier:
 
         try:
             msg = MIMEMultipart()
-            msg['From'] = self.config["sender_email"]
-            msg['To'] = self.config["recipient_email"]
-            msg['Subject'] = f"[{severity}] {title}"
+            msg["From"] = self.config["sender_email"]
+            msg["To"] = self.config["recipient_email"]
+            msg["Subject"] = f"[{severity}] {title}"
 
             body = f"""
 BÁO CÁO SỰ CỐ KỸ THUẬT - AGENTDEV OPS
@@ -58,11 +64,15 @@ Báo cáo tự động từ AgentDev Operations
 Thời gian: {self._get_timestamp()}
 """
 
-            msg.attach(MIMEText(body, 'plain', 'utf-8'))
+            msg.attach(MIMEText(body, "plain", "utf-8"))
 
-            with smtplib.SMTP(self.config["smtp_server"], self.config["smtp_port"]) as server:
+            with smtplib.SMTP(
+                self.config["smtp_server"], self.config["smtp_port"]
+            ) as server:
                 server.starttls()
-                server.login(self.config["sender_email"], self.config["sender_password"])
+                server.login(
+                    self.config["sender_email"], self.config["sender_password"]
+                )
                 server.send_message(msg)
 
             logger.info(f"Email incident report sent: {severity} - {title}")
@@ -75,6 +85,7 @@ Thời gian: {self._get_timestamp()}
     def _get_timestamp(self) -> str:
         """Get current timestamp"""
         from datetime import datetime
+
         return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
@@ -83,12 +94,16 @@ class TelegramNotifier:
 
     def __init__(self):
         self.config = {
-            "enabled": bool(os.getenv("TELEGRAM_BOT_TOKEN") and os.getenv("TELEGRAM_CHAT_ID")),
+            "enabled": bool(
+                os.getenv("TELEGRAM_BOT_TOKEN") and os.getenv("TELEGRAM_CHAT_ID")
+            ),
             "bot_token": os.getenv("TELEGRAM_BOT_TOKEN", ""),
-            "chat_id": os.getenv("TELEGRAM_CHAT_ID", "")
+            "chat_id": os.getenv("TELEGRAM_CHAT_ID", ""),
         }
 
-    def send_incident_report(self, severity: str, title: str, details: str, remediation: str) -> bool:
+    def send_incident_report(
+        self, severity: str, title: str, details: str, remediation: str
+    ) -> bool:
         """Send incident report via Telegram"""
         if not self.config["enabled"]:
             logger.warning("Telegram notifier not configured")
@@ -113,7 +128,7 @@ class TelegramNotifier:
             data = {
                 "chat_id": self.config["chat_id"],
                 "text": message,
-                "parse_mode": "Markdown"
+                "parse_mode": "Markdown",
             }
 
             response = requests.post(url, data=data, timeout=10)
@@ -129,4 +144,5 @@ class TelegramNotifier:
     def _get_timestamp(self) -> str:
         """Get current timestamp"""
         from datetime import datetime
+
         return datetime.now().strftime("%Y-%m-%d %H:%M:%S")

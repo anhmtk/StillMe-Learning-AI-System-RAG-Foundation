@@ -30,25 +30,50 @@ def warmup(model=None):
     """Stub warmup function"""
     return {"status": "warmed_up", "model": model}
 
+
 def dev_agent(task, mode="fast", **params):
     """Stub dev_agent function"""
     return f"Stub response for: {task}"
+
 
 __all__ = [
     "StillMeFramework",
     "HealthChecker",
     # Re-exported from compat
     "SearchResult",
-    "EthicalPrinciple", "ViolationSeverity",
-    "SimulationStatus", "AttackCategory", "AttackSeverity",
-    "MemoryItem", "LongTermMemory",
-    "QualityIssue", "QualityReport",
-    "RedisEventBus", "DAGExecutor", "RBACManager", "SessionManager",
-    "apply_policies", "safe_reply", "classify", "sanitize", "redact_output", "CANARY",
-    "AgentDevLogger", "log_step",
-    "health", "set_mode", "warmup", "dev_agent", "controller",
-
+    "EthicalPrinciple",
+    "ViolationSeverity",
+    "SimulationStatus",
+    "AttackCategory",
+    "AttackSeverity",
+    "MemoryItem",
+    "LongTermMemory",
+    "QualityIssue",
+    "QualityReport",
+    "RedisEventBus",
+    "DAGExecutor",
+    "RBACManager",
+    "SessionManager",
+    "apply_policies",
+    "safe_reply",
+    "classify",
+    "sanitize",
+    "redact_output",
+    "CANARY",
+    "AgentDevLogger",
+    "log_step",
+    "health",
+    "set_mode",
+    "warmup",
+    "dev_agent",
+    "controller",
     # Missing implementations
-    "NodeType", "ImpactLevel", "MatchType",
-    "SemanticSearchEngine", "RedisEventBus", "DAGExecutor", "RBACManager", "SessionManager"
+    "NodeType",
+    "ImpactLevel",
+    "MatchType",
+    "SemanticSearchEngine",
+    "RedisEventBus",
+    "DAGExecutor",
+    "RBACManager",
+    "SessionManager",
 ]

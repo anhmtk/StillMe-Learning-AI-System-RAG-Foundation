@@ -97,17 +97,23 @@ class SemanticHybridCache:
         except Exception as e:
             # Log the error but don't crash
             import logging
+
             logger = logging.getLogger(__name__)
             logger.warning(f"Embedding failed for text '{text[:50]}...': {e}")
 
             # Return a deterministic fallback embedding based on text hash
             import hashlib
-            text_hash = hashlib.md5(text.encode('utf-8')).hexdigest()
+
+            text_hash = hashlib.md5(text.encode("utf-8")).hexdigest()
             # Convert hash to deterministic vector
             hash_int = int(text_hash[:8], 16)
-            fallback_embedding = np.array([(hash_int >> i) & 1 for i in range(384)], dtype=np.float32)
+            fallback_embedding = np.array(
+                [(hash_int >> i) & 1 for i in range(384)], dtype=np.float32
+            )
             # Normalize to unit vector
-            fallback_embedding = fallback_embedding / (np.linalg.norm(fallback_embedding) + 1e-8)
+            fallback_embedding = fallback_embedding / (
+                np.linalg.norm(fallback_embedding) + 1e-8
+            )
             return fallback_embedding
 
     def get_exact_match(self, query: str) -> Optional[CacheItem]:

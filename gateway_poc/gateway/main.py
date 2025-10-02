@@ -65,7 +65,7 @@ async def lifespan(app: FastAPI):
     redis_pool = redis.ConnectionPool.from_url(
         settings.REDIS_URL,
         max_connections=settings.REDIS_POOL_SIZE,
-        retry_on_timeout=True
+        retry_on_timeout=True,
     )
     redis_client = redis.Redis(connection_pool=redis_pool)
 
@@ -79,7 +79,7 @@ async def lifespan(app: FastAPI):
         pool_size=settings.DATABASE_POOL_SIZE,
         max_overflow=settings.DATABASE_MAX_OVERFLOW,
         pool_pre_ping=True,
-        pool_recycle=3600
+        pool_recycle=3600,
     )
     database_session = sessionmaker(
         database_engine, class_=AsyncSession, expire_on_commit=False
@@ -199,22 +199,19 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
             # Receive message with timeout
             try:
                 data = await asyncio.wait_for(
-                    websocket.receive_json(),
-                    timeout=settings.WS_MESSAGE_TIMEOUT
+                    websocket.receive_json(), timeout=settings.WS_MESSAGE_TIMEOUT
                 )
             except asyncio.TimeoutError:
-                await websocket.send_json({
-                    "type": "error",
-                    "message": "Message timeout"
-                })
+                await websocket.send_json(
+                    {"type": "error", "message": "Message timeout"}
+                )
                 continue
 
             # Validate message
             if not request_validator.validate_websocket_message(data):
-                await websocket.send_json({
-                    "type": "error",
-                    "message": "Invalid message format"
-                })
+                await websocket.send_json(
+                    {"type": "error", "message": "Invalid message format"}
+                )
                 continue
 
             # Process message
@@ -244,7 +241,9 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
         print(f"WebSocket error for client {client_id}: {e}")
 
 
-async def process_command_with_monitoring(message: MessageProtocol, client_id: str) -> dict[str, Any]:
+async def process_command_with_monitoring(
+    message: MessageProtocol, client_id: str
+) -> dict[str, Any]:
     """Process command with monitoring and error handling"""
     start_time = time.time()
 
@@ -253,7 +252,7 @@ async def process_command_with_monitoring(message: MessageProtocol, client_id: s
         await redis_client.setex(
             f"command:{client_id}:{message.id}",
             3600,  # 1 hour TTL
-            message.to_json()
+            message.to_json(),
         )
 
         # Process command (simplified for POC)
@@ -262,7 +261,7 @@ async def process_command_with_monitoring(message: MessageProtocol, client_id: s
             "type": "command_response",
             "content": f"Processed command: {message.content}",
             "timestamp": time.time(),
-            "client_id": client_id
+            "client_id": client_id,
         }
 
         # Record metrics
@@ -278,7 +277,7 @@ async def process_command_with_monitoring(message: MessageProtocol, client_id: s
             "id": message.id,
             "type": "error",
             "content": f"Command processing failed: {str(e)}",
-            "timestamp": time.time()
+            "timestamp": time.time(),
         }
 
 
@@ -289,7 +288,7 @@ async def process_status_with_monitoring(message: MessageProtocol, client_id: st
         await redis_client.setex(
             f"status:{client_id}",
             300,  # 5 minutes TTL
-            message.to_json()
+            message.to_json(),
         )
 
         # Broadcast status
@@ -299,7 +298,7 @@ async def process_status_with_monitoring(message: MessageProtocol, client_id: st
             "content": message.content,
             "timestamp": message.timestamp,
             "metadata": message.metadata,
-            "client_id": client_id
+            "client_id": client_id,
         }
         await websocket_manager.broadcast_status(status_dict)
 
@@ -317,7 +316,7 @@ async def process_heartbeat_with_monitoring(message: MessageProtocol, client_id:
         await redis_client.setex(
             f"heartbeat:{client_id}",
             60,  # 1 minute TTL
-            str(time.time())
+            str(time.time()),
         )
 
         # Send heartbeat acknowledgment
@@ -326,8 +325,8 @@ async def process_heartbeat_with_monitoring(message: MessageProtocol, client_id:
             {
                 "type": "heartbeat_ack",
                 "timestamp": message.timestamp,
-                "server_time": time.time()
-            }
+                "server_time": time.time(),
+            },
         )
 
         metrics_collector.increment_heartbeats()
@@ -351,16 +350,16 @@ async def root():
             "Comprehensive Monitoring",
             "Circuit Breaker",
             "Rate Limiting",
-            "Connection Pooling"
+            "Connection Pooling",
         ],
         "endpoints": {
             "websocket": "/ws/{client_id}",
             "api": "/api",
             "health": "/api/health",
             "metrics": "/metrics",
-            "docs": "/docs" if settings.DEBUG else "disabled"
+            "docs": "/docs" if settings.DEBUG else "disabled",
         },
-        "timestamp": time.time()
+        "timestamp": time.time(),
     }
 
 
@@ -368,10 +367,7 @@ async def root():
 @app.get("/metrics")
 async def metrics():
     """Prometheus metrics endpoint"""
-    return Response(
-        content=generate_latest(),
-        media_type="text/plain"
-    )
+    return Response(content=generate_latest(), media_type="text/plain")
 
 
 # Enhanced health check
@@ -395,5 +391,5 @@ if __name__ == "__main__":
         log_level="info",
         access_log=True,
         server_header=False,
-        date_header=False
+        date_header=False,
     )

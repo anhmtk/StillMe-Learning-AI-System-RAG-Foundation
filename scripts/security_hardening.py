@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 """
 Security Hardening Script for StillMe AI Framework
@@ -22,6 +21,7 @@ from pathlib import Path
 @dataclass
 class SecurityIssue:
     """Security issue data structure"""
+
     severity: str  # CRITICAL, HIGH, MEDIUM, LOW
     category: str  # VULNERABILITY, MISCONFIGURATION, BEST_PRACTICE
     file_path: str
@@ -35,6 +35,7 @@ class SecurityIssue:
 @dataclass
 class SecurityReport:
     """Security report data structure"""
+
     total_issues: int
     critical_issues: int
     high_issues: int
@@ -60,49 +61,49 @@ class SecurityHardener:
                 r"execute\s*\(\s*['\"].*%s.*['\"]",
                 r"cursor\.execute\s*\(\s*['\"].*%s.*['\"]",
                 r"query\s*=\s*['\"].*\+.*['\"]",
-                r"f['\"].*SELECT.*{.*}.*['\"]"
+                r"f['\"].*SELECT.*{.*}.*['\"]",
             ],
             "xss": [
                 r"innerHTML\s*=",
                 r"document\.write\s*\(",
                 r"eval\s*\(",
                 r"setTimeout\s*\(\s*['\"].*['\"]",
-                r"setInterval\s*\(\s*['\"].*['\"]"
+                r"setInterval\s*\(\s*['\"].*['\"]",
             ],
             "command_injection": [
                 r"os\.system\s*\(",
                 r"subprocess\.run\s*\(\s*['\"].*['\"]",
                 r"subprocess\.call\s*\(\s*['\"].*['\"]",
                 r"subprocess\.Popen\s*\(\s*['\"].*['\"]",
-                r"shell\s*=\s*True"
+                r"shell\s*=\s*True",
             ],
             "path_traversal": [
                 r"open\s*\(\s*.*\.\./",
                 r"Path\s*\(\s*.*\.\./",
                 r"os\.path\.join\s*\(\s*.*\.\./",
                 r"\.\./.*\.\./",
-                r"\.\.\\\.\.\\"
+                r"\.\.\\\.\.\\",
             ],
             "hardcoded_secrets": [
                 r"password\s*=\s*['\"][^'\"]+['\"]",
                 r"api_key\s*=\s*['\"][^'\"]+['\"]",
                 r"secret\s*=\s*['\"][^'\"]+['\"]",
                 r"token\s*=\s*['\"][^'\"]+['\"]",
-                r"key\s*=\s*['\"][^'\"]+['\"]"
+                r"key\s*=\s*['\"][^'\"]+['\"]",
             ],
             "insecure_random": [
                 r"random\.random\s*\(",
                 r"random\.randint\s*\(",
                 r"random\.choice\s*\(",
-                r"random\.sample\s*\("
+                r"random\.sample\s*\(",
             ],
             "weak_crypto": [
                 r"hashlib\.md5\s*\(",
                 r"hashlib\.sha1\s*\(",
                 r"DES\s*\(",
                 r"RC4\s*\(",
-                r"MD5\s*\("
-            ]
+                r"MD5\s*\(",
+            ],
         }
 
     def _load_best_practices(self) -> dict[str, list[str]]:
@@ -112,32 +113,32 @@ class SecurityHardener:
                 "Validate all user inputs",
                 "Use parameterized queries",
                 "Sanitize HTML output",
-                "Validate file uploads"
+                "Validate file uploads",
             ],
             "authentication": [
                 "Use strong passwords",
                 "Implement MFA",
                 "Use secure session management",
-                "Implement account lockout"
+                "Implement account lockout",
             ],
             "authorization": [
                 "Implement RBAC",
                 "Use principle of least privilege",
                 "Validate permissions on every request",
-                "Implement proper session management"
+                "Implement proper session management",
             ],
             "encryption": [
                 "Use strong encryption algorithms",
                 "Store keys securely",
                 "Use HTTPS everywhere",
-                "Encrypt sensitive data at rest"
+                "Encrypt sensitive data at rest",
             ],
             "logging": [
                 "Log security events",
                 "Don't log sensitive data",
                 "Use secure logging",
-                "Implement log rotation"
-            ]
+                "Implement log rotation",
+            ],
         }
 
     def scan_security_issues(self) -> SecurityReport:
@@ -179,7 +180,7 @@ class SecurityHardener:
             low_issues=len(low_issues),
             security_score=security_score,
             issues=issues,
-            recommendations=recommendations
+            recommendations=recommendations,
         )
 
     def _should_skip_file(self, file_path: Path) -> bool:
@@ -194,7 +195,7 @@ class SecurityHardener:
             "site-packages",
             "dist-packages",
             "build",
-            "dist"
+            "dist",
         ]
 
         return any(pattern in str(file_path) for pattern in skip_patterns)
@@ -204,9 +205,9 @@ class SecurityHardener:
         issues = []
 
         try:
-            with open(file_path, encoding='utf-8') as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
-                lines = content.split('\n')
+                lines = content.split("\n")
 
             for pattern_name, patterns in self.security_patterns.items():
                 for pattern in patterns:
@@ -226,7 +227,9 @@ class SecurityHardener:
 
         return issues
 
-    def _create_security_issue(self, pattern_name: str, file_path: Path, line_num: int, line: str) -> SecurityIssue:
+    def _create_security_issue(
+        self, pattern_name: str, file_path: Path, line_num: int, line: str
+    ) -> SecurityIssue:
         """Create security issue from pattern match"""
         severity_map = {
             "sql_injection": "CRITICAL",
@@ -235,7 +238,7 @@ class SecurityHardener:
             "path_traversal": "HIGH",
             "hardcoded_secrets": "HIGH",
             "insecure_random": "MEDIUM",
-            "weak_crypto": "MEDIUM"
+            "weak_crypto": "MEDIUM",
         }
 
         severity = severity_map.get(pattern_name, "LOW")
@@ -247,7 +250,7 @@ class SecurityHardener:
             "path_traversal": "Potential path traversal vulnerability",
             "hardcoded_secrets": "Hardcoded secret detected",
             "insecure_random": "Insecure random number generation",
-            "weak_crypto": "Weak cryptographic algorithm"
+            "weak_crypto": "Weak cryptographic algorithm",
         }
 
         recommendation_map = {
@@ -257,7 +260,7 @@ class SecurityHardener:
             "path_traversal": "Validate and sanitize file paths",
             "hardcoded_secrets": "Use environment variables or secure key management",
             "insecure_random": "Use secrets module for cryptographic randomness",
-            "weak_crypto": "Use strong cryptographic algorithms (AES-256, SHA-256)"
+            "weak_crypto": "Use strong cryptographic algorithms (AES-256, SHA-256)",
         }
 
         return SecurityIssue(
@@ -266,61 +269,71 @@ class SecurityHardener:
             file_path=str(file_path),
             line_number=line_num,
             description=description_map.get(pattern_name, "Security issue detected"),
-            recommendation=recommendation_map.get(pattern_name, "Review and fix security issue"),
+            recommendation=recommendation_map.get(
+                pattern_name, "Review and fix security issue"
+            ),
             fix_available=True,
-            fix_code=self._generate_fix_code(pattern_name, line)
+            fix_code=self._generate_fix_code(pattern_name, line),
         )
 
     def _generate_fix_code(self, pattern_name: str, line: str) -> str:
         """Generate fix code for security issue"""
         fixes = {
-            "sql_injection": "# Use parameterized queries\n# OLD: cursor.execute(f\"SELECT * FROM users WHERE id = {user_id}\")\n# NEW: cursor.execute(\"SELECT * FROM users WHERE id = %s\", (user_id,))",
-            "command_injection": "# Use subprocess with shell=False\n# OLD: os.system(f\"echo {user_input}\")\n# NEW: subprocess.run([\"echo\", user_input], shell=False)",
+            "sql_injection": '# Use parameterized queries\n# OLD: cursor.execute(f"SELECT * FROM users WHERE id = {user_id}")\n# NEW: cursor.execute("SELECT * FROM users WHERE id = %s", (user_id,))',
+            "command_injection": '# Use subprocess with shell=False\n# OLD: os.system(f"echo {user_input}")\n# NEW: subprocess.run(["echo", user_input], shell=False)',
             "xss": "# Sanitize HTML output\n# OLD: innerHTML = user_input\n# NEW: textContent = user_input or use DOMPurify",
             "path_traversal": "# Validate file paths\n# OLD: open(user_path)\n# NEW: if os.path.commonpath([base_path, user_path]) == base_path:",
-            "hardcoded_secrets": "# Use environment variables\n# OLD: api_key = \"sk-1234567890\"\n# NEW: api_key = os.getenv(\"API_KEY\")",
+            "hardcoded_secrets": '# Use environment variables\n# OLD: api_key = "sk-1234567890"\n# NEW: api_key = os.getenv("API_KEY")',
             "insecure_random": "# Use secrets module\n# OLD: secrets.randbelow(1, 100)\n# NEW: secrets.randbelow(100) + 1",
-            "weak_crypto": "# Use strong algorithms\n# OLD: hashlib.sha256(data)\n# NEW: hashlib.sha256(data)"
+            "weak_crypto": "# Use strong algorithms\n# OLD: hashlib.sha256(data)\n# NEW: hashlib.sha256(data)",
         }
 
         return fixes.get(pattern_name, "# Review and implement secure alternative")
 
-    def _check_missing_practices(self, file_path: Path, content: str) -> list[SecurityIssue]:
+    def _check_missing_practices(
+        self, file_path: Path, content: str
+    ) -> list[SecurityIssue]:
         """Check for missing security practices"""
         issues = []
 
         # Check for missing input validation
         if "def " in content and "validate" not in content.lower():
-            issues.append(SecurityIssue(
-                severity="MEDIUM",
-                category="BEST_PRACTICE",
-                file_path=str(file_path),
-                line_number=1,
-                description="Missing input validation",
-                recommendation="Add input validation for all user inputs"
-            ))
+            issues.append(
+                SecurityIssue(
+                    severity="MEDIUM",
+                    category="BEST_PRACTICE",
+                    file_path=str(file_path),
+                    line_number=1,
+                    description="Missing input validation",
+                    recommendation="Add input validation for all user inputs",
+                )
+            )
 
         # Check for missing error handling
         if "try:" not in content and "except" not in content:
-            issues.append(SecurityIssue(
-                severity="LOW",
-                category="BEST_PRACTICE",
-                file_path=str(file_path),
-                line_number=1,
-                description="Missing error handling",
-                recommendation="Add proper error handling and logging"
-            ))
+            issues.append(
+                SecurityIssue(
+                    severity="LOW",
+                    category="BEST_PRACTICE",
+                    file_path=str(file_path),
+                    line_number=1,
+                    description="Missing error handling",
+                    recommendation="Add proper error handling and logging",
+                )
+            )
 
         # Check for missing logging
         if "import logging" not in content and "logger" not in content:
-            issues.append(SecurityIssue(
-                severity="LOW",
-                category="BEST_PRACTICE",
-                file_path=str(file_path),
-                line_number=1,
-                description="Missing security logging",
-                recommendation="Add security event logging"
-            ))
+            issues.append(
+                SecurityIssue(
+                    severity="LOW",
+                    category="BEST_PRACTICE",
+                    file_path=str(file_path),
+                    line_number=1,
+                    description="Missing security logging",
+                    recommendation="Add security event logging",
+                )
+            )
 
         return issues
 
@@ -332,20 +345,24 @@ class SecurityHardener:
         try:
             result = subprocess.run(
                 ["bandit", "-r", str(self.project_root), "-f", "json"],
-                capture_output=True, text=True, cwd=self.project_root
+                capture_output=True,
+                text=True,
+                cwd=self.project_root,
             )
             if result.returncode == 0:
                 bandit_results = json.loads(result.stdout)
                 for result_item in bandit_results.get("results", []):
-                    issues.append(SecurityIssue(
-                        severity=result_item.get("issue_severity", "LOW").upper(),
-                        category="VULNERABILITY",
-                        file_path=result_item.get("filename", ""),
-                        line_number=result_item.get("line_number", 0),
-                        description=result_item.get("issue_text", ""),
-                        recommendation=result_item.get("issue_confidence", ""),
-                        fix_available=False
-                    ))
+                    issues.append(
+                        SecurityIssue(
+                            severity=result_item.get("issue_severity", "LOW").upper(),
+                            category="VULNERABILITY",
+                            file_path=result_item.get("filename", ""),
+                            line_number=result_item.get("line_number", 0),
+                            description=result_item.get("issue_text", ""),
+                            recommendation=result_item.get("issue_confidence", ""),
+                            fix_available=False,
+                        )
+                    )
         except Exception as e:
             print(f"⚠️ Error running bandit: {e}")
 
@@ -353,20 +370,24 @@ class SecurityHardener:
         try:
             result = subprocess.run(
                 ["safety", "check", "--json"],
-                capture_output=True, text=True, cwd=self.project_root
+                capture_output=True,
+                text=True,
+                cwd=self.project_root,
             )
             if result.returncode != 0:
                 safety_results = json.loads(result.stdout)
                 for vuln in safety_results:
-                    issues.append(SecurityIssue(
-                        severity="HIGH",
-                        category="VULNERABILITY",
-                        file_path="requirements.txt",
-                        line_number=0,
-                        description=f"Vulnerable dependency: {vuln.get('package', '')}",
-                        recommendation=f"Update to version {vuln.get('secure_version', 'latest')}",
-                        fix_available=True
-                    ))
+                    issues.append(
+                        SecurityIssue(
+                            severity="HIGH",
+                            category="VULNERABILITY",
+                            file_path="requirements.txt",
+                            line_number=0,
+                            description=f"Vulnerable dependency: {vuln.get('package', '')}",
+                            recommendation=f"Update to version {vuln.get('secure_version', 'latest')}",
+                            fix_available=True,
+                        )
+                    )
         except Exception as e:
             print(f"⚠️ Error running safety: {e}")
 
@@ -385,9 +406,9 @@ class SecurityHardener:
         # Calculate score based on severity weights
         score = 100
         score -= critical_count * 20  # -20 points per critical
-        score -= high_count * 10      # -10 points per high
-        score -= medium_count * 5     # -5 points per medium
-        score -= low_count * 1        # -1 point per low
+        score -= high_count * 10  # -10 points per high
+        score -= medium_count * 5  # -5 points per medium
+        score -= low_count * 1  # -1 point per low
 
         return max(0, score)
 
@@ -399,16 +420,24 @@ class SecurityHardener:
         high_issues = [i for i in issues if i.severity == "HIGH"]
 
         if critical_issues:
-            recommendations.append("🔴 CRITICAL: Fix all critical security vulnerabilities immediately")
+            recommendations.append(
+                "🔴 CRITICAL: Fix all critical security vulnerabilities immediately"
+            )
 
         if high_issues:
-            recommendations.append("🟠 HIGH: Address high-severity security issues within 1 week")
+            recommendations.append(
+                "🟠 HIGH: Address high-severity security issues within 1 week"
+            )
 
         if any(i.category == "VULNERABILITY" for i in issues):
-            recommendations.append("🛡️ Implement comprehensive input validation and sanitization")
+            recommendations.append(
+                "🛡️ Implement comprehensive input validation and sanitization"
+            )
 
         if any("hardcoded" in i.description.lower() for i in issues):
-            recommendations.append("🔐 Replace hardcoded secrets with secure key management")
+            recommendations.append(
+                "🔐 Replace hardcoded secrets with secure key management"
+            )
 
         if any("injection" in i.description.lower() for i in issues):
             recommendations.append("💉 Use parameterized queries and input validation")
@@ -511,14 +540,19 @@ Generated: {self._get_current_timestamp()}
     def _get_current_timestamp(self) -> str:
         """Get current timestamp"""
         from datetime import datetime
+
         return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    def save_report(self, report_content: str, output_file: str = "artifacts/security_hardening_report.md"):
+    def save_report(
+        self,
+        report_content: str,
+        output_file: str = "artifacts/security_hardening_report.md",
+    ):
         """Save security report to file"""
         output_path = self.project_root / output_file
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             f.write(report_content)
 
         print(f"📄 Security report saved to: {output_path}")
@@ -526,9 +560,18 @@ Generated: {self._get_current_timestamp()}
 
 def main():
     """Main function"""
-    parser = argparse.ArgumentParser(description="Security hardening for StillMe AI Framework")
-    parser.add_argument("--output", type=str, default="artifacts/security_hardening_report.md", help="Output file path")
-    parser.add_argument("--project-root", type=str, default=".", help="Project root directory")
+    parser = argparse.ArgumentParser(
+        description="Security hardening for StillMe AI Framework"
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default="artifacts/security_hardening_report.md",
+        help="Output file path",
+    )
+    parser.add_argument(
+        "--project-root", type=str, default=".", help="Project root directory"
+    )
 
     args = parser.parse_args()
 

@@ -20,7 +20,7 @@ from datetime import datetime
 from typing import Optional
 
 # Add stillme_core to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "stillme_core"))
 
 from modules.api_provider_manager import ComplexityAnalyzer, UnifiedAPIManager
 
@@ -50,14 +50,14 @@ class RouterMonitor:
             response_time = time.time() - start_time
 
         result = {
-            'timestamp': datetime.now().isoformat(),
-            'prompt': prompt,
-            'complexity_score': complexity_score,
-            'breakdown': breakdown,
-            'selected_model': selected_model,
-            'ai_response': ai_response,
-            'response_time': response_time,
-            'debug': debug
+            "timestamp": datetime.now().isoformat(),
+            "prompt": prompt,
+            "complexity_score": complexity_score,
+            "breakdown": breakdown,
+            "selected_model": selected_model,
+            "ai_response": ai_response,
+            "response_time": response_time,
+            "debug": debug,
         }
 
         # Log to session
@@ -74,18 +74,18 @@ class RouterMonitor:
         print(f"🎯 Selected Model: {result['selected_model']}")
         print(f"⏱️  Response Time: {result['response_time']:.2f}s")
 
-        if result['debug']:
+        if result["debug"]:
             print("\n📊 Breakdown:")
-            for key, value in result['breakdown'].items():
+            for key, value in result["breakdown"].items():
                 print(f"  {key}: {value:.3f}")
 
         print("\n🤖 AI Response:")
         print(f"  {result['ai_response']}")
 
         # Model routing explanation
-        if result['complexity_score'] < 0.4:
+        if result["complexity_score"] < 0.4:
             routing_reason = "Simple prompt → Local lightweight model"
-        elif result['complexity_score'] < 0.7:
+        elif result["complexity_score"] < 0.7:
             routing_reason = "Medium complexity → Local coding model"
         else:
             routing_reason = "High complexity → Cloud model"
@@ -105,12 +105,12 @@ class RouterMonitor:
             try:
                 prompt = input("\n💬 Enter prompt: ").strip()
 
-                if prompt.lower() == 'quit':
+                if prompt.lower() == "quit":
                     break
-                elif prompt.lower() == 'stats':
+                elif prompt.lower() == "stats":
                     self.print_session_stats()
                     continue
-                elif prompt.lower() == 'clear':
+                elif prompt.lower() == "clear":
                     self.session_log.clear()
                     print("✅ Session cleared")
                     continue
@@ -141,8 +141,12 @@ class RouterMonitor:
 
         # Basic stats
         total_prompts = len(self.session_log)
-        avg_complexity = sum(r['complexity_score'] for r in self.session_log) / total_prompts
-        avg_response_time = sum(r['response_time'] for r in self.session_log) / total_prompts
+        avg_complexity = (
+            sum(r["complexity_score"] for r in self.session_log) / total_prompts
+        )
+        avg_response_time = (
+            sum(r["response_time"] for r in self.session_log) / total_prompts
+        )
 
         print(f"Total Prompts: {total_prompts}")
         print(f"Average Complexity: {avg_complexity:.3f}")
@@ -151,7 +155,7 @@ class RouterMonitor:
         # Model distribution
         model_counts = {}
         for result in self.session_log:
-            model = result['selected_model']
+            model = result["selected_model"]
             model_counts[model] = model_counts.get(model, 0) + 1
 
         print("\n🎯 Model Distribution:")
@@ -161,19 +165,19 @@ class RouterMonitor:
 
         # Complexity distribution
         complexity_ranges = {
-            'Simple (<0.4)': 0,
-            'Medium (0.4-0.7)': 0,
-            'Complex (≥0.7)': 0
+            "Simple (<0.4)": 0,
+            "Medium (0.4-0.7)": 0,
+            "Complex (≥0.7)": 0,
         }
 
         for result in self.session_log:
-            score = result['complexity_score']
+            score = result["complexity_score"]
             if score < 0.4:
-                complexity_ranges['Simple (<0.4)'] += 1
+                complexity_ranges["Simple (<0.4)"] += 1
             elif score < 0.7:
-                complexity_ranges['Medium (0.4-0.7)'] += 1
+                complexity_ranges["Medium (0.4-0.7)"] += 1
             else:
-                complexity_ranges['Complex (≥0.7)'] += 1
+                complexity_ranges["Complex (≥0.7)"] += 1
 
         print("\n🧠 Complexity Distribution:")
         for range_name, count in complexity_ranges.items():
@@ -182,13 +186,15 @@ class RouterMonitor:
 
         # Performance insights
         print("\n⚡ Performance Insights:")
-        slow_responses = [r for r in self.session_log if r['response_time'] > 2.0]
+        slow_responses = [r for r in self.session_log if r["response_time"] > 2.0]
         if slow_responses:
             print(f"  Slow responses (>2s): {len(slow_responses)}")
-            avg_slow_time = sum(r['response_time'] for r in slow_responses) / len(slow_responses)
+            avg_slow_time = sum(r["response_time"] for r in slow_responses) / len(
+                slow_responses
+            )
             print(f"  Average slow response time: {avg_slow_time:.2f}s")
 
-        high_complexity = [r for r in self.session_log if r['complexity_score'] > 0.8]
+        high_complexity = [r for r in self.session_log if r["complexity_score"] > 0.8]
         if high_complexity:
             print(f"  High complexity prompts (>0.8): {len(high_complexity)}")
 
@@ -198,7 +204,7 @@ class RouterMonitor:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"router_session_{timestamp}.json"
 
-        with open(filename, 'w', encoding='utf-8') as f:
+        with open(filename, "w", encoding="utf-8") as f:
             json.dump(self.session_log, f, indent=2, ensure_ascii=False)
 
         print(f"✅ Session log exported to {filename}")
@@ -207,7 +213,7 @@ class RouterMonitor:
     def load_session_log(self, filename: str):
         """Load session log from JSON file"""
         try:
-            with open(filename, encoding='utf-8') as f:
+            with open(filename, encoding="utf-8") as f:
                 self.session_log = json.load(f)
             print(f"✅ Session log loaded from {filename}")
         except Exception as e:
@@ -228,7 +234,7 @@ class RouterMonitor:
             "debug lỗi trong thuật toán sắp xếp",
             "Tại sao các hệ thống phức tạp lại tự tổ chức?",
             "tạo function JavaScript để validate email",
-            "Ý nghĩa của cuộc sống là gì?"
+            "Ý nghĩa của cuộc sống là gì?",
         ]
 
         times = []
@@ -274,22 +280,27 @@ class RouterMonitor:
         print(f"  Performance Grade: {grade}")
 
         return {
-            'avg_time': avg_time,
-            'min_time': min_time,
-            'max_time': max_time,
-            'avg_score': avg_score,
-            'grade': grade
+            "avg_time": avg_time,
+            "min_time": min_time,
+            "max_time": max_time,
+            "avg_score": avg_score,
+            "grade": grade,
         }
 
+
 def main():
-    parser = argparse.ArgumentParser(description='AI Router Performance Monitor')
-    parser.add_argument('--live', action='store_true', help='Live monitoring mode')
-    parser.add_argument('--stats', action='store_true', help='Show current statistics')
-    parser.add_argument('--test-prompt', type=str, help='Test a specific prompt')
-    parser.add_argument('--benchmark', type=int, default=100, help='Run performance benchmark')
-    parser.add_argument('--export', type=str, help='Export session log to file')
-    parser.add_argument('--load', type=str, help='Load session log from file')
-    parser.add_argument('--duration', type=int, default=300, help='Live monitoring duration (seconds)')
+    parser = argparse.ArgumentParser(description="AI Router Performance Monitor")
+    parser.add_argument("--live", action="store_true", help="Live monitoring mode")
+    parser.add_argument("--stats", action="store_true", help="Show current statistics")
+    parser.add_argument("--test-prompt", type=str, help="Test a specific prompt")
+    parser.add_argument(
+        "--benchmark", type=int, default=100, help="Run performance benchmark"
+    )
+    parser.add_argument("--export", type=str, help="Export session log to file")
+    parser.add_argument("--load", type=str, help="Load session log from file")
+    parser.add_argument(
+        "--duration", type=int, default=300, help="Live monitoring duration (seconds)"
+    )
 
     args = parser.parse_args()
 
@@ -318,6 +329,7 @@ def main():
         print("  --export filename: Export session log")
         print("  --load filename: Load session log")
         print("\nUse --help for more information")
+
 
 if __name__ == "__main__":
     main()

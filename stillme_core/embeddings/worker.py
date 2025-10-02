@@ -14,6 +14,7 @@ from pathlib import Path
 
 class EmbeddingRuntimeError(Exception):
     """Custom exception for embedding runtime errors"""
+
     pass
 
 
@@ -27,7 +28,7 @@ class EmbeddingWorker:
 
     def _create_worker_script(self) -> Path:
         """Create the worker script"""
-        script_content = '''
+        script_content = """
 import json
 import os
 import sys
@@ -68,7 +69,7 @@ def main():
 
 if __name__ == "__main__":
     main()
-'''
+"""
 
         # Write script to temporary file
         script_path = Path(tempfile.gettempdir()) / "embedding_worker.py"
@@ -82,10 +83,7 @@ if __name__ == "__main__":
 
         try:
             # Prepare input data
-            input_data = {
-                "model": self.model_name,
-                "texts": texts
-            }
+            input_data = {"model": self.model_name, "texts": texts}
 
             # Run worker subprocess
             result = subprocess.run(
@@ -93,7 +91,7 @@ if __name__ == "__main__":
                 input=json.dumps(input_data),
                 capture_output=True,
                 text=True,
-                timeout=self._timeout
+                timeout=self._timeout,
             )
 
             if result.returncode != 0:

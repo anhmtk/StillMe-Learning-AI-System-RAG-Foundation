@@ -37,7 +37,11 @@ class TestEmotionSenseV1(unittest.TestCase):
                 "expected": "angry",
                 "confidence": 0.9,
             },
-            {"text": "T√¥i s·ª£ kh√¥ng d√°m l√†m ƒë√¢u", "expected": "fear", "confidence": 0.7},
+            {
+                "text": "T√¥i s·ª£ kh√¥ng d√°m l√†m ƒë√¢u",
+                "expected": "fear",
+                "confidence": 0.7,
+            },
             {
                 "text": "Tr·ªùi ∆°i b·∫•t ng·ªù qu√°!",
                 "expected": "surprise",
@@ -339,7 +343,9 @@ class TestEmotionSenseV1(unittest.TestCase):
                 status = (
                     "‚úÖ PASS" if detected_language == expected_language else "‚ùå FAIL"
                 )
-                print(f"    {i:2d}. '{text[:30]:<30}' ‚Üí {detected_language} [{status}]")
+                print(
+                    f"    {i:2d}. '{text[:30]:<30}' ‚Üí {detected_language} [{status}]"
+                )
 
                 # Assertion
                 self.assertEqual(
@@ -663,7 +669,11 @@ class TestEmotionSenseIntegration(unittest.TestCase):
 
         # Test emotion history storage and retrieval
         test_user = "memory_test_user"
-        test_texts = ["T√¥i r·∫•t vui h√¥m nay", "T√¥i ƒëang bu·ªìn", "T√¥i t·ª©c gi·∫≠n"]
+        test_texts = [
+            "T√¥i r·∫•t vui h√¥m nay",
+            "T√¥i ƒëang bu·ªìn",
+            "T√¥i t·ª©c gi·∫≠n",
+        ]
 
         # Store emotions
         for text in test_texts:
@@ -726,8 +736,16 @@ class TestEmotionSenseIntegration(unittest.TestCase):
         # Test content that might need filtering
         test_cases = [
             ("T√¥i r·∫•t vui v√† h·∫°nh ph√∫c", "happy", "positive content"),
-            ("T√¥i ƒëang bu·ªìn v√† c·∫ßn gi√∫p ƒë·ª°", "sad", "negative but acceptable content"),
-            ("T√¥i t·ª©c gi·∫≠n v·ªõi ai ƒë√≥", "angry", "angry content for monitoring"),
+            (
+                "T√¥i ƒëang bu·ªìn v√† c·∫ßn gi√∫p ƒë·ª°",
+                "sad",
+                "negative but acceptable content",
+            ),
+            (
+                "T√¥i t·ª©c gi·∫≠n v·ªõi ai ƒë√≥",
+                "angry",
+                "angry content for monitoring",
+            ),
         ]
 
         for text, expected_emotion, description in test_cases:
@@ -806,7 +824,9 @@ def run_performance_test():
     print(
         f"    ‚úÖ Successful requests: {successful_requests}/1000 ({successful_requests/10:.1f}%)"
     )
-    print(f"    ‚ùå Failed requests: {failed_requests}/1000 ({failed_requests/10:.1f}%)")
+    print(
+        f"    ‚ùå Failed requests: {failed_requests}/1000 ({failed_requests/10:.1f}%)"
+    )
     print(f"    ‚è±Ô∏è  Total time: {total_time:.2f}s")
     print(f"    ‚ö° Average time: {avg_time:.2f}ms per request")
     print(
@@ -851,7 +871,9 @@ if __name__ == "__main__":
     print("\nüìä TEST RESULTS:")
     print("   Unit Tests: 10 test methods")
     print("   Integration Tests: 4 test methods")
-    print(f"   Performance Test: {'‚úÖ PASSED' if performance_result else '‚ùå FAILED'}")
+    print(
+        f"   Performance Test: {'‚úÖ PASSED' if performance_result else '‚ùå FAILED'}"
+    )
 
     print("\nüéØ QUALITY TARGETS:")
     print("   Vietnamese Accuracy: >85% ‚úÖ")

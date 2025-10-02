@@ -26,24 +26,32 @@ except ImportError:
     def get_health_monitor():  # type: ignore
         return None
 
+
 try:
     from .logger import get_logger  # type: ignore
 except ImportError:
+
     def get_logger(name):  # type: ignore
         import logging
+
         return logging.getLogger(name)
+
 
 try:
     from .metrics import get_metrics_collector  # type: ignore
 except ImportError:
+
     def get_metrics_collector():  # type: ignore
         return None
+
 
 try:
     from .tracer import get_tracer  # type: ignore
 except ImportError:
+
     def get_tracer():  # type: ignore
         return None
+
 
 # MetricType is optional
 try:
@@ -117,25 +125,45 @@ class ObservabilityDashboard:
         """Get comprehensive dashboard data"""
         try:
             # Get health status
-            health = self.health_monitor.get_health_status() if self.health_monitor else None  # type: ignore
+            health = (
+                self.health_monitor.get_health_status() if self.health_monitor else None
+            )  # type: ignore
 
             # Get metrics overview
-            metrics_overview = self.metrics_collector.get_metrics_overview() if self.metrics_collector else None  # type: ignore
+            metrics_overview = (
+                self.metrics_collector.get_metrics_overview()
+                if self.metrics_collector
+                else None
+            )  # type: ignore
 
             # Get recent traces
-            recent_traces = self.tracer.get_traces_overview(limit=10) if self.tracer else []  # type: ignore
+            recent_traces = (
+                self.tracer.get_traces_overview(limit=10) if self.tracer else []
+            )  # type: ignore
 
             # Get log stats
-            log_stats = self.logger.get_log_stats() if hasattr(self.logger, 'get_log_stats') else {}  # type: ignore
+            log_stats = (
+                self.logger.get_log_stats()
+                if hasattr(self.logger, "get_log_stats")
+                else {}
+            )  # type: ignore
 
             # Xử lý datetime object
-            health_timestamp_iso = health.timestamp.isoformat() if health and hasattr(health, 'timestamp') and isinstance(health.timestamp, datetime) else "unknown"  # type: ignore
+            health_timestamp_iso = (
+                health.timestamp.isoformat()
+                if health
+                and hasattr(health, "timestamp")
+                and isinstance(health.timestamp, datetime)
+                else "unknown"
+            )  # type: ignore
 
             return {
                 "timestamp": datetime.now().isoformat(),
                 "health": {
                     "timestamp": health_timestamp_iso,
-                    "status": health.status.value if health and hasattr(health, 'status') else "unknown",  # type: ignore
+                    "status": health.status.value
+                    if health and hasattr(health, "status")
+                    else "unknown",  # type: ignore
                     "checks": [
                         {
                             "name": check.name,
@@ -143,9 +171,15 @@ class ObservabilityDashboard:
                             "message": check.message,
                             "response_time_ms": check.response_time_ms,
                         }
-                        for check in (health.checks if health and hasattr(health, 'checks') else [])  # type: ignore
+                        for check in (
+                            health.checks
+                            if health and hasattr(health, "checks")
+                            else []
+                        )  # type: ignore
                     ],
-                    "summary": health.summary if health and hasattr(health, 'summary') else {},  # type: ignore
+                    "summary": health.summary
+                    if health and hasattr(health, "summary")
+                    else {},  # type: ignore
                 },
                 "metrics": metrics_overview,
                 "traces": {
@@ -161,9 +195,10 @@ class ObservabilityDashboard:
 
 class DashboardHandler(BaseHTTPRequestHandler):
     """HTTP request handler for the dashboard"""
+
     # THAY ĐỔI NHỎ: Thêm __init__ để gán thuộc tính dashboard rõ ràng hơn
     def __init__(self, request, client_address, server):
-        dashboard = getattr(server, 'dashboard', None)
+        dashboard = getattr(server, "dashboard", None)
         if dashboard is None:
             raise ValueError("Dashboard instance not found in server")
         self.dashboard_instance: ObservabilityDashboard = dashboard
@@ -192,7 +227,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
 
         except Exception as e:
             # Truy cập dashboard qua self.dashboard_instance đã được gán trong __init__
-            self.dashboard_instance.logger.error(f"Handler error processing request {self.path}: {e}")
+            self.dashboard_instance.logger.error(
+                f"Handler error processing request {self.path}: {e}"
+            )
             self._serve_error(str(e))
 
     def _serve_dashboard(self):
@@ -207,13 +244,25 @@ class DashboardHandler(BaseHTTPRequestHandler):
 
     def _serve_health(self):
         """Serve health status"""
-        health = self.dashboard_instance.health_monitor.get_health_status() if self.dashboard_instance.health_monitor else None  # type: ignore
+        health = (
+            self.dashboard_instance.health_monitor.get_health_status()
+            if self.dashboard_instance.health_monitor
+            else None
+        )  # type: ignore
 
         # Xử lý datetime object
-        health_timestamp_iso = health.timestamp.isoformat() if health and hasattr(health, 'timestamp') and isinstance(health.timestamp, datetime) else "unknown"  # type: ignore
+        health_timestamp_iso = (
+            health.timestamp.isoformat()
+            if health
+            and hasattr(health, "timestamp")
+            and isinstance(health.timestamp, datetime)
+            else "unknown"
+        )  # type: ignore
 
         health_dict = {
-            "status": health.status.value if health and hasattr(health, 'status') else "unknown",  # type: ignore
+            "status": health.status.value
+            if health and hasattr(health, "status")
+            else "unknown",  # type: ignore
             "timestamp": health_timestamp_iso,
             "checks": [
                 {
@@ -223,25 +272,39 @@ class DashboardHandler(BaseHTTPRequestHandler):
                     "response_time_ms": check.response_time_ms,
                     "details": check.details,
                 }
-                for check in (health.checks if health and hasattr(health, 'checks') else [])  # type: ignore
+                for check in (
+                    health.checks if health and hasattr(health, "checks") else []
+                )  # type: ignore
             ],
-            "summary": health.summary if health and hasattr(health, 'summary') else {},  # type: ignore
+            "summary": health.summary if health and hasattr(health, "summary") else {},  # type: ignore
         }
         self._send_json_response(200, health_dict)
 
     def _serve_metrics(self):
         """Serve metrics data"""
-        overview = self.dashboard_instance.metrics_collector.get_metrics_overview() if self.dashboard_instance.metrics_collector else {}  # type: ignore
+        overview = (
+            self.dashboard_instance.metrics_collector.get_metrics_overview()
+            if self.dashboard_instance.metrics_collector
+            else {}
+        )  # type: ignore
         self._send_json_response(200, overview)
 
     def _serve_traces(self):
         """Serve traces data"""
-        traces = self.dashboard_instance.tracer.get_traces_overview(limit=50) if self.dashboard_instance.tracer else []  # type: ignore
+        traces = (
+            self.dashboard_instance.tracer.get_traces_overview(limit=50)
+            if self.dashboard_instance.tracer
+            else []
+        )  # type: ignore
         self._send_json_response(200, {"traces": traces})
 
     def _serve_logs(self):
         """Serve logs data"""
-        log_stats = self.dashboard_instance.logger.get_log_stats() if hasattr(self.dashboard_instance.logger, 'get_log_stats') else {}  # type: ignore
+        log_stats = (
+            self.dashboard_instance.logger.get_log_stats()
+            if hasattr(self.dashboard_instance.logger, "get_log_stats")
+            else {}
+        )  # type: ignore
         self._send_json_response(200, log_stats)
 
     def _serve_404(self):

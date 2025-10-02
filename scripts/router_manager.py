@@ -20,7 +20,7 @@ import time
 from datetime import datetime
 
 # Add stillme_core to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "stillme_core"))
 
 from modules.api_provider_manager import ComplexityAnalyzer, UnifiedAPIManager
 
@@ -30,10 +30,10 @@ class RouterManager:
         self.manager = UnifiedAPIManager()
         self.analyzer = ComplexityAnalyzer()
         self.status = {
-            'start_time': datetime.now(),
-            'total_requests': 0,
-            'errors': 0,
-            'last_error': None
+            "start_time": datetime.now(),
+            "total_requests": 0,
+            "errors": 0,
+            "last_error": None,
         }
 
     def get_status(self) -> dict:
@@ -46,9 +46,15 @@ class RouterManager:
             analyzer_stats = self.analyzer.get_stats()
             print("🧠 Complexity Analyzer:")
             print("  Status: ✅ Active")
-            print(f"  Total Analyses: {analyzer_stats['performance']['total_analyses']}")
-            print(f"  Average Analysis Time: {analyzer_stats['performance']['avg_time_ms']:.2f}ms")
-            print(f"  Fallback Triggers: {analyzer_stats['fallback']['total_triggers']}")
+            print(
+                f"  Total Analyses: {analyzer_stats['performance']['total_analyses']}"
+            )
+            print(
+                f"  Average Analysis Time: {analyzer_stats['performance']['avg_time_ms']:.2f}ms"
+            )
+            print(
+                f"  Fallback Triggers: {analyzer_stats['fallback']['total_triggers']}"
+            )
 
             # Check manager status
             model_prefs = self.manager.model_preferences
@@ -67,14 +73,14 @@ class RouterManager:
             print("\n🎯 Overall Status: ✅ Healthy")
 
             return {
-                'analyzer': analyzer_stats,
-                'manager': {'models': model_prefs},
-                'status': 'healthy'
+                "analyzer": analyzer_stats,
+                "manager": {"models": model_prefs},
+                "status": "healthy",
             }
 
         except Exception as e:
             print(f"❌ Error getting status: {e}")
-            return {'status': 'error', 'error': str(e)}
+            return {"status": "error", "error": str(e)}
 
     def _check_system_resources(self):
         """Check system resources"""
@@ -89,11 +95,15 @@ class RouterManager:
 
             # Memory usage
             memory = psutil.virtual_memory()
-            print(f"  Memory Usage: {memory.percent:.1f}% ({memory.used / 1024 / 1024 / 1024:.1f}GB / {memory.total / 1024 / 1024 / 1024:.1f}GB)")
+            print(
+                f"  Memory Usage: {memory.percent:.1f}% ({memory.used / 1024 / 1024 / 1024:.1f}GB / {memory.total / 1024 / 1024 / 1024:.1f}GB)"
+            )
 
             # Disk usage
-            disk = psutil.disk_usage('/')
-            print(f"  Disk Usage: {disk.percent:.1f}% ({disk.used / 1024 / 1024 / 1024:.1f}GB / {disk.total / 1024 / 1024 / 1024:.1f}GB)")
+            disk = psutil.disk_usage("/")
+            print(
+                f"  Disk Usage: {disk.percent:.1f}% ({disk.used / 1024 / 1024 / 1024:.1f}GB / {disk.total / 1024 / 1024 / 1024:.1f}GB)"
+            )
 
         except ImportError:
             print("  ⚠️  psutil not available, cannot check system resources")
@@ -108,29 +118,29 @@ class RouterManager:
             stats = self.analyzer.get_stats()
 
             # Check weights
-            weights = stats['weights']
+            weights = stats["weights"]
             print(f"  Weights: {weights}")
 
             # Check thresholds
-            thresholds = stats['thresholds']
+            thresholds = stats["thresholds"]
             print(f"  Thresholds: {thresholds}")
 
             # Check environment variables
             env_vars = [
-                'COMPLEXITY_WEIGHT_LENGTH',
-                'COMPLEXITY_WEIGHT_COMPLEX_INDICATORS',
-                'COMPLEXITY_WEIGHT_ACADEMIC_TERMS',
-                'COMPLEXITY_WEIGHT_ABSTRACT_CONCEPTS',
-                'COMPLEXITY_WEIGHT_MULTI_PART',
-                'COMPLEXITY_WEIGHT_CONDITIONAL',
-                'COMPLEXITY_WEIGHT_DOMAIN_SPECIFIC',
-                'COMPLEXITY_THRESHOLD_SIMPLE',
-                'COMPLEXITY_THRESHOLD_MEDIUM'
+                "COMPLEXITY_WEIGHT_LENGTH",
+                "COMPLEXITY_WEIGHT_COMPLEX_INDICATORS",
+                "COMPLEXITY_WEIGHT_ACADEMIC_TERMS",
+                "COMPLEXITY_WEIGHT_ABSTRACT_CONCEPTS",
+                "COMPLEXITY_WEIGHT_MULTI_PART",
+                "COMPLEXITY_WEIGHT_CONDITIONAL",
+                "COMPLEXITY_WEIGHT_DOMAIN_SPECIFIC",
+                "COMPLEXITY_THRESHOLD_SIMPLE",
+                "COMPLEXITY_THRESHOLD_MEDIUM",
             ]
 
             print("  Environment Variables:")
             for var in env_vars:
-                value = os.getenv(var, 'Not set')
+                value = os.getenv(var, "Not set")
                 print(f"    {var}: {value}")
 
         except Exception as e:
@@ -146,11 +156,11 @@ class RouterManager:
 
             print("🧠 Complexity Analyzer Configuration:")
             print("  Weights:")
-            for key, value in stats['weights'].items():
+            for key, value in stats["weights"].items():
                 print(f"    {key}: {value}")
 
             print("  Thresholds:")
-            for key, value in stats['thresholds'].items():
+            for key, value in stats["thresholds"].items():
                 print(f"    {key}: {value}")
 
             print("\n🎯 Model Manager Configuration:")
@@ -158,19 +168,19 @@ class RouterManager:
 
             print("\n🌐 Environment Variables:")
             env_vars = [
-                'COMPLEXITY_WEIGHT_LENGTH',
-                'COMPLEXITY_WEIGHT_COMPLEX_INDICATORS',
-                'COMPLEXITY_WEIGHT_ACADEMIC_TERMS',
-                'COMPLEXITY_WEIGHT_ABSTRACT_CONCEPTS',
-                'COMPLEXITY_WEIGHT_MULTI_PART',
-                'COMPLEXITY_WEIGHT_CONDITIONAL',
-                'COMPLEXITY_WEIGHT_DOMAIN_SPECIFIC',
-                'COMPLEXITY_THRESHOLD_SIMPLE',
-                'COMPLEXITY_THRESHOLD_MEDIUM'
+                "COMPLEXITY_WEIGHT_LENGTH",
+                "COMPLEXITY_WEIGHT_COMPLEX_INDICATORS",
+                "COMPLEXITY_WEIGHT_ACADEMIC_TERMS",
+                "COMPLEXITY_WEIGHT_ABSTRACT_CONCEPTS",
+                "COMPLEXITY_WEIGHT_MULTI_PART",
+                "COMPLEXITY_WEIGHT_CONDITIONAL",
+                "COMPLEXITY_WEIGHT_DOMAIN_SPECIFIC",
+                "COMPLEXITY_THRESHOLD_SIMPLE",
+                "COMPLEXITY_THRESHOLD_MEDIUM",
             ]
 
             for var in env_vars:
-                value = os.getenv(var, 'Not set')
+                value = os.getenv(var, "Not set")
                 print(f"  {var}: {value}")
 
         except Exception as e:
@@ -194,18 +204,21 @@ class RouterManager:
                     model_prefs = self.manager.model_preferences
 
                     data_point = {
-                        'timestamp': datetime.now(),
-                        'analyzer_stats': stats,
-                        'model_preferences': model_prefs
+                        "timestamp": datetime.now(),
+                        "analyzer_stats": stats,
+                        "model_preferences": model_prefs,
                     }
 
                     monitoring_data.append(data_point)
 
                     # Print current status
-                    print(f"\r⏰ {datetime.now().strftime('%H:%M:%S')} | "
-                          f"Analyses: {stats['performance']['total_analyses']} | "
-                          f"Avg Time: {stats['performance']['avg_time_ms']:.2f}ms | "
-                          f"Fallbacks: {stats['fallback']['total_triggers']}", end='')
+                    print(
+                        f"\r⏰ {datetime.now().strftime('%H:%M:%S')} | "
+                        f"Analyses: {stats['performance']['total_analyses']} | "
+                        f"Avg Time: {stats['performance']['avg_time_ms']:.2f}ms | "
+                        f"Fallbacks: {stats['fallback']['total_triggers']}",
+                        end="",
+                    )
 
                     time.sleep(5)  # Update every 5 seconds
 
@@ -231,18 +244,26 @@ class RouterManager:
         print("=" * 40)
 
         total_data_points = len(monitoring_data)
-        duration = (monitoring_data[-1]['timestamp'] - monitoring_data[0]['timestamp']).total_seconds()
+        duration = (
+            monitoring_data[-1]["timestamp"] - monitoring_data[0]["timestamp"]
+        ).total_seconds()
 
         print(f"Total Data Points: {total_data_points}")
         print(f"Monitoring Duration: {duration:.1f}s")
 
         # Analyze trends
         if total_data_points > 1:
-            first_stats = monitoring_data[0]['analyzer_stats']
-            last_stats = monitoring_data[-1]['analyzer_stats']
+            first_stats = monitoring_data[0]["analyzer_stats"]
+            last_stats = monitoring_data[-1]["analyzer_stats"]
 
-            analyses_increase = last_stats['performance']['total_analyses'] - first_stats['performance']['total_analyses']
-            fallbacks_increase = last_stats['fallback']['total_triggers'] - first_stats['fallback']['total_triggers']
+            analyses_increase = (
+                last_stats["performance"]["total_analyses"]
+                - first_stats["performance"]["total_analyses"]
+            )
+            fallbacks_increase = (
+                last_stats["fallback"]["total_triggers"]
+                - first_stats["fallback"]["total_triggers"]
+            )
 
             print("\n📈 Trends:")
             print(f"  Analyses Increase: {analyses_increase}")
@@ -262,7 +283,7 @@ class RouterManager:
             ("Validate configuration", self._validate_configuration),
             ("Test routing logic", self._test_routing_logic),
             ("Check performance", self._check_performance),
-            ("Clean up logs", self._cleanup_logs)
+            ("Clean up logs", self._cleanup_logs),
         ]
 
         results = {}
@@ -271,17 +292,17 @@ class RouterManager:
             print(f"\n🔧 Running: {task_name}")
             try:
                 result = task_func()
-                results[task_name] = {'status': 'success', 'result': result}
+                results[task_name] = {"status": "success", "result": result}
                 print(f"  ✅ {task_name}: Success")
             except Exception as e:
-                results[task_name] = {'status': 'error', 'error': str(e)}
+                results[task_name] = {"status": "error", "error": str(e)}
                 print(f"  ❌ {task_name}: Error - {e}")
 
         # Print maintenance summary
         print("\n📊 Maintenance Summary")
         print("=" * 40)
 
-        successful_tasks = sum(1 for r in results.values() if r['status'] == 'success')
+        successful_tasks = sum(1 for r in results.values() if r["status"] == "success")
         total_tasks = len(results)
 
         print(f"Successful Tasks: {successful_tasks}/{total_tasks}")
@@ -300,10 +321,10 @@ class RouterManager:
             model_prefs = self.manager.model_preferences
 
             return {
-                'analyzer_active': True,
-                'manager_active': True,
-                'total_analyses': stats['performance']['total_analyses'],
-                'available_models': len(model_prefs)
+                "analyzer_active": True,
+                "manager_active": True,
+                "total_analyses": stats["performance"]["total_analyses"],
+                "available_models": len(model_prefs),
             }
         except Exception as e:
             raise Exception(f"System status check failed: {e}")
@@ -314,20 +335,22 @@ class RouterManager:
             stats = self.analyzer.get_stats()
 
             # Check weights
-            weights = stats['weights']
+            weights = stats["weights"]
             for key, value in weights.items():
                 if not (0.0 <= value <= 1.0):
                     raise Exception(f"Invalid weight {key}: {value}")
 
             # Check thresholds
-            thresholds = stats['thresholds']
-            if thresholds['simple'] >= thresholds['medium']:
-                raise Exception(f"Invalid threshold order: simple={thresholds['simple']}, medium={thresholds['medium']}")
+            thresholds = stats["thresholds"]
+            if thresholds["simple"] >= thresholds["medium"]:
+                raise Exception(
+                    f"Invalid threshold order: simple={thresholds['simple']}, medium={thresholds['medium']}"
+                )
 
             return {
-                'weights_valid': True,
-                'thresholds_valid': True,
-                'configuration_valid': True
+                "weights_valid": True,
+                "thresholds_valid": True,
+                "configuration_valid": True,
             }
         except Exception as e:
             raise Exception(f"Configuration validation failed: {e}")
@@ -338,28 +361,30 @@ class RouterManager:
             test_prompts = [
                 ("chào bạn", "gemma2:2b"),
                 ("viết code Python", "deepseek-coder:6.7b"),
-                ("Giải thích định lý bất toàn của Gödel", "deepseek-chat")
+                ("Giải thích định lý bất toàn của Gödel", "deepseek-chat"),
             ]
 
             results = []
             for prompt, expected_model in test_prompts:
                 selected_model = self.manager.choose_model(prompt)
                 is_correct = selected_model == expected_model
-                results.append({
-                    'prompt': prompt,
-                    'expected': expected_model,
-                    'actual': selected_model,
-                    'correct': is_correct
-                })
+                results.append(
+                    {
+                        "prompt": prompt,
+                        "expected": expected_model,
+                        "actual": selected_model,
+                        "correct": is_correct,
+                    }
+                )
 
-            correct_count = sum(1 for r in results if r['correct'])
+            correct_count = sum(1 for r in results if r["correct"])
             total_count = len(results)
 
             return {
-                'test_results': results,
-                'accuracy': correct_count / total_count,
-                'correct_count': correct_count,
-                'total_count': total_count
+                "test_results": results,
+                "accuracy": correct_count / total_count,
+                "correct_count": correct_count,
+                "total_count": total_count,
             }
         except Exception as e:
             raise Exception(f"Routing logic test failed: {e}")
@@ -375,9 +400,9 @@ class RouterManager:
             avg_time = (end_time - start_time) / 100
 
             return {
-                'avg_analysis_time': avg_time,
-                'avg_analysis_time_ms': avg_time * 1000,
-                'performance_grade': self._get_performance_grade(avg_time)
+                "avg_analysis_time": avg_time,
+                "avg_analysis_time_ms": avg_time * 1000,
+                "performance_grade": self._get_performance_grade(avg_time),
             }
         except Exception as e:
             raise Exception(f"Performance check failed: {e}")
@@ -400,10 +425,7 @@ class RouterManager:
         try:
             # This is a placeholder for log cleanup
             # In a real implementation, you would clean up old log files
-            return {
-                'logs_cleaned': 0,
-                'space_freed': 0
-            }
+            return {"logs_cleaned": 0, "space_freed": 0}
         except Exception as e:
             raise Exception(f"Log cleanup failed: {e}")
 
@@ -413,25 +435,28 @@ class RouterManager:
             status_data = self.get_status()
 
             export_data = {
-                'timestamp': datetime.now().isoformat(),
-                'status': status_data
+                "timestamp": datetime.now().isoformat(),
+                "status": status_data,
             }
 
-            with open(filename, 'w', encoding='utf-8') as f:
+            with open(filename, "w", encoding="utf-8") as f:
                 json.dump(export_data, f, indent=2, ensure_ascii=False)
 
             print(f"✅ Status exported to {filename}")
         except Exception as e:
             print(f"❌ Error exporting status: {e}")
 
+
 def main():
-    parser = argparse.ArgumentParser(description='AI Router Manager')
-    parser.add_argument('--status', action='store_true', help='Show router status')
-    parser.add_argument('--config', action='store_true', help='Show configuration')
-    parser.add_argument('--monitor', action='store_true', help='Start monitoring')
-    parser.add_argument('--maintenance', action='store_true', help='Run maintenance')
-    parser.add_argument('--duration', type=int, default=300, help='Monitoring duration in seconds')
-    parser.add_argument('--export', type=str, help='Export status to JSON file')
+    parser = argparse.ArgumentParser(description="AI Router Manager")
+    parser.add_argument("--status", action="store_true", help="Show router status")
+    parser.add_argument("--config", action="store_true", help="Show configuration")
+    parser.add_argument("--monitor", action="store_true", help="Start monitoring")
+    parser.add_argument("--maintenance", action="store_true", help="Run maintenance")
+    parser.add_argument(
+        "--duration", type=int, default=300, help="Monitoring duration in seconds"
+    )
+    parser.add_argument("--export", type=str, help="Export status to JSON file")
 
     args = parser.parse_args()
 
@@ -452,6 +477,7 @@ def main():
 
     if args.export:
         manager.export_status(args.export)
+
 
 if __name__ == "__main__":
     main()

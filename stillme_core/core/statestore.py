@@ -21,12 +21,21 @@ class StateStore:
         """Get job step by ID"""
         pass
 
-    async def complete_job_step(self, job_id: str, step_id: str, success: bool = True, error_message: Optional[str] = None) -> None:
+    async def complete_job_step(
+        self,
+        job_id: str,
+        step_id: str,
+        success: bool = True,
+        error_message: Optional[str] = None,
+    ) -> None:
         """Complete a job step"""
         pass
 
-    async def update_job_step_status(self, job_id: str, step_id: str, status: Any) -> None:
+    async def update_job_step_status(
+        self, job_id: str, step_id: str, status: Any
+    ) -> None:
         """Update job step status"""
         pass
+
 
 __all__ = ["StateStore"]

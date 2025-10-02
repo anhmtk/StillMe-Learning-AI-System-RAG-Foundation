@@ -14,11 +14,13 @@ from typing import Optional
 @dataclass
 class FixPattern:
     """Pattern để fix lỗi"""
+
     name: str
     error_type: str
     pattern: str
     fix_template: str
     priority: int = 1
+
 
 class PatternBasedFixer:
     """Fixer dựa trên pattern"""
@@ -35,80 +37,72 @@ class PatternBasedFixer:
                 error_type="F821",
                 pattern=r"undefined name '(ReflectionResult|NodeType|ImpactLevel|SemanticSearchEngine|SearchResult|MatchType)'",
                 fix_template="from tests.analysis_classes import {name}",
-                priority=1
+                priority=1,
             ),
-
             # Pattern 2: apply_policies, safe_reply, classify, sanitize
             FixPattern(
                 name="guard_functions",
                 error_type="F821",
                 pattern=r"undefined name '(apply_policies|safe_reply|classify|sanitize|redact_output|CANARY)'",
                 fix_template="from stillme_core.guard import {name}",
-                priority=1
+                priority=1,
             ),
-
             # Pattern 3: MemoryItem, LongTermMemory
             FixPattern(
                 name="memory_classes",
                 error_type="F821",
                 pattern=r"undefined name '(MemoryItem|LongTermMemory)'",
                 fix_template="from stillme_core.memory import {name}",
-                priority=1
+                priority=1,
             ),
-
             # Pattern 4: QualityIssue, QualityReport
             FixPattern(
                 name="quality_classes",
                 error_type="F821",
                 pattern=r"undefined name '(QualityIssue|QualityReport)'",
                 fix_template="from stillme_core.quality import {name}",
-                priority=1
+                priority=1,
             ),
-
             # Pattern 5: SimulationStatus, AttackCategory, AttackSeverity
             FixPattern(
                 name="simulation_classes",
                 error_type="F821",
                 pattern=r"undefined name '(SimulationStatus|AttackCategory|AttackSeverity|EthicalPrinciple|ViolationSeverity)'",
                 fix_template="from stillme_core.simulation import {name}",
-                priority=1
+                priority=1,
             ),
-
             # Pattern 6: RedisEventBus, DAGExecutor, RBACManager
             FixPattern(
                 name="infrastructure_classes",
                 error_type="F821",
                 pattern=r"undefined name '(RedisEventBus|DAGExecutor|RBACManager)'",
                 fix_template="from stillme_core.infrastructure import {name}",
-                priority=1
+                priority=1,
             ),
-
             # Pattern 7: Common imports
             FixPattern(
                 name="common_imports",
                 error_type="F821",
                 pattern=r"undefined name '(time|yaml|asdict|os|html_content|news_delta|reddit_engagement|wrap_content)'",
                 fix_template="import {name}",
-                priority=2
+                priority=2,
             ),
-
             # Pattern 8: AgentDevLogger, log_step
             FixPattern(
                 name="logging_functions",
                 error_type="F821",
                 pattern=r"undefined name '(AgentDevLogger|log_step)'",
                 fix_template="from stillme_core.logging import {name}",
-                priority=1
+                priority=1,
             ),
-
             # Pattern 9: AI Manager functions
             FixPattern(
                 name="ai_manager_functions",
                 error_type="F821",
                 pattern=r"undefined name '(health|set_mode|warmup|dev_agent|controller)'",
                 fix_template="from stillme_core.ai_manager import {name}",
-                priority=1
-            )
+                priority=1,
+            ),
         ]
 
     def find_matching_pattern(self, error_message: str) -> Optional[FixPattern]:
@@ -157,6 +151,7 @@ class PatternBasedFixer:
         except Exception:
             return False
 
+
 # Example usage
 if __name__ == "__main__":
     fixer = PatternBasedFixer()
@@ -167,7 +162,7 @@ if __name__ == "__main__":
         "F821 undefined name 'apply_policies'",
         "F821 undefined name 'MemoryItem'",
         "F821 undefined name 'time'",
-        "F821 undefined name 'unknown_var'"
+        "F821 undefined name 'unknown_var'",
     ]
 
     for error in test_errors:

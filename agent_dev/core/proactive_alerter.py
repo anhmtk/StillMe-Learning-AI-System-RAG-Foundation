@@ -26,24 +26,30 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
+
 class AlertPriority(Enum):
     """Mức độ ưu tiên alert"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
 
+
 class AlertChannel(Enum):
     """Kênh gửi alert"""
+
     CONSOLE = "console"
     EMAIL = "email"
     SLACK = "slack"
     WEBHOOK = "webhook"
     FILE = "file"
 
+
 @dataclass
 class AlertRule:
     """Rule để tạo alert"""
+
     id: str
     name: str
     condition: str
@@ -52,9 +58,11 @@ class AlertRule:
     enabled: bool = True
     cooldown_minutes: int = 15
 
+
 @dataclass
 class AlertEvent:
     """Event tạo alert"""
+
     id: str
     rule_id: str
     title: str
@@ -63,6 +71,7 @@ class AlertEvent:
     timestamp: datetime
     metadata: dict[str, Any]
     resolved: bool = False
+
 
 class ProactiveAlerter:
     """Hệ thống cảnh báo chủ động"""
@@ -89,22 +98,11 @@ class ProactiveAlerter:
                     "smtp_port": 587,
                     "username": "",
                     "password": "",
-                    "to_addresses": []
+                    "to_addresses": [],
                 },
-                "slack": {
-                    "enabled": False,
-                    "webhook_url": "",
-                    "channel": "#alerts"
-                },
-                "webhook": {
-                    "enabled": False,
-                    "url": "",
-                    "headers": {}
-                },
-                "file": {
-                    "enabled": True,
-                    "path": "logs/alerts.json"
-                }
+                "slack": {"enabled": False, "webhook_url": "", "channel": "#alerts"},
+                "webhook": {"enabled": False, "url": "", "headers": {}},
+                "file": {"enabled": True, "path": "logs/alerts.json"},
             },
             "rules": {
                 "high_error_count": {
@@ -112,23 +110,23 @@ class ProactiveAlerter:
                     "condition": "total_errors > 50",
                     "priority": "critical",
                     "channels": ["console", "file"],
-                    "cooldown_minutes": 15
+                    "cooldown_minutes": 15,
                 },
                 "syntax_errors": {
                     "enabled": True,
                     "condition": "syntax_errors > 5",
                     "priority": "high",
                     "channels": ["console", "file"],
-                    "cooldown_minutes": 30
+                    "cooldown_minutes": 30,
                 },
                 "import_errors": {
                     "enabled": True,
                     "condition": "import_errors > 10",
                     "priority": "medium",
                     "channels": ["console"],
-                    "cooldown_minutes": 60
-                }
-            }
+                    "cooldown_minutes": 60,
+                },
+            },
         }
 
     def _setup_logging(self):
@@ -138,11 +136,11 @@ class ProactiveAlerter:
 
         logging.basicConfig(
             level=logging.INFO,
-            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             handlers=[
                 logging.FileHandler(log_dir / "proactive_alerter.log"),
-                logging.StreamHandler()
-            ]
+                logging.StreamHandler(),
+            ],
         )
 
     def _load_rules(self) -> list[AlertRule]:
@@ -158,7 +156,7 @@ class ProactiveAlerter:
                     priority=AlertPriority(rule_config["priority"]),
                     channels=[AlertChannel(c) for c in rule_config["channels"]],
                     enabled=rule_config.get("enabled", True),
-                    cooldown_minutes=rule_config.get("cooldown_minutes", 15)
+                    cooldown_minutes=rule_config.get("cooldown_minutes", 15),
                 )
                 rules.append(rule)
 
@@ -185,7 +183,7 @@ class ProactiveAlerter:
                     message=self._generate_message(rule, metrics),
                     priority=rule.priority,
                     timestamp=datetime.now(),
-                    metadata=metrics
+                    metadata=metrics,
                 )
 
                 events.append(event)
@@ -269,7 +267,7 @@ class ProactiveAlerter:
             AlertPriority.LOW: "ℹ️",
             AlertPriority.MEDIUM: "⚠️",
             AlertPriority.HIGH: "❌",
-            AlertPriority.CRITICAL: "🚨"
+            AlertPriority.CRITICAL: "🚨",
         }
 
         emoji = priority_emoji[event.priority]
@@ -331,14 +329,18 @@ class ProactiveAlerter:
         if not self.events:
             return {"message": "No alerts"}
 
-        recent_events = [e for e in self.events if e.timestamp > datetime.now() - timedelta(hours=24)]
+        recent_events = [
+            e for e in self.events if e.timestamp > datetime.now() - timedelta(hours=24)
+        ]
 
         summary = {
             "total_events": len(self.events),
             "recent_events": len(recent_events),
             "by_priority": {},
             "by_rule": {},
-            "last_alert": self.events[-1].timestamp.isoformat() if self.events else None
+            "last_alert": self.events[-1].timestamp.isoformat()
+            if self.events
+            else None,
         }
 
         # Count by priority
@@ -353,6 +355,7 @@ class ProactiveAlerter:
 
         return summary
 
+
 # Example usage
 if __name__ == "__main__":
     # Initialize alerter
@@ -363,7 +366,7 @@ if __name__ == "__main__":
         "total_errors": 75,
         "syntax_errors": 8,
         "import_errors": 15,
-        "files_with_errors": 12
+        "files_with_errors": 12,
     }
 
     # Check metrics

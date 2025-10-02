@@ -13,22 +13,23 @@ import chardet
 def detect_encoding(file_path):
     """Detect file encoding"""
     try:
-        with open(file_path, 'rb') as f:
+        with open(file_path, "rb") as f:
             raw_data = f.read()
 
         # Check for BOM
-        if raw_data.startswith(b'\xef\xbb\xbf'):
-            return 'utf-8-sig', True
-        elif raw_data.startswith(b'\xff\xfe'):
-            return 'utf-16le', True
-        elif raw_data.startswith(b'\xfe\xff'):
-            return 'utf-16be', True
+        if raw_data.startswith(b"\xef\xbb\xbf"):
+            return "utf-8-sig", True
+        elif raw_data.startswith(b"\xff\xfe"):
+            return "utf-16le", True
+        elif raw_data.startswith(b"\xfe\xff"):
+            return "utf-16be", True
 
         # Detect encoding
         detected = chardet.detect(raw_data)
-        return detected['encoding'], False
+        return detected["encoding"], False
     except Exception:
         return None, False
+
 
 def normalize_file(file_path):
     """Normalize a single file to UTF-8 with LF endings"""
@@ -43,20 +44,28 @@ def normalize_file(file_path):
             content = f.read()
 
         # Check if already normalized
-        if encoding.lower() in ['utf-8', 'utf8'] and not has_bom and '\r\n' not in content:
+        if (
+            encoding.lower() in ["utf-8", "utf8"]
+            and not has_bom
+            and "\r\n" not in content
+        ):
             return False, "Already normalized"
 
         # Normalize line endings (CRLF -> LF)
-        normalized_content = content.replace('\r\n', '\n').replace('\r', '\n')
+        normalized_content = content.replace("\r\n", "\n").replace("\r", "\n")
 
         # Write back as UTF-8 (no BOM) with LF
-        with open(file_path, 'w', encoding='utf-8', newline='\n') as f:
+        with open(file_path, "w", encoding="utf-8", newline="\n") as f:
             f.write(normalized_content)
 
-        return True, f"Converted from {encoding} (BOM: {has_bom}) to UTF-8 (no BOM) with LF"
+        return (
+            True,
+            f"Converted from {encoding} (BOM: {has_bom}) to UTF-8 (no BOM) with LF",
+        )
 
     except Exception as e:
         return False, f"Error: {e}"
+
 
 def scan_and_normalize():
     """Scan and normalize all test-related files"""
@@ -66,7 +75,7 @@ def scan_and_normalize():
         Path("tests/conftest.py"),
         Path("tox.ini"),
         Path("Makefile"),
-        Path("package.json")
+        Path("package.json"),
     ]
 
     processed_files = []
@@ -80,11 +89,9 @@ def scan_and_normalize():
         if target_path.is_file():
             # Single file
             success, message = normalize_file(target_path)
-            processed_files.append({
-                'path': str(target_path),
-                'success': success,
-                'message': message
-            })
+            processed_files.append(
+                {"path": str(target_path), "success": success, "message": message}
+            )
 
             if success:
                 converted_files.append(str(target_path))
@@ -94,11 +101,9 @@ def scan_and_normalize():
             # Directory - scan all Python files
             for py_file in target_path.rglob("*.py"):
                 success, message = normalize_file(py_file)
-                processed_files.append({
-                    'path': str(py_file),
-                    'success': success,
-                    'message': message
-                })
+                processed_files.append(
+                    {"path": str(py_file), "success": success, "message": message}
+                )
 
                 if success:
                     converted_files.append(str(py_file))
@@ -107,12 +112,13 @@ def scan_and_normalize():
 
     return processed_files, converted_files, error_files
 
+
 def generate_report(processed_files, converted_files, error_files):
     """Generate normalization report"""
     report_path = Path("reports/encoding_normalize.txt")
     report_path.parent.mkdir(exist_ok=True)
 
-    with open(report_path, 'w', encoding='utf-8') as f:
+    with open(report_path, "w", encoding="utf-8") as f:
         f.write("Encoding and Line Ending Normalization Report\n")
         f.write("=" * 60 + "\n\n")
 
@@ -137,10 +143,17 @@ def generate_report(processed_files, converted_files, error_files):
         f.write("DETAILED RESULTS:\n")
         f.write("-" * 20 + "\n")
         for file_info in processed_files:
-            status = "✅" if file_info['success'] else "ℹ️" if "Already normalized" in file_info['message'] else "❌"
+            status = (
+                "✅"
+                if file_info["success"]
+                else "ℹ️"
+                if "Already normalized" in file_info["message"]
+                else "❌"
+            )
             f.write(f"{status} {file_info['path']}: {file_info['message']}\n")
 
     return report_path
+
 
 def main():
     """Main normalization function"""
@@ -165,6 +178,7 @@ def main():
             print(f"  - {file_path}")
 
     return len(error_files)
+
 
 if __name__ == "__main__":
     sys.exit(main())

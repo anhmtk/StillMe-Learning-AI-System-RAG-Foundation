@@ -17,7 +17,7 @@ import sys
 import time
 
 # Add stillme_core to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "stillme_core"))
 
 from modules.api_provider_manager import ComplexityAnalyzer
 
@@ -30,7 +30,7 @@ class RouterCalibrator:
     def _load_test_cases(self) -> dict[str, list[tuple[str, str, float]]]:
         """Load test cases with expected routing"""
         return {
-            'simple': [
+            "simple": [
                 ("chào bạn", "gemma2:2b", 0.0),
                 ("bạn khỏe không?", "gemma2:2b", 0.0),
                 ("2+2 bằng mấy?", "gemma2:2b", 0.0),
@@ -38,7 +38,7 @@ class RouterCalibrator:
                 ("hello", "gemma2:2b", 0.0),
                 ("how are you?", "gemma2:2b", 0.0),
             ],
-            'coding': [
+            "coding": [
                 ("viết code Python", "deepseek-coder:6.7b", 0.3),
                 ("lập trình JavaScript", "deepseek-coder:6.7b", 0.3),
                 ("debug lỗi", "deepseek-coder:6.7b", 0.3),
@@ -48,24 +48,52 @@ class RouterCalibrator:
                 ("sửa lỗi code", "deepseek-coder:6.7b", 0.3),
                 ("tạo class Python", "deepseek-coder:6.7b", 0.3),
                 ("viết code Python tính giai thừa", "deepseek-coder:6.7b", 0.3),
-                ("nếu tôi muốn học lập trình thì nên bắt đầu từ đâu?", "deepseek-coder:6.7b", 0.3),
+                (
+                    "nếu tôi muốn học lập trình thì nên bắt đầu từ đâu?",
+                    "deepseek-coder:6.7b",
+                    0.3,
+                ),
             ],
-            'complex': [
+            "complex": [
                 ("Giải thích định lý bất toàn của Gödel", "deepseek-chat", 0.7),
-                ("Phân tích mối quan hệ giữa triết học và khoa học", "deepseek-chat", 0.7),
+                (
+                    "Phân tích mối quan hệ giữa triết học và khoa học",
+                    "deepseek-chat",
+                    0.7,
+                ),
                 ("So sánh các phương pháp học máy", "deepseek-chat", 0.7),
                 ("Tại sao các hệ thống phức tạp lại tự tổ chức?", "deepseek-chat", 0.7),
                 ("Ý nghĩa của cuộc sống là gì?", "deepseek-chat", 0.7),
                 ("Bản chất của thực tại là gì?", "deepseek-chat", 0.7),
                 ("Tác động của AI đến xã hội", "deepseek-chat", 0.7),
                 ("Phân tích xu hướng phát triển công nghệ", "deepseek-chat", 0.7),
-                ("giả sử tôi có một bài toán phức tạp, làm thế nào để giải quyết nó?", "deepseek-chat", 0.7),
+                (
+                    "giả sử tôi có một bài toán phức tạp, làm thế nào để giải quyết nó?",
+                    "deepseek-chat",
+                    0.7,
+                ),
                 ("trong trường hợp nào thì nên sử dụng AI?", "deepseek-chat", 0.7),
-                ("Giải thích định lý bất toàn của Gödel và tác động của nó đến toán học hiện đại", "deepseek-chat", 0.7),
-                ("Phân tích mối quan hệ giữa triết học và khoa học trong việc hiểu bản chất của thực tại", "deepseek-chat", 0.7),
-                ("So sánh và đánh giá các phương pháp học máy khác nhau trong việc xử lý ngôn ngữ tự nhiên", "deepseek-chat", 0.7),
-                ("Tại sao các hệ thống phức tạp lại có xu hướng tự tổ chức và phát triển theo quy luật nào?", "deepseek-chat", 0.7),
-            ]
+                (
+                    "Giải thích định lý bất toàn của Gödel và tác động của nó đến toán học hiện đại",
+                    "deepseek-chat",
+                    0.7,
+                ),
+                (
+                    "Phân tích mối quan hệ giữa triết học và khoa học trong việc hiểu bản chất của thực tại",
+                    "deepseek-chat",
+                    0.7,
+                ),
+                (
+                    "So sánh và đánh giá các phương pháp học máy khác nhau trong việc xử lý ngôn ngữ tự nhiên",
+                    "deepseek-chat",
+                    0.7,
+                ),
+                (
+                    "Tại sao các hệ thống phức tạp lại có xu hướng tự tổ chức và phát triển theo quy luật nào?",
+                    "deepseek-chat",
+                    0.7,
+                ),
+            ],
         }
 
     def test_current_config(self) -> dict[str, float]:
@@ -96,7 +124,9 @@ class RouterCalibrator:
                     correct += 1
 
                 status = "✅" if is_correct else "❌"
-                print(f"  {status} {prompt[:50]}... → {actual_model} (score: {actual_score:.3f})")
+                print(
+                    f"  {status} {prompt[:50]}... → {actual_model} (score: {actual_score:.3f})"
+                )
 
                 if not is_correct:
                     print(f"    Expected: {expected_model}, Got: {actual_model}")
@@ -106,12 +136,14 @@ class RouterCalibrator:
             print(f"  📊 {category} accuracy: {accuracy:.1%} ({correct}/{total})")
 
         # Overall accuracy
-        total_correct = sum(len([tc for tc in test_cases if self._test_single_case(tc)])
-                           for test_cases in self.test_cases.values())
+        total_correct = sum(
+            len([tc for tc in test_cases if self._test_single_case(tc)])
+            for test_cases in self.test_cases.values()
+        )
         total_tests = sum(len(test_cases) for test_cases in self.test_cases.values())
         overall_accuracy = total_correct / total_tests
 
-        results['overall'] = overall_accuracy
+        results["overall"] = overall_accuracy
         print(f"\n🎯 Overall accuracy: {overall_accuracy:.1%}")
 
         return results
@@ -172,16 +204,30 @@ class RouterCalibrator:
     def _adjust_weights(self):
         """Adjust complexity analysis weights"""
         print("\n🔧 Adjusting weights:")
-        print("Available weights: length, complex_indicators, academic_terms, abstract_concepts, multi_part, conditional, domain_specific")
+        print(
+            "Available weights: length, complex_indicators, academic_terms, abstract_concepts, multi_part, conditional, domain_specific"
+        )
 
         weight_name = input("Enter weight name: ").strip()
-        if weight_name not in ['length', 'complex_indicators', 'academic_terms', 'abstract_concepts', 'multi_part', 'conditional', 'domain_specific']:
+        if weight_name not in [
+            "length",
+            "complex_indicators",
+            "academic_terms",
+            "abstract_concepts",
+            "multi_part",
+            "conditional",
+            "domain_specific",
+        ]:
             print("Invalid weight name.")
             return
 
         try:
-            new_value = float(input(f"Enter new value for {weight_name} (current: {self.analyzer.weights[weight_name]}): "))
-            os.environ[f'COMPLEXITY_WEIGHT_{weight_name.upper()}'] = str(new_value)
+            new_value = float(
+                input(
+                    f"Enter new value for {weight_name} (current: {self.analyzer.weights[weight_name]}): "
+                )
+            )
+            os.environ[f"COMPLEXITY_WEIGHT_{weight_name.upper()}"] = str(new_value)
 
             # Reload analyzer with new weights
             self.analyzer = ComplexityAnalyzer()
@@ -194,15 +240,25 @@ class RouterCalibrator:
         print("\n🔧 Adjusting thresholds:")
 
         try:
-            simple_threshold = float(input(f"Enter simple threshold (current: {self.analyzer.thresholds['simple']}): "))
-            medium_threshold = float(input(f"Enter medium threshold (current: {self.analyzer.thresholds['medium']}): "))
+            simple_threshold = float(
+                input(
+                    f"Enter simple threshold (current: {self.analyzer.thresholds['simple']}): "
+                )
+            )
+            medium_threshold = float(
+                input(
+                    f"Enter medium threshold (current: {self.analyzer.thresholds['medium']}): "
+                )
+            )
 
-            os.environ['COMPLEXITY_THRESHOLD_SIMPLE'] = str(simple_threshold)
-            os.environ['COMPLEXITY_THRESHOLD_MEDIUM'] = str(medium_threshold)
+            os.environ["COMPLEXITY_THRESHOLD_SIMPLE"] = str(simple_threshold)
+            os.environ["COMPLEXITY_THRESHOLD_MEDIUM"] = str(medium_threshold)
 
             # Reload analyzer with new thresholds
             self.analyzer = ComplexityAnalyzer()
-            print(f"✅ Updated thresholds: simple={simple_threshold}, medium={medium_threshold}")
+            print(
+                f"✅ Updated thresholds: simple={simple_threshold}, medium={medium_threshold}"
+            )
         except ValueError:
             print("Invalid value. Please enter a number.")
 
@@ -253,7 +309,7 @@ COMPLEXITY_THRESHOLD_MEDIUM={stats['thresholds']['medium']}
 """
 
         filename = f"router_config_{int(time.time())}.env"
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             f.write(config)
 
         print(f"✅ Configuration exported to {filename}")
@@ -267,53 +323,71 @@ COMPLEXITY_THRESHOLD_MEDIUM={stats['thresholds']['medium']}
 
         # Test different weight combinations
         weight_ranges = {
-            'academic_terms': [0.3, 0.4, 0.5, 0.6],
-            'abstract_concepts': [0.4, 0.5, 0.6, 0.7],
-            'domain_specific': [0.3, 0.4, 0.5, 0.6],
+            "academic_terms": [0.3, 0.4, 0.5, 0.6],
+            "abstract_concepts": [0.4, 0.5, 0.6, 0.7],
+            "domain_specific": [0.3, 0.4, 0.5, 0.6],
         }
 
         threshold_ranges = {
-            'simple': [0.2, 0.3, 0.4, 0.5],
-            'medium': [0.5, 0.6, 0.7, 0.8],
+            "simple": [0.2, 0.3, 0.4, 0.5],
+            "medium": [0.5, 0.6, 0.7, 0.8],
         }
 
-        total_combinations = len(weight_ranges['academic_terms']) * len(weight_ranges['abstract_concepts']) * len(weight_ranges['domain_specific']) * len(threshold_ranges['simple']) * len(threshold_ranges['medium'])
+        total_combinations = (
+            len(weight_ranges["academic_terms"])
+            * len(weight_ranges["abstract_concepts"])
+            * len(weight_ranges["domain_specific"])
+            * len(threshold_ranges["simple"])
+            * len(threshold_ranges["medium"])
+        )
         current_combination = 0
 
         print(f"Testing {total_combinations} combinations...")
 
-        for academic_weight in weight_ranges['academic_terms']:
-            for abstract_weight in weight_ranges['abstract_concepts']:
-                for domain_weight in weight_ranges['domain_specific']:
-                    for simple_threshold in threshold_ranges['simple']:
-                        for medium_threshold in threshold_ranges['medium']:
+        for academic_weight in weight_ranges["academic_terms"]:
+            for abstract_weight in weight_ranges["abstract_concepts"]:
+                for domain_weight in weight_ranges["domain_specific"]:
+                    for simple_threshold in threshold_ranges["simple"]:
+                        for medium_threshold in threshold_ranges["medium"]:
                             current_combination += 1
 
                             # Set environment variables
-                            os.environ['COMPLEXITY_WEIGHT_ACADEMIC_TERMS'] = str(academic_weight)
-                            os.environ['COMPLEXITY_WEIGHT_ABSTRACT_CONCEPTS'] = str(abstract_weight)
-                            os.environ['COMPLEXITY_WEIGHT_DOMAIN_SPECIFIC'] = str(domain_weight)
-                            os.environ['COMPLEXITY_THRESHOLD_SIMPLE'] = str(simple_threshold)
-                            os.environ['COMPLEXITY_THRESHOLD_MEDIUM'] = str(medium_threshold)
+                            os.environ["COMPLEXITY_WEIGHT_ACADEMIC_TERMS"] = str(
+                                academic_weight
+                            )
+                            os.environ["COMPLEXITY_WEIGHT_ABSTRACT_CONCEPTS"] = str(
+                                abstract_weight
+                            )
+                            os.environ["COMPLEXITY_WEIGHT_DOMAIN_SPECIFIC"] = str(
+                                domain_weight
+                            )
+                            os.environ["COMPLEXITY_THRESHOLD_SIMPLE"] = str(
+                                simple_threshold
+                            )
+                            os.environ["COMPLEXITY_THRESHOLD_MEDIUM"] = str(
+                                medium_threshold
+                            )
 
                             # Reload analyzer
                             self.analyzer = ComplexityAnalyzer()
 
                             # Test accuracy
                             results = self.test_current_config()
-                            accuracy = results['overall']
+                            accuracy = results["overall"]
 
-                            print(f"  [{current_combination}/{total_combinations}] Accuracy: {accuracy:.1%} (academic={academic_weight}, abstract={abstract_weight}, domain={domain_weight}, simple={simple_threshold}, medium={medium_threshold})")
+                            print(
+                                f"  [{current_combination}/{total_combinations}] Accuracy: {accuracy:.1%} (academic={academic_weight}, abstract={abstract_weight}, domain={domain_weight}, simple={simple_threshold}, medium={medium_threshold})"
+                            )
 
                             if accuracy > best_accuracy:
                                 best_accuracy = accuracy
                                 best_config = {
-                                    'academic_terms': academic_weight,
-                                    'abstract_concepts': abstract_weight,
-                                    'domain_specific': domain_weight,
-                                    'simple_threshold': simple_threshold,
-                                    'medium_threshold': medium_threshold,
-                                    'accuracy': accuracy
+                                    "academic_terms": academic_weight,
+                                    "abstract_concepts": abstract_weight,
+                                    "domain_specific": domain_weight,
+                                    "simple_threshold": simple_threshold,
+                                    "medium_threshold": medium_threshold,
+                                    "accuracy": accuracy,
                                 }
 
                             if accuracy >= target_accuracy:
@@ -341,17 +415,27 @@ COMPLEXITY_THRESHOLD_MEDIUM={config['medium_threshold']}
 """
 
         filename = f"best_router_config_{int(time.time())}.env"
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             f.write(config_text)
 
         print(f"✅ Best configuration exported to {filename}")
 
+
 def main():
-    parser = argparse.ArgumentParser(description='AI Router Calibration Tool')
-    parser.add_argument('--test-suite', action='store_true', help='Run test suite')
-    parser.add_argument('--interactive', action='store_true', help='Interactive tuning mode')
-    parser.add_argument('--auto-tune', action='store_true', help='Auto-tune configuration')
-    parser.add_argument('--target-accuracy', type=float, default=0.8, help='Target accuracy for auto-tune')
+    parser = argparse.ArgumentParser(description="AI Router Calibration Tool")
+    parser.add_argument("--test-suite", action="store_true", help="Run test suite")
+    parser.add_argument(
+        "--interactive", action="store_true", help="Interactive tuning mode"
+    )
+    parser.add_argument(
+        "--auto-tune", action="store_true", help="Auto-tune configuration"
+    )
+    parser.add_argument(
+        "--target-accuracy",
+        type=float,
+        default=0.8,
+        help="Target accuracy for auto-tune",
+    )
 
     args = parser.parse_args()
 
@@ -371,6 +455,7 @@ def main():
     else:
         print("Please specify --test-suite, --interactive, or --auto-tune")
         print("Use --help for more information")
+
 
 if __name__ == "__main__":
     main()

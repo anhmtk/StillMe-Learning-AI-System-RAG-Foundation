@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 
 class ProviderStatus(Enum):
     """Status of an LLM provider."""
+
     HEALTHY = "healthy"
     DEGRADED = "degraded"
     UNHEALTHY = "unhealthy"
@@ -25,6 +26,7 @@ class ProviderStatus(Enum):
 
 class FallbackStrategy(Enum):
     """Strategy for provider fallback."""
+
     ROUND_ROBIN = "round_robin"
     FIRST_AVAILABLE = "first_available"
     FAIL_FAST = "fail_fast"
@@ -33,6 +35,7 @@ class FallbackStrategy(Enum):
 @dataclass
 class ProviderConfig:
     """Configuration for an LLM provider."""
+
     name: str
     api_key: str
     base_url: str
@@ -49,6 +52,7 @@ class ProviderConfig:
 @dataclass
 class LLMRequest:
     """Request to an LLM provider."""
+
     prompt: str
     max_tokens: Optional[int] = None
     temperature: float = 0.7
@@ -63,6 +67,7 @@ class LLMRequest:
 @dataclass
 class LLMResponse:
     """Response from an LLM provider."""
+
     content: str
     model: str
     provider: str
@@ -75,6 +80,7 @@ class LLMResponse:
 @dataclass
 class ProviderHealth:
     """Health status of a provider."""
+
     status: ProviderStatus
     last_check: datetime
     response_time: float
@@ -115,8 +121,11 @@ class CircuitBreaker:
             return True
 
         if self.state == "open":
-            if self.last_failure_time and \
-               datetime.now() - self.last_failure_time > timedelta(seconds=self.timeout):
+            if (
+                self.last_failure_time
+                and datetime.now() - self.last_failure_time
+                > timedelta(seconds=self.timeout)
+            ):
                 self.state = "half-open"
                 return True
             return False
@@ -142,11 +151,10 @@ class LLMProviderBase(ABC):
             response_time=0.0,
             error_rate=0.0,
             total_requests=0,
-            failed_requests=0
+            failed_requests=0,
         )
         self.circuit_breaker = CircuitBreaker(
-            config.circuit_breaker_threshold,
-            config.circuit_breaker_timeout
+            config.circuit_breaker_threshold, config.circuit_breaker_timeout
         )
         self._client: Optional[Any] = None
 
@@ -169,9 +177,9 @@ class LLMProviderBase(ABC):
         """Cleanup provider resources."""
         if self._client:
             try:
-                if hasattr(self._client, 'close'):
+                if hasattr(self._client, "close"):
                     await self._client.close()
-                elif hasattr(self._client, 'aclose'):
+                elif hasattr(self._client, "aclose"):
                     await self._client.aclose()
             except Exception as e:
                 logger.warning(f"Error closing {self.config.name} client: {e}")
@@ -191,13 +199,17 @@ class LLMProviderBase(ABC):
 
         # Update error rate
         if self.health.total_requests > 0:
-            self.health.error_rate = self.health.failed_requests / self.health.total_requests
+            self.health.error_rate = (
+                self.health.failed_requests / self.health.total_requests
+            )
 
         # Update status based on error rate and circuit breaker
         if self.circuit_breaker.is_open():
             self.health.status = ProviderStatus.UNHEALTHY
             self.health.circuit_breaker_open = True
-            self.health.circuit_breaker_until = datetime.now() + timedelta(seconds=self.config.circuit_breaker_timeout)
+            self.health.circuit_breaker_until = datetime.now() + timedelta(
+                seconds=self.config.circuit_breaker_timeout
+            )
         elif self.health.error_rate > 0.5:
             self.health.status = ProviderStatus.DEGRADED
         elif self.health.error_rate < 0.1:
@@ -209,7 +221,11 @@ class LLMProviderBase(ABC):
 class LLMProviderManager:
     """Manager for multiple LLM providers with fallback support."""
 
-    def __init__(self, providers: list[LLMProviderBase], fallback_strategy: FallbackStrategy = FallbackStrategy.ROUND_ROBIN):
+    def __init__(
+        self,
+        providers: list[LLMProviderBase],
+        fallback_strategy: FallbackStrategy = FallbackStrategy.ROUND_ROBIN,
+    ):
         self.providers = {p.config.name: p for p in providers}
         self.fallback_strategy = fallback_strategy
         self._current_provider_index = 0
@@ -224,13 +240,17 @@ class LLMProviderManager:
                     success_count += 1
                     logger.info(f"Initialized provider: {provider.config.name}")
                 else:
-                    logger.warning(f"Failed to initialize provider: {provider.config.name}")
+                    logger.warning(
+                        f"Failed to initialize provider: {provider.config.name}"
+                    )
             except Exception as e:
                 logger.error(f"Error initializing provider {provider.config.name}: {e}")
 
         return success_count > 0
 
-    async def generate(self, request: LLMRequest, preferred_provider: Optional[str] = None) -> LLMResponse:
+    async def generate(
+        self, request: LLMRequest, preferred_provider: Optional[str] = None
+    ) -> LLMResponse:
         """Generate a response using the best available provider."""
         if preferred_provider and preferred_provider in self.providers:
             provider = self.providers[preferred_provider]
@@ -238,7 +258,9 @@ class LLMProviderManager:
                 try:
                     return await self._try_provider(provider, request)
                 except Exception as e:
-                    logger.warning(f"Preferred provider {preferred_provider} failed: {e}")
+                    logger.warning(
+                        f"Preferred provider {preferred_provider} failed: {e}"
+                    )
 
         # Try providers in order based on fallback strategy
         if self.fallback_strategy == FallbackStrategy.FIRST_AVAILABLE:
@@ -253,7 +275,9 @@ class LLMProviderManager:
         elif self.fallback_strategy == FallbackStrategy.ROUND_ROBIN:
             for _ in range(len(self._provider_order)):
                 provider = self._provider_order[self._current_provider_index]
-                self._current_provider_index = (self._current_provider_index + 1) % len(self._provider_order)
+                self._current_provider_index = (self._current_provider_index + 1) % len(
+                    self._provider_order
+                )
 
                 if provider.config.enabled and not provider.circuit_breaker.is_open():
                     try:
@@ -265,7 +289,9 @@ class LLMProviderManager:
         # If all providers failed, raise an exception
         raise Exception("All LLM providers are unavailable")
 
-    async def _try_provider(self, provider: LLMProviderBase, request: LLMRequest) -> LLMResponse:
+    async def _try_provider(
+        self, provider: LLMProviderBase, request: LLMRequest
+    ) -> LLMResponse:
         """Try to generate a response using a specific provider."""
         start_time = datetime.now()
 
@@ -311,7 +337,7 @@ class LLMProviderManager:
                 "circuit_breaker": {
                     "state": provider.circuit_breaker.state,
                     "failure_count": provider.circuit_breaker.failure_count,
-                    "can_attempt": provider.circuit_breaker.can_attempt()
-                }
+                    "can_attempt": provider.circuit_breaker.can_attempt(),
+                },
             }
         return status

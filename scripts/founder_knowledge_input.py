@@ -19,15 +19,20 @@ from stillme_core.alerting.alerting_system import AlertingSystem  # noqa: E402
 from stillme_core.learning.proposals_manager import ProposalsManager  # noqa: E402
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
+
 
 class FounderKnowledgeInput:
     def __init__(self):
         self.proposals_manager = ProposalsManager()
         self.alerting_system = AlertingSystem()
 
-    def add_founder_knowledge(self, title, description, source_url=None, content_type="text", priority="high"):
+    def add_founder_knowledge(
+        self, title, description, source_url=None, content_type="text", priority="high"
+    ):
         """Thêm kiến thức founder - tự động approve"""
         logger.info("👑 StillMe IPC Founder Knowledge Input")
         logger.info("==========================================")
@@ -41,13 +46,13 @@ class FounderKnowledgeInput:
                 learning_objectives=[
                     f"Master {title} concepts",
                     "Apply knowledge in practical scenarios",
-                    "Integrate with existing knowledge base"
+                    "Integrate with existing knowledge base",
                 ],
                 prerequisites=["Basic understanding of the topic"],
                 expected_outcomes=[
                     f"Expertise in {title}",
                     "Practical application skills",
-                    "Enhanced knowledge base"
+                    "Enhanced knowledge base",
                 ],
                 estimated_duration=180,  # 3 hours default
                 quality_score=0.98,  # Very high quality for founder input
@@ -57,15 +62,17 @@ class FounderKnowledgeInput:
                     "complexity": "medium",
                     "time_commitment": "medium",
                     "prerequisites": "low",
-                    "practical_value": "very_high"
+                    "practical_value": "very_high",
                 },
-                created_by="founder"
+                created_by="founder",
             )
 
             # TỰ ĐỘNG APPROVE - Không cần duyệt
             self.proposals_manager.approve_proposal(proposal.id, "founder")
 
-            logger.info(f"✅ Founder knowledge added and AUTO-APPROVED: {proposal.title}")
+            logger.info(
+                f"✅ Founder knowledge added and AUTO-APPROVED: {proposal.title}"
+            )
             logger.info(f"📋 Proposal ID: {proposal.id}")
             logger.info(f"📊 Quality Score: {proposal.quality_score}")
 
@@ -80,7 +87,7 @@ class FounderKnowledgeInput:
                 f"🆔 **Proposal ID:** {proposal.id[:8]}...\n"
                 f"✅ **Status:** AUTO-APPROVED (Founder Mode)\n\n"
                 f"StillMe IPC will start learning this knowledge immediately!",
-                "info"
+                "info",
             )
 
             # Lưu thông tin founder knowledge
@@ -114,16 +121,16 @@ class FounderKnowledgeInput:
             response.raise_for_status()
 
             # Parse content
-            soup = BeautifulSoup(response.content, 'html.parser')
+            soup = BeautifulSoup(response.content, "html.parser")
 
             # Extract title if not provided
             if not title:
-                title = soup.find('title')
+                title = soup.find("title")
                 title = title.get_text().strip() if title else "Knowledge from URL"
 
             # Extract description
             description = ""
-            for tag in soup.find_all(['p', 'div', 'article']):
+            for tag in soup.find_all(["p", "div", "article"]):
                 text = tag.get_text().strip()
                 if len(text) > 100:  # Get meaningful content
                     description = text[:500] + "..." if len(text) > 500 else text
@@ -138,7 +145,7 @@ class FounderKnowledgeInput:
                 description=description,
                 source_url=url,
                 content_type="url",
-                priority=priority
+                priority=priority,
             )
 
         except Exception as e:
@@ -154,7 +161,7 @@ class FounderKnowledgeInput:
             title=title,
             description=text_content,
             content_type="text",
-            priority=priority
+            priority=priority,
         )
 
     def _save_founder_knowledge(self, proposal, source_url=None, content_type="text"):
@@ -169,7 +176,7 @@ class FounderKnowledgeInput:
                 "created_at": datetime.now().isoformat(),
                 "created_by": "founder",
                 "auto_approved": True,
-                "founder_mode": True
+                "founder_mode": True,
             }
 
             # Lưu vào artifacts
@@ -179,13 +186,14 @@ class FounderKnowledgeInput:
             filename = f"founder_{proposal.id[:8]}.json"
             filepath = artifacts_dir / filename
 
-            with open(filepath, 'w', encoding='utf-8') as f:
+            with open(filepath, "w", encoding="utf-8") as f:
                 json.dump(founder_info, f, indent=4, ensure_ascii=False)
 
             logger.info(f"📄 Founder knowledge info saved to: {filepath}")
 
         except Exception as e:
             logger.error(f"❌ Failed to save founder knowledge info: {e}")
+
 
 def main():
     """Main function - Interactive mode"""
@@ -199,7 +207,9 @@ def main():
         priority = sys.argv[3] if len(sys.argv) > 3 else "high"
 
         founder_input = FounderKnowledgeInput()
-        proposal = founder_input.add_founder_knowledge(title, description, priority=priority)
+        proposal = founder_input.add_founder_knowledge(
+            title, description, priority=priority
+        )
 
         if proposal:
             print("\n✅ Founder knowledge added and AUTO-APPROVED!")
@@ -243,7 +253,9 @@ def main():
             print("❌ Content cannot be empty!")
             return
 
-        priority = input("\n⚡ Enter priority (low/medium/high/critical): ").strip() or "high"
+        priority = (
+            input("\n⚡ Enter priority (low/medium/high/critical): ").strip() or "high"
+        )
 
         # Add knowledge
         founder_input = FounderKnowledgeInput()
@@ -257,7 +269,9 @@ def main():
             return
 
         title = input("📝 Enter title (optional): ").strip() or None
-        priority = input("⚡ Enter priority (low/medium/high/critical): ").strip() or "high"
+        priority = (
+            input("⚡ Enter priority (low/medium/high/critical): ").strip() or "high"
+        )
 
         # Add knowledge
         founder_input = FounderKnowledgeInput()
@@ -275,11 +289,15 @@ def main():
             print("❌ Description cannot be empty!")
             return
 
-        priority = input("⚡ Enter priority (low/medium/high/critical): ").strip() or "high"
+        priority = (
+            input("⚡ Enter priority (low/medium/high/critical): ").strip() or "high"
+        )
 
         # Add knowledge
         founder_input = FounderKnowledgeInput()
-        proposal = founder_input.add_founder_knowledge(title, description, priority=priority)
+        proposal = founder_input.add_founder_knowledge(
+            title, description, priority=priority
+        )
 
     else:
         print("❌ Invalid choice!")
@@ -291,6 +309,7 @@ def main():
         print("📊 StillMe IPC will start learning immediately!")
     else:
         print("\n❌ Failed to add founder knowledge. Please try again.")
+
 
 if __name__ == "__main__":
     main()

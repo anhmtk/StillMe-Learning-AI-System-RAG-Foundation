@@ -381,9 +381,13 @@ def dev_agent(task: str, mode: str = DEFAULT_MODE, **params: Any) -> str:
     mode_lower = (mode or "fast").lower()
 
     # NEW: Sử dụng AgentDev Super cho các task development
-    if any(keyword in task.lower() for keyword in ["lỗi", "error", "sửa", "fix", "code", "viết", "test", "build"]):
+    if any(
+        keyword in task.lower()
+        for keyword in ["lỗi", "error", "sửa", "fix", "code", "viết", "test", "build"]
+    ):
         try:
             from .legacy_agentdev.agentdev_super import execute_agentdev_super_task
+
             return execute_agentdev_super_task(task)  # type: ignore
         except Exception as e:
             return f"[AIManager][super] AgentDev Super error: {e}"

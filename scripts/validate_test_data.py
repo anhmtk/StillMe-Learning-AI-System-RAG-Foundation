@@ -24,15 +24,17 @@ def validate_json_schema(data, required_fields, data_type="unknown"):
     print(f"✅ {data_type}: All required fields present")
     return True
 
+
 def validate_timestamp(timestamp_str, data_type="unknown"):
     """Validate timestamp format"""
     try:
-        datetime.fromisoformat(timestamp_str.replace('Z', '+00:00'))
+        datetime.fromisoformat(timestamp_str.replace("Z", "+00:00"))
         print(f"✅ {data_type}: Valid timestamp format")
         return True
     except ValueError:
         print(f"❌ {data_type}: Invalid timestamp format: {timestamp_str}")
         return False
+
 
 def validate_url(url, data_type="unknown"):
     """Validate URL format"""
@@ -42,6 +44,7 @@ def validate_url(url, data_type="unknown"):
 
     print(f"✅ {data_type}: Valid HTTPS URL")
     return True
+
 
 def validate_github_trending_data():
     """Validate GitHub trending test data"""
@@ -73,7 +76,9 @@ def validate_github_trending_data():
 
             # Check metrics structure
             metrics_fields = ["stars", "forks", "language", "trending_score"]
-            if not validate_json_schema(item["metrics"], metrics_fields, f"GitHub metrics {i}"):
+            if not validate_json_schema(
+                item["metrics"], metrics_fields, f"GitHub metrics {i}"
+            ):
                 return False
 
         print("✅ GitHub trending data validation passed")
@@ -85,6 +90,7 @@ def validate_github_trending_data():
     except Exception as e:
         print(f"❌ Error validating {file_path}: {e}")
         return False
+
 
 def validate_hackernews_data():
     """Validate HackerNews test data"""
@@ -116,7 +122,9 @@ def validate_hackernews_data():
 
             # Check metrics structure
             metrics_fields = ["score", "comments", "heat_score"]
-            if not validate_json_schema(item["metrics"], metrics_fields, f"HN metrics {i}"):
+            if not validate_json_schema(
+                item["metrics"], metrics_fields, f"HN metrics {i}"
+            ):
                 return False
 
         print("✅ HackerNews data validation passed")
@@ -128,6 +136,7 @@ def validate_hackernews_data():
     except Exception as e:
         print(f"❌ Error validating {file_path}: {e}")
         return False
+
 
 def validate_news_data():
     """Validate news test data"""
@@ -159,7 +168,9 @@ def validate_news_data():
 
             # Check metrics structure
             metrics_fields = ["relevance_score", "sentiment", "engagement"]
-            if not validate_json_schema(item["metrics"], metrics_fields, f"News metrics {i}"):
+            if not validate_json_schema(
+                item["metrics"], metrics_fields, f"News metrics {i}"
+            ):
                 return False
 
         print("✅ News data validation passed")
@@ -171,6 +182,7 @@ def validate_news_data():
     except Exception as e:
         print(f"❌ Error validating {file_path}: {e}")
         return False
+
 
 def validate_google_trends_data():
     """Validate Google Trends test data"""
@@ -202,7 +214,9 @@ def validate_google_trends_data():
 
             # Check metrics structure
             metrics_fields = ["trend_score", "search_volume", "growth_rate"]
-            if not validate_json_schema(item["metrics"], metrics_fields, f"Trends metrics {i}"):
+            if not validate_json_schema(
+                item["metrics"], metrics_fields, f"Trends metrics {i}"
+            ):
                 return False
 
         print("✅ Google Trends data validation passed")
@@ -214,6 +228,7 @@ def validate_google_trends_data():
     except Exception as e:
         print(f"❌ Error validating {file_path}: {e}")
         return False
+
 
 def validate_reddit_data():
     """Validate Reddit test data"""
@@ -245,7 +260,9 @@ def validate_reddit_data():
 
             # Check metrics structure
             metrics_fields = ["upvotes", "comments", "engagement_score"]
-            if not validate_json_schema(item["metrics"], metrics_fields, f"Reddit metrics {i}"):
+            if not validate_json_schema(
+                item["metrics"], metrics_fields, f"Reddit metrics {i}"
+            ):
                 return False
 
         print("✅ Reddit data validation passed")
@@ -257,6 +274,7 @@ def validate_reddit_data():
     except Exception as e:
         print(f"❌ Error validating {file_path}: {e}")
         return False
+
 
 def check_fixtures_directory():
     """Check if fixtures directory exists and has required files"""
@@ -271,7 +289,7 @@ def check_fixtures_directory():
         "hackernews_sample.json",
         "news_sample.json",
         "google_trends_sample.json",
-        "reddit_sample.json"
+        "reddit_sample.json",
     ]
 
     missing_files = []
@@ -287,6 +305,7 @@ def check_fixtures_directory():
     print("✅ All required fixture files exist")
     return True
 
+
 def main():
     """Main validation function"""
     print("🔍 Validating test data...")
@@ -297,7 +316,7 @@ def main():
         ("HackerNews Data", validate_hackernews_data),
         ("News Data", validate_news_data),
         ("Google Trends Data", validate_google_trends_data),
-        ("Reddit Data", validate_reddit_data)
+        ("Reddit Data", validate_reddit_data),
     ]
 
     all_passed = True
@@ -312,6 +331,7 @@ def main():
     else:
         print("\n❌ Some test data validation checks failed!")
         return 1
+
 
 if __name__ == "__main__":
     sys.exit(main())

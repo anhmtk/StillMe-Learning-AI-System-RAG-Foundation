@@ -8,12 +8,14 @@ from typing import Any
 
 logger = logging.getLogger(__name__)
 
+
 class DecisionStatus(Enum):
     PENDING = "pending"
     APPROVED = "approved"
     REJECTED = "rejected"
     REVIEW = "review"
     EXECUTED = "executed"
+
 
 class DecisionType(Enum):
     LEARNING = "learning"
@@ -22,15 +24,18 @@ class DecisionType(Enum):
     PERFORMANCE = "performance"
     QUALITY = "quality"
 
+
 class RiskLevel(Enum):
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
 
+
 @dataclass
 class Decision:
     """Decision record"""
+
     decision_id: str
     decision_type: DecisionType
     status: DecisionStatus
@@ -43,6 +48,7 @@ class Decision:
         if self.metadata is None:
             self.metadata = {}
 
+
 class DecisionEngine:
     """Decision engine for StillMe Framework"""
 
@@ -51,11 +57,13 @@ class DecisionEngine:
         self.decisions: list[Decision] = []
         self.logger.info("✅ DecisionEngine initialized")
 
-    def make_decision(self,
-                     decision_type: DecisionType,
-                     description: str,
-                     risk_level: RiskLevel = RiskLevel.LOW,
-                     metadata: dict[str, Any] = None) -> Decision:
+    def make_decision(
+        self,
+        decision_type: DecisionType,
+        description: str,
+        risk_level: RiskLevel = RiskLevel.LOW,
+        metadata: dict[str, Any] = None,
+    ) -> Decision:
         """Make a decision"""
         try:
             decision_id = f"decision_{len(self.decisions) + 1}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
@@ -67,7 +75,7 @@ class DecisionEngine:
                 risk_level=risk_level,
                 description=description,
                 timestamp=datetime.now(),
-                metadata=metadata or {}
+                metadata=metadata or {},
             )
 
             self.decisions.append(decision)
@@ -84,7 +92,9 @@ class DecisionEngine:
             for decision in self.decisions:
                 if decision.decision_id == decision_id:
                     decision.status = status
-                    self.logger.info(f"📝 Decision status updated: {decision_id} -> {status.value}")
+                    self.logger.info(
+                        f"📝 Decision status updated: {decision_id} -> {status.value}"
+                    )
                     return True
 
             self.logger.warning(f"⚠️ Decision not found: {decision_id}")
@@ -118,7 +128,9 @@ class DecisionEngine:
 
                 # By status
                 status_key = decision.status.value
-                decisions_by_status[status_key] = decisions_by_status.get(status_key, 0) + 1
+                decisions_by_status[status_key] = (
+                    decisions_by_status.get(status_key, 0) + 1
+                )
 
                 # By risk
                 risk_key = decision.risk_level.value
@@ -129,7 +141,7 @@ class DecisionEngine:
                 "decisions_by_type": decisions_by_type,
                 "decisions_by_status": decisions_by_status,
                 "decisions_by_risk": decisions_by_risk,
-                "timestamp": datetime.now().isoformat()
+                "timestamp": datetime.now().isoformat(),
             }
 
         except Exception as e:

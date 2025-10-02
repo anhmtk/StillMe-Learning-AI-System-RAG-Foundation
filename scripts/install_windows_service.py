@@ -22,8 +22,11 @@ import subprocess
 import sys
 from pathlib import Path
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
+
 
 def install_windows_service():
     """Install StillMe IPC as Windows Service"""
@@ -38,7 +41,9 @@ def install_windows_service():
         # Create service using nssm (Non-Sucking Service Manager)
         service_name = "StillMeIPC"
         display_name = "StillMe IPC Background Service"
-        description = "StillMe IPC Intelligent Personal Companion - Background Learning Service"
+        description = (
+            "StillMe IPC Intelligent Personal Companion - Background Learning Service"
+        )
 
         # Check if nssm is available
         try:
@@ -46,39 +51,73 @@ def install_windows_service():
         except (subprocess.CalledProcessError, FileNotFoundError):
             logger.error("NSSM (Non-Sucking Service Manager) not found!")
             logger.info("Please install NSSM from: https://nssm.cc/download")
-            logger.info("Or run as administrator and install via chocolatey: choco install nssm")
+            logger.info(
+                "Or run as administrator and install via chocolatey: choco install nssm"
+            )
             return False
 
         # Install service
         logger.info(f"Installing Windows Service: {service_name}")
 
         # Set service path
-        subprocess.run([
-            "nssm", "install", service_name,
-            sys.executable, str(service_script)
-        ], check=True)
+        subprocess.run(
+            ["nssm", "install", service_name, sys.executable, str(service_script)],
+            check=True,
+        )
 
         # Configure service
-        subprocess.run(["nssm", "set", service_name, "DisplayName", display_name], check=True)
-        subprocess.run(["nssm", "set", service_name, "Description", description], check=True)
-        subprocess.run(["nssm", "set", service_name, "Start", "SERVICE_AUTO_START"], check=True)
+        subprocess.run(
+            ["nssm", "set", service_name, "DisplayName", display_name], check=True
+        )
+        subprocess.run(
+            ["nssm", "set", service_name, "Description", description], check=True
+        )
+        subprocess.run(
+            ["nssm", "set", service_name, "Start", "SERVICE_AUTO_START"], check=True
+        )
 
         # Set working directory
-        subprocess.run(["nssm", "set", service_name, "AppDirectory", str(project_root)], check=True)
+        subprocess.run(
+            ["nssm", "set", service_name, "AppDirectory", str(project_root)], check=True
+        )
 
         # Configure logging
         log_dir = project_root / "logs"
         log_dir.mkdir(exist_ok=True)
 
-        subprocess.run(["nssm", "set", service_name, "AppStdout", str(log_dir / "service_stdout.log")], check=True)
-        subprocess.run(["nssm", "set", service_name, "AppStderr", str(log_dir / "service_stderr.log")], check=True)
+        subprocess.run(
+            [
+                "nssm",
+                "set",
+                service_name,
+                "AppStdout",
+                str(log_dir / "service_stdout.log"),
+            ],
+            check=True,
+        )
+        subprocess.run(
+            [
+                "nssm",
+                "set",
+                service_name,
+                "AppStderr",
+                str(log_dir / "service_stderr.log"),
+            ],
+            check=True,
+        )
 
         # Set recovery options
-        subprocess.run(["nssm", "set", service_name, "AppExit", "Default", "Restart"], check=True)
-        subprocess.run(["nssm", "set", service_name, "AppRestartDelay", "5000"], check=True)
+        subprocess.run(
+            ["nssm", "set", service_name, "AppExit", "Default", "Restart"], check=True
+        )
+        subprocess.run(
+            ["nssm", "set", service_name, "AppRestartDelay", "5000"], check=True
+        )
 
         # Set service account (run as SYSTEM)
-        subprocess.run(["nssm", "set", service_name, "ObjectName", "LocalSystem"], check=True)
+        subprocess.run(
+            ["nssm", "set", service_name, "ObjectName", "LocalSystem"], check=True
+        )
 
         logger.info(f"✅ Windows Service '{service_name}' installed successfully!")
         logger.info(f"📋 Service Name: {service_name}")
@@ -94,6 +133,7 @@ def install_windows_service():
     except Exception as e:
         logger.error(f"Unexpected error: {e}")
         return False
+
 
 def uninstall_windows_service():
     """Uninstall StillMe IPC Windows Service"""
@@ -122,6 +162,7 @@ def uninstall_windows_service():
         logger.error(f"Unexpected error: {e}")
         return False
 
+
 def manage_service(action):
     """Manage Windows Service"""
     try:
@@ -137,7 +178,9 @@ def manage_service(action):
             subprocess.run(["nssm", "restart", service_name], check=True)
             logger.info(f"✅ Service '{service_name}' restarted")
         elif action == "status":
-            result = subprocess.run(["nssm", "status", service_name], capture_output=True, text=True)
+            result = subprocess.run(
+                ["nssm", "status", service_name], capture_output=True, text=True
+            )
             logger.info(f"Service Status: {result.stdout.strip()}")
         else:
             logger.error(f"Unknown action: {action}")
@@ -152,13 +195,17 @@ def manage_service(action):
         logger.error(f"Unexpected error: {e}")
         return False
 
+
 def main():
     """Main function"""
     import argparse
 
     parser = argparse.ArgumentParser(description="StillMe IPC Windows Service Manager")
-    parser.add_argument("action", choices=["install", "uninstall", "start", "stop", "restart", "status"],
-                       help="Action to perform")
+    parser.add_argument(
+        "action",
+        choices=["install", "uninstall", "start", "stop", "restart", "status"],
+        help="Action to perform",
+    )
 
     args = parser.parse_args()
 
@@ -167,13 +214,21 @@ def main():
         if success:
             print("\n🎉 StillMe IPC Windows Service installed successfully!")
             print("💡 The service will start automatically with Windows")
-            print("💡 You can now close your computer and StillMe will continue learning!")
+            print(
+                "💡 You can now close your computer and StillMe will continue learning!"
+            )
             print("\n📋 Service Management Commands:")
-            print("  python scripts/install_windows_service.py start    # Start service")
+            print(
+                "  python scripts/install_windows_service.py start    # Start service"
+            )
             print("  python scripts/install_windows_service.py stop     # Stop service")
-            print("  python scripts/install_windows_service.py restart  # Restart service")
+            print(
+                "  python scripts/install_windows_service.py restart  # Restart service"
+            )
             print("  python scripts/install_windows_service.py status   # Check status")
-            print("  python scripts/install_windows_service.py uninstall # Remove service")
+            print(
+                "  python scripts/install_windows_service.py uninstall # Remove service"
+            )
         else:
             print("\n❌ Failed to install Windows Service")
             sys.exit(1)
@@ -190,6 +245,7 @@ def main():
         success = manage_service(args.action)
         if not success:
             sys.exit(1)
+
 
 if __name__ == "__main__":
     main()

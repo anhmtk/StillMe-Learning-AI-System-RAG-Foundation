@@ -14,16 +14,20 @@ from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
+
 class SecurityLevel(Enum):
     """Security level enumeration"""
+
     LOW = "low"
     MEDIUM = "medium"
     HIGH = "high"
     CRITICAL = "critical"
 
+
 @dataclass
 class SecurityEvent:
     """Security event data structure"""
+
     event_id: str
     timestamp: datetime
     event_type: str
@@ -34,14 +38,17 @@ class SecurityEvent:
     details: dict[str, Any]
     risk_score: float
 
+
 @dataclass
 class RateLimitResult:
     """Rate limit check result"""
+
     allowed: bool
     remaining: int
     reset_time: int
     limit: int
     window: int
+
 
 class SecurityHeaders:
     """Security headers implementation for OWASP ASVS compliance"""
@@ -68,22 +75,16 @@ class SecurityHeaders:
                 "form-action 'self'; "
                 "base-uri 'self'"
             ),
-
             # HTTP Strict Transport Security (HSTS)
             "Strict-Transport-Security": "max-age=31536000; includeSubDomains; preload",
-
             # Content Type Options
             "X-Content-Type-Options": "nosniff",
-
             # Frame Options
             "X-Frame-Options": "DENY",
-
             # Referrer Policy
             "Referrer-Policy": "strict-origin-when-cross-origin",
-
             # XSS Protection
             "X-XSS-Protection": "1; mode=block",
-
             # Permissions Policy
             "Permissions-Policy": (
                 "camera=(), "
@@ -95,19 +96,20 @@ class SecurityHeaders:
                 "gyroscope=(), "
                 "accelerometer=()"
             ),
-
             # Additional security headers
             "X-Permitted-Cross-Domain-Policies": "none",
             "Cross-Origin-Embedder-Policy": "require-corp",
             "Cross-Origin-Opener-Policy": "same-origin",
-            "Cross-Origin-Resource-Policy": "same-origin"
+            "Cross-Origin-Resource-Policy": "same-origin",
         }
 
     def get_security_headers(self) -> dict[str, str]:
         """Get all security headers"""
         return self.headers.copy()
 
-    def get_cors_headers(self, allowed_origins: Optional[list[str]] = None) -> dict[str, str]:
+    def get_cors_headers(
+        self, allowed_origins: Optional[list[str]] = None
+    ) -> dict[str, str]:
         """Get CORS headers"""
         if allowed_origins is None:
             allowed_origins = ["https://stillme.ai", "https://staging.stillme.ai"]
@@ -117,21 +119,24 @@ class SecurityHeaders:
             "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
             "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With",
             "Access-Control-Max-Age": "86400",
-            "Access-Control-Allow-Credentials": "true"
+            "Access-Control-Allow-Credentials": "true",
         }
 
     def get_custom_headers(self, custom_headers: dict[str, str]) -> dict[str, str]:
         """Get custom security headers"""
         return {**self.headers, **custom_headers}
 
+
 class RateLimiter:
     """Rate limiting implementation"""
 
     def __init__(self):
         self.requests = {}  # Store request counts per client
-        self.windows = {}   # Store window start times per client
+        self.windows = {}  # Store window start times per client
 
-    def check_rate_limit(self, client_id: str, limit: int = 100, window: int = 60) -> RateLimitResult:
+    def check_rate_limit(
+        self, client_id: str, limit: int = 100, window: int = 60
+    ) -> RateLimitResult:
         """Check if client is within rate limit"""
         current_time = time.time()
 
@@ -155,7 +160,7 @@ class RateLimiter:
                 remaining=0,
                 reset_time=reset_time,
                 limit=limit,
-                window=window
+                window=window,
             )
 
         # Increment request count
@@ -170,7 +175,7 @@ class RateLimiter:
             remaining=remaining,
             reset_time=reset_time,
             limit=limit,
-            window=window
+            window=window,
         )
 
     def get_rate_limit_headers(self, result: RateLimitResult) -> dict[str, str]:
@@ -178,7 +183,7 @@ class RateLimiter:
         return {
             "X-RateLimit-Limit": str(result.limit),
             "X-RateLimit-Remaining": str(result.remaining),
-            "X-RateLimit-Reset": str(result.reset_time)
+            "X-RateLimit-Reset": str(result.reset_time),
         }
 
     def cleanup_expired_windows(self):
@@ -194,6 +199,7 @@ class RateLimiter:
             del self.requests[client_id]
             del self.windows[client_id]
 
+
 class SecurityAuditLogger:
     """Security audit logging system"""
 
@@ -203,7 +209,7 @@ class SecurityAuditLogger:
             SecurityLevel.LOW: 0.3,
             SecurityLevel.MEDIUM: 0.5,
             SecurityLevel.HIGH: 0.7,
-            SecurityLevel.CRITICAL: 0.9
+            SecurityLevel.CRITICAL: 0.9,
         }
 
     def log_security_event(self, event: SecurityEvent):
@@ -211,7 +217,9 @@ class SecurityAuditLogger:
         self.events.append(event)
 
         # Log to file
-        logger.warning(f"Security Event: {event.event_type} - {event.severity.value} - {event.details}")
+        logger.warning(
+            f"Security Event: {event.event_type} - {event.severity.value} - {event.details}"
+        )
 
         # Check for high-risk events
         if event.risk_score >= self.risk_thresholds[SecurityLevel.HIGH]:
@@ -219,7 +227,9 @@ class SecurityAuditLogger:
 
     def _handle_high_risk_event(self, event: SecurityEvent):
         """Handle high-risk security events"""
-        logger.critical(f"HIGH RISK EVENT: {event.event_type} - Risk Score: {event.risk_score}")
+        logger.critical(
+            f"HIGH RISK EVENT: {event.event_type} - Risk Score: {event.risk_score}"
+        )
 
         # In a real implementation, this would trigger alerts
         # For now, we'll just log it
@@ -249,8 +259,9 @@ class SecurityAuditLogger:
             "total_events": len(self.events),
             "risk_levels": risk_levels,
             "avg_risk_score": avg_risk_score,
-            "high_risk_events": len([e for e in self.events if e.risk_score >= 0.7])
+            "high_risk_events": len([e for e in self.events if e.risk_score >= 0.7]),
         }
+
 
 class SecurityMiddleware:
     """Security middleware for web framework integration"""
@@ -278,20 +289,24 @@ class SecurityMiddleware:
                 user_agent=request_data.get("user_agent", "unknown"),
                 request_path=request_data.get("path", "unknown"),
                 details={"rate_limit_result": rate_limit_result.__dict__},
-                risk_score=0.6
+                risk_score=0.6,
             )
             self.audit_logger.log_security_event(event)
 
             return {
                 "allowed": False,
                 "reason": "rate_limit_exceeded",
-                "rate_limit_headers": self.rate_limiter.get_rate_limit_headers(rate_limit_result)
+                "rate_limit_headers": self.rate_limiter.get_rate_limit_headers(
+                    rate_limit_result
+                ),
             }
 
         # Additional security checks can be added here
         return {
             "allowed": True,
-            "rate_limit_headers": self.rate_limiter.get_rate_limit_headers(rate_limit_result)
+            "rate_limit_headers": self.rate_limiter.get_rate_limit_headers(
+                rate_limit_result
+            ),
         }
 
     def process_response(self, response_data: dict[str, Any]) -> dict[str, Any]:
@@ -316,6 +331,7 @@ class SecurityMiddleware:
         client_string = f"{source_ip}:{user_agent}"
         return hashlib.md5(client_string.encode()).hexdigest()
 
+
 class SecurityConfig:
     """Security configuration management"""
 
@@ -325,24 +341,28 @@ class SecurityConfig:
                 "enabled": True,
                 "csp_enabled": True,
                 "hsts_enabled": True,
-                "cors_enabled": True
+                "cors_enabled": True,
             },
             "rate_limiting": {
                 "enabled": True,
                 "default_limit": 100,
                 "default_window": 60,
-                "burst_protection": True
+                "burst_protection": True,
             },
             "audit_logging": {
                 "enabled": True,
                 "log_level": "WARNING",
-                "retention_days": 30
+                "retention_days": 30,
             },
             "cors": {
                 "allowed_origins": ["https://stillme.ai", "https://staging.stillme.ai"],
                 "allowed_methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-                "allowed_headers": ["Content-Type", "Authorization", "X-Requested-With"]
-            }
+                "allowed_headers": [
+                    "Content-Type",
+                    "Authorization",
+                    "X-Requested-With",
+                ],
+            },
         }
 
     def get_security_settings(self) -> dict[str, Any]:
@@ -364,6 +384,7 @@ class SecurityConfig:
         """Get CORS configuration"""
         return self.config["cors"].copy()
 
+
 class SecurityMonitor:
     """Security monitoring and alerting system"""
 
@@ -372,7 +393,7 @@ class SecurityMonitor:
         self.alert_thresholds = {
             "high_risk_events_per_hour": 10,
             "rate_limit_violations_per_hour": 100,
-            "failed_authentication_per_hour": 50
+            "failed_authentication_per_hour": 50,
         }
 
     def check_security_alerts(self) -> list[dict[str, Any]]:
@@ -383,24 +404,35 @@ class SecurityMonitor:
         # Check for high-risk events
         high_risk_events = [e for e in recent_events if e.risk_score >= 0.7]
         if len(high_risk_events) >= self.alert_thresholds["high_risk_events_per_hour"]:
-            alerts.append({
-                "type": "high_risk_events",
-                "severity": "HIGH",
-                "message": f"High risk events detected: {len(high_risk_events)}",
-                "count": len(high_risk_events),
-                "threshold": self.alert_thresholds["high_risk_events_per_hour"]
-            })
+            alerts.append(
+                {
+                    "type": "high_risk_events",
+                    "severity": "HIGH",
+                    "message": f"High risk events detected: {len(high_risk_events)}",
+                    "count": len(high_risk_events),
+                    "threshold": self.alert_thresholds["high_risk_events_per_hour"],
+                }
+            )
 
         # Check for rate limit violations
-        rate_limit_events = [e for e in recent_events if e.event_type == "rate_limit_violation"]
-        if len(rate_limit_events) >= self.alert_thresholds["rate_limit_violations_per_hour"]:
-            alerts.append({
-                "type": "rate_limit_violations",
-                "severity": "MEDIUM",
-                "message": f"Rate limit violations detected: {len(rate_limit_events)}",
-                "count": len(rate_limit_events),
-                "threshold": self.alert_thresholds["rate_limit_violations_per_hour"]
-            })
+        rate_limit_events = [
+            e for e in recent_events if e.event_type == "rate_limit_violation"
+        ]
+        if (
+            len(rate_limit_events)
+            >= self.alert_thresholds["rate_limit_violations_per_hour"]
+        ):
+            alerts.append(
+                {
+                    "type": "rate_limit_violations",
+                    "severity": "MEDIUM",
+                    "message": f"Rate limit violations detected: {len(rate_limit_events)}",
+                    "count": len(rate_limit_events),
+                    "threshold": self.alert_thresholds[
+                        "rate_limit_violations_per_hour"
+                    ],
+                }
+            )
 
         return alerts
 
@@ -413,5 +445,5 @@ class SecurityMonitor:
             "risk_summary": risk_summary,
             "active_alerts": alerts,
             "security_status": "HEALTHY" if not alerts else "WARNING",
-            "last_updated": datetime.now().isoformat()
+            "last_updated": datetime.now().isoformat(),
         }

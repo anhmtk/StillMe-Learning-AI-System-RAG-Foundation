@@ -20,15 +20,18 @@ from .normalizer import TextNormalizer
 
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class AbuseGuardResult:
     """Kết quả kiểm tra abuse guard"""
+
     should_suggest: bool
     confidence: float
     abuse_score: float
     reasoning: str
     features: dict[str, Any]
     latency_ms: float
+
 
 class ProactiveAbuseGuard:
     """Guard bảo vệ hệ thống đề xuất chủ động khỏi abuse"""
@@ -40,10 +43,16 @@ class ProactiveAbuseGuard:
         self.normalizer = TextNormalizer(self.config.get("normalizer", {}))
 
         # Thresholds (calibrated)
-        self.suggestion_threshold = self.config.get("suggestion_threshold", 0.80)  # Calibrated threshold
-        self.abuse_threshold = self.config.get("abuse_threshold", 0.13)  # Calibrated threshold
+        self.suggestion_threshold = self.config.get(
+            "suggestion_threshold", 0.80
+        )  # Calibrated threshold
+        self.abuse_threshold = self.config.get(
+            "abuse_threshold", 0.13
+        )  # Calibrated threshold
         self.rate_limit_window = self.config.get("rate_limit_window", 30)  # seconds
-        self.max_suggestions_per_window = self.config.get("max_suggestions_per_window", 2)
+        self.max_suggestions_per_window = self.config.get(
+            "max_suggestions_per_window", 2
+        )
 
         # Session tracking
         self.session_suggestions = defaultdict(list)  # session_id -> [timestamps]
@@ -59,7 +68,7 @@ class ProactiveAbuseGuard:
             "suggestions_allowed": 0,
             "suggestions_blocked": 0,
             "rate_limits_hit": 0,
-            "total_latency_ms": 0.0
+            "total_latency_ms": 0.0,
         }
 
     def _load_slang_lexicon(self):
@@ -97,10 +106,63 @@ class ProactiveAbuseGuard:
     def _load_stop_words(self):
         """Load stop words for density calculation"""
         self.stop_words = {
-            "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "of", "with", "by",
-            "is", "are", "was", "were", "be", "been", "being", "have", "has", "had", "do", "does", "did",
-            "will", "would", "could", "should", "may", "might", "must", "can", "this", "that", "these", "those",
-            "i", "you", "he", "she", "it", "we", "they", "me", "him", "her", "us", "them", "my", "your", "his", "its", "our", "their"
+            "the",
+            "a",
+            "an",
+            "and",
+            "or",
+            "but",
+            "in",
+            "on",
+            "at",
+            "to",
+            "for",
+            "of",
+            "with",
+            "by",
+            "is",
+            "are",
+            "was",
+            "were",
+            "be",
+            "been",
+            "being",
+            "have",
+            "has",
+            "had",
+            "do",
+            "does",
+            "did",
+            "will",
+            "would",
+            "could",
+            "should",
+            "may",
+            "might",
+            "must",
+            "can",
+            "this",
+            "that",
+            "these",
+            "those",
+            "i",
+            "you",
+            "he",
+            "she",
+            "it",
+            "we",
+            "they",
+            "me",
+            "him",
+            "her",
+            "us",
+            "them",
+            "my",
+            "your",
+            "his",
+            "its",
+            "our",
+            "their",
         }
 
     def _load_emoji_patterns(self):
@@ -145,7 +207,7 @@ class ProactiveAbuseGuard:
                 abuse_score=1.0,
                 reasoning="Rate limit exceeded",
                 features={"rate_limited": True},
-                latency_ms=latency
+                latency_ms=latency,
             )
 
         # Calculate abuse score using normalized text
@@ -157,9 +219,11 @@ class ProactiveAbuseGuard:
         # Determine if should suggest
         # Block if abuse score is too high OR if vague score is significant
         vague_score = self._calculate_vague_score(normalized_text)
-        should_suggest = (confidence >= self.suggestion_threshold and
-                         abuse_score < self.abuse_threshold and
-                         vague_score < 0.2)  # Block if vague score >= 0.2
+        should_suggest = (
+            confidence >= self.suggestion_threshold
+            and abuse_score < self.abuse_threshold
+            and vague_score < 0.2
+        )  # Block if vague score >= 0.2
 
         # Generate reasoning
         reasoning = self._generate_reasoning(abuse_score, confidence, should_suggest)
@@ -184,7 +248,7 @@ class ProactiveAbuseGuard:
             abuse_score=abuse_score,
             reasoning=reasoning,
             features=features,
-            latency_ms=latency
+            latency_ms=latency,
         )
 
     def _check_rate_limit(self, session_id: str) -> bool:
@@ -193,12 +257,15 @@ class ProactiveAbuseGuard:
 
         # Clean old timestamps
         self.session_suggestions[session_id] = [
-            ts for ts in self.session_suggestions[session_id]
+            ts
+            for ts in self.session_suggestions[session_id]
             if current_time - ts < self.rate_limit_window
         ]
 
         # Check if under limit
-        return len(self.session_suggestions[session_id]) < self.max_suggestions_per_window
+        return (
+            len(self.session_suggestions[session_id]) < self.max_suggestions_per_window
+        )
 
     def _calculate_abuse_score(self, text: str) -> float:
         """Calculate abuse score (0-1, higher = more abusive)"""
@@ -228,22 +295,22 @@ class ProactiveAbuseGuard:
         # Weighted combination
         weights = {
             "ngram": 0.15,
-            "slang": 0.30,      # Increased from 0.25
+            "slang": 0.30,  # Increased from 0.25
             "entropy": 0.10,
-            "stopword": 0.15,   # Decreased from 0.20
+            "stopword": 0.15,  # Decreased from 0.20
             "emoji": 0.20,
             "keyword": 0.10,
-            "vague": 0.20       # New weight for vague detection
+            "vague": 0.20,  # New weight for vague detection
         }
 
         abuse_score = (
-            ngram_score * weights["ngram"] +
-            slang_score * weights["slang"] +
-            entropy_score * weights["entropy"] +
-            stopword_score * weights["stopword"] +
-            emoji_score * weights["emoji"] +
-            keyword_score * weights["keyword"] +
-            vague_score * weights["vague"]
+            ngram_score * weights["ngram"]
+            + slang_score * weights["slang"]
+            + entropy_score * weights["entropy"]
+            + stopword_score * weights["stopword"]
+            + emoji_score * weights["emoji"]
+            + keyword_score * weights["keyword"]
+            + vague_score * weights["vague"]
         )
 
         return min(1.0, abuse_score)
@@ -255,11 +322,13 @@ class ProactiveAbuseGuard:
             return 0.0
 
         # Calculate bigram repetition
-        bigrams = [f"{words[i]} {words[i+1]}" for i in range(len(words)-1)]
+        bigrams = [f"{words[i]} {words[i+1]}" for i in range(len(words) - 1)]
         bigram_counts = Counter(bigrams)
 
         # Calculate trigram repetition
-        trigrams = [f"{words[i]} {words[i+1]} {words[i+2]}" for i in range(len(words)-2)]
+        trigrams = [
+            f"{words[i]} {words[i+1]} {words[i+2]}" for i in range(len(words) - 2)
+        ]
         trigram_counts = Counter(trigrams)
 
         # Calculate repetition ratio
@@ -269,8 +338,12 @@ class ProactiveAbuseGuard:
         if total_bigrams == 0 and total_trigrams == 0:
             return 0.0
 
-        bigram_repetition = sum(count - 1 for count in bigram_counts.values() if count > 1) / max(total_bigrams, 1)
-        trigram_repetition = sum(count - 1 for count in trigram_counts.values() if count > 1) / max(total_trigrams, 1)
+        bigram_repetition = sum(
+            count - 1 for count in bigram_counts.values() if count > 1
+        ) / max(total_bigrams, 1)
+        trigram_repetition = sum(
+            count - 1 for count in trigram_counts.values() if count > 1
+        ) / max(total_trigrams, 1)
 
         return min(1.0, (bigram_repetition + trigram_repetition) / 2)
 
@@ -302,10 +375,12 @@ class ProactiveAbuseGuard:
             probability = count / total_chars
             if probability > 0:
                 import math
+
                 entropy -= probability * math.log2(probability)
 
         # Normalize entropy (0-1, lower = more repetitive)
         import math
+
         max_entropy = math.log2(len(char_counts)) if len(char_counts) > 0 else 0
         normalized_entropy = entropy / max_entropy if max_entropy > 0 else 0
 
@@ -408,7 +483,9 @@ class ProactiveAbuseGuard:
 
         return min(1.0, vague_matches / max(len(text.split()), 1))
 
-    def _generate_reasoning(self, abuse_score: float, confidence: float, should_suggest: bool) -> str:
+    def _generate_reasoning(
+        self, abuse_score: float, confidence: float, should_suggest: bool
+    ) -> str:
         """Generate human-readable reasoning"""
         if should_suggest:
             return f"Text quality is good (confidence: {confidence:.2f}, abuse score: {abuse_score:.2f})"
@@ -431,10 +508,12 @@ class ProactiveAbuseGuard:
             "slang_score": self._calculate_slang_score(text_lower),
             "entropy_score": self._calculate_entropy_score(text_lower),
             "stopword_density": self._calculate_stopword_density(text_lower),
-            "emoji_count": sum(len(re.findall(pattern, text)) for pattern in self.emoji_patterns),
+            "emoji_count": sum(
+                len(re.findall(pattern, text)) for pattern in self.emoji_patterns
+            ),
             "keyword_stuffing": self._calculate_keyword_stuffing_score(text_lower),
             "vague_score": self._calculate_vague_score(text_lower),
-            "abuse_score": abuse_score
+            "abuse_score": abuse_score,
         }
 
     def get_stats(self) -> dict[str, Any]:
@@ -442,7 +521,8 @@ class ProactiveAbuseGuard:
         total_requests = self.stats["total_requests"]
         avg_latency = (
             self.stats["total_latency_ms"] / total_requests
-            if total_requests > 0 else 0.0
+            if total_requests > 0
+            else 0.0
         )
 
         return {
@@ -453,8 +533,9 @@ class ProactiveAbuseGuard:
             "average_latency_ms": avg_latency,
             "suggestion_rate": (
                 self.stats["suggestions_allowed"] / total_requests
-                if total_requests > 0 else 0.0
-            )
+                if total_requests > 0
+                else 0.0
+            ),
         }
 
     def reset_stats(self):
@@ -464,6 +545,6 @@ class ProactiveAbuseGuard:
             "suggestions_allowed": 0,
             "suggestions_blocked": 0,
             "rate_limits_hit": 0,
-            "total_latency_ms": 0.0
+            "total_latency_ms": 0.0,
         }
         self.session_suggestions.clear()

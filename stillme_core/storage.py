@@ -2,6 +2,7 @@
 StillMe Core Storage
 """
 
+
 class StateStore:
     """State store for job management"""
 
@@ -15,6 +16,7 @@ class StateStore:
 
     def get_job_step(self, job_id: str, step_id: str):
         """Get job step information"""
+
         class JobStep:
             def __init__(self):
                 self.status = "pending"

@@ -35,38 +35,46 @@ from .error_handler import (
 
 logger = logging.getLogger(__name__)
 
+
 class ResilienceLevel(Enum):
     """Resilience levels"""
-    MINIMAL = "minimal"      # Basic error handling
-    STANDARD = "standard"    # Standard resilience
-    HIGH = "high"           # High resilience
-    MAXIMUM = "maximum"     # Maximum resilience
+
+    MINIMAL = "minimal"  # Basic error handling
+    STANDARD = "standard"  # Standard resilience
+    HIGH = "high"  # High resilience
+    MAXIMUM = "maximum"  # Maximum resilience
+
 
 class SystemHealth(Enum):
     """System health states"""
+
     HEALTHY = "healthy"
     DEGRADED = "degraded"
     CRITICAL = "critical"
     FAILED = "failed"
 
+
 @dataclass
 class ResilienceConfig:
     """Resilience configuration"""
+
     level: ResilienceLevel = ResilienceLevel.STANDARD
     enable_prediction: bool = True
     enable_self_healing: bool = True
     enable_graceful_degradation: bool = True
     health_check_interval: int = 30  # seconds
-    prediction_window: int = 300     # seconds
-    recovery_timeout: int = 60       # seconds
+    prediction_window: int = 300  # seconds
+    recovery_timeout: int = 60  # seconds
     max_concurrent_recoveries: int = 3
     enable_circuit_breakers: bool = True
     enable_retry_policies: bool = True
     enable_fallback_modes: bool = True
 
+
 @dataclass
 class HealthMetrics:
     """System health metrics"""
+
     timestamp: datetime
     overall_health: SystemHealth
     component_health: dict[str, SystemHealth]
@@ -77,15 +85,18 @@ class HealthMetrics:
     resource_utilization: dict[str, float]
     resilience_score: float
 
+
 @dataclass
 class FailurePrediction:
     """Failure prediction result"""
+
     component: str
     predicted_failure_time: datetime
     confidence: float
     failure_type: str
     recommended_action: str
     severity: ErrorSeverity
+
 
 class ResilienceManager:
     """
@@ -117,14 +128,14 @@ class ResilienceManager:
 
         # Statistics
         self.stats = {
-            'total_failures': 0,
-            'successful_recoveries': 0,
-            'failed_recoveries': 0,
-            'predictions_made': 0,
-            'accurate_predictions': 0,
-            'system_uptime': 0,
-            'last_failure': None,
-            'last_recovery': None
+            "total_failures": 0,
+            "successful_recoveries": 0,
+            "failed_recoveries": 0,
+            "predictions_made": 0,
+            "accurate_predictions": 0,
+            "system_uptime": 0,
+            "last_failure": None,
+            "last_recovery": None,
         }
 
         # Initialize resilience system
@@ -133,15 +144,12 @@ class ResilienceManager:
     def _setup_resilience_strategies(self):
         """Setup resilience strategies by level"""
         self.resilience_strategies = {
-            ResilienceLevel.MINIMAL: [
-                self._basic_error_handling,
-                self._simple_retry
-            ],
+            ResilienceLevel.MINIMAL: [self._basic_error_handling, self._simple_retry],
             ResilienceLevel.STANDARD: [
                 self._basic_error_handling,
                 self._simple_retry,
                 self._circuit_breakers,
-                self._graceful_degradation
+                self._graceful_degradation,
             ],
             ResilienceLevel.HIGH: [
                 self._advanced_error_handling,
@@ -149,7 +157,7 @@ class ResilienceManager:
                 self._circuit_breakers,
                 self._graceful_degradation,
                 self._failure_prediction,
-                self._proactive_recovery
+                self._proactive_recovery,
             ],
             ResilienceLevel.MAXIMUM: [
                 self._advanced_error_handling,
@@ -159,13 +167,15 @@ class ResilienceManager:
                 self._failure_prediction,
                 self._proactive_recovery,
                 self._self_healing,
-                self._adaptive_resilience
-            ]
+                self._adaptive_resilience,
+            ],
         }
 
     def _initialize_resilience_system(self):
         """Initialize resilience system based on configuration"""
-        self.logger.info(f"Initializing resilience system at {self.config.level.value} level")
+        self.logger.info(
+            f"Initializing resilience system at {self.config.level.value} level"
+        )
 
         # Apply resilience strategies
         strategies = self.resilience_strategies.get(self.config.level, [])
@@ -184,8 +194,12 @@ class ResilienceManager:
     def _initialize_component_states(self):
         """Initialize component health states"""
         components = [
-            'learning_system', 'scheduler', 'resource_monitor',
-            'performance_analyzer', 'dashboard', 'api_server'
+            "learning_system",
+            "scheduler",
+            "resource_monitor",
+            "performance_analyzer",
+            "dashboard",
+            "api_server",
         ]
 
         for component in components:
@@ -283,7 +297,7 @@ class ResilienceManager:
             uptime_percentage=uptime_percentage,
             performance_degradation=performance_degradation,
             resource_utilization=resource_utilization,
-            resilience_score=resilience_score
+            resilience_score=resilience_score,
         )
 
     def _calculate_error_rate(self) -> float:
@@ -293,7 +307,9 @@ class ResilienceManager:
 
         # Calculate error rate over last 10 minutes
         cutoff_time = datetime.now() - timedelta(minutes=10)
-        recent_metrics = [m for m in self.health_metrics_history if m.timestamp > cutoff_time]
+        recent_metrics = [
+            m for m in self.health_metrics_history if m.timestamp > cutoff_time
+        ]
 
         if not recent_metrics:
             return 0.0
@@ -303,10 +319,10 @@ class ResilienceManager:
 
     def _calculate_recovery_rate(self) -> float:
         """Calculate recovery success rate"""
-        if self.stats['total_failures'] == 0:
+        if self.stats["total_failures"] == 0:
             return 1.0
 
-        return self.stats['successful_recoveries'] / self.stats['total_failures']
+        return self.stats["successful_recoveries"] / self.stats["total_failures"]
 
     def _calculate_uptime_percentage(self) -> float:
         """Calculate system uptime percentage"""
@@ -327,7 +343,9 @@ class ResilienceManager:
 
         # Calculate average performance degradation over last hour
         cutoff_time = datetime.now() - timedelta(hours=1)
-        recent_metrics = [m for m in self.health_metrics_history if m.timestamp > cutoff_time]
+        recent_metrics = [
+            m for m in self.health_metrics_history if m.timestamp > cutoff_time
+        ]
 
         if not recent_metrics:
             return 0.0
@@ -338,22 +356,22 @@ class ResilienceManager:
     async def _get_resource_utilization(self) -> dict[str, float]:
         """Get current resource utilization"""
         # This would integrate with the resource monitor
-        return {
-            'cpu': 0.0,
-            'memory': 0.0,
-            'disk': 0.0,
-            'network': 0.0
-        }
+        return {"cpu": 0.0, "memory": 0.0, "disk": 0.0, "network": 0.0}
 
-    def _calculate_resilience_score(self, error_rate: float, recovery_rate: float,
-                                  uptime_percentage: float, performance_degradation: float) -> float:
+    def _calculate_resilience_score(
+        self,
+        error_rate: float,
+        recovery_rate: float,
+        uptime_percentage: float,
+        performance_degradation: float,
+    ) -> float:
         """Calculate overall resilience score"""
         # Weighted combination of metrics
         weights = {
-            'error_rate': 0.3,
-            'recovery_rate': 0.3,
-            'uptime': 0.2,
-            'performance': 0.2
+            "error_rate": 0.3,
+            "recovery_rate": 0.3,
+            "uptime": 0.2,
+            "performance": 0.2,
         }
 
         # Normalize metrics (lower is better for error_rate and performance_degradation)
@@ -361,22 +379,31 @@ class ResilienceManager:
         performance_score = max(0, 1 - performance_degradation)
 
         resilience_score = (
-            weights['error_rate'] * error_score +
-            weights['recovery_rate'] * recovery_rate +
-            weights['uptime'] * uptime_percentage +
-            weights['performance'] * performance_score
+            weights["error_rate"] * error_score
+            + weights["recovery_rate"] * recovery_rate
+            + weights["uptime"] * uptime_percentage
+            + weights["performance"] * performance_score
         )
 
         return min(1.0, max(0.0, resilience_score))
 
-    def _determine_overall_health(self, error_rate: float, recovery_rate: float,
-                                performance_degradation: float, resilience_score: float) -> SystemHealth:
+    def _determine_overall_health(
+        self,
+        error_rate: float,
+        recovery_rate: float,
+        performance_degradation: float,
+        resilience_score: float,
+    ) -> SystemHealth:
         """Determine overall system health"""
         if resilience_score < 0.3 or error_rate > 0.5:
             return SystemHealth.FAILED
-        elif resilience_score < 0.6 or error_rate > 0.2 or performance_degradation > 0.5:
+        elif (
+            resilience_score < 0.6 or error_rate > 0.2 or performance_degradation > 0.5
+        ):
             return SystemHealth.CRITICAL
-        elif resilience_score < 0.8 or error_rate > 0.1 or performance_degradation > 0.2:
+        elif (
+            resilience_score < 0.8 or error_rate > 0.1 or performance_degradation > 0.2
+        ):
             return SystemHealth.DEGRADED
         else:
             return SystemHealth.HEALTHY
@@ -388,7 +415,9 @@ class ResilienceManager:
 
         # Log health changes
         if health_metrics.overall_health != self.current_health:
-            self.logger.info(f"System health changed to: {health_metrics.overall_health.value}")
+            self.logger.info(
+                f"System health changed to: {health_metrics.overall_health.value}"
+            )
 
     async def _predict_failures(self, health_metrics: HealthMetrics):
         """Predict potential failures"""
@@ -408,15 +437,17 @@ class ResilienceManager:
                         confidence=0.7,
                         failure_type="performance_degradation",
                         recommended_action="scale_down_operations",
-                        severity=ErrorSeverity.MEDIUM
+                        severity=ErrorSeverity.MEDIUM,
                     )
                     predictions.append(prediction)
 
         # Add predictions
         for prediction in predictions:
             self.failure_predictions.append(prediction)
-            self.stats['predictions_made'] += 1
-            self.logger.warning(f"Failure predicted for {prediction.component}: {prediction.recommended_action}")
+            self.stats["predictions_made"] += 1
+            self.logger.warning(
+                f"Failure predicted for {prediction.component}: {prediction.recommended_action}"
+            )
 
     async def _proactive_recovery_check(self, health_metrics: HealthMetrics):
         """Check for proactive recovery opportunities"""
@@ -436,25 +467,25 @@ class ResilienceManager:
             self.logger.info(f"Starting proactive recovery for {component}")
 
             # Implement component-specific recovery strategies
-            if component == 'learning_system':
+            if component == "learning_system":
                 await self._recover_learning_system()
-            elif component == 'scheduler':
+            elif component == "scheduler":
                 await self._recover_scheduler()
-            elif component == 'resource_monitor':
+            elif component == "resource_monitor":
                 await self._recover_resource_monitor()
-            elif component == 'performance_analyzer':
+            elif component == "performance_analyzer":
                 await self._recover_performance_analyzer()
 
             # Update component health
             self.component_states[component] = SystemHealth.HEALTHY
-            self.stats['successful_recoveries'] += 1
-            self.stats['last_recovery'] = datetime.now()
+            self.stats["successful_recoveries"] += 1
+            self.stats["last_recovery"] = datetime.now()
 
             self.logger.info(f"Proactive recovery completed for {component}")
 
         except Exception as e:
             self.logger.error(f"Proactive recovery failed for {component}: {e}")
-            self.stats['failed_recoveries'] += 1
+            self.stats["failed_recoveries"] += 1
         finally:
             # Remove from active recoveries
             if component in self.active_recoveries:
@@ -489,14 +520,14 @@ class ResilienceManager:
         # Keep only last 24 hours of health metrics
         cutoff_time = datetime.now() - timedelta(hours=24)
         self.health_metrics_history = [
-            m for m in self.health_metrics_history
-            if m.timestamp > cutoff_time
+            m for m in self.health_metrics_history if m.timestamp > cutoff_time
         ]
 
         # Keep only recent failure predictions
         cutoff_time = datetime.now() - timedelta(hours=1)
         self.failure_predictions = [
-            p for p in self.failure_predictions
+            p
+            for p in self.failure_predictions
             if p.predicted_failure_time > cutoff_time
         ]
 
@@ -551,13 +582,15 @@ class ResilienceManager:
         self.logger.info("Setting up adaptive resilience")
         # Adaptive resilience based on system conditions
 
-    async def handle_component_failure(self, component: str, error: Exception, context: dict[str, Any] = None):
+    async def handle_component_failure(
+        self, component: str, error: Exception, context: dict[str, Any] = None
+    ):
         """Handle component failure"""
         self.logger.error(f"Component failure detected: {component} - {error}")
 
         # Update statistics
-        self.stats['total_failures'] += 1
-        self.stats['last_failure'] = datetime.now()
+        self.stats["total_failures"] += 1
+        self.stats["last_failure"] = datetime.now()
 
         # Update component state
         self.component_states[component] = SystemHealth.FAILED
@@ -567,34 +600,38 @@ class ResilienceManager:
             await self._proactive_recovery(component, SystemHealth.FAILED)
         except Exception as recovery_error:
             self.logger.error(f"Recovery failed for {component}: {recovery_error}")
-            self.stats['failed_recoveries'] += 1
+            self.stats["failed_recoveries"] += 1
 
     def get_resilience_status(self) -> dict[str, Any]:
         """Get resilience system status"""
         return {
-            'config': asdict(self.config),
-            'current_health': self.current_health.value,
-            'component_states': {k: v.value for k, v in self.component_states.items()},
-            'degradation_modes': self.degradation_modes,
-            'active_recoveries': list(self.active_recoveries.keys()),
-            'statistics': self.stats,
-            'recent_predictions': [asdict(p) for p in self.failure_predictions[-5:]],
-            'health_metrics': asdict(self.health_metrics_history[-1]) if self.health_metrics_history else None,
-            'monitoring_active': self.is_monitoring
+            "config": asdict(self.config),
+            "current_health": self.current_health.value,
+            "component_states": {k: v.value for k, v in self.component_states.items()},
+            "degradation_modes": self.degradation_modes,
+            "active_recoveries": list(self.active_recoveries.keys()),
+            "statistics": self.stats,
+            "recent_predictions": [asdict(p) for p in self.failure_predictions[-5:]],
+            "health_metrics": asdict(self.health_metrics_history[-1])
+            if self.health_metrics_history
+            else None,
+            "monitoring_active": self.is_monitoring,
         }
 
     def export_resilience_report(self, file_path: str):
         """Export resilience report"""
         try:
             report = {
-                'export_timestamp': datetime.now().isoformat(),
-                'resilience_status': self.get_resilience_status(),
-                'health_metrics_history': [asdict(m) for m in self.health_metrics_history[-100:]],
-                'failure_predictions': [asdict(p) for p in self.failure_predictions],
-                'error_statistics': self.error_handler.get_error_statistics()
+                "export_timestamp": datetime.now().isoformat(),
+                "resilience_status": self.get_resilience_status(),
+                "health_metrics_history": [
+                    asdict(m) for m in self.health_metrics_history[-100:]
+                ],
+                "failure_predictions": [asdict(p) for p in self.failure_predictions],
+                "error_statistics": self.error_handler.get_error_statistics(),
             }
 
-            with open(file_path, 'w', encoding='utf-8') as f:
+            with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(report, f, indent=2, ensure_ascii=False, default=str)
 
             self.logger.info(f"Resilience report exported to {file_path}")
@@ -602,8 +639,10 @@ class ResilienceManager:
         except Exception as e:
             self.logger.error(f"Failed to export resilience report: {e}")
 
+
 # Global resilience manager instance
 _resilience_manager_instance: Optional[ResilienceManager] = None
+
 
 def get_resilience_manager(config: ResilienceConfig = None) -> ResilienceManager:
     """Get global resilience manager instance"""
@@ -612,7 +651,10 @@ def get_resilience_manager(config: ResilienceConfig = None) -> ResilienceManager
         _resilience_manager_instance = ResilienceManager(config)
     return _resilience_manager_instance
 
-async def initialize_resilience_system(config: ResilienceConfig = None) -> ResilienceManager:
+
+async def initialize_resilience_system(
+    config: ResilienceConfig = None,
+) -> ResilienceManager:
     """Initialize resilience system"""
     manager = get_resilience_manager(config)
     await manager.start_monitoring()

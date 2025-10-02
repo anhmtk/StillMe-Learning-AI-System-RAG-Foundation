@@ -19,6 +19,7 @@ sys.path.insert(0, str(project_root / "agent_dev" / "core"))
 
 # Import after path setup
 from symbol_index import SymbolIndex  # noqa: E402
+
 from agent_dev.core.agentdev import AgentDev  # noqa: E402
 
 
@@ -33,7 +34,9 @@ def analyze_f821_errors():
     # Build symbol index
     print("📚 Building symbol index...")
     stats = symbol_index.build_index(force_rebuild=True)
-    print(f"✅ Symbol index: {stats['files_scanned']} files, {stats['symbols_found']} symbols")
+    print(
+        f"✅ Symbol index: {stats['files_scanned']} files, {stats['symbols_found']} symbols"
+    )
 
     # Scan for errors
     print("🔍 Scanning for errors...")
@@ -48,7 +51,7 @@ def analyze_f821_errors():
         "src_vs_tests": {"src": 0, "tests": 0},
         "symbols": defaultdict(list),
         "top_missing_symbols": [],
-        "symbol_analysis": {}
+        "symbol_analysis": {},
     }
 
     for error in f821_errors:
@@ -66,26 +69,45 @@ def analyze_f821_errors():
             analysis["src_vs_tests"]["src"] += 1
 
         # Group by symbol
-        analysis["symbols"][symbol_name].append({
-            "file": error.file_path,
-            "line": error.line_number,
-            "location": "tests" if "tests/" in error.file_path else "src"
-        })
+        analysis["symbols"][symbol_name].append(
+            {
+                "file": error.file_path,
+                "line": error.line_number,
+                "location": "tests" if "tests/" in error.file_path else "src",
+            }
+        )
 
     # Analyze each symbol
     for symbol_name, occurrences in analysis["symbols"].items():
         # Check if symbol exists in core
         core_symbols = symbol_index.find_symbol(symbol_name)
-        core_symbols = [s for s in core_symbols if 'stillme_core' in s.module_path]
+        core_symbols = [s for s in core_symbols if "stillme_core" in s.module_path]
 
         # Check if it's stdlib
         stdlib_symbols = {
-            'time', 'json', 'os', 'sys', 're', 'datetime', 'asyncio', 'threading',
-            'queue', 'subprocess', 'logging', 'pathlib', 'typing', 'dataclasses',
-            'asdict', 'enum', 'collections', 'itertools', 'functools', 'operator'
+            "time",
+            "json",
+            "os",
+            "sys",
+            "re",
+            "datetime",
+            "asyncio",
+            "threading",
+            "queue",
+            "subprocess",
+            "logging",
+            "pathlib",
+            "typing",
+            "dataclasses",
+            "asdict",
+            "enum",
+            "collections",
+            "itertools",
+            "functools",
+            "operator",
         }
 
-        is_stdlib = symbol_name in stdlib_symbols or symbol_name in ['asdict', 'Path']
+        is_stdlib = symbol_name in stdlib_symbols or symbol_name in ["asdict", "Path"]
 
         analysis["symbol_analysis"][symbol_name] = {
             "occurrences": len(occurrences),
@@ -93,28 +115,47 @@ def analyze_f821_errors():
             "in_core": len(core_symbols) > 0,
             "is_stdlib": is_stdlib,
             "core_module": core_symbols[0].module_path if core_symbols else None,
-            "suggested_import": None
+            "suggested_import": None,
         }
 
         # Generate suggested import
         if is_stdlib:
-            if symbol_name == 'asdict':
-                analysis["symbol_analysis"][symbol_name]["suggested_import"] = "from dataclasses import asdict"
-            elif symbol_name == 'Path':
-                analysis["symbol_analysis"][symbol_name]["suggested_import"] = "from pathlib import Path"
+            if symbol_name == "asdict":
+                analysis["symbol_analysis"][symbol_name]["suggested_import"] = (
+                    "from dataclasses import asdict"
+                )
+            elif symbol_name == "Path":
+                analysis["symbol_analysis"][symbol_name]["suggested_import"] = (
+                    "from pathlib import Path"
+                )
             else:
-                analysis["symbol_analysis"][symbol_name]["suggested_import"] = f"import {symbol_name}"
+                analysis["symbol_analysis"][symbol_name]["suggested_import"] = (
+                    f"import {symbol_name}"
+                )
         elif core_symbols:
-            module_path = core_symbols[0].module_path.replace('/', '.').replace('\\', '.')
-            if module_path.endswith('.py'):
+            module_path = (
+                core_symbols[0].module_path.replace("/", ".").replace("\\", ".")
+            )
+            if module_path.endswith(".py"):
                 module_path = module_path[:-3]
-            analysis["symbol_analysis"][symbol_name]["suggested_import"] = f"from {module_path} import {symbol_name}"
+            analysis["symbol_analysis"][symbol_name]["suggested_import"] = (
+                f"from {module_path} import {symbol_name}"
+            )
 
     # Get top missing symbols
-    symbol_counts = Counter({symbol: len(occurrences) for symbol, occurrences in analysis["symbols"].items()})
-    analysis["top_missing_symbols"] = [{"symbol": symbol, "count": count} for symbol, count in symbol_counts.most_common(10)]
+    symbol_counts = Counter(
+        {
+            symbol: len(occurrences)
+            for symbol, occurrences in analysis["symbols"].items()
+        }
+    )
+    analysis["top_missing_symbols"] = [
+        {"symbol": symbol, "count": count}
+        for symbol, count in symbol_counts.most_common(10)
+    ]
 
     return analysis
+
 
 def main():
     """Main function"""
@@ -134,10 +175,17 @@ def main():
     # Print symbol analysis
     print("\n🔍 SYMBOL ANALYSIS:")
     for symbol, info in list(analysis["symbol_analysis"].items())[:10]:
-        status = "✅ CORE" if info["in_core"] else "📦 STDLIB" if info["is_stdlib"] else "❌ MISSING"
+        status = (
+            "✅ CORE"
+            if info["in_core"]
+            else "📦 STDLIB"
+            if info["is_stdlib"]
+            else "❌ MISSING"
+        )
         print(f"  {symbol}: {status} ({info['occurrences']} occurrences)")
         if info["suggested_import"]:
             print(f"    → {info['suggested_import']}")
+
 
 if __name__ == "__main__":
     main()

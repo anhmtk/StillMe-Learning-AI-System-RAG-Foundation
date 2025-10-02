@@ -48,14 +48,15 @@ class TestEvolutionaryLearningSystem:
             learning_mode=LearningMode.EVOLUTIONARY,
             daily_training_minutes=15,
             assessment_frequency_hours=6,
-            evolution_checkpoint_days=7
+            evolution_checkpoint_days=7,
         )
 
     @pytest.fixture
     def system(self, config):
         """Test system instance"""
-        with patch('stillme_core.learning.evolutionary_learning_system.ExperienceMemory') as mock_exp:
-
+        with patch(
+            "stillme_core.learning.evolutionary_learning_system.ExperienceMemory"
+        ) as mock_exp:
             # Mock experience memory with empty experiences list
             mock_exp_instance = Mock()
             mock_exp_instance.experiences = []
@@ -95,20 +96,21 @@ class TestEvolutionaryLearningSystem:
         # Mock the internal methods
         system._review_yesterday_experiences = AsyncMock(return_value=[])
         system._learn_from_new_content = AsyncMock(return_value=[])
-        system._perform_self_assessment = AsyncMock(return_value={
-            'gaps': ['knowledge_gap_1'],
-            'overall_score': 0.7
-        })
-        system._conduct_targeted_training = AsyncMock(return_value={
-            'exercises_completed': 3,
-            'skills_improved': ['knowledge_gap_1']
-        })
-        system._evaluate_performance = AsyncMock(return_value={
-            'accuracy_improvement': 0.05
-        })
-        system._plan_next_session = AsyncMock(return_value={
-            'focus_areas': ['accuracy_improvement']
-        })
+        system._perform_self_assessment = AsyncMock(
+            return_value={"gaps": ["knowledge_gap_1"], "overall_score": 0.7}
+        )
+        system._conduct_targeted_training = AsyncMock(
+            return_value={
+                "exercises_completed": 3,
+                "skills_improved": ["knowledge_gap_1"],
+            }
+        )
+        system._evaluate_performance = AsyncMock(
+            return_value={"accuracy_improvement": 0.05}
+        )
+        system._plan_next_session = AsyncMock(
+            return_value={"focus_areas": ["accuracy_improvement"]}
+        )
         system._save_training_session = AsyncMock()
 
         # Run daily learning session
@@ -134,15 +136,15 @@ class TestEvolutionaryLearningSystem:
         """Test learning status retrieval"""
         status = system.get_learning_status()
 
-        assert 'current_stage' in status
-        assert 'evolution_progress' in status
-        assert 'learning_metrics' in status
-        assert 'recent_sessions' in status
-        assert 'overall_score' in status
-        assert 'system_age_days' in status
+        assert "current_stage" in status
+        assert "evolution_progress" in status
+        assert "learning_metrics" in status
+        assert "recent_sessions" in status
+        assert "overall_score" in status
+        assert "system_age_days" in status
 
-        assert status['current_stage'] == EvolutionStage.INFANT.value
-        assert status['recent_sessions'] == 0
+        assert status["current_stage"] == EvolutionStage.INFANT.value
+        assert status["recent_sessions"] == 0
 
     @pytest.mark.asyncio
     async def test_evolution_to_next_stage(self, system):
@@ -162,9 +164,9 @@ class TestEvolutionaryLearningSystem:
     def test_emergency_learning_reset(self, system):
         """Test emergency learning reset"""
         # Add some data
-        system.performance_history.append({'test': 'data'})
+        system.performance_history.append({"test": "data"})
         system.training_sessions.append(Mock())
-        system.knowledge_base['test'] = 'data'
+        system.knowledge_base["test"] = "data"
 
         # Reset
         asyncio.run(system.emergency_learning_reset())
@@ -186,8 +188,8 @@ class TestLearningAssessmentSystem:
 
     def test_assessment_system_initialization(self, assessment_system):
         """Test assessment system initialization"""
-        assert assessment_system.current_parameters['learning_rate'] == 0.1
-        assert assessment_system.current_parameters['confidence_threshold'] == 0.7
+        assert assessment_system.current_parameters["learning_rate"] == 0.1
+        assert assessment_system.current_parameters["confidence_threshold"] == 0.7
         assert len(assessment_system.assessment_history) == 0
         assert len(assessment_system.learning_curves) == 0
 
@@ -196,9 +198,9 @@ class TestLearningAssessmentSystem:
         # Test knowledge questions
         questions = assessment_system._generate_knowledge_questions(3)
         assert len(questions) == 3
-        assert all('question' in q for q in questions)
-        assert all('options' in q for q in questions)
-        assert all('correct_answer' in q for q in questions)
+        assert all("question" in q for q in questions)
+        assert all("options" in q for q in questions)
+        assert all("correct_answer" in q for q in questions)
 
         # Test reasoning questions
         questions = assessment_system._generate_reasoning_questions(2)
@@ -207,22 +209,24 @@ class TestLearningAssessmentSystem:
         # Test creativity questions
         questions = assessment_system._generate_creativity_questions(2)
         assert len(questions) == 2
-        assert all(q.get('type') == 'open_ended' for q in questions)
+        assert all(q.get("type") == "open_ended" for q in questions)
 
     @pytest.mark.asyncio
     async def test_assessment_execution(self, assessment_system):
         """Test assessment execution"""
         # Mock question generation
-        assessment_system._generate_questions = Mock(return_value=[
-            {
-                'id': 'test_1',
-                'question': 'Test question?',
-                'options': ['A', 'B', 'C', 'D'],
-                'correct_answer': 0,
-                'difficulty': 'easy',
-                'category': 'test'
-            }
-        ])
+        assessment_system._generate_questions = Mock(
+            return_value=[
+                {
+                    "id": "test_1",
+                    "question": "Test question?",
+                    "options": ["A", "B", "C", "D"],
+                    "correct_answer": 0,
+                    "difficulty": "easy",
+                    "category": "test",
+                }
+            ]
+        )
 
         # Mock answer simulation
         assessment_system._simulate_answer = AsyncMock(return_value=0)
@@ -230,8 +234,7 @@ class TestLearningAssessmentSystem:
 
         # Run assessment
         result = await assessment_system.run_assessment(
-            AssessmentType.QUICK,
-            AssessmentCategory.KNOWLEDGE
+            AssessmentType.QUICK, AssessmentCategory.KNOWLEDGE
         )
 
         # Verify result
@@ -246,19 +249,19 @@ class TestLearningAssessmentSystem:
         """Test score calculation"""
         # Test perfect score
         results = {
-            'questions': [{'id': '1'}, {'id': '2'}, {'id': '3'}],
-            'correct_count': 3
+            "questions": [{"id": "1"}, {"id": "2"}, {"id": "3"}],
+            "correct_count": 3,
         }
         score = assessment_system._calculate_score(results)
         assert score == 1.0
 
         # Test partial score
-        results['correct_count'] = 2
+        results["correct_count"] = 2
         score = assessment_system._calculate_score(results)
-        assert score == 2/3
+        assert score == 2 / 3
 
         # Test zero score
-        results['correct_count'] = 0
+        results["correct_count"] = 0
         score = assessment_system._calculate_score(results)
         assert score == 0.0
 
@@ -280,13 +283,15 @@ class TestLearningAssessmentSystem:
     def test_parameter_optimization(self, assessment_system):
         """Test parameter optimization"""
         # Mock performance data
-        assessment_system._get_parameter_performance_data = Mock(return_value=[
-            {'value': 0.1, 'performance': 0.6},
-            {'value': 0.3, 'performance': 0.7},
-            {'value': 0.5, 'performance': 0.8},
-            {'value': 0.7, 'performance': 0.75},
-            {'value': 0.9, 'performance': 0.7}
-        ])
+        assessment_system._get_parameter_performance_data = Mock(
+            return_value=[
+                {"value": 0.1, "performance": 0.6},
+                {"value": 0.3, "performance": 0.7},
+                {"value": 0.5, "performance": 0.8},
+                {"value": 0.7, "performance": 0.75},
+                {"value": 0.9, "performance": 0.7},
+            ]
+        )
 
         # Test optimization
         optimizations = asyncio.run(assessment_system.optimize_parameters())
@@ -310,19 +315,19 @@ class TestLearningAssessmentSystem:
             time_taken_seconds=30,
             detailed_results={},
             recommendations=[],
-            improvement_areas=[]
+            improvement_areas=[],
         )
         assessment_system.assessment_history.append(mock_result)
 
         # Get summary
         summary = assessment_system.get_assessment_summary()
 
-        assert 'total_assessments' in summary
-        assert 'average_score' in summary
-        assert 'best_score' in summary
-        assert 'worst_score' in summary
-        assert summary['total_assessments'] == 1
-        assert summary['average_score'] == 0.8
+        assert "total_assessments" in summary
+        assert "average_score" in summary
+        assert "best_score" in summary
+        assert "worst_score" in summary
+        assert summary["total_assessments"] == 1
+        assert summary["average_score"] == 0.8
 
 
 class TestIntegration:
@@ -331,8 +336,9 @@ class TestIntegration:
     @pytest.mark.asyncio
     async def test_daily_training_workflow(self):
         """Test complete daily training workflow"""
-        with patch('stillme_core.learning.evolutionary_learning_system.ExperienceMemory') as mock_exp:
-
+        with patch(
+            "stillme_core.learning.evolutionary_learning_system.ExperienceMemory"
+        ) as mock_exp:
             # Mock experience memory with empty experiences list
             mock_exp_instance = Mock()
             mock_exp_instance.experiences = []
@@ -346,20 +352,21 @@ class TestIntegration:
             # Mock methods
             learning_system._review_yesterday_experiences = AsyncMock(return_value=[])
             learning_system._learn_from_new_content = AsyncMock(return_value=[])
-            learning_system._perform_self_assessment = AsyncMock(return_value={
-                'gaps': ['knowledge_gap_1'],
-                'overall_score': 0.7
-            })
-            learning_system._conduct_targeted_training = AsyncMock(return_value={
-                'exercises_completed': 3,
-                'skills_improved': ['knowledge_gap_1']
-            })
-            learning_system._evaluate_performance = AsyncMock(return_value={
-                'accuracy_improvement': 0.05
-            })
-            learning_system._plan_next_session = AsyncMock(return_value={
-                'focus_areas': ['accuracy_improvement']
-            })
+            learning_system._perform_self_assessment = AsyncMock(
+                return_value={"gaps": ["knowledge_gap_1"], "overall_score": 0.7}
+            )
+            learning_system._conduct_targeted_training = AsyncMock(
+                return_value={
+                    "exercises_completed": 3,
+                    "skills_improved": ["knowledge_gap_1"],
+                }
+            )
+            learning_system._evaluate_performance = AsyncMock(
+                return_value={"accuracy_improvement": 0.05}
+            )
+            learning_system._plan_next_session = AsyncMock(
+                return_value={"focus_areas": ["accuracy_improvement"]}
+            )
             learning_system._save_training_session = AsyncMock()
 
             # Run daily training
@@ -367,8 +374,7 @@ class TestIntegration:
 
             # Run assessment
             assessment = await assessment_system.run_assessment(
-                AssessmentType.QUICK,
-                AssessmentCategory.KNOWLEDGE
+                AssessmentType.QUICK, AssessmentCategory.KNOWLEDGE
             )
 
             # Verify both completed successfully
@@ -378,8 +384,9 @@ class TestIntegration:
     @pytest.mark.asyncio
     async def test_evolution_workflow(self):
         """Test evolution workflow"""
-        with patch('stillme_core.learning.evolutionary_learning_system.ExperienceMemory') as mock_exp:
-
+        with patch(
+            "stillme_core.learning.evolutionary_learning_system.ExperienceMemory"
+        ) as mock_exp:
             # Mock experience memory with empty experiences list
             mock_exp_instance = Mock()
             mock_exp_instance.experiences = []
@@ -406,8 +413,9 @@ class TestPerformance:
     @pytest.mark.asyncio
     async def test_daily_training_performance(self):
         """Test daily training performance"""
-        with patch('stillme_core.learning.evolutionary_learning_system.ExperienceMemory') as mock_exp:
-
+        with patch(
+            "stillme_core.learning.evolutionary_learning_system.ExperienceMemory"
+        ) as mock_exp:
             # Mock experience memory with empty experiences list
             mock_exp_instance = Mock()
             mock_exp_instance.experiences = []
@@ -419,10 +427,16 @@ class TestPerformance:
             # Mock all methods to return quickly
             system._review_yesterday_experiences = AsyncMock(return_value=[])
             system._learn_from_new_content = AsyncMock(return_value=[])
-            system._perform_self_assessment = AsyncMock(return_value={'gaps': [], 'overall_score': 0.7})
-            system._conduct_targeted_training = AsyncMock(return_value={'exercises_completed': 1})
-            system._evaluate_performance = AsyncMock(return_value={'accuracy_improvement': 0.01})
-            system._plan_next_session = AsyncMock(return_value={'focus_areas': []})
+            system._perform_self_assessment = AsyncMock(
+                return_value={"gaps": [], "overall_score": 0.7}
+            )
+            system._conduct_targeted_training = AsyncMock(
+                return_value={"exercises_completed": 1}
+            )
+            system._evaluate_performance = AsyncMock(
+                return_value={"accuracy_improvement": 0.01}
+            )
+            system._plan_next_session = AsyncMock(return_value={"focus_areas": []})
             system._save_training_session = AsyncMock()
 
             # Measure performance
@@ -440,17 +454,19 @@ class TestPerformance:
         assessment_system = LearningAssessmentSystem()
 
         # Mock question generation
-        assessment_system._generate_questions = Mock(return_value=[
-            {
-                'id': f'test_{i}',
-                'question': f'Test question {i}?',
-                'options': ['A', 'B', 'C', 'D'],
-                'correct_answer': 0,
-                'difficulty': 'easy',
-                'category': 'test'
-            }
-            for i in range(10)
-        ])
+        assessment_system._generate_questions = Mock(
+            return_value=[
+                {
+                    "id": f"test_{i}",
+                    "question": f"Test question {i}?",
+                    "options": ["A", "B", "C", "D"],
+                    "correct_answer": 0,
+                    "difficulty": "easy",
+                    "category": "test",
+                }
+                for i in range(10)
+            ]
+        )
 
         # Mock answer simulation
         assessment_system._simulate_answer = AsyncMock(return_value=0)
@@ -459,8 +475,7 @@ class TestPerformance:
         # Measure performance
         start_time = time.time()
         result = await assessment_system.run_assessment(
-            AssessmentType.STANDARD,
-            AssessmentCategory.KNOWLEDGE
+            AssessmentType.STANDARD, AssessmentCategory.KNOWLEDGE
         )
         end_time = time.time()
 
@@ -477,9 +492,10 @@ def event_loop():
     yield loop
     loop.close()
 
+
 # Test markers
 pytestmark = [
     pytest.mark.unified_learning,
     pytest.mark.evolutionary_system,
-    pytest.mark.learning_assessment
+    pytest.mark.learning_assessment,
 ]

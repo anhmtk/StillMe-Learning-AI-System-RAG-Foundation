@@ -27,7 +27,7 @@ class TestApprovalSystem:
     @pytest.fixture
     def temp_db(self):
         """Temporary database for testing"""
-        with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as f:
+        with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
         yield db_path
         # Windows-specific cleanup issue - skip cleanup for now
@@ -44,7 +44,7 @@ class TestApprovalSystem:
             auto_approve_threshold=0.9,
             auto_reject_threshold=0.3,
             expiration_hours=24,
-            max_pending_requests=10
+            max_pending_requests=10,
         )
         return ApprovalSystem(config, temp_db)
 
@@ -62,7 +62,7 @@ class TestApprovalSystem:
             description="Test description",
             content_preview="Test content preview",
             quality_score=0.8,
-            risk_score=0.2
+            risk_score=0.2,
         )
 
         assert request_id is not None
@@ -83,7 +83,7 @@ class TestApprovalSystem:
             description="High quality content",
             content_preview="Excellent content",
             quality_score=0.95,  # Above threshold
-            risk_score=0.05      # Below threshold
+            risk_score=0.05,  # Below threshold
         )
 
         # Should be auto-approved
@@ -99,7 +99,7 @@ class TestApprovalSystem:
             description="Risky content",
             content_preview="Potentially harmful content",
             quality_score=0.6,
-            risk_score=0.8  # Above threshold
+            risk_score=0.8,  # Above threshold
         )
 
         # Should be auto-rejected
@@ -116,7 +116,7 @@ class TestApprovalSystem:
             description="Important knowledge update",
             content_preview="Critical information",
             quality_score=0.8,
-            risk_score=0.3
+            risk_score=0.3,
         )
 
         # Should be pending (requires human approval)
@@ -145,7 +145,7 @@ class TestApprovalSystem:
             description="Potentially problematic",
             content_preview="Suspicious content",
             quality_score=0.6,
-            risk_score=0.4
+            risk_score=0.4,
         )
 
         # Manual rejection
@@ -171,7 +171,7 @@ class TestApprovalSystem:
                 description=f"Description {i}",
                 content_preview=f"Content {i}",
                 quality_score=0.7,
-                risk_score=0.3
+                risk_score=0.3,
             )
 
         # Get pending requests
@@ -195,7 +195,7 @@ class TestApprovalSystem:
             description="Will expire soon",
             content_preview="Short lived content",
             quality_score=0.7,
-            risk_score=0.3
+            risk_score=0.3,
         )
 
         # Wait for expiration (need longer wait for very short expiration)
@@ -237,13 +237,14 @@ class TestApprovalSystem:
         assert stats["total_requests"] == 3
         assert stats["pending_count"] == 1
 
+
 class TestApprovalQueueManager:
     """Test ApprovalQueueManager"""
 
     @pytest.fixture
     def temp_db(self):
         """Temporary database for testing"""
-        with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as f:
+        with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
         yield db_path
         # Windows-specific cleanup issue - skip cleanup for now
@@ -268,7 +269,7 @@ class TestApprovalQueueManager:
             description="Educational content",
             content_preview="Useful information",
             quality_score=0.8,
-            risk_score=0.2
+            risk_score=0.2,
         )
 
         assert request_id is not None
@@ -290,15 +291,30 @@ class TestApprovalQueueManager:
                 description=f"Description {i}",
                 content_preview=f"Content {i}",
                 quality_score=0.7,
-                risk_score=0.3
+                risk_score=0.3,
             )
             request_ids.append(request_id)
 
         # Batch approve
         approvals = [
-            {"request_id": request_ids[0], "action": "approve", "approver": "human", "notes": "Good"},
-            {"request_id": request_ids[1], "action": "reject", "approver": "human", "notes": "Bad"},
-            {"request_id": request_ids[2], "action": "approve", "approver": "human", "notes": "Excellent"}
+            {
+                "request_id": request_ids[0],
+                "action": "approve",
+                "approver": "human",
+                "notes": "Good",
+            },
+            {
+                "request_id": request_ids[1],
+                "action": "reject",
+                "approver": "human",
+                "notes": "Bad",
+            },
+            {
+                "request_id": request_ids[2],
+                "action": "approve",
+                "approver": "human",
+                "notes": "Excellent",
+            },
         ]
 
         results = await queue_manager.process_approval_batch(approvals)
@@ -318,7 +334,7 @@ class TestApprovalQueueManager:
                 description=f"Description {i}",
                 content_preview=f"Content {i}",
                 quality_score=0.7,
-                risk_score=0.3
+                risk_score=0.3,
             )
 
         # Get stats
@@ -346,12 +362,13 @@ class TestApprovalQueueManager:
             description="Test notification",
             content_preview="Test content",
             quality_score=0.7,
-            risk_score=0.3
+            risk_score=0.3,
         )
 
         # Check notification was sent
         assert len(notifications) > 0
         assert any("content_pending_approval" in msg for msg, _ in notifications)
+
 
 class TestIntegration:
     """Integration tests"""
@@ -359,7 +376,7 @@ class TestIntegration:
     @pytest.fixture
     def temp_db(self):
         """Temporary database for testing"""
-        with tempfile.NamedTemporaryFile(suffix='.db', delete=False) as f:
+        with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as f:
             db_path = f.name
         yield db_path
         # Windows-specific cleanup issue - skip cleanup for now
@@ -383,7 +400,7 @@ class TestIntegration:
             description="Full workflow test",
             content_preview="Complete test content",
             quality_score=0.8,
-            risk_score=0.2
+            risk_score=0.2,
         )
 
         assert request_id is not None
@@ -415,11 +432,13 @@ class TestIntegration:
         config = EvolutionaryConfig(
             enable_approval_workflow=True,
             auto_approve_threshold=0.9,
-            require_human_approval=True
+            require_human_approval=True,
         )
 
         # Mock ExperienceMemory to avoid import issues
-        with patch('stillme_core.learning.evolutionary_learning_system.ExperienceMemory') as mock_exp:
+        with patch(
+            "stillme_core.learning.evolutionary_learning_system.ExperienceMemory"
+        ) as mock_exp:
             # Mock experiences as empty list to avoid min() error
             mock_exp.return_value.experiences = []
             system = EvolutionaryLearningSystem(config)
@@ -436,7 +455,7 @@ class TestIntegration:
                     description="Test with evolutionary system",
                     content_preview="Evolutionary content",
                     quality_score=0.8,
-                    risk_score=0.2
+                    risk_score=0.2,
                 )
 
                 assert request_id is not None

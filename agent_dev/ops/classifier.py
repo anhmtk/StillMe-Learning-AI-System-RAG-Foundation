@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 class IssueSeverity(Enum):
     """Issue severity levels"""
+
     MINOR = "MINOR"
     MAJOR = "MAJOR"
     SECURITY = "SECURITY"
@@ -48,7 +49,7 @@ class IssueClassifier:
                 "reason": "Security-related issue detected",
                 "auto_fix": False,
                 "escalate": True,
-                "priority": 1
+                "priority": 1,
             }
 
         # Check for major issues
@@ -58,7 +59,7 @@ class IssueClassifier:
                 "reason": "Major issue affecting functionality",
                 "auto_fix": False,
                 "escalate": True,
-                "priority": 2
+                "priority": 2,
             }
 
         # Check for minor issues
@@ -68,7 +69,7 @@ class IssueClassifier:
                 "reason": "Minor formatting or style issue",
                 "auto_fix": True,
                 "escalate": False,
-                "priority": 3
+                "priority": 3,
             }
 
         # Default classification
@@ -77,7 +78,7 @@ class IssueClassifier:
             "reason": "Unknown issue type",
             "auto_fix": False,
             "escalate": False,
-            "priority": 4
+            "priority": 4,
         }
 
     def _is_security_issue(self, rule: str, message: str, file_path: str) -> bool:
@@ -102,7 +103,13 @@ class IssueClassifier:
             return True
 
         # Check message content
-        major_keywords = ["import", "syntax", "undefined", "not defined", "module not found"]
+        major_keywords = [
+            "import",
+            "syntax",
+            "undefined",
+            "not defined",
+            "module not found",
+        ]
         if any(keyword in message.lower() for keyword in major_keywords):
             return True
 
@@ -112,7 +119,9 @@ class IssueClassifier:
         """Check if issue is minor"""
         return rule in self.minor_patterns
 
-    def batch_classify(self, issues: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+    def batch_classify(
+        self, issues: list[dict[str, Any]]
+    ) -> dict[str, list[dict[str, Any]]]:
         """
         Classify a batch of issues
 
@@ -125,7 +134,7 @@ class IssueClassifier:
         classified = {
             IssueSeverity.SECURITY.value: [],
             IssueSeverity.MAJOR.value: [],
-            IssueSeverity.MINOR.value: []
+            IssueSeverity.MINOR.value: [],
         }
 
         for issue in issues:

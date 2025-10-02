@@ -20,6 +20,7 @@ from typing import Any, Optional
 # Initialize logger
 logger = logging.getLogger("StillMe.APIProvider")
 
+
 class UnifiedAPIManager:
     """Simple API provider manager with fallback responses"""
 
@@ -28,7 +29,9 @@ class UnifiedAPIManager:
         self.model_preferences = ["gemma2:2b", "deepseek-coder:6.7b", "deepseek-chat"]
         self.translation_core_lang = os.getenv("TRANSLATION_CORE_LANG", "en")
         self.translator_priority = os.getenv("TRANSLATOR_PRIORITY", "gemma,nllb")
-        self.nllb_model_name = os.getenv("NLLB_MODEL_NAME", "facebook/nllb-200-distilled-600M")
+        self.nllb_model_name = os.getenv(
+            "NLLB_MODEL_NAME", "facebook/nllb-200-distilled-600M"
+        )
 
         # Initialize complexity analyzer
         self.complexity_analyzer = ComplexityAnalyzer()
@@ -114,7 +117,10 @@ class UnifiedAPIManager:
         if any(word in prompt_lower for word in ["phân tích", "so sánh", "đánh giá"]):
             return "Đây là phân tích chi tiết từ StillMe AI. Tôi sẽ cung cấp câu trả lời sâu sắc và toàn diện cho câu hỏi của bạn."
 
-        elif any(word in prompt_lower for word in ["ai", "trí tuệ nhân tạo", "machine learning"]):
+        elif any(
+            word in prompt_lower
+            for word in ["ai", "trí tuệ nhân tạo", "machine learning"]
+        ):
             return "StillMe AI có thể giải thích về trí tuệ nhân tạo, machine learning, và các công nghệ AI tiên tiến."
 
         else:
@@ -124,7 +130,13 @@ class UnifiedAPIManager:
         """Generate fallback response when all else fails"""
         return f"Xin lỗi, tôi đang gặp khó khăn trong việc xử lý câu hỏi: '{prompt}'. Vui lòng thử lại sau."
 
-    def translate(self, text: str, src_lang: str, tgt_lang: str, quality_hint: Optional[str] = None) -> dict[str, Any]:
+    def translate(
+        self,
+        text: str,
+        src_lang: str,
+        tgt_lang: str,
+        quality_hint: Optional[str] = None,
+    ) -> dict[str, Any]:
         """Simple translation with fallback"""
         try:
             # Simple translation logic
@@ -149,6 +161,7 @@ class UnifiedAPIManager:
         """Get complexity analyzer statistics"""
         return self.complexity_analyzer.get_stats()
 
+
 class ComplexityAnalyzer:
     """Simple complexity analyzer"""
 
@@ -158,18 +171,42 @@ class ComplexityAnalyzer:
 
         # Simple keyword sets
         self.complex_indicators = {
-            "tại sao", "như thế nào", "phân tích", "so sánh", "đánh giá",
-            "giải thích", "mối quan hệ", "tác động", "ảnh hưởng", "nguyên nhân"
+            "tại sao",
+            "như thế nào",
+            "phân tích",
+            "so sánh",
+            "đánh giá",
+            "giải thích",
+            "mối quan hệ",
+            "tác động",
+            "ảnh hưởng",
+            "nguyên nhân",
         }
 
         self.coding_keywords = {
-            "code", "lập trình", "programming", "python", "javascript",
-            "function", "class", "variable", "algorithm", "debug"
+            "code",
+            "lập trình",
+            "programming",
+            "python",
+            "javascript",
+            "function",
+            "class",
+            "variable",
+            "algorithm",
+            "debug",
         }
 
         self.academic_terms = {
-            "định luật", "định lý", "bất toàn", "gödel", "toán học",
-            "triết học", "khoa học", "vật lý", "hóa học", "sinh học"
+            "định luật",
+            "định lý",
+            "bất toàn",
+            "gödel",
+            "toán học",
+            "triết học",
+            "khoa học",
+            "vật lý",
+            "hóa học",
+            "sinh học",
         }
 
     def analyze_complexity(self, prompt: str) -> float:
@@ -187,15 +224,21 @@ class ComplexityAnalyzer:
                 score += 0.1
 
             # Complex indicators
-            complex_count = sum(1 for keyword in self.complex_indicators if keyword in prompt_lower)
+            complex_count = sum(
+                1 for keyword in self.complex_indicators if keyword in prompt_lower
+            )
             score += min(complex_count * 0.15, 0.4)
 
             # Coding keywords
-            coding_count = sum(1 for keyword in self.coding_keywords if keyword in prompt_lower)
+            coding_count = sum(
+                1 for keyword in self.coding_keywords if keyword in prompt_lower
+            )
             score += min(coding_count * 0.1, 0.3)
 
             # Academic terms
-            academic_count = sum(1 for keyword in self.academic_terms if keyword in prompt_lower)
+            academic_count = sum(
+                1 for keyword in self.academic_terms if keyword in prompt_lower
+            )
             score += min(academic_count * 0.2, 0.4)
 
             # Multi-part questions
@@ -203,7 +246,10 @@ class ComplexityAnalyzer:
                 score += 0.1
 
             # Conditional questions
-            if any(word in prompt_lower for word in ["nếu", "khi", "trong trường hợp", "if", "when", "case"]):
+            if any(
+                word in prompt_lower
+                for word in ["nếu", "khi", "trong trường hợp", "if", "when", "case"]
+            ):
                 score += 0.1
 
             # Normalize to 0.0-1.0 range
@@ -223,6 +269,10 @@ class ComplexityAnalyzer:
         """Get analyzer statistics"""
         return {
             "total_analyses": len(self.analysis_times),
-            "avg_analysis_time_ms": sum(self.analysis_times) / len(self.analysis_times) * 1000 if self.analysis_times else 0,
-            "fallback_count": len(self.fallback_log)
+            "avg_analysis_time_ms": sum(self.analysis_times)
+            / len(self.analysis_times)
+            * 1000
+            if self.analysis_times
+            else 0,
+            "fallback_count": len(self.fallback_log),
         }

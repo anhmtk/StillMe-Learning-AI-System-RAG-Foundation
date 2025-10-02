@@ -3,6 +3,7 @@
 StillMe Market Intelligence Module
 Xử lý các request truy cập internet có kiểm soát
 """
+
 import asyncio
 import logging
 import os
@@ -19,6 +20,7 @@ sys.path.append(str(Path(__file__).parent / "common"))
 from common.http import SecureHttpClient  # noqa: E402
 
 logger = logging.getLogger(__name__)
+
 
 class MarketIntelligence:
     """Market Intelligence service với bảo mật nghiêm ngặt"""
@@ -42,13 +44,21 @@ class MarketIntelligence:
             # Try NewsAPI first
             if self.newsapi_key:
                 result = await self._search_newsapi(query, language)
-                if result["success"] and result["data"] and result["data"].get("articles"):
+                if (
+                    result["success"]
+                    and result["data"]
+                    and result["data"].get("articles")
+                ):
                     return result
 
             # Fallback to GNews
             if self.gnews_api_key:
                 result = await self._search_gnews(query, language)
-                if result["success"] and result["data"] and result["data"].get("articles"):
+                if (
+                    result["success"]
+                    and result["data"]
+                    and result["data"].get("articles")
+                ):
                     return result
 
             # Fallback to mock data if no API keys work
@@ -62,26 +72,26 @@ class MarketIntelligence:
                             "description": "Latest developments in artificial intelligence technology show promising results in various industries.",
                             "url": "https://example.com/ai-news-1",
                             "publishedAt": "2025-09-22T09:00:00Z",
-                            "source": "Tech News"
+                            "source": "Tech News",
                         },
                         {
                             "title": "Machine Learning Breakthrough",
                             "description": "New machine learning algorithms demonstrate improved accuracy and efficiency.",
                             "url": "https://example.com/ai-news-2",
                             "publishedAt": "2025-09-22T08:30:00Z",
-                            "source": "AI Weekly"
+                            "source": "AI Weekly",
                         },
                         {
                             "title": "Neural Networks in Healthcare",
                             "description": "Researchers develop new neural network models for medical diagnosis.",
                             "url": "https://example.com/ai-news-3",
                             "publishedAt": "2025-09-22T08:00:00Z",
-                            "source": "Health Tech"
-                        }
+                            "source": "Health Tech",
+                        },
                     ],
                     "total": 3,
-                    "source": "Mock Data"
-                }
+                    "source": "Mock Data",
+                },
             }
 
         except Exception as e:
@@ -89,13 +99,12 @@ class MarketIntelligence:
             return {
                 "success": False,
                 "error": f"News search failed: {str(e)}",
-                "data": None
+                "data": None,
             }
 
     async def _search_newsapi(self, query: str, language: str) -> dict[str, Any]:
         """Search using NewsAPI"""
         try:
-
             async with SecureHttpClient() as client:
                 # Ensure headers don't contain None values
                 headers = {"X-API-Key": self.newsapi_key} if self.newsapi_key else {}
@@ -106,21 +115,23 @@ class MarketIntelligence:
                     formatted_articles = []
 
                     for article in articles:
-                        formatted_articles.append({
-                            "title": article.get("title", ""),
-                            "description": article.get("description", ""),
-                            "url": article.get("url", ""),
-                            "publishedAt": article.get("publishedAt", ""),
-                            "source": article.get("source", {}).get("name", "")
-                        })
+                        formatted_articles.append(
+                            {
+                                "title": article.get("title", ""),
+                                "description": article.get("description", ""),
+                                "url": article.get("url", ""),
+                                "publishedAt": article.get("publishedAt", ""),
+                                "source": article.get("source", {}).get("name", ""),
+                            }
+                        )
 
                     return {
                         "success": True,
                         "data": {
                             "articles": formatted_articles,
                             "total": len(formatted_articles),
-                            "source": "NewsAPI"
-                        }
+                            "source": "NewsAPI",
+                        },
                     }
                 else:
                     return response
@@ -130,13 +141,12 @@ class MarketIntelligence:
             return {
                 "success": False,
                 "error": f"NewsAPI search failed: {str(e)}",
-                "data": None
+                "data": None,
             }
 
     async def _search_gnews(self, query: str, language: str) -> dict[str, Any]:
         """Search using GNews API"""
         try:
-
             url = f"{self.gnews_url}?q={query}&lang={language}&apikey={self.gnews_api_key}"
 
             async with SecureHttpClient() as client:
@@ -147,21 +157,23 @@ class MarketIntelligence:
                     formatted_articles = []
 
                     for article in articles:
-                        formatted_articles.append({
-                            "title": article.get("title", ""),
-                            "description": article.get("description", ""),
-                            "url": article.get("url", ""),
-                            "publishedAt": article.get("publishedAt", ""),
-                            "source": article.get("source", {}).get("name", "")
-                        })
+                        formatted_articles.append(
+                            {
+                                "title": article.get("title", ""),
+                                "description": article.get("description", ""),
+                                "url": article.get("url", ""),
+                                "publishedAt": article.get("publishedAt", ""),
+                                "source": article.get("source", {}).get("name", ""),
+                            }
+                        )
 
                     return {
                         "success": True,
                         "data": {
                             "articles": formatted_articles,
                             "total": len(formatted_articles),
-                            "source": "GNews"
-                        }
+                            "source": "GNews",
+                        },
                     }
                 else:
                     return response
@@ -171,7 +183,7 @@ class MarketIntelligence:
             return {
                 "success": False,
                 "error": f"GNews search failed: {str(e)}",
-                "data": None
+                "data": None,
             }
 
     async def get_github_trending(self, language: str = "python") -> dict[str, Any]:
@@ -195,23 +207,25 @@ class MarketIntelligence:
                     formatted_repos = []
 
                     for repo in repos:
-                        formatted_repos.append({
-                            "name": repo.get("name", ""),
-                            "full_name": repo.get("full_name", ""),
-                            "description": repo.get("description", ""),
-                            "html_url": repo.get("html_url", ""),
-                            "stars": repo.get("stargazers_count", 0),
-                            "language": repo.get("language", ""),
-                            "updated_at": repo.get("updated_at", "")
-                        })
+                        formatted_repos.append(
+                            {
+                                "name": repo.get("name", ""),
+                                "full_name": repo.get("full_name", ""),
+                                "description": repo.get("description", ""),
+                                "html_url": repo.get("html_url", ""),
+                                "stars": repo.get("stargazers_count", 0),
+                                "language": repo.get("language", ""),
+                                "updated_at": repo.get("updated_at", ""),
+                            }
+                        )
 
                     return {
                         "success": True,
                         "data": {
                             "repositories": formatted_repos,
                             "total": len(formatted_repos),
-                            "language": language
-                        }
+                            "language": language,
+                        },
                     }
                 else:
                     return response
@@ -221,20 +235,20 @@ class MarketIntelligence:
             return {
                 "success": False,
                 "error": f"GitHub trending failed: {str(e)}",
-                "data": None
+                "data": None,
             }
 
-    async def search_github_trending(self, topic: str, since: str = "daily") -> dict[str, Any]:
+    async def search_github_trending(
+        self, topic: str, since: str = "daily"
+    ) -> dict[str, Any]:
         """Search GitHub trending repositories by topic"""
         try:
-            logger.info(f"🔍 Searching GitHub trending for topic: {topic}, since: {since}")
+            logger.info(
+                f"🔍 Searching GitHub trending for topic: {topic}, since: {since}"
+            )
 
             # Map since parameter to GitHub API format
-            since_map = {
-                "daily": "daily",
-                "weekly": "weekly",
-                "monthly": "monthly"
-            }
+            since_map = {"daily": "daily", "weekly": "weekly", "monthly": "monthly"}
             since_map.get(since, "daily")
 
             # Build search query
@@ -263,18 +277,20 @@ class MarketIntelligence:
                         # Simple trending score based on stars and recency
                         trending_score = min(stars / 1000.0, 1.0)  # Normalize to 0-1
 
-                        formatted_repos.append({
-                            "name": repo.get("name", ""),
-                            "full_name": repo.get("full_name", ""),
-                            "description": repo.get("description", ""),
-                            "url": repo.get("html_url", ""),
-                            "stars": stars,
-                            "forks": repo.get("forks_count", 0),
-                            "language": repo.get("language", ""),
-                            "created_at": created_at,
-                            "updated_at": updated_at,
-                            "trending_score": trending_score
-                        })
+                        formatted_repos.append(
+                            {
+                                "name": repo.get("name", ""),
+                                "full_name": repo.get("full_name", ""),
+                                "description": repo.get("description", ""),
+                                "url": repo.get("html_url", ""),
+                                "stars": stars,
+                                "forks": repo.get("forks_count", 0),
+                                "language": repo.get("language", ""),
+                                "created_at": created_at,
+                                "updated_at": updated_at,
+                                "trending_score": trending_score,
+                            }
+                        )
 
                     return {
                         "success": True,
@@ -282,8 +298,8 @@ class MarketIntelligence:
                             "repositories": formatted_repos,
                             "total": len(formatted_repos),
                             "topic": topic,
-                            "since": since
-                        }
+                            "since": since,
+                        },
                     }
                 else:
                     # Fallback to mock data if API fails
@@ -302,7 +318,7 @@ class MarketIntelligence:
                                     "language": topic.title(),
                                     "created_at": "2024-01-15T10:00:00Z",
                                     "updated_at": "2025-09-22T08:00:00Z",
-                                    "trending_score": 0.8
+                                    "trending_score": 0.8,
                                 },
                                 {
                                     "name": f"{topic}-framework",
@@ -314,13 +330,13 @@ class MarketIntelligence:
                                     "language": topic.title(),
                                     "created_at": "2024-03-20T14:30:00Z",
                                     "updated_at": "2025-09-21T16:45:00Z",
-                                    "trending_score": 0.6
-                                }
+                                    "trending_score": 0.6,
+                                },
                             ],
                             "total": 2,
                             "topic": topic,
-                            "since": since
-                        }
+                            "since": since,
+                        },
                     }
 
         except Exception as e:
@@ -328,7 +344,7 @@ class MarketIntelligence:
             return {
                 "success": False,
                 "error": f"GitHub trending search failed: {str(e)}",
-                "data": None
+                "data": None,
             }
 
     async def search_hackernews_top(self, hours: int = 12) -> dict[str, Any]:
@@ -338,6 +354,7 @@ class MarketIntelligence:
 
             # Calculate timestamp for N hours ago
             from datetime import datetime, timedelta
+
             cutoff_time = datetime.now() - timedelta(hours=hours)
             timestamp = int(cutoff_time.timestamp())
 
@@ -352,23 +369,25 @@ class MarketIntelligence:
                     formatted_stories = []
 
                     for story in hits:
-                        formatted_stories.append({
-                            "title": story.get("title", ""),
-                            "url": story.get("url", ""),
-                            "score": story.get("points", 0),
-                            "comments": story.get("num_comments", 0),
-                            "author": story.get("author", ""),
-                            "created_at": story.get("created_at", ""),
-                            "objectID": story.get("objectID", "")
-                        })
+                        formatted_stories.append(
+                            {
+                                "title": story.get("title", ""),
+                                "url": story.get("url", ""),
+                                "score": story.get("points", 0),
+                                "comments": story.get("num_comments", 0),
+                                "author": story.get("author", ""),
+                                "created_at": story.get("created_at", ""),
+                                "objectID": story.get("objectID", ""),
+                            }
+                        )
 
                     return {
                         "success": True,
                         "data": {
                             "stories": formatted_stories,
                             "total": len(formatted_stories),
-                            "hours": hours
-                        }
+                            "hours": hours,
+                        },
                     }
                 else:
                     # Fallback to mock data
@@ -384,7 +403,7 @@ class MarketIntelligence:
                                     "comments": 89,
                                     "author": "techdev",
                                     "created_at": "2025-09-22T10:00:00Z",
-                                    "objectID": "12345678"
+                                    "objectID": "12345678",
                                 },
                                 {
                                     "title": "Machine Learning Breakthrough",
@@ -393,12 +412,12 @@ class MarketIntelligence:
                                     "comments": 67,
                                     "author": "mlresearcher",
                                     "created_at": "2025-09-22T09:30:00Z",
-                                    "objectID": "12345679"
-                                }
+                                    "objectID": "12345679",
+                                },
                             ],
                             "total": 2,
-                            "hours": hours
-                        }
+                            "hours": hours,
+                        },
                     }
 
         except Exception as e:
@@ -406,7 +425,7 @@ class MarketIntelligence:
             return {
                 "success": False,
                 "error": f"Hacker News top search failed: {str(e)}",
-                "data": None
+                "data": None,
             }
 
     async def get_hackernews_trending(self) -> dict[str, Any]:
@@ -424,21 +443,23 @@ class MarketIntelligence:
                     formatted_stories = []
 
                     for story in hits:
-                        formatted_stories.append({
-                            "title": story.get("title", ""),
-                            "url": story.get("url", ""),
-                            "points": story.get("points", 0),
-                            "num_comments": story.get("num_comments", 0),
-                            "author": story.get("author", ""),
-                            "created_at": story.get("created_at", "")
-                        })
+                        formatted_stories.append(
+                            {
+                                "title": story.get("title", ""),
+                                "url": story.get("url", ""),
+                                "points": story.get("points", 0),
+                                "num_comments": story.get("num_comments", 0),
+                                "author": story.get("author", ""),
+                                "created_at": story.get("created_at", ""),
+                            }
+                        )
 
                     return {
                         "success": True,
                         "data": {
                             "stories": formatted_stories,
-                            "total": len(formatted_stories)
-                        }
+                            "total": len(formatted_stories),
+                        },
                     }
                 else:
                     return response
@@ -448,10 +469,12 @@ class MarketIntelligence:
             return {
                 "success": False,
                 "error": f"Hacker News trending failed: {str(e)}",
-                "data": None
+                "data": None,
             }
 
-    async def process_web_request(self, request_type: str, query: str, **kwargs) -> dict[str, Any]:
+    async def process_web_request(
+        self, request_type: str, query: str, **kwargs
+    ) -> dict[str, Any]:
         """Xử lý web request dựa trên loại"""
         try:
             if request_type == "news":
@@ -469,7 +492,7 @@ class MarketIntelligence:
                 return {
                     "success": False,
                     "error": f"Unknown request type: {request_type}",
-                    "data": None
+                    "data": None,
                 }
 
         except Exception as e:
@@ -477,15 +500,18 @@ class MarketIntelligence:
             return {
                 "success": False,
                 "error": f"Web request failed: {str(e)}",
-                "data": None
+                "data": None,
             }
+
 
 # Global instance
 market_intel = MarketIntelligence()
 
+
 async def handle_web_request(request_type: str, query: str, **kwargs) -> dict[str, Any]:
     """Convenience function để xử lý web request"""
     return await market_intel.process_web_request(request_type, query, **kwargs)
+
 
 if __name__ == "__main__":
     # Test market intelligence
@@ -496,21 +522,21 @@ if __name__ == "__main__":
         print("\n📰 Testing news search...")
         news_result = await market_intel.search_news("AI technology", "en")
         print(f"News result: {news_result['success']}")
-        if news_result['success']:
+        if news_result["success"]:
             print(f"Found {len(news_result['data']['articles'])} articles")
 
         # Test GitHub trending
         print("\n🐙 Testing GitHub trending...")
         github_result = await market_intel.get_github_trending("python")
         print(f"GitHub result: {github_result['success']}")
-        if github_result['success']:
+        if github_result["success"]:
             print(f"Found {len(github_result['data']['repositories'])} repositories")
 
         # Test Hacker News
         print("\n🔥 Testing Hacker News...")
         hn_result = await market_intel.get_hackernews_trending()
         print(f"HN result: {hn_result['success']}")
-        if hn_result['success']:
+        if hn_result["success"]:
             print(f"Found {len(hn_result['data']['stories'])} stories")
 
     asyncio.run(test_market_intel())

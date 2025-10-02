@@ -10,7 +10,9 @@ import time
 import pytest
 
 # Add agent_dev path to sys.path
-agent_dev_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'agent_dev', 'core')
+agent_dev_path = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "agent_dev", "core"
+)
 if agent_dev_path not in sys.path:
     sys.path.insert(0, agent_dev_path)
 
@@ -24,63 +26,64 @@ SCENARIOS = [
         "name": "Fix Simple Bug",
         "input": "Fix NullPointerException in user authentication",
         "expected": "code fixed, test pass",
-        "category": "bug_fix"
+        "category": "bug_fix",
     },
     {
         "name": "Basic Refactor",
         "input": "Refactor function with bad naming conventions",
         "expected": "improved naming, functionality preserved",
-        "category": "refactor"
+        "category": "refactor",
     },
     {
         "name": "Add Simple Feature",
         "input": "Add input validation to contact form",
         "expected": "feature implemented, tests pass",
-        "category": "feature"
+        "category": "feature",
     },
     {
         "name": "Security Fix",
         "input": "Fix SQL injection vulnerability in login",
         "expected": "vulnerability patched, security improved",
-        "category": "security"
+        "category": "security",
     },
     {
         "name": "Performance Optimization",
         "input": "Optimize database query performance",
         "expected": "performance improved, functionality preserved",
-        "category": "performance"
+        "category": "performance",
     },
     {
         "name": "Test Creation",
         "input": "Create unit tests for payment module",
         "expected": "comprehensive tests created",
-        "category": "testing"
+        "category": "testing",
     },
     {
         "name": "Documentation",
         "input": "Add API documentation for user endpoints",
         "expected": "documentation created and updated",
-        "category": "documentation"
+        "category": "documentation",
     },
     {
         "name": "Conflict Resolution",
         "input": "Resolve merge conflicts in main branch",
         "expected": "conflicts resolved, code merged",
-        "category": "conflict"
+        "category": "conflict",
     },
     {
         "name": "Code Review",
         "input": "Review code quality and suggest improvements",
         "expected": "review completed, suggestions provided",
-        "category": "review"
+        "category": "review",
     },
     {
         "name": "System Monitoring",
         "input": "Monitor system health and performance",
         "expected": "monitoring active, issues detected",
-        "category": "monitoring"
-    }
+        "category": "monitoring",
+    },
 ]
+
 
 class TestE2EScenarios:
     """Test end-to-end scenarios"""
@@ -89,7 +92,6 @@ class TestE2EScenarios:
     def test_e2e_scenario(self, scenario):
         """Test individual E2E scenario"""
         try:
-
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDev(str(temp_project))
 
@@ -102,10 +104,14 @@ class TestE2EScenarios:
 
             # Assertions
             assert result is not None, f"Scenario {scenario['name']} returned None"
-            assert "✅" in result or "success" in result.lower(), f"Scenario {scenario['name']} failed: {result}"
+            assert (
+                "✅" in result or "success" in result.lower()
+            ), f"Scenario {scenario['name']} failed: {result}"
 
             # Performance check (should complete within 5 seconds)
-            assert execution_time <= 5, f"Scenario {scenario['name']} took {execution_time}s, expected ≤ 5s"
+            assert (
+                execution_time <= 5
+            ), f"Scenario {scenario['name']} took {execution_time}s, expected ≤ 5s"
 
             # Log scenario result
             print(f"\n✅ E2E Scenario: {scenario['name']}")
@@ -124,7 +130,6 @@ class TestE2EScenarios:
         bug_scenarios = [s for s in SCENARIOS if s["category"] == "bug_fix"]
 
         try:
-
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDev(str(temp_project))
 
@@ -148,7 +153,6 @@ class TestE2EScenarios:
         security_scenarios = [s for s in SCENARIOS if s["category"] == "security"]
 
         try:
-
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDev(str(temp_project))
 
@@ -169,10 +173,11 @@ class TestE2EScenarios:
 
     def test_feature_development_scenarios(self):
         """Test feature development scenarios"""
-        feature_scenarios = [s for s in SCENARIOS if s["category"] in ["feature", "refactor"]]
+        feature_scenarios = [
+            s for s in SCENARIOS if s["category"] in ["feature", "refactor"]
+        ]
 
         try:
-
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDev(str(temp_project))
 
@@ -194,7 +199,6 @@ class TestE2EScenarios:
     def test_complex_workflow(self):
         """Test complex multi-step workflow"""
         try:
-
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDev(str(temp_project))
 
@@ -203,7 +207,7 @@ class TestE2EScenarios:
                 "Plan implementation of user authentication system",
                 "Implement secure login functionality",
                 "Create comprehensive tests for authentication",
-                "Review code quality and security"
+                "Review code quality and security",
             ]
 
             results = []
@@ -224,7 +228,6 @@ class TestE2EScenarios:
     def test_error_recovery_scenarios(self):
         """Test error recovery scenarios"""
         try:
-
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDev(str(temp_project))
 
@@ -232,7 +235,7 @@ class TestE2EScenarios:
             error_scenarios = [
                 "Fix broken build after failed merge",
                 "Recover from database connection failure",
-                "Handle memory leak in production system"
+                "Handle memory leak in production system",
             ]
 
             results = []
@@ -245,12 +248,18 @@ class TestE2EScenarios:
             for result in results:
                 assert result is not None
                 # Should either succeed or provide helpful error message
-                assert "✅" in result or "success" in result.lower() or "❌" in result or "error" in result.lower()
+                assert (
+                    "✅" in result
+                    or "success" in result.lower()
+                    or "❌" in result
+                    or "error" in result.lower()
+                )
 
             TestFixtures.cleanup_temp_project(temp_project)
 
         except ImportError:
             pytest.skip("AgentDev not available")
+
 
 class TestRealWorldScenarios:
     """Test real-world scenarios"""
@@ -258,7 +267,6 @@ class TestRealWorldScenarios:
     def test_production_incident_response(self):
         """Test production incident response scenario"""
         try:
-
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDev(str(temp_project))
 
@@ -267,7 +275,7 @@ class TestRealWorldScenarios:
                 "Investigate production system outage",
                 "Identify root cause of performance degradation",
                 "Implement hotfix for critical bug",
-                "Monitor system recovery"
+                "Monitor system recovery",
             ]
 
             results = []
@@ -288,7 +296,6 @@ class TestRealWorldScenarios:
     def test_technical_debt_management(self):
         """Test technical debt management scenario"""
         try:
-
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDev(str(temp_project))
 
@@ -297,7 +304,7 @@ class TestRealWorldScenarios:
                 "Identify technical debt in codebase",
                 "Prioritize debt reduction tasks",
                 "Refactor legacy code modules",
-                "Update outdated dependencies"
+                "Update outdated dependencies",
             ]
 
             results = []

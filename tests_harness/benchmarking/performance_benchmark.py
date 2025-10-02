@@ -29,6 +29,7 @@ from evaluators.translation_eval import TranslationEval
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 class PerformanceBenchmark:
     """Benchmark để so sánh StillMe với baseline"""
 
@@ -53,8 +54,8 @@ class PerformanceBenchmark:
                 "ethical_core": False,
                 "translation": False,
                 "agentdev": False,
-                "dynamic_communication": False
-            }
+                "dynamic_communication": False,
+            },
         }
 
         # StillMe configuration
@@ -66,14 +67,16 @@ class PerformanceBenchmark:
                 "ethical_core": True,
                 "translation": True,
                 "agentdev": True,
-                "dynamic_communication": True
-            }
+                "dynamic_communication": True,
+            },
         }
 
-    def run_benchmark(self,
-                     test_cases: list[dict[str, Any]],
-                     stillme_responses: list[dict[str, Any]],
-                     baseline_responses: list[dict[str, Any]]) -> dict[str, Any]:
+    def run_benchmark(
+        self,
+        test_cases: list[dict[str, Any]],
+        stillme_responses: list[dict[str, Any]],
+        baseline_responses: list[dict[str, Any]],
+    ) -> dict[str, Any]:
         """
         Chạy benchmark so sánh StillMe vs Baseline
 
@@ -114,7 +117,9 @@ class PerformanceBenchmark:
             self.logger.error(f"❌ Performance benchmark failed: {e}")
             return {"error": str(e)}
 
-    def _evaluate_responses(self, responses: list[dict[str, Any]], model_name: str) -> dict[str, Any]:
+    def _evaluate_responses(
+        self, responses: list[dict[str, Any]], model_name: str
+    ) -> dict[str, Any]:
         """Đánh giá responses từ một model"""
         try:
             # Prepare data for evaluators
@@ -126,44 +131,54 @@ class PerformanceBenchmark:
 
             for response in responses:
                 # Persona evaluation data
-                persona_data.append({
-                    "response": response.get('response', ''),
-                    "user_input": response.get('user_input', ''),
-                    "user_preferences": response.get('user_preferences', {})
-                })
+                persona_data.append(
+                    {
+                        "response": response.get("response", ""),
+                        "user_input": response.get("user_input", ""),
+                        "user_preferences": response.get("user_preferences", {}),
+                    }
+                )
 
                 # Safety evaluation data
-                safety_data.append({
-                    "response": response.get('response', ''),
-                    "user_input": response.get('user_input', ''),
-                    "context": response.get('context', {})
-                })
+                safety_data.append(
+                    {
+                        "response": response.get("response", ""),
+                        "user_input": response.get("user_input", ""),
+                        "context": response.get("context", {}),
+                    }
+                )
 
                 # Translation evaluation data
-                translation_data.append({
-                    "response": response.get('response', ''),
-                    "user_input": response.get('user_input', ''),
-                    "expected_language": response.get('expected_language', 'vi'),
-                    "source_language": response.get('source_language', 'auto')
-                })
+                translation_data.append(
+                    {
+                        "response": response.get("response", ""),
+                        "user_input": response.get("user_input", ""),
+                        "expected_language": response.get("expected_language", "vi"),
+                        "source_language": response.get("source_language", "auto"),
+                    }
+                )
 
                 # Efficiency evaluation data
-                efficiency_data.append({
-                    "response": response.get('response', ''),
-                    "latency_ms": response.get('latency_ms', 0),
-                    "token_count": response.get('token_count', 0),
-                    "cost_estimate": response.get('cost_estimate', 0),
-                    "user_input": response.get('user_input', ''),
-                    "context": response.get('context', {})
-                })
+                efficiency_data.append(
+                    {
+                        "response": response.get("response", ""),
+                        "latency_ms": response.get("latency_ms", 0),
+                        "token_count": response.get("token_count", 0),
+                        "cost_estimate": response.get("cost_estimate", 0),
+                        "user_input": response.get("user_input", ""),
+                        "context": response.get("context", {}),
+                    }
+                )
 
                 # AgentDev evaluation data
-                agentdev_data.append({
-                    "response": response.get('response', ''),
-                    "user_input": response.get('user_input', ''),
-                    "context": response.get('context', {}),
-                    "performance_metrics": response.get('performance_metrics', {})
-                })
+                agentdev_data.append(
+                    {
+                        "response": response.get("response", ""),
+                        "user_input": response.get("user_input", ""),
+                        "context": response.get("context", {}),
+                        "performance_metrics": response.get("performance_metrics", {}),
+                    }
+                )
 
             # Run evaluations
             persona_scores = self.persona_eval.batch_evaluate(persona_data)
@@ -175,7 +190,9 @@ class PerformanceBenchmark:
             # Generate reports
             persona_report = self.persona_eval.generate_report(persona_scores)
             safety_report = self.safety_eval.generate_report(safety_scores)
-            translation_report = self.translation_eval.generate_report(translation_scores)
+            translation_report = self.translation_eval.generate_report(
+                translation_scores
+            )
             efficiency_report = self.efficiency_eval.generate_report(efficiency_scores)
             agentdev_report = self.agentdev_eval.generate_report(agentdev_scores)
 
@@ -191,16 +208,17 @@ class PerformanceBenchmark:
                     "safety": safety_report,
                     "translation": translation_report,
                     "efficiency": efficiency_report,
-                    "agentdev": agentdev_report
-                }
+                    "agentdev": agentdev_report,
+                },
             }
 
         except Exception as e:
             self.logger.error(f"Error evaluating responses: {e}")
             return {}
 
-    def _calculate_improvements(self, stillme_scores: dict[str, Any],
-                              baseline_scores: dict[str, Any]) -> dict[str, Any]:
+    def _calculate_improvements(
+        self, stillme_scores: dict[str, Any], baseline_scores: dict[str, Any]
+    ) -> dict[str, Any]:
         """Tính toán mức cải thiện"""
         try:
             improvements = {}
@@ -209,13 +227,19 @@ class PerformanceBenchmark:
             stillme_overall = self._calculate_overall_score(stillme_scores)
             baseline_overall = self._calculate_overall_score(baseline_scores)
 
-            overall_improvement = ((stillme_overall - baseline_overall) / baseline_overall * 100) if baseline_overall > 0 else 0
+            overall_improvement = (
+                ((stillme_overall - baseline_overall) / baseline_overall * 100)
+                if baseline_overall > 0
+                else 0
+            )
 
             improvements["overall"] = {
                 "stillme_score": stillme_overall,
                 "baseline_score": baseline_overall,
                 "improvement_percent": round(overall_improvement, 2),
-                "improvement_direction": "positive" if overall_improvement > 0 else "negative"
+                "improvement_direction": "positive"
+                if overall_improvement > 0
+                else "negative",
             }
 
             # Calculate category-specific improvements
@@ -226,7 +250,9 @@ class PerformanceBenchmark:
                 baseline_avg = self._get_average_score(baseline_scores, category)
 
                 if baseline_avg > 0:
-                    improvement_percent = ((stillme_avg - baseline_avg) / baseline_avg * 100)
+                    improvement_percent = (
+                        (stillme_avg - baseline_avg) / baseline_avg * 100
+                    )
                 else:
                     improvement_percent = 0
 
@@ -234,7 +260,9 @@ class PerformanceBenchmark:
                     "stillme_score": stillme_avg,
                     "baseline_score": baseline_avg,
                     "improvement_percent": round(improvement_percent, 2),
-                    "improvement_direction": "positive" if improvement_percent > 0 else "negative"
+                    "improvement_direction": "positive"
+                    if improvement_percent > 0
+                    else "negative",
                 }
 
             return improvements
@@ -246,22 +274,40 @@ class PerformanceBenchmark:
     def _calculate_overall_score(self, scores: dict[str, Any]) -> float:
         """Tính điểm tổng thể"""
         try:
-            reports = scores.get('reports', {})
+            reports = scores.get("reports", {})
 
             # Get average scores from reports
-            persona_avg = reports.get('persona', {}).get('average_scores', {}).get('overall', 0)
-            safety_avg = reports.get('safety', {}).get('average_scores', {}).get('overall_safety', 0)
-            translation_avg = reports.get('translation', {}).get('average_scores', {}).get('overall_translation', 0)
-            efficiency_avg = reports.get('efficiency', {}).get('average_scores', {}).get('overall_efficiency', 0)
-            agentdev_avg = reports.get('agentdev', {}).get('average_scores', {}).get('overall_agentdev', 0)
+            persona_avg = (
+                reports.get("persona", {}).get("average_scores", {}).get("overall", 0)
+            )
+            safety_avg = (
+                reports.get("safety", {})
+                .get("average_scores", {})
+                .get("overall_safety", 0)
+            )
+            translation_avg = (
+                reports.get("translation", {})
+                .get("average_scores", {})
+                .get("overall_translation", 0)
+            )
+            efficiency_avg = (
+                reports.get("efficiency", {})
+                .get("average_scores", {})
+                .get("overall_efficiency", 0)
+            )
+            agentdev_avg = (
+                reports.get("agentdev", {})
+                .get("average_scores", {})
+                .get("overall_agentdev", 0)
+            )
 
             # Calculate weighted average
             overall_score = (
-                persona_avg * 0.2 +
-                safety_avg * 0.2 +
-                translation_avg * 0.2 +
-                efficiency_avg * 0.2 +
-                agentdev_avg * 0.2
+                persona_avg * 0.2
+                + safety_avg * 0.2
+                + translation_avg * 0.2
+                + efficiency_avg * 0.2
+                + agentdev_avg * 0.2
             )
 
             return round(overall_score, 3)
@@ -273,20 +319,20 @@ class PerformanceBenchmark:
     def _get_average_score(self, scores: dict[str, Any], category: str) -> float:
         """Lấy điểm trung bình của một category"""
         try:
-            reports = scores.get('reports', {})
+            reports = scores.get("reports", {})
             category_report = reports.get(category, {})
-            average_scores = category_report.get('average_scores', {})
+            average_scores = category_report.get("average_scores", {})
 
             if category == "persona":
-                return average_scores.get('overall', 0)
+                return average_scores.get("overall", 0)
             elif category == "safety":
-                return average_scores.get('overall_safety', 0)
+                return average_scores.get("overall_safety", 0)
             elif category == "translation":
-                return average_scores.get('overall_translation', 0)
+                return average_scores.get("overall_translation", 0)
             elif category == "efficiency":
-                return average_scores.get('overall_efficiency', 0)
+                return average_scores.get("overall_efficiency", 0)
             elif category == "agentdev":
-                return average_scores.get('overall_agentdev', 0)
+                return average_scores.get("overall_agentdev", 0)
             else:
                 return 0.0
 
@@ -294,11 +340,13 @@ class PerformanceBenchmark:
             self.logger.error(f"Error getting average score for {category}: {e}")
             return 0.0
 
-    def _generate_benchmark_report(self,
-                                 test_cases: list[dict[str, Any]],
-                                 stillme_scores: dict[str, Any],
-                                 baseline_scores: dict[str, Any],
-                                 improvements: dict[str, Any]) -> dict[str, Any]:
+    def _generate_benchmark_report(
+        self,
+        test_cases: list[dict[str, Any]],
+        stillme_scores: dict[str, Any],
+        baseline_scores: dict[str, Any],
+        improvements: dict[str, Any],
+    ) -> dict[str, Any]:
         """Tạo báo cáo benchmark"""
         try:
             report = {
@@ -306,17 +354,23 @@ class PerformanceBenchmark:
                 "benchmark_info": {
                     "total_test_cases": len(test_cases),
                     "stillme_config": self.stillme_config,
-                    "baseline_config": self.baseline_config
+                    "baseline_config": self.baseline_config,
                 },
                 "stillme_results": stillme_scores,
                 "baseline_results": baseline_scores,
                 "improvements": improvements,
                 "summary": {
-                    "overall_improvement": improvements.get('overall', {}).get('improvement_percent', 0),
-                    "best_improvement_category": self._get_best_improvement_category(improvements),
-                    "worst_improvement_category": self._get_worst_improvement_category(improvements),
-                    "recommendations": self._generate_recommendations(improvements)
-                }
+                    "overall_improvement": improvements.get("overall", {}).get(
+                        "improvement_percent", 0
+                    ),
+                    "best_improvement_category": self._get_best_improvement_category(
+                        improvements
+                    ),
+                    "worst_improvement_category": self._get_worst_improvement_category(
+                        improvements
+                    ),
+                    "recommendations": self._generate_recommendations(improvements),
+                },
             }
 
             return report
@@ -329,11 +383,13 @@ class PerformanceBenchmark:
         """Lấy category có cải thiện tốt nhất"""
         try:
             best_category = "overall"
-            best_improvement = improvements.get('overall', {}).get('improvement_percent', 0)
+            best_improvement = improvements.get("overall", {}).get(
+                "improvement_percent", 0
+            )
 
             for category, data in improvements.items():
                 if category != "overall":
-                    improvement = data.get('improvement_percent', 0)
+                    improvement = data.get("improvement_percent", 0)
                     if improvement > best_improvement:
                         best_improvement = improvement
                         best_category = category
@@ -348,11 +404,13 @@ class PerformanceBenchmark:
         """Lấy category có cải thiện kém nhất"""
         try:
             worst_category = "overall"
-            worst_improvement = improvements.get('overall', {}).get('improvement_percent', 0)
+            worst_improvement = improvements.get("overall", {}).get(
+                "improvement_percent", 0
+            )
 
             for category, data in improvements.items():
                 if category != "overall":
-                    improvement = data.get('improvement_percent', 0)
+                    improvement = data.get("improvement_percent", 0)
                     if improvement < worst_improvement:
                         worst_improvement = improvement
                         worst_category = category
@@ -370,29 +428,49 @@ class PerformanceBenchmark:
 
             for category, data in improvements.items():
                 if category != "overall":
-                    improvement_percent = data.get('improvement_percent', 0)
+                    improvement_percent = data.get("improvement_percent", 0)
 
                     if improvement_percent > 20:
-                        recommendations.append(f"🎉 {category.title()}: Excellent improvement (+{improvement_percent}%)")
+                        recommendations.append(
+                            f"🎉 {category.title()}: Excellent improvement (+{improvement_percent}%)"
+                        )
                     elif improvement_percent > 10:
-                        recommendations.append(f"👍 {category.title()}: Good improvement (+{improvement_percent}%)")
+                        recommendations.append(
+                            f"👍 {category.title()}: Good improvement (+{improvement_percent}%)"
+                        )
                     elif improvement_percent > 0:
-                        recommendations.append(f"📈 {category.title()}: Minor improvement (+{improvement_percent}%)")
+                        recommendations.append(
+                            f"📈 {category.title()}: Minor improvement (+{improvement_percent}%)"
+                        )
                     elif improvement_percent > -10:
-                        recommendations.append(f"⚠️ {category.title()}: Needs attention ({improvement_percent}%)")
+                        recommendations.append(
+                            f"⚠️ {category.title()}: Needs attention ({improvement_percent}%)"
+                        )
                     else:
-                        recommendations.append(f"🚨 {category.title()}: Critical issue ({improvement_percent}%)")
+                        recommendations.append(
+                            f"🚨 {category.title()}: Critical issue ({improvement_percent}%)"
+                        )
 
             # Overall recommendation
-            overall_improvement = improvements.get('overall', {}).get('improvement_percent', 0)
+            overall_improvement = improvements.get("overall", {}).get(
+                "improvement_percent", 0
+            )
             if overall_improvement > 15:
-                recommendations.append("🏆 Overall: StillMe significantly outperforms baseline!")
+                recommendations.append(
+                    "🏆 Overall: StillMe significantly outperforms baseline!"
+                )
             elif overall_improvement > 5:
-                recommendations.append("✅ Overall: StillMe shows good improvement over baseline")
+                recommendations.append(
+                    "✅ Overall: StillMe shows good improvement over baseline"
+                )
             elif overall_improvement > 0:
-                recommendations.append("📊 Overall: StillMe shows minor improvement over baseline")
+                recommendations.append(
+                    "📊 Overall: StillMe shows minor improvement over baseline"
+                )
             else:
-                recommendations.append("🔧 Overall: StillMe needs optimization to outperform baseline")
+                recommendations.append(
+                    "🔧 Overall: StillMe needs optimization to outperform baseline"
+                )
 
             return recommendations
 
@@ -406,7 +484,7 @@ class PerformanceBenchmark:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             file_path = self.output_dir / f"benchmark_report_{timestamp}.json"
 
-            with open(file_path, 'w', encoding='utf-8') as f:
+            with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(benchmark_report, f, indent=2, ensure_ascii=False)
 
             self.logger.info(f"✅ Benchmark results saved: {file_path}")
@@ -416,6 +494,7 @@ class PerformanceBenchmark:
             self.logger.error(f"Error saving benchmark results: {e}")
             return ""
 
+
 # Example usage
 if __name__ == "__main__":
     # Test Performance Benchmark
@@ -424,7 +503,7 @@ if __name__ == "__main__":
     # Mock test data
     test_cases = [
         {"id": "test_1", "user_input": "Hello StillMe", "category": "greeting"},
-        {"id": "test_2", "user_input": "How are you?", "category": "question"}
+        {"id": "test_2", "user_input": "How are you?", "category": "question"},
     ]
 
     stillme_responses = [
@@ -433,15 +512,15 @@ if __name__ == "__main__":
             "user_input": "Hello StillMe",
             "latency_ms": 500,
             "token_count": 30,
-            "cost_estimate": 0.001
+            "cost_estimate": 0.001,
         },
         {
             "response": "Tôi đang hoạt động tốt, cảm ơn bạn!",
             "user_input": "How are you?",
             "latency_ms": 600,
             "token_count": 25,
-            "cost_estimate": 0.0008
-        }
+            "cost_estimate": 0.0008,
+        },
     ]
 
     baseline_responses = [
@@ -450,19 +529,19 @@ if __name__ == "__main__":
             "user_input": "Hello StillMe",
             "latency_ms": 800,
             "token_count": 35,
-            "cost_estimate": 0.0015
+            "cost_estimate": 0.0015,
         },
         {
             "response": "I'm doing well, thank you for asking!",
             "user_input": "How are you?",
             "latency_ms": 900,
             "token_count": 30,
-            "cost_estimate": 0.0012
-        }
+            "cost_estimate": 0.0012,
+        },
     ]
 
     # Run benchmark
     results = benchmark.run_benchmark(test_cases, stillme_responses, baseline_responses)
 
     print("📊 Performance Benchmark Test Results:")
-    print(json.dumps(results.get('summary', {}), indent=2, ensure_ascii=False))
+    print(json.dumps(results.get("summary", {}), indent=2, ensure_ascii=False))

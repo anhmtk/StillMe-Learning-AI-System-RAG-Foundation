@@ -32,6 +32,7 @@ from typing import Any
 # Import với fallback để tránh lỗi
 try:
     import httpx
+
     HTTPX_AVAILABLE = True
 except ImportError:
     print("⚠️ httpx not available. Install with: pip install httpx")
@@ -40,6 +41,7 @@ except ImportError:
 
 try:
     import numpy as np
+
     NUMPY_AVAILABLE = True
 except ImportError:
     print("⚠️ numpy not available. Install with: pip install numpy")
@@ -48,6 +50,7 @@ except ImportError:
 
 try:
     from dotenv import load_dotenv
+
     load_dotenv()
     DOTENV_AVAILABLE = True
 except ImportError:
@@ -66,11 +69,13 @@ logging.basicConfig(
 CONFIG_PATH = "config/nl_resources.json"
 USER_PROFILES_DB_PATH = "data/user_profiles.json"
 
+
 # Định nghĩa các Enum (GIỮ NGUYÊN)
 class Sentiment(Enum):
     POSITIVE = "tích cực"
     NEGATIVE = "tiêu cực"
     NEUTRAL = "trung tính"
+
 
 class Tone(Enum):
     FORMAL = "trang trọng"
@@ -78,14 +83,17 @@ class Tone(Enum):
     PROFESSIONAL = "chuyên nghiệp"
     FRIENDLY = "gần gũi"
 
+
 class OpenRouterModel(Enum):
     GPT_3_5_TURBO = "openai/gpt-3.5-turbo"
     GPT_4 = "openai/gpt-4"
     CLAUDE_3_SONNET = "anthropic/claude-3-sonnet"
 
+
 @dataclass
 class StyleFeatures:
     """Đặc điểm phong cách giao tiếp (GIỮ NGUYÊN CẤU TRÚC)"""
+
     formality: float = 0.5  # 0.0 = casual, 1.0 = formal
     humor_level: float = 0.3  # 0.0 = serious, 1.0 = very humorous
     conciseness: float = 0.7  # 0.0 = verbose, 1.0 = concise
@@ -95,9 +103,11 @@ class StyleFeatures:
     preferred_language: str = "vi"  # "vi" hoặc "en"
     emoji_usage: float = 0.2  # 0.0 = no emoji, 1.0 = lots of emoji
 
+
 @dataclass
 class UserProfile:
     """Hồ sơ người dùng (GIỮ NGUYÊN CẤU TRÚC)"""
+
     user_id: str
     name: str = ""
     current_style: StyleFeatures = field(default_factory=StyleFeatures)
@@ -105,6 +115,7 @@ class UserProfile:
     interaction_count: int = 0
     last_updated: float = field(default_factory=time.time)
     preferences: dict[str, Any] = field(default_factory=dict)
+
 
 class OpenRouterClient:
     """Client để gọi OpenRouter API (GIỮ NGUYÊN CHỨC NĂNG)"""
@@ -136,7 +147,9 @@ class OpenRouterClient:
 
         self.base_url = base_url
         self.model = model
-        logging.info(f"OpenRouterClient: Khởi tạo với base URL {base_url} và model {model.value}")
+        logging.info(
+            f"OpenRouterClient: Khởi tạo với base URL {base_url} và model {model.value}"
+        )
 
     async def generate_response(
         self,
@@ -170,6 +183,7 @@ class OpenRouterClient:
         if self.client:
             await self.client.aclose()
 
+
 class PersonaMorph:
     """Hệ thống thay đổi nhân cách AI (GIỮ NGUYÊN BẢN CHẤT)"""
 
@@ -195,7 +209,7 @@ class PersonaMorph:
         """Tải hồ sơ người dùng (GIỮ NGUYÊN)"""
         try:
             if os.path.exists(USER_PROFILES_DB_PATH):
-                with open(USER_PROFILES_DB_PATH, encoding='utf-8') as f:
+                with open(USER_PROFILES_DB_PATH, encoding="utf-8") as f:
                     data = json.load(f)
                     for user_id, profile_data in data.items():
                         self.profiles[user_id] = UserProfile(**profile_data)
@@ -243,7 +257,7 @@ class PersonaMorph:
                     "preferences": profile.preferences,
                 }
 
-            with open(USER_PROFILES_DB_PATH, 'w', encoding='utf-8') as f:
+            with open(USER_PROFILES_DB_PATH, "w", encoding="utf-8") as f:
                 json.dump(data, f, ensure_ascii=False, indent=2)
             logging.info("Đã lưu hồ sơ người dùng")
         except Exception as e:
@@ -306,7 +320,9 @@ class PersonaMorph:
             preferred_language = "en"
 
         # Emoji usage
-        emoji_count = sum(1 for char in text if ord(char) > 127 and len(char.encode('utf-8')) > 1)
+        emoji_count = sum(
+            1 for char in text if ord(char) > 127 and len(char.encode("utf-8")) > 1
+        )
         emoji_usage = min(emoji_count / len(text) * 10, 1.0) if text else 0.0
 
         return StyleFeatures(
@@ -328,7 +344,9 @@ class PersonaMorph:
         profile.interaction_count += 1
         profile.last_updated = time.time()
         profile.style_history.append(analyzed_style)
-        profile.style_history = profile.style_history[-10:]  # Giới hạn 10 tương tác gần nhất
+        profile.style_history = profile.style_history[
+            -10:
+        ]  # Giới hạn 10 tương tác gần nhất
 
         num_recent_styles = min(5, len(profile.style_history))
         if num_recent_styles == 0:
@@ -342,7 +360,10 @@ class PersonaMorph:
             weights /= weights.sum()
         else:
             # Fallback: simple linear weights
-            weights = [0.1 + (i * 0.9 / (num_recent_styles - 1)) for i in range(num_recent_styles)]
+            weights = [
+                0.1 + (i * 0.9 / (num_recent_styles - 1))
+                for i in range(num_recent_styles)
+            ]
             total_weight = sum(weights)
             weights = [w / total_weight for w in weights]
 
@@ -353,7 +374,9 @@ class PersonaMorph:
             new_formality = np.dot([s.formality for s in recent_styles], weights)
             new_humor_level = np.dot([s.humor_level for s in recent_styles], weights)
             new_conciseness = np.dot([s.conciseness for s in recent_styles], weights)
-            new_vocab_complexity = np.dot([s.vocabulary_complexity for s in recent_styles], weights)
+            new_vocab_complexity = np.dot(
+                [s.vocabulary_complexity for s in recent_styles], weights
+            )
         else:
             # Fallback: manual weighted average
             formality_values = [s.formality for s in recent_styles]
@@ -468,5 +491,14 @@ Câu hỏi: {base_prompt}"""
             "last_updated": profile.last_updated,
         }
 
+
 # Export chính
-__all__ = ["PersonaMorph", "StyleFeatures", "UserProfile", "OpenRouterClient", "Sentiment", "Tone", "OpenRouterModel"]
+__all__ = [
+    "PersonaMorph",
+    "StyleFeatures",
+    "UserProfile",
+    "OpenRouterClient",
+    "Sentiment",
+    "Tone",
+    "OpenRouterModel",
+]

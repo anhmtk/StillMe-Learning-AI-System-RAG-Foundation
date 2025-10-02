@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any
 
 # Add stillme_core to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 try:
     from stillme_core.modules.api_provider_manager import UnifiedAPIManager
@@ -23,9 +23,11 @@ except ImportError:
     print("Warning: UnifiedAPIManager not available, using mock")
     UnifiedAPIManager = None
 
+
 @dataclass
 class SeedConfig:
     """Cấu hình cho seed generation"""
+
     output_file: str
     num_seeds: int = 1000
     categories: list[str] = None
@@ -35,9 +37,21 @@ class SeedConfig:
     def __post_init__(self):
         if self.categories is None:
             self.categories = [
-                "greeting", "question", "request", "gratitude", "emotion",
-                "coding", "technical", "education", "career", "personal",
-                "business", "technology", "lifestyle", "health", "travel"
+                "greeting",
+                "question",
+                "request",
+                "gratitude",
+                "emotion",
+                "coding",
+                "technical",
+                "education",
+                "career",
+                "personal",
+                "business",
+                "technology",
+                "lifestyle",
+                "health",
+                "travel",
             ]
 
         if self.languages is None:
@@ -46,14 +60,17 @@ class SeedConfig:
         if self.models is None:
             self.models = ["gpt-3.5-turbo", "gpt-4", "claude-3-sonnet", "gemini-pro"]
 
+
 @dataclass
 class SeedItem:
     """Một seed item"""
+
     text: str
     language: str
     category: str
     type: str
     metadata: dict[str, Any] = None
+
 
 class SeedGenerator:
     """Generator để tạo seed data từ AI public APIs"""
@@ -72,7 +89,9 @@ class SeedGenerator:
         else:
             self.api_manager = None
 
-    def _create_generation_prompt(self, category: str, language: str, count: int) -> str:
+    def _create_generation_prompt(
+        self, category: str, language: str, count: int
+    ) -> str:
         """Tạo prompt để sinh seed data"""
 
         language_names = {
@@ -80,7 +99,7 @@ class SeedGenerator:
             "en": "English",
             "ja": "Japanese",
             "ko": "Korean",
-            "zh": "Chinese"
+            "zh": "Chinese",
         }
 
         category_descriptions = {
@@ -98,7 +117,7 @@ class SeedGenerator:
             "technology": "công nghệ và AI",
             "lifestyle": "lối sống và sở thích",
             "health": "sức khỏe và thể thao",
-            "travel": "du lịch và khám phá"
+            "travel": "du lịch và khám phá",
         }
 
         lang_name = language_names.get(language, language)
@@ -124,20 +143,27 @@ Bắt đầu:"""
 
         return prompt
 
-    async def _generate_seeds_for_category(self, category: str, language: str, count: int) -> list[SeedItem]:
+    async def _generate_seeds_for_category(
+        self, category: str, language: str, count: int
+    ) -> list[SeedItem]:
         """Sinh seeds cho một category và language cụ thể"""
 
         if not self.api_manager:
             # Mock generation for testing
             mock_seeds = []
             for i in range(count):
-                mock_seeds.append(SeedItem(
-                    text=f"Mock {category} sentence {i+1} in {language}",
-                    language=language,
-                    category=category,
-                    type="mock",
-                    metadata={"generated_by": "mock", "timestamp": datetime.now().isoformat()}
-                ))
+                mock_seeds.append(
+                    SeedItem(
+                        text=f"Mock {category} sentence {i+1} in {language}",
+                        language=language,
+                        category=category,
+                        type="mock",
+                        metadata={
+                            "generated_by": "mock",
+                            "timestamp": datetime.now().isoformat(),
+                        },
+                    )
+                )
             return mock_seeds
 
         try:
@@ -148,51 +174,57 @@ Bắt đầu:"""
             model = "gpt-3.5-turbo"  # Default model
 
             # Generate response
-            response = self.api_manager.get_response(
-                prompt=prompt,
-                model=model
-            )
+            response = self.api_manager.get_response(prompt=prompt, model=model)
 
             # Parse response
             seeds = []
-            lines = response.strip().split('\n')
+            lines = response.strip().split("\n")
 
             for line in lines:
                 line = line.strip()
-                if line and not line.startswith('#'):
+                if line and not line.startswith("#"):
                     # Remove numbering if present
-                    if line.startswith(('1.', '2.', '3.', '4.', '5.', '-', '*')):
-                        line = line.split('.', 1)[-1].strip()
-                        line = line.lstrip('-* ').strip()
+                    if line.startswith(("1.", "2.", "3.", "4.", "5.", "-", "*")):
+                        line = line.split(".", 1)[-1].strip()
+                        line = line.lstrip("-* ").strip()
 
                     if line and len(line) > 3:  # Minimum length check
-                        seeds.append(SeedItem(
-                            text=line,
-                            language=language,
-                            category=category,
-                            type="ai_generated",
-                            metadata={
-                                "generated_by": model,
-                                "timestamp": datetime.now().isoformat(),
-                                "prompt_category": category,
-                                "prompt_language": language
-                            }
-                        ))
+                        seeds.append(
+                            SeedItem(
+                                text=line,
+                                language=language,
+                                category=category,
+                                type="ai_generated",
+                                metadata={
+                                    "generated_by": model,
+                                    "timestamp": datetime.now().isoformat(),
+                                    "prompt_category": category,
+                                    "prompt_language": language,
+                                },
+                            )
+                        )
 
             # Ensure we have enough seeds
             while len(seeds) < count:
-                seeds.append(SeedItem(
-                    text=f"Generated {category} sentence {len(seeds)+1} in {language}",
-                    language=language,
-                    category=category,
-                    type="fallback",
-                    metadata={"generated_by": "fallback", "timestamp": datetime.now().isoformat()}
-                ))
+                seeds.append(
+                    SeedItem(
+                        text=f"Generated {category} sentence {len(seeds)+1} in {language}",
+                        language=language,
+                        category=category,
+                        type="fallback",
+                        metadata={
+                            "generated_by": "fallback",
+                            "timestamp": datetime.now().isoformat(),
+                        },
+                    )
+                )
 
             return seeds[:count]
 
         except Exception as e:
-            self.logger.error(f"Failed to generate seeds for {category}/{language}: {e}")
+            self.logger.error(
+                f"Failed to generate seeds for {category}/{language}: {e}"
+            )
             # Return fallback seeds
             return [
                 SeedItem(
@@ -200,7 +232,7 @@ Bắt đầu:"""
                     language=language,
                     category=category,
                     type="error_fallback",
-                    metadata={"error": str(e), "timestamp": datetime.now().isoformat()}
+                    metadata={"error": str(e), "timestamp": datetime.now().isoformat()},
                 )
             ]
 
@@ -208,12 +240,16 @@ Bắt đầu:"""
         """Sinh tất cả seed data"""
 
         all_seeds = []
-        seeds_per_combination = self.config.num_seeds // (len(self.config.categories) * len(self.config.languages))
+        seeds_per_combination = self.config.num_seeds // (
+            len(self.config.categories) * len(self.config.languages)
+        )
 
         if seeds_per_combination < 1:
             seeds_per_combination = 1
 
-        self.logger.info(f"Generating {seeds_per_combination} seeds per category/language combination")
+        self.logger.info(
+            f"Generating {seeds_per_combination} seeds per category/language combination"
+        )
 
         # Generate seeds for each category/language combination
         for category in self.config.categories:
@@ -227,8 +263,9 @@ Bắt đầu:"""
 
         # Shuffle and limit to exact number
         import random
+
         random.shuffle(all_seeds)
-        all_seeds = all_seeds[:self.config.num_seeds]
+        all_seeds = all_seeds[: self.config.num_seeds]
 
         self.logger.info(f"Generated {len(all_seeds)} total seeds")
         return all_seeds
@@ -239,16 +276,16 @@ Bắt đầu:"""
         output_path = Path(self.config.output_file)
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             for seed in seeds:
                 seed_data = {
                     "text": seed.text,
                     "language": seed.language,
                     "category": seed.category,
                     "type": seed.type,
-                    "metadata": seed.metadata or {}
+                    "metadata": seed.metadata or {},
                 }
-                f.write(json.dumps(seed_data, ensure_ascii=False) + '\n')
+                f.write(json.dumps(seed_data, ensure_ascii=False) + "\n")
 
         self.logger.info(f"Saved {len(seeds)} seeds to {output_path}")
 
@@ -258,21 +295,26 @@ Bắt đầu:"""
             "by_language": {},
             "by_category": {},
             "by_type": {},
-            "generation_time": datetime.now().isoformat()
+            "generation_time": datetime.now().isoformat(),
         }
 
         for seed in seeds:
-            stats["by_language"][seed.language] = stats["by_language"].get(seed.language, 0) + 1
-            stats["by_category"][seed.category] = stats["by_category"].get(seed.category, 0) + 1
+            stats["by_language"][seed.language] = (
+                stats["by_language"].get(seed.language, 0) + 1
+            )
+            stats["by_category"][seed.category] = (
+                stats["by_category"].get(seed.category, 0) + 1
+            )
             stats["by_type"][seed.type] = stats["by_type"].get(seed.type, 0) + 1
 
         # Save statistics
-        stats_file = output_path.with_suffix('.stats.json')
-        with open(stats_file, 'w', encoding='utf-8') as f:
+        stats_file = output_path.with_suffix(".stats.json")
+        with open(stats_file, "w", encoding="utf-8") as f:
             json.dump(stats, f, ensure_ascii=False, indent=2)
 
         self.logger.info(f"Saved statistics to {stats_file}")
         return stats
+
 
 async def main():
     """Main function"""
@@ -280,7 +322,7 @@ async def main():
     # Setup logging
     logging.basicConfig(
         level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     )
 
     logger = logging.getLogger(__name__)
@@ -290,9 +332,17 @@ async def main():
     config = SeedConfig(
         output_file="tests_harness/datasets/seed/generated_seeds.jsonl",
         num_seeds=1000,
-        categories=["greeting", "question", "request", "gratitude", "emotion", "coding", "technical"],
+        categories=[
+            "greeting",
+            "question",
+            "request",
+            "gratitude",
+            "emotion",
+            "coding",
+            "technical",
+        ],
         languages=["vi", "en", "ja", "ko"],
-        models=["gpt-3.5-turbo", "gpt-4"]
+        models=["gpt-3.5-turbo", "gpt-4"],
     )
 
     # Generate seeds
@@ -303,25 +353,26 @@ async def main():
     stats = generator.save_seeds(seeds)
 
     # Print results
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("SEED GENERATION RESULTS")
-    print("="*60)
+    print("=" * 60)
     print(f"Total Seeds Generated: {stats['total_seeds']}")
     print(f"Output File: {config.output_file}")
 
     print("\nBy Language:")
-    for lang, count in stats['by_language'].items():
+    for lang, count in stats["by_language"].items():
         print(f"  {lang}: {count}")
 
     print("\nBy Category:")
-    for cat, count in stats['by_category'].items():
+    for cat, count in stats["by_category"].items():
         print(f"  {cat}: {count}")
 
     print("\nBy Type:")
-    for type_name, count in stats['by_type'].items():
+    for type_name, count in stats["by_type"].items():
         print(f"  {type_name}: {count}")
 
-    print("="*60)
+    print("=" * 60)
+
 
 if __name__ == "__main__":
     asyncio.run(main())

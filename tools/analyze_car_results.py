@@ -12,6 +12,7 @@ from pathlib import Path
 @dataclass
 class TestMetrics:
     """Test metrics for a specific RPS level"""
+
     rps_level: int
     duration: str
     total_requests: int
@@ -22,6 +23,7 @@ class TestMetrics:
     p95_response_time: float
     p99_response_time: float
     actual_rps: float
+
 
 class CARResultsAnalyzer:
     """Analyze K6 CAR test results"""
@@ -47,39 +49,45 @@ class CARResultsAnalyzer:
         metrics = []
 
         # Extract overall metrics
-        if 'metrics' in self.summary_data:
-            http_reqs = self.summary_data['metrics'].get('http_reqs', {})
-            http_req_duration = self.summary_data['metrics'].get('http_req_duration', {})
-            http_req_failed = self.summary_data['metrics'].get('http_req_failed', {})
+        if "metrics" in self.summary_data:
+            http_reqs = self.summary_data["metrics"].get("http_reqs", {})
+            http_req_duration = self.summary_data["metrics"].get(
+                "http_req_duration", {}
+            )
+            http_req_failed = self.summary_data["metrics"].get("http_req_failed", {})
 
             # Calculate overall metrics
-            total_requests = http_reqs.get('count', 0)
-            failed_requests = int(total_requests * http_req_failed.get('rate', 0))
+            total_requests = http_reqs.get("count", 0)
+            failed_requests = int(total_requests * http_req_failed.get("rate", 0))
             successful_requests = total_requests - failed_requests
-            error_rate = http_req_failed.get('rate', 0) * 100
-            avg_response_time = http_req_duration.get('avg', 0)
-            p95_response_time = http_req_duration.get('p(95)', 0)
-            p99_response_time = http_req_duration.get('p(99)', 0)
-            actual_rps = http_reqs.get('rate', 0)
+            error_rate = http_req_failed.get("rate", 0) * 100
+            avg_response_time = http_req_duration.get("avg", 0)
+            p95_response_time = http_req_duration.get("p(95)", 0)
+            p99_response_time = http_req_duration.get("p(99)", 0)
+            actual_rps = http_reqs.get("rate", 0)
 
             # Estimate RPS levels based on test duration (10 minutes total)
             # 200 RPS for 5 minutes, 300 RPS for 3 minutes, 400 RPS for 2 minutes
-            test_duration = self.summary_data.get('state', {}).get('testRunDurationMs', 0) / 1000
+            test_duration = (
+                self.summary_data.get("state", {}).get("testRunDurationMs", 0) / 1000
+            )
 
             if test_duration > 0:
                 # Rough estimation of RPS levels
-                metrics.append(TestMetrics(
-                    rps_level=200,
-                    duration="5m",
-                    total_requests=int(total_requests * 0.5),  # Estimate
-                    successful_requests=int(successful_requests * 0.5),
-                    failed_requests=int(failed_requests * 0.5),
-                    error_rate=error_rate,
-                    avg_response_time=avg_response_time,
-                    p95_response_time=p95_response_time,
-                    p99_response_time=p99_response_time,
-                    actual_rps=actual_rps
-                ))
+                metrics.append(
+                    TestMetrics(
+                        rps_level=200,
+                        duration="5m",
+                        total_requests=int(total_requests * 0.5),  # Estimate
+                        successful_requests=int(successful_requests * 0.5),
+                        failed_requests=int(failed_requests * 0.5),
+                        error_rate=error_rate,
+                        avg_response_time=avg_response_time,
+                        p95_response_time=p95_response_time,
+                        p99_response_time=p99_response_time,
+                        actual_rps=actual_rps,
+                    )
+                )
 
         return metrics
 
@@ -145,9 +153,19 @@ class CARResultsAnalyzer:
 """
 
         # Add recommendations based on results
-        actual_rps = self.summary_data.get('metrics', {}).get('http_reqs', {}).get('rate', 0)
-        error_rate = self.summary_data.get('metrics', {}).get('http_req_failed', {}).get('rate', 0)
-        p95_latency = self.summary_data.get('metrics', {}).get('http_req_duration', {}).get('p(95)', 0)
+        actual_rps = (
+            self.summary_data.get("metrics", {}).get("http_reqs", {}).get("rate", 0)
+        )
+        error_rate = (
+            self.summary_data.get("metrics", {})
+            .get("http_req_failed", {})
+            .get("rate", 0)
+        )
+        p95_latency = (
+            self.summary_data.get("metrics", {})
+            .get("http_req_duration", {})
+            .get("p(95)", 0)
+        )
 
         if actual_rps >= 200 and error_rate < 0.01 and p95_latency < 500:
             report += """
@@ -172,9 +190,13 @@ Current results show:
             if actual_rps < 200:
                 report += f"- RPS too low: {actual_rps:.1f} (target: ≥200)\n"
             if error_rate >= 0.01:
-                report += f"- Error rate too high: {error_rate*100:.2f}% (target: <1%)\n"
+                report += (
+                    f"- Error rate too high: {error_rate*100:.2f}% (target: <1%)\n"
+                )
             if p95_latency >= 500:
-                report += f"- Latency too high: {p95_latency:.1f}ms P95 (target: <500ms)\n"
+                report += (
+                    f"- Latency too high: {p95_latency:.1f}ms P95 (target: <500ms)\n"
+                )
 
             report += """
 **Recommended Actions:**
@@ -199,11 +221,11 @@ Current results show:
 
         return report
 
+
 def main():
     """Main function"""
     analyzer = CARResultsAnalyzer(
-        "reports/k6_car_test/summary.json",
-        "reports/k6_car_test/results.json"
+        "reports/k6_car_test/summary.json", "reports/k6_car_test/results.json"
     )
 
     analyzer.load_data()
@@ -213,13 +235,14 @@ def main():
     report_path = Path("reports/throughput_tuning_report.md")
     report_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(report_path, 'w', encoding='utf-8') as f:
+    with open(report_path, "w", encoding="utf-8") as f:
         f.write(report)
 
     print("📊 Throughput tuning report generated:")
     print(f"   {report_path}")
-    print("\n" + "="*50)
+    print("\n" + "=" * 50)
     print(report)
+
 
 if __name__ == "__main__":
     main()

@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-import os
 import concurrent.futures
 import logging
+import os
 import time
 from dataclasses import dataclass
 from enum import Enum

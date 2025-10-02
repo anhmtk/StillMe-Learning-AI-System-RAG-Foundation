@@ -58,7 +58,7 @@ class SandboxDeployer:
         self._deployer = get_sandbox_deployer(str(self.project_root))
 
         # Maintain backward compatibility by exposing the same interface
-        if hasattr(self._deployer, 'docker_client'):
+        if hasattr(self._deployer, "docker_client"):
             self.docker_client = self._deployer.docker_client
             self.sandbox_controller = SandboxController(self.docker_client)
         else:
@@ -66,6 +66,7 @@ class SandboxDeployer:
             self.docker_client = None
             # Create a mock sandbox controller that doesn't require Docker
             from unittest.mock import Mock
+
             self.sandbox_controller = Mock()
             self.sandbox_controller.create_sandbox = Mock()
             self.sandbox_controller.get_status = Mock(return_value={"status": "fake"})
@@ -78,7 +79,7 @@ class SandboxDeployer:
         self,
         name: str = "security-test",
         image: str = DEFAULT_IMAGE,
-        custom_dockerfile: Optional[str] = None
+        custom_dockerfile: Optional[str] = None,
     ) -> tuple[bool, str, dict]:
         """
         Deploy a security testing sandbox
@@ -92,7 +93,9 @@ class SandboxDeployer:
             Tuple of (success, sandbox_id, deployment_info)
         """
         # Delegate to the appropriate deployer
-        return await self._deployer.deploy_security_sandbox(name, image, custom_dockerfile)
+        return await self._deployer.deploy_security_sandbox(
+            name, image, custom_dockerfile
+        )
 
     async def cleanup_deployment(self, sandbox_id: str) -> bool:
         """
@@ -125,11 +128,7 @@ class SandboxDeployer:
             level: Log level (INFO, SUCCESS, ERROR, etc.)
             message: Log message
         """
-        log_entry = {
-            "timestamp": time.time(),
-            "level": level,
-            "message": message
-        }
+        log_entry = {"timestamp": time.time(), "level": level, "message": message}
         self.deployment_logs.append(log_entry)
         logger.info(f"[{level}] {message}")
 
@@ -142,12 +141,22 @@ class SandboxDeployer:
         """
         return {
             "total_deployments": len(self.deployment_logs),
-            "successful_deployments": len([log for log in self.deployment_logs if log.get("level") == "SUCCESS"]),
-            "failed_deployments": len([log for log in self.deployment_logs if log.get("level") == "ERROR"]),
+            "successful_deployments": len(
+                [log for log in self.deployment_logs if log.get("level") == "SUCCESS"]
+            ),
+            "failed_deployments": len(
+                [log for log in self.deployment_logs if log.get("level") == "ERROR"]
+            ),
             "deployment_logs": self.deployment_logs,
             "logs": self.deployment_logs,  # Also include for backward compatibility
-            "sandbox_status": "fake" if hasattr(self._deployer, '__class__') and "Fake" in self._deployer.__class__.__name__ else "active",
-            "deployer_type": "fake" if hasattr(self._deployer, '__class__') and "Fake" in self._deployer.__class__.__name__ else "real"
+            "sandbox_status": "fake"
+            if hasattr(self._deployer, "__class__")
+            and "Fake" in self._deployer.__class__.__name__
+            else "active",
+            "deployer_type": "fake"
+            if hasattr(self._deployer, "__class__")
+            and "Fake" in self._deployer.__class__.__name__
+            else "real",
         }
 
 
@@ -160,8 +169,7 @@ async def main():
     try:
         # Deploy security sandbox
         success, sandbox_id, info = await deployer.deploy_security_sandbox(
-            name="security-test-deployment",
-            image=DEFAULT_IMAGE
+            name="security-test-deployment", image=DEFAULT_IMAGE
         )
 
         if success:

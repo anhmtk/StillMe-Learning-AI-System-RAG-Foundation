@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Any, Optional
 
 # Add stillme_core to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 try:
     from stillme_core.modules.api_provider_manager import UnifiedAPIManager
@@ -22,9 +22,11 @@ except ImportError:
     print("Warning: UnifiedAPIManager not available, using mock")
     UnifiedAPIManager = None
 
+
 @dataclass
 class BacktranslateConfig:
     """Cấu hình cho backtranslate"""
+
     intermediate_languages: list[str] = None  # Ngôn ngữ trung gian
     nllb_model: str = "facebook/nllb-200-distilled-600M"
     max_rounds: int = 2  # Số vòng dịch tối đa
@@ -35,15 +37,18 @@ class BacktranslateConfig:
         if self.intermediate_languages is None:
             self.intermediate_languages = ["en", "ja", "ko", "zh", "fr", "de", "es"]
 
+
 @dataclass
 class BacktranslateResult:
     """Kết quả backtranslate"""
+
     original: str
     variants: list[str]
     translation_paths: list[list[str]]  # Đường đi dịch
     success: bool
     error: Optional[str] = None
     metadata: dict[str, Any] = None
+
 
 class Backtranslator:
     """Backtranslator sử dụng NLLB và local models"""
@@ -79,12 +84,16 @@ class Backtranslator:
     def _detect_language(self, text: str) -> str:
         """Detect ngôn ngữ của text"""
         # Simple heuristic detection
-        vietnamese_chars = sum(1 for char in text if '\u1e00' <= char <= '\u1eff')
-        chinese_chars = sum(1 for char in text if '\u4e00' <= char <= '\u9fff')
-        japanese_chars = sum(1 for char in text if '\u3040' <= char <= '\u309f' or '\u30a0' <= char <= '\u30ff')
-        korean_chars = sum(1 for char in text if '\uac00' <= char <= '\ud7af')
-        arabic_chars = sum(1 for char in text if '\u0600' <= char <= '\u06ff')
-        cyrillic_chars = sum(1 for char in text if '\u0400' <= char <= '\u04ff')
+        vietnamese_chars = sum(1 for char in text if "\u1e00" <= char <= "\u1eff")
+        chinese_chars = sum(1 for char in text if "\u4e00" <= char <= "\u9fff")
+        japanese_chars = sum(
+            1
+            for char in text
+            if "\u3040" <= char <= "\u309f" or "\u30a0" <= char <= "\u30ff"
+        )
+        korean_chars = sum(1 for char in text if "\uac00" <= char <= "\ud7af")
+        arabic_chars = sum(1 for char in text if "\u0600" <= char <= "\u06ff")
+        cyrillic_chars = sum(1 for char in text if "\u0400" <= char <= "\u04ff")
 
         total_chars = len([c for c in text if c.isalpha()])
 
@@ -106,7 +115,9 @@ class Backtranslator:
         else:
             return "en"
 
-    async def _translate_with_nllb(self, text: str, src_lang: str, tgt_lang: str) -> str:
+    async def _translate_with_nllb(
+        self, text: str, src_lang: str, tgt_lang: str
+    ) -> str:
         """Dịch sử dụng NLLB"""
         try:
             if not self.api_manager:
@@ -115,10 +126,7 @@ class Backtranslator:
 
             # Use NLLB through UnifiedAPIManager
             result = await self.api_manager.translate(
-                text=text,
-                src_lang=src_lang,
-                tgt_lang=tgt_lang,
-                quality_hint="high"
+                text=text, src_lang=src_lang, tgt_lang=tgt_lang, quality_hint="high"
             )
 
             return result.get("text", text)
@@ -127,7 +135,9 @@ class Backtranslator:
             self.logger.warning(f"NLLB translation failed: {e}")
             return text
 
-    async def _translate_with_local(self, text: str, src_lang: str, tgt_lang: str) -> str:
+    async def _translate_with_local(
+        self, text: str, src_lang: str, tgt_lang: str
+    ) -> str:
         """Dịch sử dụng local model"""
         try:
             if not self.api_manager:
@@ -141,10 +151,7 @@ class Backtranslator:
 
 Chỉ trả về bản dịch, không giải thích:"""
 
-            response = self.api_manager.get_response(
-                prompt=prompt,
-                model="gemma2:2b"
-            )
+            response = self.api_manager.get_response(prompt=prompt, model="gemma2:2b")
 
             return response.strip()
 
@@ -172,7 +179,9 @@ Chỉ trả về bản dịch, không giải thích:"""
             translation_paths = []
 
             # Select intermediate languages (exclude source language)
-            available_langs = [lang for lang in self.config.intermediate_languages if lang != src_lang]
+            available_langs = [
+                lang for lang in self.config.intermediate_languages if lang != src_lang
+            ]
 
             # Limit number of paths
             max_paths = min(len(available_langs), 5)
@@ -181,18 +190,26 @@ Chỉ trả về bản dịch, không giải thích:"""
             for intermediate_lang in selected_langs:
                 try:
                     # Forward translation
-                    intermediate_text = await self._translate(text, src_lang, intermediate_lang)
+                    intermediate_text = await self._translate(
+                        text, src_lang, intermediate_lang
+                    )
 
                     # Backward translation
-                    backtranslated_text = await self._translate(intermediate_text, intermediate_lang, src_lang)
+                    backtranslated_text = await self._translate(
+                        intermediate_text, intermediate_lang, src_lang
+                    )
 
                     # Check if meaning is preserved (simple heuristic)
                     if self._is_meaning_preserved(text, backtranslated_text):
                         variants.append(backtranslated_text)
-                        translation_paths.append([src_lang, intermediate_lang, src_lang])
+                        translation_paths.append(
+                            [src_lang, intermediate_lang, src_lang]
+                        )
 
                 except Exception as e:
-                    self.logger.warning(f"Backtranslate path failed {src_lang}->{intermediate_lang}->{src_lang}: {e}")
+                    self.logger.warning(
+                        f"Backtranslate path failed {src_lang}->{intermediate_lang}->{src_lang}: {e}"
+                    )
                     continue
 
             return BacktranslateResult(
@@ -203,8 +220,8 @@ Chỉ trả về bản dịch, không giải thích:"""
                 metadata={
                     "source_language": src_lang,
                     "intermediate_languages": selected_langs,
-                    "successful_paths": len(variants)
-                }
+                    "successful_paths": len(variants),
+                },
             )
 
         except Exception as e:
@@ -214,7 +231,7 @@ Chỉ trả về bản dịch, không giải thích:"""
                 variants=[],
                 translation_paths=[],
                 success=False,
-                error=str(e)
+                error=str(e),
             )
 
     def _is_meaning_preserved(self, original: str, translated: str) -> bool:
@@ -249,17 +266,20 @@ Chỉ trả về bản dịch, không giải thích:"""
         processed_results = []
         for i, result in enumerate(results):
             if isinstance(result, Exception):
-                processed_results.append(BacktranslateResult(
-                    original=texts[i],
-                    variants=[],
-                    translation_paths=[],
-                    success=False,
-                    error=str(result)
-                ))
+                processed_results.append(
+                    BacktranslateResult(
+                        original=texts[i],
+                        variants=[],
+                        translation_paths=[],
+                        success=False,
+                        error=str(result),
+                    )
+                )
             else:
                 processed_results.append(result)
 
         return processed_results
+
 
 class BacktranslateAugmentor:
     """Augmentor chính cho backtranslate"""
@@ -268,7 +288,9 @@ class BacktranslateAugmentor:
         self.backtranslator = Backtranslator(config)
         self.logger = logging.getLogger(__name__)
 
-    async def augment_dataset(self, input_file: str, output_file: str) -> dict[str, Any]:
+    async def augment_dataset(
+        self, input_file: str, output_file: str
+    ) -> dict[str, Any]:
         """Augment dataset từ file input"""
         input_path = Path(input_file)
         output_path = Path(output_file)
@@ -278,16 +300,16 @@ class BacktranslateAugmentor:
 
         # Load input data
         texts = []
-        with open(input_path, encoding='utf-8') as f:
+        with open(input_path, encoding="utf-8") as f:
             for line in f:
                 line = line.strip()
                 if line:
                     try:
                         data = json.loads(line)
-                        if 'text' in data:
-                            texts.append(data['text'])
-                        elif 'message' in data:
-                            texts.append(data['message'])
+                        if "text" in data:
+                            texts.append(data["text"])
+                        elif "message" in data:
+                            texts.append(data["message"])
                         else:
                             texts.append(str(data))
                     except json.JSONDecodeError:
@@ -300,8 +322,10 @@ class BacktranslateAugmentor:
         all_results = []
 
         for i in range(0, len(texts), batch_size):
-            batch = texts[i:i+batch_size]
-            self.logger.info(f"Processing batch {i//batch_size + 1}/{(len(texts)-1)//batch_size + 1}")
+            batch = texts[i : i + batch_size]
+            self.logger.info(
+                f"Processing batch {i//batch_size + 1}/{(len(texts)-1)//batch_size + 1}"
+            )
 
             results = await self.backtranslator.backtranslate_batch(batch)
             all_results.extend(results)
@@ -309,7 +333,7 @@ class BacktranslateAugmentor:
         # Save results
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             for result in all_results:
                 if result.success:
                     for i, variant in enumerate(result.variants):
@@ -317,10 +341,12 @@ class BacktranslateAugmentor:
                             "original": result.original,
                             "variant": variant,
                             "method": "backtranslate",
-                            "translation_path": result.translation_paths[i] if i < len(result.translation_paths) else [],
-                            "metadata": result.metadata
+                            "translation_path": result.translation_paths[i]
+                            if i < len(result.translation_paths)
+                            else [],
+                            "metadata": result.metadata,
                         }
-                        f.write(json.dumps(output_data, ensure_ascii=False) + '\n')
+                        f.write(json.dumps(output_data, ensure_ascii=False) + "\n")
 
         # Generate statistics
         stats = {
@@ -329,30 +355,33 @@ class BacktranslateAugmentor:
             "success_rate": sum(1 for r in all_results if r.success) / len(all_results),
             "config": {
                 "intermediate_languages": self.backtranslator.config.intermediate_languages,
-                "max_rounds": self.backtranslator.config.max_rounds
-            }
+                "max_rounds": self.backtranslator.config.max_rounds,
+            },
         }
 
         self.logger.info(f"Backtranslate augmentation completed: {stats}")
         return stats
 
+
 async def main():
     """Demo function"""
     config = BacktranslateConfig(
-        intermediate_languages=["en", "ja", "ko"],
-        max_rounds=2
+        intermediate_languages=["en", "ja", "ko"], max_rounds=2
     )
 
     augmentor = BacktranslateAugmentor(config)
 
     # Test single text
-    result = await augmentor.backtranslator.backtranslate_text("Xin chào, hôm nay thế nào?")
+    result = await augmentor.backtranslator.backtranslate_text(
+        "Xin chào, hôm nay thế nào?"
+    )
     print(f"Original: {result.original}")
     print("Variants:")
     for i, variant in enumerate(result.variants, 1):
         print(f"  {i}. {variant}")
         if i <= len(result.translation_paths):
             print(f"     Path: {' -> '.join(result.translation_paths[i-1])}")
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

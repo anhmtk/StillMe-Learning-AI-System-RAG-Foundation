@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class MemoryItem:
     """Memory item with TTL support"""
+
     value: Any
     timestamp: float
     ttl: Optional[int] = None
@@ -46,8 +47,8 @@ class MemoryLayer:
         self.name = name
         self.config = config
         self.data: Dict[str, MemoryItem] = {}
-        self.ttl = config.get('ttl', 3600)
-        self.max_size = config.get('max_size', 1000)
+        self.ttl = config.get("ttl", 3600)
+        self.max_size = config.get("max_size", 1000)
 
     def store(self, key: str, value: Any, ttl: Optional[int] = None) -> bool:
         """Store value with TTL"""
@@ -61,9 +62,7 @@ class MemoryLayer:
 
             # Store new item
             self.data[key] = MemoryItem(
-                value=value,
-                timestamp=time.time(),
-                ttl=ttl or self.ttl
+                value=value, timestamp=time.time(), ttl=ttl or self.ttl
             )
             return True
         except Exception as e:
@@ -101,7 +100,9 @@ class MemoryLayer:
         if not self.data:
             return
 
-        oldest_key = min(self.data.keys(), key=lambda k: self.data[k].last_accessed or 0.0)
+        oldest_key = min(
+            self.data.keys(), key=lambda k: self.data[k].last_accessed or 0.0
+        )
         del self.data[oldest_key]
 
 
@@ -111,8 +112,8 @@ class MemoryManager:
     def __init__(self, config: Dict[str, Any]):
         self.config = config
         self.layers: Dict[str, MemoryLayer] = {}
-        self.ttl_enabled = config.get('ttl_enabled', True)
-        self.max_size = config.get('max_size', 1000)
+        self.ttl_enabled = config.get("ttl_enabled", True)
+        self.max_size = config.get("max_size", 1000)
 
         # Initialize default layers
         self._init_layers()
@@ -121,16 +122,21 @@ class MemoryManager:
 
     def _init_layers(self):
         """Initialize memory layers"""
-        layer_configs = self.config.get('layers', {
-            'short_term': {'ttl': 300, 'max_size': 100},  # 5 minutes
-            'mid_term': {'ttl': 3600, 'max_size': 500},  # 1 hour
-            'long_term': {'ttl': None, 'max_size': 1000}  # No expiry
-        })
+        layer_configs = self.config.get(
+            "layers",
+            {
+                "short_term": {"ttl": 300, "max_size": 100},  # 5 minutes
+                "mid_term": {"ttl": 3600, "max_size": 500},  # 1 hour
+                "long_term": {"ttl": None, "max_size": 1000},  # No expiry
+            },
+        )
 
         for name, config in layer_configs.items():
             self.layers[name] = MemoryLayer(name, config)
 
-    def store(self, key: str, value: Any, ttl: Optional[int] = None, layer: str = 'mid_term') -> bool:
+    def store(
+        self, key: str, value: Any, ttl: Optional[int] = None, layer: str = "mid_term"
+    ) -> bool:
         """Store value in specified layer"""
         # Validate inputs
         if key is None:
@@ -162,7 +168,7 @@ class MemoryManager:
             return self.layers[layer].retrieve(key)
 
         # Search all layers in order
-        for layer_name in ['short_term', 'mid_term', 'long_term']:
+        for layer_name in ["short_term", "mid_term", "long_term"]:
             if layer_name in self.layers:
                 value = self.layers[layer_name].retrieve(key)
                 if value is not None:
@@ -190,15 +196,15 @@ class MemoryManager:
     def get_stats(self) -> Dict[str, Any]:
         """Get memory statistics"""
         stats = {
-            'total_items': sum(len(layer.data) for layer in self.layers.values()),
-            'layers': {}
+            "total_items": sum(len(layer.data) for layer in self.layers.values()),
+            "layers": {},
         }
 
         for name, layer in self.layers.items():
-            stats['layers'][name] = {
-                'items': len(layer.data),
-                'max_size': layer.max_size,
-                'ttl': layer.ttl
+            stats["layers"][name] = {
+                "items": len(layer.data),
+                "max_size": layer.max_size,
+                "ttl": layer.ttl,
             }
 
         return stats
@@ -215,10 +221,10 @@ class PersistenceManager:
         if isinstance(config, str):
             db_path = config
         else:
-            db_path = config.get('db_path', 'memory.db')
+            db_path = config.get("db_path", "memory.db")
             # If storage_path is provided, use it as base directory
-            if 'storage_path' in config:
-                storage_path = Path(config['storage_path'])
+            if "storage_path" in config:
+                storage_path = Path(config["storage_path"])
                 storage_path.mkdir(exist_ok=True)
                 db_path = str(storage_path / db_path)
 
@@ -255,18 +261,21 @@ class PersistenceManager:
                 # Save all items from all layers
                 for layer_name, layer in memory_manager.layers.items():
                     for key, item in layer.data.items():
-                        conn.execute("""
+                        conn.execute(
+                            """
                             INSERT INTO memory_items 
                             (key, value, layer, timestamp, ttl, last_accessed)
                             VALUES (?, ?, ?, ?, ?, ?)
-                        """, (
-                            key,
-                            json.dumps(item.value),
-                            layer_name,
-                            item.timestamp,
-                            item.ttl,
-                            item.last_accessed
-                        ))
+                        """,
+                            (
+                                key,
+                                json.dumps(item.value),
+                                layer_name,
+                                item.timestamp,
+                                item.ttl,
+                                item.last_accessed,
+                            ),
+                        )
 
                 conn.commit()
                 return True
@@ -293,11 +302,13 @@ class PersistenceManager:
                                 value=value,
                                 timestamp=timestamp,
                                 ttl=ttl,
-                                last_accessed=last_accessed
+                                last_accessed=last_accessed,
                             )
                             memory_manager.layers[layer_name].data[key] = item
                         except json.JSONDecodeError as e:
-                            self.logger.warning(f"Failed to decode value for key {key}: {e}")
+                            self.logger.warning(
+                                f"Failed to decode value for key {key}: {e}"
+                            )
 
                 return True
         except Exception as e:
@@ -313,18 +324,21 @@ class PersistenceManager:
 
                 # Save data as key-value pairs in mid_term layer
                 for key, value in data.items():
-                    conn.execute("""
+                    conn.execute(
+                        """
                         INSERT INTO memory_items 
                         (key, value, layer, timestamp, ttl, last_accessed)
                         VALUES (?, ?, ?, ?, ?, ?)
-                    """, (
-                        key,
-                        json.dumps(value),
-                        'mid_term',
-                        time.time(),
-                        None,
-                        time.time()
-                    ))
+                    """,
+                        (
+                            key,
+                            json.dumps(value),
+                            "mid_term",
+                            time.time(),
+                            None,
+                            time.time(),
+                        ),
+                    )
 
                 conn.commit()
                 return True
@@ -346,7 +360,9 @@ class PersistenceManager:
                     try:
                         data[key] = json.loads(value_str)
                     except json.JSONDecodeError as e:
-                        self.logger.warning(f"Failed to decode value for key {key}: {e}")
+                        self.logger.warning(
+                            f"Failed to decode value for key {key}: {e}"
+                        )
 
                 return data
         except Exception as e:

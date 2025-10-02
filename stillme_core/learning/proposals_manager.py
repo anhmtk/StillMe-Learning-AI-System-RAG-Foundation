@@ -13,6 +13,7 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
+
 class ProposalsManager:
     """Manager for learning proposals"""
 
@@ -53,7 +54,7 @@ class ProposalsManager:
                 )
             """)
 
-    def create_proposal(self, **kwargs) -> 'LearningProposal':
+    def create_proposal(self, **kwargs) -> "LearningProposal":
         """Create a new learning proposal"""
         proposal_id = str(uuid.uuid4())
 
@@ -71,19 +72,23 @@ class ProposalsManager:
             "priority": kwargs.get("priority", "medium"),
             "risk_assessment": json.dumps(kwargs.get("risk_assessment", {})),
             "status": "pending",
-            "created_at": datetime.now().isoformat()
+            "created_at": datetime.now().isoformat(),
         }
 
         # Save to database
         import sqlite3
+
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 INSERT INTO proposals (
                     id, title, description, learning_objectives, prerequisites,
                     expected_outcomes, estimated_duration, quality_score, source,
                     priority, risk_assessment, status, created_at, created_by
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, tuple(proposal_data.values()) + ("system",))
+            """,
+                tuple(proposal_data.values()) + ("system",),
+            )
 
         logger.info(f"Created learning proposal: {proposal_id}")
 
@@ -101,10 +106,10 @@ class ProposalsManager:
             priority=kwargs.get("priority", "medium"),
             risk_assessment=kwargs.get("risk_assessment", {}),
             status="pending",
-            created_at=datetime.now()
+            created_at=datetime.now(),
         )
 
-    def get_all_proposals(self) -> list['LearningProposal']:
+    def get_all_proposals(self) -> list["LearningProposal"]:
         """Get all proposals"""
         import sqlite3
 
@@ -138,7 +143,7 @@ class ProposalsManager:
                         priority=row[5],
                         risk_assessment=json.loads(risk_assessment),
                         status=row[14],
-                        created_at=datetime.fromisoformat(row[12])
+                        created_at=datetime.fromisoformat(row[12]),
                     )
                     proposals.append(proposal)
                 except Exception as e:
@@ -147,27 +152,38 @@ class ProposalsManager:
 
             return proposals
 
-    def get_pending_proposals(self, limit: int = 10) -> list['LearningProposal']:
+    def get_pending_proposals(self, limit: int = 10) -> list["LearningProposal"]:
         """Get pending proposals"""
         import sqlite3
 
         with sqlite3.connect(self.db_path) as conn:
-            cursor = conn.execute("""
+            cursor = conn.execute(
+                """
                 SELECT * FROM proposals
                 WHERE status = 'pending'
                 ORDER BY created_at DESC
                 LIMIT ?
-            """, (limit,))
+            """,
+                (limit,),
+            )
 
             rows = cursor.fetchall()
             proposals = []
 
             for row in rows:
                 # Handle None values safely
-                learning_objectives = row[7] if row[7] else "[]"  # Fixed: learning_objectives is at index 7
-                prerequisites = row[8] if row[8] else "[]"  # Fixed: prerequisites is at index 8
-                expected_outcomes = row[9] if row[9] else "[]"  # Fixed: expected_outcomes is at index 9
-                risk_assessment = row[10] if row[10] else "{}"  # risk_assessment is at index 10
+                learning_objectives = (
+                    row[7] if row[7] else "[]"
+                )  # Fixed: learning_objectives is at index 7
+                prerequisites = (
+                    row[8] if row[8] else "[]"
+                )  # Fixed: prerequisites is at index 8
+                expected_outcomes = (
+                    row[9] if row[9] else "[]"
+                )  # Fixed: expected_outcomes is at index 9
+                risk_assessment = (
+                    row[10] if row[10] else "{}"
+                )  # risk_assessment is at index 10
 
                 try:
                     proposal = LearningProposal(
@@ -183,7 +199,7 @@ class ProposalsManager:
                         priority=row[5],  # Fixed: priority is at index 5
                         risk_assessment=json.loads(risk_assessment),
                         status=row[14],  # Fixed: status is at index 14
-                        created_at=datetime.fromisoformat(row[12])
+                        created_at=datetime.fromisoformat(row[12]),
                     )
                     proposals.append(proposal)
                 except Exception as e:
@@ -203,7 +219,9 @@ class ProposalsManager:
                             priority=row[9] or "medium",
                             risk_assessment={},
                             status=row[11] or "pending",
-                            created_at=datetime.fromisoformat(row[12]) if row[12] else datetime.now()
+                            created_at=datetime.fromisoformat(row[12])
+                            if row[12]
+                            else datetime.now(),
                         )
                         proposals.append(simple_proposal)
                     except Exception as e2:
@@ -217,28 +235,37 @@ class ProposalsManager:
         import sqlite3
 
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 UPDATE proposals
                 SET status = 'approved', approved_at = ?, approved_by = ?
                 WHERE id = ?
-            """, (datetime.now().isoformat(), approved_by, proposal_id))
+            """,
+                (datetime.now().isoformat(), approved_by, proposal_id),
+            )
 
         logger.info(f"Approved proposal: {proposal_id}")
         return True
 
-    def reject_proposal(self, proposal_id: str, rejected_by: str, reason: str = "") -> bool:
+    def reject_proposal(
+        self, proposal_id: str, rejected_by: str, reason: str = ""
+    ) -> bool:
         """Reject a proposal"""
         import sqlite3
 
         with sqlite3.connect(self.db_path) as conn:
-            conn.execute("""
+            conn.execute(
+                """
                 UPDATE proposals
                 SET status = 'rejected', rejected_at = ?, rejected_by = ?, rejection_reason = ?
                 WHERE id = ?
-            """, (datetime.now().isoformat(), rejected_by, reason, proposal_id))
+            """,
+                (datetime.now().isoformat(), rejected_by, reason, proposal_id),
+            )
 
         logger.info(f"Rejected proposal: {proposal_id}")
         return True
+
 
 class LearningProposal:
     """Learning proposal data class"""

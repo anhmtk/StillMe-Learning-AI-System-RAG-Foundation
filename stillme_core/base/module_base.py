@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 class ModuleStatus(Enum):
     """Module status enumeration"""
+
     INITIALIZED = "initialized"
     RUNNING = "running"
     STOPPED = "stopped"
@@ -29,6 +30,7 @@ class ModuleStatus(Enum):
 @dataclass
 class ModuleInfo:
     """Module information container"""
+
     name: str
     version: str
     description: str
@@ -152,7 +154,12 @@ class StubModule(ModuleBase):
     fully implemented. It raises NotImplementedError with clear messages.
     """
 
-    def __init__(self, name: str, description: str = "Not implemented yet", config: Optional[dict[str, Any]] = None):
+    def __init__(
+        self,
+        name: str,
+        description: str = "Not implemented yet",
+        config: Optional[dict[str, Any]] = None,
+    ):
         """
         Initialize stub module
 
@@ -176,12 +183,14 @@ class StubModule(ModuleBase):
             author="StillMe AI Team",
             status=self._status,
             dependencies=[],
-            config_schema=None
+            config_schema=None,
         )
 
     async def initialize(self) -> bool:
         """Initialize stub module"""
-        self._logger.warning(f"Stub module '{self._name}' initialized - functionality not available")
+        self._logger.warning(
+            f"Stub module '{self._name}' initialized - functionality not available"
+        )
         self._set_status(ModuleStatus.INITIALIZED)
         return True
 
@@ -202,7 +211,9 @@ class StubModule(ModuleBase):
         self._set_status(ModuleStatus.STOPPED)
 
 
-def create_stub_module(name: str, description: str = "Not implemented yet") -> StubModule:
+def create_stub_module(
+    name: str, description: str = "Not implemented yet"
+) -> StubModule:
     """
     Factory function to create stub modules
 
