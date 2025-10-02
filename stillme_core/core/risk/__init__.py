@@ -4,38 +4,16 @@ Technical risk assessment and management module
 """
 
 from .risk_assessor import RiskAssessor, RiskLevel, RiskCategory
+
 try:
+    from .technical_debt import TechnicalDebtAnalyzer
+except ImportError:
+    TechnicalDebtAnalyzer = None
+
 try:
-try:
-try:
-try:
-                    from .technical_debt import TechnicalDebtAnalyzer
+    from .complexity_analyzer import ComplexityAnalyzer
 except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-try:
-try:
-try:
-try:
-try:
-                    from .complexity_analyzer import ComplexityAnalyzer
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
+    ComplexityAnalyzer = None
 
 __all__ = [
     "RiskAssessor",

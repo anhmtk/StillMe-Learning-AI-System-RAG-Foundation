@@ -1,25 +1,20 @@
 from __future__ import annotations
 
 import os
+import concurrent.futures
+import logging
+import time
+from dataclasses import dataclass
+from enum import Enum
+from pathlib import Path
+from typing import Any
+
+from .executor import _run
 
 # stillme_core/enhanced_executor.py
 """
 Enhanced Executor with multiple testing frameworks support
 """
-import asyncio
-import concurrent.futures
-import json
-import logging
-import os
-import subprocess
-import time
-from dataclasses import dataclass
-from enum import Enum
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
-
-from .executor import ExecResult, _run
-from .plan_types import PlanItem
 
 logger = logging.getLogger(__name__)
 
@@ -45,18 +40,18 @@ class TestResult:
     duration: float
     output: str
     error_output: str
-    coverage_percent: Optional[float] = None
-    test_files: Optional[List[str]] = None
+    coverage_percent: float | None = None
+    test_files: list[str] | None = None
 
 
 @dataclass
 class TestImpact:
     """Test impact analysis result"""
 
-    affected_tests: List[str]
+    affected_tests: list[str]
     total_tests: int
     impact_percent: float
-    recommended_tests: List[str]
+    recommended_tests: list[str]
 
 
 class EnhancedExecutor:
@@ -66,13 +61,13 @@ class EnhancedExecutor:
 
     def __init__(self, repo_root: str = "."):
         self.repo_root = Path(repo_root)
-        self.test_cache: Dict[str, TestResult] = {}
-        self.impact_cache: Dict[str, TestImpact] = {}
+        self.test_cache: dict[str, TestResult] = {}
+        self.impact_cache: dict[str, TestImpact] = {}
         self.parallel_workers = min(4, os.cpu_count() or 1)
 
     def run_tests_parallel(
-        self, test_files: List[str], framework: TestFramework = TestFramework.PYTEST
-    ) -> List[TestResult]:
+        self, test_files: list[str], framework: TestFramework = TestFramework.PYTEST
+    ) -> list[TestResult]:
         """Run tests in parallel for better performance"""
         if not test_files:
             return []
@@ -103,8 +98,8 @@ class EnhancedExecutor:
         return results
 
     def _group_tests_by_framework(
-        self, test_files: List[str]
-    ) -> Dict[TestFramework, List[str]]:
+        self, test_files: list[str]
+    ) -> dict[TestFramework, list[str]]:
         """Group test files by their framework"""
         grouped = {fw: [] for fw in TestFramework}
 
@@ -137,8 +132,8 @@ class EnhancedExecutor:
             return TestFramework.PYTEST
 
     def _run_framework_tests(
-        self, framework: TestFramework, test_files: List[str]
-    ) -> Optional[TestResult]:
+        self, framework: TestFramework, test_files: list[str]
+    ) -> TestResult | None:
         """Run tests for a specific framework"""
         try:
             if framework == TestFramework.PYTEST:
@@ -153,7 +148,7 @@ class EnhancedExecutor:
             logger.error(f"Failed to run {framework.value} tests: {e}")
             return None
 
-    def _run_pytest_tests(self, test_files: List[str]) -> TestResult:
+    def _run_pytest_tests(self, test_files: list[str]) -> TestResult:
         """Run pytest tests with coverage"""
         args = [
             "python",
@@ -188,7 +183,7 @@ class EnhancedExecutor:
             test_files=test_files,
         )
 
-    def _run_unittest_tests(self, test_files: List[str]) -> TestResult:
+    def _run_unittest_tests(self, test_files: list[str]) -> TestResult:
         """Run unittest tests"""
         args = ["python", "-m", "unittest", "-v"]
         args.extend(test_files)
@@ -212,7 +207,7 @@ class EnhancedExecutor:
             test_files=test_files,
         )
 
-    def _run_doctest_tests(self, test_files: List[str]) -> TestResult:
+    def _run_doctest_tests(self, test_files: list[str]) -> TestResult:
         """Run doctest tests"""
         args = ["python", "-m", "doctest", "-v"]
         args.extend(test_files)
@@ -236,7 +231,7 @@ class EnhancedExecutor:
             test_files=test_files,
         )
 
-    def _run_nose_tests(self, test_files: List[str]) -> TestResult:
+    def _run_nose_tests(self, test_files: list[str]) -> TestResult:
         """Run nose tests"""
         args = ["python", "-m", "nose", "-v"]
         args.extend(test_files)
@@ -260,7 +255,7 @@ class EnhancedExecutor:
             test_files=test_files,
         )
 
-    def _parse_pytest_output(self, output: str) -> Tuple[int, int, int, int]:
+    def _parse_pytest_output(self, output: str) -> tuple[int, int, int, int]:
         """Parse pytest output to extract test counts"""
         import re
 
@@ -284,7 +279,7 @@ class EnhancedExecutor:
 
         return passed, failed, skipped, errors
 
-    def _parse_unittest_output(self, output: str) -> Tuple[int, int, int, int]:
+    def _parse_unittest_output(self, output: str) -> tuple[int, int, int, int]:
         """Parse unittest output to extract test counts"""
         import re
 
@@ -306,7 +301,7 @@ class EnhancedExecutor:
 
         return passed, failed, skipped, errors
 
-    def _parse_doctest_output(self, output: str) -> Tuple[int, int, int, int]:
+    def _parse_doctest_output(self, output: str) -> tuple[int, int, int, int]:
         """Parse doctest output to extract test counts"""
         import re
 
@@ -328,7 +323,7 @@ class EnhancedExecutor:
 
         return passed, failed, skipped, errors
 
-    def _parse_nose_output(self, output: str) -> Tuple[int, int, int, int]:
+    def _parse_nose_output(self, output: str) -> tuple[int, int, int, int]:
         """Parse nose output to extract test counts"""
         import re
 
@@ -350,7 +345,7 @@ class EnhancedExecutor:
 
         return passed, failed, skipped, errors
 
-    def _extract_coverage_percent(self, output: str) -> Optional[float]:
+    def _extract_coverage_percent(self, output: str) -> float | None:
         """Extract coverage percentage from pytest output"""
         import re
 
@@ -363,7 +358,7 @@ class EnhancedExecutor:
 
         return None
 
-    def analyze_test_impact(self, changed_files: List[str]) -> TestImpact:
+    def analyze_test_impact(self, changed_files: list[str]) -> TestImpact:
         """Analyze which tests are affected by code changes"""
         cache_key = os.getenv("KEY", "").join(sorted(changed_files))
 
@@ -399,7 +394,7 @@ class EnhancedExecutor:
         self.impact_cache[cache_key] = result
         return result
 
-    def _find_all_test_files(self) -> List[str]:
+    def _find_all_test_files(self) -> list[str]:
         """Find all test files in the repository"""
         test_files = []
 
@@ -419,7 +414,7 @@ class EnhancedExecutor:
 
         return list(set(test_files))  # Remove duplicates
 
-    def _is_test_affected(self, test_file: str, changed_files: List[str]) -> bool:
+    def _is_test_affected(self, test_file: str, changed_files: list[str]) -> bool:
         """Check if a test file is affected by changes"""
         try:
             with open(test_file, encoding="utf-8") as f:
@@ -460,8 +455,8 @@ class EnhancedExecutor:
         return test_name in patterns
 
     def _recommend_tests(
-        self, changed_files: List[str], affected_tests: List[str]
-    ) -> List[str]:
+        self, changed_files: list[str], affected_tests: list[str]
+    ) -> list[str]:
         """Recommend which tests to run based on changes"""
         recommended = []
 
@@ -480,8 +475,8 @@ class EnhancedExecutor:
         return list(set(recommended))  # Remove duplicates
 
     def generate_coverage_report(
-        self, test_results: List[TestResult]
-    ) -> Dict[str, Any]:
+        self, test_results: list[TestResult]
+    ) -> dict[str, Any]:
         """Generate comprehensive coverage report"""
         total_passed = sum(r.passed for r in test_results)
         total_failed = sum(r.failed for r in test_results)
@@ -524,7 +519,7 @@ class EnhancedExecutor:
 
     def _generate_coverage_recommendations(
         self, coverage: float, failed_tests: int
-    ) -> List[str]:
+    ) -> list[str]:
         """Generate recommendations based on coverage and test results"""
         recommendations = []
 

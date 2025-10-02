@@ -28,22 +28,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 # Import Phase 1 and 2.x modules
 try:
     from .security_middleware import SecurityMiddleware  # type: ignore
-try:
-try:
-try:
-try:
-try:
-                        from .performance_monitor import PerformanceMonitor
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
+    from .performance_monitor import PerformanceMonitor
     from .integration_bridge import IntegrationBridge  # type: ignore
     from .memory_security_integration import MemorySecurityIntegration  # type: ignore
     from .module_governance_system import ModuleGovernanceSystem  # type: ignore
@@ -52,95 +37,69 @@ except ImportError:
     from .autonomous_management_system import AutonomousManagementSystem  # type: ignore
     from .learning_optimization_engine import LearningOptimizationEngine  # type: ignore
 except ImportError:
-    try:
-        from stillme_core.security_middleware import SecurityMiddleware  # type: ignore
-try:
-try:
-try:
-try:
-try:
-                            from stillme_core.performance_monitor import PerformanceMonitor
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-        from stillme_core.integration_bridge import IntegrationBridge  # type: ignore
-        from stillme_core.memory_security_integration import MemorySecurityIntegration  # type: ignore
-        from stillme_core.module_governance_system import ModuleGovernanceSystem  # type: ignore
-        from stillme_core.validation_framework import ComprehensiveValidationFramework  # type: ignore
-        from stillme_core.final_validation_system import FinalValidationSystem  # type: ignore
-        from stillme_core.autonomous_management_system import AutonomousManagementSystem  # type: ignore
-        from stillme_core.learning_optimization_engine import LearningOptimizationEngine  # type: ignore
-    except ImportError:
-        # Create mock classes for testing
-        class SecurityMiddleware:
-            def __init__(self):
-                pass
+    # Create mock classes for testing
+    class SecurityMiddleware:
+        def __init__(self):
+            pass
 
-            def get_security_report(self):
-                return {"security_score": 100}
+        def get_security_report(self):
+            return {"security_score": 100}
 
-        class PerformanceMonitor:
-            def __init__(self):
-                pass
+    class PerformanceMonitor:
+        def __init__(self):
+            pass
 
-            def get_performance_summary(self):
-                return {"status": "healthy"}
+        def get_performance_summary(self):
+            return {"status": "healthy"}
 
-        class IntegrationBridge:
-            def __init__(self):
-                pass
+    class IntegrationBridge:
+        def __init__(self):
+            pass
 
-            def register_endpoint(self, method, path, handler, auth_required=False):
-                pass
+        def register_endpoint(self, method, path, handler, auth_required=False):
+            pass
 
-        class MemorySecurityIntegration:
-            def __init__(self):
-                pass
+    class MemorySecurityIntegration:
+        def __init__(self):
+            pass
 
-            def get_memory_statistics(self):
-                return {"access_logs_count": 0}
+        def get_memory_statistics(self):
+            return {"access_logs_count": 0}
 
-        class ModuleGovernanceSystem:
-            def __init__(self):
-                pass
+    class ModuleGovernanceSystem:
+        def __init__(self):
+            pass
 
-            def get_governance_status(self):
-                return {"status": "success", "data": {}}
+        def get_governance_status(self):
+            return {"status": "success", "data": {}}
 
-        class ComprehensiveValidationFramework:
-            def __init__(self):
-                pass
+    class ComprehensiveValidationFramework:
+        def __init__(self):
+            pass
 
-            def get_validation_status(self):
-                return {"status": "success", "data": {}}
+        def get_validation_status(self):
+            return {"status": "success", "data": {}}
 
-        class FinalValidationSystem:
-            def __init__(self):
-                pass
+    class FinalValidationSystem:
+        def __init__(self):
+            pass
 
-            def get_system_health(self):
-                return {"status": "success", "data": {}}
+        def get_system_health(self):
+            return {"status": "success", "data": {}}
 
-        class AutonomousManagementSystem:
-            def __init__(self):
-                pass
+    class AutonomousManagementSystem:
+        def __init__(self):
+            pass
 
-            def get_autonomous_status(self):
-                return {"status": "success", "data": {}}
+        def get_autonomous_status(self):
+            return {"status": "success", "data": {}}
 
-        class LearningOptimizationEngine:
-            def __init__(self):
-                pass
+    class LearningOptimizationEngine:
+        def __init__(self):
+            pass
 
-            def get_learning_status(self):
-                return {"status": "success", "data": {}}
+        def get_learning_status(self):
+            return {"status": "success", "data": {}}
 
 
 # Setup logging

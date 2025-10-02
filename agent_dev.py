@@ -4,15 +4,21 @@ import json
 import logging
 import os
 import shutil
-import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
-import git
 from dotenv import load_dotenv
-from jsonschema import ValidationError, validate
+from jsonschema import validate
+import datetime as _dt
+from pathlib import Path as _Path
+from typing import Optional
+from stillme_core.ai_manager import AIManager as _AIManager
+from stillme_core.bug_memory import BugMemory as _BugMemory
+from stillme_core.executor import PatchExecutor as _PatchExecutor
+from stillme_core.plan_types import PlanItem as _PlanItem
+from stillme_core.planner import Planner as _Planner
 
 # Ensure local modules path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "modules")))
@@ -167,13 +173,13 @@ JSON_SCHEMA:
 {schema_str}
 """.strip()
 
-    async def _bridge_fast_async(self, prompt: str) -> Dict[str, Any]:
+    async def _bridge_fast_async(self, prompt: str) -> dict[str, Any]:
         return await self.bridge.ask(prompt=prompt, mode="fast", provider="auto")
 
-    async def _bridge_safe_async(self, prompt: str) -> Dict[str, Any]:
+    async def _bridge_safe_async(self, prompt: str) -> dict[str, Any]:
         return await self.bridge.ask(prompt=prompt, mode="safe", provider="auto")
 
-    def _plan_with_bridge(self, problem_description: str, problem_file: str, current_attempt: int, previous_feedback: str) -> Optional[Dict[str, Any]]:
+    def _plan_with_bridge(self, problem_description: str, problem_file: str, current_attempt: int, previous_feedback: str) -> Optional[dict[str, Any]]:
         prompt = self._build_plan_prompt(problem_description, problem_file, current_attempt, previous_feedback)
         try:
             res = asyncio.run(self.bridge.ask(prompt=prompt, mode="fast", provider="ollama"))
@@ -201,12 +207,12 @@ JSON_SCHEMA:
             return None
 
     # ------------------------ Local actions -------------------------------
-    def _run_tests(self) -> Dict[str, Any]:
+    def _run_tests(self) -> dict[str, Any]:
         logger.info("Running tests...")
         result = self.sandbox.run_command(["python", "-m", "pytest", "tests/"])
         return {"success": result.returncode == 0, "stdout": result.stdout, "stderr": result.stderr}
 
-    def _run_pylint(self, file_path: str) -> Dict[str, Any]:
+    def _run_pylint(self, file_path: str) -> dict[str, Any]:
         logger.info(f"Running Pylint on {file_path}...")
         result = self.sandbox.run_command(["pylint", file_path])
         return {"success": result.returncode == 0, "stdout": result.stdout, "stderr": result.stderr}
@@ -240,7 +246,7 @@ JSON_SCHEMA:
             logger.error(f"Failed to write changes to {file_path}.")
             return False
 
-    def _review_diff(self) -> Dict[str, Any]:
+    def _review_diff(self) -> dict[str, Any]:
         logger.info("Reviewing diff...")
         result = self.sandbox.run_command(["git", "diff"])
         if result.returncode == 0:
@@ -250,7 +256,7 @@ JSON_SCHEMA:
             logger.error(f"Failed to get diff: {result.stderr}")
             return {"success": False, "error": result.stderr}
 
-    def _check_imports(self, file_path: str) -> Dict[str, Any]:
+    def _check_imports(self, file_path: str) -> dict[str, Any]:
         logger.info(f"Checking imports in {file_path}...")
         result = self.sandbox.run_command([
             "python", "-c",
@@ -258,7 +264,7 @@ JSON_SCHEMA:
         ])
         return {"success": result.returncode == 0, "stdout": result.stdout, "stderr": result.stderr}
 
-    def _install_deps(self) -> Dict[str, Any]:
+    def _install_deps(self) -> dict[str, Any]:
         logger.info("Installing dependencies from requirements.txt...")
         result = self.sandbox.run_command(["pip", "install", "-r", "requirements.txt"])
         return {"success": result.returncode == 0, "stdout": result.stdout, "stderr": result.stderr}
@@ -441,19 +447,9 @@ ZeroDivisionError: division by zero
     agent = AgentDev(problem_description, problem_file)
     agent.run()
 
-import datetime as _dt
-from pathlib import Path as _Path
-
 # =====================
 # AgentDev one-shot loop
 # =====================
-from typing import Optional
-
-from stillme_core.ai_manager import AIManager as _AIManager
-from stillme_core.bug_memory import BugMemory as _BugMemory
-from stillme_core.executor import PatchExecutor as _PatchExecutor
-from stillme_core.plan_types import PlanItem as _PlanItem
-from stillme_core.planner import Planner as _Planner
 
 
 def _ensure_log_file(log_dir: _Path) -> _Path:
@@ -535,7 +531,7 @@ def agentdev_run_once(
     result_bool: Optional[bool] = None
     chosen = items[0] if items else None
 
-    log_path = _log_jsonl(log_dir, {"step": "start", "items": len(items or [])})
+    _log_jsonl(log_dir, {"step": "start", "items": len(items or [])})
 
     if not chosen:
         _log_jsonl(log_dir, {"step": "no_plan_items", "ok": True})
