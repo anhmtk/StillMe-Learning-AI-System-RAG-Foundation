@@ -18,7 +18,7 @@ class ExecutionConfig:
     """Execution configuration"""
     timeout: float = 30.0
     max_memory: int = 512  # MB
-    allowed_languages: list[str] = None
+    allowed_languages: Optional[list[str]] = None
     sandbox_mode: bool = True
 
     def __post_init__(self):
@@ -42,7 +42,7 @@ class PatchExecutor:
         """Execute code safely"""
         logger.warning(f"PatchExecutor.execute_code({language}): Stub implementation")
 
-        if language not in self.config.allowed_languages:
+        if self.config.allowed_languages and language not in self.config.allowed_languages:
             return {
                 "success": False,
                 "error": f"Language {language} not allowed",

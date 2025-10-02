@@ -16,7 +16,7 @@ class BugRecord:
     status: str
     created_at: datetime
     updated_at: datetime
-    metadata: dict[str, Any] = None
+    metadata: Optional[dict[str, Any]] = None
 
     def __post_init__(self):
         if self.metadata is None:
