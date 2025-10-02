@@ -8,15 +8,12 @@ Real error scanning, fixing, and validation system.
 
 import json
 import logging
-import os
 import shutil
 import subprocess
-import sys
-import tempfile
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +46,7 @@ class AgentDev:
         self.backup_dir = self.project_root / "agentdev_backups"
         self.backup_dir.mkdir(exist_ok=True)
 
-    def _inventory_check(self) -> Dict[str, Any]:
+    def _inventory_check(self) -> dict[str, Any]:
         """Pre-flight inventory check - mandatory before any operations"""
         issues = []
 
@@ -85,17 +82,16 @@ class AgentDev:
 
         logger.info("🤖 AgentDev initialized")
 
-    def scan_errors(self) -> List[ErrorInfo]:
-        """Scan errors using ruff with JSON output"""
-        logger.info("🔍 Scanning errors with ruff...")
+    def scan_errors(self) -> list[ErrorInfo]:
+        """Scan errors using ruff with JSON output - TRUTH MODE"""
+        logger.info("Scanning errors with ruff...")
 
         try:
-            # Run ruff with JSON output
+            # Run ruff with JSON output - scan entire project like baseline
             cmd = [
                 "ruff", "check",
-                "stillme_ai", "tests",
-                "--output-format=json",
-                "--select", "F821,W293,W291,E302,I001,F401"
+                ".",
+                "--output-format", "json"
             ]
 
             result = subprocess.run(
@@ -105,56 +101,102 @@ class AgentDev:
                 encoding='utf-8',
                 errors='replace',
                 cwd=self.project_root,
-                timeout=60
+                timeout=120
             )
 
             errors = []
+            incomplete_sources = []
+            
+            # Check if command failed
+            if result.returncode != 0:
+                logger.error(f"Ruff failed with return code {result.returncode}")
+                logger.error(f"Stderr: {result.stderr}")
+                incomplete_sources.append("ruff")
+                # Don't return empty list - this would be lying
+                # Return a special error indicator
+                return [ErrorInfo(
+                    file="SYSTEM_ERROR",
+                    line=0,
+                    col=0,
+                    rule="RUFF_FAILED",
+                    msg=f"Ruff command failed with return code {result.returncode}",
+                    severity="system_error"
+                )]
+
             if result.stdout:
                 try:
-                    # Try parsing as JSON array first
+                    # Parse JSON output
                     data_list = json.loads(result.stdout)
                     if isinstance(data_list, list):
                         for data in data_list:
                             if 'code' in data:
+                                # Map severity based on rule type
+                                rule = data.get('code', '')
+                                if rule.startswith('E'):
+                                    severity = 'major'
+                                elif rule.startswith('W'):
+                                    severity = 'minor'
+                                else:
+                                    severity = data.get('severity', 'error')
+                                
                                 error = ErrorInfo(
                                     file=data.get('filename', ''),
                                     line=data.get('location', {}).get('row', 0),
                                     col=data.get('location', {}).get('column', 0),
-                                    rule=data.get('code', ''),
+                                    rule=rule,
                                     msg=data.get('message', ''),
-                                    severity=data.get('severity', 'error')
+                                    severity=severity
                                 )
                                 errors.append(error)
-                except json.JSONDecodeError:
-                    # Fallback to line-by-line parsing
-                    for line in result.stdout.strip().split('\n'):
-                        if line.strip():
-                            try:
-                                data = json.loads(line)
-                                if 'code' in data:
-                                    error = ErrorInfo(
-                                        file=data.get('filename', ''),
-                                        line=data.get('location', {}).get('row', 0),
-                                        col=data.get('location', {}).get('column', 0),
-                                        rule=data.get('code', ''),
-                                        msg=data.get('message', ''),
-                                        severity=data.get('severity', 'error')
-                                    )
-                                    errors.append(error)
-                            except json.JSONDecodeError:
-                                continue
+                except json.JSONDecodeError as e:
+                    logger.error(f"Failed to parse ruff JSON: {e}")
+                    incomplete_sources.append("ruff")
+                    return [ErrorInfo(
+                        file="SYSTEM_ERROR",
+                        line=0,
+                        col=0,
+                        rule="JSON_PARSE_FAILED",
+                        msg=f"Failed to parse ruff JSON: {e}",
+                        severity="system_error"
+                    )]
 
-            logger.info(f"📊 Found {len(errors)} errors")
+            # Save raw output for verification
+            artifacts_dir = self.project_root / "artifacts"
+            artifacts_dir.mkdir(exist_ok=True)
+            raw_path = artifacts_dir / "agentdev_ruff.json"
+            with open(raw_path, 'w', encoding='utf-8') as f:
+                json.dump(errors, f, indent=2, ensure_ascii=False, default=str)
+
+            logger.info(f"Found {len(errors)} errors from ruff")
+            logger.info(f"Raw output saved to: {raw_path}")
+            
+            # Print source counts
+            print(f"Source counts: ruff={len(errors)} | TOTAL={len(errors)}")
+            
             return errors
 
         except subprocess.TimeoutExpired:
-            logger.error("⏰ Ruff scan timeout")
-            return []
+            logger.error("Ruff scan timeout")
+            return [ErrorInfo(
+                file="SYSTEM_ERROR",
+                line=0,
+                col=0,
+                rule="TIMEOUT",
+                msg="Ruff scan timed out after 120s",
+                severity="system_error"
+            )]
         except Exception as e:
-            logger.error(f"❌ Error scanning: {e}")
-            return []
+            logger.error(f"Error scanning: {e}")
+            return [ErrorInfo(
+                file="SYSTEM_ERROR",
+                line=0,
+                col=0,
+                rule="EXCEPTION",
+                msg=f"Exception during scan: {e}",
+                severity="system_error"
+            )]
 
-    def backup_files(self, files: List[str]) -> str:
+    def backup_files(self, files: list[str]) -> str:
         """Backup files before fixing"""
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         backup_path = self.backup_dir / f"backup_{timestamp}"
@@ -173,7 +215,7 @@ class AgentDev:
 
         return str(backup_path)
 
-    def rollback_files(self, backup_path: str, files: List[str]):
+    def rollback_files(self, backup_path: str, files: list[str]):
         """Rollback files from backup"""
         backup_dir = Path(backup_path)
         for file_path in files:
@@ -186,7 +228,7 @@ class AgentDev:
                 if backup_file.exists():
                     shutil.copy2(backup_file, file_path)
 
-    def fix_f821_imports(self, errors: List[ErrorInfo]) -> tuple[int, int, set]:
+    def fix_f821_imports(self, errors: list[ErrorInfo]) -> tuple[int, int, set]:
         """Fix F821 errors by adding missing imports"""
         fixed = 0
         failed = 0
@@ -281,7 +323,7 @@ class AgentDev:
 
         return fixed, failed, files_touched
 
-    def apply_batch_fixes(self, errors: List[ErrorInfo], rule: str) -> Dict[str, Any]:
+    def apply_batch_fixes(self, errors: list[ErrorInfo], rule: str) -> dict[str, Any]:
         """Apply batch fixes for a specific rule"""
         logger.info(f"🔧 Applying batch fixes for {rule}...")
 
@@ -291,7 +333,7 @@ class AgentDev:
             return {"fixed": 0, "failed": 0, "files_touched": 0, "rolled_back": False}
 
         # Get unique files to backup
-        files_to_backup = list(set(e.file for e in rule_errors))
+        files_to_backup = list({e.file for e in rule_errors})
         backup_path = self.backup_files(files_to_backup)
 
         try:
@@ -353,7 +395,7 @@ class AgentDev:
                 "rolled_back": True
             }
 
-    def _fix_unused_imports(self, errors: List[ErrorInfo]) -> tuple[int, int, set]:
+    def _fix_unused_imports(self, errors: list[ErrorInfo]) -> tuple[int, int, set]:
         """Fix unused imports by removing them"""
         fixed = 0
         failed = 0
@@ -399,7 +441,7 @@ class AgentDev:
 
         return fixed, failed, files_touched
 
-    def _fix_whitespace(self, errors: List[ErrorInfo]) -> tuple[int, int, set]:
+    def _fix_whitespace(self, errors: list[ErrorInfo]) -> tuple[int, int, set]:
         """Fix whitespace issues"""
         fixed = 0
         failed = 0
@@ -419,7 +461,7 @@ class AgentDev:
 
             if result.returncode == 0:
                 fixed = len(errors)
-                files_touched = set(e.file for e in errors)
+                files_touched = {e.file for e in errors}
             else:
                 failed = len(errors)
 
@@ -429,7 +471,7 @@ class AgentDev:
 
         return fixed, failed, files_touched
 
-    def _fix_import_sorting(self, errors: List[ErrorInfo]) -> tuple[int, int, set]:
+    def _fix_import_sorting(self, errors: list[ErrorInfo]) -> tuple[int, int, set]:
         """Fix import sorting"""
         fixed = 0
         failed = 0
@@ -449,7 +491,7 @@ class AgentDev:
 
             if result.returncode == 0:
                 fixed = len(errors)
-                files_touched = set(e.file for e in errors)
+                files_touched = {e.file for e in errors}
             else:
                 failed = len(errors)
 
@@ -459,11 +501,11 @@ class AgentDev:
 
         return fixed, failed, files_touched
 
-    def _fix_generic(self, errors: List[ErrorInfo]) -> tuple[int, int, set]:
+    def _fix_generic(self, errors: list[ErrorInfo]) -> tuple[int, int, set]:
         """Generic fix for other rules"""
         return 0, len(errors), set()
 
-    def validate_fixes(self) -> Dict[str, Any]:
+    def validate_fixes(self) -> dict[str, Any]:
         """Validate fixes using ruff + pytest"""
         logger.info("✅ Validating fixes...")
 
@@ -548,7 +590,7 @@ class AgentDev:
 
             # Execute minimal pipeline: scan -> fix blockers -> validate
             initial_errors = self.scan_errors()
-            errors_before = len(initial_errors)
+            len(initial_errors)
 
             # Try to fix blocking errors (F821, E999)
             blocking_errors = [e for e in initial_errors if e.rule in ["F821", "E999"]]
@@ -777,7 +819,7 @@ class AgentDev:
             # Default mode
             return f"[{mode_str}] ✅ success | 🧠 thinking — strategy=default depth=1 modules=Impact task:'{task_excerpt}#{task_hash}' fixed={errors_fixed} remain={errors_remaining}"
 
-    def run_session(self, mode: str = "critical-first") -> Dict[str, Any]:
+    def run_session(self, mode: str = "critical-first") -> dict[str, Any]:
         """Run complete AgentDev session with batch fixing"""
         logger.info(f"🚀 Starting AgentDev session in {mode} mode...")
 
