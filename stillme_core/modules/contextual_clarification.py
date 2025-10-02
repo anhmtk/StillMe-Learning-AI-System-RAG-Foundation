@@ -126,7 +126,7 @@ class ContextAwareClarifier:
 
         # Analyze recent messages
         recent_messages = conversation_history[-5:]  # Last 5 messages
-        domain_scores = {domain: 0 for domain in domain_keywords.keys()}
+        domain_scores = dict.fromkeys(domain_keywords.keys(), 0)
 
         for message in recent_messages:
             content = message.get("content", "").lower()

@@ -14,7 +14,6 @@ import git
 from dotenv import load_dotenv
 from jsonschema import ValidationError, validate
 
-
 # Ensure local modules path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "modules")))
 
@@ -24,7 +23,6 @@ from stillme_core.sandbox_manager import DockerSandboxManager
 
 # Core components
 from stillme_ethical_core.ethics_checker import EthicsChecker
-
 
 # --- Bridge: AgentDev -> API server (/dev-agent/bridge)
 try:
@@ -102,7 +100,7 @@ if not hasattr(EthicsChecker, "assess_framework_safety"):
         # very light safeguard example; customize later
         danger = ("subprocess.run(  # SECURITY: Replaced with safe alternative" in new_code) or ("subprocess.Popen(" in new_code)
         return not danger
-    setattr(EthicsChecker, "assess_framework_safety", _assess_framework_safety_stub)
+    EthicsChecker.assess_framework_safety = _assess_framework_safety_stub
 
 class AgentDev:
     def __init__(self, problem_description: str, problem_file: str):
@@ -225,7 +223,7 @@ JSON_SCHEMA:
             ok = True
             if hasattr(self.ethics_checker, "assess_framework_safety"):
                 try:
-                    ok = bool(getattr(self.ethics_checker, "assess_framework_safety")(old_code, code_to_apply))  # type: ignore[misc]
+                    ok = bool(self.ethics_checker.assess_framework_safety(old_code, code_to_apply))  # type: ignore[misc]
                 except Exception:
                     ok = True
             if not ok:

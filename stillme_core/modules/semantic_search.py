@@ -336,13 +336,13 @@ if __name__ == "__main__":
 
     # Test general search
     results = search.find_related_items("python web framework")
-    print(f"\nSearch for 'python web framework':")
+    print("\nSearch for 'python web framework':")
     for result in results:
         print(f"  - {result.name}: {result.content} (score: {result.relevance_score:.2f})")
 
     # Test category search
     results = search.find_by_category("web_framework")
-    print(f"\nWeb frameworks:")
+    print("\nWeb frameworks:")
     for result in results:
         print(f"  - {result.name}: {result.content}")
 

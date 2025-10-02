@@ -24,16 +24,17 @@ import json
 import logging
 import random
 import sqlite3
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict, Any, List, Optional
-import uuid
 
 # Add project root to path
 import sys
+import uuid
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
 sys.path.append(str(Path(__file__).parent.parent))
 
-from stillme_core.metrics.emitter import MetricsEmitter, Metric
+from stillme_core.metrics.emitter import Metric, MetricsEmitter
 from stillme_core.metrics.registry import get_metrics_registry
 
 logger = logging.getLogger(__name__)

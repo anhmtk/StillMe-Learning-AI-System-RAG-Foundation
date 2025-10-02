@@ -25,6 +25,7 @@ from typing import Dict, List, Optional, Tuple
 
 import docker
 import requests
+
 from ...compat_docker import get_sandbox_deployer
 
 # Add parent directory to path for imports
@@ -59,10 +60,10 @@ class SandboxDeployer:
             project_root: Root directory of the project
         """
         self.project_root = Path(project_root or os.getcwd())
-        
+
         # Use compatibility layer to get appropriate deployer
         self._deployer = get_sandbox_deployer(str(self.project_root))
-        
+
         # Maintain backward compatibility by exposing the same interface
         if hasattr(self._deployer, 'docker_client'):
             self.docker_client = self._deployer.docker_client
@@ -75,7 +76,7 @@ class SandboxDeployer:
             self.sandbox_controller = Mock()
             self.sandbox_controller.create_sandbox = Mock()
             self.sandbox_controller.get_status = Mock(return_value={"status": "fake"})
-            
+
         self.deployment_logs: List[Dict] = []
 
         logger.info(f"🚀 SandboxDeployer initialized for project: {self.project_root}")

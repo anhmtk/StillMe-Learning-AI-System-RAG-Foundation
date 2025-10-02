@@ -4,9 +4,10 @@ Pytest bisect tool to find problematic test files
 """
 
 import os
-import sys
 import subprocess
+import sys
 from pathlib import Path
+
 
 def run_pytest_collect(test_files):
     """Run pytest collect on specific files"""

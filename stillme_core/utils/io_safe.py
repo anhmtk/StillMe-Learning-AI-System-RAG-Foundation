@@ -30,21 +30,21 @@ def safe_read_text(path: Path, encoding: Optional[str] = None) -> str:
             return path.read_text(encoding=encoding)
         except UnicodeDecodeError:
             # Fallback to replace mode
-            with io.open(path, "rb") as f:
+            with open(path, "rb") as f:
                 return f.read().decode(encoding, errors="replace")
-    
+
     # Auto-detect encoding
     encodings_to_try = ["utf-8", "cp1252", "latin-1", "utf-16", "ascii"]
-    
+
     for enc in encodings_to_try:
         try:
             return path.read_text(encoding=enc)
         except (UnicodeDecodeError, FileNotFoundError):
             continue
-    
+
     # Last resort: read as bytes and decode with replace
     try:
-        with io.open(path, "rb") as f:
+        with open(path, "rb") as f:
             return f.read().decode("utf-8", errors="replace")
     except (FileNotFoundError, Exception):
         # Absolute fallback: return empty string
@@ -97,7 +97,7 @@ def safe_decode(data: bytes) -> str:
         Decoded string, never raises UnicodeDecodeError
     """
     import locale
-    
+
     # Preferred encodings in order
     encodings = [
         "utf-8",
@@ -106,15 +106,15 @@ def safe_decode(data: bytes) -> str:
         "latin-1",
         "utf-16"
     ]
-    
+
     # Remove duplicates while preserving order
     unique_encodings = list(dict.fromkeys(encodings))
-    
+
     for encoding in unique_encodings:
         try:
             return data.decode(encoding)
         except UnicodeDecodeError:
             continue
-    
+
     # Last resort: decode with replace
     return data.decode("utf-8", errors="replace")

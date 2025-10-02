@@ -3,11 +3,11 @@
 StillMe Content Integrity Filter
 Lọc và sanitize nội dung từ internet để đảm bảo an toàn
 """
-import re
-import logging
 import json
-from typing import Dict, Any, List, Optional
+import logging
+import re
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -358,7 +358,7 @@ if __name__ == "__main__":
 
     # Show stats
     stats = content_filter.get_stats()
-    print(f"\n📊 Filtering Stats:")
+    print("\n📊 Filtering Stats:")
     print(f"  Total processed: {stats['total_processed']}")
     print(f"  Blocked content: {stats['blocked_content']}")
     print(f"  Sanitized content: {stats['sanitized_content']}")

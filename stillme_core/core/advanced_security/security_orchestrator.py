@@ -576,7 +576,7 @@ async def demo_security_orchestrator():
 
     # Show statistics
     stats = orchestrator.get_exercise_statistics()
-    print(f"\n📊 Orchestrator Statistics:")
+    print("\n📊 Orchestrator Statistics:")
     print(f"  - Total exercises: {stats['stats']['total_exercises']}")
     print(f"  - Completed exercises: {stats['stats']['completed_exercises']}")
     print(f"  - Success rate: {stats['success_rate']:.2f}")

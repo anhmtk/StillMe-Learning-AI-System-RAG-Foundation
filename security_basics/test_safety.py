@@ -3,19 +3,21 @@ Security tests for AgentDev
 Test basic safety, sandbox isolation, and prompt injection defense
 """
 
-import pytest
-import sys
 import os
-from pathlib import Path
-import tempfile
 import shutil
+import sys
+import tempfile
+from pathlib import Path
 
-# Add agent-dev path to sys.path
-agent_dev_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'agent-dev', 'core')
+import pytest
+
+# Add agent_dev path to sys.path
+agent_dev_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'agent_dev', 'core')
 if agent_dev_path not in sys.path:
     sys.path.insert(0, agent_dev_path)
 
 from fixtures import TestFixtures
+
 
 class TestSandboxIsolation:
     """Test sandbox isolation and file operations"""
@@ -259,8 +261,9 @@ class TestResourceLimits:
     def test_execution_time_limits(self):
         """Test execution time limits"""
         try:
-            from agent_dev.core.agentdev import AgentDev
             import time
+
+            from agent_dev.core.agentdev import AgentDev
 
             sandbox = TestFixtures.create_temp_project()
             agentdev = AgentDev(str(sandbox))

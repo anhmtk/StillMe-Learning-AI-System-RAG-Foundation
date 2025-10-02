@@ -166,7 +166,7 @@ class RationaleLogger:
 
         entries = []
         try:
-            with open(log_file, 'r', encoding='utf-8') as f:
+            with open(log_file, encoding='utf-8') as f:
                 for line in f:
                     try:
                         entry = json.loads(line.strip())

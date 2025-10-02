@@ -3,14 +3,15 @@
 Demo Optimization Analyzer - Chạy phân tích tối ưu hóa
 """
 
-import sys
 import os
+import sys
 from pathlib import Path
 
 # Add current directory to path
 sys.path.insert(0, str(Path(__file__).parent))
 
 from optimization.optimization_analyzer import OptimizationAnalyzer
+
 
 def main():
     """Demo optimization analyzer"""
@@ -28,14 +29,14 @@ def main():
     print(f"\n📊 Overall Performance: {analysis['overall_performance']['average_score']:.2f}")
     print(f"🎯 Total Recommendations: {len(analysis['recommendations'])}")
 
-    print(f"\n🔍 Performance Breakdown:")
+    print("\n🔍 Performance Breakdown:")
     print(f"  Persona: {analysis['persona_analysis']['average_score']:.2f}")
     print(f"  Safety: {analysis['safety_analysis']['average_score']:.2f}")
     print(f"  Translation: {analysis['translation_analysis']['average_score']:.2f}")
     print(f"  Efficiency: {analysis['efficiency_analysis']['average_score']:.2f}")
     print(f"  AgentDev: {analysis['agentdev_analysis']['average_score']:.2f}")
 
-    print(f"\n🎯 Top Recommendations:")
+    print("\n🎯 Top Recommendations:")
     for i, rec in enumerate(analysis['recommendations'][:3], 1):
         if isinstance(rec, dict):
             print(f"  {i}. [{rec.get('priority', 'MEDIUM').upper()}] {rec.get('title', 'Unknown')}")

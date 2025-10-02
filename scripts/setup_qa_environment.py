@@ -5,9 +5,10 @@ Installs all necessary tools and configurations for quality assurance
 """
 
 import os
-import sys
 import subprocess
+import sys
 from pathlib import Path
+
 
 def run_command(command, description):
     """Run a command and return success status"""

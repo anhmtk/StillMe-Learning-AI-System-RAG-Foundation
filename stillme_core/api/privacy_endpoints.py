@@ -388,7 +388,7 @@ async def get_privacy_status(user_id: str):
         consent_status = {}
 
         if consent_file.exists():
-            with open(consent_file, 'r') as f:
+            with open(consent_file) as f:
                 consent_status = json.load(f)
 
         return JSONResponse(content={

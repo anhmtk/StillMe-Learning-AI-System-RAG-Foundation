@@ -297,7 +297,7 @@ class SandboxDemo:
 
         if "simulation_details" in self.demo_results:
             details = self.demo_results["simulation_details"]
-            print(f"\n🎯 Security Simulation Details:")
+            print("\n🎯 Security Simulation Details:")
             print(f"   📊 Status: {details['status']}")
             print(f"   🔍 Vulnerabilities: {details['vulnerabilities']}")
             print(f"   🛡️ Defenses: {details['defenses']}")
@@ -305,7 +305,7 @@ class SandboxDemo:
 
         if "resource_usage" in self.demo_results:
             usage = self.demo_results["resource_usage"]
-            print(f"\n💻 Resource Usage:")
+            print("\n💻 Resource Usage:")
             print(f"   🖥️ CPU: {usage.get('cpu_percent', 0):.1f}%")
             print(f"   🧠 Memory: {usage.get('memory_usage_mb', 0):.1f} MB")
             print(f"   📊 Memory %: {usage.get('memory_percent', 0):.1f}%")

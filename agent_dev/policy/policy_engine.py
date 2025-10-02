@@ -4,14 +4,16 @@ StillMe AgentDev Policy Engine
 Enterprise-grade policy enforcement and compliance validation
 """
 
-import yaml
 import json
 import re
 import sys
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+import yaml
+
 
 class PolicySeverity(Enum):
     BLOCK = "BLOCK"      # Must fix before proceeding
@@ -47,7 +49,7 @@ class PolicyEngine:
             print(f"⚠️  Policy file not found: {policy_path}")
             return
 
-        with open(policy_path, 'r') as f:
+        with open(policy_path) as f:
             self.policies = yaml.safe_load(f)
 
     def validate_project_spec(self, spec_path: Optional[str] = None) -> List[PolicyViolation]:
@@ -64,7 +66,7 @@ class PolicyEngine:
                 message="project.spec.yaml not found - using defaults"
             )]
 
-        with open(spec_file, 'r') as f:
+        with open(spec_file) as f:
             spec = yaml.safe_load(f)
 
         violations = []
@@ -89,7 +91,7 @@ class PolicyEngine:
                 message=f"Task config not found: {config_path}"
             )]
 
-        with open(config_file, 'r') as f:
+        with open(config_file) as f:
             config = json.load(f)
 
         violations = []
@@ -147,7 +149,7 @@ class PolicyEngine:
         violations = []
 
         try:
-            with open(file_path, 'r') as f:
+            with open(file_path) as f:
                 content = f.read()
 
             # Check for forbidden model services
@@ -180,7 +182,7 @@ class PolicyEngine:
         violations = []
 
         try:
-            with open(file_path, 'r') as f:
+            with open(file_path) as f:
                 content = f.read()
 
             # Check for forbidden patterns
@@ -256,7 +258,7 @@ class PolicyEngine:
         violations = []
 
         try:
-            with open(file_path, 'r') as f:
+            with open(file_path) as f:
                 content = f.read()
                 lines = content.split('\n')
 
@@ -384,7 +386,7 @@ class PolicyEngine:
             print(f"\n❌ Policy validation FAILED - {len(block_violations)} blocking violations")
             return False
         else:
-            print(f"\n✅ Policy validation PASSED")
+            print("\n✅ Policy validation PASSED")
             return True
 
 def main():

@@ -9,6 +9,7 @@ import os
 import sys
 from pathlib import Path
 
+
 def resolve_conflicts():
     """Resolve conflicts in the project"""
     print("🔧 Resolving conflicts...")

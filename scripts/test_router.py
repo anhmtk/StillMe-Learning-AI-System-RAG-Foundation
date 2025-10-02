@@ -12,17 +12,21 @@ Usage:
     python scripts/test_router.py --all
 """
 
+import argparse
 import os
 import sys
-import argparse
 import time
 import unittest
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Optional, Tuple
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))
 
-from stillme_core.modules.api_provider_manager import UnifiedAPIManager, ComplexityAnalyzer
+from stillme_core.modules.api_provider_manager import (
+    ComplexityAnalyzer,
+    UnifiedAPIManager,
+)
+
 
 class TestComplexityAnalyzer(unittest.TestCase):
     def setUp(self):
@@ -364,7 +368,7 @@ class RouterTestSuite:
             }
         }
 
-        print(f"\n📊 Unit Test Results:")
+        print("\n📊 Unit Test Results:")
         print(f"  Tests run: {test_results['tests_run']}")
         print(f"  Failures: {test_results['failures']}")
         print(f"  Errors: {test_results['errors']}")
@@ -400,7 +404,7 @@ class RouterTestSuite:
             }
         }
 
-        print(f"\n📊 Integration Test Results:")
+        print("\n📊 Integration Test Results:")
         print(f"  Tests run: {test_results['tests_run']}")
         print(f"  Failures: {test_results['failures']}")
         print(f"  Errors: {test_results['errors']}")
@@ -451,7 +455,7 @@ class RouterTestSuite:
             'performance_grade': self._get_performance_grade(analysis_time + selection_time)
         }
 
-        print(f"\n📊 Performance Test Results:")
+        print("\n📊 Performance Test Results:")
         print(f"  Complexity analysis time: {analysis_time*1000:.2f}ms")
         print(f"  Model selection time: {selection_time*1000:.2f}ms")
         print(f"  Total time: {test_results['total_time']*1000:.2f}ms")
@@ -496,7 +500,7 @@ class RouterTestSuite:
         }
 
         # Print summary
-        print(f"\n📊 Full Test Suite Summary")
+        print("\n📊 Full Test Suite Summary")
         print("=" * 60)
         print(f"Unit tests: {unit_results['success_rate']:.1%} success rate")
         print(f"Integration tests: {integration_results['success_rate']:.1%} success rate")

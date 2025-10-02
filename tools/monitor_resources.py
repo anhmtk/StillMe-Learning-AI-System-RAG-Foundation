@@ -1,8 +1,10 @@
-import time
-import psutil
 import csv
 import os
 import sys
+import time
+
+import psutil
+
 
 def monitor_resources():
     """Monitor CPU and RAM usage during K6 test"""

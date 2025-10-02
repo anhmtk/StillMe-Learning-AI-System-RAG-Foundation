@@ -25,7 +25,7 @@ def load_router():
     if mode == "pro":
         try:
             mod = importlib.import_module("stillme_private.plugin")
-            ProRouter = getattr(mod, "ProRouter")
+            ProRouter = mod.ProRouter
             log.info("Using ProRouter due to STILLME_ROUTER_MODE=pro")
             return ProRouter()
         except Exception as e:
@@ -36,7 +36,7 @@ def load_router():
     # Auto-detect: prefer Pro, else Stub
     try:
         mod = importlib.import_module("stillme_private.plugin")
-        ProRouter = getattr(mod, "ProRouter")
+        ProRouter = mod.ProRouter
         log.info("Using ProRouter (auto-detected).")
         return ProRouter()
     except Exception as e:

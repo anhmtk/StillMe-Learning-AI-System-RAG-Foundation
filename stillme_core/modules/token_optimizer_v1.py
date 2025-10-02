@@ -18,6 +18,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 import numpy as np
 import tiktoken
 from pydantic import BaseModel, ConfigDict, Field
+
 from stillme_core.embeddings import SentenceTransformerBackend
 
 # ======================
@@ -82,7 +83,7 @@ class SemanticHybridCache:
             " ntn ": " như thế nào ",
             # Also handle without spaces
             "ko": "không",
-            "dc": "được", 
+            "dc": "được",
             "ntn": "như thế nào",
         }
         for k, v in replacements.items():
@@ -98,7 +99,7 @@ class SemanticHybridCache:
             import logging
             logger = logging.getLogger(__name__)
             logger.warning(f"Embedding failed for text '{text[:50]}...': {e}")
-            
+
             # Return a deterministic fallback embedding based on text hash
             import hashlib
             text_hash = hashlib.md5(text.encode('utf-8')).hexdigest()

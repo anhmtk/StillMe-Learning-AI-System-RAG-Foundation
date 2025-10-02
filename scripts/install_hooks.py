@@ -1,4 +1,5 @@
 import secrets
+
 #!/usr/bin/env python3
 """
 Install pre-commit hooks for NicheRadar v1.5
@@ -6,9 +7,10 @@ Sets up development environment with quality gates
 """
 
 import os
-import sys
 import subprocess
+import sys
 from pathlib import Path
+
 
 def run_command(command, description):
     """Run a command and return success status"""
@@ -184,7 +186,7 @@ config/production.yaml
 
     gitignore_path = Path(".gitignore")
     if gitignore_path.exists():
-        with open(gitignore_path, "r") as f:
+        with open(gitignore_path) as f:
             existing_content = f.read()
 
         if "Test artifacts" not in existing_content:

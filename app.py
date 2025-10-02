@@ -3,16 +3,17 @@
 StillMe AI Backend - Local Development
 Simple backend for desktop/mobile app testing via LAN IP
 """
-import os
-import time
+import asyncio
 import json
 import logging
-import requests
-import asyncio
-from datetime import datetime
-from typing import Optional, Dict, Any, List
+import os
+import time
 from dataclasses import asdict
-from http.server import HTTPServer, BaseHTTPRequestHandler
+from datetime import datetime
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from typing import Any, Dict, List, Optional
+
+import requests
 
 # Load policies
 try:
@@ -25,17 +26,17 @@ except Exception as e:
 
 # Import internet access modules
 try:
-    from market_intel import market_intel
-    from content_integrity_filter import content_filter
-    from sandbox_controller import sandbox_controller
+    from cache.web_cache import cache_data, generate_cache_key, get_cached_data
     from config.validate_env import env_validator
+    from content_integrity_filter import content_filter
+    from market_intel import market_intel
+    from metrics.web_metrics import record_request
+    from policy.tool_gate import validate_tool_request
+    from sandbox_controller import sandbox_controller
+    from security.content_wrap import wrap_content
 
     # Web Access v2 imports
     from web_tools import web_tools
-    from policy.tool_gate import validate_tool_request
-    from security.content_wrap import wrap_content
-    from cache.web_cache import get_cached_data, cache_data, generate_cache_key
-    from metrics.web_metrics import record_request
 
     print("✅ Internet access modules loaded successfully")
     print("✅ Web Access v2 modules loaded successfully")
@@ -312,8 +313,8 @@ class SmartRouter:
 
             # Import NicheRadar modules
             from niche_radar.collectors import collect_all_data
-            from niche_radar.scoring import NicheScorer
             from niche_radar.playbook import PlaybookGenerator
+            from niche_radar.scoring import NicheScorer
 
             # Extract topics from message
             topics = self._extract_topics_from_message(message)
@@ -356,7 +357,7 @@ class SmartRouter:
                     if "playbook" in message.lower() or "kế hoạch" in message.lower():
                         playbook_generator = PlaybookGenerator()
                         top_playbook = playbook_generator.generate_playbook(top_niches[0])
-                        response += f"\n\n📋 **EXECUTION PLAYBOOK FOR TOP NICHE:**\n"
+                        response += "\n\n📋 **EXECUTION PLAYBOOK FOR TOP NICHE:**\n"
                         response += f"**Product:** {top_playbook.product_brief.title}\n"
                         response += f"**MVP Development:** {top_playbook.mvp_spec.estimated_development_days} days\n"
                         response += f"**Pricing:** ${top_playbook.pricing_suggestion.tiers[1].price}/month (Professional tier)\n"

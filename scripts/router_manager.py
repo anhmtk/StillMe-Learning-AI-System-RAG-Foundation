@@ -12,19 +12,20 @@ Usage:
     python scripts/router_manager.py --maintenance
 """
 
-import os
-import sys
 import argparse
-import time
 import json
+import os
 import subprocess
+import sys
+import time
 from datetime import datetime
 from typing import Dict, List, Optional
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))
 
-from modules.api_provider_manager import UnifiedAPIManager, ComplexityAnalyzer
+from modules.api_provider_manager import ComplexityAnalyzer, UnifiedAPIManager
+
 
 class RouterManager:
     def __init__(self):
@@ -45,16 +46,16 @@ class RouterManager:
         try:
             # Check analyzer status
             analyzer_stats = self.analyzer.get_stats()
-            print(f"🧠 Complexity Analyzer:")
-            print(f"  Status: ✅ Active")
+            print("🧠 Complexity Analyzer:")
+            print("  Status: ✅ Active")
             print(f"  Total Analyses: {analyzer_stats['performance']['total_analyses']}")
             print(f"  Average Analysis Time: {analyzer_stats['performance']['avg_time_ms']:.2f}ms")
             print(f"  Fallback Triggers: {analyzer_stats['fallback']['total_triggers']}")
 
             # Check manager status
             model_prefs = self.manager.model_preferences
-            print(f"\n🎯 Model Manager:")
-            print(f"  Status: ✅ Active")
+            print("\n🎯 Model Manager:")
+            print("  Status: ✅ Active")
             print(f"  Available Models: {len(model_prefs)}")
             print(f"  Model Preferences: {model_prefs}")
 
@@ -65,7 +66,7 @@ class RouterManager:
             self._check_configuration()
 
             # Overall status
-            print(f"\n🎯 Overall Status: ✅ Healthy")
+            print("\n🎯 Overall Status: ✅ Healthy")
 
             return {
                 'analyzer': analyzer_stats,
@@ -79,7 +80,7 @@ class RouterManager:
 
     def _check_system_resources(self):
         """Check system resources"""
-        print(f"\n💻 System Resources:")
+        print("\n💻 System Resources:")
 
         try:
             import psutil
@@ -97,13 +98,13 @@ class RouterManager:
             print(f"  Disk Usage: {disk.percent:.1f}% ({disk.used / 1024 / 1024 / 1024:.1f}GB / {disk.total / 1024 / 1024 / 1024:.1f}GB)")
 
         except ImportError:
-            print(f"  ⚠️  psutil not available, cannot check system resources")
+            print("  ⚠️  psutil not available, cannot check system resources")
         except Exception as e:
             print(f"  ❌ Error checking system resources: {e}")
 
     def _check_configuration(self):
         """Check configuration"""
-        print(f"\n⚙️  Configuration:")
+        print("\n⚙️  Configuration:")
 
         try:
             stats = self.analyzer.get_stats()
@@ -129,7 +130,7 @@ class RouterManager:
                 'COMPLEXITY_THRESHOLD_MEDIUM'
             ]
 
-            print(f"  Environment Variables:")
+            print("  Environment Variables:")
             for var in env_vars:
                 value = os.getenv(var, 'Not set')
                 print(f"    {var}: {value}")
@@ -145,19 +146,19 @@ class RouterManager:
         try:
             stats = self.analyzer.get_stats()
 
-            print(f"🧠 Complexity Analyzer Configuration:")
-            print(f"  Weights:")
+            print("🧠 Complexity Analyzer Configuration:")
+            print("  Weights:")
             for key, value in stats['weights'].items():
                 print(f"    {key}: {value}")
 
-            print(f"  Thresholds:")
+            print("  Thresholds:")
             for key, value in stats['thresholds'].items():
                 print(f"    {key}: {value}")
 
-            print(f"\n🎯 Model Manager Configuration:")
+            print("\n🎯 Model Manager Configuration:")
             print(f"  Model Preferences: {self.manager.model_preferences}")
 
-            print(f"\n🌐 Environment Variables:")
+            print("\n🌐 Environment Variables:")
             env_vars = [
                 'COMPLEXITY_WEIGHT_LENGTH',
                 'COMPLEXITY_WEIGHT_COMPLEX_INDICATORS',
@@ -228,7 +229,7 @@ class RouterManager:
             print("\n📊 No monitoring data collected")
             return
 
-        print(f"\n📊 Monitoring Summary")
+        print("\n📊 Monitoring Summary")
         print("=" * 40)
 
         total_data_points = len(monitoring_data)
@@ -245,7 +246,7 @@ class RouterManager:
             analyses_increase = last_stats['performance']['total_analyses'] - first_stats['performance']['total_analyses']
             fallbacks_increase = last_stats['fallback']['total_triggers'] - first_stats['fallback']['total_triggers']
 
-            print(f"\n📈 Trends:")
+            print("\n📈 Trends:")
             print(f"  Analyses Increase: {analyses_increase}")
             print(f"  Fallbacks Increase: {fallbacks_increase}")
 
@@ -279,7 +280,7 @@ class RouterManager:
                 print(f"  ❌ {task_name}: Error - {e}")
 
         # Print maintenance summary
-        print(f"\n📊 Maintenance Summary")
+        print("\n📊 Maintenance Summary")
         print("=" * 40)
 
         successful_tasks = sum(1 for r in results.values() if r['status'] == 'success')

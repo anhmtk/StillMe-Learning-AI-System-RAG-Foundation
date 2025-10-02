@@ -64,9 +64,9 @@ RELATED FILES / FILES LIÊN QUAN:
 🎉 This is a compliance-critical module for audit management!
 """
 
-import logging
 import json
-from dataclasses import dataclass, asdict
+import logging
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
@@ -138,7 +138,7 @@ class AuditLogger:
         self.logger = logging.getLogger(__name__)
         self.logger.info("📋 AuditLogger initialized")
 
-    def log_event(self, 
+    def log_event(self,
                   level: AuditLevel,
                   category: AuditCategory,
                   message: str,
@@ -163,7 +163,7 @@ class AuditLogger:
         """
         try:
             event_id = f"audit_{len(self.events)}_{int(datetime.now().timestamp())}"
-            
+
             event = AuditEvent(
                 event_id=event_id,
                 timestamp=datetime.now().isoformat(),
@@ -175,14 +175,14 @@ class AuditLogger:
                 details=details or {},
                 metadata=metadata or {}
             )
-            
+
             self.events.append(event)
-            
+
             # Log to standard logger
             log_message = f"[{category.value.upper()}] {message}"
             if user_id:
                 log_message += f" (User: {user_id})"
-            
+
             if level == AuditLevel.CRITICAL:
                 self.logger.critical(log_message)
             elif level == AuditLevel.ERROR:
@@ -191,14 +191,14 @@ class AuditLogger:
                 self.logger.warning(log_message)
             else:
                 self.logger.info(log_message)
-            
+
             return event_id
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error logging audit event: {e}")
             return ""
 
-    def log_security_event(self, 
+    def log_security_event(self,
                           message: str,
                           level: AuditLevel = AuditLevel.WARNING,
                           user_id: Optional[str] = None,
@@ -267,18 +267,18 @@ class AuditLogger:
         """
         try:
             filtered_events = self.events
-            
+
             if category:
                 filtered_events = [e for e in filtered_events if e.category == category]
-            
+
             if level:
                 filtered_events = [e for e in filtered_events if e.level == level]
-            
+
             if user_id:
                 filtered_events = [e for e in filtered_events if e.user_id == user_id]
-            
+
             return filtered_events[-limit:] if limit > 0 else filtered_events
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error getting audit events: {e}")
             return []
@@ -298,35 +298,35 @@ class AuditLogger:
                 "by_user": {},
                 "recent_activity": 0
             }
-            
+
             for event in self.events:
                 # Count by category
                 category = event.category.value
                 stats["by_category"][category] = stats["by_category"].get(category, 0) + 1
-                
+
                 # Count by level
                 level = event.level.value
                 stats["by_level"][level] = stats["by_level"].get(level, 0) + 1
-                
+
                 # Count by user
                 if event.user_id:
                     user = event.user_id
                     stats["by_user"][user] = stats["by_user"].get(user, 0) + 1
-            
+
             # Count recent activity (last 24 hours)
             recent_time = datetime.now().timestamp() - 86400  # 24 hours ago
             stats["recent_activity"] = len([
-                e for e in self.events 
+                e for e in self.events
                 if datetime.fromisoformat(e.timestamp).timestamp() > recent_time
             ])
-            
+
             return stats
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error getting audit statistics: {e}")
             return {}
 
-    def export_events(self, 
+    def export_events(self,
                      format_type: str = "json",
                      category: Optional[AuditCategory] = None,
                      level: Optional[AuditLevel] = None) -> str:
@@ -343,17 +343,17 @@ class AuditLogger:
         """
         try:
             events = self.get_events(category=category, level=level, limit=0)
-            
+
             if format_type.lower() == "json":
                 return json.dumps([event.to_dict() for event in events], indent=2)
             else:
                 # CSV format
                 if not events:
                     return ""
-                
+
                 headers = ["event_id", "timestamp", "level", "category", "message", "user_id"]
                 rows = [headers]
-                
+
                 for event in events:
                     row = [
                         event.event_id,
@@ -364,9 +364,9 @@ class AuditLogger:
                         event.user_id or ""
                     ]
                     rows.append(row)
-                
+
                 return "\n".join([",".join(str(cell) for cell in row) for row in rows])
-                
+
         except Exception as e:
             self.logger.error(f"❌ Error exporting audit events: {e}")
             return ""
@@ -389,7 +389,7 @@ class AuditLogger:
             self.config = new_config
             self.logger.info("🔧 Audit configuration updated")
             return True
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error updating audit configuration: {e}")
             return False
@@ -430,7 +430,7 @@ class PrivacyFilter:
 __all__ = [
     "AuditLogger",
     "AuditEvent",
-    "AuditLevel", 
+    "AuditLevel",
     "AuditCategory",
     "AuditConfig",
     "ComplianceManager",

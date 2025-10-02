@@ -8,13 +8,15 @@ import asyncio
 import json
 import time
 import uuid
-from typing import Dict, List, Optional, Any, Set, Callable
-from dataclasses import dataclass, asdict
-from enum import Enum
-import yaml
-from pathlib import Path
-import networkx as nx
 from collections import defaultdict, deque
+from dataclasses import asdict, dataclass
+from enum import Enum
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Set
+
+import networkx as nx
+import yaml
+
 
 class NodeStatus(Enum):
     """DAG node status"""
@@ -109,7 +111,7 @@ class DAGEngine:
             config_file = Path("agent-dev/config/dag_engine.yaml")
 
         if config_file.exists():
-            with open(config_file, 'r') as f:
+            with open(config_file) as f:
                 return yaml.safe_load(f)
         else:
             return {
@@ -143,7 +145,7 @@ class DAGEngine:
             if not dag_path.exists():
                 raise FileNotFoundError(f"DAG file not found: {dag_path}")
 
-            with open(dag_path, 'r') as f:
+            with open(dag_path) as f:
                 dag_data = yaml.safe_load(f)
 
             dag_id = dag_data['id']
@@ -213,7 +215,7 @@ class DAGEngine:
             start_time=time.time(),
             end_time=None,
             duration=None,
-            nodes_status={node_id: NodeStatus.PENDING for node_id in dag_graph.nodes},
+            nodes_status=dict.fromkeys(dag_graph.nodes, NodeStatus.PENDING),
             nodes_output={},
             nodes_errors={},
             execution_log=[],

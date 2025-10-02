@@ -69,7 +69,7 @@ class HealthChecker:
                 "core": "ok",
                 "storage": "ok" if self._check_basic_storage() else "degraded"
             }
-            
+
             return {
                 "status": "ok",
                 "components": components,
@@ -349,17 +349,21 @@ class HealthChecker:
 
 def create_health_endpoints(app, config: Dict[str, Any]):
     """Create health check endpoints for the application"""
-    from .health_integration import register_health_endpoint, register_liveness_endpoint, register_metrics_endpoint
-    
+    from .health_integration import (
+        register_health_endpoint,
+        register_liveness_endpoint,
+        register_metrics_endpoint,
+    )
+
     health_checker = HealthChecker(config)
-    
+
     # Register endpoints using adapter for compatibility (liveness first for test compatibility)
     liveness_result = register_liveness_endpoint(app, health_checker)
     health_result = register_health_endpoint(app, health_checker)
     metrics_result = register_metrics_endpoint(app, health_checker)
-    
+
     logger.info(f"Health endpoints registered: health={health_result['used_style']}, liveness={liveness_result['used_style']}, metrics={metrics_result['used_style']}")
-    
+
     # Fallback: if adapter failed, use decorator style
     if "failed" in health_result['used_style']:
         @app.route('/healthz')
@@ -376,7 +380,7 @@ def create_health_endpoints(app, config: Dict[str, Any]):
             except Exception as e:
                 logger.error(f"Health probe failed: {e}")
                 return {"status": "error", "error": str(e)}, 503
-    
+
     if "failed" in liveness_result['used_style']:
         @app.route('/readyz')
         def liveness_probe():

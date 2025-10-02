@@ -6,9 +6,9 @@
 Chạy AgentDev với P1 improvements và validation.
 """
 
+import json
 import os
 import sys
-import json
 import time
 from pathlib import Path
 
@@ -17,9 +17,11 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(project_root / "agent_dev" / "core"))
 
-from agent_dev.core.agentdev import AgentDev
-from symbol_index import SymbolIndex
 from advanced_fixer import AdvancedFixer
+from symbol_index import SymbolIndex
+
+from agent_dev.core.agentdev import AgentDev
+
 
 def main():
     """Main function"""
@@ -47,13 +49,13 @@ def main():
     f821_errors = [e for e in errors if e.error_type.value == "undefined_name"]
     other_errors = [e for e in errors if e.error_type.value != "undefined_name"]
 
-    print(f"📋 Error breakdown:")
+    print("📋 Error breakdown:")
     print(f"  - F821 undefined name: {len(f821_errors)}")
     print(f"  - Other errors: {len(other_errors)}")
 
     # Fix F821 errors in batches
     if f821_errors:
-        print(f"\n🔧 Fixing F821 errors in batches of 20...")
+        print("\n🔧 Fixing F821 errors in batches of 20...")
         advanced_fixer = AdvancedFixer(str(project_root))
 
         batch_size = 20
@@ -86,13 +88,13 @@ def main():
                 print(f"    ❌ Batch failed: {e}")
                 break
 
-        print(f"\n📊 F821 Fix Summary:")
+        print("\n📊 F821 Fix Summary:")
         print(f"  - Total fixed: {total_fixed}")
         print(f"  - Total failed: {total_failed}")
         print(f"  - Success rate: {total_fixed/(total_fixed+total_failed)*100:.1f}%" if (total_fixed+total_failed) > 0 else "  - Success rate: N/A")
 
     # Final validation
-    print(f"\n🔍 Final validation...")
+    print("\n🔍 Final validation...")
     final_errors = agentdev._scan_errors()
     print(f"📊 Final error count: {len(final_errors)}")
 
@@ -108,7 +110,7 @@ def main():
         "improvement": len(errors) - len(final_errors)
     }
 
-    print(f"\n📋 FINAL SUMMARY:")
+    print("\n📋 FINAL SUMMARY:")
     print(json.dumps(summary, indent=2))
 
     # Save summary to file

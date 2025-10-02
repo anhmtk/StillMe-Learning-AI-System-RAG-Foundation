@@ -5,19 +5,20 @@ Phase 1: Primary files (production code, configs, docs)
 Phase 2: Excluded files (artifacts, dependencies, build outputs)
 """
 
-import os
-import json
+import argparse
 import csv
 import hashlib
-import subprocess
-import argparse
-import multiprocessing as mp
-from pathlib import Path
-from datetime import datetime
-from typing import Dict, List, Any, Optional, Set
+import json
 import mimetypes
-from concurrent.futures import ProcessPoolExecutor, as_completed
+import multiprocessing as mp
+import os
+import subprocess
 import time
+from concurrent.futures import ProcessPoolExecutor, as_completed
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set
+
 
 def process_file_batch(file_paths: List[Path], repo_root: Path, with_hash: bool = False) -> List[Dict[str, Any]]:
     """Process a batch of files in parallel"""

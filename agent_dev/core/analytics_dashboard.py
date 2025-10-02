@@ -11,18 +11,20 @@ Tính năng:
 5. Custom Reports - Generator báo cáo tùy chỉnh
 """
 
-import os
 import json
-import time
+import os
 import sqlite3
+import time
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
+from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
 # import matplotlib.pyplot as plt
 # import pandas as pd
 import numpy as np
-from typing import Dict, List, Optional, Any, Tuple
-from pathlib import Path
-from dataclasses import dataclass, asdict
-from datetime import datetime, timedelta
-from enum import Enum
+
 # import plotly.graph_objects as go
 # import plotly.express as px
 # from plotly.subplots import make_subplots
@@ -229,7 +231,7 @@ class AnalyticsDashboard:
 
         for file_path in python_files:
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, encoding='utf-8') as f:
                     content = f.read()
 
                 lines = content.split('\n')
@@ -345,7 +347,7 @@ class AnalyticsDashboard:
 
         for file_path in python_files:
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, encoding='utf-8') as f:
                     content = f.read()
 
                 # Kiểm tra các pattern bảo mật
@@ -401,7 +403,7 @@ class AnalyticsDashboard:
         total_test_functions = 0
         for test_file in test_files:
             try:
-                with open(test_file, 'r', encoding='utf-8') as f:
+                with open(test_file, encoding='utf-8') as f:
                     content = f.read()
 
                 for line in content.split('\n'):

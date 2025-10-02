@@ -21,12 +21,12 @@ class EmbeddingRuntimeError(Exception):
 
 class EmbeddingWorker:
     """Subprocess-based embedding worker for Windows safety"""
-    
+
     def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
         self.model_name = model_name
         self._worker_script = self._create_worker_script()
         self._timeout = 20  # 20 seconds timeout
-    
+
     def _create_worker_script(self) -> Path:
         """Create the worker script"""
         script_content = '''
@@ -71,24 +71,24 @@ def main():
 if __name__ == "__main__":
     main()
 '''
-        
+
         # Write script to temporary file
         script_path = Path(tempfile.gettempdir()) / "embedding_worker.py"
         script_path.write_text(script_content)
         return script_path
-    
+
     def embed(self, texts: List[str]) -> List[List[float]]:
         """Generate embeddings using subprocess worker"""
         if not texts:
             return []
-        
+
         try:
             # Prepare input data
             input_data = {
                 "model": self.model_name,
                 "texts": texts
             }
-            
+
             # Run worker subprocess
             result = subprocess.run(
                 [sys.executable, str(self._worker_script)],
@@ -97,32 +97,32 @@ if __name__ == "__main__":
                 text=True,
                 timeout=self._timeout
             )
-            
+
             if result.returncode != 0:
                 error_msg = result.stderr or "Unknown subprocess error"
                 raise EmbeddingRuntimeError(f"Worker failed: {error_msg}")
-            
+
             # Parse output
             try:
                 output_data = json.loads(result.stdout)
             except json.JSONDecodeError as e:
                 raise EmbeddingRuntimeError(f"Invalid JSON output: {e}")
-            
+
             if "error" in output_data:
                 raise EmbeddingRuntimeError(f"Worker error: {output_data['error']}")
-            
+
             if "embeddings" not in output_data:
                 raise EmbeddingRuntimeError("No embeddings in output")
-            
+
             return output_data["embeddings"]
-            
+
         except subprocess.TimeoutExpired:
             raise EmbeddingRuntimeError(f"Worker timeout after {self._timeout}s")
         except Exception as e:
             if isinstance(e, EmbeddingRuntimeError):
                 raise
             raise EmbeddingRuntimeError(f"Worker execution failed: {e}")
-    
+
     def cleanup(self):
         """Cleanup worker script"""
         try:

@@ -284,7 +284,7 @@ class PIIRedactor:
         stats = {'total_redactions': 0, 'by_type': {}}
 
         try:
-            with open(self.config.audit_log_path, 'r', encoding='utf-8') as f:
+            with open(self.config.audit_log_path, encoding='utf-8') as f:
                 for line in f:
                     try:
                         entry = json.loads(line.strip())

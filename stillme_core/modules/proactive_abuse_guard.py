@@ -158,9 +158,9 @@ class ProactiveAbuseGuard:
                         self.events.append(event)
                         self.logger.warning(f"🚨 Abuse detected: {pattern_type.value}")
                         return event
-            
+
             return None
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error detecting abuse: {e}")
             return None
@@ -183,7 +183,7 @@ class ProactiveAbuseGuard:
                 return ThreatLevel.CRITICAL
             else:
                 return ThreatLevel.MEDIUM
-                
+
         except Exception as e:
             self.logger.error(f"❌ Error assessing threat: {e}")
             return ThreatLevel.LOW
@@ -206,7 +206,7 @@ class ProactiveAbuseGuard:
             else:
                 self.logger.info(f"📋 Manual response required for {event.pattern_type.value}")
                 return False
-                
+
         except Exception as e:
             self.logger.error(f"❌ Error responding to threat: {e}")
             return False
@@ -225,16 +225,16 @@ class ProactiveAbuseGuard:
                 "threat_levels": {},
                 "recent_activity": len([e for e in self.events if e.timestamp])
             }
-            
+
             for event in self.events:
                 pattern = event.pattern_type.value
                 threat = event.threat_level.value
-                
+
                 stats["patterns_detected"][pattern] = stats["patterns_detected"].get(pattern, 0) + 1
                 stats["threat_levels"][threat] = stats["threat_levels"].get(threat, 0) + 1
-            
+
             return stats
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error getting statistics: {e}")
             return {}
@@ -257,7 +257,7 @@ class ProactiveAbuseGuard:
             self.config = new_config
             self.logger.info("🔧 Configuration updated")
             return True
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error updating configuration: {e}")
             return False
@@ -266,7 +266,7 @@ class ProactiveAbuseGuard:
 # Export main class
 __all__ = [
     "ProactiveAbuseGuard",
-    "AbuseEvent", 
+    "AbuseEvent",
     "AbusePattern",
     "ThreatLevel",
     "GuardConfig"

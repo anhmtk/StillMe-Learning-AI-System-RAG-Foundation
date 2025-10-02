@@ -5,17 +5,18 @@ Runs all tests and generates comprehensive reports
 """
 
 import argparse
-import sys
-import os
-from pathlib import Path
-import logging
-from datetime import datetime
 import json
+import logging
+import os
+import sys
+from datetime import datetime
+from pathlib import Path
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from optimization.optimization_analyzer import OptimizationAnalyzer
+
 # Import functions that exist
 try:
     from generate_large_dataset import generate_large_dataset
@@ -176,7 +177,7 @@ def print_final_summary(summary):
     print(f"📝 Message: {slo_message}")
 
     alert_summary = opt_analysis.get('alert_summary', {})
-    print(f"\n🚨 Alert Summary:")
+    print("\n🚨 Alert Summary:")
     print(f"   - Critical: {alert_summary.get('critical', 0)}")
     print(f"   - High: {alert_summary.get('high', 0)}")
     print(f"   - Medium: {alert_summary.get('medium', 0)}")

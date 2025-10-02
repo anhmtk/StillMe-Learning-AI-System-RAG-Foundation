@@ -6,10 +6,11 @@ Improved Impact Analyzer - Enhanced dependency detection
 import os
 import re
 import time
-from typing import Dict, List, Set, Optional, Tuple, Any
-from pathlib import Path
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set, Tuple
+
 
 class ImpactLevel(Enum):
     """Mức độ tác động"""

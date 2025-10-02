@@ -2,12 +2,14 @@
 """
 StillMe Desktop Chat App - Giao diện chat như DeepSeek
 """
-import tkinter as tk
-from tkinter import ttk, scrolledtext, messagebox
-import requests
 import json
 import threading
+import tkinter as tk
 from datetime import datetime
+from tkinter import messagebox, scrolledtext, ttk
+
+import requests
+
 
 class StillMeChatApp:
     def __init__(self, root):

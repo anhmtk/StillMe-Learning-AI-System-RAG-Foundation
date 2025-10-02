@@ -6,20 +6,22 @@
 Phân loại F821 errors để tạo kế hoạch fix.
 """
 
-import os
-import sys
 import json
+import os
 import re
+import sys
+from collections import Counter, defaultdict
 from pathlib import Path
-from collections import defaultdict, Counter
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(project_root / "agent_dev" / "core"))
 
-from agent_dev.core.agentdev import AgentDev
 from symbol_index import SymbolIndex
+
+from agent_dev.core.agentdev import AgentDev
+
 
 def analyze_f821_errors():
     """Analyze F821 errors and categorize them"""
@@ -119,7 +121,7 @@ def main():
     """Main function"""
     analysis = analyze_f821_errors()
 
-    print(f"\n📋 ANALYSIS RESULTS:")
+    print("\n📋 ANALYSIS RESULTS:")
     print(f"Total F821 errors: {analysis['total_f821_errors']}")
     print(f"Source vs Tests: {analysis['src_vs_tests']}")
     print(f"Top missing symbols: {analysis['top_missing_symbols'][:5]}")
@@ -128,10 +130,10 @@ def main():
     with open(project_root / "f821_analysis.json", "w", encoding="utf-8") as f:
         json.dump(analysis, f, indent=2, ensure_ascii=False)
 
-    print(f"\n💾 Detailed analysis saved to f821_analysis.json")
+    print("\n💾 Detailed analysis saved to f821_analysis.json")
 
     # Print symbol analysis
-    print(f"\n🔍 SYMBOL ANALYSIS:")
+    print("\n🔍 SYMBOL ANALYSIS:")
     for symbol, info in list(analysis["symbol_analysis"].items())[:10]:
         status = "✅ CORE" if info["in_core"] else "📦 STDLIB" if info["is_stdlib"] else "❌ MISSING"
         print(f"  {symbol}: {status} ({info['occurrences']} occurrences)")

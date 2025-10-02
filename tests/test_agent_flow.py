@@ -20,18 +20,17 @@ class TestAgentFlow:
             PlanItem(
                 id="test-1",
                 title="Run simple test",
-                action="run_tests",
-                target=str(test_file),
-                tests_to_run=[str(test_file)],
+                description="Run simple test",
+                steps=[],
             )
         ]
 
-        with patch("stillme_core.controller.Planner") as mock_planner_class:
+        with patch("stillme_core.core.planner.Planner") as mock_planner_class:
             mock_planner = Mock()
             mock_planner.build_plan.return_value = mock_plan_items
             mock_planner_class.return_value = mock_planner
 
-            with patch("stillme_core.controller.PatchExecutor") as mock_executor_class:
+            with patch("stillme_core.executor.PatchExecutor") as mock_executor_class:
                 mock_executor = Mock()
                 mock_executor.apply_patch_and_test.return_value = {
                     "ok": True,
@@ -41,7 +40,7 @@ class TestAgentFlow:
                 }
                 mock_executor_class.return_value = mock_executor
 
-                with patch("stillme_core.controller.Verifier") as mock_verifier_class:
+                with patch("stillme_core.verifier.Verifier") as mock_verifier_class:
                     mock_verifier = Mock()
                     mock_verifier.verify.return_value = {
                         "passed": True,
@@ -50,8 +49,9 @@ class TestAgentFlow:
                     mock_verifier_class.return_value = mock_verifier
 
                     # Run the agent
-                    controller = AgentController(repo_root=str(tmp_path))
-                    result = controller.run_agent("Run unit tests", max_steps=1)
+                    controller = AgentController()
+                    import asyncio
+                    result = asyncio.run(controller.execute_task("Run unit tests"))
 
                     # Verify result structure
                     assert "summary" in result
@@ -85,18 +85,17 @@ class TestAgentFlow:
             PlanItem(
                 id="test-1",
                 title="Run failing test",
-                action="run_tests",
-                target="test_fail.py",
-                tests_to_run=["test_fail.py"],
+                description="Run failing test",
+                steps=[],
             )
         ]
 
-        with patch("stillme_core.controller.Planner") as mock_planner_class:
+        with patch("stillme_core.core.planner.Planner") as mock_planner_class:
             mock_planner = Mock()
             mock_planner.build_plan.return_value = mock_plan_items
             mock_planner_class.return_value = mock_planner
 
-            with patch("stillme_core.controller.PatchExecutor") as mock_executor_class:
+            with patch("stillme_core.executor.PatchExecutor") as mock_executor_class:
                 mock_executor = Mock()
                 mock_executor.apply_patch_and_test.return_value = {
                     "ok": False,
@@ -106,7 +105,7 @@ class TestAgentFlow:
                 }
                 mock_executor_class.return_value = mock_executor
 
-                with patch("stillme_core.controller.Verifier") as mock_verifier_class:
+                with patch("stillme_core.verifier.Verifier") as mock_verifier_class:
                     mock_verifier = Mock()
                     mock_verifier.verify.return_value = {
                         "passed": False,
@@ -115,8 +114,9 @@ class TestAgentFlow:
                     mock_verifier_class.return_value = mock_verifier
 
                     # Run the agent
-                    controller = AgentController(repo_root=str(tmp_path))
-                    result = controller.run_agent("Run failing tests", max_steps=1)
+                    controller = AgentController()
+                    import asyncio
+                    result = asyncio.run(controller.execute_task("Run failing tests"))
 
                     # Verify result
                     assert result["total_steps"] == 1
@@ -134,14 +134,15 @@ class TestAgentFlow:
 
     def test_run_agent_no_plan_items(self, tmp_path):
         """Test agent flow when no plan items are generated"""
-        with patch("stillme_core.controller.Planner") as mock_planner_class:
+        with patch("stillme_core.core.planner.Planner") as mock_planner_class:
             mock_planner = Mock()
             mock_planner.build_plan.return_value = []  # No plan items
             mock_planner_class.return_value = mock_planner
 
             # Run the agent
-            controller = AgentController(repo_root=str(tmp_path))
-            result = controller.run_agent("No plan goal", max_steps=1)
+            controller = AgentController()
+            import asyncio
+            result = asyncio.run(controller.execute_task("No plan goal"))
 
             # Verify result
             assert result["total_steps"] == 0
@@ -156,25 +157,23 @@ class TestAgentFlow:
             PlanItem(
                 id="test-1",
                 title="Step 1",
-                action="run_tests",
-                target="test1.py",
-                tests_to_run=["test1.py"],
+                description="Step 1",
+                steps=[],
             ),
             PlanItem(
                 id="test-2",
                 title="Step 2",
-                action="run_tests",
-                target="test2.py",
-                tests_to_run=["test2.py"],
+                description="Step 2",
+                steps=[],
             ),
         ]
 
-        with patch("stillme_core.controller.Planner") as mock_planner_class:
+        with patch("stillme_core.core.planner.Planner") as mock_planner_class:
             mock_planner = Mock()
             mock_planner.build_plan.return_value = mock_plan_items
             mock_planner_class.return_value = mock_planner
 
-            with patch("stillme_core.controller.PatchExecutor") as mock_executor_class:
+            with patch("stillme_core.executor.PatchExecutor") as mock_executor_class:
                 mock_executor = Mock()
                 # First step passes, second fails
                 mock_executor.apply_patch_and_test.side_effect = [
@@ -193,7 +192,7 @@ class TestAgentFlow:
                 ]
                 mock_executor_class.return_value = mock_executor
 
-                with patch("stillme_core.controller.Verifier") as mock_verifier_class:
+                with patch("stillme_core.verifier.Verifier") as mock_verifier_class:
                     mock_verifier = Mock()
                     # First verification passes, second fails
                     mock_verifier.verify.side_effect = [
@@ -203,8 +202,9 @@ class TestAgentFlow:
                     mock_verifier_class.return_value = mock_verifier
 
                     # Run the agent
-                    controller = AgentController(repo_root=str(tmp_path))
-                    result = controller.run_agent("Run multiple tests", max_steps=2)
+                    controller = AgentController()
+                    import asyncio
+                    result = asyncio.run(controller.execute_task("Run multiple tests"))
 
                     # Verify result
                     assert result["total_steps"] == 2
@@ -218,13 +218,14 @@ class TestAgentFlow:
 
     def test_run_agent_convenience_function(self, tmp_path):
         """Test the convenience function"""
-        with patch("stillme_core.controller.Planner") as mock_planner_class:
+        with patch("stillme_core.core.planner.Planner") as mock_planner_class:
             mock_planner = Mock()
             mock_planner.build_plan.return_value = []
             mock_planner_class.return_value = mock_planner
 
             # Test convenience function
-            result = run_agent("Test goal", max_steps=1, repo_root=str(tmp_path))
+            import asyncio
+            result = asyncio.run(run_agent("Test goal"))
 
             # Verify result structure
             assert "summary" in result
@@ -234,14 +235,15 @@ class TestAgentFlow:
 
     def test_run_agent_exception_handling(self, tmp_path):
         """Test agent flow with exceptions"""
-        with patch("stillme_core.controller.Planner") as mock_planner_class:
+        with patch("stillme_core.core.planner.Planner") as mock_planner_class:
             mock_planner = Mock()
             mock_planner.build_plan.side_effect = Exception("Planner error")
             mock_planner_class.return_value = mock_planner
 
             # Run the agent
-            controller = AgentController(repo_root=str(tmp_path))
-            result = controller.run_agent("Error goal", max_steps=1)
+            controller = AgentController()
+            import asyncio
+            result = asyncio.run(controller.execute_task("Error goal"))
 
             # Verify result
             assert result["total_steps"] == 0

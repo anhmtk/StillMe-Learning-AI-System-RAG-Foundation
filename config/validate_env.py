@@ -3,9 +3,10 @@
 StillMe Environment Validation
 Kiểm tra các API keys và cấu hình khi khởi động
 """
-import os
 import logging
+import os
 from typing import Dict, List, Tuple
+
 from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
@@ -116,7 +117,7 @@ class EnvironmentValidator:
         total_required = len(self.required_keys)
         valid_required = sum(1 for k in self.required_keys.keys() if self.validation_results.get(k, False))
 
-        logger.info(f"\n📊 Summary:")
+        logger.info("\n📊 Summary:")
         logger.info(f"  Required keys: {valid_required}/{total_required}")
         logger.info(f"  Missing keys: {len(self.missing_keys)}")
         logger.info(f"  Warnings: {len(self.warnings)}")
@@ -173,7 +174,7 @@ if __name__ == "__main__":
 
     # Show summary
     summary = env_validator.get_validation_summary()
-    print(f"\n📊 Validation Summary:")
+    print("\n📊 Validation Summary:")
     print(f"  Valid required: {summary['valid_required']}/{summary['total_required']}")
     print(f"  Missing: {len(summary['missing_keys'])}")
     print(f"  Warnings: {len(summary['warnings'])}")

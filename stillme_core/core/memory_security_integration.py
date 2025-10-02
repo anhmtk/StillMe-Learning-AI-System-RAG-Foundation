@@ -25,74 +25,63 @@ from cryptography.fernet import Fernet
 # Import Phase 0 security modules
 try:
     from .security_middleware import SecurityMiddleware  # type: ignore
-try:
-try:
-try:
-try:
-try:
-                        from .performance_monitor import PerformanceMonitor
 except ImportError:
     pass
+
+try:
+    from .performance_monitor import PerformanceMonitor
 except ImportError:
     pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
+try:
     from .integration_bridge import IntegrationBridge  # type: ignore
 except ImportError:
-    try:
-        from stillme_core.security_middleware import SecurityMiddleware  # type: ignore
+    pass
+
 try:
-try:
-try:
-try:
-try:
-                            from stillme_core.performance_monitor import PerformanceMonitor
+    from stillme_core.security_middleware import SecurityMiddleware  # type: ignore
 except ImportError:
     pass
+
+try:
+    from stillme_core.performance_monitor import PerformanceMonitor
 except ImportError:
     pass
+
+try:
+    from stillme_core.integration_bridge import IntegrationBridge  # type: ignore
 except ImportError:
     pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-        from stillme_core.integration_bridge import IntegrationBridge  # type: ignore
-    except ImportError:
-        # Create mock classes for testing
-        class SecurityMiddleware:
-            def __init__(self):
-                pass
 
-            def validate_input(self, data):
-                return {"is_valid": True, "threats_detected": []}
+# Create mock classes for testing
+class SecurityMiddleware:
+    def __init__(self):
+        pass
 
-            def check_rate_limit(self, client_ip, endpoint):
-                return True
+    def validate_input(self, data):
+        return {"is_valid": True, "threats_detected": []}
 
-            def get_security_report(self):
-                return {"security_score": 100}
+    def check_rate_limit(self, client_ip, endpoint):
+        return True
 
-        class PerformanceMonitor:
-            def __init__(self):
-                pass
+    def get_security_report(self):
+        return {"security_score": 100}
 
-            def start_monitoring(self):
-                pass
+class PerformanceMonitor:
+    def __init__(self):
+        pass
 
-            def get_performance_summary(self):
-                return {"status": "healthy"}
+    def start_monitoring(self):
+        pass
 
-        class IntegrationBridge:
-            def __init__(self):
-                pass
+    def get_performance_summary(self):
+        return {"status": "healthy"}
 
-            def register_endpoint(self, method, path, handler, auth_required=False):
-                pass
+class IntegrationBridge:
+    def __init__(self):
+        pass
+
+    def register_endpoint(self, method, path, handler, auth_required=False):
+        pass
 
 
 # Import memory modules
@@ -101,11 +90,7 @@ try:
     from modules.secure_memory_manager import SecureMemoryManager, SecureMemoryConfig
 except ImportError:
 try:
-try:
-try:
-try:
-try:
-                        from layered_memory_v1 import LayeredMemoryV1
+    from layered_memory_v1 import LayeredMemoryV1
 except ImportError:
     pass
 except ImportError:

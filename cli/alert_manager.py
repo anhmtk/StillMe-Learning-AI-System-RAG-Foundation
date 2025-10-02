@@ -18,20 +18,24 @@ Version: 2.0.0
 Date: 2025-09-28
 """
 
-import asyncio
 import argparse
+import asyncio
 import json
 import logging
 import sys
 from datetime import datetime, timedelta
-from typing import Dict, Any, List
 from pathlib import Path
+from typing import Any, Dict, List
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from stillme_core.alerting.alert_manager import get_alert_manager, AlertManager
-from stillme_core.alerting.learning_alerts import get_learning_alert_manager, LearningAlertManager, LearningMetrics
+from stillme_core.alerting.alert_manager import AlertManager, get_alert_manager
+from stillme_core.alerting.learning_alerts import (
+    LearningAlertManager,
+    LearningMetrics,
+    get_learning_alert_manager,
+)
 
 # Configure logging
 logging.basicConfig(

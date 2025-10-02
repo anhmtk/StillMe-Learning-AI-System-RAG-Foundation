@@ -3,18 +3,21 @@ Unit tests for AgentDev core modules
 Test cases for Senior Thinking, Execution Engine, and Learning Foundation
 """
 
-import pytest
-import sys
 import os
+import sys
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, Mock, patch
 
-# Add agent-dev path to sys.path
-agent_dev_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'agent-dev', 'core')
+import pytest
+
+# Add agent_dev path to sys.path
+agent_dev_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'agent_dev', 'core')
 if agent_dev_path not in sys.path:
     sys.path.insert(0, agent_dev_path)
 
+from agent_dev.core.agentdev import AgentDev
 from fixtures import TestFixtures
+
 
 class TestImpactAnalyzer:
     """Test Impact Analysis module"""
@@ -213,7 +216,7 @@ class TestAgentDev:
 
             # Assertions
             assert agentdev is not None
-            assert agentdev.mode == AgentMode.SENIOR
+            assert agentdev.mode == "critical-first"
             assert hasattr(agentdev, 'impact_analyzer')
             assert hasattr(agentdev, 'business_analyzer')
             assert hasattr(agentdev, 'security_analyzer')
@@ -221,7 +224,7 @@ class TestAgentDev:
             TestFixtures.cleanup_temp_project(temp_project)
 
         except ImportError:
-            pytest.skip("AgentDevUnified not available")
+            pytest.skip("AgentDev not available")
 
     def test_agentdev_task_execution(self):
         """Test basic task execution"""
@@ -233,7 +236,7 @@ class TestAgentDev:
 
             # Test task execution
             task = "Create a test module"
-            result = agentdev.execute_task(task, AgentMode.SENIOR)
+            result = agentdev.execute_task(task, "SENIOR")
 
             # Assertions
             assert result is not None
@@ -242,7 +245,7 @@ class TestAgentDev:
             TestFixtures.cleanup_temp_project(temp_project)
 
         except ImportError:
-            pytest.skip("AgentDevUnified not available")
+            pytest.skip("AgentDev not available")
 
     def test_agentdev_senior_thinking(self):
         """Test senior thinking mode"""
@@ -254,7 +257,7 @@ class TestAgentDev:
 
             # Test senior thinking
             task = "Implement security feature"
-            result = agentdev.execute_task(task, AgentMode.SENIOR)
+            result = agentdev.execute_task(task, "SENIOR")
 
             # Should include thinking analysis
             assert "🧠" in result or "thinking" in result.lower()
@@ -262,7 +265,7 @@ class TestAgentDev:
             TestFixtures.cleanup_temp_project(temp_project)
 
         except ImportError:
-            pytest.skip("AgentDevUnified not available")
+            pytest.skip("AgentDev not available")
 
 class TestExperienceLearner:
     """Test Experience Learning module"""
@@ -320,15 +323,16 @@ class TestPerformance:
     def test_single_operation_performance(self):
         """Test single operation performance (≤ 2000ms)"""
         try:
-            from agent_dev.core.agentdev import AgentDev
             import time
+
+            from agent_dev.core.agentdev import AgentDev
 
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDev(str(temp_project))
 
             # Measure execution time
             start_time = time.time()
-            result = agentdev.execute_task("Create test file", AgentMode.SENIOR)
+            result = agentdev.execute_task("Create test file", "SENIOR")
             end_time = time.time()
 
             execution_time = (end_time - start_time) * 1000  # Convert to ms
@@ -339,20 +343,21 @@ class TestPerformance:
             TestFixtures.cleanup_temp_project(temp_project)
 
         except ImportError:
-            pytest.skip("AgentDevUnified not available")
+            pytest.skip("AgentDev not available")
 
     def test_basic_concurrency_performance(self):
         """Test basic concurrency performance (≤ 5s for 10 operations)"""
         try:
-            from agent_dev.core.agentdev import AgentDev
-            import time
             import concurrent.futures
+            import time
+
+            from agent_dev.core.agentdev import AgentDev
 
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDev(str(temp_project))
 
             def execute_task(task_id):
-                return agentdev.execute_task(f"Create test file {task_id}", AgentMode.SIMPLE)
+                return agentdev.execute_task(f"Create test file {task_id}", "SIMPLE")
 
             # Measure concurrent execution time
             start_time = time.time()
@@ -371,4 +376,4 @@ class TestPerformance:
             TestFixtures.cleanup_temp_project(temp_project)
 
         except ImportError:
-            pytest.skip("AgentDevUnified not available")
+            pytest.skip("AgentDev not available")

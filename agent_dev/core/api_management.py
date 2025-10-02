@@ -11,20 +11,22 @@ Tính năng:
 5. Version Management - Quản lý phiên bản API (v1, v2 baseline)
 """
 
-import os
-import json
-import time
 import asyncio
-import aiohttp
-import yaml
-from typing import Dict, List, Optional, Any, Tuple, Union
-from pathlib import Path
-from dataclasses import dataclass, asdict
+import json
+import os
+import random
+import re
+import string
+import time
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
-import re
-import random
-import string
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+import aiohttp
+import yaml
+
 
 class APIMethod(Enum):
     """HTTP Methods"""
@@ -141,7 +143,7 @@ class APIManagementSystem:
 
     def _load_openapi_spec(self, file_path: Path):
         """Load OpenAPI specification"""
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding='utf-8') as f:
             if file_path.suffix == '.yaml':
                 spec = yaml.safe_load(f)
             else:

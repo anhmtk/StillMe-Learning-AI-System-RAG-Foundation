@@ -11,16 +11,17 @@ Usage:
     python scripts/calibrate_router.py --auto-tune
 """
 
+import argparse
 import os
 import sys
-import argparse
 import time
 from typing import Dict, List, Tuple
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))
 
-from modules.api_provider_manager import UnifiedAPIManager, ComplexityAnalyzer
+from modules.api_provider_manager import ComplexityAnalyzer, UnifiedAPIManager
+
 
 class RouterCalibrator:
     def __init__(self):
@@ -221,7 +222,7 @@ class RouterCalibrator:
         else:
             model = "deepseek-chat"
 
-        print(f"\n📊 Analysis results:")
+        print("\n📊 Analysis results:")
         print(f"  Prompt: {prompt}")
         print(f"  Complexity score: {score:.3f}")
         print(f"  Selected model: {model}")
@@ -361,7 +362,7 @@ def main():
         print("🧪 Running AI Router Test Suite")
         print("=" * 50)
         results = calibrator.test_current_config()
-        print(f"\n📊 Final Results:")
+        print("\n📊 Final Results:")
         for category, accuracy in results.items():
             print(f"  {category}: {accuracy:.1%}")
     elif args.interactive:

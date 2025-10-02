@@ -10,13 +10,13 @@ Version: 1.0.0
 Last Updated: 2025-09-26
 """
 
-import os
-import sys
-import json
-import re
-from pathlib import Path
-from typing import Dict, List, Any
 import argparse
+import json
+import os
+import re
+import sys
+from pathlib import Path
+from typing import Any, Dict, List
 
 
 class SecurityFixer:
@@ -46,7 +46,7 @@ class SecurityFixer:
                 continue
 
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, encoding='utf-8') as f:
                     content = f.read()
 
                 original_content = content
@@ -87,7 +87,7 @@ class SecurityFixer:
                 continue
 
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, encoding='utf-8') as f:
                     content = f.read()
 
                 original_content = content
@@ -123,7 +123,7 @@ class SecurityFixer:
                 continue
 
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, encoding='utf-8') as f:
                     content = f.read()
 
                 original_content = content
@@ -164,7 +164,7 @@ class SecurityFixer:
                 continue
 
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, encoding='utf-8') as f:
                     content = f.read()
 
                 original_content = content
@@ -292,7 +292,7 @@ LOG_LEVEL=INFO
         self.create_security_config()
         self.create_env_example()
 
-        print(f"\n✅ Security fixes completed!")
+        print("\n✅ Security fixes completed!")
         print(f"   Fixes applied: {self.fixes_applied}")
         print(f"   Improvements: {len(self.security_improvements)}")
 
@@ -315,20 +315,20 @@ def main():
     # Run all fixes
     fixes_applied, improvements = fixer.run_all_fixes()
 
-    print(f"\n🔒 Security Fix Summary:")
+    print("\n🔒 Security Fix Summary:")
     print(f"   Fixes Applied: {fixes_applied}")
     print(f"   Improvements: {len(improvements)}")
 
     if improvements:
-        print(f"\n📋 Improvements Made:")
+        print("\n📋 Improvements Made:")
         for improvement in improvements:
             print(f"   - {improvement}")
 
-    print(f"\n🎯 Next Steps:")
-    print(f"   1. Review and test all changes")
-    print(f"   2. Update .env file with actual values")
-    print(f"   3. Run security scan to verify improvements")
-    print(f"   4. Update documentation")
+    print("\n🎯 Next Steps:")
+    print("   1. Review and test all changes")
+    print("   2. Update .env file with actual values")
+    print("   3. Run security scan to verify improvements")
+    print("   4. Update documentation")
 
 
 if __name__ == "__main__":

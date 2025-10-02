@@ -11,11 +11,13 @@ Version: 2.0.0
 """
 
 import os
-from typing import Dict, Any, Optional
-from .shared.config import SharedConfig
-from .core.config import CoreConfig
+from typing import Any, Dict, Optional
+
 from .agent_dev.config import AgentDevConfig
+from .core.config import CoreConfig
 from .platform.config import PlatformConfig
+from .shared.config import SharedConfig
+
 
 class ConfigManager:
     """Centralized configuration manager with hierarchy support"""

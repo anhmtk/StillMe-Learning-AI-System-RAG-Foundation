@@ -192,7 +192,7 @@ class ClarificationHandler:
         try:
             config_file = Path(config_path)
             if config_file.exists():
-                with open(config_file, 'r', encoding='utf-8') as f:
+                with open(config_file, encoding='utf-8') as f:
                     loaded_config = yaml.safe_load(f)
                     # Merge with defaults
                     clarification_config = loaded_config.get("clarification", {})

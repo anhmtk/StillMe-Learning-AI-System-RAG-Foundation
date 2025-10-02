@@ -7,7 +7,7 @@ Scans for potential secrets in code and configuration
 import re
 import sys
 from pathlib import Path
-from typing import List, Tuple, Set
+from typing import List, Set, Tuple
 
 # Common secret patterns
 SECRET_PATTERNS = [
@@ -126,7 +126,7 @@ def scan_file(file_path: Path) -> List[Tuple[int, str, str]]:
     findings = []
 
     try:
-        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+        with open(file_path, encoding='utf-8', errors='ignore') as f:
             content = f.read()
 
         for pattern in SECRET_PATTERNS:

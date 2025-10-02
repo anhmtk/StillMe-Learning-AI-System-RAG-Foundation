@@ -6,13 +6,14 @@ Pre-commit hook to check for null bytes in test files
 import sys
 from pathlib import Path
 
+
 def check_file_for_null_bytes(file_path):
     """Check if file contains null bytes"""
     try:
         with open(file_path, 'rb') as f:
             content = f.read()
             if b'\x00' in content:
-                return True, f"File contains null bytes"
+                return True, "File contains null bytes"
         return False, "OK"
     except Exception as e:
         return True, f"Error reading file: {e}"

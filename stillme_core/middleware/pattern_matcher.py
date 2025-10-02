@@ -37,7 +37,7 @@ class PatternMatcher:
         """Load patterns from config/reflex_patterns.yaml"""
         try:
             import yaml
-            with open("config/reflex_patterns.yaml", "r", encoding="utf-8") as f:
+            with open("config/reflex_patterns.yaml", encoding="utf-8") as f:
                 data = yaml.safe_load(f) or {}
 
             # Load literal patterns

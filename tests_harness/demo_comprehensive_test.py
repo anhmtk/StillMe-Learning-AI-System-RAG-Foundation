@@ -11,12 +11,12 @@ Tính năng:
 """
 
 import json
-import time
 import logging
-from typing import Dict, List, Any
+import sys
+import time
 from datetime import datetime
 from pathlib import Path
-import sys
+from typing import Any, Dict, List
 
 # Add current directory to path for imports
 sys.path.append(str(Path(__file__).parent))
@@ -289,7 +289,7 @@ class ComprehensiveTestDemo:
 
             # Files generated
             files = demo_report.get('files_generated', {})
-            print(f"\n📁 Files Generated:")
+            print("\n📁 Files Generated:")
             for file_type, file_path in files.items():
                 if file_path:
                     print(f"   • {file_type}: {file_path}")
@@ -297,7 +297,7 @@ class ComprehensiveTestDemo:
             # Evaluation results summary
             evaluator_results = demo_report.get('results', {}).get('evaluator_testing', {})
             if evaluator_results and 'error' not in evaluator_results:
-                print(f"\n📊 Evaluation Results Summary:")
+                print("\n📊 Evaluation Results Summary:")
 
                 # Persona results
                 persona_report = evaluator_results.get('persona_evaluation', {}).get('report', {})

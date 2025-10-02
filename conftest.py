@@ -1,11 +1,13 @@
 """Pytest configuration and fixtures for StillMe Framework"""
 
-import pytest
-import tempfile
 import os
+import tempfile
 import time
 from pathlib import Path
-from typing import Dict, Any, Generator, List
+from typing import Any, Dict, Generator, List
+
+import pytest
+
 
 @pytest.fixture
 def temp_dir() -> Generator[Path, None, None]:

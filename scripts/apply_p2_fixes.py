@@ -6,12 +6,12 @@
 Apply fixes for F821 errors using compat layer and missing implementations.
 """
 
-import os
-import sys
 import json
+import os
 import subprocess
-from pathlib import Path
+import sys
 from collections import defaultdict
+from pathlib import Path
 
 # Add project root to path
 project_root = Path(__file__).parent.parent
@@ -19,6 +19,7 @@ sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(project_root / "agent_dev" / "core"))
 
 from agent_dev.core.agentdev import AgentDev
+
 
 def apply_p2_fixes():
     """Apply P2 fixes for F821 errors"""
@@ -35,7 +36,7 @@ def apply_p2_fixes():
     print(f"📊 Found {len(f821_before)} F821 errors before fixes")
 
     # Load analysis
-    with open(project_root / "f821_analysis.json", "r", encoding="utf-8") as f:
+    with open(project_root / "f821_analysis.json", encoding="utf-8") as f:
         analysis = json.load(f)
 
     # Group errors by file
@@ -53,7 +54,7 @@ def apply_p2_fixes():
 
         try:
             # Read file
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 lines = f.readlines()
 
             # Add imports at the top
@@ -102,7 +103,7 @@ def apply_p2_fixes():
 
                 print(f"  ✅ Added {len(imports_added)} imports")
             else:
-                print(f"  ⏭️ No imports to add")
+                print("  ⏭️ No imports to add")
 
             files_processed += 1
 
@@ -110,7 +111,7 @@ def apply_p2_fixes():
             print(f"  ❌ Error processing {file_path}: {e}")
 
     # Scan for errors after fixes
-    print(f"\n🔍 Scanning for errors after fixes...")
+    print("\n🔍 Scanning for errors after fixes...")
     errors_after = agentdev._scan_errors()
     f821_after = [e for e in errors_after if e.error_type.value == "undefined_name"]
 
@@ -136,7 +137,7 @@ def apply_p2_fixes():
         "success_rate": f"{(len(f821_before) - len(f821_after)) / len(f821_before) * 100:.1f}%" if len(f821_before) > 0 else "N/A"
     }
 
-    print(f"\n📋 P2 FIX REPORT:")
+    print("\n📋 P2 FIX REPORT:")
     print(json.dumps(report, indent=2))
 
     # Save report
@@ -153,7 +154,7 @@ def main():
         print(f"\n✅ P2 SUCCESS: Fixed {report['improvement']} F821 errors!")
         print(f"Success rate: {report['success_rate']}")
     else:
-        print(f"\n❌ P2 FAILED: No improvement in F821 errors")
+        print("\n❌ P2 FAILED: No improvement in F821 errors")
 
 if __name__ == "__main__":
     main()

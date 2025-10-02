@@ -539,12 +539,12 @@ class HealthChecker:
         print(f"Coverage: {summary['coverage_percent']:.1f}%")
         print(f"Security High: {summary['security_high_severity']}")
 
-        print(f"\n📊 Reports generated:")
-        print(f"- docs/SYSTEM_HEALTH.md")
-        print(f"- reports/health_check.json")
-        print(f"- artifacts/coverage/")
-        print(f"- artifacts/bandit-report.json")
-        print(f"- artifacts/semgrep-report.json")
+        print("\n📊 Reports generated:")
+        print("- docs/SYSTEM_HEALTH.md")
+        print("- reports/health_check.json")
+        print("- artifacts/coverage/")
+        print("- artifacts/bandit-report.json")
+        print("- artifacts/semgrep-report.json")
 
         return self.results["overall_status"] == "PASS"
 

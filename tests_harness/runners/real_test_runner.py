@@ -11,14 +11,15 @@ Tính năng:
 """
 
 import json
-import time
-import requests
 import logging
-from typing import Dict, List, Any, Optional, Tuple
-from datetime import datetime
-from pathlib import Path
 import os
 import sys
+import time
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+import requests
 
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent))
@@ -444,7 +445,7 @@ class RealTestRunner:
     def load_test_cases_from_file(self, file_path: str) -> List[Dict[str, Any]]:
         """Load test cases từ file"""
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 if file_path.endswith('.json'):
                     return json.load(f)
                 elif file_path.endswith('.jsonl'):

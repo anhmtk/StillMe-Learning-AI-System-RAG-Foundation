@@ -4,16 +4,16 @@ Template Filler Module - Sinh biến thể từ template slots
 Tạo nhiều biến thể bằng cách thay thế các placeholder trong template
 """
 
-import json
 import asyncio
+import json
 import logging
+import os
 import random
-from typing import List, Dict, Any, Optional, Set
+import re
+import sys
 from dataclasses import dataclass
 from pathlib import Path
-import sys
-import os
-import re
+from typing import Any, Dict, List, Optional, Set
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -421,7 +421,7 @@ class TemplateFillerAugmentor:
 
         # Load custom templates
         templates = []
-        with open(template_path, 'r', encoding='utf-8') as f:
+        with open(template_path, encoding='utf-8') as f:
             data = json.load(f)
             for template_data in data.get("templates", []):
                 slots = []

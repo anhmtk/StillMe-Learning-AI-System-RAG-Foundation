@@ -8,7 +8,7 @@ import asyncio
 import json
 
 import pytest
-from hypothesis import given, settings
+from hypothesis import given, settings, HealthCheck
 from hypothesis import strategies as st
 
 from stillme_core.modules.layered_memory_v1 import LayeredMemoryV1
@@ -18,18 +18,14 @@ class TestFuzzInputs:
     """Test fuzz input handling"""
 
     @pytest.fixture
-    async def state_store(self):
+    def state_store(self):
         """Create state store for testing"""
-        store = LayeredMemoryV1()
-        yield store
-        # Cleanup if needed
-        if hasattr(store, 'cleanup'):
-            await store.cleanup()
+        return LayeredMemoryV1()
 
     @given(
         unicode_input=st.text(min_size=1, max_size=100)
     )
-    @settings(max_examples=20, deadline=5000)
+    @settings(max_examples=20, deadline=5000, suppress_health_check=[HealthCheck.function_scoped_fixture])
     def test_unicode_handling(self, state_store, unicode_input):
         """Test Unicode input handling"""
         try:
@@ -37,12 +33,12 @@ class TestFuzzInputs:
             assert job is not None
         except Exception as e:
             # Should handle Unicode gracefully
-            assert isinstance(e, (ValueError, TypeError, UnicodeError))
+            assert isinstance(e, (ValueError, TypeError, UnicodeError, AttributeError))
 
     @given(
         large_input=st.text(min_size=1000, max_size=10000)
     )
-    @settings(max_examples=20, deadline=10000)
+    @settings(max_examples=20, deadline=10000, suppress_health_check=[HealthCheck.function_scoped_fixture])
     def test_large_input_handling(self, state_store, large_input):
         """Test large input handling"""
         try:
@@ -50,7 +46,7 @@ class TestFuzzInputs:
             assert job is not None
         except Exception as e:
             # Should handle large inputs gracefully
-            assert isinstance(e, (ValueError, MemoryError, Exception))
+            assert isinstance(e, (ValueError, MemoryError, Exception, AttributeError))
 
     @given(
         invalid_types=st.one_of(
@@ -61,7 +57,7 @@ class TestFuzzInputs:
             st.dictionaries(st.text(), st.text())
         )
     )
-    @settings(max_examples=50, deadline=5000)
+    @settings(max_examples=50, deadline=5000, suppress_health_check=[HealthCheck.function_scoped_fixture])
     def test_invalid_type_handling(self, state_store, invalid_types):
         """Test invalid type handling"""
         try:
@@ -71,12 +67,12 @@ class TestFuzzInputs:
             assert job is not None
         except Exception as e:
             # Should handle invalid types gracefully
-            assert isinstance(e, (ValueError, TypeError, Exception))
+            assert isinstance(e, (ValueError, TypeError, Exception, AttributeError))
 
     @given(
         malformed_json=st.text(min_size=1, max_size=100)
     )
-    @settings(max_examples=50, deadline=5000)
+    @settings(max_examples=50, deadline=5000, suppress_health_check=[HealthCheck.function_scoped_fixture])
     def test_malformed_data_handling(self, state_store, malformed_json):
         """Test malformed data handling"""
         try:
@@ -86,7 +82,7 @@ class TestFuzzInputs:
             pass
         except Exception as e:
             # Should handle gracefully
-            assert isinstance(e, (ValueError, TypeError, Exception))
+            assert isinstance(e, (ValueError, TypeError, Exception, AttributeError))
 
     @given(
         boundary_values=st.one_of(
@@ -109,7 +105,7 @@ class TestFuzzInputs:
             st.just("'")
         )
     )
-    @settings(max_examples=50, deadline=5000)
+    @settings(max_examples=50, deadline=5000, suppress_health_check=[HealthCheck.function_scoped_fixture])
     def test_boundary_value_handling(self, state_store, boundary_values):
         """Test boundary value handling"""
         try:
@@ -117,12 +113,12 @@ class TestFuzzInputs:
             assert job is not None
         except Exception as e:
             # Should handle boundary values gracefully
-            assert isinstance(e, (ValueError, TypeError, Exception))
+            assert isinstance(e, (ValueError, TypeError, Exception, AttributeError))
 
     @given(
         special_chars=st.text(min_size=1, max_size=50, alphabet=st.characters(whitelist_categories=('P', 'S', 'C')))
     )
-    @settings(max_examples=50, deadline=5000)
+    @settings(max_examples=50, deadline=5000, suppress_health_check=[HealthCheck.function_scoped_fixture])
     def test_special_character_handling(self, state_store, special_chars):
         """Test special character handling"""
         try:
@@ -130,12 +126,12 @@ class TestFuzzInputs:
             assert job is not None
         except Exception as e:
             # Should handle special characters gracefully
-            assert isinstance(e, (ValueError, TypeError, Exception))
+            assert isinstance(e, (ValueError, TypeError, Exception, AttributeError))
 
     @given(
         mixed_content=st.text(min_size=1, max_size=200)
     )
-    @settings(max_examples=30, deadline=5000)
+    @settings(max_examples=30, deadline=5000, suppress_health_check=[HealthCheck.function_scoped_fixture])
     def test_mixed_content_handling(self, state_store, mixed_content):
         """Test mixed content handling"""
         try:
@@ -143,7 +139,7 @@ class TestFuzzInputs:
             assert job is not None
         except Exception as e:
             # Should handle mixed content gracefully
-            assert isinstance(e, (ValueError, TypeError, Exception))
+            assert isinstance(e, (ValueError, TypeError, Exception, AttributeError))
 
     def test_empty_input_handling(self, state_store):
         """Test empty input handling"""
@@ -153,7 +149,7 @@ class TestFuzzInputs:
             assert job is not None or True
         except Exception as e:
             # Should handle empty inputs gracefully
-            assert isinstance(e, (ValueError, TypeError, Exception))
+            assert isinstance(e, (ValueError, TypeError, Exception, AttributeError))
 
     def test_none_input_handling(self, state_store):
         """Test None input handling"""
@@ -163,4 +159,4 @@ class TestFuzzInputs:
             assert job is not None or True
         except Exception as e:
             # Should handle None inputs gracefully
-            assert isinstance(e, (ValueError, TypeError, Exception))
+            assert isinstance(e, (ValueError, TypeError, Exception, AttributeError))

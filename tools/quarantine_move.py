@@ -5,14 +5,15 @@ Chỉ di chuyển file có risk=LOW từ primary inventory
 Tạo manifest để có thể restore sau
 """
 
-import os
-import json
-import csv
-import shutil
-from pathlib import Path
-from datetime import datetime
-from typing import Dict, List, Any, Optional, Set
 import argparse
+import csv
+import json
+import os
+import shutil
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set
+
 
 class QuarantineMover:
     def __init__(self, repo_root: str = "."):
@@ -40,7 +41,7 @@ class QuarantineMover:
             return []
 
         candidates = []
-        with open(candidates_path, 'r', encoding='utf-8') as f:
+        with open(candidates_path, encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
                 candidates.append({
@@ -162,7 +163,7 @@ class QuarantineMover:
             self.create_quarantine_manifest(moved_files)
 
         # Summary
-        print(f"\n✅ Quarantine completed:")
+        print("\n✅ Quarantine completed:")
         print(f"  - Moved: {len(moved_files)} files")
         print(f"  - Failed: {len(failed_files)} files")
 
@@ -179,7 +180,7 @@ class QuarantineMover:
             print("ℹ️ No quarantine manifest found.")
             return
 
-        with open(manifest_path, 'r', encoding='utf-8') as f:
+        with open(manifest_path, encoding='utf-8') as f:
             manifest = json.load(f)
 
         print(f"📋 Quarantine Manifest (created: {manifest['created_at']})")
@@ -199,7 +200,7 @@ class QuarantineMover:
             print(f"❌ Manifest not found: {manifest_path}")
             return
 
-        with open(manifest_path, 'r', encoding='utf-8') as f:
+        with open(manifest_path, encoding='utf-8') as f:
             manifest = json.load(f)
 
         print(f"🔄 Restoring {manifest['total_files']} files from quarantine...")
@@ -231,7 +232,7 @@ class QuarantineMover:
                 failed_files.append(file_info["original_path"])
 
         # Summary
-        print(f"\n✅ Restore completed:")
+        print("\n✅ Restore completed:")
         print(f"  - Restored: {len(restored_files)} files")
         print(f"  - Failed: {len(failed_files)} files")
 

@@ -46,7 +46,7 @@ RELATED FILES / FILES LIÊN QUAN:
 7. TokenOptimizer - Token optimization
 8. EmotionSenseV1 - Emotion detection
 9. SecureMemoryManager ⭐ - Encryption + backup
-10. AgentDevUnified ⭐ - Senior Developer ảo, Trưởng phòng Kỹ thuật
+10. AgentDev ⭐ - Senior Developer ảo, Trưởng phòng Kỹ thuật
 
 🚨 CRITICAL INFO:
 - SecureMemoryManager integration 100% COMPLETE
@@ -98,9 +98,9 @@ from functools import wraps
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional
 
-# import psutil
-# import yaml
-# from RestrictedPython import compile_restricted
+import psutil
+import yaml
+from RestrictedPython import compile_restricted
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
@@ -335,8 +335,8 @@ class StillMeFramework:
         try:
             import os
             import sys
-            # Add agent-dev path to sys.path
-            agent_dev_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'agent-dev', 'core')
+            # Add agent_dev path to sys.path
+            agent_dev_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'agent_dev', 'core')
             if agent_dev_path not in sys.path:
                 sys.path.insert(0, agent_dev_path)
 
@@ -1150,7 +1150,7 @@ class StillMeFramework:
         """Execute task using AgentDev Unified"""
         if not self.agentdev:
             raise RuntimeError("AgentDev Unified not available")
-        
+
         return self.agentdev.execute_task(task, mode)
 
 

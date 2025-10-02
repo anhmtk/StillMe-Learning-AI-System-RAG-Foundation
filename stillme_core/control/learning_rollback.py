@@ -383,7 +383,7 @@ class LearningRollback:
             return
 
         try:
-            with open(self.snapshots_path, 'r', encoding='utf-8') as f:
+            with open(self.snapshots_path, encoding='utf-8') as f:
                 data = json.load(f)
 
             # Load snapshots

@@ -7,13 +7,14 @@ Tạo kế hoạch fix F821 errors theo ma trận.
 """
 
 import json
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
+
 
 def load_analysis():
     """Load F821 analysis"""
     project_root = Path(__file__).parent.parent
-    with open(project_root / "f821_analysis.json", "r", encoding="utf-8") as f:
+    with open(project_root / "f821_analysis.json", encoding="utf-8") as f:
         return json.load(f)
 
 def create_fix_plan():
@@ -100,7 +101,7 @@ def main():
     with open(project_root / "f821_fix_plan.json", "w", encoding="utf-8") as f:
         json.dump(plan, f, indent=2, ensure_ascii=False)
 
-    print(f"\n💾 Fix plan saved to f821_fix_plan.json")
+    print("\n💾 Fix plan saved to f821_fix_plan.json")
 
 if __name__ == "__main__":
     main()

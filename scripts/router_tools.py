@@ -12,19 +12,20 @@ Usage:
     python scripts/router_tools.py --validate
 """
 
-import os
-import sys
 import argparse
-import time
 import json
+import os
 import statistics
+import sys
+import time
 from datetime import datetime
 from typing import Dict, List, Optional
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))
 
-from modules.api_provider_manager import UnifiedAPIManager, ComplexityAnalyzer
+from modules.api_provider_manager import ComplexityAnalyzer, UnifiedAPIManager
+
 
 class RouterTools:
     def __init__(self):
@@ -413,7 +414,7 @@ class RouterTools:
 
     def _print_test_summary(self, test_results: Dict):
         """Print test summary"""
-        print(f"\n📊 Test Summary")
+        print("\n📊 Test Summary")
         print("=" * 60)
 
         total_tests = 0
@@ -448,13 +449,13 @@ class RouterTools:
 
         # Analyze complexity
         complexity_score, breakdown = self.analyzer.analyze_complexity(prompt)
-        print(f"🧠 Complexity Analysis:")
+        print("🧠 Complexity Analysis:")
         print(f"  Score: {complexity_score:.3f}")
         print(f"  Breakdown: {breakdown}")
 
         # Select model
         selected_model = self.manager.choose_model(prompt)
-        print(f"\n🎯 Model Selection:")
+        print("\n🎯 Model Selection:")
         print(f"  Selected Model: {selected_model}")
 
         # Explain routing
@@ -475,13 +476,13 @@ class RouterTools:
         found_coding = [kw for kw in coding_keywords if kw in prompt_lower]
         found_complex = [ci for ci in complex_indicators if ci in prompt_lower]
 
-        print(f"\n🔤 Keyword Analysis:")
+        print("\n🔤 Keyword Analysis:")
         if found_coding:
             print(f"  Coding Keywords: {found_coding}")
         if found_complex:
             print(f"  Complex Indicators: {found_complex}")
         if not found_coding and not found_complex:
-            print(f"  No specific keywords found")
+            print("  No specific keywords found")
 
         return {
             'prompt': prompt,
@@ -533,7 +534,7 @@ class RouterTools:
         min_score = min(scores)
         max_score = max(scores)
 
-        print(f"\n📊 Benchmark Results:")
+        print("\n📊 Benchmark Results:")
         print(f"  Average Analysis Time: {avg_time*1000:.2f}ms")
         print(f"  Min Analysis Time: {min_time*1000:.2f}ms")
         print(f"  Max Analysis Time: {max_time*1000:.2f}ms")
@@ -606,7 +607,7 @@ class RouterTools:
             # Check thresholds
             thresholds = stats['thresholds']
             if thresholds['simple'] >= thresholds['medium']:
-                return {'passed': False, 'error': f'Invalid threshold order: simple={thresholds['simple']}, medium={thresholds['medium']}'}
+                return {'passed': False, 'error': f'Invalid threshold order: simple={thresholds["simple"]}, medium={thresholds["medium"]}'}
 
             return {'passed': True}
         except Exception as e:

@@ -3,12 +3,13 @@
 Optimized Gateway for StillMe - Without Redis (for testing)
 """
 import asyncio
-import httpx
 import json
 import time
+
+import httpx
+import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-import uvicorn
 
 app = FastAPI(title="StillMe Optimized Gateway")
 

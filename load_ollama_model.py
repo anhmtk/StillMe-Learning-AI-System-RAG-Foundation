@@ -3,8 +3,10 @@
 Load Ollama model
 """
 
-import requests
 import json
+
+import requests
+
 
 def load_model():
     url = "http://127.0.0.1:11434/api/generate"
@@ -29,10 +31,10 @@ def load_model():
             print(f"📄 Response: {json.dumps(data, indent=2)}")
 
             if data.get("response"):
-                print(f"✅ Model loaded successfully!")
+                print("✅ Model loaded successfully!")
                 print(f"🤖 Response: {data['response']}")
             else:
-                print(f"❌ Model not responding properly")
+                print("❌ Model not responding properly")
         else:
             print(f"❌ Error: {response.text}")
 

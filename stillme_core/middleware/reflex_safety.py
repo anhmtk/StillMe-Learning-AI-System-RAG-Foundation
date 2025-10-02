@@ -314,7 +314,7 @@ class ReflexSafety:
 
     def reset_stats(self):
         """Reset safety statistics."""
-        self.stats = {key: 0 for key in self.stats}
+        self.stats = dict.fromkeys(self.stats, 0)
         self.circuit_breaker = CircuitBreaker()
 
 

@@ -5,17 +5,19 @@ Enterprise-grade CI/CD integration with automated workflows
 """
 
 import asyncio
+import base64
+import hashlib
+import hmac
 import json
 import time
-import base64
-import hmac
-import hashlib
-from typing import Dict, List, Optional, Any, Callable
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from enum import Enum
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional
+
 import aiohttp
 import yaml
-from pathlib import Path
+
 
 class WorkflowStatus(Enum):
     """GitHub Actions workflow status"""
@@ -117,7 +119,7 @@ class GitHubActionsIntegration:
             config_file = Path("agent-dev/config/github_actions.yaml")
 
         if config_file.exists():
-            with open(config_file, 'r') as f:
+            with open(config_file) as f:
                 return yaml.safe_load(f)
         else:
             return {

@@ -4,23 +4,24 @@ Augment Runner - Script chính để gom seed -> augmented dataset
 Kết hợp tất cả các phương pháp augment: paraphrase, backtranslate, template_fill
 """
 
-import json
-import asyncio
-import logging
 import argparse
-from typing import List, Dict, Any, Optional
-from dataclasses import dataclass, asdict
-from pathlib import Path
-import sys
+import asyncio
+import json
+import logging
 import os
+import sys
+from dataclasses import asdict, dataclass
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 # Add current directory to path
 sys.path.insert(0, os.path.dirname(__file__))
 
-from paraphraser import ParaphraseAugmentor, ParaphraseConfig
 from backtranslate import BacktranslateAugmentor, BacktranslateConfig
-from template_filler import TemplateFillerAugmentor, TemplateConfig
+from paraphraser import ParaphraseAugmentor, ParaphraseConfig
+from template_filler import TemplateConfig, TemplateFillerAugmentor
+
 
 @dataclass
 class AugmentConfig:
@@ -93,7 +94,7 @@ class AugmentRunner:
             raise FileNotFoundError(f"Seed file not found: {self.config.seed_file}")
 
         seeds = []
-        with open(seed_path, 'r', encoding='utf-8') as f:
+        with open(seed_path, encoding='utf-8') as f:
             for line in f:
                 line = line.strip()
                 if line:
@@ -278,7 +279,7 @@ class AugmentRunner:
         with open(combined_path, 'w', encoding='utf-8') as f:
             for output_file in output_files:
                 if Path(output_file).exists():
-                    with open(output_file, 'r', encoding='utf-8') as inf:
+                    with open(output_file, encoding='utf-8') as inf:
                         for line in inf:
                             line = line.strip()
                             if line:

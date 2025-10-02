@@ -118,7 +118,7 @@ class AlertingSystem:
             alerts = []
             for file_path in alert_files[:limit]:
                 try:
-                    with open(file_path, 'r', encoding='utf-8') as f:
+                    with open(file_path, encoding='utf-8') as f:
                         alert_data = json.load(f)
                     alerts.append(alert_data)
                 except Exception as e:

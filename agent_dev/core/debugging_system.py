@@ -12,20 +12,21 @@ Tính năng:
 6. Error Injection Testing - Test error injection
 """
 
-import os
-import re
 import json
+import logging
+import os
+import queue
+import re
+import threading
 import time
 import traceback
-import logging
-from typing import Dict, List, Optional, Any, Tuple, Set
-from pathlib import Path
-from dataclasses import dataclass, asdict
+from collections import Counter, defaultdict
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from collections import defaultdict, Counter
-import threading
-import queue
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set, Tuple
+
 
 class DebugLevel(Enum):
     """Mức độ debug"""
@@ -567,7 +568,7 @@ This guide helps troubleshoot {error_type.value.replace('_', ' ')} issues in Age
             return None
 
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 data = json.load(f)
 
             # Convert back to DebugSession
@@ -592,7 +593,7 @@ This guide helps troubleshoot {error_type.value.replace('_', ' ')} issues in Age
 
         for session_file in session_files:
             try:
-                with open(session_file, 'r', encoding='utf-8') as f:
+                with open(session_file, encoding='utf-8') as f:
                     data = json.load(f)
 
                 for pattern_data in data.get('error_patterns', []):

@@ -7,9 +7,10 @@ Generates comprehensive test reports from CI/CD artifacts
 import json
 import os
 import sys
-from pathlib import Path
 from datetime import datetime
-from typing import Dict, Any, List, Optional
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
 import yaml
 
 # Add project root to path
@@ -20,7 +21,7 @@ def load_test_config() -> Dict[str, Any]:
     """Load test configuration."""
     config_path = project_root / "config" / "test_config.yaml"
     if config_path.exists():
-        with open(config_path, 'r', encoding='utf-8') as f:
+        with open(config_path, encoding='utf-8') as f:
             return yaml.safe_load(f)
     return {}
 
@@ -61,7 +62,7 @@ def load_artifacts() -> Dict[str, Any]:
         file_path = artifacts_dir / file
         if file_path.exists():
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, encoding='utf-8') as f:
                     data = json.load(f)
                 artifacts[file.replace('.json', '')] = {
                     'type': 'k6_results',
@@ -87,7 +88,7 @@ def load_artifacts() -> Dict[str, Any]:
         file_path = artifacts_dir / file
         if file_path.exists():
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, encoding='utf-8') as f:
                     data = json.load(f)
                 artifacts[file.replace('.json', '')] = {
                     'type': 'security_report',
@@ -160,8 +161,8 @@ def generate_executive_summary(metrics: Dict[str, Any], config: Dict[str, Any]) 
     summary.append("# Executive Summary")
     summary.append("")
     summary.append(f"**Generated On**: {datetime.now().strftime('%Y-%m-%d %H:%M:%S UTC')}")
-    summary.append(f"**Test Framework**: SEAL-GRADE SYSTEM TESTS")
-    summary.append(f"**Repository**: StillMe AI Framework")
+    summary.append("**Test Framework**: SEAL-GRADE SYSTEM TESTS")
+    summary.append("**Repository**: StillMe AI Framework")
     summary.append("")
 
     # Overall status
@@ -332,9 +333,9 @@ def generate_architecture_info() -> str:
         info.append("- **Commit SHA**: Unknown")
         info.append("- **Branch**: Unknown")
 
-    info.append(f"- **Test Framework Version**: 1.0.0")
+    info.append("- **Test Framework Version**: 1.0.0")
     info.append(f"- **Python Version**: {sys.version.split()[0]}")
-    info.append(f"- **Test Environment**: CI/CD Pipeline")
+    info.append("- **Test Environment**: CI/CD Pipeline")
     info.append("")
 
     # Architecture diagram placeholder

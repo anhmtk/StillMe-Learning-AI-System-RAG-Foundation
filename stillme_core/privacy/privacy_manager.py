@@ -5,6 +5,7 @@ Privacy Manager - MINIMAL CONTRACT derived from tests/usages
 
 from enum import Enum
 
+
 class PIIType(Enum):
     """PII Type enum - MINIMAL CONTRACT derived from tests/usages"""
     EMAIL = "email"
@@ -18,7 +19,7 @@ class PIIType(Enum):
 
 class PrivacyManager:
     """Privacy Manager - MINIMAL CONTRACT derived from tests/usages"""
-    
+
     def __init__(self):
         """Initialize Privacy Manager"""
         pass

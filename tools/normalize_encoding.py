@@ -7,7 +7,9 @@ Converts test files to UTF-8 (no BOM) with LF line endings
 import os
 import sys
 from pathlib import Path
+
 import chardet
+
 
 def detect_encoding(file_path):
     """Detect file encoding"""
@@ -35,10 +37,10 @@ def normalize_file(file_path):
         # Detect current encoding
         encoding, has_bom = detect_encoding(file_path)
         if not encoding:
-            return False, f"Could not detect encoding"
+            return False, "Could not detect encoding"
 
         # Read file content
-        with open(file_path, 'r', encoding=encoding) as f:
+        with open(file_path, encoding=encoding) as f:
             content = f.read()
 
         # Check if already normalized
@@ -159,7 +161,7 @@ def main():
     print(f"📄 Report saved to: {report_path}")
 
     if converted_files:
-        print(f"\n🔄 Converted files:")
+        print("\n🔄 Converted files:")
         for file_path in converted_files:
             print(f"  - {file_path}")
 

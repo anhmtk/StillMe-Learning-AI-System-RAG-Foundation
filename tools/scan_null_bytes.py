@@ -7,7 +7,9 @@ Scans tests/, conftest.py, pytest.ini for encoding issues
 import os
 import sys
 from pathlib import Path
+
 import chardet
+
 
 def scan_file_for_issues(file_path):
     """Scan a single file for null bytes and encoding issues"""

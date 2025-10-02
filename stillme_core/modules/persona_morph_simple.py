@@ -196,7 +196,7 @@ class PersonaMorph:
         """Tải hồ sơ người dùng (GIỮ NGUYÊN)"""
         try:
             if os.path.exists(USER_PROFILES_DB_PATH):
-                with open(USER_PROFILES_DB_PATH, 'r', encoding='utf-8') as f:
+                with open(USER_PROFILES_DB_PATH, encoding='utf-8') as f:
                     data = json.load(f)
                     for user_id, profile_data in data.items():
                         self.profiles[user_id] = UserProfile(**profile_data)

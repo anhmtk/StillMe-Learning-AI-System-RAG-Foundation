@@ -4,11 +4,13 @@ Policy Loader for StillMe Framework
 Tải và validate các policy files
 """
 
-import os
-import yaml
 import logging
+import os
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
+import yaml
+
 
 class PolicyLoader:
     """Load and validate policy files"""
@@ -31,7 +33,7 @@ class PolicyLoader:
             try:
                 policy_path = self.base_path / policy_file
                 if policy_path.exists():
-                    with open(policy_path, 'r', encoding='utf-8') as f:
+                    with open(policy_path, encoding='utf-8') as f:
                         policy_data = yaml.safe_load(f)
                         policy_name = policy_path.stem
                         self.policies[policy_name] = policy_data

@@ -4,10 +4,11 @@ StillMe IPC Master Control
 Script điều khiển chính cho tất cả chức năng của StillMe
 """
 
-import sys
 import argparse
 import subprocess
+import sys
 from pathlib import Path
+
 
 def main():
     """Master control for StillMe IPC"""

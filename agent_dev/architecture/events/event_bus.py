@@ -6,13 +6,15 @@ Enterprise-grade event-driven architecture
 
 import asyncio
 import json
-import uuid
 import time
-from typing import Dict, List, Callable, Any, Optional, Type
-from dataclasses import dataclass, asdict
+import uuid
+from dataclasses import asdict, dataclass
 from enum import Enum
-import aiofiles
 from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional, Type
+
+import aiofiles
+
 
 class EventType(Enum):
     """Event types for AgentDev system"""
@@ -97,7 +99,7 @@ class EventBus:
 
         if config_file.exists():
             import yaml
-            with open(config_file, 'r') as f:
+            with open(config_file) as f:
                 return yaml.safe_load(f)
         else:
             return {
@@ -245,7 +247,7 @@ class EventBus:
             return
 
         try:
-            async with aiofiles.open(self.event_store_file, 'r') as f:
+            async with aiofiles.open(self.event_store_file) as f:
                 async for line in f:
                     if line.strip():
                         event_data = json.loads(line)

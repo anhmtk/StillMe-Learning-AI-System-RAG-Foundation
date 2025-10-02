@@ -4,20 +4,21 @@
 import json
 import os
 
+
 def main():
     report_path = "artifacts/bandit-core-report.json"
     if not os.path.exists(report_path):
         print("❌ No bandit report found")
         return
 
-    with open(report_path, 'r') as f:
+    with open(report_path) as f:
         data = json.load(f)
 
     results = data.get('results', [])
     high_severity = [r for r in results if r.get('issue_severity') == 'HIGH']
     medium_severity = [r for r in results if r.get('issue_severity') == 'MEDIUM']
 
-    print(f"🔒 Core Security Analysis")
+    print("🔒 Core Security Analysis")
     print(f"High severity: {len(high_severity)}")
     print(f"Medium severity: {len(medium_severity)}")
 

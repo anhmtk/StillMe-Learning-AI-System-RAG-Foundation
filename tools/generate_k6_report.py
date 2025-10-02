@@ -1,16 +1,18 @@
-import json
 import csv
+import json
 import os
 import sys
 from datetime import datetime
+
 import matplotlib.pyplot as plt
-import pandas as pd
 import numpy as np
+import pandas as pd
+
 
 def load_k6_summary(summary_path):
     """Load K6 summary JSON"""
     try:
-        with open(summary_path, 'r') as f:
+        with open(summary_path) as f:
             return json.load(f)
     except FileNotFoundError:
         print(f"⚠️ Summary file not found: {summary_path}")
@@ -22,7 +24,7 @@ def load_k6_summary(summary_path):
 def load_k6_results(results_path):
     """Load K6 results JSON"""
     try:
-        with open(results_path, 'r') as f:
+        with open(results_path) as f:
             return [json.loads(line) for line in f if line.strip()]
     except FileNotFoundError:
         print(f"⚠️ Results file not found: {results_path}")
@@ -354,7 +356,7 @@ def main():
 
         overall_pass = p95 < 500 and p99 < 1000 and error_rate < 1 and rps >= 200
 
-        print(f"\n📊 K6 SEAL-GRADE Test Summary:")
+        print("\n📊 K6 SEAL-GRADE Test Summary:")
         print(f"   P95 Latency: {p95:.2f}ms {'✅' if p95 < 500 else '❌'}")
         print(f"   P99 Latency: {p99:.2f}ms {'✅' if p99 < 1000 else '❌'}")
         print(f"   Error Rate: {error_rate:.2f}% {'✅' if error_rate < 1 else '❌'}")

@@ -8,8 +8,10 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 import yaml
+
 
 class AgentDevCLI:
     """Main CLI interface for AgentDev"""
@@ -116,7 +118,7 @@ class AgentDevCLI:
         print(f"⏱️  Downtime: {config['downtime_tolerance']}")
         print(f"🔒 PII: {config['pii_handling']}")
 
-        print(f"\n📝 EXECUTION STEPS:")
+        print("\n📝 EXECUTION STEPS:")
         for i, step in enumerate(plan["steps"], 1):
             print(f"   {i}. {step['action']}")
             if step.get('risk'):
@@ -193,7 +195,7 @@ class AgentDevCLI:
             print("Run 'stillme agentdev init-task <type>' first")
             sys.exit(1)
 
-        with open(path, 'r') as f:
+        with open(path) as f:
             return json.load(f)
 
     def _validate_policies(self, config: Dict[str, Any]) -> Dict[str, Any]:
@@ -203,7 +205,7 @@ class AgentDevCLI:
         if not spec_path.exists():
             return {"valid": True, "errors": []}  # No spec = no restrictions
 
-        with open(spec_path, 'r') as f:
+        with open(spec_path) as f:
             spec = yaml.safe_load(f)
 
         errors = []

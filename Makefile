@@ -38,7 +38,7 @@ lint:
 	@flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 	@black --check --diff .
 	@isort --check-only --diff .
-	@mypy --ignore-missing-imports agent-dev/ stillme_core/
+	@mypy --ignore-missing-imports agent_dev/ stillme_core/
 	@echo "✅ Linting completed"
 
 # Test targets
@@ -62,16 +62,16 @@ chaos:
 
 coverage:
 	@echo "📊 Running tests with coverage..."
-	@pytest agentdev_foundation_tests/ -v --cov=agent-dev --cov=stillme_core --cov-report=xml --cov-report=html --cov-report=term
+	@pytest agentdev_foundation_tests/ -v --cov=agent_dev --cov=stillme_core --cov-report=xml --cov-report=html --cov-report=term
 	@echo "✅ Coverage report generated: htmlcov/index.html"
 
 # Security targets
 security:
 	@echo "🔒 Running security scans..."
-	@bandit -r agent-dev/ stillme_core/ -f json -o bandit-report.json
-	@bandit -r agent-dev/ stillme_core/ -f txt
-	@semgrep --config=auto --json --output=semgrep-report.json agent-dev/ stillme_core/
-	@semgrep --config=auto agent-dev/ stillme_core/
+	@bandit -r agent_dev/ stillme_core/ -f json -o bandit-report.json
+	@bandit -r agent_dev/ stillme_core/ -f txt
+	@semgrep --config=auto --json --output=semgrep-report.json agent_dev/ stillme_core/
+	@semgrep --config=auto agent_dev/ stillme_core/
 	@pip-audit --format=json --output=pip-audit-report.json
 	@pip-audit --format=text
 	@echo "✅ Security scans completed"

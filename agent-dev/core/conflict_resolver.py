@@ -1,6 +1,7 @@
 """Conflict Resolver - Stub Implementation"""
 
-from typing import Dict, Any, List, Optional
+from typing import Any, Dict, List, Optional
+
 
 class ConflictResolver:
     """Stub implementation for ConflictResolver"""

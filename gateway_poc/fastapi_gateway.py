@@ -15,23 +15,23 @@ Features:
 """
 
 import asyncio
-import time
-import json
 import hashlib
-from typing import Dict, List, Optional, Any
+import json
+import logging
+import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-import logging
+from typing import Any, Dict, List, Optional
 
 import httpx
+import redis
 import uvicorn
-from fastapi import FastAPI, HTTPException, Request, Response, BackgroundTasks
+from circuit_breaker import CircuitBreaker
+from fastapi import BackgroundTasks, FastAPI, HTTPException, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
-import redis
-from circuit_breaker import CircuitBreaker
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

@@ -228,7 +228,7 @@ class MetricsRegistry:
         """Load metric definitions from config file"""
         try:
             import yaml
-            with open(self.config_path, 'r', encoding='utf-8') as f:
+            with open(self.config_path, encoding='utf-8') as f:
                 config = yaml.safe_load(f)
 
             for metric_config in config.get('metrics', []):

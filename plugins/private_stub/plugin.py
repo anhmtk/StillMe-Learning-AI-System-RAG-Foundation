@@ -1,5 +1,6 @@
 from stillme_core.router_iface import Router
 
+
 class StubRouter:  # deliberately not inheriting to avoid hard dep
     """Public stub implementation for OSS mode.
     

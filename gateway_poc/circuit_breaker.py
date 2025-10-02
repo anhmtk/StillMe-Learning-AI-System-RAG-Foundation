@@ -12,11 +12,11 @@ Features:
 """
 
 import asyncio
-import time
 import logging
-from enum import Enum
-from typing import Callable, Any, Optional
+import time
 from dataclasses import dataclass
+from enum import Enum
+from typing import Any, Callable, Optional
 
 logger = logging.getLogger(__name__)
 

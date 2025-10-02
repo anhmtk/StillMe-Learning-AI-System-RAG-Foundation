@@ -12,8 +12,9 @@ Version: 2.0.0
 """
 
 import os
-from typing import Dict, Any, Optional
 from dataclasses import dataclass
+from typing import Any, Dict, Optional
+
 
 @dataclass
 class SharedConfig:

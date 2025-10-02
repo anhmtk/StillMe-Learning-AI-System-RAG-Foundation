@@ -2,8 +2,8 @@
 
 import logging
 import sys
-from typing import Dict, Any, Optional
 from pathlib import Path
+from typing import Any, Dict, Optional
 
 # Add current directory to Python path
 sys.path.insert(0, str(Path(__file__).parent))
@@ -84,8 +84,8 @@ class StillMeEntry:
         """Initialize security systems"""
         try:
             # Import security systems
-            from stillme_core.security import SecurityManager
             from stillme_core.secrecy_filter import SecrecyFilter
+            from stillme_core.security import SecurityManager
 
             # Initialize security manager
             self.security_manager = SecurityManager()

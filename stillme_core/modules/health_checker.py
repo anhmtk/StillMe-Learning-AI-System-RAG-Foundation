@@ -66,11 +66,12 @@ RELATED FILES / FILES LIÊN QUAN:
 
 import logging
 import time
-import psutil
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
+
+import psutil
 
 logger = logging.getLogger(__name__)
 
@@ -163,19 +164,19 @@ class HealthChecker:
                 self._check_disk_health(),
                 self._check_network_health()
             ]
-            
+
             # Determine overall status
             statuses = [check.status for check in checks if check]
             if not statuses:
                 return HealthStatus.UNKNOWN
-            
+
             if HealthStatus.CRITICAL in statuses:
                 return HealthStatus.CRITICAL
             elif HealthStatus.WARNING in statuses:
                 return HealthStatus.WARNING
             else:
                 return HealthStatus.HEALTHY
-                
+
         except Exception as e:
             self.logger.error(f"❌ Error checking system health: {e}")
             return HealthStatus.UNKNOWN
@@ -184,7 +185,7 @@ class HealthChecker:
         """Check CPU health"""
         try:
             cpu_percent = psutil.cpu_percent(interval=1)
-            
+
             if cpu_percent >= self.config.critical_thresholds["cpu_percent"]:
                 status = HealthStatus.CRITICAL
                 message = f"CPU usage critical: {cpu_percent:.1f}%"
@@ -194,7 +195,7 @@ class HealthChecker:
             else:
                 status = HealthStatus.HEALTHY
                 message = f"CPU usage normal: {cpu_percent:.1f}%"
-            
+
             return HealthCheck(
                 check_type=CheckType.CPU,
                 status=status,
@@ -202,7 +203,7 @@ class HealthChecker:
                 timestamp=datetime.now().isoformat(),
                 metrics={"cpu_percent": cpu_percent}
             )
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error checking CPU health: {e}")
             return None
@@ -212,7 +213,7 @@ class HealthChecker:
         try:
             memory = psutil.virtual_memory()
             memory_percent = memory.percent
-            
+
             if memory_percent >= self.config.critical_thresholds["memory_percent"]:
                 status = HealthStatus.CRITICAL
                 message = f"Memory usage critical: {memory_percent:.1f}%"
@@ -222,7 +223,7 @@ class HealthChecker:
             else:
                 status = HealthStatus.HEALTHY
                 message = f"Memory usage normal: {memory_percent:.1f}%"
-            
+
             return HealthCheck(
                 check_type=CheckType.MEMORY,
                 status=status,
@@ -234,7 +235,7 @@ class HealthChecker:
                     "memory_total": memory.total
                 }
             )
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error checking memory health: {e}")
             return None
@@ -244,7 +245,7 @@ class HealthChecker:
         try:
             disk = psutil.disk_usage('/')
             disk_percent = (disk.used / disk.total) * 100
-            
+
             if disk_percent >= self.config.critical_thresholds["disk_percent"]:
                 status = HealthStatus.CRITICAL
                 message = f"Disk usage critical: {disk_percent:.1f}%"
@@ -254,7 +255,7 @@ class HealthChecker:
             else:
                 status = HealthStatus.HEALTHY
                 message = f"Disk usage normal: {disk_percent:.1f}%"
-            
+
             return HealthCheck(
                 check_type=CheckType.DISK,
                 status=status,
@@ -267,7 +268,7 @@ class HealthChecker:
                     "disk_total": disk.total
                 }
             )
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error checking disk health: {e}")
             return None
@@ -277,7 +278,7 @@ class HealthChecker:
         try:
             # Basic network connectivity check
             network_io = psutil.net_io_counters()
-            
+
             # Simple check - if we can get network stats, network is working
             if network_io:
                 status = HealthStatus.HEALTHY
@@ -285,7 +286,7 @@ class HealthChecker:
             else:
                 status = HealthStatus.WARNING
                 message = "Network connectivity issues detected"
-            
+
             return HealthCheck(
                 check_type=CheckType.NETWORK,
                 status=status,
@@ -298,7 +299,7 @@ class HealthChecker:
                     "packets_recv": network_io.packets_recv
                 }
             )
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error checking network health: {e}")
             return None
@@ -312,7 +313,7 @@ class HealthChecker:
         """
         try:
             overall_status = self.check_system_health()
-            
+
             report = {
                 "overall_status": overall_status.value,
                 "timestamp": datetime.now().isoformat(),
@@ -325,7 +326,7 @@ class HealthChecker:
                     "unknown": 0
                 }
             }
-            
+
             # Perform all checks
             checks = [
                 self._check_cpu_health(),
@@ -333,7 +334,7 @@ class HealthChecker:
                 self._check_disk_health(),
                 self._check_network_health()
             ]
-            
+
             for check in checks:
                 if check:
                     report["checks"].append({
@@ -343,13 +344,13 @@ class HealthChecker:
                         "timestamp": check.timestamp,
                         "metrics": check.metrics
                     })
-                    
+
                     # Update summary
                     report["summary"]["total_checks"] += 1
                     report["summary"][check.status.value] += 1
-            
+
             return report
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error generating health report: {e}")
             return {
@@ -377,11 +378,11 @@ class HealthChecker:
             if not self.config.enabled:
                 self.logger.info("📋 Health monitoring disabled")
                 return False
-            
+
             self.logger.info(f"🏥 Starting health monitoring (interval: {self.config.check_interval}s)")
             # In a real implementation, this would start a background thread
             return True
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error starting health monitoring: {e}")
             return False
@@ -397,7 +398,7 @@ class HealthChecker:
             self.logger.info("🛑 Stopping health monitoring")
             # In a real implementation, this would stop the background thread
             return True
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error stopping health monitoring: {e}")
             return False
@@ -416,7 +417,7 @@ class HealthChecker:
             self.config = new_config
             self.logger.info("🔧 Health checker configuration updated")
             return True
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error updating health checker configuration: {e}")
             return False

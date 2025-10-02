@@ -6,9 +6,10 @@
 Tập trung fix các lỗi phổ biến theo pattern thay vì fix từng lỗi riêng lẻ.
 """
 
-from typing import Dict, List, Optional, Tuple
 import re
 from dataclasses import dataclass
+from typing import Dict, List, Optional, Tuple
+
 
 @dataclass
 class FixPattern:

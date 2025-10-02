@@ -4,15 +4,17 @@ StillMe Desktop App - Enhanced with Mobile Parity
 Features: Chat UI, Telemetry, Founder Console, Settings
 """
 
-import tkinter as tk
-from tkinter import ttk, scrolledtext, messagebox, simpledialog
-import requests
 import json
 import threading
 import time
-from datetime import datetime
-from typing import Dict, List, Optional
+import tkinter as tk
 import uuid
+from datetime import datetime
+from tkinter import messagebox, scrolledtext, simpledialog, ttk
+from typing import Dict, List, Optional
+
+import requests
+
 
 class StillMeDesktopApp:
     def __init__(self):
@@ -329,7 +331,7 @@ class StillMeDesktopApp:
                 self.root.after(0, lambda: self.add_system_message(f"❌ Server error: {response.status_code}"))
 
         except Exception as e:
-            self.root.after(0, lambda: self.add_system_message(f"❌ Error: {str(e)}"))
+            self.root.after(0, lambda err=e: self.add_system_message(f"❌ Error: {str(err)}"))
 
     def add_user_message(self, message):
         """Add user message to chat"""
@@ -485,7 +487,7 @@ class StillMeDesktopApp:
         # Performance metrics
         if self.telemetry_data:
             latencies = [t['latency_ms'] for t in self.telemetry_data]
-            report += f"📈 Performance Metrics:\n"
+            report += "📈 Performance Metrics:\n"
             report += f"  Min Latency: {min(latencies)}ms\n"
             report += f"  Max Latency: {max(latencies)}ms\n"
             report += f"  P50 Latency: {sorted(latencies)[len(latencies)//2]}ms\n"
@@ -549,8 +551,8 @@ class StillMeDesktopApp:
         content += "⚙️ System Switches:\n"
         content += f"  Auto-translate: {'ON' if True else 'OFF'}\n"
         content += f"  Safety Level: {'Strict' if False else 'Normal'}\n"
-        content += f"  Token Cap: 4000\n"
-        content += f"  Max Latency: 10s\n\n"
+        content += "  Token Cap: 4000\n"
+        content += "  Max Latency: 10s\n\n"
 
         content += "📊 Live Metrics:\n"
         content += f"  Model In-Use: {self.telemetry_data[-1]['model'] if self.telemetry_data else 'N/A'}\n"

@@ -815,7 +815,7 @@ async def demo_blue_team_engine():
 
     # Show statistics
     stats = engine.get_defense_statistics()
-    print(f"\n📊 Defense Statistics:")
+    print("\n📊 Defense Statistics:")
     print(f"  - Anomalies detected: {stats['stats']['anomalies_detected']}")
     print(f"  - Defenses triggered: {stats['stats']['defenses_triggered']}")
     print(f"  - Successful defenses: {stats['stats']['successful_defenses']}")

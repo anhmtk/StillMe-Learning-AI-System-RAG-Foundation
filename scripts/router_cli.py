@@ -12,18 +12,19 @@ Usage:
     python scripts/router_cli.py --config
 """
 
+import argparse
+import json
 import os
 import sys
-import argparse
 import time
-import json
 from datetime import datetime
 from typing import Dict, List, Optional
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))
 
-from modules.api_provider_manager import UnifiedAPIManager, ComplexityAnalyzer
+from modules.api_provider_manager import ComplexityAnalyzer, UnifiedAPIManager
+
 
 class RouterCLI:
     def __init__(self):
@@ -61,13 +62,13 @@ class RouterCLI:
         self.session_history.append(result)
 
         if verbose:
-            print(f"📊 Analysis Results:")
+            print("📊 Analysis Results:")
             print(f"  Complexity Score: {complexity_score:.3f}")
             print(f"  Selected Model: {selected_model}")
             print(f"  Analysis Time: {analysis_time*1000:.2f}ms")
 
             if verbose:
-                print(f"\n🔍 Detailed Breakdown:")
+                print("\n🔍 Detailed Breakdown:")
                 for key, value in breakdown.items():
                     print(f"  {key}: {value:.3f}")
 
@@ -147,7 +148,7 @@ class RouterCLI:
             print("\n📊 No data in current session")
             return
 
-        print(f"\n📊 Session Statistics")
+        print("\n📊 Session Statistics")
         print("=" * 40)
 
         total_prompts = len(self.session_history)
@@ -164,7 +165,7 @@ class RouterCLI:
             model = result['selected_model']
             model_counts[model] = model_counts.get(model, 0) + 1
 
-        print(f"\n🎯 Model Distribution:")
+        print("\n🎯 Model Distribution:")
         for model, count in model_counts.items():
             percentage = (count / total_prompts) * 100
             print(f"  {model}: {count} ({percentage:.1f}%)")
@@ -185,7 +186,7 @@ class RouterCLI:
             else:
                 complexity_ranges['Complex (≥0.7)'] += 1
 
-        print(f"\n🧠 Complexity Distribution:")
+        print("\n🧠 Complexity Distribution:")
         for range_name, count in complexity_ranges.items():
             percentage = (count / total_prompts) * 100
             print(f"  {range_name}: {count} ({percentage:.1f}%)")
@@ -196,7 +197,7 @@ class RouterCLI:
             print("\n📊 No history in current session")
             return
 
-        print(f"\n📊 Session History")
+        print("\n📊 Session History")
         print("=" * 60)
 
         for i, result in enumerate(self.session_history, 1):
@@ -209,25 +210,25 @@ class RouterCLI:
 
     def _show_config(self):
         """Show current configuration"""
-        print(f"\n⚙️  Current Configuration")
+        print("\n⚙️  Current Configuration")
         print("=" * 40)
 
         try:
             stats = self.analyzer.get_stats()
-            print(f"🧠 Complexity Analyzer:")
+            print("🧠 Complexity Analyzer:")
             print(f"  Total Analyses: {stats['performance']['total_analyses']}")
             print(f"  Average Analysis Time: {stats['performance']['avg_time_ms']:.2f}ms")
             print(f"  Fallback Triggers: {stats['fallback']['total_triggers']}")
 
-            print(f"\n⚙️  Weights:")
+            print("\n⚙️  Weights:")
             for key, value in stats['weights'].items():
                 print(f"  {key}: {value}")
 
-            print(f"\n🎯 Thresholds:")
+            print("\n🎯 Thresholds:")
             for key, value in stats['thresholds'].items():
                 print(f"  {key}: {value}")
 
-            print(f"\n🤖 Available Models:")
+            print("\n🤖 Available Models:")
             for i, model in enumerate(self.manager.model_preferences, 1):
                 print(f"  {i}. {model}")
         except Exception as e:
@@ -240,16 +241,16 @@ class RouterCLI:
 
         try:
             stats = self.analyzer.get_stats()
-            print(f"🧠 Complexity Analyzer Stats:")
+            print("🧠 Complexity Analyzer Stats:")
             print(f"  Total Analyses: {stats['performance']['total_analyses']}")
             print(f"  Average Analysis Time: {stats['performance']['avg_time_ms']:.2f}ms")
             print(f"  Fallback Triggers: {stats['fallback']['total_triggers']}")
 
-            print(f"\n⚙️  Current Configuration:")
+            print("\n⚙️  Current Configuration:")
             print(f"  Weights: {stats['weights']}")
             print(f"  Thresholds: {stats['thresholds']}")
 
-            print(f"\n🤖 Available Models:")
+            print("\n🤖 Available Models:")
             for i, model in enumerate(self.manager.model_preferences, 1):
                 print(f"  {i}. {model}")
         except Exception as e:
@@ -267,7 +268,7 @@ class RouterCLI:
             results.append(result)
 
         # Print batch summary
-        print(f"\n📊 Batch Processing Summary")
+        print("\n📊 Batch Processing Summary")
         print("=" * 40)
 
         total_prompts = len(results)
@@ -284,7 +285,7 @@ class RouterCLI:
             model = result['selected_model']
             model_counts[model] = model_counts.get(model, 0) + 1
 
-        print(f"\n🎯 Model Distribution:")
+        print("\n🎯 Model Distribution:")
         for model, count in model_counts.items():
             percentage = (count / total_prompts) * 100
             print(f"  {model}: {count} ({percentage:.1f}%)")
@@ -319,7 +320,7 @@ class RouterCLI:
     def load_prompts_from_file(self, filename: str) -> List[str]:
         """Load prompts from a text file"""
         try:
-            with open(filename, 'r', encoding='utf-8') as f:
+            with open(filename, encoding='utf-8') as f:
                 prompts = [line.strip() for line in f if line.strip()]
 
             print(f"✅ Loaded {len(prompts)} prompts from {filename}")

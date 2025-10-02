@@ -6,9 +6,9 @@ StillMe IPC Auto Proposal Creator
 Script để tạo learning proposal tự động một lần.
 """
 
+import json
 import os
 import sys
-import json
 from datetime import datetime
 from pathlib import Path
 
@@ -78,16 +78,16 @@ def main():
     proposal = create_auto_proposal()
 
     if proposal:
-        print(f"\n🎉 Proposal created successfully!")
+        print("\n🎉 Proposal created successfully!")
         print(f"📋 Title: {proposal.title}")
         print(f"📝 Description: {proposal.description}")
         print(f"🎯 Quality Score: {proposal.quality_score}")
         print(f"⏱️ Estimated Duration: {proposal.estimated_duration} minutes")
 
-        print(f"\n💡 Next steps:")
-        print(f"• Check your dashboard to see the new proposal")
-        print(f"• Review and approve/reject the proposal")
-        print(f"• StillMe IPC will start learning if approved")
+        print("\n💡 Next steps:")
+        print("• Check your dashboard to see the new proposal")
+        print("• Review and approve/reject the proposal")
+        print("• StillMe IPC will start learning if approved")
 
         # Save proposal info
         proposal_info = {

@@ -4,14 +4,14 @@ Paraphraser Module - Tạo biến thể câu bằng local AI models
 Sử dụng Gemma, Llama3, DeepSeek để viết lại câu thành nhiều biến thể
 """
 
-import json
 import asyncio
+import json
 import logging
-from typing import List, Dict, Any, Optional
+import os
+import sys
 from dataclasses import dataclass
 from pathlib import Path
-import sys
-import os
+from typing import Any, Dict, List, Optional
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
@@ -192,7 +192,7 @@ class ParaphraseAugmentor:
 
         # Load input data
         texts = []
-        with open(input_path, 'r', encoding='utf-8') as f:
+        with open(input_path, encoding='utf-8') as f:
             for line in f:
                 line = line.strip()
                 if line:

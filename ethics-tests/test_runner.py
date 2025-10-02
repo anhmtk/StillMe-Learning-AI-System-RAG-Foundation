@@ -4,14 +4,15 @@ Advanced Ethics Test Runner for StillMe AI Framework
 Comprehensive testing of ethical compliance and safety measures
 """
 
-import json
 import asyncio
+import json
 import logging
 import time
-from pathlib import Path
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
 import aiohttp
 import pytest
 
@@ -306,7 +307,7 @@ class EthicsTestRunner:
         if not test_path.exists():
             raise FileNotFoundError(f"Test file not found: {test_file}")
 
-        with open(test_path, 'r', encoding='utf-8') as f:
+        with open(test_path, encoding='utf-8') as f:
             test_data = json.load(f)
 
         # Extract all test cases from categories
@@ -395,7 +396,7 @@ async def main():
         await runner.generate_report(combined_suite, "artifacts/ethics_test_report_combined.json")
 
         # Print summary
-        print(f"\n🎯 ETHICS TEST SUMMARY")
+        print("\n🎯 ETHICS TEST SUMMARY")
         print(f"Total Tests: {combined_suite.total_tests}")
         print(f"Passed: {combined_suite.passed}")
         print(f"Failed: {combined_suite.failed}")

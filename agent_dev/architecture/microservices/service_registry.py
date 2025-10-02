@@ -7,12 +7,14 @@ Enterprise-grade service discovery and registration
 import asyncio
 import json
 import time
-from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
 import aiohttp
 import yaml
-from pathlib import Path
+
 
 class ServiceStatus(Enum):
     HEALTHY = "HEALTHY"
@@ -66,7 +68,7 @@ class ServiceRegistry:
             config_file = Path("agent-dev/config/service_registry.yaml")
 
         if config_file.exists():
-            with open(config_file, 'r') as f:
+            with open(config_file) as f:
                 return yaml.safe_load(f)
         else:
             return {
@@ -219,7 +221,7 @@ class ServiceRegistry:
             return
 
         try:
-            with open(persistence_file, 'r') as f:
+            with open(persistence_file) as f:
                 services_data = json.load(f)
 
             for service_id, data in services_data.items():

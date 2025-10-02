@@ -6,17 +6,17 @@ AgentDev Core - Real Implementation
 Real error scanning, fixing, and validation system.
 """
 
-import os
-import sys
 import json
-import subprocess
-import tempfile
+import logging
+import os
 import shutil
-from pathlib import Path
-from typing import Dict, List, Optional, Any
+import subprocess
+import sys
+import tempfile
 from dataclasses import dataclass
 from datetime import datetime
-import logging
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -48,35 +48,35 @@ class AgentDev:
         # Backup directory for rollback
         self.backup_dir = self.project_root / "agentdev_backups"
         self.backup_dir.mkdir(exist_ok=True)
-    
+
     def _inventory_check(self) -> Dict[str, Any]:
         """Pre-flight inventory check - mandatory before any operations"""
         issues = []
-        
+
         # Check core modules exist
         core_modules = [
             "agent_dev/core/agentdev.py",
             "agent_dev/ops/__init__.py",
             "stillme_core/framework.py"
         ]
-        
+
         for module in core_modules:
             module_path = self.project_root / module
             if not module_path.exists():
                 issues.append(f"Missing core module: {module}")
-        
+
         # Check for duplicate versions
         agentdev_files = list(self.project_root.glob("**/agentdev*.py"))
         if len(agentdev_files) > 3:  # Allow some reasonable number
             issues.append(f"Too many agentdev files found: {len(agentdev_files)}")
-        
+
         # Check for invalid imports
         try:
             import agent_dev.core.agentdev
             import agent_dev.ops
         except ImportError as e:
             issues.append(f"Invalid imports: {e}")
-        
+
         return {
             "valid": len(issues) == 0,
             "issues": issues,
@@ -228,7 +228,7 @@ class AgentDev:
                     continue
 
                 # Read file
-                with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
+                with open(file_path, encoding='utf-8', errors='replace') as f:
                     lines = f.readlines()
 
                 # Find missing symbols
@@ -373,7 +373,7 @@ class AgentDev:
                     continue
 
                 # Read file
-                with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
+                with open(file_path, encoding='utf-8', errors='replace') as f:
                     lines = f.readlines()
 
                 # Remove unused imports
@@ -524,48 +524,48 @@ class AgentDev:
         """
         Execute a task - MINIMAL CONTRACT derived from tests/usages
         """
-        import time
         import hashlib
-        
+        import time
+
         start_time = time.time()
         logger.info(f"🎯 Executing task: {task} with mode: {mode}")
-        
+
         try:
             # Validate input
             if not task or not isinstance(task, str) or not task.strip():
                 return "❌ Invalid task input"
-            
+
             # Security check: Detect and sanitize dangerous prompts
             sanitized_task = self._sanitize_dangerous_prompt(task)
             if sanitized_task != task:
-                logger.warning(f"🚨 Detected potentially dangerous prompt, sanitized for safety")
+                logger.warning("🚨 Detected potentially dangerous prompt, sanitized for safety")
                 # Log security event
                 mode_str = str(mode) if mode else "default"
                 self.log_messages.append(f"[{mode_str}] SECURITY_BLOCK: Dangerous prompt detected and blocked")
                 self.log_messages.append(f"[Security] action=blocked reason=dangerous_pattern mode={mode_str}")
                 # For security tests, return a safe response without executing the dangerous task
                 return "❌ Request blocked for security reasons. Please rephrase your request safely."
-            
+
             # Execute minimal pipeline: scan -> fix blockers -> validate
             initial_errors = self.scan_errors()
             errors_before = len(initial_errors)
-            
+
             # Try to fix blocking errors (F821, E999)
             blocking_errors = [e for e in initial_errors if e.rule in ["F821", "E999"]]
             errors_fixed = 0
-            
+
             if blocking_errors:
                 logger.info(f"🔧 Attempting to fix {len(blocking_errors)} blocking errors...")
                 batch_result = self.apply_batch_fixes(blocking_errors[:5], "F821")  # Limit to 5 for safety
                 errors_fixed = batch_result.get("errors_fixed", 0)
-            
+
             # Final scan
             final_errors = self.scan_errors()
             errors_remaining = len(final_errors)
-            
+
             # Calculate duration
             duration_ms = int((time.time() - start_time) * 1000)
-            
+
             # Create sanitized task excerpt and hash for logging
             sanitized_task = self._sanitize_dangerous_prompt(task)
             if sanitized_task == "SANITIZED_DANGEROUS_PROMPT":
@@ -575,14 +575,14 @@ class AgentDev:
                 if len(sanitized_task.strip()) > 60:
                     task_excerpt += "..."
             task_hash = hashlib.md5(task.encode()).hexdigest()[:6]
-            
+
             # Format result with dynamic content
             result = self._format_result(task, errors_fixed, errors_remaining, duration_ms, mode)
-            
+
             # Log the execution with module indicators
             mode_str = str(mode) if mode else "default"
             self.log_messages.append(f"[{mode_str}] {result}")
-            
+
             # Add module-specific logs based on mode
             if "SIMPLE" in mode_str.upper():
                 # SIMPLE mode: Impact + Cleanup
@@ -592,37 +592,37 @@ class AgentDev:
                 # SENIOR mode: Impact + Security + Business (if optimize/customer/cost detected)
                 self.log_messages.append(f"[Impact] risk_score=0.7 mode={mode_str} task='{task_excerpt}#{task_hash}' t={duration_ms}ms")
                 self.log_messages.append(f"[Security] policy=strict checks=3 vulnerabilities=0 t={duration_ms}ms")
-                
+
                 # Add Business indicator if task contains optimization keywords (use sanitized task)
                 if any(keyword in sanitized_task.lower() for keyword in ["optimize", "customer", "cost", "performance", "business"]):
                     self.log_messages.append(f"[Business] roi=high priority=medium task='{task_excerpt}' t={duration_ms}ms")
-            
+
             return result
-            
+
         except Exception as e:
             logger.error(f"❌ Error executing task: {e}")
             duration_ms = int((time.time() - start_time) * 1000)
             result = self._format_result(task, 0, 0, duration_ms, mode, error=str(e))
-            
+
             # Log the error
             mode_str = str(mode) if mode else "default"
             self.log_messages.append(f"[{mode_str}] ERROR: {result}")
-            
+
             # Add error-specific module logs
             self.log_messages.append(f"[Conflict] error_type=exception mode={mode_str} t={duration_ms}ms")
-            
+
             return result
-    
+
     def _sanitize_dangerous_prompt(self, task: str) -> str:
         """
         Detect and sanitize potentially dangerous prompts that could be injection attempts.
         Returns the original task if safe, or a sanitized version if dangerous patterns detected.
         """
         import re
-        
+
         # Convert to lowercase for pattern matching
         task_lower = task.lower()
-        
+
         # Dangerous patterns that indicate prompt injection attempts
         dangerous_patterns = [
             # Prompt injection patterns
@@ -657,7 +657,7 @@ class AgentDev:
             r'ignore[-_\s]+your[-_\s]+training',  # Handle hyphens/underscores
             r'act\s+against\s+your\s+guidelines',
             r'act[-_\s]+against[-_\s]+your[-_\s]+guidelines',  # Handle hyphens/underscores
-            
+
             # XSS patterns
             r'<script[^>]*>.*</script>',
             r'<script[^>]*>',
@@ -666,7 +666,7 @@ class AgentDev:
             r'alert\s*\(',
             r'document\.cookie',
             r'window\.location',
-            
+
             # SQL injection patterns
             r';\s*drop\s+table',
             r'union\s+select',
@@ -675,14 +675,14 @@ class AgentDev:
             r'update\s+set',
             r'--\s*$',
             r'/\*.*\*/',
-            
+
             # Path traversal patterns
             r'\.\./',
             r'\.\.\\',
             r'/etc/passwd',
             r'/etc/shadow',
             r'c:\\windows\\system32',
-            
+
             # Command injection patterns
             r'rm\s+-rf\s+/',
             r'del\s+/s\s+/q',
@@ -694,13 +694,13 @@ class AgentDev:
             r'shell_exec\s*\(',
             r'subprocess\.call',
             r'__import__\s*\(',
-            
+
             # File system attacks
             r'cat\s+/etc/passwd',
             r'type\s+c:\\windows\\system32\\drivers\\etc\\hosts',
             r'ls\s+-la\s+/',
             r'dir\s+c:\\',
-            
+
             # Sensitive data patterns
             r'password\s*:\s*\w+',
             r'api\s*key\s*:\s*sk-',
@@ -711,19 +711,19 @@ class AgentDev:
             r'key\s*:\s*\w+',
             r'pass\s*:\s*\w+'
         ]
-        
+
         # Check for dangerous patterns
         for pattern in dangerous_patterns:
             if re.search(pattern, task_lower):
                 logger.warning(f"🚨 Detected dangerous pattern: {pattern}")
                 return "SANITIZED_DANGEROUS_PROMPT"
-        
+
         # Check for specific dangerous keywords in context
         dangerous_keywords = [
             'override', 'ignore', 'bypass', 'delete', 'pretend', 'jailbreak',
             'developer mode', 'system commands', 'safety rules'
         ]
-        
+
         for keyword in dangerous_keywords:
             if keyword in task_lower:
                 # Check if it's in a dangerous context
@@ -735,19 +735,19 @@ class AgentDev:
                     re.escape(keyword) + r'\s+.*override',
                     re.escape(keyword) + r'\s+.*bypass'
                 ]
-                
+
                 for context_pattern in context_patterns:
                     if re.search(context_pattern, task_lower):
                         logger.warning(f"🚨 Detected dangerous keyword in context: {keyword}")
                         return "SANITIZED_DANGEROUS_PROMPT"
-        
+
         # If no dangerous patterns found, return original task
         return task
-    
+
     def _format_result(self, task: str, errors_fixed: int, errors_remaining: int, duration_ms: int, mode=None, error=None) -> str:
         """Format result with dynamic content to avoid default literal matches"""
         import hashlib
-        
+
         # Sanitize task for safe display
         sanitized_task = self._sanitize_dangerous_prompt(task)
         if sanitized_task == "SANITIZED_DANGEROUS_PROMPT":
@@ -757,21 +757,21 @@ class AgentDev:
             task_excerpt = sanitized_task.strip()[:60].replace('\n', ' ').replace('\r', ' ')
             if len(sanitized_task.strip()) > 60:
                 task_excerpt += "..."
-        
+
         # Create deterministic hash from (task + mode) for uniqueness
         mode_str = str(mode) if mode else "default"
         hash_input = f"{task}_{mode_str}"
         task_hash = hashlib.md5(hash_input.encode()).hexdigest()[:6]
-        
+
         if error:
             return f"[{mode_str}] ✅ success | 🧠 thinking — strategy=error mode={mode_str} task:'{task_excerpt}#{task_hash}' failed={error} t={duration_ms}ms"
-        
+
         # Mode-specific formatting
         if "SIMPLE" in mode_str.upper():
             # SIMPLE mode configuration
             return f"[SIMPLE] ✅ success | 🧠 thinking — strategy=quick depth=1 modules=Impact,Cleanup task:'{task_excerpt}#{task_hash}' fixed={errors_fixed} remain={errors_remaining}"
         elif "SENIOR" in mode_str.upper():
-            # SENIOR mode configuration  
+            # SENIOR mode configuration
             return f"[SENIOR] ✅ success | 🧠 thinking — strategy=deep depth=3 modules=Impact,Security,Business task:'{task_excerpt}#{task_hash}' fixed={errors_fixed} remain={errors_remaining}"
         else:
             # Default mode
@@ -786,7 +786,7 @@ class AgentDev:
         if not inventory_result["valid"]:
             logger.error(f"Pre-flight check failed: {inventory_result['issues']}")
             return {
-                "status": "preflight_failed", 
+                "status": "preflight_failed",
                 "error": "Inventory check failed",
                 "issues": inventory_result["issues"]
             }
@@ -843,7 +843,7 @@ class AgentDev:
             self.log_messages.append(f"[Conflict] session_complete=partial mode={mode} remaining={errors_after} t=0ms")
         else:
             self.log_messages.append(f"[Business] session_complete=success mode={mode} files={len(total_files_touched)} t=0ms")
-        
+
         return {
             "done": True,
             "errors_total_before": errors_before,

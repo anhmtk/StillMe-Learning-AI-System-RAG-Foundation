@@ -4,9 +4,10 @@ Create lightweight deployment package (without node_modules)
 """
 
 import os
-import zipfile
 import shutil
+import zipfile
 from pathlib import Path
+
 
 def create_lightweight_package():
     """Create lightweight deployment package"""

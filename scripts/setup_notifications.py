@@ -11,10 +11,11 @@ Version: 1.0.0
 Date: 2025-09-29
 """
 
+import json
 import os
 import sys
-import json
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -26,6 +27,7 @@ sys.path.append(str(project_root))
 
 from stillme_core.alerting.email_notifier import EmailNotifier
 from stillme_core.alerting.telegram_notifier import TelegramNotifier
+
 
 def setup_email():
     """Setup email notifications"""

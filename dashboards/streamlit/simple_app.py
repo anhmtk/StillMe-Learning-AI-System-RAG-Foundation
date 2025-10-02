@@ -5,13 +5,14 @@ StillMe IPC Simple Learning Dashboard
 A simple, clean dashboard without complex imports to avoid issues.
 """
 
-import streamlit as st
+import json
+import time
+from datetime import datetime, timedelta
+from pathlib import Path
+
 import pandas as pd
 import plotly.express as px
-from datetime import datetime, timedelta
-import time
-import json
-from pathlib import Path
+import streamlit as st
 
 # Page config
 st.set_page_config(
@@ -115,6 +116,7 @@ class SimpleDashboard:
                 # Fallback: try to get count directly from database
                 try:
                     import sqlite3
+
                     from stillme_core.learning.proposals_manager import ProposalsManager
                     manager = ProposalsManager()
                     with sqlite3.connect(manager.db_path) as conn:
@@ -239,7 +241,7 @@ class SimpleDashboard:
                 st.markdown("**🔄 Active Learning Session:**")
                 st.markdown(f"• **Topic:** {selected_proposal['title']}")
                 st.markdown(f"• **Started:** {selected_proposal['approved_at']}")
-                st.markdown(f"• **Progress:** 25% (Just started)")
+                st.markdown("• **Progress:** 25% (Just started)")
                 st.markdown(f"• **Quality Score:** {selected_proposal['quality_score']:.2f}")
                 st.markdown(f"• **Estimated Duration:** {selected_proposal['estimated_duration']} minutes")
 
@@ -393,7 +395,7 @@ class SimpleDashboard:
                 from pathlib import Path
                 config_file = Path("data/config/automation_config.json")
                 if config_file.exists():
-                    with open(config_file, 'r') as f:
+                    with open(config_file) as f:
                         config = json.load(f)
                         st.session_state.automation_enabled = config.get('automation_enabled', True)
                 else:
@@ -421,7 +423,7 @@ class SimpleDashboard:
 
                 # Load existing config or create new
                 if config_file.exists():
-                    with open(config_file, 'r') as f:
+                    with open(config_file) as f:
                         config = json.load(f)
                 else:
                     config = {
@@ -580,6 +582,7 @@ class SimpleDashboard:
             # Try to get basic count from database without parsing complex data
             try:
                 import sqlite3
+
                 from stillme_core.learning.proposals_manager import ProposalsManager
                 manager = ProposalsManager()
 
@@ -675,7 +678,9 @@ class SimpleDashboard:
                         if st.button("✅ Approve", key=f"approve_{proposal['id']}", type="primary"):
                             try:
                                 # Update database status to approved
-                                from stillme_core.learning.proposals_manager import ProposalsManager
+                                from stillme_core.learning.proposals_manager import (
+                                    ProposalsManager,
+                                )
                                 manager = ProposalsManager()
                                 manager.approve_proposal(proposal['id'], "user")
 
@@ -703,7 +708,9 @@ class SimpleDashboard:
                         if st.button("❌ Reject", key=f"reject_{proposal['id']}", type="secondary"):
                             try:
                                 # Update database status to rejected
-                                from stillme_core.learning.proposals_manager import ProposalsManager
+                                from stillme_core.learning.proposals_manager import (
+                                    ProposalsManager,
+                                )
                                 manager = ProposalsManager()
                                 manager.reject_proposal(proposal['id'], "user", "User rejected")
 
@@ -752,8 +759,8 @@ class SimpleDashboard:
 
                     with col1:
                         st.markdown("**📋 Basic Info:**")
-                        st.write(f"**Source:** AI Generated")
-                        st.write(f"**Priority:** High")
+                        st.write("**Source:** AI Generated")
+                        st.write("**Priority:** High")
                         st.write(f"**Duration:** {selected_proposal['estimated_duration']} minutes")
                         st.write(f"**Quality Score:** {selected_proposal['quality_score']:.2f}")
                         st.write(f"**Created:** {selected_proposal['created_at']}")
@@ -1025,11 +1032,13 @@ class SimpleDashboard:
                 if title and description:
                     try:
                         # Import founder input
-                        import sys
                         import os
+                        import sys
                         sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-                        from scripts.founder_knowledge_input import FounderKnowledgeInput
+                        from scripts.founder_knowledge_input import (
+                            FounderKnowledgeInput,
+                        )
 
                         founder_input = FounderKnowledgeInput()
                         proposal = founder_input.add_founder_knowledge(
@@ -1066,7 +1075,7 @@ class SimpleDashboard:
 
                     for i, file_path in enumerate(founder_files[:5]):  # Show last 5
                         try:
-                            with open(file_path, 'r', encoding='utf-8') as f:
+                            with open(file_path, encoding='utf-8') as f:
                                 founder_data = json.load(f)
 
                             with st.expander(f"👑 {founder_data.get('title', 'Untitled')} - {founder_data.get('created_at', 'Unknown date')[:10]}"):
@@ -1074,7 +1083,7 @@ class SimpleDashboard:
                                 if founder_data.get('source_url'):
                                     st.markdown(f"**🔗 Source:** {founder_data['source_url']}")
                                 st.markdown(f"**🆔 Proposal ID:** {founder_data.get('proposal_id', 'Unknown')[:8]}...")
-                                st.markdown(f"**✅ Status:** AUTO-APPROVED (Founder Mode)")
+                                st.markdown("**✅ Status:** AUTO-APPROVED (Founder Mode)")
                         except Exception as e:
                             st.error(f"Error loading founder knowledge: {e}")
                 else:

@@ -10,12 +10,12 @@ Kiểm tra:
 - Kiểm tra bias và discrimination
 """
 
-import re
 import json
 import logging
-from typing import Dict, List, Tuple, Optional, Any, Set
-from dataclasses import dataclass, asdict
+import re
+from dataclasses import asdict, dataclass
 from datetime import datetime
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)

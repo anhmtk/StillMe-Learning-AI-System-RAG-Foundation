@@ -11,14 +11,14 @@ Version: 1.0.0
 Last Updated: 2025-09-26
 """
 
-import os
-import sys
-import json
-import subprocess
-from pathlib import Path
-from typing import Dict, List, Any, Tuple, Optional
-from dataclasses import dataclass
 import argparse
+import json
+import os
+import subprocess
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 
 @dataclass
@@ -149,7 +149,7 @@ class QualityGates:
         coverage_files = list(artifacts_path.glob("*coverage*.json"))
         for coverage_file in coverage_files:
             try:
-                with open(coverage_file, 'r') as f:
+                with open(coverage_file) as f:
                     data = json.load(f)
                 if 'totals' in data:
                     metrics['test_coverage'] = data['totals'].get('percent_covered', 0.0)
@@ -161,7 +161,7 @@ class QualityGates:
         test_files = list(artifacts_path.glob("*test*.json"))
         for test_file in test_files:
             try:
-                with open(test_file, 'r') as f:
+                with open(test_file) as f:
                     data = json.load(f)
                 if 'tests' in data and 'passed' in data:
                     total_tests = data['tests']
@@ -176,7 +176,7 @@ class QualityGates:
         security_files = list(artifacts_path.glob("*security*.json"))
         for security_file in security_files:
             try:
-                with open(security_file, 'r') as f:
+                with open(security_file) as f:
                     data = json.load(f)
                 if 'security_score' in data:
                     metrics['security_score'] = data['security_score']
@@ -199,7 +199,7 @@ class QualityGates:
         perf_files = list(artifacts_path.glob("*performance*.json"))
         for perf_file in perf_files:
             try:
-                with open(perf_file, 'r') as f:
+                with open(perf_file) as f:
                     data = json.load(f)
                 if 'metrics' in data:
                     metrics_data = data['metrics']
@@ -213,7 +213,7 @@ class QualityGates:
         ethics_files = list(artifacts_path.glob("*ethics*.json"))
         for ethics_file in ethics_files:
             try:
-                with open(ethics_file, 'r') as f:
+                with open(ethics_file) as f:
                     data = json.load(f)
                 if 'pass_rate' in data:
                     metrics['ethics_compliance'] = data['pass_rate']
@@ -406,7 +406,7 @@ Generated: {self._get_current_timestamp()}
         self.save_report(report_content)
 
         # Print summary
-        print(f"\n🚪 Quality Gates Summary:")
+        print("\n🚪 Quality Gates Summary:")
         print(f"   Overall Status: {report.overall_status}")
         print(f"   Quality Score: {report.quality_score:.1f}/100")
         print(f"   Passed: {report.passed_gates}/{report.total_gates}")

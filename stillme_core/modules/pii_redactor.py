@@ -64,8 +64,8 @@ RELATED FILES / FILES LIÊN QUAN:
 🎉 This is a privacy-critical module for data protection!
 """
 
-import re
 import logging
+import re
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Dict, List, Optional, Tuple
@@ -153,10 +153,10 @@ class PIIRedactor:
         """
         try:
             detections = []
-            
+
             for pii_type, pattern in self.patterns.items():
                 matches = re.finditer(pattern, text, re.IGNORECASE)
-                
+
                 for match in matches:
                     detection = PIIDetection(
                         pii_type=pii_type,
@@ -167,13 +167,13 @@ class PIIRedactor:
                         context=text[max(0, match.start()-20):match.end()+20]
                     )
                     detections.append(detection)
-            
+
             # Sort by position
             detections.sort(key=lambda x: x.start_pos)
-            
+
             self.logger.info(f"🔍 Detected {len(detections)} PII instances")
             return detections
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error detecting PII: {e}")
             return []
@@ -191,28 +191,28 @@ class PIIRedactor:
         try:
             if not self.config.enabled:
                 return text
-            
+
             detections = self.detect_pii(text)
             if not detections:
                 return text
-            
+
             # Sort detections by position (reverse order for safe replacement)
             detections.sort(key=lambda x: x.start_pos, reverse=True)
-            
+
             redacted_text = text
-            
+
             for detection in detections:
                 if detection.confidence >= self.config.confidence_threshold:
                     redacted_value = self._apply_redaction(detection)
                     redacted_text = (
-                        redacted_text[:detection.start_pos] + 
-                        redacted_value + 
+                        redacted_text[:detection.start_pos] +
+                        redacted_value +
                         redacted_text[detection.end_pos:]
                     )
-            
+
             self.logger.info(f"🔒 Redacted {len(detections)} PII instances")
             return redacted_text
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error redacting PII: {e}")
             return text
@@ -229,7 +229,7 @@ class PIIRedactor:
         """
         try:
             original = detection.original_text
-            
+
             if self.config.redaction_method == RedactionMethod.REMOVE:
                 return ""
             elif self.config.redaction_method == RedactionMethod.REPLACE:
@@ -241,7 +241,7 @@ class PIIRedactor:
                     return self.config.mask_character * len(original)
                 else:
                     return self.config.mask_character * 4
-                    
+
         except Exception as e:
             self.logger.error(f"❌ Error applying redaction: {e}")
             return detection.original_text
@@ -259,9 +259,9 @@ class PIIRedactor:
         try:
             detections = self.detect_pii(text)
             redacted_text = self.redact(text)
-            
+
             return redacted_text, detections
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error redacting with metadata: {e}")
             return text, []
@@ -278,7 +278,7 @@ class PIIRedactor:
         """
         try:
             detections = self.detect_pii(text)
-            
+
             stats = {
                 "total_pii": len(detections),
                 "by_type": {},
@@ -290,14 +290,14 @@ class PIIRedactor:
                 "text_length": len(text),
                 "redaction_ratio": 0.0
             }
-            
+
             total_redacted_length = 0
-            
+
             for detection in detections:
                 # Count by type
                 pii_type = detection.pii_type.value
                 stats["by_type"][pii_type] = stats["by_type"].get(pii_type, 0) + 1
-                
+
                 # Count by confidence
                 if detection.confidence >= 0.9:
                     stats["confidence_distribution"]["high"] += 1
@@ -305,14 +305,14 @@ class PIIRedactor:
                     stats["confidence_distribution"]["medium"] += 1
                 else:
                     stats["confidence_distribution"]["low"] += 1
-                
+
                 total_redacted_length += len(detection.original_text)
-            
+
             if stats["text_length"] > 0:
                 stats["redaction_ratio"] = total_redacted_length / stats["text_length"]
-            
+
             return stats
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error getting redaction statistics: {e}")
             return {}
@@ -335,7 +335,7 @@ class PIIRedactor:
             self.config = new_config
             self.logger.info("🔧 Redaction configuration updated")
             return True
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error updating redaction configuration: {e}")
             return False
@@ -355,7 +355,7 @@ class PIIRedactor:
             self.patterns[pii_type] = pattern
             self.logger.info(f"🔧 Added custom pattern for {pii_type.value}")
             return True
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error adding custom pattern: {e}")
             return False

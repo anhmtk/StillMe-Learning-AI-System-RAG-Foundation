@@ -6,8 +6,8 @@ This module provides validation capabilities for AgentDev:
 - AgentDevIntegration: Integration with existing systems
 """
 
-from .validation_system import AgentDevValidator
 from .integration import AgentDevIntegration
+from .validation_system import AgentDevValidator
 
 __all__ = [
     "AgentDevValidator",

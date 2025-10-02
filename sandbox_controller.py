@@ -6,12 +6,13 @@ Kiểm soát truy cập internet với egress allowlist mạnh, redirect rules, 
 import logging
 import os
 import re
-import yaml
 from datetime import datetime
-from typing import Dict, Any, List, Set, Tuple, Optional
-from urllib.parse import urlparse, urljoin
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Set, Tuple
+from urllib.parse import urljoin, urlparse
+
 import idna  # For IDN/Punycode handling
+import yaml
 
 logger = logging.getLogger(__name__)
 
@@ -63,7 +64,7 @@ class SandboxController:
         """Load allowlist from config file"""
         try:
             if self.config_file.exists():
-                with open(self.config_file, 'r', encoding='utf-8') as f:
+                with open(self.config_file, encoding='utf-8') as f:
                     config = yaml.safe_load(f)
                     allowlist = set(config.get('allowed_domains', []))
                     logger.info(f"✅ Loaded {len(allowlist)} domains from {self.config_file}")
@@ -431,7 +432,7 @@ if __name__ == "__main__":
 
     # Show stats
     stats = sandbox_controller.get_stats()
-    print(f"\n📊 Sandbox Stats:")
+    print("\n📊 Sandbox Stats:")
     print(f"  Total requests: {stats['total_requests']}")
     print(f"  Allowed requests: {stats['allowed_requests']}")
     print(f"  Blocked requests: {stats['blocked_requests']}")
@@ -442,7 +443,7 @@ if __name__ == "__main__":
 
     # Show status
     status = sandbox_controller.get_status()
-    print(f"\n🔍 Sandbox Status:")
+    print("\n🔍 Sandbox Status:")
     print(f"  Enabled: {status['enabled']}")
     print(f"  Egress limit: {status['egress_limit']}")
     print(f"  Allowlist: {len(status['allowlist'])} domains")

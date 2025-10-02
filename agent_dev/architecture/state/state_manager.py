@@ -7,15 +7,16 @@ Enterprise-grade state management with persistence and recovery
 import asyncio
 import json
 import pickle
+import threading
 import time
 import uuid
-from typing import Dict, List, Optional, Any, Type, TypeVar, Generic
-from dataclasses import dataclass, asdict
-from enum import Enum
-import aiofiles
-from pathlib import Path
-import threading
 from concurrent.futures import ThreadPoolExecutor
+from dataclasses import asdict, dataclass
+from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, Generic, List, Optional, Type, TypeVar
+
+import aiofiles
 
 T = TypeVar('T')
 
@@ -76,7 +77,7 @@ class StateManager:
 
         if config_file.exists():
             import yaml
-            with open(config_file, 'r') as f:
+            with open(config_file) as f:
                 return yaml.safe_load(f)
         else:
             return {
@@ -240,7 +241,7 @@ class StateManager:
             if not state_file.exists():
                 return False
 
-            async with aiofiles.open(state_file, 'r') as f:
+            async with aiofiles.open(state_file) as f:
                 state_data = json.loads(await f.read())
 
             with self.lock:
@@ -249,7 +250,7 @@ class StateManager:
             # Load snapshots
             snapshots_file = self.state_dir / f"{entity_id}_snapshots.json"
             if snapshots_file.exists():
-                async with aiofiles.open(snapshots_file, 'r') as f:
+                async with aiofiles.open(snapshots_file) as f:
                     snapshots_data = json.loads(await f.read())
 
                 with self.lock:
@@ -260,7 +261,7 @@ class StateManager:
             # Load transitions
             transitions_file = self.state_dir / f"{entity_id}_transitions.json"
             if transitions_file.exists():
-                async with aiofiles.open(transitions_file, 'r') as f:
+                async with aiofiles.open(transitions_file) as f:
                     transitions_data = json.loads(await f.read())
 
                 with self.lock:

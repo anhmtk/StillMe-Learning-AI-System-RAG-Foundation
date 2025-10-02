@@ -21,6 +21,7 @@ FUNCTIONALITY / CHỨC NĂNG:
 import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+
 from .common.logging import get_logger
 
 logger = get_logger(__name__)
@@ -30,13 +31,13 @@ class FakeSandboxDeployer:
     """
     Fake sandbox deployer for when Docker is unavailable
     """
-    
+
     def __init__(self, project_root: Optional[str] = None):
         """Initialize fake deployer"""
         self.project_root = Path(project_root or os.getcwd())
         self.deployment_logs: List[Dict] = []
         logger.info(f"🚀 FakeSandboxDeployer initialized (Docker unavailable) for project: {self.project_root}")
-    
+
     async def deploy_security_sandbox(
         self,
         name: str = "security-test",
@@ -55,17 +56,17 @@ class FakeSandboxDeployer:
             "image": image,
             "deployed_at": "2025-01-01T00:00:00Z"
         }
-        
+
         self.deployment_logs.append({
             "action": "fake_deploy",
             "name": name,
             "image": image,
             "result": result
         })
-        
+
         logger.info(f"🎭 Fake deployment completed for {name}")
         return True, f"Fake deployment successful for {name}", result
-    
+
     async def cleanup(self, container_id: str) -> Tuple[bool, str]:
         """
         Fake cleanup that always succeeds
@@ -74,10 +75,10 @@ class FakeSandboxDeployer:
             "action": "fake_cleanup",
             "container_id": container_id
         })
-        
+
         logger.info(f"🎭 Fake cleanup completed for {container_id}")
         return True, f"Fake cleanup successful for {container_id}"
-    
+
     def get_logs(self) -> List[Dict]:
         """
         Get deployment logs
@@ -89,14 +90,14 @@ class RealDockerDeployer:
     """
     Real Docker-based sandbox deployer
     """
-    
+
     def __init__(self, docker_client, project_root: Optional[str] = None):
         """Initialize real deployer with Docker client"""
         self.docker_client = docker_client
         self.project_root = Path(project_root or os.getcwd())
         self.deployment_logs: List[Dict] = []
         logger.info(f"🐳 RealDockerDeployer initialized for project: {self.project_root}")
-    
+
     async def deploy_security_sandbox(
         self,
         name: str = "security-test",
@@ -109,7 +110,7 @@ class RealDockerDeployer:
         try:
             # Pull image
             self.docker_client.images.pull(image)
-            
+
             # Run container
             container = self.docker_client.containers.run(
                 image,
@@ -118,7 +119,7 @@ class RealDockerDeployer:
                 remove=False,
                 environment={"SANDBOX_MODE": "security_test"}
             )
-            
+
             result = {
                 "engine": "docker",
                 "status": "running",
@@ -128,7 +129,7 @@ class RealDockerDeployer:
                 "image": image,
                 "deployed_at": "2025-01-01T00:00:00Z"
             }
-            
+
             self.deployment_logs.append({
                 "action": "real_deploy",
                 "name": name,
@@ -136,15 +137,15 @@ class RealDockerDeployer:
                 "container_id": container.id,
                 "result": result
             })
-            
+
             logger.info(f"🐳 Real deployment completed for {name} (ID: {container.id})")
             return True, f"Real deployment successful for {name}", result
-            
+
         except Exception as e:
             error_msg = f"Docker deployment failed: {e}"
             logger.error(error_msg)
             return False, error_msg, {"engine": "docker", "status": "failed", "error": str(e)}
-    
+
     async def cleanup(self, container_id: str) -> Tuple[bool, str]:
         """
         Real Docker cleanup
@@ -153,20 +154,20 @@ class RealDockerDeployer:
             container = self.docker_client.containers.get(container_id)
             container.stop()
             container.remove()
-            
+
             self.deployment_logs.append({
                 "action": "real_cleanup",
                 "container_id": container_id
             })
-            
+
             logger.info(f"🐳 Real cleanup completed for {container_id}")
             return True, f"Real cleanup successful for {container_id}"
-            
+
         except Exception as e:
             error_msg = f"Docker cleanup failed: {e}"
             logger.error(error_msg)
             return False, error_msg
-    
+
     def get_logs(self) -> List[Dict]:
         """
         Get deployment logs
@@ -185,7 +186,7 @@ def get_sandbox_deployer(project_root: Optional[str] = None):
     if os.getenv("DISABLE_DOCKER", "").lower() in ("1", "true", "yes"):
         logger.info("🐳 Docker disabled via DISABLE_DOCKER environment variable")
         return FakeSandboxDeployer(project_root)
-    
+
     # Try to initialize Docker client
     try:
         import docker

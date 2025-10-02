@@ -159,10 +159,10 @@ class SecurityGate:
         self.logger = logging.getLogger(__name__)
         self.logger.info("🔒 SecurityGate initialized")
 
-    def check_access(self, 
-                    user_id: str, 
-                    resource: str, 
-                    action: str, 
+    def check_access(self,
+                    user_id: str,
+                    resource: str,
+                    action: str,
                     access_level: AccessLevel = None) -> bool:
         """
         Check if user has access to resource
@@ -181,39 +181,39 @@ class SecurityGate:
             if user_id in self.blocked_users:
                 self.logger.warning(f"🚫 Access denied: User {user_id} is blocked")
                 return False
-            
+
             # Check failed attempts
             if self.failed_attempts.get(user_id, 0) >= self.config.max_failed_attempts:
                 self.logger.warning(f"🚫 Access denied: Too many failed attempts for user {user_id}")
                 return False
-            
+
             # Use default access level if not specified
             if access_level is None:
                 access_level = self.config.default_access_level
-            
+
             # Check policies
             for policy in self.policies.values():
                 if not policy.enabled:
                     continue
-                
+
                 if self._evaluate_policy(policy, user_id, resource, action, access_level):
                     self._log_access(user_id, resource, action, access_level, True)
                     return True
-            
+
             # Default deny
             self._log_access(user_id, resource, action, access_level, False)
             self._record_failed_attempt(user_id)
             return False
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error checking access: {e}")
             return False
 
-    def _evaluate_policy(self, 
-                        policy: SecurityPolicy, 
-                        user_id: str, 
-                        resource: str, 
-                        action: str, 
+    def _evaluate_policy(self,
+                        policy: SecurityPolicy,
+                        user_id: str,
+                        resource: str,
+                        action: str,
                         access_level: AccessLevel) -> bool:
         """Evaluate security policy"""
         try:
@@ -224,18 +224,18 @@ class SecurityGate:
                 return True
             elif access_level.value == "read" and policy.access_level.value in ["read", "write", "admin", "super_admin"]:
                 return True
-            
+
             return False
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error evaluating policy: {e}")
             return False
 
-    def _log_access(self, 
-                   user_id: str, 
-                   resource: str, 
-                   action: str, 
-                   access_level: AccessLevel, 
+    def _log_access(self,
+                   user_id: str,
+                   resource: str,
+                   action: str,
+                   access_level: AccessLevel,
                    granted: bool):
         """Log access attempt"""
         try:
@@ -248,12 +248,12 @@ class SecurityGate:
                 timestamp=datetime.now().isoformat(),
                 metadata={"granted": granted}
             )
-            
+
             self.access_logs.append(request)
-            
+
             status = "GRANTED" if granted else "DENIED"
             self.logger.info(f"🔐 Access {status}: {user_id} -> {resource} ({action})")
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error logging access: {e}")
 
@@ -261,11 +261,11 @@ class SecurityGate:
         """Record failed access attempt"""
         try:
             self.failed_attempts[user_id] = self.failed_attempts.get(user_id, 0) + 1
-            
+
             if self.failed_attempts[user_id] >= self.config.max_failed_attempts:
                 self.blocked_users.add(user_id)
                 self.logger.warning(f"🚫 User {user_id} blocked due to failed attempts")
-                
+
         except Exception as e:
             self.logger.error(f"❌ Error recording failed attempt: {e}")
 
@@ -283,7 +283,7 @@ class SecurityGate:
             self.policies[policy.policy_id] = policy
             self.logger.info(f"🔧 Security policy added: {policy.name}")
             return True
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error adding security policy: {e}")
             return False
@@ -306,13 +306,13 @@ class SecurityGate:
             else:
                 self.logger.warning(f"⚠️ Policy not found: {policy_id}")
                 return False
-                
+
         except Exception as e:
             self.logger.error(f"❌ Error removing security policy: {e}")
             return False
 
-    def get_access_logs(self, 
-                       user_id: Optional[str] = None, 
+    def get_access_logs(self,
+                       user_id: Optional[str] = None,
                        limit: int = 100) -> List[AccessRequest]:
         """
         Get access logs with optional filtering
@@ -326,12 +326,12 @@ class SecurityGate:
         """
         try:
             logs = self.access_logs
-            
+
             if user_id:
                 logs = [log for log in logs if log.user_id == user_id]
-            
+
             return logs[-limit:] if limit > 0 else logs
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error getting access logs: {e}")
             return []
@@ -354,7 +354,7 @@ class SecurityGate:
                 "gate_status": GateStatus.OPEN.value,
                 "timestamp": datetime.now().isoformat()
             }
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error getting security status: {e}")
             return {"error": str(e)}
@@ -378,7 +378,7 @@ class SecurityGate:
             else:
                 self.logger.warning(f"⚠️ User {user_id} is not blocked")
                 return False
-                
+
         except Exception as e:
             self.logger.error(f"❌ Error unblocking user: {e}")
             return False
@@ -397,7 +397,7 @@ class SecurityGate:
             self.config = new_config
             self.logger.info("🔧 Security gate configuration updated")
             return True
-            
+
         except Exception as e:
             self.logger.error(f"❌ Error updating security gate configuration: {e}")
             return False

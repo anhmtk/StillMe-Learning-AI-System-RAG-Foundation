@@ -5,16 +5,17 @@ Analyzes and optimizes system performance
 """
 
 import asyncio
-import time
+import gc
 import json
 import logging
-from pathlib import Path
-from typing import Dict, Any, List, Optional
-from dataclasses import dataclass, asdict
+import time
+from dataclasses import asdict, dataclass
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
 import aiohttp
 import psutil
-import gc
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -490,7 +491,7 @@ async def main():
         await optimizer.generate_performance_report(report)
 
         # Print summary
-        print(f"\n🎯 PERFORMANCE OPTIMIZATION SUMMARY")
+        print("\n🎯 PERFORMANCE OPTIMIZATION SUMMARY")
         print(f"Optimization Score: {report.optimization_score:.1f}/100")
         print(f"Total Metrics: {len(report.metrics)}")
         print(f"Recommendations: {len(report.recommendations)}")
@@ -498,7 +499,7 @@ async def main():
         print(f"Analysis Duration: {report.duration:.2f}s")
 
         # Print top recommendations
-        print(f"\n💡 TOP RECOMMENDATIONS:")
+        print("\n💡 TOP RECOMMENDATIONS:")
         for i, rec in enumerate(report.recommendations[:5], 1):
             print(f"{i}. {rec}")
 

@@ -8,7 +8,8 @@ import csv
 import random
 import re
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
 
 class PromptGenerator:
     """Generate variations of clarification test prompts"""
@@ -292,7 +293,7 @@ def main():
     existing_data = []
 
     if dataset_path.exists():
-        with open(dataset_path, 'r', encoding='utf-8') as f:
+        with open(dataset_path, encoding='utf-8') as f:
             reader = csv.DictReader(f)
             existing_data = list(reader)
 

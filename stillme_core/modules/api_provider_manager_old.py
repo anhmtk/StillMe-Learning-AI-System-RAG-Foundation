@@ -390,14 +390,14 @@ class UnifiedAPIManager:
         simple_keywords = ["chào", "xin chào", "bạn tên gì", "bạn là ai", "2+2", "bằng mấy", "thủ đô", "là gì"]
         if any(keyword in prompt_lower for keyword in simple_keywords):
             if "gemma2:2b" in self.model_preferences:
-                self.logger.info(f"🎯 Selected gemma2:2b (simple keyword match)")
+                self.logger.info("🎯 Selected gemma2:2b (simple keyword match)")
                 return "gemma2:2b"
 
         # Rule 2: Câu hỏi về code → dùng deepseek-coder:6.7b (local)
         code_keywords = ["code", "lập trình", "python", "javascript", "viết code", "debug", "lỗi", "function", "class"]
         if any(keyword in prompt_lower for keyword in code_keywords):
             if "deepseek-coder:6.7b" in self.model_preferences:
-                self.logger.info(f"🎯 Selected deepseek-coder:6.7b (code keyword match)")
+                self.logger.info("🎯 Selected deepseek-coder:6.7b (code keyword match)")
                 return "deepseek-coder:6.7b"
 
         # Rule 3: Prompt dài > 3000 token → dùng local model để tiết kiệm cost

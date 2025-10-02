@@ -4,8 +4,8 @@ StillMe IPC Quick Knowledge Input
 Script nhanh để thêm kiến thức từ command line
 """
 
-import sys
 import argparse
+import sys
 from pathlib import Path
 
 # Add project root to path
@@ -13,6 +13,7 @@ project_root = Path(__file__).resolve().parents[1]
 sys.path.append(str(project_root))
 
 from scripts.add_manual_knowledge import ManualKnowledgeInput
+
 
 def main():
     """Quick knowledge input from command line"""
@@ -35,11 +36,11 @@ def main():
     )
 
     if proposal:
-        print(f"✅ Knowledge added successfully!")
+        print("✅ Knowledge added successfully!")
         print(f"🆔 Proposal ID: {proposal.id}")
-        print(f"📊 Check dashboard: http://localhost:8506")
+        print("📊 Check dashboard: http://localhost:8506")
     else:
-        print(f"❌ Failed to add knowledge")
+        print("❌ Failed to add knowledge")
         sys.exit(1)
 
 if __name__ == "__main__":

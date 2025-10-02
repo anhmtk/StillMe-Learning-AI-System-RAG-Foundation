@@ -6,9 +6,10 @@ Xử lý các request truy cập internet có kiểm soát
 import asyncio
 import logging
 import os
-from typing import Dict, Any, Optional
 import sys
 from pathlib import Path
+from typing import Any, Dict, Optional
+
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -387,7 +388,7 @@ class MarketIntelligence:
                     }
                 else:
                     # Fallback to mock data
-                    logger.warning(f"⚠️ Hacker News API failed, using mock data")
+                    logger.warning("⚠️ Hacker News API failed, using mock data")
                     return {
                         "success": True,
                         "data": {

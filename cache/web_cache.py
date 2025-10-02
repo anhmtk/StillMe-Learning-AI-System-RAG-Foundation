@@ -3,15 +3,15 @@
 Web Cache System - LRU + TTL for Short-term Caching
 Provides efficient caching for web requests with TTL and LRU eviction
 """
-import json
 import hashlib
+import json
 import logging
 import threading
-from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, asdict
-from collections import OrderedDict
 import time
+from collections import OrderedDict
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Tuple
 
 # Setup logging
 logger = logging.getLogger(__name__)

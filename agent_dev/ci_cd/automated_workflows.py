@@ -8,11 +8,13 @@ import asyncio
 import json
 import time
 import uuid
-from typing import Dict, List, Optional, Any, Callable
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from enum import Enum
-import yaml
 from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional
+
+import yaml
+
 
 class PipelineStatus(Enum):
     """Pipeline execution status"""
@@ -109,7 +111,7 @@ class AutomatedWorkflows:
             config_file = Path("agent-dev/config/automated_workflows.yaml")
 
         if config_file.exists():
-            with open(config_file, 'r') as f:
+            with open(config_file) as f:
                 return yaml.safe_load(f)
         else:
             return {
@@ -145,7 +147,7 @@ class AutomatedWorkflows:
                 print(f"⚠️ Pipeline file not found: {pipeline_path}")
                 return None
 
-            with open(pipeline_path, 'r') as f:
+            with open(pipeline_path) as f:
                 pipeline_data = yaml.safe_load(f)
 
             # Convert trigger strings to enums

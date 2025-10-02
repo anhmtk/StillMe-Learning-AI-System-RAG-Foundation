@@ -6,9 +6,10 @@ Phân tích kết quả K6 CAR test để tạo báo cáo throughput tuning
 
 import json
 import os
-from pathlib import Path
-from typing import Dict, Any, List
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List
+
 
 @dataclass
 class TestMetrics:
@@ -36,11 +37,11 @@ class CARResultsAnalyzer:
     def load_data(self):
         """Load K6 test data"""
         if self.summary_path.exists():
-            with open(self.summary_path, 'r') as f:
+            with open(self.summary_path) as f:
                 self.summary_data = json.load(f)
 
         if self.results_path.exists():
-            with open(self.results_path, 'r') as f:
+            with open(self.results_path) as f:
                 self.results_data = [json.loads(line) for line in f if line.strip()]
 
     def extract_metrics(self) -> List[TestMetrics]:
@@ -186,7 +187,7 @@ Current results show:
 5. Profile application for bottlenecks
 """
 
-        report += f"""
+        report += """
 
 ## 📁 Test Files
 - **K6 Script**: `load_test/clarification_car_test.js`

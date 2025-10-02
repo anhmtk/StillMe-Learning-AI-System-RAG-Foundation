@@ -6,17 +6,19 @@ Enterprise-grade structured logging with correlation and context
 
 import asyncio
 import json
-import time
-import uuid
-import threading
-from typing import Dict, List, Optional, Any, Union
-from dataclasses import dataclass, asdict
-from enum import Enum
-import aiofiles
-from pathlib import Path
 import logging
 import sys
+import threading
+import time
+import uuid
+from dataclasses import asdict, dataclass
 from datetime import datetime
+from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Union
+
+import aiofiles
+
 
 class LogLevel(Enum):
     """Log levels"""
@@ -83,7 +85,7 @@ class StructuredLogger:
 
         if config_file.exists():
             import yaml
-            with open(config_file, 'r') as f:
+            with open(config_file) as f:
                 return yaml.safe_load(f)
         else:
             return {

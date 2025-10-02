@@ -1,7 +1,7 @@
 # security/content_wrap.py
 # Stub for ContentWrapSecurity
 import logging
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

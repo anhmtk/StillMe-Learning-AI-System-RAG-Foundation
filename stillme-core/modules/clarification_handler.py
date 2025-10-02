@@ -7,11 +7,12 @@ This module provides the core functionality for detecting ambiguous prompts
 and generating clarification questions to improve user interaction quality.
 """
 
-import re
 import json
-from typing import Dict, List, Optional, Tuple, Any
+import re
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
 
 @dataclass
 class ClarificationResult:

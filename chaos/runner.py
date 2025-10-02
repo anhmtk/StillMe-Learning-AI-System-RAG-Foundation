@@ -9,17 +9,17 @@ Author: StillMe AI Framework
 Created: 2025-01-08
 """
 
-import os
-import sys
-import time
-import signal
-import threading
-import subprocess
-import tempfile
-import shutil
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass
 import json
+import os
+import shutil
+import signal
+import subprocess
+import sys
+import tempfile
+import threading
+import time
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -433,7 +433,7 @@ class ChaosRunner:
         # Determine success
         success = overall_pass_rate >= 90.0 and detailed_pass_rate >= 90.0
 
-        print(f"\n🎯 Target: 90%+ pass rate")
+        print("\n🎯 Target: 90%+ pass rate")
         print(f"✅ Result: {'PASSED' if success else 'FAILED'}")
 
         return {

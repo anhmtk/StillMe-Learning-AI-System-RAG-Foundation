@@ -11,19 +11,20 @@ Usage:
     python scripts/router_dashboard.py --monitor
 """
 
+import argparse
+import json
 import os
 import sys
-import argparse
-import time
-import json
 import threading
+import time
 from datetime import datetime
 from typing import Dict, List, Optional
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))
 
-from modules.api_provider_manager import UnifiedAPIManager, ComplexityAnalyzer
+from modules.api_provider_manager import ComplexityAnalyzer, UnifiedAPIManager
+
 
 class RouterDashboard:
     def __init__(self):
@@ -92,12 +93,12 @@ class RouterDashboard:
 
     def _print_system_status(self):
         """Print system status"""
-        print(f"\n📊 System Status:")
+        print("\n📊 System Status:")
 
         # Check analyzer status
         try:
             stats = self.analyzer.get_stats()
-            print(f"  🧠 Complexity Analyzer: ✅ Active")
+            print("  🧠 Complexity Analyzer: ✅ Active")
             print(f"  📈 Total Analyses: {stats['performance']['total_analyses']}")
             print(f"  ⚡ Avg Analysis Time: {stats['performance']['avg_time_ms']:.2f}ms")
         except Exception as e:
@@ -106,14 +107,14 @@ class RouterDashboard:
         # Check manager status
         try:
             model_prefs = self.manager.model_preferences
-            print(f"  🎯 Model Manager: ✅ Active")
+            print("  🎯 Model Manager: ✅ Active")
             print(f"  🤖 Available Models: {len(model_prefs)}")
         except Exception as e:
             print(f"  🎯 Model Manager: ❌ Error - {e}")
 
     def _print_performance_metrics(self):
         """Print performance metrics"""
-        print(f"\n⚡ Performance Metrics:")
+        print("\n⚡ Performance Metrics:")
 
         if self.session_data['performance_metrics']:
             recent_metrics = self.session_data['performance_metrics'][-10:]
@@ -124,11 +125,11 @@ class RouterDashboard:
             print(f"  🧠 Recent Avg Complexity Score: {avg_score:.3f}")
             print(f"  📈 Total Prompts Processed: {len(self.session_data['prompts'])}")
         else:
-            print(f"  📊 No data available yet")
+            print("  📊 No data available yet")
 
     def _print_recent_decisions(self):
         """Print recent routing decisions"""
-        print(f"\n🎯 Recent Routing Decisions:")
+        print("\n🎯 Recent Routing Decisions:")
 
         if self.session_data['routing_decisions']:
             recent_decisions = self.session_data['routing_decisions'][-5:]
@@ -140,11 +141,11 @@ class RouterDashboard:
 
                 print(f"  {timestamp} | {prompt} → {model} (score: {score:.3f})")
         else:
-            print(f"  📊 No routing decisions yet")
+            print("  📊 No routing decisions yet")
 
     def _print_statistics(self):
         """Print statistics"""
-        print(f"\n📈 Statistics:")
+        print("\n📈 Statistics:")
 
         if self.session_data['routing_decisions']:
             # Model distribution
@@ -153,7 +154,7 @@ class RouterDashboard:
                 model = decision['selected_model']
                 model_counts[model] = model_counts.get(model, 0) + 1
 
-            print(f"  🤖 Model Distribution:")
+            print("  🤖 Model Distribution:")
             for model, count in model_counts.items():
                 percentage = (count / len(self.session_data['routing_decisions'])) * 100
                 print(f"    {model}: {count} ({percentage:.1f}%)")
@@ -174,16 +175,16 @@ class RouterDashboard:
                 else:
                     complexity_ranges['Complex (≥0.7)'] += 1
 
-            print(f"  🧠 Complexity Distribution:")
+            print("  🧠 Complexity Distribution:")
             for range_name, count in complexity_ranges.items():
                 percentage = (count / len(self.session_data['routing_decisions'])) * 100
                 print(f"    {range_name}: {count} ({percentage:.1f}%)")
         else:
-            print(f"  📊 No statistics available yet")
+            print("  📊 No statistics available yet")
 
     def _print_final_summary(self):
         """Print final summary"""
-        print(f"\n📊 Final Summary")
+        print("\n📊 Final Summary")
         print("=" * 60)
 
         if self.session_data['routing_decisions']:
@@ -200,7 +201,7 @@ class RouterDashboard:
                 model = decision['selected_model']
                 model_counts[model] = model_counts.get(model, 0) + 1
 
-            print(f"\nFinal Model Distribution:")
+            print("\nFinal Model Distribution:")
             for model, count in model_counts.items():
                 percentage = (count / total_prompts) * 100
                 print(f"  {model}: {count} ({percentage:.1f}%)")
@@ -210,7 +211,7 @@ class RouterDashboard:
                 avg_time = sum(m['analysis_time'] for m in self.session_data['performance_metrics']) / len(self.session_data['performance_metrics'])
                 avg_score = sum(m['complexity_score'] for m in self.session_data['performance_metrics']) / len(self.session_data['performance_metrics'])
 
-                print(f"\nPerformance Summary:")
+                print("\nPerformance Summary:")
                 print(f"  Average Analysis Time: {avg_time*1000:.2f}ms")
                 print(f"  Average Complexity Score: {avg_score:.3f}")
         else:
@@ -224,12 +225,12 @@ class RouterDashboard:
         # Analyzer statistics
         try:
             stats = self.analyzer.get_stats()
-            print(f"🧠 Complexity Analyzer Stats:")
+            print("🧠 Complexity Analyzer Stats:")
             print(f"  Total Analyses: {stats['performance']['total_analyses']}")
             print(f"  Average Analysis Time: {stats['performance']['avg_time_ms']:.2f}ms")
             print(f"  Fallback Triggers: {stats['fallback']['total_triggers']}")
 
-            print(f"\n⚙️  Current Configuration:")
+            print("\n⚙️  Current Configuration:")
             print(f"  Weights: {stats['weights']}")
             print(f"  Thresholds: {stats['thresholds']}")
         except Exception as e:
@@ -238,7 +239,7 @@ class RouterDashboard:
         # Model preferences
         try:
             model_prefs = self.manager.model_preferences
-            print(f"\n🤖 Available Models:")
+            print("\n🤖 Available Models:")
             for i, model in enumerate(model_prefs, 1):
                 print(f"  {i}. {model}")
         except Exception as e:
@@ -267,7 +268,7 @@ class RouterDashboard:
 
     def _print_collected_data(self):
         """Print collected monitoring data"""
-        print(f"\n📊 Collected Data Summary")
+        print("\n📊 Collected Data Summary")
         print("=" * 60)
 
         if self.session_data['routing_decisions']:
@@ -284,7 +285,7 @@ class RouterDashboard:
                 model = decision['selected_model']
                 model_counts[model] = model_counts.get(model, 0) + 1
 
-            print(f"\nModel Distribution:")
+            print("\nModel Distribution:")
             for model, count in model_counts.items():
                 percentage = (count / total_prompts) * 100
                 print(f"  {model}: {count} ({percentage:.1f}%)")
@@ -305,7 +306,7 @@ class RouterDashboard:
                 else:
                     complexity_ranges['Complex (≥0.7)'] += 1
 
-            print(f"\nComplexity Distribution:")
+            print("\nComplexity Distribution:")
             for range_name, count in complexity_ranges.items():
                 percentage = (count / total_prompts) * 100
                 print(f"  {range_name}: {count} ({percentage:.1f}%)")
@@ -315,7 +316,7 @@ class RouterDashboard:
                 avg_time = sum(m['analysis_time'] for m in self.session_data['performance_metrics']) / len(self.session_data['performance_metrics'])
                 avg_score = sum(m['complexity_score'] for m in self.session_data['performance_metrics']) / len(self.session_data['performance_metrics'])
 
-                print(f"\nPerformance Summary:")
+                print("\nPerformance Summary:")
                 print(f"  Average Analysis Time: {avg_time*1000:.2f}ms")
                 print(f"  Average Complexity Score: {avg_score:.3f}")
         else:

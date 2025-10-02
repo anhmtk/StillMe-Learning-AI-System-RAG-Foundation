@@ -49,7 +49,7 @@ class KillSwitchManager:
         """Load kill switch state from file."""
         if self.state_file.exists():
             try:
-                with open(self.state_file, 'r') as f:
+                with open(self.state_file) as f:
                     return json.load(f)
             except Exception as e:
                 log.error(f"Failed to load kill switch state: {e}")
@@ -246,7 +246,7 @@ class KillSwitchManager:
 
         try:
             entries = []
-            with open(self.audit_file, 'r') as f:
+            with open(self.audit_file) as f:
                 lines = f.readlines()
 
             # Get last N lines

@@ -5,16 +5,18 @@ Enterprise-grade multi-user support and team collaboration
 """
 
 import asyncio
+import hashlib
 import json
 import time
 import uuid
-import hashlib
-from typing import Dict, List, Optional, Any, Set
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from enum import Enum
-import aiofiles
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Set
+
+import aiofiles
 import yaml
+
 
 class UserRole(Enum):
     """User roles in AgentDev"""
@@ -135,7 +137,7 @@ class TeamManager:
             config_file = Path("agent-dev/config/team_manager.yaml")
 
         if config_file.exists():
-            with open(config_file, 'r') as f:
+            with open(config_file) as f:
                 return yaml.safe_load(f)
         else:
             return {

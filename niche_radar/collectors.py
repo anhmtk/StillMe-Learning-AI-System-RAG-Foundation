@@ -11,16 +11,16 @@ Version: 1.5.0
 """
 
 import asyncio
+import json
 import logging
 import time
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass, asdict
-import json
+from typing import Any, Dict, List, Optional
 
 # Import existing StillMe modules
 from market_intel import MarketIntelligence
-from web_tools import github_trending, hackernews_top, search_news, google_trends
+from web_tools import github_trending, google_trends, hackernews_top, search_news
 
 logger = logging.getLogger(__name__)
 
@@ -147,7 +147,7 @@ class HackerNewsCollector(BaseCollector):
             result = await hackernews_top(hours)
 
             if not result.success or not result.data:
-                self.logger.warning(f"⚠️ Hacker News collection failed")
+                self.logger.warning("⚠️ Hacker News collection failed")
                 return []
 
             records = []
@@ -232,7 +232,7 @@ class NewsDeltaCollector(BaseCollector):
                 try:
                     data = json.loads(result.data)
                 except:
-                    self.logger.warning(f"⚠️ Failed to parse news data as JSON")
+                    self.logger.warning("⚠️ Failed to parse news data as JSON")
                     return []
             else:
                 data = result.data
@@ -328,7 +328,7 @@ class GoogleTrendsCollector(BaseCollector):
             result = await google_trends(terms, region, days)
 
             if not result.success or not result.data:
-                self.logger.warning(f"⚠️ Google Trends collection failed")
+                self.logger.warning("⚠️ Google Trends collection failed")
                 return []
 
             records = []
@@ -386,7 +386,7 @@ class RedditEngagementCollector(BaseCollector):
             mock_posts = [
                 {
                     "title": f"Discussion about {query}",
-                    "url": f"https://reddit.com/r/technology/comments/mock1",
+                    "url": "https://reddit.com/r/technology/comments/mock1",
                     "score": 150,
                     "comments": 45,
                     "subreddit": "technology",
@@ -394,7 +394,7 @@ class RedditEngagementCollector(BaseCollector):
                 },
                 {
                     "title": f"New developments in {query}",
-                    "url": f"https://reddit.com/r/programming/comments/mock2",
+                    "url": "https://reddit.com/r/programming/comments/mock2",
                     "score": 89,
                     "comments": 23,
                     "subreddit": "programming",

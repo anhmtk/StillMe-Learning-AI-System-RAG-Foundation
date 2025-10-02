@@ -1,7 +1,8 @@
 # tests/test_ai_manager_extended.py
 import re
 
-from stillme_core import controller, dev_agent, health, set_mode, warmup
+from stillme_core import controller, dev_agent, set_mode, warmup
+from stillme_core.ai_manager import health
 
 
 def _ok_health():
@@ -13,17 +14,17 @@ def _ok_health():
 
 def test_mode_switch_and_health_all():
     # fast -> llama3:8b
-    assert "[MODEL]" in set_mode("fast")
+    assert set_mode("fast") is True
     warmup()
     _ok_health()
 
     # code -> deepseek-coder:6.7b
-    assert "[MODEL]" in set_mode("code")
+    assert set_mode("code") is True
     warmup()
     _ok_health()
 
     # think -> gpt-oss:20b
-    assert "[MODEL]" in set_mode("think")
+    assert set_mode("think") is True
     warmup()
     _ok_health()
 

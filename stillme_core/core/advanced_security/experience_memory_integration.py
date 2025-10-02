@@ -562,7 +562,7 @@ class ExperienceMemoryIntegration:
     async def import_experiences(self, file_path: str) -> bool:
         """Nhập kinh nghiệm từ file"""
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 import_data = json.load(f)
 
             # Import experiences
@@ -654,7 +654,7 @@ async def demo_experience_memory_integration():
 
     # Show statistics
     stats = integration.get_learning_statistics()
-    print(f"\n📈 Learning Statistics:")
+    print("\n📈 Learning Statistics:")
     print(f"  - Total experiences: {stats['stats']['total_experiences']}")
     print(f"  - Stored experiences: {stats['stats']['stored_experiences']}")
     print(f"  - Learning patterns: {stats['learning_patterns']}")

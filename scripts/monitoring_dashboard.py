@@ -11,16 +11,16 @@ Version: 1.0.0
 Last Updated: 2025-09-26
 """
 
-import os
-import sys
-import json
-import time
-import subprocess
-from pathlib import Path
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass, asdict
-from datetime import datetime, timedelta
 import argparse
+import json
+import os
+import subprocess
+import sys
+import time
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -166,7 +166,7 @@ class MonitoringDashboard:
 
             for test_file in test_files:
                 try:
-                    with open(test_file, 'r') as f:
+                    with open(test_file) as f:
                         data = json.load(f)
 
                     if 'tests' in data:
@@ -218,7 +218,7 @@ class MonitoringDashboard:
 
             for security_file in security_files:
                 try:
-                    with open(security_file, 'r') as f:
+                    with open(security_file) as f:
                         data = json.load(f)
 
                     if 'vulnerabilities' in data:
@@ -266,7 +266,7 @@ class MonitoringDashboard:
 
             for perf_file in perf_files:
                 try:
-                    with open(perf_file, 'r') as f:
+                    with open(perf_file) as f:
                         data = json.load(f)
 
                     if 'metrics' in data:
@@ -301,7 +301,7 @@ class MonitoringDashboard:
                 # Parse Windows uptime (simplified)
                 return 24.0  # Mock value
             else:  # Unix-like
-                with open('/proc/uptime', 'r') as f:
+                with open('/proc/uptime') as f:
                     uptime_seconds = float(f.read().split()[0])
                 return uptime_seconds / 3600
         except:
@@ -655,7 +655,7 @@ def main():
     print(f"📄 JSON report saved to: {json_path}")
 
     # Print summary
-    print(f"\n📊 Monitoring Summary:")
+    print("\n📊 Monitoring Summary:")
     print(f"   System Health: {system_health.overall_status}")
     print(f"   Test Pass Rate: {test_metrics.pass_rate:.1f}%")
     print(f"   Security Score: {security_metrics.security_score}/100")

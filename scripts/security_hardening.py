@@ -1,4 +1,5 @@
 import secrets
+
 #!/usr/bin/env python3
 """
 Security Hardening Script for StillMe AI Framework
@@ -11,15 +12,15 @@ Version: 1.0.0
 Last Updated: 2025-09-26
 """
 
-import os
-import sys
-import json
-import subprocess
-import re
-from pathlib import Path
-from typing import Dict, List, Any, Tuple
-from dataclasses import dataclass
 import argparse
+import json
+import os
+import re
+import subprocess
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Tuple
 
 
 @dataclass
@@ -207,7 +208,7 @@ class SecurityHardener:
         issues = []
 
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 content = f.read()
                 lines = content.split('\n')
 
@@ -549,7 +550,7 @@ def main():
     hardener.save_report(report_content, args.output)
 
     # Print summary
-    print(f"\n🔒 Security Summary:")
+    print("\n🔒 Security Summary:")
     print(f"   Total Issues: {report.total_issues}")
     print(f"   Critical: {report.critical_issues}")
     print(f"   High: {report.high_issues}")

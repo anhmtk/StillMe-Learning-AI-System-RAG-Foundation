@@ -2,31 +2,33 @@
 """
 StillMe Desktop Chat App - Beautiful UI like FlutterFlow
 """
-import tkinter as tk
-from tkinter import ttk, scrolledtext, messagebox
-import requests
 import json
-import threading
-from datetime import datetime
-import webbrowser
+import os
 import re
 import sys
-import os
+import threading
+import tkinter as tk
+import webbrowser
+from datetime import datetime
+from tkinter import messagebox, scrolledtext, ttk
+
+import requests
 
 # Add libs to path for language detection
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../libs'))
-from lang.detect import detect_language, get_language_name
-from system_prompt import system_prompt_manager
-from performance_tracker import performance_tracker, PerformanceMetrics
 from design_tokens import design_tokens
+from lang.detect import detect_language, get_language_name
+from performance_tracker import PerformanceMetrics, performance_tracker
+from system_prompt import system_prompt_manager
 
 # Add config to path for branding
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../config'))
-from brand import get_window_title, get_header_text, get_about_text, get_settings_text
+from brand import get_about_text, get_header_text, get_settings_text, get_window_title
 
 # Add runtime to path for policy loading
 sys.path.append(os.path.join(os.path.dirname(__file__), '../../runtime'))
 from policy_loader import load_policies
+
 
 class StillMeDesktopApp:
     def __init__(self, root):

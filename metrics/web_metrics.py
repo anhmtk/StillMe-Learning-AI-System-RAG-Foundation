@@ -2,9 +2,9 @@
 # Web metrics collection
 import logging
 import time
-from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

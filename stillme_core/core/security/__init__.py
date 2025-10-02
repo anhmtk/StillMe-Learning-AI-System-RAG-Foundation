@@ -3,8 +3,8 @@
 Security scanning and vulnerability assessment module
 """
 
-from .security_scanner import SecurityScanner, VulnerabilityLevel
 from .attack_simulator import AttackSimulator, AttackType
+from .security_scanner import SecurityScanner, VulnerabilityLevel
 
 try:
     from .vulnerability_assessor import VulnerabilityAssessor

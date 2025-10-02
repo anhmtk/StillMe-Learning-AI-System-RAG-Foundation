@@ -12,13 +12,14 @@ Author: StillMe Framework Team
 Version: 1.5.0
 """
 
-import yaml
 import logging
 import math
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, asdict
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+import yaml
 
 from .collectors import NicheRecord
 
@@ -55,7 +56,7 @@ class NicheScorer:
                 self.logger.warning(f"⚠️ Weights file not found: {self.weights_file}, using defaults")
                 return self._get_default_weights()
 
-            with open(weights_path, 'r', encoding='utf-8') as f:
+            with open(weights_path, encoding='utf-8') as f:
                 weights = yaml.safe_load(f)
 
             self.logger.info(f"✅ Loaded scoring weights from {self.weights_file}")
@@ -467,7 +468,7 @@ if __name__ == "__main__":
     scorer = NicheScorer()
     score = scorer.score_niche("ai_assistant", test_records)
 
-    print(f"🎯 Niche Score for 'ai_assistant':")
+    print("🎯 Niche Score for 'ai_assistant':")
     print(f"  Total Score: {score.total_score:.3f}")
     print(f"  Confidence: {score.confidence:.3f}")
     print(f"  Feasibility Fit: {score.feasibility_fit:.3f}")

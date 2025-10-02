@@ -8,6 +8,7 @@ A simple calculator plugin demonstrating the plugin architecture.
 import logging
 import re
 from typing import Any, Dict, Optional
+
 from stillme_core.base.module_base import ModuleBase, ModuleInfo, ModuleStatus
 
 logger = logging.getLogger(__name__)
@@ -175,7 +176,7 @@ class CalculatorPlugin(ModuleBase):
 
     def get_help(self) -> str:
         """Get help information"""
-        return """
+        return f"""
 Calculator Plugin Help:
 =====================
 
@@ -192,17 +193,14 @@ Examples:
 - "15 / 3" → 5
 
 Limitations:
-- Maximum expression length: {max_length} characters
-- Precision: {precision} decimal places
+- Maximum expression length: {self.max_expression_length} characters
+- Precision: {self.precision} decimal places
 - No advanced functions (sin, cos, etc.)
 
 Usage:
 - Pass expression as string: "2 + 3"
 - Or as dict: {{"expression": "2 + 3"}}
-        """.format(
-            max_length=self.max_expression_length,
-            precision=self.precision
-        )
+        """
 
 
 # Plugin factory function

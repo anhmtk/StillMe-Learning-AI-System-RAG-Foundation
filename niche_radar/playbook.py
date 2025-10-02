@@ -15,10 +15,10 @@ Version: 1.5.0
 
 import json
 import logging
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass, asdict
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 from .scoring import NicheScore
 
@@ -503,7 +503,7 @@ class PlaybookGenerator:
             headline=f"Automate {niche_score.topic.title()} with AI",
             subheadline=f"StillMe-powered {niche_score.topic} assistant that saves you hours every day",
             value_propositions=[
-                f"Built on proven StillMe AI framework",
+                "Built on proven StillMe AI framework",
                 f"{niche_score.feasibility_fit:.0%} capability fit - designed for this exact use case",
                 "Deploy in days, not months",
                 "Enterprise-grade reliability"

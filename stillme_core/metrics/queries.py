@@ -131,17 +131,17 @@ class MetricsQueries:
         conn = self.get_connection()
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT DATE(r.started_at) as date,
                    AVG(CASE WHEN m.name = 'learning_pass_rate' THEN m.value ELSE NULL END) as pass_rate,
                    AVG(CASE WHEN m.name = 'learning_accuracy' THEN m.value ELSE NULL END) as accuracy,
                    AVG(CASE WHEN m.name = 'self_assessment_score' THEN m.value ELSE NULL END) as self_assessment
             FROM runs r
             LEFT JOIN metrics m ON r.id = m.run_id
-            WHERE r.started_at >= date('now', '-{} days')
+            WHERE r.started_at >= date('now', '-{days} days')
             GROUP BY DATE(r.started_at)
             ORDER BY date
-        """.format(days))
+        """)
 
         learning_curve = []
         for row in cursor.fetchall():
@@ -162,7 +162,7 @@ class MetricsQueries:
         cursor = conn.cursor()
 
         # Latency metrics
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT m.tag,
                    AVG(m.value) as avg_latency,
                    MIN(m.value) as min_latency,
@@ -170,9 +170,9 @@ class MetricsQueries:
             FROM metrics m
             JOIN runs r ON m.run_id = r.id
             WHERE m.name = 'latency_ms' 
-            AND r.started_at >= date('now', '-{} days')
+            AND r.started_at >= date('now', '-{days} days')
             GROUP BY m.tag
-        """.format(days))
+        """)
 
         latency_metrics = {}
         for row in cursor.fetchall():
@@ -184,26 +184,26 @@ class MetricsQueries:
             }
 
         # Memory usage
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT AVG(m.value) as avg_memory,
                    MAX(m.value) as max_memory
             FROM metrics m
             JOIN runs r ON m.run_id = r.id
             WHERE m.name = 'memory_usage_mb'
-            AND r.started_at >= date('now', '-{} days')
-        """.format(days))
+            AND r.started_at >= date('now', '-{days} days')
+        """)
 
         memory_stats = cursor.fetchone()
 
         # CPU usage
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT AVG(m.value) as avg_cpu,
                    MAX(m.value) as max_cpu
             FROM metrics m
             JOIN runs r ON m.run_id = r.id
             WHERE m.name = 'cpu_usage_percent'
-            AND r.started_at >= date('now', '-{} days')
-        """.format(days))
+            AND r.started_at >= date('now', '-{days} days')
+        """)
 
         cpu_stats = cursor.fetchone()
 
@@ -226,17 +226,17 @@ class MetricsQueries:
         conn = self.get_connection()
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT DATE(r.started_at) as date,
                    m.tag as source,
                    SUM(m.value) as total_items
             FROM metrics m
             JOIN runs r ON m.run_id = r.id
             WHERE m.name = 'ingested_items'
-            AND r.started_at >= date('now', '-{} days')
+            AND r.started_at >= date('now', '-{days} days')
             GROUP BY DATE(r.started_at), m.tag
             ORDER BY date, source
-        """.format(days))
+        """)
 
         ingest_data = []
         for row in cursor.fetchall():
@@ -255,16 +255,16 @@ class MetricsQueries:
         conn = self.get_connection()
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT DATE(r.started_at) as date,
                    SUM(m.value) as total_tokens
             FROM metrics m
             JOIN runs r ON m.run_id = r.id
             WHERE m.name = 'tokens_used'
-            AND r.started_at >= date('now', '-{} days')
+            AND r.started_at >= date('now', '-{days} days')
             GROUP BY DATE(r.started_at)
             ORDER BY date
-        """.format(days))
+        """)
 
         token_usage = []
         total_tokens = 0
@@ -292,16 +292,16 @@ class MetricsQueries:
         conn = self.get_connection()
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT e.type,
                    COUNT(*) as count,
                    DATE(e.ts) as date
             FROM errors e
             JOIN runs r ON e.run_id = r.id
-            WHERE r.started_at >= date('now', '-{} days')
+            WHERE r.started_at >= date('now', '-{days} days')
             GROUP BY e.type, DATE(e.ts)
             ORDER BY date, count DESC
-        """.format(days))
+        """)
 
         error_data = {}
         for row in cursor.fetchall():
@@ -314,12 +314,12 @@ class MetricsQueries:
             })
 
         # Get total errors
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT COUNT(*) as total_errors
             FROM errors e
             JOIN runs r ON e.run_id = r.id
-            WHERE r.started_at >= date('now', '-{} days')
-        """.format(days))
+            WHERE r.started_at >= date('now', '-{days} days')
+        """)
 
         total_errors = cursor.fetchone()[0]
 
@@ -365,15 +365,15 @@ class MetricsQueries:
         conn = self.get_connection()
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT m.tag as content_type,
                    AVG(m.value) as avg_approval_rate
             FROM metrics m
             JOIN runs r ON m.run_id = r.id
             WHERE m.name = 'approval_rate'
-            AND r.started_at >= date('now', '-{} days')
+            AND r.started_at >= date('now', '-{days} days')
             GROUP BY m.tag
-        """.format(days))
+        """)
 
         approval_rates = {}
         for row in cursor.fetchall():
@@ -381,15 +381,15 @@ class MetricsQueries:
             approval_rates[content_type] = avg_rate
 
         # Get quality and risk scores
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT m.name,
                    AVG(m.value) as avg_score
             FROM metrics m
             JOIN runs r ON m.run_id = r.id
             WHERE m.name IN ('quality_score', 'risk_score')
-            AND r.started_at >= date('now', '-{} days')
+            AND r.started_at >= date('now', '-{days} days')
             GROUP BY m.name
-        """.format(days))
+        """)
 
         quality_metrics = {}
         for row in cursor.fetchall():
@@ -447,7 +447,7 @@ class MetricsQueries:
         conn = self.get_connection()
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT DATE(r.started_at) as date,
                    AVG(m.value) as avg_value,
                    MIN(m.value) as min_value,
@@ -456,10 +456,10 @@ class MetricsQueries:
             FROM metrics m
             JOIN runs r ON m.run_id = r.id
             WHERE m.name = ?
-            AND r.started_at >= date('now', '-{} days')
+            AND r.started_at >= date('now', '-{days} days')
             GROUP BY DATE(r.started_at)
             ORDER BY date
-        """.format(days), (metric_name,))
+        """, (metric_name,))
 
         trends = []
         for row in cursor.fetchall():
@@ -482,7 +482,7 @@ class MetricsQueries:
         conn = self.get_connection()
         cursor = conn.cursor()
 
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT r.session_id,
                    r.started_at,
                    r.stage,
@@ -494,9 +494,9 @@ class MetricsQueries:
                    m.ts
             FROM runs r
             JOIN metrics m ON r.id = m.run_id
-            WHERE r.started_at >= date('now', '-{} days')
+            WHERE r.started_at >= date('now', '-{days} days')
             ORDER BY r.started_at, m.name
-        """.format(days))
+        """)
 
         with open(output_path, 'w', newline='', encoding='utf-8') as csvfile:
             writer = csv.writer(csvfile)

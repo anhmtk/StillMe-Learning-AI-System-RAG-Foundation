@@ -30,6 +30,9 @@ class TestKillSwitch:
 
     def test_kill_switch_activation(self, security_monitor, audit_logger):
         """Test kill switch activation when thresholds are exceeded"""
+        # Connect security monitor to audit logger
+        security_monitor.audit_logger = audit_logger
+
         # Generate high-risk events to trigger kill switch
         for i in range(15):  # Exceed threshold of 10
             event = SecurityEvent(
@@ -56,6 +59,9 @@ class TestKillSwitch:
 
     def test_rate_limit_violation_alert(self, security_monitor, audit_logger):
         """Test rate limit violation alerting"""
+        # Connect security monitor to audit logger
+        security_monitor.audit_logger = audit_logger
+
         # Generate rate limit violation events
         for i in range(150):  # Exceed threshold of 100
             event = SecurityEvent(
@@ -82,6 +88,9 @@ class TestKillSwitch:
 
     def test_security_dashboard_data(self, security_monitor, audit_logger):
         """Test security dashboard data generation"""
+        # Connect security monitor to audit logger
+        security_monitor.audit_logger = audit_logger
+
         # Generate some test events
         for i in range(5):
             event = SecurityEvent(
@@ -96,6 +105,9 @@ class TestKillSwitch:
                 risk_score=0.5
             )
             audit_logger.log_security_event(event)
+
+        # Process events to update dashboard data
+        security_monitor.check_security_alerts()
 
         # Get dashboard data
         dashboard_data = security_monitor.get_security_dashboard_data()
@@ -213,6 +225,9 @@ class TestKillSwitch:
 
     def test_kill_switch_integration_workflow(self, security_monitor, audit_logger):
         """Test complete kill switch integration workflow"""
+        # Connect security monitor to audit logger
+        security_monitor.audit_logger = audit_logger
+
         # Step 1: Normal operation - no alerts
         alerts = security_monitor.check_security_alerts()
         assert len(alerts) == 0
@@ -254,6 +269,9 @@ class TestKillSwitch:
 
     def test_kill_switch_alert_types(self, security_monitor, audit_logger):
         """Test different types of kill switch alerts"""
+        # Connect security monitor to audit logger
+        security_monitor.audit_logger = audit_logger
+
         # Test high-risk events alert
         for i in range(15):
             event = SecurityEvent(
@@ -300,6 +318,9 @@ class TestKillSwitch:
 
     def test_kill_switch_alert_severity(self, security_monitor, audit_logger):
         """Test kill switch alert severity levels"""
+        # Connect security monitor to audit logger
+        security_monitor.audit_logger = audit_logger
+
         # Generate critical events
         for i in range(5):
             event = SecurityEvent(

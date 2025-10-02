@@ -5,19 +5,20 @@ Tạo 50 seed mẫu và demo augment ra 500-1000 câu
 """
 
 import asyncio
-import logging
 import json
-from pathlib import Path
-import sys
+import logging
 import os
+import sys
+from pathlib import Path
 
 # Add current directory to path
 sys.path.insert(0, os.path.dirname(__file__))
 
-from augmentor.augment_runner import AugmentRunner, AugmentConfig
-from augmentor.paraphraser import ParaphraseConfig
+from augmentor.augment_runner import AugmentConfig, AugmentRunner
 from augmentor.backtranslate import BacktranslateConfig
+from augmentor.paraphraser import ParaphraseConfig
 from augmentor.template_filler import TemplateConfig
+
 
 async def demo_augmentation():
     """Demo augmentation với sample data"""
@@ -87,7 +88,7 @@ async def demo_augmentation():
         for output_file in stats.output_files:
             if Path(output_file).exists() and "combined" not in output_file:
                 print(f"\n--- {Path(output_file).name} ---")
-                with open(output_file, 'r', encoding='utf-8') as f:
+                with open(output_file, encoding='utf-8') as f:
                     for i, line in enumerate(f):
                         if i >= 3:  # Show only first 3 lines
                             break
@@ -135,7 +136,7 @@ async def demo_individual_methods():
 
     # Test Template Fill
     print("\n--- Testing Template Fill ---")
-    from augmentor.template_filler import TemplateFillerAugmentor, TemplateConfig
+    from augmentor.template_filler import TemplateConfig, TemplateFillerAugmentor
 
     template_config = TemplateConfig(
         num_variants_per_template=3,
@@ -176,7 +177,7 @@ async def main():
         print("\n🔄 Running full augmentation pipeline...")
         stats = await demo_augmentation()
 
-        print(f"\n✅ Demo completed successfully!")
+        print("\n✅ Demo completed successfully!")
         print(f"📊 Generated {stats.total_outputs} variants from {stats.total_seeds} seeds")
         print(f"⏱️  Processing time: {stats.processing_time:.2f} seconds")
 

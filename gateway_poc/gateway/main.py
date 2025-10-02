@@ -4,38 +4,38 @@
 Enhanced FastAPI Gateway with improved performance, security, and monitoring
 """
 
+import asyncio
 import os
 import sys
 import time
-import asyncio
 from contextlib import asynccontextmanager
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
-import uvicorn
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request, Response
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import JSONResponse
-from prometheus_client import Counter, Histogram, Gauge, generate_latest
 import redis.asyncio as redis
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
-from sqlalchemy.orm import sessionmaker
-
-# Import enhanced modules
-from config import EnhancedSettings
+import uvicorn
+from fastapi import FastAPI, Request, Response, WebSocket, WebSocketDisconnect
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.responses import JSONResponse
 from middleware.circuit_breaker import CircuitBreakerMiddleware
 from middleware.rate_limiter import RateLimiterMiddleware
 from middleware.request_logger import RequestLoggerMiddleware
-from monitoring.metrics import MetricsCollector
-from monitoring.health import HealthChecker
-from security.auth import AuthManager
-from security.validator import RequestValidator
+from prometheus_client import Counter, Gauge, Histogram, generate_latest
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.orm import sessionmaker
 
 # Import existing modules
 from api.routes import auth, devices, health, messages
+
+# Import enhanced modules
+from config import EnhancedSettings
 from core.message_protocol import MessageProtocol, MessageType
 from core.websocket_manager import WebSocketManager
+from monitoring.health import HealthChecker
+from monitoring.metrics import MetricsCollector
+from security.auth import AuthManager
+from security.validator import RequestValidator
 
 # Initialize enhanced settings
 settings = EnhancedSettings()
@@ -45,6 +45,7 @@ metrics_collector = MetricsCollector()
 health_checker = HealthChecker()
 auth_manager = AuthManager()
 request_validator = RequestValidator()
+websocket_manager = WebSocketManager()
 
 # Redis connection pool
 redis_pool: Optional[redis.ConnectionPool] = None

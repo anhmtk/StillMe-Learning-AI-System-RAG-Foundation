@@ -1,4 +1,5 @@
 import secrets
+
 #!/usr/bin/env python3
 """
 Protected Files Compliance Check
@@ -8,7 +9,8 @@ Ensures protected files are not modified or deleted
 import os
 import sys
 from pathlib import Path
-from typing import Set, List
+from typing import List, Set
+
 
 def get_protected_files() -> Set[str]:
     """Get list of protected files"""
@@ -31,7 +33,7 @@ def get_protected_files() -> Set[str]:
     # Add files from .gitignore that should be protected
     gitignore_path = Path(".gitignore")
     if gitignore_path.exists():
-        with open(gitignore_path, 'r') as f:
+        with open(gitignore_path) as f:
             for line in f:
                 line = line.strip()
                 if line and not line.startswith('#'):

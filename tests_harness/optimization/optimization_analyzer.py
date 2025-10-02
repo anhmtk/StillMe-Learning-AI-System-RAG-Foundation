@@ -4,14 +4,14 @@ Enhanced Optimization Analyzer - Advanced analysis with SLO monitoring, trends, 
 """
 
 import json
-import os
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass
-from pathlib import Path
 import logging
-from datetime import datetime
+import os
 import subprocess
 import sys
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 # Try to import optional dependencies
 try:
@@ -21,8 +21,8 @@ except ImportError:
     HAS_PANDAS = False
 
 try:
-    import plotly.graph_objects as go
     import plotly.express as px
+    import plotly.graph_objects as go
     from plotly.subplots import make_subplots
     HAS_PLOTLY = True
 except ImportError:
@@ -30,7 +30,7 @@ except ImportError:
 
 # Import our new modules
 from .data_loader import DataLoader
-from .slo_policy import SLOPolicyManager, AlertLevel
+from .slo_policy import AlertLevel, SLOPolicyManager
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -866,8 +866,8 @@ class OptimizationAnalyzer:
 
     def _generate_static_html(self, analysis: Dict[str, Any]) -> str:
         """Generate static HTML without Plotly (fallback)"""
-        # Similar to the Plotly version but with static content
-        return f"""
+        # Build HTML content step by step
+        html_content = f"""
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -981,7 +981,7 @@ class OptimizationAnalyzer:
         # Load JSON reports
         for json_file in self.reports_dir.glob("*.json"):
             try:
-                with open(json_file, 'r', encoding='utf-8') as f:
+                with open(json_file, encoding='utf-8') as f:
                     data = json.load(f)
                     reports[json_file.stem] = data
                     logger.info(f"✅ Loaded {json_file.name}")
@@ -1427,14 +1427,14 @@ def main():
     print(f"\n📊 Overall Performance: {analysis['overall_performance']['average_score']:.2f}")
     print(f"🎯 Total Recommendations: {len(analysis['recommendations'])}")
 
-    print(f"\n🔍 Performance Breakdown:")
+    print("\n🔍 Performance Breakdown:")
     print(f"  Persona: {analysis['persona_analysis']['average_score']:.2f}")
     print(f"  Safety: {analysis['safety_analysis']['average_score']:.2f}")
     print(f"  Translation: {analysis['translation_analysis']['average_score']:.2f}")
     print(f"  Efficiency: {analysis['efficiency_analysis']['average_score']:.2f}")
     print(f"  AgentDev: {analysis['agentdev_analysis']['average_score']:.2f}")
 
-    print(f"\n🎯 Top Recommendations:")
+    print("\n🎯 Top Recommendations:")
     for i, rec in enumerate(analysis['recommendations'][:3], 1):
         print(f"  {i}. [{rec.priority.upper()}] {rec.title}")
         print(f"     Current: {rec.current_score:.2f} → Target: {rec.target_score:.2f}")

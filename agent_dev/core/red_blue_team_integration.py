@@ -12,15 +12,16 @@ Tính năng:
 6. Adaptive Defense - Phòng thủ thích ứng
 """
 
-import os
-import json
-import time
 import hashlib
-from typing import Dict, List, Optional, Any, Tuple
-from dataclasses import dataclass, asdict
+import json
+import os
+import time
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Tuple
+
 
 class AttackType(Enum):
     """Loại tấn công"""
@@ -121,7 +122,7 @@ class RedBlueTeamIntegration:
             return []
 
         try:
-            with open(self.exercises_db, 'r', encoding='utf-8') as f:
+            with open(self.exercises_db, encoding='utf-8') as f:
                 data = json.load(f)
 
             exercises = []
@@ -154,7 +155,7 @@ class RedBlueTeamIntegration:
             return []
 
         try:
-            with open(self.learning_db, 'r', encoding='utf-8') as f:
+            with open(self.learning_db, encoding='utf-8') as f:
                 return json.load(f)
         except Exception as e:
             print(f"Error loading learning history: {e}")
@@ -477,7 +478,7 @@ if __name__ == "__main__":
     # Run a security exercise
     result = red_blue_team.run_security_exercise("web_security_basics")
 
-    print(f"\n🎯 Security Exercise Results:")
+    print("\n🎯 Security Exercise Results:")
     print(f"   📊 Vulnerabilities Discovered: {result['vulnerabilities_discovered']}")
     print(f"   🔒 Security Improvements: {len(result['security_improvements'])}")
     print(f"   📈 Learning Score: {result['learning_score']:.2f}")
@@ -486,7 +487,7 @@ if __name__ == "__main__":
     # Learn from experience
     learning_result = red_blue_team.learn_from_security_experience()
 
-    print(f"\n📚 Security Learning Results:")
+    print("\n📚 Security Learning Results:")
     print(f"   📊 Total Exercises: {learning_result.total_exercises}")
     print(f"   🎯 Attack Scenarios Tested: {learning_result.attack_scenarios_tested}")
     print(f"   🔒 Defense Strategies: {learning_result.defense_strategies_implemented}")

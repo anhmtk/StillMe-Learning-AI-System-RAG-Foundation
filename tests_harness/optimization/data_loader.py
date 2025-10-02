@@ -5,12 +5,13 @@ Loads and validates report data with safe defaults
 """
 
 import json
-import os
-import yaml
-from typing import Dict, List, Any, Optional
-from pathlib import Path
 import logging
+import os
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import yaml
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +27,7 @@ class DataLoader:
         """Load SLO policy with fallback defaults"""
         try:
             if self.slo_policy_path.exists():
-                with open(self.slo_policy_path, 'r', encoding='utf-8') as f:
+                with open(self.slo_policy_path, encoding='utf-8') as f:
                     return yaml.safe_load(f)
             else:
                 logger.warning(f"SLO policy not found: {self.slo_policy_path}, using defaults")
@@ -62,7 +63,7 @@ class DataLoader:
                 continue  # Skip optimization report itself
 
             try:
-                with open(json_file, 'r', encoding='utf-8') as f:
+                with open(json_file, encoding='utf-8') as f:
                     data = json.load(f)
                     validated_data = self._validate_and_fill_defaults(data, json_file.stem)
                     reports.append(validated_data)

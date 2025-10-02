@@ -15,7 +15,7 @@ def analyze_bandit_report(report_path: str):
     print("=" * 50)
 
     try:
-        with open(report_path, 'r') as f:
+        with open(report_path) as f:
             data = json.load(f)
 
         # Count by severity
@@ -50,7 +50,7 @@ def analyze_semgrep_report(report_path: str):
     print("=" * 50)
 
     try:
-        with open(report_path, 'r') as f:
+        with open(report_path) as f:
             data = json.load(f)
 
         results = data.get('results', [])
@@ -87,7 +87,7 @@ def analyze_pip_audit_report(report_path: str):
     print("=" * 50)
 
     try:
-        with open(report_path, 'r') as f:
+        with open(report_path) as f:
             data = json.load(f)
 
         vulnerabilities = data.get('vulnerabilities', [])
@@ -145,7 +145,7 @@ def main():
     else:
         print("⚠️  Pip-audit report not found")
 
-    print(f"\n📊 Summary")
+    print("\n📊 Summary")
     print("=" * 50)
     print(f"Total high/critical security issues: {total_high_severity}")
 

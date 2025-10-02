@@ -5,10 +5,11 @@ Cost Calculator - Tính toán token và chi phí cho test harness
 
 import json
 import logging
-from typing import Dict, List, Any, Optional
+import re
 from dataclasses import dataclass
 from pathlib import Path
-import re
+from typing import Any, Dict, List, Optional
+
 
 @dataclass
 class ModelCost:
@@ -107,7 +108,7 @@ class CostCalculator:
         cost_by_model = {}
         cost_by_method = {}
 
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding='utf-8') as f:
             for line in f:
                 line = line.strip()
                 if not line:
@@ -166,7 +167,7 @@ class CostCalculator:
         cost_by_model = {}
         cost_by_method = {"seed_generation": 0.0}
 
-        with open(seed_path, 'r', encoding='utf-8') as f:
+        with open(seed_path, encoding='utf-8') as f:
             for line in f:
                 line = line.strip()
                 if not line:

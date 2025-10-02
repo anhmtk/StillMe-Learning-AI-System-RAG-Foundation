@@ -11,8 +11,9 @@ Version: 2.0.0
 """
 
 import os
-from typing import Dict, Any
 from dataclasses import dataclass
+from typing import Any, Dict
+
 
 @dataclass
 class CoreConfig:

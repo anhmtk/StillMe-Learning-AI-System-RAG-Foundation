@@ -14,11 +14,12 @@ Usage:
     python scripts/router.py interactive             # Interactive mode
 """
 
-import os
-import sys
 import argparse
+import os
 import subprocess
+import sys
 from typing import List, Optional
+
 
 class RouterCLI:
     def __init__(self):

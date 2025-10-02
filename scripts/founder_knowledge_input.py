@@ -4,10 +4,10 @@ StillMe IPC Founder Knowledge Input
 Chế độ đặc biệt cho founder - tự động approve, không cần duyệt
 """
 
-import os
-import sys
 import json
 import logging
+import os
+import sys
 from datetime import datetime
 from pathlib import Path
 
@@ -15,8 +15,8 @@ from pathlib import Path
 project_root = Path(__file__).resolve().parents[1]
 sys.path.append(str(project_root))
 
-from stillme_core.learning.proposals_manager import ProposalsManager
 from stillme_core.alerting.alerting_system import AlertingSystem
+from stillme_core.learning.proposals_manager import ProposalsManager
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -86,13 +86,13 @@ class FounderKnowledgeInput:
             # Lưu thông tin founder knowledge
             self._save_founder_knowledge(proposal, source_url, content_type)
 
-            print(f"\n🎉 Founder knowledge added and AUTO-APPROVED!")
+            print("\n🎉 Founder knowledge added and AUTO-APPROVED!")
             print(f"👑 Title: {title}")
             print(f"📝 Description: {description}")
             print(f"📊 Quality Score: {proposal.quality_score}")
             print(f"🆔 Proposal ID: {proposal.id}")
-            print(f"✅ Status: AUTO-APPROVED (Founder Mode)")
-            print(f"\n💡 StillMe IPC will start learning this knowledge immediately!")
+            print("✅ Status: AUTO-APPROVED (Founder Mode)")
+            print("\n💡 StillMe IPC will start learning this knowledge immediately!")
 
             return proposal
 
@@ -202,11 +202,11 @@ def main():
         proposal = founder_input.add_founder_knowledge(title, description, priority=priority)
 
         if proposal:
-            print(f"\n✅ Founder knowledge added and AUTO-APPROVED!")
+            print("\n✅ Founder knowledge added and AUTO-APPROVED!")
             print(f"🆔 Proposal ID: {proposal.id}")
-            print(f"📊 StillMe IPC will start learning immediately!")
+            print("📊 StillMe IPC will start learning immediately!")
         else:
-            print(f"\n❌ Failed to add founder knowledge. Please try again.")
+            print("\n❌ Failed to add founder knowledge. Please try again.")
         return
 
     # Interactive mode
@@ -286,11 +286,11 @@ def main():
         return
 
     if proposal:
-        print(f"\n✅ Founder knowledge added and AUTO-APPROVED!")
+        print("\n✅ Founder knowledge added and AUTO-APPROVED!")
         print(f"🆔 Proposal ID: {proposal.id}")
-        print(f"📊 StillMe IPC will start learning immediately!")
+        print("📊 StillMe IPC will start learning immediately!")
     else:
-        print(f"\n❌ Failed to add founder knowledge. Please try again.")
+        print("\n❌ Failed to add founder knowledge. Please try again.")
 
 if __name__ == "__main__":
     main()

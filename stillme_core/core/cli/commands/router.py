@@ -17,107 +17,56 @@ from typing import Any, Dict, List, Optional
 
 import typer
 from rich.console import Console
-from rich.table import Table
 from rich.panel import Panel
 from rich.progress import Progress, SpinnerColumn, TextColumn
-from rich.prompt import Prompt, Confirm
+from rich.prompt import Confirm, Prompt
+from rich.table import Table
 
 # Import StillMe core components
 try:
     from ...router import (
-        IntelligentRouter,
-        TaskDecomposer,
         AgentCoordinator,
+        IntelligentRouter,
         LearningEngine,
         RouterMemoryManager,
+        TaskDecomposer,
     )
-    from ...router.intelligent_router import TaskComplexity, TaskType, AgentType
-    from ...router.task_decomposer import TaskDecomposition
     from ...router.agent_coordinator import CoordinationResult
+    from ...router.intelligent_router import AgentType, TaskComplexity, TaskType
+    from ...router.task_decomposer import TaskDecomposition
 except ImportError:
     # Fallback for standalone execution
     import sys
 
     sys.path.append(str(Path(__file__).parent.parent.parent / "router"))
 try:
-try:
-try:
-try:
-try:
-                        from intelligent_router import (
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
+    from intelligent_router import (
+        AgentType,
         IntelligentRouter,
         TaskComplexity,
         TaskType,
-        AgentType,
     )
+except ImportError:
+    pass
+
 try:
+    from task_decomposer import TaskDecomposer, TaskDecomposition
+except ImportError:
+    pass
 try:
+    from agent_coordinator import AgentCoordinator, CoordinationResult
+except ImportError:
+    pass
+
 try:
-try:
-try:
-                        from task_decomposer import TaskDecomposer, TaskDecomposition
+    from learning_engine import LearningEngine
 except ImportError:
     pass
 except ImportError:
     pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
+
 try:
-try:
-try:
-try:
-try:
-                        from agent_coordinator import AgentCoordinator, CoordinationResult
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-try:
-try:
-try:
-try:
-try:
-                        from learning_engine import LearningEngine
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-except ImportError:
-    pass
-try:
-try:
-try:
-try:
-try:
-                        from memory_manager import RouterMemoryManager
-except ImportError:
-    pass
-except ImportError:
-    pass
+    from memory_manager import RouterMemoryManager
 except ImportError:
     pass
 except ImportError:
@@ -151,7 +100,7 @@ def route_request(
     ),
 ):
     """Route a user request to the most appropriate agent"""
-    console.print(f"[bold blue]🧠 Routing Request...[/bold blue]")
+    console.print("[bold blue]🧠 Routing Request...[/bold blue]")
     console.print(f"📝 Request: {request}")
     console.print(f"⚡ Complexity: {complexity}")
     console.print(f"🚨 Urgency: {urgency}")
@@ -184,7 +133,7 @@ def route_request(
                 progress.update(task, description="✅ Routing completed")
 
             # Display results
-            console.print(f"\n[bold green]🎯 Routing Decision:[/bold green]")
+            console.print("\n[bold green]🎯 Routing Decision:[/bold green]")
 
             # Create results table
             table = Table(title="Routing Results")
@@ -206,11 +155,11 @@ def route_request(
             console.print(table)
 
             if verbose:
-                console.print(f"\n[bold blue]📊 Resource Requirements:[/bold blue]")
+                console.print("\n[bold blue]📊 Resource Requirements:[/bold blue]")
                 for key, value in decision.resource_requirements.items():
                     console.print(f"  • {key}: {value}")
 
-                console.print(f"\n[bold blue]🔄 Fallback Plan:[/bold blue]")
+                console.print("\n[bold blue]🔄 Fallback Plan:[/bold blue]")
                 console.print(f"  {decision.fallback_plan}")
 
             # Store the routing decision in memory
@@ -245,7 +194,7 @@ def decompose_task(
     ),
 ):
     """Decompose a complex task into manageable subtasks"""
-    console.print(f"[bold blue]🔧 Decomposing Task...[/bold blue]")
+    console.print("[bold blue]🔧 Decomposing Task...[/bold blue]")
     console.print(f"📝 Request: {request}")
     console.print(f"🏷️  Type: {task_type}")
     console.print(f"⚡ Complexity: {complexity}")
@@ -274,7 +223,7 @@ def decompose_task(
                 progress.update(task, description="✅ Task decomposed")
 
             # Display results
-            console.print(f"\n[bold green]📋 Task Decomposition:[/bold green]")
+            console.print("\n[bold green]📋 Task Decomposition:[/bold green]")
             console.print(f"🆔 Task ID: {decomposition.task_id}")
             console.print(
                 f"⏱️  Estimated Duration: {decomposition.total_estimated_duration:.1f} seconds"
@@ -304,21 +253,21 @@ def decompose_task(
             console.print(table)
 
             if show_details:
-                console.print(f"\n[bold blue]🔗 Dependencies:[/bold blue]")
+                console.print("\n[bold blue]🔗 Dependencies:[/bold blue]")
                 for subtask in decomposition.subtasks:
                     if subtask.dependencies:
                         console.print(
                             f"  • {subtask.id} depends on: {', '.join(subtask.dependencies)}"
                         )
 
-                console.print(f"\n[bold blue]⚡ Critical Path:[/bold blue]")
+                console.print("\n[bold blue]⚡ Critical Path:[/bold blue]")
                 console.print(f"  {' → '.join(decomposition.critical_path)}")
 
-                console.print(f"\n[bold blue]🔄 Parallel Groups:[/bold blue]")
+                console.print("\n[bold blue]🔄 Parallel Groups:[/bold blue]")
                 for i, group in enumerate(decomposition.parallel_groups):
                     console.print(f"  Group {i+1}: {', '.join(group)}")
 
-                console.print(f"\n[bold blue]✅ Success Criteria:[/bold blue]")
+                console.print("\n[bold blue]✅ Success Criteria:[/bold blue]")
                 for criterion in decomposition.success_criteria:
                     console.print(f"  • {criterion}")
 
@@ -342,7 +291,7 @@ def coordinate_agents(
     ),
 ):
     """Coordinate multiple agents to execute a task"""
-    console.print(f"[bold blue]🤝 Coordinating Agents...[/bold blue]")
+    console.print("[bold blue]🤝 Coordinating Agents...[/bold blue]")
     console.print(f"🆔 Task ID: {task_id}")
     console.print(f"📋 Strategy: {strategy}")
 
@@ -353,7 +302,7 @@ def coordinate_agents(
 
             # For demo purposes, create a sample decomposition
             # In real usage, this would be retrieved from storage
-            from ...router.task_decomposer import Subtask, SubtaskStatus, DependencyType
+            from ...router.task_decomposer import DependencyType, Subtask, SubtaskStatus
 
             sample_subtasks = [
                 Subtask(
@@ -418,24 +367,24 @@ def coordinate_agents(
                 progress.update(task, description="✅ Coordination completed")
 
             # Display results
-            console.print(f"\n[bold green]🎯 Coordination Results:[/bold green]")
+            console.print("\n[bold green]🎯 Coordination Results:[/bold green]")
             console.print(f"✅ Success: {result.success}")
             console.print(f"⏱️  Duration: {result.total_duration:.1f} seconds")
             console.print(f"✅ Completed: {len(result.completed_subtasks)} subtasks")
             console.print(f"❌ Failed: {len(result.failed_subtasks)} subtasks")
 
             if result.completed_subtasks:
-                console.print(f"\n[bold green]✅ Completed Subtasks:[/bold green]")
+                console.print("\n[bold green]✅ Completed Subtasks:[/bold green]")
                 for subtask_id in result.completed_subtasks:
                     console.print(f"  • {subtask_id}")
 
             if result.failed_subtasks:
-                console.print(f"\n[bold red]❌ Failed Subtasks:[/bold red]")
+                console.print("\n[bold red]❌ Failed Subtasks:[/bold red]")
                 for subtask_id in result.failed_subtasks:
                     console.print(f"  • {subtask_id}")
 
             if result.agent_performance:
-                console.print(f"\n[bold blue]📊 Agent Performance:[/bold blue]")
+                console.print("\n[bold blue]📊 Agent Performance:[/bold blue]")
                 perf_table = Table()
                 perf_table.add_column("Agent", style="cyan")
                 perf_table.add_column("Completed", style="green")
@@ -451,7 +400,7 @@ def coordinate_agents(
                 console.print(perf_table)
 
             if result.error_messages:
-                console.print(f"\n[bold red]⚠️  Errors:[/bold red]")
+                console.print("\n[bold red]⚠️  Errors:[/bold red]")
                 for error in result.error_messages:
                     console.print(f"  • {error}")
 
@@ -469,7 +418,7 @@ def show_learning_insights(
     ),
 ):
     """Show learning insights and performance analytics"""
-    console.print(f"[bold blue]🧠 Learning Insights...[/bold blue]")
+    console.print("[bold blue]🧠 Learning Insights...[/bold blue]")
     console.print(f"📅 Analyzing last {days} days")
 
     async def _show_insights():
@@ -492,11 +441,11 @@ def show_learning_insights(
                 progress.update(task, description="✅ Analysis completed")
 
             # Display insights
-            console.print(f"\n[bold green]📊 Learning Insights:[/bold green]")
+            console.print("\n[bold green]📊 Learning Insights:[/bold green]")
 
             # Best performing agents
             if insights.get("best_performing_agents"):
-                console.print(f"\n[bold green]🏆 Best Performing Agents:[/bold green]")
+                console.print("\n[bold green]🏆 Best Performing Agents:[/bold green]")
                 for agent, perf in insights["best_performing_agents"]:
                     console.print(
                         f"  • {agent}: {perf['success_rate']:.1%} success rate"
@@ -504,7 +453,7 @@ def show_learning_insights(
 
             # Worst performing agents
             if insights.get("worst_performing_agents"):
-                console.print(f"\n[bold red]⚠️  Agents Needing Improvement:[/bold red]")
+                console.print("\n[bold red]⚠️  Agents Needing Improvement:[/bold red]")
                 for agent, perf in insights["worst_performing_agents"]:
                     console.print(
                         f"  • {agent}: {perf['success_rate']:.1%} success rate"
@@ -512,7 +461,7 @@ def show_learning_insights(
 
             # Most common task types
             if insights.get("most_common_task_types"):
-                console.print(f"\n[bold blue]📈 Most Common Task Types:[/bold blue]")
+                console.print("\n[bold blue]📈 Most Common Task Types:[/bold blue]")
                 for task_type, stats in insights["most_common_task_types"]:
                     console.print(
                         f"  • {task_type}: {stats['total_tasks']} tasks, {stats['success_rate']:.1%} success"
@@ -520,12 +469,12 @@ def show_learning_insights(
 
             # Recommendations
             if insights.get("recommendations"):
-                console.print(f"\n[bold yellow]💡 Recommendations:[/bold yellow]")
+                console.print("\n[bold yellow]💡 Recommendations:[/bold yellow]")
                 for recommendation in insights["recommendations"]:
                     console.print(f"  • {recommendation}")
 
             # Learning metrics
-            console.print(f"\n[bold blue]📊 Learning Metrics:[/bold blue]")
+            console.print("\n[bold blue]📊 Learning Metrics:[/bold blue]")
             metrics_table = Table()
             metrics_table.add_column("Metric", style="cyan")
             metrics_table.add_column("Value", style="white")
@@ -563,7 +512,7 @@ def show_learning_insights(
 @app.command()
 def show_agent_status():
     """Show status of all registered agents"""
-    console.print(f"[bold blue]🤖 Agent Status...[/bold blue]")
+    console.print("[bold blue]🤖 Agent Status...[/bold blue]")
 
     async def _show_agent_status():
         try:
@@ -605,7 +554,7 @@ def show_agent_status():
             console.print(table)
 
             # Show capabilities
-            console.print(f"\n[bold blue]🔧 Agent Capabilities:[/bold blue]")
+            console.print("\n[bold blue]🔧 Agent Capabilities:[/bold blue]")
             for agent_id, agent_info in agents.items():
                 console.print(f"  • {agent_id}: {', '.join(agent_info.capabilities)}")
 
@@ -618,7 +567,7 @@ def show_agent_status():
 @app.command()
 def test_routing_system():
     """Test the routing system with sample requests"""
-    console.print(f"[bold blue]🧪 Testing Routing System...[/bold blue]")
+    console.print("[bold blue]🧪 Testing Routing System...[/bold blue]")
 
     # Sample test requests
     test_requests = [
@@ -705,7 +654,7 @@ def test_routing_system():
 
             # Show performance metrics
             metrics = router.get_performance_metrics()
-            console.print(f"\n[bold blue]📊 Router Performance:[/bold blue]")
+            console.print("\n[bold blue]📊 Router Performance:[/bold blue]")
             console.print(f"  • Total Requests: {metrics['total_requests']}")
             console.print(f"  • Successful Routes: {metrics['successful_routes']}")
             console.print(

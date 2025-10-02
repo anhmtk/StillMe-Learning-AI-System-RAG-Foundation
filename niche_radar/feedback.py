@@ -14,14 +14,15 @@ Version: 1.5.0
 """
 
 import csv
-import yaml
 import logging
-import pandas as pd
+from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, asdict
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
 import numpy as np
+import pandas as pd
+import yaml
 
 from .scoring import NicheScore
 
@@ -326,7 +327,7 @@ class FeedbackTracker:
             # Load current weights structure
             current_weights_file = "policies/niche_weights.yaml"
             if Path(current_weights_file).exists():
-                with open(current_weights_file, 'r', encoding='utf-8') as f:
+                with open(current_weights_file, encoding='utf-8') as f:
                     weights_structure = yaml.safe_load(f)
             else:
                 weights_structure = {"scoring_weights": {}}
@@ -395,7 +396,7 @@ def update_weights_suggestion(feedback_file: str = "data/feedback.csv",
 
     # Load current weights
     try:
-        with open(weights_file, 'r', encoding='utf-8') as f:
+        with open(weights_file, encoding='utf-8') as f:
             weights_data = yaml.safe_load(f)
         current_weights = weights_data.get("scoring_weights", {})
     except:
@@ -449,7 +450,7 @@ if __name__ == "__main__":
     }
 
     learning_weights = tracker.suggest_weight_adjustments(current_weights)
-    print(f"🎯 Weight suggestions:")
+    print("🎯 Weight suggestions:")
     print(f"  Confidence: {learning_weights.confidence:.2f}")
     print(f"  Sample size: {learning_weights.sample_size}")
     print(f"  Rationale: {learning_weights.rationale}")

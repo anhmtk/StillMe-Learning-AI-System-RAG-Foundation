@@ -16,9 +16,9 @@ Version: 1.0.0
 Date: 2025-09-29
 """
 
+import logging
 import subprocess
 import sys
-import logging
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)

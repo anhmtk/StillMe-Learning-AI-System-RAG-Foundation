@@ -10,15 +10,15 @@ Version: 1.0.0
 Last Updated: 2025-09-26
 """
 
+import argparse
+import glob
+import json
 import os
 import sys
-import json
-import glob
-from pathlib import Path
-from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
-import argparse
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 
 @dataclass
@@ -159,7 +159,7 @@ class TestSummaryGenerator:
         for test_file in test_files:
             if test_file.suffix == '.json':
                 try:
-                    with open(test_file, 'r') as f:
+                    with open(test_file) as f:
                         data = json.load(f)
 
                     # Extract test metrics
@@ -185,7 +185,7 @@ class TestSummaryGenerator:
             if test_file.suffix == '.xml':
                 try:
                     # Simple XML parsing for JUnit format
-                    with open(test_file, 'r') as f:
+                    with open(test_file) as f:
                         content = f.read()
 
                     # Extract basic metrics from XML
@@ -331,13 +331,13 @@ Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
         # Quality metrics
         report_content += "\n## 📊 Quality Metrics\n\n"
-        report_content += f"### Test Coverage\n"
-        report_content += f"- **Target**: 90%+\n"
+        report_content += "### Test Coverage\n"
+        report_content += "- **Target**: 90%+\n"
         report_content += f"- **Current**: {summary.overall_coverage:.1f}%\n"
         report_content += f"- **Status**: {'✅ PASS' if summary.overall_coverage >= 90 else '⚠️ WARNING' if summary.overall_coverage >= 80 else '❌ FAIL'}\n\n"
 
-        report_content += f"### Test Pass Rate\n"
-        report_content += f"- **Target**: 95%+\n"
+        report_content += "### Test Pass Rate\n"
+        report_content += "- **Target**: 95%+\n"
         report_content += f"- **Current**: {summary.overall_pass_rate:.1f}%\n"
         report_content += f"- **Status**: {'✅ PASS' if summary.overall_pass_rate >= 95 else '⚠️ WARNING' if summary.overall_pass_rate >= 90 else '❌ FAIL'}\n\n"
 
@@ -347,11 +347,11 @@ Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
         if len(summary.test_results) > 0:
             report_content += f"- **Average Test Duration**: {summary.test_duration / len(summary.test_results):.1f}s per test type\n"
         else:
-            report_content += f"- **Average Test Duration**: N/A (no test results)\n"
+            report_content += "- **Average Test Duration**: N/A (no test results)\n"
         if summary.test_duration > 0:
             report_content += f"- **Test Efficiency**: {summary.total_passed / summary.test_duration:.1f} tests/second\n\n"
         else:
-            report_content += f"- **Test Efficiency**: N/A (no test duration)\n\n"
+            report_content += "- **Test Efficiency**: N/A (no test duration)\n\n"
 
         # Next steps
         report_content += "## 🚀 Next Steps\n\n"
@@ -408,7 +408,7 @@ def main():
     generator.save_report(report_content, args.output)
 
     # Print summary
-    print(f"\n📊 Test Summary:")
+    print("\n📊 Test Summary:")
     print(f"   Overall Status: {summary.overall_status}")
     print(f"   Total Tests: {summary.total_tests:,}")
     print(f"   Pass Rate: {summary.overall_pass_rate:.1f}%")
@@ -416,7 +416,7 @@ def main():
     print(f"   Duration: {summary.test_duration:.1f}s")
 
     if summary.critical_issues:
-        print(f"\n🚨 Critical Issues:")
+        print("\n🚨 Critical Issues:")
         for issue in summary.critical_issues:
             print(f"   - {issue}")
 

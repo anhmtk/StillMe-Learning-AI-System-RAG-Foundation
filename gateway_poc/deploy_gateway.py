@@ -8,13 +8,15 @@ Quick deployment and testing of optimized gateway
 """
 
 import asyncio
-import aiohttp
-import time
 import json
+import os
 import subprocess
 import sys
-import os
-from typing import Dict, Any
+import time
+from typing import Any, Dict
+
+import aiohttp
+
 
 class GatewayDeployer:
     """Deploy and test StillMe Gateway"""
@@ -100,7 +102,7 @@ class GatewayDeployer:
             overhead = gateway_avg - direct_avg
             overhead_pct = (overhead / direct_avg) * 100 if direct_avg > 0 else 0
 
-            print(f"📈 LATENCY RESULTS:")
+            print("📈 LATENCY RESULTS:")
             print(f"   Direct Backend: {direct_avg:.1f}ms average")
             print(f"   Gateway:        {gateway_avg:.1f}ms average")
             print(f"   Overhead:       {overhead:.1f}ms ({overhead_pct:+.1f}%)")

@@ -88,7 +88,7 @@ class KillSwitch:
         kill_file = os.getenv("STILLME_KILL_FILE", "/tmp/stillme_kill_switch")
         if os.path.exists(kill_file):
             try:
-                with open(kill_file, 'r') as f:
+                with open(kill_file) as f:
                     content = f.read().strip()
                     if content == "EMERGENCY":
                         self.state = KillSwitchState.EMERGENCY

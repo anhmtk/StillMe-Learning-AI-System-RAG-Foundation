@@ -6,13 +6,14 @@ Pre-commit hook to check for CRLF line endings in test files
 import sys
 from pathlib import Path
 
+
 def check_file_for_crlf(file_path):
     """Check if file contains CRLF line endings"""
     try:
         with open(file_path, 'rb') as f:
             content = f.read()
             if b'\r\n' in content:
-                return True, f"File contains CRLF line endings"
+                return True, "File contains CRLF line endings"
         return False, "OK"
     except Exception as e:
         return True, f"Error reading file: {e}"

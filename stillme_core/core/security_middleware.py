@@ -14,7 +14,7 @@ import time
 import hashlib
 import secrets
 import logging
-from typing import Dict, List, Optional, Any, Callable
+from typing import Dict, List, Optional, Any, Callable, Set
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 import re
@@ -28,7 +28,6 @@ logger = logging.getLogger(__name__)
 @dataclass
 class SecurityEvent:
     """Security event log entry"""
-
     timestamp: datetime
     event_type: str
     severity: str
@@ -47,77 +46,86 @@ class SecurityMiddleware:
         self.config = self._load_config(config_path)
         self.security_events: List[SecurityEvent] = []
         self.rate_limit_tracker: Dict[str, List[datetime]] = {}
-from typing import Set
-from typing import Set
-        self.blocked_ips: Set[str] = set()  # type: ignore
-        self.suspicious_patterns = [
-            r"<script[^>]*>.*?</script>",  # XSS
-            r"union\s+select",  # SQL injection
-            r"drop\s+table",  # SQL injection
-            r"exec\s*\(",  # Command injection
-            r"eval\s*\(",  # Code injection
-            r"javascript:",  # XSS
-            r"on\w+\s*=",  # XSS event handlers
-        ]
+        self.blocked_ips: Set[str] = set()
+        self.csrf_tokens: Dict[str, str] = {}
 
     def _load_config(self, config_path: str) -> Dict[str, Any]:
         """Load security configuration"""
-        try:
-            if Path(config_path).exists():
-                with open(config_path, "r", encoding="utf-8") as f:
-                    return json.load(f)
-            else:
-                return self._get_default_config()
-        except Exception as e:
-            logger.error(f"Error loading security config: {e}")
-            return self._get_default_config()
-
-    def _get_default_config(self) -> Dict[str, Any]:
-        """Get default security configuration"""
-        return {
+        default_config = {
             "security": {
                 "rate_limiting": {
                     "enabled": True,
-                    "default_limit": 100,
-                    "window_size": 60,
+                    "requests_per_minute": 60,
+                    "requests_per_hour": 1000
                 },
                 "headers": {
-                    "x_frame_options": "DENY",
-                    "x_content_type_options": "nosniff",
-                    "x_xss_protection": "1; mode=block",
+                    "X-Content-Type-Options": "nosniff",
+                    "X-Frame-Options": "DENY",
+                    "X-XSS-Protection": "1; mode=block",
+                    "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+                    "Content-Security-Policy": "default-src 'self'"
                 },
-                "input_validation": {"enabled": True, "max_string_length": 10000},
+                "input_validation": {
+                    "enabled": True,
+                    "max_length": 10000,
+                    "blocked_patterns": [
+                        r"<script.*?>.*?</script>",
+                        r"javascript:",
+                        r"on\w+\s*=",
+                        r"eval\s*\(",
+                        r"expression\s*\("
+                    ]
+                },
+                "logging": {
+                    "enabled": True,
+                    "log_file": "logs/security.log",
+                    "max_events": 10000
+                }
             }
         }
+
+        try:
+            if os.path.exists(config_path):
+                with open(config_path, 'r', encoding='utf-8') as f:
+                    config = json.load(f)
+                    # Merge with defaults
+                    for key, value in default_config.items():
+                        if key not in config:
+                            config[key] = value
+                    return config
+        except Exception as e:
+            logger.warning(f"Could not load security config: {e}")
+
+        return default_config
 
     def check_rate_limit(self, client_ip: str, endpoint: str = "default") -> bool:
         """Check if client is within rate limit"""
         if not self.config["security"]["rate_limiting"]["enabled"]:
             return True
 
-        key = f"{client_ip}:{endpoint}"
         now = datetime.now()
-        window_size = self.config["security"]["rate_limiting"]["window_size"]
-        limit = self.config["security"]["rate_limiting"]["default_limit"]
-
-        # Clean old requests
-        if key in self.rate_limit_tracker:
-            cutoff = now - timedelta(seconds=window_size)
-            self.rate_limit_tracker[key] = [
-                req_time
-                for req_time in self.rate_limit_tracker[key]
-                if req_time > cutoff
-            ]
-        else:
+        key = f"{client_ip}:{endpoint}"
+        
+        if key not in self.rate_limit_tracker:
             self.rate_limit_tracker[key] = []
 
-        # Check limit
-        if len(self.rate_limit_tracker[key]) >= limit:
+        # Clean old requests
+        cutoff_time = now - timedelta(minutes=1)
+        self.rate_limit_tracker[key] = [
+            req_time for req_time in self.rate_limit_tracker[key] 
+            if req_time > cutoff_time
+        ]
+
+        # Check rate limit
+        max_requests = self.config["security"]["rate_limiting"]["requests_per_minute"]
+        if len(self.rate_limit_tracker[key]) >= max_requests:
             self._log_security_event(
-                event_type="rate_limit_exceeded",
-                severity="medium",
-                source_ip=client_ip,
-                details={"endpoint": endpoint, "limit": limit},
+                "rate_limit_exceeded",
+                "medium",
+                client_ip,
+                "unknown",
+                {"endpoint": endpoint, "requests": len(self.rate_limit_tracker[key])},
+                "blocked"
             )
             return False
 
@@ -133,19 +141,21 @@ from typing import Set
             return result
 
         # Check length
-        max_length = self.config["security"]["input_validation"]["max_string_length"]
+        max_length = self.config["security"]["input_validation"]["max_length"]
         if len(data) > max_length:
             result["is_valid"] = False
             result["threats_detected"].append("input_too_long")
             return result
 
-        # Check for suspicious patterns
-        for pattern in self.suspicious_patterns:
+        # Check for blocked patterns
+        blocked_patterns = self.config["security"]["input_validation"]["blocked_patterns"]
+        for pattern in blocked_patterns:
             if re.search(pattern, data, re.IGNORECASE):
-                result["threats_detected"].append(f"suspicious_pattern: {pattern}")
                 result["is_valid"] = False
+                result["threats_detected"].append(f"blocked_pattern: {pattern}")
+                break
 
-        # Basic sanitization
+        # Sanitize if valid
         if result["is_valid"]:
             result["sanitized_data"] = self._sanitize_input(data)
 
@@ -154,34 +164,24 @@ from typing import Set
     def _sanitize_input(self, data: str) -> str:
         """Basic input sanitization"""
         # Remove null bytes
-        data = data.replace("\x00", "")
-
+        data = data.replace('\x00', '')
+        
         # Remove control characters except newlines and tabs
-        data = re.sub(r"[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]", "", data)
-
-        # HTML encode dangerous characters
-        dangerous_chars = {
-            "<": "&lt;",
-            ">": "&gt;",
-            '"': "&quot;",
-            "'": "&#x27;",
-            "&": "&amp;",
-        }
-
-        for char, encoded in dangerous_chars.items():
-            data = data.replace(char, encoded)
-
+        data = ''.join(char for char in data if ord(char) >= 32 or char in '\n\t')
+        
+        # Escape HTML entities
+        data = data.replace('&', '&amp;')
+        data = data.replace('<', '&lt;')
+        data = data.replace('>', '&gt;')
+        data = data.replace('"', '&quot;')
+        data = data.replace("'", '&#x27;')
+        
         return data
 
     def add_security_headers(self, headers: Dict[str, str]) -> Dict[str, str]:
         """Add security headers"""
         security_headers = self.config["security"]["headers"]
-
-        for header, value in security_headers.items():
-            # Convert header name to proper format
-            header_name = header.replace("_", "-").title()
-            headers[header_name] = value
-
+        headers.update(security_headers)
         return headers
 
     def _log_security_event(
@@ -189,8 +189,9 @@ from typing import Set
         event_type: str,
         severity: str,
         source_ip: str,
+        user_agent: str,
         details: Dict[str, Any],
-        action_taken: str = "logged",
+        action_taken: str
     ):
         """Log security event"""
         event = SecurityEvent(
@@ -198,47 +199,41 @@ from typing import Set
             event_type=event_type,
             severity=severity,
             source_ip=source_ip,
-            user_agent="",  # Would be passed from request
+            user_agent=user_agent,
             details=details,
-            action_taken=action_taken,
+            action_taken=action_taken
         )
 
         self.security_events.append(event)
 
-        # Log to file
-        self._write_security_log(event)
+        # Keep only recent events
+        max_events = self.config["security"]["logging"]["max_events"]
+        if len(self.security_events) > max_events:
+            self.security_events = self.security_events[-max_events:]
 
-        # Alert on critical events
-        if severity == "critical":
+        # Write to log file if enabled
+        if self.config["security"]["logging"]["enabled"]:
+            self._write_security_log(event)
+
+        # Send alert for critical events
+        if severity in ["high", "critical"]:
             self._send_security_alert(event)
 
     def _write_security_log(self, event: SecurityEvent):
         """Write security event to log file"""
         try:
-            log_dir = Path("logs")
-            log_dir.mkdir(exist_ok=True)
-
-            log_file = log_dir / "security.log"
-
-            log_entry = {
-                "timestamp": event.timestamp.isoformat(),
-                "event_type": event.event_type,
-                "severity": event.severity,
-                "source_ip": event.source_ip,
-                "details": event.details,
-                "action_taken": event.action_taken,
-            }
-
-            with open(log_file, "a", encoding="utf-8") as f:
-                f.write(json.dumps(log_entry) + "\n")
-
+            log_file = self.config["security"]["logging"]["log_file"]
+            os.makedirs(os.path.dirname(log_file), exist_ok=True)
+            
+            with open(log_file, 'a', encoding='utf-8') as f:
+                f.write(f"{event.timestamp.isoformat()} | {event.event_type} | {event.severity} | {event.source_ip} | {event.action_taken}\n")
         except Exception as e:
             logger.error(f"Error writing security log: {e}")
 
     def _send_security_alert(self, event: SecurityEvent):
         """Send security alert for critical events"""
         logger.warning(
-            f"🚨 CRITICAL SECURITY EVENT: {event.event_type} from {event.source_ip}"
+            f"SECURITY ALERT: {event.event_type} from {event.source_ip} - {event.details}"
         )
         # In production, this would send alerts via email, Slack, etc.
 
@@ -250,11 +245,12 @@ from typing import Set
         """Block IP address"""
         self.blocked_ips.add(client_ip)
         self._log_security_event(
-            event_type="ip_blocked",
-            severity="high",
-            source_ip=client_ip,
-            details={"reason": reason},
-            action_taken="ip_blocked",
+            "ip_blocked",
+            "high",
+            client_ip,
+            "unknown",
+            {"reason": reason},
+            "blocked"
         )
 
     def generate_csrf_token(self) -> str:
@@ -268,19 +264,15 @@ from typing import Set
     def hash_password(self, password: str) -> str:
         """Hash password securely"""
         salt = secrets.token_hex(32)
-        password_hash = hashlib.pbkdf2_hmac(
-            "sha256", password.encode("utf-8"), salt.encode("utf-8"), 100000
-        )
+        password_hash = hashlib.pbkdf2_hmac('sha256', password.encode(), salt.encode(), 100000)
         return f"{salt}:{password_hash.hex()}"
 
     def verify_password(self, password: str, password_hash: str) -> bool:
         """Verify password against hash"""
         try:
-            salt, hash_hex = password_hash.split(":")
-            password_hash_check = hashlib.pbkdf2_hmac(
-                "sha256", password.encode("utf-8"), salt.encode("utf-8"), 100000
-            )
-            return password_hash_check.hex() == hash_hex
+            salt, hash_hex = password_hash.split(':')
+            password_hash_bytes = hashlib.pbkdf2_hmac('sha256', password.encode(), salt.encode(), 100000)
+            return password_hash_bytes.hex() == hash_hex
         except Exception:
             return False
 
@@ -288,96 +280,70 @@ from typing import Set
         """Get security report"""
         now = datetime.now()
         last_24h = now - timedelta(hours=24)
-
-        recent_events = [
-            event for event in self.security_events if event.timestamp > last_24h
-        ]
-
-        event_counts = {}
-        for event in recent_events:
-            event_counts[event.event_type] = event_counts.get(event.event_type, 0) + 1
-
+        
+        recent_events = [e for e in self.security_events if e.timestamp > last_24h]
+        
         return {
-            "timestamp": now.isoformat(),
-            "total_events_24h": len(recent_events),
-            "event_breakdown": event_counts,
+            "total_events": len(self.security_events),
+            "recent_events_24h": len(recent_events),
             "blocked_ips": len(self.blocked_ips),
-            "rate_limit_violations": event_counts.get("rate_limit_exceeded", 0),
             "security_score": self._calculate_security_score(),
+            "last_updated": now.isoformat()
         }
 
     def _calculate_security_score(self) -> float:
         """Calculate security score based on recent events"""
         now = datetime.now()
         last_24h = now - timedelta(hours=24)
-
-        recent_events = [
-            event for event in self.security_events if event.timestamp > last_24h
-        ]
-
+        
+        recent_events = [e for e in self.security_events if e.timestamp > last_24h]
+        
         if not recent_events:
             return 100.0
-
-        # Penalize based on event severity
-        penalty = 0
+        
+        # Calculate score based on severity
+        score = 100.0
         for event in recent_events:
-            if event.severity == "critical":
-                penalty += 10
-            elif event.severity == "high":
-                penalty += 5
+            if event.severity == "low":
+                score -= 1
             elif event.severity == "medium":
-                penalty += 2
-            else:
-                penalty += 1
-
-        return max(0, 100 - penalty)
-
-
-# Security decorator for functions
-def secure_endpoint(rate_limit: int = 100, require_auth: bool = True):
-    """Decorator to secure API endpoints"""
-
-    def decorator(func: Callable) -> Callable:
-        def wrapper(*args, **kwargs):
-            # This would be implemented with actual request context
-            # For now, just return the function
-            return func(*args, **kwargs)
-
-        return wrapper
-
-    return decorator
+                score -= 5
+            elif event.severity == "high":
+                score -= 15
+            elif event.severity == "critical":
+                score -= 30
+        
+        return max(0.0, score)
 
 
 def main():
-    """Test security middleware"""
+    """Test the security middleware"""
     middleware = SecurityMiddleware()
-
+    
     # Test rate limiting
     print("Testing rate limiting...")
-    for i in range(5):
-        allowed = middleware.check_rate_limit("192.168.1.1", "test")
-        print(f"Request {i+1}: {'Allowed' if allowed else 'Blocked'}")
-
+    for i in range(65):
+        result = middleware.check_rate_limit("192.168.1.1")
+        print(f"Request {i+1}: {'Allowed' if result else 'Blocked'}")
+    
     # Test input validation
     print("\nTesting input validation...")
     test_inputs = [
-        "Hello World",
+        "Hello world",
         "<script>alert('xss')</script>",
-        "SELECT * FROM users",
-        "A" * 15000,  # Too long
+        "javascript:alert('xss')",
+        "A" * 10001
     ]
-
+    
     for test_input in test_inputs:
         result = middleware.validate_input(test_input)
-        print(f"Input: {test_input[:50]}...")
-        print(f"Valid: {result['is_valid']}")
-        print(f"Threats: {result['threats_detected']}")
-        print()
-
+        print(f"Input: {test_input[:50]}... -> Valid: {result['is_valid']}")
+    
     # Test security report
-    print("Security Report:")
+    print("\nSecurity Report:")
     report = middleware.get_security_report()
-    print(json.dumps(report, indent=2))
+    for key, value in report.items():
+        print(f"  {key}: {value}")
 
 
 if __name__ == "__main__":

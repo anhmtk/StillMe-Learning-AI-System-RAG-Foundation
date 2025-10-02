@@ -6,9 +6,9 @@ StillMe IPC Smart Automation
 Automation system với kiểm soát thông minh và giới hạn tần suất.
 """
 
+import json
 import os
 import sys
-import json
 import time
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -41,7 +41,7 @@ class SmartAutomation:
 
         if self.config_file.exists():
             try:
-                with open(self.config_file, 'r') as f:
+                with open(self.config_file) as f:
                     self.config = json.load(f)
                 # Reset daily counters if new day
                 if self.config.get("last_reset_date") != datetime.now().strftime("%Y-%m-%d"):
@@ -57,7 +57,7 @@ class SmartAutomation:
             from pathlib import Path
             session_file = project_root / "artifacts" / "dashboard_session.json"
             if session_file.exists():
-                with open(session_file, 'r') as f:
+                with open(session_file) as f:
                     session_data = json.load(f)
                     if "automation_enabled" in session_data:
                         self.config["enabled"] = session_data["automation_enabled"]
@@ -210,7 +210,7 @@ def main():
 
     # Show status
     status = automation.get_status()
-    print(f"\n📊 Status:")
+    print("\n📊 Status:")
     print(f"• Proposals created today: {status['proposals_created_today']}/{status['max_per_day']}")
     print(f"• Proposals created this hour: {status['proposals_created_this_hour']}/{status['max_per_hour']}")
     print(f"• Next proposal: {status['next_proposal_in']}")
@@ -219,13 +219,13 @@ def main():
     if automation.can_create_proposal():
         proposal = automation.create_proposal()
         if proposal:
-            print(f"\n🎉 Proposal created successfully!")
+            print("\n🎉 Proposal created successfully!")
             print(f"📋 Title: {proposal.title}")
             print(f"📊 Quality Score: {proposal.quality_score}")
         else:
-            print(f"\n❌ Failed to create proposal.")
+            print("\n❌ Failed to create proposal.")
     else:
-        print(f"\n⏳ Cannot create proposal right now.")
+        print("\n⏳ Cannot create proposal right now.")
         print(f"Next proposal: {status['next_proposal_in']}")
 
 if __name__ == "__main__":

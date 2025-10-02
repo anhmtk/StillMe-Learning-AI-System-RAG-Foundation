@@ -3,7 +3,8 @@
 StillMe Design Tokens
 FlutterFlow-style design system with colors, typography, and layout tokens
 """
-from typing import Dict, List, Any
+from typing import Any, Dict, List
+
 
 class DesignTokens:
     """FlutterFlow-style design tokens for StillMe IPC"""

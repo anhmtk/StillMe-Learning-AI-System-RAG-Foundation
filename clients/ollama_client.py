@@ -295,7 +295,7 @@ def generate(
     start_time = time.time()
 
     try:
-        r = _session.post(f"{OLLAMA_HOST}/api/generate", json=payload, timeout=None)
+        r = _http_client.post(f"{OLLAMA_HOST}/api/generate", json=payload, timeout=None)
         r.raise_for_status()
 
         # Handle streaming vs non-streaming response

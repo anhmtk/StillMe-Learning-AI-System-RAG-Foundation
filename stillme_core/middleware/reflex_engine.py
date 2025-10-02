@@ -119,7 +119,7 @@ def _load_config_from_yaml() -> ReflexConfig:
     try:
         import yaml  # lazy import
 
-        with open("config/reflex_engine.yaml", "r", encoding="utf-8") as f:
+        with open("config/reflex_engine.yaml", encoding="utf-8") as f:
             cfg = yaml.safe_load(f) or {}
         enabled = bool(cfg.get("enabled", True))
         shadow = bool(cfg.get("shadow_mode", True))

@@ -7,9 +7,9 @@ Tạo báo cáo HTML cơ bản với CSS styling, không có interactive charts
 
 import json
 import logging
-from typing import Dict, List, Any
 from datetime import datetime
 from pathlib import Path
+from typing import Any, Dict, List
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -490,5 +490,5 @@ if __name__ == "__main__":
         mock_metadata
     )
 
-    print(f"🏗️ Simple HTML Report Builder Test Results:")
+    print("🏗️ Simple HTML Report Builder Test Results:")
     print(f"✅ HTML report generated: {html_file}")

@@ -19,24 +19,19 @@ Phase: NicheRadar Core
 
 from .collectors import (
     GitHubTrendingCollector,
+    GoogleTrendsCollector,
     HackerNewsCollector,
     NewsDeltaCollector,
-    GoogleTrendsCollector,
-    RedditEngagementCollector
+    RedditEngagementCollector,
 )
-
-from .scoring import (
-    NicheScorer,
-    NicheScore
-)
-
 from .playbook import (
-    PlaybookGenerator,
-    ProductBrief,
+    ExecutionPack,
     MVPSpec,
+    PlaybookGenerator,
     PricingSuggestion,
-    ExecutionPack
+    ProductBrief,
 )
+from .scoring import NicheScore, NicheScorer
 
 # from .feedback import (
 #     FeedbackTracker,

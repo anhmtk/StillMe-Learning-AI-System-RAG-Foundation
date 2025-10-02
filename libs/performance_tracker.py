@@ -3,10 +3,11 @@
 StillMe Performance Tracker
 Tracks model performance metrics including tokens, latency, and model info
 """
-import time
 import json
-from typing import Dict, Any, Optional, List
+import time
 from datetime import datetime
+from typing import Any, Dict, List, Optional
+
 
 class PerformanceMetrics:
     """Container for performance metrics"""

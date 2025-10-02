@@ -1,25 +1,27 @@
 """
-StillMe Core Validation - Core validation system for StillMe AI
+🔍 VALIDATION PACKAGE
 
-This module provides core validation capabilities:
-- ValidationFramework: Main validation framework
-- FinalValidationSystem: Final validation system
-- EnhancedValidation: Enhanced validation features
+Core validation framework for StillMe components.
 
-Author: StillMe AI Team
-Version: 2.0.0
+Author: AgentDev System
+Version: 1.0.0
+Phase: 0.1 - Security Remediation
 """
 
-__version__ = "2.0.0"
-__author__ = "StillMe AI Team"
-
-# Import core validation components
-from .enhanced_validation import EnhancedValidation
-from .final_validation_system import FinalValidationSystem
-from .validation_framework import ValidationFramework
+from .validation_framework import ValidationFramework, ValidationRule, ValidationResult
+from .security_middleware import SecurityMiddleware, SecurityThreat
+from .performance_monitor import PerformanceMonitor, PerformanceMetric
+from .integration_bridge import IntegrationBridge, IntegrationEvent, IntegrationHandler
 
 __all__ = [
     "ValidationFramework",
-    "FinalValidationSystem",
-    "EnhancedValidation"
+    "ValidationRule", 
+    "ValidationResult",
+    "SecurityMiddleware",
+    "SecurityThreat",
+    "PerformanceMonitor",
+    "PerformanceMetric",
+    "IntegrationBridge",
+    "IntegrationEvent",
+    "IntegrationHandler"
 ]

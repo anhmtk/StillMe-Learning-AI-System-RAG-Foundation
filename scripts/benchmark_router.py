@@ -12,18 +12,19 @@ Usage:
     python scripts/benchmark_router.py --compare-configs
 """
 
-import os
-import sys
 import argparse
-import time
 import json
+import os
 import statistics
-from typing import Dict, List, Tuple, Optional
+import sys
+import time
+from typing import Dict, List, Optional, Tuple
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))
 
-from modules.api_provider_manager import UnifiedAPIManager, ComplexityAnalyzer
+from modules.api_provider_manager import ComplexityAnalyzer, UnifiedAPIManager
+
 
 class RouterBenchmark:
     def __init__(self):
@@ -136,17 +137,17 @@ class RouterBenchmark:
         }
 
         # Print results
-        print(f"\n📊 Performance Benchmark Results")
+        print("\n📊 Performance Benchmark Results")
         print("=" * 60)
 
-        print(f"Overall Statistics:")
+        print("Overall Statistics:")
         print(f"  Average analysis time: {results['statistics']['avg_time']*1000:.2f}ms")
         print(f"  Min analysis time: {results['statistics']['min_time']*1000:.2f}ms")
         print(f"  Max analysis time: {results['statistics']['max_time']*1000:.2f}ms")
         print(f"  Standard deviation: {results['statistics']['std_time']*1000:.2f}ms")
         print(f"  Average complexity score: {results['statistics']['avg_score']:.3f}")
 
-        print(f"\nBy Category:")
+        print("\nBy Category:")
         for category, stats in results['by_category'].items():
             print(f"  {category.capitalize()}:")
             print(f"    Avg time: {stats['avg_time']*1000:.2f}ms")
@@ -172,7 +173,7 @@ class RouterBenchmark:
 
     def benchmark_accuracy(self) -> Dict:
         """Benchmark router accuracy"""
-        print(f"\n🎯 Accuracy Benchmark")
+        print("\n🎯 Accuracy Benchmark")
         print("=" * 60)
 
         # Test cases with expected routing
@@ -312,7 +313,7 @@ class RouterBenchmark:
 
     def benchmark_fallback(self) -> Dict:
         """Benchmark fallback mechanism"""
-        print(f"\n🔄 Fallback Benchmark")
+        print("\n🔄 Fallback Benchmark")
         print("=" * 60)
 
         # Test cases for fallback detection
@@ -362,7 +363,7 @@ class RouterBenchmark:
         negative_cases = [case for case in test_cases if case[1]]
         positive_cases = [case for case in test_cases if not case[1]]
 
-        print(f"Testing negative feedback detection:")
+        print("Testing negative feedback detection:")
         for feedback, should_trigger in negative_cases:
             actual_trigger = self.analyzer.should_trigger_fallback(feedback, "original prompt", "gemma2:2b")
             is_correct = actual_trigger == should_trigger
@@ -375,7 +376,7 @@ class RouterBenchmark:
             status = "✅" if is_correct else "❌"
             print(f"  {status} '{feedback}' → {actual_trigger} (expected: {should_trigger})")
 
-        print(f"\nTesting positive feedback detection:")
+        print("\nTesting positive feedback detection:")
         for feedback, should_trigger in positive_cases:
             actual_trigger = self.analyzer.should_trigger_fallback(feedback, "original prompt", "gemma2:2b")
             is_correct = actual_trigger == should_trigger
@@ -401,7 +402,7 @@ class RouterBenchmark:
         results['overall']['total'] = total_tests
         results['overall']['accuracy'] = overall_accuracy
 
-        print(f"\n📊 Fallback Benchmark Results:")
+        print("\n📊 Fallback Benchmark Results:")
         print(f"  Negative feedback accuracy: {results['negative_feedback']['accuracy']:.1%}")
         print(f"  Positive feedback accuracy: {results['positive_feedback']['accuracy']:.1%}")
         print(f"  Overall accuracy: {overall_accuracy:.1%}")
@@ -446,7 +447,7 @@ class RouterBenchmark:
         }
 
         # Print summary
-        print(f"\n📊 Full Benchmark Summary")
+        print("\n📊 Full Benchmark Summary")
         print("=" * 60)
         print(f"Performance Grade: {self._get_performance_grade(performance_results['statistics']['avg_time'])}")
         print(f"Accuracy Grade: {self._get_accuracy_grade(accuracy_results['overall']['accuracy'])}")

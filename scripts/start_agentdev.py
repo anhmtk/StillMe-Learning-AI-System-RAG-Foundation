@@ -17,12 +17,12 @@ Version: 1.0.0
 Date: 2025-09-30
 """
 
-import sys
-import os
 import argparse
-import signal
-import time
 import json
+import os
+import signal
+import sys
+import time
 from pathlib import Path
 
 # Add project root to path
@@ -31,6 +31,7 @@ sys.path.insert(0, str(project_root))
 
 sys.path.insert(0, str(project_root / "agent_dev" / "core"))
 from agent_dev.core.agentdev import AgentDev
+
 
 class AgentDevService:
     """Service wrapper for AgentDev"""
@@ -66,7 +67,7 @@ class AgentDevService:
         self.agentdev.start_monitoring(interval=self.interval)
         self.running = True
 
-        print(f"✅ AgentDev Service started")
+        print("✅ AgentDev Service started")
         print(f"   📊 Monitoring interval: {self.interval}s")
         print(f"   🔧 Auto-fix enabled: {self.auto_fix}")
         print(f"   🏠 Project root: {project_root}")

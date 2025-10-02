@@ -5,17 +5,19 @@ Enterprise-grade distributed tracing and correlation
 """
 
 import asyncio
-import json
-import time
-import uuid
-import threading
-from typing import Dict, List, Optional, Any, Callable
-from dataclasses import dataclass, asdict
-from enum import Enum
-import aiofiles
-from pathlib import Path
 import contextvars
 import functools
+import json
+import threading
+import time
+import uuid
+from dataclasses import asdict, dataclass
+from enum import Enum
+from pathlib import Path
+from typing import Any, Callable, Dict, List, Optional
+
+import aiofiles
+
 
 class SpanStatus(Enum):
     """Span status values"""
@@ -94,7 +96,7 @@ class DistributedTracer:
 
         if config_file.exists():
             import yaml
-            with open(config_file, 'r') as f:
+            with open(config_file) as f:
                 return yaml.safe_load(f)
         else:
             return {

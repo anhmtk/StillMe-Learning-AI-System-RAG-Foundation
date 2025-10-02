@@ -340,7 +340,7 @@ class ActionSandbox:
 
     def reset_stats(self):
         """Reset sandbox statistics."""
-        self.stats = {key: 0 for key in self.stats}
+        self.stats = dict.fromkeys(self.stats, 0)
         self.idempotency_store = IdempotencyStore()
         self.execution_history = []
 

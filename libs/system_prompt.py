@@ -4,7 +4,8 @@ StillMe System Prompt Manager
 Handles session-based intro control and comprehensive response generation
 """
 import re
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 
 class SystemPromptManager:
     """Manages system prompts with session control and response depth"""

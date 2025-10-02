@@ -5,14 +5,15 @@ Enterprise-grade AST-based code analysis and semantic understanding
 """
 
 import ast
-import json
-import time
 import hashlib
-from typing import Dict, List, Optional, Any, Set, Tuple
-from dataclasses import dataclass, asdict
+import json
+import re
+import time
+from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-import re
+from typing import Any, Dict, List, Optional, Set, Tuple
+
 
 class CodeComplexity(Enum):
     """Code complexity levels"""
@@ -106,7 +107,7 @@ class ASTAnalyzer:
 
         if config_file.exists():
             import yaml
-            with open(config_file, 'r') as f:
+            with open(config_file) as f:
                 return yaml.safe_load(f)
         else:
             return {
@@ -246,7 +247,7 @@ class ASTAnalyzer:
             raise ValueError(f"File too large: {file_path}")
 
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 source_code = f.read()
         except Exception as e:
             raise ValueError(f"Failed to read file: {e}")
@@ -645,7 +646,7 @@ if __name__ == "__main__":
     try:
         analyses = analyzer.analyze_directory("agent-dev")
         summary = analyzer.get_analysis_summary(analyses)
-        print(f"\nDirectory Analysis Summary:")
+        print("\nDirectory Analysis Summary:")
         print(f"Total Files: {summary['total_files']}")
         print(f"Total Lines: {summary['total_lines']}")
         print(f"Average Complexity: {summary['average_complexity']:.2f}")

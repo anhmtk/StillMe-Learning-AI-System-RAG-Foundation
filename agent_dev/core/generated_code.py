@@ -7,7 +7,7 @@ Generated at: 2025-09-29 23:02:36
 
 def main():
     """Main function"""
-    print(f"Executing task: Create a performance optimization module")
+    print("Executing task: Create a performance optimization module")
     print("✅ Task completed successfully")
 
 if __name__ == "__main__":

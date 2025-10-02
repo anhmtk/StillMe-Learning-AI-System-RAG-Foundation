@@ -117,7 +117,7 @@ class EnhancedExecutor:
     def _detect_test_framework(self, test_file: str) -> TestFramework:
         """Detect test framework from file content"""
         try:
-            with open(test_file, "r", encoding="utf-8") as f:
+            with open(test_file, encoding="utf-8") as f:
                 content = f.read()
 
             # Check for framework indicators
@@ -422,7 +422,7 @@ class EnhancedExecutor:
     def _is_test_affected(self, test_file: str, changed_files: List[str]) -> bool:
         """Check if a test file is affected by changes"""
         try:
-            with open(test_file, "r", encoding="utf-8") as f:
+            with open(test_file, encoding="utf-8") as f:
                 content = f.read()
 
             # Simple dependency analysis

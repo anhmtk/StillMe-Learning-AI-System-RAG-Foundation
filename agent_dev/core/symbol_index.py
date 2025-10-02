@@ -8,11 +8,11 @@ Tạo chỉ mục symbol để biết symbol tồn tại ở đâu trong codebas
 
 import ast
 import json
-import os
-from pathlib import Path
-from typing import Dict, List, Set, Optional, Tuple
-from dataclasses import dataclass, asdict
 import logging
+import os
+from dataclasses import asdict, dataclass
+from pathlib import Path
+from typing import Dict, List, Optional, Set, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -86,7 +86,7 @@ class SymbolIndex:
         symbols = []
 
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 content = f.read()
 
             tree = ast.parse(content, filename=str(file_path))
@@ -163,7 +163,7 @@ class SymbolIndex:
 
     def _load_cache(self):
         """Load symbol cache from file"""
-        with open(self.cache_file, 'r', encoding='utf-8') as f:
+        with open(self.cache_file, encoding='utf-8') as f:
             data = json.load(f)
 
         self.symbols = {}

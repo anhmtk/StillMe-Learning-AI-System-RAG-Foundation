@@ -14,10 +14,10 @@ Version: 2.0.0
 __version__ = "2.0.0"
 __author__ = "StillMe AI Team"
 
-from .shared.config import SharedConfig
-from .core.config import CoreConfig
 from .agent_dev.config import AgentDevConfig
+from .core.config import CoreConfig
 from .platform.config import PlatformConfig
+from .shared.config import SharedConfig
 
 __all__ = [
     "SharedConfig",

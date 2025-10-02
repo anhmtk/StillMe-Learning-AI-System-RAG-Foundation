@@ -66,7 +66,7 @@ class ClarificationPatternStore:
         try:
             persistence_path = Path(self.persistence_file)
             if persistence_path.exists():
-                with open(persistence_path, 'r', encoding='utf-8') as f:
+                with open(persistence_path, encoding='utf-8') as f:
                     data = json.load(f)
                     for key, stat_data in data.items():
                         self.store[key] = PatternStat(**stat_data)

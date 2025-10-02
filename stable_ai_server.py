@@ -10,10 +10,10 @@ PURPOSE / MỤC ĐÍCH:
 - Xử lý yêu cầu chat và phản hồi AI
 """
 
+import logging
 import os
 import sys
 import time
-import logging
 from datetime import datetime
 from typing import Optional
 
@@ -95,9 +95,9 @@ stillme_ai = StillMeAI()
 
 # Simple HTTP server
 try:
-    from http.server import HTTPServer, BaseHTTPRequestHandler
     import json
     import urllib.parse
+    from http.server import BaseHTTPRequestHandler, HTTPServer
 
     class StillMeHandler(BaseHTTPRequestHandler):
         def do_GET(self):

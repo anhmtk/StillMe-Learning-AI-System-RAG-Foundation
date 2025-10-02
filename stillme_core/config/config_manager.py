@@ -150,7 +150,7 @@ class ConfigManager:
             return {}
 
         try:
-            with open(self.config_path, 'r', encoding='utf-8') as f:
+            with open(self.config_path, encoding='utf-8') as f:
                 config = yaml.safe_load(f)
                 logger.info(f"Configuration loaded from: {self.config_path}")
                 return config or {}

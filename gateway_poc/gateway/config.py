@@ -3,10 +3,11 @@
 Enhanced configuration management with improved security and performance settings
 """
 
-from typing import List, Optional, Dict, Any
+import os
+from typing import Any, Dict, List, Optional
+
 from pydantic import Field, validator
 from pydantic_settings import BaseSettings
-import os
 
 
 class EnhancedSettings(BaseSettings):

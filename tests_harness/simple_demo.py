@@ -7,6 +7,7 @@ import json
 import logging
 from pathlib import Path
 
+
 def create_mock_seeds():
     """Tạo mock seed data"""
     seeds = [
@@ -113,7 +114,7 @@ def run_mock_augmentation():
 
     # Load seeds
     seeds = []
-    with open(seed_file, 'r', encoding='utf-8') as f:
+    with open(seed_file, encoding='utf-8') as f:
         for line in f:
             seeds.append(json.loads(line.strip()))
 
@@ -208,7 +209,7 @@ def run_mock_augmentation():
 
     # Show sample outputs
     print("\nSample Outputs:")
-    with open(output_file, 'r', encoding='utf-8') as f:
+    with open(output_file, encoding='utf-8') as f:
         for i, line in enumerate(f):
             if i >= 10:  # Show only first 10 lines
                 break

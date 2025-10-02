@@ -11,16 +11,17 @@ Usage:
     python scripts/debug_router.py --analyze-file input.txt
 """
 
+import argparse
 import os
 import sys
-import argparse
 import time
 from typing import Dict, List, Optional
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))
 
-from modules.api_provider_manager import UnifiedAPIManager, ComplexityAnalyzer
+from modules.api_provider_manager import ComplexityAnalyzer, UnifiedAPIManager
+
 
 class RouterDebugger:
     def __init__(self):
@@ -43,19 +44,19 @@ class RouterDebugger:
         print(f"  Language: {'Vietnamese' if any(ord(c) > 127 for c in prompt) else 'English'}")
 
         # Step 2: Complexity analysis
-        print(f"\n🧠 Step 2: Complexity Analysis")
+        print("\n🧠 Step 2: Complexity Analysis")
         print("-" * 40)
 
         complexity_score, breakdown = self.analyzer.analyze_complexity(prompt)
         print(f"  Overall complexity score: {complexity_score:.3f}")
 
         if verbose:
-            print(f"  Detailed breakdown:")
+            print("  Detailed breakdown:")
             for key, value in breakdown.items():
                 print(f"    {key}: {value:.3f}")
 
         # Step 3: Model selection
-        print(f"\n🎯 Step 3: Model Selection")
+        print("\n🎯 Step 3: Model Selection")
         print("-" * 40)
 
         selected_model = self.manager.choose_model(prompt)
@@ -72,7 +73,7 @@ class RouterDebugger:
         print(f"  Routing logic: {routing_reason}")
 
         # Step 4: Keyword analysis
-        print(f"\n🔤 Step 4: Keyword Analysis")
+        print("\n🔤 Step 4: Keyword Analysis")
         print("-" * 40)
 
         prompt_lower = prompt.lower()
@@ -83,7 +84,7 @@ class RouterDebugger:
         if found_coding:
             print(f"  Coding keywords found: {found_coding}")
         else:
-            print(f"  No coding keywords found")
+            print("  No coding keywords found")
 
         # Check for complex indicators
         complex_indicators = ["tại sao", "như thế nào", "phân tích", "so sánh", "đánh giá", "giải thích", "mối quan hệ", "tác động", "ảnh hưởng"]
@@ -91,7 +92,7 @@ class RouterDebugger:
         if found_complex:
             print(f"  Complex indicators found: {found_complex}")
         else:
-            print(f"  No complex indicators found")
+            print("  No complex indicators found")
 
         # Check for academic terms
         academic_terms = ["định lý", "định luật", "nguyên lý", "khái niệm", "lý thuyết", "phương pháp", "kỹ thuật", "công nghệ", "hệ thống", "mô hình"]
@@ -99,7 +100,7 @@ class RouterDebugger:
         if found_academic:
             print(f"  Academic terms found: {found_academic}")
         else:
-            print(f"  No academic terms found")
+            print("  No academic terms found")
 
         # Check for abstract concepts
         abstract_concepts = ["ý nghĩa", "bản chất", "triết lý", "tư tưởng", "quan điểm", "góc độ", "khía cạnh", "chiều sâu", "tầm nhìn", "viễn cảnh"]
@@ -107,10 +108,10 @@ class RouterDebugger:
         if found_abstract:
             print(f"  Abstract concepts found: {found_abstract}")
         else:
-            print(f"  No abstract concepts found")
+            print("  No abstract concepts found")
 
         # Step 5: Performance analysis
-        print(f"\n⚡ Step 5: Performance Analysis")
+        print("\n⚡ Step 5: Performance Analysis")
         print("-" * 40)
 
         start_time = time.time()
@@ -135,7 +136,7 @@ class RouterDebugger:
         print(f"  Performance grade: {perf_grade}")
 
         # Step 6: Recommendations
-        print(f"\n💡 Step 6: Recommendations")
+        print("\n💡 Step 6: Recommendations")
         print("-" * 40)
 
         recommendations = []
@@ -220,23 +221,23 @@ class RouterDebugger:
         """Show analyzer statistics"""
         stats = self.analyzer.get_stats()
 
-        print(f"\n📊 Analyzer Statistics")
+        print("\n📊 Analyzer Statistics")
         print("=" * 40)
         print(f"Total analyses: {stats['performance']['total_analyses']}")
         print(f"Average analysis time: {stats['performance']['avg_time_ms']:.2f}ms")
         print(f"Fallback triggers: {stats['fallback']['total_triggers']}")
 
-        print(f"\nCurrent weights:")
+        print("\nCurrent weights:")
         for key, value in stats['weights'].items():
             print(f"  {key}: {value}")
 
-        print(f"\nCurrent thresholds:")
+        print("\nCurrent thresholds:")
         for key, value in stats['thresholds'].items():
             print(f"  {key}: {value}")
 
     def _show_config(self):
         """Show current configuration"""
-        print(f"\n⚙️  Current Configuration")
+        print("\n⚙️  Current Configuration")
         print("=" * 40)
 
         # Environment variables
@@ -259,7 +260,7 @@ class RouterDebugger:
     def analyze_file(self, filename: str):
         """Analyze prompts from a file"""
         try:
-            with open(filename, 'r', encoding='utf-8') as f:
+            with open(filename, encoding='utf-8') as f:
                 prompts = [line.strip() for line in f if line.strip()]
 
             print(f"📁 Analyzing {len(prompts)} prompts from {filename}")
@@ -276,7 +277,7 @@ class RouterDebugger:
                 print(f"  Score: {result['complexity_score']:.3f} → {result['selected_model']}")
 
             # Overall statistics
-            print(f"\n📊 Overall Analysis Results")
+            print("\n📊 Overall Analysis Results")
             print("=" * 40)
 
             avg_complexity = sum(r['complexity_score'] for r in results) / len(results)
@@ -286,7 +287,7 @@ class RouterDebugger:
                 model_counts[model] = model_counts.get(model, 0) + 1
 
             print(f"Average complexity: {avg_complexity:.3f}")
-            print(f"Model distribution:")
+            print("Model distribution:")
             for model, count in model_counts.items():
                 percentage = (count / len(results)) * 100
                 print(f"  {model}: {count} ({percentage:.1f}%)")

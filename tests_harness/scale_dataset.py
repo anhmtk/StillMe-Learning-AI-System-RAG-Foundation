@@ -1,4 +1,5 @@
 import secrets
+
 #!/usr/bin/env python3
 """
 Scale Dataset - Tăng dataset từ 50 lên 1000+ mẫu
@@ -13,17 +14,17 @@ Tính năng:
 import json
 import logging
 import random
-from typing import Dict, List, Any
+import sys
 from datetime import datetime
 from pathlib import Path
-import sys
+from typing import Any, Dict, List
 
 # Add current directory to path for imports
 sys.path.append(str(Path(__file__).parent))
 
-from augmentor.augment_runner import AugmentRunner, AugmentConfig
-from augmentor.paraphraser import ParaphraseConfig
+from augmentor.augment_runner import AugmentConfig, AugmentRunner
 from augmentor.backtranslate import BacktranslateConfig
+from augmentor.paraphraser import ParaphraseConfig
 from augmentor.template_filler import TemplateConfig
 
 # Setup logging

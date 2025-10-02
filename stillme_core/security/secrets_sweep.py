@@ -71,7 +71,7 @@ class SecretsSweeper:
         for ignore_file in ignore_files:
             ignore_path = self.project_root / ignore_file
             if ignore_path.exists():
-                with open(ignore_path, 'r') as f:
+                with open(ignore_path) as f:
                     for line in f:
                         line = line.strip()
                         if line and not line.startswith('#'):
@@ -247,7 +247,7 @@ class SecretsSweeper:
         findings = []
 
         try:
-            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            with open(file_path, encoding='utf-8', errors='ignore') as f:
                 lines = f.readlines()
 
             for line_num, line in enumerate(lines, 1):
@@ -437,7 +437,7 @@ def main():
 
     # Print summary
     summary = report["summary"]
-    print(f"\n🔍 Secrets Sweep Complete")
+    print("\n🔍 Secrets Sweep Complete")
     print(f"Files scanned: {summary['files_scanned']}")
     print(f"Total findings: {summary['total_findings']}")
     print(f"High severity: {summary['high_severity']} 🚨")
@@ -446,13 +446,13 @@ def main():
 
     # Print recommendations
     if report["recommendations"]:
-        print(f"\n📋 Recommendations:")
+        print("\n📋 Recommendations:")
         for rec in report["recommendations"]:
             print(f"  {rec}")
 
     # Exit with error if high severity issues found and requested
     if args.fail_on_high and summary["high_severity"] > 0:
-        print(f"\n❌ High severity issues found. Exiting with error code.")
+        print("\n❌ High severity issues found. Exiting with error code.")
         sys.exit(1)
 
     print(f"\n✅ Report saved to: {args.output}")

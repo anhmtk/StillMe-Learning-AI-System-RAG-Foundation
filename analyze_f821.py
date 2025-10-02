@@ -7,10 +7,11 @@ import json
 import re
 from collections import Counter
 
+
 def analyze_f821_errors():
     """Analyze F821 errors from JSON file"""
 
-    with open('f821_errors.json', 'r', encoding='utf-8', errors='replace') as f:
+    with open('f821_errors.json', encoding='utf-8', errors='replace') as f:
         data = json.load(f)
 
     symbols = []

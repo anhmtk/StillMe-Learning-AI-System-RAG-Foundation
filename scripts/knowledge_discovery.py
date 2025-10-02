@@ -4,21 +4,22 @@ StillMe IPC Knowledge Discovery System
 Tự động tìm kiến thức mới từ web, RSS, documents
 """
 
-import os
-import sys
 import json
 import logging
-import requests
+import os
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
+import requests
 
 # Add project root to path
 project_root = Path(__file__).resolve().parents[1]
 sys.path.append(str(project_root))
 
-from stillme_core.learning.proposals_manager import ProposalsManager
 from stillme_core.alerting.alerting_system import AlertingSystem
+from stillme_core.learning.proposals_manager import ProposalsManager
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -57,7 +58,7 @@ class KnowledgeDiscovery:
                 if self._create_proposal_from_topic(topic):
                     discovered_count += 1
 
-            logger.info(f"🎉 Knowledge discovery completed!")
+            logger.info("🎉 Knowledge discovery completed!")
             logger.info(f"📊 Total new proposals created: {discovered_count}")
 
             if discovered_count > 0:
@@ -238,12 +239,12 @@ def main():
         discovered_count = discovery.discover_knowledge()
 
         if discovered_count > 0:
-            print(f"\n🎉 Knowledge discovery completed!")
+            print("\n🎉 Knowledge discovery completed!")
             print(f"📊 Found {discovered_count} new learning opportunities")
-            print(f"📋 Check dashboard to review proposals: http://localhost:8506")
+            print("📋 Check dashboard to review proposals: http://localhost:8506")
         else:
-            print(f"\nℹ️ No new knowledge discovered at this time.")
-            print(f"💡 Try running again later or add manual knowledge.")
+            print("\nℹ️ No new knowledge discovered at this time.")
+            print("💡 Try running again later or add manual knowledge.")
 
     except Exception as e:
         logger.error(f"❌ Knowledge discovery failed: {e}")

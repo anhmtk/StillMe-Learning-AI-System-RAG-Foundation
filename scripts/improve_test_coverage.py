@@ -10,14 +10,14 @@ Version: 1.0.0
 Last Updated: 2025-09-26
 """
 
-import os
-import sys
-import json
-import subprocess
-from pathlib import Path
-from typing import Dict, List, Any, Tuple
-from dataclasses import dataclass
 import argparse
+import json
+import os
+import subprocess
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Tuple
 
 
 @dataclass
@@ -86,7 +86,7 @@ class CoverageAnalyzer:
     def _parse_coverage_json(self, coverage_file: Path) -> CoverageReport:
         """Parse coverage JSON file"""
         try:
-            with open(coverage_file, 'r') as f:
+            with open(coverage_file) as f:
                 data = json.load(f)
 
             total_lines = data.get('totals', {}).get('num_statements', 0)
@@ -250,11 +250,11 @@ Generated: {self._get_current_timestamp()}
         # Recommendations
         report_content += "## Recommendations\n\n"
         if report.coverage_percentage < self.target_coverage:
-            report_content += f"1. **Focus on critical modules** - Ensure security, privacy, and learning modules have 95%+ coverage\n"
-            report_content += f"2. **Add integration tests** - Test cross-module interactions and workflows\n"
-            report_content += f"3. **Add error handling tests** - Test exception paths and edge cases\n"
-            report_content += f"4. **Add performance tests** - Test under load and stress conditions\n"
-            report_content += f"5. **Automate coverage checks** - Add coverage gates to CI/CD pipeline\n\n"
+            report_content += "1. **Focus on critical modules** - Ensure security, privacy, and learning modules have 95%+ coverage\n"
+            report_content += "2. **Add integration tests** - Test cross-module interactions and workflows\n"
+            report_content += "3. **Add error handling tests** - Test exception paths and edge cases\n"
+            report_content += "4. **Add performance tests** - Test under load and stress conditions\n"
+            report_content += "5. **Automate coverage checks** - Add coverage gates to CI/CD pipeline\n\n"
         else:
             report_content += "1. **Maintain coverage** - Ensure new code includes tests\n"
             report_content += "2. **Improve test quality** - Focus on meaningful test cases\n"
@@ -319,7 +319,7 @@ def main():
     analyzer.save_report(report_content, args.output)
 
     # Print summary
-    print(f"\n📈 Coverage Summary:")
+    print("\n📈 Coverage Summary:")
     print(f"   Current: {report.coverage_percentage:.1f}%")
     print(f"   Target: {args.target}%")
     print(f"   Gap: {args.target - report.coverage_percentage:.1f}%")

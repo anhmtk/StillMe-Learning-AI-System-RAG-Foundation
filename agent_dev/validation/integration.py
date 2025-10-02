@@ -9,16 +9,21 @@ Cách sử dụng:
 3. Báo cáo trung thực với bằng chứng cụ thể
 """
 
+import json
 import os
 import sys
 import time
-import json
-from typing import Dict, List, Optional, Any, Callable
+from typing import Any, Callable, Dict, List, Optional
 
 # Add current directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from agentdev_validation_system import AgentDevValidator, ValidationResult, ErrorSeverity
+from agentdev_validation_system import (
+    AgentDevValidator,
+    ErrorSeverity,
+    ValidationResult,
+)
+
 
 class AgentDevIntegration:
     """Tích hợp hệ thống validation vào AgentDev hiện tại"""

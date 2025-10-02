@@ -4,11 +4,12 @@ Coverage check script for NicheRadar v1.5
 Ensures test coverage meets minimum requirements
 """
 
+import json
 import os
 import sys
-import json
 import xml.etree.ElementTree as ET
 from pathlib import Path
+
 
 def check_coverage_xml():
     """Check coverage from XML report"""
@@ -26,7 +27,7 @@ def check_coverage_xml():
         line_rate = float(root.get('line-rate', 0))
         branch_rate = float(root.get('branch-rate', 0))
 
-        print(f"📊 Overall Coverage:")
+        print("📊 Overall Coverage:")
         print(f"   Line Coverage: {line_rate:.1%}")
         print(f"   Branch Coverage: {branch_rate:.1%}")
 
@@ -49,7 +50,7 @@ def check_coverage_xml():
                 niche_radar_coverage[filename] = line_rate
 
         if niche_radar_coverage:
-            print(f"\n📊 NicheRadar Module Coverage:")
+            print("\n📊 NicheRadar Module Coverage:")
             for module, coverage in niche_radar_coverage.items():
                 status = "✅" if coverage >= min_coverage else "❌"
                 print(f"   {status} {module}: {coverage:.1%}")
@@ -129,7 +130,7 @@ def check_test_coverage_ratio():
     source_count = len(source_files)
     ratio = test_count / source_count
 
-    print(f"📊 Test Coverage Ratio:")
+    print("📊 Test Coverage Ratio:")
     print(f"   Test Files: {test_count}")
     print(f"   Source Files: {source_count}")
     print(f"   Ratio: {ratio:.2f}")
@@ -203,7 +204,7 @@ def main():
             all_passed = False
 
     # Generate summary
-    print(f"\n📊 Coverage Summary:")
+    print("\n📊 Coverage Summary:")
     summary = generate_coverage_summary()
 
     if all_passed:

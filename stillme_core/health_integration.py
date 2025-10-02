@@ -5,8 +5,8 @@ Health Integration - Adapter for health endpoint registration
 Provides compatibility layer for different route registration styles.
 """
 
-from typing import Any, Dict, Optional
 import logging
+from typing import Any, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ def register_health_endpoint(app, health_checker) -> Dict[str, Any]:
                 "version": health_checker.version,
                 "error": str(e)
             }, 503
-    
+
     # Try callable-first style (test expects this)
     try:
         app.route(_health_handler)
@@ -51,7 +51,7 @@ def register_health_endpoint(app, health_checker) -> Dict[str, Any]:
         except Exception as e:
             used_style = f"failed: {type(e).__name__}"
             logger.error(f"Failed to register health endpoint: {e}")
-    
+
     return {"used_style": used_style}
 
 
@@ -82,7 +82,7 @@ def register_liveness_endpoint(app, health_checker) -> Dict[str, Any]:
                 "version": "unknown",
                 "error": str(e)
             }, 503
-    
+
     # Try callable-first style (test expects this)
     try:
         app.route(_liveness_handler)
@@ -97,7 +97,7 @@ def register_liveness_endpoint(app, health_checker) -> Dict[str, Any]:
         except Exception as e:
             used_style = f"failed: {type(e).__name__}"
             logger.error(f"Failed to register liveness endpoint: {e}")
-    
+
     return {"used_style": used_style}
 
 
@@ -117,23 +117,23 @@ def register_metrics_endpoint(app, health_checker) -> Dict[str, Any]:
         """Metrics endpoint handler"""
         try:
             health_response = health_checker.run_all_checks()
-            
+
             # Convert to Prometheus format
             metrics = []
             metrics.append(f"stillme_health_status{{environment=\"{health_response.environment}\"}} {1 if health_response.status.value == 'healthy' else 0}")
             metrics.append(f"stillme_uptime_seconds {health_response.uptime_seconds}")
             metrics.append(f"stillme_version_info{{version=\"{health_response.version}\"}} 1")
-            
+
             for check_name, check in health_response.checks.items():
                 status_value = 1 if check.status.value == 'healthy' else 0
                 metrics.append(f"stillme_health_check_status{{check=\"{check_name}\"}} {status_value}")
                 metrics.append(f"stillme_health_check_duration_ms{{check=\"{check_name}\"}} {check.duration_ms}")
-            
+
             return "\n".join(metrics), 200, {"Content-Type": "text/plain"}
         except Exception as e:
             logger.error(f"Metrics check failed: {e}")
             return f"# Error: {e}", 503, {"Content-Type": "text/plain"}
-    
+
     # Try callable-first style (test expects this)
     try:
         app.route(_metrics_handler)
@@ -148,5 +148,5 @@ def register_metrics_endpoint(app, health_checker) -> Dict[str, Any]:
         except Exception as e:
             used_style = f"failed: {type(e).__name__}"
             logger.error(f"Failed to register metrics endpoint: {e}")
-    
+
     return {"used_style": used_style}

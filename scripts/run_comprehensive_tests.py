@@ -5,14 +5,15 @@ Runs all test suites and generates comprehensive reports
 """
 
 import asyncio
-import subprocess
-import time
 import json
 import logging
-from pathlib import Path
-from typing import Dict, Any, List, Optional
-from dataclasses import dataclass, asdict
+import subprocess
+import time
+from dataclasses import asdict, dataclass
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
 import aiohttp
 
 # Configure logging
@@ -453,7 +454,7 @@ class ComprehensiveTestRunner:
         """Parse coverage JSON to extract coverage percentage"""
         try:
             if Path(coverage_file).exists():
-                with open(coverage_file, 'r') as f:
+                with open(coverage_file) as f:
                     data = json.load(f)
                     return data.get('totals', {}).get('percent_covered', 0.0)
             return 0.0
@@ -554,7 +555,7 @@ async def main():
     await runner.generate_comprehensive_report(report)
 
     # Print summary
-    print(f"\n🎯 COMPREHENSIVE TEST SUMMARY")
+    print("\n🎯 COMPREHENSIVE TEST SUMMARY")
     print(f"Overall Status: {report.overall_status}")
     print(f"Total Duration: {report.total_duration:.2f}s")
     print(f"Total Tests: {sum(r.tests_run for r in report.test_results)}")
@@ -562,11 +563,11 @@ async def main():
     print(f"Failed: {sum(r.tests_failed for r in report.test_results)}")
     print(f"Errors: {sum(r.tests_errors for r in report.test_results)}")
 
-    print(f"\n📊 TEST SUITE RESULTS:")
+    print("\n📊 TEST SUITE RESULTS:")
     for result in report.test_results:
         print(f"  {result.test_suite}: {result.status} ({result.duration:.2f}s)")
 
-    print(f"\n💡 RECOMMENDATIONS:")
+    print("\n💡 RECOMMENDATIONS:")
     for i, rec in enumerate(report.recommendations[:5], 1):
         print(f"{i}. {rec}")
 

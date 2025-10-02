@@ -3,12 +3,13 @@
 Simple Gateway for StillMe - Quick Performance Test
 """
 import asyncio
-import httpx
 import json
 import time
+
+import httpx
+import uvicorn
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-import uvicorn
 
 app = FastAPI(title="StillMe Simple Gateway")
 

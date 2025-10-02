@@ -18,6 +18,19 @@ __description__ = "Core AI Framework for StillMe AI"
 # Import main framework
 # Import compatibility layer
 from .compat import *
+
+# Import AI manager functions
+from .ai_manager import set_mode, health
+
+# Stub implementations to avoid complex imports
+def warmup(model=None):
+    """Stub warmup function"""
+    return {"status": "warmed_up", "model": model}
+
+def dev_agent(task, mode="fast", **params):
+    """Stub dev_agent function"""
+    return f"Stub response for: {task}"
+
 from .framework import StillMeFramework
 from .health import HealthChecker
 

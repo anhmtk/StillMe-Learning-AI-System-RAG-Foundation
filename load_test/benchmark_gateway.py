@@ -12,13 +12,14 @@ Tests:
 """
 
 import asyncio
-import aiohttp
-import time
-import statistics
 import json
-from typing import List, Dict, Any
-from dataclasses import dataclass
 import logging
+import statistics
+import time
+from dataclasses import dataclass
+from typing import Any, Dict, List
+
+import aiohttp
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -431,7 +432,7 @@ class GatewayBenchmark:
             improvement = miss_avg - hit_avg
             improvement_pct = (improvement / miss_avg) * 100 if miss_avg > 0 else 0
 
-            print(f"\n💾 CACHE EFFECTIVENESS:")
+            print("\n💾 CACHE EFFECTIVENESS:")
             print(f"Cache Miss: {miss_avg:.1f}ms")
             print(f"Cache Hit:  {hit_avg:.1f}ms")
             print(f"Improvement: {improvement:.1f}ms ({improvement_pct:.1f}% faster)")

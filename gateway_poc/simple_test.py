@@ -6,9 +6,10 @@ Date: 2025-09-22
 """
 
 import asyncio
-import aiohttp
-import time
 import statistics
+import time
+
+import aiohttp
 import pytest
 
 # Skip async tests due to missing pytest-asyncio

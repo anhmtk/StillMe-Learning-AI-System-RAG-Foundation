@@ -51,7 +51,7 @@ class EmailNotifier:
         # Load from config file if exists
         if self.config_file.exists():
             try:
-                with open(self.config_file, 'r') as f:
+                with open(self.config_file) as f:
                     file_config = json.load(f)
                 # Merge with env config (env takes priority)
                 env_config.update(file_config)

@@ -25,9 +25,10 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+from stillme_core.core.security.attack_simulator import AttackType
+
 # Import existing modules for integration
 from stillme_core.decision_making.decision_engine import RiskLevel
-from stillme_core.core.security.attack_simulator import AttackType
 
 try:
     from stillme_core.core.advanced_security.safe_attack_simulator import (
@@ -330,7 +331,7 @@ class RedTeamEngine:
             self.attack_patterns[pattern.pattern_id] = pattern
 
         logger.info(f"✅ Initialized {len(self.attack_patterns)} attack patterns")
-    
+
     def run_light_security_check(self, repo_root: str = ".") -> Dict[str, Any]:
         """
         Chạy security scan nhẹ, trả về dict chuẩn hoá:
@@ -340,9 +341,9 @@ class RedTeamEngine:
         }
         """
         from stillme_core.utils.io_safe import safe_read_text
-        
+
         results = {"findings": [], "score": 0.0}
-        
+
         # Security patterns to check
         security_patterns = [
             (r"password\s*=\s*['\"][^'\"]+['\"]", "secret", "HIGH", "Hardcoded password"),
@@ -358,24 +359,24 @@ class RedTeamEngine:
             (r"sk-[a-zA-Z0-9]{48}", "secret", "HIGH", "OpenAI API key"),
             (r"ghp_[a-zA-Z0-9]{36}", "secret", "HIGH", "GitHub token")
         ]
-        
+
         try:
             # Scan Python files in repo
             project_root = Path(repo_root)
             python_files = list(project_root.glob("**/*.py"))
-            
+
             # Limit to first 100 files to avoid performance issues
             for file_path in python_files[:100]:
                 try:
                     # Skip if not a text file
                     if not file_path.is_file():
                         continue
-                    
+
                     # Read file safely
                     content = safe_read_text(file_path)
                     if not content:
                         continue
-                    
+
                     # Check each pattern
                     for pattern, finding_type, severity, description in security_patterns:
                         matches = re.findall(pattern, content, re.IGNORECASE)
@@ -387,7 +388,7 @@ class RedTeamEngine:
                                 if re.search(pattern, line, re.IGNORECASE):
                                     line_num = i + 1
                                     break
-                            
+
                             results["findings"].append({
                                 "id": f"SEC-{len(results['findings']) + 1}",
                                 "type": finding_type,
@@ -397,24 +398,24 @@ class RedTeamEngine:
                                 "description": description,
                                 "matches": len(matches)
                             })
-                            
+
                 except Exception as e:
                     # Skip files that can't be processed
                     continue
-            
+
             # Calculate risk score based on findings
             high_count = sum(1 for f in results["findings"] if f["severity"] == "HIGH")
             medium_count = sum(1 for f in results["findings"] if f["severity"] == "MEDIUM")
             low_count = sum(1 for f in results["findings"] if f["severity"] == "LOW")
-            
+
             # Weighted score: HIGH=1.0, MEDIUM=0.5, LOW=0.2
             results["score"] = min(
                 (high_count * 1.0 + medium_count * 0.5 + low_count * 0.2) / 10.0,
                 1.0
             )
-            
+
             return results
-            
+
         except Exception as e:
             logger.error(f"Light security check failed: {e}")
             return {

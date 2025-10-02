@@ -8,11 +8,13 @@ Usage: python ci/check_skip_not_cancel.py
 """
 
 import os
-import sys
 import re
-import yaml
+import sys
 from pathlib import Path
-from typing import List, Dict, Any, Tuple
+from typing import Any, Dict, List, Tuple
+
+import yaml
+
 
 def load_interaction_policy() -> Dict[str, Any]:
     """Load INTERACTION_POLICY.yaml policy"""
@@ -23,7 +25,7 @@ def load_interaction_policy() -> Dict[str, Any]:
         sys.exit(1)
 
     try:
-        with open(policy_path, 'r', encoding='utf-8') as f:
+        with open(policy_path, encoding='utf-8') as f:
             return yaml.safe_load(f)
     except Exception as e:
         print(f"❌ Failed to load policy: {e}")
@@ -57,7 +59,7 @@ def find_skip_handlers() -> List[Tuple[str, int, str]]:
             if any(file.endswith(ext) for ext in extensions):
                 file_path = os.path.join(root, file)
                 try:
-                    with open(file_path, 'r', encoding='utf-8') as f:
+                    with open(file_path, encoding='utf-8') as f:
                         lines = f.readlines()
 
                     for line_num, line in enumerate(lines, 1):
@@ -96,7 +98,7 @@ def find_cancel_calls() -> List[Tuple[str, int, str]]:
             if any(file.endswith(ext) for ext in extensions):
                 file_path = os.path.join(root, file)
                 try:
-                    with open(file_path, 'r', encoding='utf-8') as f:
+                    with open(file_path, encoding='utf-8') as f:
                         lines = f.readlines()
 
                     for line_num, line in enumerate(lines, 1):

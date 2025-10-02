@@ -10,17 +10,18 @@ Tính năng:
 4. Collaboration Tools - Tích hợp công cụ cộng tác (stub Slack/Discord plugin)
 """
 
-import os
 import json
-import time
+import logging
+import os
 import subprocess
 import threading
-from typing import Dict, List, Optional, Any, Tuple
-from pathlib import Path
-from dataclasses import dataclass, asdict
+import time
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
-import logging
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
 
 class ReviewStatus(Enum):
     """Trạng thái review"""
@@ -144,7 +145,7 @@ class CollaborationSystem:
         review_files = list(self.reviews_dir.glob("*.json"))
         for file_path in review_files:
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, encoding='utf-8') as f:
                     data = json.load(f)
                 review = CodeReview(**data)
                 self.reviews.append(review)
@@ -155,7 +156,7 @@ class CollaborationSystem:
         knowledge_files = list(self.knowledge_dir.glob("*.json"))
         for file_path in knowledge_files:
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, encoding='utf-8') as f:
                     data = json.load(f)
                 share = KnowledgeShare(**data)
                 self.knowledge_shares.append(share)
@@ -166,7 +167,7 @@ class CollaborationSystem:
         mentoring_files = list(self.mentoring_dir.glob("*.json"))
         for file_path in mentoring_files:
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, encoding='utf-8') as f:
                     data = json.load(f)
                 session = MentoringSession(**data)
                 self.mentoring_sessions.append(session)
@@ -295,7 +296,7 @@ class CollaborationSystem:
     def _analyze_code_quality(self, file_path: str) -> Dict[str, Any]:
         """Phân tích chất lượng code"""
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 content = f.read()
 
             lines = content.split('\n')
@@ -329,7 +330,7 @@ class CollaborationSystem:
         issues = []
 
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 content = f.read()
 
             # Kiểm tra các pattern bảo mật
@@ -357,7 +358,7 @@ class CollaborationSystem:
         slow_operations = []
 
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 content = f.read()
 
             # Kiểm tra các pattern hiệu suất

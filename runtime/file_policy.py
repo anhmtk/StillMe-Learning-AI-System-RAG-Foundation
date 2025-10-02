@@ -7,15 +7,16 @@ Purpose: Đảm bảo tất cả entrypoints đều tuân thủ FILE_PROTECTION.
 Usage: Gọi load_file_policy() ở đầu mọi entrypoint
 """
 
-import os
-import yaml
-import shutil
 import hashlib
-import re
-from typing import Dict, Any, Optional, List, Tuple
-from pathlib import Path
-from datetime import datetime
 import logging
+import os
+import re
+import shutil
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+import yaml
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -55,7 +56,7 @@ def load_file_policy(policy_path: Optional[str] = None) -> Dict[str, Any]:
             raise FileNotFoundError(f"File Protection Policy file not found: {policy_path}")
 
         # Read and parse YAML
-        with open(policy_path, 'r', encoding='utf-8') as file:
+        with open(policy_path, encoding='utf-8') as file:
             policy = yaml.safe_load(file)
 
         # Validate policy structure
@@ -201,7 +202,7 @@ def validate_env_file(file_path: str) -> Tuple[bool, List[str]]:
             errors.append(f"File size {file_size} exceeds limit {validation['file_size_limit']}")
 
         # Read and validate content
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding='utf-8') as f:
             lines = f.readlines()
 
             if len(lines) > validation['line_limit']:

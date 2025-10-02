@@ -11,17 +11,18 @@ Usage:
     python scripts/validate_router.py --performance
 """
 
+import argparse
+import json
 import os
 import sys
-import argparse
 import time
-import json
-from typing import Dict, List, Tuple, Optional
+from typing import Dict, List, Optional, Tuple
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))
 
-from modules.api_provider_manager import UnifiedAPIManager, ComplexityAnalyzer
+from modules.api_provider_manager import ComplexityAnalyzer, UnifiedAPIManager
+
 
 class RouterValidator:
     def __init__(self):
@@ -110,15 +111,15 @@ class RouterValidator:
                 results['environment'][var] = 'WARN (not set, using default)'
 
         # Print results
-        print(f"Weights validation:")
+        print("Weights validation:")
         for weight, status in results['weights'].items():
             print(f"  {weight}: {status}")
 
-        print(f"\nThresholds validation:")
+        print("\nThresholds validation:")
         for threshold, status in results['thresholds'].items():
             print(f"  {threshold}: {status}")
 
-        print(f"\nEnvironment variables:")
+        print("\nEnvironment variables:")
         for var, status in results['environment'].items():
             print(f"  {var}: {status}")
 
@@ -179,11 +180,11 @@ class RouterValidator:
             results['memory_usage']['current'] = f'WARN (current: {memory_mb:.1f}MB)'
 
         # Print results
-        print(f"Analysis time:")
+        print("Analysis time:")
         print(f"  Average: {avg_time*1000:.2f}ms ({results['analysis_time']['average']})")
         print(f"  Maximum: {max_time*1000:.2f}ms ({results['analysis_time']['maximum']})")
 
-        print(f"\nMemory usage:")
+        print("\nMemory usage:")
         print(f"  Current: {memory_mb:.1f}MB ({results['memory_usage']['current']})")
 
         print(f"\nPerformance validation: {results['overall']}")
@@ -343,10 +344,10 @@ class RouterValidator:
         results['confusion_markers']['accuracy'] = correct_positive / len(positive_feedback)
 
         # Print results
-        print(f"Negative feedback detection:")
+        print("Negative feedback detection:")
         print(f"  Correct: {correct_negative}/{len(negative_feedback)} ({results['negative_feedback']['accuracy']:.1%})")
 
-        print(f"\nPositive feedback detection:")
+        print("\nPositive feedback detection:")
         print(f"  Correct: {correct_positive}/{len(positive_feedback)} ({results['confusion_markers']['accuracy']:.1%})")
 
         # Overall fallback validation
@@ -405,7 +406,7 @@ class RouterValidator:
         overall_results['overall_status'] = overall_status
 
         # Print summary
-        print(f"\n📊 Validation Summary")
+        print("\n📊 Validation Summary")
         print("=" * 40)
         print(f"Configuration: {config_results['overall']}")
         print(f"Performance: {performance_results['overall']}")
@@ -448,7 +449,7 @@ class RouterValidator:
         results['overall_status'] = overall_status
 
         # Print summary
-        print(f"\n📊 Quick Validation Summary")
+        print("\n📊 Quick Validation Summary")
         print("=" * 40)
         print(f"Configuration: {config_results['overall']}")
         print(f"Performance: {performance_results['overall']}")

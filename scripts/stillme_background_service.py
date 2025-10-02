@@ -4,21 +4,22 @@ StillMe IPC Background Service
 Chạy ngầm, tự động khám phá kiến thức định kỳ
 """
 
+import json
+import logging
 import os
 import sys
 import time
-import json
-import logging
-import schedule
 from datetime import datetime, timedelta
 from pathlib import Path
+
+import schedule
 
 # Add project root to path
 project_root = Path(__file__).resolve().parents[1]
 sys.path.append(str(project_root))
 
-from stillme_core.learning.proposals_manager import ProposalsManager
 from stillme_core.alerting.alerting_system import AlertingSystem
+from stillme_core.learning.proposals_manager import ProposalsManager
 
 # Configure logging
 logging.basicConfig(
@@ -53,7 +54,7 @@ class StillMeBackgroundService:
 
         if self.config_file.exists():
             try:
-                with open(self.config_file, 'r') as f:
+                with open(self.config_file) as f:
                     self.config = json.load(f)
                 # Reset daily counter if new day
                 if self.config.get("last_discovery_date") != datetime.now().strftime("%Y-%m-%d"):
@@ -151,7 +152,7 @@ class StillMeBackgroundService:
 
         logger.info(f"⏰ Scheduled knowledge discovery every {discovery_interval} hours")
         logger.info(f"📊 Max discoveries per day: {self.config['max_discoveries_per_day']}")
-        logger.info(f"📊 Dashboard data export every 6 hours")
+        logger.info("📊 Dashboard data export every 6 hours")
         logger.info(f"🔔 Notifications: {'Enabled' if self.config['notification_enabled'] else 'Disabled'}")
 
         # Run initial discovery

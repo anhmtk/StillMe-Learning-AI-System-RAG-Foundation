@@ -9,12 +9,12 @@ Kiểm tra:
 - Dynamic communication style
 """
 
-import re
 import json
 import logging
-from typing import Dict, List, Tuple, Optional, Any
-from dataclasses import dataclass, asdict
+import re
+from dataclasses import asdict, dataclass
 from datetime import datetime
+from typing import Any, Dict, List, Optional, Tuple
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)

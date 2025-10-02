@@ -13,7 +13,8 @@ from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
-from stillme_core.kill_switch import KillSwitchManager, KillSwitchAction
+from stillme_core.kill_switch import KillSwitchAction, KillSwitchManager
+
 
 def format_status(status: dict) -> str:
     """Format status output."""

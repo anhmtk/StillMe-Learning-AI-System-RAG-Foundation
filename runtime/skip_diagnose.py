@@ -7,20 +7,21 @@ Purpose: Chẩn đoán trạng thái task khi user bấm Skip
 Usage: Gọi diagnose_on_skip() khi user bấm Skip button
 """
 
-import os
-import time
-import psutil
-import subprocess
-from typing import Dict, Any, Optional, List, Tuple
-from pathlib import Path
-from dataclasses import dataclass
 import logging
+import os
+import subprocess
+import time
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+import psutil
 
 from .interaction_policy import (
+    get_heartbeat_config,
     get_interaction_policy,
     get_log_tailing_config,
-    get_heartbeat_config,
-    get_pid_config
+    get_pid_config,
 )
 
 # Configure logging
@@ -186,7 +187,7 @@ def _check_pid(
 
         try:
             if os.path.exists(full_path):
-                with open(full_path, 'r') as f:
+                with open(full_path) as f:
                     pid_content = f.read().strip()
                     pid_num = int(pid_content)
 
@@ -235,7 +236,7 @@ def _tail_file(file_path: str, lines: int) -> List[str]:
 
     # Fallback: read file and get last N lines
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding='utf-8') as f:
             all_lines = f.readlines()
             return [line.strip() for line in all_lines[-lines:]]
     except Exception:

@@ -5,6 +5,7 @@ Status Enums - MINIMAL CONTRACT derived from tests/usages
 
 from enum import Enum
 
+
 class JobStatus(Enum):
     """Job status enum - MINIMAL CONTRACT derived from tests/usages"""
     PENDING = "pending"

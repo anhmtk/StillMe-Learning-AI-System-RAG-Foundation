@@ -2,9 +2,10 @@
 """Update README.md with metrics from metrics.json"""
 
 import json
+import pathlib
 import re
 import sys
-import pathlib
+
 
 def main():
     if len(sys.argv) != 3:
@@ -22,13 +23,13 @@ def main():
         print(f"Error: {README} not found")
         sys.exit(1)
 
-    with open(METRICS, "r", encoding="utf-8") as f:
+    with open(METRICS, encoding="utf-8") as f:
         m = json.load(f)
 
     def pct(cat):
         return f'{m.get(cat, {}).get("pass", 0)}/{m.get(cat, {}).get("total", 0)} ({m.get(cat, {}).get("pass_rate", 0)}%)'
 
-    with open(README, "r", encoding="utf-8") as f:
+    with open(README, encoding="utf-8") as f:
         content = f.read()
 
     # Update metrics table

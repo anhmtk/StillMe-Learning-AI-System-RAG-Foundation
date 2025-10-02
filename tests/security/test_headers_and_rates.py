@@ -20,7 +20,7 @@ class TestSecurityHeaders:
 
     def test_content_security_policy_header(self, security_headers):
         """Test Content-Security-Policy header"""
-        headers = security_headers.get_security_headers()
+        headers = security_headers.get_security_headers() if hasattr(security_headers, 'get_security_headers') else {}
 
         assert "Content-Security-Policy" in headers
         csp = headers["Content-Security-Policy"]
@@ -34,7 +34,7 @@ class TestSecurityHeaders:
 
     def test_strict_transport_security_header(self, security_headers):
         """Test Strict-Transport-Security header"""
-        headers = security_headers.get_security_headers()
+        headers = security_headers.get_security_headers() if hasattr(security_headers, 'get_security_headers') else {}
 
         assert "Strict-Transport-Security" in headers
         hsts = headers["Strict-Transport-Security"]
@@ -46,35 +46,35 @@ class TestSecurityHeaders:
 
     def test_x_content_type_options_header(self, security_headers):
         """Test X-Content-Type-Options header"""
-        headers = security_headers.get_security_headers()
+        headers = security_headers.get_security_headers() if hasattr(security_headers, 'get_security_headers') else {}
 
         assert "X-Content-Type-Options" in headers
         assert headers["X-Content-Type-Options"] == "nosniff"
 
     def test_x_frame_options_header(self, security_headers):
         """Test X-Frame-Options header"""
-        headers = security_headers.get_security_headers()
+        headers = security_headers.get_security_headers() if hasattr(security_headers, 'get_security_headers') else {}
 
         assert "X-Frame-Options" in headers
         assert headers["X-Frame-Options"] == "DENY"
 
     def test_referrer_policy_header(self, security_headers):
         """Test Referrer-Policy header"""
-        headers = security_headers.get_security_headers()
+        headers = security_headers.get_security_headers() if hasattr(security_headers, 'get_security_headers') else {}
 
         assert "Referrer-Policy" in headers
         assert headers["Referrer-Policy"] == "strict-origin-when-cross-origin"
 
     def test_x_xss_protection_header(self, security_headers):
         """Test X-XSS-Protection header"""
-        headers = security_headers.get_security_headers()
+        headers = security_headers.get_security_headers() if hasattr(security_headers, 'get_security_headers') else {}
 
         assert "X-XSS-Protection" in headers
         assert headers["X-XSS-Protection"] == "1; mode=block"
 
     def test_permissions_policy_header(self, security_headers):
         """Test Permissions-Policy header"""
-        headers = security_headers.get_security_headers()
+        headers = security_headers.get_security_headers() if hasattr(security_headers, 'get_security_headers') else {}
 
         assert "Permissions-Policy" in headers
         permissions = headers["Permissions-Policy"]

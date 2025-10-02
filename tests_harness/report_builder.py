@@ -12,10 +12,10 @@ Tính năng:
 
 import json
 import logging
-from typing import Dict, List, Any, Optional
+import os
 from datetime import datetime
 from pathlib import Path
-import os
+from typing import Any, Dict, List, Optional
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -643,7 +643,7 @@ if __name__ == "__main__":
         mock_metadata
     )
 
-    print(f"🏗️ HTML Report Builder Test Results:")
+    print("🏗️ HTML Report Builder Test Results:")
     print(f"✅ HTML report generated: {html_file}")
 
     # Export JSON

@@ -7,12 +7,13 @@ Purpose: Đảm bảo tất cả entrypoints đều tuân thủ INTERACTION_POLI
 Usage: Gọi load_interaction_policy() ở đầu mọi entrypoint
 """
 
-import os
-import yaml
 import json
-from typing import Dict, Any, Optional, List
-from pathlib import Path
 import logging
+import os
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+import yaml
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -52,7 +53,7 @@ def load_interaction_policy(policy_path: Optional[str] = None) -> Dict[str, Any]
             raise FileNotFoundError(f"Interaction Policy file not found: {policy_path}")
 
         # Read and parse YAML
-        with open(policy_path, 'r', encoding='utf-8') as file:
+        with open(policy_path, encoding='utf-8') as file:
             policy = yaml.safe_load(file)
 
         # Validate policy structure

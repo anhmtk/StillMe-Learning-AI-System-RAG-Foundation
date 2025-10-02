@@ -3,9 +3,10 @@
 Create ZIP archive for VPS deployment
 """
 
-import zipfile
 import os
+import zipfile
 from pathlib import Path
+
 
 def create_zip():
     """Create ZIP archive of deployment package"""

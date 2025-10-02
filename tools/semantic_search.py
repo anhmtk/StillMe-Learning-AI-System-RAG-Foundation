@@ -13,16 +13,17 @@ Features:
 import ast
 import hashlib
 import json
+import logging
 import os
 import re
 import time
-from dataclasses import dataclass, asdict
+from collections import defaultdict
+from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Dict, List, Set, Optional, Tuple, Any
-import logging
+from typing import Any, Dict, List, Optional, Set, Tuple
+
 import numpy as np
-from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 
@@ -150,7 +151,7 @@ class SemanticSearchEngine:
     def _process_file(self, file_path: Path):
         """Process a single file for indexing"""
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 content = f.read()
 
             self.file_contents[str(file_path)] = content

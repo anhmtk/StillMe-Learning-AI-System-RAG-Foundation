@@ -5,11 +5,12 @@ Run all tests and generate comprehensive reports
 """
 
 import os
-import sys
 import subprocess
+import sys
 import time
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+
 
 def run_command(cmd, cwd=None):
     """Run command and return result"""
@@ -58,7 +59,7 @@ def main():
     start_time = time.time()
 
     returncode, stdout, stderr = run_command(
-        f"python -m pytest {test_dir}/unit/ -v --tb=short --junitxml={test_dir}/reports/unit_results.xml --cov=agent-dev/core --cov-report=xml:{test_dir}/reports/unit_coverage.xml",
+        f"python -m pytest {test_dir}/unit/ -v --tb=short --junitxml={test_dir}/reports/unit_results.xml --cov=agent_dev/core --cov-report=xml:{test_dir}/reports/unit_coverage.xml",
         cwd=project_root
     )
 
@@ -120,7 +121,7 @@ def main():
     # Generate coverage report
     print("\n📊 Generating Coverage Report...")
     returncode, stdout, stderr = run_command(
-        f"python -m pytest {test_dir}/ --cov=agent-dev/core --cov-report=html:{test_dir}/reports/coverage_html --cov-report=term-missing",
+        f"python -m pytest {test_dir}/ --cov=agent_dev/core --cov-report=html:{test_dir}/reports/coverage_html --cov-report=term-missing",
         cwd=project_root
     )
 

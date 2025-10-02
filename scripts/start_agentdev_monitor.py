@@ -14,13 +14,13 @@ Usage:
     python scripts/start_agentdev_monitor.py [--daemon] [--config config.json]
 """
 
+import argparse
+import json
+import logging
 import os
+import signal
 import sys
 import time
-import json
-import signal
-import argparse
-import logging
 from pathlib import Path
 
 # Add project root to path
@@ -28,8 +28,11 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 # Import ops modules
-from agent_dev.ops.monitor import PatrolRunner
 from agent_dev.ops.escalation import EscalationManager
+from agent_dev.ops.monitor import PatrolRunner
+
+# Setup logging
+logger = logging.getLogger(__name__)
 
 class AgentDevOpsService:
     """AgentDev Operations Service - 24/7 Technical Manager"""
@@ -39,7 +42,7 @@ class AgentDevOpsService:
         self.patrol_runner = None
         self.escalation_manager = None
         self.running = False
-        
+
         # Setup logging
         self._setup_logging()
 
@@ -50,7 +53,7 @@ class AgentDevOpsService:
     def _load_config(self, config_file: str) -> dict:
         """Load configuration from file"""
         if config_file and Path(config_file).exists():
-            with open(config_file, 'r') as f:
+            with open(config_file) as f:
                 return json.load(f)
 
         # Default config
@@ -70,7 +73,7 @@ class AgentDevOpsService:
         """Setup logging configuration"""
         log_dir = Path(self.config["project_root"]) / "logs"
         log_dir.mkdir(exist_ok=True)
-        
+
         logging.basicConfig(
             level=logging.INFO,
             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -119,27 +122,27 @@ class AgentDevOpsService:
         try:
             while self.running:
                 current_time = time.time()
-                
+
                 # Check if quick patrol should run
                 if self.patrol_runner.should_run_quick_patrol():
                     print("🔍 Running quick patrol...")
                     patrol_result = self.patrol_runner.run_quick_patrol()
                     escalation_result = self.escalation_manager.handle_incident(patrol_result)
                     self._log_patrol_result("quick", patrol_result, escalation_result)
-                
+
                 # Check if deep patrol should run
                 if self.patrol_runner.should_run_deep_patrol():
                     print("🔍 Running deep patrol...")
                     patrol_result = self.patrol_runner.run_deep_patrol()
                     escalation_result = self.escalation_manager.handle_incident(patrol_result)
                     self._log_patrol_result("deep", patrol_result, escalation_result)
-                
+
                 # Sleep for 1 minute before next check
                 time.sleep(60)
 
         except KeyboardInterrupt:
             self.stop()
-    
+
     def _log_patrol_result(self, patrol_type: str, patrol_result: dict, escalation_result: dict):
         """Log patrol results"""
         logger.info(f"{patrol_type.capitalize()} patrol completed")
@@ -175,10 +178,10 @@ def main():
         print("🔍 Running dry-run patrol...")
         service.patrol_runner = PatrolRunner(service.config["project_root"])
         service.escalation_manager = EscalationManager()
-        
+
         patrol_result = service.patrol_runner.run_quick_patrol()
         escalation_result = service.escalation_manager.handle_incident(patrol_result)
-        
+
         print("📊 Dry-run Results:")
         print(f"  - Patrol Success: {patrol_result.get('success', False)}")
         print(f"  - Incidents Found: {escalation_result.get('incidents_found', 0)}")

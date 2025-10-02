@@ -4,11 +4,12 @@ Test data validation script for NicheRadar v1.5
 Validates test fixtures and ensures data quality
 """
 
+import json
 import os
 import sys
-import json
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
+
 
 def validate_json_schema(data, required_fields, data_type="unknown"):
     """Validate JSON data against required schema"""
@@ -52,7 +53,7 @@ def validate_github_trending_data():
         return False
 
     try:
-        with open(file_path, 'r') as f:
+        with open(file_path) as f:
             data = json.load(f)
 
         if not isinstance(data, list):
@@ -95,7 +96,7 @@ def validate_hackernews_data():
         return False
 
     try:
-        with open(file_path, 'r') as f:
+        with open(file_path) as f:
             data = json.load(f)
 
         if not isinstance(data, list):
@@ -138,7 +139,7 @@ def validate_news_data():
         return False
 
     try:
-        with open(file_path, 'r') as f:
+        with open(file_path) as f:
             data = json.load(f)
 
         if not isinstance(data, list):
@@ -181,7 +182,7 @@ def validate_google_trends_data():
         return False
 
     try:
-        with open(file_path, 'r') as f:
+        with open(file_path) as f:
             data = json.load(f)
 
         if not isinstance(data, list):
@@ -224,7 +225,7 @@ def validate_reddit_data():
         return False
 
     try:
-        with open(file_path, 'r') as f:
+        with open(file_path) as f:
             data = json.load(f)
 
         if not isinstance(data, list):

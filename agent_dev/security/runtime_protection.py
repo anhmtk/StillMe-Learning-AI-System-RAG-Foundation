@@ -5,18 +5,20 @@ Enterprise-grade runtime security monitoring and protection
 """
 
 import asyncio
+import hashlib
 import json
-import time
-import psutil
+import re
 import subprocess
 import threading
-from typing import Dict, List, Optional, Any, Callable
-from dataclasses import dataclass, asdict
+import time
+from dataclasses import asdict, dataclass
 from enum import Enum
-import aiofiles
 from pathlib import Path
-import hashlib
-import re
+from typing import Any, Callable, Dict, List, Optional
+
+import aiofiles
+import psutil
+
 
 class ThreatLevel(Enum):
     """Threat severity levels"""
@@ -84,7 +86,7 @@ class RuntimeProtection:
 
         if config_file.exists():
             import yaml
-            with open(config_file, 'r') as f:
+            with open(config_file) as f:
                 return yaml.safe_load(f)
         else:
             return {

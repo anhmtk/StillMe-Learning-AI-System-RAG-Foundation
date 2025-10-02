@@ -30,6 +30,7 @@ async def main():
     try:
         # Import modules
         from framework import StillMeFramework
+
         from modules.automated_scheduler import AutomatedScheduler, SchedulerConfig
 
         print("1. Initializing StillMe Framework...")

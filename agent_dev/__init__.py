@@ -16,8 +16,8 @@ __author__ = "StillMe AI Team"
 __description__ = "Intelligent Development Assistant for StillMe AI"
 
 # Import main components
-from .core.agentdev import AgentDev
 from .core.agent_mode import AgentMode
+from .core.agentdev import AgentDev
 
 __all__ = [
     "AgentDev",

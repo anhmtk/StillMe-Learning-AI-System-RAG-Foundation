@@ -9,11 +9,11 @@ Author: StillMe AI Framework
 Created: 2025-01-08
 """
 
-import time
-import threading
-from typing import Dict, Any
-from http.server import HTTPServer, BaseHTTPRequestHandler
 import json
+import threading
+import time
+from http.server import BaseHTTPRequestHandler, HTTPServer
+from typing import Any, Dict
 
 
 class MetricsCollector:
@@ -105,56 +105,56 @@ class MetricsCollector:
             lines = []
 
             # Request metrics
-            lines.append(f"# HELP requests_total Total number of requests")
-            lines.append(f"# TYPE requests_total counter")
+            lines.append("# HELP requests_total Total number of requests")
+            lines.append("# TYPE requests_total counter")
             lines.append(f"requests_total {self.metrics['requests_total']}")
 
-            lines.append(f"# HELP requests_duration_seconds Total request duration")
-            lines.append(f"# TYPE requests_duration_seconds counter")
+            lines.append("# HELP requests_duration_seconds Total request duration")
+            lines.append("# TYPE requests_duration_seconds counter")
             lines.append(f"requests_duration_seconds {self.metrics['requests_duration_seconds']:.3f}")
 
             # Duration buckets
-            lines.append(f"# HELP requests_duration_bucket Request duration buckets")
-            lines.append(f"# TYPE requests_duration_bucket histogram")
+            lines.append("# HELP requests_duration_bucket Request duration buckets")
+            lines.append("# TYPE requests_duration_bucket histogram")
             for bucket, count in self.metrics['requests_duration_bucket'].items():
                 lines.append(f'requests_duration_bucket{{le="{bucket}"}} {count}')
             lines.append(f'requests_duration_bucket{{le="+Inf"}} {self.metrics["requests_total"]}')
 
             # Clarification metrics
-            lines.append(f"# HELP clarify_trigger_total Total clarification triggers")
-            lines.append(f"# TYPE clarify_trigger_total counter")
+            lines.append("# HELP clarify_trigger_total Total clarification triggers")
+            lines.append("# TYPE clarify_trigger_total counter")
             lines.append(f"clarify_trigger_total {self.metrics['clarify_trigger_total']}")
 
             for trigger_type, count in self.metrics['clarify_trigger_by_type'].items():
                 lines.append(f'clarify_trigger_total{{type="{trigger_type}"}} {count}')
 
             # Error metrics
-            lines.append(f"# HELP errors_total Total errors")
-            lines.append(f"# TYPE errors_total counter")
+            lines.append("# HELP errors_total Total errors")
+            lines.append("# TYPE errors_total counter")
             lines.append(f"errors_total {self.metrics['errors_total']}")
 
             for error_type, count in self.metrics['errors_by_type'].items():
                 lines.append(f'errors_total{{type="{error_type}"}} {count}')
 
             # Detector metrics
-            lines.append(f"# HELP detector_hits_total Total detector hits")
-            lines.append(f"# TYPE detector_hits_total counter")
+            lines.append("# HELP detector_hits_total Total detector hits")
+            lines.append("# TYPE detector_hits_total counter")
             lines.append(f"detector_hits_total {self.metrics['detector_hits_total']}")
 
             for detector_type, count in self.metrics['detector_hits_by_type'].items():
                 lines.append(f'detector_hits_total{{type="{detector_type}"}} {count}')
 
             # System metrics
-            lines.append(f"# HELP system_uptime_seconds System uptime in seconds")
-            lines.append(f"# TYPE system_uptime_seconds gauge")
+            lines.append("# HELP system_uptime_seconds System uptime in seconds")
+            lines.append("# TYPE system_uptime_seconds gauge")
             lines.append(f"system_uptime_seconds {self.metrics['system_uptime_seconds']:.3f}")
 
-            lines.append(f"# HELP system_memory_usage_bytes System memory usage in bytes")
-            lines.append(f"# TYPE system_memory_usage_bytes gauge")
+            lines.append("# HELP system_memory_usage_bytes System memory usage in bytes")
+            lines.append("# TYPE system_memory_usage_bytes gauge")
             lines.append(f"system_memory_usage_bytes {self.metrics['system_memory_usage_bytes']}")
 
-            lines.append(f"# HELP system_cpu_usage_percent System CPU usage percentage")
-            lines.append(f"# TYPE system_cpu_usage_percent gauge")
+            lines.append("# HELP system_cpu_usage_percent System CPU usage percentage")
+            lines.append("# TYPE system_cpu_usage_percent gauge")
             lines.append(f"system_cpu_usage_percent {self.metrics['system_cpu_usage_percent']:.3f}")
 
             return "\n".join(lines)

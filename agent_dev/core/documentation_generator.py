@@ -12,16 +12,17 @@ Tính năng:
 6. Best Practices Library - Thư viện best practices
 """
 
-import os
 import ast
-import re
 import json
+import os
+import re
 import time
-from typing import Dict, List, Optional, Any, Tuple
-from pathlib import Path
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
 
 class DocType(Enum):
     """Loại documentation"""
@@ -215,7 +216,7 @@ Status Codes:
     def generate_module_documentation(self, file_path: str) -> DocMetadata:
         """Tạo documentation cho module"""
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 content = f.read()
 
             # Parse AST
@@ -248,7 +249,7 @@ Status Codes:
             # Generate usage examples
             usage_examples = [
                 f"from {module_name} import {', '.join([f.name for f in functions[:3] if not f.name.startswith('_')])}",
-                f"# Example usage:",
+                "# Example usage:",
                 f"# result = {functions[0].name if functions else 'function_name'}()"
             ]
 
@@ -307,7 +308,7 @@ Status Codes:
 
             # Generate examples
             examples = [
-                f"# Example usage:",
+                "# Example usage:",
                 f"# result = {func_name}({', '.join([p['name'] for p in parameters[:3]])})"
             ]
 
@@ -361,7 +362,7 @@ Status Codes:
     def generate_code_comments(self, file_path: str) -> str:
         """Tạo comments cho code"""
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 content = f.read()
 
             # Parse AST
@@ -509,7 +510,7 @@ This guide contains best practices for {language} development, automatically gen
                 quality_scores["modules"].append(module_doc.quality_score)
 
                 # Parse file for functions and classes
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, encoding='utf-8') as f:
                     content = f.read()
 
                 tree = ast.parse(content)

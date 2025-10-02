@@ -14,15 +14,16 @@ Tính năng:
 8. Learning Integration - Tích hợp học hỏi
 """
 
-import os
-import json
-import time
 import hashlib
-from typing import Dict, List, Optional, Any, Tuple
-from dataclasses import dataclass, asdict
+import json
+import os
+import time
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Tuple
+
 
 class StrategyType(Enum):
     """Loại chiến lược"""
@@ -139,7 +140,7 @@ class AdaptiveStrategy:
             return []
 
         try:
-            with open(self.strategies_db, 'r', encoding='utf-8') as f:
+            with open(self.strategies_db, encoding='utf-8') as f:
                 data = json.load(f)
 
             strategies = []
@@ -159,7 +160,7 @@ class AdaptiveStrategy:
             return []
 
         try:
-            with open(self.results_db, 'r', encoding='utf-8') as f:
+            with open(self.results_db, encoding='utf-8') as f:
                 data = json.load(f)
 
             results = []
@@ -309,11 +310,16 @@ class AdaptiveStrategy:
 
         return context
 
-    def select_strategy(self, context: Context) -> AdaptiveStrategyResult:
+    def select_strategy(self, context) -> AdaptiveStrategyResult:
         """Select the best strategy for given context"""
         start_time = time.time()
 
         # Filter strategies by context type
+        # Handle both Context objects and dict inputs
+        if isinstance(context, dict):
+            # Convert dict to Context object
+            context = self.analyze_context(context.get("task", "unknown task"))
+        
         suitable_strategies = [
             strategy for strategy in self.strategies
             if context.context_type in strategy.context_types
@@ -518,7 +524,7 @@ if __name__ == "__main__":
     # Select strategy
     result = adaptive_strategy.select_strategy(context)
 
-    print(f"🎯 Adaptive Strategy Results:")
+    print("🎯 Adaptive Strategy Results:")
     print(f"   📊 Selected Strategy: {result.selected_strategy.name}")
     print(f"   🎯 Strategy Type: {result.selected_strategy.strategy_type.value}")
     print(f"   📈 Confidence: {result.strategy_confidence:.2f}")

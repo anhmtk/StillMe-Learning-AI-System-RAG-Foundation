@@ -1,21 +1,24 @@
 import secrets
+
 #!/usr/bin/env python3
 """
 StillMe AgentDev Security Scanner
 Enterprise-grade security scanning and vulnerability assessment
 """
 
-import re
+import hashlib
 import json
-import yaml
+import re
 import subprocess
-import tempfile
 import sys
-from pathlib import Path
-from typing import Dict, List, Any, Optional, Tuple
+import tempfile
 from dataclasses import dataclass
 from enum import Enum
-import hashlib
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
+
+import yaml
+
 
 class SecuritySeverity(Enum):
     CRITICAL = "CRITICAL"
@@ -219,7 +222,7 @@ class SecurityScanner:
         issues = []
 
         try:
-            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            with open(file_path, encoding='utf-8', errors='ignore') as f:
                 content = f.read()
                 lines = content.split('\n')
 
@@ -258,7 +261,7 @@ class SecurityScanner:
         issues = []
 
         try:
-            with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            with open(file_path, encoding='utf-8', errors='ignore') as f:
                 content = f.read()
                 lines = content.split('\n')
 
@@ -383,7 +386,7 @@ class SecurityScanner:
 
         for dockerfile in dockerfiles:
             try:
-                with open(dockerfile, 'r') as f:
+                with open(dockerfile) as f:
                     content = f.read()
 
                 # Check for insecure base images
@@ -418,7 +421,7 @@ class SecurityScanner:
 
         for compose_file in docker_compose_files:
             try:
-                with open(compose_file, 'r') as f:
+                with open(compose_file) as f:
                     content = yaml.safe_load(f)
 
                 services = content.get('services', {})
@@ -498,7 +501,7 @@ class SecurityScanner:
         issues = []
 
         try:
-            with open(workflow_file, 'r') as f:
+            with open(workflow_file) as f:
                 content = yaml.safe_load(f)
 
             # Check for hardcoded secrets in workflows
@@ -526,7 +529,7 @@ class SecurityScanner:
 
         for k8s_file in k8s_files:
             try:
-                with open(k8s_file, 'r') as f:
+                with open(k8s_file) as f:
                     content = yaml.safe_load(f)
 
                 # Check for security contexts
@@ -561,7 +564,7 @@ class SecurityScanner:
 
         for tf_file in tf_files:
             try:
-                with open(tf_file, 'r') as f:
+                with open(tf_file) as f:
                     content = f.read()
 
                 # Check for hardcoded secrets
@@ -629,7 +632,7 @@ class SecurityScanner:
             print(f"\n❌ Security scan FAILED - {len(critical_issues)} critical/high issues found")
             return False
         else:
-            print(f"\n✅ Security scan PASSED")
+            print("\n✅ Security scan PASSED")
             return True
 
 def main():

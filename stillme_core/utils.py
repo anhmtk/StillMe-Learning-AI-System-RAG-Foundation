@@ -18,10 +18,10 @@ def wrap_content(content: str, content_type: str = "web", source: str = "unknown
     injection_detected = any(pattern in content.lower() for pattern in [
         "script", "javascript:", "onerror", "onload", "alert("
     ])
-    
+
     if injection_detected:
         wrapped_content = f"[REMOVED_INJECTION] {content[:50]}..."
     else:
         wrapped_content = f"[SAFE] {content}"
-    
+
     return wrapped_content, injection_detected

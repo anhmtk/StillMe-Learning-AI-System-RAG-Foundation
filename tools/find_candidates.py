@@ -5,14 +5,15 @@ Phát hiện file rác, trùng lặp, và candidates để xóa/quarantine
 Chỉ đọc từ primary inventory, không đề xuất xóa excluded files
 """
 
-import os
-import json
 import csv
 import hashlib
-from pathlib import Path
-from datetime import datetime, timedelta
-from typing import Dict, List, Any, Set, Tuple
+import json
+import os
 from collections import defaultdict
+from datetime import datetime, timedelta
+from pathlib import Path
+from typing import Any, Dict, List, Set, Tuple
+
 
 class DeletionCandidatesFinder:
     def __init__(self, repo_root: str = "."):
@@ -55,7 +56,7 @@ class DeletionCandidatesFinder:
             return []
 
         inventory = []
-        with open(inventory_path, 'r', encoding='utf-8') as f:
+        with open(inventory_path, encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
                 inventory.append({
@@ -78,7 +79,7 @@ class DeletionCandidatesFinder:
             return []
 
         inventory = []
-        with open(inventory_path, 'r', encoding='utf-8') as f:
+        with open(inventory_path, encoding='utf-8') as f:
             reader = csv.DictReader(f)
             for row in reader:
                 inventory.append({
@@ -320,11 +321,11 @@ class DeletionCandidatesFinder:
             # Summary
             f.write("## 📊 Summary\n\n")
             f.write(f"- **Total candidates**: {len(all_candidates)}\n")
-            f.write(f"- **By risk level**:\n")
+            f.write("- **By risk level**:\n")
             for risk in ["LOW", "MEDIUM", "HIGH"]:
                 count = len(by_risk[risk])
                 f.write(f"  - {risk}: {count}\n")
-            f.write(f"- **By category**:\n")
+            f.write("- **By category**:\n")
             for category, items in by_category.items():
                 f.write(f"  - {category}: {len(items)}\n")
 

@@ -3,9 +3,8 @@ import logging
 import time
 
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-
 from framework import StillMeFramework
+from pydantic import BaseModel
 
 try:
     from stillme_core.safety_guard import (  # type: ignore

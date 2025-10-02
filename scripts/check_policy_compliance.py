@@ -6,8 +6,10 @@ Ensures all required policies are loaded and enforced
 
 import os
 import sys
-import yaml
 from pathlib import Path
+
+import yaml
+
 
 def check_policy_files():
     """Check if required policy files exist"""
@@ -41,7 +43,7 @@ def validate_policy_content():
 
     for policy_file, required_sections in policies.items():
         try:
-            with open(policy_file, 'r') as f:
+            with open(policy_file) as f:
                 content = yaml.safe_load(f)
 
             for section in required_sections:
@@ -76,7 +78,7 @@ def check_policy_loading():
             continue
 
         try:
-            with open(file_path, 'r') as f:
+            with open(file_path) as f:
                 content = f.read()
 
             # Check for policy loading patterns
@@ -101,7 +103,7 @@ def check_security_compliance():
 
     for file_path, setting, expected_value in security_checks:
         try:
-            with open(file_path, 'r') as f:
+            with open(file_path) as f:
                 content = yaml.safe_load(f)
 
             # Navigate to the setting

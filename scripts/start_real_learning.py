@@ -4,10 +4,10 @@ StillMe IPC Real Learning System
 Kích hoạt hệ thống học tập thực sự với automation và alerting
 """
 
+import logging
 import os
 import sys
 import time
-import logging
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -15,10 +15,10 @@ from pathlib import Path
 project_root = Path(__file__).resolve().parents[1]
 sys.path.append(str(project_root))
 
-from stillme_core.learning.scheduler import StillMeScheduler
+from stillme_core.alerting.alerting_system import AlertingSystem
 from stillme_core.learning.automation_service import AutomationService
 from stillme_core.learning.proposals_manager import ProposalsManager
-from stillme_core.alerting.alerting_system import AlertingSystem
+from stillme_core.learning.scheduler import StillMeScheduler
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

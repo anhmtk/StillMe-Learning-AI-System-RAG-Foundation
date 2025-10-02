@@ -4,12 +4,13 @@ Test script to ping StillMe VPS server
 Usage: python test_ping.py [base_url]
 """
 
-import sys
 import json
+import sys
 import time
-import requests
 from datetime import datetime
+
 import pytest
+import requests
 
 # Skip all tests in this file due to missing server
 pytest.skip("No server running for integration tests", allow_module_level=True)

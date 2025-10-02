@@ -5,16 +5,18 @@ Enterprise-grade threat intelligence and security analytics
 """
 
 import asyncio
+import hashlib
 import json
 import time
-import hashlib
-import requests
-from typing import Dict, List, Optional, Any, Set
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from enum import Enum
-import aiofiles
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Set
+
+import aiofiles
+import requests
 import yaml
+
 
 class ThreatType(Enum):
     """Threat intelligence categories"""
@@ -83,7 +85,7 @@ class ThreatIntelligence:
             config_file = Path("agent-dev/config/threat_intelligence.yaml")
 
         if config_file.exists():
-            with open(config_file, 'r') as f:
+            with open(config_file) as f:
                 return yaml.safe_load(f)
         else:
             return {

@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 from typing import List, Set
 
+
 def find_entrypoints() -> List[Path]:
     """Find all Python entrypoints in the project"""
     entrypoints = []
@@ -56,7 +57,7 @@ def check_policy_imports(file_path: Path) -> Set[str]:
     found_imports = set()
 
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding='utf-8') as f:
             content = f.read()
 
         tree = ast.parse(content, filename=str(file_path))
@@ -80,7 +81,7 @@ def check_policy_imports(file_path: Path) -> Set[str]:
 def check_policy_usage(file_path: Path) -> bool:
     """Check if file actually uses policy functions"""
     try:
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding='utf-8') as f:
             content = f.read()
 
         # Check for policy function calls

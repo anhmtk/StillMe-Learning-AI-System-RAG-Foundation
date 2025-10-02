@@ -10,15 +10,15 @@ Tính năng chính:
 4. Ưu tiên chất lượng hơn số lượng
 """
 
-import subprocess
 import json
-import time
+import logging
 import os
 import re
-from typing import Dict, List, Tuple, Optional
+import subprocess
+import time
 from dataclasses import dataclass
 from enum import Enum
-import logging
+from typing import Dict, List, Optional, Tuple
 
 # Thiết lập logging
 logging.basicConfig(

@@ -14,15 +14,16 @@ Tính năng:
 8. Contextual Learning - Học theo ngữ cảnh
 """
 
-import os
-import json
-import time
 import hashlib
-from typing import Dict, List, Optional, Any, Tuple
-from dataclasses import dataclass, asdict
+import json
+import os
+import time
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Tuple
+
 
 class LearningType(Enum):
     """Loại học hỏi"""
@@ -127,7 +128,7 @@ class ExperienceLearner:
             return []
 
         try:
-            with open(self.experience_db, 'r', encoding='utf-8') as f:
+            with open(self.experience_db, encoding='utf-8') as f:
                 data = json.load(f)
 
             experiences = []
@@ -148,7 +149,7 @@ class ExperienceLearner:
             return []
 
         try:
-            with open(self.patterns_db, 'r', encoding='utf-8') as f:
+            with open(self.patterns_db, encoding='utf-8') as f:
                 data = json.load(f)
 
             patterns = []
@@ -168,7 +169,7 @@ class ExperienceLearner:
             return []
 
         try:
-            with open(self.insights_db, 'r', encoding='utf-8') as f:
+            with open(self.insights_db, encoding='utf-8') as f:
                 data = json.load(f)
 
             insights = []
@@ -330,7 +331,7 @@ class ExperienceLearner:
         success_experiences = [exp for exp in self.experiences if exp.success]
         if len(success_experiences) >= self.insight_min_evidence:
             insight = LearningInsight(
-                insight_id=hashlib.md5("success_insight".encode()).hexdigest()[:12],
+                insight_id=hashlib.md5(b"success_insight").hexdigest()[:12],
                 title="Success Pattern Analysis",
                 description=f"Analyzed {len(success_experiences)} successful experiences",
                 learning_type=LearningType.SUCCESS_PATTERN,
@@ -350,7 +351,7 @@ class ExperienceLearner:
         failure_experiences = [exp for exp in self.experiences if not exp.success]
         if len(failure_experiences) >= self.insight_min_evidence:
             insight = LearningInsight(
-                insight_id=hashlib.md5("failure_insight".encode()).hexdigest()[:12],
+                insight_id=hashlib.md5(b"failure_insight").hexdigest()[:12],
                 title="Failure Pattern Analysis",
                 description=f"Analyzed {len(failure_experiences)} failed experiences",
                 learning_type=LearningType.FAILURE_PATTERN,
@@ -454,7 +455,7 @@ if __name__ == "__main__":
     # Learn from experiences
     result = learner.learn_from_experience()
 
-    print(f"📚 Experience Learning Results:")
+    print("📚 Experience Learning Results:")
     print(f"   📊 Total Experiences: {result.total_experiences}")
     print(f"   🎯 Learning Patterns: {len(result.learning_patterns)}")
     print(f"   💡 Insights: {len(result.insights)}")

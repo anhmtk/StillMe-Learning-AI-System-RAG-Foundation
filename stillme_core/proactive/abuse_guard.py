@@ -102,7 +102,7 @@ class ProactiveAbuseGuard:
             "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "of", "with", "by",
             "is", "are", "was", "were", "be", "been", "being", "have", "has", "had", "do", "does", "did",
             "will", "would", "could", "should", "may", "might", "must", "can", "this", "that", "these", "those",
-            "i", "you", "he", "she", "it", "we", "they", "me", "him", "her", "us", "them", "my", "your", "his", "her", "its", "our", "their"
+            "i", "you", "he", "she", "it", "we", "they", "me", "him", "her", "us", "them", "my", "your", "his", "its", "our", "their"
         }
 
     def _load_emoji_patterns(self):

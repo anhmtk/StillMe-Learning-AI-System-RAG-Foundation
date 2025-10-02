@@ -11,18 +11,20 @@ Tính năng:
 5. Technical Debt Assessment - Đánh giá technical debt
 """
 
-import os
 import ast
 import json
+import os
+import re
 import time
-import networkx as nx
-from typing import Dict, List, Optional, Any, Tuple, Set
-from pathlib import Path
-from dataclasses import dataclass, asdict
+from collections import Counter, defaultdict
+from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
-import re
-from collections import defaultdict, Counter
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set, Tuple
+
+import networkx as nx
+
 
 class DesignPattern(Enum):
     """Design Patterns"""
@@ -244,7 +246,7 @@ class ArchitectureAnalyzer:
     def _analyze_file(self, file_path: Path):
         """Analyze individual file"""
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 content = f.read()
 
             # Parse AST
@@ -509,7 +511,7 @@ class ArchitectureAnalyzer:
 
         for file_path in python_files:
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, encoding='utf-8') as f:
                     content = f.read()
 
                 tree = ast.parse(content)
@@ -553,7 +555,7 @@ class ArchitectureAnalyzer:
 
         for file_path in python_files:
             try:
-                with open(file_path, 'r', encoding='utf-8') as f:
+                with open(file_path, encoding='utf-8') as f:
                     content = f.read()
 
                 tree = ast.parse(content)
@@ -639,7 +641,7 @@ class ArchitectureAnalyzer:
         for file_path in self.project_root.rglob("*.py"):
             if "__pycache__" not in str(file_path):
                 try:
-                    with open(file_path, 'r', encoding='utf-8') as f:
+                    with open(file_path, encoding='utf-8') as f:
                         content = f.read()
 
                     tree = ast.parse(content)
@@ -736,7 +738,7 @@ class ArchitectureAnalyzer:
                         f.write(f"**Type**: {suggestion.suggestion_type}\n")
                         f.write(f"**Impact**: {suggestion.impact}\n")
                         f.write(f"**Effort**: {suggestion.effort}\n\n")
-                        f.write(f"**Benefits**:\n")
+                        f.write("**Benefits**:\n")
                         for benefit in suggestion.benefits:
                             f.write(f"- {benefit}\n")
                         f.write("\n")

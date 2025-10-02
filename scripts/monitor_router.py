@@ -11,18 +11,19 @@ Usage:
     python scripts/monitor_router.py --test-prompt "your prompt here"
 """
 
+import argparse
+import json
 import os
 import sys
-import argparse
 import time
-import json
 from datetime import datetime
 from typing import Dict, List, Optional
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'stillme_core'))
 
-from modules.api_provider_manager import UnifiedAPIManager, ComplexityAnalyzer
+from modules.api_provider_manager import ComplexityAnalyzer, UnifiedAPIManager
+
 
 class RouterMonitor:
     def __init__(self):
@@ -66,7 +67,7 @@ class RouterMonitor:
 
     def print_analysis(self, result: Dict):
         """Print formatted analysis results"""
-        print(f"\n🔍 AI Router Analysis")
+        print("\n🔍 AI Router Analysis")
         print("=" * 60)
         print(f"📝 Prompt: {result['prompt']}")
         print(f"🧠 Complexity Score: {result['complexity_score']:.3f}")
@@ -74,11 +75,11 @@ class RouterMonitor:
         print(f"⏱️  Response Time: {result['response_time']:.2f}s")
 
         if result['debug']:
-            print(f"\n📊 Breakdown:")
+            print("\n📊 Breakdown:")
             for key, value in result['breakdown'].items():
                 print(f"  {key}: {value:.3f}")
 
-        print(f"\n🤖 AI Response:")
+        print("\n🤖 AI Response:")
         print(f"  {result['ai_response']}")
 
         # Model routing explanation
@@ -135,7 +136,7 @@ class RouterMonitor:
             print("📊 No data in current session")
             return
 
-        print(f"\n📊 Session Statistics")
+        print("\n📊 Session Statistics")
         print("=" * 40)
 
         # Basic stats
@@ -153,7 +154,7 @@ class RouterMonitor:
             model = result['selected_model']
             model_counts[model] = model_counts.get(model, 0) + 1
 
-        print(f"\n🎯 Model Distribution:")
+        print("\n🎯 Model Distribution:")
         for model, count in model_counts.items():
             percentage = (count / total_prompts) * 100
             print(f"  {model}: {count} ({percentage:.1f}%)")
@@ -174,13 +175,13 @@ class RouterMonitor:
             else:
                 complexity_ranges['Complex (≥0.7)'] += 1
 
-        print(f"\n🧠 Complexity Distribution:")
+        print("\n🧠 Complexity Distribution:")
         for range_name, count in complexity_ranges.items():
             percentage = (count / total_prompts) * 100
             print(f"  {range_name}: {count} ({percentage:.1f}%)")
 
         # Performance insights
-        print(f"\n⚡ Performance Insights:")
+        print("\n⚡ Performance Insights:")
         slow_responses = [r for r in self.session_log if r['response_time'] > 2.0]
         if slow_responses:
             print(f"  Slow responses (>2s): {len(slow_responses)}")
@@ -206,7 +207,7 @@ class RouterMonitor:
     def load_session_log(self, filename: str):
         """Load session log from JSON file"""
         try:
-            with open(filename, 'r', encoding='utf-8') as f:
+            with open(filename, encoding='utf-8') as f:
                 self.session_log = json.load(f)
             print(f"✅ Session log loaded from {filename}")
         except Exception as e:
@@ -252,7 +253,7 @@ class RouterMonitor:
         max_time = max(times)
         avg_score = sum(scores) / len(scores)
 
-        print(f"\n📊 Benchmark Results:")
+        print("\n📊 Benchmark Results:")
         print(f"  Average analysis time: {avg_time * 1000:.2f}ms")
         print(f"  Min analysis time: {min_time * 1000:.2f}ms")
         print(f"  Max analysis time: {max_time * 1000:.2f}ms")

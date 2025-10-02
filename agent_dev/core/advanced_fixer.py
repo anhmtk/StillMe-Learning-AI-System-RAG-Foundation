@@ -6,17 +6,18 @@
 Fixer với validation và rollback capability.
 """
 
+import logging
 import os
 import re
 import subprocess
 import tempfile
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass
 from datetime import datetime
-import logging
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple
 
 from symbol_index import SymbolIndex
+
 # Import will be done at runtime to avoid circular import
 
 # Stub types to avoid F821
@@ -228,7 +229,7 @@ class AdvancedFixer:
         backup_name = f"{Path(file_path).name}_{timestamp}.bak"
         backup_path = self.backup_dir / backup_name
 
-        with open(file_path, 'r', encoding='utf-8') as src:
+        with open(file_path, encoding='utf-8') as src:
             with open(backup_path, 'w', encoding='utf-8') as dst:
                 dst.write(src.read())
 
@@ -236,14 +237,14 @@ class AdvancedFixer:
 
     def _restore_file(self, file_path: str, backup_path: str):
         """Restore file from backup"""
-        with open(backup_path, 'r', encoding='utf-8') as src:
+        with open(backup_path, encoding='utf-8') as src:
             with open(file_path, 'w', encoding='utf-8') as dst:
                 dst.write(src.read())
 
     def _add_import_to_file(self, file_path: str, import_line: str) -> bool:
         """Add import to file với PEP8 ordering"""
         try:
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 lines = f.readlines()
 
             # Find insertion point (after existing imports)

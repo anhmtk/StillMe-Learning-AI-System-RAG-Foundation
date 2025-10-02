@@ -3,17 +3,19 @@ End-to-end scenarios for basic AgentDev tasks
 Real-world scenarios that test complete functionality
 """
 
-import pytest
-import sys
 import os
-from pathlib import Path
+import sys
 import time
+from pathlib import Path
 
-# Add agent-dev path to sys.path
-agent_dev_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'agent-dev', 'core')
+import pytest
+
+# Add agent_dev path to sys.path
+agent_dev_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'agent_dev', 'core')
 if agent_dev_path not in sys.path:
     sys.path.insert(0, agent_dev_path)
 
+from agent_dev.core.agentdev import AgentDev, AgentMode
 from fixtures import TestFixtures
 
 # E2E Scenarios
@@ -87,7 +89,6 @@ class TestE2EScenarios:
     def test_e2e_scenario(self, scenario):
         """Test individual E2E scenario"""
         try:
-            from agent_dev.core.agentdev import AgentDev
 
             temp_project = TestFixtures.create_temp_project()
             agentdev = AgentDev(str(temp_project))
@@ -116,17 +117,16 @@ class TestE2EScenarios:
             TestFixtures.cleanup_temp_project(temp_project)
 
         except ImportError:
-            pytest.skip("AgentDevUnified not available")
+            pytest.skip("AgentDev not available")
 
     def test_bug_fix_scenarios(self):
         """Test all bug fix scenarios"""
         bug_scenarios = [s for s in SCENARIOS if s["category"] == "bug_fix"]
 
         try:
-            from agent_dev.core.agentdev import AgentDev
 
             temp_project = TestFixtures.create_temp_project()
-            agentdev = AgentDevUnified(str(temp_project))
+            agentdev = AgentDev(str(temp_project))
 
             results = []
             for scenario in bug_scenarios:
@@ -141,17 +141,16 @@ class TestE2EScenarios:
             TestFixtures.cleanup_temp_project(temp_project)
 
         except ImportError:
-            pytest.skip("AgentDevUnified not available")
+            pytest.skip("AgentDev not available")
 
     def test_security_scenarios(self):
         """Test all security scenarios"""
         security_scenarios = [s for s in SCENARIOS if s["category"] == "security"]
 
         try:
-            from agent_dev.core.agentdev import AgentDev
 
             temp_project = TestFixtures.create_temp_project()
-            agentdev = AgentDevUnified(str(temp_project))
+            agentdev = AgentDev(str(temp_project))
 
             results = []
             for scenario in security_scenarios:
@@ -166,17 +165,16 @@ class TestE2EScenarios:
             TestFixtures.cleanup_temp_project(temp_project)
 
         except ImportError:
-            pytest.skip("AgentDevUnified not available")
+            pytest.skip("AgentDev not available")
 
     def test_feature_development_scenarios(self):
         """Test feature development scenarios"""
         feature_scenarios = [s for s in SCENARIOS if s["category"] in ["feature", "refactor"]]
 
         try:
-            from agent_dev.core.agentdev import AgentDev
 
             temp_project = TestFixtures.create_temp_project()
-            agentdev = AgentDevUnified(str(temp_project))
+            agentdev = AgentDev(str(temp_project))
 
             results = []
             for scenario in feature_scenarios:
@@ -191,15 +189,14 @@ class TestE2EScenarios:
             TestFixtures.cleanup_temp_project(temp_project)
 
         except ImportError:
-            pytest.skip("AgentDevUnified not available")
+            pytest.skip("AgentDev not available")
 
     def test_complex_workflow(self):
         """Test complex multi-step workflow"""
         try:
-            from agent_dev.core.agentdev import AgentDev
 
             temp_project = TestFixtures.create_temp_project()
-            agentdev = AgentDevUnified(str(temp_project))
+            agentdev = AgentDev(str(temp_project))
 
             # Complex workflow: Plan → Implement → Test → Review
             workflow_steps = [
@@ -222,15 +219,14 @@ class TestE2EScenarios:
             TestFixtures.cleanup_temp_project(temp_project)
 
         except ImportError:
-            pytest.skip("AgentDevUnified not available")
+            pytest.skip("AgentDev not available")
 
     def test_error_recovery_scenarios(self):
         """Test error recovery scenarios"""
         try:
-            from agent_dev.core.agentdev import AgentDev
 
             temp_project = TestFixtures.create_temp_project()
-            agentdev = AgentDevUnified(str(temp_project))
+            agentdev = AgentDev(str(temp_project))
 
             # Test error recovery
             error_scenarios = [
@@ -254,7 +250,7 @@ class TestE2EScenarios:
             TestFixtures.cleanup_temp_project(temp_project)
 
         except ImportError:
-            pytest.skip("AgentDevUnified not available")
+            pytest.skip("AgentDev not available")
 
 class TestRealWorldScenarios:
     """Test real-world scenarios"""
@@ -262,10 +258,9 @@ class TestRealWorldScenarios:
     def test_production_incident_response(self):
         """Test production incident response scenario"""
         try:
-            from agent_dev.core.agentdev import AgentDev
 
             temp_project = TestFixtures.create_temp_project()
-            agentdev = AgentDevUnified(str(temp_project))
+            agentdev = AgentDev(str(temp_project))
 
             # Production incident scenario
             incident_tasks = [
@@ -288,15 +283,14 @@ class TestRealWorldScenarios:
             TestFixtures.cleanup_temp_project(temp_project)
 
         except ImportError:
-            pytest.skip("AgentDevUnified not available")
+            pytest.skip("AgentDev not available")
 
     def test_technical_debt_management(self):
         """Test technical debt management scenario"""
         try:
-            from agent_dev.core.agentdev import AgentDev
 
             temp_project = TestFixtures.create_temp_project()
-            agentdev = AgentDevUnified(str(temp_project))
+            agentdev = AgentDev(str(temp_project))
 
             # Technical debt management
             debt_tasks = [
@@ -319,4 +313,4 @@ class TestRealWorldScenarios:
             TestFixtures.cleanup_temp_project(temp_project)
 
         except ImportError:
-            pytest.skip("AgentDevUnified not available")
+            pytest.skip("AgentDev not available")

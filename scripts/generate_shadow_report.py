@@ -2,9 +2,9 @@
 """
 Generate Shadow Evaluation Report
 """
-import sys
-import os
 import argparse
+import os
+import sys
 from pathlib import Path
 
 # Add project root to path
@@ -12,6 +12,7 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 from stillme_core.middleware.observability import ObservabilityManager
+
 
 def main():
     parser = argparse.ArgumentParser(description="Generate Reflex Engine Shadow Evaluation Report")
@@ -25,7 +26,7 @@ def main():
     config = {}
     if args.config and os.path.exists(args.config):
         import yaml
-        with open(args.config, 'r') as f:
+        with open(args.config) as f:
             config = yaml.safe_load(f)
 
     # Initialize observability manager
@@ -48,7 +49,7 @@ def main():
     evaluation = obs_manager.get_shadow_evaluation(args.hours)
     if evaluation["evaluation_ready"]:
         performance = evaluation["performance"]
-        print(f"\nSummary:")
+        print("\nSummary:")
         print(f"  Precision: {performance['precision']:.3f}")
         print(f"  Recall: {performance['recall']:.3f}")
         print(f"  F1 Score: {performance['f1_score']:.3f}")

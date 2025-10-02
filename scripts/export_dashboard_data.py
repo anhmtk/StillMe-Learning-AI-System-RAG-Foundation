@@ -17,11 +17,11 @@ Version: 1.0.0
 Date: 2025-09-29
 """
 
+import csv
+import json
+import logging
 import os
 import sys
-import json
-import csv
-import logging
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -145,7 +145,7 @@ class DashboardDataExporter:
 
             # Load existing timeline
             if timeline_file.exists():
-                with open(timeline_file, 'r', encoding='utf-8') as f:
+                with open(timeline_file, encoding='utf-8') as f:
                     timeline_data = json.load(f)
             else:
                 timeline_data = {
