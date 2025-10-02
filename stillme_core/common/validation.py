@@ -263,7 +263,7 @@ class InputSanitizer:
 
         except Exception as e:
             logger.warning(f"URL sanitization error: {e}")
-            raise ValidationError(f"Invalid URL format: {e}")
+            raise ValidationError(f"Invalid URL format: {e}") from e
 
 
 class DataValidator:
@@ -330,7 +330,7 @@ class DataValidator:
             validated = validate_email(value, check_deliverability=False)
             return validated.email
         except EmailNotValidError as e:
-            raise ValidationError(f"Invalid email address: {e}")
+            raise ValidationError(f"Invalid email address: {e}") from e
 
     @staticmethod
     def validate_url(value: str) -> str:
@@ -353,7 +353,7 @@ class DataValidator:
                 raise ValidationError("Invalid URL format")
             return value
         except Exception as e:
-            raise ValidationError(f"Invalid URL: {e}")
+            raise ValidationError(f"Invalid URL: {e}") from e
 
     @staticmethod
     def validate_phone(value: str, country_code: str = "VN") -> str:

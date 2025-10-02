@@ -94,7 +94,7 @@ class PrivacyManager:
 
         except Exception as e:
             logger.error(f"Error exporting data for user {user_id}: {e}")
-            raise HTTPException(status_code=500, detail=f"Data export failed: {str(e)}")
+            raise HTTPException(status_code=500, detail=f"Data export failed: {str(e)}") from e
 
     def delete_user_data(
         self, user_id: str, confirmation_token: str, delete_all: bool = True
@@ -130,7 +130,7 @@ class PrivacyManager:
             logger.error(f"Error deleting data for user {user_id}: {e}")
             raise HTTPException(
                 status_code=500, detail=f"Data deletion failed: {str(e)}"
-            )
+            ) from e
 
     def update_consent(
         self,
@@ -176,7 +176,7 @@ class PrivacyManager:
             logger.error(f"Error updating consent for user {user_id}: {e}")
             raise HTTPException(
                 status_code=500, detail=f"Consent update failed: {str(e)}"
-            )
+            ) from e
 
     def _validate_user_id(self, user_id: str) -> bool:
         """Validate user ID format"""
