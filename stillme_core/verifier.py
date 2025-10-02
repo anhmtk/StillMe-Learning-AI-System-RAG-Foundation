@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -29,10 +29,10 @@ class VerificationResult:
     verification_type: VerificationType
     status: VerificationStatus
     description: str
-    details: Dict[str, Any]
+    details: dict[str, Any]
     timestamp: datetime
     duration: Optional[float] = None
-    metadata: Dict[str, Any] = None
+    metadata: dict[str, Any] = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -43,11 +43,11 @@ class Verifier:
 
     def __init__(self):
         self.logger = logger
-        self.verification_results: List[VerificationResult] = []
+        self.verification_results: list[VerificationResult] = []
         self.verification_config = self._initialize_verification_config()
         self.logger.info("✅ Verifier initialized")
 
-    def _initialize_verification_config(self) -> Dict[str, Any]:
+    def _initialize_verification_config(self) -> dict[str, Any]:
         """Initialize verification configuration"""
         return {
             "max_verification_time": 300,  # 5 minutes
@@ -246,7 +246,7 @@ class Verifier:
             self.logger.error(f"❌ Failed to verify performance: {e}")
             raise
 
-    def run_comprehensive_verification(self, code_content: str, file_path: str = None) -> List[VerificationResult]:
+    def run_comprehensive_verification(self, code_content: str, file_path: str = None) -> list[VerificationResult]:
         """Run comprehensive verification"""
         try:
             results = []
@@ -263,15 +263,15 @@ class Verifier:
             self.logger.error(f"❌ Failed to run comprehensive verification: {e}")
             return []
 
-    def get_verification_results_by_type(self, verification_type: VerificationType) -> List[VerificationResult]:
+    def get_verification_results_by_type(self, verification_type: VerificationType) -> list[VerificationResult]:
         """Get verification results by type"""
         return [r for r in self.verification_results if r.verification_type == verification_type]
 
-    def get_verification_results_by_status(self, status: VerificationStatus) -> List[VerificationResult]:
+    def get_verification_results_by_status(self, status: VerificationStatus) -> list[VerificationResult]:
         """Get verification results by status"""
         return [r for r in self.verification_results if r.status == status]
 
-    def get_verification_summary(self) -> Dict[str, Any]:
+    def get_verification_summary(self) -> dict[str, Any]:
         """Get verification summary"""
         try:
             total_verifications = len(self.verification_results)
@@ -312,3 +312,164 @@ class Verifier:
         """Clear all verification results"""
         self.verification_results.clear()
         self.logger.info("🧹 All verification results cleared")
+    
+    def verify(self, step: dict[str, Any], exec_result: dict[str, Any]) -> dict[str, Any]:
+        """Verify execution result against step criteria"""
+        try:
+            # Extract success criteria from step
+            success_criteria = step.get("success_criteria", {})
+            expected_exit_code = success_criteria.get("exit_code", 0)
+            stdout_patterns = success_criteria.get("stdout_patterns", [])
+            stderr_patterns = success_criteria.get("stderr_patterns", [])
+            
+            # Check basic execution success
+            if not exec_result.get("ok", False):
+                return {
+                    "passed": False,
+                    "reason": "execution failed",
+                    "details": exec_result
+                }
+            
+            # Check exit code
+            actual_exit_code = exec_result.get("exit_code", 0)
+            if actual_exit_code != expected_exit_code:
+                return {
+                    "passed": False,
+                    "reason": f"exit code mismatch: expected {expected_exit_code}, got {actual_exit_code}",
+                    "details": exec_result
+                }
+            
+            # Check stdout patterns
+            stdout = exec_result.get("stdout", "")
+            for pattern in stdout_patterns:
+                if not self._check_patterns(stdout, [pattern]):
+                    return {
+                        "passed": False,
+                        "reason": f"stdout pattern not matched: {pattern}",
+                        "details": exec_result
+                    }
+            
+            # Check stderr patterns
+            stderr = exec_result.get("stderr", "")
+            for pattern in stderr_patterns:
+                if not self._check_patterns(stderr, [pattern]):
+                    return {
+                        "passed": False,
+                        "reason": f"stderr pattern not matched: {pattern}",
+                        "details": exec_result
+                    }
+            
+            # Default success patterns if no custom criteria
+            if not stdout_patterns and not stderr_patterns:
+                success_patterns = [r"(\d+)\s+passed", r"PASSED", r"SUCCESS"]
+                if self._check_patterns(stdout, success_patterns):
+                    return {
+                        "passed": True,
+                        "reason": "success patterns matched",
+                        "details": exec_result
+                    }
+                else:
+                    return {
+                        "passed": False,
+                        "reason": "no success patterns found in output",
+                        "details": exec_result
+                    }
+            
+            return {
+                "passed": True,
+                "reason": "all criteria met",
+                "details": exec_result
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Verification error: {e}")
+            return {
+                "passed": False,
+                "reason": f"verification error: {e}",
+                "details": exec_result
+            }
+    
+    def verify_test_results(self, exec_result: dict[str, Any]) -> dict[str, Any]:
+        """Verify test execution results"""
+        try:
+            stdout = exec_result.get("stdout", "")
+            stderr = exec_result.get("stderr", "")
+            exit_code = exec_result.get("exit_code", 0)
+            
+            # Extract test statistics
+            stats = self._extract_test_stats(stdout)
+            
+            # Determine if tests passed
+            if exit_code == 0 and stats.get("failed", 0) == 0:
+                return {
+                    "passed": True,
+                    "reason": "test results verification passed",
+                    "stats": stats,
+                    "details": {"stats": stats, "exec_result": exec_result}
+                }
+            else:
+                return {
+                    "passed": False,
+                    "reason": "test results verification failed",
+                    "stats": stats,
+                    "details": {"stats": stats, "exec_result": exec_result}
+                }
+                
+        except Exception as e:
+            self.logger.error(f"Test verification error: {e}")
+            return {
+                "passed": False,
+                "reason": f"test verification error: {e}",
+                "details": exec_result
+            }
+    
+    def _extract_test_stats(self, text: str) -> dict[str, Any]:
+        """Extract test statistics from output text"""
+        import re
+        
+        stats = {
+            "passed": 0,
+            "failed": 0,
+            "skipped": 0,
+            "total": 0,
+            "collected": 0
+        }
+        
+        # Common test output patterns
+        patterns = {
+            "passed": [r"(\d+)\s+passed", r"PASSED\s*(\d+)", r"✓\s*(\d+)"],
+            "failed": [r"(\d+)\s+failed", r"FAILED\s*(\d+)", r"✗\s*(\d+)"],
+            "skipped": [r"(\d+)\s+skipped", r"SKIPPED\s*(\d+)"],
+            "total": [r"(\d+)\s+total", r"(\d+)\s+tests"],
+            "collected": [r"collected\s+(\d+)\s+items?", r"(\d+)\s+collected"]
+        }
+        
+        for stat_type, pattern_list in patterns.items():
+            for pattern in pattern_list:
+                match = re.search(pattern, text, re.IGNORECASE)
+                if match:
+                    try:
+                        stats[stat_type] = int(match.group(1))
+                    except (ValueError, IndexError):
+                        pass
+        
+        # Calculate total if not found
+        if stats["total"] == 0:
+            stats["total"] = stats["passed"] + stats["failed"] + stats["skipped"]
+        
+        return stats
+    
+    def _check_patterns(self, text: str, patterns: list[str]) -> bool:
+        """Check if text matches any of the patterns"""
+        import re
+        
+        for pattern in patterns:
+            try:
+                if re.search(pattern, text, re.IGNORECASE):
+                    return True
+            except re.error:
+                # If pattern is invalid, treat as literal string match
+                if pattern in text:
+                    return True
+        
+        return False
