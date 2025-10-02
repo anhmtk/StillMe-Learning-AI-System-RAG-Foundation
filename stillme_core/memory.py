@@ -101,7 +101,7 @@ class MemoryLayer:
         if not self.data:
             return
         
-        oldest_key = min(self.data.keys(), key=lambda k: self.data[k].last_accessed)
+        oldest_key = min(self.data.keys(), key=lambda k: self.data[k].last_accessed or 0.0)
         del self.data[oldest_key]
 
 
@@ -207,7 +207,7 @@ class MemoryManager:
 class PersistenceManager:
     """Persistence manager for saving/loading memory data"""
     
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: Optional[Dict[str, Any]] = None):
         if config is None:
             config = {}
         
