@@ -157,7 +157,7 @@ class AdvancedDebuggingSystem:
         self.session_counter = 0
 
         # Log queue for real-time processing
-        self.log_queue = queue.Queue()
+        self.log_queue: queue.Queue[Any] = queue.Queue()
         self.log_processor_thread = threading.Thread(
             target=self._process_logs, daemon=True
         )
@@ -319,7 +319,7 @@ class AdvancedDebuggingSystem:
 
         return patterns
 
-    def start_debug_session(self, session_name: str = None) -> str:
+    def start_debug_session(self, session_name: str | None = None) -> str:
         """Bắt đầu debug session mới"""
         self.session_counter += 1
         session_id = f"debug_session_{self.session_counter}_{int(time.time())}"
@@ -347,7 +347,7 @@ class AdvancedDebuggingSystem:
         return session_id
 
     def end_debug_session(
-        self, session_id: str, resolution: str = None
+        self, session_id: str, resolution: str | None = None
     ) -> DebugSession:
         """Kết thúc debug session"""
         if session_id not in self.active_sessions:
@@ -377,8 +377,8 @@ class AdvancedDebuggingSystem:
         module: str = "",
         function: str = "",
         line_number: int = 0,
-        session_id: str = None,
-        metadata: dict[str, Any] = None,
+        session_id: str | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> LogEntry:
         """Log debug event"""
         if metadata is None:
@@ -391,7 +391,7 @@ class AdvancedDebuggingSystem:
             module=module,
             function=function,
             line_number=line_number,
-            thread_id=threading.current_thread().ident,
+            thread_id=str(threading.current_thread().ident or 0),
             session_id=session_id,
             metadata=metadata,
         )
@@ -470,12 +470,16 @@ class AdvancedDebuggingSystem:
         timeline = [LogEntry(**log) for log in session.logs]
 
         # Find probable causes
-        probable_causes = []
+        probable_causes: list[str] = []
         for pattern in error_patterns:
             if hasattr(pattern, "common_causes"):
-                probable_causes.extend(pattern.common_causes)
+                probable_causes.extend(getattr(pattern, "common_causes", []))
             elif isinstance(pattern, dict) and "common_causes" in pattern:
-                probable_causes.extend(pattern["common_causes"])
+                causes: Any = pattern.get("common_causes", [])
+                if isinstance(causes, list):
+                    for item in causes:
+                        if item is not None:
+                            probable_causes.append(str(item))
 
         # Remove duplicates
         probable_causes = list(set(probable_causes))
@@ -484,12 +488,16 @@ class AdvancedDebuggingSystem:
         confidence_score = min(len(error_patterns) * 0.2, 1.0)
 
         # Generate recommendations
-        recommendations = []
+        recommendations: list[str] = []
         for pattern in error_patterns:
             if hasattr(pattern, "solutions"):
-                recommendations.extend(pattern.solutions)
+                recommendations.extend(getattr(pattern, "solutions", []))
             elif isinstance(pattern, dict) and "solutions" in pattern:
-                recommendations.extend(pattern["solutions"])
+                solutions: Any = pattern.get("solutions", [])
+                if isinstance(solutions, list):
+                    for item in solutions:
+                        if item is not None:
+                            recommendations.append(str(item))
 
         # Remove duplicates
         recommendations = list(set(recommendations))
@@ -628,7 +636,7 @@ This guide helps troubleshoot {error_type.value.replace('_', ' ')} issues in Age
 
         # Analyze error patterns
         error_patterns_found = len(self.error_patterns)
-        error_counts = Counter()
+        error_counts: Counter[str] = Counter()
 
         for session_file in session_files:
             try:
@@ -640,11 +648,11 @@ This guide helps troubleshoot {error_type.value.replace('_', ' ')} issues in Age
             except Exception as e:
                 self.logger.error(f"Error analyzing session {session_file}: {e}")
 
-        common_errors = error_counts.most_common(10)
+        common_errors: list[tuple[str, int]] = error_counts.most_common(10)
 
         # Identify performance and security issues
-        performance_issues = []
-        security_issues = []
+        performance_issues: list[str] = []
+        security_issues: list[str] = []
 
         for _pattern_id, pattern in self.error_patterns.items():
             if pattern.error_type == ErrorType.PERFORMANCE_ERROR:
@@ -657,7 +665,7 @@ This guide helps troubleshoot {error_type.value.replace('_', ' ')} issues in Age
                 )
 
         # Generate recommendations
-        recommendations = []
+        recommendations: list[str] = []
         if total_sessions > 0:
             recommendations.append(
                 "Review common error patterns and implement preventive measures"
