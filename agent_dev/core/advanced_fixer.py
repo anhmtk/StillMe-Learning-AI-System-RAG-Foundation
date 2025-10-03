@@ -69,11 +69,8 @@ class AdvancedFixer:
             match = re.search(r"undefined name '(\w+)'", error.message)
             if not match:
                 return FixResult(
-                    error=error,
-                    status=FixStatus.FAILED,
-                    fix_applied="",
+                    success=False,
                     message="Could not extract symbol name",
-                    timestamp=datetime.now(),
                 )
 
             symbol_name = match.group(1)
@@ -84,11 +81,8 @@ class AdvancedFixer:
             )
             if not import_stmt:
                 return FixResult(
-                    error=error,
-                    status=FixStatus.SKIPPED,
-                    fix_applied="",
+                    success=False,
                     message=f"Symbol '{symbol_name}' not found in index - manual fix required",
-                    timestamp=datetime.now(),
                 )
 
             # Backup file trước khi fix
@@ -98,11 +92,8 @@ class AdvancedFixer:
             success = self._add_import_to_file(error.file_path, import_stmt)
             if not success:
                 return FixResult(
-                    error=error,
-                    status=FixStatus.FAILED,
-                    fix_applied="",
+                    success=False,
                     message="Failed to add import to file",
-                    timestamp=datetime.now(),
                 )
 
             # Validate fix
@@ -111,28 +102,19 @@ class AdvancedFixer:
                 # Rollback
                 self._restore_file(error.file_path, backup_path)
                 return FixResult(
-                    error=error,
-                    status=FixStatus.FAILED,
-                    fix_applied=import_stmt,
+                    success=False,
                     message=f"Fix validation failed: {validation_result['reason']}",
-                    timestamp=datetime.now(),
                 )
 
             return FixResult(
-                error=error,
-                status=FixStatus.SUCCESS,
-                fix_applied=import_stmt,
+                success=True,
                 message=f"Successfully fixed undefined name '{symbol_name}'",
-                timestamp=datetime.now(),
             )
 
         except Exception as e:
             return FixResult(
-                error=error,
-                status=FixStatus.FAILED,
-                fix_applied="",
+                success=False,
                 message=f"Error fixing undefined name: {str(e)}",
-                timestamp=datetime.now(),
             )
 
     def fix_invalid_literal_int(self, error: ErrorInfo) -> FixResult:
@@ -142,49 +124,42 @@ class AdvancedFixer:
             if "invalid literal for int() with base 10" in error.message:
                 # This might be from our error parser, not the actual code
                 return FixResult(
-                    error=error,
-                    status=FixStatus.SKIPPED,
-                    fix_applied="",
+                    success=False,
                     message="Invalid literal error appears to be from parser, not code",
                     timestamp=datetime.now(),
                 )
 
             # For actual code errors, we'd need to implement safe_int utility
             return FixResult(
-                error=error,
-                status=FixStatus.SKIPPED,
-                fix_applied="",
+                success=False,
                 message="Invalid literal int errors require safe_int utility - not implemented yet",
                 timestamp=datetime.now(),
             )
 
         except Exception as e:
             return FixResult(
-                error=error,
-                status=FixStatus.FAILED,
-                fix_applied="",
+                success=False,
                 message=f"Error fixing invalid literal: {str(e)}",
-                timestamp=datetime.now(),
             )
 
     def fix_batch(
         self, errors: list[ErrorInfo], max_files: int = 20
-    ) -> tuple[list[FixResult], dict]:
+    ) -> tuple[list[FixResult], dict[str, Any]]:
         """Fix a batch of errors với validation"""
-        results = []
+        results: list[FixResult] = []
 
         # Group errors by file
-        file_errors = {}
+        file_errors: dict[str, list[ErrorInfo]] = {}
         for error in errors:
             if error.file_path not in file_errors:
                 file_errors[error.file_path] = []
             file_errors[error.file_path].append(error)
 
         # Limit to max_files
-        files_to_fix = list(file_errors.keys())[:max_files]
+        files_to_fix: list[str] = list(file_errors.keys())[:max_files]
 
         # Backup all files
-        backup_paths = {}
+        backup_paths: dict[str, str] = {}
         for file_path in files_to_fix:
             backup_paths[file_path] = self._backup_file(file_path)
 
@@ -199,16 +174,13 @@ class AdvancedFixer:
                         result = self.fix_invalid_literal_int(error)
                     else:
                         result = FixResult(
-                            error=error,
-                            status=FixStatus.SKIPPED,
-                            fix_applied="",
+                            success=False,
                             message="Error type not supported",
-                            timestamp=datetime.now(),
                         )
                     results.append(result)
 
             # Validate batch
-            validation_stats = self._validate_batch(files_to_fix)
+            validation_stats: dict[str, Any] = self._validate_batch(files_to_fix)
 
             # If validation fails, rollback
             if not validation_stats["valid"]:
