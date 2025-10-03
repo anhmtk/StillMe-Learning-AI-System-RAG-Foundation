@@ -547,7 +547,7 @@ class TeamManager:
 
     def get_user_tasks(self, user_id: str) -> list[TaskAssignment]:
         """Get tasks assigned to user"""
-        user_tasks = []
+        user_tasks: list[TaskAssignment] = []
         for assignment in self.task_assignments.values():
             if assignment.assigned_to == user_id:
                 user_tasks.append(assignment)
@@ -562,7 +562,7 @@ class TeamManager:
             return []
 
         team = self.teams[team_id]
-        team_tasks = []
+        team_tasks: list[TaskAssignment] = []
 
         for assignment in self.task_assignments.values():
             if assignment.assigned_to in team.members:
@@ -585,7 +585,7 @@ class TeamManager:
         active_conflicts = len(self.get_active_conflicts())
 
         # Task status breakdown
-        task_status_counts = {}
+        task_status_counts: dict[str, int] = {}
         for assignment in self.task_assignments.values():
             status = assignment.status.value
             task_status_counts[status] = task_status_counts.get(status, 0) + 1
@@ -618,7 +618,7 @@ class TeamManager:
         current_time = time.time()
         max_duration = self.config["collaboration"]["max_session_duration"]
 
-        sessions_to_remove = []
+        sessions_to_remove: list[str] = []
         for session_id, session in self.active_sessions.items():
             if current_time - session.last_activity > max_duration:
                 sessions_to_remove.append(session_id)
@@ -694,10 +694,10 @@ if __name__ == "__main__":
 
         # Create users
         admin_id = manager.create_user(
-            "admin", "admin@example.com", "Admin User", UserRole.ADMIN
+            "admin", "admin@example.com", "Admin User", UserRole.ADMIN, "admin_hash"
         )
         dev_id = manager.create_user(
-            "developer", "dev@example.com", "Developer", UserRole.DEVELOPER
+            "developer", "dev@example.com", "Developer", UserRole.DEVELOPER, "dev_hash"
         )
 
         # Create team
