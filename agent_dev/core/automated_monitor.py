@@ -101,8 +101,8 @@ class AutomatedMonitor:
         self.agentdev = None
         self.monitoring_thread = None
         self.stop_event = threading.Event()
-        self.alerts = []
-        self.metrics_history = []
+        self.alerts: list[Any] = []
+        self.metrics_history: list[Any] = []
 
         # Setup logging
         self._setup_logging()
@@ -156,7 +156,7 @@ class AutomatedMonitor:
     def _initialize_agentdev(self):
         """Initialize AgentDev Unified"""
         try:
-            self.agentdev = AgentDev(project_root=str(self.project_root))
+            self.agentdev = AgentDev()
             logger.info("✅ AgentDev Unified initialized successfully")
         except Exception as e:
             logger.error(f"❌ Failed to initialize AgentDev: {e}")
@@ -165,17 +165,16 @@ class AutomatedMonitor:
     def _setup_schedules(self):
         """Setup monitoring schedules"""
         # Regular code quality scan
-        schedule.every(self.config["scan_interval_minutes"]).minutes.do(
-            self._scheduled_quality_scan
-        )
+        scan_job: Any = schedule.every(self.config["scan_interval_minutes"]).minutes
+        scan_job.do(self._scheduled_quality_scan)
 
         # Deep scan with AgentDev analysis
-        schedule.every(self.config["deep_scan_interval_hours"]).hours.do(
-            self._scheduled_deep_scan
-        )
+        deep_scan_job: Any = schedule.every(self.config["deep_scan_interval_hours"]).hours
+        deep_scan_job.do(self._scheduled_deep_scan)
 
         # Daily maintenance
-        schedule.every().day.at("02:00").do(self._scheduled_maintenance)
+        maintenance_job: Any = schedule.every().day.at("02:00")
+        maintenance_job.do(self._scheduled_maintenance)
 
         logger.info("📅 Monitoring schedules configured")
 
@@ -286,8 +285,8 @@ class AutomatedMonitor:
         try:
             # Run comprehensive analysis
             task = "analyze code quality and identify critical issues"
-            if self.agentdev and hasattr(self.agentdev, "execute_task"):
-                result = self.agentdev.execute_task(task, AgentMode.SENIOR)
+            if self.agentdev and hasattr(self.agentdev, "execute"):
+                result: Any = getattr(self.agentdev, "execute")(task, AgentMode.SENIOR)
             else:
                 result = "AgentDev not available"
 
@@ -315,8 +314,8 @@ class AutomatedMonitor:
         try:
             # Run cleanup tasks
             cleanup_task = "perform automated cleanup and optimization"
-            if self.agentdev and hasattr(self.agentdev, "execute_task"):
-                self.agentdev.execute_task(cleanup_task, AgentMode.SENIOR)
+            if self.agentdev and hasattr(self.agentdev, "execute"):
+                getattr(self.agentdev, "execute")(cleanup_task, AgentMode.SENIOR)
 
             # Clean up old metrics
             self._cleanup_old_metrics()
@@ -498,8 +497,8 @@ class AutomatedMonitor:
         try:
             if alert.error_type == "syntax_errors":
                 task = "fix critical syntax errors in the codebase"
-                if self.agentdev and hasattr(self.agentdev, "execute_task"):
-                    result = self.agentdev.execute_task(task, AgentMode.SENIOR)
+                if self.agentdev and hasattr(self.agentdev, "execute"):
+                    result: Any = getattr(self.agentdev, "execute")(task, AgentMode.SENIOR)
                 else:
                     result = "AgentDev not available"
 
@@ -542,7 +541,7 @@ class AutomatedMonitor:
             else None,
         }
 
-    def get_recent_alerts(self, hours: int = 24) -> list[dict]:
+    def get_recent_alerts(self, hours: int = 24) -> list[dict[str, Any]]:
         """Get recent alerts"""
         cutoff_time = datetime.now() - timedelta(hours=hours)
         recent_alerts = [a for a in self.alerts if a.timestamp > cutoff_time]
