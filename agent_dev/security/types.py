@@ -50,3 +50,28 @@ class ThreatIndicator(TypedDict, total=False):
 class ThreatFeed(TypedDict, total=False):
     indicators: list[ThreatIndicator]
     updated_at: str     # ISO datetime string
+
+# Validation System Types
+class ErrorDetail(TypedDict, total=False):
+    file: str
+    line: int
+    column: int
+    message: str
+    rule: str
+    severity: str
+
+class ValidationResult(TypedDict, total=False):
+    before_errors: int
+    after_errors: int
+    errors_fixed: int
+    critical_errors: int
+    warnings: int
+    style_suggestions: int
+    success: bool
+    evidence_files: list[str]
+
+class ValidationData(TypedDict, total=False):
+    pyright_errors: int
+    ruff_errors: int
+    total_files: int
+    timestamp: float

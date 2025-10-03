@@ -17,6 +17,7 @@ import subprocess
 import time
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any
 
 # Thiết lập logging
 logging.basicConfig(
@@ -51,7 +52,7 @@ class ValidationResult:
     execution_time: float
     success: bool
     evidence_files: list[str]
-    error_details: list[dict]
+    error_details: list[dict[str, Any]]
 
 
 class AgentDevValidator:
@@ -59,9 +60,9 @@ class AgentDevValidator:
 
     def __init__(self, project_root: str = "."):
         self.project_root = project_root
-        self.validation_log = []
+        self.validation_log: list[dict[str, Any]] = []
 
-    def run_pyright_check(self) -> tuple[int, list[dict]]:
+    def run_pyright_check(self) -> tuple[int, list[dict[str, Any]]]:
         """Chạy pyright và trả về số lỗi + chi tiết"""
         try:
             logger.info("🔍 Chạy pyright check...")
@@ -88,12 +89,12 @@ class AgentDevValidator:
                 infos = int(error_match.group(3))
 
                 # Phân loại lỗi
-                error_details = self._classify_pyright_errors(output)
+                error_details: list[dict[str, Any]] = self._classify_pyright_errors(output)
 
-            logger.info(
-                f"📊 Pyright: {error_count} errors, {warnings} warnings, {infos} infos"
-            )
-            return error_count, error_details
+                logger.info(
+                    f"📊 Pyright: {error_count} errors, {warnings} warnings, {infos} infos"
+                )
+                return error_count, error_details
 
         except subprocess.TimeoutExpired:
             logger.error("⏰ Pyright timeout")
@@ -102,7 +103,9 @@ class AgentDevValidator:
             logger.error(f"❌ Lỗi chạy pyright: {e}")
             return -1, []
 
-    def run_ruff_check(self) -> tuple[int, list[dict]]:
+        return 0, []
+
+    def run_ruff_check(self) -> tuple[int, list[dict[str, Any]]]:
         """Chạy ruff và trả về số lỗi + chi tiết"""
         try:
             logger.info("🔍 Chạy ruff check...")
@@ -123,7 +126,7 @@ class AgentDevValidator:
                 error_match = re.search(r"Found (\d+) errors?", output)
                 if error_match:
                     error_count = int(error_match.group(1))
-                    error_details = self._classify_ruff_errors(output)
+                    error_details: list[dict[str, Any]] = self._classify_ruff_errors(output)
 
             logger.info(f"📊 Ruff: {error_count} errors")
             return error_count, error_details
@@ -135,9 +138,9 @@ class AgentDevValidator:
             logger.error(f"❌ Lỗi chạy ruff: {e}")
             return -1, []
 
-    def _classify_pyright_errors(self, output: str) -> list[dict]:
+    def _classify_pyright_errors(self, output: str) -> list[dict[str, Any]]:
         """Phân loại lỗi pyright theo mức độ nghiêm trọng"""
-        errors = []
+        errors: list[dict[str, Any]] = []
         lines = output.split("\n")
 
         for line in lines:
@@ -156,9 +159,9 @@ class AgentDevValidator:
 
         return errors
 
-    def _classify_ruff_errors(self, output: str) -> list[dict]:
+    def _classify_ruff_errors(self, output: str) -> list[dict[str, Any]]:
         """Phân loại lỗi ruff theo mức độ nghiêm trọng"""
-        errors = []
+        errors: list[dict[str, Any]] = []
         lines = output.split("\n")
 
         for line in lines:
@@ -218,7 +221,7 @@ class AgentDevValidator:
             logger.error(f"❌ Lỗi chạy quick test: {e}")
             return False
 
-    def validate_before_fix(self) -> dict:
+    def validate_before_fix(self) -> dict[str, Any]:
         """Kiểm tra trạng thái trước khi sửa"""
         logger.info("📋 BẮT ĐẦU VALIDATION - TRẠNG THÁI TRƯỚC KHI SỬA")
 
@@ -231,7 +234,7 @@ class AgentDevValidator:
 
         # Tạo bằng chứng
         evidence_file = f"validation_before_{int(time.time())}.json"
-        evidence_data = {
+        evidence_data: dict[str, Any] = {
             "timestamp": time.time(),
             "pyright_errors": pyright_errors,
             "ruff_errors": ruff_errors,
@@ -255,7 +258,7 @@ class AgentDevValidator:
             "execution_time": time.time() - start_time,
         }
 
-    def validate_after_fix(self, before_data: dict) -> ValidationResult:
+    def validate_after_fix(self, before_data: dict[str, Any]) -> ValidationResult:
         """Kiểm tra trạng thái sau khi sửa"""
         logger.info("📋 VALIDATION - TRẠNG THÁI SAU KHI SỬA")
 
@@ -272,7 +275,7 @@ class AgentDevValidator:
         errors_fixed = total_before - total_after
 
         # Phân loại lỗi
-        all_details = pyright_details + ruff_details
+        all_details: list[dict[str, Any]] = pyright_details + ruff_details
         critical_errors = len(
             [
                 e
@@ -293,7 +296,7 @@ class AgentDevValidator:
 
         # Tạo bằng chứng
         evidence_file = f"validation_after_{int(time.time())}.json"
-        evidence_data = {
+        evidence_data: dict[str, Any] = {
             "timestamp": time.time(),
             "before_data": before_data,
             "pyright_errors": pyright_errors,
@@ -312,13 +315,13 @@ class AgentDevValidator:
             json.dump(evidence_data, f, indent=2, ensure_ascii=False)
 
         # Đánh giá thành công
-        success = (
+        success: bool = (
             (
                 errors_fixed > 0  # Có sửa được lỗi
                 and test_passed  # Code vẫn chạy được
                 and (
                     critical_errors == 0
-                    or critical_errors < before_data.get("critical_errors", 0)
+                    or critical_errors < (before_data["critical_errors"] if "critical_errors" in before_data else 0)
                 )  # Giảm lỗi nghiêm trọng
             )
             if total_before > 0
@@ -432,7 +435,7 @@ def main():
     print("🧪 Test hệ thống validation...")
 
     # Test validation trước khi sửa
-    before_data = validator.validate_before_fix()
+    before_data: dict[str, Any] = validator.validate_before_fix()
     print(f"📊 Trước khi sửa: {before_data['total_errors']} lỗi")
 
     # Giả lập sửa lỗi (không thực sự sửa gì)
