@@ -27,9 +27,9 @@ import uuid
 from collections import deque
 from collections.abc import Mapping
 from dataclasses import asdict, dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -42,8 +42,8 @@ class Metric:
     value: float
     unit: str = ""
     tag: str = ""
-    ts: Optional[datetime] = None
-    metadata: Optional[dict[str, Any]] = None
+    ts: datetime | None = None
+    metadata: dict[str, Any] | None = None
 
 
 @dataclass
@@ -79,9 +79,9 @@ class MetricsEmitter:
         self.events_dir.mkdir(parents=True, exist_ok=True)
 
         # Session management
-        self.session_id: Optional[str] = None
-        self.session_start: Optional[datetime] = None
-        self.current_stage: Optional[str] = None
+        self.session_id: str | None = None
+        self.session_start: datetime | None = None
+        self.current_stage: str | None = None
 
         # Batch processing
         self.batch_size = batch_size
@@ -91,7 +91,7 @@ class MetricsEmitter:
 
         # Threading
         self._lock = threading.Lock()
-        self._flush_task: Optional[asyncio.Task] = None
+        self._flush_task: asyncio.Task | None = None
         self._running = False
 
         # Initialize database
@@ -187,7 +187,7 @@ class MetricsEmitter:
         """Bắt đầu session mới"""
         with self._lock:
             self.session_id = f"sess_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:4]}"
-            self.session_start = datetime.now(timezone.utc)
+            self.session_start = datetime.now(UTC)
             self.current_stage = stage
 
             # Insert into database
@@ -217,8 +217,8 @@ class MetricsEmitter:
         self,
         event: str,
         component: str,
-        metrics: Optional[Mapping[str, Any]] = None,
-        meta: Optional[Mapping[str, Any]] = None,
+        metrics: Mapping[str, Any] | None = None,
+        meta: Mapping[str, Any] | None = None,
     ):
         """Ghi event vào buffer"""
         if not self.session_id:
@@ -226,7 +226,7 @@ class MetricsEmitter:
             self.start_session("default")
 
         event_record = Event(
-            ts=datetime.now(timezone.utc),
+            ts=datetime.now(UTC),
             session_id=self.session_id or "unknown",
             stage=self.current_stage or "unknown",
             component=component,
@@ -249,7 +249,7 @@ class MetricsEmitter:
             self.start_session("default")
 
         if metric.ts is None:
-            metric.ts = datetime.now(timezone.utc)
+            metric.ts = datetime.now(UTC)
 
         with self._lock:
             self.metric_buffer.append(metric)
@@ -373,7 +373,7 @@ class MetricsEmitter:
             logger.warning("No active session to end")
             return
 
-        end_time = datetime.now(timezone.utc)
+        end_time = datetime.now(UTC)
 
         conn = sqlite3.connect(self.db_path)
         cursor = conn.cursor()
@@ -439,7 +439,7 @@ class MetricsEmitter:
 
 
 # Global instance
-_metrics_emitter_instance: Optional[MetricsEmitter] = None
+_metrics_emitter_instance: MetricsEmitter | None = None
 
 
 def get_metrics_emitter() -> MetricsEmitter:
@@ -451,7 +451,7 @@ def get_metrics_emitter() -> MetricsEmitter:
 
 
 def initialize_metrics_emitter(
-    config: Optional[dict[str, Any]] = None,
+    config: dict[str, Any] | None = None,
 ) -> MetricsEmitter:
     """Initialize global metrics emitter with config"""
     global _metrics_emitter_instance

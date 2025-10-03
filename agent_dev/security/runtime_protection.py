@@ -9,10 +9,11 @@ import json
 import re
 import threading
 import time
+from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any, cast
 
 import aiofiles
 import psutil
@@ -73,7 +74,7 @@ class ProcessProfile:
 class RuntimeProtection:
     """Enterprise runtime protection system"""
 
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config_path: str | None = None):
         self.config = self._load_config(config_path)
         self.alerts: list[SecurityAlert] = []
         self.process_profiles: dict[int, ProcessProfile] = {}
@@ -83,7 +84,7 @@ class RuntimeProtection:
         self.alert_callbacks: list[Callable[[SecurityAlert], None]] = []
         self.lock = threading.RLock()
 
-    def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
+    def _load_config(self, config_path: str | None = None) -> dict[str, Any]:
         """Load runtime protection configuration"""
         if config_path:
             config_file = Path(config_path)
@@ -192,7 +193,7 @@ class RuntimeProtection:
 
         return alert
 
-    def _analyze_process(self, process: psutil.Process) -> Optional[SecurityAlert]:
+    def _analyze_process(self, process: psutil.Process) -> SecurityAlert | None:
         """Analyze process for suspicious behavior"""
         try:
             # Get process information
@@ -250,11 +251,11 @@ class RuntimeProtection:
 
             # Check file descriptors
             try:
-                num_fds = (
-                    process.num_fds()
-                    if hasattr(process, "num_fds")
-                    else len(process.open_files())
-                )
+                if hasattr(process, "num_fds"):
+                    process_obj = cast(Any, process)
+                    num_fds = cast(int, process_obj.num_fds())  # validated above - hasattr check
+                else:
+                    num_fds = len(process.open_files())
                 if num_fds > self.config["thresholds"]["file_descriptors"]:
                     return self._create_alert(
                         event_type=SecurityEvent.RESOURCE_ABUSE,
@@ -273,7 +274,7 @@ class RuntimeProtection:
 
             # Check network connections
             try:
-                connections = process.connections()
+                connections = process.net_connections()
                 if len(connections) > self.config["thresholds"]["network_connections"]:
                     return self._create_alert(
                         event_type=SecurityEvent.NETWORK_ANOMALY,
@@ -300,9 +301,11 @@ class RuntimeProtection:
     def _monitor_processes(self):
         """Monitor running processes for security threats"""
         try:
-            for process in psutil.process_iter(
+            process_iter = psutil.process_iter(
                 ["pid", "name", "cmdline", "memory_info", "cpu_percent"]
-            ):
+            )
+            processes = cast(Any, process_iter)
+            for process in processes:
                 try:
                     alert = self._analyze_process(process)
                     if alert:
@@ -376,9 +379,10 @@ class RuntimeProtection:
         """Monitor network activity for anomalies"""
         try:
             connections = psutil.net_connections()
-            suspicious_connections = []
+            suspicious_connections: list[Any] = []
 
             for conn in connections:
+                conn: Any = conn
                 if conn.raddr and conn.raddr.ip:
                     # Check for suspicious IP patterns
                     for pattern in self.suspicious_patterns["suspicious_network"]:
@@ -452,11 +456,17 @@ class RuntimeProtection:
             for alert in self.alerts:
                 # Count by threat level
                 level = alert.threat_level.value
-                alerts_by_level[level] = alerts_by_level.get(level, 0) + 1
+                if level in alerts_by_level:
+                    alerts_by_level[level] = alerts_by_level[level] + 1
+                else:
+                    alerts_by_level[level] = 1
 
                 # Count by event type
                 event_type = alert.event_type.value
-                alerts_by_type[event_type] = alerts_by_type.get(event_type, 0) + 1
+                if event_type in alerts_by_type:
+                    alerts_by_type[event_type] = alerts_by_type[event_type] + 1
+                else:
+                    alerts_by_type[event_type] = 1
 
             return {
                 "total_alerts": total_alerts,

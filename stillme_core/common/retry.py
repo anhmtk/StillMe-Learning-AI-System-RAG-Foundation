@@ -39,9 +39,10 @@ import functools
 import random
 import threading
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Callable, Optional
+from typing import Any
 
 from .errors import CircuitBreakerError
 from .logging import get_logger
@@ -66,7 +67,7 @@ class RetryConfig:
     jitter: bool = True
     jitter_range: float = 0.1
     exceptions: tuple[type[Exception], ...] = (Exception,)
-    retry_condition: Optional[Callable[[Exception], bool]] = None
+    retry_condition: Callable[[Exception], bool] | None = None
 
 
 @dataclass
@@ -382,7 +383,7 @@ def retry_with_backoff(
     max_delay: float = 60.0,
     exceptions: tuple[type[Exception], ...] = (Exception,),
     jitter: bool = True,
-    retry_condition: Optional[Callable[[Exception], bool]] = None,
+    retry_condition: Callable[[Exception], bool] | None = None,
 ):
     """
     Decorator for retry with exponential backoff

@@ -57,7 +57,7 @@ class PerformanceLoadTestSuite:
         try:
             process = psutil.Process(os.getpid())
             return process.memory_info().rss / 1024 / 1024
-        except:
+        except Exception:
             return 0.0
 
     def _simulate_request(self, processing_time: float = 0.1) -> dict[str, Any]:
@@ -162,7 +162,7 @@ class PerformanceLoadTestSuite:
                         try:
                             cpu_usage = psutil.cpu_percent(interval=0.1)
                             cpu_usage_samples.append(cpu_usage)
-                        except:
+                        except Exception:
                             cpu_usage_samples.append(0)
 
                 time.time()

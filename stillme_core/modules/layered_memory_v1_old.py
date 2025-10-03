@@ -30,7 +30,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 from cryptography.fernet import Fernet
@@ -94,7 +94,7 @@ def _get_or_create_encryption_key():
         try:
             with open(key_file, "rb") as f:
                 return f.read()
-        except:
+        except Exception:
             pass
 
     # Create new key
@@ -102,7 +102,7 @@ def _get_or_create_encryption_key():
     try:
         with open(key_file, "wb") as f:
             f.write(key)
-    except:
+    except Exception:
         pass
     return key
 
@@ -118,7 +118,7 @@ class MemoryItem:
     timestamp: datetime
     last_accessed: datetime
     metadata: dict
-    embedding: Optional[np.ndarray] = None
+    embedding: np.ndarray | None = None
 
 
 # -------------------- BASE LAYER --------------------
@@ -408,7 +408,7 @@ class LongTermMemory(BaseMemoryLayer):
                 # If it's a string, try to decrypt it
                 try:
                     content = self._decrypt(encrypted_content.encode())
-                except:
+                except Exception:
                     # If decryption fails, treat as plain text
                     content = encrypted_content
             else:
@@ -420,7 +420,7 @@ class LongTermMemory(BaseMemoryLayer):
             if len(row) > 4 and row[4]:
                 try:
                     metadata = pickle.loads(row[4])
-                except:
+                except Exception:
                     metadata = {}
 
             return MemoryItem(
@@ -448,8 +448,8 @@ class LayeredMemoryV1:
 
     def __init__(
         self,
-        secure_storage_config: Optional[SecureMemoryConfig] = None,
-        external_secure_storage: Optional[Any] = None,
+        secure_storage_config: SecureMemoryConfig | None = None,
+        external_secure_storage: Any | None = None,
     ):
         self.short_term = ShortTermMemory()
         self.mid_term = MidTermMemory()
@@ -587,7 +587,7 @@ class LayeredMemoryV1:
         content: str,
         priority: float = 0.5,
         auto_compress: bool = True,
-        metadata: Optional[dict] = None,
+        metadata: dict | None = None,
     ):
         """Add memory with automatic layer selection and secure storage"""
         item = MemoryItem(
@@ -617,7 +617,7 @@ class LayeredMemoryV1:
                 self.logger.warning("No event loop running, skipping async save")
 
     def search(
-        self, query: str, time_range: Optional[tuple[datetime, datetime]] = None
+        self, query: str, time_range: tuple[datetime, datetime] | None = None
     ) -> list[MemoryItem]:
         """Search across all layers with optional time filter"""
         results = []

@@ -10,7 +10,7 @@ import urllib.parse
 import webbrowser
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Any, Optional
+from typing import Any
 
 # Khối Import: Đã xử lý triệt để lỗi import
 # Import with fallbacks for missing modules
@@ -71,8 +71,8 @@ class ObservabilityDashboard:
         self.tracer = get_tracer()
         self.health_monitor = get_health_monitor()
 
-        self.server: Optional[HTTPServer] = None
-        self.server_thread: Optional[threading.Thread] = None
+        self.server: HTTPServer | None = None
+        self.server_thread: threading.Thread | None = None
         self.is_running = False
 
     def start(self, open_browser: bool = True):
@@ -786,7 +786,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
 
 
 # Global dashboard instance
-_global_dashboard: Optional[ObservabilityDashboard] = None
+_global_dashboard: ObservabilityDashboard | None = None
 
 
 def get_dashboard(port: int = 8080, host: str = "localhost") -> ObservabilityDashboard:

@@ -20,7 +20,6 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Optional
 
 
 class DocType(Enum):
@@ -365,7 +364,7 @@ Status Codes:
             )
 
     def _calculate_doc_quality(
-        self, docstring: Optional[str], func_count: int, class_count: int
+        self, docstring: str | None, func_count: int, class_count: int
     ) -> float:
         """Tính điểm chất lượng documentation"""
         score = 0.0

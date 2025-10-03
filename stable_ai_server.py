@@ -105,7 +105,6 @@ stillme_ai = StillMeAI()
 # Simple HTTP server
 try:
     import json
-    import urllib.parse
     from http.server import BaseHTTPRequestHandler, HTTPServer
 
     class StillMeHandler(BaseHTTPRequestHandler):

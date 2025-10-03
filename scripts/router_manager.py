@@ -327,7 +327,7 @@ class RouterManager:
                 "available_models": len(model_prefs),
             }
         except Exception as e:
-            raise Exception(f"System status check failed: {e}")
+            raise Exception(f"System status check failed: {e}") from e
 
     def _validate_configuration(self):
         """Validate configuration"""
@@ -353,7 +353,7 @@ class RouterManager:
                 "configuration_valid": True,
             }
         except Exception as e:
-            raise Exception(f"Configuration validation failed: {e}")
+            raise Exception(f"Configuration validation failed: {e}") from e
 
     def _test_routing_logic(self):
         """Test routing logic"""
@@ -387,7 +387,7 @@ class RouterManager:
                 "total_count": total_count,
             }
         except Exception as e:
-            raise Exception(f"Routing logic test failed: {e}")
+            raise Exception(f"Routing logic test failed: {e}") from e
 
     def _check_performance(self):
         """Check performance"""
@@ -405,7 +405,7 @@ class RouterManager:
                 "performance_grade": self._get_performance_grade(avg_time),
             }
         except Exception as e:
-            raise Exception(f"Performance check failed: {e}")
+            raise Exception(f"Performance check failed: {e}") from e
 
     def _get_performance_grade(self, avg_time: float) -> str:
         """Get performance grade"""
@@ -427,7 +427,7 @@ class RouterManager:
             # In a real implementation, you would clean up old log files
             return {"logs_cleaned": 0, "space_freed": 0}
         except Exception as e:
-            raise Exception(f"Log cleanup failed: {e}")
+            raise Exception(f"Log cleanup failed: {e}") from e
 
     def export_status(self, filename: str):
         """Export status to JSON file"""

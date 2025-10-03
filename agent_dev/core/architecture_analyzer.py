@@ -427,7 +427,7 @@ class ArchitectureAnalyzer:
                 # Count boolean operators in condition
                 condition_complexity = 0
                 for condition_node in ast.walk(child.test):
-                    if isinstance(condition_node, (ast.And, ast.Or)):
+                    if isinstance(condition_node, ast.And | ast.Or):
                         condition_complexity += 1
 
                 if condition_complexity > 2:
@@ -526,7 +526,7 @@ class ArchitectureAnalyzer:
             max_depth = max(max_depth, depth)
 
             for child in ast.iter_child_nodes(node):
-                if isinstance(child, (ast.If, ast.For, ast.While, ast.With, ast.Try)):
+                if isinstance(child, ast.If | ast.For | ast.While | ast.With | ast.Try):
                     visit_node(child, depth + 1)
                 else:
                     visit_node(child, depth)
@@ -603,7 +603,7 @@ class ArchitectureAnalyzer:
 
                         for child in ast.walk(node):
                             if isinstance(
-                                child, (ast.If, ast.While, ast.For, ast.ExceptHandler)
+                                child, ast.If | ast.While | ast.For | ast.ExceptHandler
                             ):
                                 complexity += 1
                             elif isinstance(child, ast.BoolOp):
@@ -733,7 +733,7 @@ class ArchitectureAnalyzer:
         complexity = 0
 
         for node in ast.walk(tree):
-            if isinstance(node, (ast.If, ast.While, ast.For, ast.ExceptHandler)):
+            if isinstance(node, ast.If | ast.While | ast.For | ast.ExceptHandler):
                 complexity += 1
             elif isinstance(node, ast.BoolOp):
                 complexity += len(node.values) - 1

@@ -39,7 +39,6 @@ except ImportError as e:
 # Import StillMe core modules
 try:
     from ...common.logging import get_logger
-    from ...common.retry import RetryManager
     from ...compat_circuitbreaker import SafeCircuitBreaker
     from ...modules.layered_memory_v1 import LayeredMemoryV1
     from ...modules.prediction_engine import PredictionEngine

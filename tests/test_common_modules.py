@@ -423,10 +423,10 @@ class TestRetryMechanisms:
         def failing_function():
             raise Exception("Service down")
 
-        with pytest.raises(Exception):
+        with pytest.raises(Exception, match="Service down"):
             breaker.call(failing_function)
 
-        with pytest.raises(Exception):
+        with pytest.raises(Exception, match="Service down"):
             breaker.call(failing_function)
 
         # Circuit should be open now
@@ -463,10 +463,10 @@ class TestRetryMechanisms:
             raise Exception("Service down")
 
         # First two calls should raise the original exception
-        with pytest.raises(Exception):
+        with pytest.raises(Exception, match="Service down"):
             decorated_function()
 
-        with pytest.raises(Exception):
+        with pytest.raises(Exception, match="Service down"):
             decorated_function()
 
         # Third call should raise CircuitBreakerError

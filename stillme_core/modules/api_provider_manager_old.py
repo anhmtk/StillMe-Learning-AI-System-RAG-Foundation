@@ -5,7 +5,7 @@ import os
 # Import common utilities
 import sys
 import time
-from typing import Any, Optional
+from typing import Any
 
 try:
     from openai import OpenAI
@@ -397,7 +397,7 @@ class UnifiedAPIManager:
 
     def __init__(
         self,
-        model_preferences: Optional[list[str]] = None,
+        model_preferences: list[str] | None = None,
         fallback_model: str = "gpt-3.5-turbo",
     ):
         """
@@ -603,7 +603,7 @@ class UnifiedAPIManager:
         user_feedback: str,
         selected_model: str,
         response_quality: str = "unknown",
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Handle fallback when user feedback indicates poor response quality.
 
@@ -739,7 +739,7 @@ class UnifiedAPIManager:
         text: str,
         src_lang: str,
         tgt_lang: str,
-        quality_hint: Optional[str] = None,
+        quality_hint: str | None = None,
     ) -> dict:
         """
         Translate text using local-first approach: Gemma -> NLLB fallback
@@ -1023,7 +1023,7 @@ class UnifiedAPIManager:
         """Call OpenAI API (legacy method)."""
         return "Error: OpenAI API not implemented in UnifiedAPIManager"
 
-    def call_ollama_api(self, prompt: str, model: Optional[str] = None) -> str:
+    def call_ollama_api(self, prompt: str, model: str | None = None) -> str:
         """Call Ollama API using modern /api/chat endpoint."""
         try:
             # Determine model to use

@@ -18,7 +18,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 # import matplotlib.pyplot as plt
 # import pandas as pd
@@ -73,7 +73,7 @@ class TrendAnalysis:
     change_percentage: float
     confidence: float
     data_points: list[float]
-    prediction: Optional[float]
+    prediction: float | None
 
 
 @dataclass

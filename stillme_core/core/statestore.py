@@ -3,7 +3,7 @@
 StateStore - MINIMAL CONTRACT derived from tests/usages
 """
 
-from typing import Any, Optional
+from typing import Any
 
 
 class StateStore:
@@ -26,7 +26,7 @@ class StateStore:
         job_id: str,
         step_id: str,
         success: bool = True,
-        error_message: Optional[str] = None,
+        error_message: str | None = None,
     ) -> None:
         """Complete a job step"""
         pass

@@ -19,7 +19,6 @@ import os
 import sys
 import time
 from pathlib import Path
-from typing import Optional
 
 from ...compat_docker import get_sandbox_deployer
 
@@ -45,7 +44,7 @@ class SandboxDeployer:
     🚀 Quản lý triển khai Sandbox tự động
     """
 
-    def __init__(self, project_root: Optional[str] = None):
+    def __init__(self, project_root: str | None = None):
         """
         Initialize Sandbox Deployer
 
@@ -79,7 +78,7 @@ class SandboxDeployer:
         self,
         name: str = "security-test",
         image: str = DEFAULT_IMAGE,
-        custom_dockerfile: Optional[str] = None,
+        custom_dockerfile: str | None = None,
     ) -> tuple[bool, str, dict]:
         """
         Deploy a security testing sandbox

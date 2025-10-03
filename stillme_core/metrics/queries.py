@@ -21,7 +21,7 @@ import logging
 import sqlite3
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ class MetricsQueries:
         """Get database connection"""
         return sqlite3.connect(self.db_path)
 
-    def get_daily_summary(self, date: Optional[str] = None) -> dict[str, Any]:
+    def get_daily_summary(self, date: str | None = None) -> dict[str, Any]:
         """Get daily summary metrics"""
         if date is None:
             date = datetime.now().strftime("%Y-%m-%d")
@@ -529,7 +529,7 @@ class MetricsQueries:
 
 
 # Global instance
-_metrics_queries_instance: Optional[MetricsQueries] = None
+_metrics_queries_instance: MetricsQueries | None = None
 
 
 def get_metrics_queries() -> MetricsQueries:
@@ -540,7 +540,7 @@ def get_metrics_queries() -> MetricsQueries:
     return _metrics_queries_instance
 
 
-def initialize_metrics_queries(db_path: Optional[str] = None) -> MetricsQueries:
+def initialize_metrics_queries(db_path: str | None = None) -> MetricsQueries:
     """Initialize global metrics queries with db path"""
     global _metrics_queries_instance
     _metrics_queries_instance = MetricsQueries(db_path)

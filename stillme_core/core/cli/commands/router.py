@@ -28,9 +28,7 @@ try:
         RouterMemoryManager,
         TaskDecomposer,
     )
-    from ...router.agent_coordinator import CoordinationResult
-    from ...router.intelligent_router import AgentType, TaskComplexity, TaskType
-    from ...router.task_decomposer import TaskDecomposition
+    from ...router.intelligent_router import TaskComplexity, TaskType
 except ImportError:
     # Fallback for standalone execution
     import sys
@@ -38,7 +36,6 @@ except ImportError:
     sys.path.append(str(Path(__file__).parent.parent.parent / "router"))
 try:
     from intelligent_router import (
-        AgentType,
         IntelligentRouter,
         TaskComplexity,
         TaskType,
@@ -47,11 +44,11 @@ except ImportError:
     pass
 
 try:
-    from task_decomposer import TaskDecomposer, TaskDecomposition
+    from task_decomposer import TaskDecomposer
 except ImportError:
     pass
 try:
-    from agent_coordinator import AgentCoordinator, CoordinationResult
+    from agent_coordinator import AgentCoordinator
 except ImportError:
     pass
 
@@ -59,15 +56,9 @@ try:
     from learning_engine import LearningEngine
 except ImportError:
     pass
-except ImportError:
-    pass
 
 try:
     from memory_manager import RouterMemoryManager
-except ImportError:
-    pass
-except ImportError:
-    pass
 except ImportError:
     pass
 

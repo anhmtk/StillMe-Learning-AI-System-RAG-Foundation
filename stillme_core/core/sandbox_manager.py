@@ -1,7 +1,6 @@
 import logging
 import os
 import subprocess
-from typing import List, Optional
 
 logger = logging.getLogger("StillmeCore-SandboxManager")
 
@@ -16,7 +15,7 @@ class DockerSandboxManager:
         self.container_id = None
         logger.info(f"DockerSandboxManager initialized with image: {self.docker_image}")
 
-    def _run_command_in_host(self, command: List[str], timeout: int = 60):
+    def _run_command_in_host(self, command: list[str], timeout: int = 60):
         try:
             result = subprocess.run(
                 command, capture_output=True, text=True, timeout=timeout
@@ -93,7 +92,7 @@ class DockerSandboxManager:
         logger.info("Docker container stopped and removed.")
 
     def run_command(
-        self, command: List[str], timeout: int = 300
+        self, command: list[str], timeout: int = 300
     ) -> subprocess.CompletedProcess:
         if not self.container_id:
             logger.error("No active container to run command in.")
@@ -120,7 +119,7 @@ class DockerSandboxManager:
                 args=command, returncode=1, stdout="", stderr=f"Error: {e}"
             )
 
-    def get_file_content(self, file_path_in_container: str) -> Optional[str]:
+    def get_file_content(self, file_path_in_container: str) -> str | None:
         if not self.container_id:
             logger.error("No active container to get file content from.")
             return None

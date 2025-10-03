@@ -28,7 +28,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -89,7 +89,7 @@ class EnhancedValidation:
         self,
         metrics_db_path: str,
         validation_db_path: str,
-        config: Optional[dict[str, Any]] = None,
+        config: dict[str, Any] | None = None,
     ):
         self.metrics_db_path = Path(metrics_db_path)
         self.validation_db_path = Path(validation_db_path)
@@ -896,7 +896,7 @@ class EnhancedValidation:
 def create_enhanced_validation(
     metrics_db_path: str,
     validation_db_path: str,
-    config: Optional[dict[str, Any]] = None,
+    config: dict[str, Any] | None = None,
 ) -> EnhancedValidation:
     """Factory function để create enhanced validation"""
     return EnhancedValidation(metrics_db_path, validation_db_path, config)

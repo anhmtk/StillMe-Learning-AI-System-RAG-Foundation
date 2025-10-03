@@ -7,7 +7,7 @@ A simple calculator plugin demonstrating the plugin architecture.
 
 import logging
 import re
-from typing import Any, Optional
+from typing import Any
 
 from stillme_core.base.module_base import ModuleBase, ModuleInfo, ModuleStatus
 
@@ -24,7 +24,7 @@ class CalculatorPlugin(ModuleBase):
     - Simple expressions
     """
 
-    def __init__(self, config: Optional[dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         super().__init__(config)
         self.supported_operations = ["+", "-", "*", "/", "(", ")"]
         self.max_expression_length = self.config.get("max_expression_length", 100)
@@ -159,12 +159,12 @@ class CalculatorPlugin(ModuleBase):
             # Round to specified precision
             return round(float(result), self.precision)
 
-        except ZeroDivisionError:
-            raise ValueError("Division by zero")
-        except SyntaxError:
-            raise ValueError("Invalid expression syntax")
+        except ZeroDivisionError as e:
+            raise ValueError("Division by zero") from e
+        except SyntaxError as e:
+            raise ValueError("Invalid expression syntax") from e
         except Exception as e:
-            raise ValueError(f"Calculation error: {str(e)}")
+            raise ValueError(f"Calculation error: {str(e)}") from e
 
     def get_supported_operations(self) -> list:
         """Get list of supported operations"""
@@ -200,7 +200,7 @@ Usage:
 
 
 # Plugin factory function
-def create_plugin(config: Optional[dict[str, Any]] = None) -> CalculatorPlugin:
+def create_plugin(config: dict[str, Any] | None = None) -> CalculatorPlugin:
     """Create calculator plugin instance"""
     return CalculatorPlugin(config)
 

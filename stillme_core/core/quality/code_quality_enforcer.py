@@ -12,7 +12,6 @@ import time
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +29,7 @@ class QualityIssue:
     severity: str  # error, warning, info
     category: str  # style, bug, complexity, etc.
     fixable: bool = False
-    auto_fix: Optional[str] = None
+    auto_fix: str | None = None
 
 
 @dataclass
@@ -59,7 +58,7 @@ class CodeQualityEnforcer:
     and provides intelligent analysis and auto-fixing capabilities.
     """
 
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config_path: str | None = None):
         """
         Initialize the Code Quality Enforcer.
 
@@ -79,10 +78,10 @@ class CodeQualityEnforcer:
     async def analyze_directory(
         self,
         target_path: str,
-        tools: Optional[list[str]] = None,
+        tools: list[str] | None = None,
         auto_fix: bool = False,
-        include_patterns: Optional[list[str]] = None,
-        exclude_patterns: Optional[list[str]] = None,
+        include_patterns: list[str] | None = None,
+        exclude_patterns: list[str] | None = None,
     ) -> QualityReport:
         """
         Analyze a directory for code quality issues.
@@ -154,8 +153,8 @@ class CodeQualityEnforcer:
     def _get_python_files(
         self,
         target_path: Path,
-        include_patterns: Optional[list[str]] = None,
-        exclude_patterns: Optional[list[str]] = None,
+        include_patterns: list[str] | None = None,
+        exclude_patterns: list[str] | None = None,
     ) -> list[Path]:
         """Get list of Python files to analyze"""
         include_patterns = include_patterns or ["*.py"]

@@ -27,23 +27,16 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../.."))
 # Import modules to test
 try:
     from stillme_core.core.advanced_security.blue_team_engine import (
-        AnomalyType,
         BlueTeamEngine,
-        DefenseAction,
     )
     from stillme_core.core.advanced_security.experience_memory_integration import (
         ExperienceMemoryIntegration,
-        ExperienceType,
     )
     from stillme_core.core.advanced_security.red_team_engine import (
-        AttackResult,
-        AttackType,
         RedTeamEngine,
     )
     from stillme_core.core.advanced_security.sandbox_controller import SandboxController
     from stillme_core.core.advanced_security.security_orchestrator import (
-        ExerciseType,
-        SecurityExercise,
         SecurityOrchestrator,
     )
 except ImportError as e:
@@ -78,7 +71,7 @@ class TestRedTeamEngine(unittest.TestCase):
         }
         try:
             self.red_team = RedTeamEngine(self.config)
-        except:
+        except Exception:
             self.red_team = RedTeamEngine()
 
     def test_red_team_initialization(self):
@@ -141,7 +134,7 @@ class TestBlueTeamEngine(unittest.TestCase):
         }
         try:
             self.blue_team = BlueTeamEngine(self.config)
-        except:
+        except Exception:
             self.blue_team = BlueTeamEngine()
 
     def test_blue_team_initialization(self):
@@ -223,7 +216,7 @@ class TestSecurityOrchestrator(unittest.TestCase):
         }
         try:
             self.orchestrator = SecurityOrchestrator(self.config)
-        except:
+        except Exception:
             self.orchestrator = SecurityOrchestrator()
 
     def test_orchestrator_initialization(self):
@@ -306,7 +299,7 @@ class TestExperienceMemoryIntegration(unittest.TestCase):
         }
         try:
             self.memory_integration = ExperienceMemoryIntegration(self.config)
-        except:
+        except Exception:
             self.memory_integration = ExperienceMemoryIntegration()
 
     def test_memory_integration_initialization(self):

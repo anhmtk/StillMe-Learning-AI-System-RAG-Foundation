@@ -7,10 +7,9 @@ and prevent crashes from Unicode issues.
 """
 
 from pathlib import Path
-from typing import Optional
 
 
-def safe_read_text(path: Path, encoding: Optional[str] = None) -> str:
+def safe_read_text(path: Path, encoding: str | None = None) -> str:
     """
     Đọc file văn bản an toàn với fallback encoding:
     - Ưu tiên UTF-8
@@ -50,7 +49,7 @@ def safe_read_text(path: Path, encoding: Optional[str] = None) -> str:
         return ""
 
 
-def safe_read_lines(path: Path, encoding: Optional[str] = None) -> list[str]:
+def safe_read_lines(path: Path, encoding: str | None = None) -> list[str]:
     """
     Đọc file theo dòng an toàn
 

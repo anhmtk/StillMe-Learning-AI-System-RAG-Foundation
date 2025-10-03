@@ -245,7 +245,7 @@ class TestReflexEngineIntegration:
 
         why_reflex = result["why_reflex"]
         assert "processing_time_ms" in why_reflex
-        assert isinstance(why_reflex["processing_time_ms"], (int, float))
+        assert isinstance(why_reflex["processing_time_ms"], int | float)
         assert why_reflex["processing_time_ms"] >= 0
 
     def test_shadow_evaluation_logging(self):

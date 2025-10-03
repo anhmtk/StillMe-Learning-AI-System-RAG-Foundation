@@ -11,9 +11,11 @@ import sys
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, cast
 
 import yaml
+
+from .normalize import extract_template_spec, iter_containers
 
 
 class SecuritySeverity(Enum):
@@ -32,10 +34,10 @@ class SecurityIssue:
     severity: SecuritySeverity
     title: str
     description: str
-    file_path: Optional[str] = None
-    line_number: Optional[int] = None
-    cwe_id: Optional[str] = None
-    remediation: Optional[str] = None
+    file_path: str | None = None
+    line_number: int | None = None
+    cwe_id: str | None = None
+    remediation: str | None = None
     confidence: str = "MEDIUM"
 
 
@@ -44,7 +46,7 @@ class SecurityScanner:
 
     def __init__(self, repo_root: str = "."):
         self.repo_root = Path(repo_root)
-        self.issues = []
+        self.issues: list[SecurityIssue] = []
         self.secret_patterns = self._load_secret_patterns()
         self.vulnerability_db = self._load_vulnerability_db()
 
@@ -52,7 +54,7 @@ class SecurityScanner:
         """Run comprehensive security scan"""
         print("🔒 Starting comprehensive security scan...")
 
-        self.issues = []
+        self.issues: list[SecurityIssue] = []
 
         # Secret scanning
         self.issues.extend(self.scan_secrets())
@@ -74,7 +76,7 @@ class SecurityScanner:
     def scan_secrets(self) -> list[SecurityIssue]:
         """Scan for hardcoded secrets and credentials"""
         print("🔍 Scanning for secrets...")
-        issues = []
+        issues: list[SecurityIssue] = []
 
         # Define secret patterns
         secret_patterns = [
@@ -150,7 +152,7 @@ class SecurityScanner:
     def scan_dependencies(self) -> list[SecurityIssue]:
         """Scan for vulnerable dependencies"""
         print("📦 Scanning dependencies...")
-        issues = []
+        issues: list[SecurityIssue] = []
 
         # Check Python dependencies
         issues.extend(self._scan_python_dependencies())
@@ -166,7 +168,7 @@ class SecurityScanner:
     def scan_code_issues(self) -> list[SecurityIssue]:
         """Scan for code security issues"""
         print("🔍 Scanning code for security issues...")
-        issues = []
+        issues: list[SecurityIssue] = []
 
         # SQL Injection patterns
         sql_patterns = [
@@ -211,7 +213,7 @@ class SecurityScanner:
     def scan_configuration(self) -> list[SecurityIssue]:
         """Scan configuration files for security issues"""
         print("⚙️  Scanning configuration...")
-        issues = []
+        issues: list[SecurityIssue] = []
 
         # Check Docker configurations
         issues.extend(self._scan_docker_configs())
@@ -227,7 +229,7 @@ class SecurityScanner:
     def scan_infrastructure(self) -> list[SecurityIssue]:
         """Scan infrastructure configurations"""
         print("🏗️  Scanning infrastructure...")
-        issues = []
+        issues: list[SecurityIssue] = []
 
         # Check Kubernetes configurations
         issues.extend(self._scan_k8s_configs())
@@ -249,7 +251,7 @@ class SecurityScanner:
 
     def _get_scan_files(self) -> list[Path]:
         """Get list of files to scan"""
-        files = []
+        files: list[Path] = []
 
         # Include common file types
         extensions = [
@@ -279,9 +281,11 @@ class SecurityScanner:
             "dist",
         }
 
-        filtered_files = []
+        filtered_files: list[Path] = []
         for file_path in files:
-            if not any(exclude_dir in file_path.parts for exclude_dir in exclude_dirs):
+            if not any(
+                exclude_dir in str(file_path.parts) for exclude_dir in exclude_dirs
+            ):
                 filtered_files.append(file_path)
 
         return filtered_files
@@ -290,7 +294,7 @@ class SecurityScanner:
         self, file_path: Path, patterns: list[tuple[str, str, SecuritySeverity]]
     ) -> list[SecurityIssue]:
         """Scan file for secret patterns"""
-        issues = []
+        issues: list[SecurityIssue] = []
 
         try:
             with open(file_path, encoding="utf-8", errors="ignore") as f:
@@ -335,7 +339,7 @@ class SecurityScanner:
         self, file_path: Path, patterns: list[tuple[str, str, SecuritySeverity]]
     ) -> list[SecurityIssue]:
         """Scan file for security patterns"""
-        issues = []
+        issues: list[SecurityIssue] = []
 
         try:
             with open(file_path, encoding="utf-8", errors="ignore") as f:
@@ -393,7 +397,7 @@ class SecurityScanner:
 
     def _scan_python_dependencies(self) -> list[SecurityIssue]:
         """Scan Python dependencies for vulnerabilities"""
-        issues = []
+        issues: list[SecurityIssue] = []
 
         requirements_files = [
             self.repo_root / "requirements.txt",
@@ -441,7 +445,7 @@ class SecurityScanner:
 
     def _scan_node_dependencies(self) -> list[SecurityIssue]:
         """Scan Node.js dependencies for vulnerabilities"""
-        issues = []
+        issues: list[SecurityIssue] = []
 
         package_json = self.repo_root / "package.json"
         if package_json.exists():
@@ -481,7 +485,7 @@ class SecurityScanner:
 
     def _scan_docker_images(self) -> list[SecurityIssue]:
         """Scan Docker images for vulnerabilities"""
-        issues = []
+        issues: list[SecurityIssue] = []
 
         # This would integrate with tools like Trivy or Clair
         # For now, just check for common insecure base images
@@ -520,7 +524,7 @@ class SecurityScanner:
 
     def _scan_docker_configs(self) -> list[SecurityIssue]:
         """Scan Docker configurations for security issues"""
-        issues = []
+        issues: list[SecurityIssue] = []
 
         docker_compose_files = list(self.repo_root.rglob("docker-compose*.yml"))
 
@@ -564,7 +568,7 @@ class SecurityScanner:
 
     def _scan_env_files(self) -> list[SecurityIssue]:
         """Scan environment files for security issues"""
-        issues = []
+        issues: list[SecurityIssue] = []
 
         env_files = list(self.repo_root.rglob(".env*"))
 
@@ -597,7 +601,7 @@ class SecurityScanner:
 
     def _scan_cicd_configs(self) -> list[SecurityIssue]:
         """Scan CI/CD configurations for security issues"""
-        issues = []
+        issues: list[SecurityIssue] = []
 
         # Check GitHub Actions
         github_actions = self.repo_root / ".github" / "workflows"
@@ -609,7 +613,7 @@ class SecurityScanner:
 
     def _scan_github_workflow(self, workflow_file: Path) -> list[SecurityIssue]:
         """Scan GitHub workflow for security issues"""
-        issues = []
+        issues: list[SecurityIssue] = []
 
         try:
             with open(workflow_file) as f:
@@ -636,7 +640,7 @@ class SecurityScanner:
 
     def _scan_k8s_configs(self) -> list[SecurityIssue]:
         """Scan Kubernetes configurations for security issues"""
-        issues = []
+        issues: list[SecurityIssue] = []
 
         k8s_files = list(self.repo_root.rglob("*.yaml")) + list(
             self.repo_root.rglob("*.yml")
@@ -650,27 +654,21 @@ class SecurityScanner:
                 # Check for security contexts
                 if isinstance(content, dict):
                     # Check for privileged containers
-                    if content.get("kind") in ["Deployment", "Pod", "DaemonSet"]:
-                        spec = content.get("spec", {})
-                        containers = (
-                            spec.get("template", {})
-                            .get("spec", {})
-                            .get("containers", [])
-                        )
-
-                        for container in containers:
-                            security_context = container.get("securityContext", {})
-                            if security_context.get("privileged"):
-                                issues.append(
-                                    SecurityIssue(
-                                        id="K8S_PRIVILEGED",
-                                        severity=SecuritySeverity.HIGH,
-                                        title="Privileged Kubernetes container",
-                                        description="Privileged containers have full host access",
-                                        file_path=str(k8s_file),
-                                        remediation="Remove privileged security context",
-                                    )
-                                )
+                    if cast(dict[str, Any], content).get("kind") in ["Deployment", "Pod", "DaemonSet"]:
+                        tpl = extract_template_spec(cast(dict[str, Any], content))
+                        for container in iter_containers(tpl):
+                            sc = container.get("securityContext")
+                            if sc and sc.get("privileged"):
+                                                    issues.append(
+                                                        SecurityIssue(
+                                                            id="K8S_PRIVILEGED",
+                                                            severity=SecuritySeverity.HIGH,
+                                                            title="Privileged Kubernetes container",
+                                                            description="Privileged containers have full host access",
+                                                            file_path=str(k8s_file),
+                                                            remediation="Remove privileged security context",
+                                                        )
+                                                    )
 
             except Exception:
                 pass
@@ -679,7 +677,7 @@ class SecurityScanner:
 
     def _scan_terraform_configs(self) -> list[SecurityIssue]:
         """Scan Terraform configurations for security issues"""
-        issues = []
+        issues: list[SecurityIssue] = []
 
         tf_files = list(self.repo_root.rglob("*.tf"))
 
@@ -715,7 +713,7 @@ class SecurityScanner:
         report += "=" * 50 + "\n\n"
 
         # Group by severity
-        by_severity = {}
+        by_severity: dict[str, list[SecurityIssue]] = {}
         for issue in issues:
             severity = issue.severity.value
             if severity not in by_severity:

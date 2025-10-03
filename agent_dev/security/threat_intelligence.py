@@ -11,7 +11,7 @@ import time
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import aiofiles
 import requests
@@ -76,7 +76,7 @@ class ThreatReport:
 class ThreatIntelligence:
     """Enterprise threat intelligence system"""
 
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config_path: str | None = None):
         self.config = self._load_config(config_path)
         self.indicators: dict[str, ThreatIndicator] = {}
         self.reports: dict[str, ThreatReport] = {}
@@ -85,7 +85,7 @@ class ThreatIntelligence:
         self.update_interval = self.config.get("update_interval", 3600)  # 1 hour
         self.running = False
 
-    def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
+    def _load_config(self, config_path: str | None = None) -> dict[str, Any]:
         """Load threat intelligence configuration"""
         if config_path:
             config_file = Path(config_path)
@@ -156,8 +156,8 @@ class ThreatIntelligence:
         severity: ThreatSeverity,
         confidence: float,
         source: str,
-        tags: Optional[list[str]] = None,
-        metadata: Optional[dict[str, Any]] = None,
+        tags: list[str] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> str:
         """Add threat indicator"""
         indicator_id = self._calculate_indicator_hash(indicator_type, value)
@@ -198,7 +198,7 @@ class ThreatIntelligence:
 
     def check_indicator(
         self, indicator_type: ThreatType, value: str
-    ) -> Optional[ThreatIndicator]:
+    ) -> ThreatIndicator | None:
         """Check if indicator is known threat"""
         indicator_id = self._calculate_indicator_hash(indicator_type, value)
         return self.indicators.get(indicator_id)
@@ -219,7 +219,7 @@ class ThreatIntelligence:
 
     async def _fetch_virustotal_data(
         self, indicator_type: ThreatType, value: str
-    ) -> Optional[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """Fetch data from VirusTotal API"""
         api_key = self.config["sources"]["api_keys"].get("virustotal")
         if not api_key:
@@ -261,7 +261,7 @@ class ThreatIntelligence:
             print(f"⚠️ VirusTotal API error: {e}")
             return None
 
-    async def _fetch_abuseipdb_data(self, ip: str) -> Optional[dict[str, Any]]:
+    async def _fetch_abuseipdb_data(self, ip: str) -> dict[str, Any] | None:
         """Fetch data from AbuseIPDB API"""
         api_key = self.config["sources"]["api_keys"].get("abuseipdb")
         if not api_key:
@@ -532,7 +532,7 @@ def stop_threat_intelligence():
     threat_intelligence.stop_intelligence_service()
 
 
-def check_threat(artifact_type: str, artifact_value: str) -> Optional[ThreatIndicator]:
+def check_threat(artifact_type: str, artifact_value: str) -> ThreatIndicator | None:
     """Check if artifact is a known threat"""
     type_mapping = {
         "ip": ThreatType.IP_REPUTATION,

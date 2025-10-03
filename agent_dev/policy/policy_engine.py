@@ -10,7 +10,7 @@ import sys
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import yaml
 
@@ -28,9 +28,9 @@ class PolicyViolation:
     rule_id: str
     severity: PolicySeverity
     message: str
-    file_path: Optional[str] = None
-    line_number: Optional[int] = None
-    suggestion: Optional[str] = None
+    file_path: str | None = None
+    line_number: int | None = None
+    suggestion: str | None = None
 
 
 class PolicyEngine:
@@ -41,7 +41,7 @@ class PolicyEngine:
         self.policies = {}
         self.violations = []
 
-    def load_policies(self, policy_file: Optional[str] = None):
+    def load_policies(self, policy_file: str | None = None):
         """Load policies from YAML file"""
         if policy_file:
             policy_path = Path(policy_file)
@@ -56,7 +56,7 @@ class PolicyEngine:
             self.policies = yaml.safe_load(f)
 
     def validate_project_spec(
-        self, spec_path: Optional[str] = None
+        self, spec_path: str | None = None
     ) -> list[PolicyViolation]:
         """Validate project specification compliance"""
         if spec_path:
@@ -76,7 +76,7 @@ class PolicyEngine:
         with open(spec_file) as f:
             spec = yaml.safe_load(f)
 
-        violations = []
+        violations: list[PolicyViolation] = []
 
         # Check edge stateless policy
         if spec.get("edge_stateless", True):
@@ -103,7 +103,7 @@ class PolicyEngine:
         with open(config_file) as f:
             config = json.load(f)
 
-        violations = []
+        violations: list[PolicyViolation] = []
 
         # Check inference location
         if config.get("inference_location") == "EDGE_STATELESS":
@@ -126,7 +126,7 @@ class PolicyEngine:
 
     def scan_codebase(self) -> list[PolicyViolation]:
         """Scan codebase for policy violations"""
-        violations = []
+        violations: list[PolicyViolation] = []
 
         # Check for forbidden patterns
         violations.extend(self._scan_forbidden_patterns())
@@ -141,7 +141,7 @@ class PolicyEngine:
 
     def _check_edge_stateless_compliance(self) -> list[PolicyViolation]:
         """Check edge stateless compliance"""
-        violations = []
+        violations: list[PolicyViolation] = []
 
         # Check for model runtime in edge/
         edge_dir = self.repo_root / "edge"
@@ -159,7 +159,7 @@ class PolicyEngine:
         self, file_path: Path
     ) -> list[PolicyViolation]:
         """Check docker-compose file for forbidden model containers"""
-        violations = []
+        violations: list[PolicyViolation] = []
 
         try:
             with open(file_path) as f:
@@ -199,7 +199,7 @@ class PolicyEngine:
 
     def _check_python_for_model_runtime(self, file_path: Path) -> list[PolicyViolation]:
         """Check Python file for forbidden model runtime code"""
-        violations = []
+        violations: list[PolicyViolation] = []
 
         try:
             with open(file_path) as f:
@@ -241,7 +241,7 @@ class PolicyEngine:
         self, spec: dict[str, Any]
     ) -> list[PolicyViolation]:
         """Check inference location compliance"""
-        violations = []
+        violations: list[PolicyViolation] = []
 
         allowed_locations = spec.get(
             "allowed_inference_locations", ["CORE_LOCAL", "CORE_CLOUD"]
@@ -262,7 +262,7 @@ class PolicyEngine:
 
     def _scan_forbidden_patterns(self) -> list[PolicyViolation]:
         """Scan for forbidden patterns in codebase"""
-        violations = []
+        violations: list[PolicyViolation] = []
 
         # Define forbidden patterns
         forbidden_patterns = [
@@ -289,7 +289,7 @@ class PolicyEngine:
         self, file_path: Path, patterns: list[tuple[str, str]]
     ) -> list[PolicyViolation]:
         """Check file for forbidden patterns"""
-        violations = []
+        violations: list[PolicyViolation] = []
 
         try:
             with open(file_path) as f:
@@ -323,7 +323,7 @@ class PolicyEngine:
 
     def _scan_security_issues(self) -> list[PolicyViolation]:
         """Scan for security issues"""
-        violations = []
+        violations: list[PolicyViolation] = []
 
         # Check for hardcoded secrets
         secret_patterns = [
@@ -342,7 +342,7 @@ class PolicyEngine:
 
     def _scan_architecture_violations(self) -> list[PolicyViolation]:
         """Scan for architecture violations"""
-        violations = []
+        violations: list[PolicyViolation] = []
 
         # Check for circular imports
         violations.extend(self._check_circular_imports())
@@ -371,7 +371,7 @@ class PolicyEngine:
         report += "=" * 50 + "\n\n"
 
         # Group by severity
-        by_severity = {}
+        by_severity: dict[str, list[PolicyViolation]] = {}
         for violation in violations:
             severity = violation.severity.value
             if severity not in by_severity:
@@ -397,11 +397,11 @@ class PolicyEngine:
 
         return report
 
-    def validate_all(self, config_path: Optional[str] = None) -> bool:
+    def validate_all(self, config_path: str | None = None) -> bool:
         """Run all validations and return True if all pass"""
         self.load_policies()
 
-        all_violations = []
+        all_violations: list[PolicyViolation] = []
 
         # Validate project spec
         all_violations.extend(self.validate_project_spec())
@@ -418,7 +418,7 @@ class PolicyEngine:
         print(report)
 
         # Check if any BLOCK violations
-        block_violations = [
+        block_violations: list[PolicyViolation] = [
             v for v in all_violations if v.severity == PolicySeverity.BLOCK
         ]
 

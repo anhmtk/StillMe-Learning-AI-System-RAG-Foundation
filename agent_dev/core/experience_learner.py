@@ -21,7 +21,6 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Optional
 
 
 class LearningType(Enum):
@@ -61,7 +60,7 @@ class Experience:
     confidence: LearningConfidence
     timestamp: datetime
     frequency: int = 1
-    last_used: Optional[datetime] = None
+    last_used: datetime | None = None
 
 
 @dataclass

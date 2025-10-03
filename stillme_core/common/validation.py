@@ -25,10 +25,11 @@ import json
 import re
 import urllib.parse
 import uuid
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import date, datetime
 from enum import Enum
-from typing import Any, Callable, Optional, Union
+from typing import Any
 
 import phonenumbers
 from email_validator import EmailNotValidError, validate_email
@@ -75,11 +76,11 @@ class ValidationRule:
     field_name: str
     data_type: DataType
     required: bool = True
-    min_length: Optional[int] = None
-    max_length: Optional[int] = None
-    pattern: Optional[str] = None
-    allowed_values: Optional[list[Any]] = None
-    custom_validator: Optional[Callable] = None
+    min_length: int | None = None
+    max_length: int | None = None
+    pattern: str | None = None
+    allowed_values: list[Any] | None = None
+    custom_validator: Callable | None = None
     sanitize: bool = True
     severity: ValidationSeverity = ValidationSeverity.ERROR
 
@@ -139,7 +140,7 @@ class InputSanitizer:
     ]
 
     @staticmethod
-    def sanitize_string(value: str, max_length: Optional[int] = None) -> str:
+    def sanitize_string(value: str, max_length: int | None = None) -> str:
         """
         Sanitize string input
         Làm sạch input string
@@ -167,7 +168,7 @@ class InputSanitizer:
         return value.strip()
 
     @staticmethod
-    def sanitize_html(value: str, allowed_tags: Optional[list[str]] = None) -> str:
+    def sanitize_html(value: str, allowed_tags: list[str] | None = None) -> str:
         """
         Sanitize HTML input
         Làm sạch input HTML
@@ -275,9 +276,9 @@ class DataValidator:
     @staticmethod
     def validate_string(
         value: Any,
-        min_length: Optional[int] = None,
-        max_length: Optional[int] = None,
-        pattern: Optional[str] = None,
+        min_length: int | None = None,
+        max_length: int | None = None,
+        pattern: str | None = None,
     ) -> str:
         """
         Validate string data
@@ -379,7 +380,7 @@ class DataValidator:
                 parsed, phonenumbers.PhoneNumberFormat.E164
             )
         except Exception as e:
-            raise ValidationError(f"Invalid phone number: {e}")
+            raise ValidationError(f"Invalid phone number: {e}") from e
 
     @staticmethod
     def validate_ip_address(value: str) -> str:
@@ -400,7 +401,7 @@ class DataValidator:
             ipaddress.ip_address(value)
             return value
         except ValueError as e:
-            raise ValidationError(f"Invalid IP address: {e}")
+            raise ValidationError(f"Invalid IP address: {e}") from e
 
     @staticmethod
     def validate_uuid(value: str) -> str:
@@ -421,10 +422,10 @@ class DataValidator:
             uuid.UUID(value)
             return value
         except ValueError as e:
-            raise ValidationError(f"Invalid UUID: {e}")
+            raise ValidationError(f"Invalid UUID: {e}") from e
 
     @staticmethod
-    def validate_date(value: Union[str, date], format: str = "%Y-%m-%d") -> date:
+    def validate_date(value: str | date, format: str = "%Y-%m-%d") -> date:
         """
         Validate date
         Xác thực ngày
@@ -445,11 +446,11 @@ class DataValidator:
         try:
             return datetime.strptime(value, format).date()
         except ValueError as e:
-            raise ValidationError(f"Invalid date format: {e}")
+            raise ValidationError(f"Invalid date format: {e}") from e
 
     @staticmethod
     def validate_datetime(
-        value: Union[str, datetime], format: str = "%Y-%m-%d %H:%M:%S"
+        value: str | datetime, format: str = "%Y-%m-%d %H:%M:%S"
     ) -> datetime:
         """
         Validate datetime
@@ -471,10 +472,10 @@ class DataValidator:
         try:
             return datetime.strptime(value, format)
         except ValueError as e:
-            raise ValidationError(f"Invalid datetime format: {e}")
+            raise ValidationError(f"Invalid datetime format: {e}") from e
 
     @staticmethod
-    def validate_json(value: Union[str, dict, list]) -> Union[dict, list]:
+    def validate_json(value: str | dict | list) -> dict | list:
         """
         Validate JSON
         Xác thực JSON
@@ -488,17 +489,17 @@ class DataValidator:
         Raises:
             ValidationError: If JSON is invalid
         """
-        if isinstance(value, (dict, list)):
+        if isinstance(value, dict | list):
             return value
 
         try:
             return json.loads(value)
         except json.JSONDecodeError as e:
-            raise ValidationError(f"Invalid JSON: {e}")
+            raise ValidationError(f"Invalid JSON: {e}") from e
 
     @staticmethod
     def validate_integer(
-        value: Any, min_value: Optional[int] = None, max_value: Optional[int] = None
+        value: Any, min_value: int | None = None, max_value: int | None = None
     ) -> int:
         """
         Validate integer
@@ -517,8 +518,8 @@ class DataValidator:
         """
         try:
             int_value = int(value)
-        except (ValueError, TypeError):
-            raise ValidationError(f"Invalid integer: {value}")
+        except (ValueError, TypeError) as e:
+            raise ValidationError(f"Invalid integer: {value}") from e
 
         if min_value is not None and int_value < min_value:
             raise ValidationError(f"Integer too small: minimum {min_value}")
@@ -530,7 +531,7 @@ class DataValidator:
 
     @staticmethod
     def validate_float(
-        value: Any, min_value: Optional[float] = None, max_value: Optional[float] = None
+        value: Any, min_value: float | None = None, max_value: float | None = None
     ) -> float:
         """
         Validate float
@@ -549,8 +550,8 @@ class DataValidator:
         """
         try:
             float_value = float(value)
-        except (ValueError, TypeError):
-            raise ValidationError(f"Invalid float: {value}")
+        except (ValueError, TypeError) as e:
+            raise ValidationError(f"Invalid float: {value}") from e
 
         if min_value is not None and float_value < min_value:
             raise ValidationError(f"Float too small: minimum {min_value}")
@@ -584,7 +585,7 @@ class DataValidator:
             elif value.lower() in ("false", "0", "no", "off"):
                 return False
 
-        if isinstance(value, (int, float)):
+        if isinstance(value, int | float):
             return bool(value)
 
         raise ValidationError(f"Invalid boolean: {value}")
@@ -727,7 +728,7 @@ class ValidationEngine:
 
         except Exception as e:
             self.logger.error(f"Validation engine error: {e}")
-            raise StillMeException(f"Validation failed: {e}")
+            raise StillMeException(f"Validation failed: {e}") from e
 
     def _validate_by_type(self, value: Any, rule: ValidationRule) -> Any:
         """
@@ -776,9 +777,9 @@ class ValidationEngine:
 
 def validate_user_input(
     data: dict[str, Any],
-    required_fields: Optional[list[str]] = None,
-    string_fields: Optional[list[str]] = None,
-    email_fields: Optional[list[str]] = None,
+    required_fields: list[str] | None = None,
+    string_fields: list[str] | None = None,
+    email_fields: list[str] | None = None,
 ) -> ValidationResult:
     """
     Validate user input with common rules

@@ -15,7 +15,6 @@ import json
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 
 @dataclass
@@ -143,7 +142,7 @@ class TestSummaryGenerator:
 
     def _load_test_type_results(
         self, artifacts_path: Path, test_type: str
-    ) -> Optional[TestResult]:
+    ) -> TestResult | None:
         """Load results for a specific test type"""
         # Look for test result files
         pattern_files = [

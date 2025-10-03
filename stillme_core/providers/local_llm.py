@@ -5,7 +5,6 @@ Supports Ollama and other local LLM servers.
 
 import asyncio
 import logging
-from typing import Optional
 
 import httpx
 
@@ -19,7 +18,7 @@ class LocalLLMProvider(LLMProviderBase):
 
     def __init__(self, config: ProviderConfig):
         super().__init__(config)
-        self._client: Optional[httpx.AsyncClient] = None
+        self._client: httpx.AsyncClient | None = None
 
     async def initialize(self) -> bool:
         """Initialize the local LLM client."""

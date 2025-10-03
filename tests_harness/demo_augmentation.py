@@ -100,7 +100,7 @@ async def demo_augmentation():
                                 print(f"  {data['variant']}")
                             elif "text" in data:
                                 print(f"  {data['text']}")
-                        except:
+                        except Exception:
                             print(f"  {line.strip()}")
 
         print("=" * 60)

@@ -5,7 +5,7 @@ Metrics collection for AgentDev
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 def ensure_parent_dir(file_path: str | Path) -> None:
@@ -31,7 +31,7 @@ class AgentDevMetrics:
         failed_steps: int,
         pass_rate: float,
         total_duration_s: float,
-        steps_details: Optional[list] = None,
+        steps_details: list | None = None,
     ) -> None:
         """
         Record session metrics
@@ -156,7 +156,7 @@ class AgentDevMetrics:
 
 
 # Global metrics instance
-_global_metrics: Optional[AgentDevMetrics] = None
+_global_metrics: AgentDevMetrics | None = None
 
 
 def get_metrics() -> AgentDevMetrics:
@@ -174,7 +174,7 @@ def record_session(
     failed_steps: int,
     pass_rate: float,
     total_duration_s: float,
-    steps_details: Optional[list] = None,
+    steps_details: list | None = None,
 ) -> None:
     """Convenience function to record session metrics"""
     get_metrics().record_session(

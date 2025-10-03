@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -32,11 +32,11 @@ class SecurityIncident:
     event_type: SecurityEvent
     security_level: SecurityLevel
     description: str
-    source_ip: Optional[str] = None
-    user_id: Optional[str] = None
+    source_ip: str | None = None
+    user_id: str | None = None
     timestamp: datetime = None
     resolved: bool = False
-    resolution: Optional[str] = None
+    resolution: str | None = None
     metadata: dict[str, Any] = None
 
     def __post_init__(self):
@@ -73,8 +73,8 @@ class SecurityManager:
         event_type: SecurityEvent,
         description: str,
         security_level: SecurityLevel = SecurityLevel.MEDIUM,
-        source_ip: Optional[str] = None,
-        user_id: Optional[str] = None,
+        source_ip: str | None = None,
+        user_id: str | None = None,
         metadata: dict[str, Any] = None,
     ) -> SecurityIncident:
         """Log a security event"""

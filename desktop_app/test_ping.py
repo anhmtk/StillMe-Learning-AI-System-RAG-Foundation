@@ -26,7 +26,7 @@ def test_health():
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
-        raise Exception(f"Health check failed: {e}")
+        raise Exception(f"Health check failed: {e}") from e
 
 
 def test_chat(base_url):
@@ -51,7 +51,7 @@ def test_chat(base_url):
         response.raise_for_status()
         return response.json()
     except requests.exceptions.RequestException as e:
-        raise Exception(f"Chat request failed: {e}")
+        raise Exception(f"Chat request failed: {e}") from e
 
 
 def main():

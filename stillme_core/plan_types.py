@@ -2,7 +2,7 @@
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 
 class PlanStatus(Enum):
@@ -27,7 +27,7 @@ class PlanStep:
     id: str
     action: str
     parameters: dict[str, Any]
-    expected_output: Optional[str] = None
+    expected_output: str | None = None
     dependencies: list[str] = None
     status: PlanStatus = PlanStatus.PENDING
 
@@ -46,16 +46,16 @@ class PlanItem:
     steps: list[PlanStep]
     priority: PlanPriority = PlanPriority.MEDIUM
     status: PlanStatus = PlanStatus.PENDING
-    created_at: Optional[str] = None
-    updated_at: Optional[str] = None
+    created_at: str | None = None
+    updated_at: str | None = None
     metadata: dict[str, Any] = None
 
     # Additional attributes for AgentDev compatibility
-    patch: Optional[str] = None
-    action: Optional[str] = None
-    tests_to_run: Optional[list[str]] = None
-    diff_hint: Optional[str] = None
-    target: Optional[str] = None
+    patch: str | None = None
+    action: str | None = None
+    tests_to_run: list[str] | None = None
+    diff_hint: str | None = None
+    target: str | None = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -70,8 +70,8 @@ class ExecutionResult:
     step_id: str
     success: bool
     output: Any = None
-    error: Optional[str] = None
-    execution_time: Optional[float] = None
+    error: str | None = None
+    execution_time: float | None = None
     metadata: dict[str, Any] = None
 
     def __post_init__(self):

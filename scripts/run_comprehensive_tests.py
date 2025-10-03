@@ -12,7 +12,7 @@ import time
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 # Configure logging
 logging.basicConfig(
@@ -31,7 +31,7 @@ class TestResult:
     tests_failed: int
     tests_errors: int
     coverage_percent: float
-    details: Optional[dict[str, Any]] = None
+    details: dict[str, Any] | None = None
 
 
 @dataclass

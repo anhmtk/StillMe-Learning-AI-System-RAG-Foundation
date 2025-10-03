@@ -5,7 +5,7 @@ Approval Queue - Stub implementation
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 
 class ApprovalStatus(Enum):
@@ -59,7 +59,7 @@ class ApprovalQueue:
                 return True
         return False
 
-    def get_request(self, request_id: str) -> Optional[ApprovalRequest]:
+    def get_request(self, request_id: str) -> ApprovalRequest | None:
         """Get request by ID"""
         for req in self.requests:
             if req.id == request_id:
@@ -91,7 +91,7 @@ class ApprovalQueueManager:
         """Reject request"""
         return self.queue.reject_request(request_id)
 
-    async def get_request(self, request_id: str) -> Optional[ApprovalRequest]:
+    async def get_request(self, request_id: str) -> ApprovalRequest | None:
         """Get request by ID"""
         return self.queue.get_request(request_id)
 

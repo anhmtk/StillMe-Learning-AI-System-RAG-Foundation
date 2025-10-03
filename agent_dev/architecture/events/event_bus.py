@@ -8,10 +8,11 @@ import asyncio
 import json
 import time
 import uuid
+from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any
 
 import aiofiles
 
@@ -68,9 +69,9 @@ class Event:
     timestamp: float
     source: str
     data: dict[str, Any]
-    correlation_id: Optional[str] = None
-    causation_id: Optional[str] = None
-    metadata: Optional[dict[str, Any]] = None
+    correlation_id: str | None = None
+    causation_id: str | None = None
+    metadata: dict[str, Any] | None = None
 
 
 @dataclass
@@ -87,7 +88,7 @@ class EventHandler:
 class EventBus:
     """Enterprise event bus with persistence and replay capabilities"""
 
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config_path: str | None = None):
         self.handlers: dict[EventType, list[EventHandler]] = {}
         self.event_store: list[Event] = []
         self.config = self._load_config(config_path)
@@ -100,7 +101,7 @@ class EventBus:
         self.max_events = self.config.get("max_events", 10000)
         self.running = False
 
-    def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
+    def _load_config(self, config_path: str | None = None) -> dict[str, Any]:
         """Load event bus configuration"""
         if config_path:
             config_file = Path(config_path)
@@ -123,7 +124,7 @@ class EventBus:
         self,
         event_types: list[EventType],
         handler_func: Callable[[Event], None],
-        handler_id: Optional[str] = None,
+        handler_id: str | None = None,
         priority: int = 0,
         async_handler: bool = False,
     ) -> str:
@@ -175,9 +176,9 @@ class EventBus:
         event_type: EventType,
         data: dict[str, Any],
         source: str,
-        correlation_id: Optional[str] = None,
-        causation_id: Optional[str] = None,
-        metadata: Optional[dict[str, Any]] = None,
+        correlation_id: str | None = None,
+        causation_id: str | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> str:
         """Publish an event"""
         event = Event(
@@ -238,9 +239,9 @@ class EventBus:
 
     async def replay_events(
         self,
-        event_types: Optional[list[EventType]] = None,
-        from_timestamp: Optional[float] = None,
-        to_timestamp: Optional[float] = None,
+        event_types: list[EventType] | None = None,
+        from_timestamp: float | None = None,
+        to_timestamp: float | None = None,
     ) -> list[Event]:
         """Replay events from store"""
         events = []
@@ -339,7 +340,7 @@ async def publish_task_event(
     event_type: EventType,
     task_id: str,
     data: dict[str, Any],
-    correlation_id: Optional[str] = None,
+    correlation_id: str | None = None,
 ) -> str:
     """Publish task-related event"""
     return await event_bus.publish(
@@ -351,7 +352,7 @@ async def publish_task_event(
 
 
 async def publish_security_event(
-    event_type: EventType, data: dict[str, Any], correlation_id: Optional[str] = None
+    event_type: EventType, data: dict[str, Any], correlation_id: str | None = None
 ) -> str:
     """Publish security-related event"""
     return await event_bus.publish(
@@ -363,7 +364,7 @@ async def publish_security_event(
 
 
 async def publish_system_event(
-    event_type: EventType, data: dict[str, Any], correlation_id: Optional[str] = None
+    event_type: EventType, data: dict[str, Any], correlation_id: str | None = None
 ) -> str:
     """Publish system-related event"""
     return await event_bus.publish(

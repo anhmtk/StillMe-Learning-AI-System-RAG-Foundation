@@ -11,9 +11,10 @@ Phase: 0.1 - Security Remediation
 import json
 import logging
 import os
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Callable, Optional
+from typing import Any
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -88,7 +89,7 @@ class ValidationFramework:
             logger.info(f"Removed validation rule: {rule_name}")
 
     def validate(
-        self, data: Any, rule_name: Optional[str] = None
+        self, data: Any, rule_name: str | None = None
     ) -> list[ValidationResult]:
         """Validate data against rules"""
         results = []

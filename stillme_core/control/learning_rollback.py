@@ -18,7 +18,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -79,14 +79,14 @@ class LearningRollback:
     - Safety checks: Validate rollback safety
     """
 
-    def __init__(self, config: Optional[dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self.logger = logger
 
         # Storage
         self.snapshots: dict[str, LearningSnapshot] = {}
         self.rollback_history: list[RollbackResult] = []
-        self.current_version: Optional[str] = None
+        self.current_version: str | None = None
 
         # Configuration
         self.artifacts_path = Path("artifacts")
@@ -107,7 +107,7 @@ class LearningRollback:
         update_type: LearningUpdateType,
         description: str,
         changes: dict[str, Any],
-        dependencies: Optional[list[str]] = None,
+        dependencies: list[str] | None = None,
     ) -> LearningSnapshot:
         """
         Create a snapshot of current learning state.
@@ -424,7 +424,7 @@ class LearningRollback:
         except Exception as e:
             self.logger.error(f"Failed to load snapshots: {e}")
 
-    def get_current_version(self) -> Optional[str]:
+    def get_current_version(self) -> str | None:
         """Get current version ID"""
         return self.current_version
 

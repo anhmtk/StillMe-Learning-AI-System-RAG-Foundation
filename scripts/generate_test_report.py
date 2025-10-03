@@ -379,7 +379,7 @@ def generate_architecture_info() -> str:
 
         info.append(f"- **Commit SHA**: {commit_sha}")
         info.append(f"- **Branch**: {branch}")
-    except:
+    except Exception:
         info.append("- **Commit SHA**: Unknown")
         info.append("- **Branch**: Unknown")
 

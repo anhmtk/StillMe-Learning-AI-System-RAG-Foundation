@@ -1,9 +1,3 @@
-import pytest
-
-pytest.skip("Missing imports from stillme_core", allow_module_level=True)
-
-from stillme_core import ReflectionResult
-
 #!/usr/bin/env python3
 """
 Integration tests for Reflection Controller
@@ -25,6 +19,7 @@ import time
 import pytest
 
 # Import components to test
+from stillme_core import ReflectionResult
 from stillme_core.reflection_controller import (
     ReflectionConfig,
     ReflectionContext,
@@ -34,6 +29,8 @@ from stillme_core.reflection_controller import (
 )
 from stillme_core.reflection_scorer import get_default_scorer
 from stillme_core.secrecy_filter import get_default_filter
+
+pytest.skip("Missing imports from stillme_core", allow_module_level=True)
 
 
 class TestReflectionIntegration:
@@ -204,7 +201,7 @@ class TestReflectionIntegration:
         start_time = time.time()
         tasks = [
             self.controller.enhance_response(response, query)
-            for response, query in zip(responses, queries)
+            for response, query in zip(responses, queries, strict=False)
         ]
 
         results = await asyncio.gather(*tasks, return_exceptions=True)

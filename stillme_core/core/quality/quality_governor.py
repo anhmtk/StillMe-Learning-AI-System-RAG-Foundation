@@ -331,9 +331,9 @@ class QualityGovernor:
 
         for node in ast.walk(tree):
             if (
-                isinstance(node, (ast.If, ast.While, ast.For, ast.AsyncFor))
+                isinstance(node, ast.If | ast.While | ast.For | ast.AsyncFor)
                 or isinstance(node, ast.ExceptHandler)
-                or isinstance(node, (ast.And, ast.Or))
+                or isinstance(node, ast.And | ast.Or)
             ):
                 complexity += 1
 
@@ -351,9 +351,9 @@ class QualityGovernor:
                     if isinstance(child, ast.If) and child != node:
                         complexity += 1
             elif (
-                isinstance(node, (ast.While, ast.For, ast.AsyncFor))
+                isinstance(node, ast.While | ast.For | ast.AsyncFor)
                 or isinstance(node, ast.ExceptHandler)
-                or isinstance(node, (ast.And, ast.Or))
+                or isinstance(node, ast.And | ast.Or)
             ):
                 complexity += 1
 

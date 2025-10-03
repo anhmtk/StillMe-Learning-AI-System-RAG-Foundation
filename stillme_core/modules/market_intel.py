@@ -19,7 +19,7 @@ import time
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import aiohttp
 
@@ -232,7 +232,7 @@ class MarketIntelligence:
         self.last_request_time[source] = now
         return True
 
-    def _get_next_proxy(self) -> Optional[dict[str, str]]:
+    def _get_next_proxy(self) -> dict[str, str] | None:
         """Get next proxy in rotation"""
         if not self.proxy_list:
             return None
@@ -682,7 +682,7 @@ class MarketIntelligence:
             return []
 
     async def get_reddit_trends(
-        self, subreddits: Optional[list[str]] = None, max_posts: int = 10
+        self, subreddits: list[str] | None = None, max_posts: int = 10
     ) -> list[TrendData]:
         """
         Lấy trending posts từ Reddit
@@ -771,7 +771,7 @@ class MarketIntelligence:
             return []
 
     async def get_stackoverflow_trends(
-        self, tags: Optional[list[str]] = None, max_questions: int = 10
+        self, tags: list[str] | None = None, max_questions: int = 10
     ) -> list[TrendData]:
         """
         Lấy trending questions từ Stack Overflow
@@ -866,7 +866,7 @@ class MarketIntelligence:
             return []
 
     async def consolidate_trends(
-        self, keywords: Optional[list[str]] = None
+        self, keywords: list[str] | None = None
     ) -> MarketIntelligenceReport:
         """
         Tổng hợp dữ liệu từ tất cả các nguồn và tạo báo cáo xu hướng
@@ -1065,7 +1065,7 @@ class MarketIntelligence:
         )
 
     async def get_predictive_analysis(
-        self, keywords: Optional[list[str]] = None
+        self, keywords: list[str] | None = None
     ) -> dict[str, Any]:
         """
         Lấy phân tích dự báo xu hướng với khuyến nghị kinh doanh
@@ -1147,7 +1147,7 @@ class MarketIntelligence:
 
 # Convenience functions for easy integration
 async def get_market_intelligence(
-    keywords: Optional[list[str]] = None,
+    keywords: list[str] | None = None,
 ) -> MarketIntelligenceReport:
     """
     Convenience function to get market intelligence report
@@ -1163,7 +1163,7 @@ async def get_market_intelligence(
 
 
 def get_market_intelligence_sync(
-    keywords: Optional[list[str]] = None,
+    keywords: list[str] | None = None,
 ) -> MarketIntelligenceReport:
     """
     Synchronous version of get_market_intelligence

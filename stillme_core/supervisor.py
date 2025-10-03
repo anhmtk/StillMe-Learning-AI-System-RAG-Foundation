@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -39,9 +39,9 @@ class LessonProposal:
     status: LessonStatus
     created_by: str
     created_at: datetime
-    approved_by: Optional[str] = None
-    approved_at: Optional[datetime] = None
-    metadata: Optional[dict[str, Any]] = None
+    approved_by: str | None = None
+    approved_at: datetime | None = None
+    metadata: dict[str, Any] | None = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -60,7 +60,7 @@ class DailySupervisor:
     total_learning_time: int  # minutes
     performance_score: float
     notes: list[str]
-    metadata: Optional[dict[str, Any]] = None
+    metadata: dict[str, Any] | None = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -102,8 +102,8 @@ class Supervisor:
         category: str,
         difficulty: str = "medium",
         estimated_duration: int = 30,
-        prerequisites: Optional[list[str]] = None,
-        learning_objectives: Optional[list[str]] = None,
+        prerequisites: list[str] | None = None,
+        learning_objectives: list[str] | None = None,
         created_by: str = "system",
     ) -> LessonProposal:
         """Create a new lesson proposal"""
@@ -182,7 +182,7 @@ class Supervisor:
         return [p for p in self.lesson_proposals if p.status == LessonStatus.APPROVED]
 
     def create_daily_supervisor(
-        self, date: Optional[datetime] = None
+        self, date: datetime | None = None
     ) -> DailySupervisor:
         """Create daily supervisor record"""
         try:
@@ -213,11 +213,11 @@ class Supervisor:
     def update_daily_supervisor(
         self,
         supervisor_id: str,
-        lessons_completed: Optional[int] = None,
-        lessons_failed: Optional[int] = None,
-        total_learning_time: Optional[int] = None,
-        performance_score: Optional[float] = None,
-        note: Optional[str] = None,
+        lessons_completed: int | None = None,
+        lessons_failed: int | None = None,
+        total_learning_time: int | None = None,
+        performance_score: float | None = None,
+        note: str | None = None,
     ) -> bool:
         """Update daily supervisor record"""
         try:
@@ -245,8 +245,8 @@ class Supervisor:
             return False
 
     def get_daily_supervisor(
-        self, date: Optional[datetime] = None
-    ) -> Optional[DailySupervisor]:
+        self, date: datetime | None = None
+    ) -> DailySupervisor | None:
         """Get daily supervisor for a specific date"""
         try:
             if date is None:

@@ -9,7 +9,7 @@ Usage: Gọi load_interaction_policy() ở đầu mọi entrypoint
 
 import logging
 import os
-from typing import Any, Optional
+from typing import Any
 
 import yaml
 
@@ -18,11 +18,11 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Global policy instance
-_policy: Optional[dict[str, Any]] = None
+_policy: dict[str, Any] | None = None
 _policy_loaded = False
 
 
-def load_interaction_policy(policy_path: Optional[str] = None) -> dict[str, Any]:
+def load_interaction_policy(policy_path: str | None = None) -> dict[str, Any]:
     """
     Load Interaction Policy từ YAML file
 
@@ -72,7 +72,7 @@ def load_interaction_policy(policy_path: Optional[str] = None) -> dict[str, Any]
     except Exception as error:
         error_message = f"Failed to load Interaction Policy from {policy_path}: {error}"
         logger.error(f"❌ {error_message}")
-        raise ValueError(error_message)
+        raise ValueError(error_message) from error
 
 
 def _validate_policy(policy: dict[str, Any]) -> None:
@@ -274,7 +274,7 @@ def ensure_policy_loaded() -> None:
         try:
             load_interaction_policy()
         except Exception as e:
-            raise ValueError(f"Failed to auto-load Interaction Policy: {e}")
+            raise ValueError(f"Failed to auto-load Interaction Policy: {e}") from e
 
 
 # Auto-load policy on module import

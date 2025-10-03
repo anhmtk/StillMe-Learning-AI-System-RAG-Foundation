@@ -68,7 +68,7 @@ import logging
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -127,7 +127,7 @@ class PIIRedactor:
     TODO: Implement full privacy features.
     """
 
-    def __init__(self, config: Optional[RedactionConfig] = None):
+    def __init__(self, config: RedactionConfig | None = None):
         """Initialize PIIRedactor"""
         self.config = config or RedactionConfig()
         self.patterns = self._initialize_patterns()

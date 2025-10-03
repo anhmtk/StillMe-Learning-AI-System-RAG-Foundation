@@ -1,10 +1,11 @@
 """Safe Runner for StillMe Framework"""
 
 import logging
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Callable, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -34,10 +35,10 @@ class SafeRun:
     status: RunStatus
     safety_level: SafetyLevel
     start_time: datetime
-    end_time: Optional[datetime] = None
-    duration: Optional[float] = None
+    end_time: datetime | None = None
+    duration: float | None = None
     result: Any = None
-    error: Optional[str] = None
+    error: str | None = None
     metadata: dict[str, Any] = None
 
     def __post_init__(self):

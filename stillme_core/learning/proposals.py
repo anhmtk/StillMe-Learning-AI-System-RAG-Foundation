@@ -25,7 +25,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -82,15 +82,15 @@ class LearningProposal:
     approval_required: bool
     metadata: dict[str, Any]
     # Optional fields from database
-    approved_at: Optional[str] = None
-    approved_by: Optional[str] = None
-    rejected_at: Optional[str] = None
-    rejected_by: Optional[str] = None
-    rejection_reason: Optional[str] = None
-    learning_started_at: Optional[str] = None
-    learning_completed_at: Optional[str] = None
-    learning_failed_at: Optional[str] = None
-    failure_reason: Optional[str] = None
+    approved_at: str | None = None
+    approved_by: str | None = None
+    rejected_at: str | None = None
+    rejected_by: str | None = None
+    rejection_reason: str | None = None
+    learning_started_at: str | None = None
+    learning_completed_at: str | None = None
+    learning_failed_at: str | None = None
+    failure_reason: str | None = None
 
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary"""
@@ -219,7 +219,7 @@ class LearningProposalsManager:
             logger.error(f"Failed to create proposal: {e}")
             raise
 
-    def get_proposal(self, proposal_id: str) -> Optional[LearningProposal]:
+    def get_proposal(self, proposal_id: str) -> LearningProposal | None:
         """Lấy đề xuất theo ID"""
         try:
             with sqlite3.connect(self.db_path) as conn:
@@ -236,7 +236,7 @@ class LearningProposalsManager:
 
                 # Convert row to dict
                 columns = [desc[0] for desc in cursor.description]
-                data = dict(zip(columns, row))
+                data = dict(zip(columns, row, strict=False))
 
                 # Parse JSON fields
                 data["learning_objectives"] = json.loads(data["learning_objectives"])
@@ -268,7 +268,7 @@ class LearningProposalsManager:
                 proposals = []
                 for row in cursor.fetchall():
                     columns = [desc[0] for desc in cursor.description]
-                    data = dict(zip(columns, row))
+                    data = dict(zip(columns, row, strict=False))
 
                     # Parse JSON fields
                     data["learning_objectives"] = json.loads(

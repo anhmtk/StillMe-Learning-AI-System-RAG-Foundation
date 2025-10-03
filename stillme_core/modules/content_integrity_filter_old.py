@@ -26,7 +26,7 @@ import os
 import re
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 # Import với fallback để tránh lỗi
 try:
@@ -205,7 +205,7 @@ class OpenRouterClient:
         messages: list,
         temperature: float = 0.1,
         max_tokens: int = 700,
-        response_format: Optional[dict] = None,
+        response_format: dict | None = None,
     ) -> str:
         """Gửi yêu cầu chat completion tới OpenRouter API."""
         payload = {
@@ -225,6 +225,11 @@ class OpenRouterClient:
             response.raise_for_status()
             data = response.json()
             return data["choices"][0]["message"]["content"]
+        except (KeyError, IndexError, json.JSONDecodeError) as e:
+            logger.error(
+                f"OpenRouter API Response Parse Error: {e} - Raw: {response.text if 'response' in locals() else 'No response'}"
+            )
+            raise
         except Exception as e:
             if (
                 HTTPX_AVAILABLE
@@ -241,15 +246,7 @@ class OpenRouterClient:
             ):
                 logger.error(f"OpenRouter API Network Error: {e}")
             else:
-                logger.error(f"OpenRouter API Error: {e}")
-            raise
-        except (KeyError, IndexError, json.JSONDecodeError) as e:
-            logger.error(
-                f"OpenRouter API Response Parse Error: {e} - Raw: {response.text if 'response' in locals() else 'No response'}"
-            )
-            raise
-        except Exception as e:
-            logger.error(f"Lỗi không mong muốn trong OpenRouterClient: {e}")
+                logger.error(f"Lỗi không mong muốn trong OpenRouterClient: {e}")
             raise
 
     async def close(self):
@@ -265,7 +262,7 @@ class ContentIntegrityFilter:
     """
 
     def __init__(
-        self, openrouter_api_key: Optional[str] = None, testing_mode: bool = False
+        self, openrouter_api_key: str | None = None, testing_mode: bool = False
     ):
         if not openrouter_api_key:
             openrouter_api_key = os.getenv("OPENROUTER_API_KEY")
@@ -416,7 +413,7 @@ class ContentIntegrityFilter:
         return url.split("/")[0]
 
     async def pre_filter_content(
-        self, content_text: str, source_url: Optional[str] = None
+        self, content_text: str, source_url: str | None = None
     ) -> tuple[bool, str, Severity]:
         """
         Giai đoạn 1: Lọc nhanh dựa trên từ khóa, nguồn và độ dài nội dung.
@@ -605,11 +602,11 @@ class ContentIntegrityFilter:
         self,
         content_id: str,
         content_text: str,
-        source_url: Optional[str],
+        source_url: str | None,
         violation_type: ContentViolationType,
         severity: Severity,
         details: str,
-        extra_data: Optional[dict] = None,
+        extra_data: dict | None = None,
     ):
         """
         Ghi lại chi tiết về một vi phạm nội dung vào file log chuyên biệt.
@@ -638,7 +635,7 @@ class ContentIntegrityFilter:
         )
 
     async def filter_content(
-        self, content_id: str, content_text: str, source_url: Optional[str] = None
+        self, content_id: str, content_text: str, source_url: str | None = None
     ) -> tuple[bool, str, Severity, dict[str, Any]]:
         """
         Hàm chính điều phối quá trình lọc nội dung.
@@ -814,7 +811,7 @@ class ContentIntegrityFilter:
         model: OpenRouterModel,
         temperature: float = 0.1,
         max_tokens: int = 700,
-        response_format: Optional[dict] = None,
+        response_format: dict | None = None,
     ) -> str:
         """Call LLM API hoặc trả về test response trong testing mode"""
         if self.testing_mode:

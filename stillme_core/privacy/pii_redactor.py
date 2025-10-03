@@ -12,7 +12,6 @@ Created: 2025-01-08
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional
 
 
 class PIIType(Enum):
@@ -52,7 +51,7 @@ class PIIRedactor:
     - Confidence scoring
     """
 
-    def __init__(self, config: Optional[dict] = None):
+    def __init__(self, config: dict | None = None):
         """Initialize PII redactor with configuration"""
         self.config = config or {}
         self.patterns = self._build_patterns()

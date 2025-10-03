@@ -21,10 +21,11 @@ import hashlib
 import html
 import json
 import re
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any
 
 import bleach
 import jinja2
@@ -66,10 +67,10 @@ class TemplateConfig:
     name: str
     template_type: TemplateType
     security_level: SecurityLevel
-    allowed_variables: Optional[set[str]] = None
-    max_length: Optional[int] = None
-    required_variables: Optional[set[str]] = None
-    custom_validators: Optional[list[Callable]] = None
+    allowed_variables: set[str] | None = None
+    max_length: int | None = None
+    required_variables: set[str] | None = None
+    custom_validators: list[Callable] | None = None
     cache_enabled: bool = True
     audit_logging: bool = True
 
@@ -79,8 +80,8 @@ class TemplateContext:
     """Template rendering context - Context render template"""
 
     variables: dict[str, Any]
-    metadata: Optional[dict[str, Any]] = None
-    security_context: Optional[dict[str, Any]] = None
+    metadata: dict[str, Any] | None = None
+    security_context: dict[str, Any] | None = None
 
 
 class SecurityValidator:
@@ -198,8 +199,8 @@ class SecurityValidator:
     @staticmethod
     def validate_variables(
         variables: dict[str, Any],
-        allowed_variables: Optional[set[str]] = None,
-        required_variables: Optional[set[str]] = None,
+        allowed_variables: set[str] | None = None,
+        required_variables: set[str] | None = None,
     ) -> None:
         """
         Validate template variables
@@ -245,7 +246,7 @@ class TemplateManager:
     Hệ thống quản lý template an toàn
     """
 
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config_path: str | None = None):
         """
         Initialize template manager
         Khởi tạo template manager
@@ -308,7 +309,7 @@ class TemplateManager:
             )
         except Exception as e:
             self.logger.error(f"Failed to load template configurations: {e}")
-            raise StillMeException(f"Template configuration error: {e}")
+            raise StillMeException(f"Template configuration error: {e}") from e
 
     def _secure_filter(self, value: Any, security_level: str = "medium") -> str:
         """
@@ -352,7 +353,7 @@ class TemplateManager:
         self,
         template_name: str,
         template_content: str,
-        config: Optional[TemplateConfig] = None,
+        config: TemplateConfig | None = None,
     ) -> Template:
         """
         Load and compile template
@@ -389,16 +390,16 @@ class TemplateManager:
 
         except TemplateSyntaxError as e:
             self.logger.error(f"Template syntax error in '{template_name}': {e}")
-            raise ValidationError(f"Invalid template syntax: {e}")
+            raise ValidationError(f"Invalid template syntax: {e}") from e
         except Exception as e:
             self.logger.error(f"Template loading error for '{template_name}': {e}")
-            raise StillMeException(f"Template loading failed: {e}")
+            raise StillMeException(f"Template loading failed: {e}") from e
 
     def render_template(
         self,
         template_name: str,
         context: TemplateContext,
-        config: Optional[TemplateConfig] = None,
+        config: TemplateConfig | None = None,
     ) -> str:
         """
         Render template with context
@@ -463,13 +464,13 @@ class TemplateManager:
 
         except UndefinedError as e:
             self.logger.error(f"Undefined variable in template '{template_name}': {e}")
-            raise ValidationError(f"Undefined variable: {e}")
+            raise ValidationError(f"Undefined variable: {e}") from e
         except Exception as e:
             self.logger.error(f"Template rendering error for '{template_name}': {e}")
-            raise StillMeException(f"Template rendering failed: {e}")
+            raise StillMeException(f"Template rendering failed: {e}") from e
 
     def load_template_from_file(
-        self, file_path: str, template_name: Optional[str] = None
+        self, file_path: str, template_name: str | None = None
     ) -> Template:
         """
         Load template from file
@@ -494,7 +495,7 @@ class TemplateManager:
 
         except Exception as e:
             self.logger.error(f"Failed to load template from file '{file_path}': {e}")
-            raise StillMeException(f"Template file loading failed: {e}")
+            raise StillMeException(f"Template file loading failed: {e}") from e
 
     def save_template_to_file(
         self, template_name: str, template_content: str, file_path: str
@@ -525,9 +526,9 @@ class TemplateManager:
 
         except Exception as e:
             self.logger.error(f"Failed to save template to file '{file_path}': {e}")
-            raise StillMeException(f"Template file saving failed: {e}")
+            raise StillMeException(f"Template file saving failed: {e}") from e
 
-    def get_template_config(self, template_name: str) -> Optional[TemplateConfig]:
+    def get_template_config(self, template_name: str) -> TemplateConfig | None:
         """
         Get template configuration
         Lấy cấu hình template

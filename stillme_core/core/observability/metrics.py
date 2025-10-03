@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 class MetricType(Enum):
@@ -34,8 +34,8 @@ class MetricPoint:
     value: float
     metric_type: str
     timestamp: str
-    labels: Optional[dict[str, str]] = None
-    unit: Optional[str] = None
+    labels: dict[str, str] | None = None
+    unit: str | None = None
 
 
 @dataclass
@@ -153,8 +153,8 @@ class MetricsCollector:
         name: str,
         value: float,
         metric_type: MetricType = MetricType.GAUGE,
-        labels: Optional[dict[str, str]] = None,
-        unit: Optional[str] = None,
+        labels: dict[str, str] | None = None,
+        unit: str | None = None,
     ):
         """Record a metric"""
         metric = MetricPoint(
@@ -173,7 +173,7 @@ class MetricsCollector:
         self._store_metric(metric)
 
     def increment_counter(
-        self, name: str, value: float = 1.0, labels: Optional[dict[str, str]] = None
+        self, name: str, value: float = 1.0, labels: dict[str, str] | None = None
     ):
         """Increment a counter metric"""
         self.record_metric(name, value, MetricType.COUNTER, labels)
@@ -182,31 +182,31 @@ class MetricsCollector:
         self,
         name: str,
         value: float,
-        labels: Optional[dict[str, str]] = None,
-        unit: Optional[str] = None,
+        labels: dict[str, str] | None = None,
+        unit: str | None = None,
     ):
         """Set a gauge metric"""
         self.record_metric(name, value, MetricType.GAUGE, labels, unit)
 
     def record_histogram(
-        self, name: str, value: float, labels: Optional[dict[str, str]] = None
+        self, name: str, value: float, labels: dict[str, str] | None = None
     ):
         """Record a histogram value"""
         self.record_metric(name, value, MetricType.HISTOGRAM, labels)
 
     def record_timer(
-        self, name: str, duration_ms: float, labels: Optional[dict[str, str]] = None
+        self, name: str, duration_ms: float, labels: dict[str, str] | None = None
     ):
         """Record a timer metric"""
         self.record_metric(name, duration_ms, MetricType.TIMER, labels, "ms")
 
-    def time_operation(self, name: str, labels: Optional[dict[str, str]] = None):
+    def time_operation(self, name: str, labels: dict[str, str] | None = None):
         """Context manager for timing operations"""
         return TimerContext(self, name, labels)
 
     def get_metric_summary(
-        self, name: str, time_range: Optional[timedelta] = None
-    ) -> Optional[MetricSummary]:
+        self, name: str, time_range: timedelta | None = None
+    ) -> MetricSummary | None:
         """Get summary statistics for a metric"""
         with self._lock:
             conn = sqlite3.connect(self.db_path)
@@ -338,8 +338,8 @@ class MetricsCollector:
     def export_metrics(
         self,
         output_file: str,
-        time_range: Optional[timedelta] = None,
-        metric_names: Optional[list[str]] = None,
+        time_range: timedelta | None = None,
+        metric_names: list[str] | None = None,
     ) -> bool:
         """Export metrics to JSON file"""
         try:
@@ -438,7 +438,7 @@ class TimerContext:
         self,
         collector: MetricsCollector,
         name: str,
-        labels: Optional[dict[str, str]] = None,
+        labels: dict[str, str] | None = None,
     ):
         self.collector = collector
         self.name = name
@@ -456,7 +456,7 @@ class TimerContext:
 
 
 # Global metrics collector instance
-_global_collector: Optional[MetricsCollector] = None
+_global_collector: MetricsCollector | None = None
 
 
 def get_metrics_collector() -> MetricsCollector:

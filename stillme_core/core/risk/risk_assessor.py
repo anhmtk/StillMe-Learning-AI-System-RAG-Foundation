@@ -419,9 +419,9 @@ class RiskAssessor:
 
                 for child in ast.walk(node):
                     if (
-                        isinstance(child, (ast.If, ast.While, ast.For, ast.AsyncFor))
+                        isinstance(child, ast.If | ast.While | ast.For | ast.AsyncFor)
                         or isinstance(child, ast.ExceptHandler)
-                        or isinstance(child, (ast.And, ast.Or))
+                        or isinstance(child, ast.And | ast.Or)
                     ):
                         complexity += 1
 

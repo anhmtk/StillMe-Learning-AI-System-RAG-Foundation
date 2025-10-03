@@ -44,7 +44,6 @@ import os
 # Import common utilities
 import sys
 from enum import Enum
-from typing import Optional
 
 import httpx  # Import httpx cần thiết cho OpenRouterClient
 
@@ -224,7 +223,7 @@ class EthicsGuard:
 
     async def check_input_safety(
         self, user_input: str
-    ) -> tuple[bool, Optional[ViolationType], Optional[Severity], str]:
+    ) -> tuple[bool, ViolationType | None, Severity | None, str]:
         if self.detect_keywords(user_input):
             return (
                 False,
@@ -288,7 +287,7 @@ class EthicsGuard:
 
     async def check_output_safety(
         self, ai_response: str
-    ) -> tuple[bool, Optional[ViolationType], Optional[Severity], str]:
+    ) -> tuple[bool, ViolationType | None, Severity | None, str]:
         if self.detect_keywords(ai_response):
             return (
                 False,

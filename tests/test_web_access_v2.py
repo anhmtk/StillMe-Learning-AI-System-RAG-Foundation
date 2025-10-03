@@ -1,12 +1,10 @@
-import os
-
 #!/usr/bin/env python3
 """
 Web Access v2 Test Suite - Red-Team & Functional Tests
 Comprehensive testing for enhanced web access security
 """
 
-# Import modules to test
+import os
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path

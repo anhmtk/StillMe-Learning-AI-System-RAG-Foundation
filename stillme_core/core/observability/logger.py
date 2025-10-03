@@ -15,12 +15,12 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 # Context variables for request tracking
-request_id_var: ContextVar[Optional[str]] = ContextVar("request_id", default=None)
-user_id_var: ContextVar[Optional[str]] = ContextVar("user_id", default=None)
-session_id_var: ContextVar[Optional[str]] = ContextVar("session_id", default=None)
+request_id_var: ContextVar[str | None] = ContextVar("request_id", default=None)
+user_id_var: ContextVar[str | None] = ContextVar("user_id", default=None)
+session_id_var: ContextVar[str | None] = ContextVar("session_id", default=None)
 
 
 class LogLevel(Enum):
@@ -43,12 +43,12 @@ class LogEntry:
     module: str
     function: str
     line_number: int
-    request_id: Optional[str] = None
-    user_id: Optional[str] = None
-    session_id: Optional[str] = None
-    extra_data: Optional[dict[str, Any]] = None
-    duration_ms: Optional[float] = None
-    trace_id: Optional[str] = None
+    request_id: str | None = None
+    user_id: str | None = None
+    session_id: str | None = None
+    extra_data: dict[str, Any] | None = None
+    duration_ms: float | None = None
+    trace_id: str | None = None
 
 
 class StructuredLogger:
@@ -57,7 +57,7 @@ class StructuredLogger:
     def __init__(
         self,
         name: str = "stillme",
-        log_file: Optional[str] = None,
+        log_file: str | None = None,
         level: LogLevel = LogLevel.INFO,
         enable_console: bool = True,
         enable_file: bool = True,
@@ -81,7 +81,7 @@ class StructuredLogger:
         # Performance tracking
         self._start_times: dict[str, float] = {}
 
-    def _get_context(self) -> dict[str, Optional[str]]:
+    def _get_context(self) -> dict[str, str | None]:
         """Get current context variables"""
         return {
             "request_id": request_id_var.get(),
@@ -104,8 +104,8 @@ class StructuredLogger:
         self,
         level: LogLevel,
         message: str,
-        extra_data: Optional[dict[str, Any]] = None,
-        duration_ms: Optional[float] = None,
+        extra_data: dict[str, Any] | None = None,
+        duration_ms: float | None = None,
     ) -> LogEntry:
         """Create a structured log entry"""
         # Get caller information
@@ -213,7 +213,7 @@ class StructuredLogger:
         self._start_times[operation] = time.time()
         self.debug(f"Started timing operation: {operation}")
 
-    def end_timer(self, operation: str, message: Optional[str] = None):
+    def end_timer(self, operation: str, message: str | None = None):
         """End timing an operation and log duration"""
         if operation in self._start_times:
             duration_ms = (time.time() - self._start_times[operation]) * 1000
@@ -255,9 +255,9 @@ class StructuredLogger:
 
     def set_context(
         self,
-        request_id: Optional[str] = None,
-        user_id: Optional[str] = None,
-        session_id: Optional[str] = None,
+        request_id: str | None = None,
+        user_id: str | None = None,
+        session_id: str | None = None,
     ):
         """Set context variables for current thread"""
         if request_id:
@@ -307,7 +307,7 @@ class StructuredLogger:
 
 
 # Global logger instance
-_global_logger: Optional[StructuredLogger] = None
+_global_logger: StructuredLogger | None = None
 
 
 def get_logger(name: str = "stillme") -> StructuredLogger:
@@ -320,7 +320,7 @@ def get_logger(name: str = "stillme") -> StructuredLogger:
 
 def setup_logging(
     name: str = "stillme",
-    log_file: Optional[str] = None,
+    log_file: str | None = None,
     level: LogLevel = LogLevel.INFO,
     enable_console: bool = True,
     enable_file: bool = True,
@@ -343,9 +343,9 @@ class LogContext:
 
     def __init__(
         self,
-        request_id: Optional[str] = None,
-        user_id: Optional[str] = None,
-        session_id: Optional[str] = None,
+        request_id: str | None = None,
+        user_id: str | None = None,
+        session_id: str | None = None,
     ):
         self.request_id = request_id or str(uuid.uuid4())
         self.user_id = user_id

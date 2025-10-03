@@ -16,7 +16,7 @@ import time
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 import psutil
@@ -233,7 +233,7 @@ class Alert:
     source: str
     timestamp: datetime
     resolved: bool
-    resolved_at: Optional[datetime]
+    resolved_at: datetime | None
     metadata: dict[str, Any]
 
 
@@ -246,7 +246,7 @@ class HealthCheck:
     status: SystemState
     last_check: datetime
     response_time: float
-    error_message: Optional[str]
+    error_message: str | None
     metadata: dict[str, Any]
 
 
@@ -259,7 +259,7 @@ class RecoveryPlan:
     actions: list[RecoveryAction]
     priority: int
     timeout_seconds: int
-    rollback_plan: Optional[str]
+    rollback_plan: str | None
     metadata: dict[str, Any]
 
 
@@ -268,7 +268,7 @@ class AutonomousManagementSystem:
     Main Autonomous Management System
     """
 
-    def __init__(self, config: Optional[dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self.logger = self._setup_logging()
 

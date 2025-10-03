@@ -16,7 +16,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 # Import all Phase 2 modules
 try:
@@ -94,11 +94,11 @@ class IntegrationTestResult:
     test_type: IntegrationTestType
     status: TestStatus
     start_time: datetime
-    end_time: Optional[datetime]
+    end_time: datetime | None
     duration: float
     passed: bool
     failed: bool
-    error_message: Optional[str]
+    error_message: str | None
     metrics: dict[str, Any]
     details: dict[str, Any]
 
@@ -140,7 +140,7 @@ class Phase2IntegrationTesting:
     Main Phase 2 Integration Testing System
     """
 
-    def __init__(self, config: Optional[dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self.logger = self._setup_logging()
 

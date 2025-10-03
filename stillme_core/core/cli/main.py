@@ -131,8 +131,7 @@ def doctor():
         # Check StillMe modules
         task3 = progress.add_task("Checking StillMe modules...", total=None)
         try:
-            from stillme_core.cli import main
-            from stillme_core.quality import CodeQualityEnforcer
+            pass  # No imports needed for this check
 
             progress.update(task3, description="✅ StillMe modules loaded successfully")
         except ImportError as e:

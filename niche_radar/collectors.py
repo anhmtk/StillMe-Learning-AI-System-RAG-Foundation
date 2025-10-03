@@ -16,7 +16,7 @@ import logging
 import time
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 # Import existing StillMe modules
 from market_intel import MarketIntelligence
@@ -120,7 +120,7 @@ class GitHubTrendingCollector(BaseCollector):
                         ).days
                         if days_since_creation > 0:
                             velocity = stars / days_since_creation
-                    except:
+                    except Exception:
                         velocity = stars / 30  # Default to 30 days
 
                 metrics = {
@@ -267,7 +267,7 @@ class NewsDeltaCollector(BaseCollector):
             if isinstance(result.data, str):
                 try:
                     data = json.loads(result.data)
-                except:
+                except Exception:
                     self.logger.warning("⚠️ Failed to parse news data as JSON")
                     return []
             else:
@@ -326,7 +326,7 @@ class NewsDeltaCollector(BaseCollector):
 
             # Exponential decay: 1.0 for 0 hours, 0.5 for 12 hours, 0.1 for 48 hours
             return max(0.0, 1.0 - (hours_ago / 48.0))
-        except:
+        except Exception:
             return 0.5  # Default score
 
     def _calculate_relevance_score(
@@ -502,7 +502,7 @@ def get_all_collectors() -> dict[str, BaseCollector]:
 
 
 async def collect_all_data(
-    topics: Optional[list[str]] = None,
+    topics: list[str] | None = None,
 ) -> dict[str, list[NicheRecord]]:
     """Collect data from all sources"""
     if topics is None:

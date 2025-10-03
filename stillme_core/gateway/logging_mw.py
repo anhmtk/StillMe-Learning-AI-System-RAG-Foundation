@@ -15,8 +15,8 @@ import logging
 import uuid
 from contextvars import ContextVar
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
-from typing import Any, Optional
+from datetime import UTC, datetime
+from typing import Any
 
 from ..privacy.pii_redactor import PIIRedactor
 
@@ -39,10 +39,10 @@ class LogEntry:
     event: str
     pii_redacted: bool
     message: str
-    metadata: Optional[dict[str, Any]] = None
-    duration_ms: Optional[float] = None
-    status_code: Optional[int] = None
-    error: Optional[str] = None
+    metadata: dict[str, Any] | None = None
+    duration_ms: float | None = None
+    status_code: int | None = None
+    error: str | None = None
 
 
 class StructuredLogger:
@@ -58,7 +58,7 @@ class StructuredLogger:
     - Audit trail compliance
     """
 
-    def __init__(self, name: str, config: Optional[dict] = None):
+    def __init__(self, name: str, config: dict | None = None):
         """Initialize structured logger"""
         self.name = name
         self.config = config or {}
@@ -105,10 +105,10 @@ class StructuredLogger:
         level: str,
         event: str,
         message: str,
-        metadata: Optional[dict[str, Any]] = None,
-        duration_ms: Optional[float] = None,
-        status_code: Optional[int] = None,
-        error: Optional[str] = None,
+        metadata: dict[str, Any] | None = None,
+        duration_ms: float | None = None,
+        status_code: int | None = None,
+        error: str | None = None,
     ) -> LogEntry:
         """Create structured log entry"""
         context = self._get_context()
@@ -133,7 +133,7 @@ class StructuredLogger:
             redacted_error, _ = self._redact_content(error)
 
         return LogEntry(
-            timestamp=datetime.now(timezone.utc).isoformat(),
+            timestamp=datetime.now(UTC).isoformat(),
             level=level,
             trace_id=context["trace_id"],
             span_id=context["span_id"],
@@ -188,7 +188,7 @@ class LoggingMiddleware:
     - Correlation ID management
     """
 
-    def __init__(self, config: Optional[dict] = None):
+    def __init__(self, config: dict | None = None):
         """Initialize logging middleware"""
         self.config = config or {}
         self.logger = StructuredLogger("gateway.middleware", config)
@@ -233,10 +233,10 @@ class LoggingMiddleware:
         self,
         method: str,
         path: str,
-        query_params: Optional[dict[str, Any]] = None,
-        headers: Optional[dict[str, str]] = None,
-        body: Optional[str] = None,
-        user_id: Optional[str] = None,
+        query_params: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
+        body: str | None = None,
+        user_id: str | None = None,
     ) -> str:
         """
         Log incoming request and return request ID
@@ -287,10 +287,10 @@ class LoggingMiddleware:
         self,
         request_id: str,
         status_code: int,
-        headers: Optional[dict[str, str]] = None,
-        body: Optional[str] = None,
-        duration_ms: Optional[float] = None,
-        error: Optional[str] = None,
+        headers: dict[str, str] | None = None,
+        body: str | None = None,
+        duration_ms: float | None = None,
+        error: str | None = None,
     ):
         """
         Log outgoing response
@@ -338,10 +338,10 @@ class LoggingMiddleware:
         method: str,
         path: str,
         status_code: int,
-        user_id: Optional[str] = None,
-        duration_ms: Optional[float] = None,
-        query_params: Optional[dict[str, Any]] = None,
-        error: Optional[str] = None,
+        user_id: str | None = None,
+        duration_ms: float | None = None,
+        query_params: dict[str, Any] | None = None,
+        error: str | None = None,
     ):
         """
         Log access event (simplified version for high-volume logging)
@@ -394,7 +394,7 @@ default_middleware = LoggingMiddleware()
 
 
 def set_request_context(
-    request_id: str, trace_id: str, span_id: str, user_id: Optional[str] = None
+    request_id: str, trace_id: str, span_id: str, user_id: str | None = None
 ):
     """Set request context for logging"""
     request_id_var.set(request_id)

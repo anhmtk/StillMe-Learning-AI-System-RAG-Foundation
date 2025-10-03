@@ -9,7 +9,6 @@ and system-wide functionality with chaos engineering scenarios.
 Module này chứa các test tích hợp xác minh giao tiếp liên module và chức năng toàn hệ thống.
 """
 
-import asyncio
 import time
 
 import pytest
@@ -352,13 +351,13 @@ class TestChaosEngineering:
         timeout_seconds = test_config["chaos"]["api_timeout_seconds"]
 
         # Setup API manager to timeout
-        mock_api_manager.send_request.side_effect = asyncio.TimeoutError("API timeout")
+        mock_api_manager.send_request.side_effect = TimeoutError("API timeout")
 
         # Test timeout handling
         start_time = time.time()
         try:
             mock_api_manager.send_request("test request")
-        except asyncio.TimeoutError:
+        except TimeoutError:
             end_time = time.time()
             # Verify timeout occurred within reasonable time
             assert (end_time - start_time) < timeout_seconds + 1

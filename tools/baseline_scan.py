@@ -12,7 +12,7 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 
 class BaselineScanner:
@@ -32,7 +32,7 @@ class BaselineScanner:
             "bandit": {"ok": False, "count": 0, "raw_path": None},
         }
 
-    def run_command(self, cmd: List[str], timeout: int = 120) -> Dict[str, Any]:
+    def run_command(self, cmd: list[str], timeout: int = 120) -> dict[str, Any]:
         """Run command with proper Windows handling"""
         try:
             result = subprocess.run(
@@ -69,7 +69,7 @@ class BaselineScanner:
                 "timeout": False,
             }
 
-    def scan_ruff(self) -> Dict[str, Any]:
+    def scan_ruff(self) -> dict[str, Any]:
         """Scan with ruff and capture JSON output"""
         print("Running ruff check...")
 
@@ -118,7 +118,7 @@ class BaselineScanner:
                 "error": "json_parse_failed",
             }
 
-    def scan_pytest(self) -> Dict[str, Any]:
+    def scan_pytest(self) -> dict[str, Any]:
         """Scan with pytest and count failures"""
         print("Running pytest...")
 
@@ -145,7 +145,7 @@ class BaselineScanner:
 
         return {"ok": ok, "failures": failures, "returncode": result["returncode"]}
 
-    def scan_mypy(self) -> Dict[str, Any]:
+    def scan_mypy(self) -> dict[str, Any]:
         """Check if mypy is configured and run it"""
         print("Checking mypy...")
 
@@ -174,7 +174,7 @@ class BaselineScanner:
         print("Mypy completed successfully")
         return {"ok": True, "reason": "success"}
 
-    def scan_bandit(self) -> Dict[str, Any]:
+    def scan_bandit(self) -> dict[str, Any]:
         """Scan with bandit for security issues"""
         print("Running bandit...")
 
@@ -223,7 +223,7 @@ class BaselineScanner:
                 "error": "json_parse_failed",
             }
 
-    def run_baseline_scan(self) -> Dict[str, Any]:
+    def run_baseline_scan(self) -> dict[str, Any]:
         """Run complete baseline scan"""
         print("Starting baseline scan in TRUTH MODE...")
         print(f"Project root: {self.project_root}")

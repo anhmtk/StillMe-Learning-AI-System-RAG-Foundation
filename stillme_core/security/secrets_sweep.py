@@ -8,7 +8,6 @@ import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Optional
 
 
 class SecretPattern:
@@ -40,7 +39,7 @@ class SecretFinding:
         matched_text: str,
         severity: str,
         confidence: float = 1.0,
-        context: Optional[str] = None,
+        context: str | None = None,
     ):
         self.file_path = file_path
         self.line_number = line_number
@@ -306,7 +305,7 @@ class SecretsSweeper:
 
         return findings
 
-    def scan_directory(self, directory: Optional[str] = None) -> list[SecretFinding]:
+    def scan_directory(self, directory: str | None = None) -> list[SecretFinding]:
         """Scan directory for secrets."""
         if directory is None:
             directory = self.project_root

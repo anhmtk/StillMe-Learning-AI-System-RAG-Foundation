@@ -17,7 +17,7 @@ import io
 import logging
 import re
 from dataclasses import dataclass
-from typing import Any, Optional, Union
+from typing import Any
 
 from PIL import Image
 
@@ -30,16 +30,16 @@ class MultiModalResult:
 
     needs_clarification: bool
     input_type: str  # "text", "code", "image", "mixed"
-    question: Optional[str]
-    options: Optional[list[str]]
+    question: str | None
+    options: list[str] | None
     confidence: float
     reasoning: str
     metadata: dict[str, Any]
-    suggestions: Optional[list[str]] = None
-    domain: Optional[str] = None
+    suggestions: list[str] | None = None
+    domain: str | None = None
     round_number: int = 1
     max_rounds: int = 2
-    trace_id: Optional[str] = None
+    trace_id: str | None = None
 
 
 class VisualClarifier:
@@ -56,7 +56,7 @@ class VisualClarifier:
         )
         self.analysis_mode = config.get("image_analysis", "stub")
 
-    def _validate_image(self, image_data: Union[bytes, str]) -> dict[str, Any]:
+    def _validate_image(self, image_data: bytes | str) -> dict[str, Any]:
         """Validate image data and extract metadata"""
         try:
             if isinstance(image_data, str):
@@ -149,7 +149,7 @@ class VisualClarifier:
             }
 
     def analyze(
-        self, image_data: Union[bytes, str], context: dict[str, Any] = None
+        self, image_data: bytes | str, context: dict[str, Any] = None
     ) -> MultiModalResult:
         """
         Analyze image and generate clarification questions

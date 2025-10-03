@@ -8,10 +8,11 @@ import asyncio
 import hashlib
 import hmac
 import json
+from collections.abc import Callable
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any
 
 import aiohttp
 import yaml
@@ -70,7 +71,7 @@ class WorkflowRun:
     run_id: int
     workflow_id: int
     status: WorkflowStatus
-    conclusion: Optional[str]
+    conclusion: str | None
     head_branch: str
     head_sha: str
     created_at: str
@@ -96,9 +97,9 @@ class Job:
     run_id: int
     name: str
     status: JobStatus
-    conclusion: Optional[str]
+    conclusion: str | None
     started_at: str
-    completed_at: Optional[str]
+    completed_at: str | None
     steps: list[dict[str, Any]]
     check_run_url: str
     labels: list[str]
@@ -111,7 +112,7 @@ class Job:
 class GitHubActionsIntegration:
     """Enterprise GitHub Actions integration"""
 
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config_path: str | None = None):
         self.config = self._load_config(config_path)
         self.github_token = self.config.get("github_token")
         self.webhook_secret = self.config.get("webhook_secret")
@@ -119,9 +120,9 @@ class GitHubActionsIntegration:
         self.owner = self.config.get("owner")
         self.base_url = "https://api.github.com"
         self.webhook_handlers: dict[EventType, list[Callable]] = {}
-        self.session: Optional[aiohttp.ClientSession] = None
+        self.session: aiohttp.ClientSession | None = None
 
-    def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
+    def _load_config(self, config_path: str | None = None) -> dict[str, Any]:
         """Load GitHub Actions configuration"""
         if config_path:
             config_file = Path(config_path)
@@ -208,7 +209,7 @@ class GitHubActionsIntegration:
             return []
 
     async def get_workflow_runs(
-        self, workflow_id: str, status: Optional[WorkflowStatus] = None, limit: int = 10
+        self, workflow_id: str, status: WorkflowStatus | None = None, limit: int = 10
     ) -> list[WorkflowRun]:
         """Get workflow runs"""
         session = await self._get_session()
@@ -294,7 +295,7 @@ class GitHubActionsIntegration:
         self,
         workflow_id: str,
         ref: str = "main",
-        inputs: Optional[dict[str, Any]] = None,
+        inputs: dict[str, Any] | None = None,
     ) -> bool:
         """Trigger a workflow run"""
         session = await self._get_session()
@@ -351,7 +352,7 @@ class GitHubActionsIntegration:
             print(f"⚠️ Failed to rerun workflow: {e}")
             return False
 
-    async def get_workflow_logs(self, run_id: int) -> Optional[str]:
+    async def get_workflow_logs(self, run_id: int) -> str | None:
         """Get workflow run logs"""
         session = await self._get_session()
         url = f"{self.base_url}/repos/{self.owner}/{self.repository}/actions/runs/{run_id}/logs"
@@ -390,7 +391,7 @@ class GitHubActionsIntegration:
         return hmac.compare_digest(signature, expected_signature)
 
     async def handle_webhook(
-        self, event_type: str, payload: dict[str, Any], signature: Optional[str] = None
+        self, event_type: str, payload: dict[str, Any], signature: str | None = None
     ) -> bool:
         """Handle GitHub webhook event"""
         # Verify signature if provided
@@ -486,7 +487,7 @@ github_actions = GitHubActionsIntegration()
 
 # Convenience functions
 async def trigger_agentdev_workflow(
-    workflow_name: str, inputs: Optional[dict[str, Any]] = None
+    workflow_name: str, inputs: dict[str, Any] | None = None
 ) -> bool:
     """Trigger AgentDev workflow"""
     # Map workflow names to IDs (this would need to be configured)

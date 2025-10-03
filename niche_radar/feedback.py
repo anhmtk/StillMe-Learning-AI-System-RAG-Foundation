@@ -459,7 +459,7 @@ def update_weights_suggestion(
         with open(weights_file, encoding="utf-8") as f:
             weights_data = yaml.safe_load(f)
         current_weights = weights_data.get("scoring_weights", {})
-    except:
+    except Exception:
         current_weights = {}
 
     # Generate suggestions

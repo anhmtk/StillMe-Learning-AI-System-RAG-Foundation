@@ -4,7 +4,6 @@ OpenAI provider implementation for StillMe AI Framework.
 
 import asyncio
 import logging
-from typing import Optional
 
 import httpx
 
@@ -18,7 +17,7 @@ class OpenAIProvider(LLMProviderBase):
 
     def __init__(self, config: ProviderConfig):
         super().__init__(config)
-        self._client: Optional[httpx.AsyncClient] = None
+        self._client: httpx.AsyncClient | None = None
 
     async def initialize(self) -> bool:
         """Initialize the OpenAI client."""

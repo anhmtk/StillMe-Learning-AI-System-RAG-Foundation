@@ -767,7 +767,7 @@ FORMAT: Return as JSON array of plan items with fields:
                 ctl.set_model("deepseek-coder:6.7b")
                 return ctl.run_python_via_model(prompt)
             except Exception as e:
-                raise Exception(f"Code mode failed: {e}")
+                raise Exception(f"Code mode failed: {e}") from e
 
         bridge_mode = _TEXT_MODE_MAP.get(mode_lower, "fast")
         try:
@@ -777,9 +777,9 @@ FORMAT: Return as JSON array of plan items with fields:
             try:
                 return asyncio.run(_bridge_async_ask(prompt, mode=bridge_mode))
             except Exception as e:
-                raise Exception(f"Bridge mode {bridge_mode} failed: {e}")
+                raise Exception(f"Bridge mode {bridge_mode} failed: {e}") from e
         except Exception as e:
-            raise Exception(f"Bridge mode {bridge_mode} failed: {e}")
+            raise Exception(f"Bridge mode {bridge_mode} failed: {e}") from e
 
     # ====== Learning and Feedback Methods ======
 

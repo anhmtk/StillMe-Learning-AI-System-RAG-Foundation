@@ -32,7 +32,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -73,7 +73,7 @@ class AuditTrailEntry:
     entry_id: str
     timestamp: datetime
     operation_type: str
-    user_id: Optional[str]
+    user_id: str | None
     resource_accessed: str
     action_performed: str
     result_status: str
@@ -102,7 +102,7 @@ class DataValidationFramework:
     Enterprise-grade data validation framework với focus vào accuracy và security
     """
 
-    def __init__(self, db_path: str, config: Optional[dict[str, Any]] = None):
+    def __init__(self, db_path: str, config: dict[str, Any] | None = None):
         self.db_path = Path(db_path)
         self.config = config or self._get_default_config()
 
@@ -327,7 +327,7 @@ class DataValidationFramework:
 
     def validate_data(
         self,
-        data: Union[dict[str, Any], list[dict[str, Any]]],
+        data: dict[str, Any] | list[dict[str, Any]],
         validation_type: str = "usage_event",
     ) -> ValidationResult:
         """
@@ -666,7 +666,7 @@ class DataValidationFramework:
         # Create a normalized version of the record for hashing
         normalized = {}
         for key, value in record.items():
-            if isinstance(value, (dict, list)):
+            if isinstance(value, dict | list):
                 normalized[key] = json.dumps(value, sort_keys=True)
             else:
                 normalized[key] = str(value)
@@ -1016,8 +1016,8 @@ class DataValidationFramework:
         resource_accessed: str,
         action_performed: str,
         result_status: str,
-        user_id: Optional[str] = None,
-        metadata: Optional[dict[str, Any]] = None,
+        user_id: str | None = None,
+        metadata: dict[str, Any] | None = None,
     ):
         """Log audit trail entry"""
         try:
@@ -1259,7 +1259,7 @@ class DataValidationFramework:
 
 # Factory function
 def create_validation_framework(
-    db_path: str, config: Optional[dict[str, Any]] = None
+    db_path: str, config: dict[str, Any] | None = None
 ) -> DataValidationFramework:
     """Factory function để create validation framework"""
     return DataValidationFramework(db_path, config)

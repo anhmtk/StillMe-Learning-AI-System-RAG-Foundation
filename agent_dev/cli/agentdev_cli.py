@@ -8,7 +8,7 @@ import argparse
 import json
 import sys
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import yaml
 
@@ -92,7 +92,7 @@ class AgentDevCLI:
 
         return config
 
-    def plan(self, config_path: Optional[str] = None):
+    def plan(self, config_path: str | None = None):
         """Generate execution plan"""
         config = self._load_config(config_path)
 
@@ -127,7 +127,7 @@ class AgentDevCLI:
 
         return True
 
-    def dry_run(self, config_path: Optional[str] = None):
+    def dry_run(self, config_path: str | None = None):
         """Run conformance tests and contract validation"""
         config = self._load_config(config_path)
 
@@ -159,7 +159,7 @@ class AgentDevCLI:
             print("❌ DRY RUN FAILED - Fix issues before execution")
             return False
 
-    def execute(self, config_path: Optional[str] = None):
+    def execute(self, config_path: str | None = None):
         """Execute the planned changes"""
         config = self._load_config(config_path)
 
@@ -183,7 +183,7 @@ class AgentDevCLI:
 
         return result["success"]
 
-    def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
+    def _load_config(self, config_path: str | None = None) -> dict[str, Any]:
         """Load task configuration"""
         if config_path:
             path = Path(config_path)

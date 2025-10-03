@@ -1,6 +1,6 @@
 import time
+from collections.abc import Callable
 from datetime import timedelta
-from typing import Callable
 from unittest.mock import MagicMock, patch
 
 import numpy as np

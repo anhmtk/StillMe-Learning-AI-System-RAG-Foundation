@@ -593,7 +593,7 @@ class StillMeDesktopApp:
 
                     dt = datetime.fromisoformat(retrieved_at.replace("Z", "+00:00"))
                     formatted_time = dt.strftime("%H:%M")
-                except:
+                except Exception:
                     formatted_time = "Unknown"
             else:
                 formatted_time = "Unknown"

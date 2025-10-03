@@ -11,7 +11,7 @@ import time
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 class CodeComplexity(Enum):
@@ -50,7 +50,7 @@ class CodeMetric:
 
     metric_name: str
     value: float
-    threshold: Optional[float]
+    threshold: float | None
     severity: str
     description: str
     recommendations: list[str]
@@ -75,7 +75,7 @@ class ASTNode:
     """AST node representation"""
 
     node_type: str
-    name: Optional[str]
+    name: str | None
     line_number: int
     column_number: int
     children: list["ASTNode"]
@@ -105,13 +105,13 @@ class CodeAnalysis:
 class ASTAnalyzer:
     """Enterprise AST-based code analyzer"""
 
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config_path: str | None = None):
         self.config = self._load_config(config_path)
         self.patterns = self._load_patterns()
         self.metrics_config = self._load_metrics_config()
         self.analysis_cache: dict[str, CodeAnalysis] = {}
 
-    def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
+    def _load_config(self, config_path: str | None = None) -> dict[str, Any]:
         """Load AST analyzer configuration"""
         if config_path:
             config_file = Path(config_path)
@@ -279,12 +279,12 @@ class ASTAnalyzer:
             with open(file_path, encoding="utf-8") as f:
                 source_code = f.read()
         except Exception as e:
-            raise ValueError(f"Failed to read file: {e}")
+            raise ValueError(f"Failed to read file: {e}") from e
 
         try:
             tree = ast.parse(source_code, filename=str(file_path))
         except SyntaxError as e:
-            raise ValueError(f"Syntax error in file: {e}")
+            raise ValueError(f"Syntax error in file: {e}") from e
 
         # Perform analysis
         analysis = self._analyze_ast(tree, str(file_path), source_code)
@@ -368,9 +368,9 @@ class ASTAnalyzer:
 
         return nodes
 
-    def _get_node_name(self, node: ast.AST) -> Optional[str]:
+    def _get_node_name(self, node: ast.AST) -> str | None:
         """Get node name if applicable"""
-        if isinstance(node, (ast.FunctionDef, ast.ClassDef, ast.Name)):
+        if isinstance(node, ast.FunctionDef | ast.ClassDef | ast.Name):
             return getattr(node, "name", None)
         elif isinstance(node, ast.Assign):
             if node.targets and isinstance(node.targets[0], ast.Name):
@@ -400,7 +400,7 @@ class ASTAnalyzer:
 
         return attributes
 
-    def _get_call_function_name(self, node: ast.Call) -> Optional[str]:
+    def _get_call_function_name(self, node: ast.Call) -> str | None:
         """Get function name from call node"""
         if isinstance(node.func, ast.Name):
             return node.func.id
@@ -413,11 +413,11 @@ class ASTAnalyzer:
         complexity = 0
 
         # Decision points
-        if isinstance(node, (ast.If, ast.While, ast.For, ast.AsyncFor)):
+        if isinstance(node, ast.If | ast.While | ast.For | ast.AsyncFor):
             complexity += 1
         elif isinstance(node, ast.ExceptHandler):
             complexity += 1
-        elif isinstance(node, (ast.And, ast.Or)):
+        elif isinstance(node, ast.And | ast.Or):
             complexity += 1
 
         # Nested structures
@@ -508,11 +508,11 @@ class ASTAnalyzer:
         complexity = 1  # Base complexity
 
         for node in ast.walk(tree):
-            if isinstance(node, (ast.If, ast.While, ast.For, ast.AsyncFor)):
+            if isinstance(node, ast.If | ast.While | ast.For | ast.AsyncFor):
                 complexity += 1
             elif isinstance(node, ast.ExceptHandler):
                 complexity += 1
-            elif isinstance(node, (ast.And, ast.Or)):
+            elif isinstance(node, ast.And | ast.Or):
                 complexity += 1
 
         return complexity

@@ -361,7 +361,7 @@ class DeletionCandidatesFinder:
                                 "source": "primary",
                             }
                         )
-            except:
+            except Exception:
                 pass
 
         return candidates

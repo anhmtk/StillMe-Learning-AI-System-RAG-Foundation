@@ -1,5 +1,4 @@
 from dataclasses import dataclass, field
-from typing import Optional
 
 
 @dataclass
@@ -7,9 +6,9 @@ class PlanItem:
     id: str
     title: str
     action: str = "edit_file"
-    target: Optional[str] = None
-    patch: Optional[str] = None
-    diff_hint: Optional[str] = None
+    target: str | None = None
+    patch: str | None = None
+    diff_hint: str | None = None
     tests_to_run: list[str] = field(default_factory=list)
     risk: str = "low"
     deps: list[str] = field(default_factory=list)

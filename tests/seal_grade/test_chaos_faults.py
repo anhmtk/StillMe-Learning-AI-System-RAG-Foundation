@@ -71,7 +71,7 @@ class TestChaosEngineering:
         try:
             asyncio.run(asyncio.wait_for(delayed_operation(), timeout=0.05))
             raise AssertionError("Should have timed out")
-        except asyncio.TimeoutError:
+        except TimeoutError:
             assert True, "Correctly handled timeout"
 
     def test_disk_full_simulation(self, state_store):
@@ -267,13 +267,7 @@ class TestChaosEngineering:
                 # System should handle fault gracefully
                 assert isinstance(
                     e,
-                    (
-                        asyncio.TimeoutError,
-                        Exception,
-                        MemoryError,
-                        OSError,
-                        PermissionError,
-                    ),
+                    asyncio.TimeoutError | Exception | MemoryError | OSError | PermissionError,
                 )
 
     def test_system_resilience(self, state_store):

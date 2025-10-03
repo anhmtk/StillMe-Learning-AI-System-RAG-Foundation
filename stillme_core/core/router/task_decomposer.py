@@ -14,12 +14,12 @@ import time
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Import StillMe core components
 try:
     from ..observability.logger import get_logger
-    from ..observability.metrics import MetricType, get_metrics_collector
+    from ..observability.metrics import get_metrics_collector
     from ..observability.tracer import get_tracer
     from .intelligent_router import AgentType, TaskComplexity, TaskType  # type: ignore
 except ImportError:
@@ -34,7 +34,7 @@ except ImportError:
     pass
 
 try:
-    from ...core.observability.metrics import MetricType, get_metrics_collector
+    from ...core.observability.metrics import get_metrics_collector
 except ImportError:
     pass
 
@@ -119,17 +119,17 @@ class Subtask:
     task_type: TaskType
     complexity: TaskComplexity
     estimated_duration: float  # in seconds
-    required_skills: List[str]
-    assigned_agent: Optional[AgentType]
-    dependencies: List[str]  # IDs of dependent subtasks
+    required_skills: list[str]
+    assigned_agent: AgentType | None
+    dependencies: list[str]  # IDs of dependent subtasks
     dependency_type: DependencyType
     priority: float  # 0.0 to 1.0
     status: SubtaskStatus
     created_at: float
-    started_at: Optional[float] = None
-    completed_at: Optional[float] = None
-    error_message: Optional[str] = None
-    result: Optional[Dict[str, Any]] = None
+    started_at: float | None = None
+    completed_at: float | None = None
+    error_message: str | None = None
+    result: dict[str, Any] | None = None
 
 
 @dataclass
@@ -140,12 +140,12 @@ class TaskDecomposition:
     original_request: str
     main_task_type: TaskType
     main_complexity: TaskComplexity
-    subtasks: List[Subtask]
+    subtasks: list[Subtask]
     total_estimated_duration: float
-    critical_path: List[str]  # IDs of subtasks on critical path
-    parallel_groups: List[List[str]]  # Groups of subtasks that can run in parallel
-    resource_requirements: Dict[str, Any]
-    success_criteria: List[str]
+    critical_path: list[str]  # IDs of subtasks on critical path
+    parallel_groups: list[list[str]]  # Groups of subtasks that can run in parallel
+    resource_requirements: dict[str, Any]
+    success_criteria: list[str]
     created_at: float
     status: SubtaskStatus
     progress_percentage: float = 0.0
@@ -159,7 +159,7 @@ class TaskDecomposer:
     AgentDev to handle complex requests by breaking them into manageable pieces.
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         """Initialize the Task Decomposer"""
         self.config = config or {}
         self.logger = logger
@@ -183,7 +183,7 @@ class TaskDecomposer:
         if self.logger:
             self.logger.info("🔧 Task Decomposer initialized")
 
-    def _load_decomposition_patterns(self) -> Dict[str, Any]:
+    def _load_decomposition_patterns(self) -> dict[str, Any]:
         """Load patterns for task decomposition"""
         return {
             "feature_development": {
@@ -271,7 +271,7 @@ class TaskDecomposer:
             },
         }
 
-    def _load_task_templates(self) -> Dict[TaskType, Dict[str, Any]]:
+    def _load_task_templates(self) -> dict[TaskType, dict[str, Any]]:
         """Load templates for different task types"""
         return {
             TaskType.FEATURE_DEVELOPMENT: {
@@ -360,7 +360,7 @@ class TaskDecomposer:
             },
         }
 
-    def _load_skill_requirements(self) -> Dict[str, List[str]]:
+    def _load_skill_requirements(self) -> dict[str, list[str]]:
         """Load skill requirements for different task types"""
         return {
             "programming": ["code_analysis", "debugging", "architecture"],
@@ -376,7 +376,7 @@ class TaskDecomposer:
         request: str,
         task_type: TaskType,
         complexity: TaskComplexity,
-        context: Optional[Dict[str, Any]] = None,
+        context: dict[str, Any] | None = None,
     ) -> TaskDecomposition:
         """
         Decompose a complex task into manageable subtasks
@@ -465,8 +465,8 @@ class TaskDecomposer:
                 raise
 
     async def _analyze_decomposition_hints(
-        self, request: str, context: Optional[Dict[str, Any]]
-    ) -> List[Dict[str, Any]]:
+        self, request: str, context: dict[str, Any] | None
+    ) -> list[dict[str, Any]]:
         """Analyze request for hints about how to decompose it"""
         hints = []
         request_lower = request.lower()
@@ -517,8 +517,8 @@ class TaskDecomposer:
         request: str,
         task_type: TaskType,
         complexity: TaskComplexity,
-        hints: List[Dict[str, Any]],
-    ) -> List[Subtask]:
+        hints: list[dict[str, Any]],
+    ) -> list[Subtask]:
         """Generate subtasks based on task type, complexity, and hints"""
         subtasks = []
 
@@ -662,7 +662,7 @@ class TaskDecomposer:
 
         return complexity_values[new_index]
 
-    def _get_phase_skills(self, phase: str, task_type: TaskType) -> List[str]:
+    def _get_phase_skills(self, phase: str, task_type: TaskType) -> list[str]:
         """Get required skills for a specific phase"""
         base_skills = {
             "analysis": ["analysis", "problem_solving"],
@@ -776,8 +776,8 @@ class TaskDecomposer:
         return max(0.0, min(1.0, base_priority))
 
     def _apply_decomposition_hints(
-        self, subtasks: List[Subtask], hints: List[Dict[str, Any]], request: str
-    ) -> List[Subtask]:
+        self, subtasks: list[Subtask], hints: list[dict[str, Any]], request: str
+    ) -> list[Subtask]:
         """Apply decomposition hints to modify subtasks"""
         # This is a simplified implementation
         # In a real system, this would be more sophisticated
@@ -805,8 +805,8 @@ class TaskDecomposer:
         return subtasks
 
     def _calculate_dependencies(
-        self, subtasks: List[Subtask], task_type: TaskType
-    ) -> Dict[str, List[str]]:
+        self, subtasks: list[Subtask], task_type: TaskType
+    ) -> dict[str, list[str]]:
         """Calculate dependencies between subtasks"""
         dependencies = {}
 
@@ -837,8 +837,8 @@ class TaskDecomposer:
         return dependencies
 
     def _calculate_critical_path(
-        self, subtasks: List[Subtask], dependencies: Dict[str, List[str]]
-    ) -> List[str]:
+        self, subtasks: list[Subtask], dependencies: dict[str, list[str]]
+    ) -> list[str]:
         """Calculate the critical path through the subtasks"""
         # Simple critical path calculation
         # In a real system, this would use proper critical path method (CPM)
@@ -854,10 +854,10 @@ class TaskDecomposer:
         longest_path = []
         max_duration = 0
 
-        def calculate_path_duration(path: List[str]) -> float:
+        def calculate_path_duration(path: list[str]) -> float:
             return sum(s.estimated_duration for s in subtasks if s.id in path)
 
-        def find_longest_path(current_path: List[str], current_subtask: Subtask):
+        def find_longest_path(current_path: list[str], current_subtask: Subtask):
             nonlocal longest_path, max_duration
 
             current_path = current_path + [current_subtask.id]
@@ -882,8 +882,8 @@ class TaskDecomposer:
         return longest_path
 
     def _identify_parallel_groups(
-        self, subtasks: List[Subtask], dependencies: Dict[str, List[str]]
-    ) -> List[List[str]]:
+        self, subtasks: list[Subtask], dependencies: dict[str, list[str]]
+    ) -> list[list[str]]:
         """Identify groups of subtasks that can run in parallel"""
         parallel_groups = []
 
@@ -911,8 +911,8 @@ class TaskDecomposer:
         return parallel_groups
 
     def _calculate_resource_requirements(
-        self, subtasks: List[Subtask]
-    ) -> Dict[str, Any]:
+        self, subtasks: list[Subtask]
+    ) -> dict[str, Any]:
         """Calculate resource requirements for all subtasks"""
         requirements = {
             "cpu_intensive": False,
@@ -953,7 +953,7 @@ class TaskDecomposer:
 
     def _define_success_criteria(
         self, request: str, task_type: TaskType, complexity: TaskComplexity
-    ) -> List[str]:
+    ) -> list[str]:
         """Define success criteria for the task"""
         criteria = []
 
@@ -996,9 +996,9 @@ class TaskDecomposer:
 
     def _calculate_total_duration(
         self,
-        subtasks: List[Subtask],
-        critical_path: List[str],
-        parallel_groups: List[List[str]],
+        subtasks: list[Subtask],
+        critical_path: list[str],
+        parallel_groups: list[list[str]],
     ) -> float:
         """Calculate total estimated duration considering parallelization"""
         if not subtasks:
@@ -1083,11 +1083,11 @@ class TaskDecomposer:
                 },
             )
 
-    def get_performance_metrics(self) -> Dict[str, Any]:
+    def get_performance_metrics(self) -> dict[str, Any]:
         """Get current performance metrics"""
         return self.performance_metrics.copy()
 
-    def get_decomposition_history(self, limit: int = 100) -> List[Dict[str, Any]]:
+    def get_decomposition_history(self, limit: int = 100) -> list[dict[str, Any]]:
         """Get recent decomposition history"""
         return self.decomposition_history[-limit:]
 
@@ -1096,8 +1096,8 @@ class TaskDecomposer:
         task_id: str,
         subtask_id: str,
         status: SubtaskStatus,
-        result: Optional[Dict[str, Any]] = None,
-        error_message: Optional[str] = None,
+        result: dict[str, Any] | None = None,
+        error_message: str | None = None,
     ):
         """Update the status of a subtask"""
         # This would typically update a database or storage system
@@ -1114,7 +1114,7 @@ class TaskDecomposer:
                 },
             )
 
-    def export_decomposition_data(self) -> Dict[str, Any]:
+    def export_decomposition_data(self) -> dict[str, Any]:
         """Export decomposition data for analysis"""
         return {
             "decomposition_patterns": self.decomposition_patterns,
@@ -1127,10 +1127,10 @@ class TaskDecomposer:
 
 
 # Global decomposer instance
-_decomposer_instance: Optional[TaskDecomposer] = None
+_decomposer_instance: TaskDecomposer | None = None
 
 
-def get_task_decomposer(config: Optional[Dict[str, Any]] = None) -> TaskDecomposer:
+def get_task_decomposer(config: dict[str, Any] | None = None) -> TaskDecomposer:
     """Get or create global TaskDecomposer instance"""
     global _decomposer_instance
 
@@ -1145,7 +1145,7 @@ async def decompose_task(
     request: str,
     task_type: TaskType,
     complexity: TaskComplexity,
-    context: Optional[Dict[str, Any]] = None,
+    context: dict[str, Any] | None = None,
 ) -> TaskDecomposition:
     """Convenience function to decompose a task"""
     decomposer = get_task_decomposer()

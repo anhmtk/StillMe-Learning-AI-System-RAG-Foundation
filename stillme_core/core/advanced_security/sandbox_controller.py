@@ -21,7 +21,7 @@ import uuid
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import docker
 import psutil
@@ -92,11 +92,11 @@ class SandboxInstance:
     """Sandbox instance representation"""
 
     config: SandboxConfig
-    container_id: Optional[str] = None
+    container_id: str | None = None
     status: SandboxStatus = SandboxStatus.CREATING
     created_at: float = 0.0
-    started_at: Optional[float] = None
-    stopped_at: Optional[float] = None
+    started_at: float | None = None
+    stopped_at: float | None = None
     resource_usage: dict[str, Any] = None
     logs: list[dict[str, Any]] = None
     health_checks: list[dict[str, Any]] = None
@@ -121,7 +121,7 @@ class SandboxController:
     🚀 Bộ điều khiển Sandbox nâng cao với cô lập Docker
     """
 
-    def __init__(self, docker_client: Optional[docker.DockerClient] = None):
+    def __init__(self, docker_client: docker.DockerClient | None = None):
         """
         Initialize Sandbox Controller
 
@@ -150,7 +150,7 @@ class SandboxController:
         self.active_sandboxes: dict[str, SandboxInstance] = {}
         self.sandbox_history: list[SandboxInstance] = []
         self.isolation_base = Path(tempfile.mkdtemp(prefix="sandbox_"))
-        self.monitoring_task: Optional[asyncio.Task] = None
+        self.monitoring_task: asyncio.Task | None = None
         self.is_monitoring = False
 
         # Initialize security policies
@@ -380,7 +380,7 @@ class SandboxController:
         return container
 
     async def execute_in_sandbox(
-        self, sandbox_id: str, command: list[str], timeout: Optional[int] = None
+        self, sandbox_id: str, command: list[str], timeout: int | None = None
     ) -> dict[str, Any]:
         """
         Execute command in sandbox
@@ -613,7 +613,7 @@ class SandboxController:
             # Auto-destroy timeout sandboxes
             await self.destroy_sandbox(sandbox.config.sandbox_id)
 
-    def get_sandbox_status(self, sandbox_id: str) -> Optional[dict[str, Any]]:
+    def get_sandbox_status(self, sandbox_id: str) -> dict[str, Any] | None:
         """Get sandbox status and information"""
         if sandbox_id in self.active_sandboxes:
             sandbox = self.active_sandboxes[sandbox_id]

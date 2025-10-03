@@ -11,7 +11,7 @@ import statistics
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from stillme_core.quality.code_quality_enforcer import QualityIssue, QualityReport
 
@@ -159,10 +159,10 @@ class QualityMetrics:
 
     def get_reports(
         self,
-        target_path: Optional[str] = None,
-        start_date: Optional[datetime] = None,
-        end_date: Optional[datetime] = None,
-        limit: Optional[int] = None,
+        target_path: str | None = None,
+        start_date: datetime | None = None,
+        end_date: datetime | None = None,
+        limit: int | None = None,
     ) -> list[QualityReport]:
         """Get quality reports from database"""
         query = "SELECT report_data FROM quality_reports WHERE 1=1"
@@ -242,7 +242,7 @@ class QualityMetrics:
 
         # Calculate trends
         trends = []
-        for key, group_reports in grouped_reports.items():
+        for _key, group_reports in grouped_reports.items():
             # Calculate averages
             quality_scores = [r.quality_score for r in group_reports]
             total_issues = sum(r.total_issues for r in group_reports)
@@ -487,7 +487,7 @@ class QualityMetrics:
             return "Quality is stable. Consider setting higher standards."
 
     def export_metrics(
-        self, output_path: str, target_path: Optional[str] = None
+        self, output_path: str, target_path: str | None = None
     ) -> None:
         """Export metrics to JSON file"""
         reports = self.get_reports(target_path)

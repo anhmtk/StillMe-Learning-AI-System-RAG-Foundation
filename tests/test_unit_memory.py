@@ -1,5 +1,3 @@
-from typing import Any
-
 """
 Unit Tests for Memory Module
 Tests layered memory, TTL, persistence, and retrieval functionality
@@ -8,6 +6,7 @@ Tests layered memory, TTL, persistence, and retrieval functionality
 import os
 import tempfile
 import time
+from typing import Any
 
 import pytest
 
@@ -295,11 +294,11 @@ class TestMemoryEdgeCases:
         values = [f"value_{i}" for i in range(100)]
 
         # Store all
-        for key, value in zip(keys, values):
+        for key, value in zip(keys, values, strict=False):
             manager.store(key, value)
 
         # Retrieve all
-        for key, expected_value in zip(keys, values):
+        for key, expected_value in zip(keys, values, strict=False):
             retrieved = manager.retrieve(key)
             assert retrieved == expected_value
 

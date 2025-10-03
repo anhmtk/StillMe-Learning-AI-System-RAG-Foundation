@@ -27,11 +27,12 @@ import logging
 import random
 import time
 import traceback
+from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -729,7 +730,7 @@ def with_retry(policy: RetryPolicy):
 
 
 # Global error handler instance
-_error_handler_instance: Optional[ErrorHandler] = None
+_error_handler_instance: ErrorHandler | None = None
 
 
 def get_error_handler() -> ErrorHandler:

@@ -6,7 +6,6 @@ CLI commands for building, testing, and packaging applications.
 """
 
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -158,7 +157,7 @@ def test(
     test_type: str = typer.Option(
         "auto", "--type", "-t", help="Test type (python, web, cli, auto)"
     ),
-    test_cases: Optional[list[str]] = typer.Option(
+    test_cases: list[str] | None = typer.Option(
         None, "--test-case", help="Custom test cases"
     ),
 ):

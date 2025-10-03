@@ -6,7 +6,7 @@ Tải và validate các policy files
 
 import logging
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import yaml
 
@@ -63,7 +63,7 @@ class PolicyLoader:
         self.logger.info("✅ All policies validated successfully")
         return True
 
-    def get_policy(self, policy_name: str) -> Optional[dict[str, Any]]:
+    def get_policy(self, policy_name: str) -> dict[str, Any] | None:
         """Get specific policy"""
         return self.policies.get(policy_name)
 
@@ -106,7 +106,7 @@ def load_policies() -> PolicyLoader:
     return _policy_loader
 
 
-def get_policy(policy_name: str) -> Optional[dict[str, Any]]:
+def get_policy(policy_name: str) -> dict[str, Any] | None:
     """Get specific policy"""
     loader = load_policies()
     return loader.get_policy(policy_name)

@@ -7,7 +7,7 @@ Enhanced FastAPI Gateway with improved performance, security, and monitoring
 import asyncio
 import time
 from contextlib import asynccontextmanager
-from typing import Any, Optional
+from typing import Any
 
 import redis.asyncio as redis
 import uvicorn
@@ -46,8 +46,8 @@ request_validator = RequestValidator()
 websocket_manager = WebSocketManager()
 
 # Redis connection pool
-redis_pool: Optional[redis.ConnectionPool] = None
-redis_client: Optional[redis.Redis] = None
+redis_pool: redis.ConnectionPool | None = None
+redis_client: redis.Redis | None = None
 
 # Database connection
 database_engine = None
@@ -201,7 +201,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
                 data = await asyncio.wait_for(
                     websocket.receive_json(), timeout=settings.WS_MESSAGE_TIMEOUT
                 )
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 await websocket.send_json(
                     {"type": "error", "message": "Message timeout"}
                 )

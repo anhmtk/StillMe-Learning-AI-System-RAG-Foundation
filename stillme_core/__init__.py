@@ -22,7 +22,13 @@ __description__ = "Core AI Framework for StillMe AI"
 # Import compatibility layer
 # Import AI manager functions
 from .ai_manager import health, set_mode
-from .compat import *
+
+try:
+    from .compat import EthicalPrinciple, SearchResult, ViolationSeverity
+except ImportError:
+    SearchResult = None
+    EthicalPrinciple = None
+    ViolationSeverity = None
 
 
 # Stub implementations to avoid complex imports
@@ -41,7 +47,7 @@ __all__ = [
     "HealthChecker",
     # Re-exported from compat - commented out due to F405 errors
     # "SearchResult",
-    # "EthicalPrinciple", 
+    # "EthicalPrinciple",
     # "ViolationSeverity",
     # "SimulationStatus",
     # "AttackCategory",

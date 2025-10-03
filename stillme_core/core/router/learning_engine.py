@@ -13,14 +13,14 @@ import time
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Import StillMe core components
 try:
     from ..observability.logger import get_logger
-    from ..observability.metrics import MetricType, get_metrics_collector
+    from ..observability.metrics import get_metrics_collector
     from ..observability.tracer import get_tracer
-    from .intelligent_router import (  # type: ignore
+    from .intelligent_router import (
         AgentType,  # type: ignore
         RoutingDecision,  # type: ignore
         TaskComplexity,  # type: ignore
@@ -38,7 +38,7 @@ except ImportError:
     pass
 
 try:
-    from ...core.observability.metrics import MetricType, get_metrics_collector
+    from ...core.observability.metrics import get_metrics_collector
 except ImportError:
     pass
 
@@ -115,8 +115,8 @@ class LearningEvent:
     event_id: str
     event_type: LearningEventType
     timestamp: float
-    data: Dict[str, Any]
-    context: Dict[str, Any]
+    data: dict[str, Any]
+    context: dict[str, Any]
 
 
 @dataclass
@@ -125,8 +125,8 @@ class LearningPattern:
 
     pattern_id: str
     pattern_type: str
-    conditions: Dict[str, Any]
-    outcomes: Dict[str, Any]
+    conditions: dict[str, Any]
+    outcomes: dict[str, Any]
     confidence: float
     frequency: int
     last_updated: float
@@ -140,7 +140,7 @@ class LearningEngine:
     routing decisions over time based on outcomes and user feedback.
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         """Initialize the Learning Engine"""
         self.config = config or {}
         self.logger = logger
@@ -148,9 +148,9 @@ class LearningEngine:
         self.tracer = tracer
 
         # Learning data storage
-        self.learning_events: List[LearningEvent] = []
-        self.learned_patterns: Dict[str, LearningPattern] = {}
-        self.routing_improvements: Dict[str, Any] = {}
+        self.learning_events: list[LearningEvent] = []
+        self.learned_patterns: dict[str, LearningPattern] = {}
+        self.routing_improvements: dict[str, Any] = {}
 
         # Performance tracking
         self.learning_metrics = {
@@ -166,8 +166,8 @@ class LearningEngine:
     async def record_learning_event(
         self,
         event_type: LearningEventType,
-        data: Dict[str, Any],
-        context: Optional[Dict[str, Any]] = None,
+        data: dict[str, Any],
+        context: dict[str, Any] | None = None,
     ):
         """Record a learning event"""
         event_id = f"event_{int(time.time() * 1000)}"
@@ -276,8 +276,8 @@ class LearningEngine:
 
         # Extract feedback information
         satisfaction = data.get("satisfaction", 0.0)  # 0.0 to 1.0
-        feedback_type = data.get("feedback_type", "general")
-        task_context = data.get("task_context", {})
+        data.get("feedback_type", "general")
+        data.get("task_context", {})
 
         # Update learning metrics
         if satisfaction > 0.7:  # Positive feedback
@@ -323,8 +323,8 @@ class LearningEngine:
         self,
         task_type: TaskType,
         complexity: TaskComplexity,
-        context: Optional[Dict[str, Any]] = None,
-    ) -> Dict[str, Any]:
+        context: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """Get routing suggestions based on learned patterns"""
 
         suggestions = {
@@ -371,7 +371,7 @@ class LearningEngine:
 
         return suggestions
 
-    async def apply_learned_improvements(self) -> Dict[str, Any]:
+    async def apply_learned_improvements(self) -> dict[str, Any]:
         """Apply learned improvements to the system"""
         improvements_applied = {
             "routing_rules_updated": 0,
@@ -381,12 +381,12 @@ class LearningEngine:
         }
 
         # Update routing rules based on learned patterns
-        for pattern_id, pattern in self.learned_patterns.items():
+        for _pattern_id, pattern in self.learned_patterns.items():
             if pattern.pattern_type == "routing_decision" and pattern.confidence > 0.8:
                 improvements_applied["routing_rules_updated"] += 1
 
         # Update agent preferences based on outcomes
-        for improvement_key, improvement in self.routing_improvements.items():
+        for _improvement_key, improvement in self.routing_improvements.items():
             success_rate = improvement["success_count"] / (
                 improvement["success_count"] + improvement["failure_count"]
             )
@@ -411,13 +411,13 @@ class LearningEngine:
 
         return improvements_applied
 
-    def get_learning_metrics(self) -> Dict[str, Any]:
+    def get_learning_metrics(self) -> dict[str, Any]:
         """Get current learning metrics"""
         return self.learning_metrics.copy()
 
     def get_learned_patterns(
-        self, pattern_type: Optional[str] = None
-    ) -> Dict[str, LearningPattern]:
+        self, pattern_type: str | None = None
+    ) -> dict[str, LearningPattern]:
         """Get learned patterns, optionally filtered by type"""
         if pattern_type:
             return {
@@ -427,7 +427,7 @@ class LearningEngine:
             }
         return self.learned_patterns.copy()
 
-    def export_learning_data(self) -> Dict[str, Any]:
+    def export_learning_data(self) -> dict[str, Any]:
         """Export learning data for analysis"""
         return {
             "learning_metrics": self.learning_metrics,
@@ -440,10 +440,10 @@ class LearningEngine:
 
 
 # Global learning engine instance
-_learning_engine_instance: Optional[LearningEngine] = None
+_learning_engine_instance: LearningEngine | None = None
 
 
-def get_learning_engine(config: Optional[Dict[str, Any]] = None) -> LearningEngine:
+def get_learning_engine(config: dict[str, Any] | None = None) -> LearningEngine:
     """Get or create global LearningEngine instance"""
     global _learning_engine_instance
 
@@ -459,7 +459,7 @@ async def record_routing_decision(
     complexity: TaskComplexity,
     selected_agent: AgentType,
     confidence: float,
-    context: Optional[Dict[str, Any]] = None,
+    context: dict[str, Any] | None = None,
 ):
     """Convenience function to record a routing decision"""
     engine = get_learning_engine()
@@ -480,7 +480,7 @@ async def record_task_completion(
     duration: float,
     agent_used: AgentType,
     task_type: TaskType,
-    context: Optional[Dict[str, Any]] = None,
+    context: dict[str, Any] | None = None,
 ):
     """Convenience function to record task completion"""
     engine = get_learning_engine()

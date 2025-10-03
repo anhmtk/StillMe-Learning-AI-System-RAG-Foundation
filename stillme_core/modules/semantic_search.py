@@ -213,7 +213,7 @@ class SemanticSearch:
         scored_items.sort(key=lambda x: x[0], reverse=True)
 
         results = []
-        for score, i, item in scored_items[:limit]:
+        for score, _i, item in scored_items[:limit]:
             result = SearchResult(
                 name=item["name"],
                 content=item["content"],

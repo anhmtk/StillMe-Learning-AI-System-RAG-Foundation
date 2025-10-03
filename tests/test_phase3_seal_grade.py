@@ -26,7 +26,7 @@ import tempfile
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 from unittest.mock import patch
 
 import pytest
@@ -94,7 +94,7 @@ class SealGradeResult:
     test_name: str
     passed: bool
     execution_time: float
-    error_message: Optional[str] = None
+    error_message: str | None = None
     metrics: dict[str, Any] = None
 
 
@@ -103,10 +103,10 @@ class SealGradeTestSuite:
 
     def __init__(self):
         self.results: list[SealGradeResult] = []
-        self.handler: Optional[ClarificationHandler] = None
-        self.multi_modal_clarifier: Optional[MultiModalClarifier] = None
-        self.proactive_suggestion: Optional[ProactiveSuggestion] = None
-        self.audit_logger: Optional[AuditLogger] = None
+        self.handler: ClarificationHandler | None = None
+        self.multi_modal_clarifier: MultiModalClarifier | None = None
+        self.proactive_suggestion: ProactiveSuggestion | None = None
+        self.audit_logger: AuditLogger | None = None
         self.setup_test_environment()
 
     def setup_test_environment(self):

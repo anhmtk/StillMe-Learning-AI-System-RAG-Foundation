@@ -10,7 +10,7 @@ import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -108,7 +108,7 @@ class SecurityHeaders:
         return self.headers.copy()
 
     def get_cors_headers(
-        self, allowed_origins: Optional[list[str]] = None
+        self, allowed_origins: list[str] | None = None
     ) -> dict[str, str]:
         """Get CORS headers"""
         if allowed_origins is None:

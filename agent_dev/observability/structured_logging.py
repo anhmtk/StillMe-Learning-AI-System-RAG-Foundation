@@ -14,7 +14,7 @@ import uuid
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import aiofiles
 
@@ -54,26 +54,26 @@ class LogEntry:
     category: LogCategory
     message: str
     source: str
-    correlation_id: Optional[str]
-    span_id: Optional[str]
-    trace_id: Optional[str]
-    user_id: Optional[str]
-    session_id: Optional[str]
+    correlation_id: str | None
+    span_id: str | None
+    trace_id: str | None
+    user_id: str | None
+    session_id: str | None
     attributes: dict[str, Any]
-    stack_trace: Optional[str]
+    stack_trace: str | None
     tags: list[str]
 
 
 class StructuredLogger:
     """Enterprise structured logging system"""
 
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config_path: str | None = None):
         self.config = self._load_config(config_path)
         self.log_entries: list[LogEntry] = []
         self.log_handlers: list[Any] = []
-        self.correlation_id: Optional[str] = None
-        self.session_id: Optional[str] = None
-        self.user_id: Optional[str] = None
+        self.correlation_id: str | None = None
+        self.session_id: str | None = None
+        self.user_id: str | None = None
         self.lock = threading.RLock()
         self.max_entries = self.config.get("max_entries", 100000)
         self.enabled = True
@@ -81,7 +81,7 @@ class StructuredLogger:
         # Setup standard logging
         self._setup_standard_logging()
 
-    def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
+    def _load_config(self, config_path: str | None = None) -> dict[str, Any]:
         """Load logging configuration"""
         if config_path:
             config_file = Path(config_path)
@@ -197,9 +197,9 @@ class StructuredLogger:
         category: LogCategory,
         message: str,
         source: str,
-        attributes: Optional[dict[str, Any]] = None,
-        tags: Optional[list[str]] = None,
-        exception: Optional[Exception] = None,
+        attributes: dict[str, Any] | None = None,
+        tags: list[str] | None = None,
+        exception: Exception | None = None,
     ) -> LogEntry:
         """Create structured log entry"""
         # Import trace context if available
@@ -243,9 +243,9 @@ class StructuredLogger:
         category: LogCategory,
         message: str,
         source: str,
-        attributes: Optional[dict[str, Any]] = None,
-        tags: Optional[list[str]] = None,
-        exception: Optional[Exception] = None,
+        attributes: dict[str, Any] | None = None,
+        tags: list[str] | None = None,
+        exception: Exception | None = None,
     ):
         """Internal logging method"""
         if not self.enabled:
@@ -283,8 +283,8 @@ class StructuredLogger:
         self,
         message: str,
         source: str = "agentdev",
-        attributes: Optional[dict[str, Any]] = None,
-        tags: Optional[list[str]] = None,
+        attributes: dict[str, Any] | None = None,
+        tags: list[str] | None = None,
     ):
         """Log trace message"""
         self._log(LogLevel.TRACE, LogCategory.SYSTEM, message, source, attributes, tags)
@@ -293,8 +293,8 @@ class StructuredLogger:
         self,
         message: str,
         source: str = "agentdev",
-        attributes: Optional[dict[str, Any]] = None,
-        tags: Optional[list[str]] = None,
+        attributes: dict[str, Any] | None = None,
+        tags: list[str] | None = None,
     ):
         """Log debug message"""
         self._log(LogLevel.DEBUG, LogCategory.SYSTEM, message, source, attributes, tags)
@@ -303,8 +303,8 @@ class StructuredLogger:
         self,
         message: str,
         source: str = "agentdev",
-        attributes: Optional[dict[str, Any]] = None,
-        tags: Optional[list[str]] = None,
+        attributes: dict[str, Any] | None = None,
+        tags: list[str] | None = None,
     ):
         """Log info message"""
         self._log(LogLevel.INFO, LogCategory.SYSTEM, message, source, attributes, tags)
@@ -313,8 +313,8 @@ class StructuredLogger:
         self,
         message: str,
         source: str = "agentdev",
-        attributes: Optional[dict[str, Any]] = None,
-        tags: Optional[list[str]] = None,
+        attributes: dict[str, Any] | None = None,
+        tags: list[str] | None = None,
     ):
         """Log warning message"""
         self._log(LogLevel.WARN, LogCategory.SYSTEM, message, source, attributes, tags)
@@ -323,9 +323,9 @@ class StructuredLogger:
         self,
         message: str,
         source: str = "agentdev",
-        attributes: Optional[dict[str, Any]] = None,
-        tags: Optional[list[str]] = None,
-        exception: Optional[Exception] = None,
+        attributes: dict[str, Any] | None = None,
+        tags: list[str] | None = None,
+        exception: Exception | None = None,
     ):
         """Log error message"""
         self._log(
@@ -342,9 +342,9 @@ class StructuredLogger:
         self,
         message: str,
         source: str = "agentdev",
-        attributes: Optional[dict[str, Any]] = None,
-        tags: Optional[list[str]] = None,
-        exception: Optional[Exception] = None,
+        attributes: dict[str, Any] | None = None,
+        tags: list[str] | None = None,
+        exception: Exception | None = None,
     ):
         """Log fatal message"""
         self._log(
@@ -363,8 +363,8 @@ class StructuredLogger:
         level: LogLevel,
         message: str,
         task_id: str,
-        attributes: Optional[dict[str, Any]] = None,
-        tags: Optional[list[str]] = None,
+        attributes: dict[str, Any] | None = None,
+        tags: list[str] | None = None,
     ):
         """Log task-related message"""
         attrs = attributes or {}
@@ -375,8 +375,8 @@ class StructuredLogger:
         self,
         level: LogLevel,
         message: str,
-        attributes: Optional[dict[str, Any]] = None,
-        tags: Optional[list[str]] = None,
+        attributes: dict[str, Any] | None = None,
+        tags: list[str] | None = None,
     ):
         """Log security-related message"""
         self._log(
@@ -387,8 +387,8 @@ class StructuredLogger:
         self,
         level: LogLevel,
         message: str,
-        attributes: Optional[dict[str, Any]] = None,
-        tags: Optional[list[str]] = None,
+        attributes: dict[str, Any] | None = None,
+        tags: list[str] | None = None,
     ):
         """Log performance-related message"""
         self._log(
@@ -405,8 +405,8 @@ class StructuredLogger:
         level: LogLevel,
         message: str,
         user_id: str,
-        attributes: Optional[dict[str, Any]] = None,
-        tags: Optional[list[str]] = None,
+        attributes: dict[str, Any] | None = None,
+        tags: list[str] | None = None,
     ):
         """Log audit message"""
         attrs = attributes or {}
@@ -418,8 +418,8 @@ class StructuredLogger:
         level: LogLevel,
         message: str,
         endpoint: str,
-        attributes: Optional[dict[str, Any]] = None,
-        tags: Optional[list[str]] = None,
+        attributes: dict[str, Any] | None = None,
+        tags: list[str] | None = None,
     ):
         """Log API-related message"""
         attrs = attributes or {}
@@ -428,10 +428,10 @@ class StructuredLogger:
 
     def get_logs(
         self,
-        level: Optional[LogLevel] = None,
-        category: Optional[LogCategory] = None,
-        source: Optional[str] = None,
-        correlation_id: Optional[str] = None,
+        level: LogLevel | None = None,
+        category: LogCategory | None = None,
+        source: str | None = None,
+        correlation_id: str | None = None,
         limit: int = 100,
     ) -> list[LogEntry]:
         """Get filtered log entries"""
@@ -508,10 +508,10 @@ class StructuredLogger:
     async def export_logs(
         self,
         file_path: str,
-        level: Optional[LogLevel] = None,
-        category: Optional[LogCategory] = None,
-        start_time: Optional[float] = None,
-        end_time: Optional[float] = None,
+        level: LogLevel | None = None,
+        category: LogCategory | None = None,
+        start_time: float | None = None,
+        end_time: float | None = None,
     ):
         """Export logs to file"""
         try:
@@ -571,7 +571,7 @@ def set_user_id(user_id: str):
 
 
 def log_task_start(
-    task_id: str, task_type: str, attributes: Optional[dict[str, Any]] = None
+    task_id: str, task_type: str, attributes: dict[str, Any] | None = None
 ):
     """Log task start"""
     attrs = attributes or {}
@@ -580,7 +580,7 @@ def log_task_start(
 
 
 def log_task_complete(
-    task_id: str, duration: float, attributes: Optional[dict[str, Any]] = None
+    task_id: str, duration: float, attributes: dict[str, Any] | None = None
 ):
     """Log task completion"""
     attrs = attributes or {}
@@ -598,7 +598,7 @@ def log_performance_metric(
     metric_name: str,
     value: float,
     unit: str,
-    attributes: Optional[dict[str, Any]] = None,
+    attributes: dict[str, Any] | None = None,
 ):
     """Log performance metric"""
     attrs = attributes or {}

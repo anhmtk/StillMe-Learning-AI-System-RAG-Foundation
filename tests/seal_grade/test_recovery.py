@@ -67,7 +67,7 @@ class TestRecovery:
 
         except Exception as e:
             # Should handle process kill gracefully
-            assert isinstance(e, (ValueError, TypeError, Exception, AttributeError))
+            assert isinstance(e, ValueError | TypeError | Exception | AttributeError)
 
     def test_memory_corruption_recovery(self, state_store):
         """Test recovery from memory corruption"""
@@ -87,7 +87,7 @@ class TestRecovery:
 
         except Exception as e:
             # Should handle memory issues gracefully
-            assert isinstance(e, (MemoryError, ValueError, Exception, AttributeError))
+            assert isinstance(e, MemoryError | ValueError | Exception | AttributeError)
 
     def test_network_failure_recovery(self, state_store):
         """Test recovery from network failure"""
@@ -107,7 +107,7 @@ class TestRecovery:
         except Exception as e:
             # Should handle network issues gracefully
             assert isinstance(
-                e, (ConnectionError, TimeoutError, Exception, AttributeError)
+                e, ConnectionError | TimeoutError | Exception | AttributeError
             )
 
     def test_disk_full_recovery(self, state_store):
@@ -127,7 +127,7 @@ class TestRecovery:
 
         except Exception as e:
             # Should handle disk issues gracefully
-            assert isinstance(e, (OSError, IOError, Exception, AttributeError))
+            assert isinstance(e, OSError | IOError | Exception | AttributeError)
 
     def test_concurrent_access_recovery(self, state_store):
         """Test recovery from concurrent access issues"""
@@ -148,7 +148,7 @@ class TestRecovery:
 
         except Exception as e:
             # Should handle concurrent access gracefully
-            assert isinstance(e, (ValueError, TypeError, Exception, AttributeError))
+            assert isinstance(e, ValueError | TypeError | Exception | AttributeError)
 
     def test_invalid_data_recovery(self, state_store):
         """Test recovery from invalid data"""
@@ -160,7 +160,7 @@ class TestRecovery:
 
         except Exception as e:
             # Should handle invalid data gracefully
-            assert isinstance(e, (ValueError, TypeError, Exception, AttributeError))
+            assert isinstance(e, ValueError | TypeError | Exception | AttributeError)
 
     def test_timeout_recovery(self, state_store):
         """Test recovery from timeout"""
@@ -180,7 +180,7 @@ class TestRecovery:
         except Exception as e:
             # Should handle timeout gracefully
             assert isinstance(
-                e, (TimeoutError, asyncio.TimeoutError, Exception, AttributeError)
+                e, TimeoutError | asyncio.TimeoutError | Exception | AttributeError
             )
 
     def test_resource_exhaustion_recovery(self, state_store):
@@ -199,7 +199,7 @@ class TestRecovery:
 
         except Exception as e:
             # Should handle resource exhaustion gracefully
-            assert isinstance(e, (MemoryError, OSError, Exception, AttributeError))
+            assert isinstance(e, MemoryError | OSError | Exception | AttributeError)
 
     def test_graceful_shutdown_recovery(self, state_store):
         """Test recovery from graceful shutdown"""
@@ -226,4 +226,4 @@ class TestRecovery:
 
         except Exception as e:
             # Should handle shutdown gracefully
-            assert isinstance(e, (ValueError, TypeError, Exception, AttributeError))
+            assert isinstance(e, ValueError | TypeError | Exception | AttributeError)

@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ class QualityGateResult:
     threshold: float
     passed: bool
     timestamp: datetime
-    details: Optional[dict[str, Any]] = None
+    details: dict[str, Any] | None = None
 
     def __post_init__(self):
         if self.details is None:
@@ -114,7 +114,7 @@ class AgentDevQualityIntegration:
 
     def _run_coverage_gate(
         self, test_results: dict[str, Any] = None
-    ) -> Optional[QualityGateResult]:
+    ) -> QualityGateResult | None:
         """Run coverage quality gate"""
         try:
             if not test_results:
@@ -149,7 +149,7 @@ class AgentDevQualityIntegration:
 
     def _run_security_gate(
         self, security_scan: dict[str, Any] = None
-    ) -> Optional[QualityGateResult]:
+    ) -> QualityGateResult | None:
         """Run security quality gate"""
         try:
             if not security_scan:
@@ -191,7 +191,7 @@ class AgentDevQualityIntegration:
 
     def _run_performance_gate(
         self, performance_metrics: dict[str, Any] = None
-    ) -> Optional[QualityGateResult]:
+    ) -> QualityGateResult | None:
         """Run performance quality gate"""
         try:
             if not performance_metrics:
@@ -235,7 +235,7 @@ class AgentDevQualityIntegration:
 
     def _run_maintainability_gate(
         self, code_content: str
-    ) -> Optional[QualityGateResult]:
+    ) -> QualityGateResult | None:
         """Run maintainability quality gate"""
         try:
             if not code_content:
@@ -294,7 +294,7 @@ class AgentDevQualityIntegration:
             self.logger.error(f"❌ Failed to run maintainability gate: {e}")
             return None
 
-    def _run_ethics_gate(self, code_content: str) -> Optional[QualityGateResult]:
+    def _run_ethics_gate(self, code_content: str) -> QualityGateResult | None:
         """Run ethics quality gate"""
         try:
             if not code_content:

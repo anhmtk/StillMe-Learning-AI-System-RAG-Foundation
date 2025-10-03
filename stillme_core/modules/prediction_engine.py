@@ -14,7 +14,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -161,7 +161,7 @@ class PredictionEngine:
 
         return grouped
 
-    def _extract_technology_name(self, title: str) -> Optional[str]:
+    def _extract_technology_name(self, title: str) -> str | None:
         """Extract technology name from trend title"""
         # Simple keyword extraction
         tech_keywords = [
@@ -223,7 +223,7 @@ class PredictionEngine:
 
     def _analyze_technology_trends(
         self, tech_name: str, trends: list[dict[str, Any]]
-    ) -> Optional[TrendPrediction]:
+    ) -> TrendPrediction | None:
         """Analyze trends for a specific technology"""
         if not trends:
             return None
@@ -277,7 +277,7 @@ class PredictionEngine:
 
     def _create_prediction_signal(
         self, trend: dict[str, Any]
-    ) -> Optional[PredictionSignal]:
+    ) -> PredictionSignal | None:
         """Create prediction signal from trend data"""
         source = trend.get("source", "")
         trend.get("title", "")

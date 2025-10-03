@@ -16,7 +16,7 @@ Version: 1.0.1 (Fixed and Optimized)
 import time
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 # --- Observability Setup (Import Only Once) ---
 # Import StillMe core observability components safely.
@@ -100,9 +100,9 @@ class RequestContext:
     timestamp: float
     urgency: str = "normal"  # low, normal, high, critical
     # Fix type hinting and default values for mutable types
-    user_preferences: Optional[dict[str, Any]] = None
-    previous_requests: Optional[list[dict]] = None
-    system_load: Optional[dict[str, float]] = None
+    user_preferences: dict[str, Any] | None = None
+    previous_requests: list[dict] | None = None
+    system_load: dict[str, float] | None = None
 
     def __post_init__(self):
         """Initializes default values for mutable fields."""
@@ -154,7 +154,7 @@ class IntelligentRouter:
     AgentDev to make intelligent decisions about request handling.
     """
 
-    def __init__(self, config: Optional[dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         """Initialize the Intelligent Router"""
         self.config = config or {}
         # Assign global observability objects

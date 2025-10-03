@@ -16,25 +16,13 @@ import time
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 # Import StillMe core components
 try:
     from ..observability.logger import get_logger
-    from ..observability.metrics import MetricType, get_metrics_collector
+    from ..observability.metrics import get_metrics_collector
     from ..observability.tracer import get_tracer
-    from .intelligent_router import (  # type: ignore
-        AgentType as RouterAgentType,
-    )
-    from .intelligent_router import (
-        RoutingDecision as RouterRoutingDecision,
-    )
-    from .intelligent_router import (
-        TaskComplexity as RouterTaskComplexity,
-    )
-    from .intelligent_router import (
-        TaskType as RouterTaskType,
-    )
 except ImportError:
     # Fallback for standalone execution
     import sys
@@ -47,7 +35,7 @@ except ImportError:
     pass
 
 try:
-    from stillme_core.observability.metrics import MetricType, get_metrics_collector
+    from stillme_core.observability.metrics import get_metrics_collector
 except ImportError:
     pass
 
@@ -126,7 +114,7 @@ class RouterMemory:
     confidence: float
     success: bool
     duration: float
-    user_satisfaction: Optional[float]
+    user_satisfaction: float | None
     context: dict[str, Any]
     outcome: dict[str, Any]
 
@@ -139,7 +127,7 @@ class RouterMemoryManager:
     enabling long-term learning and pattern recognition.
     """
 
-    def __init__(self, config: Optional[dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         """Initialize the Router Memory Manager"""
         self.config = config or {}
         self.logger = logger if logger is not None else logging.getLogger(__name__)
@@ -232,9 +220,9 @@ class RouterMemoryManager:
         confidence: float,
         success: bool,
         duration: float,
-        context: Optional[dict[str, Any]] = None,
-        outcome: Optional[dict[str, Any]] = None,
-        user_satisfaction: Optional[float] = None,
+        context: dict[str, Any] | None = None,
+        outcome: dict[str, Any] | None = None,
+        user_satisfaction: float | None = None,
     ) -> str:
         """Store a router decision in memory"""
         memory_id = f"memory_{int(time.time() * 1000)}"
@@ -441,7 +429,7 @@ class RouterMemoryManager:
                     stats["total_confidence"] += row[3]
 
                 # Calculate averages
-                for task_type, stats in task_stats.items():
+                for _task_type, stats in task_stats.items():
                     if stats["total_tasks"] > 0:
                         stats["success_rate"] = (
                             stats["successful_tasks"] / stats["total_tasks"]
@@ -646,11 +634,11 @@ class RouterMemoryManager:
 
 
 # Global memory manager instance
-_memory_manager_instance: Optional[RouterMemoryManager] = None
+_memory_manager_instance: RouterMemoryManager | None = None
 
 
 def get_router_memory_manager(
-    config: Optional[dict[str, Any]] = None,
+    config: dict[str, Any] | None = None,
 ) -> RouterMemoryManager:
     """Get or create global RouterMemoryManager instance"""
     global _memory_manager_instance
@@ -670,9 +658,9 @@ async def store_router_memory(
     confidence: float,
     success: bool,
     duration: float,
-    context: Optional[dict[str, Any]] = None,
-    outcome: Optional[dict[str, Any]] = None,
-    user_satisfaction: Optional[float] = None,
+    context: dict[str, Any] | None = None,
+    outcome: dict[str, Any] | None = None,
+    user_satisfaction: float | None = None,
 ) -> str:
     """Convenience function to store router memory"""
     manager = get_router_memory_manager()

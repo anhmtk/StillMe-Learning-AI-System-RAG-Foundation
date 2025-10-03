@@ -6,7 +6,7 @@ Manages policy levels and control mechanisms.
 import logging
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional, Union
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ class PolicyConfig:
 class PolicyController:
     """Controller for managing AI policy and behavior."""
 
-    def __init__(self, config: Optional[dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self.policy_level = PolicyLevel(self.config.get("level", "balanced"))
         self.dry_run = self.config.get("dry_run", False)
@@ -92,7 +92,7 @@ class PolicyController:
         """Get the current policy configuration."""
         return self.policy_configs[self.policy_level]
 
-    def set_policy_level(self, level: Union[PolicyLevel, str]):
+    def set_policy_level(self, level: PolicyLevel | str):
         """Set the policy level."""
         if isinstance(level, str):
             level = PolicyLevel(level)
@@ -197,7 +197,7 @@ class PolicyController:
 
 
 # Global policy controller instance
-_policy_controller: Optional[PolicyController] = None
+_policy_controller: PolicyController | None = None
 
 
 def get_policy_controller() -> PolicyController:

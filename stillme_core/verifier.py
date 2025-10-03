@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional, Union
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -35,8 +35,8 @@ class VerificationResult:
     description: str
     details: dict[str, Any]
     timestamp: datetime
-    duration: Optional[float] = None
-    metadata: Optional[dict[str, Any]] = None
+    duration: float | None = None
+    metadata: dict[str, Any] | None = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -69,7 +69,7 @@ class LegacyVerifier:
         }
 
     def verify_code_quality(
-        self, code_content: str, file_path: Optional[str] = None
+        self, code_content: str, file_path: str | None = None
     ) -> VerificationResult:
         """Verify code quality"""
         try:
@@ -134,7 +134,7 @@ class LegacyVerifier:
             raise
 
     def verify_security(
-        self, code_content: str, file_path: Optional[str] = None
+        self, code_content: str, file_path: str | None = None
     ) -> VerificationResult:
         """Verify security"""
         try:
@@ -203,7 +203,7 @@ class LegacyVerifier:
             raise
 
     def verify_performance(
-        self, code_content: str, file_path: Optional[str] = None
+        self, code_content: str, file_path: str | None = None
     ) -> VerificationResult:
         """Verify performance"""
         try:
@@ -264,7 +264,7 @@ class LegacyVerifier:
             raise
 
     def run_comprehensive_verification(
-        self, code_content: str, file_path: Optional[str] = None
+        self, code_content: str, file_path: str | None = None
     ) -> list[VerificationResult]:
         """Run comprehensive verification"""
         try:
@@ -354,8 +354,8 @@ class LegacyVerifier:
         self,
         step: dict[str, Any],
         exec_result: dict[str, Any],
-        success_criteria: Optional[dict[str, Any]] = None,
-    ) -> Union[bool, dict[str, Any]]:
+        success_criteria: dict[str, Any] | None = None,
+    ) -> bool | dict[str, Any]:
         """Verify execution result against step criteria"""
         try:
             # Use provided success_criteria or extract from step
@@ -441,7 +441,7 @@ class LegacyVerifier:
         """Verify test execution results"""
         try:
             stdout = exec_result.get("stdout", "")
-            stderr = exec_result.get("stderr", "")
+            exec_result.get("stderr", "")
             exit_code = exec_result.get("exit_code", 0)
 
             # Extract test statistics

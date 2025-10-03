@@ -14,7 +14,7 @@ import hashlib
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set, cast
+from typing import Any, cast
 
 # TYPE_CHECKING imports removed - not used in runtime
 
@@ -44,13 +44,13 @@ class MockSecurityMiddleware:
     def __init__(self) -> None:
         pass
 
-    def validate_input(self, data: Any) -> Dict[str, Any]:
+    def validate_input(self, data: Any) -> dict[str, Any]:
         return {"is_valid": True, "threats_detected": []}
 
     def check_rate_limit(self, client_ip: str, endpoint: str) -> bool:
         return True
 
-    def get_security_report(self) -> Dict[str, Any]:
+    def get_security_report(self) -> dict[str, Any]:
         return {"security_score": 100}
 
 
@@ -61,7 +61,7 @@ class MockPerformanceMonitor:
     def start_monitoring(self) -> None:
         pass
 
-    def get_performance_summary(self) -> Dict[str, Any]:
+    def get_performance_summary(self) -> dict[str, Any]:
         return {"status": "healthy"}
 
 
@@ -93,21 +93,21 @@ except ImportError:
         # Create mock LayeredMemoryV1
         class MockLayeredMemoryV1:
             def __init__(self) -> None:
-                self.memories: List[Dict[str, Any]] = []
+                self.memories: list[dict[str, Any]] = []
 
             def add_memory(
-                self, content: str, metadata: Dict[str, Any], priority: float = 0.5
+                self, content: str, metadata: dict[str, Any], priority: float = 0.5
             ) -> None:
                 self.memories.append(
                     {"content": content, "metadata": metadata, "priority": priority}
                 )
 
-            def search(self, query: str) -> List[Dict[str, Any]]:
+            def search(self, query: str) -> list[dict[str, Any]]:
                 return [
                     m for m in self.memories if query.lower() in m["content"].lower()
                 ]
 
-            def get_health_status(self) -> Dict[str, str]:
+            def get_health_status(self) -> dict[str, str]:
                 return {"status": "healthy", "count": str(len(self.memories))}
 
         _LayeredMemoryV1 = MockLayeredMemoryV1
@@ -147,12 +147,12 @@ except ImportError:
         class MockSecureMemoryManager:
             def __init__(self, config: MockSecureMemoryConfig) -> None:
                 self.config = config
-                self.encrypted_data: Dict[str, bytes] = {}
+                self.encrypted_data: dict[str, bytes] = {}
 
             def store(self, key: str, data: bytes) -> None:
                 self.encrypted_data[key] = data
 
-            def retrieve(self, key: str) -> Optional[bytes]:
+            def retrieve(self, key: str) -> bytes | None:
                 return self.encrypted_data.get(key)
 
         _SecureMemoryConfig = MockSecureMemoryConfig
@@ -189,7 +189,7 @@ class MemorySecurityConfig:
     audit_trail: bool = True
     max_memory_size_mb: int = 100
     max_operations_per_minute: int = 1000
-    security_levels: Optional[Dict[str, int]] = None
+    security_levels: dict[str, int] | None = None
 
     def __post_init__(self):
         if self.security_levels is None:
@@ -206,7 +206,7 @@ class MemorySecurityIntegration:
     Main memory security integration system
     """
 
-    def __init__(self, config: Optional[MemorySecurityConfig] = None):
+    def __init__(self, config: MemorySecurityConfig | None = None):
         self.config = config or MemorySecurityConfig()
         self.logger = self._setup_logging()
 
@@ -226,12 +226,12 @@ class MemorySecurityIntegration:
         self.secure_storage = None
 
         # Security tracking
-        self.access_logs: List[MemoryAccessLog] = []
-        self.blocked_operations: Set[str] = set()
-        self.security_events: List[Dict[str, Any]] = []
+        self.access_logs: list[MemoryAccessLog] = []
+        self.blocked_operations: set[str] = set()
+        self.security_events: list[dict[str, Any]] = []
 
         # Performance tracking
-        self.operation_metrics: Dict[str, List[float]] = {
+        self.operation_metrics: dict[str, list[float]] = {
             "read_times": [],
             "write_times": [],
             "search_times": [],
@@ -331,7 +331,7 @@ class MemorySecurityIntegration:
         layer: str = "short_term",
         security_level: str = "private",
         user_id: str = "system",
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> bool:
         """
         Store memory with security validation
@@ -388,7 +388,7 @@ class MemorySecurityIntegration:
 
     async def retrieve_memory(
         self, query: str, layer: str = "auto", user_id: str = "system"
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Retrieve memory with security validation
         """
@@ -446,7 +446,7 @@ class MemorySecurityIntegration:
 
     async def search_memory(
         self, query: str, user_id: str = "system"
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Search memory with security validation
         """
@@ -642,7 +642,7 @@ class MemorySecurityIntegration:
             self.logger.error(f"Error checking security level permission: {e}")
             return False
 
-    def _get_user_permissions(self, user_id: str) -> Dict[str, Any]:
+    def _get_user_permissions(self, user_id: str) -> dict[str, Any]:
         """Get user permissions - simplified version"""
         # In production, this would query a user management system
         return {
@@ -651,8 +651,8 @@ class MemorySecurityIntegration:
         }
 
     def _filter_results_by_security(
-        self, results: List[Dict[str, Any]], user_id: str
-    ) -> List[Dict[str, Any]]:
+        self, results: list[dict[str, Any]], user_id: str
+    ) -> list[dict[str, Any]]:
         """Filter results based on user security level"""
         try:
             user_permissions = self._get_user_permissions(user_id)
@@ -746,7 +746,7 @@ class MemorySecurityIntegration:
         except Exception as e:
             self.logger.error(f"Error logging security event: {e}")
 
-    async def _health_check(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _health_check(self, data: dict[str, Any]) -> dict[str, Any]:
         """Health check endpoint"""
         try:
             # Check memory system health
@@ -790,7 +790,7 @@ class MemorySecurityIntegration:
                 "message": str(e),
             }
 
-    async def _get_security_report(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_security_report(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get security report endpoint"""
         try:
             # Get recent security events
@@ -857,7 +857,7 @@ class MemorySecurityIntegration:
                 "message": str(e),
             }
 
-    async def _validate_memory_operation(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _validate_memory_operation(self, data: dict[str, Any]) -> dict[str, Any]:
         """Validate memory operation endpoint"""
         try:
             operation = data.get("operation", "")
@@ -886,7 +886,7 @@ class MemorySecurityIntegration:
                 "message": str(e),
             }
 
-    def get_memory_statistics(self) -> Dict[str, Any]:
+    def get_memory_statistics(self) -> dict[str, Any]:
         """Get memory system statistics"""
         try:
             return {

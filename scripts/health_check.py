@@ -101,7 +101,7 @@ class HealthChecker:
                 with open("artifacts/coverage.json") as f:
                     cov_data = json.load(f)
                     coverage = cov_data.get("totals", {}).get("percent_covered", 0.0)
-            except:
+            except Exception:
                 pass
 
         result = {
@@ -169,7 +169,7 @@ class HealthChecker:
                             bandit_medium += 1
                         elif severity == "low":
                             bandit_low += 1
-            except:
+            except Exception:
                 pass
 
         # Parse semgrep results
@@ -189,7 +189,7 @@ class HealthChecker:
                             semgrep_medium += 1
                         elif severity == "info":
                             semgrep_low += 1
-            except:
+            except Exception:
                 pass
 
         total_high = bandit_high + semgrep_high
@@ -286,7 +286,7 @@ class HealthChecker:
                     if result == 0:
                         open_ports.append(port)
                     sock.close()
-                except:
+                except Exception:
                     pass
 
             result = {
@@ -331,7 +331,7 @@ class HealthChecker:
                     versions[lib] = result.stdout.strip()
                 else:
                     missing.append(lib)
-            except:
+            except Exception:
                 missing.append(lib)
 
         result = {

@@ -83,7 +83,7 @@ class FuzzSecurityTestSuite:
         try:
             process = psutil.Process(os.getpid())
             return process.memory_info().rss / 1024 / 1024
-        except:
+        except Exception:
             return 0.0
 
     def _measure_performance(self, func, *args, **kwargs):

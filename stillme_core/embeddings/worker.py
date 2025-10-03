@@ -102,7 +102,7 @@ if __name__ == "__main__":
             try:
                 output_data = json.loads(result.stdout)
             except json.JSONDecodeError as e:
-                raise EmbeddingRuntimeError(f"Invalid JSON output: {e}")
+                raise EmbeddingRuntimeError(f"Invalid JSON output: {e}") from e
 
             if "error" in output_data:
                 raise EmbeddingRuntimeError(f"Worker error: {output_data['error']}")
@@ -112,12 +112,12 @@ if __name__ == "__main__":
 
             return output_data["embeddings"]
 
-        except subprocess.TimeoutExpired:
-            raise EmbeddingRuntimeError(f"Worker timeout after {self._timeout}s")
+        except subprocess.TimeoutExpired as e:
+            raise EmbeddingRuntimeError(f"Worker timeout after {self._timeout}s") from e
         except Exception as e:
             if isinstance(e, EmbeddingRuntimeError):
                 raise
-            raise EmbeddingRuntimeError(f"Worker execution failed: {e}")
+            raise EmbeddingRuntimeError(f"Worker execution failed: {e}") from e
 
     def cleanup(self):
         """Cleanup worker script"""

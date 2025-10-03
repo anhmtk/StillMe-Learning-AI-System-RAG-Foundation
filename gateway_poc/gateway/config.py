@@ -4,7 +4,6 @@ Enhanced configuration management with improved security and performance setting
 """
 
 import os
-from typing import Optional
 
 from pydantic import Field, validator
 from pydantic_settings import BaseSettings
@@ -71,7 +70,7 @@ class EnhancedSettings(BaseSettings):
     STILLME_CORE_URL: str = Field(
         default="http://localhost:8000", env="STILLME_CORE_URL"
     )
-    STILLME_API_KEY: Optional[str] = Field(default=None, env="STILLME_API_KEY")
+    STILLME_API_KEY: str | None = Field(default=None, env="STILLME_API_KEY")
     STILLME_TIMEOUT: int = 30
     STILLME_RETRY_ATTEMPTS: int = 3
     STILLME_RETRY_DELAY: int = 1
@@ -139,25 +138,25 @@ class EnhancedSettings(BaseSettings):
     CSP_POLICY: str = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self'; connect-src 'self' wss: ws:; frame-ancestors 'none';"
 
     # Notifications
-    FIREBASE_PROJECT_ID: Optional[str] = Field(default=None, env="FIREBASE_PROJECT_ID")
-    FIREBASE_PRIVATE_KEY: Optional[str] = Field(
+    FIREBASE_PROJECT_ID: str | None = Field(default=None, env="FIREBASE_PROJECT_ID")
+    FIREBASE_PRIVATE_KEY: str | None = Field(
         default=None, env="FIREBASE_PRIVATE_KEY"
     )
-    FIREBASE_CLIENT_EMAIL: Optional[str] = Field(
+    FIREBASE_CLIENT_EMAIL: str | None = Field(
         default=None, env="FIREBASE_CLIENT_EMAIL"
     )
 
     # Email notifications
-    SMTP_HOST: Optional[str] = Field(default=None, env="SMTP_HOST")
+    SMTP_HOST: str | None = Field(default=None, env="SMTP_HOST")
     SMTP_PORT: int = Field(default=587, env="SMTP_PORT")
-    SMTP_USERNAME: Optional[str] = Field(default=None, env="SMTP_USERNAME")
-    SMTP_PASSWORD: Optional[str] = Field(default=None, env="SMTP_PASSWORD")
+    SMTP_USERNAME: str | None = Field(default=None, env="SMTP_USERNAME")
+    SMTP_PASSWORD: str | None = Field(default=None, env="SMTP_PASSWORD")
     SMTP_USE_TLS: bool = Field(default=True, env="SMTP_USE_TLS")
 
     # Alerting
     ENABLE_ALERTS: bool = True
     ALERT_EMAIL_RECIPIENTS: list[str] = Field(default=[], env="ALERT_EMAIL_RECIPIENTS")
-    ALERT_WEBHOOK_URL: Optional[str] = Field(default=None, env="ALERT_WEBHOOK_URL")
+    ALERT_WEBHOOK_URL: str | None = Field(default=None, env="ALERT_WEBHOOK_URL")
     ALERT_THRESHOLDS: dict[str, int] = {
         "error_rate": 5,  # 5% error rate
         "response_time": 1000,  # 1 second

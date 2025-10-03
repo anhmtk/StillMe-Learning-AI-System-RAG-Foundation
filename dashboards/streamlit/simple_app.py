@@ -134,7 +134,7 @@ class SimpleDashboard:
                         )
                         db_count = cursor.fetchone()[0]
                         pending_count = len(sample_proposals) + db_count
-                except:
+                except Exception:
                     pending_count = len(sample_proposals)
 
             new_today = len(
@@ -438,7 +438,7 @@ class SimpleDashboard:
                         )
                 else:
                     st.session_state.automation_enabled = True  # Default to True
-            except:
+            except Exception:
                 st.session_state.automation_enabled = True  # Fallback to True
 
         # Automation toggle
@@ -676,7 +676,7 @@ class SimpleDashboard:
                             st.info(
                                 f"Found {count} pending proposals in database, but couldn't load details."
                             )
-                except:
+                except Exception:
                     pass
 
         # Use sample_proposals as proposals

@@ -149,7 +149,7 @@ class OptimizationAnalyzer:
             # Format: 2025-09-17T12-00-00Z
             dt = datetime.strptime(run_id, "%Y-%m-%dT%H-%M-%SZ")
             return dt.timestamp()
-        except:
+        except Exception:
             return 0.0
 
     def _get_git_sha(self) -> str:
@@ -162,7 +162,7 @@ class OptimizationAnalyzer:
                 cwd=Path.cwd(),
             )
             return result.stdout.strip()[:8] if result.returncode == 0 else "unknown"
-        except:
+        except Exception:
             return "unknown"
 
     def _calculate_overall_score(self, reports: list[dict[str, Any]]) -> float:
@@ -601,7 +601,7 @@ class OptimizationAnalyzer:
         self, analysis: dict[str, Any], html_path: Path
     ) -> None:
         """Create interactive HTML report with Plotly charts"""
-        if HAS_PLOTLY:
+        if has_plotly:
             html_content = self._generate_plotly_html(analysis)
         else:
             html_content = self._generate_static_html(analysis)

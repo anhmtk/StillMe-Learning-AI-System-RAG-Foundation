@@ -15,7 +15,7 @@ PURPOSE / MỤC ĐÍCH:
 import logging
 import os
 import time
-from typing import Any, Optional
+from typing import Any
 
 # Initialize logger
 logger = logging.getLogger("StillMe.APIProvider")
@@ -38,7 +38,7 @@ class UnifiedAPIManager:
 
         self.logger.info("✅ UnifiedAPIManager initialized (simple mode)")
 
-    def get_response(self, prompt: str, model: Optional[str] = None) -> str:
+    def get_response(self, prompt: str, model: str | None = None) -> str:
         """Get AI response from appropriate model"""
         try:
             # Choose model based on complexity
@@ -135,7 +135,7 @@ class UnifiedAPIManager:
         text: str,
         src_lang: str,
         tgt_lang: str,
-        quality_hint: Optional[str] = None,
+        quality_hint: str | None = None,
     ) -> dict[str, Any]:
         """Simple translation with fallback"""
         try:

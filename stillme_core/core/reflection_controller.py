@@ -28,7 +28,7 @@ import time
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from .reflection_scorer import ReflectionScorer, ScoringResult, ScoringWeights
 from .secrecy_filter import SecrecyFilter
@@ -91,7 +91,7 @@ class ReflectionController:
     Bộ điều khiển phản tư chính với thuật toán phản tư có giới hạn
     """
 
-    def __init__(self, config: Optional[ReflectionConfig] = None):
+    def __init__(self, config: ReflectionConfig | None = None):
         self.config = config or ReflectionConfig()
         self.logger = logging.getLogger(f"{__name__}.ReflectionController")
 
@@ -149,7 +149,7 @@ class ReflectionController:
             self.logger.warning(f"Could not load configuration: {e}")
 
     def should_reflect(
-        self, query: str, context: Optional[ReflectionContext] = None
+        self, query: str, context: ReflectionContext | None = None
     ) -> bool:
         """
         Determine if reflection should be applied
@@ -245,8 +245,8 @@ class ReflectionController:
         self,
         response: str,
         query: str,
-        context: Optional[ReflectionContext] = None,
-        mode: Optional[ReflectionMode] = None,
+        context: ReflectionContext | None = None,
+        mode: ReflectionMode | None = None,
     ) -> ReflectionResult:
         """
         Enhance response through bounded reflection
@@ -458,7 +458,7 @@ class ReflectionController:
         query: str,
         context: ReflectionContext,
         score_result: ScoringResult,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Generate improvement suggestion / Tạo gợi ý cải thiện"""
         try:
             # Analyze score result to identify areas for improvement

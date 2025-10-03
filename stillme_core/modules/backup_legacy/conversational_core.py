@@ -1,4 +1,11 @@
 
+import logging
+from dataclasses import dataclass
+from typing import Any, Dict, List, Optional
+
+logger = logging.getLogger(__name__)
+
+
 class SecureMemoryManager:
     def __init__(self):
         self.data = {}
@@ -16,15 +23,6 @@ class EthicsChecker:
 class AuditLogger:
     def log(self, event):
         print(f"Audit Log: {event}")
-
-
-
-import logging
-from dataclasses import dataclass
-from typing import Any, Dict, List, Optional
-
-
-logger = logging.getLogger(__name__)
 
 @dataclass
 class ConversationalcoreConfig:

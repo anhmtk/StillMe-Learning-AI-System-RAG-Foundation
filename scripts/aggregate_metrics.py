@@ -30,7 +30,7 @@ import shutil
 import sys
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 sys.path.append(str(Path(__file__).parent.parent))
 
@@ -62,7 +62,7 @@ class MetricsAggregator:
 
         logger.info(f"MetricsAggregator initialized: db={db_path}, output={output_dir}")
 
-    def aggregate_daily_metrics(self, date: Optional[str] = None) -> dict[str, Any]:
+    def aggregate_daily_metrics(self, date: str | None = None) -> dict[str, Any]:
         """Aggregate daily metrics"""
         if date is None:
             date = datetime.now().strftime("%Y-%m-%d")
@@ -103,7 +103,7 @@ class MetricsAggregator:
 
         return aggregated_data
 
-    def create_daily_summary_csv(self, date: Optional[str] = None) -> str:
+    def create_daily_summary_csv(self, date: str | None = None) -> str:
         """Create daily summary CSV"""
         if date is None:
             date = datetime.now().strftime("%Y-%m-%d")

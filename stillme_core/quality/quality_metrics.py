@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -105,7 +105,7 @@ class QualityMetrics:
         """Get metrics by status"""
         return [m for m in self.metrics if m.status == status]
 
-    def get_latest_metric(self, metric_type: MetricType) -> Optional[QualityMetric]:
+    def get_latest_metric(self, metric_type: MetricType) -> QualityMetric | None:
         """Get the latest metric of a specific type"""
         metrics = self.get_metrics_by_type(metric_type)
         if metrics:

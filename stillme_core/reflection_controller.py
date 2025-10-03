@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -59,12 +59,12 @@ class ReflectionSession:
     title: str
     description: str
     start_time: datetime
-    end_time: Optional[datetime] = None
-    duration: Optional[float] = None
+    end_time: datetime | None = None
+    duration: float | None = None
     insights: list[str] = None
     improvements: list[str] = None
     action_items: list[str] = None
-    confidence_score: Optional[float] = None
+    confidence_score: float | None = None
     metadata: dict[str, Any] = None
 
     def __post_init__(self):
@@ -96,10 +96,10 @@ class ReflectionContext:
     """Reflection context record"""
 
     context_id: str
-    user_id: Optional[str] = None
-    session_id: Optional[str] = None
-    topic: Optional[str] = None
-    domain: Optional[str] = None
+    user_id: str | None = None
+    session_id: str | None = None
+    topic: str | None = None
+    domain: str | None = None
     urgency: str = "normal"
     metadata: dict[str, Any] = None
 

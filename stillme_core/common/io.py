@@ -15,7 +15,7 @@ import shutil
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any
 
 import aiofiles
 import yaml
@@ -46,7 +46,7 @@ class FileInfo:
     size: int
     modified_time: float
     format: FileFormat
-    checksum: Optional[str] = None
+    checksum: str | None = None
     exists: bool = False
 
 
@@ -55,7 +55,7 @@ class FileOperation:
     """File operation configuration - Cấu hình thao tác file"""
 
     source: str
-    destination: Optional[str] = None
+    destination: str | None = None
     backup: bool = False
     create_dirs: bool = True
     overwrite: bool = False
@@ -68,7 +68,7 @@ class FileManager:
     Tiện ích quản lý file với xử lý lỗi và xác thực
     """
 
-    def __init__(self, base_path: Optional[str] = None):
+    def __init__(self, base_path: str | None = None):
         """
         Initialize file manager - Khởi tạo file manager
 
@@ -78,7 +78,7 @@ class FileManager:
         self.base_path = Path(base_path) if base_path else Path.cwd()
         logger.info("File manager initialized", base_path=str(self.base_path))
 
-    def _resolve_path(self, path: Union[str, Path]) -> Path:
+    def _resolve_path(self, path: str | Path) -> Path:
         """Resolve file path - Giải quyết đường dẫn file"""
         path = Path(path)
         if not path.is_absolute():
@@ -109,7 +109,7 @@ class FileManager:
                 hash_md5.update(chunk)
         return hash_md5.hexdigest()
 
-    def get_file_info(self, path: Union[str, Path]) -> FileInfo:
+    def get_file_info(self, path: str | Path) -> FileInfo:
         """
         Get file information - Lấy thông tin file
 
@@ -142,7 +142,7 @@ class FileManager:
             exists=True,
         )
 
-    def ensure_directory(self, path: Union[str, Path]) -> Path:
+    def ensure_directory(self, path: str | Path) -> Path:
         """
         Ensure directory exists - Đảm bảo thư mục tồn tại
 
@@ -158,7 +158,7 @@ class FileManager:
         return path
 
     def backup_file(
-        self, path: Union[str, Path], backup_suffix: str = ".backup"
+        self, path: str | Path, backup_suffix: str = ".backup"
     ) -> Path:
         """
         Create backup of file - Tạo backup file
@@ -181,7 +181,7 @@ class FileManager:
         return backup_path
 
     def safe_write(
-        self, path: Union[str, Path], data: Any, operation: FileOperation
+        self, path: str | Path, data: Any, operation: FileOperation
     ) -> None:
         """
         Safely write data to file - Ghi data an toàn vào file
@@ -276,7 +276,7 @@ class FileManager:
             raise ValidationError(f"File validation failed: {e!s}") from e
 
     def read_file(
-        self, path: Union[str, Path], format_type: Optional[FileFormat] = None
+        self, path: str | Path, format_type: FileFormat | None = None
     ) -> Any:
         """
         Read file content - Đọc nội dung file
@@ -325,7 +325,7 @@ class FileManager:
                 return f.read()
 
     async def async_read_file(
-        self, path: Union[str, Path], format_type: Optional[FileFormat] = None
+        self, path: str | Path, format_type: FileFormat | None = None
     ) -> Any:
         """
         Async read file content - Đọc nội dung file bất đồng bộ
@@ -368,7 +368,7 @@ class FileManager:
             return self._read_data(path, format_type)
 
     async def async_write_file(
-        self, path: Union[str, Path], data: Any, operation: FileOperation
+        self, path: str | Path, data: Any, operation: FileOperation
     ) -> None:
         """
         Async write data to file - Ghi data vào file bất đồng bộ
@@ -437,8 +437,8 @@ class FileManager:
 
     def copy_file(
         self,
-        source: Union[str, Path],
-        destination: Union[str, Path],
+        source: str | Path,
+        destination: str | Path,
         operation: FileOperation,
     ) -> None:
         """
@@ -483,8 +483,8 @@ class FileManager:
 
     def move_file(
         self,
-        source: Union[str, Path],
-        destination: Union[str, Path],
+        source: str | Path,
+        destination: str | Path,
         operation: FileOperation,
     ) -> None:
         """
@@ -527,7 +527,7 @@ class FileManager:
                 f"Failed to move file from {source} to {destination}: {e!s}"
             ) from e
 
-    def delete_file(self, path: Union[str, Path], backup: bool = False) -> None:
+    def delete_file(self, path: str | Path, backup: bool = False) -> None:
         """
         Delete file - Xóa file
 
@@ -552,7 +552,7 @@ class FileManager:
             raise StillMeException(f"Failed to delete file {path}: {e!s}") from e
 
     def list_files(
-        self, directory: Union[str, Path], pattern: str = "*", recursive: bool = False
+        self, directory: str | Path, pattern: str = "*", recursive: bool = False
     ) -> list[FileInfo]:
         """
         List files in directory - Liệt kê files trong thư mục
@@ -587,7 +587,7 @@ class FileManager:
 # Convenience functions - Các hàm tiện ích
 
 
-def read_json(path: Union[str, Path]) -> dict[str, Any]:
+def read_json(path: str | Path) -> dict[str, Any]:
     """
     Read JSON file - Đọc file JSON
 
@@ -602,7 +602,7 @@ def read_json(path: Union[str, Path]) -> dict[str, Any]:
 
 
 def write_json(
-    path: Union[str, Path],
+    path: str | Path,
     data: dict[str, Any],
     backup: bool = False,
     overwrite: bool = True,
@@ -627,7 +627,7 @@ def write_json(
     manager.safe_write(path, data, operation)
 
 
-def read_yaml(path: Union[str, Path]) -> dict[str, Any]:
+def read_yaml(path: str | Path) -> dict[str, Any]:
     """
     Read YAML file - Đọc file YAML
 
@@ -642,7 +642,7 @@ def read_yaml(path: Union[str, Path]) -> dict[str, Any]:
 
 
 def write_yaml(
-    path: Union[str, Path],
+    path: str | Path,
     data: dict[str, Any],
     backup: bool = False,
     overwrite: bool = True,
@@ -667,7 +667,7 @@ def write_yaml(
     manager.safe_write(path, data, operation)
 
 
-async def async_read_json(path: Union[str, Path]) -> dict[str, Any]:
+async def async_read_json(path: str | Path) -> dict[str, Any]:
     """
     Async read JSON file - Đọc file JSON bất đồng bộ
 
@@ -682,7 +682,7 @@ async def async_read_json(path: Union[str, Path]) -> dict[str, Any]:
 
 
 async def async_write_json(
-    path: Union[str, Path],
+    path: str | Path,
     data: dict[str, Any],
     backup: bool = False,
     overwrite: bool = True,

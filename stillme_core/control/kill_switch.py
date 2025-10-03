@@ -10,7 +10,7 @@ import os
 import time
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,7 @@ class KillSwitch:
     - Emergency kill: Critical system protection
     """
 
-    def __init__(self, config: Optional[dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = KillSwitchConfig(**(config or {}))
         self.state = KillSwitchState.ACTIVE
         self.error_count = 0
@@ -272,7 +272,7 @@ class KillSwitch:
 
 
 # Global kill switch instance
-_kill_switch: Optional[KillSwitch] = None
+_kill_switch: KillSwitch | None = None
 
 
 def get_kill_switch() -> KillSwitch:

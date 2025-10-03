@@ -8,7 +8,7 @@ import threading
 import time
 from collections import deque
 from dataclasses import asdict, dataclass
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -91,7 +91,7 @@ class ProcessingTimeTracker:
 class ShadowEvaluator:
     """Evaluate reflex engine performance in shadow mode"""
 
-    def __init__(self, config: Optional[dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self.evaluation_window_hours = self.config.get("evaluation_window_hours", 24)
         self.min_samples_for_evaluation = self.config.get(
@@ -115,7 +115,7 @@ class ShadowEvaluator:
         processing_time_ms: float,
         scores: dict[str, float],
         trace_id: str,
-        timestamp: Optional[float] = None,
+        timestamp: float | None = None,
     ):
         """Add a shadow evaluation sample"""
         if timestamp is None:
@@ -134,7 +134,7 @@ class ShadowEvaluator:
         with self.lock:
             self.samples.append(sample)
 
-    def get_recent_samples(self, hours: Optional[int] = None) -> list[dict[str, Any]]:
+    def get_recent_samples(self, hours: int | None = None) -> list[dict[str, Any]]:
         """Get samples from recent time window"""
         if hours is None:
             hours = self.evaluation_window_hours
@@ -144,7 +144,7 @@ class ShadowEvaluator:
         with self.lock:
             return [s for s in self.samples if s["timestamp"] >= cutoff_time]
 
-    def evaluate_performance(self, hours: Optional[int] = None) -> dict[str, Any]:
+    def evaluate_performance(self, hours: int | None = None) -> dict[str, Any]:
         """Evaluate reflex engine performance"""
         recent_samples = self.get_recent_samples(hours)
 
@@ -217,7 +217,7 @@ class ShadowEvaluator:
             "evaluation_window_hours": hours or self.evaluation_window_hours,
         }
 
-    def generate_report(self, hours: Optional[int] = None) -> str:
+    def generate_report(self, hours: int | None = None) -> str:
         """Generate markdown report of shadow evaluation"""
         evaluation = self.evaluate_performance(hours)
 
@@ -291,7 +291,7 @@ Generated: {time.strftime('%Y-%m-%d %H:%M:%S UTC', time.gmtime())}
 class ObservabilityManager:
     """Central observability manager for reflex engine"""
 
-    def __init__(self, config: Optional[dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self.metrics = ReflexMetrics()
         self.processing_tracker = ProcessingTimeTracker()
@@ -342,8 +342,8 @@ class ObservabilityManager:
         processing_time_ms: float,
         scores: dict[str, float],
         why_reflex: dict[str, Any],
-        user_id: Optional[str] = None,
-        tenant_id: Optional[str] = None,
+        user_id: str | None = None,
+        tenant_id: str | None = None,
         shadow_mode: bool = True,
     ):
         """Log a reflex decision with full context"""
@@ -412,11 +412,11 @@ class ObservabilityManager:
         with self.lock:
             return asdict(self.metrics)
 
-    def get_shadow_evaluation(self, hours: Optional[int] = None) -> dict[str, Any]:
+    def get_shadow_evaluation(self, hours: int | None = None) -> dict[str, Any]:
         """Get shadow evaluation results"""
         return self.shadow_evaluator.evaluate_performance(hours)
 
-    def generate_shadow_report(self, hours: Optional[int] = None) -> str:
+    def generate_shadow_report(self, hours: int | None = None) -> str:
         """Generate shadow evaluation report"""
         return self.shadow_evaluator.generate_report(hours)
 

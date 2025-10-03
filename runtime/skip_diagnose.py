@@ -12,7 +12,7 @@ import os
 import subprocess
 import time
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 import psutil
 
@@ -36,21 +36,21 @@ class SkipDiagnosisResult:
     details: str
     confidence: float  # 0-1
     recommendations: list[str]
-    log_snippet: Optional[str] = None
-    heartbeat_status: Optional[bool] = None
-    pid_status: Optional[bool] = None
+    log_snippet: str | None = None
+    heartbeat_status: bool | None = None
+    pid_status: bool | None = None
 
 
 @dataclass
 class SkipDiagnoseOptions:
     """Options for skip diagnosis"""
 
-    log_path: Optional[str] = None
-    pid: Optional[int] = None
-    heartbeat_path: Optional[str] = None
-    diagnose_ms: Optional[int] = None
-    process_name: Optional[str] = None
-    working_directory: Optional[str] = None
+    log_path: str | None = None
+    pid: int | None = None
+    heartbeat_path: str | None = None
+    diagnose_ms: int | None = None
+    process_name: str | None = None
+    working_directory: str | None = None
 
 
 def diagnose_on_skip(opts: SkipDiagnoseOptions = None) -> SkipDiagnosisResult:
@@ -110,7 +110,7 @@ def diagnose_on_skip(opts: SkipDiagnoseOptions = None) -> SkipDiagnosisResult:
 
 
 def _analyze_logs(
-    log_path: Optional[str], log_config: dict[str, Any], working_directory: str
+    log_path: str | None, log_config: dict[str, Any], working_directory: str
 ) -> dict[str, Any]:
     """Analyze log files for task status"""
     log_files = [log_path] if log_path else _find_log_files(working_directory)
@@ -159,7 +159,7 @@ def _analyze_logs(
 
 
 def _check_heartbeat(
-    heartbeat_path: Optional[str],
+    heartbeat_path: str | None,
     heartbeat_config: dict[str, Any],
     working_directory: str,
 ) -> bool:
@@ -185,7 +185,7 @@ def _check_heartbeat(
 
 
 def _check_pid(
-    pid: Optional[int], pid_config: dict[str, Any], working_directory: str
+    pid: int | None, pid_config: dict[str, Any], working_directory: str
 ) -> bool:
     """Check PID status"""
     if pid is not None:

@@ -8,7 +8,7 @@ import logging
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("Supervisor")
 
@@ -240,7 +240,7 @@ class DailySupervisor:
 
         return [LessonProposal(**p) for p in proposals_data["proposals"]]
 
-    def get_latest_knowledge_pack(self) -> Optional[KnowledgePack]:
+    def get_latest_knowledge_pack(self) -> KnowledgePack | None:
         """Get the latest knowledge pack"""
         if not self.knowledge_packs_dir.exists():
             return None
@@ -268,7 +268,7 @@ class DailySupervisor:
 
 
 # Global supervisor instance
-_supervisor_instance: Optional[DailySupervisor] = None
+_supervisor_instance: DailySupervisor | None = None
 
 
 def get_supervisor() -> DailySupervisor:

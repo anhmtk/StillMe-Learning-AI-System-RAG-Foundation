@@ -8,7 +8,7 @@ StillMe AI Manager - Stub Implementation
 
 import logging
 from dataclasses import dataclass
-from typing import Any, Optional, Union
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class AIManagerConfig:
     """AI Manager configuration"""
 
-    model_preferences: Optional[dict[str, Any]] = None
+    model_preferences: dict[str, Any] | None = None
     timeout: float = 30.0
     max_retries: int = 3
 
@@ -29,7 +29,7 @@ class AIManager:
     # TODO[stabilize]: Implement full AI management functionality
     """
 
-    def __init__(self, config: Optional[AIManagerConfig] = None):
+    def __init__(self, config: AIManagerConfig | None = None):
         """Initialize AI Manager"""
         self.config = config or AIManagerConfig()
         logger.warning("AIManager: Using stub implementation - not for production")
@@ -43,7 +43,7 @@ class AIManager:
         logger.warning(f"AIManager.set_mode({mode}): Stub implementation")
         return True
 
-    def compute_number(self, expression: str) -> Union[int, float]:
+    def compute_number(self, expression: str) -> int | float:
         """Compute mathematical expression"""
         logger.warning(f"AIManager.compute_number({expression}): Stub implementation")
         try:
@@ -55,7 +55,7 @@ class AIManager:
             logger.error(f"Compute error: {e}")
             return 0
 
-    def generate_patch(self, plan_item: Any, context: str = "") -> Optional[str]:
+    def generate_patch(self, plan_item: Any, context: str = "") -> str | None:
         """Generate patch for plan item - Stub implementation"""
         logger.warning("AIManager.generate_patch(): Stub implementation")
         # Return a simple stub patch
@@ -75,7 +75,7 @@ def set_mode(mode: str) -> bool:
     return manager.set_mode(mode)
 
 
-def compute_number(expression: str) -> Union[int, float]:
+def compute_number(expression: str) -> int | float:
     """Compute number function"""
     manager = AIManager()
     return manager.compute_number(expression)

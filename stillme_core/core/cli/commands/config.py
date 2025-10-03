@@ -6,7 +6,6 @@ Commands for managing StillMe configuration and settings.
 
 import json
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -44,7 +43,7 @@ def show():
 @app.command()
 def get(
     key: str = typer.Argument(..., help="Configuration key to get"),
-    section: Optional[str] = typer.Option(
+    section: str | None = typer.Option(
         None, "--section", "-s", help="Configuration section"
     ),
 ):

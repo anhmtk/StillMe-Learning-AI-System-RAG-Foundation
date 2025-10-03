@@ -12,7 +12,7 @@ import os
 import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 class QuarantineMover:
@@ -218,7 +218,7 @@ class QuarantineMover:
                 f"  - {file_info['original_path']} ({file_info['size']:,} bytes, {file_info['category']})"
             )
 
-    def restore_from_graveyard(self, manifest_path: Optional[str] = None) -> None:
+    def restore_from_graveyard(self, manifest_path: str | None = None) -> None:
         """Restore files từ graveyard"""
         if manifest_path is None:
             manifest_path = str(self.reports_dir / "quarantine_manifest.json")

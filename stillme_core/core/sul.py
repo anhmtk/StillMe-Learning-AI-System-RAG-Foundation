@@ -7,7 +7,7 @@ import ast
 import logging
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger("SUL")
 
@@ -214,7 +214,7 @@ class SystemUnderstandingLayer:
                     continue
 
                 for node in ast.walk(tree):
-                    if isinstance(node, (ast.FunctionDef, ast.ClassDef)):
+                    if isinstance(node, ast.FunctionDef | ast.ClassDef):
                         if node.name == symbol_name:
                             results["definitions"].append(
                                 {
@@ -239,7 +239,7 @@ class SystemUnderstandingLayer:
 
 
 # Global SUL instance
-_sul_instance: Optional[SystemUnderstandingLayer] = None
+_sul_instance: SystemUnderstandingLayer | None = None
 
 
 def get_sul() -> SystemUnderstandingLayer:

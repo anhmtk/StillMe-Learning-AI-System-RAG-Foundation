@@ -8,7 +8,7 @@ StillMe Code Executor - Stub Implementation
 
 import logging
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +19,7 @@ class ExecutionConfig:
 
     timeout: float = 30.0
     max_memory: int = 512  # MB
-    allowed_languages: Optional[list[str]] = None
+    allowed_languages: list[str] | None = None
     sandbox_mode: bool = True
 
     def __post_init__(self):
@@ -34,7 +34,7 @@ class PatchExecutor:
     # TODO[stabilize]: Implement full code execution functionality
     """
 
-    def __init__(self, config: Optional[ExecutionConfig] = None):
+    def __init__(self, config: ExecutionConfig | None = None):
         """Initialize Patch Executor"""
         self.config = config or ExecutionConfig()
         logger.warning("PatchExecutor: Using stub implementation - not for production")
@@ -84,7 +84,7 @@ class PatchExecutor:
         logger.warning("PatchExecutor.apply_unified_diff(): Stub implementation")
         return True
 
-    def run_pytest(self, test_files: Optional[list[str]] = None) -> dict[str, Any]:
+    def run_pytest(self, test_files: list[str] | None = None) -> dict[str, Any]:
         """Run pytest - Stub implementation"""
         logger.warning("PatchExecutor.run_pytest(): Stub implementation")
         return {"ok": True, "collected": 0, "failed": 0}
@@ -142,7 +142,7 @@ class SafeExecutor:
     # TODO[stabilize]: Implement full safe execution functionality
     """
 
-    def __init__(self, config: Optional[ExecutionConfig] = None):
+    def __init__(self, config: ExecutionConfig | None = None):
         """Initialize Safe Executor"""
         self.config = config or ExecutionConfig()
         logger.warning("SafeExecutor: Using stub implementation - not for production")

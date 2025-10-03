@@ -64,7 +64,7 @@ class StillMeBackgroundService:
                     self.config["last_discovery_date"] = datetime.now().strftime(
                         "%Y-%m-%d"
                     )
-            except:
+            except Exception:
                 self.config = default_config
         else:
             self.config = default_config

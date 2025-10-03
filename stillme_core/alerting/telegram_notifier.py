@@ -51,7 +51,7 @@ class TelegramNotifier:
                     file_config = json.load(f)
                 # Merge with env config (env takes priority)
                 env_config.update(file_config)
-            except:
+            except Exception:
                 pass
 
         self.config = env_config

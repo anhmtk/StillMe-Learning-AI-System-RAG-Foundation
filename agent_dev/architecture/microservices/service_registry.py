@@ -10,7 +10,7 @@ import time
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import aiohttp
 import yaml
@@ -50,14 +50,14 @@ class ServiceDefinition:
     host: str
     port: int
     health_check_path: str = "/health"
-    metadata: Optional[dict[str, Any]] = None
-    tags: Optional[list[str]] = None
+    metadata: dict[str, Any] | None = None
+    tags: list[str] | None = None
 
 
 class ServiceRegistry:
     """Enterprise service registry with health monitoring"""
 
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config_path: str | None = None):
         self.services: dict[str, ServiceInstance] = {}
         self.config = self._load_config(config_path)
         self.heartbeat_interval = self.config.get("heartbeat_interval", 30)
@@ -65,7 +65,7 @@ class ServiceRegistry:
         self.cleanup_interval = self.config.get("cleanup_interval", 60)
         self.running = False
 
-    def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
+    def _load_config(self, config_path: str | None = None) -> dict[str, Any]:
         """Load service registry configuration"""
         if config_path:
             config_file = Path(config_path)
@@ -124,7 +124,7 @@ class ServiceRegistry:
         return False
 
     async def discover_services(
-        self, service_name: Optional[str] = None, tags: Optional[list[str]] = None
+        self, service_name: str | None = None, tags: list[str] | None = None
     ) -> list[ServiceInstance]:
         """Discover healthy service instances"""
         healthy_services = []
@@ -144,8 +144,8 @@ class ServiceRegistry:
         return healthy_services
 
     async def get_service_url(
-        self, service_name: str, version: Optional[str] = None
-    ) -> Optional[str]:
+        self, service_name: str, version: str | None = None
+    ) -> str | None:
         """Get URL for a healthy service instance"""
         services = await self.discover_services(service_name)
 
@@ -312,7 +312,7 @@ service_registry = ServiceRegistry()
 
 
 async def register_agentdev_service(
-    service_name: str, port: int, metadata: Optional[dict[str, Any]] = None
+    service_name: str, port: int, metadata: dict[str, Any] | None = None
 ) -> str:
     """Convenience function to register AgentDev service"""
     service_def = ServiceDefinition(
@@ -328,7 +328,7 @@ async def register_agentdev_service(
     return await service_registry.register_service(service_def)
 
 
-async def discover_agentdev_service(service_name: str) -> Optional[str]:
+async def discover_agentdev_service(service_name: str) -> str | None:
     """Convenience function to discover AgentDev service"""
     return await service_registry.get_service_url(service_name)
 

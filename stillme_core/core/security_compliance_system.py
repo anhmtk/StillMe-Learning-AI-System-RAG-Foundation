@@ -17,7 +17,7 @@ import time
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 # Import Phase 1 and 2.x modules
 try:
@@ -153,8 +153,8 @@ class SecurityEvent:
     source: str
     timestamp: datetime
     resolved: bool
-    resolved_at: Optional[datetime]
-    metadata: Dict[str, Any]
+    resolved_at: datetime | None
+    metadata: dict[str, Any]
 
 
 @dataclass
@@ -167,9 +167,9 @@ class ComplianceCheck:
     status: str
     last_check: datetime
     next_check: datetime
-    findings: List[str]
-    remediation: List[str]
-    metadata: Dict[str, Any]
+    findings: list[str]
+    remediation: list[str]
+    metadata: dict[str, Any]
 
 
 @dataclass
@@ -180,12 +180,12 @@ class Vulnerability:
     severity: VulnerabilitySeverity
     title: str
     description: str
-    cve_id: Optional[str]
-    affected_components: List[str]
+    cve_id: str | None
+    affected_components: list[str]
     discovered_at: datetime
-    patched_at: Optional[datetime]
+    patched_at: datetime | None
     remediation: str
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 @dataclass
@@ -198,12 +198,12 @@ class SecurityIncident:
     title: str
     description: str
     discovered_at: datetime
-    contained_at: Optional[datetime]
-    resolved_at: Optional[datetime]
-    affected_components: List[str]
-    response_actions: List[str]
-    lessons_learned: List[str]
-    metadata: Dict[str, Any]
+    contained_at: datetime | None
+    resolved_at: datetime | None
+    affected_components: list[str]
+    response_actions: list[str]
+    lessons_learned: list[str]
+    metadata: dict[str, Any]
 
 
 class SecurityComplianceSystem:
@@ -211,7 +211,7 @@ class SecurityComplianceSystem:
     Main Security Compliance System
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self.logger = self._setup_logging()
 
@@ -227,10 +227,10 @@ class SecurityComplianceSystem:
         self.learning_engine = LearningOptimizationEngine()
 
         # Security and compliance state
-        self.security_events: List[SecurityEvent] = []
-        self.compliance_checks: Dict[str, ComplianceCheck] = {}
-        self.vulnerabilities: List[Vulnerability] = []
-        self.security_incidents: List[SecurityIncident] = []
+        self.security_events: list[SecurityEvent] = []
+        self.compliance_checks: dict[str, ComplianceCheck] = {}
+        self.vulnerabilities: list[Vulnerability] = []
+        self.security_incidents: list[SecurityIncident] = []
 
         # Security components
         self.threat_detector = ThreatDetector()
@@ -245,7 +245,7 @@ class SecurityComplianceSystem:
         self.incident_response_enabled = True
 
         # Performance tracking
-        self.performance_metrics: Dict[str, List[float]] = {
+        self.performance_metrics: dict[str, list[float]] = {
             "security_scan_times": [],
             "compliance_check_times": [],
             "vulnerability_scan_times": [],
@@ -574,7 +574,7 @@ class SecurityComplianceSystem:
         """Monitor threat indicators"""
         try:
             # Check system health for security indicators
-            system_health = self.final_validation.get_system_health()
+            self.final_validation.get_system_health()
 
             # Check for suspicious patterns
             suspicious_patterns = self.threat_detector.detect_suspicious_patterns()
@@ -597,7 +597,7 @@ class SecurityComplianceSystem:
         except Exception as e:
             self.logger.error(f"Error performing vulnerability scan: {e}")
 
-    def _create_security_event(self, event_data: Dict[str, Any]):
+    def _create_security_event(self, event_data: dict[str, Any]):
         """Create security event"""
         try:
             event = SecurityEvent(
@@ -629,7 +629,7 @@ class SecurityComplianceSystem:
         except Exception as e:
             self.logger.error(f"Error creating security event: {e}")
 
-    def _add_vulnerability(self, vuln_data: Dict[str, Any]):
+    def _add_vulnerability(self, vuln_data: dict[str, Any]):
         """Add vulnerability"""
         try:
             vulnerability = Vulnerability(
@@ -734,7 +734,7 @@ class SecurityComplianceSystem:
         except Exception as e:
             self.logger.error(f"Error executing incident response action {action}: {e}")
 
-    async def _get_security_status(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_security_status(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get security status endpoint"""
         try:
             return {
@@ -778,7 +778,7 @@ class SecurityComplianceSystem:
                 "message": str(e),
             }
 
-    async def _get_security_events(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_security_events(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get security events endpoint"""
         try:
             events_data = []
@@ -821,11 +821,11 @@ class SecurityComplianceSystem:
                 "message": str(e),
             }
 
-    async def _get_compliance_status(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_compliance_status(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get compliance status endpoint"""
         try:
             compliance_data = []
-            for check_id, check in self.compliance_checks.items():
+            for _check_id, check in self.compliance_checks.items():
                 compliance_data.append(
                     {
                         "check_id": check.check_id,
@@ -856,7 +856,7 @@ class SecurityComplianceSystem:
                     "compliant_checks": compliant_checks,
                     "compliance_score": compliance_score,
                     "standards": list(
-                        set(c.standard.value for c in self.compliance_checks.values())
+                        {c.standard.value for c in self.compliance_checks.values()}
                     ),
                 },
             }
@@ -868,7 +868,7 @@ class SecurityComplianceSystem:
                 "message": str(e),
             }
 
-    async def _get_vulnerabilities(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_vulnerabilities(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get vulnerabilities endpoint"""
         try:
             vulnerabilities_data = []
@@ -915,7 +915,7 @@ class SecurityComplianceSystem:
                 "message": str(e),
             }
 
-    async def _get_security_incidents(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_security_incidents(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get security incidents endpoint"""
         try:
             incidents_data = []
@@ -973,7 +973,7 @@ class SecurityComplianceSystem:
                 "message": str(e),
             }
 
-    async def _trigger_security_scan(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _trigger_security_scan(self, data: dict[str, Any]) -> dict[str, Any]:
         """Trigger security scan endpoint"""
         try:
             scan_type = data.get("scan_type", "full")
@@ -997,7 +997,7 @@ class SecurityComplianceSystem:
                 "message": str(e),
             }
 
-    async def _create_security_incident(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _create_security_incident(self, data: dict[str, Any]) -> dict[str, Any]:
         """Create security incident endpoint"""
         try:
             incident_data = {
@@ -1061,7 +1061,7 @@ class ThreatDetector:
     def __init__(self):
         self.threat_patterns = []
 
-    def detect_threats(self) -> List[Dict[str, Any]]:
+    def detect_threats(self) -> list[dict[str, Any]]:
         """Detect security threats"""
         threats = []
 
@@ -1078,7 +1078,7 @@ class ThreatDetector:
 
         return threats
 
-    def detect_suspicious_patterns(self) -> List[Dict[str, Any]]:
+    def detect_suspicious_patterns(self) -> list[dict[str, Any]]:
         """Detect suspicious patterns"""
         patterns = []
 
@@ -1102,7 +1102,7 @@ class ComplianceAuditor:
     def __init__(self):
         self.audit_history = []
 
-    def audit_compliance(self, check: ComplianceCheck) -> Dict[str, Any]:
+    def audit_compliance(self, check: ComplianceCheck) -> dict[str, Any]:
         """Audit compliance for a check"""
         # Mock compliance audit
         return {"status": "compliant", "findings": [], "remediation": []}
@@ -1114,7 +1114,7 @@ class VulnerabilityScanner:
     def __init__(self):
         self.scan_history = []
 
-    def scan_vulnerabilities(self) -> List[Dict[str, Any]]:
+    def scan_vulnerabilities(self) -> list[dict[str, Any]]:
         """Scan for vulnerabilities"""
         vulnerabilities = []
 

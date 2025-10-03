@@ -9,7 +9,7 @@ import uuid
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -37,15 +37,15 @@ class TransparencyEvent:
     confidence_scores: dict[str, float]
     reasoning: str
     metadata: dict[str, Any]
-    trace_id: Optional[str] = None
-    user_id: Optional[str] = None
-    session_id: Optional[str] = None
+    trace_id: str | None = None
+    user_id: str | None = None
+    session_id: str | None = None
 
 
 class TransparencyLogger:
     """Logger for AI decision transparency."""
 
-    def __init__(self, config: Optional[dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self.enabled = self.config.get("enabled", True)
         self.level = TransparencyLevel(self.config.get("level", "basic"))
@@ -72,10 +72,10 @@ class TransparencyLogger:
         decision_factors: list[dict[str, Any]],
         confidence_scores: dict[str, float],
         reasoning: str,
-        metadata: Optional[dict[str, Any]] = None,
-        trace_id: Optional[str] = None,
-        user_id: Optional[str] = None,
-        session_id: Optional[str] = None,
+        metadata: dict[str, Any] | None = None,
+        trace_id: str | None = None,
+        user_id: str | None = None,
+        session_id: str | None = None,
     ) -> str:
         """Log a decision event with full transparency."""
         if not self.enabled:
@@ -184,7 +184,7 @@ class TransparencyLogger:
         else:
             return data
 
-    def get_trace_id(self, headers: dict[str, str]) -> Optional[str]:
+    def get_trace_id(self, headers: dict[str, str]) -> str | None:
         """Extract trace ID from request headers."""
         return headers.get(self.trace_id_header)
 
@@ -192,7 +192,7 @@ class TransparencyLogger:
         """Create a new trace ID."""
         return str(uuid.uuid4())
 
-    def log_rationale(self, rationale: str, trace_id: Optional[str] = None):
+    def log_rationale(self, rationale: str, trace_id: str | None = None):
         """Log AI decision rationale."""
         if not self.enabled or not self.log_rationale:
             return
@@ -210,7 +210,7 @@ class TransparencyLogger:
 
 
 # Global transparency logger instance
-_transparency_logger: Optional[TransparencyLogger] = None
+_transparency_logger: TransparencyLogger | None = None
 
 
 def get_transparency_logger() -> TransparencyLogger:

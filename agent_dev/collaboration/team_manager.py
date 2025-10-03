@@ -10,7 +10,7 @@ import uuid
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import yaml
 
@@ -61,7 +61,7 @@ class User:
     created_at: float
     last_active: float
     preferences: dict[str, Any]
-    avatar_url: Optional[str] = None
+    avatar_url: str | None = None
 
 
 @dataclass
@@ -89,8 +89,8 @@ class TaskAssignment:
     assigned_at: float
     status: TaskStatus
     priority: int
-    estimated_hours: Optional[float]
-    actual_hours: Optional[float]
+    estimated_hours: float | None
+    actual_hours: float | None
     dependencies: list[str]
     blockers: list[str]
     notes: str
@@ -106,9 +106,9 @@ class Conflict:
     involved_users: list[str]
     affected_resources: list[str]
     created_at: float
-    resolved_at: Optional[float]
-    resolution: Optional[str]
-    resolved_by: Optional[str]
+    resolved_at: float | None
+    resolution: str | None
+    resolved_by: str | None
     severity: str  # low, medium, high, critical
 
 
@@ -131,7 +131,7 @@ class CollaborationSession:
 class TeamManager:
     """Enterprise team management and collaboration system"""
 
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config_path: str | None = None):
         self.config = self._load_config(config_path)
         self.users: dict[str, User] = {}
         self.teams: dict[str, Team] = {}
@@ -142,7 +142,7 @@ class TeamManager:
         self.locks: dict[str, dict[str, Any]] = {}  # Resource locks
         self.running = False
 
-    def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
+    def _load_config(self, config_path: str | None = None) -> dict[str, Any]:
         """Load team management configuration"""
         if config_path:
             config_file = Path(config_path)
@@ -272,7 +272,7 @@ class TeamManager:
         assigned_to: str,
         assigned_by: str,
         priority: int = 1,
-        estimated_hours: Optional[float] = None,
+        estimated_hours: float | None = None,
     ) -> bool:
         """Assign task to user"""
         if assigned_to not in self.users:

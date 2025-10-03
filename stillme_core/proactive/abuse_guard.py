@@ -14,7 +14,7 @@ import re
 import time
 from collections import Counter, defaultdict
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 from .normalizer import TextNormalizer
 
@@ -36,7 +36,7 @@ class AbuseGuardResult:
 class ProactiveAbuseGuard:
     """Guard bảo vệ hệ thống đề xuất chủ động khỏi abuse"""
 
-    def __init__(self, config: Optional[dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
 
         # Initialize normalizer

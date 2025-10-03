@@ -32,7 +32,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import psutil
 
@@ -49,12 +49,12 @@ class UsageEvent:
     timestamp: datetime
     module_name: str
     feature_name: str
-    user_id: Optional[str]
+    user_id: str | None
     session_id: str
     duration_ms: float
     resource_usage: dict[str, float]  # CPU, memory, disk, network
     success: bool
-    error_code: Optional[str]
+    error_code: str | None
     metadata: dict[str, Any]
 
 
@@ -90,7 +90,7 @@ class CoreMetricsCollector:
     Enterprise-grade metrics collector với focus vào accuracy và efficiency
     """
 
-    def __init__(self, config: Optional[dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or self._get_default_config()
         self.db_path = Path(self.config["db_path"])
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
@@ -252,10 +252,10 @@ class CoreMetricsCollector:
         feature_name: str,
         duration_ms: float,
         success: bool = True,
-        user_id: Optional[str] = None,
-        session_id: Optional[str] = None,
-        error_code: Optional[str] = None,
-        metadata: Optional[dict[str, Any]] = None,
+        user_id: str | None = None,
+        session_id: str | None = None,
+        error_code: str | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> str:
         """
         Track usage event với complete resource monitoring
@@ -386,7 +386,7 @@ class CoreMetricsCollector:
                 logger.error(f"❌ Periodic flush error: {e}")
 
     def get_performance_metrics(
-        self, module_name: Optional[str] = None, time_range_hours: int = 24
+        self, module_name: str | None = None, time_range_hours: int = 24
     ) -> list[PerformanceMetrics]:
         """
         Get performance metrics với caching
@@ -697,7 +697,7 @@ class SystemMonitor:
 
 # Factory function
 def create_metrics_collector(
-    config: Optional[dict[str, Any]] = None,
+    config: dict[str, Any] | None = None,
 ) -> CoreMetricsCollector:
     """Factory function để create metrics collector"""
     return CoreMetricsCollector(config)

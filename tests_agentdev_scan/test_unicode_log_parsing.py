@@ -92,7 +92,7 @@ def test_encoding_handling():
 
         # Should not crash due to encoding
         try:
-            errors = agentdev.scan_errors()
+            agentdev.scan_errors()
             print("PASS Encoding handling: No crash")
         except UnicodeError as e:
             print(f"FAIL Encoding error: {e}")

@@ -8,7 +8,6 @@ import logging
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Optional
 
 log = logging.getLogger(__name__)
 
@@ -105,7 +104,7 @@ class KillSwitchManager:
         self,
         action: KillSwitchAction,
         actor: str,
-        reason: Optional[str] = None,
+        reason: str | None = None,
         result: str = "SUCCESS",
     ):
         """Log kill switch action to audit log."""
@@ -122,7 +121,7 @@ class KillSwitchManager:
         self.audit_logger.info(json.dumps(log_entry))
         log.info(f"Kill switch {action.value} by {actor}: {result}")
 
-    def arm(self, actor: str, reason: Optional[str] = None) -> dict:
+    def arm(self, actor: str, reason: str | None = None) -> dict:
         """Arm the kill switch."""
         current_state = KillSwitchState(self._state["state"])
 
@@ -157,7 +156,7 @@ class KillSwitchManager:
             "reason": reason,
         }
 
-    def fire(self, actor: str, reason: Optional[str] = None) -> dict:
+    def fire(self, actor: str, reason: str | None = None) -> dict:
         """Fire the kill switch (emergency stop)."""
         current_state = KillSwitchState(self._state["state"])
 
@@ -197,7 +196,7 @@ class KillSwitchManager:
             "reason": reason,
         }
 
-    def disarm(self, actor: str, reason: Optional[str] = None) -> dict:
+    def disarm(self, actor: str, reason: str | None = None) -> dict:
         """Disarm the kill switch."""
         current_state = KillSwitchState(self._state["state"])
 
@@ -291,7 +290,7 @@ class KillSwitchManager:
                             entries.append(
                                 {"timestamp": timestamp, "level": level, "data": data}
                             )
-                        except:
+                        except Exception:
                             entries.append(
                                 {
                                     "timestamp": timestamp,
@@ -299,7 +298,7 @@ class KillSwitchManager:
                                     "message": message,
                                 }
                             )
-                except:
+                except Exception:
                     continue
 
             return entries

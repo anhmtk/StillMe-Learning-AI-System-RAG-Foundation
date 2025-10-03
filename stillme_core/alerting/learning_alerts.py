@@ -23,7 +23,7 @@ Date: 2025-09-28
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 from .alert_manager import AlertManager, get_alert_manager
 
@@ -506,7 +506,7 @@ class LearningAlertManager:
 
 
 # Global learning alert manager instance
-_learning_alert_manager_instance: Optional[LearningAlertManager] = None
+_learning_alert_manager_instance: LearningAlertManager | None = None
 
 
 def get_learning_alert_manager() -> LearningAlertManager:

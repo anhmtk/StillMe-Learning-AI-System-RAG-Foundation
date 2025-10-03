@@ -20,7 +20,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import aiohttp
 import yaml
@@ -85,7 +85,7 @@ class APITestResult:
     response_time: float
     status_code: int
     response_size: int
-    error_message: Optional[str]
+    error_message: str | None
     test_data: dict[str, Any]
     timestamp: datetime
 

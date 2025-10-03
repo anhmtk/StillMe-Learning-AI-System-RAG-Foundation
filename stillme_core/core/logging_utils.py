@@ -5,7 +5,6 @@ Structured logging utilities for AgentDev
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 
 def ensure_parent_dir(file_path: str | Path) -> None:
@@ -32,7 +31,7 @@ class AgentDevLogger:
         stdout_tail: str = "",
         description: str = "",
         target: str = "",
-        tests_run: Optional[list] = None,
+        tests_run: list | None = None,
     ) -> None:
         """
         Log a step execution to JSONL file
@@ -121,7 +120,7 @@ class AgentDevLogger:
 
 
 # Global logger instance
-_global_logger: Optional[AgentDevLogger] = None
+_global_logger: AgentDevLogger | None = None
 
 
 def get_logger() -> AgentDevLogger:
@@ -140,7 +139,7 @@ def log_step(
     stdout_tail: str = "",
     description: str = "",
     target: str = "",
-    tests_run: Optional[list] = None,
+    tests_run: list | None = None,
 ) -> None:
     """Convenience function to log a step"""
     get_logger().log_step(

@@ -124,7 +124,7 @@ class TestCollectScoreTop10:
 
         # Results should be identical
         assert len(top_niches) == len(top_niches2)
-        for _i, (niche1, niche2) in enumerate(zip(top_niches, top_niches2)):
+        for _i, (niche1, niche2) in enumerate(zip(top_niches, top_niches2, strict=False)):
             assert niche1.total_score == niche2.total_score
             assert niche1.topic == niche2.topic
 

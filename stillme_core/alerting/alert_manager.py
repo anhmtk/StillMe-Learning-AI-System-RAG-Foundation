@@ -30,7 +30,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from typing import Any, Optional
+from typing import Any
 
 import requests
 
@@ -789,7 +789,7 @@ class AlertManager:
 
 
 # Global alert manager instance
-_alert_manager_instance: Optional[AlertManager] = None
+_alert_manager_instance: AlertManager | None = None
 
 
 def get_alert_manager(config: dict[str, Any] = None) -> AlertManager:

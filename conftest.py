@@ -1231,7 +1231,7 @@ def mock_daily_learning():
             target_date = date or "2025-09-27"
 
             # Filter lessons by date (mock filtering)
-            daily_lessons = [l for l in self.lessons if target_date in l["learned_at"]]
+            daily_lessons = [lesson for lesson in self.lessons if target_date in lesson["learned_at"]]
 
             insights = []
             for lesson in daily_lessons[-5:]:  # Last 5 lessons
@@ -1243,9 +1243,9 @@ def mock_daily_learning():
             """Get overall learning progress"""
             total_lessons = len(self.lessons)
             interaction_lessons = len(
-                [l for l in self.lessons if l["type"] == "interaction"]
+                [lesson for lesson in self.lessons if lesson["type"] == "interaction"]
             )
-            feedback_lessons = len([l for l in self.lessons if l["type"] == "feedback"])
+            feedback_lessons = len([lesson for lesson in self.lessons if lesson["type"] == "feedback"])
 
             return {
                 "total_lessons": total_lessons,

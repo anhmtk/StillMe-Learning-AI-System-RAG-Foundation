@@ -5,10 +5,11 @@ Standardized logging of AI decision-making processes with citations and traceabi
 
 import json
 import logging
+import os
 import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 log = logging.getLogger(__name__)
 
@@ -21,7 +22,7 @@ class RationaleSignal:
         name: str,
         value: Any,
         weight: float = 1.0,
-        source: Optional[str] = None,
+        source: str | None = None,
         confidence: float = 1.0,
     ):
         self.name = name
@@ -62,10 +63,10 @@ class RationaleCitation:
     def __init__(
         self,
         source: str,
-        url: Optional[str] = None,
-        date: Optional[str] = None,
+        url: str | None = None,
+        date: str | None = None,
         confidence: float = 1.0,
-        excerpt: Optional[str] = None,
+        excerpt: str | None = None,
     ):
         self.source = source
         self.url = url
@@ -95,9 +96,9 @@ class RationaleEntry:
         explanations: list[RationaleExplanation],
         citations: list[RationaleCitation],
         trace_id: str,
-        timestamp: Optional[str] = None,
-        context: Optional[dict] = None,
-        metadata: Optional[dict] = None,
+        timestamp: str | None = None,
+        context: dict | None = None,
+        metadata: dict | None = None,
     ):
         self.decision_id = decision_id
         self.policy = policy
@@ -174,9 +175,9 @@ class RationaleLogger:
 
     def get_decisions(
         self,
-        date: Optional[str] = None,
-        policy: Optional[str] = None,
-        trace_id: Optional[str] = None,
+        date: str | None = None,
+        policy: str | None = None,
+        trace_id: str | None = None,
     ) -> list[dict]:
         """Retrieve rationale entries."""
         if date is None:
@@ -229,9 +230,9 @@ def log_decision_rationale(
     final_action: Any,
     explanations: list[RationaleExplanation],
     citations: list[RationaleCitation],
-    trace_id: Optional[str] = None,
-    context: Optional[dict] = None,
-    metadata: Optional[dict] = None,
+    trace_id: str | None = None,
+    context: dict | None = None,
+    metadata: dict | None = None,
 ) -> str:
     """Log a decision with rationale and return decision ID."""
 
@@ -293,7 +294,7 @@ def with_rationale(policy: str, enable_in_careful_mode: bool = True):
 
             # Add input signals if they're simple types
             for i, arg in enumerate(args[:3]):  # Limit to first 3 args
-                if isinstance(arg, (str, int, float, bool)):
+                if isinstance(arg, str | int | float | bool):
                     signals.append(
                         RationaleSignal(f"arg_{i}", str(arg)[:100], 0.8, "input")
                     )
@@ -361,7 +362,7 @@ def create_signal(
     name: str,
     value: Any,
     weight: float = 1.0,
-    source: Optional[str] = None,
+    source: str | None = None,
     confidence: float = 1.0,
 ) -> RationaleSignal:
     """Create a rationale signal."""
@@ -377,14 +378,10 @@ def create_explanation(
 
 def create_citation(
     source: str,
-    url: Optional[str] = None,
-    date: Optional[str] = None,
+    url: str | None = None,
+    date: str | None = None,
     confidence: float = 1.0,
-    excerpt: Optional[str] = None,
+    excerpt: str | None = None,
 ) -> RationaleCitation:
     """Create a rationale citation."""
     return RationaleCitation(source, url, date, confidence, excerpt)
-
-
-# Import os for environment variable check
-import os

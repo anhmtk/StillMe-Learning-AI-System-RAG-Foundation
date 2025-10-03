@@ -11,13 +11,13 @@ Version: 1.0.0
 
 import re
 import unicodedata
-from typing import Any, Optional
+from typing import Any
 
 
 class TextNormalizer:
     """Text normalizer cho abuse detection"""
 
-    def __init__(self, config: Optional[dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
 
         # Normalization options
@@ -176,6 +176,6 @@ class TextNormalizer:
 
 
 # Factory function for easy integration
-def create_normalizer(config: Optional[dict[str, Any]] = None) -> TextNormalizer:
+def create_normalizer(config: dict[str, Any] | None = None) -> TextNormalizer:
     """Create a text normalizer instance"""
     return TextNormalizer(config)

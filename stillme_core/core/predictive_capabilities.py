@@ -29,7 +29,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -83,7 +83,7 @@ class PredictiveCapabilities:
     Enterprise-grade predictive analytics system
     """
 
-    def __init__(self, metrics_db_path: str, config: Optional[dict[str, Any]] = None):
+    def __init__(self, metrics_db_path: str, config: dict[str, Any] | None = None):
         self.metrics_db_path = Path(metrics_db_path)
         self.config = config or self._get_default_config()
 
@@ -663,7 +663,7 @@ class PredictiveCapabilities:
 
     def _predict_performance_anomaly(
         self, current_metrics: dict[str, Any], time_horizon: int
-    ) -> Optional[AnomalyPrediction]:
+    ) -> AnomalyPrediction | None:
         """Predict performance anomalies"""
         try:
             if not current_metrics:
@@ -706,7 +706,7 @@ class PredictiveCapabilities:
 
     def _predict_resource_anomaly(
         self, current_metrics: dict[str, Any], time_horizon: int
-    ) -> Optional[AnomalyPrediction]:
+    ) -> AnomalyPrediction | None:
         """Predict resource anomalies"""
         try:
             if not current_metrics:
@@ -749,7 +749,7 @@ class PredictiveCapabilities:
 
     def _predict_usage_anomaly(
         self, current_metrics: dict[str, Any], time_horizon: int
-    ) -> Optional[AnomalyPrediction]:
+    ) -> AnomalyPrediction | None:
         """Predict usage anomalies"""
         try:
             if not current_metrics:
@@ -814,7 +814,7 @@ class PredictiveCapabilities:
 
 # Factory function
 def create_predictive_capabilities(
-    metrics_db_path: str, config: Optional[dict[str, Any]] = None
+    metrics_db_path: str, config: dict[str, Any] | None = None
 ) -> PredictiveCapabilities:
     """Factory function để create predictive capabilities"""
     return PredictiveCapabilities(metrics_db_path, config)

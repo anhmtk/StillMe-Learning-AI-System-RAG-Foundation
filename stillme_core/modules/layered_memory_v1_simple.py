@@ -15,7 +15,7 @@ PURPOSE / MỤC ĐÍCH:
 import logging
 import time
 from dataclasses import asdict, dataclass
-from typing import Any, Optional
+from typing import Any
 
 # Initialize logger
 logger = logging.getLogger("StillMe.LayeredMemory")
@@ -31,7 +31,7 @@ class MemoryItem:
     importance: float
     access_count: int = 0
     last_accessed: float = 0.0
-    tags: Optional[list[str]] = None
+    tags: list[str] | None = None
 
     def __post_init__(self):
         if self.tags is None:
@@ -43,7 +43,7 @@ class MemoryItem:
 class LayeredMemoryV1:
     """Simple layered memory system with intelligent forgetting"""
 
-    def __init__(self, config: Optional[dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.logger = logger
         self.config = config or self._get_default_config()
 
@@ -78,7 +78,7 @@ class LayeredMemoryV1:
         }
 
     def store(
-        self, content: str, importance: float = 0.5, tags: Optional[list[str]] = None
+        self, content: str, importance: float = 0.5, tags: list[str] | None = None
     ) -> str:
         """Store a new memory item"""
         try:

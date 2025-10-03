@@ -1,10 +1,9 @@
-from datetime import datetime
-from unittest.mock import Mock, patch
-
 """
 Test suite for Resource Monitoring
 """
 
+from datetime import datetime
+from unittest.mock import Mock, patch
 
 import pytest
 

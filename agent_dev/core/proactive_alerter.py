@@ -22,7 +22,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +76,7 @@ class AlertEvent:
 class ProactiveAlerter:
     """Hệ thống cảnh báo chủ động"""
 
-    def __init__(self, config: Optional[dict] = None):
+    def __init__(self, config: dict | None = None):
         self.config = config or self._default_config()
         self.rules = self._load_rules()
         self.events = []

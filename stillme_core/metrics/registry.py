@@ -22,7 +22,7 @@ import logging
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -74,9 +74,9 @@ class MetricDefinition:
     unit: MetricUnit
     tags: list[str] = field(default_factory=list)
     metadata: dict[str, Any] = field(default_factory=dict)
-    min_value: Optional[float] = None
-    max_value: Optional[float] = None
-    default_value: Optional[float] = None
+    min_value: float | None = None
+    max_value: float | None = None
+    default_value: float | None = None
 
 
 class MetricsRegistry:
@@ -87,7 +87,7 @@ class MetricsRegistry:
     cho toàn bộ metrics system.
     """
 
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config_path: str | None = None):
         self.config_path = config_path or "config/metrics_registry.yaml"
         self.definitions: dict[str, MetricDefinition] = {}
         self._load_default_definitions()
@@ -264,12 +264,12 @@ class MetricsRegistry:
         self.definitions[definition.name] = definition
         logger.info(f"Registered metric: {definition.name}")
 
-    def get_definition(self, name: str) -> Optional[MetricDefinition]:
+    def get_definition(self, name: str) -> MetricDefinition | None:
         """Get metric definition by name"""
         return self.definitions.get(name)
 
     def validate_metric(
-        self, name: str, value: float, tags: Optional[dict[str, str]] = None
+        self, name: str, value: float, tags: dict[str, str] | None = None
     ) -> bool:
         """Validate metric value and tags"""
         definition = self.get_definition(name)
@@ -367,7 +367,7 @@ class MetricsRegistry:
 
 
 # Global instance
-_metrics_registry_instance: Optional[MetricsRegistry] = None
+_metrics_registry_instance: MetricsRegistry | None = None
 
 
 def get_metrics_registry() -> MetricsRegistry:
@@ -378,7 +378,7 @@ def get_metrics_registry() -> MetricsRegistry:
     return _metrics_registry_instance
 
 
-def initialize_metrics_registry(config_path: Optional[str] = None) -> MetricsRegistry:
+def initialize_metrics_registry(config_path: str | None = None) -> MetricsRegistry:
     """Initialize global metrics registry with config"""
     global _metrics_registry_instance
     _metrics_registry_instance = MetricsRegistry(config_path)

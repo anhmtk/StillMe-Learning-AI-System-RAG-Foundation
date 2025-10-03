@@ -30,7 +30,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -98,7 +98,7 @@ class AdvancedVisualization:
     Enterprise-grade visualization system
     """
 
-    def __init__(self, metrics_db_path: str, config: Optional[dict[str, Any]] = None):
+    def __init__(self, metrics_db_path: str, config: dict[str, Any] | None = None):
         self.metrics_db_path = Path(metrics_db_path)
         self.config = config or self._get_default_config()
 
@@ -380,7 +380,7 @@ class AdvancedVisualization:
             logger.error(f"❌ Automated insights generation failed: {e}")
             return []
 
-    def _create_chart(self, chart_config: dict[str, Any]) -> Optional[ChartData]:
+    def _create_chart(self, chart_config: dict[str, Any]) -> ChartData | None:
         """Create chart from configuration"""
         try:
             chart_id = f"chart_{int(time.time() * 1000)}"
@@ -637,7 +637,7 @@ class AdvancedVisualization:
             logger.error(f"❌ Error getting available features: {e}")
             return []
 
-    def _get_chart_by_id(self, chart_id: str) -> Optional[ChartData]:
+    def _get_chart_by_id(self, chart_id: str) -> ChartData | None:
         """Get chart by ID"""
         try:
             if chart_id in self._chart_cache:
@@ -920,7 +920,7 @@ class AdvancedVisualization:
 
 # Factory function
 def create_advanced_visualization(
-    metrics_db_path: str, config: Optional[dict[str, Any]] = None
+    metrics_db_path: str, config: dict[str, Any] | None = None
 ) -> AdvancedVisualization:
     """Factory function để create advanced visualization"""
     return AdvancedVisualization(metrics_db_path, config)

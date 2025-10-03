@@ -12,7 +12,7 @@ import os
 import re
 import shutil
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 import yaml
 
@@ -21,11 +21,11 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Global policy instance
-_policy: Optional[dict[str, Any]] = None
+_policy: dict[str, Any] | None = None
 _policy_loaded = False
 
 
-def load_file_policy(policy_path: Optional[str] = None) -> dict[str, Any]:
+def load_file_policy(policy_path: str | None = None) -> dict[str, Any]:
     """
     Load File Protection Policy từ YAML file
 
@@ -83,7 +83,7 @@ def load_file_policy(policy_path: Optional[str] = None) -> dict[str, Any]:
             f"Failed to load File Protection Policy from {policy_path}: {error}"
         )
         logger.error(f"❌ {error_message}")
-        raise ValueError(error_message)
+        raise ValueError(error_message) from error
 
 
 def _validate_policy(policy: dict[str, Any]) -> None:
@@ -422,7 +422,7 @@ def ensure_policy_loaded() -> None:
         try:
             load_file_policy()
         except Exception as e:
-            raise ValueError(f"Failed to auto-load File Protection Policy: {e}")
+            raise ValueError(f"Failed to auto-load File Protection Policy: {e}") from e
 
 
 # Auto-load policy on module import

@@ -29,7 +29,7 @@ import sys
 import uuid
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 sys.path.append(str(Path(__file__).parent.parent))
 
@@ -69,7 +69,7 @@ class MetricsBackfill:
         logger.info(f"MetricsBackfill initialized: db={db_path}")
 
     def generate_learning_curve_data(
-        self, days: int, start_date: Optional[datetime] = None
+        self, days: int, start_date: datetime | None = None
     ) -> list[dict[str, Any]]:
         """Generate realistic learning curve data"""
         if start_date is None:

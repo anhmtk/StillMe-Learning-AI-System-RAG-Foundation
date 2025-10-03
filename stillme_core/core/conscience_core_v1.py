@@ -5,7 +5,7 @@ Handles safety filtering, refusal logic, and ethical compliance
 """
 
 import re
-from typing import Callable, Optional
+from collections.abc import Callable
 
 # Safety keyword patterns
 DANGEROUS_KEYWORDS = [
@@ -49,7 +49,7 @@ LEGAL_KEYWORDS = [
 
 
 def conscience_hook(
-    user_input: str, fallback_func: Optional[Callable[[str], str]] = None
+    user_input: str, fallback_func: Callable[[str], str] | None = None
 ) -> tuple[str, str]:
     """
     Safety and ethics hook for StillMe AI

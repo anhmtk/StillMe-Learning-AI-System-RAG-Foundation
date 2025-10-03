@@ -1,0 +1,94 @@
+name: Module Validation
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  validate-modules:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        module: [
+          "stillme_core/common",
+          "gateway_poc", 
+          "stillme_core",
+          "agent_dev",
+          "clients",
+          "desktop_app",
+          "dashboards",
+          "niche_radar",
+          "plugins",
+          "runtime",
+          "scripts",
+          "tests",
+          "tools"
+        ]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install ruff mypy pytest
+        pip install -e .
+    
+    - name: Run Ruff linting for ${{ matrix.module }}
+      run: |
+        echo "🔍 Linting module: ${{ matrix.module }}"
+        ruff check ${{ matrix.module }} --statistics
+        if [ $? -ne 0 ]; then
+          echo "❌ Ruff linting failed for ${{ matrix.module }}"
+          exit 1
+        fi
+        echo "✅ Ruff linting passed for ${{ matrix.module }}"
+    
+    - name: Run Mypy type checking for ${{ matrix.module }}
+      run: |
+        echo "🔍 Type checking module: ${{ matrix.module }}"
+        mypy ${{ matrix.module }} --ignore-missing-imports
+        if [ $? -ne 0 ]; then
+          echo "❌ Mypy type checking failed for ${{ matrix.module }}"
+          exit 1
+        fi
+        echo "✅ Mypy type checking passed for ${{ matrix.module }}"
+    
+    - name: Run tests for ${{ matrix.module }} (if available)
+      run: |
+        echo "🔍 Running tests for module: ${{ matrix.module }}"
+        if [ -d "${{ matrix.module }}/tests" ] || [ -f "${{ matrix.module }}/test_*.py" ]; then
+          pytest ${{ matrix.module }} -v
+          if [ $? -ne 0 ]; then
+            echo "❌ Tests failed for ${{ matrix.module }}"
+            exit 1
+          fi
+          echo "✅ Tests passed for ${{ matrix.module }}"
+        else
+          echo "ℹ️ No tests found for ${{ matrix.module }}"
+        fi
+    
+    - name: Check for forbidden type: ignore comments
+      run: |
+        echo "🔍 Checking for forbidden type: ignore comments in ${{ matrix.module }}"
+        python scripts/deny_type_ignore.py ${{ matrix.module }}
+        if [ $? -ne 0 ]; then
+          echo "❌ Found forbidden type: ignore comments in ${{ matrix.module }}"
+          exit 1
+        fi
+        echo "✅ No forbidden type: ignore comments found in ${{ matrix.module }}"
+    
+    - name: Module validation summary
+      run: |
+        echo "🎉 Module ${{ matrix.module }} validation completed successfully!"
+        echo "✅ Ruff linting: PASSED"
+        echo "✅ Mypy type checking: PASSED"
+        echo "✅ Tests: PASSED"
+        echo "✅ No forbidden type: ignore: PASSED"

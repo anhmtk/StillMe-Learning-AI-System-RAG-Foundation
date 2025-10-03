@@ -12,7 +12,6 @@ import subprocess
 import tempfile
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 from stillme_core.quality.code_quality_enforcer import QualityIssue
 
@@ -27,7 +26,7 @@ class FixResult:
     errors_fixed: list[str]
     warnings: list[str]
     errors: list[str]
-    backup_path: Optional[str] = None
+    backup_path: str | None = None
 
 
 class AutoFixer:
@@ -262,7 +261,7 @@ class AutoFixer:
             # Find all import statements
             imports = []
             for node in ast.walk(tree):
-                if isinstance(node, (ast.Import, ast.ImportFrom)):
+                if isinstance(node, ast.Import | ast.ImportFrom):
                     imports.append(node)
 
             # Find all name references

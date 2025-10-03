@@ -12,7 +12,7 @@ import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ class ModuleInfo:
     author: str
     status: ModuleStatus
     dependencies: list[str]
-    config_schema: Optional[dict[str, Any]] = None
+    config_schema: dict[str, Any] | None = None
 
 
 class ModuleBase(ABC):
@@ -48,7 +48,7 @@ class ModuleBase(ABC):
     It provides common functionality and ensures consistency across the framework.
     """
 
-    def __init__(self, config: Optional[dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         """
         Initialize the module
 
@@ -158,7 +158,7 @@ class StubModule(ModuleBase):
         self,
         name: str,
         description: str = "Not implemented yet",
-        config: Optional[dict[str, Any]] = None,
+        config: dict[str, Any] | None = None,
     ):
         """
         Initialize stub module

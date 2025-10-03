@@ -1,5 +1,3 @@
-from typing import Any
-
 #!/usr/bin/env python3
 """
 Regression SEAL-GRADE Test Suite for Proactive Abuse Guard
@@ -17,6 +15,7 @@ import os
 import sys
 import time
 from pathlib import Path
+from typing import Any
 
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

@@ -12,7 +12,7 @@ Cách sử dụng:
 import os
 import sys
 import time
-from typing import Callable
+from collections.abc import Callable
 
 # Add current directory to path
 sys.path.insert(

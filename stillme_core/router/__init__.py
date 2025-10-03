@@ -6,7 +6,7 @@ This module provides the Router interface that tests expect.
 It wraps the IntelligentRouter with a simpler interface.
 """
 
-from typing import Any, Dict
+from typing import Any
 
 from ..core.router.intelligent_router import (
     IntelligentRouter,
@@ -22,14 +22,14 @@ class Router:
     This provides the interface that tests expect.
     """
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         """Initialize Router with config."""
         self.config = config
         self.models = config.get("models", {})
         self.fallback_enabled = config.get("fallback_enabled", True)
         self.intelligent_router = IntelligentRouter(config)
 
-    def route(self, request: Dict[str, Any]) -> Dict[str, Any]:
+    def route(self, request: dict[str, Any]) -> dict[str, Any]:
         """
         Route a request and return routing decision.
 
@@ -75,7 +75,7 @@ class Router:
                     "fallback_used": True,
                 }
             else:
-                raise ValueError(f"Routing failed: {e}")
+                raise ValueError(f"Routing failed: {e}") from e
 
 
 class ModelSelector:
@@ -83,7 +83,7 @@ class ModelSelector:
     Model selector for choosing appropriate models.
     """
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] = None):
         """Initialize ModelSelector."""
         self.config = config or {}
         self.models = self.config.get(
@@ -95,7 +95,7 @@ class ModelSelector:
             },
         )
 
-    def select_model(self, request: Dict[str, Any]) -> str:
+    def select_model(self, request: dict[str, Any]) -> str:
         """
         Select model based on request.
 
@@ -189,14 +189,14 @@ class FallbackHandler:
     Fallback handler for when primary routing fails.
     """
 
-    def __init__(self, config: Dict[str, Any] = None):
+    def __init__(self, config: dict[str, Any] = None):
         """Initialize FallbackHandler."""
         self.config = config or {}
         self.fallback_providers = self.config.get(
             "fallback_providers", ["openai", "anthropic"]
         )
 
-    def handle_fallback(self, request: Dict[str, Any]) -> Dict[str, Any]:
+    def handle_fallback(self, request: dict[str, Any]) -> dict[str, Any]:
         """
         Handle fallback routing.
 

@@ -23,7 +23,7 @@ import logging
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -45,7 +45,7 @@ class FilterResult:
     filtered_content: str
     violations: list[str]
     security_level: SecurityLevel
-    policy_response: Optional[str] = None
+    policy_response: str | None = None
     metadata: dict[str, Any] = None  # type: ignore
 
 

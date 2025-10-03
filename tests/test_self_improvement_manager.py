@@ -164,8 +164,8 @@ class TestSelfImprovementManager:
         logs = self.manager._read_performance_logs()
 
         assert len(logs) >= 2
-        assert any("api_usage.log" in l["file"] for l in logs)
-        assert any("performance_metrics.json" in l["file"] for l in logs)
+        assert any("api_usage.log" in log["file"] for log in logs)
+        assert any("performance_metrics.json" in log["file"] for log in logs)
 
     def test_read_error_logs(self):
         """Test đọc logs lỗi"""

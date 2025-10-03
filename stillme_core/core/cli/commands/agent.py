@@ -6,7 +6,6 @@ Commands for running automated development tasks with AgentDev.
 
 import asyncio
 import json
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -29,7 +28,7 @@ def run(
     max_steps: int = typer.Option(
         5, "--max-steps", "-s", help="Maximum number of steps to execute"
     ),
-    output: Optional[str] = typer.Option(
+    output: str | None = typer.Option(
         None, "--output", "-o", help="Output file for task results"
     ),
     verbose: bool = typer.Option(
@@ -110,7 +109,7 @@ def run(
 @app.command()
 def plan(
     project_goal: str = typer.Argument(..., help="High-level project goal to plan for"),
-    output: Optional[str] = typer.Option(
+    output: str | None = typer.Option(
         None, "--output", "-o", help="Output file for detailed plan"
     ),
     format: str = typer.Option(
@@ -200,10 +199,10 @@ def plan(
 @app.command()
 def review(
     directory_path: str = typer.Argument(".", help="Directory to review"),
-    tools: Optional[list[str]] = typer.Option(
+    tools: list[str] | None = typer.Option(
         None, "--tool", "-t", help="Specific tools to use (ruff, pylint, mypy)"
     ),
-    output: Optional[str] = typer.Option(
+    output: str | None = typer.Option(
         None, "--output", "-o", help="Output file for review report"
     ),
 ):

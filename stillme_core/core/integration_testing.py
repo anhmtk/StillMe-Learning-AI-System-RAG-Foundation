@@ -29,7 +29,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -46,7 +46,7 @@ class IntegrationTestResult:
     status: str  # "passed", "failed", "skipped", "error"
     duration_ms: float
     performance_metrics: dict[str, float]
-    error_message: Optional[str]
+    error_message: str | None
     timestamp: datetime
 
 
@@ -69,7 +69,7 @@ class IntegrationTesting:
     Enterprise-grade integration testing system
     """
 
-    def __init__(self, metrics_db_path: str, config: Optional[dict[str, Any]] = None):
+    def __init__(self, metrics_db_path: str, config: dict[str, Any] | None = None):
         self.metrics_db_path = Path(metrics_db_path)
         self.config = config or self._get_default_config()
 
@@ -803,7 +803,7 @@ class IntegrationTesting:
 
 # Factory function
 def create_integration_testing(
-    metrics_db_path: str, config: Optional[dict[str, Any]] = None
+    metrics_db_path: str, config: dict[str, Any] | None = None
 ) -> IntegrationTesting:
     """Factory function để create integration testing"""
     return IntegrationTesting(metrics_db_path, config)

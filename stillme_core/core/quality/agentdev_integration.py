@@ -10,7 +10,7 @@ import json
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from stillme_core.quality.auto_fixer import AutoFixer
 from stillme_core.quality.code_quality_enforcer import (
@@ -44,7 +44,7 @@ class AgentDevQualityIntegration:
         self,
         target_path: str,
         auto_fix: bool = True,
-        tools: Optional[list[str]] = None,
+        tools: list[str] | None = None,
         save_metrics: bool = True,
     ) -> dict[str, Any]:
         """

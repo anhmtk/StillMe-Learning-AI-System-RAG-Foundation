@@ -26,9 +26,10 @@ import logging
 import threading
 import time
 from collections import deque
+from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
-from typing import Any, Callable, Optional
+from typing import Any
 
 try:
     import psutil
@@ -209,7 +210,7 @@ class ResourceMonitor:
 
         # Monitoring state
         self.is_monitoring = False
-        self.monitoring_task: Optional[asyncio.Task] = None
+        self.monitoring_task: asyncio.Task | None = None
         self.metrics_history = deque(maxlen=1000)
         self.alerts: list[ResourceAlert] = []
         self.alert_callbacks: list[Callable[[ResourceAlert], None]] = []
@@ -569,7 +570,7 @@ class ResourceMonitor:
             return True
         return False
 
-    def get_current_metrics(self) -> Optional[ResourceMetrics]:
+    def get_current_metrics(self) -> ResourceMetrics | None:
         """Get current resource metrics"""
         if self.metrics_history:
             return self.metrics_history[-1]
@@ -630,7 +631,7 @@ class ResourceMonitor:
 
 
 # Global resource monitor instance
-_resource_monitor_instance: Optional[ResourceMonitor] = None
+_resource_monitor_instance: ResourceMonitor | None = None
 
 
 def get_resource_monitor(thresholds: ResourceThresholds = None) -> ResourceMonitor:

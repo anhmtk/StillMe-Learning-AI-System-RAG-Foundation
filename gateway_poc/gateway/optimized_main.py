@@ -7,7 +7,6 @@ Tối ưu cho performance với workers, uvloop, httptools, orjson
 import asyncio
 import logging
 import time
-from typing import Optional
 
 import httpx
 import uvicorn
@@ -19,7 +18,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Global HTTP client for external API calls (if needed)
-http_client: Optional[httpx.AsyncClient] = None
+http_client: httpx.AsyncClient | None = None
 
 app = FastAPI(
     title="StillMe Clarification Core API",

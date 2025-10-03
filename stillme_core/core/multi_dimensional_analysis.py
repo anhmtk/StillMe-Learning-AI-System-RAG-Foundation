@@ -30,7 +30,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -92,7 +92,7 @@ class MultiDimensionalAnalysis:
     Enterprise-grade multi-dimensional analytics system
     """
 
-    def __init__(self, metrics_db_path: str, config: Optional[dict[str, Any]] = None):
+    def __init__(self, metrics_db_path: str, config: dict[str, Any] | None = None):
         self.metrics_db_path = Path(metrics_db_path)
         self.config = config or self._get_default_config()
 
@@ -946,7 +946,7 @@ class MultiDimensionalAnalysis:
 
     def _calculate_correlation(
         self, usage1: dict[str, int], usage2: dict[str, int]
-    ) -> Optional[float]:
+    ) -> float | None:
         """Calculate correlation between two usage patterns"""
         try:
             # Get common time points
@@ -1043,7 +1043,7 @@ class MultiDimensionalAnalysis:
 
 # Factory function
 def create_multi_dimensional_analysis(
-    metrics_db_path: str, config: Optional[dict[str, Any]] = None
+    metrics_db_path: str, config: dict[str, Any] | None = None
 ) -> MultiDimensionalAnalysis:
     """Factory function để create multi-dimensional analysis"""
     return MultiDimensionalAnalysis(metrics_db_path, config)

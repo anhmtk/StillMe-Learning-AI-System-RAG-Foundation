@@ -5,6 +5,8 @@ import time
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from typing import Literal, Optional, Dict, Any
+from enum import Enum
 
 # Import StillMeFramework from correct path
 try:
@@ -61,10 +63,29 @@ sm = StillMeFramework()
 # Framework tự động khởi tạo modules trong __init__
 
 
+class AgentMode(str, Enum):
+    """AgentDev mode enumeration"""
+    FAST = "fast"
+    SAFE = "safe"
+    CODE = "code"
+    REAL = "real"
+
 class InferenceRequest(BaseModel):
     prompt: str
     locale: str = "vi"
     safety_mode: str = "maximum"
+
+class DevAgentRequest(BaseModel):
+    prompt: str
+    mode: AgentMode = AgentMode.FAST
+    params: Optional[Dict[str, Any]] = None
+
+class DevAgentResponse(BaseModel):
+    ok: bool
+    mode: AgentMode
+    output: str
+    latency_ms: float
+    error: Optional[str] = None
 
 
 def _call_framework(prompt: str, locale: str, safety: str):
@@ -151,3 +172,43 @@ def inference(req: InferenceRequest):
 @app.post("/process")
 def process(req: InferenceRequest):
     return _inference_common(req)
+
+
+@app.post("/dev-agent", response_model=DevAgentResponse)
+def dev_agent(req: DevAgentRequest):
+    """AgentDev endpoint with proper mode handling"""
+    t0 = time.perf_counter()
+    
+    try:
+        # Import AgentDev functionality
+        try:
+            from stillme_core.core.ai_manager import dev_agent as dev_agent_func
+            result = dev_agent_func(req.prompt, mode=req.mode.value, **(req.params or {}))
+        except ImportError:
+            # Fallback if AgentDev not available
+            result = f"AgentDev not available. Prompt: {req.prompt}, Mode: {req.mode.value}"
+        
+        latency_ms = (time.perf_counter() - t0) * 1000.0
+        
+        return DevAgentResponse(
+            ok=True,
+            mode=req.mode,
+            output=str(result),
+            latency_ms=latency_ms
+        )
+        
+    except Exception as e:
+        latency_ms = (time.perf_counter() - t0) * 1000.0
+        return DevAgentResponse(
+            ok=False,
+            mode=req.mode,
+            output="",
+            latency_ms=latency_ms,
+            error=str(e)
+        )
+
+
+@app.post("/dev-agent/bridge", response_model=DevAgentResponse)
+def dev_agent_bridge(req: DevAgentRequest):
+    """AgentDev bridge endpoint for internal communication"""
+    return dev_agent(req)

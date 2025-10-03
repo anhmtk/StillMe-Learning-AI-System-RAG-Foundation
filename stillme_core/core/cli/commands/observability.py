@@ -8,7 +8,6 @@ CLI commands for monitoring, logging, metrics, and health checks.
 import json
 import time
 from pathlib import Path
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -182,11 +181,11 @@ def health(
 
 @app.command()
 def metrics(
-    metric_name: Optional[str] = typer.Argument(
+    metric_name: str | None = typer.Argument(
         None, help="Specific metric name to show"
     ),
     summary: bool = typer.Option(False, "--summary", "-s", help="Show metrics summary"),
-    export: Optional[str] = typer.Option(
+    export: str | None = typer.Option(
         None, "--export", "-e", help="Export metrics to file"
     ),
 ):
@@ -272,7 +271,7 @@ def metrics(
 
 @app.command()
 def traces(
-    trace_id: Optional[str] = typer.Argument(None, help="Specific trace ID to show"),
+    trace_id: str | None = typer.Argument(None, help="Specific trace ID to show"),
     recent: int = typer.Option(
         10, "--recent", "-r", help="Number of recent traces to show"
     ),
@@ -383,7 +382,7 @@ def traces(
 
 @app.command()
 def logs(
-    level: Optional[str] = typer.Option(
+    level: str | None = typer.Option(
         None, "--level", "-l", help="Filter by log level"
     ),
     lines: int = typer.Option(50, "--lines", "-n", help="Number of lines to show"),

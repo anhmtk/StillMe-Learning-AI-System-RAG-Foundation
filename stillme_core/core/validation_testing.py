@@ -31,7 +31,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import psutil
 
@@ -52,7 +52,7 @@ class TestResult:
     accuracy_score: float
     performance_score: float
     memory_usage_mb: float
-    error_message: Optional[str]
+    error_message: str | None
     details: dict[str, Any]
     timestamp: datetime
 
@@ -95,7 +95,7 @@ class ValidationTesting:
         self,
         metrics_db_path: str,
         validation_db_path: str,
-        config: Optional[dict[str, Any]] = None,
+        config: dict[str, Any] | None = None,
     ):
         self.metrics_db_path = Path(metrics_db_path)
         self.validation_db_path = Path(validation_db_path)
@@ -1190,7 +1190,7 @@ class ValidationTesting:
 def create_validation_testing(
     metrics_db_path: str,
     validation_db_path: str,
-    config: Optional[dict[str, Any]] = None,
+    config: dict[str, Any] | None = None,
 ) -> ValidationTesting:
     """Factory function để create validation testing"""
     return ValidationTesting(metrics_db_path, validation_db_path, config)

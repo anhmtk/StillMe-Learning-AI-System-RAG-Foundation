@@ -91,10 +91,11 @@ import subprocess
 import sys
 import time
 from collections import defaultdict
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any
 
 import psutil
 import yaml
@@ -298,14 +299,14 @@ class JsonFormatter(logging.Formatter):
 
 # ------------------- CORE FRAMEWORK -------------------
 class StillMeFramework:
-    def __init__(self, config: Optional[dict[str, Any]] = None) -> None:
+    def __init__(self, config: dict[str, Any] | None = None) -> None:
         self._modules: dict[str, Any] = {}
         self._dependency_graph: defaultdict[str, list[str]] = defaultdict(list)
         self._api_endpoints: dict[str, Callable[..., Any]] = {}
         self._middlewares: list[Any] = []
         self._security_policies: dict[str, Any] = {}
-        self._heartbeat_task: Optional[asyncio.Task[None]] = None
-        self.agentdev: Optional[Any] = None
+        self._heartbeat_task: asyncio.Task[None] | None = None
+        self.agentdev: Any | None = None
         self._setup_framework(config or {})
         self._metrics = FrameworkMetrics()
 
@@ -626,7 +627,7 @@ class StillMeFramework:
             return None
 
     async def get_market_intelligence(
-        self, keywords: Optional[list[str]] = None
+        self, keywords: list[str] | None = None
     ) -> str:
         """
         Lấy thông tin thị trường và xu hướng với dự báo
@@ -839,7 +840,7 @@ class StillMeFramework:
             await asyncio.gather(*tasks)
 
     # ------------ MODULE MANAGEMENT ------------
-    def load_module(self, module_name: str) -> Optional[Any]:
+    def load_module(self, module_name: str) -> Any | None:
         self.audit_logger.info(f"Attempting to load module: {module_name}")
         if module_name in self._modules:
             self.logger.warning(f"Module {module_name} already loaded")
@@ -882,7 +883,7 @@ class StillMeFramework:
         try:
             compile_restricted(code, filename=module_path, mode="exec")
         except SyntaxError as e:
-            raise SecurityViolation(f"Restricted syntax in {module_name}: {e!s}")
+            raise SecurityViolation(f"Restricted syntax in {module_name}: {e!s}") from e
 
         spec = importlib.util.spec_from_file_location(
             f"modules.{module_name}", module_path
@@ -945,7 +946,7 @@ class StillMeFramework:
                         timeout=300,
                     )
                 except subprocess.SubprocessError as e:
-                    raise DependencyError(f"Failed to install requirements: {e!s}")
+                    raise DependencyError(f"Failed to install requirements: {e!s}") from e
 
     def _resolve_dependencies(self, module: Any):
         if not hasattr(module.ModuleMeta, "dependencies"):
@@ -1213,7 +1214,7 @@ class StillMeFramework:
                 self.logger.error(f"Cleanup error: {e!s}")
                 await asyncio.sleep(3600)
 
-    def execute_agentdev_task(self, task: str, mode: Optional[str] = None) -> str:
+    def execute_agentdev_task(self, task: str, mode: str | None = None) -> str:
         """Execute task using AgentDev Unified"""
         if not self.agentdev:
             raise RuntimeError("AgentDev not available")

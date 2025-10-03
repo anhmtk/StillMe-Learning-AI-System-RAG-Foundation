@@ -8,10 +8,11 @@ import asyncio
 import json
 import time
 import uuid
+from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any
 
 import yaml
 
@@ -58,12 +59,12 @@ class PipelineStep:
     name: str
     description: str
     command: str
-    working_directory: Optional[str]
+    working_directory: str | None
     environment: dict[str, str]
     dependencies: list[str]
     timeout: int
     retry_count: int
-    condition: Optional[str]
+    condition: str | None
     artifacts: list[str]
     notifications: list[str]
 
@@ -95,8 +96,8 @@ class PipelineExecution:
     trigger_type: TriggerType
     trigger_data: dict[str, Any]
     started_at: float
-    completed_at: Optional[float]
-    duration: Optional[float]
+    completed_at: float | None
+    duration: float | None
     steps_executed: list[str]
     steps_failed: list[str]
     artifacts: list[str]
@@ -107,7 +108,7 @@ class PipelineExecution:
 class AutomatedWorkflows:
     """Enterprise automated workflows system"""
 
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config_path: str | None = None):
         self.config = self._load_config(config_path)
         self.pipelines: dict[str, Pipeline] = {}
         self.executions: dict[str, PipelineExecution] = {}
@@ -115,7 +116,7 @@ class AutomatedWorkflows:
         self.webhook_handlers: dict[str, Callable] = {}
         self.running = False
 
-    def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
+    def _load_config(self, config_path: str | None = None) -> dict[str, Any]:
         """Load automated workflows configuration"""
         if config_path:
             config_file = Path(config_path)
@@ -147,7 +148,7 @@ class AutomatedWorkflows:
                 },
             }
 
-    def load_pipeline(self, pipeline_file: str) -> Optional[Pipeline]:
+    def load_pipeline(self, pipeline_file: str) -> Pipeline | None:
         """Load pipeline from YAML file"""
         try:
             pipeline_path = Path(self.config["pipelines_directory"]) / pipeline_file
@@ -221,8 +222,8 @@ class AutomatedWorkflows:
         self,
         pipeline_id: str,
         trigger_type: TriggerType,
-        trigger_data: Optional[dict[str, Any]] = None,
-        variables: Optional[dict[str, str]] = None,
+        trigger_data: dict[str, Any] | None = None,
+        variables: dict[str, str] | None = None,
     ) -> str:
         """Execute a pipeline"""
         if pipeline_id not in self.pipelines:
@@ -423,7 +424,7 @@ class AutomatedWorkflows:
 
                 return process.returncode == 0
 
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 process.kill()
                 self._log_execution(execution, f"Step timed out after {step.timeout}s")
                 return False
@@ -603,7 +604,7 @@ automated_workflows = AutomatedWorkflows()
 
 
 # Convenience functions
-def load_pipeline(pipeline_file: str) -> Optional[Pipeline]:
+def load_pipeline(pipeline_file: str) -> Pipeline | None:
     """Load pipeline from file"""
     return automated_workflows.load_pipeline(pipeline_file)
 
@@ -611,7 +612,7 @@ def load_pipeline(pipeline_file: str) -> Optional[Pipeline]:
 async def execute_pipeline(
     pipeline_id: str,
     trigger_type: TriggerType,
-    trigger_data: Optional[dict[str, Any]] = None,
+    trigger_data: dict[str, Any] | None = None,
 ) -> str:
     """Execute pipeline"""
     return await automated_workflows.execute_pipeline(

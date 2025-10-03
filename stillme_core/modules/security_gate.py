@@ -68,7 +68,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -155,7 +155,7 @@ class SecurityGate:
     TODO: Implement full security features.
     """
 
-    def __init__(self, config: Optional[SecurityConfig] = None):
+    def __init__(self, config: SecurityConfig | None = None):
         """Initialize SecurityGate"""
         self.config = config or SecurityConfig()
         self.policies: dict[str, SecurityPolicy] = {}
@@ -333,7 +333,7 @@ class SecurityGate:
             return False
 
     def get_access_logs(
-        self, user_id: Optional[str] = None, limit: int = 100
+        self, user_id: str | None = None, limit: int = 100
     ) -> list[AccessRequest]:
         """
         Get access logs with optional filtering

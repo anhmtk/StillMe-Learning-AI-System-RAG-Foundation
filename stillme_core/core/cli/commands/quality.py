@@ -6,7 +6,6 @@ Commands for code quality analysis, fixing, and monitoring.
 
 import asyncio
 import json
-from typing import Optional
 
 import typer
 from rich.console import Console
@@ -26,14 +25,14 @@ console = Console()
 @app.command()
 def check(
     target_path: str = typer.Argument(".", help="Path to analyze"),
-    tools: Optional[list[str]] = typer.Option(
+    tools: list[str] | None = typer.Option(
         None,
         "--tool",
         "-t",
         help="Specific tools to run (ruff, pylint, mypy, black, isort)",
     ),
     auto_fix: bool = typer.Option(False, "--fix", "-f", help="Apply automatic fixes"),
-    output: Optional[str] = typer.Option(
+    output: str | None = typer.Option(
         None, "--output", "-o", help="Output file for detailed report"
     ),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Show detailed output"),
@@ -127,7 +126,7 @@ def workflow(
     workflow_type: str = typer.Option(
         "full", "--type", "-t", help="Workflow type: quick, full, pre-commit"
     ),
-    output: Optional[str] = typer.Option(
+    output: str | None = typer.Option(
         None, "--output", "-o", help="Output file for workflow report"
     ),
 ):

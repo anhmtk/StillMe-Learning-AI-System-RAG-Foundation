@@ -16,10 +16,11 @@ import secrets
 import threading
 import time
 import uuid
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Callable, Optional
+from typing import Any
 
 import jwt
 import websockets
@@ -61,10 +62,10 @@ class IntegrationMessage:
     payload: dict[str, Any]
     timestamp: datetime
     auth_level: AuthLevel
-    correlation_id: Optional[str] = None
+    correlation_id: str | None = None
     retry_count: int = 0
     max_retries: int = 3
-    ttl: Optional[timedelta] = None
+    ttl: timedelta | None = None
 
 
 @dataclass
@@ -88,7 +89,7 @@ class CircuitBreakerState:
 
     is_open: bool = False
     failure_count: int = 0
-    last_failure_time: Optional[datetime] = None
+    last_failure_time: datetime | None = None
     success_count: int = 0
     threshold: int = 5
     timeout: timedelta = timedelta(minutes=1)
@@ -97,14 +98,14 @@ class CircuitBreakerState:
 class AuthenticationManager:
     """Manages authentication and authorization"""
 
-    def __init__(self, secret_key: Optional[str] = None):
+    def __init__(self, secret_key: str | None = None):
         self.secret_key = secret_key or secrets.token_urlsafe(32)
         self.active_tokens: dict[str, dict[str, Any]] = {}
         self.user_permissions: dict[str, list[str]] = {}
         self.token_ttl = timedelta(hours=24)
 
     def generate_token(
-        self, user_id: str, permissions: Optional[list[str]] = None
+        self, user_id: str, permissions: list[str] | None = None
     ) -> str:
         """Generate JWT token for user"""
         payload = {
@@ -124,7 +125,7 @@ class AuthenticationManager:
 
         return token
 
-    def validate_token(self, token: str) -> Optional[dict[str, Any]]:
+    def validate_token(self, token: str) -> dict[str, Any] | None:
         """Validate JWT token"""
         try:
             payload = jwt.decode(token, self.secret_key, algorithms=["HS256"])
@@ -294,12 +295,12 @@ class MessageQueue:
                     logger.error(f"Error in subscriber callback: {e}")
 
     async def get_message(
-        self, timeout: Optional[float] = None
-    ) -> Optional[IntegrationMessage]:
+        self, timeout: float | None = None
+    ) -> IntegrationMessage | None:
         """Get message from queue"""
         try:
             return await asyncio.wait_for(self.queue.get(), timeout=timeout)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             return None
 
 
@@ -308,7 +309,7 @@ class IntegrationBridge:
     Main integration bridge class
     """
 
-    def __init__(self, config: Optional[dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self.auth_manager = AuthenticationManager()
         self.rate_limiter = RateLimiter()
@@ -433,7 +434,7 @@ class IntegrationBridge:
         method: str,
         path: str,
         headers: dict[str, str],
-        body: Optional[dict[str, Any]] = None,
+        body: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Handle incoming API request"""
         start_time = time.time()

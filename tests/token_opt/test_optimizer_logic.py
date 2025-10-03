@@ -230,7 +230,7 @@ class TestTokenOptimizerLogic:
         emb2 = optimizer.cache._get_embedding(text2)
 
         assert len(emb1) == len(emb2)
-        assert all(abs(a - b) < 1e-10 for a, b in zip(emb1, emb2))
+        assert all(abs(a - b) < 1e-10 for a, b in zip(emb1, emb2, strict=False))
 
     def test_fake_backend_deterministic(self, optimizer):
         """Test that fake backend is deterministic"""
@@ -241,5 +241,5 @@ class TestTokenOptimizerLogic:
         emb2 = optimizer.cache._get_embedding(text)
         emb3 = optimizer.cache._get_embedding(text)
 
-        assert all(abs(a - b) < 1e-10 for a, b in zip(emb1, emb2))
-        assert all(abs(a - b) < 1e-10 for a, b in zip(emb2, emb3))
+        assert all(abs(a - b) < 1e-10 for a, b in zip(emb1, emb2, strict=False))
+        assert all(abs(a - b) < 1e-10 for a, b in zip(emb2, emb3, strict=False))

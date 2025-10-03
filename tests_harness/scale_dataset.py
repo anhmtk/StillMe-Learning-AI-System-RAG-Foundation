@@ -1,5 +1,3 @@
-import secrets
-
 #!/usr/bin/env python3
 """
 Scale Dataset - Tăng dataset từ 50 lên 1000+ mẫu
@@ -14,6 +12,7 @@ Tính năng:
 import json
 import logging
 import random
+import secrets
 import sys
 from datetime import datetime
 from pathlib import Path

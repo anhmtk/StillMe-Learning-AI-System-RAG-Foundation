@@ -11,7 +11,7 @@ import os
 import threading
 import time
 from collections.abc import Generator
-from typing import Any, Optional
+from typing import Any
 
 import httpx
 import requests
@@ -28,7 +28,7 @@ OLLAMA_NUM_PREDICT = int(os.getenv("RESPONSE_TOKENS", "256"))
 logger = logging.getLogger(__name__)
 
 # Global httpx client singleton with keep-alive
-_http_client: Optional[httpx.Client] = None
+_http_client: httpx.Client | None = None
 _client_lock = threading.Lock()
 
 
@@ -255,10 +255,10 @@ def call_ollama_chat(
 
     except httpx.TimeoutException:
         logger.error("Ollama API timeout after %s seconds", request_timeout)
-        raise TimeoutError(f"Ollama API timeout after {request_timeout} seconds")
+        raise TimeoutError(f"Ollama API timeout after {request_timeout} seconds") from None
     except httpx.RequestError as e:
         logger.error("Ollama API request failed: %s", e)
-        raise ConnectionError(f"Ollama API request failed: {e}")
+        raise ConnectionError(f"Ollama API request failed: {e}") from e
     except Exception as e:
         logger.error("Ollama /api/generate failed: %s", e)
         raise
@@ -364,7 +364,7 @@ def _log_telemetry(
             if route_info:
                 route = route_info.get("route", "unknown")
                 fast_lane = route_info.get("fast_lane", False)
-        except:
+        except Exception:
             pass
 
         # Calculate timing

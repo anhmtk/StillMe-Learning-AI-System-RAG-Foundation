@@ -48,7 +48,7 @@ class SmartAutomation:
                 ):
                     self.config["proposals_created_today"] = 0
                     self.config["last_reset_date"] = datetime.now().strftime("%Y-%m-%d")
-            except:
+            except Exception:
                 self.config = default_config
         else:
             self.config = default_config
@@ -61,7 +61,7 @@ class SmartAutomation:
                     session_data = json.load(f)
                     if "automation_enabled" in session_data:
                         self.config["enabled"] = session_data["automation_enabled"]
-        except:
+        except Exception:
             pass
 
         self.save_config()

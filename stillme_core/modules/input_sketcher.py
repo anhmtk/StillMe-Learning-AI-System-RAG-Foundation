@@ -1,6 +1,6 @@
 # modules/input_sketcher.py
 import re
-from typing import Any, Optional
+from typing import Any
 
 VI_CHARS = "ăâđêôơưáàạảãấầậẩẫắằặẳẵéèẹẻẽếềệểễíìịỉĩóòọỏõốồộổỗớờợởỡúùụủũứừựửữýỳỵỷỹ"
 CODE_MARKERS = [
@@ -113,7 +113,7 @@ def make_signature(text: str) -> str:
     return f"len={words}|lang={lang}|code={code}|qm={qm}|flags={flags_str}|head={head}"
 
 
-def cheap_rules(text: str) -> Optional[str]:
+def cheap_rules(text: str) -> str | None:
     """Trả về 1 trong {coding, creative, chitchat, general, complex} nếu chắc chắn; else None."""
     t = (text or "").lower().strip()
     if not t:

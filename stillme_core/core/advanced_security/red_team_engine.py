@@ -22,16 +22,13 @@ import time
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 # Import existing modules for integration
 from stillme_core.decision_making.decision_engine import RiskLevel
 
 try:
     from stillme_core.core.advanced_security.safe_attack_simulator import (
-        AttackCategory,
-        AttackScenario,
-        AttackSeverity,
         SafeAttackSimulator,
     )
     from stillme_core.core.advanced_security.sandbox_controller import (
@@ -40,9 +37,8 @@ try:
     )
     from stillme_core.decision_making.decision_engine import (
         DecisionEngine,
-        DecisionType,
     )
-    from stillme_core.modules.layered_memory_v1 import LayeredMemoryV1, MemoryItem
+    from stillme_core.modules.layered_memory_v1 import LayeredMemoryV1
 except ImportError as e:
     logging.warning(f"Some modules not available: {e}")
 
@@ -130,7 +126,7 @@ class GeneratedAttack:
     failure_indicators: list[str]
     risk_level: RiskLevel
     confidence: float
-    adaptation_strategy: Optional[str] = None
+    adaptation_strategy: str | None = None
 
 
 @dataclass
@@ -156,7 +152,7 @@ class RedTeamEngine:
     """
 
     def __init__(
-        self, config: Optional[dict[str, Any]] = None, config_path: Optional[str] = None
+        self, config: dict[str, Any] | None = None, config_path: str | None = None
     ):
         """
         Initialize Red Team Engine

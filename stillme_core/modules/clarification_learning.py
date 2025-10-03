@@ -10,7 +10,7 @@ import time
 from collections import defaultdict
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -47,11 +47,11 @@ class ClarificationAttempt:
 
     prompt: str
     question: str
-    user_reply: Optional[str]
+    user_reply: str | None
     success: bool
     context: dict[str, Any]
     timestamp: float = time.time()
-    trace_id: Optional[str] = None
+    trace_id: str | None = None
 
 
 class ClarificationPatternStore:
@@ -60,7 +60,7 @@ class ClarificationPatternStore:
     In-memory + file-backed persistence
     """
 
-    def __init__(self, decay: float = 0.9, persistence_file: Optional[str] = None):
+    def __init__(self, decay: float = 0.9, persistence_file: str | None = None):
         self.decay = decay
         self.store: dict[str, PatternStat] = defaultdict(PatternStat)
         self.persistence_file = persistence_file or "data/clarification_patterns.json"
@@ -137,7 +137,7 @@ class ClarificationPatternStore:
             for k, v in items[:k]
         ]
 
-    def get_pattern_stats(self, key: str) -> Optional[PatternStat]:
+    def get_pattern_stats(self, key: str) -> PatternStat | None:
         """Get statistics for a specific pattern"""
         return self.store.get(key)
 
@@ -171,10 +171,10 @@ class ClarificationLearner:
         *,
         prompt: str,
         question: str,
-        user_reply: Optional[str],
+        user_reply: str | None,
         success: bool,
         context: dict[str, Any],
-        trace_id: Optional[str] = None,
+        trace_id: str | None = None,
     ):
         """
         Record a clarification attempt and update patterns

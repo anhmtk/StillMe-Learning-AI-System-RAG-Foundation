@@ -281,7 +281,7 @@ class TestUnifiedAPIManager:
         # Test with exception
         mock_api_manager.send_request.side_effect = Exception("API Error")
 
-        with pytest.raises(Exception):
+        with pytest.raises(Exception, match="API Error"):
             mock_api_manager.send_request("test prompt")
 
 

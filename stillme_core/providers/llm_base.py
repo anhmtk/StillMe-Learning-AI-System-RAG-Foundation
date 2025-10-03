@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -54,14 +54,14 @@ class LLMRequest:
     """Request to an LLM provider."""
 
     prompt: str
-    max_tokens: Optional[int] = None
+    max_tokens: int | None = None
     temperature: float = 0.7
     top_p: float = 1.0
     frequency_penalty: float = 0.0
     presence_penalty: float = 0.0
-    stop: Optional[list[str]] = None
-    user: Optional[str] = None
-    metadata: Optional[dict[str, Any]] = None
+    stop: list[str] | None = None
+    user: str | None = None
+    metadata: dict[str, Any] | None = None
 
 
 @dataclass
@@ -74,7 +74,7 @@ class LLMResponse:
     usage: dict[str, int]
     finish_reason: str
     response_time: float
-    metadata: Optional[dict[str, Any]] = None
+    metadata: dict[str, Any] | None = None
 
 
 @dataclass
@@ -88,7 +88,7 @@ class ProviderHealth:
     total_requests: int
     failed_requests: int
     circuit_breaker_open: bool = False
-    circuit_breaker_until: Optional[datetime] = None
+    circuit_breaker_until: datetime | None = None
 
 
 class CircuitBreaker:
@@ -98,7 +98,7 @@ class CircuitBreaker:
         self.threshold = threshold
         self.timeout = timeout
         self.failure_count = 0
-        self.last_failure_time: Optional[datetime] = None
+        self.last_failure_time: datetime | None = None
         self.state = "closed"  # closed, open, half-open
 
     def record_success(self):
@@ -156,7 +156,7 @@ class LLMProviderBase(ABC):
         self.circuit_breaker = CircuitBreaker(
             config.circuit_breaker_threshold, config.circuit_breaker_timeout
         )
-        self._client: Optional[Any] = None
+        self._client: Any | None = None
 
     @abstractmethod
     async def initialize(self) -> bool:
@@ -249,7 +249,7 @@ class LLMProviderManager:
         return success_count > 0
 
     async def generate(
-        self, request: LLMRequest, preferred_provider: Optional[str] = None
+        self, request: LLMRequest, preferred_provider: str | None = None
     ) -> LLMResponse:
         """Generate a response using the best available provider."""
         if preferred_provider and preferred_provider in self.providers:

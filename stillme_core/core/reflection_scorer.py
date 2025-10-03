@@ -24,7 +24,7 @@ import logging
 import re
 from collections import Counter
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +61,7 @@ class ReflectionScorer:
     Bộ chấm điểm heuristic cho đánh giá chất lượng phản hồi
     """
 
-    def __init__(self, weights: Optional[ScoringWeights] = None):
+    def __init__(self, weights: ScoringWeights | None = None):
         self.weights = weights or ScoringWeights()
         self.logger = logging.getLogger(f"{__name__}.ReflectionScorer")
 
@@ -189,7 +189,7 @@ class ReflectionScorer:
         ]
 
     def score_response(
-        self, response: str, query: str, context: Optional[dict[str, Any]] = None
+        self, response: str, query: str, context: dict[str, Any] | None = None
     ) -> ScoringResult:
         """
         Score a response across multiple dimensions

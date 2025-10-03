@@ -25,18 +25,9 @@ from datetime import datetime
 from enum import Enum
 from typing import Any
 
-# Import existing modules
-try:
-    from ..security.security_scanner import SecurityIssue, VulnerabilityLevel
-    from .safe_attack_simulator import AttackCategory, AttackSeverity, SimulationResult
-    from .sandbox_controller import SandboxController
-except ImportError as e:
-    logging.warning(f"Some security modules not available: {e}")
-
 # Import StillMe core modules
 try:
     from ...common.logging import get_logger
-    from ...common.retry import RetryManager
     from ...compat_circuitbreaker import SafeCircuitBreaker
     from ...modules.layered_memory_v1 import LayeredMemoryV1
     from ...modules.prediction_engine import PredictionEngine

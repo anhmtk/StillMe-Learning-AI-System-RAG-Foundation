@@ -14,7 +14,7 @@ import re
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import yaml
 
@@ -24,8 +24,8 @@ logger = logging.getLogger(__name__)
 try:
     from .audit_logger import AuditLogger
     from .clarification_engine import ClarificationEngine
-    from .multi_modal_clarification import MultiModalClarifier, MultiModalResult
-    from .proactive_suggestion import ProactiveSuggestion, SuggestionResult
+    from .multi_modal_clarification import MultiModalClarifier
+    from .proactive_suggestion import ProactiveSuggestion
 
     PHASE3_AVAILABLE = True
 except ImportError as e:
@@ -85,18 +85,18 @@ class ClarificationResult:
 
     needs_clarification: bool
     confidence: float
-    question: Optional[str]
-    category: Optional[str]
+    question: str | None
+    category: str | None
     reasoning: str
-    options: Optional[list[str]] = None
-    domain: Optional[str] = None
+    options: list[str] | None = None
+    domain: str | None = None
     round_number: int = 1
     max_rounds: int = 2
-    trace_id: Optional[str] = None
+    trace_id: str | None = None
     # Phase 3 additions
-    input_type: Optional[str] = None  # "text", "code", "image", "mixed"
-    suggestions: Optional[list[str]] = None
-    metadata: Optional[dict[str, Any]] = None
+    input_type: str | None = None  # "text", "code", "image", "mixed"
+    suggestions: list[str] | None = None
+    metadata: dict[str, Any] | None = None
 
 
 class ClarificationHandler:
@@ -119,7 +119,7 @@ class ClarificationHandler:
     - Advanced observability
     """
 
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config_path: str | None = None):
         self.config = self._load_config(config_path)
         self.ambiguity_patterns = self._load_ambiguity_patterns()
         self.clarification_templates = self._load_clarification_templates()
@@ -164,7 +164,7 @@ class ClarificationHandler:
             "audit_events_logged": 0,
         }
 
-    def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
+    def _load_config(self, config_path: str | None = None) -> dict[str, Any]:
         """Load configuration from YAML file"""
         default_config = {
             "enabled": True,
@@ -505,12 +505,6 @@ class ClarificationHandler:
                 "What are the requirements for this {item}?",
                 "Could you specify what this {item} should accomplish?",
             ],
-            "slang_informal": [
-                "I'd be happy to help! Could you clarify what you need?",
-                "What would you like me to do for you?",
-                "Could you be more specific about what you need help with?",
-                "I'm here to help! What can I do for you?",
-            ],
             "contextual_dependency": [
                 "I don't have the previous context. Could you provide more details?",
                 "What was done before that I should reference?",
@@ -588,10 +582,10 @@ class ClarificationHandler:
     def detect_ambiguity(
         self,
         prompt: str,
-        context: Optional[dict[str, Any]] = None,
-        mode: Optional[str] = None,
+        context: dict[str, Any] | None = None,
+        mode: str | None = None,
         round_number: int = 1,
-        trace_id: Optional[str] = None,
+        trace_id: str | None = None,
     ) -> ClarificationResult:
         """
         Detect if a prompt is ambiguous and needs clarification
@@ -778,7 +772,7 @@ class ClarificationHandler:
         basic_result: ClarificationResult,
         mode: str,
         round_number: int,
-        trace_id: Optional[str],
+        trace_id: str | None,
     ) -> ClarificationResult:
         """Phase 2 context-aware ambiguity detection"""
         # Extract context information
@@ -891,7 +885,7 @@ class ClarificationHandler:
         return min(1.0, base_confidence * length_factor * category_weight)
 
     def _generate_clarification_question(
-        self, prompt: str, category: str, context: Optional[dict[str, Any]] = None
+        self, prompt: str, category: str, context: dict[str, Any] | None = None
     ) -> str:
         """Generate appropriate clarification question"""
         if not category or category not in self.clarification_templates:
@@ -1033,11 +1027,11 @@ class ClarificationHandler:
     def generate_clarification(
         self,
         prompt: str,
-        context: Optional[dict[str, Any]] = None,
-        mode: Optional[str] = None,
+        context: dict[str, Any] | None = None,
+        mode: str | None = None,
         round_number: int = 1,
-        trace_id: Optional[str] = None,
-    ) -> Optional[str]:
+        trace_id: str | None = None,
+    ) -> str | None:
         """
         Generate clarification question for ambiguous prompt
 
@@ -1058,10 +1052,10 @@ class ClarificationHandler:
         self,
         prompt: str,
         question: str,
-        user_reply: Optional[str],
+        user_reply: str | None,
         success: bool,
-        context: Optional[dict[str, Any]] = None,
-        trace_id: Optional[str] = None,
+        context: dict[str, Any] | None = None,
+        trace_id: str | None = None,
     ):
         """
         Record feedback from clarification attempt

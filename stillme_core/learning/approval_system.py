@@ -5,7 +5,7 @@ Approval System - Stub implementation
 
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 
 class ApprovalStatus(Enum):
@@ -96,7 +96,7 @@ class ApprovalSystem:
                 return True
         return False
 
-    async def get_request(self, request_id: str) -> Optional[ApprovalRequest]:
+    async def get_request(self, request_id: str) -> ApprovalRequest | None:
         """Get request by ID"""
         for req in self.requests:
             if req.id == request_id:

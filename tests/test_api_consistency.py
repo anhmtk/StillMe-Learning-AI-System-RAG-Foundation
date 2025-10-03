@@ -12,7 +12,7 @@ Version: 1.0.0
 
 import inspect
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from typing import Any
 
 
 @dataclass
@@ -24,16 +24,16 @@ class APIConsistencyIssue:
     class1: str
     class2: str
     method: str
-    details: Dict[str, Any]
+    details: dict[str, Any]
 
 
 class APIConsistencyChecker:
     """Checks API consistency across modules"""
 
     def __init__(self):
-        self.issues: List[APIConsistencyIssue] = []
+        self.issues: list[APIConsistencyIssue] = []
 
-    def check_verifier_consistency(self) -> List[APIConsistencyIssue]:
+    def check_verifier_consistency(self) -> list[APIConsistencyIssue]:
         """Check consistency between Verifier classes"""
         issues = []
 
@@ -115,14 +115,18 @@ class APIConsistencyChecker:
 
         return issues
 
-    def check_duplicate_classes(self) -> List[APIConsistencyIssue]:
+    def check_duplicate_classes(self) -> list[APIConsistencyIssue]:
         """Check for duplicate class names across modules"""
         issues = []
 
         # Check for duplicate Verifier classes
         try:
-            from stillme_core.core.verifier import Verifier as VerifierNew
-            from stillme_core.verifier import LegacyVerifier as VerifierOld
+            import importlib.util
+            spec_new = importlib.util.find_spec("stillme_core.core.verifier")
+            spec_old = importlib.util.find_spec("stillme_core.verifier")
+            
+            if spec_new is None or spec_old is None:
+                issues.append("Verifier modules not found")
 
             # No longer consider this a duplicate class issue since we renamed to LegacyVerifier
             # issues.append(APIConsistencyIssue(
@@ -142,7 +146,7 @@ class APIConsistencyChecker:
 
         return issues
 
-    def check_method_availability(self) -> List[APIConsistencyIssue]:
+    def check_method_availability(self) -> list[APIConsistencyIssue]:
         """Check if expected methods are available in classes"""
         issues = []
 
@@ -183,7 +187,7 @@ class APIConsistencyChecker:
 
         return issues
 
-    def run_all_checks(self) -> Dict[str, Any]:
+    def run_all_checks(self) -> dict[str, Any]:
         """Run all API consistency checks"""
         all_issues = []
 

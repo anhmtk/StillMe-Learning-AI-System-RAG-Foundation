@@ -167,19 +167,19 @@ class StatePropertyTests:
         """Test that bulk job creation is commutative"""
         # Create jobs in order A
         jobs_a = []
-        for i, (job_id, name) in enumerate(zip(job_ids, names)):
+        for i, (job_id, name) in enumerate(zip(job_ids, names, strict=False)):
             job = await state_store.create_job(job_id, name, f"Description {i}")
             jobs_a.append(job)
 
         # Create jobs in reverse order B
         jobs_b = []
-        for i, (job_id, name) in enumerate(reversed(list(zip(job_ids, names)))):
+        for i, (job_id, name) in enumerate(reversed(list(zip(job_ids, names, strict=False)))):
             job = await state_store.create_job(job_id, name, f"Description {i}")
             jobs_b.append(job)
 
         # Results should be identical (commutative)
         assert len(jobs_a) == len(jobs_b)
-        for job_a, job_b in zip(jobs_a, jobs_b):
+        for job_a, job_b in zip(jobs_a, jobs_b, strict=False):
             assert job_a.job_id == job_b.job_id
             assert job_a.name == job_b.name
             assert job_a.status == job_b.status
@@ -221,7 +221,7 @@ class StatePropertyTests:
 
         # Results should be identical
         assert len(steps_forward) == len(steps_reverse)
-        for step_f, step_r in zip(steps_forward, steps_reverse):
+        for step_f, step_r in zip(steps_forward, steps_reverse, strict=False):
             assert step_f.step_id == step_r.step_id
             assert step_f.name == step_r.name
             assert step_f.step_type == step_r.step_type
@@ -526,7 +526,7 @@ class StateMachineTests(RuleBasedStateMachine):
         # Create step if it doesn't exist
         try:
             await self.state_store.get_job_step(job.job_id, step_id)
-        except:
+        except Exception:
             await self.state_store.create_job_step(
                 job.job_id, step_id, f"Step {step_id}", "testing"
             )

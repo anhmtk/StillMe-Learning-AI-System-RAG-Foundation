@@ -1,9 +1,3 @@
-from unittest.mock import patch
-
-import pytest
-
-pytest.skip("Module not available", allow_module_level=True)
-
 #!/usr/bin/env python3
 """
 Test suite for Reward Manager
@@ -17,14 +11,14 @@ Version: 1.0.0
 
 import asyncio
 import shutil
-
-# Add project root to path
 import sys
 import tempfile
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
+# Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from stillme_core.learning.reward_manager import (
@@ -32,6 +26,8 @@ from stillme_core.learning.reward_manager import (
     RewardManager,
     RewardType,
 )
+
+pytest.skip("Module not available", allow_module_level=True)
 
 
 class TestRewardManager:

@@ -13,7 +13,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional, TypeVar
+from typing import Any, TypeVar
 
 import aiofiles
 
@@ -42,7 +42,7 @@ class StateSnapshot:
     data: dict[str, Any]
     timestamp: float
     version: int
-    metadata: Optional[dict[str, Any]] = None
+    metadata: dict[str, Any] | None = None
 
 
 @dataclass
@@ -51,17 +51,17 @@ class StateTransition:
 
     transition_id: str
     entity_id: str
-    from_state: Optional[str]
+    from_state: str | None
     to_state: str
     timestamp: float
     reason: str
-    data: Optional[dict[str, Any]] = None
+    data: dict[str, Any] | None = None
 
 
 class StateManager:
     """Enterprise state manager with persistence, recovery, and versioning"""
 
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config_path: str | None = None):
         self.states: dict[str, dict[str, Any]] = {}
         self.snapshots: dict[str, list[StateSnapshot]] = {}
         self.transitions: dict[str, list[StateTransition]] = {}
@@ -80,7 +80,7 @@ class StateManager:
         self.executor = ThreadPoolExecutor(max_workers=4)
         self.running = False
 
-    def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
+    def _load_config(self, config_path: str | None = None) -> dict[str, Any]:
         """Load state manager configuration"""
         if config_path:
             config_file = Path(config_path)
@@ -106,7 +106,7 @@ class StateManager:
 
     def get_state(
         self, entity_id: str, state_type: StateType
-    ) -> Optional[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """Get current state for an entity"""
         with self.lock:
             state_key = f"{state_type.value}:{entity_id}"
@@ -153,7 +153,7 @@ class StateManager:
         self,
         entity_id: str,
         state_type: StateType,
-        metadata: Optional[dict[str, Any]] = None,
+        metadata: dict[str, Any] | None = None,
     ) -> str:
         """Create a checkpoint/snapshot of current state"""
         with self.lock:
@@ -417,7 +417,7 @@ class TaskState:
 
     @staticmethod
     def update_task_status(
-        task_id: str, status: str, progress: Optional[dict[str, Any]] = None
+        task_id: str, status: str, progress: dict[str, Any] | None = None
     ) -> bool:
         """Update task status"""
         current_state = state_manager.get_state(task_id, StateType.TASK_STATE)

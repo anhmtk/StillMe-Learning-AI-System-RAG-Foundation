@@ -13,11 +13,11 @@ from contextvars import ContextVar
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 # Context variables for tracing
-trace_id_var: ContextVar[Optional[str]] = ContextVar("trace_id", default=None)
-span_id_var: ContextVar[Optional[str]] = ContextVar("span_id", default=None)
+trace_id_var: ContextVar[str | None] = ContextVar("trace_id", default=None)
+span_id_var: ContextVar[str | None] = ContextVar("span_id", default=None)
 
 
 @dataclass
@@ -26,15 +26,15 @@ class TraceSpan:
 
     trace_id: str
     span_id: str
-    parent_span_id: Optional[str]
+    parent_span_id: str | None
     operation_name: str
     start_time: str
-    end_time: Optional[str]
-    duration_ms: Optional[float]
-    tags: Optional[dict[str, Any]]
-    logs: Optional[list[dict[str, Any]]]
+    end_time: str | None
+    duration_ms: float | None
+    tags: dict[str, Any] | None
+    logs: list[dict[str, Any]] | None
     status: str  # "started", "completed", "error"
-    error_message: Optional[str] = None
+    error_message: str | None = None
 
 
 @dataclass
@@ -43,8 +43,8 @@ class TraceContext:
 
     trace_id: str
     span_id: str
-    parent_span_id: Optional[str] = None
-    baggage: Optional[dict[str, str]] = None
+    parent_span_id: str | None = None
+    baggage: dict[str, str] | None = None
 
 
 class RequestTracer:
@@ -118,9 +118,9 @@ class RequestTracer:
     def start_span(
         self,
         operation_name: str,
-        trace_id: Optional[str] = None,
-        parent_span_id: Optional[str] = None,
-        tags: Optional[dict[str, Any]] = None,
+        trace_id: str | None = None,
+        parent_span_id: str | None = None,
+        tags: dict[str, Any] | None = None,
     ) -> TraceSpan:
         """Start a new trace span"""
         # Generate IDs if not provided
@@ -156,7 +156,7 @@ class RequestTracer:
 
         return span
 
-    def finish_span(self, span_id: str, error_message: Optional[str] = None):
+    def finish_span(self, span_id: str, error_message: str | None = None):
         """Finish a trace span"""
         with self._cache_lock:
             if span_id not in self._active_spans:
@@ -234,7 +234,7 @@ class RequestTracer:
             conn.close()
             return spans
 
-    def get_span(self, span_id: str) -> Optional[TraceSpan]:
+    def get_span(self, span_id: str) -> TraceSpan | None:
         """Get a specific span"""
         with self._lock:
             conn = sqlite3.connect(self.db_path)
@@ -311,8 +311,8 @@ class RequestTracer:
 
     def get_performance_stats(
         self,
-        operation_name: Optional[str] = None,
-        time_range: Optional[timedelta] = None,
+        operation_name: str | None = None,
+        time_range: timedelta | None = None,
     ) -> dict[str, Any]:
         """Get performance statistics for operations"""
         with self._lock:
@@ -385,8 +385,8 @@ class RequestTracer:
     def export_traces(
         self,
         output_file: str,
-        trace_ids: Optional[list[str]] = None,
-        time_range: Optional[timedelta] = None,
+        trace_ids: list[str] | None = None,
+        time_range: timedelta | None = None,
     ) -> bool:
         """Export traces to JSON file"""
         try:
@@ -520,7 +520,7 @@ class RequestTracer:
 
 
 # Global tracer instance
-_global_tracer: Optional[RequestTracer] = None
+_global_tracer: RequestTracer | None = None
 
 
 def get_tracer() -> RequestTracer:
@@ -538,21 +538,4 @@ def setup_tracing(db_path: str = "traces.db") -> RequestTracer:
     return _global_tracer
 
 
-# Context manager for tracing
-class TraceContext:
-    """Context manager for tracing operations"""
-
-    def __init__(self, operation_name: str, tags: Optional[dict[str, Any]] = None):
-        self.operation_name = operation_name
-        self.tags = tags or {}
-        self.tracer = get_tracer()
-        self.span = None
-
-    def __enter__(self):
-        self.span = self.tracer.start_span(self.operation_name, tags=self.tags)
-        return self.span
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        if self.span:
-            error_message = str(exc_val) if exc_val else None
-            self.tracer.finish_span(self.span.span_id, error_message)
+# Context manager for tracing - removed duplicate class definition

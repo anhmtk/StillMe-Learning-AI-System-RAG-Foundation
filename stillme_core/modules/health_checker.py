@@ -68,7 +68,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 import psutil
 
@@ -146,7 +146,7 @@ class HealthChecker:
     TODO: Implement full health monitoring features.
     """
 
-    def __init__(self, config: Optional[HealthConfig] = None):
+    def __init__(self, config: HealthConfig | None = None):
         """Initialize HealthChecker"""
         self.config = config or HealthConfig()
         self.checks: list[HealthCheck] = []
@@ -184,7 +184,7 @@ class HealthChecker:
             self.logger.error(f"❌ Error checking system health: {e}")
             return HealthStatus.UNKNOWN
 
-    def _check_cpu_health(self) -> Optional[HealthCheck]:
+    def _check_cpu_health(self) -> HealthCheck | None:
         """Check CPU health"""
         try:
             cpu_percent = psutil.cpu_percent(interval=1)
@@ -211,7 +211,7 @@ class HealthChecker:
             self.logger.error(f"❌ Error checking CPU health: {e}")
             return None
 
-    def _check_memory_health(self) -> Optional[HealthCheck]:
+    def _check_memory_health(self) -> HealthCheck | None:
         """Check memory health"""
         try:
             memory = psutil.virtual_memory()
@@ -243,7 +243,7 @@ class HealthChecker:
             self.logger.error(f"❌ Error checking memory health: {e}")
             return None
 
-    def _check_disk_health(self) -> Optional[HealthCheck]:
+    def _check_disk_health(self) -> HealthCheck | None:
         """Check disk health"""
         try:
             disk = psutil.disk_usage("/")
@@ -276,7 +276,7 @@ class HealthChecker:
             self.logger.error(f"❌ Error checking disk health: {e}")
             return None
 
-    def _check_network_health(self) -> Optional[HealthCheck]:
+    def _check_network_health(self) -> HealthCheck | None:
         """Check network health"""
         try:
             # Basic network connectivity check

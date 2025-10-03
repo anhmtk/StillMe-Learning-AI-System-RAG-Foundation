@@ -11,7 +11,6 @@ import json
 import logging
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -166,7 +165,7 @@ class SymbolIndex:
 
     def get_import_for_symbol(
         self, symbol_name: str, target_file: str
-    ) -> Optional[str]:
+    ) -> str | None:
         """Tạo import statement cho symbol"""
         symbols = self.find_symbol(symbol_name)
         if not symbols:

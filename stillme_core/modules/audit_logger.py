@@ -69,7 +69,7 @@ import logging
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -101,8 +101,8 @@ class AuditEvent:
     level: AuditLevel
     category: AuditCategory
     message: str
-    user_id: Optional[str] = None
-    session_id: Optional[str] = None
+    user_id: str | None = None
+    session_id: str | None = None
     details: dict[str, Any] = None
     metadata: dict[str, Any] = None
 
@@ -135,7 +135,7 @@ class AuditLogger:
     TODO: Implement full audit features.
     """
 
-    def __init__(self, config: Optional[AuditConfig] = None):
+    def __init__(self, config: AuditConfig | None = None):
         """Initialize AuditLogger"""
         self.config = config or AuditConfig()
         self.events: list[AuditEvent] = []
@@ -147,10 +147,10 @@ class AuditLogger:
         level: AuditLevel,
         category: AuditCategory,
         message: str,
-        user_id: Optional[str] = None,
-        session_id: Optional[str] = None,
-        details: Optional[dict[str, Any]] = None,
-        metadata: Optional[dict[str, Any]] = None,
+        user_id: str | None = None,
+        session_id: str | None = None,
+        details: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> str:
         """
         Log an audit event
@@ -208,8 +208,8 @@ class AuditLogger:
         self,
         message: str,
         level: AuditLevel = AuditLevel.WARNING,
-        user_id: Optional[str] = None,
-        details: Optional[dict[str, Any]] = None,
+        user_id: str | None = None,
+        details: dict[str, Any] | None = None,
     ) -> str:
         """
         Log a security-related audit event
@@ -235,8 +235,8 @@ class AuditLogger:
         self,
         message: str,
         level: AuditLevel = AuditLevel.INFO,
-        user_id: Optional[str] = None,
-        details: Optional[dict[str, Any]] = None,
+        user_id: str | None = None,
+        details: dict[str, Any] | None = None,
     ) -> str:
         """
         Log a compliance-related audit event
@@ -260,9 +260,9 @@ class AuditLogger:
 
     def get_events(
         self,
-        category: Optional[AuditCategory] = None,
-        level: Optional[AuditLevel] = None,
-        user_id: Optional[str] = None,
+        category: AuditCategory | None = None,
+        level: AuditLevel | None = None,
+        user_id: str | None = None,
         limit: int = 100,
     ) -> list[AuditEvent]:
         """
@@ -346,8 +346,8 @@ class AuditLogger:
     def export_events(
         self,
         format_type: str = "json",
-        category: Optional[AuditCategory] = None,
-        level: Optional[AuditLevel] = None,
+        category: AuditCategory | None = None,
+        level: AuditLevel | None = None,
     ) -> str:
         """
         Export audit events

@@ -36,7 +36,6 @@ except ImportError as e:
 # Import StillMe core modules
 try:
     from ...common.logging import get_logger
-    from ...common.retry import RetryManager
     from ...compat_circuitbreaker import SafeCircuitBreaker
     from ...modules.layered_memory_v1 import LayeredMemoryV1
     from ...modules.prediction_engine import PredictionEngine
@@ -534,7 +533,7 @@ class SecurityOrchestrator:
             try:
                 # Check for scheduled exercises
                 current_time = datetime.now()
-                for exercise_id, exercise in list(self.scheduled_exercises.items()):
+                for _exercise_id, exercise in list(self.scheduled_exercises.items()):
                     if (
                         exercise.scheduled_time <= current_time
                         and exercise.status == ExerciseStatus.SCHEDULED

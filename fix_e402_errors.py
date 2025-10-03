@@ -17,7 +17,6 @@ def fix_e402_errors_in_file(file_path: str) -> bool:
 
         # Find the first non-comment, non-docstring line
         first_import_line = -1
-        docstring_end = -1
 
         for i, line in enumerate(lines):
             stripped = line.strip()
@@ -31,7 +30,6 @@ def fix_e402_errors_in_file(file_path: str) -> bool:
                 # Find docstring end
                 for j in range(i + 1, len(lines)):
                     if '"""' in lines[j] or "'''" in lines[j]:
-                        docstring_end = j
                         break
                 continue
 

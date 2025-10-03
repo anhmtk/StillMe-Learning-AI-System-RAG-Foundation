@@ -19,7 +19,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 # Import Phase 2 modules
 try:
@@ -241,7 +241,7 @@ class IntelligentPricingEngine:
     Main Intelligent Pricing Engine
     """
 
-    def __init__(self, config: Optional[dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self.logger = self._setup_logging()
 

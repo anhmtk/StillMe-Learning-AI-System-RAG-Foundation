@@ -17,7 +17,6 @@ import os
 import sys
 import time
 from datetime import datetime
-from typing import Optional
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "stillme_core"))
@@ -198,7 +197,7 @@ class RouterMonitor:
         if high_complexity:
             print(f"  High complexity prompts (>0.8): {len(high_complexity)}")
 
-    def export_session_log(self, filename: Optional[str] = None):
+    def export_session_log(self, filename: str | None = None):
         """Export session log to JSON file"""
         if not filename:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

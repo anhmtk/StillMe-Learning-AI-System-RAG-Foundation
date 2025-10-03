@@ -23,7 +23,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import psutil  # type: ignore
 import schedule  # type: ignore
@@ -85,16 +85,16 @@ class Alert:
     title: str
     message: str
     timestamp: datetime
-    file_path: Optional[str] = None
-    line_number: Optional[int] = None
-    error_type: Optional[str] = None
+    file_path: str | None = None
+    line_number: int | None = None
+    error_type: str | None = None
     auto_fixable: bool = False
 
 
 class AutomatedMonitor:
     """Hệ thống giám sát tự động cho AgentDev"""
 
-    def __init__(self, project_root: str = ".", config: Optional[dict] = None):
+    def __init__(self, project_root: str = ".", config: dict | None = None):
         self.project_root = Path(project_root)
         self.config = config or self._default_config()
         self.status = MonitorStatus.INACTIVE

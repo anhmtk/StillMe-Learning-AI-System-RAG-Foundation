@@ -12,7 +12,7 @@ import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import Any, Optional
+from typing import Any
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -225,7 +225,7 @@ class IntegrationBridge:
             "total_failed": self.integration_stats["failed_events"],
         }
 
-    def _find_handler(self, event_type: str) -> Optional[IntegrationHandler]:
+    def _find_handler(self, event_type: str) -> IntegrationHandler | None:
         """Find appropriate handler for event type"""
         for handler in self.handlers:
             if handler.can_handle(event_type):

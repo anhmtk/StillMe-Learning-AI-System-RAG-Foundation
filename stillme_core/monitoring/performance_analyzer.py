@@ -28,7 +28,7 @@ import time
 from collections import defaultdict, deque
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -59,7 +59,7 @@ class PerformancePattern:
     pattern_id: str
     pattern_type: str  # improvement, degradation, oscillation, stable
     start_time: datetime
-    end_time: Optional[datetime]
+    end_time: datetime | None
     metrics: list[PerformanceMetrics]
     trend: str  # increasing, decreasing, stable, oscillating
     confidence: float
@@ -114,7 +114,7 @@ class PerformanceAnalyzer:
 
         # Analysis state
         self.is_analyzing = False
-        self.analysis_task: Optional[asyncio.Task] = None
+        self.analysis_task: asyncio.Task | None = None
         self.last_analysis_time = None
 
         # Performance baselines
@@ -243,7 +243,7 @@ class PerformanceAnalyzer:
 
     def _detect_trend(
         self, values: list[float], metric_name: str
-    ) -> Optional[PerformancePattern]:
+    ) -> PerformancePattern | None:
         """Detect trend in metric values"""
         if len(values) < 5:
             return None
@@ -650,7 +650,7 @@ class PerformanceAnalyzer:
 
 
 # Global performance analyzer instance
-_performance_analyzer_instance: Optional[PerformanceAnalyzer] = None
+_performance_analyzer_instance: PerformanceAnalyzer | None = None
 
 
 def get_performance_analyzer(analysis_window_hours: int = 24) -> PerformanceAnalyzer:

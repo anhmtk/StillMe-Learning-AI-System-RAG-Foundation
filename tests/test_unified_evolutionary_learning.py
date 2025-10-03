@@ -18,10 +18,7 @@ import asyncio
 import time
 from unittest.mock import AsyncMock, Mock, patch
 
-# Import systems to test
 import pytest
-
-pytest.skip("Module not available", allow_module_level=True)
 
 from stillme_core.learning.evolutionary_learning_system import (
     EvolutionaryConfig,
@@ -36,6 +33,8 @@ from stillme_core.learning.learning_assessment_system import (
     AssessmentType,
     LearningAssessmentSystem,
 )
+
+pytest.skip("Module not available", allow_module_level=True)
 
 
 class TestEvolutionaryLearningSystem:

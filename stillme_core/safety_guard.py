@@ -9,7 +9,7 @@ StillMe Safety Guard - Stub Implementation
 import logging
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ class SafetyGuard:
     # TODO[stabilize]: Implement full safety checking functionality
     """
 
-    def __init__(self, config: Optional[SafetyConfig] = None):
+    def __init__(self, config: SafetyConfig | None = None):
         """Initialize Safety Guard"""
         self.config = config or SafetyConfig()
         logger.warning("SafetyGuard: Using stub implementation - not for production")
@@ -93,7 +93,7 @@ def sanitize_ai_output(output: str) -> str:
     return guard.sanitize_output(output)
 
 
-def apply_policies(content: str, policies: Optional[dict] = None) -> dict:
+def apply_policies(content: str, policies: dict | None = None) -> dict:
     """Apply safety policies to content"""
     guard = SafetyGuard()
     return {
@@ -103,7 +103,7 @@ def apply_policies(content: str, policies: Optional[dict] = None) -> dict:
     }
 
 
-def redact_output(output: str, sensitive_patterns: Optional[list] = None) -> str:
+def redact_output(output: str, sensitive_patterns: list | None = None) -> str:
     """Redact sensitive information from output"""
     if sensitive_patterns is None:
         sensitive_patterns = ["password", "token", "key", "secret"]
@@ -115,7 +115,7 @@ def redact_output(output: str, sensitive_patterns: Optional[list] = None) -> str
     return redacted
 
 
-def safe_reply(content: str, context: Optional[dict] = None) -> str:
+def safe_reply(content: str, context: dict | None = None) -> str:
     """Generate safe reply with content filtering"""
     guard = SafetyGuard()
 

@@ -43,10 +43,9 @@ import time
 from contextvars import ContextVar
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 # Context variable for correlation ID
-correlation_id: ContextVar[Optional[str]] = ContextVar("correlation_id", default=None)
+correlation_id: ContextVar[str | None] = ContextVar("correlation_id", default=None)
 
 
 class JsonFormatter(logging.Formatter):
@@ -55,7 +54,7 @@ class JsonFormatter(logging.Formatter):
     Formatter JSON cho logging có cấu trúc
     """
 
-    def __init__(self, datefmt: Optional[str] = None):
+    def __init__(self, datefmt: str | None = None):
         super().__init__(datefmt=datefmt)
         self.datefmt = datefmt or "%Y-%m-%d %H:%M:%S"
 
@@ -121,7 +120,7 @@ class StandardFormatter(logging.Formatter):
     Formatter text chuẩn cho development
     """
 
-    def __init__(self, datefmt: Optional[str] = None):
+    def __init__(self, datefmt: str | None = None):
         super().__init__(
             fmt="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
             datefmt=datefmt or "%Y-%m-%d %H:%M:%S",
@@ -140,7 +139,7 @@ class StructuredLogger:
     def __init__(
         self,
         name: str,
-        log_file: Optional[str] = None,
+        log_file: str | None = None,
         level: int = logging.INFO,
         json_format: bool = True,
         console_output: bool = True,

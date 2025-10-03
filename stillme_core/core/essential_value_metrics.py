@@ -25,7 +25,7 @@ import sqlite3
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -100,7 +100,7 @@ class EssentialValueMetrics:
     Enterprise-grade value metrics calculator với focus vào accuracy
     """
 
-    def __init__(self, db_path: str, config: Optional[dict[str, Any]] = None):
+    def __init__(self, db_path: str, config: dict[str, Any] | None = None):
         self.db_path = Path(db_path)
         self.config = config or self._get_default_config()
 
@@ -434,7 +434,7 @@ class EssentialValueMetrics:
             return QualityImprovementMetrics(0, 0, 0, 0, 0, 0, "stable")
 
     def calculate_roi_metrics(
-        self, time_range_hours: int = 24, total_investment_usd: Optional[float] = None
+        self, time_range_hours: int = 24, total_investment_usd: float | None = None
     ) -> ROIMetrics:
         """
         Calculate ROI metrics
@@ -699,7 +699,7 @@ class EssentialValueMetrics:
 
 # Factory function
 def create_value_metrics_calculator(
-    db_path: str, config: Optional[dict[str, Any]] = None
+    db_path: str, config: dict[str, Any] | None = None
 ) -> EssentialValueMetrics:
     """Factory function để create value metrics calculator"""
     return EssentialValueMetrics(db_path, config)

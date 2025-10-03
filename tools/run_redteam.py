@@ -100,7 +100,8 @@ def main():
 
         pid = os.getpid()
         proc = psutil.Process(pid)
-        proc.memory_info().rss
+        memory_rss = proc.memory_info().rss
+        print(f"  📊 Memory RSS: {memory_rss / 1024 / 1024:.1f} MB")
         t0 = time.perf_counter()
 
         try:

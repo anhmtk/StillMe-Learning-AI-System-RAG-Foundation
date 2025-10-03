@@ -1,6 +1,3 @@
-import time
-from unittest.mock import Mock, patch
-
 """
 Comprehensive Security Test Suite for StillMe AI Framework
 ========================================================
@@ -20,6 +17,8 @@ Last Updated: 2025-09-26
 
 import os
 import tempfile
+import time
+from unittest.mock import Mock, patch
 
 import pytest
 

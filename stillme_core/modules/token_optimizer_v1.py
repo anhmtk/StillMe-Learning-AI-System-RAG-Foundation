@@ -12,8 +12,9 @@ import hashlib
 import logging
 import time
 from collections import OrderedDict
+from collections.abc import Callable
 from datetime import datetime, timedelta
-from typing import Any, Callable, Optional
+from typing import Any
 
 import numpy as np
 import tiktoken
@@ -54,7 +55,7 @@ class CacheItem(BaseModel):
     response: str
     embedding: np.ndarray
     created_at: datetime = Field(default_factory=datetime.now)
-    ttl: Optional[timedelta] = None
+    ttl: timedelta | None = None
     token_count: int
     usage_count: int = 0
 
@@ -116,7 +117,7 @@ class SemanticHybridCache:
             )
             return fallback_embedding
 
-    def get_exact_match(self, query: str) -> Optional[CacheItem]:
+    def get_exact_match(self, query: str) -> CacheItem | None:
         key = self._generate_key(query)
         if key in self.cache:
             item = self.cache[key]
@@ -128,7 +129,7 @@ class SemanticHybridCache:
 
     def get_semantic_match(
         self, query: str, threshold: float
-    ) -> Optional[tuple[CacheItem, float]]:
+    ) -> tuple[CacheItem, float] | None:
         query_embedding = self._get_embedding(self._normalize_text(query))
         best_match = None
         best_score = 0.0
@@ -155,7 +156,7 @@ class SemanticHybridCache:
         query: str,
         response: str,
         token_count: int,
-        ttl: Optional[timedelta] = None,
+        ttl: timedelta | None = None,
     ) -> None:
         key = self._generate_key(query)
         item = CacheItem(

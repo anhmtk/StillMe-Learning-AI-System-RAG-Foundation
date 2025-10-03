@@ -8,7 +8,6 @@ Tập trung fix các lỗi phổ biến theo pattern thay vì fix từng lỗi r
 
 import re
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -105,14 +104,14 @@ class PatternBasedFixer:
             ),
         ]
 
-    def find_matching_pattern(self, error_message: str) -> Optional[FixPattern]:
+    def find_matching_pattern(self, error_message: str) -> FixPattern | None:
         """Tìm pattern phù hợp với error message"""
         for pattern in sorted(self.patterns, key=lambda x: x.priority):
             if re.search(pattern.pattern, error_message):
                 return pattern
         return None
 
-    def generate_fix(self, error_message: str, file_path: str) -> Optional[str]:
+    def generate_fix(self, error_message: str, file_path: str) -> str | None:
         """Generate fix dựa trên pattern"""
         pattern = self.find_matching_pattern(error_message)
         if not pattern:

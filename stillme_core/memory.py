@@ -15,7 +15,7 @@ import sqlite3
 import time
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -26,8 +26,8 @@ class MemoryItem:
 
     value: Any
     timestamp: float
-    ttl: Optional[int] = None
-    last_accessed: Optional[float] = None
+    ttl: int | None = None
+    last_accessed: float | None = None
 
     def __post_init__(self):
         if self.last_accessed is None:
@@ -43,14 +43,14 @@ class MemoryItem:
 class MemoryLayer:
     """Memory layer with TTL support"""
 
-    def __init__(self, name: str, config: Dict[str, Any]):
+    def __init__(self, name: str, config: dict[str, Any]):
         self.name = name
         self.config = config
-        self.data: Dict[str, MemoryItem] = {}
+        self.data: dict[str, MemoryItem] = {}
         self.ttl = config.get("ttl", 3600)
         self.max_size = config.get("max_size", 1000)
 
-    def store(self, key: str, value: Any, ttl: Optional[int] = None) -> bool:
+    def store(self, key: str, value: Any, ttl: int | None = None) -> bool:
         """Store value with TTL"""
         try:
             # Clean expired items
@@ -69,7 +69,7 @@ class MemoryLayer:
             logger.error(f"Failed to store in layer {self.name}: {e}")
             return False
 
-    def retrieve(self, key: str) -> Optional[Any]:
+    def retrieve(self, key: str) -> Any | None:
         """Retrieve value, return None if expired or not found"""
         try:
             if key not in self.data:
@@ -109,9 +109,9 @@ class MemoryLayer:
 class MemoryManager:
     """Main memory manager with layered storage and TTL support"""
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.config = config
-        self.layers: Dict[str, MemoryLayer] = {}
+        self.layers: dict[str, MemoryLayer] = {}
         self.ttl_enabled = config.get("ttl_enabled", True)
         self.max_size = config.get("max_size", 1000)
 
@@ -135,7 +135,7 @@ class MemoryManager:
             self.layers[name] = MemoryLayer(name, config)
 
     def store(
-        self, key: str, value: Any, ttl: Optional[int] = None, layer: str = "mid_term"
+        self, key: str, value: Any, ttl: int | None = None, layer: str = "mid_term"
     ) -> bool:
         """Store value in specified layer"""
         # Validate inputs
@@ -151,7 +151,7 @@ class MemoryManager:
 
         return self.layers[layer].store(key, value, ttl)
 
-    def retrieve(self, key: str, layer: Optional[str] = None) -> Optional[Any]:
+    def retrieve(self, key: str, layer: str | None = None) -> Any | None:
         """Retrieve value from layers (searches all if layer not specified)"""
         # Validate inputs
         if key is None:
@@ -176,7 +176,7 @@ class MemoryManager:
 
         return None
 
-    def clear(self, layer: Optional[str] = None) -> bool:
+    def clear(self, layer: str | None = None) -> bool:
         """Clear memory layer(s)"""
         try:
             if layer:
@@ -193,7 +193,7 @@ class MemoryManager:
             logger.error(f"Failed to clear memory: {e}")
             return False
 
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get memory statistics"""
         stats = {
             "total_items": sum(len(layer.data) for layer in self.layers.values()),
@@ -213,7 +213,7 @@ class MemoryManager:
 class PersistenceManager:
     """Persistence manager for saving/loading memory data"""
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         if config is None:
             config = {}
 
@@ -263,7 +263,7 @@ class PersistenceManager:
                     for key, item in layer.data.items():
                         conn.execute(
                             """
-                            INSERT INTO memory_items 
+                            INSERT INTO memory_items
                             (key, value, layer, timestamp, ttl, last_accessed)
                             VALUES (?, ?, ?, ?, ?, ?)
                         """,
@@ -315,7 +315,7 @@ class PersistenceManager:
             self.logger.error(f"Failed to load data: {e}")
             return False
 
-    def save(self, data: Dict[str, Any]) -> bool:
+    def save(self, data: dict[str, Any]) -> bool:
         """Save data directly to database (for backward compatibility)"""
         try:
             with sqlite3.connect(self.db_path) as conn:
@@ -326,7 +326,7 @@ class PersistenceManager:
                 for key, value in data.items():
                     conn.execute(
                         """
-                        INSERT INTO memory_items 
+                        INSERT INTO memory_items
                         (key, value, layer, timestamp, ttl, last_accessed)
                         VALUES (?, ?, ?, ?, ?, ?)
                     """,
@@ -346,7 +346,7 @@ class PersistenceManager:
             self.logger.error(f"Failed to save data: {e}")
             return False
 
-    def load(self) -> Dict[str, Any]:
+    def load(self) -> dict[str, Any]:
         """Load data directly from database (for backward compatibility)"""
         try:
             data = {}

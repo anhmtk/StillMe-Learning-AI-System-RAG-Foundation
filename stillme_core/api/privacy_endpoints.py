@@ -11,7 +11,7 @@ import logging
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
@@ -45,7 +45,7 @@ class ConsentRequest(BaseModel):
     user_id: str
     consent_type: str  # data_collection, analytics, marketing
     granted: bool
-    timestamp: Optional[datetime] = None
+    timestamp: datetime | None = None
 
 
 class PrivacyManager:
@@ -137,7 +137,7 @@ class PrivacyManager:
         user_id: str,
         consent_type: str,
         granted: bool,
-        timestamp: Optional[datetime] = None,
+        timestamp: datetime | None = None,
     ) -> dict[str, Any]:
         """Update user consent"""
         try:
@@ -226,7 +226,7 @@ class PrivacyManager:
 
         return user_data
 
-    def _get_conversation_history(self, user_id: str) -> Optional[list[dict[str, Any]]]:
+    def _get_conversation_history(self, user_id: str) -> list[dict[str, Any]] | None:
         """Get conversation history for user"""
         # Mock implementation - in real system, this would query the database
         return [
@@ -242,7 +242,7 @@ class PrivacyManager:
             },
         ]
 
-    def _get_user_preferences(self, user_id: str) -> Optional[dict[str, Any]]:
+    def _get_user_preferences(self, user_id: str) -> dict[str, Any] | None:
         """Get user preferences"""
         # Mock implementation
         return {
@@ -252,7 +252,7 @@ class PrivacyManager:
             "privacy_mode": "balanced",
         }
 
-    def _get_analytics_data(self, user_id: str) -> Optional[dict[str, Any]]:
+    def _get_analytics_data(self, user_id: str) -> dict[str, Any] | None:
         """Get analytics data for user"""
         # Mock implementation
         return {
@@ -261,7 +261,7 @@ class PrivacyManager:
             "feature_usage": {"clarification": 15, "suggestions": 8, "multi_modal": 3},
         }
 
-    def _get_audit_logs(self, user_id: str) -> Optional[list[dict[str, Any]]]:
+    def _get_audit_logs(self, user_id: str) -> list[dict[str, Any]] | None:
         """Get audit logs for user"""
         # Mock implementation
         return [
@@ -370,7 +370,7 @@ async def export_user_data(request: DataExportRequest):
 
     except Exception as e:
         logger.error(f"Export endpoint error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/delete")
@@ -387,7 +387,7 @@ async def delete_user_data(request: DataDeletionRequest):
 
     except Exception as e:
         logger.error(f"Delete endpoint error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.post("/consent")
@@ -405,7 +405,7 @@ async def update_consent(request: ConsentRequest):
 
     except Exception as e:
         logger.error(f"Consent endpoint error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/status/{user_id}")
@@ -431,7 +431,7 @@ async def get_privacy_status(user_id: str):
 
     except Exception as e:
         logger.error(f"Privacy status endpoint error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e)) from e
 
 
 @router.get("/health")

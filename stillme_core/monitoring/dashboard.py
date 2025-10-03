@@ -26,17 +26,42 @@ import logging
 import threading
 from dataclasses import asdict
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
-try:
+# Initialize FASTAPI_AVAILABLE
+FASTAPI_AVAILABLE = False
+
+if TYPE_CHECKING:
     from fastapi import FastAPI, WebSocket, WebSocketDisconnect
     from fastapi.responses import HTMLResponse, JSONResponse
-    from fastapi.staticfiles import StaticFiles
-
-    FASTAPI_AVAILABLE = True
-except ImportError:
-    FASTAPI_AVAILABLE = False
-    logging.warning("FastAPI not available. Install with: pip install fastapi uvicorn")
+else:
+    try:
+        from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+        from fastapi.responses import HTMLResponse, JSONResponse
+        FASTAPI_AVAILABLE = True
+    except ImportError:
+        FASTAPI_AVAILABLE = False
+        # Create dummy classes for runtime when FastAPI is not available
+        class FastAPI:
+            def __init__(self, *args: Any, **kwargs: Any) -> None: pass
+            def get(self, *args: Any, **kwargs: Any) -> Any: return lambda: None
+            def websocket(self, *args: Any, **kwargs: Any) -> Any: return lambda: None
+        
+        class WebSocket:
+            async def accept(self) -> None: pass
+            async def receive_text(self) -> str: return ""
+            async def send_text(self, text: str) -> None: pass
+            async def close(self) -> None: pass
+        
+        class WebSocketDisconnect(Exception): pass
+        
+        class HTMLResponse:
+            def __init__(self, content: str) -> None: pass
+        
+        class JSONResponse:
+            def __init__(self, content: Any) -> None: pass
+        
+        logging.warning("FastAPI not available. Install with: pip install fastapi uvicorn")
 
 from .performance_analyzer import PerformanceAnalyzer, get_performance_analyzer
 from .resource_monitor import ResourceMonitor, get_resource_monitor
@@ -59,16 +84,16 @@ class MonitoringDashboard:
         self.performance_analyzer: Optional[PerformanceAnalyzer] = None
 
         # WebSocket connections
-        self.active_connections: list[WebSocket] = []
+        self.active_connections: List[WebSocket] = []
         self.connection_lock = threading.Lock()
 
         # Dashboard state
         self.is_running = False
         self.app: Optional[FastAPI] = None
-        self.broadcast_task: Optional[asyncio.Task] = None
+        self.broadcast_task: Optional[asyncio.Task[None]] = None
 
         # Dashboard data
-        self.dashboard_data = {
+        self.dashboard_data: Dict[str, Any] = {
             "last_update": None,
             "resource_metrics": None,
             "performance_analysis": None,
@@ -110,57 +135,58 @@ class MonitoringDashboard:
     def _setup_routes(self):
         """Setup FastAPI routes"""
 
-        @self.app.get("/")
-        async def dashboard_home():
-            """Dashboard home page"""
-            return HTMLResponse(self._get_dashboard_html())
+        if self.app is not None:
+            @self.app.get("/")
+            async def dashboard_home() -> HTMLResponse:  # noqa: F401
+                """Dashboard home page"""
+                return HTMLResponse(self._get_dashboard_html())
 
-        @self.app.get("/api/status")
-        async def get_status():
-            """Get system status"""
-            return JSONResponse(self._get_system_status())
+            @self.app.get("/api/status")
+            async def get_status() -> JSONResponse:  # noqa: F401
+                """Get system status"""
+                return JSONResponse(self._get_system_status())
 
-        @self.app.get("/api/metrics")
-        async def get_metrics():
-            """Get current metrics"""
-            return JSONResponse(self._get_current_metrics())
+            @self.app.get("/api/metrics")
+            async def get_metrics() -> JSONResponse:  # noqa: F401
+                """Get current metrics"""
+                return JSONResponse(self._get_current_metrics())
 
-        @self.app.get("/api/analysis")
-        async def get_analysis():
-            """Get performance analysis"""
-            return JSONResponse(self._get_performance_analysis())
+            @self.app.get("/api/analysis")
+            async def get_analysis() -> JSONResponse:  # noqa: F401
+                """Get performance analysis"""
+                return JSONResponse(self._get_performance_analysis())
 
-        @self.app.get("/api/alerts")
-        async def get_alerts():
-            """Get active alerts"""
-            return JSONResponse(self._get_active_alerts())
+            @self.app.get("/api/alerts")
+            async def get_alerts() -> JSONResponse:  # noqa: F401
+                """Get active alerts"""
+                return JSONResponse(self._get_active_alerts())
 
-        @self.app.get("/api/learning-sessions")
-        async def get_learning_sessions():
-            """Get learning sessions"""
-            return JSONResponse(self._get_learning_sessions())
+            @self.app.get("/api/learning-sessions")
+            async def get_learning_sessions() -> JSONResponse:  # noqa: F401
+                """Get learning sessions"""
+                return JSONResponse(self._get_learning_sessions())
 
-        @self.app.get("/api/evolution-milestones")
-        async def get_evolution_milestones():
-            """Get evolution milestones"""
-            return JSONResponse(self._get_evolution_milestones())
+            @self.app.get("/api/evolution-milestones")
+            async def get_evolution_milestones() -> JSONResponse:  # noqa: F401
+                """Get evolution milestones"""
+                return JSONResponse(self._get_evolution_milestones())
 
-        @self.app.websocket("/ws")
-        async def websocket_endpoint(websocket: WebSocket):
-            """WebSocket endpoint for real-time updates"""
-            await websocket.accept()
+            @self.app.websocket("/ws")
+            async def websocket_endpoint(websocket: WebSocket) -> None:  # noqa: F401
+                """WebSocket endpoint for real-time updates"""
+                await websocket.accept()
 
-            with self.connection_lock:
-                self.active_connections.append(websocket)
-
-            try:
-                while True:
-                    # Keep connection alive
-                    await websocket.receive_text()
-            except WebSocketDisconnect:
                 with self.connection_lock:
-                    if websocket in self.active_connections:
-                        self.active_connections.remove(websocket)
+                    self.active_connections.append(websocket)
+
+                try:
+                    while True:
+                        # Keep connection alive
+                        await websocket.receive_text()
+                except WebSocketDisconnect:
+                    with self.connection_lock:
+                        if websocket in self.active_connections:
+                            self.active_connections.remove(websocket)
 
     async def start(self):
         """Start dashboard server"""
@@ -174,9 +200,12 @@ class MonitoringDashboard:
             self.broadcast_task = asyncio.create_task(self._broadcast_updates())
 
             # Start server
-            config = uvicorn.Config(
-                self.app, host=self.host, port=self.port, log_level="info"
-            )
+            if self.app is not None:
+                config = uvicorn.Config(
+                    self.app, host=self.host, port=self.port, log_level="info"
+                )
+            else:
+                raise RuntimeError("FastAPI app not initialized")
             server = uvicorn.Server(config)
 
             self.is_running = True
@@ -204,7 +233,7 @@ class MonitoringDashboard:
             for connection in self.active_connections:
                 try:
                     await connection.close()
-                except:
+                except Exception:
                     pass
             self.active_connections.clear()
 
@@ -222,11 +251,11 @@ class MonitoringDashboard:
                     message = json.dumps(self.dashboard_data, default=str)
 
                     with self.connection_lock:
-                        disconnected = []
+                        disconnected: List[WebSocket] = []
                         for connection in self.active_connections:
                             try:
                                 await connection.send_text(message)
-                            except:
+                            except Exception:
                                 disconnected.append(connection)
 
                         # Remove disconnected connections
@@ -265,18 +294,18 @@ class MonitoringDashboard:
 
             # Learning sessions
             if self.resource_monitor:
-                sessions = list(self.resource_monitor.learning_processes)
+                # Type cast to help type checker understand the types
+                learning_processes: set[str] = self.resource_monitor.learning_processes
+                process_start_times: dict[str, datetime] = self.resource_monitor.process_start_times
+                
+                sessions: List[str] = list(learning_processes)
                 self.dashboard_data["learning_sessions"] = [
                     {
                         "session_id": session_id,
-                        "start_time": self.resource_monitor.process_start_times.get(
-                            session_id
-                        ),
+                        "start_time": process_start_times.get(session_id),
                         "duration": str(
                             datetime.now()
-                            - self.resource_monitor.process_start_times.get(
-                                session_id, datetime.now()
-                            )
+                            - process_start_times.get(session_id, datetime.now())
                         ),
                     }
                     for session_id in sessions
@@ -284,9 +313,9 @@ class MonitoringDashboard:
 
             # Evolution milestones
             if self.performance_analyzer:
-                milestones = self.performance_analyzer.evolution_milestones[
-                    -5:
-                ]  # Last 5
+                # Type cast to help type checker understand the types
+                evolution_milestones: List[Any] = self.performance_analyzer.evolution_milestones
+                milestones: List[Any] = evolution_milestones[-5:]  # Last 5
                 self.dashboard_data["evolution_milestones"] = milestones
 
             # System status
@@ -333,7 +362,7 @@ class MonitoringDashboard:
 
         return "healthy"
 
-    def _get_system_status(self) -> dict[str, Any]:
+    def _get_system_status(self) -> Dict[str, Any]:
         """Get system status"""
         return {
             "status": self.dashboard_data["system_status"],
@@ -345,50 +374,52 @@ class MonitoringDashboard:
             },
         }
 
-    def _get_current_metrics(self) -> dict[str, Any]:
+    def _get_current_metrics(self) -> Dict[str, Any]:
         """Get current metrics"""
         if self.resource_monitor:
             return self.resource_monitor.get_metrics_summary()
         return {"error": "Resource monitor not available"}
 
-    def _get_performance_analysis(self) -> dict[str, Any]:
+    def _get_performance_analysis(self) -> Dict[str, Any]:
         """Get performance analysis"""
         if self.performance_analyzer:
             return self.performance_analyzer.get_analysis_report()
         return {"error": "Performance analyzer not available"}
 
-    def _get_active_alerts(self) -> list[dict[str, Any]]:
+    def _get_active_alerts(self) -> List[Dict[str, Any]]:
         """Get active alerts"""
         if self.resource_monitor:
             alerts = [a for a in self.resource_monitor.alerts if not a.resolved]
             return [asdict(a) for a in alerts]
         return []
 
-    def _get_learning_sessions(self) -> list[dict[str, Any]]:
+    def _get_learning_sessions(self) -> List[Dict[str, Any]]:
         """Get learning sessions"""
         if self.resource_monitor:
-            sessions = list(self.resource_monitor.learning_processes)
+            # Type cast to help type checker understand the types
+            learning_processes: set[str] = self.resource_monitor.learning_processes
+            process_start_times: dict[str, datetime] = self.resource_monitor.process_start_times
+            
+            sessions: List[str] = list(learning_processes)
             return [
                 {
                     "session_id": session_id,
-                    "start_time": self.resource_monitor.process_start_times.get(
-                        session_id
-                    ),
+                    "start_time": process_start_times.get(session_id),
                     "duration": str(
                         datetime.now()
-                        - self.resource_monitor.process_start_times.get(
-                            session_id, datetime.now()
-                        )
+                        - process_start_times.get(session_id, datetime.now())
                     ),
                 }
                 for session_id in sessions
             ]
         return []
 
-    def _get_evolution_milestones(self) -> list[dict[str, Any]]:
+    def _get_evolution_milestones(self) -> List[Dict[str, Any]]:
         """Get evolution milestones"""
         if self.performance_analyzer:
-            return self.performance_analyzer.evolution_milestones[-10:]  # Last 10
+            # Type cast to help type checker understand the types
+            evolution_milestones: List[Any] = self.performance_analyzer.evolution_milestones
+            return evolution_milestones[-10:]  # Last 10
         return []
 
     def _get_dashboard_html(self) -> str:

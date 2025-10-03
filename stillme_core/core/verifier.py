@@ -4,7 +4,7 @@ verifier.py - Verification logic for AgentDev execution results
 
 import logging
 import re
-from typing import Any, Optional, Union
+from typing import Any
 
 logger = logging.getLogger("AgentDev-Verifier")
 
@@ -35,8 +35,8 @@ class Verifier:
         self,
         step: dict[str, Any],
         exec_result: dict[str, Any],
-        success_criteria: Optional[dict[str, Any]] = None,
-    ) -> Union[bool, dict[str, Any]]:
+        success_criteria: dict[str, Any] | None = None,
+    ) -> bool | dict[str, Any]:
         """
         Verify execution result against success criteria.
 

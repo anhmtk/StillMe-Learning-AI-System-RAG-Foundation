@@ -599,7 +599,7 @@ class ExperienceMemory:
                 # Use most common value or average for numeric values
                 non_none_values = [v for v in values if v is not None]
                 if non_none_values:
-                    if all(isinstance(v, (int, float)) for v in non_none_values):
+                    if all(isinstance(v, int | float) for v in non_none_values):
                         expected_outcome[key] = sum(non_none_values) / len(
                             non_none_values
                         )

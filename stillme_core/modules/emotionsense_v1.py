@@ -15,7 +15,7 @@ import time
 from collections import defaultdict, deque
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 # Add project root to Python path
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -41,7 +41,6 @@ except ImportError:
 
 try:
     from sklearn.feature_extraction.text import TfidfVectorizer
-    from sklearn.metrics.pairwise import cosine_similarity
 
     SKLEARN_AVAILABLE = True
 except ImportError:
@@ -80,7 +79,7 @@ class EmotionSenseV1:
     Hỗ trợ tiếng Việt với độ chính xác cao
     """
 
-    def __init__(self, config: Optional[dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         """Khởi tạo EmotionSense module"""
         # Initialize common utilities
         self.config_manager = ConfigManager("config/emotion_sense_config.json", {})
@@ -437,7 +436,7 @@ class EmotionSenseV1:
         confidence: float,
         method: str,
         language: str,
-        error_code: Optional[str] = None,
+        error_code: str | None = None,
     ) -> dict[str, Any]:
         """Create standardized emotion result"""
         result = {

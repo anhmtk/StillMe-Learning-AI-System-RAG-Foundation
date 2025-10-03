@@ -9,7 +9,7 @@ import statistics
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ class LearningSession:
 
     session_id: str
     start_time: str
-    end_time: Optional[str]
+    end_time: str | None
     status: str
     success_rate: float
     reward_score: float

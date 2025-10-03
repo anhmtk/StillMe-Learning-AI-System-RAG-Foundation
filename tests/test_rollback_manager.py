@@ -8,8 +8,6 @@ from pathlib import Path
 
 import pytest
 
-pytest.skip("Module not available", allow_module_level=True)
-
 from stillme_core.learning.rollback_manager import (
     LearningSnapshot,
     RollbackManager,
@@ -17,6 +15,8 @@ from stillme_core.learning.rollback_manager import (
     SandboxResult,
     SandboxStatus,
 )
+
+pytest.skip("Module not available", allow_module_level=True)
 
 
 class TestRollbackManager:

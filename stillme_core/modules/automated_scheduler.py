@@ -12,7 +12,7 @@ import signal
 import sys
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 from apscheduler.events import EVENT_JOB_ERROR, EVENT_JOB_EXECUTED, EVENT_JOB_MISSED
 from apscheduler.executors.asyncio import AsyncIOExecutor
@@ -51,7 +51,7 @@ class SchedulerConfig:
 class AutomatedScheduler:
     """Automated scheduler for StillMe learning system"""
 
-    def __init__(self, config: Optional[SchedulerConfig] = None):
+    def __init__(self, config: SchedulerConfig | None = None):
         self.config = config or SchedulerConfig()
         self.logger = logging.getLogger(__name__)
         self.scheduler = None
@@ -474,7 +474,7 @@ class AutomatedScheduler:
 
 # Factory function
 def create_automated_scheduler(
-    config: Optional[SchedulerConfig] = None,
+    config: SchedulerConfig | None = None,
 ) -> AutomatedScheduler:
     """Create and return an AutomatedScheduler instance"""
     return AutomatedScheduler(config)

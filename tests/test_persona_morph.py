@@ -34,7 +34,7 @@ def persona_morph_instance():
     # Cleanup
     try:
         asyncio.run(pm.close())  # Đóng client khi tất cả các test hoàn tất
-    except:
+    except Exception:
         pass  # Ignore cleanup errors
 
 

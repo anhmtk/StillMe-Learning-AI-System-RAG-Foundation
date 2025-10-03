@@ -19,7 +19,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import psutil
 
@@ -114,15 +114,15 @@ class ModuleInfo:
     version: str
     status: ModuleStatus
     priority: ModulePriority
-    dependencies: List[str]
-    dependents: List[str]
+    dependencies: list[str]
+    dependents: list[str]
     health_score: float
     last_health_check: datetime
-    startup_time: Optional[datetime]
-    shutdown_time: Optional[datetime]
+    startup_time: datetime | None
+    shutdown_time: datetime | None
     error_count: int
-    last_error: Optional[str]
-    metadata: Dict[str, Any]
+    last_error: str | None
+    metadata: dict[str, Any]
 
 
 @dataclass
@@ -137,9 +137,9 @@ class ModuleConfiguration:
     max_restart_attempts: int
     health_check_interval: int
     timeout_seconds: int
-    resource_limits: Dict[str, Any]
-    environment_variables: Dict[str, str]
-    custom_settings: Dict[str, Any]
+    resource_limits: dict[str, Any]
+    environment_variables: dict[str, str]
+    custom_settings: dict[str, Any]
     last_updated: datetime
 
 
@@ -164,7 +164,7 @@ class ModuleGovernanceSystem:
     Main Module Governance System
     """
 
-    def __init__(self, config: Optional[Dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self.logger = self._setup_logging()
 
@@ -175,9 +175,9 @@ class ModuleGovernanceSystem:
         self.memory_integration = MemorySecurityIntegration()
 
         # Module registry
-        self.modules: Dict[str, ModuleInfo] = {}
-        self.module_configs: Dict[str, ModuleConfiguration] = {}
-        self.module_instances: Dict[str, Any] = {}
+        self.modules: dict[str, ModuleInfo] = {}
+        self.module_configs: dict[str, ModuleConfiguration] = {}
+        self.module_instances: dict[str, Any] = {}
 
         # Governance state
         self.governance_metrics = GovernanceMetrics(
@@ -200,7 +200,7 @@ class ModuleGovernanceSystem:
         self.auto_recovery_enabled = True
 
         # Performance tracking
-        self.performance_metrics: Dict[str, List[float]] = {
+        self.performance_metrics: dict[str, list[float]] = {
             "startup_times": [],
             "shutdown_times": [],
             "health_check_times": [],
@@ -285,12 +285,12 @@ class ModuleGovernanceSystem:
         except Exception as e:
             self.logger.error(f"Error discovering modules: {e}")
 
-    def _scan_directory_for_modules(self, directory: str) -> Dict[str, str]:
+    def _scan_directory_for_modules(self, directory: str) -> dict[str, str]:
         """Scan directory for Python modules"""
         modules = {}
 
         try:
-            for root, dirs, files in os.walk(directory):
+            for root, _dirs, files in os.walk(directory):
                 for file in files:
                     if file.endswith(".py") and not file.startswith("__"):
                         module_name = file[:-3]  # Remove .py extension
@@ -791,7 +791,7 @@ class ModuleGovernanceSystem:
                 f"Error in internal module restart for {module_name}: {e}"
             )
 
-    def get_governance_status(self) -> Dict[str, Any]:
+    def get_governance_status(self) -> dict[str, Any]:
         """Get governance system status"""
         try:
             return {
@@ -837,7 +837,7 @@ class ModuleGovernanceSystem:
                 "message": str(e),
             }
 
-    def get_modules_status(self) -> Dict[str, Any]:
+    def get_modules_status(self) -> dict[str, Any]:
         """Get status of all modules"""
         try:
             modules_data = {}
@@ -880,15 +880,15 @@ class ModuleGovernanceSystem:
                 "message": str(e),
             }
 
-    async def _get_governance_status(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_governance_status(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get governance status endpoint"""
         return self.get_governance_status()
 
-    async def _get_modules_status(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_modules_status(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get modules status endpoint"""
         return self.get_modules_status()
 
-    async def _start_module(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _start_module(self, data: dict[str, Any]) -> dict[str, Any]:
         """Start module endpoint"""
         try:
             module_name = data.get("module_name", "")
@@ -913,7 +913,7 @@ class ModuleGovernanceSystem:
                 "message": str(e),
             }
 
-    async def _stop_module(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _stop_module(self, data: dict[str, Any]) -> dict[str, Any]:
         """Stop module endpoint"""
         try:
             module_name = data.get("module_name", "")
@@ -938,7 +938,7 @@ class ModuleGovernanceSystem:
                 "message": str(e),
             }
 
-    async def _restart_module(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _restart_module(self, data: dict[str, Any]) -> dict[str, Any]:
         """Restart module endpoint"""
         try:
             module_name = data.get("module_name", "")
@@ -963,7 +963,7 @@ class ModuleGovernanceSystem:
                 "message": str(e),
             }
 
-    async def _get_governance_health(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    async def _get_governance_health(self, data: dict[str, Any]) -> dict[str, Any]:
         """Get governance health endpoint"""
         try:
             # Get system health

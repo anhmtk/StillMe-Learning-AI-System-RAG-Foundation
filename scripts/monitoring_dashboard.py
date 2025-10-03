@@ -318,7 +318,7 @@ class MonitoringDashboard:
                 with open("/proc/uptime") as f:
                     uptime_seconds = float(f.read().split()[0])
                 return uptime_seconds / 3600
-        except:
+        except Exception:
             return 0.0
 
     def _get_cpu_usage(self) -> float:
@@ -336,7 +336,7 @@ class MonitoringDashboard:
                 subprocess.run(["top", "-bn1"], capture_output=True, text=True)
                 # Parse CPU usage (simplified)
                 return 30.0  # Mock value
-        except:
+        except Exception:
             return 0.0
 
     def _get_memory_usage(self) -> float:
@@ -354,7 +354,7 @@ class MonitoringDashboard:
                 subprocess.run(["free", "-m"], capture_output=True, text=True)
                 # Parse memory usage (simplified)
                 return 50.0  # Mock value
-        except:
+        except Exception:
             return 0.0
 
     def _get_disk_usage(self) -> float:
@@ -372,7 +372,7 @@ class MonitoringDashboard:
                 subprocess.run(["df", "-h"], capture_output=True, text=True)
                 # Parse disk usage (simplified)
                 return 65.0  # Mock value
-        except:
+        except Exception:
             return 0.0
 
     def _get_network_latency(self) -> float:
@@ -386,7 +386,7 @@ class MonitoringDashboard:
             )
             # Parse ping output (simplified)
             return 25.0  # Mock value
-        except:
+        except Exception:
             return 0.0
 
     def _get_error_rate(self) -> float:

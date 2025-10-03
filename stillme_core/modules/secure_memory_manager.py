@@ -45,7 +45,7 @@ import shutil
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any
 
 from cryptography.fernet import Fernet
 
@@ -77,7 +77,7 @@ class SecureMemoryConfig:
 class SecureMemoryManager:
     """Quản lý bộ nhớ an toàn với mã hóa và các tính năng nâng cao."""
 
-    def __init__(self, config: Optional[SecureMemoryConfig] = None):
+    def __init__(self, config: SecureMemoryConfig | None = None):
         self.config = config or SecureMemoryConfig()
         self.logger = logging.getLogger(__name__)
 
@@ -177,7 +177,7 @@ class SecureMemoryManager:
             return False
 
     async def save(
-        self, data: Union[str, dict, list], auto_backup: Optional[bool] = None
+        self, data: str | dict | list, auto_backup: bool | None = None
     ) -> bool:
         """Mã hóa và lưu dữ liệu vào file với error handling và async support."""
         start_time = time.time()
@@ -188,7 +188,7 @@ class SecureMemoryManager:
                 await self._rotate_key()
 
             # Convert data to string if needed
-            if isinstance(data, (dict, list)):
+            if isinstance(data, dict | list):
                 data_str = json.dumps(data, ensure_ascii=False, indent=2)
             else:
                 data_str = str(data)
@@ -224,7 +224,7 @@ class SecureMemoryManager:
             self.last_error = str(e)
             return False
 
-    async def load(self) -> Optional[str]:
+    async def load(self) -> str | None:
         """Giải mã dữ liệu từ file với error handling."""
         start_time = time.time()
 

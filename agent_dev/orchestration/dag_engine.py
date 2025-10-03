@@ -8,10 +8,11 @@ import asyncio
 import json
 import time
 import uuid
+from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any
 
 import networkx as nx
 import yaml
@@ -57,15 +58,15 @@ class DAGNode:
     description: str
     task_type: str
     command: str
-    working_directory: Optional[str]
+    working_directory: str | None
     environment: dict[str, str]
     dependencies: list[str]
     retry_count: int
     timeout: int
     priority: int
-    condition: Optional[str]
-    on_success: Optional[str]
-    on_failure: Optional[str]
+    condition: str | None
+    on_success: str | None
+    on_failure: str | None
     resources: dict[str, Any]
     metadata: dict[str, Any]
 
@@ -78,8 +79,8 @@ class DAGExecution:
     dag_id: str
     status: DAGStatus
     start_time: float
-    end_time: Optional[float]
-    duration: Optional[float]
+    end_time: float | None
+    duration: float | None
     nodes_status: dict[str, NodeStatus]
     nodes_output: dict[str, Any]
     nodes_errors: dict[str, str]
@@ -98,7 +99,7 @@ class ExecutionResult:
     end_time: float
     duration: float
     output: Any
-    error: Optional[str]
+    error: str | None
     retry_count: int
     resources_used: dict[str, Any]
 
@@ -106,7 +107,7 @@ class ExecutionResult:
 class DAGEngine:
     """Enterprise DAG execution engine"""
 
-    def __init__(self, config_path: Optional[str] = None):
+    def __init__(self, config_path: str | None = None):
         self.config = self._load_config(config_path)
         self.dags: dict[str, nx.DiGraph] = {}
         self.executions: dict[str, DAGExecution] = {}
@@ -114,7 +115,7 @@ class DAGEngine:
         self.resource_pools: dict[str, dict[str, Any]] = {}
         self.running = False
 
-    def _load_config(self, config_path: Optional[str] = None) -> dict[str, Any]:
+    def _load_config(self, config_path: str | None = None) -> dict[str, Any]:
         """Load DAG engine configuration"""
         if config_path:
             config_file = Path(config_path)
@@ -214,8 +215,8 @@ class DAGEngine:
     def execute_dag(
         self,
         dag_id: str,
-        variables: Optional[dict[str, Any]] = None,
-        context: Optional[dict[str, Any]] = None,
+        variables: dict[str, Any] | None = None,
+        context: dict[str, Any] | None = None,
     ) -> str:
         """Execute a DAG"""
         if dag_id not in self.dags:
@@ -296,7 +297,7 @@ class DAGEngine:
         try:
             topo_order = list(nx.topological_sort(dag_graph))
         except nx.NetworkXError:
-            raise ValueError("DAG contains cycles")
+            raise ValueError("DAG contains cycles") from None
 
         for node_id in topo_order:
             if execution.status == DAGStatus.CANCELLED:
@@ -524,7 +525,7 @@ class DAGEngine:
                         resources_used={},
                     )
 
-            except asyncio.TimeoutError:
+            except TimeoutError:
                 process.kill()
                 return ExecutionResult(
                     node_id=node.node_id,
@@ -625,7 +626,7 @@ class DAGEngine:
 
         return False
 
-    def get_execution_status(self, execution_id: str) -> Optional[dict[str, Any]]:
+    def get_execution_status(self, execution_id: str) -> dict[str, Any] | None:
         """Get execution status"""
         execution = self.executions.get(execution_id)
         if not execution:
@@ -720,12 +721,12 @@ def load_dag(dag_file: str) -> str:
     return dag_engine.load_dag(dag_file)
 
 
-def execute_dag(dag_id: str, variables: Optional[dict[str, Any]] = None) -> str:
+def execute_dag(dag_id: str, variables: dict[str, Any] | None = None) -> str:
     """Execute DAG"""
     return dag_engine.execute_dag(dag_id, variables)
 
 
-def get_execution_status(execution_id: str) -> Optional[dict[str, Any]]:
+def get_execution_status(execution_id: str) -> dict[str, Any] | None:
     """Get execution status"""
     return dag_engine.get_execution_status(execution_id)
 

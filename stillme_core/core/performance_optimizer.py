@@ -14,11 +14,12 @@ import json
 import logging
 import pstats
 import time
+from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 import psutil
 

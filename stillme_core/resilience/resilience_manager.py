@@ -23,10 +23,11 @@ Date: 2025-09-28
 import asyncio
 import json
 import logging
+from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import Any, Callable, Optional
+from typing import Any
 
 from .error_handler import (
     ErrorSeverity,
@@ -124,7 +125,7 @@ class ResilienceManager:
 
         # Monitoring
         self.is_monitoring = False
-        self.monitoring_task: Optional[asyncio.Task] = None
+        self.monitoring_task: asyncio.Task | None = None
 
         # Statistics
         self.stats = {
@@ -641,7 +642,7 @@ class ResilienceManager:
 
 
 # Global resilience manager instance
-_resilience_manager_instance: Optional[ResilienceManager] = None
+_resilience_manager_instance: ResilienceManager | None = None
 
 
 def get_resilience_manager(config: ResilienceConfig = None) -> ResilienceManager:

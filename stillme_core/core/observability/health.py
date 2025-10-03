@@ -9,11 +9,12 @@ import json
 import sqlite3
 import threading
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import datetime, timedelta
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any
 
 import psutil
 
@@ -34,9 +35,9 @@ class HealthCheck:
     name: str
     status: HealthStatus
     message: str
-    details: Optional[dict[str, Any]] = None
-    response_time_ms: Optional[float] = None
-    last_checked: Optional[str] = None
+    details: dict[str, Any] | None = None
+    response_time_ms: float | None = None
+    last_checked: str | None = None
 
 
 @dataclass
@@ -175,7 +176,7 @@ class HealthMonitor:
         return self.run_health_checks()
 
     def get_health_history(
-        self, check_name: Optional[str] = None, hours: int = 24
+        self, check_name: str | None = None, hours: int = 24
     ) -> list[HealthCheck]:
         """Get health check history"""
         with self._lock:
@@ -558,7 +559,7 @@ class HealthMonitor:
 
 
 # Global health monitor instance
-_global_health_monitor: Optional[HealthMonitor] = None
+_global_health_monitor: HealthMonitor | None = None
 
 
 def get_health_monitor() -> HealthMonitor:

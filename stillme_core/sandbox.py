@@ -8,7 +8,7 @@ StillMe Sandbox - Stub Implementation
 
 import logging
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ class Sandbox:
     # TODO[stabilize]: Implement full sandbox functionality
     """
 
-    def __init__(self, config: Optional[SandboxConfig] = None):
+    def __init__(self, config: SandboxConfig | None = None):
         """Initialize Sandbox"""
         self.config = config or SandboxConfig()
         self.sandbox_id = f"stub_sandbox_{id(self)}"
@@ -54,7 +54,7 @@ class Sandbox:
         self.is_active = False
         return True
 
-    def execute(self, command: str, timeout: Optional[float] = None) -> dict[str, Any]:
+    def execute(self, command: str, timeout: float | None = None) -> dict[str, Any]:
         """Execute command in sandbox"""
         logger.warning(f"Sandbox.execute({command}): Stub implementation")
 
@@ -84,7 +84,7 @@ class Sandbox:
         }
 
 
-def prepare_sandbox(config: Optional[SandboxConfig] = None) -> Sandbox:
+def prepare_sandbox(config: SandboxConfig | None = None) -> Sandbox:
     """
     Prepare sandbox environment
 
@@ -96,7 +96,7 @@ def prepare_sandbox(config: Optional[SandboxConfig] = None) -> Sandbox:
 
 
 def run_tests_in_sandbox(
-    tests: list[str], config: Optional[SandboxConfig] = None
+    tests: list[str], config: SandboxConfig | None = None
 ) -> dict[str, Any]:
     """
     Run tests in sandbox

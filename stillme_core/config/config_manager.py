@@ -15,7 +15,7 @@ Version: 1.0.0
 import logging
 import os
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any
 
 import yaml
 from pydantic import BaseModel, Field
@@ -120,7 +120,7 @@ class ConfigManager:
     with support for environment variable overrides.
     """
 
-    def __init__(self, config_path: Optional[Union[str, Path]] = None):
+    def __init__(self, config_path: str | Path | None = None):
         """
         Initialize configuration manager
 
@@ -130,7 +130,7 @@ class ConfigManager:
         self.config_path = (
             Path(config_path) if config_path else Path("config/default.yaml")
         )
-        self._config: Optional[StillMeConfig] = None
+        self._config: StillMeConfig | None = None
         self._env_prefix = "STILLME__"
 
     def load_config(self) -> StillMeConfig:
@@ -292,7 +292,7 @@ class ConfigManager:
 
 
 # Global configuration manager instance
-_config_manager: Optional[ConfigManager] = None
+_config_manager: ConfigManager | None = None
 
 
 def get_config_manager() -> ConfigManager:

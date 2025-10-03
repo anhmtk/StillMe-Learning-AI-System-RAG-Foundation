@@ -9,7 +9,7 @@ import time
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 import psutil
 
@@ -33,7 +33,7 @@ class HealthCheck:
     message: str
     duration_ms: float
     timestamp: datetime
-    details: Optional[dict[str, Any]] = None
+    details: dict[str, Any] | None = None
 
 
 @dataclass
@@ -52,7 +52,7 @@ class HealthResponse:
 class HealthChecker:
     """Main health check orchestrator"""
 
-    def __init__(self, config: Optional[dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self.start_time = time.time()
         self._version = self.config.get("version", "1.0.0")

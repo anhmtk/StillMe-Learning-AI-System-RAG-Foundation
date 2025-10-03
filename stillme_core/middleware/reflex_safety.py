@@ -173,7 +173,7 @@ class ReflexSafety:
 
             return result
 
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self.stats["timeouts"] += 1
             self.circuit_breaker.on_failure()
             return False, "deep_check_timeout"

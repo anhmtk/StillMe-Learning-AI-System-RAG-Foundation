@@ -3,7 +3,7 @@
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ class BugRecord:
     status: str
     created_at: datetime
     updated_at: datetime
-    metadata: Optional[dict[str, Any]] = None
+    metadata: dict[str, Any] | None = None
 
     def __post_init__(self):
         if self.metadata is None:
@@ -52,7 +52,7 @@ class BugMemory:
             self.logger.error(f"❌ Failed to add bug {bug_id}: {e}")
             return False
 
-    def get_bug(self, bug_id: str) -> Optional[BugRecord]:
+    def get_bug(self, bug_id: str) -> BugRecord | None:
         """Get bug by ID"""
         return self.bugs.get(bug_id)
 
@@ -78,7 +78,7 @@ class BugMemory:
         self.bugs.clear()
         self.logger.info("🧹 All bugs cleared")
 
-    def record(self, file: str, test_name: Optional[str], message: str) -> bool:
+    def record(self, file: str, test_name: str | None, message: str) -> bool:
         """Record a bug/error for AgentDev compatibility"""
         try:
             bug_id = f"{file}_{test_name or 'unknown'}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"

@@ -12,7 +12,7 @@ import json
 import logging
 import subprocess
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from jsonschema import ValidationError, validate
 
@@ -116,7 +116,7 @@ def _extract_json_block(text: str) -> str:
 
 
 def _normalize_plan_v1(
-    raw: dict[str, Any], problem_file: Optional[str]
+    raw: dict[str, Any], problem_file: str | None
 ) -> dict[str, Any]:
     """
     Chuẩn hoá JSON “yếu” thành schema Planner (module_name, description, objectives, steps[{step_id, action, reasoning}]).
@@ -195,8 +195,8 @@ class Planner:
     def create_plan(
         self,
         prompt: str,
-        error_type: Optional[str] = None,
-        problem_file: Optional[str] = None,
+        error_type: str | None = None,
+        problem_file: str | None = None,
     ) -> dict[str, Any]:
         """
         Tạo kế hoạch sửa lỗi cho DevAgent.
@@ -220,7 +220,7 @@ class Planner:
             "Chỉ trả về JSON hợp lệ theo schema đã mô tả, không kèm văn bản ngoài JSON."
         )
 
-        def _preview(s: Optional[str]) -> str:
+        def _preview(s: str | None) -> str:
             try:
                 return (s or "")[:300].replace("\n", "\\n")
             except Exception:
@@ -320,8 +320,8 @@ class Planner:
         return safe_dummy
 
     def _try_parse_and_validate_plan(
-        self, raw_response: Optional[str], problem_file: Optional[str] = None
-    ) -> Optional[dict[str, Any]]:
+        self, raw_response: str | None, problem_file: str | None = None
+    ) -> dict[str, Any] | None:
         # Chặn None / chuỗi rỗng
         if (
             not raw_response
@@ -398,7 +398,7 @@ class Planner:
         prompt_key = hashlib.sha256(prompt.encode()).hexdigest()
         self.fallback_cache[prompt_key] = plan
 
-    def _get_cached_plan(self, prompt: str) -> Optional[dict[str, Any]]:
+    def _get_cached_plan(self, prompt: str) -> dict[str, Any] | None:
         prompt_key = hashlib.sha256(prompt.encode()).hexdigest()
         return self.fallback_cache.get(prompt_key)
 
@@ -580,11 +580,11 @@ class Planner:
     def plan(
         self,
         problem_description: str,
-        problem_file: Optional[str] = None,
-        error_type: Optional[str] = None,
-        previous_plan_feedback: Optional[str] = None,
+        problem_file: str | None = None,
+        error_type: str | None = None,
+        previous_plan_feedback: str | None = None,
         current_attempt: int = 1,
-    ) -> Optional[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         prompt = self._build_prompt(
             problem_description=problem_description,
             problem_file=problem_file,
@@ -596,8 +596,8 @@ class Planner:
     def _build_prompt(
         self,
         problem_description: str,
-        problem_file: Optional[str] = None,
-        previous_feedback: Optional[str] = None,
+        problem_file: str | None = None,
+        previous_feedback: str | None = None,
         current_attempt: int = 1,
     ) -> str:
         prompt = f"[AgentDev Planning Request - Attempt {current_attempt}]\n\n"

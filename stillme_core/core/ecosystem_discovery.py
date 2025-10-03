@@ -17,7 +17,7 @@ import time
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import networkx as nx
 import psutil
@@ -168,7 +168,7 @@ class StillMeEcosystemDiscovery:
 
     def _analyze_module(
         self, file_path: Path, module_type: str
-    ) -> Optional[ModuleInfo]:
+    ) -> ModuleInfo | None:
         """Phân tích chi tiết một module"""
         try:
             # Basic file info
@@ -364,7 +364,7 @@ class StillMeEcosystemDiscovery:
 
         return self.dependency_graph
 
-    def _find_matching_module(self, import_name: str) -> Optional[str]:
+    def _find_matching_module(self, import_name: str) -> str | None:
         """Tìm module matching với import name"""
         # Direct match
         if import_name in self.modules:
@@ -588,7 +588,7 @@ class StillMeEcosystemDiscovery:
 
         return recommendations
 
-    def save_report(self, report: dict[str, Any], filename: Optional[str] = None):
+    def save_report(self, report: dict[str, Any], filename: str | None = None):
         """Lưu report ra file"""
         if filename is None:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

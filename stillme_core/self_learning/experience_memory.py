@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -31,12 +31,12 @@ class ExperienceType(Enum):
 class ExperienceQuery:
     """Experience query parameters"""
 
-    category: Optional[ExperienceCategory] = None
-    experience_type: Optional[ExperienceType] = None
-    start_date: Optional[datetime] = None
-    end_date: Optional[datetime] = None
+    category: ExperienceCategory | None = None
+    experience_type: ExperienceType | None = None
+    start_date: datetime | None = None
+    end_date: datetime | None = None
     limit: int = 10
-    metadata_filter: Optional[dict[str, Any]] = None
+    metadata_filter: dict[str, Any] | None = None
 
 
 @dataclass
@@ -153,7 +153,7 @@ class ExperienceMemory:
             self.logger.error(f"❌ Failed to query experiences: {e}")
             return []
 
-    def get_experience_by_id(self, experience_id: str) -> Optional[Experience]:
+    def get_experience_by_id(self, experience_id: str) -> Experience | None:
         """Get experience by ID"""
         try:
             for experience in self.experiences:

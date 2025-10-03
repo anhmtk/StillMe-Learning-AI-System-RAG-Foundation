@@ -37,7 +37,7 @@ class TestFuzzInputs:
             assert job is not None
         except Exception as e:
             # Should handle Unicode gracefully
-            assert isinstance(e, (ValueError, TypeError, UnicodeError, AttributeError))
+            assert isinstance(e, ValueError | TypeError | UnicodeError | AttributeError)
 
     @given(large_input=st.text(min_size=1000, max_size=10000))
     @settings(
@@ -54,7 +54,7 @@ class TestFuzzInputs:
             assert job is not None
         except Exception as e:
             # Should handle large inputs gracefully
-            assert isinstance(e, (ValueError, MemoryError, Exception, AttributeError))
+            assert isinstance(e, ValueError | MemoryError | Exception | AttributeError)
 
     @given(
         invalid_types=st.one_of(
@@ -79,7 +79,7 @@ class TestFuzzInputs:
             assert job is not None
         except Exception as e:
             # Should handle invalid types gracefully
-            assert isinstance(e, (ValueError, TypeError, Exception, AttributeError))
+            assert isinstance(e, ValueError | TypeError | Exception | AttributeError)
 
     @given(malformed_json=st.text(min_size=1, max_size=100))
     @settings(
@@ -96,7 +96,7 @@ class TestFuzzInputs:
             pass
         except Exception as e:
             # Should handle gracefully
-            assert isinstance(e, (ValueError, TypeError, Exception, AttributeError))
+            assert isinstance(e, ValueError | TypeError | Exception | AttributeError)
 
     @given(
         boundary_values=st.one_of(
@@ -135,7 +135,7 @@ class TestFuzzInputs:
             assert job is not None
         except Exception as e:
             # Should handle boundary values gracefully
-            assert isinstance(e, (ValueError, TypeError, Exception, AttributeError))
+            assert isinstance(e, ValueError | TypeError | Exception | AttributeError)
 
     @given(
         special_chars=st.text(
@@ -158,7 +158,7 @@ class TestFuzzInputs:
             assert job is not None
         except Exception as e:
             # Should handle special characters gracefully
-            assert isinstance(e, (ValueError, TypeError, Exception, AttributeError))
+            assert isinstance(e, ValueError | TypeError | Exception | AttributeError)
 
     @given(mixed_content=st.text(min_size=1, max_size=200))
     @settings(
@@ -175,7 +175,7 @@ class TestFuzzInputs:
             assert job is not None
         except Exception as e:
             # Should handle mixed content gracefully
-            assert isinstance(e, (ValueError, TypeError, Exception, AttributeError))
+            assert isinstance(e, ValueError | TypeError | Exception | AttributeError)
 
     def test_empty_input_handling(self, state_store):
         """Test empty input handling"""
@@ -185,7 +185,7 @@ class TestFuzzInputs:
             assert job is not None or True
         except Exception as e:
             # Should handle empty inputs gracefully
-            assert isinstance(e, (ValueError, TypeError, Exception, AttributeError))
+            assert isinstance(e, ValueError | TypeError | Exception | AttributeError)
 
     def test_none_input_handling(self, state_store):
         """Test None input handling"""
@@ -195,4 +195,4 @@ class TestFuzzInputs:
             assert job is not None or True
         except Exception as e:
             # Should handle None inputs gracefully
-            assert isinstance(e, (ValueError, TypeError, Exception, AttributeError))
+            assert isinstance(e, ValueError | TypeError | Exception | AttributeError)

@@ -12,7 +12,7 @@ import random
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass
@@ -382,8 +382,8 @@ Feedback: {memory_item.feedback}
     def search_learning_memory(
         self,
         query: str,
-        category: Optional[str] = None,
-        min_score: Optional[float] = None,
+        category: str | None = None,
+        min_score: float | None = None,
     ) -> list[dict[str, Any]]:
         """Tìm kiếm learning results từ LayeredMemoryV1"""
         if not self.memory_manager:
@@ -445,7 +445,7 @@ Feedback: {memory_item.feedback}
                         try:
                             entry = json.loads(line.strip())
                             recent_scores.append(entry.get("score", 0))
-                        except:
+                        except Exception:
                             continue
 
             avg_score = sum(recent_scores) / len(recent_scores) if recent_scores else 0

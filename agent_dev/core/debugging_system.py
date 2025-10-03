@@ -23,7 +23,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 class DebugLevel(Enum):
@@ -81,15 +81,15 @@ class DebugSession:
 
     session_id: str
     start_time: datetime
-    end_time: Optional[datetime]
+    end_time: datetime | None
     status: DebugSessionStatus
     error_count: int
     warnings_count: int
     logs: list[dict[str, Any]]
     error_patterns: list[ErrorPattern]
-    root_cause: Optional[str]
-    resolution: Optional[str]
-    duration: Optional[float]
+    root_cause: str | None
+    resolution: str | None
+    duration: float | None
 
 
 @dataclass
@@ -103,7 +103,7 @@ class LogEntry:
     function: str
     line_number: int
     thread_id: str
-    session_id: Optional[str]
+    session_id: str | None
     metadata: dict[str, Any]
 
 
@@ -598,7 +598,7 @@ This guide helps troubleshoot {error_type.value.replace('_', ' ')} issues in Age
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(asdict(session), f, indent=2, default=str)
 
-    def _load_debug_session(self, session_id: str) -> Optional[DebugSession]:
+    def _load_debug_session(self, session_id: str) -> DebugSession | None:
         """Load debug session từ file"""
         filename = f"session_{session_id}.json"
         file_path = self.debug_sessions_dir / filename

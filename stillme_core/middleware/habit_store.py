@@ -7,7 +7,7 @@ import logging
 import threading
 import time
 from dataclasses import asdict, dataclass
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +47,7 @@ class HabitStore:
     Habit Store with opt-in privacy, quorum requirements, and decay
     """
 
-    def __init__(self, config: Optional[dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
 
         # Privacy settings
@@ -167,8 +167,8 @@ class HabitStore:
         cue: str,
         action: str,
         confidence: float = 1.0,
-        user_id: Optional[str] = None,
-        tenant_id: Optional[str] = None,
+        user_id: str | None = None,
+        tenant_id: str | None = None,
     ) -> bool:
         """
         Observe a cue-action pair. Returns True if habit was created/updated.
@@ -252,7 +252,7 @@ class HabitStore:
         )
         return True
 
-    def get_habit_score(self, cue: str) -> tuple[float, Optional[str]]:
+    def get_habit_score(self, cue: str) -> tuple[float, str | None]:
         """
         Get habit score for a cue. Returns (score, action) or (0.0, None).
         """
@@ -285,7 +285,7 @@ class HabitStore:
             return score, habit.action
 
     def get_all_habits(
-        self, user_id: Optional[str] = None, tenant_id: Optional[str] = None
+        self, user_id: str | None = None, tenant_id: str | None = None
     ) -> list[dict[str, Any]]:
         """Get all habits (for export/debugging)"""
         if not self.is_enabled():
@@ -311,7 +311,7 @@ class HabitStore:
             )
 
     def delete_habits(
-        self, user_id: Optional[str] = None, tenant_id: Optional[str] = None
+        self, user_id: str | None = None, tenant_id: str | None = None
     ) -> int:
         """Delete habits for a user/tenant (for privacy compliance)"""
         if not self.is_enabled():
@@ -342,7 +342,7 @@ class HabitStore:
             return deleted_count
 
     def export_habits(
-        self, user_id: Optional[str] = None, tenant_id: Optional[str] = None
+        self, user_id: str | None = None, tenant_id: str | None = None
     ) -> dict[str, Any]:
         """Export habits data (for GDPR compliance)"""
         if not self.is_enabled():

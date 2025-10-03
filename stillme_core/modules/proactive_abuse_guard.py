@@ -69,7 +69,7 @@ RELATED FILES / FILES LIÊN QUAN:
 import logging
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +100,7 @@ class AbuseEvent:
     pattern_type: AbusePattern
     threat_level: ThreatLevel
     timestamp: str
-    user_id: Optional[str] = None
+    user_id: str | None = None
     details: dict[str, Any] = None
     metadata: dict[str, Any] = None
 
@@ -124,7 +124,7 @@ class ProactiveAbuseGuard:
     TODO: Implement full security features.
     """
 
-    def __init__(self, config: Optional[GuardConfig] = None):
+    def __init__(self, config: GuardConfig | None = None):
         """Initialize ProactiveAbuseGuard"""
         self.config = config or GuardConfig()
         self.events: list[AbuseEvent] = []
@@ -137,7 +137,7 @@ class ProactiveAbuseGuard:
         self.logger = logging.getLogger(__name__)
         self.logger.info("🛡️ ProactiveAbuseGuard initialized")
 
-    def detect_abuse(self, event_data: dict[str, Any]) -> Optional[AbuseEvent]:
+    def detect_abuse(self, event_data: dict[str, Any]) -> AbuseEvent | None:
         """
         Detect abuse patterns in event data
 

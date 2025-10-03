@@ -15,15 +15,16 @@ Version: 1.0.0
 
 import asyncio
 import time
+from collections.abc import Callable
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Optional
+from typing import Any
 
 # Import StillMe core components
 try:
     from ..observability.logger import get_logger
-    from ..observability.metrics import MetricType, get_metrics_collector
+    from ..observability.metrics import get_metrics_collector
     from ..observability.tracer import get_tracer
     from .intelligent_router import AgentType, TaskComplexity, TaskType  # type: ignore
     from .task_decomposer import (  # type: ignore
@@ -42,7 +43,7 @@ except ImportError:
     pass
 
 try:
-    from stillme_core.observability.metrics import MetricType, get_metrics_collector
+    from stillme_core.observability.metrics import get_metrics_collector
 except ImportError:
     pass  # type: ignore
 
@@ -82,7 +83,6 @@ except ImportError:
         GENERAL = "general"
 
     from dataclasses import dataclass
-    from typing import Optional
 
     @dataclass
     class Subtask:
@@ -188,7 +188,7 @@ class CoordinationResult:
     failed_subtasks: list[str]
     total_duration: float
     agent_performance: dict[str, dict[str, Any]]
-    final_result: Optional[dict[str, Any]]
+    final_result: dict[str, Any] | None
     error_messages: list[str]
 
 
@@ -200,7 +200,7 @@ class AgentCoordinator:
     AgentDev to manage and coordinate multiple agents working on complex tasks.
     """
 
-    def __init__(self, config: Optional[dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         """Initialize the Agent Coordinator"""
         self.config = config or {}
         self.logger = logger
@@ -449,7 +449,7 @@ class AgentCoordinator:
 
     def _find_best_agent_for_group(
         self, group_type: str, group_subtasks: list[Subtask]
-    ) -> Optional[str]:
+    ) -> str | None:
         """Find the best agent for a group of subtasks"""
         best_agent = None
         best_score = 0.0
@@ -730,7 +730,7 @@ class AgentCoordinator:
         while remaining_subtasks:
             # Find subtasks that can be executed (dependencies satisfied)
             ready_subtasks = []
-            for subtask_id, subtask in remaining_subtasks.items():
+            for _subtask_id, subtask in remaining_subtasks.items():
                 if all(dep in completed_set for dep in subtask.dependencies):
                     ready_subtasks.append(subtask)
 
@@ -822,7 +822,7 @@ class AgentCoordinator:
         )
 
         # Process results
-        for (task, subtask_id, agent_id), result in zip(tasks, results):
+        for (_task, subtask_id, agent_id), result in zip(tasks, results, strict=False):
             if isinstance(result, Exception):
                 failed_subtasks.append(subtask_id)
                 error_messages.append(
@@ -1165,7 +1165,7 @@ class AgentCoordinator:
             del self.registered_agents[agent_id]
             self.logger.info(f"Unregistered agent: {agent_id}")
 
-    def get_agent_status(self, agent_id: str) -> Optional[AgentInfo]:
+    def get_agent_status(self, agent_id: str) -> AgentInfo | None:
         """Get status information for a specific agent"""
         return self.registered_agents.get(agent_id)
 
@@ -1193,10 +1193,10 @@ class AgentCoordinator:
 
 
 # Global coordinator instance
-_coordinator_instance: Optional[AgentCoordinator] = None
+_coordinator_instance: AgentCoordinator | None = None
 
 
-def get_agent_coordinator(config: Optional[dict[str, Any]] = None) -> AgentCoordinator:
+def get_agent_coordinator(config: dict[str, Any] | None = None) -> AgentCoordinator:
     """Get or create global AgentCoordinator instance"""
     global _coordinator_instance
 

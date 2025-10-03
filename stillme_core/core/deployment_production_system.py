@@ -16,22 +16,10 @@ import time
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 from enum import Enum
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 # Import all Phase 2 modules with proper typing
 if TYPE_CHECKING:
-    from stillme_core.autonomous_management_system import (
-        AutonomousManagementSystem as CoreAutonomousManagementSystem,
-    )
-    from stillme_core.learning_optimization_engine import (
-        LearningOptimizationEngine as CoreLearningOptimizationEngine,
-    )
-    from stillme_core.phase2_integration_testing import (
-        Phase2IntegrationTesting as CorePhase2IntegrationTesting,
-    )
-    from stillme_core.security_compliance_system import (
-        SecurityComplianceSystem as CoreSecurityComplianceSystem,
-    )
 
     from .autonomous_management_system import AutonomousManagementSystem
     from .learning_optimization_engine import LearningOptimizationEngine
@@ -45,48 +33,34 @@ try:
     from .phase2_integration_testing import Phase2IntegrationTesting
     from .security_compliance_system import SecurityComplianceSystem
 except ImportError:
-    try:
-        from stillme_core.autonomous_management_system import (
-            AutonomousManagementSystem as CoreAutonomousManagementSystem,
-        )
-        from stillme_core.learning_optimization_engine import (
-            LearningOptimizationEngine as CoreLearningOptimizationEngine,
-        )
-        from stillme_core.phase2_integration_testing import (
-            Phase2IntegrationTesting as CorePhase2IntegrationTesting,
-        )
-        from stillme_core.security_compliance_system import (
-            SecurityComplianceSystem as CoreSecurityComplianceSystem,
-        )
-    except ImportError:
-        # Create mock classes for testing with proper typing
-        class AutonomousManagementSystem:
-            def __init__(self) -> None:
-                pass
+    # Create mock classes for testing with proper typing
+    class AutonomousManagementSystem:
+        def __init__(self) -> None:
+            pass
 
-            def get_autonomous_status(self) -> dict[str, Any]:
-                return {"status": "success", "data": {}}
+        def get_autonomous_status(self) -> dict[str, Any]:
+            return {"status": "success", "data": {}}
 
-        class LearningOptimizationEngine:
-            def __init__(self) -> None:
-                pass
+    class LearningOptimizationEngine:
+        def __init__(self) -> None:
+            pass
 
-            def get_learning_status(self) -> dict[str, Any]:
-                return {"status": "success", "data": {}}
+        def get_learning_status(self) -> dict[str, Any]:
+            return {"status": "success", "data": {}}
 
-        class SecurityComplianceSystem:
-            def __init__(self) -> None:
-                pass
+    class SecurityComplianceSystem:
+        def __init__(self) -> None:
+            pass
 
-            def get_security_status(self) -> dict[str, Any]:
-                return {"status": "success", "data": {}}
+        def get_security_status(self) -> dict[str, Any]:
+            return {"status": "success", "data": {}}
 
-        class Phase2IntegrationTesting:
-            def __init__(self) -> None:
-                pass
+    class Phase2IntegrationTesting:
+        def __init__(self) -> None:
+            pass
 
-            def get_integration_status(self) -> dict[str, Any]:
-                return {"status": "success", "data": {}}
+        def get_integration_status(self) -> dict[str, Any]:
+            return {"status": "success", "data": {}}
 
 
 # Setup logging
@@ -136,7 +110,7 @@ class DeploymentPlan:
     rollback_plan: str
     health_checks: list[str]
     created_at: datetime
-    scheduled_at: Optional[datetime]
+    scheduled_at: datetime | None
     metadata: dict[str, Any]
 
 
@@ -148,10 +122,10 @@ class DeploymentExecution:
     plan_id: str
     status: DeploymentStatus
     start_time: datetime
-    end_time: Optional[datetime]
+    end_time: datetime | None
     duration: float
     success: bool
-    error_message: Optional[str]
+    error_message: str | None
     steps_completed: list[str]
     steps_failed: list[str]
     rollback_triggered: bool
@@ -197,7 +171,7 @@ class DeploymentProductionSystem:
     Main Deployment Production System
     """
 
-    def __init__(self, config: Optional[dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self.logger = self._setup_logging()
 

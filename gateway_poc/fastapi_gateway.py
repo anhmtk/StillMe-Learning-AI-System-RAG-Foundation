@@ -20,7 +20,7 @@ import logging
 import time
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 import httpx
 import redis
@@ -61,8 +61,8 @@ class LatencyMetrics:
 
 class ChatRequest(BaseModel):
     message: str
-    user_id: Optional[str] = "anonymous"
-    session_id: Optional[str] = None
+    user_id: str | None = "anonymous"
+    session_id: str | None = None
     use_cache: bool = True
 
 
@@ -172,7 +172,7 @@ class StillMeGateway:
                     services["stillme_backend"] = (
                         "healthy" if response.status_code == 200 else "unhealthy"
                     )
-            except:
+            except Exception:
                 services["stillme_backend"] = "unhealthy"
 
             # Check Ollama backend
@@ -184,7 +184,7 @@ class StillMeGateway:
                     services["ollama_backend"] = (
                         "healthy" if response.status_code == 200 else "unhealthy"
                     )
-            except:
+            except Exception:
                 services["ollama_backend"] = "unhealthy"
 
             # Check Redis
@@ -194,7 +194,7 @@ class StillMeGateway:
                     services["redis"] = "healthy"
                 else:
                     services["redis"] = "unhealthy"
-            except:
+            except Exception:
                 services["redis"] = "unhealthy"
 
             return HealthResponse(
@@ -268,7 +268,7 @@ class StillMeGateway:
 
             except Exception as e:
                 logger.error(f"Chat endpoint error: {e}")
-                raise HTTPException(status_code=500, detail=str(e))
+                raise HTTPException(status_code=500, detail=str(e)) from e
 
         @self.app.post("/api/ollama")
         async def ollama_endpoint(request: dict, background_tasks: BackgroundTasks):
@@ -289,7 +289,7 @@ class StillMeGateway:
 
             except Exception as e:
                 logger.error(f"Ollama endpoint error: {e}")
-                raise HTTPException(status_code=500, detail=str(e))
+                raise HTTPException(status_code=500, detail=str(e)) from e
 
         @self.app.get("/api/metrics")
         async def get_metrics():
@@ -389,7 +389,7 @@ class StillMeGateway:
         content = f"{message}:{user_id}"
         return hashlib.sha256(content.encode()).hexdigest()
 
-    async def _get_from_cache(self, key: str) -> Optional[dict]:
+    async def _get_from_cache(self, key: str) -> dict | None:
         """Get response from cache"""
         try:
             if self.redis_client:

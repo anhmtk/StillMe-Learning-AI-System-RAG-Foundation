@@ -11,7 +11,7 @@ import json
 import time
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, Optional, Union
+from typing import Any
 from urllib.parse import urljoin
 
 import httpx
@@ -41,11 +41,11 @@ class HTTPRequest:
 
     method: HTTPMethod
     url: str
-    headers: Optional[dict[str, str]] = None
-    params: Optional[dict[str, Any]] = None
-    data: Optional[Union[dict[str, Any], str, bytes]] = None
-    json_data: Optional[dict[str, Any]] = None
-    timeout: Optional[float] = None
+    headers: dict[str, str] | None = None
+    params: dict[str, Any] | None = None
+    data: dict[str, Any] | str | bytes | None = None
+    json_data: dict[str, Any] | None = None
+    timeout: float | None = None
     follow_redirects: bool = True
     verify_ssl: bool = True
 
@@ -61,7 +61,7 @@ class HTTPResponse:
     url: str
     elapsed_time: float
     request: HTTPRequest
-    json_data: Optional[dict[str, Any]] = None
+    json_data: dict[str, Any] | None = None
 
     def is_success(self) -> bool:
         """Check if response is successful - Kiểm tra response có thành công không"""
@@ -89,8 +89,8 @@ class HTTPResponse:
 class HTTPClientConfig:
     """HTTP Client configuration - Cấu hình HTTP Client"""
 
-    base_url: Optional[str] = None
-    default_headers: Optional[dict[str, str]] = None
+    base_url: str | None = None
+    default_headers: dict[str, str] | None = None
     timeout: float = 30.0
     max_retries: int = 3
     retry_delay: float = 1.0
@@ -105,7 +105,7 @@ class AsyncHttpClient:
     HTTP Client bất đồng bộ với retry, timeout và xử lý lỗi
     """
 
-    def __init__(self, config: Optional[HTTPClientConfig] = None):
+    def __init__(self, config: HTTPClientConfig | None = None):
         """
         Initialize HTTP client - Khởi tạo HTTP client
 
@@ -156,7 +156,7 @@ class AsyncHttpClient:
 
     def _prepare_data(
         self, request: HTTPRequest
-    ) -> Optional[Union[dict[str, Any], str, bytes]]:
+    ) -> dict[str, Any] | str | bytes | None:
         """Prepare data for request - Chuẩn bị data cho request"""
         if request.json_data:
             return json.dumps(request.json_data)
@@ -379,7 +379,7 @@ class HttpRequestBuilder:
         self._request.params[key] = value
         return self
 
-    def data(self, data: Union[dict[str, Any], str, bytes]) -> "HttpRequestBuilder":
+    def data(self, data: dict[str, Any] | str | bytes) -> "HttpRequestBuilder":
         """Set request data - Thiết lập request data"""
         self._request.data = data
         return self
@@ -417,7 +417,7 @@ class ResponseValidator:
 
     @staticmethod
     def validate_json_response(
-        response: HTTPResponse, required_fields: Optional[list[str]] = None
+        response: HTTPResponse, required_fields: list[str] | None = None
     ) -> dict[str, Any]:
         """
         Validate JSON response - Xác thực JSON response
@@ -528,7 +528,7 @@ class SecureHttpClient(AsyncHttpClient):
     HTTP Client bảo mật với các tính năng bảo mật bổ sung
     """
 
-    def __init__(self, config: Optional[HTTPClientConfig] = None):
+    def __init__(self, config: HTTPClientConfig | None = None):
         """Initialize secure HTTP client"""
         if config is None:
             config = HTTPClientConfig()

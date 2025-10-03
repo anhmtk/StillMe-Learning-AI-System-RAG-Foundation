@@ -4,7 +4,7 @@ import re
 import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 ZERO_WIDTH = "[\u200b\u200c\u200d\u2060\u2066-\u2069\ufeff]"
 RTL_MARKS = "[\u200e\u200f]"
@@ -28,7 +28,7 @@ try:
 except ImportError:
     # Fallback if import fails
     def get_template(
-        template_name: str, locale: str = "vi", context: Optional[dict[str, Any]] = None
+        template_name: str, locale: str = "vi", context: dict[str, Any] | None = None
     ) -> str:
         return "Xin lỗi, mình không thể hỗ trợ yêu cầu này."
 
@@ -126,7 +126,7 @@ def luhn_check(card_number: str) -> bool:
             checksum += digit
 
         return checksum % 10 == 0
-    except:
+    except Exception:
         return False
 
 
@@ -464,7 +464,7 @@ SAFE_TEMPLATES_EN = {
 
 
 def safe_reply(
-    category: str, locale: str = "vi", context: Optional[dict[str, Any]] = None
+    category: str, locale: str = "vi", context: dict[str, Any] | None = None
 ) -> str:
     """Generate intelligent safe response based on category, locale, and context"""
 

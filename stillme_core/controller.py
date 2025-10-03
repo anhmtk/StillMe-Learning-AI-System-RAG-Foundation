@@ -8,7 +8,7 @@ StillMe Agent Controller - Stub Implementation
 
 import logging
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ class AgentController:
     # TODO[stabilize]: Implement full agent control functionality
     """
 
-    def __init__(self, config: Optional[AgentConfig] = None):
+    def __init__(self, config: AgentConfig | None = None):
         """Initialize Agent Controller"""
         self.config = config or AgentConfig()
         self.is_running = False
@@ -156,7 +156,7 @@ class AgentController:
         }
 
 
-async def run_agent(task: str, config: Optional[AgentConfig] = None) -> dict[str, Any]:
+async def run_agent(task: str, config: AgentConfig | None = None) -> dict[str, Any]:
     """
     Run agent with given task
 
@@ -171,7 +171,7 @@ async def run_agent(task: str, config: Optional[AgentConfig] = None) -> dict[str
         await controller.stop()
 
 
-def respond(request: str, context: Optional[dict[str, Any]] = None) -> str:
+def respond(request: str, context: dict[str, Any] | None = None) -> str:
     """Global respond function for backward compatibility"""
     if not request:
         return "Empty request provided"
@@ -182,7 +182,7 @@ def respond(request: str, context: Optional[dict[str, Any]] = None) -> str:
     return response
 
 
-def answer(question: str, context: Optional[dict[str, Any]] = None) -> str:
+def answer(question: str, context: dict[str, Any] | None = None) -> str:
     """Global answer function for backward compatibility"""
     if not question:
         return "No question provided"

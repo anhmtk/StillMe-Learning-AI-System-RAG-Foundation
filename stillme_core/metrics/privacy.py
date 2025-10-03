@@ -25,7 +25,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +77,7 @@ class PIIRedactor:
     để đảm bảo privacy compliance.
     """
 
-    def __init__(self, config: Optional[PrivacyConfig] = None):
+    def __init__(self, config: PrivacyConfig | None = None):
         self.config = config or PrivacyConfig()
         self.patterns: list[PIIPattern] = []
         self._load_default_patterns()
@@ -337,7 +337,7 @@ class PrivacyManager:
     cho toàn bộ metrics collection system.
     """
 
-    def __init__(self, config: Optional[PrivacyConfig] = None):
+    def __init__(self, config: PrivacyConfig | None = None):
         self.config = config or PrivacyConfig()
         self.redactor = PIIRedactor(config)
 
@@ -406,7 +406,7 @@ class PrivacyManager:
 
 
 # Global instance
-_privacy_manager_instance: Optional[PrivacyManager] = None
+_privacy_manager_instance: PrivacyManager | None = None
 
 
 def get_privacy_manager() -> PrivacyManager:
@@ -418,7 +418,7 @@ def get_privacy_manager() -> PrivacyManager:
 
 
 def initialize_privacy_manager(
-    config: Optional[PrivacyConfig] = None,
+    config: PrivacyConfig | None = None,
 ) -> PrivacyManager:
     """Initialize global privacy manager with config"""
     global _privacy_manager_instance

@@ -41,7 +41,6 @@ import json
 import logging
 import random
 from pathlib import Path
-from typing import Optional
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -242,7 +241,7 @@ class IdentityHandler:
 
     def generate_identity_response(
         self, message: str, locale: str = "vi"
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Tạo response về identity/origin
 
@@ -260,7 +259,7 @@ class IdentityHandler:
 
     def generate_architecture_response(
         self, message: str, locale: str = "vi"
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Tạo response về architecture/internal structure (BẢO MẬT)
 
@@ -309,7 +308,7 @@ class IdentityHandler:
 
     def generate_secure_response(
         self, message: str, locale: str = "vi"
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Generate secure response for identity or architecture questions
 

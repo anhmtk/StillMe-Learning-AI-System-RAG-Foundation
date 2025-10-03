@@ -19,7 +19,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 # Import Phase 2 modules
 try:
@@ -194,7 +194,7 @@ class UsageAnalyticsEngine:
     Main Usage Analytics Engine
     """
 
-    def __init__(self, config: Optional[dict[str, Any]] = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or {}
         self.logger = self._setup_logging()
 
@@ -1069,7 +1069,7 @@ class ValueQuantifier:
         # Mock value calculation
         return event.duration * 10.0  # $10 per second
 
-    def calculate_time_saving_metric(self) -> Optional[ValueMetric]:
+    def calculate_time_saving_metric(self) -> ValueMetric | None:
         """Calculate time saving metric"""
         # Mock time saving calculation
         return ValueMetric(
@@ -1086,7 +1086,7 @@ class ValueQuantifier:
             metadata={},
         )
 
-    def calculate_quality_improvement_metric(self) -> Optional[ValueMetric]:
+    def calculate_quality_improvement_metric(self) -> ValueMetric | None:
         """Calculate quality improvement metric"""
         # Mock quality improvement calculation
         return ValueMetric(
@@ -1103,7 +1103,7 @@ class ValueQuantifier:
             metadata={},
         )
 
-    def calculate_risk_reduction_metric(self) -> Optional[ValueMetric]:
+    def calculate_risk_reduction_metric(self) -> ValueMetric | None:
         """Calculate risk reduction metric"""
         # Mock risk reduction calculation
         return ValueMetric(
@@ -1132,7 +1132,7 @@ class CostAnalyzer:
         # Mock cost calculation
         return event.duration * 0.5  # $0.5 per second
 
-    def analyze_infrastructure_cost(self) -> Optional[CostAnalysis]:
+    def analyze_infrastructure_cost(self) -> CostAnalysis | None:
         """Analyze infrastructure cost"""
         # Mock infrastructure cost analysis
         return CostAnalysis(
@@ -1148,7 +1148,7 @@ class CostAnalyzer:
             metadata={},
         )
 
-    def analyze_development_cost(self) -> Optional[CostAnalysis]:
+    def analyze_development_cost(self) -> CostAnalysis | None:
         """Analyze development cost"""
         # Mock development cost analysis
         return CostAnalysis(
@@ -1164,7 +1164,7 @@ class CostAnalyzer:
             metadata={},
         )
 
-    def analyze_operational_cost(self) -> Optional[CostAnalysis]:
+    def analyze_operational_cost(self) -> CostAnalysis | None:
         """Analyze operational cost"""
         # Mock operational cost analysis
         return CostAnalysis(

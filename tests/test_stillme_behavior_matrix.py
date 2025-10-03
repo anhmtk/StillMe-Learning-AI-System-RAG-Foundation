@@ -710,7 +710,7 @@ def test_behavior_sample(prompt, expected):
             from stillme_core.modules.telemetry import reset_log
 
             reset_log()
-        except:
+        except Exception:
             pass
 
     text, route, ms = call_stillme(prompt)

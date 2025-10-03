@@ -20,7 +20,6 @@ FUNCTIONALITY / CHỨC NĂNG:
 
 import os
 from pathlib import Path
-from typing import Optional
 
 from .common.logging import get_logger
 
@@ -32,7 +31,7 @@ class FakeSandboxDeployer:
     Fake sandbox deployer for when Docker is unavailable
     """
 
-    def __init__(self, project_root: Optional[str] = None):
+    def __init__(self, project_root: str | None = None):
         """Initialize fake deployer"""
         self.project_root = Path(project_root or os.getcwd())
         self.deployment_logs: list[dict] = []
@@ -44,7 +43,7 @@ class FakeSandboxDeployer:
         self,
         name: str = "security-test",
         image: str = "fake-security-image",
-        custom_dockerfile: Optional[str] = None,
+        custom_dockerfile: str | None = None,
     ) -> tuple[bool, str, dict]:
         """
         Fake deployment that always succeeds
@@ -89,7 +88,7 @@ class RealDockerDeployer:
     Real Docker-based sandbox deployer
     """
 
-    def __init__(self, docker_client, project_root: Optional[str] = None):
+    def __init__(self, docker_client, project_root: str | None = None):
         """Initialize real deployer with Docker client"""
         self.docker_client = docker_client
         self.project_root = Path(project_root or os.getcwd())
@@ -102,7 +101,7 @@ class RealDockerDeployer:
         self,
         name: str = "security-test",
         image: str = "alpine:latest",
-        custom_dockerfile: Optional[str] = None,
+        custom_dockerfile: str | None = None,
     ) -> tuple[bool, str, dict]:
         """
         Real Docker deployment
@@ -180,7 +179,7 @@ class RealDockerDeployer:
         return self.deployment_logs.copy()
 
 
-def get_sandbox_deployer(project_root: Optional[str] = None):
+def get_sandbox_deployer(project_root: str | None = None):
     """
     Get appropriate sandbox deployer based on Docker availability
 
