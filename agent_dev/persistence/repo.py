@@ -1,21 +1,23 @@
+#!/usr/bin/env python3
 """
-Repository classes for AgentDev persistence
-==========================================
+AgentDev Persistence Repository
+===============================
 
-CRUD operations for database models.
+CRUD operations for AgentDev database models.
 """
 
-from typing import List, Optional, Dict, Any
-from datetime import datetime, timezone, timedelta
+from datetime import UTC, datetime, timedelta
+from typing import Any
+
+from sqlalchemy import desc
 from sqlalchemy.orm import Session
-from sqlalchemy import desc, asc
 
 from .models import (
     FeedbackModel,
-    UserPreferencesModel,
-    RuleModel,
     LearnedSolutionModel,
     MetricModel,
+    RuleModel,
+    UserPreferencesModel,
 )
 
 
@@ -25,23 +27,19 @@ class FeedbackRepo:
     def __init__(self, session: Session):
         self.session = session
     
-    def create(self, user_id: str, feedback: str, session_id: str, 
-               feedback_type: str = "neutral", context: Optional[str] = None) -> FeedbackModel:
-        """Create new feedback record"""
+    def create_feedback(self, user_id: str, feedback: str, session_id: str | None = None) -> FeedbackModel:
+        """Create new feedback"""
         feedback_obj = FeedbackModel(
             user_id=user_id,
             feedback=feedback,
             session_id=session_id,
-            feedback_type=feedback_type,
-            context=context,
-            timestamp=datetime.now(timezone.utc)
         )
         self.session.add(feedback_obj)
         self.session.commit()
         self.session.refresh(feedback_obj)
         return feedback_obj
     
-    def get_by_user(self, user_id: str, limit: int = 100) -> List[FeedbackModel]:
+    def get_feedback_by_user(self, user_id: str, limit: int = 100) -> list[FeedbackModel]:
         """Get feedback by user ID"""
         return self.session.query(FeedbackModel)\
             .filter(FeedbackModel.user_id == user_id)\
@@ -49,20 +47,19 @@ class FeedbackRepo:
             .limit(limit)\
             .all()
     
-    def get_by_session(self, session_id: str) -> List[FeedbackModel]:
+    def get_feedback_by_session(self, session_id: str) -> list[FeedbackModel]:
         """Get feedback by session ID"""
         return self.session.query(FeedbackModel)\
             .filter(FeedbackModel.session_id == session_id)\
             .order_by(desc(FeedbackModel.timestamp))\
             .all()
     
-    def get_recent(self, hours: int = 24, limit: int = 100) -> List[FeedbackModel]:
+    def get_recent_feedback(self, hours: int = 24) -> list[FeedbackModel]:
         """Get recent feedback within specified hours"""
-        cutoff_time = datetime.now(timezone.utc) - timedelta(hours=hours)
+        cutoff_time = datetime.now(UTC) - timedelta(hours=hours)
         return self.session.query(FeedbackModel)\
             .filter(FeedbackModel.timestamp >= cutoff_time)\
             .order_by(desc(FeedbackModel.timestamp))\
-            .limit(limit)\
             .all()
 
 
@@ -80,8 +77,8 @@ class UserPreferencesRepo:
             .first()
         
         if existing:
-            setattr(existing, 'preference_value', value)
-            setattr(existing, 'updated_at', datetime.now(timezone.utc))
+            existing.preference_value = value
+            existing.updated_at = datetime.now(UTC)
             self.session.commit()
             return existing
         else:
@@ -89,23 +86,21 @@ class UserPreferencesRepo:
                 user_id=user_id,
                 preference_key=key,
                 preference_value=value,
-                created_at=datetime.now(timezone.utc),
-                updated_at=datetime.now(timezone.utc)
             )
             self.session.add(pref)
             self.session.commit()
             self.session.refresh(pref)
             return pref
     
-    def get_preference(self, user_id: str, key: str) -> Optional[str]:
-        """Get user preference value"""
+    def get_preference(self, user_id: str, key: str) -> str | None:
+        """Get user preference"""
         pref = self.session.query(UserPreferencesModel)\
             .filter(UserPreferencesModel.user_id == user_id)\
             .filter(UserPreferencesModel.preference_key == key)\
             .first()
         return str(pref.preference_value) if pref else None
     
-    def get_all_preferences(self, user_id: str) -> Dict[str, str]:
+    def get_all_preferences(self, user_id: str) -> dict[str, str]:
         """Get all user preferences"""
         prefs = self.session.query(UserPreferencesModel)\
             .filter(UserPreferencesModel.user_id == user_id)\
@@ -114,54 +109,59 @@ class UserPreferencesRepo:
 
 
 class RuleRepo:
-    """Repository for rule operations"""
+    """Repository for rules operations"""
     
     def __init__(self, session: Session):
         self.session = session
     
-    def create_rule(self, rule_name: str, rule_definition: str, 
-                   priority: int = 0, is_active: bool = True) -> RuleModel:
+    def create_rule(self, rule_name: str, rule_definition: str, priority: int = 0) -> RuleModel:
         """Create new rule"""
         rule = RuleModel(
             rule_name=rule_name,
             rule_definition=rule_definition,
             priority=priority,
-            is_active=is_active,
-            created_at=datetime.now(timezone.utc),
-            updated_at=datetime.now(timezone.utc)
         )
         self.session.add(rule)
         self.session.commit()
         self.session.refresh(rule)
         return rule
     
-    def get_active_rules(self) -> List[RuleModel]:
-        """Get all active rules ordered by priority"""
-        return self.session.query(RuleModel)\
-            .filter(RuleModel.is_active == True)\
-            .order_by(asc(RuleModel.priority))\
-            .all()
+    def update_rule(self, rule_name: str, rule_definition: str, 
+                   priority: int | None = None, is_active: bool | None = None) -> RuleModel | None:
+        """Update existing rule"""
+        rule = self.get_rule_by_name(rule_name)
+        if rule:
+            rule.rule_definition = rule_definition
+            rule.updated_at = datetime.now(UTC)
+            if priority is not None:
+                rule.priority = priority
+            if is_active is not None:
+                rule.is_active = is_active
+            self.session.commit()
+            return rule
+        return None
     
-    def get_rule_by_name(self, rule_name: str) -> Optional[RuleModel]:
+    def get_rule_by_name(self, rule_name: str) -> RuleModel | None:
         """Get rule by name"""
         return self.session.query(RuleModel)\
             .filter(RuleModel.rule_name == rule_name)\
             .first()
     
-    def update_rule(self, rule_name: str, rule_definition: str, 
-                   priority: Optional[int] = None, is_active: Optional[bool] = None) -> Optional[RuleModel]:
-        """Update existing rule"""
+    def get_active_rules(self) -> list[RuleModel]:
+        """Get all active rules ordered by priority"""
+        return self.session.query(RuleModel)\
+            .filter(RuleModel.is_active)\
+            .order_by(desc(RuleModel.priority))\
+            .all()
+    
+    def delete_rule(self, rule_name: str) -> bool:
+        """Delete rule by name"""
         rule = self.get_rule_by_name(rule_name)
         if rule:
-            setattr(rule, 'rule_definition', rule_definition)
-            setattr(rule, 'updated_at', datetime.now(timezone.utc))
-            if priority is not None:
-                setattr(rule, 'priority', priority)
-            if is_active is not None:
-                setattr(rule, 'is_active', is_active)
+            self.session.delete(rule)
             self.session.commit()
-            return rule
-        return None
+            return True
+        return False
 
 
 class LearnedSolutionRepo:
@@ -170,30 +170,25 @@ class LearnedSolutionRepo:
     def __init__(self, session: Session):
         self.session = session
     
-    def record_solution(self, error_type: str, solution: str, 
-                       success_rate: float = 1.0) -> LearnedSolutionModel:
-        """Record a learned solution"""
+    def create_solution(self, error_type: str, solution: str) -> LearnedSolutionModel:
+        """Create new learned solution"""
         solution_obj = LearnedSolutionModel(
             error_type=error_type,
             solution=solution,
-            success_rate=success_rate,
-            usage_count=1,
-            created_at=datetime.now(timezone.utc),
-            last_used=datetime.now(timezone.utc)
         )
         self.session.add(solution_obj)
         self.session.commit()
         self.session.refresh(solution_obj)
         return solution_obj
     
-    def get_solutions_for_error(self, error_type: str) -> List[LearnedSolutionModel]:
+    def get_solutions_for_error(self, error_type: str) -> list[LearnedSolutionModel]:
         """Get solutions for specific error type"""
         return self.session.query(LearnedSolutionModel)\
             .filter(LearnedSolutionModel.error_type == error_type)\
-            .order_by(desc(getattr(LearnedSolutionModel, 'success_rate')))\
+            .order_by(desc(LearnedSolutionModel.success_rate))\
             .all()
     
-    def update_success_rate(self, solution_id: int, success: bool) -> Optional[LearnedSolutionModel]:
+    def update_success_rate(self, solution_id: int, success: bool) -> LearnedSolutionModel | None:
         """Update solution success rate"""
         solution = self.session.query(LearnedSolutionModel)\
             .filter(LearnedSolutionModel.id == solution_id)\
@@ -204,13 +199,21 @@ class LearnedSolutionRepo:
             alpha = 0.1
             current_rate = float(getattr(solution, 'success_rate', 1.0))
             new_rate = alpha * (1.0 if success else 0.0) + (1 - alpha) * current_rate
-            setattr(solution, 'success_rate', new_rate)
+            solution.success_rate = new_rate
             current_count = int(getattr(solution, 'usage_count', 0))
-            setattr(solution, 'usage_count', current_count + 1)
-            setattr(solution, 'last_used', datetime.now(timezone.utc))
+            solution.usage_count = current_count + 1
+            solution.last_used = datetime.now(UTC)
             self.session.commit()
             return solution
         return None
+    
+    def get_top_solutions(self, error_type: str, limit: int = 5) -> list[LearnedSolutionModel]:
+        """Get top solutions for error type"""
+        return self.session.query(LearnedSolutionModel)\
+            .filter(LearnedSolutionModel.error_type == error_type)\
+            .order_by(desc(LearnedSolutionModel.success_rate))\
+            .limit(limit)\
+            .all()
 
 
 class MetricRepo:
@@ -219,61 +222,57 @@ class MetricRepo:
     def __init__(self, session: Session):
         self.session = session
     
-    def record_metric(self, metric_name: str, metric_value: float, 
-                     metric_type: str, context: Optional[str] = None) -> MetricModel:
+    def record_metric(self, name: str, value: float, metric_type: str, context: str | None = None) -> MetricModel:
         """Record a metric"""
         metric = MetricModel(
-            metric_name=metric_name,
-            metric_value=metric_value,
+            metric_name=name,
+            metric_value=value,
             metric_type=metric_type,
             context=context,
-            timestamp=datetime.now(timezone.utc)
         )
         self.session.add(metric)
         self.session.commit()
         self.session.refresh(metric)
         return metric
     
-    def get_metrics_by_name(self, metric_name: str, hours: int = 24) -> List[MetricModel]:
-        """Get metrics by name within specified hours"""
-        cutoff_time = datetime.now(timezone.utc) - timedelta(hours=hours)
+    def get_metrics_by_name(self, name: str, limit: int = 100) -> list[MetricModel]:
+        """Get metrics by name"""
         return self.session.query(MetricModel)\
-            .filter(MetricModel.metric_name == metric_name)\
-            .filter(MetricModel.timestamp >= cutoff_time)\
-            .order_by(asc(MetricModel.timestamp))\
+            .filter(MetricModel.metric_name == name)\
+            .order_by(desc(MetricModel.timestamp))\
+            .limit(limit)\
             .all()
     
-    def get_metrics_summary(self, hours: int = 24) -> Dict[str, Dict[str, Any]]:
-        """Get metrics summary for specified hours"""
-        cutoff_time = datetime.now(timezone.utc) - timedelta(hours=hours)
-        metrics = self.session.query(MetricModel)\
-            .filter(MetricModel.timestamp >= cutoff_time)\
+    def get_metrics_by_type(self, metric_type: str, limit: int = 100) -> list[MetricModel]:
+        """Get metrics by type"""
+        return self.session.query(MetricModel)\
+            .filter(MetricModel.metric_type == metric_type)\
+            .order_by(desc(MetricModel.timestamp))\
+            .limit(limit)\
             .all()
+    
+    def get_recent_metrics(self, hours: int = 24) -> list[MetricModel]:
+        """Get recent metrics within specified hours"""
+        cutoff_time = datetime.now(UTC) - timedelta(hours=hours)
+        return self.session.query(MetricModel)\
+            .filter(MetricModel.timestamp >= cutoff_time)\
+            .order_by(desc(MetricModel.timestamp))\
+            .all()
+    
+    def get_metrics_summary(self, name: str | None = None) -> dict[str, Any]:
+        """Get metrics summary"""
+        query = self.session.query(MetricModel)
+        if name:
+            query = query.filter(MetricModel.metric_name == name)
         
-        summary: Dict[str, Dict[str, Any]] = {}
-        for metric in metrics:
-            metric_name = str(metric.metric_name)
-            if metric_name not in summary:
-                summary[metric_name] = {
-                    "count": 0,
-                    "total": 0.0,
-                    "min": float('inf'),
-                    "max": float('-inf'),
-                    "type": str(metric.metric_type)
-                }
-            
-            stats = summary[metric_name]
-            stats["count"] += 1
-            metric_value = float(getattr(metric, 'metric_value', 0.0))
-            stats["total"] += metric_value
-            stats["min"] = min(stats["min"], metric_value)
-            stats["max"] = max(stats["max"], metric_value)
+        metrics = query.all()
+        if not metrics:
+            return {"count": 0, "avg": 0.0, "min": 0.0, "max": 0.0}
         
-        # Calculate averages
-        for _, stats in summary.items():
-            if stats["count"] > 0:
-                stats["avg"] = stats["total"] / stats["count"]
-            else:
-                stats["avg"] = 0.0
-        
-        return summary
+        values = [float(getattr(metric, 'metric_value', 0.0)) for metric in metrics]
+        return {
+            "count": len(values),
+            "avg": sum(values) / len(values),
+            "min": min(values),
+            "max": max(values),
+        }

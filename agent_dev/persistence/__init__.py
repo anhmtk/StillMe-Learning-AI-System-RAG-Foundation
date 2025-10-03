@@ -1,47 +1,48 @@
+#!/usr/bin/env python3
 """
 AgentDev Persistence Package
 ============================
 
-Persistent storage capabilities for AgentDev including:
-- Database models and schemas
-- CRUD operations
-- Type definitions
-- Repository patterns
+Database foundation for AgentDev with SQLite + SQLModel/SQLAlchemy.
+Provides CRUD operations for feedback, user preferences, rules, learned solutions, and metrics.
 """
 
 from .models import (
     FeedbackModel,
-    UserPreferencesModel,
-    RuleModel,
     LearnedSolutionModel,
     MetricModel,
+    RuleModel,
+    UserPreferencesModel,
 )
 from .repo import (
     FeedbackRepo,
-    UserPreferencesRepo,
-    RuleRepo,
     LearnedSolutionRepo,
     MetricRepo,
+    RuleRepo,
+    UserPreferencesRepo,
 )
 from .types import (
     FeedbackRow,
-    UserPrefRow,
-    RuleRow,
     LearnedSolutionRow,
     MetricRow,
+    RuleRow,
+    UserPrefRow,
 )
 
 __all__ = [
+    # Models
     "FeedbackModel",
     "UserPreferencesModel", 
     "RuleModel",
     "LearnedSolutionModel",
     "MetricModel",
+    # Repositories
     "FeedbackRepo",
     "UserPreferencesRepo",
-    "RuleRepo",
+    "RuleRepo", 
     "LearnedSolutionRepo",
     "MetricRepo",
+    # Types
     "FeedbackRow",
     "UserPrefRow",
     "RuleRow",

@@ -1,27 +1,26 @@
+#!/usr/bin/env python3
 """
-Type definitions for AgentDev persistence layer
-==============================================
+AgentDev Persistence Types
+==========================
 
-TypedDict definitions for database rows and data structures.
+TypedDict schemas for data transfer objects.
 """
 
-from typing import TypedDict
 from datetime import datetime
+from typing import TypedDict
 
 
 class FeedbackRow(TypedDict):
-    """Feedback database row structure"""
+    """Feedback row type"""
     id: int
     user_id: str
     feedback: str
-    session_id: str
+    session_id: str | None
     timestamp: datetime
-    feedback_type: str  # "positive", "negative", "neutral"
-    context: str  # JSON string of context data
 
 
 class UserPrefRow(TypedDict):
-    """User preferences database row structure"""
+    """User preference row type"""
     id: int
     user_id: str
     preference_key: str
@@ -31,18 +30,18 @@ class UserPrefRow(TypedDict):
 
 
 class RuleRow(TypedDict):
-    """Rule database row structure"""
+    """Rule row type"""
     id: int
     rule_name: str
-    rule_definition: str  # JSON string of rule logic
-    is_active: bool
+    rule_definition: str
     priority: int
+    is_active: bool
     created_at: datetime
     updated_at: datetime
 
 
 class LearnedSolutionRow(TypedDict):
-    """Learned solution database row structure"""
+    """Learned solution row type"""
     id: int
     error_type: str
     solution: str
@@ -53,10 +52,10 @@ class LearnedSolutionRow(TypedDict):
 
 
 class MetricRow(TypedDict):
-    """Metric database row structure"""
+    """Metric row type"""
     id: int
     metric_name: str
     metric_value: float
-    metric_type: str  # "counter", "timer", "gauge"
+    metric_type: str
     timestamp: datetime
-    context: str  # JSON string of context data
+    context: str | None

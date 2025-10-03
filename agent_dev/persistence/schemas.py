@@ -6,7 +6,7 @@ Input/Output schemas using Pydantic v2 for data validation.
 """
 
 from datetime import datetime
-from typing import Optional
+
 from pydantic import BaseModel, Field
 
 
@@ -16,7 +16,7 @@ class FeedbackIn(BaseModel):
     feedback: str = Field(..., description="Feedback text")
     session_id: str = Field(..., description="Session ID")
     feedback_type: str = Field(default="neutral", description="Type of feedback")
-    context: Optional[str] = Field(default=None, description="Context as JSON string")
+    context: str | None = Field(default=None, description="Context as JSON string")
 
 
 class FeedbackOut(BaseModel):
@@ -27,7 +27,7 @@ class FeedbackOut(BaseModel):
     session_id: str
     timestamp: datetime
     feedback_type: str
-    context: Optional[str] = None
+    context: str | None = None
 
 
 class UserPreferenceIn(BaseModel):
@@ -89,7 +89,7 @@ class MetricIn(BaseModel):
     metric_name: str = Field(..., description="Metric name")
     metric_value: float = Field(..., description="Metric value")
     metric_type: str = Field(..., description="Metric type: counter, timer, gauge")
-    context: Optional[str] = Field(default=None, description="Context as JSON string")
+    context: str | None = Field(default=None, description="Context as JSON string")
 
 
 class MetricOut(BaseModel):
@@ -99,7 +99,7 @@ class MetricOut(BaseModel):
     metric_value: float
     metric_type: str
     timestamp: datetime
-    context: Optional[str] = None
+    context: str | None = None
 
 
 class MetricsSummary(BaseModel):

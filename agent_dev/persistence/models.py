@@ -1,16 +1,26 @@
+#!/usr/bin/env python3
 """
-SQLAlchemy models for AgentDev persistence
-=========================================
+AgentDev Persistence Models
+===========================
 
-Database models using SQLAlchemy for persistent storage.
+SQLModel/SQLAlchemy models for AgentDev database tables.
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+from typing import Any
+
 from sqlalchemy import (
-    Column, Integer, String, Text, Boolean, Float, DateTime, 
-    create_engine, Index
+    Boolean,
+    Column,
+    DateTime,
+    Float,
+    Index,
+    Integer,
+    String,
+    Text,
+    create_engine,
 )
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 Base = declarative_base()
@@ -23,14 +33,12 @@ class FeedbackModel(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(String(255), nullable=False, index=True)
     feedback = Column(Text, nullable=False)
-    session_id = Column(String(255), nullable=False, index=True)
-    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
-    feedback_type = Column(String(50), nullable=False, default="neutral")
-    context = Column(Text, nullable=True)  # JSON string
+    session_id = Column(String(255), nullable=True, index=True)
+    timestamp = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
     
     __table_args__ = (
-        Index("idx_feedback_user_timestamp", "user_id", "timestamp"),
-        Index("idx_feedback_session", "session_id"),
+        Index('idx_feedback_user_timestamp', 'user_id', 'timestamp'),
+        Index('idx_feedback_session', 'session_id'),
     )
 
 
@@ -42,74 +50,78 @@ class UserPreferencesModel(Base):
     user_id = Column(String(255), nullable=False, index=True)
     preference_key = Column(String(255), nullable=False)
     preference_value = Column(Text, nullable=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
+    updated_at = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
     
     __table_args__ = (
-        Index("idx_user_pref_key", "user_id", "preference_key", unique=True),
+        Index('idx_user_prefs_user_key', 'user_id', 'preference_key', unique=True),
     )
 
 
 class RuleModel(Base):
-    """Rule database model"""
+    """Rules database model"""
     __tablename__ = "rules"
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     rule_name = Column(String(255), nullable=False, unique=True, index=True)
     rule_definition = Column(Text, nullable=False)  # JSON string
-    is_active = Column(Boolean, default=True, nullable=False)
     priority = Column(Integer, default=0, nullable=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
-    updated_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc), nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
+    updated_at = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
     
     __table_args__ = (
-        Index("idx_rule_active_priority", "is_active", "priority"),
+        Index('idx_rules_active_priority', 'is_active', 'priority'),
     )
 
 
 class LearnedSolutionModel(Base):
-    """Learned solution database model"""
+    """Learned solutions database model"""
     __tablename__ = "learned_solutions"
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     error_type = Column(String(255), nullable=False, index=True)
     solution = Column(Text, nullable=False)
-    success_rate = Column(Float, default=1.0, nullable=False)
+    success_rate: Column[float] = Column(Float, default=1.0, nullable=False)
     usage_count = Column(Integer, default=0, nullable=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
-    last_used = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
+    last_used = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
     
     __table_args__ = (
-        Index("idx_learned_error_type", "error_type"),
-        Index("idx_learned_success_rate", "success_rate"),
+        Index('idx_learned_solutions_error_success', 'error_type', 'success_rate'),
     )
 
 
 class MetricModel(Base):
-    """Metric database model"""
+    """Metrics database model"""
     __tablename__ = "metrics"
     
     id = Column(Integer, primary_key=True, autoincrement=True)
     metric_name = Column(String(255), nullable=False, index=True)
-    metric_value = Column(Float, nullable=False)
+    metric_value: Column[float] = Column(Float, nullable=False)
     metric_type = Column(String(50), nullable=False)  # "counter", "timer", "gauge"
-    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+    timestamp = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
     context = Column(Text, nullable=True)  # JSON string
     
     __table_args__ = (
-        Index("idx_metric_name_timestamp", "metric_name", "timestamp"),
-        Index("idx_metric_type", "metric_type"),
+        Index('idx_metrics_name_timestamp', 'metric_name', 'timestamp'),
+        Index('idx_metrics_type_timestamp', 'metric_type', 'timestamp'),
     )
 
 
+# Database engine and session factory
 def create_database_engine(database_url: str = "sqlite:///agentdev.db"):
-    """Create database engine and session factory"""
-    engine = create_engine(database_url, echo=False)
-    Base.metadata.create_all(engine)
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-    return engine, SessionLocal
+    """Create database engine"""
+    return create_engine(database_url, echo=False)
 
 
 def create_memory_database():
-    """Create in-memory SQLite database for testing"""
-    return create_database_engine("sqlite:///:memory:")
+    """Create in-memory database for testing"""
+    engine = create_engine("sqlite:///:memory:", echo=False)
+    Base.metadata.create_all(engine)
+    return engine
+
+
+def get_session_factory(engine: Any):
+    """Get session factory"""
+    return sessionmaker(bind=engine)
