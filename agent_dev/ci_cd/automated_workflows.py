@@ -113,7 +113,7 @@ class AutomatedWorkflows:
         self.pipelines: dict[str, Pipeline] = {}
         self.executions: dict[str, PipelineExecution] = {}
         self.scheduled_jobs: dict[str, Any] = {}
-        self.webhook_handlers: dict[str, Callable] = {}
+        self.webhook_handlers: dict[str, Callable[..., Any]] = {}
         self.running = False
 
     def _load_config(self, config_path: str | None = None) -> dict[str, Any]:
@@ -164,7 +164,7 @@ class AutomatedWorkflows:
             triggers = [TriggerType(t) for t in pipeline_data.get("triggers", [])]
 
             # Convert steps
-            steps = []
+            steps: list[PipelineStep] = []
             for step_data in pipeline_data.get("steps", []):
                 step = PipelineStep(
                     step_id=step_data["id"],
@@ -304,11 +304,11 @@ class AutomatedWorkflows:
         self, execution: PipelineExecution, pipeline: Pipeline
     ):
         """Execute pipeline steps sequentially"""
-        executed_steps = set()
+        executed_steps: set[str] = set()
 
         while len(executed_steps) < len(pipeline.steps):
             # Find steps that can be executed (dependencies satisfied)
-            ready_steps = []
+            ready_steps: list[PipelineStep] = []
             for step in pipeline.steps:
                 if step.step_id in executed_steps:
                     continue
@@ -344,13 +344,13 @@ class AutomatedWorkflows:
         # This is a simplified parallel execution
         # In a real implementation, you'd need a more sophisticated dependency resolver
 
-        tasks = []
+        tasks: list[asyncio.Task[Any]] = []
         for step in pipeline.steps:
             task = asyncio.create_task(self._execute_step(execution, step))
             tasks.append(task)
 
         # Wait for all steps to complete
-        results = await asyncio.gather(*tasks, return_exceptions=True)
+        results: list[Any] = await asyncio.gather(*tasks, return_exceptions=True)
 
         # Check for failures
         for i, result in enumerate(results):
