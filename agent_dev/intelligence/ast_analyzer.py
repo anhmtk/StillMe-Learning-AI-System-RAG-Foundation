@@ -261,33 +261,34 @@ class ASTAnalyzer:
 
     def analyze_file(self, file_path: str) -> CodeAnalysis:
         """Analyze a single file"""
-        file_path = Path(file_path)
+        file_path_obj: Path = Path(file_path)
 
         # Check cache
+        file_hash: str = ""
         if self.config["cache_enabled"]:
-            file_hash = self._calculate_file_hash(file_path)
+            file_hash = self._calculate_file_hash(file_path_obj)
             if file_hash in self.analysis_cache:
                 cached_analysis = self.analysis_cache[file_hash]
                 if cached_analysis.file_path == str(file_path):
                     return cached_analysis
 
         # Check file size
-        if file_path.stat().st_size > self.config["max_file_size"]:
-            raise ValueError(f"File too large: {file_path}")
+        if file_path_obj.stat().st_size > self.config["max_file_size"]:
+            raise ValueError(f"File too large: {file_path_obj}")
 
         try:
-            with open(file_path, encoding="utf-8") as f:
+            with open(file_path_obj, encoding="utf-8") as f:
                 source_code = f.read()
         except Exception as e:
             raise ValueError(f"Failed to read file: {e}") from e
 
         try:
-            tree = ast.parse(source_code, filename=str(file_path))
+            tree = ast.parse(source_code, filename=str(file_path_obj))
         except SyntaxError as e:
             raise ValueError(f"Syntax error in file: {e}") from e
 
         # Perform analysis
-        analysis = self._analyze_ast(tree, str(file_path), source_code)
+        analysis = self._analyze_ast(tree, str(file_path_obj), source_code)
 
         # Cache result
         if self.config["cache_enabled"]:
@@ -352,7 +353,7 @@ class ASTAnalyzer:
 
     def _extract_ast_nodes(self, tree: ast.AST) -> list[ASTNode]:
         """Extract AST nodes with metadata"""
-        nodes = []
+        nodes: list[ASTNode] = []
 
         for node in ast.walk(tree):
             ast_node = ASTNode(
@@ -379,7 +380,7 @@ class ASTAnalyzer:
 
     def _get_node_attributes(self, node: ast.AST) -> dict[str, Any]:
         """Get node attributes"""
-        attributes = {}
+        attributes: dict[str, Any] = {}
 
         if isinstance(node, ast.FunctionDef):
             attributes["args_count"] = len(node.args.args)
@@ -422,14 +423,16 @@ class ASTAnalyzer:
 
         # Nested structures
         if hasattr(node, "body"):
-            for child in node.body:
-                complexity += self._calculate_node_complexity(child)
+            body = getattr(node, "body", None)
+            if body and hasattr(body, "__iter__"):
+                for child in body:
+                    complexity += self._calculate_node_complexity(child)
 
         return complexity
 
     def _calculate_metrics(self, tree: ast.AST, lines: list[str]) -> list[CodeMetric]:
         """Calculate code metrics"""
-        metrics = []
+        metrics: list[CodeMetric] = []
 
         # Cyclomatic complexity
         cyclomatic = self._calculate_cyclomatic_complexity(tree)
@@ -519,7 +522,7 @@ class ASTAnalyzer:
 
     def _detect_patterns(self, source_code: str, lines: list[str]) -> list[CodePattern]:
         """Detect code patterns"""
-        patterns = []
+        patterns: list[CodePattern] = []
 
         for category, pattern_defs in self.patterns.items():
             for pattern_name, pattern_config in pattern_defs.items():
@@ -640,7 +643,7 @@ class ASTAnalyzer:
         self, metrics: list[CodeMetric], patterns: list[CodePattern]
     ) -> list[str]:
         """Generate improvement recommendations"""
-        recommendations = []
+        recommendations: list[str] = []
 
         # Metric-based recommendations
         for metric in metrics:
@@ -665,12 +668,12 @@ class ASTAnalyzer:
 
     def analyze_directory(self, directory_path: str) -> dict[str, CodeAnalysis]:
         """Analyze all Python files in directory"""
-        directory = Path(directory_path)
-        analyses = {}
+        directory: Path = Path(directory_path)
+        analyses: dict[str, CodeAnalysis] = {}
 
         for py_file in directory.rglob("*.py"):
             try:
-                analysis = self.analyze_file(py_file)
+                analysis = self.analyze_file(str(py_file))
                 analyses[str(py_file)] = analysis
             except Exception as e:
                 print(f"⚠️ Failed to analyze {py_file}: {e}")
@@ -679,23 +682,23 @@ class ASTAnalyzer:
 
     def get_analysis_summary(self, analyses: dict[str, CodeAnalysis]) -> dict[str, Any]:
         """Get summary of multiple analyses"""
-        total_files = len(analyses)
-        total_lines = sum(
+        total_files: int = len(analyses)
+        total_lines: float = sum(
             a.metrics[1].value for a in analyses.values() if len(a.metrics) > 1
         )
-        avg_complexity = (
+        avg_complexity: float = (
             sum(a.complexity_score for a in analyses.values()) / total_files
             if total_files > 0
             else 0
         )
-        avg_quality = (
+        avg_quality: float = (
             sum(a.quality_score for a in analyses.values()) / total_files
             if total_files > 0
             else 0
         )
 
         # Count issues by severity
-        issue_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+        issue_counts: dict[str, int] = {"critical": 0, "high": 0, "medium": 0, "low": 0}
         for analysis in analyses.values():
             for pattern in analysis.patterns:
                 issue_counts[pattern.severity] += 1
