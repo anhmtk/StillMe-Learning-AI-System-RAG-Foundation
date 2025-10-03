@@ -99,7 +99,7 @@ class SymbolIndex:
 
     def _extract_symbols_from_file(self, file_path: Path) -> list[SymbolInfo]:
         """Extract symbols from a Python file using AST"""
-        symbols = []
+        symbols: list[SymbolInfo] = []
 
         try:
             with open(file_path, encoding="utf-8") as f:
@@ -163,9 +163,7 @@ class SymbolIndex:
         """Tìm symbol trong index"""
         return self.symbols.get(symbol_name, [])
 
-    def get_import_for_symbol(
-        self, symbol_name: str, target_file: str
-    ) -> str | None:
+    def get_import_for_symbol(self, symbol_name: str, target_file: str) -> str | None:
         """Tạo import statement cho symbol"""
         symbols = self.find_symbol(symbol_name)
         if not symbols:
