@@ -66,7 +66,7 @@ class AdvancedFixer:
         """Fix F821 undefined name với symbol index"""
         try:
             # Extract symbol name
-            match = re.search(r"undefined name '(\w+)'", error.message)
+            match = re.search(r"undefined name '(\w+)'", error.msg)
             if not match:
                 return FixResult(
                     success=False,
@@ -77,7 +77,7 @@ class AdvancedFixer:
 
             # Tìm symbol trong index
             import_stmt = self.symbol_index.get_import_for_symbol(
-                symbol_name, error.file_path
+                symbol_name, error.file
             )
             if not import_stmt:
                 return FixResult(
@@ -86,10 +86,10 @@ class AdvancedFixer:
                 )
 
             # Backup file trước khi fix
-            backup_path = self._backup_file(error.file_path)
+            backup_path = self._backup_file(error.file)
 
             # Apply fix
-            success = self._add_import_to_file(error.file_path, import_stmt)
+            success = self._add_import_to_file(error.file, import_stmt)
             if not success:
                 return FixResult(
                     success=False,
@@ -97,10 +97,10 @@ class AdvancedFixer:
                 )
 
             # Validate fix
-            validation_result = self._validate_fix(error.file_path, symbol_name)
+            validation_result = self._validate_fix(error.file, symbol_name)
             if not validation_result["valid"]:
                 # Rollback
-                self._restore_file(error.file_path, backup_path)
+                self._restore_file(error.file, backup_path)
                 return FixResult(
                     success=False,
                     message=f"Fix validation failed: {validation_result['reason']}",
@@ -121,19 +121,17 @@ class AdvancedFixer:
         """Fix invalid literal for int() errors"""
         try:
             # Check if this is a parser error (from our own parsing)
-            if "invalid literal for int() with base 10" in error.message:
+            if "invalid literal for int() with base 10" in error.msg:
                 # This might be from our error parser, not the actual code
                 return FixResult(
                     success=False,
                     message="Invalid literal error appears to be from parser, not code",
-                    timestamp=datetime.now(),
                 )
 
             # For actual code errors, we'd need to implement safe_int utility
             return FixResult(
                 success=False,
                 message="Invalid literal int errors require safe_int utility - not implemented yet",
-                timestamp=datetime.now(),
             )
 
         except Exception as e:
@@ -151,9 +149,9 @@ class AdvancedFixer:
         # Group errors by file
         file_errors: dict[str, list[ErrorInfo]] = {}
         for error in errors:
-            if error.file_path not in file_errors:
-                file_errors[error.file_path] = []
-            file_errors[error.file_path].append(error)
+            if error.file not in file_errors:
+                file_errors[error.file] = []
+            file_errors[error.file].append(error)
 
         # Limit to max_files
         files_to_fix: list[str] = list(file_errors.keys())[:max_files]
@@ -168,9 +166,9 @@ class AdvancedFixer:
             for file_path in files_to_fix:
                 file_errors_list = file_errors[file_path]
                 for error in file_errors_list:
-                    if error.error_type.value == "undefined_name":
+                    if error.rule == "F821":
                         result = self.fix_f821_undefined_name(error)
-                    elif "invalid literal for int()" in error.message:
+                    elif "invalid literal for int()" in error.msg:
                         result = self.fix_invalid_literal_int(error)
                     else:
                         result = FixResult(
@@ -189,9 +187,10 @@ class AdvancedFixer:
                     self._restore_file(file_path, backup_paths[file_path])
 
                 # Update results to reflect rollback
+                # Mark successful fixes as failed due to rollback
                 for result in results:
-                    if result.status == FixStatus.SUCCESS:
-                        result.status = FixStatus.FAILED
+                    if result.success:
+                        result.success = False
                         result.message = "Rolled back due to validation failure"
 
             return results, validation_stats
