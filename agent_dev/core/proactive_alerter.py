@@ -76,18 +76,18 @@ class AlertEvent:
 class ProactiveAlerter:
     """Hệ thống cảnh báo chủ động"""
 
-    def __init__(self, config: dict | None = None):
+    def __init__(self, config: dict[str, Any] | None = None):
         self.config = config or self._default_config()
         self.rules = self._load_rules()
-        self.events = []
-        self.last_alert_times = {}
+        self.events: list[Any] = []
+        self.last_alert_times: dict[str, Any] = {}
 
         # Setup logging
         self._setup_logging()
 
         logger.info("🚨 Proactive Alerter initialized")
 
-    def _default_config(self) -> dict:
+    def _default_config(self) -> dict[str, Any]:
         """Default configuration"""
         return {
             "channels": {
@@ -145,7 +145,7 @@ class ProactiveAlerter:
 
     def _load_rules(self) -> list[AlertRule]:
         """Load alert rules from config"""
-        rules = []
+        rules: list[AlertRule] = []
 
         for rule_id, rule_config in self.config["rules"].items():
             if rule_config.get("enabled", True):
@@ -164,7 +164,7 @@ class ProactiveAlerter:
 
     def check_metrics(self, metrics: dict[str, Any]) -> list[AlertEvent]:
         """Check metrics against alert rules"""
-        events = []
+        events: list[AlertEvent] = []
 
         for rule in self.rules:
             if not rule.enabled:
@@ -318,7 +318,7 @@ class ProactiveAlerter:
 
         logger.info(f"File alert written: {event.title}")
 
-    def get_recent_events(self, hours: int = 24) -> list[dict]:
+    def get_recent_events(self, hours: int = 24) -> list[dict[str, Any]]:
         """Get recent alert events"""
         cutoff_time = datetime.now() - timedelta(hours=hours)
         recent_events = [e for e in self.events if e.timestamp > cutoff_time]
@@ -333,7 +333,7 @@ class ProactiveAlerter:
             e for e in self.events if e.timestamp > datetime.now() - timedelta(hours=24)
         ]
 
-        summary = {
+        summary: dict[str, Any] = {
             "total_events": len(self.events),
             "recent_events": len(recent_events),
             "by_priority": {},
