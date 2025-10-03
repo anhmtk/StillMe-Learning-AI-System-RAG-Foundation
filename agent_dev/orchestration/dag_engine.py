@@ -133,7 +133,7 @@ class DAGEngine:
 
     def __init__(self, config_path: str | None = None):
         self.config = self._load_config(config_path)
-        self.dags: dict[str, nx.DiGraph[str, dict[str, Any]]] = {}
+        self.dags: dict[str, nx.DiGraph[str]] = {}
         self.executions: dict[str, DAGExecution] = {}
         self.node_handlers: dict[str, Callable[..., Any]] = {}
         self.resource_pools: dict[str, dict[str, Any]] = {}
@@ -316,7 +316,7 @@ class DAGEngine:
             )
 
     async def _execute_sequential(
-        self, execution: DAGExecution, dag_graph: nx.DiGraph[str, dict[str, Any]]
+        self, execution: DAGExecution, dag_graph: nx.DiGraph[str]
     ):
         """Execute DAG nodes sequentially"""
         # Topological sort for sequential execution
@@ -333,7 +333,7 @@ class DAGEngine:
             await self._execute_node(execution, node)
 
     async def _execute_parallel(
-        self, execution: DAGExecution, dag_graph: nx.DiGraph[str, dict[str, Any]]
+        self, execution: DAGExecution, dag_graph: nx.DiGraph[str]
     ):
         """Execute DAG nodes in parallel where possible"""
         completed_nodes: set[str] = set()
@@ -384,7 +384,7 @@ class DAGEngine:
                 break
 
     async def _execute_adaptive(
-        self, execution: DAGExecution, dag_graph: nx.DiGraph[str, dict[str, Any]]
+        self, execution: DAGExecution, dag_graph: nx.DiGraph[str]
     ):
         """Execute DAG with adaptive strategy"""
         # Start with parallel execution, fall back to sequential if needed
@@ -882,7 +882,7 @@ if __name__ == "__main__":
                 dag_file.unlink()
 
     def _get_topological_order(
-        self, dag_graph: nx.DiGraph[str, dict[str, Any]]
+        self, dag_graph: nx.DiGraph[str]
     ) -> list[str]:
         """Get topological order of DAG nodes"""
         try:
@@ -892,9 +892,9 @@ if __name__ == "__main__":
 
     def _create_dag_graph(
         self, nodes: list[DAGNode]
-    ) -> nx.DiGraph[str, dict[str, Any]]:
+    ) -> nx.DiGraph[str]:
         """Create DAG graph from nodes"""
-        dag_graph: nx.DiGraph[str, dict[str, Any]] = nx.DiGraph()
+        dag_graph: nx.DiGraph[str] = nx.DiGraph()
 
         # Add nodes
         for node in nodes:
