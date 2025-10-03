@@ -292,7 +292,7 @@ class ThreatIntelligence:
             response = requests.get(source_config["url"], timeout=30)
             response.raise_for_status()
 
-            domains = []
+            domains: list[str] = []
             for line in response.text.split("\n"):
                 if line.strip() and not line.startswith("#"):
                     parts = line.split("\t")
@@ -358,7 +358,7 @@ class ThreatIntelligence:
         self, artifact_type: str, artifact_value: str
     ) -> dict[str, Any]:
         """Analyze artifact against threat intelligence"""
-        analysis_result = {
+        analysis_result: dict[str, Any] = {
             "artifact_type": artifact_type,
             "artifact_value": artifact_value,
             "threat_detected": False,
@@ -447,15 +447,17 @@ class ThreatIntelligence:
         for indicator in self.indicators.values():
             # Count by type
             indicator_type = indicator.indicator_type.value
-            indicators_by_type[indicator_type] = (
-                indicators_by_type.get(indicator_type, 0) + 1
-            )
+            if indicator_type in indicators_by_type:
+                indicators_by_type[indicator_type] = indicators_by_type[indicator_type] + 1
+            else:
+                indicators_by_type[indicator_type] = 1
 
             # Count by severity
             severity = indicator.severity.value
-            indicators_by_severity[severity] = (
-                indicators_by_severity.get(severity, 0) + 1
-            )
+            if severity in indicators_by_severity:
+                indicators_by_severity[severity] = indicators_by_severity[severity] + 1
+            else:
+                indicators_by_severity[severity] = 1
 
         return {
             "total_indicators": total_indicators,
