@@ -23,7 +23,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 
 class DebugLevel(Enum):
@@ -475,11 +475,11 @@ class AdvancedDebuggingSystem:
             if hasattr(pattern, "common_causes"):
                 probable_causes.extend(getattr(pattern, "common_causes", []))
             elif isinstance(pattern, dict) and "common_causes" in pattern:
-                causes: Any = pattern.get("common_causes", [])
-                if isinstance(causes, list):
-                    for item in causes:
-                        if item is not None:
-                            probable_causes.append(str(item))
+                pattern_dict = cast(dict[str, Any], pattern)
+                causes = cast(list[Any], pattern_dict.get("common_causes", []))
+                for item in causes:
+                    if item is not None:
+                        probable_causes.append(str(item))
 
         # Remove duplicates
         probable_causes = list(set(probable_causes))
@@ -493,11 +493,11 @@ class AdvancedDebuggingSystem:
             if hasattr(pattern, "solutions"):
                 recommendations.extend(getattr(pattern, "solutions", []))
             elif isinstance(pattern, dict) and "solutions" in pattern:
-                solutions: Any = pattern.get("solutions", [])
-                if isinstance(solutions, list):
-                    for item in solutions:
-                        if item is not None:
-                            recommendations.append(str(item))
+                pattern_dict = cast(dict[str, Any], pattern)
+                solutions = cast(list[Any], pattern_dict.get("solutions", []))
+                for item in solutions:
+                    if item is not None:
+                        recommendations.append(str(item))
 
         # Remove duplicates
         recommendations = list(set(recommendations))
