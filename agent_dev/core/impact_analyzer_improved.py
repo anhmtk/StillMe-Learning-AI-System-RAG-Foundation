@@ -169,7 +169,7 @@ class ImpactAnalyzer:
 
     def _analyze_dependencies_enhanced(self, task: str) -> list[DependencyInfo]:
         """Enhanced dependency analysis with better detection"""
-        dependencies = []
+        dependencies: list[DependencyInfo] = []
         task_lower = task.lower()
 
         # Database dependencies
@@ -332,7 +332,7 @@ class ImpactAnalyzer:
 
     def _analyze_security_risks(self, task: str) -> list[SecurityRisk]:
         """Phân tích rủi ro bảo mật"""
-        risks = []
+        risks: list[SecurityRisk] = []
         task_lower = task.lower()
 
         # SQL injection risks
@@ -521,7 +521,7 @@ class ImpactAnalyzer:
         performance: PerformanceImpact,
     ) -> list[str]:
         """Tạo khuyến nghị"""
-        recommendations = []
+        recommendations: list[str] = []
 
         if dependencies:
             recommendations.append("Review and update dependencies")
