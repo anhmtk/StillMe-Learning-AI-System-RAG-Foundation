@@ -46,7 +46,8 @@ class AgentModuleTester:
                 }
 
             module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
+            if spec.loader is not None:
+                spec.loader.exec_module(module)
 
             logger.info(f"✅ Module {module_name} loaded successfully")
             return {"success": True, "error": None, "fixed": False}
@@ -71,7 +72,7 @@ class AgentModuleTester:
 
     def test_all_modules(self) -> dict[str, Any]:
         """Test tất cả modules trong thư mục"""
-        results = {"total": 0, "passed": 0, "failed": 0, "fixed": 0, "modules": {}}
+        results: dict[str, Any] = {"total": 0, "passed": 0, "failed": 0, "fixed": 0, "modules": {}}
 
         if not self.modules_dir.exists():
             logger.error(f"Modules directory not found: {self.modules_dir}")
@@ -87,23 +88,23 @@ class AgentModuleTester:
                 continue
 
             # Test module
-            test_result = self.test_module(module_name)
+            test_result: dict[str, Any] = self.test_module(module_name)
             results["modules"][module_name] = test_result
 
             if test_result["success"]:
-                results["passed"] += 1
+                results["passed"] = results["passed"] + 1
             else:
-                results["failed"] += 1
+                results["failed"] = results["failed"] + 1
 
                 # Thử sửa lỗi
                 if self.fix_module_error(module_name, test_result["error"]):
-                    results["fixed"] += 1
+                    results["fixed"] = results["fixed"] + 1
 
                     # Test lại sau khi sửa
-                    retest_result = self.test_module(module_name)
+                    retest_result: dict[str, Any] = self.test_module(module_name)
                     if retest_result["success"]:
-                        results["passed"] += 1
-                        results["failed"] -= 1
+                        results["passed"] = results["passed"] + 1
+                        results["failed"] = results["failed"] - 1
                         results["modules"][module_name] = retest_result
 
         return results
