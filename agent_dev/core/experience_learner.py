@@ -21,6 +21,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
+from typing import Any
 
 
 class LearningType(Enum):
@@ -141,7 +142,7 @@ class ExperienceLearner:
             with open(self.experience_db, encoding="utf-8") as f:
                 data = json.load(f)
 
-            experiences = []
+            experiences: list[Experience] = []
             for exp_data in data:
                 exp_data["timestamp"] = datetime.fromisoformat(exp_data["timestamp"])
                 if exp_data.get("last_used"):
@@ -164,7 +165,7 @@ class ExperienceLearner:
             with open(self.patterns_db, encoding="utf-8") as f:
                 data = json.load(f)
 
-            patterns = []
+            patterns: list[LearningPattern] = []
             for pattern_data in data:
                 pattern_data["created_at"] = datetime.fromisoformat(
                     pattern_data["created_at"]
@@ -188,7 +189,7 @@ class ExperienceLearner:
             with open(self.insights_db, encoding="utf-8") as f:
                 data = json.load(f)
 
-            insights = []
+            insights: list[LearningInsight] = []
             for insight_data in data:
                 insight_data["created_at"] = datetime.fromisoformat(
                     insight_data["created_at"]
@@ -203,7 +204,7 @@ class ExperienceLearner:
     def _save_experiences(self):
         """Save experiences to database"""
         try:
-            data = []
+            data: list[dict[str, Any]] = []
             for exp in self.experiences:
                 exp_dict = asdict(exp)
                 exp_dict["timestamp"] = exp.timestamp.isoformat()
@@ -219,7 +220,7 @@ class ExperienceLearner:
     def _save_patterns(self):
         """Save patterns to database"""
         try:
-            data = []
+            data: list[dict[str, Any]] = []
             for pattern in self.patterns:
                 pattern_dict = asdict(pattern)
                 pattern_dict["created_at"] = pattern.created_at.isoformat()
@@ -234,7 +235,7 @@ class ExperienceLearner:
     def _save_insights(self):
         """Save insights to database"""
         try:
-            data = []
+            data: list[dict[str, Any]] = []
             for insight in self.insights:
                 insight_dict = asdict(insight)
                 insight_dict["created_at"] = insight.created_at.isoformat()
@@ -251,7 +252,7 @@ class ExperienceLearner:
         action: str,
         result: str,
         success: bool,
-        performance_metrics: dict[str, float] = None,
+        performance_metrics: dict[str, float] | None = None,
         learning_type: LearningType = LearningType.SUCCESS_PATTERN,
     ) -> str:
         """Record a new experience"""
@@ -306,10 +307,10 @@ class ExperienceLearner:
 
     def analyze_patterns(self) -> list[LearningPattern]:
         """Analyze experiences to identify patterns"""
-        patterns = []
+        patterns: list[LearningPattern] = []
 
         # Group experiences by type and context
-        experience_groups = {}
+        experience_groups: dict[str, list[Experience]] = {}
         for exp in self.experiences:
             key = f"{exp.learning_type.value}_{exp.context}"
             if key not in experience_groups:
@@ -355,7 +356,7 @@ class ExperienceLearner:
 
     def generate_insights(self) -> list[LearningInsight]:
         """Generate insights from experiences and patterns"""
-        insights = []
+        insights: list[LearningInsight] = []
 
         # Analyze success patterns
         success_experiences = [exp for exp in self.experiences if exp.success]
@@ -418,7 +419,7 @@ class ExperienceLearner:
         failure_patterns = [p for p in patterns if p.success_rate < 0.3]
 
         # Generate recommendations
-        recommendations = []
+        recommendations: list[str] = []
         if success_patterns:
             recommendations.append(
                 f"Continue using {len(success_patterns)} successful patterns"
@@ -450,10 +451,10 @@ class ExperienceLearner:
 
     def get_recommendations(self, context: str) -> list[str]:
         """Get recommendations based on learned patterns"""
-        recommendations = []
+        recommendations: list[str] = []
 
         # Find relevant patterns
-        relevant_patterns = []
+        relevant_patterns: list[LearningPattern] = []
         for pattern in self.patterns:
             if any(
                 context.lower() in condition.lower() for condition in pattern.conditions
