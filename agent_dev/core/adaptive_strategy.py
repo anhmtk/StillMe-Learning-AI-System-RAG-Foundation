@@ -156,7 +156,7 @@ class AdaptiveStrategy:
             with open(self.strategies_db, encoding="utf-8") as f:
                 data = json.load(f)
 
-            strategies = []
+            strategies: list[Strategy] = []
             for strategy_data in data:
                 strategy_data["created_at"] = datetime.fromisoformat(
                     strategy_data["created_at"]
@@ -180,7 +180,7 @@ class AdaptiveStrategy:
             with open(self.results_db, encoding="utf-8") as f:
                 data = json.load(f)
 
-            results = []
+            results: list[StrategyResult] = []
             for result_data in data:
                 result_data["timestamp"] = datetime.fromisoformat(
                     result_data["timestamp"]
@@ -195,7 +195,7 @@ class AdaptiveStrategy:
     def _save_strategies(self):
         """Save strategies to database"""
         try:
-            data = []
+            data: list[dict[str, Any]] = []
             for strategy in self.strategies:
                 strategy_dict = asdict(strategy)
                 strategy_dict["created_at"] = strategy.created_at.isoformat()
@@ -210,7 +210,7 @@ class AdaptiveStrategy:
     def _save_strategy_results(self):
         """Save strategy results to database"""
         try:
-            data = []
+            data: list[dict[str, Any]] = []
             for result in self.strategy_results:
                 result_dict = asdict(result)
                 result_dict["timestamp"] = result.timestamp.isoformat()
@@ -382,7 +382,7 @@ class AdaptiveStrategy:
 
         return context
 
-    def select_strategy(self, context) -> AdaptiveStrategyResult:
+    def select_strategy(self, context: Context | dict[str, Any]) -> AdaptiveStrategyResult:
         """Select the best strategy for given context"""
         start_time = time.time()
 
@@ -390,7 +390,9 @@ class AdaptiveStrategy:
         # Handle both Context objects and dict inputs
         if isinstance(context, dict):
             # Convert dict to Context object
-            context = self.analyze_context(context.get("task", "unknown task"))
+            task_desc: str = context.get("task", "unknown task")
+            context_obj: Context = self.analyze_context(task_desc)
+            context = context_obj
 
         suitable_strategies = [
             strategy
@@ -407,7 +409,7 @@ class AdaptiveStrategy:
             ]
 
         # Score strategies based on multiple factors
-        scored_strategies = []
+        scored_strategies: list[tuple[Any, float]] = []
         for strategy in suitable_strategies:
             # Performance score
             performance_score = self._get_performance_score(strategy.performance_level)
@@ -486,7 +488,7 @@ class AdaptiveStrategy:
         self, strategy: Strategy, context: Context
     ) -> list[str]:
         """Generate recommendations based on selected strategy"""
-        recommendations = []
+        recommendations: list[str] = []
 
         # Strategy-specific recommendations
         if strategy.strategy_type == StrategyType.CONSERVATIVE:
