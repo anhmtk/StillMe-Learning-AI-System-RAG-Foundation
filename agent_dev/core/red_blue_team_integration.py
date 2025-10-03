@@ -137,10 +137,10 @@ class RedBlueTeamIntegration:
             with open(self.exercises_db, encoding="utf-8") as f:
                 data = json.load(f)
 
-            exercises = []
+            exercises: list[SecurityExercise] = []
             for exercise_data in data:
                 # Convert attack scenarios
-                attack_scenarios = []
+                attack_scenarios: list[AttackScenario] = []
                 for scenario_data in exercise_data.get("attack_scenarios", []):
                     scenario_data["created_at"] = datetime.fromisoformat(
                         scenario_data["created_at"]
@@ -148,7 +148,7 @@ class RedBlueTeamIntegration:
                     attack_scenarios.append(AttackScenario(**scenario_data))
 
                 # Convert defense strategies
-                defense_strategies = []
+                defense_strategies: list[DefenseStrategy] = []
                 for strategy_data in exercise_data.get("defense_strategies", []):
                     strategy_data["created_at"] = datetime.fromisoformat(
                         strategy_data["created_at"]
@@ -167,7 +167,7 @@ class RedBlueTeamIntegration:
             print(f"Error loading exercises: {e}")
             return []
 
-    def _load_learning_history(self) -> list[dict]:
+    def _load_learning_history(self) -> list[dict[str, Any]]:
         """Load learning history from database"""
         if not self.learning_db.exists():
             return []
@@ -182,13 +182,13 @@ class RedBlueTeamIntegration:
     def _save_exercises(self):
         """Save exercises to database"""
         try:
-            data = []
+            data: list[dict[str, Any]] = []
             for exercise in self.exercises:
                 exercise_dict = asdict(exercise)
                 exercise_dict["created_at"] = exercise.created_at.isoformat()
 
                 # Convert attack scenarios
-                attack_scenarios = []
+                attack_scenarios: list[dict[str, Any]] = []
                 for scenario in exercise.attack_scenarios:
                     scenario_dict = asdict(scenario)
                     scenario_dict["created_at"] = scenario.created_at.isoformat()
@@ -196,7 +196,7 @@ class RedBlueTeamIntegration:
                 exercise_dict["attack_scenarios"] = attack_scenarios
 
                 # Convert defense strategies
-                defense_strategies = []
+                defense_strategies: list[dict[str, Any]] = []
                 for strategy in exercise.defense_strategies:
                     strategy_dict = asdict(strategy)
                     strategy_dict["created_at"] = strategy.created_at.isoformat()
@@ -332,7 +332,7 @@ class RedBlueTeamIntegration:
         print(f"⚠️ Difficulty: {exercise.difficulty_level.value}")
 
         # Simulate attack scenarios
-        attack_results = []
+        attack_results: list[dict[str, Any]] = []
         for scenario in exercise.attack_scenarios:
             print(f"\n🔴 Testing Attack: {scenario.description}")
             print(f"   Payload: {scenario.payload}")
@@ -350,7 +350,7 @@ class RedBlueTeamIntegration:
             )
 
         # Simulate defense strategies
-        defense_results = []
+        defense_results: list[dict[str, Any]] = []
         for strategy in exercise.defense_strategies:
             print(f"\n🔵 Testing Defense: {strategy.description}")
             print(f"   Implementation: {strategy.implementation}")
@@ -441,21 +441,21 @@ class RedBlueTeamIntegration:
     def _generate_security_recommendations(
         self,
         exercise: SecurityExercise,
-        attack_results: list[dict],
-        defense_results: list[dict],
+        attack_results: list[dict[str, Any]],
+        defense_results: list[dict[str, Any]],
     ) -> list[str]:
         """Generate security recommendations"""
-        recommendations = []
+        recommendations: list[str] = []
 
         # Analyze attack results
-        successful_attacks = [r for r in attack_results if r["success"]]
+        successful_attacks: list[dict[str, Any]] = [r for r in attack_results if r["success"]]
         if successful_attacks:
             recommendations.append(
                 f"Implement additional defenses for {len(successful_attacks)} successful attack scenarios"
             )
 
         # Analyze defense results
-        effective_defenses = [r for r in defense_results if r["effectiveness"] > 0.8]
+        effective_defenses: list[dict[str, Any]] = [r for r in defense_results if r["effectiveness"] > 0.8]
         if effective_defenses:
             recommendations.append(
                 f"Deploy {len(effective_defenses)} highly effective defense strategies"
@@ -493,7 +493,7 @@ class RedBlueTeamIntegration:
         )
 
         # Generate security improvements
-        security_improvements = []
+        security_improvements: list[str] = []
         for exercise in self.exercises:
             security_improvements.extend(
                 [s.description for s in exercise.defense_strategies]
