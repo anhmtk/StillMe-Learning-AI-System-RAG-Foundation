@@ -250,7 +250,7 @@ Status Codes:
                 description = f"Module {module_name} - Auto-generated documentation"
 
             # Generate features list
-            features = []
+            features: list[str] = []
             for func in functions:
                 if not func.name.startswith("_"):
                     features.append(
@@ -312,7 +312,7 @@ Status Codes:
             docstring = ast.get_docstring(function_node)
 
             # Extract parameters
-            parameters = []
+            parameters: list[dict[str, str]] = []
             for arg in function_node.args.args:
                 param_info = {
                     "name": arg.arg,
@@ -328,7 +328,7 @@ Status Codes:
                 description = f"Function {func_name}"
 
             # Generate examples
-            examples = [
+            examples: list[str] = [
                 "# Example usage:",
                 f"# result = {func_name}({', '.join([p['name'] for p in parameters[:3]])})",
             ]
@@ -384,6 +384,7 @@ Status Codes:
 
     def generate_code_comments(self, file_path: str) -> str:
         """Tạo comments cho code"""
+        content = ""
         try:
             with open(file_path, encoding="utf-8") as f:
                 content = f.read()
@@ -393,7 +394,7 @@ Status Codes:
 
             # Add comments to functions without docstrings
             lines = content.split("\n")
-            new_lines = []
+            new_lines: list[str] = []
 
             for i, line in enumerate(lines):
                 new_lines.append(line)
@@ -411,7 +412,11 @@ Status Codes:
 
                     if not has_docstring:
                         # Add a comment
-                        func_name = re.search(r"def\s+(\w+)", line).group(1)
+                        match = re.search(r"def\s+(\w+)", line)
+                        if match:
+                            func_name = match.group(1)
+                        else:
+                            continue
                         indent = len(line) - len(line.lstrip())
                         comment = (
                             " " * (indent + 4)
@@ -516,9 +521,9 @@ This guide contains best practices for {language} development, automatically gen
         python_files = list(self.project_root.rglob("*.py"))
         total_files = len(python_files)
         documented_files = 0
-        generated_docs = []
-        missing_docs = []
-        quality_scores = {"modules": [], "functions": [], "classes": []}
+        generated_docs: list[DocMetadata] = []
+        missing_docs: list[str] = []
+        quality_scores: dict[str, list[float]] = {"modules": [], "functions": [], "classes": []}
 
         for file_path in python_files:
             try:
@@ -572,12 +577,12 @@ This guide contains best practices for {language} development, automatically gen
         )
 
         # Calculate average quality scores
-        avg_quality_scores = {}
+        avg_quality_scores: dict[str, float] = {}
         for category, scores in quality_scores.items():
             avg_quality_scores[category] = sum(scores) / len(scores) if scores else 0.0
 
         # Generate recommendations
-        recommendations = []
+        recommendations: list[str] = []
         if documentation_coverage < 50:
             recommendations.append("Increase documentation coverage to at least 50%")
         if avg_quality_scores.get("modules", 0) < 0.7:
