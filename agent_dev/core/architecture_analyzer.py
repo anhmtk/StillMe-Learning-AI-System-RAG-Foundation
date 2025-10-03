@@ -135,7 +135,7 @@ class ArchitectureReport:
 
     analysis_timestamp: datetime
     metrics: ArchitectureMetrics
-    dependency_graph: dict[str, list[str]]
+    dependency_graph: dict[str, dict[str, dict[str, Any]]]
     coupling_analysis: dict[str, CouplingLevel]
     complexity_analysis: dict[str, ComplexityLevel]
     recommendations: list[str]
@@ -521,7 +521,7 @@ class ArchitectureAnalyzer:
         """Calculate maximum nesting depth"""
         max_depth = 0
 
-        def visit_node(node, depth):
+        def visit_node(node: ast.AST, depth: int) -> None:
             nonlocal max_depth
             max_depth = max(max_depth, depth)
 
@@ -627,17 +627,17 @@ class ArchitectureAnalyzer:
 
         # Average degree
         degrees = [
-            self.dependency_graph.degree(node) for node in self.dependency_graph.nodes()
+            int(self.dependency_graph.degree(node)) for node in self.dependency_graph.nodes()
         ]
         metrics["average_degree"] = sum(degrees) / len(degrees) if degrees else 0
 
         # In-degree and out-degree
         in_degrees = [
-            self.dependency_graph.in_degree(node)
+            int(self.dependency_graph.in_degree(node))
             for node in self.dependency_graph.nodes()
         ]
         out_degrees = [
-            self.dependency_graph.out_degree(node)
+            int(self.dependency_graph.out_degree(node))
             for node in self.dependency_graph.nodes()
         ]
 
@@ -679,7 +679,7 @@ class ArchitectureAnalyzer:
         coupling_analysis = {}
 
         for node in self.dependency_graph.nodes():
-            degree = self.dependency_graph.degree(node)
+            degree = int(self.dependency_graph.degree(node))
 
             if degree <= 2:
                 coupling_analysis[node] = CouplingLevel.LOW
