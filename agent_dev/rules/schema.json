@@ -1,68 +1,124 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "AgentDev Rule Schema",
-  "description": "Schema for defining AgentDev rules",
+  "description": "JSON schema for AgentDev rule definitions",
   "type": "object",
+  "required": ["rule_name", "description", "conditions", "action"],
   "properties": {
     "rule_name": {
       "type": "string",
-      "description": "Unique name for the rule"
+      "description": "Unique name for the rule",
+      "minLength": 1,
+      "maxLength": 255
     },
     "description": {
-      "type": "string",
-      "description": "Human-readable description of the rule"
+      "type": "string", 
+      "description": "Human-readable description of the rule",
+      "minLength": 1,
+      "maxLength": 1000
     },
     "priority": {
       "type": "integer",
+      "description": "Rule priority (higher = more important)",
       "minimum": 0,
-      "maximum": 100,
-      "description": "Rule priority (0 = highest priority)"
+      "maximum": 1000,
+      "default": 0
     },
     "is_active": {
       "type": "boolean",
-      "description": "Whether the rule is currently active"
+      "description": "Whether the rule is currently active",
+      "default": true
     },
     "conditions": {
       "type": "array",
+      "description": "List of conditions that must be met",
+      "minItems": 1,
       "items": {
         "type": "object",
+        "required": ["field", "operator", "value"],
         "properties": {
           "field": {
             "type": "string",
-            "description": "Field to check (e.g., 'action', 'context.task')"
+            "description": "Field path to check (supports dot notation)",
+            "minLength": 1
           },
           "operator": {
             "type": "string",
-            "enum": ["equals", "not_equals", "contains", "not_contains", "matches", "not_matches", "in", "not_in", "greater_than", "less_than"],
-            "description": "Comparison operator"
+            "description": "Comparison operator",
+            "enum": ["eq", "ne", "gt", "gte", "lt", "lte", "in", "nin", "contains", "not_contains", "regex", "exists", "not_exists"]
           },
           "value": {
             "description": "Value to compare against"
+          },
+          "case_sensitive": {
+            "type": "boolean",
+            "description": "Whether string comparison is case sensitive",
+            "default": true
           }
-        },
-        "required": ["field", "operator", "value"]
-      },
-      "description": "List of conditions that must be met"
+        }
+      }
     },
     "action": {
       "type": "object",
+      "description": "Action to take when rule is violated",
+      "required": ["type"],
       "properties": {
         "type": {
           "type": "string",
-          "enum": ["block", "allow", "warn", "log"],
-          "description": "Action to take when rule matches"
+          "description": "Type of action",
+          "enum": ["block", "warn", "log", "redirect", "transform"]
         },
         "message": {
           "type": "string",
-          "description": "Message to display when rule is triggered"
+          "description": "Message to display when rule is violated"
         },
-        "metadata": {
-          "type": "object",
-          "description": "Additional metadata for the action"
+        "redirect_to": {
+          "type": "string",
+          "description": "URL or action to redirect to (for redirect action)"
+        },
+        "transform_function": {
+          "type": "string",
+          "description": "Function name to call for transformation (for transform action)"
+        },
+        "severity": {
+          "type": "string",
+          "description": "Severity level",
+          "enum": ["low", "medium", "high", "critical"],
+          "default": "medium"
         }
-      },
-      "required": ["type", "message"]
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional metadata for the rule",
+      "properties": {
+        "author": {
+          "type": "string",
+          "description": "Rule author"
+        },
+        "version": {
+          "type": "string",
+          "description": "Rule version"
+        },
+        "tags": {
+          "type": "array",
+          "description": "Tags for categorization",
+          "items": {
+            "type": "string"
+          }
+        },
+        "created_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Rule creation timestamp"
+        },
+        "updated_at": {
+          "type": "string", 
+          "format": "date-time",
+          "description": "Rule last update timestamp"
+        }
+      }
     }
   },
-  "required": ["rule_name", "description", "conditions", "action"]
+  "additionalProperties": false
 }
