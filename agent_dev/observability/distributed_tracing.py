@@ -13,7 +13,7 @@ import uuid
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 
 class SpanStatus(Enum):
@@ -79,7 +79,7 @@ class Trace:
 
 # Context variables for tracing
 current_span_context = contextvars.ContextVar("span_context", default=None)
-current_trace_id = contextvars.ContextVar("trace_id", default=None)
+current_trace_id = contextvars.ContextVar("trace_id", default="")
 
 
 class DistributedTracer:
@@ -90,7 +90,7 @@ class DistributedTracer:
         self.traces: dict[str, Trace] = {}
         self.spans: dict[str, Span] = {}
         self.active_spans: dict[str, Span] = {}
-        self.exporters = []
+        self.exporters: list[Any] = []
         self.sampling_rate = self.config.get("sampling_rate", 1.0)
         self.max_traces = self.config.get("max_traces", 10000)
         self.lock = threading.RLock()
@@ -143,9 +143,7 @@ class DistributedTracer:
         """Generate unique span ID"""
         return format(uuid.uuid4().int, "016x")
 
-    def start_trace(
-        self, name: str, attributes: dict[str, Any] | None = None
-    ) -> str:
+    def start_trace(self, name: str, attributes: dict[str, Any] | None = None) -> str | None:
         """Start a new trace"""
         if not self._should_sample():
             return None
@@ -174,7 +172,7 @@ class DistributedTracer:
 
         # Set context variables
         current_trace_id.set(trace_id)
-        current_span_context.set(SpanContext(trace_id=trace_id, span_id=span_id))
+        current_span_context.set(cast(Any, SpanContext(trace_id=trace_id, span_id=span_id)))
 
         print(f"🔍 Trace started: {trace_id} - {name}")
         return trace_id
@@ -185,7 +183,7 @@ class DistributedTracer:
         kind: SpanKind = SpanKind.INTERNAL,
         attributes: dict[str, Any] | None = None,
         parent_span_id: str | None = None,
-    ) -> str:
+    ) -> str | None:
         """Start a new span"""
         if not self._should_sample():
             return None
@@ -195,7 +193,10 @@ class DistributedTracer:
         if not current_context and not parent_span_id:
             # Start new trace
             trace_id = self.start_trace(name, attributes)
-            return current_span_context.get().span_id
+            if trace_id is None:
+                return None
+            new_context = current_span_context.get()
+            return new_context.span_id if new_context else None
 
         span_id = self._generate_span_id()
         trace_id = current_context.trace_id if current_context else parent_span_id
@@ -210,7 +211,7 @@ class DistributedTracer:
 
         span = Span(
             span_id=span_id,
-            trace_id=trace_id,
+            trace_id=trace_id or "",
             parent_span_id=parent_span_id,
             name=name,
             kind=kind,
@@ -229,9 +230,9 @@ class DistributedTracer:
 
         # Update context
         current_span_context.set(
-            SpanContext(
-                trace_id=trace_id, span_id=span_id, parent_span_id=parent_span_id
-            )
+            cast(Any, SpanContext(
+                trace_id=trace_id or "", span_id=span_id, parent_span_id=parent_span_id
+            ))
         )
 
         print(f"🔍 Span started: {span_id} - {name}")
@@ -339,16 +340,22 @@ class DistributedTracer:
             active_spans = len(self.active_spans)
 
             # Count spans by status
-            spans_by_status = {}
+            spans_by_status: dict[str, int] = {}
             for span in self.spans.values():
                 status = span.status.value
-                spans_by_status[status] = spans_by_status.get(status, 0) + 1
+                if status in spans_by_status:
+                    spans_by_status[status] = spans_by_status[status] + 1
+                else:
+                    spans_by_status[status] = 1
 
             # Count traces by status
-            traces_by_status = {}
+            traces_by_status: dict[str, int] = {}
             for trace in self.traces.values():
                 status = trace.status.value
-                traces_by_status[status] = traces_by_status.get(status, 0) + 1
+                if status in traces_by_status:
+                    traces_by_status[status] = traces_by_status[status] + 1
+                else:
+                    traces_by_status[status] = 1
 
             # Calculate average duration
             durations = [
@@ -373,7 +380,13 @@ class DistributedTracer:
 
         for exporter in self.exporters:
             try:
-                await exporter.export(traces_to_export)
+                exporter_obj: Any = exporter
+                if hasattr(exporter_obj, 'export'):
+                    export_method = exporter_obj.export
+                    if callable(export_method):
+                        result = export_method(traces_to_export)
+                        if hasattr(result, '__await__'):
+                            await cast(Any, result)
             except Exception as e:
                 print(f"⚠️ Export error: {e}")
 
@@ -409,31 +422,35 @@ tracer = DistributedTracer()
 def trace_function(name: str | None = None, kind: SpanKind = SpanKind.INTERNAL):
     """Decorator to automatically trace function execution"""
 
-    def decorator(func):
+    def decorator(func: Any) -> Any:
         @functools.wraps(func)
-        async def async_wrapper(*args, **kwargs):
+        async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
             span_name = name or f"{func.__module__}.{func.__name__}"
             span_id = tracer.start_span(span_name, kind)
 
             try:
                 result = await func(*args, **kwargs)
-                tracer.end_span(span_id, SpanStatus.OK)
+                if span_id is not None:
+                    tracer.end_span(span_id, SpanStatus.OK)
                 return result
             except Exception as e:
-                tracer.end_span(span_id, SpanStatus.ERROR, {"error": str(e)})
+                if span_id is not None:
+                    tracer.end_span(span_id, SpanStatus.ERROR, {"error": str(e)})
                 raise
 
         @functools.wraps(func)
-        def sync_wrapper(*args, **kwargs):
+        def sync_wrapper(*args: Any, **kwargs: Any) -> Any:
             span_name = name or f"{func.__module__}.{func.__name__}"
             span_id = tracer.start_span(span_name, kind)
 
             try:
                 result = func(*args, **kwargs)
-                tracer.end_span(span_id, SpanStatus.OK)
+                if span_id is not None:
+                    tracer.end_span(span_id, SpanStatus.OK)
                 return result
             except Exception as e:
-                tracer.end_span(span_id, SpanStatus.ERROR, {"error": str(e)})
+                if span_id is not None:
+                    tracer.end_span(span_id, SpanStatus.ERROR, {"error": str(e)})
                 raise
 
         if asyncio.iscoroutinefunction(func):
@@ -457,7 +474,7 @@ def trace_span(name: str, kind: SpanKind = SpanKind.INTERNAL):
             self.span_id = tracer.start_span(self.name, self.kind)
             return self
 
-        def __exit__(self, exc_type, exc_val, exc_tb):
+        def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
             if self.span_id:
                 status = SpanStatus.ERROR if exc_type else SpanStatus.OK
                 tracer.end_span(self.span_id, status)
@@ -474,7 +491,7 @@ def trace_span(name: str, kind: SpanKind = SpanKind.INTERNAL):
 
 
 # Convenience functions
-def start_trace(name: str, attributes: dict[str, Any] | None = None) -> str:
+def start_trace(name: str, attributes: dict[str, Any] | None = None) -> str | None:
     """Start a new trace"""
     return tracer.start_trace(name, attributes)
 
@@ -483,7 +500,7 @@ def start_span(
     name: str,
     kind: SpanKind = SpanKind.INTERNAL,
     attributes: dict[str, Any] | None = None,
-) -> str:
+) -> str | None:
     """Start a new span"""
     return tracer.start_span(name, kind, attributes)
 
@@ -497,7 +514,7 @@ def end_span(
     tracer.end_span(span_id, status, attributes)
 
 
-def get_current_trace_id() -> str | None:
+def get_current_trace_id() -> str:
     """Get current trace ID from context"""
     return current_trace_id.get()
 
@@ -536,7 +553,9 @@ if __name__ == "__main__":
         print(f"Tracing statistics: {stats}")
 
         # Get trace
-        trace = tracer_instance.get_trace(trace_id)
+        trace = None
+        if trace_id is not None:
+            trace = tracer_instance.get_trace(trace_id)
         if trace:
             print(f"Trace duration: {trace.duration:.3f}s")
             print(f"Number of spans: {len(trace.spans)}")

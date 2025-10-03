@@ -129,7 +129,7 @@ class StructuredLogger:
 
         # Create custom formatter
         class StructuredFormatter(logging.Formatter):
-            def format(self, record):
+            def format(self, record: logging.LogRecord) -> str:
                 # Convert standard log record to structured format
                 log_entry = LogEntry(
                     log_id=str(uuid.uuid4()),
@@ -266,8 +266,9 @@ class StructuredLogger:
         logger = logging.getLogger(source)
 
         # Add custom attributes to log record
+        level_int = getattr(logging, level.value, logging.INFO)
         record = logger.makeRecord(
-            logger.name, level.value, source, 0, message, (), exception
+            logger.name, level_int, source, 0, message, (), None
         )
         record.correlation_id = log_entry.correlation_id
         record.span_id = log_entry.span_id
@@ -464,22 +465,31 @@ class StructuredLogger:
             total_logs = len(self.log_entries)
 
             # Count by level
-            logs_by_level = {}
+            logs_by_level: dict[str, int] = {}
             for log in self.log_entries:
                 level = log.level.value
-                logs_by_level[level] = logs_by_level.get(level, 0) + 1
+                if level in logs_by_level:
+                    logs_by_level[level] = logs_by_level[level] + 1
+                else:
+                    logs_by_level[level] = 1
 
             # Count by category
-            logs_by_category = {}
+            logs_by_category: dict[str, int] = {}
             for log in self.log_entries:
                 category = log.category.value
-                logs_by_category[category] = logs_by_category.get(category, 0) + 1
+                if category in logs_by_category:
+                    logs_by_category[category] = logs_by_category[category] + 1
+                else:
+                    logs_by_category[category] = 1
 
             # Count by source
-            logs_by_source = {}
+            logs_by_source: dict[str, int] = {}
             for log in self.log_entries:
                 source = log.source.split(":")[0]  # Get module name
-                logs_by_source[source] = logs_by_source.get(source, 0) + 1
+                if source in logs_by_source:
+                    logs_by_source[source] = logs_by_source[source] + 1
+                else:
+                    logs_by_source[source] = 1
 
             # Get recent error rate
             recent_logs = [
