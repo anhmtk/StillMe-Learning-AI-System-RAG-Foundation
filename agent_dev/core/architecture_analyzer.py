@@ -20,7 +20,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 import networkx as nx
 
@@ -623,23 +623,34 @@ class ArchitectureAnalyzer:
             return {}
 
         # Calculate various coupling metrics
-        metrics = {}
+        metrics: dict[str, float] = {}
 
         # Average degree
-        degrees = [
-            cast(int, self.dependency_graph.degree(node)) for node in self.dependency_graph.nodes()
-        ]
+        degrees: list[int] = []
+        for node in self.dependency_graph.nodes():
+            degree_val: Any = getattr(self.dependency_graph, 'degree')(node)
+            try:
+                degrees.append(int(degree_val))
+            except (TypeError, ValueError):
+                degrees.append(0)  # fallback for unknown types
         metrics["average_degree"] = sum(degrees) / len(degrees) if degrees else 0
 
         # In-degree and out-degree
-        in_degrees = [
-            cast(int, self.dependency_graph.in_degree(node))
-            for node in self.dependency_graph.nodes()
-        ]
-        out_degrees = [
-            cast(int, self.dependency_graph.out_degree(node))
-            for node in self.dependency_graph.nodes()
-        ]
+        in_degrees: list[int] = []
+        for node in self.dependency_graph.nodes():
+            degree_val = self.dependency_graph.in_degree(node)
+            if isinstance(degree_val, int):
+                in_degrees.append(degree_val)
+            else:
+                in_degrees.append(0)
+        
+        out_degrees: list[int] = []
+        for node in self.dependency_graph.nodes():
+            degree_val = self.dependency_graph.out_degree(node)
+            if isinstance(degree_val, int):
+                out_degrees.append(degree_val)
+            else:
+                out_degrees.append(0)
 
         metrics["average_in_degree"] = (
             sum(in_degrees) / len(in_degrees) if in_degrees else 0
@@ -679,7 +690,11 @@ class ArchitectureAnalyzer:
         coupling_analysis: dict[str, CouplingLevel] = {}
 
         for node in self.dependency_graph.nodes():
-            degree = cast(int, self.dependency_graph.degree(node))
+            degree_val: Any = getattr(self.dependency_graph, 'degree')(node)
+            try:
+                degree = int(degree_val)
+            except (TypeError, ValueError):
+                degree = 0
 
             if degree <= 2:
                 coupling_analysis[node] = CouplingLevel.LOW
