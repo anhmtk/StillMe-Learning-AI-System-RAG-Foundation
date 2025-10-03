@@ -270,7 +270,7 @@ class AgentDevValidator:
         test_passed = self.run_quick_test()
 
         # Tính toán kết quả
-        total_before = before_data["total_errors"]
+        total_before = before_data.get("total_errors", 0)
         total_after = pyright_errors + ruff_errors
         errors_fixed = total_before - total_after
 
@@ -337,7 +337,7 @@ class AgentDevValidator:
             style_suggestions=style_suggestions,
             execution_time=time.time() - start_time,
             success=success,
-            evidence_files=[before_data["evidence_file"], evidence_file],
+            evidence_files=[before_data.get("evidence_file", "before_validation.json"), evidence_file],
             error_details=all_details,
         )
 

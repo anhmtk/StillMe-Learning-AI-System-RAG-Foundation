@@ -626,9 +626,7 @@ class StillMeFramework:
             self.logger.warning("AgentDev not available")
             return None
 
-    async def get_market_intelligence(
-        self, keywords: list[str] | None = None
-    ) -> str:
+    async def get_market_intelligence(self, keywords: list[str] | None = None) -> str:
         """
         Lấy thông tin thị trường và xu hướng với dự báo
 
@@ -946,7 +944,9 @@ class StillMeFramework:
                         timeout=300,
                     )
                 except subprocess.SubprocessError as e:
-                    raise DependencyError(f"Failed to install requirements: {e!s}") from e
+                    raise DependencyError(
+                        f"Failed to install requirements: {e!s}"
+                    ) from e
 
     def _resolve_dependencies(self, module: Any):
         if not hasattr(module.ModuleMeta, "dependencies"):

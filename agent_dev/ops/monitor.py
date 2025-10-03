@@ -141,6 +141,7 @@ class PatrolRunner:
 
             # Parse JSON output with Unicode safety
             import json
+
             try:
                 from stillme_core.utils.io_safe import safe_decode
 
@@ -174,9 +175,7 @@ class PatrolRunner:
                             if len(parts) >= 4:
                                 issue_dict: dict[str, Any] = {
                                     "file": parts[0],
-                                    "line": int(parts[1])
-                                    if parts[1].isdigit()
-                                    else 0,
+                                    "line": int(parts[1]) if parts[1].isdigit() else 0,
                                     "rule": parts[3].strip().split()[0]
                                     if parts[3].strip()
                                     else "UNKNOWN",
@@ -255,16 +254,16 @@ class PatrolRunner:
             try:
                 # Dynamic import to avoid type checking issues
                 import importlib.util
+
                 spec = importlib.util.spec_from_file_location(
-                    "red_team_engine", 
-                    red_team_path
+                    "red_team_engine", red_team_path
                 )
                 if spec is None or spec.loader is None:
                     return {"status": "not_available"}
-                
+
                 red_team_module = importlib.util.module_from_spec(spec)
                 spec.loader.exec_module(red_team_module)
-                
+
                 # Get the engine class
                 RedTeamEngine = getattr(red_team_module, "RedTeamEngine", None)
                 if RedTeamEngine is None:
@@ -272,8 +271,10 @@ class PatrolRunner:
 
                 # Run light scenario
                 engine: Any = RedTeamEngine()
-                result: dict[str, Any] = engine.run_light_security_check(self.project_root)
-                
+                result: dict[str, Any] = engine.run_light_security_check(
+                    self.project_root
+                )
+
                 return {
                     "status": "completed",
                     "risk_score": result.get("risk_score", 0.0),

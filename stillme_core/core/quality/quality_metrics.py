@@ -486,9 +486,7 @@ class QualityMetrics:
         else:
             return "Quality is stable. Consider setting higher standards."
 
-    def export_metrics(
-        self, output_path: str, target_path: str | None = None
-    ) -> None:
+    def export_metrics(self, output_path: str, target_path: str | None = None) -> None:
         """Export metrics to JSON file"""
         reports = self.get_reports(target_path)
 

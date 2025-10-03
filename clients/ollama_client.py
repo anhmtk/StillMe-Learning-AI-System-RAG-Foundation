@@ -255,7 +255,9 @@ def call_ollama_chat(
 
     except httpx.TimeoutException:
         logger.error("Ollama API timeout after %s seconds", request_timeout)
-        raise TimeoutError(f"Ollama API timeout after {request_timeout} seconds") from None
+        raise TimeoutError(
+            f"Ollama API timeout after {request_timeout} seconds"
+        ) from None
     except httpx.RequestError as e:
         logger.error("Ollama API request failed: %s", e)
         raise ConnectionError(f"Ollama API request failed: {e}") from e

@@ -181,9 +181,7 @@ def health(
 
 @app.command()
 def metrics(
-    metric_name: str | None = typer.Argument(
-        None, help="Specific metric name to show"
-    ),
+    metric_name: str | None = typer.Argument(None, help="Specific metric name to show"),
     summary: bool = typer.Option(False, "--summary", "-s", help="Show metrics summary"),
     export: str | None = typer.Option(
         None, "--export", "-e", help="Export metrics to file"
@@ -382,9 +380,7 @@ def traces(
 
 @app.command()
 def logs(
-    level: str | None = typer.Option(
-        None, "--level", "-l", help="Filter by log level"
-    ),
+    level: str | None = typer.Option(None, "--level", "-l", help="Filter by log level"),
     lines: int = typer.Option(50, "--lines", "-n", help="Number of lines to show"),
     follow: bool = typer.Option(False, "--follow", "-f", help="Follow log output"),
 ):

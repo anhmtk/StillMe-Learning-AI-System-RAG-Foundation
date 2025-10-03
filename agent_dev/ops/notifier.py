@@ -10,6 +10,7 @@ import os
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from typing import Any
 
 import requests
 
@@ -20,7 +21,7 @@ class EmailNotifier:
     """Email notification handler"""
 
     def __init__(self):
-        self.config = {
+        self.config: dict[str, Any] = {
             "enabled": bool(
                 os.getenv("SMTP_USERNAME")
                 and os.getenv("SMTP_PASSWORD")
@@ -93,7 +94,7 @@ class TelegramNotifier:
     """Telegram notification handler"""
 
     def __init__(self):
-        self.config = {
+        self.config: dict[str, Any] = {
             "enabled": bool(
                 os.getenv("TELEGRAM_BOT_TOKEN") and os.getenv("TELEGRAM_CHAT_ID")
             ),

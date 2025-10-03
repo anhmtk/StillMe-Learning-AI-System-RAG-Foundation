@@ -15,6 +15,7 @@ from typing import Any
 # Try to import optional dependencies
 try:
     import pandas as pd  # type: ignore
+
     has_pandas = True
 except ImportError:
     pd = None  # type: ignore
@@ -24,6 +25,7 @@ try:
     # Import plotly components only if needed
     import plotly.graph_objects as go  # type: ignore
     from plotly.subplots import make_subplots  # type: ignore
+
     has_plotly = True
 except ImportError:
     go = None  # type: ignore
@@ -556,7 +558,9 @@ class OptimizationAnalyzer:
         # Convert SLO alerts to recommendations
         for alert in slo_alerts:
             if alert.level in [AlertLevel.CRITICAL, AlertLevel.HIGH]:
-                category: str = alert.metric.split("_")[0]  # Extract category from metric
+                category: str = alert.metric.split("_")[
+                    0
+                ]  # Extract category from metric
                 action_info: dict[str, Any] = action_map.get(category, {})
 
                 recommendations.append(
@@ -577,8 +581,15 @@ class OptimizationAnalyzer:
                 )
 
         # Sort by priority
-        priority_order: dict[str, int] = {"critical": 0, "high": 1, "medium": 2, "low": 3}
-        recommendations.sort(key=lambda x: priority_order.get(x.get("priority", "low"), 4))
+        priority_order: dict[str, int] = {
+            "critical": 0,
+            "high": 1,
+            "medium": 2,
+            "low": 3,
+        }
+        recommendations.sort(
+            key=lambda x: priority_order.get(x.get("priority", "low"), 4)
+        )
 
         return recommendations
 
@@ -1449,7 +1460,9 @@ class OptimizationAnalyzer:
 
         # Tạo báo cáo chi tiết
         timestamp: str = (
-            pd.Timestamp.now().isoformat() if has_pandas and pd is not None else datetime.now().isoformat()
+            pd.Timestamp.now().isoformat()
+            if has_pandas and pd is not None
+            else datetime.now().isoformat()
         )
         report: dict[str, Any] = {
             "timestamp": timestamp,

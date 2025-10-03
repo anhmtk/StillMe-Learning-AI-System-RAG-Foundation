@@ -762,6 +762,60 @@ class SecurityScanner:
             print("\n✅ Security scan PASSED")
             return True
 
+    def scan_plan(self, plan: dict[str, Any]) -> dict[str, Any]:
+        """Scan execution plan for security issues"""
+        import time
+        
+        issues = []
+        blocked = False
+        
+        if "tasks" in plan:
+            for task in plan["tasks"]:
+                if "command" in task:
+                    command = task["command"]
+                    if command and any(danger in command.lower() for danger in ["rm -rf", "sudo rm", "del /", "format"]):
+                        issues.append({
+                            "type": "dangerous_command",
+                            "message": f"Dangerous command detected: {command}",
+                            "severity": "high"
+                        })
+                        blocked = True
+        
+        return {
+            "issues": issues,
+            "blocked": blocked,
+            "scan_time": time.time()
+        }
+
+    def scan_result(self, result: Any) -> dict[str, Any]:
+        """Scan execution result for security issues"""
+        import time
+        
+        issues = []
+        
+        if hasattr(result, 'output') and result.output:
+            output = str(result.output)
+            # Check for sensitive information in output
+            sensitive_patterns = [
+                r'password\s*[:=]\s*\w+',
+                r'api[_-]?key\s*[:=]\s*\w+',
+                r'token\s*[:=]\s*\w+',
+                r'secret\s*[:=]\s*\w+'
+            ]
+            
+            for pattern in sensitive_patterns:
+                if re.search(pattern, output, re.IGNORECASE):
+                    issues.append({
+                        "type": "sensitive_data_exposure",
+                        "message": f"Sensitive data detected in output: {pattern}",
+                        "severity": "high"
+                    })
+        
+        return {
+            "issues": issues,
+            "scan_time": time.time()
+        }
+
 
 def main():
     """CLI entry point for security scanner"""

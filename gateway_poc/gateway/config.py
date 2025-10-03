@@ -139,12 +139,8 @@ class EnhancedSettings(BaseSettings):
 
     # Notifications
     FIREBASE_PROJECT_ID: str | None = Field(default=None, env="FIREBASE_PROJECT_ID")
-    FIREBASE_PRIVATE_KEY: str | None = Field(
-        default=None, env="FIREBASE_PRIVATE_KEY"
-    )
-    FIREBASE_CLIENT_EMAIL: str | None = Field(
-        default=None, env="FIREBASE_CLIENT_EMAIL"
-    )
+    FIREBASE_PRIVATE_KEY: str | None = Field(default=None, env="FIREBASE_PRIVATE_KEY")
+    FIREBASE_CLIENT_EMAIL: str | None = Field(default=None, env="FIREBASE_CLIENT_EMAIL")
 
     # Email notifications
     SMTP_HOST: str | None = Field(default=None, env="SMTP_HOST")

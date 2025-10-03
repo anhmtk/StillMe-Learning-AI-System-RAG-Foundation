@@ -3,7 +3,6 @@ StillMe Kill Switch API
 FastAPI endpoints for kill switch operations.
 """
 
-
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
@@ -64,7 +63,9 @@ async def get_status(manager: KillSwitchManager = Depends(get_manager)):
         status = manager.status()
         return KillSwitchStatus(**status)
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to get status: {str(e)}") from e
+        raise HTTPException(
+            status_code=500, detail=f"Failed to get status: {str(e)}"
+        ) from e
 
 
 @router.post("/arm", response_model=KillSwitchResponse)
@@ -154,7 +155,9 @@ async def health_check(manager: KillSwitchManager = Depends(get_manager)):
             else f"System is {status['state']}",
         }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Health check failed: {str(e)}") from e
+        raise HTTPException(
+            status_code=500, detail=f"Health check failed: {str(e)}"
+        ) from e
 
 
 # Middleware to check kill switch status

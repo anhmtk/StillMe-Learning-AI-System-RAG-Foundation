@@ -20,7 +20,6 @@ from typing import TYPE_CHECKING, Any
 
 # Import all Phase 2 modules with proper typing
 if TYPE_CHECKING:
-
     from .autonomous_management_system import AutonomousManagementSystem
     from .learning_optimization_engine import LearningOptimizationEngine
     from .phase2_integration_testing import Phase2IntegrationTesting

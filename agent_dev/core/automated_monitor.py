@@ -94,7 +94,7 @@ class Alert:
 class AutomatedMonitor:
     """Hệ thống giám sát tự động cho AgentDev"""
 
-    def __init__(self, project_root: str = ".", config: dict | None = None):
+    def __init__(self, project_root: str = ".", config: dict[str, Any] | None = None):
         self.project_root = Path(project_root)
         self.config = config or self._default_config()
         self.status = MonitorStatus.INACTIVE
@@ -115,7 +115,7 @@ class AutomatedMonitor:
 
         logger.info("🤖 AgentDev Automated Monitor initialized")
 
-    def _default_config(self) -> dict:
+    def _default_config(self) -> dict[str, Any]:
         """Default configuration"""
         return {
             "scan_interval_minutes": 15,  # Scan every 15 minutes

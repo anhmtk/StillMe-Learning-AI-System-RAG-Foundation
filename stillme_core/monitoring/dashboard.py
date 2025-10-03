@@ -26,7 +26,7 @@ import logging
 import threading
 from dataclasses import asdict
 from datetime import datetime
-from typing import Any, Dict, List, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 # Initialize FASTAPI_AVAILABLE
 FASTAPI_AVAILABLE = False
@@ -38,30 +38,49 @@ else:
     try:
         from fastapi import FastAPI, WebSocket, WebSocketDisconnect
         from fastapi.responses import HTMLResponse, JSONResponse
+
         FASTAPI_AVAILABLE = True
     except ImportError:
         FASTAPI_AVAILABLE = False
+
         # Create dummy classes for runtime when FastAPI is not available
         class FastAPI:
-            def __init__(self, *args: Any, **kwargs: Any) -> None: pass
-            def get(self, *args: Any, **kwargs: Any) -> Any: return lambda: None
-            def websocket(self, *args: Any, **kwargs: Any) -> Any: return lambda: None
-        
+            def __init__(self, *args: Any, **kwargs: Any) -> None:
+                pass
+
+            def get(self, *args: Any, **kwargs: Any) -> Any:
+                return lambda: None
+
+            def websocket(self, *args: Any, **kwargs: Any) -> Any:
+                return lambda: None
+
         class WebSocket:
-            async def accept(self) -> None: pass
-            async def receive_text(self) -> str: return ""
-            async def send_text(self, text: str) -> None: pass
-            async def close(self) -> None: pass
-        
-        class WebSocketDisconnect(Exception): pass
-        
+            async def accept(self) -> None:
+                pass
+
+            async def receive_text(self) -> str:
+                return ""
+
+            async def send_text(self, text: str) -> None:
+                pass
+
+            async def close(self) -> None:
+                pass
+
+        class WebSocketDisconnect(Exception):
+            pass
+
         class HTMLResponse:
-            def __init__(self, content: str) -> None: pass
-        
+            def __init__(self, content: str) -> None:
+                pass
+
         class JSONResponse:
-            def __init__(self, content: Any) -> None: pass
-        
-        logging.warning("FastAPI not available. Install with: pip install fastapi uvicorn")
+            def __init__(self, content: Any) -> None:
+                pass
+
+        logging.warning(
+            "FastAPI not available. Install with: pip install fastapi uvicorn"
+        )
 
 from .performance_analyzer import PerformanceAnalyzer, get_performance_analyzer
 from .resource_monitor import ResourceMonitor, get_resource_monitor
@@ -80,20 +99,20 @@ class MonitoringDashboard:
         self.logger = logging.getLogger(__name__)
 
         # Components
-        self.resource_monitor: Optional[ResourceMonitor] = None
-        self.performance_analyzer: Optional[PerformanceAnalyzer] = None
+        self.resource_monitor: ResourceMonitor | None = None
+        self.performance_analyzer: PerformanceAnalyzer | None = None
 
         # WebSocket connections
-        self.active_connections: List[WebSocket] = []
+        self.active_connections: list[WebSocket] = []
         self.connection_lock = threading.Lock()
 
         # Dashboard state
         self.is_running = False
-        self.app: Optional[FastAPI] = None
-        self.broadcast_task: Optional[asyncio.Task[None]] = None
+        self.app: FastAPI | None = None
+        self.broadcast_task: asyncio.Task[None] | None = None
 
         # Dashboard data
-        self.dashboard_data: Dict[str, Any] = {
+        self.dashboard_data: dict[str, Any] = {
             "last_update": None,
             "resource_metrics": None,
             "performance_analysis": None,
@@ -136,6 +155,7 @@ class MonitoringDashboard:
         """Setup FastAPI routes"""
 
         if self.app is not None:
+
             @self.app.get("/")
             async def dashboard_home() -> HTMLResponse:  # noqa: F401
                 """Dashboard home page"""
@@ -251,7 +271,7 @@ class MonitoringDashboard:
                     message = json.dumps(self.dashboard_data, default=str)
 
                     with self.connection_lock:
-                        disconnected: List[WebSocket] = []
+                        disconnected: list[WebSocket] = []
                         for connection in self.active_connections:
                             try:
                                 await connection.send_text(message)
@@ -296,9 +316,11 @@ class MonitoringDashboard:
             if self.resource_monitor:
                 # Type cast to help type checker understand the types
                 learning_processes: set[str] = self.resource_monitor.learning_processes
-                process_start_times: dict[str, datetime] = self.resource_monitor.process_start_times
-                
-                sessions: List[str] = list(learning_processes)
+                process_start_times: dict[str, datetime] = (
+                    self.resource_monitor.process_start_times
+                )
+
+                sessions: list[str] = list(learning_processes)
                 self.dashboard_data["learning_sessions"] = [
                     {
                         "session_id": session_id,
@@ -314,8 +336,10 @@ class MonitoringDashboard:
             # Evolution milestones
             if self.performance_analyzer:
                 # Type cast to help type checker understand the types
-                evolution_milestones: List[Any] = self.performance_analyzer.evolution_milestones
-                milestones: List[Any] = evolution_milestones[-5:]  # Last 5
+                evolution_milestones: list[Any] = (
+                    self.performance_analyzer.evolution_milestones
+                )
+                milestones: list[Any] = evolution_milestones[-5:]  # Last 5
                 self.dashboard_data["evolution_milestones"] = milestones
 
             # System status
@@ -362,7 +386,7 @@ class MonitoringDashboard:
 
         return "healthy"
 
-    def _get_system_status(self) -> Dict[str, Any]:
+    def _get_system_status(self) -> dict[str, Any]:
         """Get system status"""
         return {
             "status": self.dashboard_data["system_status"],
@@ -374,33 +398,35 @@ class MonitoringDashboard:
             },
         }
 
-    def _get_current_metrics(self) -> Dict[str, Any]:
+    def _get_current_metrics(self) -> dict[str, Any]:
         """Get current metrics"""
         if self.resource_monitor:
             return self.resource_monitor.get_metrics_summary()
         return {"error": "Resource monitor not available"}
 
-    def _get_performance_analysis(self) -> Dict[str, Any]:
+    def _get_performance_analysis(self) -> dict[str, Any]:
         """Get performance analysis"""
         if self.performance_analyzer:
             return self.performance_analyzer.get_analysis_report()
         return {"error": "Performance analyzer not available"}
 
-    def _get_active_alerts(self) -> List[Dict[str, Any]]:
+    def _get_active_alerts(self) -> list[dict[str, Any]]:
         """Get active alerts"""
         if self.resource_monitor:
             alerts = [a for a in self.resource_monitor.alerts if not a.resolved]
             return [asdict(a) for a in alerts]
         return []
 
-    def _get_learning_sessions(self) -> List[Dict[str, Any]]:
+    def _get_learning_sessions(self) -> list[dict[str, Any]]:
         """Get learning sessions"""
         if self.resource_monitor:
             # Type cast to help type checker understand the types
             learning_processes: set[str] = self.resource_monitor.learning_processes
-            process_start_times: dict[str, datetime] = self.resource_monitor.process_start_times
-            
-            sessions: List[str] = list(learning_processes)
+            process_start_times: dict[str, datetime] = (
+                self.resource_monitor.process_start_times
+            )
+
+            sessions: list[str] = list(learning_processes)
             return [
                 {
                     "session_id": session_id,
@@ -414,11 +440,13 @@ class MonitoringDashboard:
             ]
         return []
 
-    def _get_evolution_milestones(self) -> List[Dict[str, Any]]:
+    def _get_evolution_milestones(self) -> list[dict[str, Any]]:
         """Get evolution milestones"""
         if self.performance_analyzer:
             # Type cast to help type checker understand the types
-            evolution_milestones: List[Any] = self.performance_analyzer.evolution_milestones
+            evolution_milestones: list[Any] = (
+                self.performance_analyzer.evolution_milestones
+            )
             return evolution_milestones[-10:]  # Last 10
         return []
 
@@ -741,7 +769,7 @@ class MonitoringDashboard:
 
 
 # Global dashboard instance
-_dashboard_instance: Optional[MonitoringDashboard] = None
+_dashboard_instance: MonitoringDashboard | None = None
 
 
 def get_monitoring_dashboard(

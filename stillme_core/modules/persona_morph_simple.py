@@ -384,10 +384,18 @@ class PersonaMorph:
             conciseness_values = [s.conciseness for s in recent_styles]
             vocab_values = [s.vocabulary_complexity for s in recent_styles]
 
-            new_formality = sum(f * w for f, w in zip(formality_values, weights, strict=False))
-            new_humor_level = sum(h * w for h, w in zip(humor_values, weights, strict=False))
-            new_conciseness = sum(c * w for c, w in zip(conciseness_values, weights, strict=False))
-            new_vocab_complexity = sum(v * w for v, w in zip(vocab_values, weights, strict=False))
+            new_formality = sum(
+                f * w for f, w in zip(formality_values, weights, strict=False)
+            )
+            new_humor_level = sum(
+                h * w for h, w in zip(humor_values, weights, strict=False)
+            )
+            new_conciseness = sum(
+                c * w for c, w in zip(conciseness_values, weights, strict=False)
+            )
+            new_vocab_complexity = sum(
+                v * w for v, w in zip(vocab_values, weights, strict=False)
+            )
 
         # Cập nhật phong cách hiện tại
         profile.current_style = StyleFeatures(

@@ -104,9 +104,7 @@ class AuthenticationManager:
         self.user_permissions: dict[str, list[str]] = {}
         self.token_ttl = timedelta(hours=24)
 
-    def generate_token(
-        self, user_id: str, permissions: list[str] | None = None
-    ) -> str:
+    def generate_token(self, user_id: str, permissions: list[str] | None = None) -> str:
         """Generate JWT token for user"""
         payload = {
             "user_id": user_id,

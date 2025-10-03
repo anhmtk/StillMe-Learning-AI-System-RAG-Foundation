@@ -104,9 +104,7 @@ class StateManager:
                 "compression": True,
             }
 
-    def get_state(
-        self, entity_id: str, state_type: StateType
-    ) -> dict[str, Any] | None:
+    def get_state(self, entity_id: str, state_type: StateType) -> dict[str, Any] | None:
         """Get current state for an entity"""
         with self.lock:
             state_key = f"{state_type.value}:{entity_id}"

@@ -157,9 +157,7 @@ class FileManager:
         logger.debug("Directory ensured", path=str(path))
         return path
 
-    def backup_file(
-        self, path: str | Path, backup_suffix: str = ".backup"
-    ) -> Path:
+    def backup_file(self, path: str | Path, backup_suffix: str = ".backup") -> Path:
         """
         Create backup of file - Tạo backup file
 
@@ -180,9 +178,7 @@ class FileManager:
         logger.info("File backed up", original=str(path), backup=str(backup_path))
         return backup_path
 
-    def safe_write(
-        self, path: str | Path, data: Any, operation: FileOperation
-    ) -> None:
+    def safe_write(self, path: str | Path, data: Any, operation: FileOperation) -> None:
         """
         Safely write data to file - Ghi data an toàn vào file
 
@@ -275,9 +271,7 @@ class FileManager:
         except Exception as e:
             raise ValidationError(f"File validation failed: {e!s}") from e
 
-    def read_file(
-        self, path: str | Path, format_type: FileFormat | None = None
-    ) -> Any:
+    def read_file(self, path: str | Path, format_type: FileFormat | None = None) -> Any:
         """
         Read file content - Đọc nội dung file
 

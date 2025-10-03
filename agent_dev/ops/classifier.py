@@ -131,7 +131,7 @@ class IssueClassifier:
         Returns:
             Dictionary with issues grouped by severity
         """
-        classified = {
+        classified: dict[str, list[dict[str, Any]]] = {
             IssueSeverity.SECURITY.value: [],
             IssueSeverity.MAJOR.value: [],
             IssueSeverity.MINOR.value: [],

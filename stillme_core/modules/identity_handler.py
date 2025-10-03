@@ -306,9 +306,7 @@ class IdentityHandler:
 
         return selected_template
 
-    def generate_secure_response(
-        self, message: str, locale: str = "vi"
-    ) -> str | None:
+    def generate_secure_response(self, message: str, locale: str = "vi") -> str | None:
         """
         Generate secure response for identity or architecture questions
 

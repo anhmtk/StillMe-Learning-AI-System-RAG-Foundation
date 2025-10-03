@@ -94,7 +94,9 @@ class PrivacyManager:
 
         except Exception as e:
             logger.error(f"Error exporting data for user {user_id}: {e}")
-            raise HTTPException(status_code=500, detail=f"Data export failed: {str(e)}") from e
+            raise HTTPException(
+                status_code=500, detail=f"Data export failed: {str(e)}"
+            ) from e
 
     def delete_user_data(
         self, user_id: str, confirmation_token: str, delete_all: bool = True

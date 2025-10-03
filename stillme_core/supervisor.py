@@ -181,9 +181,7 @@ class Supervisor:
         """Get approved lesson proposals"""
         return [p for p in self.lesson_proposals if p.status == LessonStatus.APPROVED]
 
-    def create_daily_supervisor(
-        self, date: datetime | None = None
-    ) -> DailySupervisor:
+    def create_daily_supervisor(self, date: datetime | None = None) -> DailySupervisor:
         """Create daily supervisor record"""
         try:
             if date is None:

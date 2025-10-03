@@ -122,9 +122,10 @@ class APIConsistencyChecker:
         # Check for duplicate Verifier classes
         try:
             import importlib.util
+
             spec_new = importlib.util.find_spec("stillme_core.core.verifier")
             spec_old = importlib.util.find_spec("stillme_core.verifier")
-            
+
             if spec_new is None or spec_old is None:
                 issues.append("Verifier modules not found")
 

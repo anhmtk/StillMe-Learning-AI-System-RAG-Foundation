@@ -233,9 +233,7 @@ class AgentDevQualityIntegration:
             self.logger.error(f"❌ Failed to run performance gate: {e}")
             return None
 
-    def _run_maintainability_gate(
-        self, code_content: str
-    ) -> QualityGateResult | None:
+    def _run_maintainability_gate(self, code_content: str) -> QualityGateResult | None:
         """Run maintainability quality gate"""
         try:
             if not code_content:

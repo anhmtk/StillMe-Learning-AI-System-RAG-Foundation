@@ -7,7 +7,7 @@ Handles incident escalation and remediation planning.
 
 import logging
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
 
 from .classifier import IssueClassifier, IssueSeverity
 from .notifier import EmailNotifier, TelegramNotifier
@@ -35,7 +35,7 @@ class EscalationManager:
         """
         incidents = self._analyze_patrol_results(patrol_result)
 
-        escalation_result = {
+        escalation_result: dict[str, Any] = {
             "timestamp": datetime.now().isoformat(),
             "incidents_found": len(incidents),
             "escalations_sent": 0,
@@ -48,9 +48,9 @@ class EscalationManager:
             escalation_result["actions"].append(action)
 
             if action["escalated"]:
-                escalation_result["escalations_sent"] += 1
+                escalation_result["escalations_sent"] = escalation_result["escalations_sent"] + 1
             if action["auto_fixed"]:
-                escalation_result["auto_fixes_applied"] += 1
+                escalation_result["auto_fixes_applied"] = escalation_result["auto_fixes_applied"] + 1
 
         return escalation_result
 
@@ -58,7 +58,7 @@ class EscalationManager:
         self, patrol_result: dict[str, Any]
     ) -> list[dict[str, Any]]:
         """Analyze patrol results and identify incidents"""
-        incidents = []
+        incidents: list[dict[str, Any]] = []
 
         # Analyze ruff issues
         ruff_issues = patrol_result.get("ruff_issues", [])
@@ -108,7 +108,7 @@ class EscalationManager:
         incident_type = incident["type"]
         severity = incident["severity"]
 
-        action = {
+        action: dict[str, Any] = {
             "incident_type": incident_type,
             "severity": severity,
             "escalated": False,
@@ -127,13 +127,15 @@ class EscalationManager:
             if self.email_notifier.send_incident_report(
                 severity, title, details, remediation
             ):
-                action["channels_used"].append("email")
+                channels_used_list = cast(list[str], action["channels_used"])
+                channels_used_list.append("email")
 
             # Send via Telegram
             if self.telegram_notifier.send_incident_report(
                 severity, title, details, remediation
             ):
-                action["channels_used"].append("telegram")
+                channels_used_list = cast(list[str], action["channels_used"])
+                channels_used_list.append("telegram")
 
         # Handle auto-fix for minor issues
         elif severity == IssueSeverity.MINOR.value and incident_type == "code_quality":

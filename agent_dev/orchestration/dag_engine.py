@@ -53,22 +53,46 @@ class ExecutionStrategy(Enum):
 class DAGNode:
     """DAG node definition"""
 
-    node_id: str
-    name: str
-    description: str
-    task_type: str
-    command: str
-    working_directory: str | None
-    environment: dict[str, str]
-    dependencies: list[str]
-    retry_count: int
-    timeout: int
-    priority: int
-    condition: str | None
-    on_success: str | None
-    on_failure: str | None
-    resources: dict[str, Any]
-    metadata: dict[str, Any]
+    def __init__(
+        self,
+        node_id: str,
+        name: str,
+        task_type: str,
+        description: str = "",
+        command: str = "",
+        working_directory: str | None = None,
+        environment: dict[str, str] | None = None,
+        dependencies: list[str] | None = None,
+        retry_count: int = 0,
+        timeout: int = 300,
+        priority: int = 0,
+        condition: str | None = None,
+        on_success: str | None = None,
+        on_failure: str | None = None,
+        resources: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
+        **kwargs,
+    ):
+        self.node_id = node_id
+        self.name = name
+        self.description = description
+        self.task_type = task_type
+        self.command = command
+        self.working_directory = working_directory
+        self.environment = environment or {}
+        self.dependencies = dependencies or []
+        self.retry_count = retry_count
+        self.timeout = timeout
+        self.priority = priority
+        self.condition = condition
+        self.on_success = on_success
+        self.on_failure = on_failure
+        self.resources = resources or {}
+        self.metadata = metadata or {}
+
+        # Handle additional parameters
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
 
 @dataclass
@@ -109,7 +133,7 @@ class DAGEngine:
 
     def __init__(self, config_path: str | None = None):
         self.config = self._load_config(config_path)
-        self.dags: dict[str, nx.DiGraph[Any]] = {}
+        self.dags: dict[str, nx.DiGraph[str, dict[str, Any]]] = {}
         self.executions: dict[str, DAGExecution] = {}
         self.node_handlers: dict[str, Callable[..., Any]] = {}
         self.resource_pools: dict[str, dict[str, Any]] = {}
@@ -161,7 +185,7 @@ class DAGEngine:
                 dag_data = yaml.safe_load(f)
 
             dag_id = dag_data["id"]
-            dag_graph: nx.DiGraph[Any] = nx.DiGraph()
+            dag_graph: nx.DiGraph = nx.DiGraph()
 
             # Add nodes
             for node_data in dag_data.get("nodes", []):
@@ -253,7 +277,7 @@ class DAGEngine:
         """Execute DAG asynchronously"""
         try:
             execution.status = DAGStatus.RUNNING
-            dag_graph: nx.DiGraph[Any] = self.dags[execution.dag_id]
+            dag_graph: nx.DiGraph = self.dags[execution.dag_id]
 
             # Get execution strategy
             strategy = ExecutionStrategy(
@@ -291,7 +315,9 @@ class DAGEngine:
                 f"🏁 DAG execution completed: {execution.execution_id} - {execution.status.value}"
             )
 
-    async def _execute_sequential(self, execution: DAGExecution, dag_graph: nx.DiGraph[Any]):
+    async def _execute_sequential(
+        self, execution: DAGExecution, dag_graph: nx.DiGraph[str, dict[str, Any]]
+    ):
         """Execute DAG nodes sequentially"""
         # Topological sort for sequential execution
         try:
@@ -306,7 +332,9 @@ class DAGEngine:
             node: DAGNode = dag_graph.nodes[node_id]["node"]
             await self._execute_node(execution, node)
 
-    async def _execute_parallel(self, execution: DAGExecution, dag_graph: nx.DiGraph[Any]):
+    async def _execute_parallel(
+        self, execution: DAGExecution, dag_graph: nx.DiGraph[str, dict[str, Any]]
+    ):
         """Execute DAG nodes in parallel where possible"""
         completed_nodes: set[str] = set()
         running_tasks: dict[str, asyncio.Task[Any]] = {}
@@ -355,7 +383,9 @@ class DAGEngine:
             ):
                 break
 
-    async def _execute_adaptive(self, execution: DAGExecution, dag_graph: nx.DiGraph[Any]):
+    async def _execute_adaptive(
+        self, execution: DAGExecution, dag_graph: nx.DiGraph[str, dict[str, Any]]
+    ):
         """Execute DAG with adaptive strategy"""
         # Start with parallel execution, fall back to sequential if needed
         try:
@@ -672,7 +702,7 @@ class DAGEngine:
         if dag_id not in self.dags:
             return {}
 
-        dag_graph: nx.DiGraph[Any] = self.dags[dag_id]
+        dag_graph: nx.DiGraph = self.dags[dag_id]
         executions = [e for e in self.executions.values() if e.dag_id == dag_id]
 
         # Calculate statistics
@@ -851,4 +881,33 @@ if __name__ == "__main__":
             if dag_file.exists():
                 dag_file.unlink()
 
+    def _get_topological_order(
+        self, dag_graph: nx.DiGraph[str, dict[str, Any]]
+    ) -> list[str]:
+        """Get topological order of DAG nodes"""
+        try:
+            return list(nx.topological_sort(dag_graph))
+        except nx.NetworkXError:
+            return list(dag_graph.nodes)
+
+    def _create_dag_graph(
+        self, nodes: list[DAGNode]
+    ) -> nx.DiGraph[str, dict[str, Any]]:
+        """Create DAG graph from nodes"""
+        dag_graph: nx.DiGraph[str, dict[str, Any]] = nx.DiGraph()
+
+        # Add nodes
+        for node in nodes:
+            dag_graph.add_node(node.node_id, node=node)
+
+        # Add edges based on dependencies
+        for node in nodes:
+            for dep in node.dependencies:
+                if dep in dag_graph.nodes:
+                    dag_graph.add_edge(dep, node.node_id)
+
+        return dag_graph
+
+
+if __name__ == "__main__":
     asyncio.run(main())

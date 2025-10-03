@@ -166,9 +166,7 @@ class StillMeEcosystemDiscovery:
 
         return modules
 
-    def _analyze_module(
-        self, file_path: Path, module_type: str
-    ) -> ModuleInfo | None:
+    def _analyze_module(self, file_path: Path, module_type: str) -> ModuleInfo | None:
         """Phân tích chi tiết một module"""
         try:
             # Basic file info

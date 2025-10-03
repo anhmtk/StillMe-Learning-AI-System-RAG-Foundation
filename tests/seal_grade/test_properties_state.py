@@ -173,7 +173,9 @@ class StatePropertyTests:
 
         # Create jobs in reverse order B
         jobs_b = []
-        for i, (job_id, name) in enumerate(reversed(list(zip(job_ids, names, strict=False)))):
+        for i, (job_id, name) in enumerate(
+            reversed(list(zip(job_ids, names, strict=False)))
+        ):
             job = await state_store.create_job(job_id, name, f"Description {i}")
             jobs_b.append(job)
 

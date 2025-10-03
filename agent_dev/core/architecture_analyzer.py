@@ -154,7 +154,7 @@ class ArchitectureAnalyzer:
         self._ensure_directories()
 
         # Analysis data
-        self.dependency_graph = nx.DiGraph()
+        self.dependency_graph: nx.DiGraph[str, dict[str, Any]] = nx.DiGraph()
         self.dependencies: list[DependencyInfo] = []
         self.design_patterns: list[DesignPatternMatch] = []
         self.refactoring_suggestions: list[RefactoringSuggestion] = []

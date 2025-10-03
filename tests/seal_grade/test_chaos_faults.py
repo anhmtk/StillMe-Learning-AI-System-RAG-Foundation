@@ -267,7 +267,11 @@ class TestChaosEngineering:
                 # System should handle fault gracefully
                 assert isinstance(
                     e,
-                    asyncio.TimeoutError | Exception | MemoryError | OSError | PermissionError,
+                    asyncio.TimeoutError
+                    | Exception
+                    | MemoryError
+                    | OSError
+                    | PermissionError,
                 )
 
     def test_system_resilience(self, state_store):

@@ -174,7 +174,10 @@ class TestTokenOptimizerIntegration:
                 embeddings2 = optimizer.cache._get_embedding("test text")
 
                 assert len(embeddings1) == len(embeddings2)
-                assert all(abs(a - b) < 1e-10 for a, b in zip(embeddings1, embeddings2, strict=False))
+                assert all(
+                    abs(a - b) < 1e-10
+                    for a, b in zip(embeddings1, embeddings2, strict=False)
+                )
 
     def test_optimizer_deterministic_fallback(self, config):
         """Test that fallback produces deterministic results"""

@@ -115,9 +115,7 @@ def _extract_json_block(text: str) -> str:
     return t
 
 
-def _normalize_plan_v1(
-    raw: dict[str, Any], problem_file: str | None
-) -> dict[str, Any]:
+def _normalize_plan_v1(raw: dict[str, Any], problem_file: str | None) -> dict[str, Any]:
     """
     Chuẩn hoá JSON “yếu” thành schema Planner (module_name, description, objectives, steps[{step_id, action, reasoning}]).
     - Điền mặc định khi thiếu
