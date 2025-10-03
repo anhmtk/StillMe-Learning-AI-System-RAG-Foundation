@@ -206,8 +206,8 @@ class CollaborationSystem:
         performance_analysis = self._analyze_performance(file_path)
 
         # Tổng hợp kết quả
-        comments = []
-        suggestions = []
+        comments: list[str] = []
+        suggestions: list[str] = []
         score = 100.0
 
         # Xử lý linting results
@@ -286,8 +286,8 @@ class CollaborationSystem:
 
     def _run_linting(self, file_path: str) -> dict[str, list[str]]:
         """Chạy linting tools"""
-        errors = []
-        warnings = []
+        errors: list[str] = []
+        warnings: list[str] = []
 
         try:
             # Chạy flake8
@@ -344,7 +344,7 @@ class CollaborationSystem:
 
             # Tìm code trùng lặp (đơn giản)
             duplicate_code = 0
-            line_counts = {}
+            line_counts: dict[str, int] = {}
             for line in lines:
                 if line.strip() and not line.strip().startswith("#"):
                     line_counts[line] = line_counts.get(line, 0) + 1
@@ -362,7 +362,7 @@ class CollaborationSystem:
 
     def _analyze_security(self, file_path: str) -> dict[str, list[str]]:
         """Phân tích bảo mật"""
-        issues = []
+        issues: list[str] = []
 
         try:
             with open(file_path, encoding="utf-8") as f:
@@ -390,7 +390,7 @@ class CollaborationSystem:
 
     def _analyze_performance(self, file_path: str) -> dict[str, list[str]]:
         """Phân tích hiệu suất"""
-        slow_operations = []
+        slow_operations: list[str] = []
 
         try:
             with open(file_path, encoding="utf-8") as f:
@@ -428,7 +428,7 @@ class CollaborationSystem:
         content: str,
         author: str,
         category: str = "general",
-        tags: list[str] = None,
+        tags: list[str] | None = None,
     ) -> KnowledgeShare:
         """Chia sẻ kiến thức"""
         if tags is None:
@@ -493,7 +493,7 @@ class CollaborationSystem:
 
     def _generate_mentoring_recommendations(self, topic: str) -> list[str]:
         """Tạo recommendations cho mentoring"""
-        recommendations = []
+        recommendations: list[str] = []
 
         topic_lower = topic.lower()
 
@@ -564,7 +564,7 @@ class CollaborationSystem:
         mentoring_sessions = len(self.mentoring_sessions)
 
         # Tính team activity
-        team_activity = {}
+        team_activity: dict[str, int] = {}
         for review in self.reviews:
             team_activity[review.reviewer] = team_activity.get(review.reviewer, 0) + 1
 
@@ -576,7 +576,7 @@ class CollaborationSystem:
             team_activity[session.mentee] = team_activity.get(session.mentee, 0) + 1
 
         # Tạo recommendations
-        recommendations = []
+        recommendations: list[str] = []
 
         if total_reviews > 0:
             approval_rate = approved_reviews / total_reviews
