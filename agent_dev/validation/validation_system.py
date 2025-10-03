@@ -89,7 +89,9 @@ class AgentDevValidator:
                 infos = int(error_match.group(3))
 
                 # Phân loại lỗi
-                error_details: list[dict[str, Any]] = self._classify_pyright_errors(output)
+                error_details: list[dict[str, Any]] = self._classify_pyright_errors(
+                    output
+                )
 
                 logger.info(
                     f"📊 Pyright: {error_count} errors, {warnings} warnings, {infos} infos"
@@ -126,7 +128,9 @@ class AgentDevValidator:
                 error_match = re.search(r"Found (\d+) errors?", output)
                 if error_match:
                     error_count = int(error_match.group(1))
-                    error_details: list[dict[str, Any]] = self._classify_ruff_errors(output)
+                    error_details: list[dict[str, Any]] = self._classify_ruff_errors(
+                        output
+                    )
 
             logger.info(f"📊 Ruff: {error_count} errors")
             return error_count, error_details
@@ -321,7 +325,12 @@ class AgentDevValidator:
                 and test_passed  # Code vẫn chạy được
                 and (
                     critical_errors == 0
-                    or critical_errors < (before_data["critical_errors"] if "critical_errors" in before_data else 0)
+                    or critical_errors
+                    < (
+                        before_data["critical_errors"]
+                        if "critical_errors" in before_data
+                        else 0
+                    )
                 )  # Giảm lỗi nghiêm trọng
             )
             if total_before > 0
@@ -337,7 +346,10 @@ class AgentDevValidator:
             style_suggestions=style_suggestions,
             execution_time=time.time() - start_time,
             success=success,
-            evidence_files=[before_data.get("evidence_file", "before_validation.json"), evidence_file],
+            evidence_files=[
+                before_data.get("evidence_file", "before_validation.json"),
+                evidence_file,
+            ],
             error_details=all_details,
         )
 

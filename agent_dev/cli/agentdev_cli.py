@@ -59,7 +59,7 @@ class AgentDevCLI:
         # Budget constraints
         if config["inference_location"] == "CORE_CLOUD":
             budget = input("\n2. Cloud Budget (USD/month) [100]: ").strip() or "100"
-            config["cloud_budget_usd"] = int(budget)
+            config["cloud_budget_usd"] = str(int(budget))
 
         # Downtime tolerance
         print("\n3. Downtime Tolerance:")
@@ -208,7 +208,7 @@ class AgentDevCLI:
         with open(spec_path) as f:
             spec = yaml.safe_load(f)
 
-        errors = []
+        errors: list[str] = []
 
         # Check edge stateless policy
         if (

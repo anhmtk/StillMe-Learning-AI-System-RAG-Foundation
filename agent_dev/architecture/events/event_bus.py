@@ -216,7 +216,9 @@ class EventBus:
         for handler in handlers:
             try:
                 if handler.async_handler:
-                    await handler.handler_func(event)
+                    result = handler.handler_func(event)
+                    if result is not None:
+                        await result  # type: ignore
                 else:
                     handler.handler_func(event)
             except Exception as e:
@@ -244,7 +246,7 @@ class EventBus:
         to_timestamp: float | None = None,
     ) -> list[Event]:
         """Replay events from store"""
-        events = []
+        events: list[Event] = []
 
         for event in self.event_store:
             # Filter by event type
@@ -293,7 +295,7 @@ class EventBus:
 
     def get_event_statistics(self) -> dict[str, Any]:
         """Get event bus statistics"""
-        event_counts = {}
+        event_counts: dict[str, int] = {}
         for event in self.event_store:
             event_type = event.event_type.value
             event_counts[event_type] = event_counts.get(event_type, 0) + 1
@@ -381,7 +383,7 @@ def event_handler(
 ):
     """Decorator for event handlers"""
 
-    def decorator(func):
+    def decorator(func: Any):
         handler_id = event_bus.subscribe(
             event_types=event_types,
             handler_func=func,
@@ -403,12 +405,18 @@ if __name__ == "__main__":
 
         # Define event handlers
         @event_handler([EventType.TASK_CREATED], priority=1)
-        def handle_task_created(event: Event):
+        def handle_task_created(event: Event) -> None:
             print(f"🎯 Task created: {event.data.get('task_id')}")
 
         @event_handler([EventType.SECURITY_VIOLATION_DETECTED], priority=10)
-        async def handle_security_violation(event: Event):
+        async def handle_security_violation(event: Event) -> None:
             print(f"🚨 Security violation: {event.data.get('violation_type')}")
+
+        # Register handlers
+        bus.add_handler(EventType.TASK_CREATED, handle_task_created)
+        bus.add_handler(
+            EventType.SECURITY_VIOLATION_DETECTED, handle_security_violation
+        )
 
         # Publish events
         await publish_task_event(

@@ -8,6 +8,7 @@ Tập trung fix các lỗi phổ biến theo pattern thay vì fix từng lỗi r
 
 import re
 from dataclasses import dataclass
+from typing import Any
 
 
 @dataclass
@@ -141,11 +142,11 @@ class PatternBasedFixer:
         """Get tất cả patterns"""
         return self.patterns
 
-    def fix_error(self, error_info) -> bool:
+    def fix_error(self, error_info: Any) -> bool:
         """Fix a single error and return success status"""
         try:
-            error_message = f"{error_info.rule} {error_info.msg}"
-            fix = self.generate_fix(error_message, error_info.file)
+            error_message = f"{error_info.rule} {error_info.msg}"  # type: ignore
+            fix = self.generate_fix(error_message, error_info.file)  # type: ignore
             return fix is not None and fix.strip() != ""
         except Exception:
             return False

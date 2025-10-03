@@ -349,7 +349,7 @@ class StateManager:
                 len(transitions) for transitions in self.transitions.values()
             )
 
-            state_types = {}
+            state_types: dict[str, int] = {}
             for state_key in self.states.keys():
                 state_type = state_key.split(":", 1)[0]
                 state_types[state_type] = state_types.get(state_type, 0) + 1

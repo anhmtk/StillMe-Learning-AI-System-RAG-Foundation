@@ -48,9 +48,13 @@ class EscalationManager:
             escalation_result["actions"].append(action)
 
             if action["escalated"]:
-                escalation_result["escalations_sent"] = escalation_result["escalations_sent"] + 1
+                escalation_result["escalations_sent"] = (
+                    escalation_result["escalations_sent"] + 1
+                )
             if action["auto_fixed"]:
-                escalation_result["auto_fixes_applied"] = escalation_result["auto_fixes_applied"] + 1
+                escalation_result["auto_fixes_applied"] = (
+                    escalation_result["auto_fixes_applied"] + 1
+                )
 
         return escalation_result
 

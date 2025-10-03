@@ -23,9 +23,9 @@ class Executor:
         """Execute a plan"""
         # Handle both object and dict plans
         if isinstance(plan, dict):
-            tasks = plan.get("tasks", [])
+            tasks = plan.get("tasks", [])  # type: ignore
         else:
-            tasks = getattr(plan, "tasks", [])
+            tasks = getattr(plan, "tasks", [])  # type: ignore
 
         if not tasks:
             return ExecutionResult(
@@ -33,11 +33,11 @@ class Executor:
             )
 
         # Simulate execution
-        task = tasks[0]
+        task = tasks[0]  # type: ignore
         if isinstance(task, dict):
-            command = task.get("command", "")
+            command = task.get("command", "")  # type: ignore
         else:
-            command = getattr(task, "command", "")
+            command = getattr(task, "command", "")  # type: ignore
 
         if command:
             return ExecutionResult(

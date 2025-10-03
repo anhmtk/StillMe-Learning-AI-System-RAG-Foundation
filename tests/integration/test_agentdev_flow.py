@@ -6,22 +6,21 @@ Integration Test cho AgentDev Flow
 Test toàn bộ workflow: Plan → Execute → Validate → Secure
 """
 
-import asyncio
-import time
-from typing import Any, Dict, List
-
-import pytest
+import os
 
 # Import các module AgentDev
 import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+import time
+
+import pytest
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from agent_dev.core.agentdev import AgentDev
-from agent_dev.orchestration.dag_engine import DAGEngine, DAGNode, DAGExecution
-from agent_dev.validation.validation_system import AgentDevValidator, ValidationResult
+from agent_dev.intelligence.scoring_engine import ScoreResult, ScoringEngine
+from agent_dev.orchestration.dag_engine import DAGEngine, DAGNode
 from agent_dev.security.security_scanner import SecurityScanner
-from agent_dev.intelligence.scoring_engine import ScoringEngine, ScoreResult
+from agent_dev.validation.validation_system import AgentDevValidator, ValidationResult
 
 
 class TestAgentDevIntegration:
@@ -38,12 +37,12 @@ class TestAgentDevIntegration:
     def test_scenario_1_basic_flow(self):
         """Scenario 1: Basic Plan → Execute → Validate → Secure"""
         print("\n🧪 Scenario 1: Basic Flow")
-        
+
         # Step 1: Create plan
         goal = "Run simple task"
         plan = self.agentdev.planner.create_plan(goal)
         assert plan is not None
-        assert hasattr(plan, 'tasks')
+        assert hasattr(plan, "tasks")
         print(f"✅ Plan created: {len(plan.tasks)} tasks")
 
         # Step 2: Execute plan
@@ -66,7 +65,7 @@ class TestAgentDevIntegration:
     def test_scenario_2_invalid_input_handling(self):
         """Scenario 2: Invalid Input Handling"""
         print("\n🧪 Scenario 2: Invalid Input Handling")
-        
+
         # Step 1: Create plan with invalid parameters
         invalid_plan = {
             "tasks": [
@@ -89,14 +88,16 @@ class TestAgentDevIntegration:
         # Step 3: Validate should catch the error
         validation_result = self.validator.validate_before_fix()
         assert validation_result is not None
-        print(f"✅ Validation caught issues: {validation_result.get('total_errors', 0)} errors")
+        print(
+            f"✅ Validation caught issues: {validation_result.get('total_errors', 0)} errors"
+        )
 
         print("✅ Scenario 2: PASS")
 
     def test_scenario_3_security_enforcement(self):
         """Scenario 3: Security Enforcement"""
         print("\n🧪 Scenario 3: Security Enforcement")
-        
+
         # Step 1: Create plan with dangerous task
         dangerous_plan = {
             "tasks": [
@@ -104,7 +105,7 @@ class TestAgentDevIntegration:
                     "id": "dangerous_task",
                     "name": "dangerous_command",
                     "command": "rm -rf /",
-                    "parameters": {"path": "/"}
+                    "parameters": {"path": "/"},
                 }
             ]
         }
@@ -112,14 +113,14 @@ class TestAgentDevIntegration:
         # Step 2: Security scanner should detect danger
         security_result = self.security_scanner.scan_plan(dangerous_plan)
         assert security_result is not None
-        
-        issues = security_result.get('issues', [])
-        dangerous_found = any('rm -rf' in str(issue) for issue in issues)
+
+        issues = security_result.get("issues", [])
+        dangerous_found = any("rm -rf" in str(issue) for issue in issues)
         assert dangerous_found, "Should detect dangerous command"
         print(f"✅ Security detected {len(issues)} issues")
 
         # Step 3: Plan should be blocked
-        assert security_result.get('blocked', False), "Plan should be blocked"
+        assert security_result.get("blocked", False), "Plan should be blocked"
         print("✅ Plan blocked by security")
 
         print("✅ Scenario 3: PASS")
@@ -127,52 +128,53 @@ class TestAgentDevIntegration:
     def test_scenario_4_orchestration_dag(self):
         """Scenario 4: Orchestration with Dependencies"""
         print("\n🧪 Scenario 4: Orchestration DAG")
-        
+
         # Step 1: Create DAG with dependencies
         task_a = DAGNode(
             node_id="task_a",
             task_type="simple",
             name="Task A",
-            parameters={"value": "A"}
+            parameters={"value": "A"},
         )
-        
+
         task_b = DAGNode(
-            node_id="task_b", 
+            node_id="task_b",
             task_type="simple",
             name="Task B",
             parameters={"value": "B"},
-            dependencies=["task_a"]
+            dependencies=["task_a"],
         )
-        
+
         task_c = DAGNode(
             node_id="task_c",
-            task_type="simple", 
+            task_type="simple",
             name="Task C",
             parameters={"value": "C"},
-            dependencies=["task_b"]
+            dependencies=["task_b"],
         )
 
         # Step 2: Create DAG graph manually
         dag_id = "test_dag"
         import networkx as nx
+
         dag_graph = nx.DiGraph()
-        
+
         # Add nodes
         dag_graph.add_node("task_a", node=task_a)
         dag_graph.add_node("task_b", node=task_b)
         dag_graph.add_node("task_c", node=task_c)
-        
+
         # Add edges based on dependencies
         dag_graph.add_edge("task_a", "task_b")
         dag_graph.add_edge("task_b", "task_c")
-        
+
         self.dag_engine.dags[dag_id] = dag_graph
-        
+
         # Step 3: Verify execution order
         topo_order = list(nx.topological_sort(dag_graph))
-        
+
         assert topo_order[0] == "task_a", "Task A should be first"
-        assert topo_order[1] == "task_b", "Task B should be second" 
+        assert topo_order[1] == "task_b", "Task B should be second"
         assert topo_order[2] == "task_c", "Task C should be third"
         print(f"✅ DAG order: {' → '.join(topo_order)}")
 
@@ -181,18 +183,18 @@ class TestAgentDevIntegration:
     def test_scenario_5_intelligence_scoring(self):
         """Scenario 5: Intelligence Scoring"""
         print("\n🧪 Scenario 5: Intelligence Scoring")
-        
+
         # Step 1: Create test results
         good_result = {
             "status": "success",
             "output": "Task completed successfully",
-            "metrics": {"accuracy": 0.95, "performance": 0.88}
+            "metrics": {"accuracy": 0.95, "performance": 0.88},
         }
-        
+
         bad_result = {
-            "status": "failed", 
+            "status": "failed",
             "output": "Task failed with errors",
-            "metrics": {"accuracy": 0.45, "performance": 0.32}
+            "metrics": {"accuracy": 0.45, "performance": 0.32},
         }
 
         # Step 2: Score good result
@@ -200,17 +202,23 @@ class TestAgentDevIntegration:
         assert isinstance(good_score, ScoreResult)
         assert 0.0 <= good_score.confidence <= 1.0, "Confidence should be in [0.0, 1.0]"
         assert good_score.status in ["pass", "warn", "fail"], "Status should be valid"
-        print(f"✅ Good result score: {good_score.status} (confidence: {good_score.confidence:.2f})")
+        print(
+            f"✅ Good result score: {good_score.status} (confidence: {good_score.confidence:.2f})"
+        )
 
-        # Step 3: Score bad result  
+        # Step 3: Score bad result
         bad_score = self.scoring_engine.score_result(bad_result)
         assert isinstance(bad_score, ScoreResult)
         assert 0.0 <= bad_score.confidence <= 1.0, "Confidence should be in [0.0, 1.0]"
         assert bad_score.status in ["pass", "warn", "fail"], "Status should be valid"
-        print(f"✅ Bad result score: {bad_score.status} (confidence: {bad_score.confidence:.2f})")
+        print(
+            f"✅ Bad result score: {bad_score.status} (confidence: {bad_score.confidence:.2f})"
+        )
 
         # Step 4: Verify scoring logic
-        assert good_score.confidence > bad_score.confidence, "Good result should have higher confidence"
+        assert (
+            good_score.confidence > bad_score.confidence
+        ), "Good result should have higher confidence"
         print("✅ Scoring logic verified")
 
         print("✅ Scenario 5: PASS")
@@ -218,13 +226,8 @@ class TestAgentDevIntegration:
     def test_scenario_6_stress_test(self):
         """Scenario 6: End-to-End Stress Test"""
         print("\n🧪 Scenario 6: Stress Test (10 tasks)")
-        
-        results = {
-            "pass": 0,
-            "fail": 0, 
-            "block": 0,
-            "latencies": []
-        }
+
+        results = {"pass": 0, "fail": 0, "block": 0, "latencies": []}
 
         # Step 1: Create 10 random tasks
         tasks = [
@@ -235,41 +238,49 @@ class TestAgentDevIntegration:
             {"type": "valid", "name": "valid_task_3", "command": "pwd"},
             {"type": "invalid", "name": "invalid_task_2", "parameters": {}},
             {"type": "valid", "name": "valid_task_4", "command": "date"},
-            {"type": "dangerous", "name": "dangerous_task_2", "command": "sudo rm -rf /"},
+            {
+                "type": "dangerous",
+                "name": "dangerous_task_2",
+                "command": "sudo rm -rf /",
+            },
             {"type": "valid", "name": "valid_task_5", "command": "whoami"},
-            {"type": "invalid", "name": "invalid_task_3", "command": ""}
+            {"type": "invalid", "name": "invalid_task_3", "command": ""},
         ]
 
         # Step 2: Process each task
         for i, task in enumerate(tasks):
             start_time = time.time()
-            
+
             try:
                 # Create plan
                 plan = {
-                    "tasks": [{
-                        "id": f"task_{i}",
-                        "name": task["name"],
-                        "command": task["command"],
-                        "parameters": task.get("parameters", {})
-                    }]
+                    "tasks": [
+                        {
+                            "id": f"task_{i}",
+                            "name": task["name"],
+                            "command": task["command"],
+                            "parameters": task.get("parameters", {}),
+                        }
+                    ]
                 }
 
                 # Security scan
                 security_result = self.security_scanner.scan_plan(plan)
-                if security_result.get('blocked', False):
+                if security_result.get("blocked", False):
                     results["block"] += 1
                     print(f"  Task {i+1}: BLOCKED by security")
                 else:
                     # Execute
                     try:
                         result = self.agentdev.executor.run(plan)
-                        if result and result.status == 'success':        
+                        if result and result.status == "success":
                             results["pass"] += 1
                             print(f"  Task {i+1}: PASS")
                         else:
                             results["fail"] += 1
-                            print(f"  Task {i+1}: FAIL - {result.status if result else 'None'}")
+                            print(
+                                f"  Task {i+1}: FAIL - {result.status if result else 'None'}"
+                            )
                     except Exception as e:
                         results["fail"] += 1
                         print(f"  Task {i+1}: FAIL (exception: {e})")
@@ -285,8 +296,8 @@ class TestAgentDevIntegration:
         # Step 3: Calculate metrics
         total_tasks = len(tasks)
         avg_latency = sum(results["latencies"]) / len(results["latencies"])
-        
-        print(f"\n📊 Stress Test Results:")
+
+        print("\n📊 Stress Test Results:")
         print(f"  Total tasks: {total_tasks}")
         print(f"  Pass: {results['pass']}")
         print(f"  Fail: {results['fail']}")
@@ -305,29 +316,29 @@ class TestAgentDevIntegration:
         """Generate integration test report"""
         print("\n📋 INTEGRATION TEST REPORT")
         print("=" * 50)
-        
+
         scenarios = [
             ("Scenario 1", "Basic Flow", "PASS"),
-            ("Scenario 2", "Invalid Input Handling", "PASS"), 
+            ("Scenario 2", "Invalid Input Handling", "PASS"),
             ("Scenario 3", "Security Enforcement", "PASS"),
             ("Scenario 4", "Orchestration DAG", "PASS"),
             ("Scenario 5", "Intelligence Scoring", "PASS"),
-            ("Scenario 6", "Stress Test", "PASS")
+            ("Scenario 6", "Stress Test", "PASS"),
         ]
-        
+
         print("| Scenario | Kết quả | Pass/Fail | Ghi chú |")
         print("|----------|---------|-----------|---------|")
-        
+
         for scenario_id, description, result in scenarios:
             status = "✅ PASS" if result == "PASS" else "❌ FAIL"
             print(f"| {scenario_id} | {description} | {status} | All checks passed |")
-        
+
         print("\n🎯 ACCEPTANCE CRITERIA:")
         print("✅ All scenarios pass")
         print("✅ No crashes")
         print("✅ Detailed metrics provided")
         print("✅ No # type: ignore or commented out code")
-        
+
         print("\n**ko dùng # type: ignore để che giấu lỗi, ko dùng comment out**")
 
 

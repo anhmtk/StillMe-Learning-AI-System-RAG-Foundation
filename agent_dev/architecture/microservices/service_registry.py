@@ -127,7 +127,7 @@ class ServiceRegistry:
         self, service_name: str | None = None, tags: list[str] | None = None
     ) -> list[ServiceInstance]:
         """Discover healthy service instances"""
-        healthy_services = []
+        healthy_services: list[ServiceInstance] = []
 
         for instance in self.services.values():
             if instance.status != ServiceStatus.HEALTHY:
@@ -189,7 +189,7 @@ class ServiceRegistry:
         current_time = time.time()
         stale_threshold = self.heartbeat_interval * 3  # 3x heartbeat interval
 
-        stale_services = []
+        stale_services: list[str] = []
         for service_id, instance in self.services.items():
             if current_time - instance.last_heartbeat > stale_threshold:
                 stale_services.append(service_id)
