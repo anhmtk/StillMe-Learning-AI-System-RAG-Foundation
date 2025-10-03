@@ -119,7 +119,7 @@ class GitHubActionsIntegration:
         self.repository = self.config.get("repository")
         self.owner = self.config.get("owner")
         self.base_url = "https://api.github.com"
-        self.webhook_handlers: dict[EventType, list[Callable]] = {}
+        self.webhook_handlers: dict[EventType, list[Callable[..., Any]]] = {}
         self.session: aiohttp.ClientSession | None = None
 
     def _load_config(self, config_path: str | None = None) -> dict[str, Any]:
@@ -187,7 +187,7 @@ class GitHubActionsIntegration:
                 response.raise_for_status()
                 data = await response.json()
 
-                workflows = []
+                workflows: list[GitHubWorkflow] = []
                 for workflow_data in data.get("workflows", []):
                     workflow = GitHubWorkflow(
                         workflow_id=workflow_data["id"],
@@ -215,7 +215,7 @@ class GitHubActionsIntegration:
         session = await self._get_session()
         url = f"{self.base_url}/repos/{self.owner}/{self.repository}/actions/workflows/{workflow_id}/runs"
 
-        params = {"per_page": limit}
+        params: dict[str, Any] = {"per_page": limit}
         if status:
             params["status"] = status.value
 
@@ -224,7 +224,7 @@ class GitHubActionsIntegration:
                 response.raise_for_status()
                 data = await response.json()
 
-                runs = []
+                runs: list[WorkflowRun] = []
                 for run_data in data.get("workflow_runs", []):
                     run = WorkflowRun(
                         run_id=run_data["id"],
@@ -265,7 +265,7 @@ class GitHubActionsIntegration:
                 response.raise_for_status()
                 data = await response.json()
 
-                jobs = []
+                jobs: list[Job] = []
                 for job_data in data.get("jobs", []):
                     job = Job(
                         job_id=job_data["id"],
@@ -370,7 +370,7 @@ class GitHubActionsIntegration:
             print(f"⚠️ Failed to get logs: {e}")
             return None
 
-    def register_webhook_handler(self, event_type: EventType, handler: Callable):
+    def register_webhook_handler(self, event_type: EventType, handler: Callable[..., Any]):
         """Register webhook event handler"""
         if event_type not in self.webhook_handlers:
             self.webhook_handlers[event_type] = []
@@ -440,7 +440,7 @@ class GitHubActionsIntegration:
         """Get comprehensive workflow status summary"""
         workflows = await self.get_workflows()
 
-        summary = {
+        summary: dict[str, Any] = {
             "total_workflows": len(workflows),
             "active_workflows": len([w for w in workflows if w.state == "active"]),
             "workflow_status": {},
@@ -510,7 +510,7 @@ async def get_ci_status() -> dict[str, Any]:
     return await github_actions.get_workflow_status_summary()
 
 
-def register_ci_webhook_handler(event_type: EventType, handler: Callable):
+def register_ci_webhook_handler(event_type: EventType, handler: Callable[..., Any]):
     """Register CI/CD webhook handler"""
     github_actions.register_webhook_handler(event_type, handler)
 
