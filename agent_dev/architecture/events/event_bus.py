@@ -413,8 +413,8 @@ if __name__ == "__main__":
             print(f"🚨 Security violation: {event.data.get('violation_type')}")
 
         # Register handlers
-        bus.add_handler(EventType.TASK_CREATED, handle_task_created)
-        bus.add_handler(
+        bus.add_handler(EventType.TASK_CREATED, handle_task_created)  # type: ignore
+        bus.add_handler(  # type: ignore
             EventType.SECURITY_VIOLATION_DETECTED, handle_security_violation
         )
 
