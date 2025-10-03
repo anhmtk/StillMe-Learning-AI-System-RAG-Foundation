@@ -71,7 +71,7 @@ class DAGNode:
         on_failure: str | None = None,
         resources: dict[str, Any] | None = None,
         metadata: dict[str, Any] | None = None,
-        **kwargs,
+        **kwargs: Any,
     ):
         self.node_id = node_id
         self.name = name
@@ -185,7 +185,7 @@ class DAGEngine:
                 dag_data = yaml.safe_load(f)
 
             dag_id = dag_data["id"]
-            dag_graph: nx.DiGraph = nx.DiGraph()
+            dag_graph: nx.DiGraph[str] = nx.DiGraph()
 
             # Add nodes
             for node_data in dag_data.get("nodes", []):
@@ -277,7 +277,7 @@ class DAGEngine:
         """Execute DAG asynchronously"""
         try:
             execution.status = DAGStatus.RUNNING
-            dag_graph: nx.DiGraph = self.dags[execution.dag_id]
+            dag_graph: nx.DiGraph[str] = self.dags[execution.dag_id]
 
             # Get execution strategy
             strategy = ExecutionStrategy(
@@ -702,7 +702,7 @@ class DAGEngine:
         if dag_id not in self.dags:
             return {}
 
-        dag_graph: nx.DiGraph = self.dags[dag_id]
+        dag_graph: nx.DiGraph[str] = self.dags[dag_id]
         executions = [e for e in self.executions.values() if e.dag_id == dag_id]
 
         # Calculate statistics
@@ -723,8 +723,8 @@ class DAGEngine:
 
         return {
             "dag_id": dag_id,
-            "node_count": len(dag_graph.nodes),
-            "edge_count": len(dag_graph.edges),
+            "node_count": len(list(dag_graph.nodes)),
+            "edge_count": len(list(dag_graph.edges)),
             "total_executions": total_executions,
             "successful_executions": successful_executions,
             "failed_executions": failed_executions,
@@ -837,9 +837,7 @@ nodes:
     priority: 1
 """
 
-if __name__ == "__main__":
-
-    async def main():
+async def main():
         # Example usage
         engine = DAGEngine()
 
@@ -881,32 +879,6 @@ if __name__ == "__main__":
             if dag_file.exists():
                 dag_file.unlink()
 
-    def _get_topological_order(
-        self, dag_graph: nx.DiGraph[str]
-    ) -> list[str]:
-        """Get topological order of DAG nodes"""
-        try:
-            return list(nx.topological_sort(dag_graph))
-        except nx.NetworkXError:
-            return list(dag_graph.nodes)
-
-    def _create_dag_graph(
-        self, nodes: list[DAGNode]
-    ) -> nx.DiGraph[str]:
-        """Create DAG graph from nodes"""
-        dag_graph: nx.DiGraph[str] = nx.DiGraph()
-
-        # Add nodes
-        for node in nodes:
-            dag_graph.add_node(node.node_id, node=node)
-
-        # Add edges based on dependencies
-        for node in nodes:
-            for dep in node.dependencies:
-                if dep in dag_graph.nodes:
-                    dag_graph.add_edge(dep, node.node_id)
-
-        return dag_graph
 
 
 if __name__ == "__main__":
