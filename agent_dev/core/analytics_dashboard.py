@@ -198,7 +198,7 @@ class AnalyticsDashboard:
 
     def collect_metrics(self) -> list[MetricData]:
         """Thu thập metrics từ hệ thống"""
-        metrics = []
+        metrics: list[MetricData] = []
         current_time = datetime.now()
 
         # Code Quality Metrics
@@ -224,7 +224,7 @@ class AnalyticsDashboard:
 
     def _collect_code_quality_metrics(self, timestamp: datetime) -> list[MetricData]:
         """Thu thập metrics chất lượng code"""
-        metrics = []
+        metrics: list[MetricData] = []
 
         # Đếm số lượng files Python
         python_files = list(self.project_root.rglob("*.py"))
@@ -320,7 +320,7 @@ class AnalyticsDashboard:
 
     def _collect_performance_metrics(self, timestamp: datetime) -> list[MetricData]:
         """Thu thập metrics hiệu suất"""
-        metrics = []
+        metrics: list[MetricData] = []
 
         # Kiểm tra thời gian phản hồi của các test
         test_files = list(self.project_root.rglob("*test*.py"))
@@ -371,7 +371,7 @@ class AnalyticsDashboard:
 
     def _collect_security_metrics(self, timestamp: datetime) -> list[MetricData]:
         """Thu thập metrics bảo mật"""
-        metrics = []
+        metrics: list[MetricData] = []
 
         # Đếm số lượng security issues
         security_issues = 0
@@ -421,7 +421,7 @@ class AnalyticsDashboard:
 
     def _collect_testing_metrics(self, timestamp: datetime) -> list[MetricData]:
         """Thu thập metrics testing"""
-        metrics = []
+        metrics: list[MetricData] = []
 
         # Đếm số lượng test files
         test_files = list(self.project_root.rglob("*test*.py"))
@@ -592,7 +592,7 @@ class AnalyticsDashboard:
         current_metrics = self.collect_metrics()
 
         # Phân tích xu hướng cho các metrics chính
-        trends = []
+        trends: list[Any] = []
         for metric in current_metrics:
             trend = self.analyze_trends(metric.metric_id, period_days)
             trends.append(trend)
@@ -618,7 +618,7 @@ class AnalyticsDashboard:
         self, metrics: list[MetricData], trends: list[TrendAnalysis]
     ) -> list[str]:
         """Tạo insights từ metrics và trends"""
-        insights = []
+        insights: list[str] = []
 
         # Phân tích code quality
         code_quality_metrics = [
@@ -708,7 +708,7 @@ class AnalyticsDashboard:
         self, metrics: list[MetricData], trends: list[TrendAnalysis]
     ) -> list[str]:
         """Tạo recommendations từ metrics và trends"""
-        recommendations = []
+        recommendations: list[str] = []
 
         # Recommendations dựa trên metrics
         for metric in metrics:
