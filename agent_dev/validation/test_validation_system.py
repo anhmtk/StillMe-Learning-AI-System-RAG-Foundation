@@ -6,13 +6,14 @@ Test Validation System - Script test đơn giản cho hệ thống validation
 import os
 import sys
 import time
+from typing import Any
 
 # Add current directory to path
 sys.path.insert(
     0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 )
 
-from agentdev_validation_system import AgentDevValidator
+from agent_dev.validation.validation_system import AgentDevValidator
 
 
 def main():
@@ -25,7 +26,7 @@ def main():
 
     # Test validation trước
     print("📋 Test validation trước khi sửa...")
-    before_data = validator.validate_before_fix()
+    before_data: dict[str, Any] = validator.validate_before_fix()
 
     print("📊 Kết quả:")
     print(f"   🔢 Pyright errors: {before_data['pyright_errors']}")
@@ -39,7 +40,7 @@ def main():
 
     # Test validation sau
     print("📋 Test validation sau khi sửa...")
-    result = validator.validate_after_fix(before_data)
+    result: Any = validator.validate_after_fix(before_data)
 
     print("\n📊 Kết quả cuối cùng:")
     print(f"   🔢 Lỗi trước: {result.before_errors}")
@@ -51,7 +52,7 @@ def main():
     print(f"   🎯 Thành công: {'✅' if result.success else '❌'}")
 
     # Tạo báo cáo
-    report = validator.generate_report(result)
+    report: str = validator.generate_report(result)
     print("\n📄 Báo cáo:")
     print(report)
 
