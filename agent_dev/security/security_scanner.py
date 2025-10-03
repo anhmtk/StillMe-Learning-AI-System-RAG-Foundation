@@ -654,21 +654,25 @@ class SecurityScanner:
                 # Check for security contexts
                 if isinstance(content, dict):
                     # Check for privileged containers
-                    if cast(dict[str, Any], content).get("kind") in ["Deployment", "Pod", "DaemonSet"]:
+                    if cast(dict[str, Any], content).get("kind") in [
+                        "Deployment",
+                        "Pod",
+                        "DaemonSet",
+                    ]:
                         tpl = extract_template_spec(cast(dict[str, Any], content))
                         for container in iter_containers(tpl):
                             sc = container.get("securityContext")
                             if sc and sc.get("privileged"):
-                                                    issues.append(
-                                                        SecurityIssue(
-                                                            id="K8S_PRIVILEGED",
-                                                            severity=SecuritySeverity.HIGH,
-                                                            title="Privileged Kubernetes container",
-                                                            description="Privileged containers have full host access",
-                                                            file_path=str(k8s_file),
-                                                            remediation="Remove privileged security context",
-                                                        )
-                                                    )
+                                issues.append(
+                                    SecurityIssue(
+                                        id="K8S_PRIVILEGED",
+                                        severity=SecuritySeverity.HIGH,
+                                        title="Privileged Kubernetes container",
+                                        description="Privileged containers have full host access",
+                                        file_path=str(k8s_file),
+                                        remediation="Remove privileged security context",
+                                    )
+                                )
 
             except Exception:
                 pass
@@ -765,56 +769,56 @@ class SecurityScanner:
     def scan_plan(self, plan: dict[str, Any]) -> dict[str, Any]:
         """Scan execution plan for security issues"""
         import time
-        
-        issues = []
+
+        issues: list[dict[str, str]] = []
         blocked = False
-        
+
         if "tasks" in plan:
             for task in plan["tasks"]:
                 if "command" in task:
                     command = task["command"]
-                    if command and any(danger in command.lower() for danger in ["rm -rf", "sudo rm", "del /", "format"]):
-                        issues.append({
-                            "type": "dangerous_command",
-                            "message": f"Dangerous command detected: {command}",
-                            "severity": "high"
-                        })
+                    if command and any(
+                        danger in command.lower()
+                        for danger in ["rm -rf", "sudo rm", "del /", "format"]
+                    ):
+                        issues.append(
+                            {
+                                "type": "dangerous_command",
+                                "message": f"Dangerous command detected: {command}",
+                                "severity": "high",
+                            }
+                        )
                         blocked = True
-        
-        return {
-            "issues": issues,
-            "blocked": blocked,
-            "scan_time": time.time()
-        }
+
+        return {"issues": issues, "blocked": blocked, "scan_time": time.time()}
 
     def scan_result(self, result: Any) -> dict[str, Any]:
         """Scan execution result for security issues"""
         import time
-        
-        issues = []
-        
-        if hasattr(result, 'output') and result.output:
+
+        issues: list[dict[str, str]] = []
+
+        if hasattr(result, "output") and result.output:
             output = str(result.output)
             # Check for sensitive information in output
             sensitive_patterns = [
-                r'password\s*[:=]\s*\w+',
-                r'api[_-]?key\s*[:=]\s*\w+',
-                r'token\s*[:=]\s*\w+',
-                r'secret\s*[:=]\s*\w+'
+                r"password\s*[:=]\s*\w+",
+                r"api[_-]?key\s*[:=]\s*\w+",
+                r"token\s*[:=]\s*\w+",
+                r"secret\s*[:=]\s*\w+",
             ]
-            
+
             for pattern in sensitive_patterns:
                 if re.search(pattern, output, re.IGNORECASE):
-                    issues.append({
-                        "type": "sensitive_data_exposure",
-                        "message": f"Sensitive data detected in output: {pattern}",
-                        "severity": "high"
-                    })
-        
-        return {
-            "issues": issues,
-            "scan_time": time.time()
-        }
+                    issues.append(
+                        {
+                            "type": "sensitive_data_exposure",
+                            "message": f"Sensitive data detected in output: {pattern}",
+                            "severity": "high",
+                        }
+                    )
+
+        return {"issues": issues, "scan_time": time.time()}
 
 
 def main():
