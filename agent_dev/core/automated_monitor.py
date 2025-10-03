@@ -25,8 +25,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-import psutil  # type: ignore
-import schedule  # type: ignore
+import psutil
+import schedule
 
 
 # Stub for AgentMode
