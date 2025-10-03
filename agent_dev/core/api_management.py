@@ -176,11 +176,11 @@ class APIManagementSystem:
                     self.endpoints[f"{method.upper()}:{path}"] = endpoint
 
     def _parse_openapi_endpoint(
-        self, path: str, method: str, details: dict, spec: dict
+        self, path: str, method: str, details: dict[str, Any], spec: dict[str, Any]
     ) -> APIEndpoint:
         """Parse OpenAPI endpoint to APIEndpoint"""
         # Extract parameters
-        parameters = []
+        parameters: list[dict[str, Any]] = []
         for param in details.get("parameters", []):
             parameters.append(
                 {
@@ -192,8 +192,8 @@ class APIManagementSystem:
             )
 
         # Extract request/response schemas
-        request_schema = {}
-        response_schema = {}
+        request_schema: dict[str, Any] = {}
+        response_schema: dict[str, Any] = {}
 
         if "requestBody" in details:
             request_schema = details["requestBody"].get("content", {})
@@ -202,7 +202,7 @@ class APIManagementSystem:
             response_schema = details["responses"]
 
         # Extract examples
-        examples = []
+        examples: list[Any] = []
         if "examples" in details:
             examples = details["examples"]
 
@@ -274,11 +274,11 @@ class APIManagementSystem:
         self, schema: dict[str, Any]
     ) -> list[dict[str, Any]]:
         """Generate validation rules from schema"""
-        rules = []
+        rules: list[dict[str, Any]] = []
 
         if "properties" in schema:
             for prop, prop_schema in schema["properties"].items():
-                rule = {
+                rule: dict[str, Any] = {
                     "field": prop,
                     "type": prop_schema.get("type", "string"),
                     "required": prop in schema.get("required", []),
@@ -304,7 +304,7 @@ class APIManagementSystem:
         self, endpoint: APIEndpoint, schema: dict[str, Any]
     ) -> list[dict[str, Any]]:
         """Generate test cases for endpoint"""
-        test_cases = []
+        test_cases: list[dict[str, Any]] = []
 
         # Valid test case
         valid_data = self._generate_valid_data(schema)
@@ -349,7 +349,7 @@ class APIManagementSystem:
 
     def _generate_valid_data(self, schema: dict[str, Any]) -> dict[str, Any]:
         """Generate valid test data from schema"""
-        data = {}
+        data: dict[str, Any] = {}
 
         if "properties" in schema:
             for prop, prop_schema in schema["properties"].items():
@@ -547,7 +547,7 @@ class APIManagementSystem:
 
     def _generate_fuzz_data(self, schema: dict[str, Any]) -> dict[str, Any]:
         """Generate fuzz test data"""
-        fuzz_data = {}
+        fuzz_data: dict[str, Any] = {}
 
         if "properties" in schema:
             for prop, prop_schema in schema["properties"].items():
@@ -622,7 +622,7 @@ class APIManagementSystem:
             raise ValueError(f"Endpoint {endpoint_id} not found")
 
         self.endpoints[endpoint_id]
-        results = []
+        results: list[APITestResult | BaseException] = []
 
         # Create semaphore to limit concurrent requests
         semaphore = asyncio.Semaphore(100)  # Max 100 concurrent requests
@@ -644,7 +644,7 @@ class APIManagementSystem:
 
     def generate_openapi_spec(self) -> dict[str, Any]:
         """Generate OpenAPI specification"""
-        spec = {
+        spec: dict[str, Any] = {
             "openapi": "3.0.0",
             "info": {
                 "title": "AgentDev Unified API",
@@ -722,7 +722,7 @@ class APIManagementSystem:
                 }
 
         # Identify security issues
-        security_issues = []
+        security_issues: list[str] = []
         for result in self.test_results:
             if result.status_code in [401, 403, 500]:
                 security_issues.append(
@@ -730,7 +730,7 @@ class APIManagementSystem:
                 )
 
         # Identify contract violations
-        contract_violations = []
+        contract_violations: list[str] = []
         for result in self.test_results:
             if result.test_type == TestType.CONTRACT and result.status == "failed":
                 contract_violations.append(
@@ -738,7 +738,7 @@ class APIManagementSystem:
                 )
 
         # Generate recommendations
-        recommendations = []
+        recommendations: list[str] = []
         if test_coverage < 80:
             recommendations.append("Increase API test coverage to at least 80%")
         if performance_metrics.get("avg_response_time", 0) > 1.0:
