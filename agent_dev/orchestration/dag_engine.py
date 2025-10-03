@@ -109,9 +109,9 @@ class DAGEngine:
 
     def __init__(self, config_path: str | None = None):
         self.config = self._load_config(config_path)
-        self.dags: dict[str, nx.DiGraph] = {}
+        self.dags: dict[str, nx.DiGraph[Any]] = {}
         self.executions: dict[str, DAGExecution] = {}
-        self.node_handlers: dict[str, Callable] = {}
+        self.node_handlers: dict[str, Callable[..., Any]] = {}
         self.resource_pools: dict[str, dict[str, Any]] = {}
         self.running = False
 
@@ -161,7 +161,7 @@ class DAGEngine:
                 dag_data = yaml.safe_load(f)
 
             dag_id = dag_data["id"]
-            dag_graph = nx.DiGraph()
+            dag_graph: nx.DiGraph[Any] = nx.DiGraph()
 
             # Add nodes
             for node_data in dag_data.get("nodes", []):
@@ -207,7 +207,7 @@ class DAGEngine:
             print(f"⚠️ Failed to load DAG {dag_file}: {e}")
             raise
 
-    def register_node_handler(self, task_type: str, handler: Callable):
+    def register_node_handler(self, task_type: str, handler: Callable[..., Any]):
         """Register custom node handler"""
         self.node_handlers[task_type] = handler
         print(f"✅ Node handler registered: {task_type}")
@@ -253,7 +253,7 @@ class DAGEngine:
         """Execute DAG asynchronously"""
         try:
             execution.status = DAGStatus.RUNNING
-            dag_graph = self.dags[execution.dag_id]
+            dag_graph: nx.DiGraph[Any] = self.dags[execution.dag_id]
 
             # Get execution strategy
             strategy = ExecutionStrategy(
@@ -291,11 +291,11 @@ class DAGEngine:
                 f"🏁 DAG execution completed: {execution.execution_id} - {execution.status.value}"
             )
 
-    async def _execute_sequential(self, execution: DAGExecution, dag_graph: nx.DiGraph):
+    async def _execute_sequential(self, execution: DAGExecution, dag_graph: nx.DiGraph[Any]):
         """Execute DAG nodes sequentially"""
         # Topological sort for sequential execution
         try:
-            topo_order = list(nx.topological_sort(dag_graph))
+            topo_order: list[str] = list(nx.topological_sort(dag_graph))
         except nx.NetworkXError:
             raise ValueError("DAG contains cycles") from None
 
@@ -303,17 +303,17 @@ class DAGEngine:
             if execution.status == DAGStatus.CANCELLED:
                 break
 
-            node = dag_graph.nodes[node_id]["node"]
+            node: DAGNode = dag_graph.nodes[node_id]["node"]
             await self._execute_node(execution, node)
 
-    async def _execute_parallel(self, execution: DAGExecution, dag_graph: nx.DiGraph):
+    async def _execute_parallel(self, execution: DAGExecution, dag_graph: nx.DiGraph[Any]):
         """Execute DAG nodes in parallel where possible"""
-        completed_nodes = set()
-        running_tasks = {}
+        completed_nodes: set[str] = set()
+        running_tasks: dict[str, asyncio.Task[Any]] = {}
 
         while len(completed_nodes) < len(dag_graph.nodes):
             # Find ready nodes
-            ready_nodes = []
+            ready_nodes: list[str] = []
             for node_id in dag_graph.nodes:
                 if (
                     node_id not in completed_nodes
@@ -321,7 +321,7 @@ class DAGEngine:
                     and execution.nodes_status[node_id] == NodeStatus.PENDING
                 ):
                     # Check if all dependencies are completed
-                    dependencies = list(dag_graph.predecessors(node_id))
+                    dependencies: list[str] = list(dag_graph.predecessors(node_id))
                     if all(dep in completed_nodes for dep in dependencies):
                         ready_nodes.append(node_id)
 
@@ -330,13 +330,13 @@ class DAGEngine:
                 if len(running_tasks) >= self.config["max_concurrent_nodes"]:
                     break
 
-                node = dag_graph.nodes[node_id]["node"]
+                node: DAGNode = dag_graph.nodes[node_id]["node"]
                 task = asyncio.create_task(self._execute_node(execution, node))
                 running_tasks[node_id] = task
 
             # Wait for at least one task to complete
             if running_tasks:
-                done, pending = await asyncio.wait(
+                done, _ = await asyncio.wait(
                     running_tasks.values(), return_when=asyncio.FIRST_COMPLETED
                 )
 
@@ -355,7 +355,7 @@ class DAGEngine:
             ):
                 break
 
-    async def _execute_adaptive(self, execution: DAGExecution, dag_graph: nx.DiGraph):
+    async def _execute_adaptive(self, execution: DAGExecution, dag_graph: nx.DiGraph[Any]):
         """Execute DAG with adaptive strategy"""
         # Start with parallel execution, fall back to sequential if needed
         try:
@@ -445,9 +445,9 @@ class DAGEngine:
 
         # Check if custom handler exists
         if node.task_type in self.node_handlers:
-            handler = self.node_handlers[node.task_type]
+            handler: Callable[..., Any] = self.node_handlers[node.task_type]
             try:
-                output = await handler(node, execution)
+                output: Any = await handler(node, execution)
                 return ExecutionResult(
                     node_id=node.node_id,
                     status=NodeStatus.COMPLETED,
@@ -672,7 +672,7 @@ class DAGEngine:
         if dag_id not in self.dags:
             return {}
 
-        dag_graph = self.dags[dag_id]
+        dag_graph: nx.DiGraph[Any] = self.dags[dag_id]
         executions = [e for e in self.executions.values() if e.dag_id == dag_id]
 
         # Calculate statistics
