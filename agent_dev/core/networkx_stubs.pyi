@@ -1,7 +1,7 @@
 """
 NetworkX type stubs for AgentDev
 """
-from typing import Any, Dict, List, Set, Union
+from typing import Any, Dict, Set
 from collections.abc import Iterator
 
 # Type aliases for NetworkX views
