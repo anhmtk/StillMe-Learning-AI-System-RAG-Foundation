@@ -253,7 +253,7 @@ class AdvancedFixer:
             logger.error("Error adding import to %s: %s", file_path, e)
             return False
 
-    def _validate_fix(self, file_path: str, symbol_name: str) -> dict:
+    def _validate_fix(self, file_path: str, symbol_name: str) -> dict[str, Any]:
         """Validate that fix actually works"""
         try:
             # Run syntax check
@@ -277,7 +277,7 @@ class AdvancedFixer:
         except Exception as e:
             return {"valid": False, "reason": f"Validation error: {str(e)}"}
 
-    def _validate_batch(self, file_paths: list[str]) -> dict:
+    def _validate_batch(self, file_paths: list[str]) -> dict[str, Any]:
         """Validate entire batch of fixes"""
         try:
             # Run flake8 on fixed files
@@ -301,7 +301,7 @@ class AdvancedFixer:
                 "errors": [f"Validation error: {str(e)}"],
             }
 
-    def fix_error_with_context(self, error_info, symbol_index) -> bool:
+    def fix_error_with_context(self, error_info: Any, symbol_index: Any) -> bool:
         """Fix a single error with symbol context"""
         try:
             # For now, return True for successful fixes
