@@ -20,7 +20,7 @@ from dataclasses import asdict, dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import networkx as nx
 
@@ -627,17 +627,17 @@ class ArchitectureAnalyzer:
 
         # Average degree
         degrees = [
-            int(self.dependency_graph.degree(node)) for node in self.dependency_graph.nodes()
+            cast(int, self.dependency_graph.degree(node)) for node in self.dependency_graph.nodes()
         ]
         metrics["average_degree"] = sum(degrees) / len(degrees) if degrees else 0
 
         # In-degree and out-degree
         in_degrees = [
-            int(self.dependency_graph.in_degree(node))
+            cast(int, self.dependency_graph.in_degree(node))
             for node in self.dependency_graph.nodes()
         ]
         out_degrees = [
-            int(self.dependency_graph.out_degree(node))
+            cast(int, self.dependency_graph.out_degree(node))
             for node in self.dependency_graph.nodes()
         ]
 
@@ -660,7 +660,7 @@ class ArchitectureAnalyzer:
     def _calculate_cohesion_metrics(self) -> dict[str, float]:
         """Calculate cohesion metrics"""
         # Simplified cohesion calculation
-        metrics = {}
+        metrics: dict[str, float] = {}
 
         # LCOM (Lack of Cohesion of Methods) - simplified
         total_classes = len(
@@ -676,10 +676,10 @@ class ArchitectureAnalyzer:
 
     def _analyze_coupling(self) -> dict[str, CouplingLevel]:
         """Analyze coupling levels"""
-        coupling_analysis = {}
+        coupling_analysis: dict[str, CouplingLevel] = {}
 
         for node in self.dependency_graph.nodes():
-            degree = int(self.dependency_graph.degree(node))
+            degree = cast(int, self.dependency_graph.degree(node))
 
             if degree <= 2:
                 coupling_analysis[node] = CouplingLevel.LOW
@@ -694,7 +694,7 @@ class ArchitectureAnalyzer:
 
     def _analyze_complexity(self) -> dict[str, ComplexityLevel]:
         """Analyze complexity levels"""
-        complexity_analysis = {}
+        complexity_analysis: dict[str, ComplexityLevel] = {}
 
         # Analyze based on cyclomatic complexity and other factors
         for file_path in self.project_root.rglob("*.py"):
@@ -747,7 +747,7 @@ class ArchitectureAnalyzer:
         complexity_analysis: dict[str, ComplexityLevel],
     ) -> list[str]:
         """Generate architecture recommendations"""
-        recommendations = []
+        recommendations: list[str] = []
 
         # Complexity recommendations
         if metrics.cyclomatic_complexity > 10:
@@ -813,7 +813,7 @@ class ArchitectureAnalyzer:
             f.write(f"**Generated**: {timestamp}\n\n")
 
             # Group by priority
-            by_priority = defaultdict(list)
+            by_priority: defaultdict[str, list[Any]] = defaultdict(list)
             for suggestion in report.metrics.refactoring_suggestions:
                 by_priority[suggestion.priority].append(suggestion)
 
