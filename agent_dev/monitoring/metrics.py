@@ -21,7 +21,7 @@ class MetricsCollector:
     
     def __init__(self, database_url: str = "sqlite:///:memory:"):
         """Initialize metrics collector with database"""
-        engine, SessionLocal = create_memory_database() if database_url == "sqlite:///:memory:" else create_database_engine(database_url)
+        _, SessionLocal = create_memory_database() if database_url == "sqlite:///:memory:" else create_database_engine(database_url)
         self.SessionLocal = SessionLocal
         self.counters: Dict[str, int] = defaultdict(int)
         self.timers: Dict[str, List[float]] = defaultdict(list)

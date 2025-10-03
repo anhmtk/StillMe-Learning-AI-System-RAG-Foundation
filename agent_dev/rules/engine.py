@@ -9,7 +9,6 @@ import json
 import re
 from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
-from pathlib import Path
 
 from ..persistence.repo import RuleRepo
 from ..persistence.models import create_memory_database, create_database_engine
@@ -30,7 +29,7 @@ class RuleEngine:
     
     def __init__(self, database_url: str = "sqlite:///:memory:"):
         """Initialize rule engine with database"""
-        engine, SessionLocal = create_memory_database() if database_url == "sqlite:///:memory:" else create_database_engine(database_url)
+        _, SessionLocal = create_memory_database() if database_url == "sqlite:///:memory:" else create_database_engine(database_url)
         self.SessionLocal = SessionLocal
         self.rules: List[Dict[str, Any]] = []
         self._load_rules()
@@ -44,9 +43,9 @@ class RuleEngine:
             self.rules = []
             for rule in active_rules:
                 try:
-                    rule_def = json.loads(rule.rule_definition)
-                    rule_def["rule_name"] = rule.rule_name
-                    rule_def["priority"] = rule.priority
+                    rule_def = json.loads(str(rule.rule_definition))
+                    rule_def["rule_name"] = str(rule.rule_name)
+                    rule_def["priority"] = int(rule.priority)
                     self.rules.append(rule_def)
                 except json.JSONDecodeError:
                     continue
@@ -199,17 +198,17 @@ class RuleEngine:
 
 def load_rules(database_url: str = "sqlite:///:memory:") -> List[Dict[str, Any]]:
     """Load rules from database"""
-    engine, SessionLocal = create_memory_database() if database_url == "sqlite:///:memory:" else create_database_engine(database_url)
+    _, SessionLocal = create_memory_database() if database_url == "sqlite:///:memory:" else create_database_engine(database_url)
     session = SessionLocal()
     try:
         rule_repo = RuleRepo(session)
         active_rules = rule_repo.get_active_rules()
-        rules = []
+        rules: List[Dict[str, Any]] = []
         for rule in active_rules:
             try:
-                rule_def = json.loads(rule.rule_definition)
-                rule_def["rule_name"] = rule.rule_name
-                rule_def["priority"] = rule.priority
+                rule_def = json.loads(str(rule.rule_definition))
+                rule_def["rule_name"] = str(rule.rule_name)
+                rule_def["priority"] = int(rule.priority)
                 rules.append(rule_def)
             except json.JSONDecodeError:
                 continue

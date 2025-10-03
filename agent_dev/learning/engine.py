@@ -5,10 +5,8 @@ Learning Engine for AgentDev
 Feedback analysis and behavior adjustment engine.
 """
 
-import re
 from typing import Dict, List, Any, Optional
 from collections import Counter
-from datetime import datetime, timezone
 
 from ..persistence.repo import FeedbackRepo, LearnedSolutionRepo
 from ..persistence.models import create_memory_database, create_database_engine
@@ -19,7 +17,7 @@ class LearningEngine:
     
     def __init__(self, database_url: str = "sqlite:///:memory:"):
         """Initialize learning engine with database"""
-        engine, SessionLocal = create_memory_database() if database_url == "sqlite:///:memory:" else create_database_engine(database_url)
+        _, SessionLocal = create_memory_database() if database_url == "sqlite:///:memory:" else create_database_engine(database_url)
         self.SessionLocal = SessionLocal
         self.feedback_patterns = self._load_feedback_patterns()
         self.suggestion_rules = self._load_suggestion_rules()
@@ -109,7 +107,7 @@ class LearningEngine:
                 # Analyze feedback for patterns
                 patterns = self._extract_patterns(feedback_text)
                 
-                for pattern, category in patterns.items():
+                for _, category in patterns.items():
                     if category in self.suggestion_rules:
                         # Record learned solution
                         solution_repo.record_solution(
@@ -153,16 +151,16 @@ class LearningEngine:
                     recent_feedback = feedback_repo.get_recent(hours=24, limit=10)
                 
                 # Analyze feedback patterns
-                suggestions = []
-                pattern_counts = Counter()
+                suggestions: List[str] = []
+                pattern_counts: Counter[str] = Counter()
                 
                 for feedback in recent_feedback:
-                    patterns = self._extract_patterns(feedback.feedback)
-                    for pattern, category in patterns.items():
+                    patterns = self._extract_patterns(str(feedback.feedback))
+                    for _, category in patterns.items():
                         pattern_counts[category] += 1
                 
                 # Generate suggestions based on most common patterns
-                for category, count in pattern_counts.most_common(3):
+                for category, _ in pattern_counts.most_common(3):
                     if category in self.suggestion_rules:
                         suggestions.append(self.suggestion_rules[category])
                 
@@ -195,8 +193,8 @@ class LearningEngine:
                 
                 # Analyze feedback
                 total_feedback = len(recent_feedback)
-                positive_count = sum(1 for f in recent_feedback if f.feedback_type == "positive")
-                negative_count = sum(1 for f in recent_feedback if f.feedback_type == "negative")
+                positive_count = sum(1 for f in recent_feedback if str(f.feedback_type) == "positive")
+                negative_count = sum(1 for f in recent_feedback if str(f.feedback_type) == "negative")
                 neutral_count = total_feedback - positive_count - negative_count
                 
                 # Calculate sentiment score
@@ -205,10 +203,10 @@ class LearningEngine:
                     sentiment_score = (positive_count - negative_count) / total_feedback
                 
                 # Extract common patterns
-                pattern_counts = Counter()
+                pattern_counts: Counter[str] = Counter()
                 for feedback in recent_feedback:
-                    patterns = self._extract_patterns(feedback.feedback)
-                    for pattern, category in patterns.items():
+                    patterns = self._extract_patterns(str(feedback.feedback))
+                    for _, category in patterns.items():
                         pattern_counts[category] += 1
                 
                 return {
