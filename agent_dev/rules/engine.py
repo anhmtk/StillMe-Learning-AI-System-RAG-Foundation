@@ -14,6 +14,7 @@ from typing import Any
 from agent_dev.persistence.repo import (
     RuleRepo,  # Giả sử RuleRepo cung cấp kiểu dữ liệu cho rule objects
 )
+# from agent_dev.rules.types import RuleCondition  # Not used in current implementation
 
 
 @dataclass
@@ -156,56 +157,26 @@ class RuleEngine:
         self, condition: dict[str, Any], context: dict[str, Any]
     ) -> bool:
         """Evaluate a single condition"""
-        # THAY ĐỔI: Ép kiểu rõ ràng hơn
-        field: str = str(condition.get("field", ""))
-        operator: str = str(condition.get("operator", "eq"))
-        expected_value: Any = condition.get("value")
-        case_sensitive: bool = bool(condition.get("case_sensitive", True))
+        field: str = condition["field"]
+        operator: str = condition["operator"]
+        expected: list[str | int | float] = condition["expected"]
 
         # Get actual value from context
         actual_value: Any = self._get_nested_value(context, field)
 
-        # Handle different operators (Giữ nguyên logic if/elif)
+        # Handle different operators
         if operator == "eq":
-            return self._compare_values(
-                actual_value, expected_value, case_sensitive, "=="
-            )
-        elif operator == "ne":
-            return self._compare_values(
-                actual_value, expected_value, case_sensitive, "!="
-            )
+            return self._compare_values(actual_value, operator, expected)
+        elif operator == "neq":
+            return self._compare_values(actual_value, operator, expected)
         elif operator == "gt":
-            return self._compare_values(
-                actual_value, expected_value, case_sensitive, ">"
-            )
-        elif operator == "gte":
-            return self._compare_values(
-                actual_value, expected_value, case_sensitive, ">="
-            )
+            return self._compare_values(actual_value, operator, expected)
         elif operator == "lt":
-            return self._compare_values(
-                actual_value, expected_value, case_sensitive, "<"
-            )
-        elif operator == "lte":
-            return self._compare_values(
-                actual_value, expected_value, case_sensitive, "<="
-            )
+            return self._compare_values(actual_value, operator, expected)
         elif operator == "in":
-            return self._check_in(actual_value, expected_value, case_sensitive)
-        elif operator == "nin":
-            return not self._check_in(actual_value, expected_value, case_sensitive)
-        elif operator == "contains":
-            return self._check_contains(actual_value, expected_value, case_sensitive)
-        elif operator == "not_contains":
-            return not self._check_contains(
-                actual_value, expected_value, case_sensitive
-            )
+            return self._check_in(actual_value, expected)
         elif operator == "regex":
-            return self._check_regex(actual_value, expected_value, case_sensitive)
-        elif operator == "exists":
-            return actual_value is not None
-        elif operator == "not_exists":
-            return actual_value is None
+            return self._check_regex(actual_value, expected)
         else:
             return False
 
@@ -225,82 +196,56 @@ class RuleEngine:
         return current_value
 
     def _compare_values(
-        self, actual: Any, expected: Any, case_sensitive: bool, op: str
+        self, actual: Any, operator: str, expected: list[str | int | float]
     ) -> bool:
-        """Compare two values using specified operator"""
-        if actual is None or expected is None:
+        """Compare values using specified operator"""
+        if actual is None:
             return False
 
-        # Handle string comparison
-        if isinstance(actual, str) and isinstance(expected, str):
-            if not case_sensitive:
-                actual = actual.lower()
-                expected = expected.lower()
-
-        try:
-            # Giữ nguyên logic so sánh
-            if op == "==":
-                return actual == expected
-            elif op == "!=":
-                return actual != expected
-            # ... (các toán tử so sánh khác)
-            elif op == ">":
-                return actual > expected
-            elif op == ">=":
-                return actual >= expected
-            elif op == "<":
-                return actual < expected
-            elif op == "<=":
-                return actual <= expected
-        except TypeError:
+        if operator == "eq":
+            return any(str(actual) == str(item) for item in expected)
+        elif operator == "neq":
+            return all(str(actual) != str(item) for item in expected)
+        elif operator == "gt":
+            return all(
+                float(actual) > float(item) 
+                for item in expected 
+                if isinstance(item, (int, float)) and isinstance(actual, (int, float))
+            )
+        elif operator == "lt":
+            return all(
+                float(actual) < float(item) 
+                for item in expected 
+                if isinstance(item, (int, float)) and isinstance(actual, (int, float))
+            )
+        else:
             return False
 
-        return False
-
-    def _check_in(self, actual: Any, expected: Any, case_sensitive: bool) -> bool:
+    def _check_in(self, actual: Any, expected: list[str | int | float]) -> bool:
         """Check if actual value is in expected list"""
-        if not isinstance(expected, list):
+        if actual is None:
             return False
+        
+        return str(actual) in [str(item) for item in expected]
 
-        if isinstance(actual, str) and not case_sensitive:
-            expected_lower: list[str] = []
-            for item in expected:
-                if item is None:
-                    continue
-                try:
-                    if isinstance(item, str):
-                        expected_lower.append(item.lower())
-                    else:
-                        # Type-safe string conversion
-                        try:
-                            item_str: str = str(item)
-                            expected_lower.append(item_str.lower())
-                        except (TypeError, ValueError):
-                            continue
-                except (TypeError, ValueError):
-                    continue
-            return str(actual).lower() in expected_lower
-
-        return actual in expected
-
-    def _check_contains(self, actual: Any, expected: Any, case_sensitive: bool) -> bool:
+    def _check_contains(self, actual: Any, expected: list[str | int | float]) -> bool:
         """Check if actual string contains expected string"""
-        if not isinstance(actual, str) or not isinstance(expected, str):
+        if not isinstance(actual, str):
             return False
 
-        if not case_sensitive:
-            return expected.lower() in actual.lower()
+        return any(str(item) in actual for item in expected if isinstance(item, str))
 
-        return expected in actual
-
-    def _check_regex(self, actual: Any, expected: Any, case_sensitive: bool) -> bool:
+    def _check_regex(self, actual: Any, expected: list[str | int | float]) -> bool:
         """Check if actual string matches expected regex"""
-        if not isinstance(actual, str) or not isinstance(expected, str):
+        if not isinstance(actual, str):
             return False
 
         try:
-            flags = 0 if case_sensitive else re.IGNORECASE
-            return bool(re.search(expected, actual, flags))
+            return any(
+                re.search(str(item), actual) 
+                for item in expected 
+                if isinstance(item, str)
+            )
         except re.error:
             return False
 
@@ -377,7 +322,18 @@ def validate_rule(rule: dict[str, Any]) -> bool:
             "exists",
             "not_exists",
         ]
-        operator: str | None = condition.get("operator")
+        # Get operator from condition
+        operator: str | None = None
+        if "operator" in condition:
+            operator_value: Any = condition["operator"]
+            if isinstance(operator_value, str):
+                operator = operator_value
+            else:
+                try:
+                    operator = str(operator_value)
+                except (TypeError, ValueError):
+                    pass
+        
         if operator is None or operator not in valid_operators:
             return False
 
