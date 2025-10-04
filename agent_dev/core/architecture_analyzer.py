@@ -629,16 +629,9 @@ class ArchitectureAnalyzer:
         degrees: list[int] = []
         for node in self.dependency_graph.nodes():
             try:
-                degree_val: Any = self.dependency_graph.degree(node)
-                # Handle NetworkX degree method return types safely
-                if isinstance(degree_val, int):
-                    degrees.append(degree_val)
-                else:
-                    # For DiDegreeView or other types, try to get length
-                    try:
-                        degrees.append(int(len(degree_val)))
-                    except (TypeError, ValueError, AttributeError):
-                        degrees.append(0)  # fallback for unknown types
+                # Use len(neighbors) instead of degree() for type safety
+                degree_val: int = len(list(self.dependency_graph.neighbors(node)))
+                degrees.append(degree_val)
             except (TypeError, ValueError, AttributeError):
                 degrees.append(0)  # fallback for unknown types
         metrics["average_degree"] = sum(degrees) / len(degrees) if degrees else 0
@@ -647,18 +640,12 @@ class ArchitectureAnalyzer:
         in_degrees: list[int] = []
         for node in self.dependency_graph.nodes():
             degree_val = self.dependency_graph.in_degree(node)
-            if isinstance(degree_val, int):
-                in_degrees.append(degree_val)
-            else:
-                in_degrees.append(0)
+            in_degrees.append(degree_val)
 
         out_degrees: list[int] = []
         for node in self.dependency_graph.nodes():
             degree_val = self.dependency_graph.out_degree(node)
-            if isinstance(degree_val, int):
-                out_degrees.append(degree_val)
-            else:
-                out_degrees.append(0)
+            out_degrees.append(degree_val)
 
         metrics["average_in_degree"] = (
             sum(in_degrees) / len(in_degrees) if in_degrees else 0
@@ -699,16 +686,8 @@ class ArchitectureAnalyzer:
 
         for node in self.dependency_graph.nodes():
             try:
-                degree_val: Any = self.dependency_graph.degree(node)
-                # Handle NetworkX degree method return types safely
-                if isinstance(degree_val, int):
-                    degree = degree_val
-                else:
-                    # For DiDegreeView or other types, try to get length
-                    try:
-                        degree = int(len(degree_val))
-                    except (TypeError, ValueError, AttributeError):
-                        degree = 0
+                # Use len(neighbors) instead of degree() for type safety
+                degree: int = len(list(self.dependency_graph.neighbors(node)))
             except (TypeError, ValueError, AttributeError):
                 degree = 0
 

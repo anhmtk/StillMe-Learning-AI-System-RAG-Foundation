@@ -60,14 +60,14 @@ class AgentDev:
         # Rule 1: Test before claim
         self.rule_repo.create_rule(
             "test_before_claim",
-            '{"description": "Must test before claiming task", "conditions": [{"field": "task", "operator": "eq", "value": "claim"}, {"field": "tested", "operator": "eq", "value": false}], "action": {"type": "block", "message": "Must test before claiming task", "severity": "high"}}',
+            '{"description": "Must test before claiming task", "conditions": [{"field": "task", "operator": "eq", "value": ["claim"]}, {"field": "tested", "operator": "eq", "value": [false]}], "action": {"type": "block", "message": "Must test before claiming task", "severity": "high"}}',
             priority=10,
         )
 
         # Rule 2: Forbid dangerous shell commands
         self.rule_repo.create_rule(
             "forbid_dangerous_shell",
-            '{"description": "Block dangerous shell commands", "conditions": [{"field": "cmd", "operator": "contains", "value": "rm -rf"}], "action": {"type": "block", "message": "Dangerous shell command detected", "severity": "critical"}}',
+            '{"description": "Block dangerous shell commands", "conditions": [{"field": "cmd", "operator": "contains", "value": ["rm -rf"]}], "action": {"type": "block", "message": "Dangerous shell command detected", "severity": "critical"}}',
             priority=5,
         )
 

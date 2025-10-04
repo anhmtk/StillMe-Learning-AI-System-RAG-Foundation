@@ -160,7 +160,7 @@ class RuleEngine:
         """Evaluate a single condition"""
         field: str = condition["field"]
         operator: str = condition["operator"]
-        expected: list[str | int | float] = condition["expected"]
+        expected: list[str | int | float] = condition["value"]
 
         # Get actual value from context
         actual_value: Any = self._get_nested_value(context, field)
@@ -178,6 +178,8 @@ class RuleEngine:
             return self._check_in(actual_value, expected)
         elif operator == "regex":
             return self._check_regex(actual_value, expected)
+        elif operator == "contains":
+            return self._check_contains(actual_value, expected)
         else:
             return False
 
@@ -209,14 +211,14 @@ class RuleEngine:
             return all(str(actual) != str(item) for item in expected)
         elif operator == "gt":
             return all(
-                float(actual) > float(item) 
-                for item in expected 
+                float(actual) > float(item)
+                for item in expected
                 if isinstance(item, int | float) and isinstance(actual, int | float)
             )
         elif operator == "lt":
             return all(
-                float(actual) < float(item) 
-                for item in expected 
+                float(actual) < float(item)
+                for item in expected
                 if isinstance(item, int | float) and isinstance(actual, int | float)
             )
         else:
@@ -226,7 +228,7 @@ class RuleEngine:
         """Check if actual value is in expected list"""
         if actual is None:
             return False
-        
+
         return str(actual) in [str(item) for item in expected]
 
     def _check_contains(self, actual: Any, expected: list[str | int | float]) -> bool:
@@ -243,8 +245,8 @@ class RuleEngine:
 
         try:
             return any(
-                re.search(str(item), actual) 
-                for item in expected 
+                re.search(str(item), actual)
+                for item in expected
                 if isinstance(item, str)
             )
         except re.error:
@@ -293,15 +295,11 @@ def validate_rule(rule: dict[str, Any]) -> bool:
             return False
 
     # Validate conditions
-    # THAY ĐỔI: Khai báo rõ ràng kiểu dữ liệu
-    conditions: Any = rule.get("conditions", [])
+    conditions: list[dict[str, Any]] = rule.get("conditions", [])
     if not conditions:
         return False
 
     for condition in conditions:
-        if not isinstance(condition, dict):
-            return False
-
         required_condition_fields: list[str] = ["field", "operator", "value"]
         for field_name in required_condition_fields:
             if field_name not in condition:
@@ -323,18 +321,21 @@ def validate_rule(rule: dict[str, Any]) -> bool:
             "exists",
             "not_exists",
         ]
-        # Get operator from condition
+        # Get operator from condition with safe type handling
         operator: str | None = None
         if "operator" in condition:
-            operator_value: Any = condition["operator"]
+            operator_value = condition["operator"]
             if isinstance(operator_value, str):
                 operator = operator_value
+            elif isinstance(operator_value, int | float):
+                operator = str(operator_value)
             else:
+                # Safe string conversion for unknown types
                 try:
                     operator = str(operator_value)
                 except (TypeError, ValueError):
                     pass
-        
+
         if operator is None or operator not in valid_operators:
             return False
 
