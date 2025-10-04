@@ -79,9 +79,9 @@ class TestAgentDevIntegration:
 
         # Step 2: Try to execute invalid plan
         try:
-            result = self.agentdev.executor.run(invalid_plan)
+            self.agentdev.executor.run(invalid_plan)
             # Should not reach here
-            assert False, "Should have failed with invalid input"
+            raise AssertionError("Should have failed with invalid input")
         except Exception as e:
             print(f"✅ Caught expected error: {type(e).__name__}")
 

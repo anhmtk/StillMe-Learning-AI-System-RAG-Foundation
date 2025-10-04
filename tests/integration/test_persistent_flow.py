@@ -5,17 +5,16 @@ Integration Tests for Persistent Flow
 Test complete persistent flow with all components working together.
 """
 
-import pytest
-from agent_dev.rules.engine import RuleEngine
 from agent_dev.learning.engine import LearningEngine
 from agent_dev.monitoring.metrics import MetricsCollector
+from agent_dev.rules.engine import RuleEngine
 
 
 def test_flow_with_rule_violation():
     """Test flow with rule violation"""
     # Initialize components
     rule_engine = RuleEngine()
-    learning_engine = LearningEngine()
+    # learning_engine = LearningEngine()  # Not used in this test
     metrics = MetricsCollector()
     
     # Add a rule that blocks dangerous actions

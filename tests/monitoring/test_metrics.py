@@ -6,17 +6,16 @@ AgentDev Monitoring Tests
 Test cases for the monitoring and metrics system.
 """
 
-import pytest
 import time
 from unittest.mock import Mock
 
 from agent_dev.monitoring.metrics import (
     MetricsCollector,
-    record_event,
-    timer,
     dump_metrics,
     get_metrics_collector,
+    record_event,
     reset_metrics,
+    timer,
 )
 
 

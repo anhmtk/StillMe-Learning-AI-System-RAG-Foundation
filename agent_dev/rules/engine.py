@@ -14,8 +14,7 @@ from typing import Any
 from agent_dev.persistence.repo import (
     RuleRepo,  # Giả sử RuleRepo cung cấp kiểu dữ liệu cho rule objects
 )
-
-# from agent_dev.rules.types import RuleCondition  # Not used in current implementation
+from agent_dev.rules.types import ComplianceResult, ValidationResult
 
 
 @dataclass
@@ -96,23 +95,69 @@ class RuleEngine:
         """List all active rules"""
         return [rule for rule in self.rules if rule.get("is_active", True)]
 
+    def validate_rule(self, spec: dict[str, Any]) -> ValidationResult:
+        """Validate a rule specification"""
+        errors: list[str] = []
+
+        # Check required fields
+        if "rule_name" not in spec:
+            errors.append("Missing required field: rule_name")
+        if "conditions" not in spec:
+            errors.append("Missing required field: conditions")
+        elif not isinstance(spec["conditions"], list):
+            errors.append("conditions must be a list")
+        else:
+            # Validate each condition
+            conditions: list[dict[str, Any]] = spec["conditions"]  # type: ignore[assignment]
+            for i, condition in enumerate(conditions):
+                if not isinstance(condition, dict):  # type: ignore[unnecessary-isinstance]
+                    errors.append(f"Condition {i} must be a dictionary")
+                    continue
+
+                # Check required condition fields
+                if "field" not in condition:
+                    errors.append(f"Condition {i} missing field")
+                if "operator" not in condition:
+                    errors.append(f"Condition {i} missing operator")
+                elif condition["operator"] not in [
+                    "eq",
+                    "ne",
+                    "gt",
+                    "lt",
+                    "in",
+                    "regex",
+                    "contains",
+                    "not_contains",
+                    "exists",
+                    "not_exists",
+                ]:
+                    errors.append(
+                        f"Condition {i} has invalid operator: {condition['operator']}"
+                    )
+                if "value" not in condition:
+                    errors.append(f"Condition {i} missing value")
+                elif not isinstance(condition["value"], list):
+                    errors.append(f"Condition {i} value must be a list")
+
+        return ValidationResult(ok=len(errors) == 0, errors=errors)
+
     def check_compliance(
         self, action: str, context: dict[str, Any]
-    ) -> list[RuleEvalResult]:
+    ) -> ComplianceResult:
         """Check compliance against all rules"""
-        results: list[RuleEvalResult] = []
+        violated_rules: list[str] = []
 
         for rule in self.rules:
             if not rule.get("is_active", True):
                 continue
 
             result = self._evaluate_rule(rule, action, context)
-            if result:
-                results.append(result)
+            if result and not result.compliant:
+                violated_rules.append(result.rule_name)
 
-        # THAY ĐỔI: Sử dụng .get() an toàn cho metadata, vì RuleEvalResult giờ luôn có dict
-        results.sort(key=lambda r: r.metadata.get("priority", 0), reverse=True)
-        return results
+        return ComplianceResult(
+            compliant=len(violated_rules) == 0, violated_rules=violated_rules
+        )
 
     def _evaluate_rule(
         self, rule: dict[str, Any], action: str, context: dict[str, Any]
@@ -180,6 +225,8 @@ class RuleEngine:
             return self._check_regex(actual_value, expected)
         elif operator == "contains":
             return self._check_contains(actual_value, expected)
+        elif operator == "not_contains":
+            return not self._check_contains(actual_value, expected)
         elif operator == "exists":
             return actual_value is not None
         elif operator == "not_exists":
@@ -191,16 +238,16 @@ class RuleEngine:
         """Get nested value from context using dot notation"""
         keys: list[str] = field.split(".")
         # THAY ĐỔI: Khai báo rõ ràng kiểu dữ liệu và không dùng lại Any ở lần gán sau
-        current_value: Any = context
+        current_value: Any = context  # type: ignore[assignment]
 
         for key in keys:
             # THAY ĐỔI: Kiểm tra an toàn trước khi truy cập key
-            if key in current_value:
-                current_value = current_value[key]  # Gán lại, giữ nguyên kiểu Any
+            if isinstance(current_value, dict) and key in current_value:
+                current_value = current_value[key]  # type: ignore[assignment]
             else:
                 return None
 
-        return current_value
+        return current_value  # type: ignore[return-value]
 
     def _compare_values(
         self, actual: Any, operator: str, expected: list[str | int | float]
@@ -212,7 +259,7 @@ class RuleEngine:
         if operator == "eq":
             return any(str(actual) == str(item) for item in expected)
         elif operator == "neq":
-            return all(str(actual) != str(item) for item in expected)
+            return any(str(actual) != str(item) for item in expected)
         elif operator == "gt":
             return all(
                 float(actual) > float(item)
@@ -237,10 +284,16 @@ class RuleEngine:
 
     def _check_contains(self, actual: Any, expected: list[str | int | float]) -> bool:
         """Check if actual string contains expected string"""
-        if not isinstance(actual, str):
+        if isinstance(actual, str):
+            return any(
+                str(item) in actual for item in expected if isinstance(item, str)
+            )
+        elif isinstance(actual, list):
+            return any(
+                str(item) in actual for item in expected if isinstance(item, str)
+            )
+        else:
             return False
-
-        return any(str(item) in actual for item in expected if isinstance(item, str))
 
     def _check_regex(self, actual: Any, expected: list[str | int | float]) -> bool:
         """Check if actual string matches expected regex"""
@@ -312,7 +365,7 @@ def validate_rule(rule: dict[str, Any]) -> bool:
         # Validate operator
         valid_operators: list[str] = [
             "eq",
-            "ne",
+            "neq",
             "gt",
             "gte",
             "lt",
@@ -357,7 +410,7 @@ def validate_rule(rule: dict[str, Any]) -> bool:
 
 def check_compliance(
     action: str, context: dict[str, Any], rule_engine: RuleEngine | None = None
-) -> list[RuleEvalResult]:
+) -> ComplianceResult:
     """Check compliance for an action against context"""
     if rule_engine is None:
         rule_engine = RuleEngine()

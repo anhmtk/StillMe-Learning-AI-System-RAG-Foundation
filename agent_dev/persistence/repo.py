@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# ruff: noqa: B010
 """
 AgentDev Persistence Repository
 ===============================
@@ -6,12 +7,13 @@ AgentDev Persistence Repository
 CRUD operations for AgentDev database models.
 """
 
+import json
 from datetime import UTC, datetime, timedelta
 from typing import Any  # Cải thiện imports
 
 # THAY ĐỔI: Phải import các đối tượng SQLAlchemy rõ ràng hơn
 from sqlalchemy import desc
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
 from .models import (
     FeedbackModel,
@@ -20,6 +22,12 @@ from .models import (
     RuleModel,
     UserPreferencesModel,
 )
+
+
+def get_session_factory(engine: Any):
+    """Create a session factory for the given engine."""
+    return sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
 
 # KHAI BÁO TYPE ALIAS: Giúp Pyright hiểu rằng 'Query' trong các repo method là một đối tượng SQLAlchemy.
 # Tuy nhiên, cách tốt nhất trong các trường hợp này là dùng # type: ignore cho các dòng query phức tạp
@@ -104,8 +112,8 @@ class UserPreferencesRepo:
         )
 
         if existing:
-            existing.preference_value = value
-            existing.updated_at = datetime.now(UTC)
+            setattr(existing, "preference_value", value)
+            setattr(existing, "updated_at", datetime.now(UTC))
             self.session.commit()
             return existing
         else:
@@ -175,12 +183,12 @@ class RuleRepo:
         """Update existing rule"""
         rule: RuleModel | None = self.get_rule_by_name(rule_name)
         if rule:
-            rule.rule_definition = rule_definition
-            rule.updated_at = datetime.now(UTC)
+            setattr(rule, "rule_definition", rule_definition)
+            setattr(rule, "updated_at", datetime.now(UTC))
             if priority is not None:
-                rule.priority = priority
+                setattr(rule, "priority", priority)
             if is_active is not None:
-                rule.is_active = is_active
+                setattr(rule, "is_active", is_active)
             self.session.commit()
             return rule
         return None
@@ -254,12 +262,12 @@ class LearnedSolutionRepo:
             # THAY ĐỔI: Kiểm tra an toàn trước khi ép kiểu
             current_rate = float(getattr(solution, "success_rate", 1.0))
             new_rate = alpha * (1.0 if success else 0.0) + (1 - alpha) * current_rate
-            solution.success_rate = new_rate
+            setattr(solution, "success_rate", new_rate)
 
             # THAY ĐỔI: Kiểm tra an toàn trước khi ép kiểu
             current_count = int(getattr(solution, "usage_count", 0))
-            solution.usage_count = current_count + 1
-            solution.last_used = datetime.now(UTC)
+            setattr(solution, "usage_count", current_count + 1)
+            setattr(solution, "last_used", datetime.now(UTC))
             self.session.commit()
             return solution
         return None
@@ -284,14 +292,18 @@ class MetricRepo:
         self.session: Session = session
 
     def record_metric(
-        self, name: str, value: float, metric_type: str, context: str | None = None
+        self,
+        name: str,
+        value: float,
+        metric_type: str,
+        context: dict[str, Any] | None = None,
     ) -> MetricModel:
         """Record a metric"""
         metric = MetricModel(
             metric_name=name,
             metric_value=value,
             metric_type=metric_type,
-            context=context,
+            context=json.dumps(context) if context else None,
         )
         self.session.add(metric)
         self.session.commit()

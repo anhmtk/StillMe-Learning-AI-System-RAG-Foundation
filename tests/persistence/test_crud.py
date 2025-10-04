@@ -262,14 +262,18 @@ class TestMetricRepo:
             name="execution_time",
             value=1.5,
             metric_type="timer",
-            context='{"operation": "test"}',
+            context={"operation": "test"},
         )
 
         assert metric.id is not None
         assert metric.metric_name == "execution_time"
         assert metric.metric_value == 1.5
         assert metric.metric_type == "timer"
-        assert metric.context == '{"operation": "test"}'
+        # Context is stored as JSON string, need to parse
+        import json
+
+        context_dict = json.loads(metric.context) if metric.context else {}
+        assert context_dict["operation"] == "test"
 
     def test_get_metrics_by_name(self, metric_repo: MetricRepo):
         """Test getting metrics by name"""

@@ -74,18 +74,35 @@ class AgentDev:
     def execute(self, task: str, mode: Any = None) -> str:
         """Execute a task with rule compliance and monitoring"""
         # Record task start
-        self.monitor.record_event("tasks_started", 1.0)
+        try:
+            self.monitor.record_event("tasks_started", 1.0)
+        except Exception as e:
+            # Monitor error - continue execution
+            print(f"Warning: Failed to record task start: {e}")
 
         # Check rule compliance
         context = {"task": task, "mode": mode, "tested": False, "cmd": task}
-        compliance_results = self.rule_engine.check_compliance("execute_task", context)
+        try:
+            compliance_results = self.rule_engine.check_compliance(
+                "execute_task", context
+            )
+        except Exception as e:
+            # Rule engine error - block execution
+            self.monitor.record_event("tasks_blocked", 1.0, {"error": str(e)})
+            return f"BLOCKED: Rule engine error - {str(e)}"
 
-        if compliance_results:
+        if not compliance_results["compliant"]:
             # Rule violation - block execution
             self.monitor.record_event(
-                "tasks_blocked", 1.0, {"rule": compliance_results[0].rule_name}
+                "tasks_blocked",
+                1.0,
+                {
+                    "rule": compliance_results["violated_rules"][0]
+                    if compliance_results["violated_rules"]
+                    else "unknown"
+                },
             )
-            return f"BLOCKED: {compliance_results[0].message}"
+            return f"BLOCKED: Rule violation - {compliance_results['violated_rules']}"
 
         # Execute with monitoring
         with self.monitor.timer("task_execution"):
@@ -97,7 +114,10 @@ class AgentDev:
                 result: Any = self.executor.run(plan)
 
                 # Record success
-                self.monitor.record_event("tasks_pass", 1.0)
+                try:
+                    self.monitor.record_event("tasks_pass", 1.0)
+                except Exception as e:
+                    print(f"Warning: Failed to record task pass: {e}")
 
                 # Return result
                 if result and hasattr(result, "status"):
@@ -110,7 +130,10 @@ class AgentDev:
 
             except Exception as e:
                 # Record failure
-                self.monitor.record_event("tasks_fail", 1.0, {"error": str(e)})
+                try:
+                    self.monitor.record_event("tasks_fail", 1.0, {"error": str(e)})
+                except Exception as monitor_e:
+                    print(f"Warning: Failed to record task fail: {monitor_e}")
                 return f"error: {str(e)}"
 
     def receive_feedback(

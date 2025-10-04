@@ -5,7 +5,6 @@ Test Learning Engine functionality
 Test feedback recording and suggestion generation.
 """
 
-import pytest
 from agent_dev.learning.engine import (
     LearningEngine,
     record_feedback,
@@ -182,7 +181,7 @@ def test_multiple_users():
         "Good quality output"
     ]
     
-    for user, feedback in zip(users, feedbacks):
+    for user, feedback in zip(users, feedbacks, strict=False):
         engine.record_feedback(
             user_id=user,
             feedback_text=feedback,
