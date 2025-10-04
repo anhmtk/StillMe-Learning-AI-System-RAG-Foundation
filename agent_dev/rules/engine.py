@@ -14,6 +14,7 @@ from typing import Any
 from agent_dev.persistence.repo import (
     RuleRepo,  # Giả sử RuleRepo cung cấp kiểu dữ liệu cho rule objects
 )
+
 # from agent_dev.rules.types import RuleCondition  # Not used in current implementation
 
 
@@ -210,13 +211,13 @@ class RuleEngine:
             return all(
                 float(actual) > float(item) 
                 for item in expected 
-                if isinstance(item, (int, float)) and isinstance(actual, (int, float))
+                if isinstance(item, int | float) and isinstance(actual, int | float)
             )
         elif operator == "lt":
             return all(
                 float(actual) < float(item) 
                 for item in expected 
-                if isinstance(item, (int, float)) and isinstance(actual, (int, float))
+                if isinstance(item, int | float) and isinstance(actual, int | float)
             )
         else:
             return False
