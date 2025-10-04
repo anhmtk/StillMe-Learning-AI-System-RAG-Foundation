@@ -180,6 +180,10 @@ class RuleEngine:
             return self._check_regex(actual_value, expected)
         elif operator == "contains":
             return self._check_contains(actual_value, expected)
+        elif operator == "exists":
+            return actual_value is not None
+        elif operator == "not_exists":
+            return actual_value is None
         else:
             return False
 

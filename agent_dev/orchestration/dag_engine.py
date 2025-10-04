@@ -133,7 +133,7 @@ class DAGEngine:
 
     def __init__(self, config_path: str | None = None):
         self.config = self._load_config(config_path)
-        self.dags: dict[str, nx.DiGraph[str]] = {}
+        self.dags: dict[str, nx.DiGraph] = {}
         self.executions: dict[str, DAGExecution] = {}
         self.node_handlers: dict[str, Callable[..., Any]] = {}
         self.resource_pools: dict[str, dict[str, Any]] = {}
@@ -185,7 +185,7 @@ class DAGEngine:
                 dag_data = yaml.safe_load(f)
 
             dag_id = dag_data["id"]
-            dag_graph: nx.DiGraph[str] = nx.DiGraph()
+            dag_graph: nx.DiGraph = nx.DiGraph()
 
             # Add nodes
             for node_data in dag_data.get("nodes", []):
@@ -277,7 +277,7 @@ class DAGEngine:
         """Execute DAG asynchronously"""
         try:
             execution.status = DAGStatus.RUNNING
-            dag_graph: nx.DiGraph[str] = self.dags[execution.dag_id]
+            dag_graph: nx.DiGraph = self.dags[execution.dag_id]
 
             # Get execution strategy
             strategy = ExecutionStrategy(
@@ -315,9 +315,7 @@ class DAGEngine:
                 f"🏁 DAG execution completed: {execution.execution_id} - {execution.status.value}"
             )
 
-    async def _execute_sequential(
-        self, execution: DAGExecution, dag_graph: nx.DiGraph[str]
-    ):
+    async def _execute_sequential(self, execution: DAGExecution, dag_graph: nx.DiGraph):
         """Execute DAG nodes sequentially"""
         # Topological sort for sequential execution
         try:
@@ -332,9 +330,7 @@ class DAGEngine:
             node: DAGNode = dag_graph.nodes[node_id]["node"]
             await self._execute_node(execution, node)
 
-    async def _execute_parallel(
-        self, execution: DAGExecution, dag_graph: nx.DiGraph[str]
-    ):
+    async def _execute_parallel(self, execution: DAGExecution, dag_graph: nx.DiGraph):
         """Execute DAG nodes in parallel where possible"""
         completed_nodes: set[str] = set()
         running_tasks: dict[str, asyncio.Task[Any]] = {}
@@ -383,9 +379,7 @@ class DAGEngine:
             ):
                 break
 
-    async def _execute_adaptive(
-        self, execution: DAGExecution, dag_graph: nx.DiGraph[str]
-    ):
+    async def _execute_adaptive(self, execution: DAGExecution, dag_graph: nx.DiGraph):
         """Execute DAG with adaptive strategy"""
         # Start with parallel execution, fall back to sequential if needed
         try:
@@ -702,7 +696,7 @@ class DAGEngine:
         if dag_id not in self.dags:
             return {}
 
-        dag_graph: nx.DiGraph[str] = self.dags[dag_id]
+        dag_graph: nx.DiGraph = self.dags[dag_id]
         executions = [e for e in self.executions.values() if e.dag_id == dag_id]
 
         # Calculate statistics
@@ -837,48 +831,48 @@ nodes:
     priority: 1
 """
 
+
 async def main():
-        # Example usage
-        engine = DAGEngine()
+    # Example usage
+    engine = DAGEngine()
 
-        # Create example DAG file
-        dag_file = Path("example_dag.yaml")
-        with open(dag_file, "w") as f:
-            f.write(EXAMPLE_DAG)
+    # Create example DAG file
+    dag_file = Path("example_dag.yaml")
+    with open(dag_file, "w") as f:
+        f.write(EXAMPLE_DAG)
 
-        try:
-            # Load DAG
-            dag_id = engine.load_dag("example_dag.yaml")
+    try:
+        # Load DAG
+        dag_id = engine.load_dag("example_dag.yaml")
 
-            # Execute DAG
-            execution_id = engine.execute_dag(dag_id, {"auto_deploy": True})
+        # Execute DAG
+        execution_id = engine.execute_dag(dag_id, {"auto_deploy": True})
 
-            # Monitor execution
-            while True:
-                status = engine.get_execution_status(execution_id)
-                if status:
-                    print(
-                        f"Progress: {status['progress']:.1%} - Status: {status['status']}"
-                    )
+        # Monitor execution
+        while True:
+            status = engine.get_execution_status(execution_id)
+            if status:
+                print(
+                    f"Progress: {status['progress']:.1%} - Status: {status['status']}"
+                )
 
-                    if status["status"] in ["completed", "failed", "cancelled"]:
-                        break
+                if status["status"] in ["completed", "failed", "cancelled"]:
+                    break
 
-                await asyncio.sleep(5)
+            await asyncio.sleep(5)
 
-            # Get final status
-            final_status = engine.get_execution_status(execution_id)
-            print(f"Final status: {final_status}")
+        # Get final status
+        final_status = engine.get_execution_status(execution_id)
+        print(f"Final status: {final_status}")
 
-            # Get DAG statistics
-            stats = engine.get_dag_statistics(dag_id)
-            print(f"DAG statistics: {stats}")
+        # Get DAG statistics
+        stats = engine.get_dag_statistics(dag_id)
+        print(f"DAG statistics: {stats}")
 
-        finally:
-            # Cleanup
-            if dag_file.exists():
-                dag_file.unlink()
-
+    finally:
+        # Cleanup
+        if dag_file.exists():
+            dag_file.unlink()
 
 
 if __name__ == "__main__":
