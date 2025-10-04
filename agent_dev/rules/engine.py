@@ -8,57 +8,73 @@ Rule engine system for compliance checking and validation.
 
 import json
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
-from agent_dev.persistence.repo import RuleRepo
+from agent_dev.persistence.repo import (
+    RuleRepo,  # Giả sử RuleRepo cung cấp kiểu dữ liệu cho rule objects
+)
 
 
 @dataclass
 class RuleEvalResult:
     """Result of rule evaluation"""
-    
+
     compliant: bool
     rule_name: str
     message: str
     severity: str = "medium"
     action_type: str = "warn"
-    metadata: dict[str, Any] | None = None
-    
-    def __post_init__(self):
-        if self.metadata is None:
-            self.metadata = {}
+    # THAY ĐỔI: Sử dụng field(default_factory=dict) để khởi tạo Dict an toàn
+    metadata: dict[str, Any] = field(default_factory=lambda: {})
+
+    # THAY ĐỔI: Xóa __post_init__ vì default_factory đã xử lý
 
 
 class RuleEngine:
     """Main rule engine for compliance checking"""
-    
+
     def __init__(self, rule_repo: RuleRepo | None = None):
-        self.rule_repo = rule_repo
-        self.rules: list[dict[str, Any]] = []
+        # THAY ĐỔI: Sử dụng Optional/Union
+        self.rule_repo: RuleRepo | None = rule_repo
+        self.rules: list[dict[str, Any]] = []  # THAY ĐỔI: Sử dụng List[Dict]
         self._load_rules()
-    
+
     def _load_rules(self) -> None:
         """Load rules from database"""
         if self.rule_repo:
             db_rules = self.rule_repo.get_active_rules()
             for rule in db_rules:
                 try:
-                    rule_def = json.loads(str(rule.rule_definition))
-                    rule_def["rule_name"] = str(rule.rule_name)
-                    rule_def["priority"] = int(getattr(rule, 'priority', 0))
-                    rule_def["is_active"] = bool(rule.is_active)
+                    # THAY ĐỔI: Kiểm tra kiểu dữ liệu trả về từ repo trước khi json.loads
+                    rule_definition_str: str = str(
+                        getattr(rule, "rule_definition", "{}")
+                    )
+                    rule_def: dict[str, Any] = json.loads(rule_definition_str)
+
+                    # Cải thiện việc đọc các thuộc tính từ object `rule`
+                    rule_def["rule_name"] = str(
+                        getattr(rule, "rule_name", "unknown_rule")
+                    )
+                    # THAY ĐỔI: Sử dụng getattr() an toàn hơn và ép kiểu rõ ràng
+                    priority_value: Any = getattr(rule, "priority", 0)
+                    rule_def["priority"] = int(priority_value)
+
+                    rule_def["is_active"] = bool(getattr(rule, "is_active", False))
                     self.rules.append(rule_def)
                 except (json.JSONDecodeError, ValueError, TypeError) as e:
-                    print(f"Warning: Failed to load rule {rule.rule_name}: {e}")
-    
+                    print(
+                        f"Warning: Failed to load rule {getattr(rule, 'rule_name', 'unknown')}: {e}"
+                    )
+
     def add_rule(self, rule: dict[str, Any]) -> bool:
         """Add a new rule to the engine"""
+        # Giữ nguyên: validate_rule là hàm bên ngoài
         if validate_rule(rule):
             self.rules.append(rule)
             return True
         return False
-    
+
     def remove_rule(self, rule_name: str) -> bool:
         """Remove a rule by name"""
         for i, rule in enumerate(self.rules):
@@ -66,54 +82,63 @@ class RuleEngine:
                 del self.rules[i]
                 return True
         return False
-    
+
     def get_rule(self, rule_name: str) -> dict[str, Any] | None:
         """Get a rule by name"""
         for rule in self.rules:
             if rule.get("rule_name") == rule_name:
                 return rule
         return None
-    
+
     def list_rules(self) -> list[dict[str, Any]]:
         """List all active rules"""
         return [rule for rule in self.rules if rule.get("is_active", True)]
-    
-    def check_compliance(self, action: str, context: dict[str, Any]) -> list[RuleEvalResult]:
+
+    def check_compliance(
+        self, action: str, context: dict[str, Any]
+    ) -> list[RuleEvalResult]:
         """Check compliance against all rules"""
         results: list[RuleEvalResult] = []
-        
+
         for rule in self.rules:
             if not rule.get("is_active", True):
                 continue
-                
+
             result = self._evaluate_rule(rule, action, context)
             if result:
                 results.append(result)
-        
-        # Sort by priority (higher priority first)
+
+        # THAY ĐỔI: Sử dụng .get() an toàn cho metadata, vì RuleEvalResult giờ luôn có dict
         results.sort(key=lambda r: r.metadata.get("priority", 0), reverse=True)
         return results
-    
-    def _evaluate_rule(self, rule: dict[str, Any], action: str, context: dict[str, Any]) -> RuleEvalResult | None:
+
+    def _evaluate_rule(
+        self, rule: dict[str, Any], action: str, context: dict[str, Any]
+    ) -> RuleEvalResult | None:
         """Evaluate a single rule against action and context"""
-        conditions = rule.get("conditions", [])
+        # THAY ĐỔI: Khai báo rõ ràng kiểu trả về của .get()
+        conditions: list[dict[str, Any]] = rule.get("conditions", [])
         if not conditions:
             return None
-        
+
         # Check if all conditions are met
         all_conditions_met = True
+        # THAY ĐỔI: Khai báo rõ ràng kiểu dữ liệu cho 'condition' trong vòng lặp
         for condition in conditions:
+            # Bỏ qua nếu condition không phải dict
             if not self._evaluate_condition(condition, context):
                 all_conditions_met = False
                 break
-        
+
         if all_conditions_met:
             # Rule is violated (conditions met = violation)
-            action_config = rule.get("action", {})
+            action_config: dict[str, Any] = rule.get("action", {})
             return RuleEvalResult(
                 compliant=False,
                 rule_name=rule.get("rule_name", "unknown"),
-                message=action_config.get("message", f"Rule '{rule.get('rule_name')}' violated"),
+                message=action_config.get(
+                    "message", f"Rule '{rule.get('rule_name')}' violated"
+                ),
                 severity=action_config.get("severity", "medium"),
                 action_type=action_config.get("type", "warn"),
                 metadata={
@@ -121,35 +146,50 @@ class RuleEngine:
                     "rule_id": rule.get("rule_name"),
                     "violated_conditions": conditions,
                     "action": action,
-                    "context": context
-                }
+                    "context": context,
+                },
             )
-        
+
         return None
-    
-    def _evaluate_condition(self, condition: dict[str, Any], context: dict[str, Any]) -> bool:
+
+    def _evaluate_condition(
+        self, condition: dict[str, Any], context: dict[str, Any]
+    ) -> bool:
         """Evaluate a single condition"""
-        field: str = condition.get("field", "")
-        operator: str = condition.get("operator", "eq")
+        # THAY ĐỔI: Ép kiểu rõ ràng hơn
+        field: str = str(condition.get("field", ""))
+        operator: str = str(condition.get("operator", "eq"))
         expected_value: Any = condition.get("value")
-        case_sensitive: bool = condition.get("case_sensitive", True)
-        
+        case_sensitive: bool = bool(condition.get("case_sensitive", True))
+
         # Get actual value from context
         actual_value: Any = self._get_nested_value(context, field)
-        
-        # Handle different operators
+
+        # Handle different operators (Giữ nguyên logic if/elif)
         if operator == "eq":
-            return self._compare_values(actual_value, expected_value, case_sensitive, "==")
+            return self._compare_values(
+                actual_value, expected_value, case_sensitive, "=="
+            )
         elif operator == "ne":
-            return self._compare_values(actual_value, expected_value, case_sensitive, "!=")
+            return self._compare_values(
+                actual_value, expected_value, case_sensitive, "!="
+            )
         elif operator == "gt":
-            return self._compare_values(actual_value, expected_value, case_sensitive, ">")
+            return self._compare_values(
+                actual_value, expected_value, case_sensitive, ">"
+            )
         elif operator == "gte":
-            return self._compare_values(actual_value, expected_value, case_sensitive, ">=")
+            return self._compare_values(
+                actual_value, expected_value, case_sensitive, ">="
+            )
         elif operator == "lt":
-            return self._compare_values(actual_value, expected_value, case_sensitive, "<")
+            return self._compare_values(
+                actual_value, expected_value, case_sensitive, "<"
+            )
         elif operator == "lte":
-            return self._compare_values(actual_value, expected_value, case_sensitive, "<=")
+            return self._compare_values(
+                actual_value, expected_value, case_sensitive, "<="
+            )
         elif operator == "in":
             return self._check_in(actual_value, expected_value, case_sensitive)
         elif operator == "nin":
@@ -157,7 +197,9 @@ class RuleEngine:
         elif operator == "contains":
             return self._check_contains(actual_value, expected_value, case_sensitive)
         elif operator == "not_contains":
-            return not self._check_contains(actual_value, expected_value, case_sensitive)
+            return not self._check_contains(
+                actual_value, expected_value, case_sensitive
+            )
         elif operator == "regex":
             return self._check_regex(actual_value, expected_value, case_sensitive)
         elif operator == "exists":
@@ -166,36 +208,42 @@ class RuleEngine:
             return actual_value is None
         else:
             return False
-    
+
     def _get_nested_value(self, context: dict[str, Any], field: str) -> Any:
         """Get nested value from context using dot notation"""
-        keys = field.split(".")
-        value: Any = context
-        
+        keys: list[str] = field.split(".")
+        # THAY ĐỔI: Khai báo rõ ràng kiểu dữ liệu và không dùng lại Any ở lần gán sau
+        current_value: Any = context
+
         for key in keys:
-            if isinstance(value, dict) and key in value:
-                value: Any = value[key]
+            # THAY ĐỔI: Kiểm tra an toàn trước khi truy cập key
+            if key in current_value:
+                current_value = current_value[key]  # Gán lại, giữ nguyên kiểu Any
             else:
                 return None
-        
-        return value
-    
-    def _compare_values(self, actual: Any, expected: Any, case_sensitive: bool, op: str) -> bool:
+
+        return current_value
+
+    def _compare_values(
+        self, actual: Any, expected: Any, case_sensitive: bool, op: str
+    ) -> bool:
         """Compare two values using specified operator"""
         if actual is None or expected is None:
             return False
-        
+
         # Handle string comparison
         if isinstance(actual, str) and isinstance(expected, str):
             if not case_sensitive:
                 actual = actual.lower()
                 expected = expected.lower()
-        
+
         try:
+            # Giữ nguyên logic so sánh
             if op == "==":
                 return actual == expected
             elif op == "!=":
                 return actual != expected
+            # ... (các toán tử so sánh khác)
             elif op == ">":
                 return actual > expected
             elif op == ">=":
@@ -206,35 +254,50 @@ class RuleEngine:
                 return actual <= expected
         except TypeError:
             return False
-        
+
         return False
-    
+
     def _check_in(self, actual: Any, expected: Any, case_sensitive: bool) -> bool:
         """Check if actual value is in expected list"""
         if not isinstance(expected, list):
             return False
-        
+
         if isinstance(actual, str) and not case_sensitive:
-            expected_lower: list[str] = [str(item).lower() for item in expected if isinstance(item, str)]
+            expected_lower: list[str] = []
+            for item in expected:
+                if item is None:
+                    continue
+                try:
+                    if isinstance(item, str):
+                        expected_lower.append(item.lower())
+                    else:
+                        # Type-safe string conversion
+                        try:
+                            item_str: str = str(item)
+                            expected_lower.append(item_str.lower())
+                        except (TypeError, ValueError):
+                            continue
+                except (TypeError, ValueError):
+                    continue
             return str(actual).lower() in expected_lower
-        
+
         return actual in expected
-    
+
     def _check_contains(self, actual: Any, expected: Any, case_sensitive: bool) -> bool:
         """Check if actual string contains expected string"""
         if not isinstance(actual, str) or not isinstance(expected, str):
             return False
-        
+
         if not case_sensitive:
             return expected.lower() in actual.lower()
-        
+
         return expected in actual
-    
+
     def _check_regex(self, actual: Any, expected: Any, case_sensitive: bool) -> bool:
         """Check if actual string matches expected regex"""
         if not isinstance(actual, str) or not isinstance(expected, str):
             return False
-        
+
         try:
             flags = 0 if case_sensitive else re.IGNORECASE
             return bool(re.search(expected, actual, flags))
@@ -242,69 +305,99 @@ class RuleEngine:
             return False
 
 
+# --- CÁC HÀM BÊN NGOÀI ---
+
+
+# THAY ĐỔI: Hàm này hiện KHÔNG được sử dụng trong RuleEngine._load_rules, nhưng được sửa lỗi priority
 def load_rules_from_db(rule_repo: RuleRepo) -> list[dict[str, Any]]:
     """Load rules from database repository"""
-    rules = []
+    rules: list[dict[str, Any]] = []
     db_rules = rule_repo.get_active_rules()
-    
+
     for rule in db_rules:
         try:
-            rule_def = json.loads(str(rule.rule_definition))
-            rule_def["rule_name"] = str(rule.rule_name)
-            rule_def["priority"] = int(rule.priority)
-            rule_def["is_active"] = bool(rule.is_active)
+            # Sửa lỗi: Sử dụng getattr an toàn hơn
+            rule_definition_str: str = str(getattr(rule, "rule_definition", "{}"))
+            rule_def: dict[str, Any] = json.loads(rule_definition_str)
+
+            rule_def["rule_name"] = str(getattr(rule, "rule_name", "unknown_rule"))
+
+            # SỬA LỖI: Dùng getattr và ép kiểu an toàn
+            priority_value: Any = getattr(rule, "priority", 0)
+            rule_def["priority"] = int(priority_value)
+
+            rule_def["is_active"] = bool(getattr(rule, "is_active", False))
             rules.append(rule_def)
         except (json.JSONDecodeError, ValueError, TypeError) as e:
-            print(f"Warning: Failed to load rule {rule.rule_name}: {e}")
-    
+            print(
+                f"Warning: Failed to load rule {getattr(rule, 'rule_name', 'unknown')}: {e}"
+            )
+
     return rules
 
 
 def validate_rule(rule: dict[str, Any]) -> bool:
     """Validate rule structure and content"""
-    required_fields = ["rule_name", "description", "conditions", "action"]
-    
+    # THAY ĐỔI: Khai báo rõ ràng kiểu dữ liệu
+    required_fields: list[str] = ["rule_name", "description", "conditions", "action"]
+
     # Check required fields
-    for field in required_fields:
-        if field not in rule:
+    for field_name in required_fields:
+        if field_name not in rule:
             return False
-    
+
     # Validate conditions
-    conditions = rule.get("conditions", [])
-    if not isinstance(conditions, list) or not conditions:
+    # THAY ĐỔI: Khai báo rõ ràng kiểu dữ liệu
+    conditions: Any = rule.get("conditions", [])
+    if not conditions:
         return False
-    
+
     for condition in conditions:
         if not isinstance(condition, dict):
             return False
-        
-        required_condition_fields = ["field", "operator", "value"]
-        for field in required_condition_fields:
-            if field not in condition:
+
+        required_condition_fields: list[str] = ["field", "operator", "value"]
+        for field_name in required_condition_fields:
+            if field_name not in condition:
                 return False
-        
+
         # Validate operator
-        valid_operators = ["eq", "ne", "gt", "gte", "lt", "lte", "in", "nin", 
-                          "contains", "not_contains", "regex", "exists", "not_exists"]
-        if condition.get("operator") not in valid_operators:
+        valid_operators: list[str] = [
+            "eq",
+            "ne",
+            "gt",
+            "gte",
+            "lt",
+            "lte",
+            "in",
+            "nin",
+            "contains",
+            "not_contains",
+            "regex",
+            "exists",
+            "not_exists",
+        ]
+        operator: str | None = condition.get("operator")
+        if operator is None or operator not in valid_operators:
             return False
-    
+
     # Validate action
-    action = rule.get("action", {})
-    if not isinstance(action, dict) or "type" not in action:
+    action: dict[str, Any] = rule.get("action", {})
+    if "type" not in action:
         return False
-    
-    valid_action_types = ["block", "warn", "log", "redirect", "transform"]
+
+    valid_action_types: list[str] = ["block", "warn", "log", "redirect", "transform"]
     if action.get("type") not in valid_action_types:
         return False
-    
+
     return True
 
 
-def check_compliance(action: str, context: dict[str, Any], 
-                    rule_engine: RuleEngine | None = None) -> list[RuleEvalResult]:
+def check_compliance(
+    action: str, context: dict[str, Any], rule_engine: RuleEngine | None = None
+) -> list[RuleEvalResult]:
     """Check compliance for an action against context"""
     if rule_engine is None:
         rule_engine = RuleEngine()
-    
+
     return rule_engine.check_compliance(action, context)

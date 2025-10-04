@@ -12,6 +12,7 @@ from typing import TypedDict
 
 class FeedbackRow(TypedDict):
     """Feedback row type"""
+
     id: int
     user_id: str
     feedback: str
@@ -21,6 +22,7 @@ class FeedbackRow(TypedDict):
 
 class UserPrefRow(TypedDict):
     """User preference row type"""
+
     id: int
     user_id: str
     preference_key: str
@@ -31,6 +33,7 @@ class UserPrefRow(TypedDict):
 
 class RuleRow(TypedDict):
     """Rule row type"""
+
     id: int
     rule_name: str
     rule_definition: str
@@ -42,6 +45,7 @@ class RuleRow(TypedDict):
 
 class LearnedSolutionRow(TypedDict):
     """Learned solution row type"""
+
     id: int
     error_type: str
     solution: str
@@ -53,6 +57,7 @@ class LearnedSolutionRow(TypedDict):
 
 class MetricRow(TypedDict):
     """Metric row type"""
+
     id: int
     metric_name: str
     metric_value: float

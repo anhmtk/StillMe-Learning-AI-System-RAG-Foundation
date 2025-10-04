@@ -1,10 +1,12 @@
 """
 Schedule library type stubs for AgentDev
 """
-from typing import Any, Callable
+
+from collections.abc import Callable
+from typing import Any
 
 class Job:
-    def do(self, job_func: Callable[..., Any]) -> 'Job': ...
+    def do(self, job_func: Callable[..., Any]) -> Job: ...
 
 class Every:
     def minutes(self) -> Job: ...

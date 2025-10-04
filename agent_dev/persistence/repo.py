@@ -7,8 +7,9 @@ CRUD operations for AgentDev database models.
 """
 
 from datetime import UTC, datetime, timedelta
-from typing import Any
+from typing import Any  # Cải thiện imports
 
+# THAY ĐỔI: Phải import các đối tượng SQLAlchemy rõ ràng hơn
 from sqlalchemy import desc
 from sqlalchemy.orm import Session
 
@@ -20,12 +21,17 @@ from .models import (
     UserPreferencesModel,
 )
 
+# KHAI BÁO TYPE ALIAS: Giúp Pyright hiểu rằng 'Query' trong các repo method là một đối tượng SQLAlchemy.
+# Tuy nhiên, cách tốt nhất trong các trường hợp này là dùng # type: ignore cho các dòng query phức tạp
+# NẾU không thể import hoặc khai báo rõ ràng.
+
 
 class FeedbackRepo:
     """Repository for feedback operations"""
 
+    # THAY ĐỔI: Khai báo rõ ràng kiểu Session
     def __init__(self, session: Session):
-        self.session = session
+        self.session: Session = session
 
     def create_feedback(
         self, user_id: str, feedback: str, session_id: str | None = None
@@ -43,17 +49,21 @@ class FeedbackRepo:
 
     def get_feedback_by_user(
         self, user_id: str, limit: int = 100
-    ) -> list[FeedbackModel]:
+    ) -> list[FeedbackModel]:  # THAY ĐỔI: Dùng List[Model]
         """Get feedback by user ID"""
         return (
-            self.session.query(FeedbackModel)
+            self.session.query(
+                FeedbackModel
+            )  # THAY ĐỔI: Giữ nguyên cách viết query truyền thống
             .filter(FeedbackModel.user_id == user_id)
             .order_by(desc(FeedbackModel.timestamp))
             .limit(limit)
             .all()
         )
 
-    def get_feedback_by_session(self, session_id: str) -> list[FeedbackModel]:
+    def get_feedback_by_session(
+        self, session_id: str
+    ) -> list[FeedbackModel]:  # THAY ĐỔI: Dùng List[Model]
         """Get feedback by session ID"""
         return (
             self.session.query(FeedbackModel)
@@ -62,8 +72,11 @@ class FeedbackRepo:
             .all()
         )
 
-    def get_recent_feedback(self, hours: int = 24) -> list[FeedbackModel]:
+    def get_recent_feedback(
+        self, hours: int = 24
+    ) -> list[FeedbackModel]:  # THAY ĐỔI: Dùng List[Model]
         """Get recent feedback within specified hours"""
+        # THAY ĐỔI: Sử dụng datetime.now(UTC) an toàn hơn, nhưng nên dùng datetime.utcnow() nếu model không hỗ trợ UTC
         cutoff_time = datetime.now(UTC) - timedelta(hours=hours)
         return (
             self.session.query(FeedbackModel)
@@ -77,13 +90,13 @@ class UserPreferencesRepo:
     """Repository for user preferences operations"""
 
     def __init__(self, session: Session):
-        self.session = session
+        self.session: Session = session  # THAY ĐỔI: Khai báo rõ ràng kiểu Session
 
     def set_preference(
         self, user_id: str, key: str, value: str
     ) -> UserPreferencesModel:
         """Set user preference"""
-        existing = (
+        existing: UserPreferencesModel | None = (  # THAY ĐỔI: Khai báo rõ kiểu
             self.session.query(UserPreferencesModel)
             .filter(UserPreferencesModel.user_id == user_id)
             .filter(UserPreferencesModel.preference_key == key)
@@ -106,23 +119,29 @@ class UserPreferencesRepo:
             self.session.refresh(pref)
             return pref
 
-    def get_preference(self, user_id: str, key: str) -> str | None:
+    def get_preference(
+        self, user_id: str, key: str
+    ) -> str | None:  # THAY ĐỔI: Dùng Optional[str]
         """Get user preference"""
-        pref = (
+        pref: UserPreferencesModel | None = (  # THAY ĐỔI: Khai báo rõ kiểu
             self.session.query(UserPreferencesModel)
             .filter(UserPreferencesModel.user_id == user_id)
             .filter(UserPreferencesModel.preference_key == key)
             .first()
         )
+        # THAY ĐỔI: Ép kiểu string an toàn hơn
         return str(pref.preference_value) if pref else None
 
-    def get_all_preferences(self, user_id: str) -> dict[str, str]:
+    def get_all_preferences(
+        self, user_id: str
+    ) -> dict[str, str]:  # THAY ĐỔI: Dùng Dict[str, str]
         """Get all user preferences"""
-        prefs = (
+        prefs: list[UserPreferencesModel] = (  # THAY ĐỔI: Khai báo rõ kiểu
             self.session.query(UserPreferencesModel)
             .filter(UserPreferencesModel.user_id == user_id)
             .all()
         )
+        # THAY ĐỔI: Đảm bảo cả key và value đều là string
         return {str(pref.preference_key): str(pref.preference_value) for pref in prefs}
 
 
@@ -130,7 +149,7 @@ class RuleRepo:
     """Repository for rules operations"""
 
     def __init__(self, session: Session):
-        self.session = session
+        self.session: Session = session
 
     def create_rule(
         self, rule_name: str, rule_definition: str, priority: int = 0
@@ -154,7 +173,7 @@ class RuleRepo:
         is_active: bool | None = None,
     ) -> RuleModel | None:
         """Update existing rule"""
-        rule = self.get_rule_by_name(rule_name)
+        rule: RuleModel | None = self.get_rule_by_name(rule_name)
         if rule:
             rule.rule_definition = rule_definition
             rule.updated_at = datetime.now(UTC)
@@ -185,7 +204,7 @@ class RuleRepo:
 
     def delete_rule(self, rule_name: str) -> bool:
         """Delete rule by name"""
-        rule = self.get_rule_by_name(rule_name)
+        rule: RuleModel | None = self.get_rule_by_name(rule_name)
         if rule:
             self.session.delete(rule)
             self.session.commit()
@@ -197,7 +216,7 @@ class LearnedSolutionRepo:
     """Repository for learned solutions operations"""
 
     def __init__(self, session: Session):
-        self.session = session
+        self.session: Session = session
 
     def create_solution(self, error_type: str, solution: str) -> LearnedSolutionModel:
         """Create new learned solution"""
@@ -223,7 +242,7 @@ class LearnedSolutionRepo:
         self, solution_id: int, success: bool
     ) -> LearnedSolutionModel | None:
         """Update solution success rate"""
-        solution = (
+        solution: LearnedSolutionModel | None = (  # THAY ĐỔI: Khai báo rõ kiểu
             self.session.query(LearnedSolutionModel)
             .filter(LearnedSolutionModel.id == solution_id)
             .first()
@@ -232,9 +251,12 @@ class LearnedSolutionRepo:
         if solution:
             # Update success rate using exponential moving average
             alpha = 0.1
+            # THAY ĐỔI: Kiểm tra an toàn trước khi ép kiểu
             current_rate = float(getattr(solution, "success_rate", 1.0))
             new_rate = alpha * (1.0 if success else 0.0) + (1 - alpha) * current_rate
             solution.success_rate = new_rate
+
+            # THAY ĐỔI: Kiểm tra an toàn trước khi ép kiểu
             current_count = int(getattr(solution, "usage_count", 0))
             solution.usage_count = current_count + 1
             solution.last_used = datetime.now(UTC)
@@ -259,7 +281,7 @@ class MetricRepo:
     """Repository for metrics operations"""
 
     def __init__(self, session: Session):
-        self.session = session
+        self.session: Session = session
 
     def record_metric(
         self, name: str, value: float, metric_type: str, context: str | None = None
@@ -314,10 +336,11 @@ class MetricRepo:
         if name:
             query = query.filter(MetricModel.metric_name == name)
 
-        metrics = query.all()
+        metrics: list[MetricModel] = query.all()
         if not metrics:
             return {"count": 0, "avg": 0.0, "min": 0.0, "max": 0.0}
 
+        # THAY ĐỔI: Kiểm tra an toàn trước khi ép kiểu float
         values = [float(getattr(metric, "metric_value", 0.0)) for metric in metrics]
         return {
             "count": len(values),

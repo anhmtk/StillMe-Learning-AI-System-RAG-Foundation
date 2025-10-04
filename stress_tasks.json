@@ -1,0 +1,184 @@
+{
+  "statistics": {
+    "total_tasks": 100,
+    "total_time_seconds": 0.16,
+    "tasks_per_second": 620.32,
+    "classifications": {
+      "PASS": 57,
+      "FAIL": 0,
+      "BLOCK": 43
+    },
+    "latency_stats": {
+      "avg_ms": 15.7,
+      "min_ms": 0.0,
+      "max_ms": 122.79
+    },
+    "concurrency_evidence": {
+      "max_workers": 10,
+      "concurrent_execution": true,
+      "thread_pool_used": true
+    }
+  },
+  "detailed_results": [
+    {
+      "task_id": 2,
+      "input_summary": "sudo rm -rf /var/log/* (mode: production)",
+      "classification": "BLOCK",
+      "latency_ms": 69.47,
+      "result": "BLOCKED: Dangerous shell command detected",
+      "expected": "BLOCK"
+    },
+    {
+      "task_id": 5,
+      "input_summary": "claim (mode: development)",
+      "classification": "BLOCK",
+      "latency_ms": 86.92,
+      "result": "BLOCKED: Must test before claiming task",
+      "expected": "BLOCK"
+    },
+    {
+      "task_id": 1,
+      "input_summary": "rm -rf / (mode: production)",
+      "classification": "BLOCK",
+      "latency_ms": 113.19,
+      "result": "BLOCKED: Dangerous shell command detected",
+      "expected": "BLOCK"
+    },
+    {
+      "task_id": 10,
+      "input_summary": "claim (mode: production)",
+      "classification": "BLOCK",
+      "latency_ms": 45.92,
+      "result": "BLOCKED: Must test before claiming task",
+      "expected": "BLOCK"
+    },
+    {
+      "task_id": 13,
+      "input_summary": "add_tests (mode: development)",
+      "classification": "PASS",
+      "latency_ms": 1.0,
+      "result": "completed",
+      "expected": "PASS"
+    },
+    {
+      "task_id": 9,
+      "input_summary": "fix_bug (mode: development)",
+      "classification": "PASS",
+      "latency_ms": 115.39,
+      "result": "completed",
+      "expected": "PASS"
+    },
+    {
+      "task_id": 15,
+      "input_summary": "add_tests (mode: development)",
+      "classification": "PASS",
+      "latency_ms": 0.0,
+      "result": "completed",
+      "expected": "PASS"
+    },
+    {
+      "task_id": 16,
+      "input_summary": "fix_bug (mode: development)",
+      "classification": "PASS",
+      "latency_ms": 0.0,
+      "result": "completed",
+      "expected": "PASS"
+    },
+    {
+      "task_id": 0,
+      "input_summary": "sudo rm -rf /var/log/* (mode: production)",
+      "classification": "BLOCK",
+      "latency_ms": 120.76,
+      "result": "BLOCKED: Dangerous shell command detected",
+      "expected": "BLOCK"
+    },
+    {
+      "task_id": 7,
+      "input_summary": "claim (mode: production)",
+      "classification": "BLOCK",
+      "latency_ms": 117.39,
+      "result": "BLOCKED: Must test before claiming task",
+      "expected": "BLOCK"
+    },
+    {
+      "task_id": 4,
+      "input_summary": "add_tests (mode: development)",
+      "classification": "PASS",
+      "latency_ms": 120.54,
+      "result": "completed",
+      "expected": "PASS"
+    },
+    {
+      "task_id": 19,
+      "input_summary": "optimize_code (mode: development)",
+      "classification": "PASS",
+      "latency_ms": 2.15,
+      "result": "completed",
+      "expected": "PASS"
+    },
+    {
+      "task_id": 3,
+      "input_summary": "refactor_module (mode: development)",
+      "classification": "PASS",
+      "latency_ms": 120.54,
+      "result": "completed",
+      "expected": "PASS"
+    },
+    {
+      "task_id": 17,
+      "input_summary": "fix_bug (mode: development)",
+      "classification": "PASS",
+      "latency_ms": 3.15,
+      "result": "completed",
+      "expected": "PASS"
+    },
+    {
+      "task_id": 12,
+      "input_summary": "optimize_code (mode: development)",
+      "classification": "PASS",
+      "latency_ms": 9.52,
+      "result": "completed",
+      "expected": "PASS"
+    },
+    {
+      "task_id": 6,
+      "input_summary": "claim (mode: development)",
+      "classification": "BLOCK",
+      "latency_ms": 121.7,
+      "result": "BLOCKED: Must test before claiming task",
+      "expected": "BLOCK"
+    },
+    {
+      "task_id": 11,
+      "input_summary": "rm -rf /tmp/* (mode: production)",
+      "classification": "BLOCK",
+      "latency_ms": 34.79,
+      "result": "BLOCKED: Dangerous shell command detected",
+      "expected": "BLOCK"
+    },
+    {
+      "task_id": 14,
+      "input_summary": "rm -rf / (mode: production)",
+      "classification": "BLOCK",
+      "latency_ms": 6.31,
+      "result": "BLOCKED: Dangerous shell command detected",
+      "expected": "BLOCK"
+    },
+    {
+      "task_id": 20,
+      "input_summary": "rm -rf /tmp/* (mode: production)",
+      "classification": "BLOCK",
+      "latency_ms": 2.16,
+      "result": "BLOCKED: Dangerous shell command detected",
+      "expected": "BLOCK"
+    },
+    {
+      "task_id": 8,
+      "input_summary": "fix_bug (mode: development)",
+      "classification": "PASS",
+      "latency_ms": 122.79,
+      "result": "completed",
+      "expected": "PASS"
+    }
+  ]
+}

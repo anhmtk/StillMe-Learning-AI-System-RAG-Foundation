@@ -628,10 +628,18 @@ class ArchitectureAnalyzer:
         # Average degree
         degrees: list[int] = []
         for node in self.dependency_graph.nodes():
-            degree_val: Any = getattr(self.dependency_graph, 'degree')(node)
             try:
-                degrees.append(int(degree_val))
-            except (TypeError, ValueError):
+                degree_val: Any = self.dependency_graph.degree(node)
+                # Handle NetworkX degree method return types safely
+                if isinstance(degree_val, int):
+                    degrees.append(degree_val)
+                else:
+                    # For DiDegreeView or other types, try to get length
+                    try:
+                        degrees.append(int(len(degree_val)))
+                    except (TypeError, ValueError, AttributeError):
+                        degrees.append(0)  # fallback for unknown types
+            except (TypeError, ValueError, AttributeError):
                 degrees.append(0)  # fallback for unknown types
         metrics["average_degree"] = sum(degrees) / len(degrees) if degrees else 0
 
@@ -643,7 +651,7 @@ class ArchitectureAnalyzer:
                 in_degrees.append(degree_val)
             else:
                 in_degrees.append(0)
-        
+
         out_degrees: list[int] = []
         for node in self.dependency_graph.nodes():
             degree_val = self.dependency_graph.out_degree(node)
@@ -690,10 +698,18 @@ class ArchitectureAnalyzer:
         coupling_analysis: dict[str, CouplingLevel] = {}
 
         for node in self.dependency_graph.nodes():
-            degree_val: Any = getattr(self.dependency_graph, 'degree')(node)
             try:
-                degree = int(degree_val)
-            except (TypeError, ValueError):
+                degree_val: Any = self.dependency_graph.degree(node)
+                # Handle NetworkX degree method return types safely
+                if isinstance(degree_val, int):
+                    degree = degree_val
+                else:
+                    # For DiDegreeView or other types, try to get length
+                    try:
+                        degree = int(len(degree_val))
+                    except (TypeError, ValueError, AttributeError):
+                        degree = 0
+            except (TypeError, ValueError, AttributeError):
                 degree = 0
 
             if degree <= 2:

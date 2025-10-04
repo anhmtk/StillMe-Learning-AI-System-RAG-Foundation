@@ -32,14 +32,14 @@ from .types import (
 __all__ = [
     # Models
     "FeedbackModel",
-    "UserPreferencesModel", 
+    "UserPreferencesModel",
     "RuleModel",
     "LearnedSolutionModel",
     "MetricModel",
     # Repositories
     "FeedbackRepo",
     "UserPreferencesRepo",
-    "RuleRepo", 
+    "RuleRepo",
     "LearnedSolutionRepo",
     "MetricRepo",
     # Types

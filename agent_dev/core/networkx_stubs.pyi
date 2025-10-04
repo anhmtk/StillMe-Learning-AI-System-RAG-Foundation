@@ -1,15 +1,16 @@
 """
 NetworkX type stubs for AgentDev
 """
-from typing import Any, Dict, Set
+
 from collections.abc import Iterator
+from typing import Any
 
 # Type aliases for NetworkX views
-NodeView = Set[str]
-EdgeView = Set[tuple[str, str]]
-DiDegreeView = Dict[str, int]
-OutDegreeView = Dict[str, int]
-InDegreeView = Dict[str, int]
+NodeView = set[str]
+EdgeView = set[tuple[str, str]]
+DiDegreeView = dict[str, int]
+OutDegreeView = dict[str, int]
+InDegreeView = dict[str, int]
 
 class DiGraph:
     def __init__(self) -> None: ...

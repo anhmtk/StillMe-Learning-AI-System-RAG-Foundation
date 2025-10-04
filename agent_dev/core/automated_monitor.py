@@ -169,7 +169,9 @@ class AutomatedMonitor:
         scan_job.do(self._scheduled_quality_scan)
 
         # Deep scan with AgentDev analysis
-        deep_scan_job: Any = schedule.every(self.config["deep_scan_interval_hours"]).hours
+        deep_scan_job: Any = schedule.every(
+            self.config["deep_scan_interval_hours"]
+        ).hours
         deep_scan_job.do(self._scheduled_deep_scan)
 
         # Daily maintenance
@@ -286,12 +288,12 @@ class AutomatedMonitor:
             # Run comprehensive analysis
             task = "analyze code quality and identify critical issues"
             if self.agentdev and hasattr(self.agentdev, "execute"):
-                result: Any = getattr(self.agentdev, "execute")(task, AgentMode.SENIOR)
+                result: Any = self.agentdev.execute(task, AgentMode.SENIOR)
             else:
                 result = "AgentDev not available"
 
             # Parse result and create alerts if needed
-            if "❌" in result or "error" in result.lower():
+            if "❌" in str(result) or "error" in str(result).lower():
                 self._send_alert(
                     Alert(
                         id=f"deep_scan_{int(time.time())}",
@@ -315,7 +317,7 @@ class AutomatedMonitor:
             # Run cleanup tasks
             cleanup_task = "perform automated cleanup and optimization"
             if self.agentdev and hasattr(self.agentdev, "execute"):
-                getattr(self.agentdev, "execute")(cleanup_task, AgentMode.SENIOR)
+                self.agentdev.execute(cleanup_task, AgentMode.SENIOR)
 
             # Clean up old metrics
             self._cleanup_old_metrics()
@@ -498,7 +500,7 @@ class AutomatedMonitor:
             if alert.error_type == "syntax_errors":
                 task = "fix critical syntax errors in the codebase"
                 if self.agentdev and hasattr(self.agentdev, "execute"):
-                    result: Any = getattr(self.agentdev, "execute")(task, AgentMode.SENIOR)
+                    result: Any = self.agentdev.execute(task, AgentMode.SENIOR)
                 else:
                     result = "AgentDev not available"
 
