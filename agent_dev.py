@@ -9,7 +9,7 @@ import sys
 from datetime import datetime
 from pathlib import Path
 from pathlib import Path as _Path
-from typing import Any, Optional
+from typing import Any
 
 from dotenv import load_dotenv
 from jsonschema import validate
@@ -219,7 +219,7 @@ JSON_SCHEMA:
         problem_file: str,
         current_attempt: int,
         previous_feedback: str,
-    ) -> Optional[dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         prompt = self._build_plan_prompt(
             problem_description, problem_file, current_attempt, previous_feedback
         )
@@ -344,7 +344,7 @@ JSON_SCHEMA:
             "stderr": result.stderr,
         }
 
-    def _resolve_conflict(self, file_path: str, code_to_apply: Optional[str]) -> bool:
+    def _resolve_conflict(self, file_path: str, code_to_apply: str | None) -> bool:
         logger.info(f"Attempting to resolve conflict for {file_path}...")
         if code_to_apply:
             logger.info(f"Applying specific code to resolve conflict in {file_path}...")
@@ -623,9 +623,9 @@ def _log_jsonl(log_dir: _Path, record: dict) -> _Path:
 
 def agentdev_run_once(
     *,
-    planner: Optional[object] = None,
-    executor: Optional[_PatchExecutor] = None,
-    bug_memory: Optional[_BugMemory] = None,
+    planner: object | None = None,
+    executor: _PatchExecutor | None = None,
+    bug_memory: _BugMemory | None = None,
     log_dir: _Path = _Path("logs/agentdev"),
     run_full_suite_after_pass: bool = False,
     tests_dir: str = "tests",
@@ -633,8 +633,8 @@ def agentdev_run_once(
     pr_draft: bool = True,
     pr_base: str = "main",
     pr_remote: str = "origin",
-    pr_title: Optional[str] = None,
-    pr_body: Optional[str] = None,
+    pr_title: str | None = None,
+    pr_body: str | None = None,
 ):
     """
     Skeleton one-shot:
@@ -676,7 +676,7 @@ def agentdev_run_once(
         else:
             items = []
 
-    result_bool: Optional[bool] = None
+    result_bool: bool | None = None
     chosen = items[0] if items else None
 
     _log_jsonl(log_dir, {"step": "start", "items": len(items or [])})

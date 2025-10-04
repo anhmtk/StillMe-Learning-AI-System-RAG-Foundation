@@ -9,7 +9,7 @@ import json
 import logging
 import time
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 from urllib.parse import urlparse
 
 import httpx
@@ -53,7 +53,7 @@ class SecureHttpClient:
         self.log_file.parent.mkdir(exist_ok=True)
 
         # Client instance
-        self._client: Optional[httpx.AsyncClient] = None
+        self._client: httpx.AsyncClient | None = None
 
     async def __aenter__(self):
         """Async context manager entry"""
@@ -174,7 +174,7 @@ class SecureHttpClient:
             logger.error(f"❌ Failed to log request: {e}")
 
     async def get(
-        self, url: str, headers: Optional[dict[str, str]] = None
+        self, url: str, headers: dict[str, str] | None = None
     ) -> dict[str, Any]:
         """GET request với bảo mật"""
         return await self._make_request("GET", url, headers=headers)
@@ -182,8 +182,8 @@ class SecureHttpClient:
     async def post(
         self,
         url: str,
-        data: Optional[dict[str, Any]] = None,
-        headers: Optional[dict[str, str]] = None,
+        data: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> dict[str, Any]:
         """POST request với bảo mật"""
         return await self._make_request("POST", url, data=data, headers=headers)
@@ -192,8 +192,8 @@ class SecureHttpClient:
         self,
         method: str,
         url: str,
-        data: Optional[dict[str, Any]] = None,
-        headers: Optional[dict[str, str]] = None,
+        data: dict[str, Any] | None = None,
+        headers: dict[str, str] | None = None,
     ) -> dict[str, Any]:
         """Thực hiện HTTP request với bảo mật"""
         start_time = time.time()

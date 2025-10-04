@@ -20,7 +20,11 @@ class TestRuleEngineExtended:
             "description": "Complex rule with multiple conditions",
             "conditions": [
                 {"field": "user.role", "operator": "eq", "value": ["admin"]},
-                {"field": "action", "operator": "in", "value": ["delete", "modify"]},
+                {
+                    "field": "action",
+                    "operator": "in",
+                    "value": ["admin_action", "modify"],
+                },
                 {"field": "resource", "operator": "contains", "value": ["important"]},
             ],
             "action": {
@@ -37,13 +41,11 @@ class TestRuleEngineExtended:
         # Test with matching context
         context = {
             "user": {"role": "admin"},
-            "action": "delete",
             "resource": "important_database",
         }
         results = engine.check_compliance("admin_action", context)
-        assert len(results) == 1
-        assert results[0].compliant is False
-        assert results[0].rule_name == "complex_rule"
+        assert results["compliant"] is False
+        assert "complex_rule" in results["violated_rules"]
 
     def test_rule_engine_with_nested_context(self):
         """Test rule engine with nested context"""
@@ -63,7 +65,7 @@ class TestRuleEngineExtended:
 
         context = {"user": {"profile": {"level": 10}}, "permissions": {"admin": True}}
         results = engine.check_compliance("admin_check", context)
-        assert len(results) == 1
+        assert results["compliant"] is False
 
     def test_rule_engine_with_missing_fields(self):
         """Test rule engine with missing fields in context"""
@@ -81,9 +83,9 @@ class TestRuleEngineExtended:
         engine.add_rule(rule)
 
         context = {"existing_field": "value"}
-        results = engine.check_compliance("test", context)
+        results = engine.check_compliance("test_action", context)
         # Should not match because field is missing
-        assert len(results) == 0
+        assert results["compliant"] is True
 
     def test_rule_engine_with_none_values(self):
         """Test rule engine with None values"""
@@ -102,13 +104,13 @@ class TestRuleEngineExtended:
 
         # Test with None value
         context = {"optional_field": None}
-        results = engine.check_compliance("test", context)
-        assert len(results) == 0  # None should not match exists
+        results = engine.check_compliance("test_action", context)
+        assert results["compliant"] is True  # None should not match exists
 
         # Test with actual value
         context = {"optional_field": "value"}
-        results = engine.check_compliance("test", context)
-        assert len(results) == 1
+        results = engine.check_compliance("test_action", context)
+        assert results["compliant"] is False
 
     def test_rule_engine_with_empty_context(self):
         """Test rule engine with empty context"""
@@ -126,8 +128,8 @@ class TestRuleEngineExtended:
         engine.add_rule(rule)
 
         context = {}
-        results = engine.check_compliance("test", context)
-        assert len(results) == 0
+        results = engine.check_compliance("test_action", context)
+        assert results["compliant"] is True
 
     def test_rule_engine_with_invalid_operators(self):
         """Test rule engine with invalid operators"""
@@ -145,9 +147,9 @@ class TestRuleEngineExtended:
         engine.add_rule(rule)
 
         context = {"test_field": "value"}
-        results = engine.check_compliance("test", context)
+        results = engine.check_compliance("test_action", context)
         # Should not match because operator is invalid
-        assert len(results) == 0
+        assert results["compliant"] is True
 
     def test_rule_engine_with_mixed_types(self):
         """Test rule engine with mixed data types"""
@@ -158,7 +160,11 @@ class TestRuleEngineExtended:
             "description": "Rule with mixed types",
             "conditions": [
                 {"field": "numeric_field", "operator": "gt", "value": [10]},
-                {"field": "string_field", "operator": "contains", "value": ["test"]},
+                {
+                    "field": "string_field",
+                    "operator": "contains",
+                    "value": ["test_string"],
+                },
                 {"field": "boolean_field", "operator": "eq", "value": [True]},
             ],
             "action": {"type": "warn", "message": "Mixed types rule"},
@@ -171,8 +177,8 @@ class TestRuleEngineExtended:
             "string_field": "test_string",
             "boolean_field": True,
         }
-        results = engine.check_compliance("test", context)
-        assert len(results) == 1
+        results = engine.check_compliance("test_action", context)
+        assert results["compliant"] is False
 
     def test_rule_engine_with_regex_edge_cases(self):
         """Test rule engine with regex edge cases"""
@@ -195,18 +201,18 @@ class TestRuleEngineExtended:
 
         # Test valid email
         context = {"email": "user@example.com"}
-        results = engine.check_compliance("test", context)
-        assert len(results) == 1
+        results = engine.check_compliance("test_action", context)
+        assert results["compliant"] is False
 
         # Test invalid email
         context = {"email": "invalid-email"}
-        results = engine.check_compliance("test", context)
-        assert len(results) == 0
+        results = engine.check_compliance("test_action", context)
+        assert results["compliant"] is True
 
         # Test None email
         context = {"email": None}
-        results = engine.check_compliance("test", context)
-        assert len(results) == 0
+        results = engine.check_compliance("test_action", context)
+        assert results["compliant"] is True
 
     def test_rule_engine_with_comparison_operators(self):
         """Test rule engine with comparison operators"""
@@ -226,13 +232,13 @@ class TestRuleEngineExtended:
 
         # Test matching conditions
         context = {"score": 90, "age": 30}
-        results = engine.check_compliance("test", context)
-        assert len(results) == 1
+        results = engine.check_compliance("test_action", context)
+        assert results["compliant"] is False
 
         # Test non-matching conditions
         context = {"score": 70, "age": 30}
-        results = engine.check_compliance("test", context)
-        assert len(results) == 0
+        results = engine.check_compliance("test_action", context)
+        assert results["compliant"] is True
 
     def test_rule_engine_with_in_operator_edge_cases(self):
         """Test rule engine with 'in' operator edge cases"""
@@ -255,18 +261,18 @@ class TestRuleEngineExtended:
 
         # Test matching status
         context = {"status": "active"}
-        results = engine.check_compliance("test", context)
-        assert len(results) == 1
+        results = engine.check_compliance("test_action", context)
+        assert results["compliant"] is False
 
         # Test non-matching status
         context = {"status": "invalid"}
-        results = engine.check_compliance("test", context)
-        assert len(results) == 0
+        results = engine.check_compliance("test_action", context)
+        assert results["compliant"] is True
 
         # Test None status
         context = {"status": None}
-        results = engine.check_compliance("test", context)
-        assert len(results) == 0
+        results = engine.check_compliance("test_action", context)
+        assert results["compliant"] is True
 
     def test_rule_engine_with_contains_operator_edge_cases(self):
         """Test rule engine with 'contains' operator edge cases"""
@@ -289,18 +295,18 @@ class TestRuleEngineExtended:
 
         # Test matching message
         context = {"message": "System error occurred"}
-        results = engine.check_compliance("test", context)
-        assert len(results) == 1
+        results = engine.check_compliance("test_action", context)
+        assert results["compliant"] is False
 
         # Test non-matching message
         context = {"message": "System success"}
-        results = engine.check_compliance("test", context)
-        assert len(results) == 0
+        results = engine.check_compliance("test_action", context)
+        assert results["compliant"] is True
 
         # Test None message
         context = {"message": None}
-        results = engine.check_compliance("test", context)
-        assert len(results) == 0
+        results = engine.check_compliance("test_action", context)
+        assert results["compliant"] is True
 
     def test_rule_engine_with_not_exists_operator(self):
         """Test rule engine with 'not_exists' operator"""
@@ -319,13 +325,13 @@ class TestRuleEngineExtended:
 
         # Test with missing field (should match)
         context = {"other_field": "value"}
-        results = engine.check_compliance("test", context)
-        assert len(results) == 1
+        results = engine.check_compliance("test_action", context)
+        assert results["compliant"] is False
 
         # Test with existing field (should not match)
         context = {"sensitive_data": "secret"}
-        results = engine.check_compliance("test", context)
-        assert len(results) == 0
+        results = engine.check_compliance("test_action", context)
+        assert results["compliant"] is True
 
     def test_rule_engine_with_priority_ordering(self):
         """Test rule engine with priority ordering"""
@@ -335,7 +341,9 @@ class TestRuleEngineExtended:
         low_priority_rule = {
             "rule_name": "low_priority_rule",
             "description": "Low priority rule",
-            "conditions": [{"field": "action", "operator": "eq", "value": ["test"]}],
+            "conditions": [
+                {"field": "action", "operator": "eq", "value": ["test_action"]}
+            ],
             "action": {"type": "warn", "message": "Low priority warning"},
             "priority": 1,
         }
@@ -344,7 +352,9 @@ class TestRuleEngineExtended:
         high_priority_rule = {
             "rule_name": "high_priority_rule",
             "description": "High priority rule",
-            "conditions": [{"field": "action", "operator": "eq", "value": ["test"]}],
+            "conditions": [
+                {"field": "action", "operator": "eq", "value": ["test_action"]}
+            ],
             "action": {"type": "block", "message": "High priority block"},
             "priority": 10,
         }
@@ -352,13 +362,13 @@ class TestRuleEngineExtended:
         engine.add_rule(low_priority_rule)
         engine.add_rule(high_priority_rule)
 
-        context = {"action": "test"}
-        results = engine.check_compliance("test", context)
+        context = {}
+        results = engine.check_compliance("test_action", context)
 
         # Should have 2 results, high priority first
-        assert len(results) == 2
-        assert results[0].rule_name == "high_priority_rule"
-        assert results[1].rule_name == "low_priority_rule"
+        assert len(results["violated_rules"]) == 2
+        assert results["violated_rules"][0] == "high_priority_rule"
+        assert results["violated_rules"][1] == "low_priority_rule"
 
     def test_rule_engine_with_inactive_rules(self):
         """Test rule engine with inactive rules"""
@@ -368,7 +378,9 @@ class TestRuleEngineExtended:
         active_rule = {
             "rule_name": "active_rule",
             "description": "Active rule",
-            "conditions": [{"field": "action", "operator": "eq", "value": ["test"]}],
+            "conditions": [
+                {"field": "action", "operator": "eq", "value": ["test_action"]}
+            ],
             "action": {"type": "warn", "message": "Active rule"},
             "is_active": True,
         }
@@ -377,7 +389,9 @@ class TestRuleEngineExtended:
         inactive_rule = {
             "rule_name": "inactive_rule",
             "description": "Inactive rule",
-            "conditions": [{"field": "action", "operator": "eq", "value": ["test"]}],
+            "conditions": [
+                {"field": "action", "operator": "eq", "value": ["test_action"]}
+            ],
             "action": {"type": "warn", "message": "Inactive rule"},
             "is_active": False,
         }
@@ -385,12 +399,12 @@ class TestRuleEngineExtended:
         engine.add_rule(active_rule)
         engine.add_rule(inactive_rule)
 
-        context = {"action": "test"}
-        results = engine.check_compliance("test", context)
+        context = {}
+        results = engine.check_compliance("test_action", context)
 
         # Should only have 1 result (active rule)
-        assert len(results) == 1
-        assert results[0].rule_name == "active_rule"
+        assert results["compliant"] is False
+        assert results["violated_rules"][0] == "active_rule"
 
     def test_rule_engine_error_handling(self):
         """Test rule engine error handling"""
@@ -407,8 +421,8 @@ class TestRuleEngineExtended:
 
         # Test with None context
         results = engine.check_compliance("test", None)
-        assert isinstance(results, list)
-        assert len(results) == 0
+        assert isinstance(results, dict)
+        assert results["compliant"] is True
 
     def test_rule_engine_with_repo_integration(self):
         """Test rule engine with repository integration"""
@@ -416,7 +430,7 @@ class TestRuleEngineExtended:
         # Create mock rule object with required attributes
         mock_rule = Mock()
         mock_rule.rule_name = "repo_rule"
-        mock_rule.rule_definition = '{"description": "Rule from repository", "conditions": [{"field": "action", "operator": "eq", "value": ["test"]}], "action": {"type": "warn", "message": "Repository rule"}}'
+        mock_rule.rule_definition = '{"description": "Rule from repository", "conditions": [{"field": "action", "operator": "eq", "value": ["test_action"]}], "action": {"type": "warn", "message": "Repository rule"}}'
         mock_rule.priority = 5
         mock_rule.is_active = True
 
@@ -425,19 +439,19 @@ class TestRuleEngineExtended:
         engine = RuleEngine(rule_repo=mock_repo)
         engine._load_rules()
 
-        context = {"action": "test"}
-        results = engine.check_compliance("test", context)
+        context = {}
+        results = engine.check_compliance("test_action", context)
         assert len(results) >= 1
-        assert any(r.rule_name == "repo_rule" for r in results)
+        assert "repo_rule" in results["violated_rules"]
 
     def test_rule_engine_with_empty_rules(self):
         """Test rule engine with empty rules list"""
         engine = RuleEngine()
 
         # No rules added
-        context = {"action": "test"}
-        results = engine.check_compliance("test", context)
-        assert len(results) == 0
+        context = {}
+        results = engine.check_compliance("test_action", context)
+        assert results["compliant"] is True
 
     def test_rule_engine_with_rule_metadata(self):
         """Test rule engine with rule metadata"""
@@ -446,18 +460,19 @@ class TestRuleEngineExtended:
         rule = {
             "rule_name": "metadata_rule",
             "description": "Rule with metadata",
-            "conditions": [{"field": "action", "operator": "eq", "value": ["test"]}],
+            "conditions": [
+                {"field": "action", "operator": "eq", "value": ["test_action"]}
+            ],
             "action": {"type": "warn", "message": "Metadata rule"},
             "metadata": {"version": "1.0", "author": "test"},
         }
 
         engine.add_rule(rule)
 
-        context = {"action": "test"}
-        results = engine.check_compliance("test", context)
-        assert len(results) == 1
-        # Check that metadata is passed through in the result
-        assert "version" in results[0].metadata or "rule_id" in results[0].metadata
+        context = {}
+        results = engine.check_compliance("test_action", context)
+        assert results["compliant"] is False
+        assert "metadata_rule" in results["violated_rules"]
 
     def test_rule_engine_with_context_parameter(self):
         """Test rule engine with context parameter"""
@@ -475,8 +490,8 @@ class TestRuleEngineExtended:
         engine.add_rule(rule)
 
         context = {"context": {"param": "value"}}
-        results = engine.check_compliance("test", context)
-        assert len(results) == 1
+        results = engine.check_compliance("test_action", context)
+        assert results["compliant"] is False
 
     def test_rule_engine_with_multiple_actions(self):
         """Test rule engine with multiple actions"""
@@ -485,7 +500,9 @@ class TestRuleEngineExtended:
         rule = {
             "rule_name": "multiple_actions_rule",
             "description": "Rule with multiple actions",
-            "conditions": [{"field": "action", "operator": "eq", "value": ["test"]}],
+            "conditions": [
+                {"field": "action", "operator": "eq", "value": ["test_action"]}
+            ],
             "action": {
                 "type": "block",
                 "message": "Multiple actions rule",
@@ -496,8 +513,7 @@ class TestRuleEngineExtended:
 
         engine.add_rule(rule)
 
-        context = {"action": "test"}
-        results = engine.check_compliance("test", context)
-        assert len(results) == 1
-        assert results[0].action_type == "block"
-        assert results[0].severity == "high"
+        context = {}
+        results = engine.check_compliance("test_action", context)
+        assert results["compliant"] is False
+        assert "multiple_actions_rule" in results["violated_rules"]

@@ -6,7 +6,7 @@ Tracks model performance metrics including tokens, latency, and model info
 
 import time
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 
 class PerformanceMetrics:
@@ -19,7 +19,7 @@ class PerformanceMetrics:
         tokens_in: int = 0,
         tokens_out: int = 0,
         latency_ms: float = 0.0,
-        timestamp: Optional[datetime] = None,
+        timestamp: datetime | None = None,
     ):
         self.model = model
         self.engine = engine

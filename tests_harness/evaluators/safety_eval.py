@@ -15,7 +15,7 @@ import logging
 import re
 from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -102,7 +102,7 @@ class SafetyEval:
         ]
 
     def evaluate(
-        self, response: str, user_input: str = "", context: Optional[dict] = None
+        self, response: str, user_input: str = "", context: dict | None = None
     ) -> SafetyScore:
         """
         Đánh giá an toàn của response

@@ -764,9 +764,9 @@ def mock_input_sketcher():
             analysis = {
                 "data_type": type(input_data).__name__,
                 "is_iterable": hasattr(input_data, "__iter__")
-                and not isinstance(input_data, (str, bytes)),
+                and not isinstance(input_data, str | bytes),
                 "is_dict_like": hasattr(input_data, "keys"),
-                "is_numeric": isinstance(input_data, (int, float)),
+                "is_numeric": isinstance(input_data, int | float),
                 "is_string": isinstance(input_data, str),
                 "complexity": "simple",
             }
@@ -775,7 +775,7 @@ def mock_input_sketcher():
             if isinstance(input_data, dict):
                 analysis["complexity"] = "medium" if len(input_data) < 10 else "high"
                 analysis["keys_count"] = len(input_data)
-            elif isinstance(input_data, (list, tuple)):
+            elif isinstance(input_data, list | tuple):
                 analysis["complexity"] = "medium" if len(input_data) < 50 else "high"
                 analysis["items_count"] = len(input_data)
             elif isinstance(input_data, str):
@@ -802,9 +802,9 @@ def mock_input_sketcher():
                 ):
                     patterns.append({"type": "mixed_alphanumeric", "confidence": 0.7})
 
-            elif isinstance(input_data, (list, tuple)):
+            elif isinstance(input_data, list | tuple):
                 # Pattern detection for sequences
-                if all(isinstance(item, (int, float)) for item in input_data):
+                if all(isinstance(item, int | float) for item in input_data):
                     patterns.append({"type": "numeric_sequence", "confidence": 0.9})
                 if all(isinstance(item, str) for item in input_data):
                     patterns.append({"type": "string_sequence", "confidence": 0.9})
@@ -815,7 +815,7 @@ def mock_input_sketcher():
                 # Pattern detection for dictionaries
                 if all(isinstance(v, str) for v in input_data.values()):
                     patterns.append({"type": "string_dict", "confidence": 0.8})
-                if all(isinstance(v, (int, float)) for v in input_data.values()):
+                if all(isinstance(v, int | float) for v in input_data.values()):
                     patterns.append({"type": "numeric_dict", "confidence": 0.8})
 
             # Store patterns for this input type

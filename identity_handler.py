@@ -4,7 +4,7 @@ import logging
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -73,7 +73,7 @@ class IdentityHandler:
             self.logger.error(f"❌ Failed to create identity: {e}")
             return ""
 
-    def get_identity(self, identity_id: str) -> Optional[Identity]:
+    def get_identity(self, identity_id: str) -> Identity | None:
         """Get identity by ID"""
         for identity in self.identities:
             if identity.id == identity_id:

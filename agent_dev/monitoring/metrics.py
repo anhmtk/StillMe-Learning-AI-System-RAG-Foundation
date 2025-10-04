@@ -49,7 +49,8 @@ class MetricsCollector:
             # Persist to database if available
             if self.metric_repo:
                 try:
-                    context_dict = event if isinstance(event, dict) else {}  # type: ignore[unnecessary-isinstance]
+                    # Proper type checking for context dict
+                    context_dict: dict[str, Any] = dict(event)
                     self.metric_repo.record_metric(name, value, "counter", context_dict)
                 except Exception as e:
                     print(f"Warning: Failed to persist metric {name}: {e}")

@@ -8,7 +8,7 @@ import asyncio
 import logging
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 from common.http import SecureHttpClient
 from content_integrity_filter import ContentIntegrityFilter
@@ -24,9 +24,9 @@ class WebResult:
     """Standardized web result with attribution"""
 
     success: bool
-    data: Optional[dict[str, Any]] = None
-    error: Optional[str] = None
-    attribution: Optional[dict[str, Any]] = None
+    data: dict[str, Any] | None = None
+    error: str | None = None
+    attribution: dict[str, Any] | None = None
     cache_hit: bool = False
     latency_ms: float = 0.0
 

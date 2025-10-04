@@ -9,7 +9,7 @@ Rule engine system for compliance checking and validation.
 import json
 import re
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, cast
 
 from agent_dev.persistence.repo import (
     RuleRepo,  # Giả sử RuleRepo cung cấp kiểu dữ liệu cho rule objects
@@ -107,13 +107,19 @@ class RuleEngine:
         elif not isinstance(spec["conditions"], list):
             errors.append("conditions must be a list")
         else:
-            # Validate each condition
-            conditions: list[dict[str, Any]] = spec["conditions"]  # type: ignore[assignment]
-            for i, condition in enumerate(conditions):
-                if not isinstance(condition, dict):  # type: ignore[unnecessary-isinstance]
+            # Validate each condition - proper type checking
+            conditions_raw = cast(Any, spec["conditions"])
+            # Safe cast after validation
+            conditions_list: list[Any] = cast(list[Any], conditions_raw)
+            conditions: list[dict[str, Any]] = []
+            for i, condition_raw in enumerate(conditions_list):
+                if not isinstance(condition_raw, dict):
                     errors.append(f"Condition {i} must be a dictionary")
                     continue
+                # Safe cast after validation
+                conditions.append(cast(dict[str, Any], condition_raw))
 
+            for i, condition in enumerate(conditions):
                 # Check required condition fields
                 if "field" not in condition:
                     errors.append(f"Condition {i} missing field")
@@ -147,7 +153,12 @@ class RuleEngine:
         """Check compliance against all rules"""
         violated_rules: list[str] = []
 
-        for rule in self.rules:
+        # Sort rules by priority (higher priority first)
+        sorted_rules = sorted(
+            self.rules, key=lambda r: r.get("priority", 0), reverse=True
+        )
+
+        for rule in sorted_rules:
             if not rule.get("is_active", True):
                 continue
 
@@ -168,12 +179,16 @@ class RuleEngine:
         if not conditions:
             return None
 
+        # Add action to context for rule evaluation
+        eval_context = context.copy()
+        eval_context["action"] = action
+
         # Check if all conditions are met
         all_conditions_met = True
         # THAY ĐỔI: Khai báo rõ ràng kiểu dữ liệu cho 'condition' trong vòng lặp
         for condition in conditions:
             # Bỏ qua nếu condition không phải dict
-            if not self._evaluate_condition(condition, context):
+            if not self._evaluate_condition(condition, eval_context):
                 all_conditions_met = False
                 break
 
@@ -237,17 +252,17 @@ class RuleEngine:
     def _get_nested_value(self, context: dict[str, Any], field: str) -> Any:
         """Get nested value from context using dot notation"""
         keys: list[str] = field.split(".")
-        # THAY ĐỔI: Khai báo rõ ràng kiểu dữ liệu và không dùng lại Any ở lần gán sau
-        current_value: Any = context  # type: ignore[assignment]
+        # Proper type handling without type: ignore
+        current_value: Any = context
 
         for key in keys:
-            # THAY ĐỔI: Kiểm tra an toàn trước khi truy cập key
+            # Safe type checking before accessing nested values
             if isinstance(current_value, dict) and key in current_value:
-                current_value = current_value[key]  # type: ignore[assignment]
+                current_value = cast(Any, current_value[key])
             else:
                 return None
 
-        return current_value  # type: ignore[return-value]
+        return current_value
 
     def _compare_values(
         self, actual: Any, operator: str, expected: list[str | int | float]

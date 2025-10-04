@@ -254,7 +254,7 @@ class AugmentRunner:
                 *[task[1] for task in tasks], return_exceptions=True
             )
 
-            for (method_name, _), result in zip(tasks, task_results):
+            for (method_name, _), result in zip(tasks, task_results, strict=False):
                 if isinstance(result, Exception):
                     results[method_name] = {"error": str(result)}
                 else:

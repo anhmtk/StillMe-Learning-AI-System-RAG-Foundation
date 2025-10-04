@@ -10,7 +10,7 @@ import re
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -33,8 +33,8 @@ class ToolDecision:
 
     allowed: bool
     reason: str
-    sanitized_params: Optional[dict[str, Any]] = None
-    estimated_cost: Optional[dict[str, Any]] = None
+    sanitized_params: dict[str, Any] | None = None
+    estimated_cost: dict[str, Any] | None = None
     risk_level: str = "low"
 
 
@@ -323,7 +323,7 @@ class ToolGatePolicy:
                 sanitized_value = re.sub(r'[<>"\']', "", value)
                 sanitized_value = sanitized_value.strip()
                 sanitized[key] = sanitized_value
-            elif isinstance(value, (int, float, bool)):
+            elif isinstance(value, int | float | bool):
                 sanitized[key] = value
             elif isinstance(value, list):
                 sanitized_list = []
@@ -344,8 +344,8 @@ class ToolGatePolicy:
         self,
         allowed: bool,
         reason: str,
-        sanitized_params: Optional[dict[str, Any]] = None,
-        estimated_cost: Optional[dict[str, Any]] = None,
+        sanitized_params: dict[str, Any] | None = None,
+        estimated_cost: dict[str, Any] | None = None,
         risk_level: str = "low",
     ) -> ToolDecision:
         """Create tool decision"""

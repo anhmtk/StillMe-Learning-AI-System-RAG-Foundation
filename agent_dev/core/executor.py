@@ -4,7 +4,7 @@ AgentDev Executor - Thực thi tasks
 """
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 
 @dataclass
@@ -19,25 +19,39 @@ class ExecutionResult:
 class Executor:
     """Executor for running tasks"""
 
-    def run(self, plan: Any) -> ExecutionResult:
+    def run(self, plan: dict[str, Any] | Any) -> ExecutionResult:
         """Execute a plan"""
-        # Handle both object and dict plans
+        # Handle both object and dict plans with proper type checking
+        tasks_raw: Any
         if isinstance(plan, dict):
-            tasks = plan.get("tasks", [])  # type: ignore
+            # Safe dict access with proper typing
+            plan_dict = cast(dict[str, Any], plan)
+            tasks_raw = plan_dict.get("tasks", [])
         else:
-            tasks = getattr(plan, "tasks", [])  # type: ignore
+            tasks_raw = getattr(plan, "tasks", [])
 
+        # Validate tasks is a list with proper type checking
+        if not isinstance(tasks_raw, list):
+            return ExecutionResult(
+                status="failed", output="Tasks must be a list", metrics={}
+            )
+
+        # Safe cast after validation
+        tasks = cast(list[Any], tasks_raw)
         if not tasks:
             return ExecutionResult(
                 status="failed", output="No tasks to execute", metrics={}
             )
 
-        # Simulate execution
-        task = tasks[0]  # type: ignore
+        # Simulate execution - safe access to first task
+        task: Any = tasks[0]
+        command: str = ""
         if isinstance(task, dict):
-            command = task.get("command", "")  # type: ignore
+            # Safe dict access with proper typing
+            task_dict = cast(dict[str, Any], task)
+            command = str(task_dict.get("command", ""))
         else:
-            command = getattr(task, "command", "")  # type: ignore
+            command = str(getattr(task, "command", ""))
 
         if command:
             return ExecutionResult(

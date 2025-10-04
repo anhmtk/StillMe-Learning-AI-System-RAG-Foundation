@@ -12,7 +12,7 @@ import time
 from dataclasses import asdict
 from datetime import datetime
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Any, Optional
+from typing import Any
 
 import requests
 
@@ -95,7 +95,7 @@ class SmartRouter:
         self,
         message: str,
         session_id: str = "default",
-        system_prompt: Optional[str] = None,
+        system_prompt: str | None = None,
         web_search_enabled: bool = True,
     ) -> dict[str, Any]:
         """Route message to appropriate AI model with StillMe persona enforcement"""
@@ -681,7 +681,7 @@ class SmartRouter:
             return "Lỗi khi định dạng dữ liệu web."
 
     def _call_ollama(
-        self, model: str, message: str, system_prompt: Optional[str] = None
+        self, model: str, message: str, system_prompt: str | None = None
     ) -> dict[str, Any]:
         """Call Ollama API with system prompt"""
         try:
@@ -740,7 +740,7 @@ class SmartRouter:
             }
 
     def _call_deepseek_cloud(
-        self, message: str, system_prompt: Optional[str] = None
+        self, message: str, system_prompt: str | None = None
     ) -> dict[str, Any]:
         """Call DeepSeek Cloud API"""
         try:
@@ -786,7 +786,7 @@ class SmartRouter:
             )  # Fallback
 
     def _call_openrouter(
-        self, model: str, message: str, system_prompt: Optional[str] = None
+        self, model: str, message: str, system_prompt: str | None = None
     ) -> dict[str, Any]:
         """Call OpenRouter API (GPT-5, Claude, etc.)"""
         try:

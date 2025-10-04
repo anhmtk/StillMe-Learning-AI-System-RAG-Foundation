@@ -99,7 +99,6 @@ def check_comment_out():
                             line,
                         )
                         if temp_disable_match:
-                            reason = temp_disable_match.group(1)
                             expires = temp_disable_match.group(2)
 
                             try:

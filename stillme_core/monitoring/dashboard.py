@@ -28,6 +28,10 @@ from dataclasses import asdict
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
+# Import monitoring components
+from .performance_analyzer import PerformanceAnalyzer, get_performance_analyzer
+from .resource_monitor import ResourceMonitor, get_resource_monitor
+
 # Initialize FASTAPI_AVAILABLE
 FASTAPI_AVAILABLE = False
 
@@ -81,9 +85,6 @@ else:
         logging.warning(
             "FastAPI not available. Install with: pip install fastapi uvicorn"
         )
-
-from .performance_analyzer import PerformanceAnalyzer, get_performance_analyzer
-from .resource_monitor import ResourceMonitor, get_resource_monitor
 
 logger = logging.getLogger(__name__)
 

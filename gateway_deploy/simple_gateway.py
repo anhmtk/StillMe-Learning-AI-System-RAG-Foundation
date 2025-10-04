@@ -6,7 +6,6 @@ Gateway đơn giản để test kết nối
 
 import json
 from datetime import datetime
-from typing import Optional
 
 import httpx
 import uvicorn
@@ -40,8 +39,8 @@ AI_SERVER_URL = "http://192.168.1.8:14725"
 # Pydantic models
 class MessageRequest(BaseModel):
     message: str
-    language: Optional[str] = "vi"
-    timestamp: Optional[str] = None
+    language: str | None = "vi"
+    timestamp: str | None = None
 
 
 class MessageResponse(BaseModel):

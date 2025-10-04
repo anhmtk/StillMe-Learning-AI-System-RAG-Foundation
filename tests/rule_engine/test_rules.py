@@ -8,11 +8,7 @@ Test cases for the Rule Engine system.
 
 from unittest.mock import Mock
 
-from agent_dev.rules.engine import (
-    RuleEngine,
-    check_compliance,
-    validate_rule,
-)
+from agent_dev.rules.engine import RuleEngine, check_compliance, validate_rule
 
 
 class TestRuleEngine:
@@ -252,7 +248,7 @@ class TestRuleEvaluation:
             "description": "Complex rule with multiple conditions",
             "conditions": [
                 {"field": "user.role", "operator": "eq", "value": ["admin"]},
-                {"field": "action", "operator": "eq", "value": ["delete"]},
+                {"field": "action", "operator": "eq", "value": ["delete_resource"]},
                 {"field": "resource", "operator": "contains", "value": ["important"]},
             ],
             "action": {
@@ -267,7 +263,6 @@ class TestRuleEvaluation:
         # Non-compliant: all conditions met
         context = {
             "user": {"role": "admin"},
-            "action": "delete",
             "resource": "important_database",
         }
         results = engine.check_compliance("delete_resource", context)
@@ -279,7 +274,6 @@ class TestRuleEvaluation:
         # Compliant: one condition not met
         context = {
             "user": {"role": "user"},
-            "action": "delete",
             "resource": "important_database",
         }
         results = engine.check_compliance("delete_resource", context)

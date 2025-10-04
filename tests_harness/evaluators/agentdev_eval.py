@@ -15,7 +15,7 @@ import logging
 import re
 from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -120,8 +120,8 @@ class AgentDevEval:
         self,
         response: str,
         user_input: str = "",
-        context: Optional[dict] = None,
-        performance_metrics: Optional[dict] = None,
+        context: dict | None = None,
+        performance_metrics: dict | None = None,
     ) -> AgentDevScore:
         """
         Đánh giá AgentDev integration và performance
@@ -238,7 +238,7 @@ class AgentDevEval:
             self.logger.error(f"Error evaluating integration: {e}")
             return 0.0
 
-    def _evaluate_performance(self, performance_metrics: Optional[dict]) -> float:
+    def _evaluate_performance(self, performance_metrics: dict | None) -> float:
         """Đánh giá performance"""
         try:
             if not performance_metrics:
@@ -392,7 +392,7 @@ class AgentDevEval:
             return 0.0
 
     def _evaluate_learning_capability(
-        self, response: str, context: Optional[dict]
+        self, response: str, context: dict | None
     ) -> float:
         """Đánh giá khả năng học hỏi"""
         try:

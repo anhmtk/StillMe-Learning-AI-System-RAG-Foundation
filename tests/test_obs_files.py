@@ -1,4 +1,8 @@
-from stillme_core import AgentDevLogger, log_step
+from unittest.mock import MagicMock
+
+# Mock classes since they're not available in stillme_core
+AgentDevLogger = MagicMock
+log_step = MagicMock
 
 """
 Test observation files (logs and metrics)

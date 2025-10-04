@@ -15,7 +15,7 @@ import logging
 import re
 from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -95,7 +95,7 @@ class EfficiencyEval:
         token_count: int,
         cost_estimate: float,
         user_input: str = "",
-        context: Optional[dict] = None,
+        context: dict | None = None,
     ) -> EfficiencyScore:
         """
         Đánh giá hiệu suất của response
@@ -275,7 +275,7 @@ class EfficiencyEval:
             self.logger.error(f"Error evaluating response quality: {e}")
             return 0.0
 
-    def _evaluate_throughput(self, context: Optional[dict]) -> float:
+    def _evaluate_throughput(self, context: dict | None) -> float:
         """Đánh giá throughput"""
         try:
             if not context or "throughput_rps" not in context:

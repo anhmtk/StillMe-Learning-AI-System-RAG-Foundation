@@ -13,9 +13,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 # Quan trọng: import models để đăng ký vào metadata
-from agent_dev.persistence.models import (
-    Base,
-)  # noqa: F401
+from agent_dev.persistence.models import Base  # noqa: F401
 
 
 @pytest.fixture(scope="session")

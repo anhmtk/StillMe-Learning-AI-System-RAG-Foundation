@@ -11,7 +11,7 @@ import os
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -44,7 +44,7 @@ class ParaphraseResult:
     variants: list[str]
     model_used: str
     success: bool
-    error: Optional[str] = None
+    error: str | None = None
     metadata: dict[str, Any] = None
 
 

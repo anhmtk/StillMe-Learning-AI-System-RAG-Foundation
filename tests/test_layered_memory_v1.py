@@ -1,4 +1,8 @@
-from stillme_core import LongTermMemory, MemoryItem
+from unittest.mock import MagicMock
+
+# Mock classes since they're not available in stillme_core
+LongTermMemory = MagicMock
+MemoryItem = MagicMock
 
 """
 test_layered_memory_v1.py

@@ -1,7 +1,7 @@
 # modules/intelligent_router.py
 # Stub for intelligent router with ModelRouter
 import logging
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +21,7 @@ class ModelRouter:
         self.route_history: list[dict[str, Any]] = []
 
     def get_ai_response(
-        self, prompt: str, context: Optional[dict[str, Any]] = None
+        self, prompt: str, context: dict[str, Any] | None = None
     ) -> str:
         """Get AI response for the given prompt"""
         self.request_count += 1
@@ -77,7 +77,7 @@ class ModelRouter:
         else:
             return "llama3"  # Default local model
 
-    def explain_last_route(self) -> Optional[str]:
+    def explain_last_route(self) -> str | None:
         """Explain the last routing decision"""
         if not self.route_history:
             return "No routing history available"
@@ -126,7 +126,7 @@ def explain_last_route():
     return router.explain_last_route()
 
 
-def route_request(prompt: str, context: Optional[dict[str, Any]] = None) -> str:
+def route_request(prompt: str, context: dict[str, Any] | None = None) -> str:
     """Global function to route request (for backward compatibility)"""
     router = ModelRouter()
     return router.get_ai_response(prompt, context)

@@ -14,7 +14,7 @@ import logging
 import re
 from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -93,7 +93,7 @@ class PersonaEval:
         self,
         response: str,
         user_input: str = "",
-        user_preferences: Optional[dict] = None,
+        user_preferences: dict | None = None,
     ) -> PersonaScore:
         """
         Đánh giá persona của response
@@ -151,7 +151,7 @@ class PersonaEval:
             return PersonaScore(0, 0, 0, 0, 0)
 
     def _evaluate_addressing_style(
-        self, response: str, user_preferences: Optional[dict] = None
+        self, response: str, user_preferences: dict | None = None
     ) -> float:
         """Đánh giá cách xưng hô"""
         try:
@@ -300,7 +300,7 @@ class PersonaEval:
             return 0.0
 
     def _evaluate_dynamic_adaptation(
-        self, response: str, user_preferences: Optional[dict] = None
+        self, response: str, user_preferences: dict | None = None
     ) -> float:
         """Đánh giá khả năng thích ứng động"""
         try:

@@ -9,7 +9,7 @@ and generating clarification questions to improve user interaction quality.
 
 import re
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass
@@ -18,8 +18,8 @@ class ClarificationResult:
 
     needs_clarification: bool
     confidence: float
-    question: Optional[str]
-    category: Optional[str]
+    question: str | None
+    category: str | None
     reasoning: str
 
 
@@ -275,7 +275,7 @@ class ClarificationHandler:
 
     def generate_clarification(
         self, prompt: str, context: dict[str, Any] = None
-    ) -> Optional[str]:
+    ) -> str | None:
         """
         Generate clarification question for ambiguous prompt
 

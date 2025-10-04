@@ -17,10 +17,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent))
 
 try:
-    from agent_dev.core.adaptive_strategy import AdaptiveStrategy
-    from agent_dev.core.agent_mode import AgentMode
     from agent_dev.core.agentdev import AgentDev, ErrorInfo
-    from agent_dev.core.experience_learner import ExperienceLearner
 
     AGENTDEV_AVAILABLE = True
 except ImportError as e:
@@ -280,7 +277,7 @@ class TestAgentDevPerformance:
             "_run_ruff_scan",
             return_value={"success": True, "errors": 0, "files": 0, "details": []},
         ):
-            errors = agent.scan_errors()
+            agent.scan_errors()
 
         end_time = time.time()
         scan_time = end_time - start_time

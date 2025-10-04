@@ -16,7 +16,6 @@ import time
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 # Import Ollama client
 try:
@@ -36,11 +35,11 @@ class ModelStatus:
 
     name: str
     is_warm: bool = False
-    last_heartbeat: Optional[datetime] = None
-    warmup_time: Optional[datetime] = None
+    last_heartbeat: datetime | None = None
+    warmup_time: datetime | None = None
     error_count: int = 0
-    last_error: Optional[str] = None
-    response_time_ms: Optional[float] = None
+    last_error: str | None = None
+    response_time_ms: float | None = None
 
 
 class ModelWarmupManager:
@@ -74,7 +73,7 @@ class ModelWarmupManager:
         self.warmup_timeout = self.config.get("warmup_timeout_seconds", 30)
 
         # Threading
-        self.keep_alive_thread: Optional[threading.Thread] = None
+        self.keep_alive_thread: threading.Thread | None = None
         self.shutdown_event = threading.Event()
         self._lock = threading.Lock()
 
@@ -331,7 +330,7 @@ class ModelWarmupManager:
                 name for name, status in self.model_status.items() if status.is_warm
             ]
 
-    def get_model_status(self, model: str) -> Optional[ModelStatus]:
+    def get_model_status(self, model: str) -> ModelStatus | None:
         """Get detailed status of a specific model"""
         with self._lock:
             return self.model_status.get(model)
@@ -412,7 +411,7 @@ class ModelWarmupManager:
 
 
 # Global instance for easy access
-_warmup_manager: Optional[ModelWarmupManager] = None
+_warmup_manager: ModelWarmupManager | None = None
 
 
 def get_warmup_manager() -> ModelWarmupManager:

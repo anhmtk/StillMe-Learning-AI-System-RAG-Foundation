@@ -4,7 +4,7 @@ import logging
 import time
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -18,8 +18,8 @@ class WebRequest:
     status_code: int
     response_time: float
     timestamp: str
-    user_agent: Optional[str] = None
-    ip_address: Optional[str] = None
+    user_agent: str | None = None
+    ip_address: str | None = None
 
 
 @dataclass
@@ -42,7 +42,7 @@ class WebMetricsCollector:
     def __init__(self):
         self.logger = logger
         self.requests: list[WebRequest] = []
-        self.metrics_cache: Optional[WebMetrics] = None
+        self.metrics_cache: WebMetrics | None = None
         self.cache_timestamp = 0
         self.cache_duration = 60  # Cache for 1 minute
 

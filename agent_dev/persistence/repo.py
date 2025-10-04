@@ -29,9 +29,11 @@ def get_session_factory(engine: Any):
     return sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-# KHAI BÁO TYPE ALIAS: Giúp Pyright hiểu rằng 'Query' trong các repo method là một đối tượng SQLAlchemy.
-# Tuy nhiên, cách tốt nhất trong các trường hợp này là dùng # type: ignore cho các dòng query phức tạp
-# NẾU không thể import hoặc khai báo rõ ràng.
+# TYPE ANNOTATION GUIDANCE: Để tránh lỗi type checking, hãy:
+# 1. Import đầy đủ các type từ SQLAlchemy: from sqlalchemy.orm import Query
+# 2. Sử dụng type hints rõ ràng: def method() -> list[Model]:
+# 3. Validate runtime trước khi cast: if isinstance(obj, ExpectedType): cast(ExpectedType, obj)
+# 4. Tránh # type: ignore - thay bằng proper type annotations và runtime validation
 
 
 class FeedbackRepo:

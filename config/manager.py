@@ -11,7 +11,7 @@ Version: 2.0.0
 """
 
 import os
-from typing import Any, Optional
+from typing import Any
 
 from .agent_dev.config import AgentDevConfig
 from .core.config import CoreConfig
@@ -81,7 +81,7 @@ class ConfigManager:
         except Exception:
             return False
 
-    def get_env_override(self, key: str) -> Optional[str]:
+    def get_env_override(self, key: str) -> str | None:
         """Get environment variable override"""
         return os.getenv(key)
 

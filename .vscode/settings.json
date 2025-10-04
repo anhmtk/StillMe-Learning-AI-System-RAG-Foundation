@@ -35,5 +35,6 @@
     "cursorpyright.analysis.stubPath": "C:\\Users\\LENOVO\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages",
     "cursorpyright.analysis.typeCheckingMode": "basic",
     "java.compile.nullAnalysis.mode": "automatic",
-    "java.configuration.updateBuildConfiguration": "interactive"
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "makefile.configureOnOpen": false
 }

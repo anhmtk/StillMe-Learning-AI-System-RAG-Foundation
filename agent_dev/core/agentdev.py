@@ -12,6 +12,7 @@ from agent_dev.monitoring.metrics import MetricsCollector
 from agent_dev.persistence.models import create_memory_database, get_session_factory
 from agent_dev.persistence.repo import FeedbackRepo, MetricRepo, RuleRepo
 from agent_dev.rules.engine import RuleEngine
+from agent_dev.security.defense import SecurityDefense
 
 
 class AgentDev:
@@ -19,8 +20,9 @@ class AgentDev:
 
     def __init__(self, db_path: str = "./data/agentdev.db"):
         """Initialize AgentDev with persistent capabilities"""
-        # Ensure data directory exists
-        os.makedirs(os.path.dirname(db_path), exist_ok=True)
+        # Ensure data directory exists (skip for in-memory databases)
+        if db_path != ":memory:" and not db_path.startswith("sqlite:///:memory:"):
+            os.makedirs(os.path.dirname(db_path), exist_ok=True)
 
         # Initialize database
         self.engine = create_memory_database(db_path)
@@ -46,6 +48,9 @@ class AgentDev:
         # Initialize core components
         self.planner = Planner()
         self.executor = Executor()
+
+        # Initialize security defense
+        self.security_defense = SecurityDefense()
 
     def _load_initial_rules(self) -> None:
         """Load initial rules from database or create defaults"""
@@ -73,12 +78,27 @@ class AgentDev:
 
     def execute(self, task: str, mode: Any = None) -> str:
         """Execute a task with rule compliance and monitoring"""
+        # Check for empty task first
+        if not task or not task.strip():
+            return "failed"
+
         # Record task start
         try:
             self.monitor.record_event("tasks_started", 1.0)
         except Exception as e:
             # Monitor error - continue execution
             print(f"Warning: Failed to record task start: {e}")
+
+        # Check security defense first
+        try:
+            security_result = self.security_defense.analyze_prompt(task)
+            if not security_result["safe"]:
+                self.monitor.record_event("tasks_blocked", 1.0, {"reason": "security"})
+                return f"BLOCKED: {security_result['reason']}"
+        except Exception as e:
+            # Security defense error - block execution
+            self.monitor.record_event("tasks_blocked", 1.0, {"error": str(e)})
+            return f"BLOCKED: Security defense error - {str(e)}"
 
         # Check rule compliance
         context = {"task": task, "mode": mode, "tested": False, "cmd": task}

@@ -9,10 +9,7 @@ Test CRUD operations for all persistence models.
 import pytest
 from sqlalchemy.orm import Session
 
-from agent_dev.persistence.models import (
-    create_memory_database,
-    get_session_factory,
-)
+from agent_dev.persistence.models import create_memory_database, get_session_factory
 from agent_dev.persistence.repo import (
     FeedbackRepo,
     LearnedSolutionRepo,

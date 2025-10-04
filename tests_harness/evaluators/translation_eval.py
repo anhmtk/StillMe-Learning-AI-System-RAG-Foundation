@@ -15,7 +15,7 @@ import logging
 import re
 from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
@@ -128,8 +128,8 @@ class TranslationEval:
         self,
         response: str,
         user_input: str = "",
-        expected_language: Optional[str] = None,
-        source_language: Optional[str] = None,
+        expected_language: str | None = None,
+        source_language: str | None = None,
     ) -> TranslationScore:
         """
         Đánh giá khả năng dịch thuật của response
@@ -195,7 +195,7 @@ class TranslationEval:
             return TranslationScore(0, 0, 0, 0, 0, 0)
 
     def _evaluate_language_detection(
-        self, response: str, expected_language: Optional[str] = None
+        self, response: str, expected_language: str | None = None
     ) -> float:
         """Đánh giá phát hiện ngôn ngữ"""
         try:
@@ -244,7 +244,7 @@ class TranslationEval:
             return 0.0
 
     def _evaluate_translation_accuracy(
-        self, response: str, user_input: str, source_language: Optional[str] = None
+        self, response: str, user_input: str, source_language: str | None = None
     ) -> float:
         """Đánh giá độ chính xác dịch"""
         try:
@@ -423,7 +423,7 @@ class TranslationEval:
             self.logger.error(f"Error evaluating URL preservation: {e}")
             return 0.0
 
-    def _detect_language(self, text: str) -> Optional[str]:
+    def _detect_language(self, text: str) -> str | None:
         """Phát hiện ngôn ngữ của text"""
         try:
             language_scores = {}
@@ -543,7 +543,7 @@ class TranslationEval:
             self.logger.error(f"Error checking translation quality: {e}")
             return 0.0
 
-    def _extract_intent(self, text: str) -> Optional[str]:
+    def _extract_intent(self, text: str) -> str | None:
         """Trích xuất ý định từ text"""
         try:
             text_lower = text.lower()

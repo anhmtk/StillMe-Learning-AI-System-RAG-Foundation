@@ -8,69 +8,51 @@ import re
 
 
 def fix_syntax_errors():
-    """Fix common syntax errors in test files"""
+    """Fix all syntax errors in test files"""
 
-    # Find all Python files in tests directory
+    # Find all test files
     test_files = []
-    for root, dirs, files in os.walk("tests"):
-        # Skip certain directories
-        dirs[:] = [
-            d
-            for d in dirs
-            if d
-            not in [
-                "__pycache__",
-                "fixtures",
-                "cassettes",
-                "config",
-                "devops",
-                "ethics",
-                "logs",
-                "reports",
-                "safety",
-                "security",
-            ]
-        ]
-
+    for root, _dirs, files in os.walk("tests"):
         for file in files:
             if file.endswith(".py"):
                 test_files.append(os.path.join(root, file))
 
-    fixed_count = 0
+    for test_file in test_files:
+        if os.path.exists(test_file):
+            print(f"Checking {test_file}")
+            fix_file(test_file)
 
-    for file_path in test_files:
-        try:
-            with open(file_path, encoding="utf-8", errors="replace") as f:
-                content = f.read()
 
-            original_content = content
+def fix_file(file_path):
+    """Fix a single test file"""
+    try:
+        with open(file_path, encoding="utf-8") as f:
+            content = f.read()
 
-            # Fix empty import statements
-            content = re.sub(
-                r"^from [^\s]+ import \(\s*\)$",
-                r"# \g<0>  # Empty import",
-                content,
-                flags=re.MULTILINE,
-            )
+        # Fix indentation errors
+        content = re.sub(
+            r"(\s+)([A-Za-z_][A-Za-z0-9_]*),\s*\n\s*=\s*MagicMock",
+            r"\1\2 = MagicMock",
+            content,
+        )
 
-            # Fix incomplete try blocks
-            content = re.sub(
-                r"^try:\s*$\n\s*$\n\s*except",
-                r"try:\n    pass\nexcept",
-                content,
-                flags=re.MULTILINE,
-            )
+        # Fix multiple assignments on same line
+        content = re.sub(
+            r"(\s+)([A-Za-z_][A-Za-z0-9_]*),\s*\n\s*([A-Za-z_][A-Za-z0-9_]*),\s*\n\s*=\s*MagicMock",
+            r"\1\2 = MagicMock\n\1\3 = MagicMock",
+            content,
+        )
 
-            if content != original_content:
-                with open(file_path, "w", encoding="utf-8") as f:
-                    f.write(content)
-                print(f"Fixed: {file_path}")
-                fixed_count += 1
+        # Fix escaped quotes
+        content = re.sub(r"\\'", "'", content)
 
-        except Exception as e:
-            print(f"Error fixing {file_path}: {e}")
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(content)
 
-    print(f"Fixed {fixed_count} files")
+        print(f"✅ Fixed {file_path}")
+
+    except Exception as e:
+        print(f"❌ Error fixing {file_path}: {e}")
 
 
 if __name__ == "__main__":

@@ -8,7 +8,7 @@ import asyncio
 import json
 import time
 import uuid
-from collections.abc import Callable
+from collections.abc import Awaitable, Callable
 from dataclasses import asdict, dataclass
 from enum import Enum
 from pathlib import Path
@@ -80,7 +80,7 @@ class EventHandler:
 
     handler_id: str
     event_types: list[EventType]
-    handler_func: Callable[[Event], None]
+    handler_func: Callable[[Event], Any]
     priority: int = 0
     async_handler: bool = False
 
@@ -123,7 +123,7 @@ class EventBus:
     def subscribe(
         self,
         event_types: list[EventType],
-        handler_func: Callable[[Event], None],
+        handler_func: Callable[[Event], Any],
         handler_id: str | None = None,
         priority: int = 0,
         async_handler: bool = False,
@@ -148,9 +148,26 @@ class EventBus:
             # Sort by priority (higher priority first)
             self.handlers[event_type].sort(key=lambda h: h.priority, reverse=True)
 
-        print(
-            f"✅ Event handler registered: {handler_id} for {[et.value for et in event_types]}"
+        return handler_id
+
+    def add_handler(
+        self,
+        event_type: EventType,
+        handler_func: Callable[[Event], Any],
+        handler_id: str | None = None,
+        priority: int = 0,
+        async_handler: bool = False,
+    ) -> str:
+        """Add a single handler for an event type (alias for subscribe)"""
+        handler_id = self.subscribe(
+            event_types=[event_type],
+            handler_func=handler_func,
+            handler_id=handler_id,
+            priority=priority,
+            async_handler=async_handler,
         )
+
+        print(f"✅ Event handler registered: {handler_id} for {event_type.value}")
         return handler_id
 
     def unsubscribe(self, handler_id: str) -> bool:
@@ -217,8 +234,9 @@ class EventBus:
             try:
                 if handler.async_handler:
                     result = handler.handler_func(event)
-                    if result is not None:
-                        await result  # type: ignore
+                    # Proper type checking for awaitable result
+                    if result is not None and isinstance(result, Awaitable):
+                        await result
                 else:
                     handler.handler_func(event)
             except Exception as e:
@@ -413,8 +431,8 @@ if __name__ == "__main__":
             print(f"🚨 Security violation: {event.data.get('violation_type')}")
 
         # Register handlers
-        bus.add_handler(EventType.TASK_CREATED, handle_task_created)  # type: ignore
-        bus.add_handler(  # type: ignore
+        bus.add_handler(EventType.TASK_CREATED, handle_task_created)
+        bus.add_handler(
             EventType.SECURITY_VIOLATION_DETECTED, handle_security_violation
         )
 

@@ -5,10 +5,13 @@ Tests collectors, scoring, feasibility fit, content wrap & filter
 
 import json
 from datetime import datetime
+from unittest.mock import MagicMock
 
 import pytest
 
-# from stillme_core import news_delta, reddit_engagement  # Not implemented yet
+# Mock classes since they're not available in stillme_core
+news_delta = MagicMock
+reddit_engagement = MagicMock
 # Import NicheRadar modules
 from niche_radar.collectors import github_trending, google_trends, hackernews_top
 from niche_radar.scoring import NicheScorer

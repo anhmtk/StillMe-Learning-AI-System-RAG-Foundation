@@ -145,8 +145,13 @@ class PatternBasedFixer:
     def fix_error(self, error_info: Any) -> bool:
         """Fix a single error and return success status"""
         try:
-            error_message = f"{error_info.rule} {error_info.msg}"  # type: ignore
-            fix = self.generate_fix(error_message, error_info.file)  # type: ignore
+            # Safe attribute access with proper type checking
+            rule_name = getattr(error_info, "rule", "unknown")
+            msg = getattr(error_info, "msg", "unknown error")
+            file_path = getattr(error_info, "file", "unknown")
+
+            error_message = f"{rule_name} {msg}"
+            fix = self.generate_fix(error_message, file_path)
             return fix is not None and fix.strip() != ""
         except Exception:
             return False

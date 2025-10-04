@@ -126,6 +126,13 @@ def create_memory_database(db_path: str = ":memory:"):
         engine = create_engine(db_path, echo=False)
     else:
         # Just a file path, add sqlite:/// prefix
+        # Ensure directory exists for file-based databases
+        import os
+
+        if not db_path.startswith(":memory:"):
+            db_dir = os.path.dirname(db_path)
+            if db_dir and not os.path.exists(db_dir):
+                os.makedirs(db_dir, exist_ok=True)
         engine = create_engine(f"sqlite:///{db_path}", echo=False)
     Base.metadata.create_all(engine)
     return engine

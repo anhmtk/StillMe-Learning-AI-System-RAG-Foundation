@@ -358,7 +358,11 @@ class StillMeFramework:
             )
 
             self.agentdev = AgentDev(
-                project_root=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                db_path=os.path.join(
+                    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                    "data",
+                    "agentdev.db",
+                )
             )
             self.logger.info(
                 "✅ AgentDev Unified - Trưởng phòng Kỹ thuật StillMe IPC initialized"

@@ -13,7 +13,7 @@ import re
 import sys
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 # Add stillme_core to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -67,7 +67,7 @@ class TemplateResult:
     variants: list[str]
     slot_combinations: list[dict[str, str]]
     success: bool
-    error: Optional[str] = None
+    error: str | None = None
     metadata: dict[str, Any] = None
 
 
@@ -432,7 +432,7 @@ Biến thể:"""
             unique_combinations = []
             seen = set()
 
-            for variant, combo in zip(variants, slot_combinations):
+            for variant, combo in zip(variants, slot_combinations, strict=False):
                 if variant not in seen:
                     seen.add(variant)
                     unique_variants.append(variant)
