@@ -1,133 +1,56 @@
-# ─────────────────────────────────────────────────────────────
-# StillMe / AgentDev .gitignore (Python-first, CI-friendly)
-# ─────────────────────────────────────────────────────────────
+# Large files and build artifacts
+*.tar.gz
+*.zip
+reports/k6_seal_test/results.json
+stillme_deployment.*
+stillme_lightweight_deployment.*
 
-########## Python bytecode / build ##########
+# Node modules
+node_modules/
+stillme_platform/desktop/node_modules/
+
+# Python cache
 __pycache__/
-*.py[cod]
-*$py.class
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
 
-build/
-dist/
-*.whl
-.eggs/
-*.egg-info/
-.installed.cfg
-MANIFEST
-
-########## Virtual envs ##########
+# Virtual environments
 .venv/
 venv/
 env/
-ENV/
-env.bak/
-venv.bak/
 
-########## Test / Coverage / Bench ##########
-.pytest_cache/
-.tox/
-.nox/
-.hypothesis/
-.coverage
-.coverage.*
-coverage/
-coverage.xml
-htmlcov/
-.benchmarks/
-
-########## Linters / Type checkers ##########
-.ruff_cache/
-.mypy_cache/
-.pytype/
-.pyre/
-
-########## Logs / Reports / Artifacts ##########
-logs/
-*.log
-reports/
-artifacts/
-test-results/
-playwright-report/
-playwright/.cache/
-
-########## Datasets / Models (local only) ##########
-datasets/
-data/
-*.csv
-*.tsv
-*.jsonl
-*.parquet
-models/
-*.pt
-*.bin
-*.onnx
-*.h5
-*.pkl
-*.joblib
-*.zip
-*.7z
-
-########## Security / Secrets ##########
-.env
-.env.*
-*.key
-*.pem
-*.pfx
-*.p12
-*.crt
-*.cer
-*.der
-config/local.yaml
-config/production.yaml
-config/staging.yaml
-
-########## Sandbox / Temp ##########
-tmp/
-temp/
-cache/
-.quarantine/
-quarantine/
-_graveyard/
-
-########## Jupyter / Notebooks ##########
-.ipynb_checkpoints/
-
-########## Docs builders ##########
-docs/_build/
-.site/
-.docusaurus/
-.vuepress/dist/
-
-########## Node / Frontend (nếu có) ##########
-node_modules/
-.npm/
-.pnpm-debug.log*
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.yarn/
-web_modules/
-.next/
-.nuxt/
-out/
-.dist/
-
-########## IDE / Editors ##########
+# IDE files
 .vscode/
 .idea/
-*.iml
-*.ipr
-*.iws
-.history/
-.vscode-test/
+*.swp
+*.swo
 
-########## OS junk ##########
+# OS files
 .DS_Store
 Thumbs.db
-ehthumbs.db
-.Spotlight-V100
-.Trashes
 
-# ─────────────────────────────────────────────────────────────
-# END
-# ─────────────────────────────────────────────────────────────
+# Logs
+*.log
+logs/
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Coverage reports
+htmlcov/
+.coverage
+coverage.xml
+
+# Test artifacts
+.pytest_cache/
+.tox/
+
+# Temporary files
+temp/
+tmp/
+*.tmp
