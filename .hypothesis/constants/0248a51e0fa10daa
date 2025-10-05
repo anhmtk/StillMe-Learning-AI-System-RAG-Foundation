@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\core\observability\metrics.py
+# hypothesis_version: 6.140.2
+
+[0.0, 1.0, -1000, 100, 1000, ' AND timestamp >= ?', ' ORDER BY timestamp', ',', '?', 'All time', 'counter', 'database_size', 'end', 'export_timestamp', 'gauge', 'histogram', 'id', 'labels', 'metric_type', 'metrics', 'metrics.db', 'metrics_by_type', 'ms', 'name', 'start', 'time_range', 'timer', 'timestamp', 'total_metrics', 'unique_metrics', 'unit', 'unknown', 'utf-8', 'value', 'w']

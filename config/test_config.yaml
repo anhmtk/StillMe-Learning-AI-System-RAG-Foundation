@@ -1,0 +1,188 @@
+# SEAL-GRADE SYSTEM TESTS Configuration
+# Enterprise-grade testing configuration for StillMe AI Framework
+
+# Test Environment Configuration
+environment:
+  matrix:
+    - os: ["ubuntu-latest", "windows-latest", "macos-latest"]
+    - python: ["3.11", "3.12"]
+    - workers: [1, 4, 8]
+  
+  # Performance thresholds
+  performance:
+    gateway_p95_slo: 300  # ms
+    gateway_p95_threshold: 500  # ms
+    error_rate_threshold: 0.01  # 1%
+    recovery_time_threshold: 5  # seconds
+    ethics_violation_threshold: 0.001  # 0.1%
+    
+  # Coverage requirements
+  coverage:
+    lines_min: 90  # %
+    branches_min: 80  # %
+    mutation_min: 70  # %
+    
+  # Load testing
+  load_testing:
+    concurrent_users: 500
+    requests_per_hour: 10000
+    soak_duration_hours: 4
+    ramp_up_duration_minutes: 5
+    
+  # Token budget for real provider tests
+  token_budget:
+    daily_limit: 1000
+    per_test_limit: 10
+    cost_tracking: true
+
+# Test Categories and Markers
+test_categories:
+  unit:
+    markers: ["unit", "fast"]
+    timeout: 30
+    parallel: true
+    
+  integration:
+    markers: ["integration", "medium"]
+    timeout: 120
+    parallel: false
+    
+  security:
+    markers: ["security", "slow"]
+    timeout: 300
+    parallel: false
+    
+  ethics:
+    markers: ["ethics", "slow"]
+    timeout: 300
+    parallel: false
+    
+  load:
+    markers: ["load", "slow"]
+    timeout: 1800
+    parallel: false
+    
+  chaos:
+    markers: ["chaos", "slow"]
+    timeout: 600
+    parallel: false
+    
+  soak:
+    markers: ["soak", "very_slow"]
+    timeout: 14400  # 4 hours
+    parallel: false
+    
+  ux:
+    markers: ["ux", "medium"]
+    timeout: 180
+    parallel: true
+
+# Module-specific configurations
+modules:
+  router:
+    test_timeout: 60
+    mock_providers: true
+    fallback_tests: true
+    
+  memory:
+    test_timeout: 90
+    persistence_tests: true
+    ttl_tests: true
+    
+  ethics:
+    test_timeout: 120
+    injection_tests: true
+    bias_tests: true
+    
+  clarification_core:
+    test_timeout: 60
+    p1_p2_p3_tests: true
+    
+  agent_dev:
+    test_timeout: 180
+    sandbox_tests: true
+    orchestration_tests: true
+    
+  api_gateway:
+    test_timeout: 60
+    latency_tests: true
+    backpressure_tests: true
+
+# Security testing
+security:
+  tools:
+    - bandit
+    - semgrep
+    - pip-audit
+    - gitleaks
+    
+  patterns:
+    - prompt_injection
+    - jailbreak
+    - pii_leak
+    - secret_exposure
+    
+  thresholds:
+    critical: 0
+    high: 0
+    medium: 5
+    low: 10
+
+# Observability
+observability:
+  tracing:
+    enabled: true
+    provider: "opentelemetry"
+    export_format: "json"
+    
+  metrics:
+    enabled: true
+    export_format: "prometheus"
+    
+  logging:
+    level: "INFO"
+    format: "json"
+    include_trace_id: true
+
+# Dataset configuration
+datasets:
+  ambiguous_prompts:
+    path: "datasets/ambiguous_prompts.json"
+    refresh_interval: "weekly"
+    
+  redteam_prompts:
+    path: "datasets/redteam_prompts.json"
+    refresh_interval: "monthly"
+    
+  pii_samples:
+    path: "datasets/pii_samples.json"
+    refresh_interval: "monthly"
+    
+  load_test_scenarios:
+    path: "datasets/load_test_scenarios.json"
+    refresh_interval: "quarterly"
+
+# CI/CD configuration
+ci_cd:
+  artifacts:
+    - "artifacts/coverage.html"
+    - "artifacts/pytest.html"
+    - "artifacts/k6.json"
+    - "artifacts/otel_traces/"
+    - "artifacts/metrics.json"
+    - "artifacts/security_report.json"
+    - "artifacts/mutation_report.html"
+    
+  required_checks:
+    - "unit_tests_pass"
+    - "integration_tests_pass"
+    - "security_scan_pass"
+    - "coverage_threshold_met"
+    - "performance_threshold_met"
+    - "ethics_tests_pass"
+    
+  code_owners:
+    - "security"
+    - "performance"
+    - "ethics"
+

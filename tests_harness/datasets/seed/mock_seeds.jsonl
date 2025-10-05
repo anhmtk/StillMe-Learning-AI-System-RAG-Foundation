@@ -1,0 +1,10 @@
+{"text": "Xin chào, hôm nay thế nào?", "type": "greeting", "language": "vi", "category": "persona"}
+{"text": "Hello, how are you today?", "type": "greeting", "language": "en", "category": "persona"}
+{"text": "Tôi muốn học lập trình Python", "type": "request", "language": "vi", "category": "coding"}
+{"text": "How can I learn machine learning?", "type": "request", "language": "en", "category": "coding"}
+{"text": "Cảm ơn bạn rất nhiều", "type": "gratitude", "language": "vi", "category": "persona"}
+{"text": "Thank you very much", "type": "gratitude", "language": "en", "category": "persona"}
+{"text": "Làm thế nào để tối ưu hóa database?", "type": "question", "language": "vi", "category": "technical"}
+{"text": "What is the best way to optimize performance?", "type": "question", "language": "en", "category": "technical"}
+{"text": "Tôi cảm thấy buồn hôm nay", "type": "emotion", "language": "vi", "category": "emotion"}
+{"text": "I feel sad today", "type": "emotion", "language": "en", "category": "emotion"}

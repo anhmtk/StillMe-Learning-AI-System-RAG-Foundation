@@ -1,0 +1,16 @@
+[Unit]
+Description=StillMe Auto-Restart Manager
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/opt/stillme
+ExecStart=/usr/bin/python3 /opt/stillme/vps_restart_ai_server.py monitor
+Restart=always
+RestartSec=30
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

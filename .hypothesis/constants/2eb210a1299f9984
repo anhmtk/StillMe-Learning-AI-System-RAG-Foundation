@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\common\retry.py
+# hypothesis_version: 6.140.2
+
+[0.0, 0.1, 0.5, 1.0, 2.0, 60.0, 'CircuitBreaker', 'RetryManager', '__name__', 'closed', 'failure_count', 'half_open', 'is_closed', 'is_half_open', 'is_open', 'last_failure_time', 'open', 'state', 'success_count', 'unknown']

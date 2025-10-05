@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\agent_dev\core\executor.py
+# hypothesis_version: 6.140.2
+
+[0.1, 'Invalid task command', 'No tasks to execute', 'Tasks must be a list', 'command', 'execution_time', 'failed', 'success', 'tasks']

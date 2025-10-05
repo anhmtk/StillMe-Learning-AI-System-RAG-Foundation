@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\core\observability\tracer.py
+# hypothesis_version: 6.140.2
+
+[0.95, 0.99, 100, 1000, ' AND start_time >= ?', ' ORDER BY start_time', ',', '?', 'No data found', 'all', 'completed', 'duration_ms', 'end_time', 'error', 'error_count', 'error_message', 'error_rate', 'export_timestamp', 'has_error', 'id', 'info', 'level', 'logs', 'max_duration_ms', 'mean_duration_ms', 'median_duration_ms', 'message', 'min_duration_ms', 'operation_name', 'p95_duration_ms', 'p99_duration_ms', 'parent_span_id', 'span_count', 'span_id', 'start_time', 'started', 'status', 'tags', 'timestamp', 'total_duration', 'total_operations', 'total_traces', 'trace_id', 'traces', 'traces.db', 'utf-8', 'w']

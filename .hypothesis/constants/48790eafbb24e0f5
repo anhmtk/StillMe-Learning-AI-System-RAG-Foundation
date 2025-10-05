@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\privacy\pii_redactor.py
+# hypothesis_version: 6.140.2
+
+[0.5, 0.6, 0.7, 0.75, 0.8, 0.85, 0.88, 0.9, 0.95, '*', '**', '***', '****', '****:', '***.', '-', '.', ':', '@', '\\D', '\\b[A-Za-z0-9]{32,}\\b', '\\b[\\u0400-\\u04ff]+\\b', '\\b[\\u4e00-\\u9fff]+\\b', '\\b\\+?[1-9]\\d{1,14}\\b', '\\b\\d{13,19}\\b', '\\b\\d{9,12}\\b', '\\b\\d{9}\\b', 'credit_card', 'email', 'id_number', 'ip', 'name', 'phone', 'preserve_format', 'redaction_tag', 'ssn', 'token']

@@ -1,0 +1,14 @@
+title = "StillMe Gitleaks Rules"
+
+[allowlist]
+paths = [
+  '''^build/''',
+  '''^\.dart_tool/''',
+  '''^\.gradle/''',
+  '''^android/app/build/''',
+  '''^ios/Pods/''',
+]
+
+regexes = [
+  '''FAKE|DUMMY|PLACEHOLDER|EXAMPLE_KEY'''
+]

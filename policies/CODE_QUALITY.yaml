@@ -1,0 +1,49 @@
+version: 1
+code_quality:
+  linting:
+    python: ["ruff", "pyright"]
+    typescript: ["eslint", "prettier"]
+    enabled: true
+    fail_on_error: true
+    
+  formatting:
+    python: "black"
+    typescript: "prettier"
+    line_length: 100
+    indent_size: 4
+    
+  module_boundaries:
+    allowed_imports:
+      - "stillme_core.modules.*"
+      - "stillme_core.common.*"
+      - "libs.*"
+      - "config.*"
+    forbidden_imports:
+      - "node_modules"
+      - "site-packages"
+      - "__pycache__"
+      
+  dependency_rules:
+    max_dependencies: 50
+    security_scan: true
+    license_check: true
+    outdated_check: true
+    
+  testing:
+    coverage_threshold: 80
+    unit_tests_required: true
+    integration_tests_required: true
+    performance_tests: false
+    
+  documentation:
+    docstrings_required: true
+    type_hints_required: true
+    readme_required: true
+    changelog_required: true
+
+messages:
+  lint_error: "❌ Linting error detected"
+  format_error: "❌ Code formatting error"
+  import_violation: "❌ Import boundary violation"
+  dependency_issue: "❌ Dependency issue detected"
+  test_failure: "❌ Test failure detected"

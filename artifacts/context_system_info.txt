@@ -1,0 +1,40 @@
+StillMe System Context Information
+=====================================
+
+Generated: 2025-09-27T15:45:00
+Branch: chore/stabilize-architecture-2025-09-27
+
+Environment:
+- Python: 3.12.10
+- OS: Windows 11 (10.0.26100)
+- Shell: PowerShell
+
+Installed Tools:
+- pytest: 8.4.2
+- bandit: 1.8.6
+- semgrep: 1.138.0
+- ruff: 0.12.11
+- mypy: 1.7.1
+- pip-audit: 2.9.0
+
+Dependency Conflicts Detected:
+- fastapi 0.104.1 requires anyio<4.0.0,>=3.7.1, but you have anyio 4.11.0
+- google-ai-generativelanguage 0.6.6 requires protobuf<5.0.0,>=3.19.5, but you have protobuf 6.32.1
+- litellm 1.76.1 requires aiohttp>=3.10, but you have aiohttp 3.9.1
+- litellm 1.76.1 requires jsonschema<5.0.0,>=4.22.0, but you have jsonschema 4.20.0
+- open-interpreter 0.4.3 requires starlette<0.38.0,>=0.37.2, but you have starlette 0.27.0
+- stillme-ai 2.1.0 requires pytest-asyncio>=1.1.0, but you have pytest-asyncio 0.21.1
+
+Critical Issues Identified:
+1. 52 import errors in test suite
+2. Learning systems conflict (old vs new)
+3. 13 high severity security vulnerabilities
+4. Missing modules: ai_manager, controller, safety_guard, executor, sandbox
+5. API compatibility issues with UnifiedAPIManager
+
+Stabilization Plan:
+- Phase 1: Fix import errors and create missing stubs
+- Phase 2: Resolve learning systems conflict
+- Phase 3: Fix security vulnerabilities
+- Phase 4: API compatibility fixes
+- Phase 5: Comprehensive testing

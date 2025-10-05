@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\ai_manager.py
+# hypothesis_version: 6.140.2
+
+[30.0, 'Unsafe expression', '__', 'eval', 'exec', 'import', 'model_present', 'ollama_up', 'tiny_generate_ok']

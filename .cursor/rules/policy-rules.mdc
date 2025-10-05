@@ -1,0 +1,58 @@
+---
+description: "StillMe Policy Rules - Skip behavior và .env protection"
+globs:
+  - "**/*.py"
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.js"
+  - "**/*.jsx"
+  - "**/*.dart"
+alwaysApply: true
+---
+
+# StillMe Policy Rules
+
+## Skip Behavior Policy
+- **Skip = Diagnose, KHÔNG phải Cancel**: Khi user bấm Skip, phải chẩn đoán trạng thái task, không được hủy bỏ
+- **Load Interaction Policy**: Mọi entrypoint phải load `policies/INTERACTION_POLICY.yaml`
+- **Use Skip Diagnose**: Gọi `diagnoseOnSkip()` thay vì `cancel()` khi bấm Skip
+- **Policy Compliance**: Tuân thủ `runtime/interaction_policy.py` hoặc `.ts`
+
+## .env Protection Policy
+- **TUYỆT ĐỐI KHÔNG XOÁ .env**: File .env chứa thông tin nhạy cảm, không được xoá/đổi tên/di chuyển
+- **Load File Protection Policy**: Mọi entrypoint phải load `policies/FILE_PROTECTION.yaml`
+- **Use File Policy**: Gọi `assert_protected_files()` trước khi thao tác files
+- **Backup Before Operations**: Tự động backup .env trước khi sửa đổi
+- **Commit Protection**: Không commit .env files, chỉ commit .env.example
+
+## Required Imports
+```python
+# Python entrypoints
+from runtime.interaction_policy import load_interaction_policy, get_interaction_policy
+from runtime.file_policy import load_file_policy, assert_protected_files
+from runtime.skip_diagnose import diagnose_on_skip
+```
+
+```typescript
+// TypeScript entrypoints
+import { loadInteractionPolicy, getInteractionPolicy } from './runtime/interaction_policy';
+import { loadFilePolicy, assertProtectedFiles } from './runtime/file_policy';
+import { diagnoseOnSkip } from './runtime/skip_diagnose';
+```
+
+## Policy Loading
+- **Auto-load on import**: Policy loaders tự động load policy khi import
+- **Fail-fast**: Nếu không load được policy, throw error ngay lập tức
+- **Compliance check**: CI checks đảm bảo tất cả entrypoints load policy
+
+## Violations
+- **Skip calling cancel()**: ❌ Vi phạm nghiêm trọng
+- **Deleting .env**: ❌ Vi phạm nghiêm trọng
+- **Not loading policy**: ❌ Vi phạm compliance
+- **Committing .env**: ❌ Vi phạm security
+
+## Enforcement
+- **Runtime**: Strict mode cho production, relaxed cho development
+- **CI/CD**: Pre-commit hooks và CI checks
+- **Monitoring**: Log tất cả policy violations
+- **Backup**: Tự động backup trước khi thao tác nguy hiểm

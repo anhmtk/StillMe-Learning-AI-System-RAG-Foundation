@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\security\__init__.py
+# hypothesis_version: 6.140.2
+
+[b'OK', 0.0, 0.8, 100, '*', '1; mode=block', '200 OK', '2025-10-01T19:00:00Z', '86400', 'CRITICAL', 'Content-Type', 'DENY', 'HIGH', 'MEDIUM', 'NORMAL', 'Permissions-Policy', 'RateLimiter', 'Referrer-Policy', 'SecurityAuditLogger', 'SecurityConfig', 'SecurityEvent', 'SecurityHeaders', 'SecurityLevel', 'SecurityManager', 'SecurityMiddleware', 'SecurityMonitor', 'WARNING', 'X-Frame-Options', 'X-RateLimit-Limit', 'X-RateLimit-Reset', 'X-XSS-Protection', '_processed', 'active_alerts', 'alert_types', 'allowed', 'avg_risk_score', 'cors', 'count', 'critical', 'enabled', 'event_type', 'events', 'headers', 'high', 'high_risk_events', 'last_updated', 'low', 'max_requests', 'medium', 'message', 'nosniff', 'rate_limit', 'rate_limiting', 'remaining', 'reset_time', 'risk_levels', 'risk_score', 'risk_summary', 'security_status', 'severity', 'text/plain', 'timestamp', 'total_events', 'type']

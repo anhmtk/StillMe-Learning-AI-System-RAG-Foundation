@@ -1,0 +1,72 @@
+name: CI - AgentDev Automated Monitor
+
+on:
+  schedule:
+    # Run every 15 minutes
+    - cron: '*/15 * * * *'
+  workflow_dispatch: # Manual trigger
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  agentdev-monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install schedule psutil
+    
+    - name: Run AgentDev Automated Monitor
+      run: |
+        echo "🤖 Starting AgentDev Automated Monitor..."
+        python -c "
+        import sys
+        sys.path.append('agent-dev/core')
+        from automated_monitor import AutomatedMonitor
+        
+        # Initialize monitor
+        monitor = AutomatedMonitor(project_root='.')
+        
+        # Run single quality scan
+        print('🔍 Running quality scan...')
+        metrics = monitor._scan_code_quality()
+        print(f'📊 Found {metrics.total_errors} errors in {metrics.files_with_errors} files')
+        
+        # Check thresholds
+        monitor._check_quality_thresholds(metrics)
+        
+        # Get status
+        status = monitor.get_status()
+        print(f'📈 Monitor Status: {status}')
+        
+        # Exit with error code if critical issues found
+        if metrics.total_errors > 50:
+            print('🚨 CRITICAL: Too many errors found!')
+            sys.exit(1)
+        elif metrics.total_errors > 20:
+            print('⚠️ WARNING: High error count detected')
+            sys.exit(2)
+        else:
+            print('✅ Code quality check passed')
+            sys.exit(0)
+        "
+    
+    - name: Upload Monitor Report
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: agentdev-monitor-report
+        path: logs/agentdev_monitor_*.log

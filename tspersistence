@@ -1,0 +1,48 @@
+[35m.github/workflows/no-ignore-gate.yml[m[36m:[m[32m30[m[36m:[m        echo "🔍 Step 1: Auditing all '[1;31m# type: ignore[m' in repository..."
+[35m.github/workflows/no-ignore-gate.yml[m[36m:[m[32m120[m[36m:[m        echo "✅ No '[1;31m# type: ignore[m' found in repository"
+[35m.venv/Lib/site-packages/_pytest/_code/code.py[m[36m:[m[32m77[m[36m:[m    __hash__ = None  [1;31m# type: ignore[m
+[35m.venv/Lib/site-packages/_pytest/_code/code.py[m[36m:[m[32m370[m[36m:[m                and excludepath_ in (str(p) for p in codepath.parents)  [1;31m# type: ignore[m[operator]
+[35m.venv/Lib/site-packages/_pytest/_code/code.py[m[36m:[m[32m412[m[36m:[m            fn = lambda x: not x.ishidden(excinfo_or_fn)  [1;31m# noqa[m: E731
+[35m.venv/Lib/site-packages/_pytest/_code/code.py[m[36m:[m[32m471[m[36m:[m        exception: E,  [1;31m# type: ignore[m[misc]
+[35m.venv/Lib/site-packages/_pytest/_code/code.py[m[36m:[m[32m1025[m[36m:[m            traceback = traceback[:max_frames] + traceback[-max_frames:]  [1;31m# type: ignore[m
+[35m.venv/Lib/site-packages/_pytest/_code/code.py[m[36m:[m[32m1356[m[36m:[m            fn = inspect.getsourcefile(obj) or inspect.getfile(obj)  [1;31m# type: ignore[m[arg-type]
+[35m.venv/Lib/site-packages/_pytest/_code/source.py[m[36m:[m[32m38[m[36m:[m                src = inspect.getsource(obj)  [1;31m# type: ignore[m[arg-type]
+[35m.venv/Lib/site-packages/_pytest/_code/source.py[m[36m:[m[32m47[m[36m:[m    __hash__ = None  [1;31m# type: ignore[m
+[35m.venv/Lib/site-packages/_pytest/_code/source.py[m[36m:[m[32m131[m[36m:[m        return obj.__code__  [1;31m# type: ignore[m[attr-defined,no-any-return]
+[35m.venv/Lib/site-packages/_pytest/_py/error.py[m[36m:[m[32m111[m[36m:[m    return getattr(_error_maker, attr)  [1;31m# type: ignore[m[no-any-return]
+[35m.venv/Lib/site-packages/_pytest/_py/path.py[m[36m:[m[32m227[m[36m:[m        entry = error.checked_call(pwd.getpwuid, self.uid)  [1;31m# type:ignore[m[attr-defined,unused-ignore]
+[35m.venv/Lib/site-packages/_pytest/_py/path.py[m[36m:[m[32m237[m[36m:[m        entry = error.checked_call(grp.getgrgid, self.gid)  [1;31m# type:ignore[m[attr-defined,unused-ignore]
+[35m.venv/Lib/site-packages/_pytest/_py/path.py[m[36m:[m[32m255[m[36m:[m        user = pwd.getpwnam(user)[2]  [1;31m# type:ignore[m[attr-defined,unused-ignore]
+[35m.venv/Lib/site-packages/_pytest/_py/path.py[m[36m:[m[32m263[m[36m:[m        group = grp.getgrnam(group)[2]  [1;31m# type:ignore[m[attr-defined,unused-ignore]
+[35m.venv/Lib/site-packages/_pytest/_py/path.py[m[36m:[m[32m320[m[36m:[m            return error.checked_call(os.readlink, self.strpath)  [1;31m# type: ignore[m[arg-type,return-value,unused-ignore]
+[35m.venv/Lib/site-packages/_pytest/assertion/__init__.py[m[36m:[m[32m71[m[36m:[m            msg = "expected module names as *args, got {0} instead"  [1;31m# type: ignore[m[unreachable]
+[35m.venv/Lib/site-packages/_pytest/assertion/__init__.py[m[36m:[m[32m80[m[36m:[m        importhook = DummyRewriteHook()  [1;31m# type: ignore[m
+[35m.venv/Lib/site-packages/_pytest/assertion/rewrite.py[m[36m:[m[32m45[m[36m:[mfrom _pytest.assertion.util import format_explanation as _format_explanation  [1;31m# noqa[m:F401, isort:skip
+[35m.venv/Lib/site-packages/_pytest/assertion/rewrite.py[m[36m:[m[32m107[m[36m:[m        spec = self._find_spec(name, path)  [1;31m# type: ignore[m
+[35m.venv/Lib/site-packages/_pytest/assertion/rewrite.py[m[36m:[m[32m1007[m[36m:[m                self.expl_stmts.append(ast.If(cond, fail_inner, []))  [1;31m# noqa[m: F821
+[35m.venv/Lib/site-packages/_pytest/assertion/rewrite.py[m[36m:[m[32m1021[m[36m:[m                    self.variables_overwrite[self.scope][v.left.target.id] = v.left  [1;31m# type:ignore[m[assignment]
+[35m.venv/Lib/site-packages/_pytest/assertion/rewrite.py[m[36m:[m[32m1065[m[36m:[m                arg = self.variables_overwrite[self.scope][arg.id]  [1;31m# type:ignore[m[assignment]
+[35m.venv/Lib/site-packages/_pytest/assertion/rewrite.py[m[36m:[m[32m1073[m[36m:[m                keyword.value = self.variables_overwrite[self.scope][keyword.value.id]  [1;31m# type:ignore[m[assignment]
+[35m.venv/Lib/site-packages/_pytest/assertion/rewrite.py[m[36m:[m[32m1110[m[36m:[m            comp.left = self.variables_overwrite[self.scope][comp.left.id]  [1;31m# type:ignore[m[assignment]
+[35m.venv/Lib/site-packages/_pytest/assertion/rewrite.py[m[36m:[m[32m1112[m[36m:[m            self.variables_overwrite[self.scope][comp.left.target.id] = comp.left  [1;31m# type:ignore[m[assignment]
+[35m.venv/Lib/site-packages/_pytest/assertion/rewrite.py[m[36m:[m[32m1130[m[36m:[m                self.variables_overwrite[self.scope][left_res.id] = next_operand  [1;31m# type:ignore[m[assignment]
+[35m.venv/Lib/site-packages/_pytest/capture.py[m[36m:[m[32m76[m[36m:[m            import colorama  [1;31m# noqa[m: F401
+[35m.venv/Lib/site-packages/_pytest/capture.py[m[36m:[m[32m109[m[36m:[m    if not hasattr(stream, "buffer"):  [1;31m# type: ignore[m[unreachable,unused-ignore]
+[35m.venv/Lib/site-packages/_pytest/capture.py[m[36m:[m[32m114[m[36m:[m    if not isinstance(raw_stdout, io._WindowsConsoleIO):  [1;31m# type: ignore[m[attr-defined,unused-ignore]
+[35m.venv/Lib/site-packages/_pytest/capture.py[m[36m:[m[32m274[m[36m:[m        return self  [1;31m# type: ignore[m[return-value]
+[35m.venv/Lib/site-packages/_pytest/capture.py[m[36m:[m[32m598[m[36m:[m        collections.namedtuple("CaptureResult", ["out", "err"]),  [1;31m# noqa[m: PYI024
+[35m.venv/Lib/site-packages/_pytest/capture.py[m[36m:[m[32m687[m[36m:[m        return CaptureResult(out, err)  [1;31m# type: ignore[m[arg-type]
+[35m.venv/Lib/site-packages/_pytest/config/__init__.py[m[36m:[m[32m332[m[36m:[m        msg = (  [1;31m# type:ignore[m[unreachable]
+[35m.venv/Lib/site-packages/_pytest/config/__init__.py[m[36m:[m[32m478[m[36m:[m        return _get_legacy_hook_marks(  [1;31m# type: ignore[m[return-value]
+[35m.venv/Lib/site-packages/_pytest/config/__init__.py[m[36m:[m[32m488[m[36m:[m                opts = _get_legacy_hook_marks(  [1;31m# type: ignore[m[assignment]
+[35m.venv/Lib/site-packages/_pytest/config/__init__.py[m[36m:[m[32m1082[m[36m:[m        self.hook: pluggy.HookRelay = PathAwareHookProxy(self.pluginmanager.hook)  [1;31m# type: ignore[m[assignment]
+[35m.venv/Lib/site-packages/_pytest/config/__init__.py[m[36m:[m[32m1310[m[36m:[m        self._parser._config_source_hint = via  [1;31m# type: ignore[m
+[35m.venv/Lib/site-packages/_pytest/config/__init__.py[m[36m:[m[32m1316[m[36m:[m            del self._parser._config_source_hint  [1;31m# type: ignore[m
+[35m.venv/Lib/site-packages/_pytest/config/__init__.py[m[36m:[m[32m1502[m[36m:[m        self._parser.after_preparse = True  [1;31m# type: ignore[m
+[35m.venv/Lib/site-packages/_pytest/config/__init__.py[m[36m:[m[32m1827[m[36m:[m        return False  [1;31m# type: ignore[m[unreachable]
+[35m.venv/Lib/site-packages/_pytest/config/__init__.py[m[36m:[m[32m1917[m[36m:[m        action: "warnings._ActionKind" = warnings._getaction(action_)  [1;31m# type: ignore[m[attr-defined]
+[35m.venv/Lib/site-packages/_pytest/config/argparsing.py[m[36m:[m[32m137[m[36m:[m        file_or_dir_arg.completer = filescompleter  [1;31m# type: ignore[m
+[35m.venv/Lib/site-packages/_pytest/config/argparsing.py[m[36m:[m[32m434[m[36m:[m    def parse_args(  [1;31m# type: ignore[m
+[35m.venv/Lib/site-packages/_pytest/config/argparsing.py[m[36m:[m[32m514[m[36m:[m            action._formatted_action_invocation = orgstr  [1;31m# type: ignore[m
+[35m.venv/Lib/site-packages/_pytest/config/argparsing.py[m[36m:[m[32m539[m[36m:[m        action._formatted_action_invocation = formatted_action_invocation  [1;31m# type: ignore[m
+[35m.venv/Lib/site-packages/_pytest/config/compat.py[m[36m:[m[32m81[m[36m:[m          

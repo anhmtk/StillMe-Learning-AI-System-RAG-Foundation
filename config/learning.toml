@@ -1,0 +1,65 @@
+system = "unified"
+
+[scheduler]
+enabled = true
+cron_expression = "30 2 * * *"
+timezone = "Asia/Ho_Chi_Minh"
+jitter_seconds = 300
+max_concurrent_sessions = 1
+skip_if_cpu_high = true
+cpu_threshold = 70
+
+[resource_limits]
+max_cpu_percent = 70
+max_memory_mb = 24576
+max_tokens_per_day = 10000
+max_tokens_per_hour = 1000
+max_content_length = 100000
+
+[safety]
+idempotency_enabled = false
+human_approval_required = true
+rollback_enabled = false
+backup_enabled = false
+alerting_enabled = false
+require_citations = true
+disable_finetune = true
+
+[monitoring]
+enable_metrics = true
+metrics_export_format = "json"
+log_level = "INFO"
+log_format = "json"
+enable_tracing = true
+webhook_url = ""
+email_smtp_server = ""
+email_user = ""
+email_pass = ""
+
+[migration]
+auto_migrate = true
+backup_before_migrate = true
+batch_size = 100
+
+[new_system]
+rss_sources = [ "https://arxiv.org/list/cs.AI/rss", "https://openai.com/blog/rss.xml", "https://deepmind.com/blog/rss.xml",]
+quality_threshold = 0.72
+risk_threshold = 0.25
+max_recommendations_per_day = 5
+max_ingestions_per_day = 3
+max_docs_per_scan = 20
+disable_finetune = true
+html_crawl_enabled = false
+citations_required = true
+
+[old_system]
+max_experiences = 10000
+pattern_threshold = 0.6
+similarity_threshold = 0.7
+db_path = ".experience_memory.db"
+cleanup_days = 90
+
+[compatibility]
+parallel_mode = false
+sync_data = false
+conflict_resolution = "new_wins"

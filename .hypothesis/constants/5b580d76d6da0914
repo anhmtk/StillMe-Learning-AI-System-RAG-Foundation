@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\compat_circuitbreaker.py
+# hypothesis_version: 6.140.2
+
+[60.0, ', ', 'SafeCircuitBreaker', 'expected_exception', 'failure_threshold', 'logger', 'recovery_timeout', 'success_threshold']

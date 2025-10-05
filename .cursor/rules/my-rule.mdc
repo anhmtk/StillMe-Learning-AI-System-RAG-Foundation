@@ -1,0 +1,14 @@
+---
+description: "Không sửa folder legacy hoặc backup"
+globs:
+  - "**/*.py"
+alwaysApply: true
+---
+
+Khi fix lỗi, tuyệt đối KHÔNG đụng tới các folder:
+- `modules/backup_legacy`
+- `tests/fixtures`
+- `node_modules`
+- `**/__pycache__`
+
+Chỉ tập trung sửa Error, không xóa test, không thay đổi public API trừ khi có test fail bắt buộc.

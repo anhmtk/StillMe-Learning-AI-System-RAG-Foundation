@@ -1,0 +1,14 @@
+abuse_threshold: 0.13
+calibration_results:
+  f1_score: 0.8333333333333333
+  false_negative_rate: 0.0
+  false_negatives: 0
+  false_positive_rate: 0.13333333333333333
+  false_positives: 2
+  precision: 0.7142857142857143
+  recall: 1.0
+  true_negatives: 13
+  true_positives: 5
+calibration_score: 0.6174603174603175
+calibration_timestamp: 1758815335.4871593
+suggestion_threshold: 0.8

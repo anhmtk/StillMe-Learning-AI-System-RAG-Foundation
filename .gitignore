@@ -1,0 +1,36 @@
+﻿# Archive files
+*.tar.gz
+*.zip
+*.rar
+*.7z
+
+# Executables and binaries
+*.exe
+*.dll
+*.so
+*.pdb
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Test results and reports
+reports/**/*.json
+*.log
+logs/
+
+# Environment and IDE
+.env
+.venv
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Large data files
+*.csv
+*.json
+*.xml

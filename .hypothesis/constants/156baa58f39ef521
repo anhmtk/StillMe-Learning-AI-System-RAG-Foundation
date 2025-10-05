@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\common\logging.py
+# hypothesis_version: 6.140.2
+
+[1024, '%Y-%m-%d %H:%M:%S', 'StillMe.API', 'StillMe.Audit', 'StillMe.Framework', 'StillMe.Security', 'StructuredLogger', 'args', 'correlation_id', 'created', 'exc_info', 'exc_text', 'exception', 'filename', 'funcName', 'function', 'getMessage', 'level', 'levelname', 'levelno', 'line', 'lineno', 'logger', 'logs/api.log', 'logs/audit.log', 'logs/framework.log', 'logs/security.log', 'message', 'module', 'msecs', 'msg', 'name', 'pathname', 'process', 'processName', 'relativeCreated', 'stack_info', 'thread', 'threadName', 'timestamp', 'utf-8']

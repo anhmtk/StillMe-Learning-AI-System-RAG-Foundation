@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\modules\clarification_learning.py
+# hypothesis_version: 6.140.2
+
+[0.0, 0.02, 0.2, 0.3, 0.9, 1.0, '...', ':', 'A web application', 'Build an app', 'Create something', 'Write code for this', '__main__', 'confidence', 'domain_hint', 'failure', 'fallback', 'generic', 'learned', 'pattern_count', 'programming', 'prompt', 'question', 'recent_attempts', 'slots', 'source', 'success', 'success_rate', 'successful_attempts', 'template', 'template_key', 'test_user', 'timestamp', 'total_attempts', 'updated_at', 'user_id', 'utf-8', 'w', 'web']

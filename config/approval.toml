@@ -1,0 +1,135 @@
+# StillMe Learning Approval System Configuration
+# Cấu hình hệ thống phê duyệt học tập
+
+[approval]
+# Enable/disable approval system
+enabled = true
+
+# Auto-approval threshold (0.0 - 1.0)
+# Content with quality >= threshold and risk <= (1-threshold) will be auto-approved
+auto_approve_threshold = 0.9
+
+# Auto-rejection threshold (0.0 - 1.0)  
+# Content with risk >= threshold will be auto-rejected
+auto_reject_threshold = 0.3
+
+# Request expiration time in hours
+expiration_hours = 24
+
+# Maximum pending requests before rejecting new ones
+max_pending_requests = 50
+
+# Content types that require human approval
+require_human_approval = [
+    "knowledge_update",
+    "skill_template"
+]
+
+# Notification settings
+[approval.notifications]
+# Enable notifications for approval events
+enabled = true
+
+# Notification channels
+channels = ["email", "telegram"]
+
+# Rate limiting
+rate_limit_per_hour = 10
+
+# Cooldown period in minutes
+cooldown_minutes = 5
+
+# Database settings
+[approval.database]
+# Database file path
+db_path = "data/approval.db"
+
+# Backup settings
+backup_enabled = true
+backup_interval_hours = 24
+backup_retention_days = 30
+
+# Performance settings
+[approval.performance]
+# Batch processing size
+batch_size = 10
+
+# Cleanup interval in hours
+cleanup_interval_hours = 6
+
+# Statistics retention in days
+stats_retention_days = 90
+
+# Security settings
+[approval.security]
+# Require authentication for approvals
+require_auth = false
+
+# Allowed approvers (if auth enabled)
+allowed_approvers = ["admin", "human", "system"]
+
+# Audit logging
+audit_enabled = true
+audit_log_path = "logs/approval_audit.log"
+
+# Integration settings
+[approval.integration]
+# Learning system integration
+learning_system_enabled = true
+
+# Alert system integration  
+alert_system_enabled = true
+
+# Webhook for external systems
+webhook_enabled = false
+webhook_url = ""
+webhook_secret = ""
+
+# Quality scoring
+[approval.quality]
+# Quality score weights
+reputation_weight = 0.3
+relevance_weight = 0.25
+novelty_weight = 0.2
+evidence_weight = 0.15
+tech_depth_weight = 0.1
+
+# Risk scoring
+[approval.risk]
+# Risk score weights
+injection_risk_weight = 0.4
+bias_risk_weight = 0.3
+privacy_risk_weight = 0.2
+safety_risk_weight = 0.1
+
+# Content type specific settings
+[approval.content_types]
+# RSS Article settings
+[approval.content_types.rss_article]
+auto_approve_threshold = 0.85
+max_content_length = 10000
+allowed_domains = ["arxiv.org", "openai.com", "deepmind.com"]
+
+# PDF Document settings  
+[approval.content_types.pdf_document]
+auto_approve_threshold = 0.8
+max_file_size_mb = 50
+require_license_check = true
+
+# Experience settings
+[approval.content_types.experience]
+auto_approve_threshold = 0.9
+require_validation = true
+max_experience_age_days = 30
+
+# Knowledge Update settings
+[approval.content_types.knowledge_update]
+require_human_approval = true
+auto_approve_threshold = 0.95
+require_citation = true
+
+# Skill Template settings
+[approval.content_types.skill_template]
+require_human_approval = true
+auto_approve_threshold = 0.9
+require_testing = true

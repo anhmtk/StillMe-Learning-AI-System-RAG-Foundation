@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\core\status.py
+# hypothesis_version: 6.140.2
+
+['JobStatus', 'StepStatus', 'completed', 'failed', 'pending', 'running']

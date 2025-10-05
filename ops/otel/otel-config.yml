@@ -1,0 +1,72 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 1s
+    send_batch_size: 1024
+    send_batch_max_size: 2048
+  
+  memory_limiter:
+    limit_mib: 128
+    spike_limit_mib: 32
+    check_interval: 5s
+  
+  resource:
+    attributes:
+      - key: service.name
+        value: agentdev
+        action: upsert
+      - key: service.version
+        value: "1.0.0"
+        action: upsert
+      - key: deployment.environment
+        value: test
+        action: upsert
+
+exporters:
+  prometheusremotewrite:
+    endpoint: http://prometheus:9090/api/v1/write
+    external_labels:
+      source: agentdev
+      environment: test
+  
+  logging:
+    loglevel: info
+    sampling_initial: 2
+    sampling_thereafter: 500
+
+  # For debugging - export to stdout
+  debug:
+    verbosity: normal
+    sampling_initial: 5
+    sampling_thereafter: 200
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [logging, debug]
+    
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, resource]
+      exporters: [prometheusremotewrite, logging]
+    
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch, resource]
+      exporters: [logging, debug]
+
+  extensions: []
+  telemetry:
+    logs:
+      level: info
+    metrics:
+      address: 0.0.0.0:8888

@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\modules\detectors\multiple_functions_detector.py
+# hypothesis_version: 6.140.2
+
+[0.0, 0.2, 0.3, 0.5, 1.0, '(', 'category', 'confidence', 'def ', 'def function_0():', 'def function_1():', 'def function_2():', 'def function_3():', 'def function_4():', 'def function_5():', 'def function_6():', 'def function_7():', 'def function_8():', 'def function_9():', 'features', 'function_\\d+', 'function_count', 'function_matches', 'function_names', 'multiple_functions', 'needs_clarification', 'numbered_functions', 'repetitive_patterns', 'test_functions_found']

@@ -1,0 +1,59 @@
+#!/usr/bin/env python3
+"""
+Fix syntax errors in test files
+"""
+
+import os
+import re
+
+
+def fix_syntax_errors():
+    """Fix all syntax errors in test files"""
+
+    # Find all test files
+    test_files = []
+    for root, _dirs, files in os.walk("tests"):
+        for file in files:
+            if file.endswith(".py"):
+                test_files.append(os.path.join(root, file))
+
+    for test_file in test_files:
+        if os.path.exists(test_file):
+            print(f"Checking {test_file}")
+            fix_file(test_file)
+
+
+def fix_file(file_path):
+    """Fix a single test file"""
+    try:
+        with open(file_path, encoding="utf-8") as f:
+            content = f.read()
+
+        # Fix indentation errors
+        content = re.sub(
+            r"(\s+)([A-Za-z_][A-Za-z0-9_]*),\s*\n\s*=\s*MagicMock",
+            r"\1\2 = MagicMock",
+            content,
+        )
+
+        # Fix multiple assignments on same line
+        content = re.sub(
+            r"(\s+)([A-Za-z_][A-Za-z0-9_]*),\s*\n\s*([A-Za-z_][A-Za-z0-9_]*),\s*\n\s*=\s*MagicMock",
+            r"\1\2 = MagicMock\n\1\3 = MagicMock",
+            content,
+        )
+
+        # Fix escaped quotes
+        content = re.sub(r"\\'", "'", content)
+
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write(content)
+
+        print(f"✅ Fixed {file_path}")
+
+    except Exception as e:
+        print(f"❌ Error fixing {file_path}: {e}")
+
+
+if __name__ == "__main__":
+    fix_syntax_errors()

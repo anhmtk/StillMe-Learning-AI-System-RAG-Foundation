@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\niche_radar\__init__.py
+# hypothesis_version: 6.140.2
+
+['1.5.0', 'ExecutionPack', 'HackerNewsCollector', 'MVPSpec', 'NewsDeltaCollector', 'NicheScore', 'NicheScorer', 'PlaybookGenerator', 'PricingSuggestion', 'ProductBrief']

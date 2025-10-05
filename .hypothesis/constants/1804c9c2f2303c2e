@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\quality\quality_metrics.py
+# hypothesis_version: 6.140.2
+
+[0.0, 0.8, 3.0, 7.0, 8.0, 9.0, 10.0, 30.0, 70.0, 80.0, 100.0, 'FAIL', 'PASS', 'WARNING', 'complexity', 'coverage', 'duplication', 'error', 'latest_metrics', 'maintainability', 'metrics_by_status', 'metrics_by_type', 'percentage', 'reliability', 'security', 'status', 'timestamp', 'total_metrics', 'unit', 'value']

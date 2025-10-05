@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\modules\proactive_abuse_guard.py
+# hypothesis_version: 6.140.2
+
+['AbuseEvent', 'AbusePattern', 'GuardConfig', 'INFO', 'ProactiveAbuseGuard', 'ThreatLevel', 'burst_traffic', 'content_abuse', 'critical', 'data_abuse', 'data_extraction', 'high', 'low', 'malicious_content', 'medium', 'patterns_detected', 'privacy_violation', 'rapid_requests', 'rate_limiting', 'recent_activity', 'resource_exhaustion', 'spam_content', 'system_abuse', 'system_manipulation', 'threat_levels', 'total_events']

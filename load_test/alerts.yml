@@ -1,0 +1,104 @@
+# Alert rules for K6 SEAL-GRADE Test - Phase 3 Clarification Core
+# ================================================================
+
+groups:
+  - name: clarification_core_alerts
+    rules:
+      # High Error Rate Alert
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[1m]) / rate(http_requests_total[1m]) > 0.01
+        for: 1m
+        labels:
+          severity: critical
+          component: clarification_core
+        annotations:
+          summary: "High error rate detected in Clarification Core"
+          description: "Error rate is {{ $value | humanizePercentage }} for more than 1 minute"
+          
+      # High Latency Alert
+      - alert: HighP99Latency
+        expr: histogram_quantile(0.99, rate(http_request_duration_seconds_bucket[5m])) > 1
+        for: 2m
+        labels:
+          severity: warning
+          component: clarification_core
+        annotations:
+          summary: "High p99 latency detected"
+          description: "p99 latency is {{ $value }}s for more than 2 minutes"
+          
+      # Low Clarification Success Rate
+      - alert: LowClarificationSuccessRate
+        expr: rate(clarification_success_rate[5m]) < 0.9
+        for: 3m
+        labels:
+          severity: warning
+          component: clarification_core
+        annotations:
+          summary: "Low clarification success rate"
+          description: "Clarification success rate is {{ $value | humanizePercentage }} for more than 3 minutes"
+          
+      # Low Proactive Suggestion Rate
+      - alert: LowProactiveSuggestionRate
+        expr: rate(proactive_suggestion_rate[5m]) < 0.7
+        for: 5m
+        labels:
+          severity: warning
+          component: clarification_core
+        annotations:
+          summary: "Low proactive suggestion rate"
+          description: "Proactive suggestion rate is {{ $value | humanizePercentage }} for more than 5 minutes"
+          
+      # Low Multi-Modal Processing Rate
+      - alert: LowMultiModalProcessingRate
+        expr: rate(multimodal_processing_rate[5m]) < 0.8
+        for: 5m
+        labels:
+          severity: warning
+          component: clarification_core
+        annotations:
+          summary: "Low multi-modal processing rate"
+          description: "Multi-modal processing rate is {{ $value | humanizePercentage }} for more than 5 minutes"
+          
+      # High Memory Usage
+      - alert: HighMemoryUsage
+        expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes > 0.9
+        for: 5m
+        labels:
+          severity: critical
+          component: system
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value | humanizePercentage }} for more than 5 minutes"
+          
+      # High CPU Usage
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100 > 90
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is {{ $value }}% for more than 5 minutes"
+          
+      # Service Down
+      - alert: ClarificationCoreDown
+        expr: up{job="stillme-clarification-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: clarification_core
+        annotations:
+          summary: "Clarification Core API is down"
+          description: "Clarification Core API has been down for more than 1 minute"
+          
+      # K6 Test Failure
+      - alert: K6TestFailure
+        expr: rate(clarification_failures[1m]) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+          component: k6_test
+        annotations:
+          summary: "K6 test failure rate is high"
+          description: "K6 test failure rate is {{ $value }} failures/sec for more than 2 minutes"

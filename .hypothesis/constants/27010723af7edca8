@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\modules\secure_memory_manager.py
+# hypothesis_version: 6.140.2
+
+['%Y%m%d_%H%M%S', '2.0.0', 'SecureMemoryConfig', 'SecureMemoryManager', 'StillMe AI Team', 'async_support', 'author', 'auto_save', 'backup_*.enc', 'backup_count', 'backups', 'config_class', 'created', 'cryptography', 'decryption_time', 'degraded', 'dependencies', 'description', 'encryption_time', 'encryption_working', 'error', 'error_count', 'fernet', 'file_exists', 'health_check_test', 'healthy', 'key_age_days', 'key_exists', 'key_rotation', 'last_error', 'last_operation', 'manual', 'memory.enc', 'memory.key', 'name', 'path', 'pre_restore', 'should_rotate_key', 'shutdown', 'size', 'status', 'total_operations', 'unhealthy', 'utf-8', 'version']

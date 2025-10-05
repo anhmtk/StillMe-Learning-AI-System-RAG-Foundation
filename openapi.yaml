@@ -1,0 +1,855 @@
+openapi: 3.0.3
+info:
+  title: StillMe AI Framework API
+  description: |
+    The StillMe AI Framework provides intelligent clarification and proactive suggestions
+    for ambiguous prompts. This API enables seamless integration with AI applications
+    that need to understand and clarify user intent.
+    
+    ## Core Features
+    - **Ambiguous Prompt Detection**: Automatically detects when user prompts need clarification
+    - **Proactive Suggestions**: Provides intelligent suggestions to improve user experience
+    - **Multi-modal Support**: Handles text, code, and visual content
+    - **Enterprise Security**: Built-in abuse detection and rate limiting
+    - **Privacy-First**: Configurable privacy modes and PII redaction
+    
+    ## Authentication
+    This API uses session-based authentication. Include your session token in the
+    `X-Session` header for authenticated requests.
+    
+    ## Rate Limiting
+    - 100 requests per minute per IP address
+    - 20 requests per minute burst limit
+    - Rate limit headers are included in responses
+    
+    ## Privacy & Security
+    - All PII is automatically redacted from logs
+    - Configurable privacy modes (strict/balanced/permissive)
+    - Built-in abuse detection and prevention
+    - No data is stored unless explicitly configured
+    
+  version: 1.0.0
+  contact:
+    name: StillMe AI Team
+    email: support@stillme.ai
+    url: https://stillme.ai
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: https://stillme.ai/terms
+
+servers:
+  - url: https://api.stillme.ai/v1
+    description: Production server
+  - url: https://staging-api.stillme.ai/v1
+    description: Staging server
+  - url: http://localhost:8000
+    description: Development server
+
+tags:
+  - name: health
+    description: Health check and system status
+  - name: clarification
+    description: Core clarification functionality
+  - name: suggestions
+    description: Proactive suggestions
+  - name: configuration
+    description: System configuration and settings
+  - name: privacy
+    description: Privacy and data management
+
+paths:
+  /health:
+    get:
+      tags:
+        - health
+      summary: Health Check
+      description: |
+        Returns the current health status of the StillMe AI Framework.
+        This endpoint can be used for monitoring and load balancer health checks.
+      operationId: getHealth
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+              examples:
+                healthy:
+                  summary: Healthy service
+                  value:
+                    status: "ok"
+                    message: "StillMe AI Framework is running"
+                    service: "clarification_core"
+                    version: "1.0.0"
+                    timestamp: "2024-01-15T10:30:00Z"
+                    uptime: 3600
+                    modules:
+                      clarification_handler: "running"
+                      abuse_guard: "running"
+                      proactive_suggestions: "running"
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unhealthy:
+                  summary: Unhealthy service
+                  value:
+                    status: "error"
+                    message: "Service is experiencing issues"
+                    error_code: "SERVICE_DEGRADED"
+                    details:
+                      clarification_handler: "error"
+                      abuse_guard: "running"
+
+  /chat:
+    post:
+      tags:
+        - clarification
+      summary: Process Chat Message
+      description: |
+        Processes a chat message and provides clarification or suggestions as needed.
+        This is the main endpoint for interacting with the StillMe AI Framework.
+        
+        The system will:
+        1. Analyze the input for ambiguity
+        2. Check for abuse patterns
+        3. Generate clarification questions if needed
+        4. Provide proactive suggestions
+        5. Return an appropriate response
+        
+        **Rate Limiting**: 100 requests/minute per IP
+        **Privacy**: All PII is automatically redacted from logs
+      operationId: processChat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+            examples:
+              ambiguous_prompt:
+                summary: Ambiguous prompt requiring clarification
+                value:
+                  prompt: "Do it now"
+                  context:
+                    user_id: "user123"
+                    session_id: "session456"
+                    timestamp: "2024-01-15T10:30:00Z"
+              clear_prompt:
+                summary: Clear prompt with suggestions
+                value:
+                  prompt: "Create a Python function to calculate the factorial of a number"
+                  context:
+                    user_id: "user123"
+                    session_id: "session456"
+                    timestamp: "2024-01-15T10:30:00Z"
+              code_prompt:
+                summary: Code analysis request
+                value:
+                  prompt: "def foo(:\n    pass"
+                  context:
+                    user_id: "user123"
+                    session_id: "session456"
+                    timestamp: "2024-01-15T10:30:00Z"
+      responses:
+        '200':
+          description: Successful processing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+              examples:
+                clarification_needed:
+                  summary: Clarification required
+                  value:
+                    response: "I need more information to help you effectively."
+                    status: "clarification_needed"
+                    service: "clarification_core"
+                    clarification:
+                      question: "What would you like me to do?"
+                      options:
+                        - "Create a new file"
+                        - "Modify existing code"
+                        - "Run a command"
+                        - "Something else"
+                    confidence: 0.25
+                    reasoning: "The prompt 'Do it now' lacks specific context about what action to perform."
+                suggestion_provided:
+                  summary: Proactive suggestion provided
+                  value:
+                    response: "Here's a Python function to calculate factorial:"
+                    status: "success"
+                    service: "clarification_core"
+                    suggestion:
+                      type: "code_improvement"
+                      title: "Consider adding input validation"
+                      description: "Add type hints and input validation for better code quality"
+                      code: |
+                        def factorial(n: int) -> int:
+                            if not isinstance(n, int) or n < 0:
+                                raise ValueError("n must be a non-negative integer")
+                            return 1 if n <= 1 else n * factorial(n - 1)
+                    confidence: 0.85
+                abuse_detected:
+                  summary: Abuse pattern detected
+                  value:
+                    response: "I need more context to provide helpful assistance."
+                    status: "abuse_detected"
+                    service: "clarification_core"
+                    confidence: 0.15
+                    reasoning: "The input contains patterns that may be abusive or spam-like."
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalid_request:
+                  summary: Invalid request format
+                  value:
+                    status: "error"
+                    message: "Invalid request format"
+                    error_code: "INVALID_REQUEST"
+                    details: "Missing required field: prompt"
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                rate_limited:
+                  summary: Rate limit exceeded
+                  value:
+                    status: "error"
+                    message: "Rate limit exceeded"
+                    error_code: "RATE_LIMIT_EXCEEDED"
+                    details: "Too many requests. Please try again later."
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /suggest:
+    post:
+      tags:
+        - suggestions
+      summary: Get Proactive Suggestions
+      description: |
+        Generates proactive suggestions based on the current context and user behavior.
+        This endpoint is useful for providing intelligent recommendations to improve
+        user experience and productivity.
+        
+        **Rate Limiting**: 20 requests/minute per session
+        **Privacy**: Suggestions are generated without storing personal data
+      operationId: getSuggestions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SuggestionRequest'
+            examples:
+              code_context:
+                summary: Code improvement suggestions
+                value:
+                  context: "python_development"
+                  current_code: "def calculate(x, y):\n    return x + y"
+                  user_intent: "optimization"
+              general_context:
+                summary: General productivity suggestions
+                value:
+                  context: "general"
+                  user_activity: "frequent_clarification_requests"
+                  user_intent: "efficiency"
+      responses:
+        '200':
+          description: Suggestions generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuggestionResponse'
+              examples:
+                code_suggestions:
+                  summary: Code improvement suggestions
+                  value:
+                    suggestions:
+                      - type: "performance"
+                        title: "Add type hints"
+                        description: "Consider adding type hints for better code clarity"
+                        confidence: 0.9
+                        impact: "high"
+                      - type: "security"
+                        title: "Input validation"
+                        description: "Add input validation to prevent errors"
+                        confidence: 0.8
+                        impact: "medium"
+                    status: "success"
+                    service: "proactive_suggestions"
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /config:
+    get:
+      tags:
+        - configuration
+      summary: Get Configuration
+      description: |
+        Returns the current configuration of the StillMe AI Framework.
+        This endpoint is useful for debugging and understanding system settings.
+        
+        **Authentication**: Requires valid session token
+        **Privacy**: Sensitive configuration values are redacted
+      operationId: getConfiguration
+      security:
+        - sessionAuth: []
+      responses:
+        '200':
+          description: Configuration retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigurationResponse'
+              examples:
+                full_config:
+                  summary: Full configuration
+                  value:
+                    abuse_guard:
+                      enabled: true
+                      thresholds:
+                        suggestion: 0.8
+                        abuse: 0.15
+                    clarification:
+                      enabled: true
+                      max_rounds: 2
+                      confidence_thresholds:
+                        ask_clarify: 0.25
+                        proceed: 0.80
+                    privacy:
+                      mode: "balanced"
+                      redact_pii: true
+                    performance:
+                      max_latency_ms: 500
+                      target_throughput_rps: 200
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      tags:
+        - configuration
+      summary: Update Configuration
+      description: |
+        Updates the configuration of the StillMe AI Framework.
+        Only certain configuration values can be updated at runtime.
+        
+        **Authentication**: Requires valid session token
+        **Authorization**: Requires admin privileges
+        **Privacy**: Sensitive configuration values cannot be updated
+      operationId: updateConfiguration
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigurationUpdateRequest'
+      responses:
+        '200':
+          description: Configuration updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigurationResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /data/delete:
+    post:
+      tags:
+        - privacy
+      summary: Delete User Data
+      description: |
+        Deletes all data associated with a specific user.
+        This endpoint is required for GDPR compliance and user privacy.
+        
+        **Authentication**: Requires valid session token
+        **Privacy**: This action is irreversible
+      operationId: deleteUserData
+      security:
+        - sessionAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DataDeletionRequest'
+      responses:
+        '200':
+          description: Data deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DataDeletionResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: header
+      name: X-Session
+      description: Session token for authentication
+
+  schemas:
+    HealthResponse:
+      type: object
+      required:
+        - status
+        - message
+        - service
+      properties:
+        status:
+          type: string
+          enum: [ok, error, degraded]
+          description: Overall health status
+        message:
+          type: string
+          description: Human-readable status message
+        service:
+          type: string
+          description: Service name
+        version:
+          type: string
+          description: Service version
+        timestamp:
+          type: string
+          format: date-time
+          description: Response timestamp
+        uptime:
+          type: integer
+          description: Service uptime in seconds
+        modules:
+          type: object
+          additionalProperties:
+            type: string
+            enum: [running, error, degraded, stopped]
+          description: Status of individual modules
+
+    ChatRequest:
+      type: object
+      required:
+        - prompt
+      properties:
+        prompt:
+          type: string
+          description: The user's input prompt
+          minLength: 1
+          maxLength: 10000
+        context:
+          $ref: '#/components/schemas/RequestContext'
+        options:
+          $ref: '#/components/schemas/RequestOptions'
+
+    RequestContext:
+      type: object
+      properties:
+        user_id:
+          type: string
+          description: Unique user identifier
+        session_id:
+          type: string
+          description: Session identifier
+        timestamp:
+          type: string
+          format: date-time
+          description: Request timestamp
+        previous_messages:
+          type: array
+          items:
+            type: string
+          description: Previous messages in the conversation
+        user_preferences:
+          type: object
+          description: User preferences and settings
+
+    RequestOptions:
+      type: object
+      properties:
+        max_clarification_rounds:
+          type: integer
+          minimum: 1
+          maximum: 5
+          default: 2
+          description: Maximum number of clarification rounds
+        enable_suggestions:
+          type: boolean
+          default: true
+          description: Whether to enable proactive suggestions
+        privacy_mode:
+          type: string
+          enum: [strict, balanced, permissive]
+          default: balanced
+          description: Privacy mode for this request
+        language:
+          type: string
+          default: en
+          description: Preferred language for responses
+
+    ChatResponse:
+      type: object
+      required:
+        - response
+        - status
+        - service
+      properties:
+        response:
+          type: string
+          description: The main response content
+        status:
+          type: string
+          enum: [success, clarification_needed, abuse_detected, error]
+          description: Response status
+        service:
+          type: string
+          description: Service that generated the response
+        clarification:
+          $ref: '#/components/schemas/Clarification'
+        suggestion:
+          $ref: '#/components/schemas/Suggestion'
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Confidence score for the response
+        reasoning:
+          type: string
+          description: Explanation of the decision-making process
+        metadata:
+          type: object
+          description: Additional metadata about the response
+
+    Clarification:
+      type: object
+      required:
+        - question
+      properties:
+        question:
+          type: string
+          description: The clarification question
+        options:
+          type: array
+          items:
+            type: string
+          description: Suggested options for the user
+        context:
+          type: string
+          description: Additional context for the clarification
+        required:
+          type: boolean
+          default: true
+          description: Whether clarification is required to proceed
+
+    Suggestion:
+      type: object
+      required:
+        - type
+        - title
+        - description
+      properties:
+        type:
+          type: string
+          enum: [performance, security, ux, scalability, maintainability, code_improvement]
+          description: Type of suggestion
+        title:
+          type: string
+          description: Short title for the suggestion
+        description:
+          type: string
+          description: Detailed description of the suggestion
+        code:
+          type: string
+          description: Code example (if applicable)
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+          description: Confidence score for the suggestion
+        impact:
+          type: string
+          enum: [low, medium, high]
+          description: Expected impact of implementing the suggestion
+
+    SuggestionRequest:
+      type: object
+      required:
+        - context
+      properties:
+        context:
+          type: string
+          description: Current context or activity
+        current_code:
+          type: string
+          description: Current code (if applicable)
+        user_intent:
+          type: string
+          description: User's intent or goal
+        user_activity:
+          type: string
+          description: Recent user activity pattern
+        preferences:
+          type: object
+          description: User preferences for suggestions
+
+    SuggestionResponse:
+      type: object
+      required:
+        - suggestions
+        - status
+        - service
+      properties:
+        suggestions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Suggestion'
+          description: List of generated suggestions
+        status:
+          type: string
+          enum: [success, no_suggestions, error]
+          description: Response status
+        service:
+          type: string
+          description: Service that generated the suggestions
+        metadata:
+          type: object
+          description: Additional metadata about the suggestions
+
+    ConfigurationResponse:
+      type: object
+      required:
+        - configuration
+        - status
+      properties:
+        configuration:
+          type: object
+          description: Current configuration values
+        status:
+          type: string
+          enum: [success, error]
+          description: Response status
+        last_updated:
+          type: string
+          format: date-time
+          description: When the configuration was last updated
+        version:
+          type: string
+          description: Configuration version
+
+    ConfigurationUpdateRequest:
+      type: object
+      properties:
+        abuse_guard:
+          type: object
+          properties:
+            enabled:
+              type: boolean
+            thresholds:
+              type: object
+              properties:
+                suggestion:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                abuse:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+        clarification:
+          type: object
+          properties:
+            max_rounds:
+              type: integer
+              minimum: 1
+              maximum: 5
+            confidence_thresholds:
+              type: object
+              properties:
+                ask_clarify:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+                proceed:
+                  type: number
+                  minimum: 0
+                  maximum: 1
+        privacy:
+          type: object
+          properties:
+            mode:
+              type: string
+              enum: [strict, balanced, permissive]
+            redact_pii:
+              type: boolean
+
+    DataDeletionRequest:
+      type: object
+      required:
+        - user_id
+      properties:
+        user_id:
+          type: string
+          description: User ID whose data should be deleted
+        confirmation:
+          type: string
+          description: Confirmation text (e.g., "DELETE MY DATA")
+        reason:
+          type: string
+          description: Reason for data deletion (optional)
+
+    DataDeletionResponse:
+      type: object
+      required:
+        - status
+        - message
+      properties:
+        status:
+          type: string
+          enum: [success, error]
+          description: Deletion status
+        message:
+          type: string
+          description: Human-readable status message
+        deleted_items:
+          type: array
+          items:
+            type: string
+          description: List of deleted data items
+        retention_period:
+          type: integer
+          description: Data retention period in days
+
+    ErrorResponse:
+      type: object
+      required:
+        - status
+        - message
+      properties:
+        status:
+          type: string
+          enum: [error]
+          description: Error status
+        message:
+          type: string
+          description: Human-readable error message
+        error_code:
+          type: string
+          description: Machine-readable error code
+        details:
+          type: string
+          description: Additional error details
+        timestamp:
+          type: string
+          format: date-time
+          description: Error timestamp
+        request_id:
+          type: string
+          description: Unique request identifier for debugging
+
+  examples:
+    HealthCheck:
+      summary: Healthy service
+      value:
+        status: "ok"
+        message: "StillMe AI Framework is running"
+        service: "clarification_core"
+        version: "1.0.0"
+        timestamp: "2024-01-15T10:30:00Z"
+        uptime: 3600
+        modules:
+          clarification_handler: "running"
+          abuse_guard: "running"
+          proactive_suggestions: "running"
+
+    ChatRequest:
+      summary: Typical chat request
+      value:
+        prompt: "Create a Python function to calculate factorial"
+        context:
+          user_id: "user123"
+          session_id: "session456"
+          timestamp: "2024-01-15T10:30:00Z"
+        options:
+          max_clarification_rounds: 2
+          enable_suggestions: true
+          privacy_mode: "balanced"
+
+    ChatResponse:
+      summary: Successful response with suggestion
+      value:
+        response: "Here's a Python function to calculate factorial:"
+        status: "success"
+        service: "clarification_core"
+        suggestion:
+          type: "code_improvement"
+          title: "Add input validation"
+          description: "Consider adding type hints and input validation"
+          code: "def factorial(n: int) -> int:\n    if n < 0:\n        raise ValueError('n must be non-negative')\n    return 1 if n <= 1 else n * factorial(n - 1)"
+          confidence: 0.9
+          impact: "high"
+        confidence: 0.85
+        reasoning: "The prompt was clear and specific, allowing for a direct response with improvement suggestions."

@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\core\observability\health.py
+# hypothesis_version: 6.140.2
+
+[100, 1000, 1024, ' AND name = ?', '*.jsonl', '/', 'No log files found', 'SELECT 1', 'available_gb', 'avg_response_time_ms', 'check_summaries', 'cpu_count', 'cpu_percent', 'critical', 'degraded', 'degraded_checks', 'disk_percent', 'error', 'free_gb', 'getloadavg', 'health.db', 'health_percentage', 'healthy', 'healthy_checks', 'latest_message', 'latest_status', 'load_15min', 'load_1min', 'load_5min', 'load_percent', 'log_file_count', 'log_files', 'logs', 'max_response_time_ms', 'memory_percent', 'min_response_time_ms', 'status_counts', 'system_cpu', 'system_disk', 'system_load', 'system_memory', 'test_health.db', 'thresholds', 'time_range_hours', 'total_checks', 'total_gb', 'total_runs', 'total_size_mb', 'unhealthy', 'unhealthy_checks', 'unique_checks', 'unknown', 'warning']

@@ -1,0 +1,381 @@
+name: "CI Tier 2 - Comprehensive CI"
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # Daily at 2 AM UTC
+  workflow_dispatch:
+    inputs:
+      run_full_suite:
+        description: 'Run full test suite'
+        required: false
+        default: 'true'
+        type: boolean
+      run_chaos_tests:
+        description: 'Run chaos engineering tests'
+        required: false
+        default: 'false'
+        type: boolean
+      run_mutation_tests:
+        description: 'Run mutation testing'
+        required: false
+        default: 'false'
+        type: boolean
+
+env:
+  PYTHON_VERSION: "3.12"
+  NODE_VERSION: "18"
+
+jobs:
+  comprehensive-tests:
+    name: "Comprehensive Tests"
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-test.txt
+        pip install pytest-cov pytest-html pytest-xdist
+        pip install hypothesis mutmut cosmic-ray
+    
+    - name: Run comprehensive test suite
+      run: |
+        python -m pytest tests/ -v --tb=short --cov=agentdev --cov-report=html --cov-report=xml --html=report.html --self-contained-html
+    
+    - name: Upload test reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-reports
+        path: |
+          htmlcov/
+          coverage.xml
+          report.html
+
+  mutation-testing:
+    name: "Mutation Testing"
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    if: github.event.inputs.run_mutation_tests == 'true' || github.event_name == 'schedule'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-test.txt
+        pip install mutmut
+    
+    - name: Run mutation testing
+      run: |
+        mutmut run --paths-to-mutate=agentdev/ --tests-dir=tests/agentdev/
+        mutmut junitxml > mutation-results.xml
+    
+    - name: Upload mutation results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: mutation-results
+        path: |
+          mutation-results.xml
+          .mutmut-cache/
+
+  chaos-engineering:
+    name: "Chaos Engineering"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: github.event.inputs.run_chaos_tests == 'true' || github.event_name == 'schedule'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-test.txt
+        pip install chaos-engineering
+    
+    - name: Run chaos tests
+      run: |
+        python -m pytest tests/chaos/ -v --tb=short
+    
+    - name: Upload chaos results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: chaos-results
+        path: |
+          chaos-reports/
+
+  load-testing:
+    name: "Load Testing"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+    
+    - name: Install k6
+      run: |
+        sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+        echo "deb https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6.list
+        sudo apt-get update
+        sudo apt-get install k6
+    
+    - name: Run load tests
+      run: |
+        k6 run load_test/baseline.js --out json=load-results.json
+        k6 run load_test/with_cache.js --out json=load-results-cache.json
+        k6 run load_test/with_egress_guard.js --out json=load-results-guard.json
+    
+    - name: Upload load test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: load-test-results
+        path: |
+          load-results.json
+          load-results-cache.json
+          load-results-guard.json
+
+  fuzzing:
+    name: "Fuzzing Tests"
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-test.txt
+        pip install hypothesis
+    
+    - name: Run fuzzing tests
+      run: |
+        python -m pytest tests/fuzzing/ -v --tb=short --hypothesis-show-statistics
+    
+    - name: Upload fuzzing results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: fuzzing-results
+        path: |
+          fuzzing-reports/
+
+  integration-tests:
+    name: "Integration Tests"
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-test.txt
+    
+    - name: Run integration tests
+      run: |
+        python -m pytest tests/integration/ -v --tb=short
+    
+    - name: Upload integration results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: integration-results
+        path: |
+          integration-reports/
+
+  performance-benchmark:
+    name: "Performance Benchmark"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-test.txt
+        pip install pytest-benchmark
+    
+    - name: Run performance benchmarks
+      run: |
+        python -m pytest tests/benchmarks/ -v --benchmark-only --benchmark-save=benchmark-results
+    
+    - name: Upload benchmark results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: benchmark-results
+        path: |
+          .benchmarks/
+
+  security-deep-scan:
+    name: "Security Deep Scan"
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: Install security tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit safety semgrep
+        pip install -r requirements.txt
+    
+    - name: Run comprehensive security scan
+      run: |
+        bandit -r . -f json -o bandit-comprehensive.json
+        safety check --json --output safety-comprehensive.json
+        semgrep --config=auto --json --output=semgrep-comprehensive.json .
+        python ci/security_deep_scan.py
+    
+    - name: Upload security reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: security-deep-reports
+        path: |
+          bandit-comprehensive.json
+          safety-comprehensive.json
+          semgrep-comprehensive.json
+          security-deep-report.json
+
+  generate-report:
+    name: "Generate Comprehensive Report"
+    runs-on: ubuntu-latest
+    needs: [comprehensive-tests, mutation-testing, chaos-engineering, load-testing, fuzzing, integration-tests, performance-benchmark, security-deep-scan]
+    if: always()
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+    
+    - name: Generate comprehensive report
+      run: |
+        python ci/generate_comprehensive_report.py
+    
+    - name: Upload final report
+      uses: actions/upload-artifact@v3
+      with:
+        name: comprehensive-ci-report
+        path: |
+          comprehensive-ci-report.html
+          comprehensive-ci-report.json
+    
+    - name: Comment on PR (if applicable)
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const report = JSON.parse(fs.readFileSync('comprehensive-ci-report.json', 'utf8'));
+          
+          let comment = '## Comprehensive CI Report\n\n';
+          comment += `**Overall Status:** ${report.overall_status}\n\n`;
+          comment += `**Test Coverage:** ${report.coverage}%\n\n`;
+          comment += `**Mutation Score:** ${report.mutation_score}%\n\n`;
+          comment += `**Performance:** ${report.performance_status}\n\n`;
+          comment += `**Security:** ${report.security_status}\n\n`;
+          comment += `**Load Test:** ${report.load_test_status}\n\n`;
+          
+          if (report.overall_status === 'PASS') {
+            comment += 'All comprehensive tests passed! Ready for production deployment.';
+          } else {
+            comment += 'Some tests failed. Please review the detailed reports.';
+          }
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });

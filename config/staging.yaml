@@ -1,0 +1,62 @@
+# StillMe NicheRadar v1.5 - Staging Configuration
+# Profile staging cho testing và QA
+# Không ghi đè production
+
+# Web Access Settings
+web_search:
+  enabled: true
+  timeout: 5
+  retry_count: 2
+  response_limit: 2097152  # 2MB
+
+# Cache Settings
+cache:
+  enabled: true
+  default_ttl: 300  # 5 minutes
+  max_size: 1000
+  cleanup_interval: 600  # 10 minutes
+
+# Tool Gate Settings
+tool_gate:
+  enabled: true
+  log_decisions: true
+  log_file: "logs/tool_gate.log"
+  max_cost_estimate: 1000
+
+# NicheRadar Settings
+niche_radar:
+  enabled: true
+  max_topics: 10
+  confidence_threshold: 0.6
+  report_dir: "reports"
+  playbook_dir: "reports/playbooks"
+
+# Security Settings
+security:
+  content_wrap: true
+  injection_detection: true
+  allowlist_enforcement: true
+  redirect_limit: 3
+  require_https: true
+
+# Metrics Settings
+metrics:
+  enabled: true
+  log_interval: 300  # 5 minutes
+  log_file: "logs/web_metrics.log"
+  export_summary: true
+
+# Testing Settings
+testing:
+  use_vcr_cassettes: true
+  cassette_dir: "tests/cassettes"
+  mock_external_apis: false
+  deterministic_scoring: true
+
+# Logging Settings
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "logs/staging.log"
+  max_size: 10485760  # 10MB
+  backup_count: 5

@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\security\security_manager.py
+# hypothesis_version: 6.140.2
+
+[100, 300, 3600, 'audit_logging', 'critical', 'data_breach', 'data_retention_days', 'encryption_required', 'error', 'high', 'incidents_by_level', 'incidents_by_type', 'lockout_duration', 'login_attempt', 'low', 'max_login_attempts', 'medium', 'password_min_length', 'permission_denied', 'require_2fa', 'resolved_incidents', 'security_policies', 'security_score', 'session_timeout', 'suspicious_activity', 'system_compromise', 'timestamp', 'total_incidents', 'unresolved_incidents', '⚠️', '🔒']

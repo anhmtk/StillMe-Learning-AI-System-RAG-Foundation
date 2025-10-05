@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\verifier.py
+# hypothesis_version: 6.140.2
+
+[0.8, 5.0, 10.0, 15.0, 20.0, 25.0, 30.0, 50.0, 100.0, 100, 300, 'Empty code content', 'FIXME', 'TODO', 'code_length', 'code_quality', 'error', 'eval(', 'exec(', 'failed', 'failed_verifications', 'file_path', 'for i in range(len(', 'functionality', 'in_progress', 'integration', 'issues', 'pass_rate', 'pass_threshold', 'passed', 'passed_verifications', 'password', 'pending', 'performance', 'print(', 'retry_attempts', 'score', 'secret', 'security', 'shell=True', 'skipped', 'subprocess', 'time.sleep(', 'timestamp', 'total_verifications', 'verification_config', 'verification_types', 'vulnerabilities', 'while True:']

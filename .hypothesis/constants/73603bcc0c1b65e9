@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\agent_dev\persistence\models.py
+# hypothesis_version: 6.140.2
+
+[1.0, 100, 255, '1.0', ':memory:', 'date', 'diff_hash', 'enabled', 'error_type', 'feedback', 'feedback_events', 'hits', 'idx_feedback_session', 'idx_patch_hash', 'idx_patch_ts', 'idx_rules_severity', 'is_active', 'learned_solutions', 'medium', 'metric_name', 'metric_type', 'metrics', 'metrics_daily', 'outcome', 'patch_history', 'preference_key', 'priority', 'rule_applied', 'rule_definitions', 'rules', 'session_id', 'severity', 'source', 'sqlite:///', 'sqlite:///:memory:', 'success_rate', 'timestamp', 'ts', 'user_id', 'user_preferences']

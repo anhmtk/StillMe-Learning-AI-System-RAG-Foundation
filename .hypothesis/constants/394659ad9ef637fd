@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\modules\communication_style_manager.py
+# hypothesis_version: 6.140.2
+
+[0.7, 100, ',', '.', '\\s*,\\s*,', '\\s*\\.\\s*\\.', '\\s+', '^tất nhiên rồi,?\\s*', 'certainly', 'chi tiết', 'cảm ơn bạn đã hỏi', 'description', 'details', 'error', 'file', "i'd be glad to", "i'd be happy to", "i'm very glad", "i'm very happy", 'info', 'information', 'lỗi', 'mô tả', 'name', 'of course', 'optimized_length', 'original_length', 'path', 'reduction_percentage', 'thank you for asking', 'thông tin', 'tên', 'tôi hiểu bạn đang', 'tôi rất sẵn lòng', 'tôi rất vui được', 'tôi sẽ cố gắng', 'tất nhiên rồi', 'was_optimized', 'đây là một câu hỏi', 'đường dẫn']

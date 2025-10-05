@@ -1,0 +1,83 @@
+name: CI Unit Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        python-version: [3.11, 3.12]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Cache pip dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-test.txt
+        pip install flake8 black isort mypy
+    
+    - name: Lint with flake8
+      run: |
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    
+    - name: Check code formatting with black
+      run: |
+        black --check --diff .
+    
+    - name: Check import sorting with isort
+      run: |
+        isort --check-only --diff .
+    
+    - name: Type check with mypy
+      run: |
+        mypy --ignore-missing-imports agent-dev/ stillme_core/
+    
+    - name: Run unit tests
+      run: |
+        pytest agentdev_foundation_tests/unit/ -v --cov=agent-dev --cov=stillme_core --cov-report=xml --cov-report=html --junitxml=junit-unit.xml
+    
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+    
+    - name: Upload coverage reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-report-${{ matrix.python-version }}
+        path: htmlcov/
+    
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results-${{ matrix.python-version }}
+        path: junit-unit.xml
+    
+    - name: Check coverage thresholds
+      run: |
+        coverage report --fail-under=85
+        coverage report --show-missing

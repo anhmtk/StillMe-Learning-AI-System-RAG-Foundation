@@ -1,0 +1,245 @@
+name: ⚡ Performance Testing
+
+on:
+  schedule:
+    # Run weekly on Sundays at 3 AM UTC
+    - cron: '0 3 * * 0'
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  performance-test:
+    name: ⚡ Performance & Load Testing
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+    
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        cache: 'pip'
+    
+    - name: 📦 Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .[dev]
+        pip install pytest-benchmark memory-profiler psutil
+    
+    - name: ⚡ Run Performance Tests
+      run: |
+        echo "⚡ Running performance tests..."
+        
+        # Create performance test script
+        cat > performance_test.py << 'EOF'
+        import time
+        import psutil
+        import memory_profiler
+        from stillme_core.quality.code_quality_enforcer import CodeQualityEnforcer
+        import asyncio
+        
+        async def test_quality_enforcer_performance():
+            """Test CodeQualityEnforcer performance"""
+            print("🔍 Testing CodeQualityEnforcer performance...")
+            
+            enforcer = CodeQualityEnforcer()
+            
+            # Test with different file sizes
+            test_paths = [
+                "stillme_core/quality/",
+                "stillme_core/cli/",
+                "."
+            ]
+            
+            results = {}
+            
+            for path in test_paths:
+                print(f"  Testing path: {path}")
+                
+                # Measure execution time
+                start_time = time.time()
+                start_memory = psutil.Process().memory_info().rss / 1024 / 1024  # MB
+                
+                try:
+                    report = await enforcer.analyze_directory(path, tools=["ruff"])
+                    
+                    end_time = time.time()
+                    end_memory = psutil.Process().memory_info().rss / 1024 / 1024  # MB
+                    
+                    results[path] = {
+                        'execution_time': end_time - start_time,
+                        'memory_usage': end_memory - start_memory,
+                        'files_analyzed': report.total_files,
+                        'issues_found': report.total_issues,
+                        'quality_score': report.quality_score
+                    }
+                    
+                    print(f"    ✅ Completed in {results[path]['execution_time']:.2f}s")
+                    print(f"    📊 Files: {results[path]['files_analyzed']}, Issues: {results[path]['issues_found']}")
+                    
+                except Exception as e:
+                    print(f"    ❌ Error: {e}")
+                    results[path] = {'error': str(e)}
+            
+            return results
+        
+        async def test_cli_performance():
+            """Test CLI performance"""
+            print("🖥️ Testing CLI performance...")
+            
+            import subprocess
+            import time
+            
+            cli_commands = [
+                ["python", "stillme_cli_final.py", "info"],
+                ["python", "stillme_cli_final.py", "doctor"],
+                ["python", "stillme_cli_final.py", "status"],
+                ["python", "stillme_cli_final.py", "quality-check", "stillme_core/quality", "--tool", "ruff"]
+            ]
+            
+            results = {}
+            
+            for cmd in cli_commands:
+                cmd_name = " ".join(cmd[2:])  # Skip python and script name
+                print(f"  Testing command: {cmd_name}")
+                
+                start_time = time.time()
+                start_memory = psutil.Process().memory_info().rss / 1024 / 1024  # MB
+                
+                try:
+                    result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+                    
+                    end_time = time.time()
+                    end_memory = psutil.Process().memory_info().rss / 1024 / 1024  # MB
+                    
+                    results[cmd_name] = {
+                        'execution_time': end_time - start_time,
+                        'memory_usage': end_memory - start_memory,
+                        'return_code': result.returncode,
+                        'success': result.returncode == 0
+                    }
+                    
+                    print(f"    ✅ Completed in {results[cmd_name]['execution_time']:.2f}s")
+                    
+                except subprocess.TimeoutExpired:
+                    print(f"    ⏰ Timeout after 60s")
+                    results[cmd_name] = {'error': 'timeout'}
+                except Exception as e:
+                    print(f"    ❌ Error: {e}")
+                    results[cmd_name] = {'error': str(e)}
+            
+            return results
+        
+        async def main():
+            print("🚀 Starting performance tests...")
+            
+            # Test quality enforcer
+            quality_results = await test_quality_enforcer_performance()
+            
+            # Test CLI
+            cli_results = await test_cli_performance()
+            
+            # Generate summary
+            print("\n📊 Performance Test Summary:")
+            print("=" * 50)
+            
+            print("\n🔍 CodeQualityEnforcer Performance:")
+            for path, result in quality_results.items():
+                if 'error' not in result:
+                    print(f"  {path}: {result['execution_time']:.2f}s, {result['memory_usage']:.1f}MB")
+                else:
+                    print(f"  {path}: ERROR - {result['error']}")
+            
+            print("\n🖥️ CLI Performance:")
+            for cmd, result in cli_results.items():
+                if 'error' not in result:
+                    print(f"  {cmd}: {result['execution_time']:.2f}s, {result['memory_usage']:.1f}MB")
+                else:
+                    print(f"  {cmd}: ERROR - {result['error']}")
+            
+            # Save results
+            import json
+            with open('performance-results.json', 'w') as f:
+                json.dump({
+                    'quality_enforcer': quality_results,
+                    'cli': cli_results,
+                    'timestamp': time.time()
+                }, f, indent=2)
+            
+            print("\n✅ Performance tests completed!")
+        
+        if __name__ == "__main__":
+            asyncio.run(main())
+        EOF
+        
+        # Run performance tests
+        python performance_test.py
+    
+    - name: 📊 Upload Performance Reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: performance-reports-${{ github.run_number }}
+        path: performance-results.json
+        retention-days: 30
+    
+    - name: 📈 Performance Gate
+      run: |
+        echo "📈 Running performance gate..."
+        
+        python -c "
+        import json
+        
+        try:
+            with open('performance-results.json', 'r') as f:
+                results = json.load(f)
+            
+            # Define performance thresholds
+            MAX_EXECUTION_TIME = 30.0  # seconds
+            MAX_MEMORY_USAGE = 500.0   # MB
+            
+            print('📊 Performance Gate Results:')
+            print('=' * 40)
+            
+            # Check quality enforcer performance
+            quality_issues = []
+            for path, result in results['quality_enforcer'].items():
+                if 'error' not in result:
+                    if result['execution_time'] > MAX_EXECUTION_TIME:
+                        quality_issues.append(f'{path}: Execution time {result[\"execution_time\"]:.2f}s > {MAX_EXECUTION_TIME}s')
+                    if result['memory_usage'] > MAX_MEMORY_USAGE:
+                        quality_issues.append(f'{path}: Memory usage {result[\"memory_usage\"]:.1f}MB > {MAX_MEMORY_USAGE}MB')
+            
+            # Check CLI performance
+            cli_issues = []
+            for cmd, result in results['cli'].items():
+                if 'error' not in result:
+                    if result['execution_time'] > MAX_EXECUTION_TIME:
+                        cli_issues.append(f'{cmd}: Execution time {result[\"execution_time\"]:.2f}s > {MAX_EXECUTION_TIME}s')
+                    if result['memory_usage'] > MAX_MEMORY_USAGE:
+                        cli_issues.append(f'{cmd}: Memory usage {result[\"memory_usage\"]:.1f}MB > {MAX_MEMORY_USAGE}MB')
+            
+            # Report results
+            if quality_issues or cli_issues:
+                print('❌ Performance gate failed!')
+                print('Issues found:')
+                for issue in quality_issues + cli_issues:
+                    print(f'  - {issue}')
+                exit(1)
+            else:
+                print('✅ Performance gate passed!')
+                print('All performance metrics within acceptable limits.')
+        
+        except FileNotFoundError:
+            print('❌ Performance results not found!')
+            exit(1)
+        except Exception as e:
+            print(f'❌ Error checking performance: {e}')
+            exit(1)
+        "
