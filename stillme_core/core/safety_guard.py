@@ -24,7 +24,7 @@ except Exception:
 
 # Import enhanced templates
 try:
-    from .policy_templates import get_template  # type: ignore
+    from .policy_templates import get_template
 except ImportError:
     # Fallback if import fails
     def get_template(

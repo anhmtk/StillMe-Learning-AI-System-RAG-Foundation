@@ -615,14 +615,14 @@ class LearningOptimizationEngine:
                 if "performance" in entry.input_data:
                     perf_data = entry.input_data["performance"]
                     if "status" in perf_data:
-                        performance_values.append(  # type: ignore
+                        performance_values.append(
                             1 if perf_data["status"] == "healthy" else 0
                         )
 
-            if len(performance_values) >= 10:  # type: ignore
-                avg_performance = sum(performance_values) / len(performance_values)  # type: ignore
+            if len(performance_values) >= 10:
+                avg_performance = sum(performance_values) / len(performance_values)
                 if avg_performance < 0.8:
-                    patterns.append(  # type: ignore
+                    patterns.append(
                         {
                             "type": "performance_degradation",
                             "confidence": 0.8,
@@ -664,7 +664,7 @@ class LearningOptimizationEngine:
 
             knowledge = KnowledgeBase(
                 knowledge_id=knowledge_id,
-                category=KnowledgeCategory.SYSTEM_PATTERNS,  # type: ignore
+                category=KnowledgeCategory.SYSTEM_PATTERNS,
                 title=f"Pattern: {pattern['type']}",
                 content=pattern["description"],
                 confidence=pattern["confidence"],

@@ -21,10 +21,10 @@ try:
     from ..observability.metrics import get_metrics_collector
     from ..observability.tracer import get_tracer
     from .intelligent_router import (
-        AgentType,  # type: ignore
-        RoutingDecision,  # type: ignore
-        TaskComplexity,  # type: ignore
-        TaskType,  # type: ignore
+        AgentType,
+        RoutingDecision,
+        TaskComplexity,
+        TaskType,
     )
 except ImportError:
     # Fallback for standalone execution

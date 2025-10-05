@@ -25,7 +25,7 @@ try:
     from .pattern_matcher import PatternMatcher
 except Exception:  # pragma: no cover - pattern matcher will be added in next prompts
 
-    class PatternMatcher:  # type: ignore
+    class PatternMatcher:
         def __init__(self, config: dict[str, Any] | None = None):
             self.config = config or {}
 
@@ -39,7 +39,7 @@ try:
     from .reflex_policy import ReflexPolicy
 except Exception:  # pragma: no cover
 
-    class ReflexPolicy:  # type: ignore
+    class ReflexPolicy:
         def __init__(self, policy_level: str = "balanced"):
             self.level = policy_level
 
@@ -52,7 +52,7 @@ try:
     from .reflex_safety import ReflexSafety
 except Exception:  # pragma: no cover
 
-    class ReflexSafety:  # type: ignore
+    class ReflexSafety:
         def quick_check(self, text: str) -> bool:
             return True
 
@@ -72,7 +72,7 @@ try:
     from .action_sandbox import ActionSandbox
 except Exception:  # pragma: no cover
 
-    class ActionSandbox:  # type: ignore
+    class ActionSandbox:
         def __init__(self, config: dict[str, Any] | None = None):
             self.config = config or {}
             self.dry_run = self.config.get("dry_run", True)
@@ -96,7 +96,7 @@ try:
     from .habit_store import HabitStore
 except Exception:  # pragma: no cover
 
-    class HabitStore:  # type: ignore
+    class HabitStore:
         def __init__(self, config: dict[str, Any] | None = None):
             self.config = config or {}
 
@@ -121,7 +121,7 @@ try:
     from .observability import ObservabilityManager
 except Exception:  # pragma: no cover
 
-    class ObservabilityManager:  # type: ignore
+    class ObservabilityManager:
         def __init__(self, config: dict[str, Any] | None = None):
             self.config = config or {}
 

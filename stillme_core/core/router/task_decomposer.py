@@ -21,7 +21,7 @@ try:
     from ..observability.logger import get_logger
     from ..observability.metrics import get_metrics_collector
     from ..observability.tracer import get_tracer
-    from .intelligent_router import AgentType, TaskComplexity, TaskType  # type: ignore
+    from .intelligent_router import AgentType, TaskComplexity, TaskType
 except ImportError:
     # Fallback for standalone execution
     import sys
@@ -393,7 +393,7 @@ class TaskDecomposer:
         start_time = time.time()
         task_id = f"task_{int(time.time() * 1000)}"
 
-        with self.tracer.start_span("decompose_task") as span:  # type: ignore
+        with self.tracer.start_span("decompose_task") as span:
             span.set_attribute("task_type", task_type.value)
             span.set_attribute("complexity", complexity.value)
             span.set_attribute("task_id", task_id)

@@ -322,7 +322,7 @@ class MarketIntelligence:
         try:
             # Sử dụng gtrending library
             try:
-                from gtrending import fetch_repos  # type: ignore
+                from gtrending import fetch_repos
             except ImportError:
                 logger.warning("gtrending not available, using fallback")
                 return []
@@ -382,7 +382,7 @@ class MarketIntelligence:
         try:
             # Sử dụng pytrends library
             try:
-                from pytrends.request import TrendReq  # type: ignore
+                from pytrends.request import TrendReq
             except ImportError:
                 logger.warning("pytrends not available, using fallback")
                 return []
@@ -517,7 +517,7 @@ class MarketIntelligence:
         """Get news from GNews API"""
         try:
             try:
-                from gnews import GNews  # type: ignore
+                from gnews import GNews
             except ImportError:
                 logger.warning("gnews not available, using fallback")
                 return []

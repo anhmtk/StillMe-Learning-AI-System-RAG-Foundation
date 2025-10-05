@@ -25,7 +25,7 @@ class DockerSandboxManager:
             logger.error(f"Error running command: {command} | {e}")
             return None
 
-    def start_container(self) -> bool:  # type: ignore
+    def start_container(self) -> bool:
         # Check if Docker is running
         try:
             self._run_command_in_host(["docker", "info"], timeout=5)
@@ -105,7 +105,7 @@ class DockerSandboxManager:
         try:
             # Add a timeout to prevent commands from hanging indefinitely
             result = self._run_command_in_host(full_command, timeout=timeout)
-            return result  # type: ignore
+            return result
         except subprocess.TimeoutExpired:
             logger.error(
                 f"Command timed out after {timeout} seconds: {' '.join(command)}"

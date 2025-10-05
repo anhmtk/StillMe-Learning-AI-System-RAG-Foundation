@@ -99,7 +99,7 @@ class CodeQualityEnforcer:
         start_time = time.time()
         self.logger.info(f"Starting quality analysis of {target_path}")
 
-        target_path = Path(target_path)  # type: ignore
+        target_path = Path(target_path)
         if not target_path.exists():
             raise ValueError(f"Target path does not exist: {target_path}")
 
@@ -107,12 +107,12 @@ class CodeQualityEnforcer:
         python_files = self._get_python_files(
             target_path,
             include_patterns,
-            exclude_patterns,  # type: ignore
+            exclude_patterns,
         )
 
         if not python_files:
             self.logger.warning(f"No Python files found in {target_path}")
-            return self._create_empty_report(target_path)  # type: ignore
+            return self._create_empty_report(target_path)
 
         # Run quality tools
         tools_to_run = tools or list(self.tools.keys())
@@ -140,7 +140,7 @@ class CodeQualityEnforcer:
             python_files,
             all_issues,
             auto_fixes_applied,
-            execution_time,  # type: ignore
+            execution_time,
         )
 
         self.logger.info(
@@ -589,7 +589,7 @@ class CodeQualityEnforcer:
 
     def save_report(self, report: QualityReport, output_path: str) -> None:
         """Save quality report to file"""
-        output_path = Path(output_path)  # type: ignore
+        output_path = Path(output_path)
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Convert to JSON-serializable format

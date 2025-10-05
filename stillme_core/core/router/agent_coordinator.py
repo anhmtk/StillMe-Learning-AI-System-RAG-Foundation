@@ -26,8 +26,8 @@ try:
     from ..observability.logger import get_logger
     from ..observability.metrics import get_metrics_collector
     from ..observability.tracer import get_tracer
-    from .intelligent_router import AgentType, TaskComplexity, TaskType  # type: ignore
-    from .task_decomposer import (  # type: ignore
+    from .intelligent_router import AgentType, TaskComplexity, TaskType
+    from .task_decomposer import (
         Subtask,
         SubtaskStatus,
         TaskDecomposition,
@@ -45,7 +45,7 @@ except ImportError:
 try:
     from stillme_core.observability.metrics import get_metrics_collector
 except ImportError:
-    pass  # type: ignore
+    pass
 
 try:
     from stillme_core.observability.tracer import get_tracer
@@ -296,7 +296,7 @@ class AgentCoordinator:
         start_time = time.time()
         plan_id = f"coordination_{int(time.time() * 1000)}"
 
-        with self.tracer.start_span("coordinate_task_execution") as span:  # type: ignore
+        with self.tracer.start_span("coordinate_task_execution") as span:
             span.set_attribute("plan_id", plan_id)
             span.set_attribute("subtasks_count", len(decomposition.subtasks))
             span.set_attribute("task_type", decomposition.main_task_type.value)
@@ -531,7 +531,7 @@ class AgentCoordinator:
             },
             AgentType.TESTER: {
                 TaskType.TESTING: 1.0,
-                TaskType.VALIDATION: 0.9,  # type: ignore
+                TaskType.VALIDATION: 0.9,
                 TaskType.BUG_FIX: 0.6,
             },
             AgentType.DOCUMENTER: {TaskType.DOCUMENTATION: 1.0, TaskType.ANALYSIS: 0.7},
@@ -871,7 +871,7 @@ class AgentCoordinator:
             required_skills=["analysis", "coordination"],
             assigned_agent=AgentType.AGENTDEV,
             dependencies=[],
-            dependency_type=None,  # type: ignore
+            dependency_type=None,
             priority=1.0,
             status=SubtaskStatus.PENDING,
             created_at=time.time(),

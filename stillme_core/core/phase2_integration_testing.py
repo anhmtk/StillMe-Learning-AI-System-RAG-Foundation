@@ -20,19 +20,19 @@ from typing import Any
 
 # Import all Phase 2 modules
 try:
-    from .autonomous_management_system import AutonomousManagementSystem  # type: ignore
-    from .learning_optimization_engine import LearningOptimizationEngine  # type: ignore
-    from .security_compliance_system import SecurityComplianceSystem  # type: ignore
+    from .autonomous_management_system import AutonomousManagementSystem
+    from .learning_optimization_engine import LearningOptimizationEngine
+    from .security_compliance_system import SecurityComplianceSystem
 except ImportError:
     try:
         from stillme_core.autonomous_management_system import (
-            AutonomousManagementSystem,  # type: ignore
+            AutonomousManagementSystem,
         )
         from stillme_core.learning_optimization_engine import (
-            LearningOptimizationEngine,  # type: ignore
+            LearningOptimizationEngine,
         )
         from stillme_core.security_compliance_system import (
-            SecurityComplianceSystem,  # type: ignore
+            SecurityComplianceSystem,
         )
     except ImportError:
         # Create mock classes for testing

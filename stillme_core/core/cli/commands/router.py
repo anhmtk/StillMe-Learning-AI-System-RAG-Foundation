@@ -153,10 +153,10 @@ def route_request(
             # Store the routing decision in memory
             memory_manager = RouterMemoryManager()
             await memory_manager.store_memory(
-                request_hash=hash(request),  # type: ignore
-                task_type=TaskType.GENERAL,  # Would be determined by analysis  # type: ignore
-                complexity=TaskComplexity(complexity),  # type: ignore
-                selected_agent=decision.primary_agent,  # type: ignore
+                request_hash=hash(request),
+                task_type=TaskType.GENERAL,  # Would be determined by analysis
+                complexity=TaskComplexity(complexity),
+                selected_agent=decision.primary_agent,
                 confidence=decision.confidence,
                 success=True,  # Assume success for now
                 duration=decision.estimated_time,
@@ -204,8 +204,8 @@ def decompose_task(
 
                 decomposition = await decomposer.decompose_task(
                     request=request,
-                    task_type=TaskType(task_type),  # type: ignore
-                    complexity=TaskComplexity(complexity),  # type: ignore
+                    task_type=TaskType(task_type),
+                    complexity=TaskComplexity(complexity),
                 )
 
                 progress.update(task, description="✅ Task decomposed")
@@ -297,8 +297,8 @@ def coordinate_agents(
                     id="analysis_1",
                     title="Analyze Requirements",
                     description="Analyze the task requirements",
-                    task_type=TaskType.ANALYSIS,  # type: ignore
-                    complexity=TaskComplexity.MEDIUM,  # type: ignore
+                    task_type=TaskType.ANALYSIS,
+                    complexity=TaskComplexity.MEDIUM,
                     estimated_duration=300,
                     required_skills=["analysis"],
                     assigned_agent=None,
@@ -312,8 +312,8 @@ def coordinate_agents(
                     id="implementation_1",
                     title="Implement Solution",
                     description="Implement the solution",
-                    task_type=TaskType.FEATURE_DEVELOPMENT,  # type: ignore
-                    complexity=TaskComplexity.COMPLEX,  # type: ignore
+                    task_type=TaskType.FEATURE_DEVELOPMENT,
+                    complexity=TaskComplexity.COMPLEX,
                     estimated_duration=600,
                     required_skills=["programming"],
                     assigned_agent=None,
@@ -330,8 +330,8 @@ def coordinate_agents(
             decomposition = TaskDecomposition(
                 task_id=task_id,
                 original_request="Sample coordination task",
-                main_task_type=TaskType.FEATURE_DEVELOPMENT,  # type: ignore
-                main_complexity=TaskComplexity.COMPLEX,  # type: ignore
+                main_task_type=TaskType.FEATURE_DEVELOPMENT,
+                main_complexity=TaskComplexity.COMPLEX,
                 subtasks=sample_subtasks,
                 total_estimated_duration=900,
                 critical_path=["analysis_1", "implementation_1"],
@@ -350,7 +350,7 @@ def coordinate_agents(
             ) as progress:
                 task = progress.add_task("Coordinating agent execution...", total=None)
 
-                result = await coordinator.coordinate_task_execution(decomposition)  # type: ignore
+                result = await coordinator.coordinate_task_execution(decomposition)
 
                 progress.update(task, description="✅ Coordination completed")
 

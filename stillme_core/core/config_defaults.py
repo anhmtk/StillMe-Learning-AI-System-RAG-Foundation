@@ -21,7 +21,7 @@ GIT_EMAIL: str = os.getenv("GIT_EMAIL", "agentdev@example.com")
 def try_load_dotenv() -> None:
     """Load .env if python-dotenv is installed; otherwise ignore silently."""
     try:
-        from dotenv import load_dotenv  # type: ignore
+        from dotenv import load_dotenv
 
         load_dotenv()  # load default .env in cwd
     except Exception:

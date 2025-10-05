@@ -57,7 +57,7 @@ try:
     )
 
     # Create a type alias to avoid type conflicts
-    ContentIntegrityFilter = _ContentIntegrityFilter  # type: ignore
+    ContentIntegrityFilter = _ContentIntegrityFilter
 except ImportError:
     # Mock ContentIntegrityFilter nếu không tồn tại
     class ContentIntegrityFilter:

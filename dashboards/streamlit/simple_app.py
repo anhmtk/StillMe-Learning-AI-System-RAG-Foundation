@@ -406,6 +406,7 @@ class SimpleDashboard:
             if self.proposals_manager:
                 # Force refresh of proposals manager
                 from stillme_core.learning.proposals_manager import ProposalsManager
+
                 self.proposals_manager = ProposalsManager()
                 return True
         except Exception as e:
@@ -478,21 +479,27 @@ class SimpleDashboard:
             try:
                 from stillme_core.learning.proposals_manager import ProposalsManager
                 import sqlite3
-                
+
                 manager = ProposalsManager()
                 with sqlite3.connect(manager.db_path) as conn:
                     # Get approved count
-                    cursor = conn.execute("SELECT COUNT(*) FROM proposals WHERE status = 'approved'")
+                    cursor = conn.execute(
+                        "SELECT COUNT(*) FROM proposals WHERE status = 'approved'"
+                    )
                     approved_count = cursor.fetchone()[0]
-                    
+
                     # Get completed count
-                    cursor = conn.execute("SELECT COUNT(*) FROM proposals WHERE status = 'completed'")
+                    cursor = conn.execute(
+                        "SELECT COUNT(*) FROM proposals WHERE status = 'completed'"
+                    )
                     completed_count = cursor.fetchone()[0]
-                    
+
                     # Get learning count
-                    cursor = conn.execute("SELECT COUNT(*) FROM proposals WHERE status = 'learning'")
+                    cursor = conn.execute(
+                        "SELECT COUNT(*) FROM proposals WHERE status = 'learning'"
+                    )
                     learning_count = cursor.fetchone()[0]
-                    
+
                     # Get today's new approvals
                     cursor = conn.execute("""
                         SELECT COUNT(*) FROM proposals 
@@ -500,7 +507,7 @@ class SimpleDashboard:
                         AND DATE(approved_at) = DATE('now')
                     """)
                     new_approved_today = cursor.fetchone()[0]
-                    
+
                     # Get today's new completions
                     cursor = conn.execute("""
                         SELECT COUNT(*) FROM proposals 
@@ -508,7 +515,7 @@ class SimpleDashboard:
                         AND DATE(learning_completed_at) = DATE('now')
                     """)
                     new_completed_today = cursor.fetchone()[0]
-                
+
             except Exception as e:
                 # Fallback to mock data if database error
                 approved_count = 0
@@ -520,7 +527,7 @@ class SimpleDashboard:
 
             st.markdown(f"✅ **Approved:** {approved_count} (+{new_approved_today})")
             st.markdown(f"🎓 **Completed:** {completed_count} (+{new_completed_today})")
-            
+
             if learning_count > 0:
                 st.markdown(f"⚡ **Learning:** {learning_count} active sessions")
             else:
@@ -542,7 +549,7 @@ class SimpleDashboard:
                             avg_progress = avg_progress / 100  # Convert to 0-1 range
                 except Exception:
                     avg_progress = 0.75  # Fallback
-                
+
                 st.progress(avg_progress)
                 st.markdown(f"**Progress:** {avg_progress*100:.0f}% complete")
             else:

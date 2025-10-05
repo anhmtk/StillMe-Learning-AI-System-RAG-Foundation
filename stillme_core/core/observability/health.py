@@ -376,7 +376,7 @@ class HealthMonitor:
                 cpu_count = psutil.cpu_count()
 
                 # Calculate load as percentage of CPU cores
-                load_percent = (load_avg[0] / cpu_count) * 100  # type: ignore
+                load_percent = (load_avg[0] / cpu_count) * 100
 
                 if load_percent > 100:
                     status = HealthStatus.UNHEALTHY

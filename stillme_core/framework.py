@@ -101,7 +101,7 @@ import psutil
 import yaml
 
 try:
-    from RestrictedPython import compile_restricted  # type: ignore
+    from RestrictedPython import compile_restricted
 except ImportError:
     # Mock for missing RestrictedPython
     def compile_restricted(

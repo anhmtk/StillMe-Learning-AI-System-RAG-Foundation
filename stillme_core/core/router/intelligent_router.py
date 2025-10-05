@@ -21,7 +21,7 @@ from typing import Any
 # --- Observability Setup (Import Only Once) ---
 # Import StillMe core observability components safely.
 try:
-    from stillme_core.observability.logger import get_logger  # type: ignore
+    from stillme_core.observability.logger import get_logger
 
     logger = get_logger(__name__)
 except ImportError:
@@ -30,14 +30,14 @@ except ImportError:
     logger = logging.getLogger(__name__)
 
 try:
-    from stillme_core.observability.metrics import get_metrics_collector  # type: ignore
+    from stillme_core.observability.metrics import get_metrics_collector
 
     metrics = get_metrics_collector()
 except ImportError:
     metrics = None
 
 try:
-    from stillme_core.observability.tracer import get_tracer  # type: ignore
+    from stillme_core.observability.tracer import get_tracer
 
     tracer = get_tracer()
 except ImportError:

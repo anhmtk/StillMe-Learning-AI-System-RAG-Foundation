@@ -158,42 +158,42 @@ class MonitoringDashboard:
         if self.app is not None:
 
             @self.app.get("/")
-            async def dashboard_home() -> HTMLResponse:  # noqa: F401
+            async def dashboard_home() -> HTMLResponse:
                 """Dashboard home page"""
                 return HTMLResponse(self._get_dashboard_html())
 
             @self.app.get("/api/status")
-            async def get_status() -> JSONResponse:  # noqa: F401
+            async def get_status() -> JSONResponse:
                 """Get system status"""
                 return JSONResponse(self._get_system_status())
 
             @self.app.get("/api/metrics")
-            async def get_metrics() -> JSONResponse:  # noqa: F401
+            async def get_metrics() -> JSONResponse:
                 """Get current metrics"""
                 return JSONResponse(self._get_current_metrics())
 
             @self.app.get("/api/analysis")
-            async def get_analysis() -> JSONResponse:  # noqa: F401
+            async def get_analysis() -> JSONResponse:
                 """Get performance analysis"""
                 return JSONResponse(self._get_performance_analysis())
 
             @self.app.get("/api/alerts")
-            async def get_alerts() -> JSONResponse:  # noqa: F401
+            async def get_alerts() -> JSONResponse:
                 """Get active alerts"""
                 return JSONResponse(self._get_active_alerts())
 
             @self.app.get("/api/learning-sessions")
-            async def get_learning_sessions() -> JSONResponse:  # noqa: F401
+            async def get_learning_sessions() -> JSONResponse:
                 """Get learning sessions"""
                 return JSONResponse(self._get_learning_sessions())
 
             @self.app.get("/api/evolution-milestones")
-            async def get_evolution_milestones() -> JSONResponse:  # noqa: F401
+            async def get_evolution_milestones() -> JSONResponse:
                 """Get evolution milestones"""
                 return JSONResponse(self._get_evolution_milestones())
 
             @self.app.websocket("/ws")
-            async def websocket_endpoint(websocket: WebSocket) -> None:  # noqa: F401
+            async def websocket_endpoint(websocket: WebSocket) -> None:
                 """WebSocket endpoint for real-time updates"""
                 await websocket.accept()
 

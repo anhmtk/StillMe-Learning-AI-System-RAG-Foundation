@@ -388,7 +388,7 @@ def dev_agent(task: str, mode: str = DEFAULT_MODE, **params: Any) -> str:
         try:
             from .legacy_agentdev.agentdev_super import execute_agentdev_super_task
 
-            return execute_agentdev_super_task(task)  # type: ignore
+            return execute_agentdev_super_task(task)
         except Exception as e:
             return f"[AIManager][super] AgentDev Super error: {e}"
 

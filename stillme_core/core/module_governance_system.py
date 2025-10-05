@@ -25,18 +25,18 @@ import psutil
 
 # Import Phase 0 security modules
 try:
-    from .integration_bridge import IntegrationBridge  # type: ignore
-    from .memory_security_integration import MemorySecurityIntegration  # type: ignore
+    from .integration_bridge import IntegrationBridge
+    from .memory_security_integration import MemorySecurityIntegration
     from .performance_monitor import PerformanceMonitor
-    from .security_middleware import SecurityMiddleware  # type: ignore
+    from .security_middleware import SecurityMiddleware
 except ImportError:
     try:
-        from stillme_core.integration_bridge import IntegrationBridge  # type: ignore
+        from stillme_core.integration_bridge import IntegrationBridge
         from stillme_core.memory_security_integration import (
-            MemorySecurityIntegration,  # type: ignore
+            MemorySecurityIntegration,
         )
         from stillme_core.performance_monitor import PerformanceMonitor
-        from stillme_core.security_middleware import SecurityMiddleware  # type: ignore
+        from stillme_core.security_middleware import SecurityMiddleware
     except ImportError:
         # Create mock classes for testing
         class SecurityMiddleware:

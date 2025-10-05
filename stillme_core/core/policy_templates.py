@@ -27,7 +27,7 @@ SAFE_TEMPLATES_EN = {
 }
 
 
-def get_template(template_name: str, locale: str = "vi", context: dict = None) -> str:  # type: ignore
+def get_template(template_name: str, locale: str = "vi", context: dict = None) -> str:
     """Get template by name and locale with intelligent context adaptation"""
     templates = SAFE_TEMPLATES_VI if locale.startswith("vi") else SAFE_TEMPLATES_EN
     base_template = templates.get(template_name, templates["refuse_generic"])

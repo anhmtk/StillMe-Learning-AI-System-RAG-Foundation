@@ -24,28 +24,28 @@ from typing import Any
 # Import Phase 2 modules
 try:
     from .autonomous_management_system import (
-        AutonomousManagementSystem as AMS,  # type: ignore
+        AutonomousManagementSystem as AMS,
     )
     from .learning_optimization_engine import (
-        LearningOptimizationEngine as LOE,  # type: ignore
+        LearningOptimizationEngine as LOE,
     )
     from .security_compliance_system import (
-        SecurityComplianceSystem as SCS,  # type: ignore
+        SecurityComplianceSystem as SCS,
     )
-    from .usage_analytics_engine import UsageAnalyticsEngine as UAE  # type: ignore
+    from .usage_analytics_engine import UsageAnalyticsEngine as UAE
 except ImportError:
     try:
         from stillme_core.autonomous_management_system import (
-            AutonomousManagementSystem as AMS,  # type: ignore
+            AutonomousManagementSystem as AMS,
         )
         from stillme_core.learning_optimization_engine import (
-            LearningOptimizationEngine as LOE,  # type: ignore
+            LearningOptimizationEngine as LOE,
         )
         from stillme_core.security_compliance_system import (
-            SecurityComplianceSystem as SCS,  # type: ignore
+            SecurityComplianceSystem as SCS,
         )
         from stillme_core.usage_analytics_engine import (
-            UsageAnalyticsEngine as UAE,  # type: ignore
+            UsageAnalyticsEngine as UAE,
         )
     except ImportError:
         # Create mock classes for testing

@@ -46,7 +46,7 @@ class FilterResult:
     violations: list[str]
     security_level: SecurityLevel
     policy_response: str | None = None
-    metadata: dict[str, Any] = None  # type: ignore
+    metadata: dict[str, Any] = None
 
 
 class SecrecyFilter:

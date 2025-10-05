@@ -368,7 +368,7 @@ class AttackSimulator:
             f"{self.target_url}{endpoint}",
             data={"action": "delete"},
             headers={"Referer": "http://evil.com"},
-            timeout=10,  # type: ignore
+            timeout=10,
         )
 
     async def _ddos_attack(self, payload: AttackPayload, endpoint: str):
@@ -376,7 +376,7 @@ class AttackSimulator:
         # Simulate multiple rapid requests
         tasks = []
         for _ in range(10):  # Limited for testing
-            task = self.session.get(f"{self.target_url}{endpoint}", timeout=5)  # type: ignore
+            task = self.session.get(f"{self.target_url}{endpoint}", timeout=5)
             tasks.append(task)
 
         responses = await asyncio.gather(*tasks, return_exceptions=True)

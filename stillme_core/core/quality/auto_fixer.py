@@ -106,7 +106,7 @@ class AutoFixer:
         self, file_path: str, issues: list[QualityIssue]
     ) -> FixResult:
         """Fix issues in a single file"""
-        file_path = Path(file_path)  # type: ignore
+        file_path = Path(file_path)
 
         if not file_path.exists():
             return FixResult(
@@ -123,7 +123,7 @@ class AutoFixer:
         if self.create_backups:
             backup_path = f"{file_path}.backup"
             file_path.rename(backup_path)
-            file_path = Path(backup_path)  # type: ignore
+            file_path = Path(backup_path)
 
         try:
             # Read file content

@@ -21,15 +21,15 @@ from typing import Any
 
 # Import Phase 1 and 2.x modules
 try:
-    from .autonomous_management_system import AutonomousManagementSystem  # type: ignore
-    from .final_validation_system import FinalValidationSystem  # type: ignore
-    from .integration_bridge import IntegrationBridge  # type: ignore
-    from .learning_optimization_engine import LearningOptimizationEngine  # type: ignore
-    from .memory_security_integration import MemorySecurityIntegration  # type: ignore
-    from .module_governance_system import ModuleGovernanceSystem  # type: ignore
-    from .performance_monitor import PerformanceMonitor  # type: ignore
-    from .security_middleware import SecurityMiddleware  # type: ignore
-    from .validation_framework import ComprehensiveValidationFramework  # type: ignore
+    from .autonomous_management_system import AutonomousManagementSystem
+    from .final_validation_system import FinalValidationSystem
+    from .integration_bridge import IntegrationBridge
+    from .learning_optimization_engine import LearningOptimizationEngine
+    from .memory_security_integration import MemorySecurityIntegration
+    from .module_governance_system import ModuleGovernanceSystem
+    from .performance_monitor import PerformanceMonitor
+    from .security_middleware import SecurityMiddleware
+    from .validation_framework import ComprehensiveValidationFramework
 except ImportError:
     # Create mock classes for testing
     class SecurityMiddleware:

@@ -18,8 +18,8 @@ def _norm_mode(mode: str | None) -> Literal["fast", "safe"]:
     m = (mode or "fast").lower().strip()
     if m not in ALLOWED_MODES:
         logger.warning("provider_router: invalid mode '%s' → dùng 'safe'", m)
-        return "safe"  # type: ignore[return-value]
-    return m  # type: ignore[return-value]
+        return "safe"
+    return m
 
 
 class ProviderRouter:

@@ -652,7 +652,7 @@ class ExperienceMemory:
     ) -> LearningPattern:
         """Merge two similar patterns"""
         # Combine examples
-        all_examples = existing.examples + new.examples  # type: ignore
+        all_examples = existing.examples + new.examples
         unique_examples = list(set(all_examples))
 
         # Update frequency and success rate

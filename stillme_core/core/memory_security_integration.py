@@ -279,7 +279,7 @@ class MemorySecurityIntegration:
 
             # Initialize secure storage
             if _SecureMemoryManager and _SecureMemoryConfig:
-                self.secure_storage = _SecureMemoryManager(secure_config)  # type: ignore
+                self.secure_storage = _SecureMemoryManager(secure_config)
             else:
                 self.secure_storage = None
 
@@ -300,20 +300,20 @@ class MemorySecurityIntegration:
         try:
             # Start performance monitoring
             if hasattr(self.performance_monitor, "start_monitoring"):
-                self.performance_monitor.start_monitoring()  # type: ignore
+                self.performance_monitor.start_monitoring()
 
             # Register security endpoints
             if hasattr(self.integration_bridge, "register_endpoint"):
-                self.integration_bridge.register_endpoint(  # type: ignore
+                self.integration_bridge.register_endpoint(
                     "GET", "/memory/health", self._health_check, auth_required=True
                 )
-                self.integration_bridge.register_endpoint(  # type: ignore
+                self.integration_bridge.register_endpoint(
                     "GET",
                     "/memory/security-report",
                     self._get_security_report,
                     auth_required=True,
                 )
-                self.integration_bridge.register_endpoint(  # type: ignore
+                self.integration_bridge.register_endpoint(
                     "POST",
                     "/memory/validate",
                     self._validate_memory_operation,
@@ -357,7 +357,7 @@ class MemorySecurityIntegration:
 
             # Store memory
             if self.memory_system and hasattr(self.memory_system, "add_memory"):
-                self.memory_system.add_memory(  # type: ignore
+                self.memory_system.add_memory(
                     content=content,
                     priority=0.8 if security_level == "confidential" else 0.5,
                     metadata=metadata or {},
@@ -409,7 +409,7 @@ class MemorySecurityIntegration:
             # Retrieve memory
             results: list[Any]
             if self.memory_system and hasattr(self.memory_system, "search"):
-                results = self.memory_system.search(query=query)  # type: ignore
+                results = self.memory_system.search(query=query)
             else:
                 results = []
 
@@ -752,7 +752,7 @@ class MemorySecurityIntegration:
             # Check memory system health
             if self.memory_system and hasattr(self.memory_system, "get_health_status"):
                 try:
-                    health_result = self.memory_system.get_health_status()  # type: ignore
+                    health_result = self.memory_system.get_health_status()
                     memory_health: dict[str, Any] = (
                         cast(dict[str, Any], health_result)
                         if isinstance(health_result, dict)

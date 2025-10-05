@@ -15,50 +15,49 @@ from typing import Any
 # Khối Import: Đã xử lý triệt để lỗi import
 # Import with fallbacks for missing modules
 try:
-    from .health import HealthStatus, get_health_monitor  # type: ignore
+    from .health import HealthStatus, get_health_monitor
 except ImportError:
     # Create fallback classes
-    class HealthStatus:  # type: ignore
+    class HealthStatus:
         HEALTHY = "healthy"
         DEGRADED = "degraded"
         UNHEALTHY = "unhealthy"
 
-    def get_health_monitor():  # type: ignore
+    def get_health_monitor():
         return None
 
 
 try:
-    from .logger import get_logger  # type: ignore
+    from .logger import get_logger
 except ImportError:
 
-    def get_logger(name):  # type: ignore
+    def get_logger(name):
         import logging
 
         return logging.getLogger(name)
 
 
 try:
-    from .metrics import get_metrics_collector  # type: ignore
+    from .metrics import get_metrics_collector
 except ImportError:
 
-    def get_metrics_collector():  # type: ignore
+    def get_metrics_collector():
         return None
 
 
 try:
-    from .tracer import get_tracer  # type: ignore
+    from .tracer import get_tracer
 except ImportError:
 
-    def get_tracer():  # type: ignore
+    def get_tracer():
         return None
 
 
 # MetricType is optional
 try:
-    from .metrics import MetricType  # type: ignore
+    from .metrics import MetricType
 except ImportError:
-    MetricType = None  # type: ignore
-
+    MetricType = None
 
 class ObservabilityDashboard:
     """Web-based observability dashboard"""
@@ -127,27 +126,23 @@ class ObservabilityDashboard:
             # Get health status
             health = (
                 self.health_monitor.get_health_status() if self.health_monitor else None
-            )  # type: ignore
-
+            )
             # Get metrics overview
             metrics_overview = (
                 self.metrics_collector.get_metrics_overview()
                 if self.metrics_collector
                 else None
-            )  # type: ignore
-
+            )
             # Get recent traces
             recent_traces = (
                 self.tracer.get_traces_overview(limit=10) if self.tracer else []
-            )  # type: ignore
-
+            )
             # Get log stats
             log_stats = (
                 self.logger.get_log_stats()
                 if hasattr(self.logger, "get_log_stats")
                 else {}
-            )  # type: ignore
-
+            )
             # Xử lý datetime object
             health_timestamp_iso = (
                 health.timestamp.isoformat()
@@ -155,16 +150,14 @@ class ObservabilityDashboard:
                 and hasattr(health, "timestamp")
                 and isinstance(health.timestamp, datetime)
                 else "unknown"
-            )  # type: ignore
-
+            )
             return {
                 "timestamp": datetime.now().isoformat(),
                 "health": {
                     "timestamp": health_timestamp_iso,
                     "status": health.status.value
                     if health and hasattr(health, "status")
-                    else "unknown",  # type: ignore
-                    "checks": [
+                    else "unknown",                    "checks": [
                         {
                             "name": check.name,
                             "status": check.status.value,
@@ -175,12 +168,11 @@ class ObservabilityDashboard:
                             health.checks
                             if health and hasattr(health, "checks")
                             else []
-                        )  # type: ignore
+                        )
                     ],
                     "summary": health.summary
                     if health and hasattr(health, "summary")
-                    else {},  # type: ignore
-                },
+                    else {},                },
                 "metrics": metrics_overview,
                 "traces": {
                     "recent_traces": recent_traces,
@@ -248,8 +240,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
             self.dashboard_instance.health_monitor.get_health_status()
             if self.dashboard_instance.health_monitor
             else None
-        )  # type: ignore
-
+        )
         # Xử lý datetime object
         health_timestamp_iso = (
             health.timestamp.isoformat()
@@ -257,13 +248,11 @@ class DashboardHandler(BaseHTTPRequestHandler):
             and hasattr(health, "timestamp")
             and isinstance(health.timestamp, datetime)
             else "unknown"
-        )  # type: ignore
-
+        )
         health_dict = {
             "status": health.status.value
             if health and hasattr(health, "status")
-            else "unknown",  # type: ignore
-            "timestamp": health_timestamp_iso,
+            else "unknown",            "timestamp": health_timestamp_iso,
             "checks": [
                 {
                     "name": check.name,
@@ -274,10 +263,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
                 }
                 for check in (
                     health.checks if health and hasattr(health, "checks") else []
-                )  # type: ignore
+                )
             ],
-            "summary": health.summary if health and hasattr(health, "summary") else {},  # type: ignore
-        }
+            "summary": health.summary if health and hasattr(health, "summary") else {},        }
         self._send_json_response(200, health_dict)
 
     def _serve_metrics(self):
@@ -286,7 +274,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
             self.dashboard_instance.metrics_collector.get_metrics_overview()
             if self.dashboard_instance.metrics_collector
             else {}
-        )  # type: ignore
+        )
         self._send_json_response(200, overview)
 
     def _serve_traces(self):
@@ -295,7 +283,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
             self.dashboard_instance.tracer.get_traces_overview(limit=50)
             if self.dashboard_instance.tracer
             else []
-        )  # type: ignore
+        )
         self._send_json_response(200, {"traces": traces})
 
     def _serve_logs(self):
@@ -304,7 +292,7 @@ class DashboardHandler(BaseHTTPRequestHandler):
             self.dashboard_instance.logger.get_log_stats()
             if hasattr(self.dashboard_instance.logger, "get_log_stats")
             else {}
-        )  # type: ignore
+        )
         self._send_json_response(200, log_stats)
 
     def _serve_404(self):

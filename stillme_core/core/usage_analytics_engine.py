@@ -23,27 +23,27 @@ from typing import Any
 
 # Import Phase 2 modules
 try:
-    from .autonomous_management_system import AutonomousManagementSystem  # type: ignore
-    from .deployment_production_system import DeploymentProductionSystem  # type: ignore
-    from .learning_optimization_engine import LearningOptimizationEngine  # type: ignore
-    from .phase2_integration_testing import Phase2IntegrationTesting  # type: ignore
-    from .security_compliance_system import SecurityComplianceSystem  # type: ignore
+    from .autonomous_management_system import AutonomousManagementSystem
+    from .deployment_production_system import DeploymentProductionSystem
+    from .learning_optimization_engine import LearningOptimizationEngine
+    from .phase2_integration_testing import Phase2IntegrationTesting
+    from .security_compliance_system import SecurityComplianceSystem
 except ImportError:
     try:
         from stillme_core.autonomous_management_system import (
-            AutonomousManagementSystem,  # type: ignore
+            AutonomousManagementSystem,
         )
         from stillme_core.deployment_production_system import (
-            DeploymentProductionSystem,  # type: ignore
+            DeploymentProductionSystem,
         )
         from stillme_core.learning_optimization_engine import (
-            LearningOptimizationEngine,  # type: ignore
+            LearningOptimizationEngine,
         )
         from stillme_core.phase2_integration_testing import (
-            Phase2IntegrationTesting,  # type: ignore
+            Phase2IntegrationTesting,
         )
         from stillme_core.security_compliance_system import (
-            SecurityComplianceSystem,  # type: ignore
+            SecurityComplianceSystem,
         )
     except ImportError:
         # Create mock classes for testing

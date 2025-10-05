@@ -40,15 +40,15 @@ try:
     from .secure_memory_manager import SecureMemoryConfig as _SecureMemoryConfig
     from .secure_memory_manager import SecureMemoryManager as _SecureMemoryManager
 
-    SecureMemoryManager = _SecureMemoryManager  # type: ignore
-    SecureMemoryConfig = _SecureMemoryConfig  # type: ignore
+    SecureMemoryManager = _SecureMemoryManager
+    SecureMemoryConfig = _SecureMemoryConfig
 except ImportError:
     try:
         from secure_memory_manager import SecureMemoryConfig as _SecureMemoryConfig
         from secure_memory_manager import SecureMemoryManager as _SecureMemoryManager
 
-        SecureMemoryManager = _SecureMemoryManager  # type: ignore
-        SecureMemoryConfig = _SecureMemoryConfig  # type: ignore
+        SecureMemoryManager = _SecureMemoryManager
+        SecureMemoryConfig = _SecureMemoryConfig
     except ImportError:
         # Mock classes for testing
         class SecureMemoryManager:
