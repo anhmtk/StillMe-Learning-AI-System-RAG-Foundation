@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\modules\ethical_core_system_v1.py
+# hypothesis_version: 6.140.2
+
+[0.0, 0.7, 150, ' (sau điều chỉnh)', 'An toàn.', 'Authorization', 'Content-Type', 'Không có dấu hiệu.', 'Không rõ.', 'Lỗi LLM', 'Nội dung thù địch.', 'Nội dung độc hại.', 'OPENROUTER_API_KEY', 'StillMe.EthicalCore', 'application/json', 'choices', 'compliance_score', 'content', 'critical', 'ethical_violations', 'forbidden_keywords', 'formal', 'friendly', 'google/gemini-pro', 'high', 'informal', 'is_appropriate', 'is_compliant', 'is_hate_speech', 'is_toxic', 'is_vulnerable', 'logs', 'low', 'max_tokens', 'medium', 'message', 'messages', 'model', 'mạo danh', 'negative', 'neutral', 'ngôn ngữ thù địch', 'nội dung độc hại', 'openchat/openchat-7b', 'positive', 'reason', 'role', 'root_cause', 'sensitive_topics', 'serious', 'severity', 'suggested_action', 'temperature', 'từ khóa cấm', 'tự gây hại', 'user', 'user_id', 'utf-8', 'violation_type']

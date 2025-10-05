@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\agent_dev\auto_fix.py
+# hypothesis_version: 6.140.2
+
+[300, '([^\\s]+\\.py)', '--db-path', '--max-tries', '--maxfail=1', '--tb=short', '-m', '-q', '=', 'Database path', 'Fix applied', 'Fix failed', 'No file path found', 'Tests still failing', '__main__', 'agentdev.db', 'cycles_run', 'error', 'error_sig', 'failure', 'file_path', 'final_result', 'fix_action', 'fixes_applied', 'import', 'line (\\d+)', 'line_number', 'message', 'name', 'name_error', 'pytest', 'r', 'reason', 'rule', 'source', 'success', 'test_name', 'tests_passing', 'total_fixes', 'utf-8']

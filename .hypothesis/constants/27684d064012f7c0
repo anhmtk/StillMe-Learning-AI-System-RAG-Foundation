@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\common\templates.py
+# hypothesis_version: 6.140.2
+
+['<button[^>]*>', '<embed[^>]*>', '<form[^>]*>', '<iframe[^>]*>', '<input[^>]*>', '<link[^>]*>', '<meta[^>]*>', '<object[^>]*>', '<select[^>]*>', '<style[^>]*>', '<textarea[^>]*>', '@import', 'a', 'allowed_variables', 'alt', 'api_response', 'audit_logging', 'b', 'br', 'cache_enabled', 'critical', 'data:text/html', 'em', 'email', 'escape_html', 'escape_json', 'expression\\s*\\(', 'high', 'href', 'i', 'img', 'javascript:', 'li', 'log_message', 'low', 'max_length', 'medium', 'notification', 'ol', 'on\\w+\\s*=', 'p', 'prompt', 'required_variables', 'response', 'secure', 'security_level', 'security_response', 'src', 'strong', 'template_configs', 'template_manager', 'templates', 'title', 'type', 'u', 'ul', 'url\\s*\\(', 'vbscript:']

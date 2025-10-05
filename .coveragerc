@@ -1,0 +1,23 @@
+[run]
+branch = True
+source =
+    agent_dev
+    stillme_core
+omit =
+    tests/*
+    agentdev_tests/*
+    **/.venv/*
+    .venv/*
+    **/site-packages/*
+    **/_vendor/*
+
+[report]
+show_missing = True
+skip_covered = True
+omit =
+    tests/*
+    agentdev_tests/*
+    **/.venv/*
+    .venv/*
+    **/site-packages/*
+    **/_vendor/*

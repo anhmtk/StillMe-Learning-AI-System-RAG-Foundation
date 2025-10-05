@@ -1,0 +1,161 @@
+name: 🔒 Security Scanning
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  security-scan:
+    name: 🔒 Comprehensive Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    
+    - name: 🐍 Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        cache: 'pip'
+    
+    - name: 📦 Install security tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .[dev]
+        pip install safety bandit semgrep pip-audit
+    
+    - name: 🔒 Run Security Scans
+      run: |
+        echo "🔒 Running comprehensive security scans..."
+        
+        # Safety - Check for known vulnerabilities
+        echo "🛡️ Checking for known vulnerabilities with Safety..."
+        safety check --json --output safety-report.json || true
+        
+        # Bandit - Security linter
+        echo "🚨 Running Bandit security linter..."
+        bandit -r stillme_core/ -f json -o bandit-report.json || true
+        
+        # Semgrep - Advanced security patterns
+        echo "🔍 Running Semgrep security scan..."
+        semgrep --config=auto --json --output=semgrep-report.json . || true
+        
+        # pip-audit - Audit dependencies
+        echo "📋 Auditing Python dependencies..."
+        pip-audit --format=json --output=pip-audit-report.json || true
+    
+    - name: 📊 Generate Security Report
+      run: |
+        echo "📊 Generating security report..."
+        
+        # Create comprehensive security report
+        python -c "
+        import json
+        import os
+        from datetime import datetime
+        
+        def load_json_safely(filename):
+            try:
+                with open(filename, 'r') as f:
+                    return json.load(f)
+            except (FileNotFoundError, json.JSONDecodeError):
+                return {}
+        
+        # Load all security reports
+        safety_data = load_json_safely('safety-report.json')
+        bandit_data = load_json_safely('bandit-report.json')
+        semgrep_data = load_json_safely('semgrep-report.json')
+        pip_audit_data = load_json_safely('pip-audit-report.json')
+        
+        # Generate summary
+        summary = {
+            'timestamp': datetime.now().isoformat(),
+            'safety': {
+                'vulnerabilities': len(safety_data.get('vulnerabilities', [])),
+                'status': 'PASS' if len(safety_data.get('vulnerabilities', [])) == 0 else 'FAIL'
+            },
+            'bandit': {
+                'issues': len(bandit_data.get('results', [])),
+                'high_severity': len([r for r in bandit_data.get('results', []) if r.get('issue_severity') == 'HIGH']),
+                'status': 'PASS' if len(bandit_data.get('results', [])) == 0 else 'FAIL'
+            },
+            'semgrep': {
+                'findings': len(semgrep_data.get('results', [])),
+                'status': 'PASS' if len(semgrep_data.get('results', [])) == 0 else 'FAIL'
+            },
+            'pip_audit': {
+                'vulnerabilities': len(pip_audit_data.get('vulnerabilities', [])),
+                'status': 'PASS' if len(pip_audit_data.get('vulnerabilities', [])) == 0 else 'FAIL'
+            }
+        }
+        
+        # Overall status
+        all_passed = all([
+            summary['safety']['status'] == 'PASS',
+            summary['bandit']['status'] == 'PASS',
+            summary['semgrep']['status'] == 'PASS',
+            summary['pip_audit']['status'] == 'PASS'
+        ])
+        summary['overall_status'] = 'PASS' if all_passed else 'FAIL'
+        
+        # Save summary
+        with open('security-summary.json', 'w') as f:
+            json.dump(summary, f, indent=2)
+        
+        print(f'Overall Security Status: {summary[\"overall_status\"]}')
+        "
+    
+    - name: 📊 Upload Security Reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: security-reports-${{ github.run_number }}
+        path: |
+          safety-report.json
+          bandit-report.json
+          semgrep-report.json
+          pip-audit-report.json
+          security-summary.json
+        retention-days: 90
+    
+    - name: 🚨 Security Gate
+      run: |
+        echo "🚨 Running security gate..."
+        
+        # Check if any critical security issues found
+        python -c "
+        import json
+        
+        with open('security-summary.json', 'r') as f:
+            summary = json.load(f)
+        
+        if summary['overall_status'] == 'FAIL':
+            print('❌ Security gate failed!')
+            print('Critical security issues found:')
+            
+            if summary['safety']['vulnerabilities'] > 0:
+                print(f'  - Safety: {summary[\"safety\"][\"vulnerabilities\"]} vulnerabilities')
+            
+            if summary['bandit']['high_severity'] > 0:
+                print(f'  - Bandit: {summary[\"bandit\"][\"high_severity\"]} high severity issues')
+            
+            if summary['semgrep']['findings'] > 0:
+                print(f'  - Semgrep: {summary[\"semgrep\"][\"findings\"]} security findings')
+            
+            if summary['pip_audit']['vulnerabilities'] > 0:
+                print(f'  - pip-audit: {summary[\"pip_audit\"][\"vulnerabilities\"]} dependency vulnerabilities')
+            
+            exit(1)
+        else:
+            print('✅ Security gate passed!')
+        "

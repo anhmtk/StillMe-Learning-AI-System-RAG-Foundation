@@ -1,0 +1,70 @@
+rules:
+  - name: detect_hardcoded_secrets
+    pattern_regex: "(?i)(password|secret|key|token|api_key|private_key|credential)\\s*[=:]\\s*['\"][^'\"]{8,}['\"]"
+    fix_action: "flag_secret_exposure"
+    severity: "critical"
+    enabled: true
+    hits: 0
+
+  - name: detect_sql_injection
+    pattern_regex: "(?i)(execute|query|sql)\\s*\\(\\s*['\"].*\\+.*['\"]"
+    fix_action: "flag_sql_injection"
+    severity: "high"
+    enabled: true
+    hits: 0
+
+  - name: detect_path_traversal
+    pattern_regex: "(?i)(open|file|read|write)\\s*\\(\\s*['\"].*\\.\\./.*['\"]"
+    fix_action: "flag_path_traversal"
+    severity: "high"
+    enabled: true
+    hits: 0
+
+  - name: detect_command_injection
+    pattern_regex: "(?i)(subprocess|os\\.system|exec|eval)\\s*\\(\\s*['\"].*\\+.*['\"]"
+    fix_action: "flag_command_injection"
+    severity: "high"
+    enabled: true
+    hits: 0
+
+  - name: detect_unsafe_deserialization
+    pattern_regex: "(?i)(pickle|marshal|yaml\\.load|json\\.loads)\\s*\\(\\s*[^)]*input"
+    fix_action: "flag_unsafe_deserialization"
+    severity: "high"
+    enabled: true
+    hits: 0
+
+  - name: detect_weak_crypto
+    pattern_regex: "(?i)(md5|sha1|des|rc4)\\s*\\(|hashlib\\.(md5|sha1)"
+    fix_action: "flag_weak_crypto"
+    severity: "medium"
+    enabled: true
+    hits: 0
+
+  - name: detect_insecure_random
+    pattern_regex: "(?i)(random\\.random|random\\.randint|random\\.choice)"
+    fix_action: "flag_insecure_random"
+    severity: "medium"
+    enabled: true
+    hits: 0
+
+  - name: detect_http_without_https
+    pattern_regex: "(?i)(http://|requests\\.get\\s*\\(\\s*['\"]http://)"
+    fix_action: "flag_http_without_https"
+    severity: "medium"
+    enabled: true
+    hits: 0
+
+  - name: detect_debug_code
+    pattern_regex: "(?i)(print\\s*\\(|console\\.log|debugger|pdb\\.set_trace)"
+    fix_action: "flag_debug_code"
+    severity: "low"
+    enabled: true
+    hits: 0
+
+  - name: detect_type_ignore_abuse
+    pattern_regex: "#\\s*type:\\s*ignore"
+    fix_action: "flag_type_ignore_abuse"
+    severity: "low"
+    enabled: true
+    hits: 0

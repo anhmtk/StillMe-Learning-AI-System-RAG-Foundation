@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StillMe IPC - Learning Evolution Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+        
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .metric-value {
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 20px;
+        }
+        
+        .evolution-timeline {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .timeline-date {
+            font-weight: bold;
+            color: #667eea;
+            margin-right: 15px;
+            min-width: 100px;
+        }
+        
+        .timeline-content {
+            flex: 1;
+        }
+        
+        .timeline-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .timeline-description {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-active { background: #28a745; }
+        .status-learning { background: #ffc107; }
+        .status-completed { background: #17a2b8; }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .refresh-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin: 20px 0;
+            transition: background 0.3s ease;
+        }
+        
+        .refresh-btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .suggested-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .suggested-title {
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 8px;
+        }
+        
+        .suggested-description {
+            color: #666;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .suggested-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 0.8rem;
+            color: #888;
+        }
+        
+        .suggested-meta span {
+            background: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 StillMe IPC</h1>
+            <p>Intelligent Personal Companion - Learning Evolution Dashboard</p>
+            <button class="refresh-btn" onclick="loadData()">🔄 Refresh Data</button>
+        </div>
+        
+        <div id="loading" class="loading">
+            <h2>🔄 Loading StillMe's Learning Progress...</h2>
+            <p>Fetching data from GitHub...</p>
+        </div>
+        
+        <div id="error" class="error" style="display: none;">
+            <h3>❌ Error Loading Data</h3>
+            <p id="error-message"></p>
+        </div>
+        
+        <div id="dashboard" style="display: none;">
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h3>📊 Learning Statistics</h3>
+                    <div class="metric">
+                        <span>Total Proposals</span>
+                        <span class="metric-value" id="total-proposals">-</span>
+                    </div>
+                    <div class="metric">
+                        <span>Approved Proposals</span>
+                        <span class="metric-value" id="approved-proposals">-</span>
+                    </div>
+                    <div class="metric">
+                        <span>Learning Sessions</span>
+                        <span class="metric-value" id="learning-sessions">-</span>
+                    </div>
+                    <div class="metric">
+                        <span>Knowledge Sources</span>
+                        <span class="metric-value" id="knowledge-sources">-</span>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>📈 Learning Progress</h3>
+                    <div class="chart-container">
+                        <canvas id="progressChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3>🎯 Current Status</h3>
+                    <div class="metric">
+                        <span><span class="status-indicator status-active"></span>Background Service</span>
+                        <span class="metric-value">Active</span>
+                    </div>
+                    <div class="metric">
+                        <span><span class="status-indicator status-learning"></span>Auto Discovery</span>
+                        <span class="metric-value">Every 3h</span>
+                    </div>
+                    <div class="metric">
+                        <span><span class="status-indicator status-completed"></span>Notifications</span>
+                        <span class="metric-value">Email + Telegram</span>
+                    </div>
+                    <div class="metric">
+                        <span><span class="status-indicator status-active"></span>Last Update</span>
+                        <span class="metric-value" id="last-update">-</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="evolution-timeline">
+                <h3>🚀 Learning Evolution Timeline</h3>
+                <div id="timeline-content">
+                    <!-- Timeline items will be populated here -->
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>🎯 Suggested Next Learning</h3>
+                <div id="suggested-learning">
+                    <!-- Suggested learning items will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const GITHUB_REPO = 'your-username/stillme_ai'; // Update this
+        const DATA_FILES = {
+            proposals: 'data/learning/proposals.json',
+            metrics: 'artifacts/metrics/learning_summary.csv',
+            timeline: 'docs/evolution_timeline.json'
+        };
+        
+        let progressChart;
+        
+        // Load data from GitHub
+        async function loadData() {
+            try {
+                showLoading();
+                
+                // Load proposals data
+                const proposalsData = await loadFromGitHub(DATA_FILES.proposals);
+                const metricsData = await loadFromGitHub(DATA_FILES.metrics);
+                const timelineData = await loadFromGitHub(DATA_FILES.timeline);
+                
+                // Update dashboard
+                updateStatistics(proposalsData, metricsData);
+                updateProgressChart(metricsData);
+                updateTimeline(timelineData);
+                updateLastUpdate();
+                
+                showDashboard();
+                
+            } catch (error) {
+                showError('Failed to load data: ' + error.message);
+            }
+        }
+        
+        // Load data from GitHub API
+        async function loadFromGitHub(filePath) {
+            const url = `https://api.github.com/repos/${GITHUB_REPO}/contents/${filePath}`;
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            const content = atob(data.content);
+            
+            // Parse based on file type
+            if (filePath.endsWith('.json')) {
+                return JSON.parse(content);
+            } else if (filePath.endsWith('.csv')) {
+                return parseCSV(content);
+            }
+            
+            return content;
+        }
+        
+        // Parse CSV content
+        function parseCSV(csvContent) {
+            const lines = csvContent.split('\n');
+            const headers = lines[0].split(',');
+            const data = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim()) {
+                    const values = lines[i].split(',');
+                    const row = {};
+                    headers.forEach((header, index) => {
+                        row[header.trim()] = values[index]?.trim();
+                    });
+                    data.push(row);
+                }
+            }
+            
+            return data;
+        }
+        
+        // Update statistics
+        function updateStatistics(proposalsData, metricsData) {
+            document.getElementById('total-proposals').textContent = proposalsData?.length || 0;
+            document.getElementById('approved-proposals').textContent = 
+                proposalsData?.filter(p => p.status === 'approved').length || 0;
+            document.getElementById('learning-sessions').textContent = 
+                proposalsData?.filter(p => p.status === 'completed').length || 0;
+            document.getElementById('knowledge-sources').textContent = 
+                new Set(proposalsData?.map(p => p.source)).size || 0;
+            
+            // Update suggested learning with real data
+            updateSuggestedLearning(proposalsData);
+        }
+        
+        // Update progress chart
+        function updateProgressChart(metricsData) {
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            
+            if (progressChart) {
+                progressChart.destroy();
+            }
+            
+            // Prepare chart data
+            const labels = metricsData.map(row => row.date || row.timestamp);
+            const approvedData = metricsData.map(row => parseInt(row.approved) || 0);
+            const completedData = metricsData.map(row => parseInt(row.completed) || 0);
+            
+            progressChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Approved Proposals',
+                        data: approvedData,
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Completed Learning',
+                        data: completedData,
+                        borderColor: '#28a745',
+                        backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Update timeline
+        function updateTimeline(timelineData) {
+            const timelineContent = document.getElementById('timeline-content');
+            
+            if (!timelineData || !timelineData.events) {
+                timelineContent.innerHTML = '<p>No timeline data available</p>';
+                return;
+            }
+            
+            timelineContent.innerHTML = timelineData.events.map(event => `
+                <div class="timeline-item">
+                    <div class="timeline-date">${event.date}</div>
+                    <div class="timeline-content">
+                        <div class="timeline-title">${event.title}</div>
+                        <div class="timeline-description">${event.description}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Update suggested learning with real data
+        function updateSuggestedLearning(proposalsData) {
+            const suggestedContainer = document.getElementById('suggested-learning');
+            if (!suggestedContainer) return;
+            
+            // Get pending proposals as suggested learning
+            const pendingProposals = proposalsData.filter(p => p.status === 'pending');
+            
+            if (pendingProposals.length === 0) {
+                suggestedContainer.innerHTML = '<p>No pending learning proposals</p>';
+                return;
+            }
+            
+            suggestedContainer.innerHTML = pendingProposals.slice(0, 4).map(proposal => `
+                <div class="suggested-item">
+                    <div class="suggested-title">${proposal.title}</div>
+                    <div class="suggested-description">${proposal.description}</div>
+                    <div class="suggested-meta">
+                        <span class="suggested-source">📚 Source: ${proposal.source}</span>
+                        <span class="suggested-duration">⏱️ ${proposal.estimated_duration} min</span>
+                        <span class="suggested-quality">📊 Quality: ${proposal.quality_score}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Update last update time
+        function updateLastUpdate() {
+            const now = new Date();
+            document.getElementById('last-update').textContent = now.toLocaleString();
+        }
+        
+        // Show loading state
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'none';
+        }
+        
+        // Show error state
+        function showError(message) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('dashboard').style.display = 'none';
+        }
+        
+        // Show dashboard
+        function showDashboard() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+        }
+        
+        // Auto-refresh every 5 minutes
+        setInterval(loadData, 5 * 60 * 1000);
+        
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', loadData);
+    </script>
+</body>
+</html>

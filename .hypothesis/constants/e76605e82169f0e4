@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\decision_making\ethical_guardrails.py
+# hypothesis_version: 6.140.2
+
+['abnormal', 'accountability', 'all', 'always', 'attack', 'autonomy', 'beneficence', 'criminal', 'critical', 'danger', 'deception', 'error', 'everyone', 'fraud', 'harm', 'high', 'illegal', 'justice', 'low', 'medium', 'never', 'nobody', 'non_maleficence', 'none', 'normal', 'scam', 'strange', 'threat', 'timestamp', 'total_violations', 'transparency', 'typical', 'violence', 'weird']

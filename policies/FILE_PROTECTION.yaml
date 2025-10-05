@@ -1,0 +1,265 @@
+# StillMe File Protection Policy - Single Source of Truth
+# Policy trung tâm cho bảo vệ files quan trọng
+# Version: 1.0
+# Created: 2025-09-22
+# Purpose: Bảo vệ .env và các files quan trọng khỏi bị xoá/đổi tên/commit nhầm
+
+version: 1
+metadata:
+  name: "StillMe File Protection Policy"
+  description: "Policy trung tâm cho bảo vệ files quan trọng (.env, config, secrets)"
+  author: "StillMe Platform Team"
+  last_updated: "2025-09-22T00:30:00Z"
+  critical: true  # This policy is critical for security
+
+# Protected files - tuyệt đối không được xoá/đổi tên
+protected_files:
+  - ".env"                    # Main environment file
+  - ".env.local"             # Local environment
+
+# Rules cho từng loại operation
+rules:
+  delete:
+    action: "deny"           # Tuyệt đối cấm xoá
+    severity: "critical"     # Mức độ nghiêm trọng
+    auto_backup: true        # Tự động backup trước khi xoá
+    require_approval: true   # Cần approval từ admin
+    
+  rename:
+    action: "deny"           # Tuyệt đối cấm đổi tên
+    severity: "critical"
+    auto_backup: true
+    require_approval: true
+    
+  move:
+    action: "deny"           # Tuyệt đối cấm di chuyển
+    severity: "critical"
+    auto_backup: true
+    require_approval: true
+    
+  modify:
+    action: "require_approval"  # Cần approval để sửa
+    severity: "high"
+    auto_backup: true
+    require_approval: true
+    validation_required: true  # Cần validate content
+    
+  copy:
+    action: "allow"          # Cho phép copy
+    severity: "low"
+    auto_backup: false
+    require_approval: false
+    
+  read:
+    action: "allow"          # Cho phép đọc
+    severity: "low"
+    auto_backup: false
+    require_approval: false
+
+# Commit rules
+commit:
+  .env: "ignore"             # Không commit .env
+  .env.local: "ignore"       # Không commit .env.local
+  .env.prod: "ignore"        # Không commit .env.prod
+  .env.dev: "ignore"         # Không commit .env.dev
+  .env.staging: "ignore"     # Không commit .env.staging
+  .env.test: "ignore"        # Không commit .env.test
+  .env.backup: "ignore"      # Không commit .env.backup
+  .env.old: "ignore"         # Không commit .env.old
+  .env.orig: "ignore"        # Không commit .env.orig
+  .env.template: "ignore"    # Không commit .env.template
+  .env.notifications: "ignore"  # Không commit .env.notifications
+  .env.secrets: "ignore"     # Không commit .env.secrets
+  .env.keys: "ignore"        # Không commit .env.keys
+  .env.credentials: "ignore" # Không commit .env.credentials
+  .env.example: "allow"      # Cho phép commit .env.example
+
+# Messages cho user
+messages:
+  delete_violation_vi: "❌ Không được xoá file .env. File này chứa thông tin nhạy cảm."
+  delete_violation_en: "❌ Cannot delete .env file. This file contains sensitive information."
+  
+  rename_violation_vi: "❌ Không được đổi tên file .env. File này chứa thông tin nhạy cảm."
+  rename_violation_en: "❌ Cannot rename .env file. This file contains sensitive information."
+  
+  move_violation_vi: "❌ Không được di chuyển file .env. File này chứa thông tin nhạy cảm."
+  move_violation_en: "❌ Cannot move .env file. This file contains sensitive information."
+  
+  modify_violation_vi: "⚠️ Sửa file .env cần xác nhận rõ ràng và approval từ admin."
+  modify_violation_en: "⚠️ Modifying .env file requires explicit confirmation and admin approval."
+  
+  commit_violation_vi: "❌ Không được commit file .env. Sử dụng .env.example thay thế."
+  commit_violation_en: "❌ Cannot commit .env file. Use .env.example instead."
+  
+  backup_created_vi: "✅ Đã tạo backup file .env tại: {backup_path}"
+  backup_created_en: "✅ Created .env backup at: {backup_path}"
+  
+  approval_required_vi: "🔒 Cần approval từ admin để thực hiện thao tác này."
+  approval_required_en: "🔒 Admin approval required for this operation."
+
+# Validation rules
+validation:
+  required_keys:             # Các keys bắt buộc trong .env
+    - "OPENAI_API_KEY"
+    - "OPENROUTER_API_KEY"
+    - "DEEPSEEK_API_KEY"
+    - "OLLAMA_API_URL"
+    - "PREFERRED_MODEL_NAME"
+    - "FALLBACK_MODEL_NAME"
+  
+  key_patterns:              # Pattern validation cho keys
+    OPENAI_API_KEY: "^sk-proj-[a-zA-Z0-9_-]+$"
+    OPENROUTER_API_KEY: "^sk-or-v1-[a-zA-Z0-9_-]+$"
+    DEEPSEEK_API_KEY: "^sk-[a-zA-Z0-9_-]+$"
+    OLLAMA_API_URL: "^https?://[a-zA-Z0-9.-]+:[0-9]+$"
+  
+  file_size_limit: 1048576   # 1MB limit cho .env file
+  line_limit: 1000           # Tối đa 1000 dòng
+  
+  encoding: "utf-8"          # Chỉ cho phép UTF-8 encoding
+  line_endings: "unix"       # Chỉ cho phép Unix line endings
+
+# Backup configuration
+backup:
+  enabled: true
+  directory: ".env_backups"
+  max_backups: 10            # Giữ tối đa 10 backups
+  compression: true          # Nén backup files
+  encryption: false          # Không mã hoá (có thể bật sau)
+  
+  # Backup triggers
+  triggers:
+    - "before_delete"
+    - "before_rename"
+    - "before_move"
+    - "before_modify"
+    - "daily"                # Backup hàng ngày
+    - "weekly"               # Backup hàng tuần
+  
+  # Backup naming pattern
+  naming_pattern: ".env.backup.{timestamp}.{operation}"
+  timestamp_format: "%Y%m%d_%H%M%S"
+
+# Monitoring configuration
+monitoring:
+  enabled: true
+  log_file: "logs/file_protection.log"
+  log_level: "INFO"
+  
+  # Events to monitor
+  events:
+    - "file_access"
+    - "file_modify"
+    - "file_delete"
+    - "file_rename"
+    - "file_move"
+    - "backup_created"
+    - "validation_failed"
+    - "approval_required"
+    - "policy_violation"
+  
+  # Alerts
+  alerts:
+    critical_violation:
+      enabled: true
+      channels: ["console", "log", "email"]
+      threshold: 1            # Alert ngay lập tức
+    
+    multiple_violations:
+      enabled: true
+      channels: ["console", "log"]
+      threshold: 3            # Alert sau 3 violations
+      time_window: 3600       # Trong 1 giờ
+
+# Integration với tools
+integrations:
+  git:
+    pre_commit_hook: true
+    post_commit_hook: false
+    pre_push_hook: true
+    
+  ci_cd:
+    check_protected_files: true
+    validate_env_files: true
+    backup_on_deploy: true
+    
+  ide:
+    cursor_rules: true
+    vscode_settings: true
+    intellij_settings: true
+    
+  file_system:
+    inotify: true             # Linux
+    fsevents: true            # macOS
+    read_directory_changes: true  # Windows
+
+# Compliance requirements
+compliance:
+  required_for:
+    - "All entrypoints"
+    - "All build tools"
+    - "All deployment scripts"
+    - "All CI/CD pipelines"
+    - "All development tools"
+  
+  must_load_policy: true
+  must_validate_files: true
+  must_backup_before_operations: true
+  
+  # Compliance checks
+  checks:
+    - "check_protected_files_exist"
+    - "check_protected_files_not_committed"
+    - "check_backup_system_working"
+    - "check_validation_system_working"
+    - "check_monitoring_system_working"
+
+# Emergency procedures
+emergency:
+  # Khi .env bị xoá nhầm
+  recovery_procedures:
+    - "Check backup directory"
+    - "Restore from latest backup"
+    - "Validate restored file"
+    - "Notify admin"
+    - "Update monitoring"
+  
+  # Khi .env bị commit nhầm
+  git_recovery:
+    - "Remove from git history"
+    - "Add to .gitignore"
+    - "Force push (if safe)"
+    - "Notify team"
+    - "Rotate secrets"
+  
+  # Contact information
+  emergency_contacts:
+    admin: "admin@stillme-ai.com"
+    security: "security@stillme-ai.com"
+    devops: "devops@stillme-ai.com"
+
+# Policy enforcement
+enforcement:
+  # Runtime enforcement
+  runtime:
+    enabled: true
+    strict_mode: true         # Strict mode - block all violations
+    grace_period: 0           # Không có grace period
+    
+  # Development enforcement
+  development:
+    enabled: true
+    strict_mode: false        # Relaxed mode cho development
+    grace_period: 300         # 5 phút grace period
+    
+  # Production enforcement
+  production:
+    enabled: true
+    strict_mode: true         # Strict mode cho production
+    grace_period: 0           # Không có grace period
+    
+  # Testing enforcement
+  testing:
+    enabled: true
+    strict_mode: false        # Relaxed mode cho testing
+    grace_period: 60          # 1 phút grace period

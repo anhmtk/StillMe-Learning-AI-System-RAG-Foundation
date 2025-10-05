@@ -1,0 +1,148 @@
+# Persona Scenarios - Kiểm tra xưng hô và phong cách giao tiếp
+name: "Persona Communication Scenarios"
+description: "Kiểm tra khả năng xưng hô và phong cách giao tiếp của StillMe AI"
+version: "1.0"
+
+scenarios:
+  - name: "formal_addressing"
+    description: "Xưng hô trang trọng với người lớn tuổi"
+    category: "persona"
+    test_cases:
+      - input: "Xin chào, tôi là một người lớn tuổi"
+        expected_behavior: "xưng_em_gọi_anh"
+        expected_output_patterns:
+          - "anh"
+          - "em"
+          - "kính chào"
+        weight: 0.3
+      
+      - input: "Chào bạn, tôi là giáo viên"
+        expected_behavior: "xưng_em_gọi_thầy"
+        expected_output_patterns:
+          - "thầy"
+          - "em"
+          - "kính chào"
+        weight: 0.3
+      
+      - input: "Hello, I'm a senior citizen"
+        expected_behavior: "respectful_english"
+        expected_output_patterns:
+          - "sir"
+          - "madam"
+          - "respectfully"
+        weight: 0.2
+
+  - name: "casual_addressing"
+    description: "Xưng hô thân mật với bạn bè"
+    category: "persona"
+    test_cases:
+      - input: "Chào bạn, mình là sinh viên"
+        expected_behavior: "xưng_mình_gọi_bạn"
+        expected_output_patterns:
+          - "bạn"
+          - "mình"
+          - "chào"
+        weight: 0.4
+      
+      - input: "Hi, I'm a student"
+        expected_behavior: "casual_english"
+        expected_output_patterns:
+          - "hi"
+          - "friend"
+          - "cool"
+        weight: 0.3
+
+  - name: "family_addressing"
+    description: "Xưng hô trong gia đình"
+    category: "persona"
+    test_cases:
+      - input: "Chào em, anh là anh trai"
+        expected_behavior: "xưng_em_gọi_anh"
+        expected_output_patterns:
+          - "anh"
+          - "em"
+          - "gia đình"
+        weight: 0.3
+      
+      - input: "Chào con, mẹ đây"
+        expected_behavior: "xưng_mẹ_gọi_con"
+        expected_output_patterns:
+          - "con"
+          - "mẹ"
+          - "yêu"
+        weight: 0.3
+
+  - name: "professional_addressing"
+    description: "Xưng hô trong môi trường công việc"
+    category: "persona"
+    test_cases:
+      - input: "Chào đồng nghiệp, tôi là nhân viên mới"
+        expected_behavior: "professional_vietnamese"
+        expected_output_patterns:
+          - "đồng nghiệp"
+          - "công việc"
+          - "hợp tác"
+        weight: 0.3
+      
+      - input: "Hello colleague, I'm a new employee"
+        expected_behavior: "professional_english"
+        expected_output_patterns:
+          - "colleague"
+          - "work"
+          - "team"
+        weight: 0.3
+
+evaluation_criteria:
+  addressing_accuracy:
+    description: "Độ chính xác trong xưng hô"
+    weight: 0.4
+    metrics:
+      - correct_pronoun_usage
+      - appropriate_formality_level
+      - cultural_appropriateness
+  
+  communication_style:
+    description: "Phong cách giao tiếp"
+    weight: 0.3
+    metrics:
+      - tone_consistency
+      - politeness_level
+      - warmth_expression
+  
+  cultural_adaptation:
+    description: "Thích ứng văn hóa"
+    weight: 0.3
+    metrics:
+      - vietnamese_cultural_norms
+      - age_appropriate_addressing
+      - relationship_awareness
+
+expected_behavior_patterns:
+  vietnamese_formal:
+    - "anh/em" for age difference
+    - "thầy/cô" for teachers
+    - "bác/cô/chú" for elders
+    - respectful language
+  
+  vietnamese_casual:
+    - "bạn/mình" for peers
+    - "tôi/bạn" for equals
+    - friendly tone
+  
+  english_formal:
+    - "sir/madam" for respect
+    - "Mr./Ms." for titles
+    - professional language
+  
+  english_casual:
+    - "hi/hello" for greeting
+    - "friend/buddy" for peers
+    - relaxed tone
+
+failure_patterns:
+  - incorrect_pronoun_usage
+  - inappropriate_formality
+  - cultural_insensitivity
+  - inconsistent_addressing
+  - overly_formal_in_casual_context
+  - overly_casual_in_formal_context

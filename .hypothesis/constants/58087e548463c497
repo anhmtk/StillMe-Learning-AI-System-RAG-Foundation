@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\agent_dev\telemetry.py
+# hypothesis_version: 6.140.2
+
+[100, 1000, '%Y%m%d_%H%M%S', 'a', 'budget_check', 'budget_type', 'completion', 'context', 'current_usage', 'data', 'decision', 'duration_ms', 'error', 'error_message', 'error_type', 'event_type', 'limit', 'log_file', 'percentage', 'phase', 'phase_count', 'phase_end', 'phase_number', 'phase_start', 'policy', 'policy_decision', 'policy_name', 'r', 'reason', 'result', 'safety', 'session_duration', 'status', 'success', 'task_result', 'task_spec', 'timestamp', 'trace_id', 'utf-8']

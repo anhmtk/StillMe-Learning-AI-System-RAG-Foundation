@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\modules\pii_redactor.py
+# hypothesis_version: 6.140.2
+
+[0.0, 0.7, 0.8, 0.9, '*', 'PIIDetection', 'PIIRedactor', 'PIIType', 'RedactionConfig', 'RedactionMethod', 'address', 'by_type', 'credit_card', 'date_of_birth', 'email', 'hash', 'high', 'ip_address', 'low', 'mask', 'medium', 'name', 'phone', 'redaction_ratio', 'remove', 'replace', 'ssn', 'text_length', 'total_pii']

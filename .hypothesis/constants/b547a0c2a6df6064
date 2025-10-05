@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\core\observability\dashboard.py
+# hypothesis_version: 6.140.2
+
+[200, 404, 500, 8080, '/', '/api/data', '/api/health', '/api/logs', '/api/metrics', '/api/traces', 'Content-Length', 'Content-Type', 'Dashboard stopped', 'Not Found', 'application/json', 'checks', 'dashboard', 'degraded', 'details', 'error', 'get_log_stats', 'health', 'healthy', 'localhost', 'logs', 'message', 'metrics', 'name', 'recent_traces', 'response_time_ms', 'status', 'summary', 'text/html', 'text/plain', 'timestamp', 'total_traces', 'traces', 'unhealthy', 'unknown', 'utf-8']

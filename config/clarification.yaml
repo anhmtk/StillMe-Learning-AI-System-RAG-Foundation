@@ -1,0 +1,86 @@
+clarification:
+  enabled: true
+  default_mode: careful   # careful | quick
+  max_rounds: 2
+  confidence_thresholds:
+    ask_clarify: 0.25     # nếu score > ngưỡng thì hỏi lại (Phase 1 compatible)
+    proceed: 0.80         # nếu chắc chắn đủ rõ thì trả lời
+  caching:
+    enabled: true
+    max_entries: 1024
+    ttl_seconds: 3600
+  learning:
+    enabled: true
+    min_samples_to_apply: 3       # đủ mẫu mới nâng pattern
+    decay: 0.90                   # giảm trọng số theo thời gian
+  telemetry:
+    log_level: info
+    sample_rate: 1.0
+  safety:
+    circuit_breaker:
+      max_failures: 5
+      reset_seconds: 60
+  
+  # Phase 3: Multi-Modal Clarification
+  multi_modal:
+    enabled: true
+    image_analysis: stub         # "stub" | "openai" | "custom"
+    code_analysis: ast           # "ast" | "llm"
+    text_analysis: enhanced      # "basic" | "enhanced"
+    max_image_size_mb: 10
+    supported_image_formats: ["jpg", "jpeg", "png", "gif", "webp"]
+    code_languages: ["python", "javascript", "typescript", "java", "cpp", "go", "rust"]
+  
+  # Phase 3: Proactive Suggestions
+  proactive:
+    enabled: true
+    max_suggestions: 3
+    categories: ["performance", "security", "ux", "scalability", "maintainability"]
+    confidence_threshold: 0.6    # minimum confidence to show suggestions
+    learning_enabled: true       # learn from user selections
+  
+  # Phase 3: Enterprise Audit & Compliance
+  enterprise_audit:
+    enabled: true
+    redact_pii: true
+    store_format: jsonl          # JSON Lines log
+    log_file: "logs/clarification_audit.jsonl"
+    fields: ["trace_id", "user_id", "domain", "mode", "question", "success", "timestamp", "input_type"]
+    retention_days: 90
+    privacy_filters:
+      - "email"
+      - "password"
+      - "api_key"
+      - "token"
+      - "secret"
+      - "credit_card"
+      - "ssn"
+    compliance:
+      gdpr_enabled: true
+      ccpa_enabled: true
+      sox_enabled: false
+  
+  # Phase 3: Advanced Observability
+  observability:
+    metrics:
+      enabled: true
+      prometheus_endpoint: "/metrics"
+      custom_metrics:
+        - "clarification_multi_modal_count"
+        - "clarification_proactive_used"
+        - "clarification_audit_redacted"
+        - "clarification_enterprise_compliance"
+    dashboards:
+      enabled: true
+      grafana_config: "dashboards/clarification_dashboard.json"
+    alerts:
+      enabled: true
+      rules:
+        - name: "high_failure_rate"
+          condition: "clarification_failure_rate > 0.2"
+          duration: "10m"
+          severity: "warning"
+        - name: "audit_log_failure"
+          condition: "audit_log_errors > 5"
+          duration: "5m"
+          severity: "critical"

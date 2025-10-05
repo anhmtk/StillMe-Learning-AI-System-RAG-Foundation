@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\config\shared\config.py
+# hypothesis_version: 6.140.2
+
+['CORS_ORIGINS', 'DATABASE_URL', 'DEBUG', 'ENVIRONMENT', 'INFO', 'LOG_FORMAT', 'LOG_LEVEL', 'REDIS_URL', 'SECRET_KEY', 'SharedConfig', 'cors_origins', 'database_url', 'debug', 'development', 'environment', 'false', 'log_format', 'log_level', 'redis_url', 'secret_key', 'sqlite:///stillme.db', 'true', 'your-secret-key-here']

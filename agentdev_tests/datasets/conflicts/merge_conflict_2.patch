@@ -1,0 +1,10 @@
+--- a/main.py
++++ b/main.py
+@@ -1,5 +1,5 @@
+ def calculate_sum(a, b):
+-    return a + b
++    return a + b  # Keep original logic
+@@ -3,3 +3,3 @@
+ def calculate_product(a, b):
+-    return a * b
++    return a * b * 2  # Double the product

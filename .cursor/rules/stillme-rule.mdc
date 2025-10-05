@@ -1,0 +1,12 @@
+---
+description: "Giới hạn phạm vi phân tích – không quét venv/site-packages/legacy"
+globs:
+  - "**/*.py"
+alwaysApply: true
+---
+
+Khi chạy pyright/ruff:
+- Chỉ phân tích: `framework.py`, `modules/`, `api/`, `utils/`, `stillme_ai/`.
+- Luôn loại: `.venv*/`, `site-packages/`, `dist-packages/`, `__pycache__/`, `node_modules/`,
+  `modules/backup_legacy/`, `tests/fixtures/`, và mọi thư mục `**/Lib/**/test/**`, `**/Tests/**`.
+- Dùng `pyright --stats --ignoreexternal` và `ruff check . --fix --force-exclude`.

@@ -1,0 +1,145 @@
+# StillMe AI Framework - Phase 3 Clarification Core
+# Prometheus Alert Rules
+# 
+# Author: StillMe AI Framework
+# Created: 2025-01-08
+
+groups:
+  - name: stillme_phase3_alerts
+    rules:
+      # High Error Rate Alert
+      - alert: HighErrorRate
+        expr: rate(errors_total[5m]) / rate(requests_total[5m]) * 100 > 2
+        for: 5m
+        labels:
+          severity: warning
+          service: stillme_phase3
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value }}% for the last 5 minutes"
+          runbook_url: "https://docs.stillme.ai/runbooks/high-error-rate"
+
+      # High P99 Latency Alert
+      - alert: HighP99Latency
+        expr: histogram_quantile(0.99, rate(requests_duration_bucket[5m])) > 1.5
+        for: 5m
+        labels:
+          severity: warning
+          service: stillme_phase3
+        annotations:
+          summary: "High P99 latency detected"
+          description: "P99 latency is {{ $value }}s for the last 5 minutes"
+          runbook_url: "https://docs.stillme.ai/runbooks/high-latency"
+
+      # High P95 Latency Alert
+      - alert: HighP95Latency
+        expr: histogram_quantile(0.95, rate(requests_duration_bucket[5m])) > 1.0
+        for: 5m
+        labels:
+          severity: warning
+          service: stillme_phase3
+        annotations:
+          summary: "High P95 latency detected"
+          description: "P95 latency is {{ $value }}s for the last 5 minutes"
+          runbook_url: "https://docs.stillme.ai/runbooks/high-latency"
+
+      # Low Request Rate Alert
+      - alert: LowRequestRate
+        expr: rate(requests_total[5m]) < 1
+        for: 10m
+        labels:
+          severity: info
+          service: stillme_phase3
+        annotations:
+          summary: "Low request rate detected"
+          description: "Request rate is {{ $value }} req/s for the last 10 minutes"
+          runbook_url: "https://docs.stillme.ai/runbooks/low-request-rate"
+
+      # High Clarification Rate Alert
+      - alert: HighClarificationRate
+        expr: rate(clarify_trigger_total[5m]) > 20
+        for: 5m
+        labels:
+          severity: warning
+          service: stillme_phase3
+        annotations:
+          summary: "High clarification rate detected"
+          description: "Clarification rate is {{ $value }} triggers/sec for the last 5 minutes"
+          runbook_url: "https://docs.stillme.ai/runbooks/high-clarification-rate"
+
+      # High Memory Usage Alert
+      - alert: HighMemoryUsage
+        expr: system_memory_usage_bytes > 500 * 1024 * 1024  # 500MB
+        for: 5m
+        labels:
+          severity: warning
+          service: stillme_phase3
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value | humanize1024 }}B"
+          runbook_url: "https://docs.stillme.ai/runbooks/high-memory-usage"
+
+      # High CPU Usage Alert
+      - alert: HighCPUUsage
+        expr: system_cpu_usage_percent > 80
+        for: 5m
+        labels:
+          severity: warning
+          service: stillme_phase3
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is {{ $value }}%"
+          runbook_url: "https://docs.stillme.ai/runbooks/high-cpu-usage"
+
+      # Service Down Alert
+      - alert: ServiceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: stillme_phase3
+        annotations:
+          summary: "Service is down"
+          description: "StillMe Phase 3 service is not responding"
+          runbook_url: "https://docs.stillme.ai/runbooks/service-down"
+
+      # Detector Failure Alert
+      - alert: DetectorFailure
+        expr: rate(detector_hits_total[5m]) == 0 and rate(requests_total[5m]) > 0
+        for: 10m
+        labels:
+          severity: warning
+          service: stillme_phase3
+        annotations:
+          summary: "Detector failure detected"
+          description: "No detector hits detected despite active requests"
+          runbook_url: "https://docs.stillme.ai/runbooks/detector-failure"
+
+      # Unusual Detector Pattern Alert
+      - alert: UnusualDetectorPattern
+        expr: |
+          (
+            rate(detector_hits_total{type="sqli"}[5m]) / rate(requests_total[5m]) > 0.5
+            or
+            rate(detector_hits_total{type="xss"}[5m]) / rate(requests_total[5m]) > 0.5
+          )
+        for: 5m
+        labels:
+          severity: warning
+          service: stillme_phase3
+        annotations:
+          summary: "Unusual detector pattern detected"
+          description: "High rate of security detector hits detected"
+          runbook_url: "https://docs.stillme.ai/runbooks/unusual-detector-pattern"
+
+      # System Uptime Alert
+      - alert: SystemUptime
+        expr: system_uptime_seconds < 300  # 5 minutes
+        for: 1m
+        labels:
+          severity: info
+          service: stillme_phase3
+        annotations:
+          summary: "System recently restarted"
+          description: "System uptime is {{ $value }}s"
+          runbook_url: "https://docs.stillme.ai/runbooks/system-restart"

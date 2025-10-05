@@ -1,0 +1,5 @@
+Null Bytes and Encoding Scan Report
+==================================================
+
+✅ No problematic files found.
+All test files are clean.

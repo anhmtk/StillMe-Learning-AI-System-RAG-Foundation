@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\control\kill_switch.py
+# hypothesis_version: 6.140.2
+
+[300, 'EMERGENCY', 'Emergency protection', 'Error count reset', 'HARD', 'Manual activation', 'Manual hard kill', 'Manual soft kill', 'SOFT', 'STILLME_KILL_FILE', 'active', 'auto_recovery', 'cooldown_remaining', 'emergency', 'enabled', 'error_count', 'false', 'inactive', 'kill_reason', 'kill_timestamp', 'last_error_time', 'state', 'stillme.killswitch', 'unknown', 'w']

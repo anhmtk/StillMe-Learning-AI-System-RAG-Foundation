@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\config\__init__.py
+# hypothesis_version: 6.140.2
+
+['2.0.0', 'AgentDevConfig', 'CoreConfig', 'PlatformConfig', 'SharedConfig', 'StillMe AI Team']

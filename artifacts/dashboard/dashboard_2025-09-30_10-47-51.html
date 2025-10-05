@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentDev Unified Analytics Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .metric-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .metric-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .metric-label {
+            color: #666;
+            margin-top: 5px;
+        }
+        .insights-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .recommendations-section {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .insight-item, .recommendation-item {
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 4px solid #667eea;
+            background: #f8f9fa;
+        }
+        .chart-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>AgentDev Unified Analytics Dashboard</h1>
+        <p>Báo cáo được tạo lúc: 30/09/2025 10:47:51</p>
+        <p>Khoảng thời gian: 23/09/2025 - 30/09/2025</p>
+    </div>
+    
+    <div class="metrics-grid">
+
+        <div class="metric-card">
+            <div class="metric-value">1685.00</div>
+            <div class="metric-label">Tổng số file Python (files)</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-value">4490.00</div>
+            <div class="metric-label">Tổng số classes (classes)</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-value">21247.00</div>
+            <div class="metric-label">Tổng số functions (functions)</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-value">618593.00</div>
+            <div class="metric-label">Tổng số dòng code (lines)</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-value">29.11</div>
+            <div class="metric-label">Độ phức tạp trung bình (lines/function)</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-value">4.78</div>
+            <div class="metric-label">Thời gian chạy test trung bình (seconds)</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-value">172.24</div>
+            <div class="metric-label">Sử dụng bộ nhớ (MB)</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-value">11.53</div>
+            <div class="metric-label">Sử dụng CPU (%)</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-value">149.00</div>
+            <div class="metric-label">Số lượng vấn đề bảo mật (issues)</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-value">0.91</div>
+            <div class="metric-label">Điểm bảo mật (score)</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-value">188.00</div>
+            <div class="metric-label">Tổng số file test (files)</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-value">1769.00</div>
+            <div class="metric-label">Tổng số test functions (functions)</div>
+        </div>
+
+        <div class="metric-card">
+            <div class="metric-value">0.88</div>
+            <div class="metric-label">Test coverage (%)</div>
+        </div>
+
+    </div>
+    
+    <div class="insights-section">
+        <h2>📊 Phân tích và Insights</h2>
+
+        <div class="insight-item">Project có 2.7 classes mỗi file, cho thấy cấu trúc tốt</div>
+
+        <div class="insight-item">Memory usage cao (172.2MB), cần kiểm tra memory leaks</div>
+
+        <div class="insight-item">Security score tốt (0.91)</div>
+
+        <div class="insight-item">Test coverage tốt (87.7%)</div>
+
+    </div>
+    
+    <div class="recommendations-section">
+        <h2>💡 Khuyến nghị</h2>
+
+        <div class="recommendation-item">Xem xét refactoring để giảm số dòng code</div>
+
+        <div class="recommendation-item">Giảm độ phức tạp của functions bằng cách chia nhỏ</div>
+
+        <div class="recommendation-item">Kiểm tra và sửa memory leaks</div>
+
+        <div class="recommendation-item">Sửa các vấn đề bảo mật được phát hiện</div>
+
+    </div>
+    
+    <div class="chart-container">
+        <h2>📈 Biểu đồ xu hướng</h2>
+        <div id="trends-chart"></div>
+    </div>
+    
+    <script>
+        // Tạo biểu đồ xu hướng
+        var trendsData = [];
+        var trendsLabels = [];
+        
+        // Dữ liệu mẫu cho biểu đồ
+        var sampleData = {
+            x: ['Tuần 1', 'Tuần 2', 'Tuần 3', 'Tuần 4'],
+            y: [85, 87, 89, 92],
+            type: 'scatter',
+            mode: 'lines+markers',
+            name: 'Code Quality Score',
+            line: {color: '#667eea'}
+        };
+        
+        var layout = {
+            title: 'Xu hướng Code Quality',
+            xaxis: {title: 'Thời gian'},
+            yaxis: {title: 'Điểm số'},
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            paper_bgcolor: 'rgba(0,0,0,0)'
+        };
+        
+        Plotly.newPlot('trends-chart', [sampleData], layout);
+    </script>
+</body>
+</html>

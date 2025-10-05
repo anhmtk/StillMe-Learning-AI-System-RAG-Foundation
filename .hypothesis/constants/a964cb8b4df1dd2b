@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\tests_harness\evaluators\persona_eval.py
+# hypothesis_version: 6.140.2
+
+[0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.8, 1.0, 'Chào', 'Hello', 'Hello StillMe', 'Hi', 'No scores provided', 'Xin chào', 'Xin chào StillMe', '[a-zA-Z]', '\\b(em|cháu|con)\\b', '\\b(😊|😄|😃|😁|😆)\\b', '__main__', 'addressing_style', 'anh', 'average_scores', 'best_score', 'casual', 'casual_english', 'casual_vietnamese', 'communication_style', 'communication_tone', 'consistency', 'dynamic', 'dynamic_adaptation', 'enabled', 'error', 'excellent', 'fair', 'formal', 'formal_english', 'formal_vietnamese', 'friendly', 'good', 'helpful', 'hey', 'hi', 'high', 'hôm nay', 'kính chào', 'ok', 'okay', 'overall', 'poor', 'preferred_name', 'professional', 'response', 'score_distribution', 'timestamp', 'today', 'total_responses', 'trân trọng', 'user_input', 'user_preferences', 'worst_score', 'xin chào', 'you']

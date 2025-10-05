@@ -1,0 +1,28 @@
+# Global code owners
+* @[INSERT_GITHUB_USERNAME]
+
+# Core framework
+stillme_core/ @[INSERT_GITHUB_USERNAME]
+
+# Router system
+stillme_core/router_* @[INSERT_GITHUB_USERNAME]
+
+# Plugin system
+plugins/ @[INSERT_GITHUB_USERNAME]
+
+# Tests
+tests/ @[INSERT_GITHUB_USERNAME]
+
+# Documentation
+docs/ @[INSERT_GITHUB_USERNAME]
+README.md @[INSERT_GITHUB_USERNAME]
+CONTRIBUTING.md @[INSERT_GITHUB_USERNAME]
+SECURITY.md @[INSERT_GITHUB_USERNAME]
+
+# CI/CD
+.github/ @[INSERT_GITHUB_USERNAME]
+
+# Configuration
+pyproject.toml @[INSERT_GITHUB_USERNAME]
+requirements.txt @[INSERT_GITHUB_USERNAME]
+pre-commit-config.yaml @[INSERT_GITHUB_USERNAME]

@@ -1,0 +1,50 @@
+name: CI Integration Tests
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  integration-tests:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.12
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-test.txt
+    
+    - name: Run integration tests
+      run: |
+        pytest agentdev_foundation_tests/integration/ -v --junitxml=junit-integration.xml --timeout=300
+    
+    - name: Run chaos tests
+      run: |
+        pytest agentdev_foundation_tests/chaos/ -v --junitxml=junit-chaos.xml --timeout=600
+    
+    - name: Upload integration test results
+      uses: actions/upload-artifact@v3
+      with:
+        name: integration-test-results
+        path: junit-integration.xml
+    
+    - name: Upload chaos test results
+      uses: actions/upload-artifact@v3
+      with:
+        name: chaos-test-results
+        path: junit-chaos.xml
+    
+    - name: Generate test summary
+      run: |
+        echo "## Integration Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "Integration tests completed successfully" >> $GITHUB_STEP_SUMMARY
+        echo "Chaos tests completed successfully" >> $GITHUB_STEP_SUMMARY

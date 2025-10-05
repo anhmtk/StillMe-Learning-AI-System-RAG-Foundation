@@ -1,0 +1,31 @@
+Documentation files in docs/ directory:
+
+ARCHITECTURE_OVERVIEW.md - System architecture overview
+AGENTDEV_ASSESSMENT.md - AgentDev capability assessment
+ENHANCED_LEARNING_DASHBOARD.md - Learning dashboard documentation
+LEARNING_METRICS_DASHBOARD.md - Metrics dashboard documentation
+PROJECT_OVERVIEW.md - Project overview and stats
+STILLME_SYSTEM_OVERVIEW.md - System overview
+DASHBOARD_ARCHITECTURE.md - Dashboard architecture
+GITHUB_PAGES_SETUP.md - GitHub Pages setup guide
+SECURITY.md - Security documentation
+DEVELOPMENT_GUIDE.md - Development guide
+API_DOCUMENTATION.md - API documentation
+CLI_USAGE.md - CLI usage guide
+PLUGIN_GUIDE.md - Plugin development guide
+PRIVACY_MODE.md - Privacy mode documentation
+ETHICS_SECURITY_PRIVACY_REPORT.md - Ethics and security report
+SYSTEM_HEALTH.md - System health monitoring
+TECH_DEBT.md - Technical debt documentation
+TEST_ENV.md - Testing environment setup
+SAFETY_TEST_README.md - Safety testing guide
+STRESS_TEST_README.md - Stress testing guide
+SEAL_GRADE_TEST_REPORT.md - SEAL grade test report
+
+Subdirectories:
+- adr/ - Architecture Decision Records
+- rfc/ - Request for Comments
+- dashboard/ - Dashboard static files
+- dev/ - Development documentation
+
+Total: 80+ documentation files

@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\core\router\memory_manager.py
+# hypothesis_version: 6.140.2
+
+[0.0, 0.5, 300, 1000, 10000, 'agentdev', 'analysis', 'analyst', 'avg_confidence', 'avg_duration', 'avg_retrieval_time', 'avg_satisfaction', 'bug_fix', 'code_review', 'code_reviewer', 'complex', 'complexity', 'confidence', 'context', 'critical', 'days_covered', 'db_path', 'deployer', 'deployment', 'documentation', 'documenter', 'duration', 'error', 'export_timestamp', 'failed_retrievals', 'feature_development', 'general', 'max_memories', 'medium', 'memories', 'memory_id', 'monitoring', 'observability', 'outcome', 'recommendations', 'refactoring', 'request_hash', 'router_memory.db', 'selected_agent', 'simple', 'success', 'success_rate', 'success_trends', 'successful_tasks', 'task_type', 'tester', 'testing', 'timestamp', 'total_confidence', 'total_count', 'total_duration', 'total_memories', 'total_tasks', 'user_satisfaction']

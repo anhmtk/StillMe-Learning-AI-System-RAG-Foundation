@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\core\observability\logger.py
+# hypothesis_version: 6.140.2
+
+[1000, 1024, 5000, '\x1b[0m', '\x1b[31m', '\x1b[32m', '\x1b[33m', '\x1b[35m', '\x1b[36m', 'CRITICAL', 'DEBUG', 'ERROR', 'INFO', 'UNKNOWN', 'WARNING', '__name__', 'a', 'context', 'duration_ms', 'error', 'exception_message', 'exception_type', 'file_size', 'file_size_mb', 'level', 'level_counts', 'log_file', 'logs', 'operation', 'request_id', 'session_id', 'stillme', 'total_logs', 'traceback', 'unknown', 'user_id', 'utf-8']

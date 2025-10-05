@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\middleware\action_sandbox.py
+# hypothesis_version: 6.140.2
+
+[0.001, 100, 1000, 3600, 10000, ', ', '<script', 'action', 'blocked', 'blocked_executions', 'calculate_score', 'config', 'config_change', 'database_drop', 'dry_run', 'dry_run_executions', 'email_send', 'error', 'eval(', 'file_delete', 'file_write', 'format_response', 'idempotency_enabled', 'idempotency_max_size', 'idempotent', 'idempotent_hits', 'invalid_parameters', 'javascript:', 'log_message', 'max_history_size', 'network_request', 'ok', 'params_keys', 'payment_process', 'process_kill', 'processing_time_ms', 'reason', 'result', 'result_summary', 'safe', 'safe_executions', 'send_notification', 'service_stop', 'side_effect_blocking', 'side_effects_blocked', 'sms_send', 'stats', 'stored_at', 'success', 'system_command', 'timestamp', 'total_executions', 'trace_id', 'ttl_seconds', 'update_cache', 'update_metrics', 'user_data_access', 'validate_input', 'validated']

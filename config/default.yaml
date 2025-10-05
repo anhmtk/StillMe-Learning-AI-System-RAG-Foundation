@@ -1,0 +1,107 @@
+# StillMe AI Framework - Default Configuration
+# ============================================
+
+# Thresholds configuration
+thresholds:
+  abuse_guard:
+    suggestion: 0.8
+    abuse: 0.15
+  latency:
+    p95: 500.0
+    p99: 1000.0
+  quality:
+    min_score: 70.0
+    max_errors: 0.0
+
+# Performance configuration
+performance:
+  max_latency_ms: 10
+  target_throughput_req_s: 1000
+  max_workers: 4
+  timeout_seconds: 30
+
+# Security configuration
+security:
+  cors_origins:
+    - "http://localhost:3000"
+    - "http://localhost:8080"
+    - "http://localhost:8000"
+  rate_limit_window: 30
+  max_requests_per_window: 100
+  pii_redaction: true
+  audit_logging: true
+
+# Provider configuration
+providers:
+  order:
+    - "local_llm"
+    - "openai"
+    - "openrouter"
+  timeout: 30
+  retry_attempts: 3
+  circuit_breaker_threshold: 5
+
+# Features configuration
+features:
+  emotion_detection: false  # Heavy dependency, disabled by default
+  multi_modal: true
+  proactive_suggestions: true
+  learning_enabled: true
+
+# Logging configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  rationale: false  # Enable to log decision rationale
+
+# Policy configuration
+policy:
+  level: "balanced"  # strict | balanced | creative
+  dry_run: false
+
+# Privacy configuration
+privacy:
+  mode: "standard"  # standard | strict
+  opt_in_required: false
+  data_retention_days: 30
+
+# Clarification configuration (existing)
+clarification:
+  enabled: true
+  default_mode: careful
+  max_rounds: 2
+  confidence_thresholds:
+    ask_clarify: 0.25
+    proceed: 0.80
+  caching:
+    enabled: true
+    max_entries: 1024
+    ttl_seconds: 3600
+  learning:
+    enabled: true
+    min_samples_to_apply: 3
+    decay: 0.90
+  telemetry:
+    log_level: info
+    sample_rate: 1.0
+  safety:
+    circuit_breaker:
+      max_failures: 5
+      reset_seconds: 60
+  multi_modal:
+    enabled: true
+    image_analysis: stub
+    code_analysis: ast
+    text_analysis: enhanced
+    max_image_size_mb: 10
+    supported_image_formats: ["jpg", "jpeg", "png", "gif", "webp"]
+    code_languages: ["python", "javascript", "typescript", "java", "cpp", "go", "rust"]
+  proactive:
+    enabled: true
+    max_suggestions: 3
+    categories: ["performance", "security", "ux", "scalability", "maintainability"]
+    confidence_threshold: 0.6
+    learning_enabled: true
+  enterprise_audit:
+    enabled: true
+    redact_pii: true

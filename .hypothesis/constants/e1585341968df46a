@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\security\content_wrap.py
+# hypothesis_version: 6.140.2
+
+['![image](', '../../', '</script>', '<scr ipt>', '<script>', 'DROP TABLE', 'Empty content', 'Path traversal', 'SELECT * FROM', '[/SECURE]', '[REMOVED_OBFUSCATED]', '[SECURE:', '[WEB_SNIPPET_END]', '[WEB_SNIPPET_START]', ']', 'block_rate', 'description', 'drop', 'eval(', 'exec', 'exec(', 'forget everything', 'high', 'issues', 'java script:', 'javascript', 'javascript:', 'low', 'markdown', 'medium', 'news', 'obfuscated', 'os.system', 'pattern', 'position', 'prompt_injection', 'risk_level', 'safe', 'script', 'severity', 'subprocess', 'system', 'system(', 'total_blocked', 'total_filtered', 'unknown', 'valid', 'web', 'you are now']

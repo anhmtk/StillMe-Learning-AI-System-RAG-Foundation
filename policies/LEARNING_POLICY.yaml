@@ -1,0 +1,190 @@
+# StillMe Learning Policy
+# Safe daily smart-learning configuration for MVP
+
+# Domain allowlist - only trusted sources
+allowlist_domains:
+  - "arxiv.org"           # Academic papers
+  - "openai.com"          # OpenAI blog/research
+  - "deepmind.com"        # DeepMind blog/research
+
+# Content quotas and limits
+quotas:
+  max_docs_per_scan: 20           # Maximum documents to fetch per scan
+  max_recommendations_per_day: 5  # Maximum recommendations per day
+  max_ingestion_per_day: 3        # Maximum documents to ingest per day
+  max_content_length: 100000      # Maximum content length (characters)
+
+# Quality and risk thresholds
+thresholds:
+  quality_min: 0.72               # Minimum quality score (0.0-1.0)
+  risk_max: 0.25                  # Maximum risk score (0.0-1.0)
+  novelty_min: 0.3                # Minimum novelty score (0.0-1.0)
+  relevance_min: 0.6              # Minimum relevance score (0.0-1.0)
+
+# Safety constraints
+safety:
+  disable_finetune: true          # NO fine-tuning in MVP
+  require_human_approval: true    # All ingestion requires human approval
+  enable_rollback: true           # Enable rollback mechanism
+  max_rollback_days: 7            # Maximum days to keep rollback data
+
+# Content filtering
+content_filters:
+  # License requirements
+  allowed_licenses:
+    - "CC-BY"                     # Creative Commons Attribution
+    - "CC-BY-SA"                  # Creative Commons Attribution-ShareAlike
+    - "Apache-2.0"                # Apache License 2.0
+    - "MIT"                       # MIT License
+    - "BSD-3-Clause"              # BSD 3-Clause License
+  
+  # Rejected licenses
+  rejected_licenses:
+    - "All Rights Reserved"
+    - "Proprietary"
+    - "Commercial"
+  
+  # Content type restrictions
+  allowed_content_types:
+    - "research_paper"
+    - "blog_post"
+    - "technical_article"
+    - "documentation"
+  
+  # Blocked content types
+  blocked_content_types:
+    - "advertisement"
+    - "spam"
+    - "personal_blog"
+    - "social_media"
+
+# Risk assessment
+risk_assessment:
+  # Prompt injection patterns
+  injection_patterns:
+    - "ignore previous instructions"
+    - "system prompt"
+    - "jailbreak"
+    - "roleplay as"
+    - "pretend to be"
+    - "act as if"
+  
+  # High-risk keywords
+  high_risk_keywords:
+    - "hack"
+    - "exploit"
+    - "vulnerability"
+    - "bypass"
+    - "circumvent"
+    - "unauthorized"
+  
+  # PII patterns
+  pii_patterns:
+    - "email"
+    - "phone"
+    - "address"
+    - "ssn"
+    - "credit card"
+
+# Quality scoring weights
+quality_weights:
+  reputation: 0.30                # Source reputation weight
+  relevance: 0.25                 # Relevance to StillMe objectives
+  novelty: 0.15                   # Novelty compared to existing knowledge
+  evidence: 0.15                  # Evidence quality (citations, data)
+  tech_depth: 0.10                # Technical depth
+  recency: 0.05                   # Recency bonus
+
+# Reputation scores by domain
+reputation_scores:
+  "arxiv.org": 0.95               # High reputation - academic
+  "openai.com": 0.90              # High reputation - industry leader
+  "deepmind.com": 0.90            # High reputation - research lab
+  "github.com": 0.80              # Good reputation - code
+  "stackoverflow.com": 0.70       # Medium reputation - Q&A
+  "medium.com": 0.50              # Medium reputation - blog platform
+  "reddit.com": 0.30              # Low reputation - social
+
+# Learning objectives (for relevance scoring)
+learning_objectives:
+  - "artificial_intelligence"
+  - "machine_learning"
+  - "natural_language_processing"
+  - "computer_vision"
+  - "robotics"
+  - "ethics_in_ai"
+  - "ai_safety"
+  - "transparency"
+  - "explainability"
+  - "bias_detection"
+  - "privacy_preservation"
+  - "security"
+
+# Citation requirements
+citations:
+  require_citations: true         # All responses must include citations
+  min_citations: 1                # Minimum citations per response
+  max_citations: 5                # Maximum citations per response
+  citation_format: "markdown"     # Citation format (markdown, apa, etc.)
+
+# Audit and logging
+audit:
+  log_all_decisions: true         # Log all learning decisions
+  log_approvals: true             # Log human approvals
+  log_rejections: true            # Log rejections with reasons
+  retention_days: 90              # Audit log retention (days)
+
+# Rollback configuration
+rollback:
+  enable_automatic: false         # Disable automatic rollback in MVP
+  require_confirmation: true      # Require confirmation for rollbacks
+  max_rollback_size_mb: 100       # Maximum rollback data size
+  rollback_triggers:
+    - "quality_degradation"       # Trigger on quality degradation
+    - "error_rate_increase"       # Trigger on error rate increase
+    - "human_request"             # Trigger on human request
+
+# Monitoring and alerts
+monitoring:
+  enable_metrics: true            # Enable metrics collection
+  alert_on_high_risk: true        # Alert on high-risk content
+  alert_on_quota_exceeded: true   # Alert on quota exceeded
+  alert_on_quality_drop: true     # Alert on quality drop
+  
+  # Alert thresholds
+  alert_thresholds:
+    risk_score: 0.8               # Alert if risk score > 0.8
+    quality_score: 0.5            # Alert if quality score < 0.5
+    error_rate: 0.1               # Alert if error rate > 10%
+
+# Development and testing
+development:
+  enable_debug_mode: false        # Disable debug mode in production
+  enable_test_mode: false         # Disable test mode in production
+  mock_external_apis: false       # Use real APIs (not mocks)
+  
+  # Test configuration
+  test_quotas:
+    max_docs_per_scan: 5          # Reduced for testing
+    max_recommendations_per_day: 2
+    max_ingestion_per_day: 1
+
+# Compliance and governance
+compliance:
+  gdpr_compliant: true            # GDPR compliance
+  ccpa_compliant: true            # CCPA compliance
+  data_retention_days: 30         # Data retention period
+  right_to_deletion: true         # Support right to deletion
+  
+  # Data handling
+  data_handling:
+    encrypt_at_rest: true         # Encrypt data at rest
+    encrypt_in_transit: true      # Encrypt data in transit
+    anonymize_pii: true           # Anonymize PII
+    audit_data_access: true       # Audit data access
+
+# Version and metadata
+version: "1.0.0"
+last_updated: "2025-09-26"
+created_by: "StillMe AI Framework"
+description: "Safe daily smart-learning policy for MVP deployment"

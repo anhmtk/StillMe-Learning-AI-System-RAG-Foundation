@@ -1,0 +1,119 @@
+Encoding and Line Ending Normalization Report
+============================================================
+
+Total files processed: 69
+Files converted: 33
+Files with errors: 2
+
+CONVERTED FILES:
+--------------------
+✅ tests\test_advanced_agentdev.py
+✅ tests\test_agentdev_basic.py
+✅ tests\test_agentdev_direct.py
+✅ tests\test_agentdev_minimal.py
+✅ tests\test_agentdev_simple.py
+✅ tests\test_agent_flow.py
+✅ tests\test_api_bridge.py
+✅ tests\test_api_dev_agent.py
+✅ tests\test_api_pr_fullsuite.py
+✅ tests\test_bugmemory_priority.py
+✅ tests\test_bug_memory.py
+✅ tests\test_bug_memory_record.py
+✅ tests\test_code_quality_enforcer.py
+✅ tests\test_compute_ai_manager.py
+✅ tests\test_config_defaults.py
+✅ tests\test_enhanced_agentdev.py
+✅ tests\test_example.py
+✅ tests\test_example_module.py
+✅ tests\test_executor.py
+✅ tests\test_executor_patch.py
+✅ tests\test_generate_patch_stub.py
+✅ tests\test_health_ai_manager.py
+✅ tests\test_niche_units.py
+✅ tests\test_obs_files.py
+✅ tests\test_planner_multi.py
+✅ tests\test_plan_types.py
+✅ tests\test_sandbox.py
+✅ tests\test_supervisor_flow.py
+✅ tests\test_verifier.py
+✅ tests\__init__.py
+✅ pytest.ini
+✅ tox.ini
+✅ package.json
+
+FILES WITH ERRORS:
+--------------------
+❌ tests\test_internet_access.py
+❌ Makefile
+
+DETAILED RESULTS:
+--------------------
+ℹ️ tests\conftest.py: Already normalized
+✅ tests\test_advanced_agentdev.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+✅ tests\test_agentdev_basic.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+✅ tests\test_agentdev_direct.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+ℹ️ tests\test_agentdev_loop.py: Already normalized
+✅ tests\test_agentdev_minimal.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+✅ tests\test_agentdev_simple.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+✅ tests\test_agent_flow.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+ℹ️ tests\test_ai_manager_extended.py: Already normalized
+✅ tests\test_api_bridge.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+✅ tests\test_api_dev_agent.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+ℹ️ tests\test_api_provider_manager.py: Already normalized
+✅ tests\test_api_pr_fullsuite.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+ℹ️ tests\test_batch2_http_io.py: Already normalized
+ℹ️ tests\test_batch3_templates_validation.py: Already normalized
+✅ tests\test_bugmemory_priority.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+✅ tests\test_bug_memory.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+✅ tests\test_bug_memory_record.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+✅ tests\test_code_quality_enforcer.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+ℹ️ tests\test_common_modules.py: Already normalized
+ℹ️ tests\test_communication_style_manager.py: Already normalized
+✅ tests\test_compute_ai_manager.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+✅ tests\test_config_defaults.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+ℹ️ tests\test_connectivity.py: Already normalized
+ℹ️ tests\test_content_integrity_filter.py: Already normalized
+ℹ️ tests\test_conversational_core_v1.py: Already normalized
+ℹ️ tests\test_emotionsense_v1.py: Already normalized
+✅ tests\test_enhanced_agentdev.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+ℹ️ tests\test_ethical_core_system_v1.py: Already normalized
+✅ tests\test_example.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+✅ tests\test_example_module.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+✅ tests\test_executor.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+✅ tests\test_executor_patch.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+ℹ️ tests\test_gateway_architecture.py: Already normalized
+✅ tests\test_generate_patch_stub.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+ℹ️ tests\test_gpt5_bridge.py: Already normalized
+ℹ️ tests\test_guard.py: Already normalized
+ℹ️ tests\test_guard_v3.py: Already normalized
+ℹ️ tests\test_guard_v4.py: Already normalized
+✅ tests\test_health_ai_manager.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+ℹ️ tests\test_identity_handler.py: Already normalized
+ℹ️ tests\test_identity_integration.py: Already normalized
+❌ tests\test_internet_access.py: Error: 'charmap' codec can't decode byte 0x8f in position 5779: character maps to <undefined>
+ℹ️ tests\test_layered_memory_v1.py: Already normalized
+ℹ️ tests\test_niche_integration.py: Already normalized
+✅ tests\test_niche_units.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+✅ tests\test_obs_files.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+ℹ️ tests\test_persona_morph.py: Already normalized
+✅ tests\test_planner_multi.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+✅ tests\test_plan_types.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+ℹ️ tests\test_reflection_controller.py: Already normalized
+ℹ️ tests\test_reflection_integration.py: Already normalized
+ℹ️ tests\test_router.py: Already normalized
+ℹ️ tests\test_router_v9.py: Already normalized
+✅ tests\test_sandbox.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+ℹ️ tests\test_security_handler.py: Already normalized
+ℹ️ tests\test_self_improvement_manager.py: Already normalized
+ℹ️ tests\test_smart_gpt_api_manager_v1.py: Already normalized
+ℹ️ tests\test_stillme_behavior_matrix.py: Already normalized
+✅ tests\test_supervisor_flow.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+ℹ️ tests\test_token_optimizer_v1.py: Already normalized
+✅ tests\test_verifier.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+ℹ️ tests\test_web_access_v2.py: Already normalized
+✅ tests\__init__.py: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+✅ pytest.ini: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+ℹ️ tests\conftest.py: Already normalized
+✅ tox.ini: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF
+❌ Makefile: Error: 'charmap' codec can't decode byte 0x8d in position 1300: character maps to <undefined>
+✅ package.json: Converted from ascii (BOM: False) to UTF-8 (no BOM) with LF

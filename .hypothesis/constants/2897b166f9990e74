@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\agent_dev\safety.py
+# hypothesis_version: 6.140.2
+
+[100, 1000, 1024, 'POLICY_VIOLATION', 'SIGALRM', 'analysis', 'analyze_structure', 'apply_refactoring', 'backup_original', 'budget', 'bytes_written', 'check_format', 'command', 'commands_executed', 'context', 'count_lines', 'create_file', 'elapsed_time', 'error_type', 'eval', 'exec', 'file_operations', 'fs_quota_kb', 'generate_report', 'import os', 'import subprocess', 'import sys', 'list_files', 'message', 'mkdir', 'os.system', 'policy_level', 'read_file', 'recoverable', 'refactoring', 'replace_text', 'rmdir', 'search_text', 'strict', 'subprocess', 'suggested_action', 'text_operations', 'timeout', 'timeout_s', 'timestamp', 'validate_file', 'validate_syntax', 'validation', 'violation', 'violation_details', 'violations', 'write_file']

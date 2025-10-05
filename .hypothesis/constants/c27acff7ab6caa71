@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\emotionsense_v1.py
+# hypothesis_version: 6.140.2
+
+[0.0, 0.5, 0.8, 'INVALID_INPUT', 'MODEL_ERROR', 'PROCESSING_ERROR', 'SUCCESS', 'TIMEOUT', 'afraid', 'amazed', 'amazing', 'angry', 'anxious', 'awful', 'depressed', 'disgust', 'disgusted', 'emotions_by_type', 'error', 'excited', 'fear', 'furious', 'great', 'gross', 'happy', 'hate', 'incredible', 'joy', 'mad', 'nasty', 'neutral', 'rage', 'revolting', 'sad', 'scared', 'shocked', 'surprise', 'surprised', 'terrible', 'timestamp', 'total_detections', 'unhappy', 'wonderful', 'worried', 'wow']

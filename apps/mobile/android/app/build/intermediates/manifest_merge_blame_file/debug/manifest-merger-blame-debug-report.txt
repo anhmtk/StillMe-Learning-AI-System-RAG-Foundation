@@ -1,0 +1,120 @@
+1<?xml version="1.0" encoding="utf-8"?>
+2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+3    package="com.stillmemobile"
+4    android:versionCode="1"
+5    android:versionName="1.0" >
+6
+7    <uses-sdk
+8        android:minSdkVersion="21"
+8-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml
+9        android:targetSdkVersion="33" />
+9-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml
+10
+11    <uses-permission android:name="android.permission.INTERNET" />
+11-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:3:5-67
+11-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:3:22-64
+12    <uses-permission android:name="android.permission.CAMERA" />
+12-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:4:5-65
+12-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:4:22-62
+13    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+13-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:5:5-71
+13-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:5:22-68
+14    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+14-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:6:5-80
+14-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:6:22-77
+15    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+15-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:7:5-81
+15-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:7:22-78
+16    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+16-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:8:5-79
+16-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:8:22-76
+17    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+17-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:9:5-81
+17-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:9:22-78
+18    <uses-permission android:name="android.permission.VIBRATE" />
+18-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:10:5-66
+18-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:10:22-63
+19    <uses-permission android:name="android.permission.USE_FINGERPRINT" />
+19-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:11:5-74
+19-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:11:22-71
+20    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+20-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:12:5-72
+20-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:12:22-69
+21    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+21-->[com.facebook.flipper:flipper:0.125.0] C:\Users\LENOVO\.gradle\caches\transforms-3\1e0b3882abc1a515b1d32c3c8b21a5a4\transformed\jetified-flipper-0.125.0\AndroidManifest.xml:16:5-76
+21-->[com.facebook.flipper:flipper:0.125.0] C:\Users\LENOVO\.gradle\caches\transforms-3\1e0b3882abc1a515b1d32c3c8b21a5a4\transformed\jetified-flipper-0.125.0\AndroidManifest.xml:16:22-73
+22
+23    <application
+23-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:14:5-33:19
+24        android:name="com.stillmemobile.MainApplication"
+24-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:15:7-38
+25        android:allowBackup="false"
+25-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:19:7-34
+26        android:appComponentFactory="androidx.core.app.CoreComponentFactory"
+26-->[androidx.core:core:1.7.0] C:\Users\LENOVO\.gradle\caches\transforms-3\be959738cfcaa72580042129a5022d81\transformed\core-1.7.0\AndroidManifest.xml:24:18-86
+27        android:debuggable="true"
+28        android:icon="@mipmap/ic_launcher"
+28-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:17:7-41
+29        android:label="@string/app_name"
+29-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:16:7-39
+30        android:roundIcon="@mipmap/ic_launcher_round"
+30-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:18:7-52
+31        android:theme="@style/AppTheme" >
+31-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:20:7-38
+32        <activity
+32-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:21:7-32:18
+33            android:name="com.stillmemobile.MainActivity"
+33-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:22:9-37
+34            android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|screenSize|smallestScreenSize|uiMode"
+34-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:24:9-118
+35            android:exported="true"
+35-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:27:9-32
+36            android:label="@string/app_name"
+36-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:23:9-41
+37            android:launchMode="singleTask"
+37-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:25:9-40
+38            android:windowSoftInputMode="adjustResize" >
+38-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:26:9-51
+39            <intent-filter>
+39-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:28:9-31:25
+40                <action android:name="android.intent.action.MAIN" />
+40-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:29:13-65
+40-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:29:21-62
+41
+42                <category android:name="android.intent.category.LAUNCHER" />
+42-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:30:13-73
+42-->D:\stillme_ai\stillme_platform\mobile\android\app\src\main\AndroidManifest.xml:30:23-70
+43            </intent-filter>
+44        </activity>
+45
+46        <meta-data
+46-->[com.facebook.soloader:soloader:0.10.5] C:\Users\LENOVO\.gradle\caches\transforms-3\80400c614df88c0317432f467899302b\transformed\jetified-soloader-0.10.5\AndroidManifest.xml:12:9-14:37
+47            android:name="com.facebook.soloader.enabled"
+47-->[com.facebook.soloader:soloader:0.10.5] C:\Users\LENOVO\.gradle\caches\transforms-3\80400c614df88c0317432f467899302b\transformed\jetified-soloader-0.10.5\AndroidManifest.xml:13:13-57
+48            android:value="false" />
+48-->[com.facebook.soloader:soloader:0.10.5] C:\Users\LENOVO\.gradle\caches\transforms-3\80400c614df88c0317432f467899302b\transformed\jetified-soloader-0.10.5\AndroidManifest.xml:14:13-34
+49
+50        <provider
+50-->[androidx.emoji2:emoji2:1.0.0] C:\Users\LENOVO\.gradle\caches\transforms-3\25670664705259a4556eb0f96d6390f9\transformed\jetified-emoji2-1.0.0\AndroidManifest.xml:26:9-34:20
+51            android:name="androidx.startup.InitializationProvider"
+51-->[androidx.emoji2:emoji2:1.0.0] C:\Users\LENOVO\.gradle\caches\transforms-3\25670664705259a4556eb0f96d6390f9\transformed\jetified-emoji2-1.0.0\AndroidManifest.xml:27:13-67
+52            android:authorities="com.stillmemobile.androidx-startup"
+52-->[androidx.emoji2:emoji2:1.0.0] C:\Users\LENOVO\.gradle\caches\transforms-3\25670664705259a4556eb0f96d6390f9\transformed\jetified-emoji2-1.0.0\AndroidManifest.xml:28:13-68
+53            android:exported="false" >
+53-->[androidx.emoji2:emoji2:1.0.0] C:\Users\LENOVO\.gradle\caches\transforms-3\25670664705259a4556eb0f96d6390f9\transformed\jetified-emoji2-1.0.0\AndroidManifest.xml:29:13-37
+54            <meta-data
+54-->[androidx.emoji2:emoji2:1.0.0] C:\Users\LENOVO\.gradle\caches\transforms-3\25670664705259a4556eb0f96d6390f9\transformed\jetified-emoji2-1.0.0\AndroidManifest.xml:31:13-33:52
+55                android:name="androidx.emoji2.text.EmojiCompatInitializer"
+55-->[androidx.emoji2:emoji2:1.0.0] C:\Users\LENOVO\.gradle\caches\transforms-3\25670664705259a4556eb0f96d6390f9\transformed\jetified-emoji2-1.0.0\AndroidManifest.xml:32:17-75
+56                android:value="androidx.startup" />
+56-->[androidx.emoji2:emoji2:1.0.0] C:\Users\LENOVO\.gradle\caches\transforms-3\25670664705259a4556eb0f96d6390f9\transformed\jetified-emoji2-1.0.0\AndroidManifest.xml:33:17-49
+57            <meta-data
+57-->[androidx.lifecycle:lifecycle-process:2.4.0] C:\Users\LENOVO\.gradle\caches\transforms-3\8c9d6e70ac94b2e92250cabf265f716b\transformed\jetified-lifecycle-process-2.4.0\AndroidManifest.xml:31:13-33:52
+58                android:name="androidx.lifecycle.ProcessLifecycleInitializer"
+58-->[androidx.lifecycle:lifecycle-process:2.4.0] C:\Users\LENOVO\.gradle\caches\transforms-3\8c9d6e70ac94b2e92250cabf265f716b\transformed\jetified-lifecycle-process-2.4.0\AndroidManifest.xml:32:17-78
+59                android:value="androidx.startup" />
+59-->[androidx.lifecycle:lifecycle-process:2.4.0] C:\Users\LENOVO\.gradle\caches\transforms-3\8c9d6e70ac94b2e92250cabf265f716b\transformed\jetified-lifecycle-process-2.4.0\AndroidManifest.xml:33:17-49
+60        </provider>
+61    </application>
+62
+63</manifest>

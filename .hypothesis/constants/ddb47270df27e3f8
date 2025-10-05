@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\agent_dev\rules\engine.py
+# hypothesis_version: 6.140.2
+
+['.', 'action', 'block', 'conditions', 'contains', 'context', 'critical', 'description', 'enabled', 'eq', 'exists', 'field', 'fix_action', 'gt', 'gte', 'high', 'hits', 'in', 'is_active', 'log', 'low', 'lt', 'lte', 'medium', 'message', 'name', 'ne', 'neq', 'nin', 'not_contains', 'not_exists', 'operator', 'pattern_regex', 'priority', 'priority_score', 'r', 'redirect', 'regex', 'rule_definition', 'rule_id', 'rule_name', 'rules', 'severity', 'transform', 'type', 'unknown', 'unknown_rule', 'utf-8', 'value', 'violated_conditions', 'warn', '{}']

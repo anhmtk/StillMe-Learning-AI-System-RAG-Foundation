@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\quality\auto_fixer.py
+# hypothesis_version: 6.140.2
+
+[0.6, 0.7, 0.8, 0.9, 1.0, 120, '"""', '#', "'''", '\\b\\d{3,}\\b', 'add_docstrings', 'add_validation', 'applied', 'cache_results', 'complexity', 'def ', 'error', 'extract_constants', 'extract_method', 'failed', 'fix_line_length', 'fixes_by_status', 'fixes_by_type', 'for ', 'for i in range(len(', 'if ', 'improve_modularity', 'improve_naming', 'key', 'maintainability', 'optimize_loops', 'password', 'pending', 'performance', 'reduce_complexity', 'reduce_dependencies', 'reduce_duplication', 'reduce_nesting', 'sanitize_input', 'secret', 'security', 'simplify_condition', 'skipped', 'style', 'testability', 'timestamp', 'token', 'total_fixes', 'try:', 'use_secure_functions', 'while ', 'with ']

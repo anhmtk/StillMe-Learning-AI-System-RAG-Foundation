@@ -1,0 +1,152 @@
+# NicheRadar Scoring Weights Configuration
+# ======================================
+# 
+# Trọng số cho công thức NicheScore:
+# NicheScore = w1*TrendMomentum + w2*GHVelocity + w3*HNHeat + 
+#              w4*NewsDelta + w5*RedditEngagement - w6*CompetitionProxy + w7*FeasibilityFit
+#
+# Tất cả trọng số phải có tổng = 1.0 để đảm bảo score trong khoảng [0,1]
+# Có thể điều chỉnh thủ công hoặc qua feedback loop
+
+scoring_weights:
+  # Core trend signals (0.6 total)
+  trend_momentum: 0.20      # Google Trends momentum
+  github_velocity: 0.15     # GitHub stars velocity
+  hackernews_heat: 0.10     # Hacker News engagement
+  news_delta: 0.10          # News recency & relevance
+  reddit_engagement: 0.05   # Reddit social signals
+  
+  # Competition & feasibility (0.4 total)
+  competition_proxy: 0.15   # Negative weight for competition
+  feasibility_fit: 0.25     # How well it fits StillMe capabilities
+
+# Signal normalization parameters
+normalization:
+  # Z-score parameters for each signal type
+  github_velocity:
+    mean: 5.0
+    std: 10.0
+    max_cap: 50.0
+  
+  hackernews_heat:
+    mean: 50.0
+    std: 100.0
+    max_cap: 500.0
+  
+  news_delta:
+    mean: 0.5
+    std: 0.3
+    max_cap: 1.0
+  
+  reddit_engagement:
+    mean: 25.0
+    std: 50.0
+    max_cap: 200.0
+  
+  google_trends:
+    mean: 50.0
+    std: 25.0
+    max_cap: 100.0
+
+# StillMe capability mapping for feasibility scoring
+stillme_capabilities:
+  # High fit (score 0.8-1.0)
+  high_fit:
+    - "ai_assistant"
+    - "nlp_processing"
+    - "translation"
+    - "content_generation"
+    - "chatbot"
+    - "automation"
+    - "api_integration"
+    - "data_analysis"
+    - "document_processing"
+    - "workflow_automation"
+  
+  # Medium fit (score 0.5-0.7)
+  medium_fit:
+    - "web_scraping"
+    - "monitoring"
+    - "notification"
+    - "scheduling"
+    - "reporting"
+    - "dashboard"
+    - "analytics"
+    - "integration"
+    - "middleware"
+    - "tooling"
+  
+  # Low fit (score 0.1-0.4)
+  low_fit:
+    - "mobile_app"
+    - "game_development"
+    - "graphics_design"
+    - "video_editing"
+    - "hardware_control"
+    - "blockchain"
+    - "cryptocurrency"
+    - "trading"
+    - "ecommerce"
+    - "social_media"
+
+# Competition proxy calculation
+competition_analysis:
+  # Keywords that indicate high competition
+  high_competition_keywords:
+    - "crm"
+    - "project management"
+    - "email marketing"
+    - "social media"
+    - "ecommerce"
+    - "payment"
+    - "analytics"
+    - "dashboard"
+    - "api"
+    - "saas"
+  
+  # Keywords that indicate medium competition
+  medium_competition_keywords:
+    - "automation"
+    - "workflow"
+    - "integration"
+    - "monitoring"
+    - "notification"
+    - "scheduling"
+    - "reporting"
+    - "tool"
+    - "utility"
+    - "helper"
+  
+  # Keywords that indicate low competition
+  low_competition_keywords:
+    - "niche"
+    - "specialized"
+    - "custom"
+    - "enterprise"
+    - "b2b"
+    - "internal"
+    - "private"
+    - "specific"
+    - "targeted"
+    - "focused"
+
+# Confidence calculation parameters
+confidence_weights:
+  source_coverage: 0.4      # How many sources have data
+  signal_consistency: 0.3   # How consistent signals are across sources
+  data_freshness: 0.2       # How recent the data is
+  source_credibility: 0.1   # Credibility of sources
+
+# Minimum thresholds for scoring
+thresholds:
+  min_confidence: 0.3       # Minimum confidence to include in top 10
+  min_sources: 2            # Minimum number of sources required
+  max_age_hours: 72         # Maximum age of data in hours
+  min_engagement: 10        # Minimum engagement score
+
+# Learning parameters for feedback loop
+learning:
+  feedback_weight: 0.1      # How much feedback affects weights
+  min_feedback_samples: 5   # Minimum samples before adjusting weights
+  max_weight_change: 0.05   # Maximum change per feedback cycle
+  decay_factor: 0.95        # Decay factor for old feedback

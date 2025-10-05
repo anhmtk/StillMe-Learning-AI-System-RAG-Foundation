@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\modules\api_provider_manager.py
+# hypothesis_version: 6.140.2
+
+[0.0, 0.1, 0.15, 0.2, 0.3, 0.4, 0.5, 0.7, 0.8, 1.0, 100, 200, 1000, '?', 'NLLB_MODEL_NAME', 'StillMe.APIProvider', 'TRANSLATOR_PRIORITY', 'ai', 'algorithm', 'avg_analysis_time_ms', 'bug', 'bất toàn', 'case', 'chào', 'class', 'code', 'confidence', 'debug', 'deepseek-chat', 'deepseek-coder:6.7b', 'en', 'engine', 'error', 'fallback_count', 'function', 'gemma,nllb', 'gemma2:2b', 'giải thích', 'gödel', 'hello', 'hi', 'hóa học', 'if', 'javascript', 'khi', 'khoa học', 'lập trình', 'lỗi', 'machine learning', 'mối quan hệ', 'nguyên nhân', 'như thế nào', 'none', 'nếu', 'phân tích', 'programming', 'python', 'simple', 'sinh học', 'so sánh', 'status', 'test', 'text', 'total_analyses', 'toán học', 'triết học', 'trong trường hợp', 'trí tuệ nhân tạo', 'trạng thái', 'tác động', 'tại sao', 'variable', 'vi', 'vật lý', 'when', 'xin chào', 'đánh giá', 'định luật', 'định lý', 'ảnh hưởng']

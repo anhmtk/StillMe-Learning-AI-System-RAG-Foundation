@@ -1,0 +1,28 @@
+# Reflex Engine Patterns Configuration
+# Supports literal patterns and regex patterns for habit detection
+
+literal_patterns:
+  - "hello"
+  - "hi"
+  - "help"
+  - "thanks"
+  - "bye"
+  - "good morning"
+  - "good evening"
+  - "how are you"
+  - "what's up"
+  - "status"
+
+regex_patterns:
+  - r"\b(please|pls)\s+(help|assist|do)\b"
+  - r"\b(show|display|list)\s+(me|us)\b"
+  - r"\b(create|make|build)\s+(a|an|the)\b"
+  - r"\b(delete|remove|clear)\s+(all|everything)\b"
+  - r"\b(restart|reboot|reload)\b"
+
+# Semantic hints (placeholder for future ML-based matching)
+semantic_hints:
+  - "greeting"
+  - "request_help"
+  - "status_check"
+  - "action_request"

@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\quality\code_quality_enforcer.py
+# hypothesis_version: 6.140.2
+
+[120, '"""', '#', "'''", '\\b\\d{3,}\\b', 'blocking_operation', 'class ', 'class_too_large', 'complexity', 'critical', 'def ', 'duplicate_code', 'elif ', 'else:', 'error', 'excellent', 'except:', 'fair', 'finally:', 'for ', 'for i in range(len(', 'function_too_long', 'good', 'hard_dependencies', 'hardcoded_secret', 'if ', 'inefficient_loop', 'key', 'line_length_exceeded', 'magic_number', 'maintainability', 'memory_leak_risk', 'missing_docstring', 'missing_tests', 'password', 'performance', 'poor', 'poor_naming', 'secret', 'security', 'side_effects', 'sql_injection_risk', 'style', 'testability', 'tight_coupling', 'timestamp', 'token', 'total_violations', 'trailing_whitespace', 'try:', 'untestable_code', 'unused_import', 'violations_by_level', 'weak_cryptography', 'while ', 'with ']

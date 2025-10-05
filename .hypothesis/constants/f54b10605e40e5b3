@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\stillme_core\core\security\security_scanner.py
+# hypothesis_version: 6.140.2
+
+[0.0, 100.0, 100, 120, '*.py', '--config=auto', '--exclude', '--json', '--no-git-ignore', '--version', '-f', '-r', '-x', '.', 'AKIA[0-9A-Z]{16}', 'API Key', 'AWS Access Key', 'Command Injection', 'Database URL', 'ERROR', 'INFO', 'JWT Token', 'Password', 'Path Traversal', 'Private Key', 'SQL Injection', 'Secret Key', 'WARNING', 'bandit', 'check', 'check_id', 'code', 'critical', 'custom_patterns', 'description', 'extra', 'filename', 'high', 'id', 'info', 'issue_confidence', 'issue_cwe', 'issue_severity', 'issue_text', 'json', 'level', 'line', 'line_number', 'lines', 'low', 'medium', 'message', 'name', 'path', 'pattern', 'requirements.txt', 'results', 'safety', 'secret_detection', 'semgrep', 'severity', 'start', 'test', 'test_*.py', 'test_id', 'tests/', 'unknown', 'utf-8']

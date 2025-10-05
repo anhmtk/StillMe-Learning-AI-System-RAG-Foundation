@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\identity_handler.py
+# hypothesis_version: 6.140.2
+
+['active', 'anonymous', 'error', 'identities_by_status', 'identities_by_type', 'inactive', 'pending', 'service', 'suspended', 'system', 'timestamp', 'total_identities', 'user']

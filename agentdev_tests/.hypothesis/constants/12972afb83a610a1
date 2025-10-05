@@ -1,0 +1,4 @@
+# file: D:\stillme_ai\agent_dev\rules\types.py
+# hypothesis_version: 6.140.2
+
+['contains', 'eq', 'exists', 'gt', 'in', 'lt', 'ne', 'not_contains', 'not_exists', 'regex']

@@ -1,0 +1,125 @@
+name: No-Ignore Gate
+
+on:
+  push:
+    branches: [ main, develop, hardening/no-ignore-across-repo ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+jobs:
+  no-ignore-gate:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install mypy pyright ruff pytest
+        
+    - name: Step 1 - Audit Type Ignores
+      run: |
+        echo "🔍 Step 1: Auditing all '# type: ignore' in repository..."
+        python tools/audit_type_ignores.py
+        IGNORE_COUNT=$(python -c "
+        import csv
+        with open('artifacts/type_ignores.csv', 'r') as f:
+            reader = csv.reader(f)
+            count = sum(1 for row in reader) - 1  # Subtract header
+        print(count)
+        ")
+        echo "Found $IGNORE_COUNT type ignores"
+        if [ "$IGNORE_COUNT" -gt 0 ]; then
+          echo "❌ FAIL: Repository has $IGNORE_COUNT type ignores that need to be fixed!"
+          echo "See artifacts/type_ignores.csv for details"
+          exit 1
+        else
+          echo "✅ PASS: No type ignores found"
+        fi
+        
+    - name: Step 2 - Type Check with Strict Mode
+      run: |
+        echo "🔍 Step 2: Running strict type checks..."
+        
+        # Run mypy with strict mode
+        echo "Running mypy --strict..."
+        mypy --strict --warn-unused-ignores --warn-redundant-casts --warn-return-any . > artifacts/mypy.txt 2>&1 || true
+        
+        # Run pyright with strict mode
+        echo "Running pyright..."
+        pyright --stats > artifacts/pyright.txt 2>&1 || true
+        
+        # Check for unused ignores in mypy output
+        if grep -q "unused.*ignore" artifacts/mypy.txt; then
+          echo "❌ FAIL: Found unused type ignores in mypy output"
+          cat artifacts/mypy.txt
+          exit 1
+        fi
+        
+        # Check for unused ignores in pyright output
+        if grep -q "reportUnusedIgnore" artifacts/pyright.txt; then
+          echo "❌ FAIL: Found unused type ignores in pyright output"
+          cat artifacts/pyright.txt
+          exit 1
+        fi
+        
+        echo "✅ PASS: No unused type ignores found"
+        
+    - name: Step 3 - Run Tests
+      run: |
+        echo "🔍 Step 3: Running tests..."
+        pytest -q --tb=short > artifacts/pytest_report.txt 2>&1
+        if [ $? -ne 0 ]; then
+          echo "❌ FAIL: Tests failed"
+          cat artifacts/pytest_report.txt
+          exit 1
+        else
+          echo "✅ PASS: All tests passed"
+        fi
+        
+    - name: Step 4 - Run Linter
+      run: |
+        echo "🔍 Step 4: Running linter..."
+        ruff check . --output-format=json > artifacts/ruff_report.json 2>&1 || true
+        ruff check . --fix --force-exclude > artifacts/ruff_fixed.txt 2>&1 || true
+        
+        # Check for critical errors (not just warnings)
+        if grep -q "error" artifacts/ruff_report.json; then
+          echo "❌ FAIL: Found critical linting errors"
+          cat artifacts/ruff_report.json
+          exit 1
+        else
+          echo "✅ PASS: No critical linting errors"
+        fi
+        
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: no-ignore-gate-artifacts
+        path: |
+          artifacts/type_ignores.csv
+          artifacts/type_ignores_summary.md
+          artifacts/mypy.txt
+          artifacts/pyright.txt
+          artifacts/pytest_report.txt
+          artifacts/ruff_report.json
+          artifacts/ruff_fixed.txt
+          
+    - name: Final Status
+      run: |
+        echo "🎉 No-Ignore Gate: ALL CHECKS PASSED"
+        echo "✅ No '# type: ignore' found in repository"
+        echo "✅ No unused type ignores in type checkers"
+        echo "✅ All tests passed"
+        echo "✅ No critical linting errors"
+        echo ""
+        echo "Repository is ready for production with strict typing!"

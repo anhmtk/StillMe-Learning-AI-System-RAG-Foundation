@@ -1,0 +1,400 @@
+name: Test & Evaluation Harness
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'tests_harness/**'
+      - 'stillme_core/**'
+      - 'stable_ai_server.py'
+      - 'real_stillme_gateway.py'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'tests_harness/**'
+      - 'stillme_core/**'
+      - 'stable_ai_server.py'
+      - 'real_stillme_gateway.py'
+  schedule:
+    # Run nightly at 2:00 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      offline_mode:
+        description: 'Run in offline mode (mock providers)'
+        required: false
+        default: 'false'
+        type: boolean
+
+env:
+  PYTHON_VERSION: '3.9'
+  CACHE_VERSION: v1
+
+jobs:
+  test-harness:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        mode: [online, offline]
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history for git SHA
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+        cache: 'pip'
+    
+    - name: Cache Hugging Face models
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/huggingface
+        key: ${{ runner.os }}-huggingface-${{ env.CACHE_VERSION }}
+        restore-keys: |
+          ${{ runner.os }}-huggingface-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install plotly pandas pyyaml
+    
+    - name: Set up environment variables
+      if: ${{ matrix.mode == 'offline' || github.event_name == 'schedule' || github.event.inputs.offline_mode == 'true' }}
+      run: |
+        echo "TRANSLATION_CORE_LANG=en" >> $GITHUB_ENV
+        echo "TRANSLATOR_PRIORITY=gemma,nllb" >> $GITHUB_ENV
+        echo "NLLB_MODEL_NAME=facebook/nllb-200-distilled-600M" >> $GITHUB_ENV
+        echo "OFFLINE_MODE=true" >> $GITHUB_ENV
+        echo "MOCK_PROVIDERS=true" >> $GITHUB_ENV
+
+    - name: Set up environment variables (online)
+      if: ${{ matrix.mode == 'online' && github.event_name != 'schedule' && github.event.inputs.offline_mode != 'true' }}
+      run: |
+        echo "TRANSLATION_CORE_LANG=en" >> $GITHUB_ENV
+        echo "TRANSLATOR_PRIORITY=gemma,nllb" >> $GITHUB_ENV
+        echo "NLLB_MODEL_NAME=facebook/nllb-200-distilled-600M" >> $GITHUB_ENV
+        echo "OFFLINE_MODE=false" >> $GITHUB_ENV
+        echo "MOCK_PROVIDERS=false" >> $GITHUB_ENV
+    
+    - name: Create test data
+      run: |
+        cd tests_harness
+        mkdir -p reports datasets/seed datasets/augmented
+        
+        # Create sample test data if running offline
+        if [ "${{ matrix.mode }}" = "offline" ]; then
+          python -c "
+          import json
+          from datetime import datetime
+          
+          # Create sample report with new schema
+          sample_report = {
+              'run_id': datetime.now().strftime('%Y-%m-%dT%H-%M-%SZ'),
+              'git_sha': 'test1234',
+              'mode': 'offline',
+              'prices_version': 'v1',
+              'model_matrix': {
+                  'chat': 'gemma2:2b',
+                  'code': 'deepseek-coder-6.7b',
+                  'translate': 'nllb-600M'
+              },
+              'overall_score': 0.85,
+              'evaluations': {
+                  'persona': {'average_score': 0.82, 'by_scenario': {}},
+                  'safety': {'average_score': 0.91, 'jailbreak_block_rate': 0.88, 'no_stacktrace_leak': True},
+                  'translation': {'average_score': 0.83, 'lang_pairs': {'vi-en': 0.86}},
+                  'efficiency': {
+                      'average_score': 0.79,
+                      'average_latency': 1.8,
+                      'p50_latency': 1.2,
+                      'p95_latency': 3.9,
+                      'average_token_cost': 620,
+                      'token_saving_pct': 0.24
+                  },
+                  'agentdev': {
+                      'average_score': 0.77,
+                      'success_rate': 0.82,
+                      'avg_steps': 6.1,
+                      'avg_time_per_step': 0.7
+                  }
+              },
+              'security': {
+                  'sandbox_egress_blocked': True,
+                  'attack_block_rates': {
+                      'SQLi': 0.90,
+                      'XSS': 1.00
+                  }
+              },
+              'model_selection': {
+                  'confusion_matrix': [
+                      ['coding', 'deepseek-coder-6.7b', True],
+                      ['simple', 'gemma2:2b', True],
+                      ['translation', 'nllb-600M', False]
+                  ],
+                  'overall_accuracy': 0.67
+              },
+              'slo_status': True,
+              'slo_message': 'PASS - All SLOs met',
+              'failed_slos': [],
+              'alert_summary': {
+                  'critical': 0,
+                  'high': 0,
+                  'medium': 0,
+                  'low': 0,
+                  'pass': 8
+              },
+              'action_items': [
+                  {
+                      'failure': 'wrong_pronoun',
+                      'category': 'persona',
+                      'modules': ['modules/persona_morph.py', 'modules/communication_style_manager.py'],
+                      'effort': 'M',
+                      'suggestion': 'increase PersonaMorph weight and review communication style manager'
+                  },
+                  {
+                      'failure': 'high_latency',
+                      'category': 'efficiency',
+                      'modules': ['modules/token_optimizer_v1.py'],
+                      'effort': 'L',
+                      'suggestion': 'optimize TokenOptimizer and implement caching'
+                  },
+                  {
+                      'failure': 'jailbreak_success',
+                      'category': 'safety',
+                      'modules': ['modules/ethical_core_system_v1.py'],
+                      'effort': 'H',
+                      'suggestion': 'immediately review and strengthen jailbreak detection mechanisms'
+                  }
+              ],
+              'failures': [
+                  {'id': 'persona_02', 'reason': 'wrong_pronoun', 'suggest': 'increase PersonaMorph weight'}
+              ]
+          }
+          
+          with open('reports/sample_report.json', 'w') as f:
+              json.dump(sample_report, f, indent=2)
+          "
+        fi
+    
+    - name: Run Test Harness
+      run: |
+        cd tests_harness
+        
+        # Run comprehensive test
+        python demo_comprehensive_test.py
+        
+        # Run optimization analysis
+        python demo_optimization.py
+        
+        # Generate large dataset (smaller for CI)
+        python -c "
+        from generate_large_dataset import generate_large_dataset
+        generate_large_dataset(max_samples=100, output_file='reports/ci_dataset.json')
+        "
+        
+        # Run performance benchmark
+        python benchmarking/performance_benchmark.py
+    
+    - name: Validate reports
+      run: |
+        cd tests_harness
+        
+        # Check if reports were generated
+        if [ ! -f "reports/optimization_report.json" ]; then
+          echo "❌ optimization_report.json not found"
+          exit 1
+        fi
+        
+        if [ ! -f "reports/optimization_report.html" ]; then
+          echo "❌ optimization_report.html not found"
+          exit 1
+        fi
+        
+        # Validate JSON structure
+        python -c "
+        import json
+        with open('reports/optimization_report.json', 'r') as f:
+            data = json.load(f)
+        
+        required_keys = [
+            'run_id', 'git_sha', 'mode', 'overall_score', 'evaluations', 
+            'security', 'model_selection', 'slo_status', 'slo_message', 
+            'alert_summary', 'failed_slos', 'action_items'
+        ]
+        for key in required_keys:
+            if key not in data:
+                print(f'❌ Missing required key: {key}')
+                exit(1)
+        
+        # Validate alert_summary structure
+        alert_summary = data.get('alert_summary', {})
+        required_alert_keys = ['critical', 'high', 'medium', 'low', 'pass']
+        for key in required_alert_keys:
+            if key not in alert_summary:
+                print(f'❌ Missing alert_summary key: {key}')
+                exit(1)
+        
+        print('✅ JSON report structure is valid')
+        print('CI_CHECK: optimization_report.json READY')
+        "
+        
+        echo "✅ All reports generated successfully"
+    
+    - name: Upload reports as artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-harness-reports-${{ matrix.mode }}
+        path: |
+          tests_harness/reports/*.json
+          tests_harness/reports/*.html
+        retention-days: 30
+    
+    - name: Comment PR with results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          
+          try {
+            const reportPath = 'tests_harness/reports/optimization_report.json';
+            if (fs.existsSync(reportPath)) {
+              const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+              
+              const comment = `## 🧪 Test & Evaluation Harness Results
+              
+              **Mode:** ${{ matrix.mode }}
+              **SLO Status:** ${report.slo_status ? '✅ PASS' : '❌ FAIL'}
+              **Message:** ${report.slo_message || 'No message available'}
+              
+              **Alert Summary:**
+              - Critical: ${report.alert_summary?.critical || 0}
+              - High: ${report.alert_summary?.high || 0}
+              - Medium: ${report.alert_summary?.medium || 0}
+              - Low: ${report.alert_summary?.low || 0}
+              - Pass: ${report.alert_summary?.pass || 0}
+              
+              **Performance Scores:**
+              - Overall: ${(report.overall_score || 0).toFixed(2)}
+              - Persona: ${(report.evaluations?.persona?.average_score || 0).toFixed(2)}
+              - Safety: ${(report.evaluations?.safety?.average_score || 0).toFixed(2)}
+              - Translation: ${(report.evaluations?.translation?.average_score || 0).toFixed(2)}
+              - Efficiency: ${(report.evaluations?.efficiency?.average_score || 0).toFixed(2)}
+              - AgentDev: ${(report.evaluations?.agentdev?.average_score || 0).toFixed(2)}
+              
+              **Failed SLOs:** ${report.failed_slos?.length || 0} issues
+              **Action Items:** ${report.action_items?.length || 0} recommendations
+              
+              ${report.action_items && report.action_items.length > 0 ? `
+              **🔧 Top Action Items:**
+              ${report.action_items.slice(0, 3).map(item => 
+                `- [${item.category}] ${item.failure} → ${item.modules.join(', ')} (Effort: ${item.effort})`
+              ).join('\n              ')}
+              ` : ''}
+              
+              📊 [View detailed report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+              `;
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            }
+          } catch (error) {
+            console.log('Could not create PR comment:', error);
+          }
+    
+    - name: Create summary
+      if: always()
+      run: |
+        echo "## Test & Evaluation Harness Summary" >> $GITHUB_STEP_SUMMARY
+        echo "- **Mode:** ${{ matrix.mode }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Status:** ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+        echo "- **Reports:** Generated in tests_harness/reports/" >> $GITHUB_STEP_SUMMARY
+        echo "- **Artifacts:** Available for download" >> $GITHUB_STEP_SUMMARY
+
+  security-scan:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Run security scan
+      run: |
+        # Basic security checks
+        echo "🔍 Running security checks..."
+        
+        # Check for hardcoded secrets
+        if grep -r "password\|secret\|key" tests_harness/ --include="*.py" | grep -v "example\|test\|mock"; then
+          echo "⚠️ Potential hardcoded secrets found"
+        else
+          echo "✅ No hardcoded secrets detected"
+        fi
+        
+        # Check for dangerous imports
+        if grep -r "eval\|exec\|subprocess" tests_harness/ --include="*.py" | grep -v "subprocess.run"; then
+          echo "⚠️ Potentially dangerous code patterns found"
+        else
+          echo "✅ No dangerous code patterns detected"
+        fi
+        
+        echo "✅ Security scan completed"
+
+  performance-test:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event.inputs.offline_mode == 'false'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install plotly pandas pyyaml
+    
+    - name: Run performance tests
+      run: |
+        cd tests_harness
+        
+        # Test with larger dataset
+        python -c "
+        from generate_large_dataset import generate_large_dataset
+        import time
+        
+        start_time = time.time()
+        generate_large_dataset(max_samples=1000, output_file='reports/performance_test.json')
+        end_time = time.time()
+        
+        duration = end_time - start_time
+        print(f'Dataset generation took {duration:.2f} seconds')
+        
+        if duration > 300:  # 5 minutes
+            print('⚠️ Performance test failed: Too slow')
+            exit(1)
+        else:
+            print('✅ Performance test passed')
+        "
+    
+    - name: Upload performance results
+      uses: actions/upload-artifact@v4
+      with:
+        name: performance-results
+        path: tests_harness/reports/performance_test.json
+        retention-days: 7

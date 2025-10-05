@@ -1,0 +1,37 @@
+# Force UTF-8 + LF for test & pytest configuration
+tests/** text eol=lf working-tree-encoding=UTF-8
+pytest.ini text eol=lf working-tree-encoding=UTF-8
+tox.ini text eol=lf working-tree-encoding=UTF-8
+Makefile text eol=lf working-tree-encoding=UTF-8
+package.json text eol=lf working-tree-encoding=UTF-8
+
+# Python files
+**/*.py text eol=lf working-tree-encoding=UTF-8
+
+# Configuration files
+*.ini text eol=lf working-tree-encoding=UTF-8
+*.yaml text eol=lf working-tree-encoding=UTF-8
+*.yml text eol=lf working-tree-encoding=UTF-8
+*.json text eol=lf working-tree-encoding=UTF-8
+
+# Scripts
+*.sh text eol=lf working-tree-encoding=UTF-8
+*.bat text eol=crlf working-tree-encoding=UTF-8
+
+# Documentation
+*.md text eol=lf working-tree-encoding=UTF-8
+*.txt text eol=lf working-tree-encoding=UTF-8
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.tar.gz binary
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
