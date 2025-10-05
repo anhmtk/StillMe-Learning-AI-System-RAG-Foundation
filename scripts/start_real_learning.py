@@ -7,6 +7,7 @@ Kích hoạt hệ thống học tập thực sự với automation và alerting
 import logging
 import sys
 import time
+from datetime import datetime
 from pathlib import Path
 
 # Add project root to path
@@ -17,6 +18,10 @@ from stillme_core.alerting.alerting_system import AlertingSystem
 from stillme_core.learning.automation_service import AutomationService
 from stillme_core.learning.proposals_manager import ProposalsManager
 from stillme_core.learning.scheduler import StillMeScheduler
+from stillme_core.learning.evolutionary_learning_system import (
+    get_learning_system,
+    start_learning_session,
+)
 
 # Configure logging
 logging.basicConfig(
@@ -125,6 +130,71 @@ class RealLearningSystem:
 
         except Exception as e:
             logger.error(f"❌ Failed to create initial proposal: {e}")
+
+    def start_learning_for_approved_proposal(self, proposal_id: str) -> bool:
+        """Bắt đầu học cho proposal đã được approve"""
+        try:
+            logger.info(f"🚀 Starting real learning for proposal: {proposal_id}")
+
+            # Bắt đầu learning session
+            session_id = start_learning_session(proposal_id)
+
+            if session_id:
+                logger.info(f"✅ Learning session started: {session_id[:8]}...")
+                return True
+            else:
+                logger.error(
+                    f"❌ Failed to start learning session for proposal: {proposal_id}"
+                )
+                return False
+
+        except Exception as e:
+            logger.error(f"❌ Error starting learning for proposal {proposal_id}: {e}")
+            return False
+
+    def get_learning_progress(self, proposal_id: str) -> dict:
+        """Lấy tiến độ học tập của proposal"""
+        try:
+            proposal = self.proposals_manager.get_proposal(proposal_id)
+            if not proposal:
+                return {"error": "Proposal not found"}
+
+            # Lấy session data nếu có
+            session_id = getattr(proposal, "session_id", None)
+            if session_id:
+                learning_system = get_learning_system()
+                session_data = learning_system.get_session_status(session_id)
+                if session_data:
+                    return {
+                        "proposal_id": proposal_id,
+                        "title": proposal.title,
+                        "progress": session_data.get("progress", 0),
+                        "status": session_data.get("status", "unknown"),
+                        "current_objective": session_data.get("current_objective", 0),
+                        "total_objectives": len(proposal.learning_objectives),
+                        "learning_notes": session_data.get("learning_notes", []),
+                        "started_at": session_data.get("started_at"),
+                        "last_updated": datetime.now().isoformat(),
+                    }
+
+            # Fallback: lấy từ proposal data
+            return {
+                "proposal_id": proposal_id,
+                "title": proposal.title,
+                "progress": getattr(proposal, "learning_progress", 0),
+                "status": proposal.status,
+                "current_objective": getattr(proposal, "current_objective", 0),
+                "total_objectives": len(proposal.learning_objectives),
+                "learning_notes": getattr(proposal, "learning_notes", []),
+                "started_at": getattr(proposal, "learning_started_at"),
+                "last_updated": getattr(
+                    proposal, "last_updated", datetime.now().isoformat()
+                ),
+            }
+
+        except Exception as e:
+            logger.error(f"❌ Error getting learning progress: {e}")
+            return {"error": str(e)}
 
     def shutdown(self):
         """Tắt hệ thống"""

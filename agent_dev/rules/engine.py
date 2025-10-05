@@ -8,7 +8,9 @@ Rule engine system for compliance checking and validation.
 
 import json
 import re
+import yaml
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any, cast
 
 from agent_dev.persistence.repo import (
@@ -168,6 +170,66 @@ class RuleEngine:
 
         return ComplianceResult(
             compliant=len(violated_rules) == 0, violated_rules=violated_rules
+        )
+
+    def load_yaml_rules(self, rules_file: str = "rulesets/agentdev_rules.yaml") -> None:
+        """Load rules from YAML file"""
+        try:
+            rules_path = Path(rules_file)
+            if not rules_path.exists():
+                print(f"Warning: Rules file {rules_file} not found")
+                return
+
+            with open(rules_path, "r", encoding="utf-8") as f:
+                data = yaml.safe_load(f)
+
+            if "rules" not in data:
+                print("Warning: No 'rules' section found in YAML")
+                return
+
+            for rule_data in data["rules"]:
+                rule = {
+                    "name": rule_data.get("name", ""),
+                    "pattern_regex": rule_data.get("pattern_regex", ""),
+                    "fix_action": rule_data.get("fix_action", ""),
+                    "severity": rule_data.get("severity", "medium"),
+                    "enabled": rule_data.get("enabled", True),
+                }
+
+                # Add to rules list
+                self.rules.append(rule)
+
+        except Exception as e:
+            print(f"Error loading YAML rules: {e}")
+
+    def find_matching_rules(self, error_text: str) -> list[dict[str, Any]]:
+        """Find rules that match the error text"""
+        matching_rules = []
+
+        for rule in self.rules:
+            if not rule.get("enabled", True):
+                continue
+
+            pattern = rule.get("pattern_regex", "")
+            if not pattern:
+                continue
+
+            try:
+                if re.search(pattern, error_text, re.IGNORECASE):
+                    matching_rules.append(rule)
+            except re.error:
+                continue
+
+        # Sort by priority (severity weight * hits)
+        severity_weights = {"low": 1, "medium": 2, "high": 3, "critical": 4}
+        for rule in matching_rules:
+            severity = rule.get("severity", "medium")
+            weight = severity_weights.get(severity, 2)
+            hits = rule.get("hits", 0)
+            rule["priority_score"] = hits * weight
+
+        return sorted(
+            matching_rules, key=lambda r: r.get("priority_score", 0), reverse=True
         )
 
     def _evaluate_rule(

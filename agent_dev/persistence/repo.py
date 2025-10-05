@@ -16,9 +16,13 @@ from sqlalchemy import desc
 from sqlalchemy.orm import Session, sessionmaker
 
 from .models import (
+    FeedbackEvent,
     FeedbackModel,
     LearnedSolutionModel,
+    MetricsDaily,
     MetricModel,
+    PatchHistory,
+    RuleDef,
     RuleModel,
     UserPreferencesModel,
 )
@@ -362,3 +366,139 @@ class MetricRepo:
             "min": min(values),
             "max": max(values),
         }
+
+    # Self-Improvement Loop CRUD methods
+
+    def record_feedback(
+        self,
+        source: str,
+        test_name: str | None,
+        error_sig: str,
+        rule_applied: str | None,
+        outcome: str,
+        notes: str | None = None,
+    ) -> int:
+        """Record feedback event"""
+        feedback = FeedbackEvent(
+            source=source,
+            test_name=test_name,
+            error_sig=error_sig,
+            rule_applied=rule_applied,
+            outcome=outcome,
+            notes=notes,
+        )
+        self.session.add(feedback)
+        self.session.commit()
+        return feedback.id
+
+    def record_metrics(
+        self,
+        date: datetime,
+        pass_rate: float,
+        fail_rate: float,
+        coverage_overall: float,
+        coverage_touched: float,
+        mttr_min: float | None = None,
+        lint_errors: int = 0,
+        pyright_errors: int = 0,
+    ) -> int:
+        """Record daily metrics"""
+        metrics = MetricsDaily(
+            date=date,
+            pass_rate=pass_rate,
+            fail_rate=fail_rate,
+            coverage_overall=coverage_overall,
+            coverage_touched=coverage_touched,
+            mttr_min=mttr_min,
+            lint_errors=lint_errors,
+            pyright_errors=pyright_errors,
+        )
+        self.session.add(metrics)
+        self.session.commit()
+        return metrics.id
+
+    def record_patch(
+        self,
+        files_changed: list[str],
+        tests_failed_before: int,
+        tests_passed_after: int,
+        coverage_before: float,
+        coverage_after: float,
+        diff_hash: str,
+    ) -> int:
+        """Record patch history"""
+        patch = PatchHistory(
+            files_changed=json.dumps(files_changed),
+            tests_failed_before=tests_failed_before,
+            tests_passed_after=tests_passed_after,
+            coverage_before=coverage_before,
+            coverage_after=coverage_after,
+            diff_hash=diff_hash,
+        )
+        self.session.add(patch)
+        self.session.commit()
+        return patch.id
+
+    def get_rules_by_priority(self) -> list[RuleDef]:
+        """Get rules ordered by priority (hits * severity_weight)"""
+        rules = self.session.query(RuleDef).filter(RuleDef.enabled == True).all()
+
+        # Calculate priority scores
+        severity_weights = {"low": 1, "medium": 2, "high": 3, "critical": 4}
+        for rule in rules:
+            weight = severity_weights.get(rule.severity, 2)
+            rule.priority_score = rule.hits * weight
+
+        return sorted(rules, key=lambda r: r.priority_score, reverse=True)
+
+    def update_rule_hits(self, rule_name: str, success: bool = True) -> None:
+        """Update rule hit count and last applied timestamp"""
+        rule = self.session.query(RuleDef).filter(RuleDef.name == rule_name).first()
+        if rule:
+            rule.hits += 1
+            rule.last_applied_at = datetime.now(UTC)
+            self.session.commit()
+
+    def get_recent_metrics(self, days: int = 7) -> list[MetricsDaily]:
+        """Get recent metrics for anomaly detection"""
+        cutoff = datetime.now(UTC) - timedelta(days=days)
+        return (
+            self.session.query(MetricsDaily)
+            .filter(MetricsDaily.date >= cutoff)
+            .order_by(MetricsDaily.date.desc())
+            .all()
+        )
+
+
+class AgentDevRepo:
+    """Main repository class that combines all repos"""
+
+    def __init__(self, engine: Any):
+        self.engine = engine
+        self.session_factory = get_session_factory(engine)
+        self.session = self.session_factory()
+
+        self.feedback_repo = FeedbackRepo(self.session)
+        self.user_prefs_repo = UserPreferencesRepo(self.session)
+        self.rule_repo = RuleRepo(self.session)
+        self.learned_solution_repo = LearnedSolutionRepo(self.session)
+        self.metric_repo = MetricRepo(self.session)
+
+    # Delegate methods to appropriate repos
+    def record_feedback(self, *args, **kwargs):
+        return self.feedback_repo.record_feedback(*args, **kwargs)
+
+    def record_metrics(self, *args, **kwargs):
+        return self.metric_repo.record_metrics(*args, **kwargs)
+
+    def record_patch(self, *args, **kwargs):
+        return self.metric_repo.record_patch(*args, **kwargs)
+
+    def get_rules_by_priority(self, *args, **kwargs):
+        return self.rule_repo.get_rules_by_priority(*args, **kwargs)
+
+    def update_rule_hits(self, *args, **kwargs):
+        return self.rule_repo.update_rule(*args, **kwargs)
+
+    def get_recent_metrics(self, *args, **kwargs):
+        return self.metric_repo.get_recent_metrics(*args, **kwargs)

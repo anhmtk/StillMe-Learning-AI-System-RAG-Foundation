@@ -111,6 +111,87 @@ class MetricModel(Base):
     )
 
 
+class FeedbackEvent(Base):
+    """Feedback events for self-improvement loop"""
+
+    __tablename__ = "feedback_events"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    ts = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
+    source = Column(String(100), nullable=False)  # "pytest", "pyright", "ruff"
+    test_name = Column(String(255), nullable=True)
+    error_sig = Column(Text, nullable=False)  # Error signature/pattern
+    rule_applied = Column(String(100), nullable=True)
+    outcome = Column(String(50), nullable=False)  # "success", "failure", "skipped"
+    notes = Column(Text, nullable=True)
+
+    __table_args__ = (
+        Index("idx_feedback_source_ts", "source", "ts"),
+        Index("idx_feedback_rule_outcome", "rule_applied", "outcome"),
+    )
+
+
+class RuleDef(Base):
+    """Rule definitions for auto-fixing"""
+
+    __tablename__ = "rule_definitions"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String(100), nullable=False, unique=True)
+    version = Column(String(20), nullable=False, default="1.0")
+    pattern_regex = Column(Text, nullable=False)
+    fix_action = Column(String(100), nullable=False)
+    severity = Column(
+        String(20), nullable=False, default="medium"
+    )  # low, medium, high, critical
+    enabled = Column(Boolean, default=True, nullable=False)
+    hits = Column(Integer, default=0, nullable=False)
+    last_applied_at = Column(DateTime, nullable=True)
+
+    __table_args__ = (
+        Index("idx_rules_enabled_hits", "enabled", "hits"),
+        Index("idx_rules_severity", "severity"),
+    )
+
+
+class MetricsDaily(Base):
+    """Daily metrics for monitoring"""
+
+    __tablename__ = "metrics_daily"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    date = Column(DateTime, nullable=False, unique=True)
+    pass_rate = Column(Float, nullable=False)
+    fail_rate = Column(Float, nullable=False)
+    coverage_overall = Column(Float, nullable=False)
+    coverage_touched = Column(Float, nullable=False)
+    mttr_min = Column(Float, nullable=True)  # Mean Time To Repair in minutes
+    lint_errors = Column(Integer, default=0, nullable=False)
+    pyright_errors = Column(Integer, default=0, nullable=False)
+
+    __table_args__ = (Index("idx_metrics_daily_date", "date"),)
+
+
+class PatchHistory(Base):
+    """History of applied patches"""
+
+    __tablename__ = "patch_history"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    ts = Column(DateTime, default=lambda: datetime.now(UTC), nullable=False)
+    files_changed = Column(Text, nullable=False)  # JSON list of files
+    tests_failed_before = Column(Integer, nullable=False)
+    tests_passed_after = Column(Integer, nullable=False)
+    coverage_before = Column(Float, nullable=False)
+    coverage_after = Column(Float, nullable=False)
+    diff_hash = Column(String(64), nullable=False)  # SHA256 of diff
+
+    __table_args__ = (
+        Index("idx_patch_ts", "ts"),
+        Index("idx_patch_hash", "diff_hash"),
+    )
+
+
 # Database engine and session factory
 def create_database_engine(database_url: str = "sqlite:///agentdev.db"):
     """Create database engine"""

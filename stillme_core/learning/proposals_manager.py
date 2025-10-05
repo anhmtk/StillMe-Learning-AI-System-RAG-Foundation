@@ -50,7 +50,15 @@ class ProposalsManager:
                     approved_by TEXT,
                     rejected_at TEXT,
                     rejected_by TEXT,
-                    rejection_reason TEXT
+                    rejection_reason TEXT,
+                    session_id TEXT,
+                    learning_started_at TEXT,
+                    learning_completed_at TEXT,
+                    learning_progress REAL DEFAULT 0,
+                    current_objective INTEGER DEFAULT 0,
+                    learning_notes TEXT,
+                    last_updated TEXT,
+                    final_progress REAL
                 )
             """)
 
@@ -246,6 +254,97 @@ class ProposalsManager:
 
         logger.info(f"Approved proposal: {proposal_id}")
         return True
+
+    def update_proposal_status(self, proposal_id: str, status: str) -> bool:
+        """Update proposal status"""
+        import sqlite3
+
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                conn.execute(
+                    "UPDATE proposals SET status = ? WHERE id = ?",
+                    (status, proposal_id),
+                )
+            logger.info(f"Updated proposal {proposal_id} status to {status}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to update proposal status: {e}")
+            return False
+
+    def update_proposal(self, proposal_id: str, updates: dict) -> bool:
+        """Update proposal with new data"""
+        import sqlite3
+
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                # Build dynamic UPDATE query
+                set_clauses = []
+                values = []
+
+                for key, value in updates.items():
+                    if key in [
+                        "learning_progress",
+                        "current_objective",
+                        "learning_notes",
+                        "session_id",
+                        "learning_started_at",
+                        "learning_completed_at",
+                        "last_updated",
+                        "final_progress",
+                    ]:
+                        set_clauses.append(f"{key} = ?")
+                        if isinstance(value, (list, dict)):
+                            values.append(json.dumps(value))
+                        else:
+                            values.append(value)
+
+                if set_clauses:
+                    values.append(proposal_id)
+                    query = (
+                        f"UPDATE proposals SET {', '.join(set_clauses)} WHERE id = ?"
+                    )
+                    conn.execute(query, values)
+
+            logger.info(f"Updated proposal {proposal_id} with {len(updates)} fields")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to update proposal: {e}")
+            return False
+
+    def get_proposal(self, proposal_id: str):
+        """Get a specific proposal by ID"""
+        import sqlite3
+
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                cursor = conn.execute(
+                    "SELECT * FROM proposals WHERE id = ?", (proposal_id,)
+                )
+                row = cursor.fetchone()
+
+                if row:
+                    # Parse the proposal data
+                    return LearningProposal(
+                        id=row[0],
+                        title=row[1],
+                        description=row[2],
+                        learning_objectives=json.loads(row[3]) if row[3] else [],
+                        prerequisites=json.loads(row[4]) if row[4] else [],
+                        expected_outcomes=json.loads(row[5]) if row[5] else [],
+                        estimated_duration=row[6],
+                        quality_score=row[7],
+                        source=row[8],
+                        priority=row[9],
+                        risk_assessment=json.loads(row[10]) if row[10] else {},
+                        status=row[11],
+                        created_at=datetime.fromisoformat(row[12])
+                        if row[12]
+                        else datetime.now(),
+                    )
+                return None
+        except Exception as e:
+            logger.error(f"Failed to get proposal {proposal_id}: {e}")
+            return None
 
     def reject_proposal(
         self, proposal_id: str, rejected_by: str, reason: str = ""
