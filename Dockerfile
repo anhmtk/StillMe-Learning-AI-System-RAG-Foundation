@@ -1,5 +1,5 @@
 # Multi-stage build for production-ready StillMe AI
-FROM python:3.12-slim as builder
+FROM python:3.13-slim as builder
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -24,7 +24,7 @@ COPY requirements-test.txt ./
 RUN pip install --no-cache-dir -r requirements-test.txt
 
 # Production stage
-FROM python:3.12-slim as production
+FROM python:3.13-slim as production
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
