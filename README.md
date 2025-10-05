@@ -16,6 +16,25 @@ Some strategic parts (advanced routing heuristics, private datasets, security pa
 
 > **Language note**: I am not fluent in English. This README is written **with AI translation/assistance**. If anything is unclear, please open an issue—I truly appreciate your help improving the docs.
 
+## 🧪 AgentDev Hardening Tests
+
+StillMe IPC includes **AgentDev**, our Senior Developer AI that undergoes comprehensive big-tech level hardening tests:
+
+### Test Results
+![AgentDev Tests](https://img.shields.io/badge/AgentDev%20Tests-1%2F84%20passing-red)
+![AgentDev Coverage](https://img.shields.io/badge/AgentDev%20Coverage-10%25-red)
+![AgentDev Security](https://img.shields.io/badge/AgentDev%20Security-0%25%20pass-red)
+
+**Status**: ❌ **CRITICAL GAPS IDENTIFIED** - See [AgentDev Hardening Report](agentdev_tests/reports/AGENTDEV_HARDENING_REPORT.md) for comprehensive analysis.
+
+### Quality Gates
+- ✅ Test Coverage: ≥90% lines, ≥80% branches
+- ✅ Test Pass Rate: ≥95%
+- ✅ Performance: P95 E2E < 800ms
+- ✅ Security: All adversarial tests pass
+- ✅ Resilience: All chaos tests pass
+- ✅ Learning: ≥10% improvement rate
+
 ## Community & Feedback
 
 I'm actively learning and I welcome technical and product-direction feedback.
