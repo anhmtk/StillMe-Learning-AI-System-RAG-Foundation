@@ -1,6 +1,6 @@
 # 🤖 AgentDev - Senior Developer AI of StillMe IPC
 
-**AgentDev** là một Senior Developer ảo được tích hợp chặt chẽ vào StillMe IPC, hoạt động như **Trưởng phòng Kỹ thuật** với nhiệm vụ tuần tra 24/7, giám sát và bảo đảm hoạt động trơn tru của toàn bộ hệ thống.
+AgentDev is a virtual Senior Developer that is tightly integrated into StillMe IPC, operating as the Head of Technical Department with 24/7 patrol duties,monitoring and ensuring the smooth operation of the entire system
 
 ## 🧪 How We Test AgentDev
 
