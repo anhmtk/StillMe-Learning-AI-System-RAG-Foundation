@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StillMe AI - Community Learning</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        
+        header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .main-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .sidebar {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            height: fit-content;
+        }
+        
+        .section-title {
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            color: #4a5568;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .proposal-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #f8fafc;
+            transition: all 0.3s ease;
+        }
+        
+        .proposal-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .proposal-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+        
+        .proposal-meta {
+            color: #718096;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+        }
+        
+        .proposal-description {
+            color: #4a5568;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        .voting-section {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        .vote-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .vote-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .upvote-btn {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .upvote-btn:hover {
+            background: #38a169;
+            transform: scale(1.05);
+        }
+        
+        .downvote-btn {
+            background: #f56565;
+            color: white;
+        }
+        
+        .downvote-btn:hover {
+            background: #e53e3e;
+            transform: scale(1.05);
+        }
+        
+        .vote-count {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #2d3748;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #4a5568;
+        }
+        
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .stat-label {
+            color: #718096;
+            font-size: 0.9em;
+        }
+        
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .leaderboard-rank {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+            width: 40px;
+        }
+        
+        .leaderboard-info {
+            flex: 1;
+            margin-left: 15px;
+        }
+        
+        .leaderboard-name {
+            font-weight: bold;
+            color: #2d3748;
+        }
+        
+        .leaderboard-stats {
+            color: #718096;
+            font-size: 0.9em;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+        }
+        
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .success {
+            background: #c6f6d5;
+            color: #2f855a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            header h1 {
+                font-size: 2em;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 StillMe AI Community Learning</h1>
+            <p>Cùng đề xuất và bình chọn bài học cho AI!</p>
+        </header>
+
+        <div class="dashboard-grid">
+            <div class="main-content">
+                <!-- Statistics -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-number" id="active-proposals">-</div>
+                        <div class="stat-label">Active Proposals</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="total-votes">-</div>
+                        <div class="stat-label">Total Votes</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="approved-today">-</div>
+                        <div class="stat-label">Approved Today</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number" id="community-members">-</div>
+                        <div class="stat-label">Community Members</div>
+                    </div>
+                </div>
+
+                <!-- Active Proposals -->
+                <h2 class="section-title">📋 Active Proposals</h2>
+                <div id="proposals-list">
+                    <div class="loading">Loading proposals...</div>
+                </div>
+
+                <!-- Submit New Proposal -->
+                <h2 class="section-title">💡 Submit New Proposal</h2>
+                <form id="proposal-form">
+                    <div class="form-group">
+                        <label for="title">Proposal Title</label>
+                        <input type="text" id="title" placeholder="Enter a clear, descriptive title" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="description">Description</label>
+                        <textarea id="description" rows="4" placeholder="Describe what StillMe should learn and why it's important" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="objectives">Learning Objectives</label>
+                        <textarea id="objectives" rows="3" placeholder="List specific learning goals (one per line)" required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="category">Category</label>
+                        <select id="category" required>
+                            <option value="">Select a category</option>
+                            <option value="programming">Programming & Development</option>
+                            <option value="ai-ml">AI & Machine Learning</option>
+                            <option value="devops">DevOps & Infrastructure</option>
+                            <option value="soft-skills">Soft Skills & Communication</option>
+                            <option value="data-science">Data Science & Analytics</option>
+                            <option value="cybersecurity">Cybersecurity</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">🚀 Submit Proposal</button>
+                </form>
+            </div>
+
+            <div class="sidebar">
+                <!-- Top Contributors -->
+                <h2 class="section-title">🏆 Top Contributors</h2>
+                <div id="contributors-list">
+                    <div class="loading">Loading contributors...</div>
+                </div>
+
+                <!-- Recent Activity -->
+                <h2 class="section-title">📈 Recent Activity</h2>
+                <div id="recent-activity">
+                    <div class="loading">Loading activity...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="assets/dashboard.js"></script>
+</body>
+</html>

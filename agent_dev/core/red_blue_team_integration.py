@@ -448,14 +448,18 @@ class RedBlueTeamIntegration:
         recommendations: list[str] = []
 
         # Analyze attack results
-        successful_attacks: list[dict[str, Any]] = [r for r in attack_results if r["success"]]
+        successful_attacks: list[dict[str, Any]] = [
+            r for r in attack_results if r["success"]
+        ]
         if successful_attacks:
             recommendations.append(
                 f"Implement additional defenses for {len(successful_attacks)} successful attack scenarios"
             )
 
         # Analyze defense results
-        effective_defenses: list[dict[str, Any]] = [r for r in defense_results if r["effectiveness"] > 0.8]
+        effective_defenses: list[dict[str, Any]] = [
+            r for r in defense_results if r["effectiveness"] > 0.8
+        ]
         if effective_defenses:
             recommendations.append(
                 f"Deploy {len(effective_defenses)} highly effective defense strategies"

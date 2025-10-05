@@ -17,7 +17,7 @@ from .metrics import (
 __all__ = [
     "MetricsCollector",
     "record_event",
-    "timer", 
+    "timer",
     "dump_metrics",
     "get_metrics_collector",
 ]

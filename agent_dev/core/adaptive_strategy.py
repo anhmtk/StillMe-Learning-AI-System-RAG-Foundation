@@ -382,7 +382,9 @@ class AdaptiveStrategy:
 
         return context
 
-    def select_strategy(self, context: Context | dict[str, Any]) -> AdaptiveStrategyResult:
+    def select_strategy(
+        self, context: Context | dict[str, Any]
+    ) -> AdaptiveStrategyResult:
         """Select the best strategy for given context"""
         start_time = time.time()
 

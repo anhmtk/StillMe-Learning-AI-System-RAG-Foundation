@@ -16,7 +16,7 @@ from .engine import (
 
 __all__ = [
     "RuleEngine",
-    "RuleEvalResult", 
+    "RuleEvalResult",
     "load_rules_from_db",
     "validate_rule",
     "check_compliance",

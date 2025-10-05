@@ -267,9 +267,7 @@ class StructuredLogger:
 
         # Add custom attributes to log record
         level_int = getattr(logging, level.value, logging.INFO)
-        record = logger.makeRecord(
-            logger.name, level_int, source, 0, message, (), None
-        )
+        record = logger.makeRecord(logger.name, level_int, source, 0, message, (), None)
         record.correlation_id = log_entry.correlation_id
         record.span_id = log_entry.span_id
         record.trace_id = log_entry.trace_id

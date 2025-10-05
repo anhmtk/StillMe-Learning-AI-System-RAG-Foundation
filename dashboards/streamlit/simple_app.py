@@ -304,6 +304,25 @@ class SimpleDashboard:
                 "time_spent": [],
             }
 
+    def get_community_statistics(self) -> dict[str, any]:
+        """Get community voting statistics"""
+        try:
+            # Mock community statistics - replace with actual API calls
+            return {
+                'active_proposals': 12,
+                'votes_today': 45,
+                'approved_today': 2,
+                'community_members': 89
+            }
+        except Exception as e:
+            st.error(f"Failed to get community statistics: {e}")
+            return {
+                'active_proposals': 0,
+                'votes_today': 0,
+                'approved_today': 0,
+                'community_members': 0
+            }
+
     def get_real_learning_report(self) -> dict[str, any]:
         """Get real learning report data"""
         if not self.proposals_manager:
@@ -809,6 +828,20 @@ class SimpleDashboard:
         # Auto-learning section
         if AUTO_LEARNING_AVAILABLE:
             st.sidebar.markdown("## 🤖 Auto Learning System")
+            
+            # Community voting section
+            st.sidebar.markdown("### 🏆 Community Voting")
+            community_stats = self.get_community_statistics()
+            
+            col1, col2 = st.sidebar.columns(2)
+            with col1:
+                st.metric("Active Proposals", community_stats.get('active_proposals', 0))
+            with col2:
+                st.metric("Community Votes", community_stats.get('votes_today', 0))
+            
+            if st.sidebar.button("🗳️ View Community Proposals", help="View and vote on community proposals"):
+                st.session_state.show_community = True
+                st.rerun()
 
             # Auto-discovery status
             auto_discovery_status = st.sidebar.selectbox(
@@ -1688,6 +1721,164 @@ class SimpleDashboard:
             st.markdown("• No learning suggestions available yet")
             st.markdown("• Create some learning proposals to get suggestions!")
 
+    def render_community_proposals(self) -> None:
+        """Render community proposals voting interface"""
+        st.markdown("### 🏆 Community Learning Proposals")
+        st.markdown("Vote on learning proposals submitted by the community!")
+        
+        # Community statistics
+        community_stats = self.get_community_statistics()
+        
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.metric("Active Proposals", community_stats.get('active_proposals', 0))
+        with col2:
+            st.metric("Votes Today", community_stats.get('votes_today', 0))
+        with col3:
+            st.metric("Approved Today", community_stats.get('approved_today', 0))
+        with col4:
+            st.metric("Community Members", community_stats.get('community_members', 0))
+        
+        st.markdown("---")
+        
+        # Mock community proposals - replace with actual API calls
+        mock_proposals = [
+            {
+                'id': 'comm-001',
+                'title': 'Learn Advanced Python Async Programming',
+                'description': 'StillMe should master async/await patterns, asyncio library, and concurrent programming in Python to handle modern web applications efficiently.',
+                'author': 'python_dev_2024',
+                'category': 'programming',
+                'upvotes': 23,
+                'downvotes': 2,
+                'status': 'voting',
+                'learning_objectives': [
+                    'Master asyncio library fundamentals',
+                    'Implement async web scraping',
+                    'Build concurrent API clients',
+                    'Understand async database operations'
+                ]
+            },
+            {
+                'id': 'comm-002',
+                'title': 'Master Machine Learning Model Deployment',
+                'description': 'Learn to deploy ML models in production using Docker, Kubernetes, and cloud platforms like AWS SageMaker and Google Cloud AI Platform.',
+                'author': 'ml_engineer',
+                'category': 'ai-ml',
+                'upvotes': 18,
+                'downvotes': 1,
+                'status': 'voting',
+                'learning_objectives': [
+                    'Containerize ML models with Docker',
+                    'Deploy on Kubernetes clusters',
+                    'Implement model versioning',
+                    'Set up monitoring and logging'
+                ]
+            },
+            {
+                'id': 'comm-003',
+                'title': 'Learn DevOps Best Practices',
+                'description': 'Master CI/CD pipelines, infrastructure as code, monitoring, and security practices for modern software development.',
+                'author': 'devops_guru',
+                'category': 'devops',
+                'upvotes': 31,
+                'downvotes': 0,
+                'status': 'voting',
+                'learning_objectives': [
+                    'Implement GitOps workflows',
+                    'Master Terraform for IaC',
+                    'Set up monitoring with Prometheus',
+                    'Implement security scanning'
+                ]
+            }
+        ]
+        
+        # Display proposals
+        for proposal in mock_proposals:
+            with st.expander(f"📋 {proposal['title']} (👍 {proposal['upvotes']} 👎 {proposal['downvotes']})"):
+                st.write(f"**Author:** {proposal['author']} | **Category:** {proposal['category']}")
+                st.write(f"**Description:** {proposal['description']}")
+                
+                st.write("**Learning Objectives:**")
+                for obj in proposal['learning_objectives']:
+                    st.write(f"• {obj}")
+                
+                # Voting section
+                st.markdown("---")
+                col1, col2, col3 = st.columns([1, 1, 2])
+                
+                with col1:
+                    if st.button(f"👍 Upvote ({proposal['upvotes']})", key=f"up_{proposal['id']}"):
+                        st.success("✅ Vote recorded! Thank you for participating.")
+                        st.rerun()
+                
+                with col2:
+                    if st.button(f"👎 Downvote ({proposal['downvotes']})", key=f"down_{proposal['id']}"):
+                        st.info("📝 Vote recorded. Thank you for your feedback.")
+                        st.rerun()
+                
+                with col3:
+                    progress = min((proposal['upvotes'] / 50) * 100, 100)
+                    st.progress(progress / 100)
+                    st.write(f"**Progress:** {proposal['upvotes']}/50 votes needed")
+        
+        # Submit new proposal section
+        st.markdown("---")
+        st.markdown("### 💡 Submit New Proposal")
+        
+        with st.form("community_proposal_form"):
+            st.write("Help StillMe learn by submitting a new learning proposal!")
+            
+            col1, col2 = st.columns(2)
+            with col1:
+                title = st.text_input("Proposal Title", placeholder="What should StillMe learn?")
+                category = st.selectbox(
+                    "Category",
+                    ["programming", "ai-ml", "devops", "soft-skills", "data-science", "cybersecurity", "other"]
+                )
+            
+            with col2:
+                author = st.text_input("Your Name/Username", placeholder="Community member")
+                objectives = st.text_area(
+                    "Learning Objectives (one per line)",
+                    placeholder="List specific learning goals..."
+                )
+            
+            description = st.text_area(
+                "Description",
+                placeholder="Describe what StillMe should learn and why it's important..."
+            )
+            
+            submitted = st.form_submit_button("🚀 Submit Proposal")
+            
+            if submitted:
+                if title and description and objectives and author:
+                    st.success("🎉 Proposal submitted successfully! It will appear in the voting list shortly.")
+                    st.info("📢 You'll be notified when the community votes on your proposal.")
+                else:
+                    st.error("❌ Please fill in all required fields.")
+        
+        # Community leaderboard
+        st.markdown("---")
+        st.markdown("### 🏆 Top Contributors")
+        
+        mock_contributors = [
+            {"rank": 1, "username": "ai_researcher", "proposals": 8, "votes": 156},
+            {"rank": 2, "username": "python_dev_2024", "proposals": 6, "votes": 134},
+            {"rank": 3, "username": "ml_engineer", "proposals": 5, "votes": 98},
+            {"rank": 4, "username": "devops_guru", "proposals": 4, "votes": 87},
+            {"rank": 5, "username": "data_scientist", "proposals": 3, "votes": 76}
+        ]
+        
+        for contributor in mock_contributors:
+            col1, col2, col3 = st.columns([1, 3, 2])
+            with col1:
+                st.write(f"**#{contributor['rank']}**")
+            with col2:
+                st.write(f"**{contributor['username']}**")
+            with col3:
+                st.write(f"{contributor['proposals']} proposals • {contributor['votes']} votes")
+
     def render_security_privacy(self):
         """Render security and privacy tab"""
         st.markdown("### 🔒 Security & Privacy")
@@ -1744,6 +1935,7 @@ class SimpleDashboard:
                     "📊 Analytics",
                     "📈 Learning Curve",
                     "📊 Learning Report",
+                "🏆 Community Proposals",
                     "🔒 Security & Privacy",
                 ]
             )
@@ -1765,8 +1957,11 @@ class SimpleDashboard:
 
             with tab5:
                 self.render_full_learning_report()
-
+                
             with tab6:
+                self.render_community_proposals()
+
+            with tab7:
                 self.render_security_privacy()
 
         # Footer

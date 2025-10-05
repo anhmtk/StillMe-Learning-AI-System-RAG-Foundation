@@ -253,7 +253,9 @@ class RuntimeProtection:
             try:
                 if hasattr(process, "num_fds"):
                     process_obj = cast(Any, process)
-                    num_fds = cast(int, process_obj.num_fds())  # validated above - hasattr check
+                    num_fds = cast(
+                        int, process_obj.num_fds()
+                    )  # validated above - hasattr check
                 else:
                     num_fds = len(process.open_files())
                 if num_fds > self.config["thresholds"]["file_descriptors"]:

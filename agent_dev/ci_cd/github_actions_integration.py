@@ -370,7 +370,9 @@ class GitHubActionsIntegration:
             print(f"⚠️ Failed to get logs: {e}")
             return None
 
-    def register_webhook_handler(self, event_type: EventType, handler: Callable[..., Any]):
+    def register_webhook_handler(
+        self, event_type: EventType, handler: Callable[..., Any]
+    ):
         """Register webhook event handler"""
         if event_type not in self.webhook_handlers:
             self.webhook_handlers[event_type] = []

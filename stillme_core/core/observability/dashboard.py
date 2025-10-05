@@ -59,6 +59,7 @@ try:
 except ImportError:
     MetricType = None
 
+
 class ObservabilityDashboard:
     """Web-based observability dashboard"""
 
@@ -157,7 +158,8 @@ class ObservabilityDashboard:
                     "timestamp": health_timestamp_iso,
                     "status": health.status.value
                     if health and hasattr(health, "status")
-                    else "unknown",                    "checks": [
+                    else "unknown",
+                    "checks": [
                         {
                             "name": check.name,
                             "status": check.status.value,
@@ -172,7 +174,8 @@ class ObservabilityDashboard:
                     ],
                     "summary": health.summary
                     if health and hasattr(health, "summary")
-                    else {},                },
+                    else {},
+                },
                 "metrics": metrics_overview,
                 "traces": {
                     "recent_traces": recent_traces,
@@ -252,7 +255,8 @@ class DashboardHandler(BaseHTTPRequestHandler):
         health_dict = {
             "status": health.status.value
             if health and hasattr(health, "status")
-            else "unknown",            "timestamp": health_timestamp_iso,
+            else "unknown",
+            "timestamp": health_timestamp_iso,
             "checks": [
                 {
                     "name": check.name,
@@ -265,7 +269,8 @@ class DashboardHandler(BaseHTTPRequestHandler):
                     health.checks if health and hasattr(health, "checks") else []
                 )
             ],
-            "summary": health.summary if health and hasattr(health, "summary") else {},        }
+            "summary": health.summary if health and hasattr(health, "summary") else {},
+        }
         self._send_json_response(200, health_dict)
 
     def _serve_metrics(self):

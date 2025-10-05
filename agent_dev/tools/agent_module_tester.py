@@ -72,7 +72,13 @@ class AgentModuleTester:
 
     def test_all_modules(self) -> dict[str, Any]:
         """Test tất cả modules trong thư mục"""
-        results: dict[str, Any] = {"total": 0, "passed": 0, "failed": 0, "fixed": 0, "modules": {}}
+        results: dict[str, Any] = {
+            "total": 0,
+            "passed": 0,
+            "failed": 0,
+            "fixed": 0,
+            "modules": {},
+        }
 
         if not self.modules_dir.exists():
             logger.error(f"Modules directory not found: {self.modules_dir}")

@@ -448,7 +448,9 @@ class ThreatIntelligence:
             # Count by type
             indicator_type = indicator.indicator_type.value
             if indicator_type in indicators_by_type:
-                indicators_by_type[indicator_type] = indicators_by_type[indicator_type] + 1
+                indicators_by_type[indicator_type] = (
+                    indicators_by_type[indicator_type] + 1
+                )
             else:
                 indicators_by_type[indicator_type] = 1
 

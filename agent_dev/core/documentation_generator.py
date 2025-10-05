@@ -523,7 +523,11 @@ This guide contains best practices for {language} development, automatically gen
         documented_files = 0
         generated_docs: list[DocMetadata] = []
         missing_docs: list[str] = []
-        quality_scores: dict[str, list[float]] = {"modules": [], "functions": [], "classes": []}
+        quality_scores: dict[str, list[float]] = {
+            "modules": [],
+            "functions": [],
+            "classes": [],
+        }
 
         for file_path in python_files:
             try:
