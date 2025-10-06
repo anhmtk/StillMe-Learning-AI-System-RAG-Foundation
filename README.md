@@ -1,11 +1,11 @@
 # 🌟 StillMe AI — Intelligent Personal Companion
 
-[![CI Unit Tests](https://github.com/OWNER/REPO/actions/workflows/ci-unit.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/ci-unit.yml)
-[![CI Integration Tests](https://github.com/OWNER/REPO/actions/workflows/ci-integration.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/ci-integration.yml)
-[![CI Security Scans](https://github.com/OWNER/REPO/actions/workflows/ci-security.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/ci-security.yml)
-[![CI DAST Tests](https://github.com/OWNER/REPO/actions/workflows/ci-dast.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/ci-dast.yml)
-[![CD Staging](https://github.com/OWNER/REPO/actions/workflows/cd-staging.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/cd-staging.yml)
-[![CD Production](https://github.com/OWNER/REPO/actions/workflows/cd-prod.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/cd-prod.yml)
+[![CI Unit Tests](https://github.com/anhmtk/stillme_ai_ipc/actions/workflows/ci-unit.yml/badge.svg)](https://github.com/anhmtk/stillme_ai_ipc/actions/workflows/ci-unit.yml)
+[![CI Integration Tests](https://github.com/anhmtk/stillme_ai_ipc/actions/workflows/ci-integration.yml/badge.svg)](https://github.com/anhmtk/stillme_ai_ipc/actions/workflows/ci-integration.yml)
+[![CI Security Scans](https://github.com/anhmtk/stillme_ai_ipc/actions/workflows/ci-security.yml/badge.svg)](https://github.com/anhmtk/stillme_ai_ipc/actions/workflows/ci-security.yml)
+[![CI DAST Tests](https://github.com/anhmtk/stillme_ai_ipc/actions/workflows/ci-dast.yml/badge.svg)](https://github.com/anhmtk/stillme_ai_ipc/actions/workflows/ci-dast.yml)
+[![CD Staging](https://github.com/anhmtk/stillme_ai_ipc/actions/workflows/cd-staging.yml/badge.svg)](https://github.com/anhmtk/stillme_ai_ipc/actions/workflows/cd-staging.yml)
+[![CD Production](https://github.com/anhmtk/stillme_ai_ipc/actions/workflows/cd-prod.yml/badge.svg)](https://github.com/anhmtk/stillme_ai_ipc/actions/workflows/cd-prod.yml)
 [![Coverage](https://img.shields.io/badge/coverage-97%25+-green)](artifacts/coverage.html)
 [![Security](https://img.shields.io/badge/security-OWASP%20ASVS%20Level%202+-green)](docs/SECURITY_COMPLIANCE_MAP.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -63,6 +63,15 @@ StillMe IPC now uses **100% REAL DATA** instead of mock data:
 - **Stack Overflow API**: Programming questions with activity metrics
 - **Rate Limiting**: Intelligent API management to avoid blocking
 
+#### 🏆 Community Proposal & Voting System (NEW!)
+- **GitHub-Based Dashboard**: Interactive community dashboard hosted on GitHub Pages
+- **Multi-Channel Submission**: GitHub Issues, web forms, Telegram bot, email
+- **Automated Voting Workflow**: 7-14 day voting periods with auto-approval thresholds
+- **Real-time Voting**: Live voting progress with upvote/downvote tracking
+- **Community Leaderboard**: Top contributors based on proposals and votes
+- **Auto-Learning Integration**: Approved proposals automatically start learning
+- **Smart Notifications**: Email/Telegram alerts for new proposals and completions
+
 #### ✅ Real Learning System Integration
 - **Evolutionary Learning System**: Real learning sessions with threading
 - **Progress Tracking**: Real-time database updates every 30 seconds
@@ -98,6 +107,35 @@ StillMe AI follows a modular architecture with comprehensive components:
 | Component | Coverage | Status |
 |---|---|---|
 | Core Framework | 97.9% | ✅ Excellent |
+
+## 🚀 Quick Start
+
+### GitHub Repository
+- **Main Repository**: [https://github.com/anhmtk/stillme_ai_ipc](https://github.com/anhmtk/stillme_ai_ipc)
+- **Community Dashboard**: [https://anhmtk.github.io/stillme_ai_ipc/docs/community_dashboard/](https://anhmtk.github.io/stillme_ai_ipc/docs/community_dashboard/)
+- **Latest Release**: [Releases](https://github.com/anhmtk/stillme_ai_ipc/releases)
+
+### Local Development
+```bash
+# Clone repository
+git clone https://github.com/anhmtk/stillme_ai_ipc.git
+cd stillme_ai_ipc
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run dashboard
+streamlit run dashboards/streamlit/simple_app.py --server.port 8501
+
+# Run community voting processor
+python scripts/community_voting_processor.py
+```
+
+### Community Features
+- **Submit Proposals**: Use GitHub Issues or community dashboard
+- **Vote on Proposals**: Interactive voting with real-time progress
+- **Track Learning**: Monitor StillMe's learning progress
+- **Leaderboard**: See top community contributors
 | Security Tests | 100% | ✅ Passed |
 | Performance Tests | 100% | ✅ Passed |
 | Mobile App | 95% | ✅ Ready |
@@ -922,8 +960,10 @@ make security-report # Generate security report
 
 ## 🤝 Community & Support
 
-- **Issues**: [GitHub Issues](https://github.com/stillme-ai/stillme/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/stillme-ai/stillme/discussions)
+- **Repository**: [GitHub Repository](https://github.com/anhmtk/stillme_ai_ipc)
+- **Issues**: [GitHub Issues](https://github.com/anhmtk/stillme_ai_ipc/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/anhmtk/stillme_ai_ipc/discussions)
+- **Community Dashboard**: [GitHub Pages](https://anhmtk.github.io/stillme_ai_ipc/docs/community_dashboard/)
 - **Security**: [Security Policy](SECURITY.md)
 - **Contributing**: [Contributing Guide](CONTRIBUTING.md)
 
