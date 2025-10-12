@@ -1,10 +1,19 @@
 name: 🧹 Cleanup Audit
 
 on:
+  workflow_dispatch:
+    inputs:
+      score_threshold:
+        description: 'Highlight high-risk files with score ≥ this value'
+        required: false
+        default: '70'
+  schedule:
+    - cron: '0 3 * * 1'   # chạy tự động mỗi thứ 2 03:00 UTC (tuỳ chọn)
   pull_request:
     branches: [ main, develop ]
   push:
     branches: [ main, develop ]
+
 
 jobs:
   cleanup-audit:
@@ -15,7 +24,8 @@ jobs:
       uses: actions/checkout@v4
       with:
         fetch-depth: 0
-    
+    - name: Prepare artifacts directory
+      run: mkdir -p artifacts
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
