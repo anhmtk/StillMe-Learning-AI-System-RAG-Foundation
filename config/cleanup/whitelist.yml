@@ -1,0 +1,84 @@
+# StillMe Cleanup Whitelist
+# Protected files that should NOT be moved to _attic/
+
+protected_files:
+  # Entry points
+  - "app.py"
+  - "stillme_entry.py"
+  - "api_server.py"
+  - "stable_ai_server.py"
+  
+  # Core modules
+  - "stillme_core/__init__.py"
+  - "stillme_core/core/__init__.py"
+  - "stillme_core/learning/__init__.py"
+  - "stillme_core/modules/__init__.py"
+  
+  # Base classes and schemas
+  - "stillme_core/core/ai_manager.py"
+  - "stillme_core/core/executor.py"
+  - "stillme_core/core/planner.py"
+  - "stillme_core/core/controller.py"
+  
+  # Loaders and migrations
+  - "stillme_core/learning/pipeline.py"
+  - "stillme_core/learning/database.py"
+  
+  # Plugin system
+  - "stillme_core/core/plugin_manager.py"
+  - "plugins/__init__.py"
+  - "plugins/calculator/__init__.py"
+  - "plugins/private_stub/__init__.py"
+  
+  # Registry and router
+  - "stillme_core/core/router/"
+  - "stillme_core/providers/"
+  
+  # Dynamic import modules (Wave-1c protection)
+  - "e2e_scenarios/__init__.py"
+  - "integration/__init__.py"
+  - "oi_adapter/__init__.py"
+  - "security_basics/__init__.py"
+  - "tools/__init__.py"
+  - "unit/__init__.py"
+  
+  # Configuration
+  - "config/"
+  - "requirements.txt"
+  - "pyproject.toml"
+  - "setup.py"
+  
+  # Documentation
+  - "README.md"
+  - "docs/"
+  
+  # CI/CD
+  - ".github/"
+  - "Makefile"
+  
+  # Tests (keep main test structure)
+  - "tests/__init__.py"
+  - "conftest.py"
+  
+  # Tools and scripts (keep main ones)
+  - "tools/"
+  - "tools/inventory/"
+  - "scripts/windows/"
+  - "scripts/windows/attic_move.ps1"
+  - "scripts/windows/attic_rollback.ps1"
+  
+  # CI/CD and GitHub
+  - ".github/"
+  - ".github/workflows/"
+
+protected_patterns:
+  - "__init__.py"
+  - "base"
+  - "schema"
+  - "loader"
+  - "migrations"
+  - "plugin"
+  - "registry"
+  - "router"
+  - "entry"
+  - "main"
