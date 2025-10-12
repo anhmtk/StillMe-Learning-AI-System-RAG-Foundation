@@ -86,6 +86,19 @@ def load_dynamic_registry(file_path: str) -> Set[str]:
         print(f"Warning: Could not load dynamic registry: {e}")
         return set()
 
+def load_near_dupes(file_path: str) -> Dict[str, Dict[str, Any]]:
+    """Load near-duplicate data"""
+    if not os.path.exists(file_path):
+        return {}
+    
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            return data.get('near_dupe_clusters', {})
+    except Exception as e:
+        print(f"Warning: Could not load near-dupes data: {e}")
+        return {}
+
 def get_git_touches(file_path: str) -> int:
     """Get number of git touches for a file"""
     try:
@@ -140,6 +153,13 @@ def is_whitelisted(file_path: str, whitelist: Set[str]) -> bool:
             return True
     return False
 
+def is_near_dupe_of_canonical(file_path: str, near_dupes: Dict[str, Dict[str, Any]]) -> bool:
+    """Check if file is a near-duplicate of a canonical file"""
+    for cluster_data in near_dupes.values():
+        if file_path in cluster_data.get('non_canonical', []):
+            return True
+    return False
+
 def calculate_redundant_score(
     file_path: str,
     inbound_imports: int,
@@ -149,7 +169,8 @@ def calculate_redundant_score(
     looks_backup: bool,
     in_registry: bool,
     is_whitelisted: bool,
-    dupe_bucket: str = ""
+    dupe_bucket: str = "",
+    is_near_dupe: bool = False
 ) -> int:
     """Calculate redundant score (0-100)"""
     
@@ -170,6 +191,8 @@ def calculate_redundant_score(
         score += 10
     if looks_backup:
         score += 10
+    if is_near_dupe and inbound_imports == 0 and executed_lines == 0:
+        score += 15  # Bonus for unused near-duplicates
     
     # Protections
     if is_whitelisted:
@@ -204,7 +227,8 @@ def analyze_all_files(
     coverage_file: str = "artifacts/coverage.json",
     ast_dupes_file: str = "artifacts/ast_dupes.json",
     whitelist_file: str = "config/cleanup/whitelist.yml",
-    dynamic_registry_file: str = "artifacts/dynamic_registry_paths.json"
+    dynamic_registry_file: str = "artifacts/dynamic_registry_paths.json",
+    near_dupes_file: str = "artifacts/near_dupes.json"
 ) -> List[Dict[str, Any]]:
     """Analyze all Python files and calculate redundant scores"""
     
@@ -214,6 +238,7 @@ def analyze_all_files(
     ast_dupes = load_ast_dupes(ast_dupes_file)
     whitelist = load_whitelist(whitelist_file)
     dynamic_modules = load_dynamic_registry(dynamic_registry_file)
+    near_dupes = load_near_dupes(near_dupes_file)
     
     print("🔍 Analyzing Python files...")
     results = []
@@ -239,11 +264,12 @@ def analyze_all_files(
                 in_registry = is_in_registry(rel_path, dynamic_modules)
                 whitelisted = is_whitelisted(rel_path, whitelist)
                 dupe_bucket = ast_dupes.get(rel_path, "")
+                is_near_dupe = is_near_dupe_of_canonical(rel_path, near_dupes)
                 
                 # Calculate score
                 score = calculate_redundant_score(
                     rel_path, inbound_imports, executed_lines, git_touches,
-                    days_since_last_change, looks_backup, in_registry, whitelisted, dupe_bucket
+                    days_since_last_change, looks_backup, in_registry, whitelisted, dupe_bucket, is_near_dupe
                 )
                 
                 results.append({
@@ -256,6 +282,7 @@ def analyze_all_files(
                     'in_registry': in_registry,
                     'is_whitelisted': whitelisted,
                     'dupe_bucket': dupe_bucket,
+                    'is_near_dupe': is_near_dupe,
                     'redundant_score': score
                 })
     
@@ -280,7 +307,7 @@ def main():
         fieldnames = [
             'path', 'inbound_imports', 'executed_lines', 'git_touches',
             'days_since_last_change', 'looks_backup', 'in_registry',
-            'is_whitelisted', 'dupe_bucket', 'redundant_score'
+            'is_whitelisted', 'dupe_bucket', 'is_near_dupe', 'redundant_score'
         ]
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
