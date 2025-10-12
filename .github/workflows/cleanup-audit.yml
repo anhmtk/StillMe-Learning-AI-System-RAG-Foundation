@@ -9,10 +9,7 @@ on:
         default: '70'
   schedule:
     - cron: '0 3 * * 1'   # chạy tự động mỗi thứ 2 03:00 UTC (tuỳ chọn)
-  pull_request:
-    branches: [ main, develop ]
-  push:
-    branches: [ main, develop ]
+  
 
 
 jobs:
