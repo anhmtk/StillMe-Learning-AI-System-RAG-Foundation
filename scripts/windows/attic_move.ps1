@@ -1,119 +1,252 @@
-# PowerShell script for moving files to _attic/ directory
-# Supports CSV input and filtering parameters
+# PowerShell script to move files to _attic/ (quarantine)
+# Usage: .\attic_move.ps1 [-WhatIf] [-Force]
 
 param(
+    [switch]$WhatIf,
+    [switch]$Force,
+    [string]$RedundancyReport = "artifacts/redundancy_report.csv",
     [string]$FromCsv = "",
     [int]$ScoreMin = 80,
-    [int]$TopN = 200,
-    [int]$RelaxedMin = 60,
-    [switch]$WhatIf = $false
+    [int]$TopN = 200
 )
 
-# Create _attic directory if it doesn't exist
-if (-not (Test-Path "_attic")) {
-    New-Item -ItemType Directory -Path "_attic" -Force
-    New-Item -ItemType File -Path "_attic/.gitkeep" -Force
+# Set error action preference
+$ErrorActionPreference = "Stop"
+
+# Function to log messages
+function Write-Log {
+    param([string]$Message, [string]$Level = "INFO")
+    $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+    Write-Host "[$timestamp] [$Level] $Message"
 }
 
-# Initialize move log
-$moveLog = @()
-$timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
-
-Write-Host "Starting attic move operation..." -ForegroundColor Green
-Write-Host "  - Score minimum: $ScoreMin" -ForegroundColor Yellow
-Write-Host "  - Relaxed minimum: $RelaxedMin" -ForegroundColor Yellow
-Write-Host "  - Top N: $TopN" -ForegroundColor Yellow
-Write-Host "  - WhatIf: $WhatIf" -ForegroundColor Yellow
-
-if ($FromCsv -and (Test-Path $FromCsv)) {
-    Write-Host "Reading candidates from CSV: $FromCsv" -ForegroundColor Cyan
+# Function to create _attic directory structure
+function New-AtticDirectory {
+    param([string]$SourcePath)
     
-    $candidates = Import-Csv $FromCsv
-    $movedCount = 0
-    $processedCount = 0
+    $relativePath = $SourcePath -replace [regex]::Escape($PWD.Path + "\"), ""
+    $atticPath = Join-Path "_attic" $relativePath
+    $atticDir = Split-Path $atticPath -Parent
     
-    foreach ($candidate in $candidates) {
-        if ($processedCount -ge $TopN) {
-            break
+    if (-not (Test-Path $atticDir)) {
+        New-Item -ItemType Directory -Path $atticDir -Force | Out-Null
+        Write-Log "Created directory: $atticDir"
+    }
+    
+    return $atticPath
+}
+
+# Function to move file to attic
+function Move-ToAttic {
+    param(
+        [string]$SourcePath,
+        [string]$Reason,
+        [int]$Score
+    )
+    
+    try {
+        if (-not (Test-Path $SourcePath)) {
+            Write-Log "File not found: $SourcePath" "WARN"
+            return $false
         }
         
-        $filePath = $candidate.path
-        $score = [int]$candidate.redundant_score
-        $isNearDupe = $candidate.is_near_dupe -eq "True"
-        $looksBackup = $candidate.looks_backup -eq "True"
-        $inboundImports = [int]$candidate.inbound_imports
-        $executedLines = [int]$candidate.executed_lines
-        $gitTouches = [int]$candidate.git_touches
-        $daysSinceLastChange = [int]$candidate.days_since_last_change
-        $isWhitelisted = $candidate.is_whitelisted -eq "True"
-        $inRegistry = $candidate.in_registry -eq "True"
+        $atticPath = New-AtticDirectory -SourcePath $SourcePath
         
-        # Apply decision rules
-        $meetsGeneralCriteria = $score -ge $ScoreMin
-        $meetsRelaxedCriteria = $score -ge $RelaxedMin -and ($isNearDupe -or $looksBackup)
+        if ($WhatIf) {
+            Write-Log "WOULD MOVE: $SourcePath -> $atticPath (Score: $Score, Reason: $Reason)" "INFO"
+            return $true
+        }
         
-        # 3-KHÔNG rule
-        $threeKhong = ($inboundImports -eq 0 -and $executedLines -eq 0 -and $gitTouches -le 1 -and $daysSinceLastChange -gt 180)
+        # Create parent directory in attic
+        $atticParent = Split-Path $atticPath -Parent
+        if (-not (Test-Path $atticParent)) {
+            New-Item -ItemType Directory -Path $atticParent -Force | Out-Null
+        }
         
-        # 2-KHÓA rule (protection)
-        $twoKhoa = -not $isWhitelisted -and -not $inRegistry -and -not $filePath.EndsWith("__init__.py")
+        # Move file
+        Move-Item -Path $SourcePath -Destination $atticPath -Force
+        Write-Log "MOVED: $SourcePath -> $atticPath (Score: $Score, Reason: $Reason)" "INFO"
         
-        if (($meetsGeneralCriteria -or $meetsRelaxedCriteria) -and $threeKhong -and $twoKhoa) {
-            if (Test-Path $filePath) {
-                $destPath = "_attic/$filePath"
-                $destDir = Split-Path $destPath -Parent
-                
-                if (-not (Test-Path $destDir)) {
-                    New-Item -ItemType Directory -Path $destDir -Force | Out-Null
-                }
-                
-                if ($WhatIf) {
-                    Write-Host "  [WHATIF] Would move: $filePath -> $destPath (score: $score)" -ForegroundColor Yellow
-                } else {
-                    try {
-                        Move-Item -Path $filePath -Destination $destPath -Force
-                        Write-Host "  Moved: $filePath (score: $score)" -ForegroundColor Green
-                        
-                        $moveLog += [PSCustomObject]@{
-                            src = $filePath
-                            dst = $destPath
-                            timestamp = $timestamp
-                            score = $score
-                            reason = if ($meetsRelaxedCriteria) { "relaxed" } else { "general" }
-                        }
-                        
-                        $movedCount++
-                    } catch {
-                        Write-Host "  Failed to move: $filePath - $($_.Exception.Message)" -ForegroundColor Red
-                    }
-                }
-                
-                $processedCount++
-            } else {
-                Write-Host "  File not found: $filePath" -ForegroundColor Yellow
+        # Log to CSV
+        $moveRecord = [PSCustomObject]@{
+            Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+            SourcePath = $SourcePath
+            AtticPath = $atticPath
+            Reason = $Reason
+            Score = $Score
+            Action = "MOVE"
+        }
+        
+        $csvPath = "artifacts/attic_moves.csv"
+        $csvDir = Split-Path $csvPath -Parent
+        if (-not (Test-Path $csvDir)) {
+            New-Item -ItemType Directory -Path $csvDir -Force | Out-Null
+        }
+        
+        if (-not (Test-Path $csvPath)) {
+            $moveRecord | Export-Csv -Path $csvPath -NoTypeInformation
+        } else {
+            $moveRecord | Export-Csv -Path $csvPath -NoTypeInformation -Append
+        }
+        
+        return $true
+        
+    } catch {
+        Write-Log "Error moving $SourcePath : $($_.Exception.Message)" "ERROR"
+        return $false
+    }
+}
+
+# Function to process backup files
+function Process-BackupFiles {
+    Write-Log "Processing backup files..."
+    
+    $backupPatterns = @(
+        "*_backup.py",
+        "*backup*.py", 
+        "*.bak.py",
+        "*_old.py",
+        "*_copy.py",
+        "*_tmp.py",
+        "*.py.save",
+        "*.py~"
+    )
+    
+    $movedCount = 0
+    foreach ($pattern in $backupPatterns) {
+        $files = Get-ChildItem -Path . -Recurse -Filter $pattern -File
+        foreach ($file in $files) {
+            if (Move-ToAttic -SourcePath $file.FullName -Reason "Backup pattern: $pattern" -Score 100) {
+                $movedCount++
             }
         }
     }
     
-    Write-Host "Move operation complete:" -ForegroundColor Green
-    Write-Host "  - Files processed: $processedCount" -ForegroundColor White
-    Write-Host "  - Files moved: $movedCount" -ForegroundColor White
-    
-    # Save move log
-    if ($moveLog.Count -gt 0) {
-        $logFile = "artifacts/attic_moves.csv"
-        $logDir = Split-Path $logFile -Parent
-        if (-not (Test-Path $logDir)) {
-            New-Item -ItemType Directory -Path $logDir -Force | Out-Null
-        }
-        
-        $moveLog | Export-Csv -Path $logFile -NoTypeInformation -Append
-        Write-Host "  - Move log saved to: $logFile" -ForegroundColor White
-    }
-    
-} else {
-    Write-Host "CSV file not found: $FromCsv" -ForegroundColor Red
-    Write-Host "Usage: .\attic_move.ps1 -FromCsv path -ScoreMin int -TopN int [-RelaxedMin int] [-WhatIf]" -ForegroundColor Yellow
+    Write-Log "Moved $movedCount backup files"
 }
 
-Write-Host "Attic move operation completed!" -ForegroundColor Green
+# Function to process backup directories
+function Process-BackupDirectories {
+    Write-Log "Processing backup directories..."
+    
+    $backupDirs = @(
+        "backup",
+        "backup_legacy", 
+        "old",
+        ".ipynb_checkpoints",
+        "__pycache__"
+    )
+    
+    $movedCount = 0
+    foreach ($dirPattern in $backupDirs) {
+        $dirs = Get-ChildItem -Path . -Recurse -Directory -Name $dirPattern
+        foreach ($dir in $dirs) {
+            $fullPath = Join-Path $PWD $dir
+            if (Test-Path $fullPath) {
+                $atticPath = New-AtticDirectory -SourcePath $fullPath
+                
+                if ($WhatIf) {
+                    Write-Log "WOULD MOVE DIRECTORY: $fullPath -> $atticPath" "INFO"
+                } else {
+                    try {
+                        $atticParent = Split-Path $atticPath -Parent
+                        if (-not (Test-Path $atticParent)) {
+                            New-Item -ItemType Directory -Path $atticParent -Force | Out-Null
+                        }
+                        
+                        Move-Item -Path $fullPath -Destination $atticPath -Force
+                        Write-Log "MOVED DIRECTORY: $fullPath -> $atticPath" "INFO"
+                        $movedCount++
+                    } catch {
+                        Write-Log "Error moving directory $fullPath : $($_.Exception.Message)" "ERROR"
+                    }
+                }
+            }
+        }
+    }
+    
+    Write-Log "Moved $movedCount backup directories"
+}
+
+# Function to process high-score files from CSV
+function Process-HighScoreFiles {
+    param([string]$CsvPath, [int]$MinScore = 70, [int]$MaxFiles = 200)
+    
+    if (-not (Test-Path $CsvPath)) {
+        Write-Log "Redundancy report not found: $CsvPath" "WARN"
+        return
+    }
+    
+    Write-Log "Processing high-score files from $CsvPath (min score: $MinScore, max files: $MaxFiles)..."
+    
+    try {
+        $csvData = Import-Csv -Path $CsvPath
+        $movedCount = 0
+        $processedCount = 0
+        
+        foreach ($row in $csvData) {
+            if ($processedCount -ge $MaxFiles) {
+                break
+            }
+            
+            $score = [int]$row.redundant_score
+            if ($score -ge $MinScore -and $row.is_whitelisted -eq "False") {
+                $sourcePath = Join-Path $PWD $row.path
+                $reason = "High redundant score: $score"
+                
+                if (Move-ToAttic -SourcePath $sourcePath -Reason $reason -Score $score) {
+                    $movedCount++
+                }
+                $processedCount++
+            }
+        }
+        
+        Write-Log "Processed $processedCount files, moved $movedCount high-score files"
+        
+    } catch {
+        Write-Log "Error processing CSV: $($_.Exception.Message)" "ERROR"
+    }
+}
+
+# Main execution
+Write-Log "Starting attic move operation..."
+Write-Log "WhatIf mode: $WhatIf"
+Write-Log "Force mode: $Force"
+
+# Create _attic directory
+if (-not (Test-Path "_attic")) {
+    New-Item -ItemType Directory -Path "_attic" -Force | Out-Null
+    Write-Log "Created _attic directory"
+}
+
+# Create .gitkeep in _attic
+$gitkeepPath = Join-Path "_attic" ".gitkeep"
+if (-not (Test-Path $gitkeepPath)) {
+    New-Item -ItemType File -Path $gitkeepPath -Force | Out-Null
+    Write-Log "Created .gitkeep in _attic"
+}
+
+# Process different types of files
+if ($FromCsv -ne "") {
+    # Use CSV-based processing
+    Write-Log "Using CSV-based processing: $FromCsv"
+    Process-HighScoreFiles -CsvPath $FromCsv -MinScore $ScoreMin -MaxFiles $TopN
+} else {
+    # Use legacy processing
+    Write-Log "Using legacy processing"
+    Process-BackupFiles
+    Process-BackupDirectories
+    Process-HighScoreFiles -CsvPath $RedundancyReport -MinScore 70
+}
+
+Write-Log "Attic move operation completed"
+
+# Summary
+if (Test-Path "artifacts/attic_moves.csv") {
+    $moves = Import-Csv -Path "artifacts/attic_moves.csv"
+    Write-Log "Total files moved: $($moves.Count)"
+    
+    if ($moves.Count -gt 0) {
+        Write-Log "Move log saved to: artifacts/attic_moves.csv"
+    }
+}
