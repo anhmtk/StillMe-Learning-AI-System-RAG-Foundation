@@ -27,10 +27,12 @@ jobs:
     - name: Prepare artifacts directory
       run: mkdir -p artifacts
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@
       with:
         python-version: '3.11'
-    
+    - name: Ensure jq is available
+      run: sudo apt-get update && sudo apt-get install -y jq
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -89,7 +91,7 @@ jobs:
         fi
     
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@
       if: always()
       with:
         name: cleanup-audit-artifacts
