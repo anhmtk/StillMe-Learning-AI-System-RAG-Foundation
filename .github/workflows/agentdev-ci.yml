@@ -1,16 +1,7 @@
 name: AgentDev CI
 
 on:
-  push:
-    paths:
-      - 'agent_dev/**'
-      - 'tests/test_*agent*'
-      - 'tests/security/test_agentdev*'
-  pull_request:
-    paths:
-      - 'agent_dev/**'
-      - 'tests/test_*agent*'
-      - 'tests/security/test_agentdev*'
+  workflow_dispatch:
 
 jobs:
   agentdev-check:

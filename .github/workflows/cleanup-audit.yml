@@ -1,9 +1,10 @@
 name: 🧹 Cleanup Audit
 
 on:
-  pull_request:
-    branches: [ main, develop ]
+  workflow_dispatch:
   push:
+    branches: [ main, develop ]
+  pull_request:
     branches: [ main, develop ]
 
 jobs:
@@ -43,23 +44,34 @@ jobs:
       run: |
         python tools/inventory/redundant_score.py || echo 'path,inbound_imports,executed_lines,git_touches,days_since_last_change,looks_backup,in_registry,is_whitelisted,dupe_bucket,is_near_dupe,redundant_score' > artifacts/redundancy_report.csv
     
-    - name: Check for backup files
+    - name: Check for backup files (STRICT GATES)
       run: |
-        echo "🔍 Checking for backup files..."
+        echo "🔍 Checking for backup files with STRICT GATES..."
         BACKUP_FILES=$(find . -name "*_backup.py" -o -name "*_old.py" -o -name "*_copy.py" -o -name "*_tmp.py" -o -name "*.py~" -o -name "*.py.save" | grep -v "_attic/" | grep -v ".git/" || true)
         if [ -n "$BACKUP_FILES" ]; then
-          echo "❌ Found backup files (excluding _attic/):"
+          echo "❌ FAIL: Found backup files (excluding _attic/):"
           echo "$BACKUP_FILES"
+          echo "🚫 These files are NOT ALLOWED in the main codebase!"
+          echo "💡 Move them to _attic/ or delete them permanently."
           exit 1
         else
-          echo "✅ No backup files found"
+          echo "✅ No backup files found - STRICT GATES PASSED"
         fi
     
-    - name: Check for new unused near-duplicates
+    - name: Check for new unused near-duplicates (ENHANCED)
       run: |
-        echo "🔍 Checking for new unused near-duplicates..."
-        if [ -f "artifacts/near_dupes_baseline.json" ] && [ -f "artifacts/near_dupes.json" ]; then
-          echo "⚠️  Near-duplicate analysis completed. Review results in artifacts/near_dupes.json"
+        echo "🔍 Checking for new unused near-duplicates with ENHANCED detection..."
+        if [ -f "artifacts/baseline/near_dupes_baseline.json" ] && [ -f "artifacts/near_dupes.json" ]; then
+          BASELINE_COUNT=$(jq '.near_dupe_clusters | length' artifacts/baseline/near_dupes_baseline.json 2>/dev/null || echo "0")
+          CURRENT_COUNT=$(jq '.near_dupe_clusters | length' artifacts/near_dupes.json 2>/dev/null || echo "0")
+          NEW_CLUSTERS=$((CURRENT_COUNT - BASELINE_COUNT))
+          if [ "$NEW_CLUSTERS" -gt 0 ]; then
+            echo "⚠️  WARN: Found $NEW_CLUSTERS new near-duplicate clusters!"
+            echo "📊 Baseline: $BASELINE_COUNT clusters, Current: $CURRENT_COUNT clusters"
+            echo "🔍 Review artifacts/near_dupes.json for details"
+          else
+            echo "✅ No new near-duplicate clusters found"
+          fi
         else
           echo "⚠️  No baseline found for near-duplicate comparison"
         fi
@@ -79,7 +91,7 @@ jobs:
         fi
     
     - name: Upload artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: cleanup-audit-artifacts

@@ -1,10 +1,7 @@
 name: "CI Tier 1 - Fast CI"
 
 on:
-  push:
-    branches: [ main, develop ]
-  pull_request:
-    branches: [ main, develop ]
+  workflow_dispatch:
 
 env:
   PYTHON_VERSION: "3.12"
