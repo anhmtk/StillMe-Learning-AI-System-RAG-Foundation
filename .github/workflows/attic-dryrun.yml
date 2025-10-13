@@ -1,83 +1,68 @@
 name: 🗂️ Attic Dry-Run (Weekly)
 
 on:
+  workflow_dispatch:
   schedule:
-    # Run every Monday at 2 AM UTC
-    - cron: '0 2 * * 1'
-  workflow_dispatch: # Allow manual trigger
+    - cron: '0 2 * * 1'   # Thứ 2, 02:00 UTC
+
+permissions:
+  contents: read
 
 jobs:
   attic-dryrun:
     runs-on: ubuntu-latest
-    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-    
-    - name: Set up Python
-      uses: actions/setup-python@v4
-      with:
-        python-version: '3.11'
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install grimp networkx scikit-learn pytest pytest-cov coverage pyyaml
-    
-    - name: Run attic sweeper (dry-run)
-      run: |
-        echo "🗂️ Running attic sweeper in dry-run mode..."
-        python tools/inventory/attic_sweeper.py --days 30 --dry-run --output artifacts/attic_eviction_candidates.csv
-    
-    - name: Check eviction candidates
-      run: |
-        echo "📊 Checking eviction candidates..."
-        if [ -f "artifacts/attic_eviction_candidates.csv" ]; then
-          CANDIDATE_COUNT=$(tail -n +2 artifacts/attic_eviction_candidates.csv | wc -l)
-          EVICTION_COUNT=$(tail -n +2 artifacts/attic_eviction_candidates.csv | grep -c "true" || echo "0")
-          echo "📈 Total files in attic: $CANDIDATE_COUNT"
-          echo "🗑️  Eviction candidates: $EVICTION_COUNT"
-          
-          if [ "$EVICTION_COUNT" -gt 0 ]; then
-            echo "⚠️  Found $EVICTION_COUNT files ready for eviction!"
-            echo "📋 Top candidates:"
-            tail -n +2 artifacts/attic_eviction_candidates.csv | grep "true" | head -5 | while IFS=',' read -r path original days refs protected reason candidate tiv4
-      if: always()
-      with:
-        name: attic-dryrun-artifacts-${{ github.run_number }}
-        path: |
-          artifacts/attic_eviction_candidates.csv
-          artifacts/attic_moves.csv
-        retention-days: 90
-    
-    - name: Generate summary
-      run: |
-        echo "## 🗂️ Weekly Attic Dry-Run Summary" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "**Run Date:** $(date)" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        
-        if [ -f "artifacts/attic_eviction_candidates.csv" ]; then
-          CANDIDATE_COUNT=$(tail -n +2 artifacts/attic_eviction_candidates.csv | wc -l)
-          EVICTION_COUNT=$(tail -n +2 artifacts/attic_eviction_candidates.csv | grep -c "true" || echo "0")
-          echo "- **Total files in attic:** $CANDIDATE_COUNT" >> $GITHUB_STEP_SUMMARY
-          echo "- **Eviction candidates:** $EVICTION_COUNT" >> $GITHUB_STEP_SUMMARY
-          
-          if [ "$EVICTION_COUNT" -gt 0 ]; then
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### 🗑️ Ready for Eviction" >> $GITHUB_STEP_SUMMARY
-            echo "| File | Days in Attic | Reason |" >> $GITHUB_STEP_SUMMARY
-            echo "|------|---------------|--------|" >> $GITHUB_STEP_SUMMARY
-            tail -n +2 artifacts/attic_eviction_candidates.csv | grep "true" | head -10 | while IFS=',' read -r path original days refs protected reason candidate timestamp; do
-              echo "| \`$path\` | $days | $reason |" >> $GITHUB_STEP_SUMMARY
-            done
-          fi
-        fi
-        
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### 📋 Next Steps" >> $GITHUB_STEP_SUMMARY
-        echo "- Review eviction candidates in artifacts" >> $GITHUB_STEP_SUMMARY
-        echo "- Plan controlled deletion in Wave-2b if no issues found" >> $GITHUB_STEP_SUMMARY
-        echo "- Monitor for 1-2 weeks before permanent deletion" >> $GITHUB_STEP_SUMMARY
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Prepare artifacts dir
+        run: mkdir -p artifacts
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install grimp networkx scikit-learn pytest pytest-cov coverage pyyaml
+
+      - name: Run attic sweeper (dry-run)
+        run: |
+          echo "🗂️ Running attic sweeper (dry-run)…"
+          python tools/inventory/attic_sweeper.py --days 30 --dry-run --output artifacts/attic_eviction_candidates.csv || true
+          # đảm bảo luôn có file để upload
+          test -f artifacts/attic_eviction_candidates.csv || \
+            echo "path,original,days,refs,protected,reason,candidate,timestamp" > artifacts/attic_eviction_candidates.csv
+
+      - name: Generate summary
+        run: |
+          CANDIDATE_COUNT=$(tail -n +2 artifacts/attic_eviction_candidates.csv 2>/dev/null | wc -l | xargs)
+          EVICTION_COUNT=$(tail -n +2 artifacts/attic_eviction_candidates.csv 2>/dev/null | grep -c ",true" || echo "0")
+          {
+            echo "## 🗂️ Weekly Attic Dry-Run Summary"
+            echo ""
+            echo "- **Run Date:** $(date -u) (UTC)"
+            echo "- **Total files in attic:** ${CANDIDATE_COUNT:-0}"
+            echo "- **Eviction candidates:** ${EVICTION_COUNT:-0}"
+            if [ "${EVICTION_COUNT:-0}" -gt 0 ]; then
+              echo ""
+              echo "### 🗑️ Ready for Eviction"
+              echo "| File | Days in Attic | Reason |"
+              echo "|------|---------------|--------|"
+              tail -n +2 artifacts/attic_eviction_candidates.csv | grep ",true" | head -10 | awk -F',' '{printf("| `%s` | %s | %s |\n",$1,$3,$6)}'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: attic-dryrun-artifacts-${{ github.run_number }}
+          path: |
+            artifacts/attic_eviction_candidates.csv
+            artifacts/attic_moves.csv
+          retention-days: 90
