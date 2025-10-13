@@ -54,7 +54,7 @@ jobs:
         fi
     
     - name: Upload attic artifacts
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       if: always()
       with:
         name: attic-dryrun-artifacts-${{ github.run_number }}
@@ -90,5 +90,5 @@ jobs:
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "### 📋 Next Steps" >> $GITHUB_STEP_SUMMARY
         echo "- Review eviction candidates in artifacts" >> $GITHUB_STEP_SUMMARY
-        echo "- Plan controlled deletion in Wave-2b if no issues found" >> $GITHUB_STEP_SUMMARY
+        echo "- Plan controlled deletion in Wave-2c if no issues found" >> $GITHUB_STEP_SUMMARY
         echo "- Monitor for 1-2 weeks before permanent deletion" >> $GITHUB_STEP_SUMMARY
