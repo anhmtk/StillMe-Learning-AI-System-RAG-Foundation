@@ -43,18 +43,7 @@ jobs:
           if [ "$EVICTION_COUNT" -gt 0 ]; then
             echo "⚠️  Found $EVICTION_COUNT files ready for eviction!"
             echo "📋 Top candidates:"
-            tail -n +2 artifacts/attic_eviction_candidates.csv | grep "true" | head -5 | while IFS=',' read -r path original days refs protected reason candidate timestamp; do
-              echo "  - $path ($days days in attic)"
-            done
-          else
-            echo "✅ No files ready for eviction"
-          fi
-        else
-          echo "❌ No eviction candidates file found"
-        fi
-    
-    - name: Upload attic artifacts
-      uses: actions/upload-artifact@v3
+            tail -n +2 artifacts/attic_eviction_candidates.csv | grep "true" | head -5 | while IFS=',' read -r path original days refs protected reason candidate tiv4
       if: always()
       with:
         name: attic-dryrun-artifacts-${{ github.run_number }}
