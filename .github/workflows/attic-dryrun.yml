@@ -61,8 +61,8 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-      - name: attic-dryrun-artifacts-${{ github.run_number }}
-            path: |
+          name: attic-dryrun-artifacts-${{ github.run_number }}
+          path: |
             artifacts/attic_eviction_candidates.csv
             artifacts/attic_moves.csv
-            retention-days: 90
+          retention-days: 90
