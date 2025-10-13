@@ -1,0 +1,40 @@
+name: AgentDev CI
+
+on:
+  workflow_dispatch:
+
+jobs:
+  agentdev-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install ruff pyright pytest
+        pip install -r requirements.txt
+    
+    - name: Run Ruff check (AgentDev)
+      run: ruff check agent_dev/ --output-format=json
+    
+    - name: Run Pyright check (AgentDev)
+      run: pyright agent_dev/ --stats
+    
+    - name: Run AgentDev tests
+      run: |
+        pytest -q tests/test_agent_flow.py
+        pytest -q tests/security/test_agentdev_security_defense.py
+        pytest -q tests/test_api_dev_agent.py
+        pytest -q test_agentdev_core_comprehensive.py
+    
+    - name: Check test results
+      run: |
+        echo "AgentDev CI completed successfully"
+        echo "✅ All AgentDev checks passed"

@@ -34,3 +34,5 @@ Thumbs.db
 *.csv
 *.json
 *.xml
+.coverage
+!_attic/**
