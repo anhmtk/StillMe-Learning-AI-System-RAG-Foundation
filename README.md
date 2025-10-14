@@ -26,24 +26,6 @@ StillMe AI is a comprehensive AI framework with **multiple core modules** across
 - **Security**: 🔄 **In Development** (OWASP compliance planned)
 - **CI/CD**: ✅ **Active** (4 workflows standardized)
 
-### 🧪 AgentDev System
-
-StillMe includes **AgentDev**, a Senior Developer AI system with comprehensive capabilities:
-
-#### Test Results (Current Status)
-![AgentDev Tests](https://img.shields.io/badge/AgentDev%20Tests-1%2F84%20passing-red)
-![AgentDev Coverage](https://img.shields.io/badge/AgentDev%20Coverage-10%25-red)
-![AgentDev Security](https://img.shields.io/badge/AgentDev%20Security-0%25%20pass-red)
-
-**Status**: 🔄 **IN DEVELOPMENT** - Core functionality implemented, testing infrastructure being established.
-
-#### Quality Gates (Target)
-- 🎯 Test Coverage: ≥90% lines, ≥80% branches (target)
-- 🎯 Test Pass Rate: ≥95% (target)
-- 🎯 Performance: P95 E2E < 800ms (target)
-- 🎯 Security: All adversarial tests pass (target)
-- 🎯 Resilience: All chaos tests pass (target)
-- 🎯 Learning: Advanced evolutionary system (target)
 
 ### 🎯 REAL DATA Integration (Latest Update)
 
@@ -328,23 +310,30 @@ python -m stillme_core.framework
 
 ## 🤖 AgentDev System - Senior Developer AI
 
-**AgentDev** is StillMe's virtual Senior Developer AI, designed to think and act like a real senior developer with comprehensive capabilities.
+**AgentDev** is StillMe's virtual Senior Developer AI, designed to think and act like a real senior developer with comprehensive capabilities. It serves as the **Head of Technical Department** with 24/7 monitoring and maintenance duties.
 
 ### 🚀 **Core Features**
 
 #### **Senior Thinking Capabilities**
-- **Impact Analysis**: Analyze impact before coding
-- **Business Thinking**: Evaluate business value and ROI
-- **Security Thinking**: Security-first approach to development
-- **Proactive Cleanup**: Automatic cleanup and optimization
-- **Conflict Resolution**: Intelligent conflict resolution
-- **Experience Learning**: Learn from past experiences
+- **Impact Analysis**: Dependency analysis, performance impact, security risk assessment
+- **Business Thinking**: ROI analysis, market value, strategic alignment
+- **Security Thinking**: Vulnerability detection, security best practices
+- **Cleanup Manager**: Auto cleanup temp files, dead code, duplicates
+- **Conflict Resolver**: Auto resolve import conflicts, code conflicts
+- **Experience Learning**: Learn from past experiences, pattern recognition
 - **Adaptive Strategy**: Context-aware strategy selection
-- **Red Team/Blue Team**: Security simulation and defense learning
+- **Red Team/Blue Team**: Security attack/defense simulation
 
 #### **Operating Modes**
 - `AgentMode.SIMPLE` - Basic task execution
 - `AgentMode.SENIOR` - Senior developer thinking (Main mode)
+
+#### **Integration với StillMe IPC**
+- **Framework Integration**: Tích hợp với `stillme_core/framework.py`
+- **Learning System**: Tích hợp với learning system
+- **Memory System**: Tích hợp với memory system
+- **Security System**: Tích hợp với security system
+- **24/7 Operations**: Continuous monitoring và maintenance
 
 #### **🧪 Test Results (Current Status)**
 - **Total Tests**: 84 tests (target)
@@ -368,6 +357,18 @@ python -m stillme_core.framework
 - **API Management**: REST API design and testing ✅
 - **Architecture Analyzer**: Design pattern recognition ✅
 - **Analytics Dashboard**: Metrics collection and analysis ✅
+
+#### **📁 Key Files & Modules**
+- `agent_dev/core/agentdev.py` - Core AgentDev system
+- `agent_dev/core/impact_analyzer.py` - Impact analysis module
+- `agent_dev/core/business_analyzer.py` - Business thinking module
+- `agent_dev/core/security_analyzer.py` - Security thinking module
+- `agent_dev/core/cleanup_manager.py` - Cleanup management module
+- `agent_dev/core/conflict_resolver.py` - Conflict resolution module
+- `agent_dev/core/experience_learner.py` - Experience learning module
+- `agent_dev/core/adaptive_strategy.py` - Adaptive strategy module
+- `agent_dev/core/red_blue_team_integration.py` - Red Team/Blue Team integration
+- `agent_dev/README.md` - AgentDev documentation
 
 #### **Usage**
 ```python
@@ -661,46 +662,6 @@ python scripts/stillme_control.py discover
 - `stillme_core/alerting/email_notifier.py` - Email notifications
 - `stillme_core/alerting/telegram_notifier.py` - Telegram notifications
 
-### 2025-09-29 - AgentDev Unified Integration Release
-
-**🤖 AgentDev Unified - Trưởng phòng Kỹ thuật StillMe IPC (Completed)**
-- ✅ **Senior Thinking Modules**: Impact Analysis, Business Thinking, Security Thinking, Cleanup Manager, Conflict Resolver
-- ✅ **Learning Modules**: Experience Learner, Adaptive Strategy, Red Team/Blue Team Integration
-- ✅ **Real Code Generation**: Tạo code thật, file thật, validation thực tế
-- ✅ **24/7 Monitoring**: Tuần tra liên tục, giám sát hệ thống StillMe IPC
-- ✅ **Security Learning**: Red Team/Blue Team mô phỏng tấn công/phòng thủ
-- ✅ **Performance Optimization**: ~0.6s thinking time, real execution
-- ✅ **Code Quality**: Pyright=0, Ruff=0, Security Defense integrated
-- ✅ **Type Safety**: Full type checking without # type: ignore
-
-**🚀 Core Features:**
-- ✅ **Impact Analysis**: Dependency analysis, performance impact, security risk assessment
-- ✅ **Business Thinking**: ROI analysis, market value, strategic alignment
-- ✅ **Security Thinking**: Vulnerability detection, security best practices
-- ✅ **Cleanup Manager**: Auto cleanup temp files, dead code, duplicates
-- ✅ **Conflict Resolver**: Auto resolve import conflicts, code conflicts
-- ✅ **Experience Learning**: Learn from past experiences, pattern recognition
-- ✅ **Adaptive Strategy**: Context-aware strategy selection
-- ✅ **Red Team/Blue Team**: Security attack/defense simulation
-
-**🛠️ Integration với StillMe IPC:**
-- ✅ **Framework Integration**: Tích hợp với `stillme_core/framework.py`
-- ✅ **Learning System**: Tích hợp với learning system
-- ✅ **Memory System**: Tích hợp với memory system
-- ✅ **Security System**: Tích hợp với security system
-- ✅ **24/7 Operations**: Continuous monitoring và maintenance
-
-**New Files & Modules:**
-- `agent_dev/core/agentdev.py` - Core AgentDev system
-- `agent-dev/core/impact_analyzer.py` - Impact analysis module
-- `agent-dev/core/business_analyzer.py` - Business thinking module
-- `agent-dev/core/security_analyzer.py` - Security thinking module
-- `agent-dev/core/cleanup_manager.py` - Cleanup management module
-- `agent-dev/core/conflict_resolver.py` - Conflict resolution module
-- `agent-dev/core/experience_learner.py` - Experience learning module
-- `agent-dev/core/adaptive_strategy.py` - Adaptive strategy module
-- `agent-dev/core/red_blue_team_integration.py` - Red Team/Blue Team integration
-- `agent_dev/README.md` - AgentDev documentation
 
 ### 2025-09-27 - Unified Evolutionary Learning System Release
 
