@@ -77,6 +77,53 @@ StillMe IPC now uses **100% REAL DATA** instead of mock data:
 - **Quality Scoring**: Dynamic scoring based on engagement metrics
 - **Notification System**: Multi-channel alerts (Email, Telegram, Dashboard)
 
+## 🚀 Quick Start
+
+### First Run Setup
+
+StillMe AI automatically creates sample configuration files on first run:
+
+```bash
+# Clone the repository
+git clone https://github.com/anhmtk/stillme_ai_ipc.git
+cd stillme_ai_ipc
+
+# Install dependencies
+pip install -e .
+
+# First run creates sample config files automatically
+python -c "from stillme_core.framework import StillMeFramework; print('✅ Framework initialized')"
+```
+
+**What happens on first run:**
+- ✅ Creates `config/` directory with sample files
+- ✅ Generates `.env` from `env.example` 
+- ✅ Sets up development configuration
+- ✅ Enables DRY_RUN mode for safe testing
+
+**Sample files created:**
+- `config/reflection.yaml` - Learning system configuration
+- `config/runtime_base_url.txt` - Runtime server URL
+- `config/env/dev.yaml` - Development environment settings
+- `config/env/prod.yaml` - Production environment settings
+- `config/env/staging.yaml` - Staging environment settings
+- `.env` - Environment variables (from `env.example`)
+
+**Next steps:**
+1. Review and edit the generated config files as needed
+2. Set your API keys in `.env` (optional for DRY_RUN mode)
+3. Run tests: `pytest -q -k "smoke"`
+4. Start development: `python -m stillme_core.framework`
+
+### Configuration
+
+The framework uses a comprehensive configuration system:
+
+- **Environment Variables**: Set in `.env` file (see `env.example`)
+- **YAML Configs**: Environment-specific settings in `config/env/`
+- **Runtime Config**: Dynamic configuration via `config/runtime_base_url.txt`
+- **Bootstrap System**: Auto-creates missing config files with safe defaults
+
 ## 🏗️ Architecture Overview
 
 StillMe AI follows a modular architecture with comprehensive components:
@@ -571,62 +618,10 @@ python scripts/stillme_control.py discover
 * ✅ **Phase 1**: Read-only learning MVP (discovery → scoring → approval → ingest)
 * ✅ **Phase 2**: Interactive Dashboard & Background Automation System
 * 🔄 **Phase 3**: Self-quiz, consistency checking, and unlearning
-* 🎯 **Phase 4**: Unified Learning Architecture (Community Idea)
-
-### 🧠 **Phase 4: Unified Learning Architecture** (Community Contribution)
-
-**Concept**: Centralized knowledge learning with intelligent distribution to specialized modules.
-
-**Current Architecture**:
-```
-StillMe Learning ←→ User (conversation patterns)
-AgentDev Learning ←→ Developers (code feedback)
-```
-
-**Proposed Architecture**:
-```
-📚 StillMe Learning (Master)
-    ↓ (intelligent knowledge distribution)
-🤖 AgentDev Learning (Specialized)
-    ↓ (applied knowledge)
-💻 Development Tasks
-```
-
-**Benefits**:
-- **Centralized Learning**: All knowledge flows through StillMe
-- **Intelligent Distribution**: Knowledge filtered and optimized for each module
-- **Cross-pollination**: Knowledge sharing between specialized systems
-- **Unified Knowledge Base**: Single source of truth for all learning
-
-**Implementation Ideas**:
-- Knowledge classification system (technical, conversational, procedural)
-- Intelligent routing based on knowledge type and context
-- Specialized learning adapters for different modules
-- Cross-module knowledge sharing protocols
-
-**Community Input Welcome**: This is an open concept for community discussion and improvement!
-
-### 💡 **Community Ideas & Contributions**
-
-**We welcome community input on:**
-- **Architecture improvements** like the Unified Learning concept above
-- **Implementation approaches** for complex features
-- **Performance optimizations** and scalability solutions
-- **Security enhancements** and best practices
-- **User experience** improvements and accessibility
-- **Documentation** and educational content
-
-**How to contribute:**
-1. **Open an issue** with your idea or suggestion
-2. **Create a discussion** for architectural concepts
-3. **Submit a PR** for implementation improvements
-4. **Share feedback** on existing features
-
-**Future Enhancements**:
-* 🔄 **Controlled adaptation** with LoRA fine-tuning
-* **Test coverage** to ≥85% lines / ≥80% branches
-* **Open ethics/security runners** (keep sensitive patterns private)
-* **Community-driven documentation** improvements
+* 🔄 **Phase 4**: Controlled adaptation with LoRA fine-tuning
+* Increase test coverage to ≥85% lines / ≥80% branches
+* Expand open ethics/security runners (keep sensitive patterns private)
+* Iterate on documentation with community help
 
 ## Changelog
 
