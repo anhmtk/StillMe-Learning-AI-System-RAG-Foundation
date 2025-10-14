@@ -10,7 +10,16 @@ PURPOSE / MỤC ĐÍCH:
 - Điều phối tất cả 9 core modules với dependency injection
 - Provides unified API for AI operations
 - Cung cấp API thống nhất cho các thao tác AI
+"""
 
+# Config bootstrap - chạy sớm để đảm bảo config files tồn tại
+try:
+    from stillme_core.config_bootstrap import ensure_minimum_config
+    ensure_minimum_config()
+except Exception as e:
+    print("Config bootstrap note:", e)
+
+"""
 FUNCTIONALITY / CHỨC NĂNG:
 - Module loading and initialization
 - Tải và khởi tạo modules
@@ -75,9 +84,6 @@ RELATED FILES / FILES LIÊN QUAN:
 📖 DETAILED DOCUMENTATION:
 - PROJECT_OVERVIEW.md - Complete project overview
 - QUICK_REFERENCE.md - Quick reference card
-
-🎉 This is a WORLD-CLASS AI Framework ready for production!
-"""
 
 import asyncio
 import importlib.util
