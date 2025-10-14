@@ -14,6 +14,7 @@ Tính năng:
 8. Learning Integration - Tích hợp học hỏi
 """
 
+from typing import TYPE_CHECKING
 import hashlib
 import json
 import time
@@ -125,7 +126,7 @@ class AdaptiveStrategyResult:
 class AdaptiveStrategy:
     """Senior Developer Adaptive Strategy"""
 
-    def __init__(self, project_root: str = "."):
+    def __init__(self, project_root: str = ".") -> None:
         self.project_root = Path(project_root)
         self.strategies_db = self.project_root / "data" / "adaptive_strategies.json"
         self.results_db = self.project_root / "data" / "strategy_results.json"
@@ -192,7 +193,7 @@ class AdaptiveStrategy:
             print(f"Error loading strategy results: {e}")
             return []
 
-    def _save_strategies(self):
+    def _save_strategies(self) -> None:
         """Save strategies to database"""
         try:
             data: list[dict[str, Any]] = []
@@ -207,7 +208,7 @@ class AdaptiveStrategy:
         except Exception as e:
             print(f"Error saving strategies: {e}")
 
-    def _save_strategy_results(self):
+    def _save_strategy_results(self) -> None:
         """Save strategy results to database"""
         try:
             data: list[dict[str, Any]] = []
@@ -221,7 +222,7 @@ class AdaptiveStrategy:
         except Exception as e:
             print(f"Error saving strategy results: {e}")
 
-    def _initialize_default_strategies(self):
+    def _initialize_default_strategies(self) -> None:
         """Initialize default strategies"""
         default_strategies = [
             Strategy(

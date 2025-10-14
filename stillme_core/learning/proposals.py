@@ -17,6 +17,7 @@ Version: 1.0.0
 Date: 2025-09-28
 """
 
+from typing import TYPE_CHECKING
 import json
 import logging
 import sqlite3
@@ -114,12 +115,12 @@ class LearningProposal:
 class LearningProposalsManager:
     """Quản lý đề xuất học tập"""
 
-    def __init__(self, db_path: str = "data/learning/proposals.db"):
+    def __init__(self, db_path: str = "data/learning/proposals.db") -> None:
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_database()
 
-    def _init_database(self):
+    def _init_database(self) -> None:
         """Khởi tạo database"""
         with sqlite3.connect(self.db_path) as conn:
             conn.execute("""
