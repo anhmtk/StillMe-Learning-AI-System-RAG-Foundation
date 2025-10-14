@@ -1,0 +1,37 @@
+name: Costs Report
+
+on:
+  schedule:
+    - cron: "0 7 * * MON"   # mỗi Thứ Hai 14:00 ICT
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Generate COSTS.md
+        run: |
+          python scripts/gen_costs_report.py
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          title: "chore(docs): update COSTS.md (weekly)"
+          commit-message: "chore(docs): update COSTS.md (weekly)"
+          branch: "bot/update-costs-md"
+          base: "main"
+          delete-branch: true
+          add-paths: |
+            reports/COSTS.md
