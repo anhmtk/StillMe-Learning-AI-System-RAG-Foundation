@@ -10,5 +10,5 @@ paths = [
 ]
 
 regexes = [
-  '''FAKE|DUMMY|PLACEHOLDER|EXAMPLE_KEY'''
+  '''FAKE|DUMMY|PLACEHOLDER|EXAMPLE_KEY|sk-xxxx|sk-dev-xxxx|sk-or-dev-xxxx|test_key_for_testing_purposes_only'''
 ]
