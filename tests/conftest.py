@@ -5,15 +5,31 @@ Standardized test infrastructure for AgentDev
 
 import os
 import random
+import sys
 import tempfile
+from pathlib import Path
 
 import numpy as np
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
+# Add project root to path for imports
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+# Set DRY_RUN mode for safe imports
+os.environ.setdefault("STILLME_DRY_RUN", "1")
+
 # Quan trọng: import models để đăng ký vào metadata
-from agent_dev.persistence.models import Base  # noqa: F401
+try:
+    from agent_dev.persistence.models import Base  # noqa: F401
+except ImportError:
+    # Fallback if agent_dev not available
+    from sqlalchemy.orm import declarative_base
+
+    Base = declarative_base()
 
 
 @pytest.fixture(scope="session")
