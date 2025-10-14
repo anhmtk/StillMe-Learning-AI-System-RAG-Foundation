@@ -6,8 +6,16 @@ from datetime import datetime
 from enum import Enum
 from typing import Any
 
-import httpx  # Sử dụng httpx thay vì aiohttp để thống nhất với các module khác nếu có, hoặc dùng aiohttp nếu được yêu cầu cụ thể
 from dotenv import load_dotenv
+
+# Lazy import for heavy modules
+def _get_httpx():
+    """Lazy import for httpx"""
+    try:
+        import httpx
+        return httpx
+    except ImportError:
+        return None
 
 # Load biến môi trường từ file .env
 load_dotenv()
@@ -146,6 +154,9 @@ class OpenRouterClient:
             raise ValueError(
                 "OPENROUTER_API_KEY không được tìm thấy. Vui lòng thiết lập biến môi trường."
             )
+        httpx = _get_httpx()
+        if httpx is None:
+            raise ImportError("httpx is required but not available")
         self.client = httpx.AsyncClient(
             headers={
                 "Authorization": f"Bearer {api_key}",
@@ -180,14 +191,13 @@ class OpenRouterClient:
             response.raise_for_status()
             data = response.json()
             return data["choices"][0]["message"]["content"]
-        except httpx.HTTPStatusError as e:
-            logger.error(
-                f"OpenRouter API HTTP Error ({e.response.status_code}): {e.response.text}"
-            )
-            raise
-        except httpx.RequestError as e:
-            logger.error(f"OpenRouter API Network Error: {e}")
-            raise
+        except Exception as e:
+            if "httpx" in str(type(e)):
+                logger.error(f"OpenRouter API HTTP Error: {e}")
+                raise
+            else:
+                logger.error(f"OpenRouter API Request Error: {e}")
+                raise
         except (KeyError, IndexError, json.JSONDecodeError) as e:
             logger.error(
                 f"OpenRouter API Response Parse Error: {e} - Raw: {response.text if 'response' in locals() else 'No response'}"
