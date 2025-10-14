@@ -1,0 +1,48 @@
+# Staging Environment Configuration
+environment: staging
+debug: true
+log_level: INFO
+
+# Server Configuration
+server:
+  host: 0.0.0.0
+  port: 8080
+  workers: 2
+
+# Database Configuration
+database:
+  type: sqlite
+  path: /app/data/staging.db
+  pool_size: 10
+
+# AgentDev Configuration
+agentdev:
+  mode: SENIOR
+  thinking_enabled: true
+  learning_enabled: true
+  max_iterations: 15
+
+# Security Configuration
+security:
+  enable_auth: true
+  rate_limit: 500
+  cors_origins: ["https://staging.stillme.ai"]
+
+# Monitoring
+monitoring:
+  enabled: true
+  metrics_port: 9090
+  health_check_interval: 30
+
+# Features
+features:
+  analytics: true
+  collaboration: true
+  documentation: true
+  debugging: true
+
+# SLO Configuration
+slo:
+  p95_latency_ms: 500
+  error_rate_percent: 1.0
+  availability_percent: 99.9

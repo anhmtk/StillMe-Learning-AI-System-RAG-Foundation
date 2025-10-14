@@ -1,0 +1,42 @@
+# Development Environment Configuration
+environment: development
+debug: true
+log_level: DEBUG
+
+# Server Configuration
+server:
+  host: localhost
+  port: 8080
+  workers: 1
+
+# Database Configuration
+database:
+  type: sqlite
+  path: ./data/dev.db
+  pool_size: 5
+
+# AgentDev Configuration
+agentdev:
+  mode: SENIOR
+  thinking_enabled: true
+  learning_enabled: true
+  max_iterations: 10
+
+# Security Configuration
+security:
+  enable_auth: false
+  rate_limit: 1000
+  cors_origins: ["*"]
+
+# Monitoring
+monitoring:
+  enabled: true
+  metrics_port: 9090
+  health_check_interval: 30
+
+# Features
+features:
+  analytics: true
+  collaboration: true
+  documentation: true
+  debugging: true
