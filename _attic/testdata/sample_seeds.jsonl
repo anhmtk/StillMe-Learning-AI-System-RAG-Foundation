@@ -1,0 +1,76 @@
+{"text": "Xin chào, hôm nay thế nào?", "type": "greeting", "language": "vi", "category": "persona"}
+{"text": "Hello, how are you today?", "type": "greeting", "language": "en", "category": "persona"}
+{"text": "Tôi muốn học lập trình Python", "type": "request", "language": "vi", "category": "coding"}
+{"text": "How can I learn machine learning?", "type": "request", "language": "en", "category": "coding"}
+{"text": "Cảm ơn bạn rất nhiều", "type": "gratitude", "language": "vi", "category": "persona"}
+{"text": "Thank you very much", "type": "gratitude", "language": "en", "category": "persona"}
+{"text": "Làm thế nào để tối ưu hóa database?", "type": "question", "language": "vi", "category": "technical"}
+{"text": "What is the best way to optimize performance?", "type": "question", "language": "en", "category": "technical"}
+{"text": "Tôi cảm thấy buồn hôm nay", "type": "emotion", "language": "vi", "category": "emotion"}
+{"text": "I feel sad today", "type": "emotion", "language": "en", "category": "emotion"}
+{"text": "Chúc mừng sinh nhật bạn!", "type": "celebration", "language": "vi", "category": "persona"}
+{"text": "Happy birthday to you!", "type": "celebration", "language": "en", "category": "persona"}
+{"text": "Bạn có thể giúp tôi debug code không?", "type": "help_request", "language": "vi", "category": "coding"}
+{"text": "Can you help me debug this code?", "type": "help_request", "language": "en", "category": "coding"}
+{"text": "Tôi đang học tiếng Anh", "type": "learning", "language": "vi", "category": "education"}
+{"text": "I am learning Vietnamese", "type": "learning", "language": "en", "category": "education"}
+{"text": "Hôm nay thời tiết đẹp quá", "type": "observation", "language": "vi", "category": "casual"}
+{"text": "The weather is beautiful today", "type": "observation", "language": "en", "category": "casual"}
+{"text": "Tôi muốn tìm hiểu về AI", "type": "interest", "language": "vi", "category": "technology"}
+{"text": "I want to learn about artificial intelligence", "type": "interest", "language": "en", "category": "technology"}
+{"text": "Bạn nghĩ gì về công nghệ blockchain?", "type": "opinion_request", "language": "vi", "category": "technology"}
+{"text": "What do you think about blockchain technology?", "type": "opinion_request", "language": "en", "category": "technology"}
+{"text": "Tôi cần lời khuyên về sự nghiệp", "type": "advice_request", "language": "vi", "category": "career"}
+{"text": "I need career advice", "type": "advice_request", "language": "en", "category": "career"}
+{"text": "Cảm ơn bạn đã giúp đỡ", "type": "gratitude", "language": "vi", "category": "persona"}
+{"text": "Thank you for your help", "type": "gratitude", "language": "en", "category": "persona"}
+{"text": "Tôi đang tìm kiếm công việc mới", "type": "job_search", "language": "vi", "category": "career"}
+{"text": "I am looking for a new job", "type": "job_search", "language": "en", "category": "career"}
+{"text": "Bạn có thể giải thích thuật toán này không?", "type": "explanation_request", "language": "vi", "category": "technical"}
+{"text": "Can you explain this algorithm?", "type": "explanation_request", "language": "en", "category": "technical"}
+{"text": "Tôi muốn cải thiện kỹ năng giao tiếp", "type": "skill_improvement", "language": "vi", "category": "personal_development"}
+{"text": "I want to improve my communication skills", "type": "skill_improvement", "language": "en", "category": "personal_development"}
+{"text": "Hôm nay tôi có cuộc họp quan trọng", "type": "sharing", "language": "vi", "category": "work"}
+{"text": "I have an important meeting today", "type": "sharing", "language": "en", "category": "work"}
+{"text": "Bạn có thể recommend sách hay không?", "type": "recommendation_request", "language": "vi", "category": "education"}
+{"text": "Can you recommend some good books?", "type": "recommendation_request", "language": "en", "category": "education"}
+{"text": "Tôi đang stress về deadline", "type": "stress_sharing", "language": "vi", "category": "emotion"}
+{"text": "I am stressed about the deadline", "type": "stress_sharing", "language": "en", "category": "emotion"}
+{"text": "Làm thế nào để quản lý thời gian hiệu quả?", "type": "productivity_question", "language": "vi", "category": "productivity"}
+{"text": "How to manage time effectively?", "type": "productivity_question", "language": "en", "category": "productivity"}
+{"text": "Tôi muốn học nấu ăn", "type": "hobby_interest", "language": "vi", "category": "lifestyle"}
+{"text": "I want to learn cooking", "type": "hobby_interest", "language": "en", "category": "lifestyle"}
+{"text": "Bạn có thể hướng dẫn tôi setup môi trường dev không?", "type": "setup_help", "language": "vi", "category": "coding"}
+{"text": "Can you guide me to setup a dev environment?", "type": "setup_help", "language": "en", "category": "coding"}
+{"text": "Tôi đang suy nghĩ về việc chuyển nghề", "type": "career_contemplation", "language": "vi", "category": "career"}
+{"text": "I am thinking about changing careers", "type": "career_contemplation", "language": "en", "category": "career"}
+{"text": "Cảm ơn bạn đã lắng nghe", "type": "gratitude", "language": "vi", "category": "persona"}
+{"text": "Thank you for listening", "type": "gratitude", "language": "en", "category": "persona"}
+{"text": "Tôi muốn tìm hiểu về startup", "type": "business_interest", "language": "vi", "category": "business"}
+{"text": "I want to learn about startups", "type": "business_interest", "language": "en", "category": "business"}
+{"text": "Bạn có thể giúp tôi viết CV không?", "type": "cv_help", "language": "vi", "category": "career"}
+{"text": "Can you help me write a resume?", "type": "cv_help", "language": "en", "category": "career"}
+{"text": "Tôi đang học React Native", "type": "learning", "language": "vi", "category": "coding"}
+{"text": "I am learning React Native", "type": "learning", "language": "en", "category": "coding"}
+{"text": "Hôm nay tôi cảm thấy rất vui", "type": "emotion", "language": "vi", "category": "emotion"}
+{"text": "I feel very happy today", "type": "emotion", "language": "en", "category": "emotion"}
+{"text": "Bạn có thể giải thích về cloud computing không?", "type": "tech_explanation", "language": "vi", "category": "technology"}
+{"text": "Can you explain cloud computing?", "type": "tech_explanation", "language": "en", "category": "technology"}
+{"text": "Tôi muốn học thiết kế UI/UX", "type": "design_interest", "language": "vi", "category": "design"}
+{"text": "I want to learn UI/UX design", "type": "design_interest", "language": "en", "category": "design"}
+{"text": "Cảm ơn bạn đã chia sẻ kinh nghiệm", "type": "gratitude", "language": "vi", "category": "persona"}
+{"text": "Thank you for sharing your experience", "type": "gratitude", "language": "en", "category": "persona"}
+{"text": "Tôi đang tìm hiểu về DevOps", "type": "learning", "language": "vi", "category": "technology"}
+{"text": "I am learning about DevOps", "type": "learning", "language": "en", "category": "technology"}
+{"text": "Bạn có thể recommend công cụ quản lý dự án không?", "type": "tool_recommendation", "language": "vi", "category": "productivity"}
+{"text": "Can you recommend project management tools?", "type": "tool_recommendation", "language": "en", "category": "productivity"}
+{"text": "Tôi muốn cải thiện kỹ năng leadership", "type": "leadership_development", "language": "vi", "category": "personal_development"}
+{"text": "I want to improve my leadership skills", "type": "leadership_development", "language": "en", "category": "personal_development"}
+{"text": "Hôm nay tôi có presentation quan trọng", "type": "work_sharing", "language": "vi", "category": "work"}
+{"text": "I have an important presentation today", "type": "work_sharing", "language": "en", "category": "work"}
+{"text": "Bạn có thể hướng dẫn tôi học data science không?", "type": "learning_guidance", "language": "vi", "category": "education"}
+{"text": "Can you guide me to learn data science?", "type": "learning_guidance", "language": "en", "category": "education"}
+{"text": "Tôi đang suy nghĩ về việc học thêm bằng cấp", "type": "education_contemplation", "language": "vi", "category": "education"}
+{"text": "I am thinking about getting additional degrees", "type": "education_contemplation", "language": "en", "category": "education"}
+{"text": "Cảm ơn bạn đã động viên tôi", "type": "gratitude", "language": "vi", "category": "persona"}
+{"text": "Thank you for encouraging me", "type": "gratitude", "language": "en", "category": "persona"}
