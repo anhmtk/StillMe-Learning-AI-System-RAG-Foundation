@@ -102,7 +102,6 @@ class TestNicheRadarE2E:
         logger.info("🧪 Testing niche scoring...")
 
         # Create mock records for testing
-        from datetime import datetime
 
         from niche_radar.collectors import NicheRecord
 
@@ -153,7 +152,6 @@ class TestNicheRadarE2E:
         logger.info("🧪 Testing playbook generation...")
 
         # Create mock niche score
-        from datetime import datetime
 
         from niche_radar.scoring import NicheScore
 
@@ -214,9 +212,7 @@ class TestNicheRadarE2E:
         logger.info("🧪 Testing Top 10 report generation...")
 
         # Create mock niche scores
-        from datetime import datetime
 
-        from niche_radar.scoring import NicheScore
 
         mock_scores = [
             NicheScore(
@@ -271,9 +267,7 @@ class TestNicheRadarE2E:
         logger.info("🧪 Testing attribution requirements...")
 
         # This test ensures every niche result has proper attribution
-        from datetime import datetime
 
-        from niche_radar.collectors import NicheRecord
 
         mock_record = NicheRecord(
             source="GitHub",
@@ -431,7 +425,6 @@ async def test_full_pipeline():
 
 if __name__ == "__main__":
     # Run tests
-    import logging
 
     logging.basicConfig(level=logging.INFO)
 

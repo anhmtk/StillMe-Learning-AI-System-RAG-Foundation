@@ -241,7 +241,6 @@ class TestRouterPerformance:
 
     def test_router_throughput(self):
         """Test router throughput."""
-        import time
 
         router = Router({})
         requests = [{"prompt": f"Request {i}"} for i in range(100)]

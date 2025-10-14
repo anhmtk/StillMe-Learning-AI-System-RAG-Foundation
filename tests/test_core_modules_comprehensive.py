@@ -20,7 +20,6 @@ import json
 import tempfile
 from pathlib import Path
 
-import pytest
 
 from stillme_core.control.kill_switch import KillSwitch
 from stillme_core.control.learning_rollback import LearningRollback
@@ -38,15 +37,12 @@ from unittest.mock import MagicMock
 
 # Mock classes since they're not available in stillme_core
 CollaborativeLearning = MagicMock
-from unittest.mock import MagicMock
 
 # Mock classes since they're not available in stillme_core
 LearningMetricsCollector = MagicMock
-from unittest.mock import MagicMock
 
 # Mock classes since they're not available in stillme_core
 MetaLearningManager = MagicMock
-from unittest.mock import MagicMock
 
 # Mock classes since they're not available in stillme_core
 RewardManager = MagicMock

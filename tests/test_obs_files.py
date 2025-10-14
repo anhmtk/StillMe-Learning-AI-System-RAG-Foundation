@@ -248,7 +248,6 @@ class TestMetrics:
 
     def test_convenience_functions(self, tmp_path):
         """Test convenience functions"""
-        import os
 
         os.chdir(tmp_path)
 

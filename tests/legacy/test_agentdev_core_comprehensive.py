@@ -188,7 +188,6 @@ class TestAgentMode:
             pytest.skip("AgentDev not available")
 
         # Test mode switching
-        from agent_dev.core.agentdev import AgentDev
 
         agent = AgentDev(mode="safe")
         assert agent.mode == "safe"

@@ -842,7 +842,6 @@ class TestAuditIntegration:
 
     def test_performance_large_workflow(self, full_audit_system):
         """Test performance with large number of events"""
-        import time
 
         # Log many events
         start_time = time.time()

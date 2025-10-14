@@ -379,7 +379,6 @@ class ProactiveAbuseGuard:
                 entropy -= probability * math.log2(probability)
 
         # Normalize entropy (0-1, lower = more repetitive)
-        import math
 
         max_entropy = math.log2(len(char_counts)) if len(char_counts) > 0 else 0
         normalized_entropy = entropy / max_entropy if max_entropy > 0 else 0

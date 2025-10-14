@@ -22,7 +22,6 @@ def test_auto_falls_back_when_pro_absent(monkeypatch):
     # Ensure private module not present
     sys.modules.pop("stillme_private", None)
     sys.modules.pop("stillme_private.plugin", None)
-    from stillme_core.router_loader import load_router
 
     r = load_router()
     m = r.choose_model("hello")
@@ -34,7 +33,6 @@ def test_force_pro_but_missing(monkeypatch, capsys):
     """Test that forcing pro mode falls back to stub when Pro is not available."""
     monkeypatch.setenv("STILLME_ROUTER_MODE", "pro")
     sys.modules.pop("stillme_private", None)
-    from stillme_core.router_loader import load_router
 
     r = load_router()  # should fall back to Stub
     m = r.choose_model("hello")
@@ -67,7 +65,6 @@ def test_stub_router_heuristics():
 
 def test_empty_prompt():
     """Test handling of empty or None prompts."""
-    from plugins.private_stub.plugin import StubRouter
 
     router = StubRouter()
 

@@ -193,7 +193,6 @@ class TestStructuredLogger:
         logger.setLevel(logging.INFO)
 
         # Capture log output
-        import io
 
         log_capture = io.StringIO()
         handler = logging.StreamHandler(log_capture)

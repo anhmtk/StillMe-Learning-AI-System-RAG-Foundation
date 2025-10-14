@@ -55,21 +55,14 @@ if TYPE_CHECKING:
 
 # Runtime imports with fallback
 try:
-    from .security_middleware import SecurityMiddleware
 except ImportError:
     SecurityMiddleware = None
 
 try:
-    from .performance_monitor import PerformanceMonitor
 except ImportError:
     PerformanceMonitor = None
 
 try:
-    from .final_validation_system import FinalValidationSystem
-    from .integration_bridge import IntegrationBridge
-    from .memory_security_integration import MemorySecurityIntegration
-    from .module_governance_system import ModuleGovernanceSystem
-    from .validation_framework import ComprehensiveValidationFramework
 except ImportError:
     FinalValidationSystem = None
     IntegrationBridge = None
@@ -78,33 +71,26 @@ except ImportError:
     ComprehensiveValidationFramework = None
 
 try:
-    from stillme_core.security_middleware import (
         SecurityMiddleware as CoreSecurityMiddleware,
     )
 except ImportError:
     CoreSecurityMiddleware = None
 
 try:
-    from stillme_core.performance_monitor import (
         PerformanceMonitor as CorePerformanceMonitor,
     )
 except ImportError:
     CorePerformanceMonitor = None
 
 try:
-    from stillme_core.final_validation_system import (
         FinalValidationSystem as CoreFinalValidationSystem,
     )
-    from stillme_core.integration_bridge import (
         IntegrationBridge as CoreIntegrationBridge,
     )
-    from stillme_core.memory_security_integration import (
         MemorySecurityIntegration as CoreMemorySecurityIntegration,
     )
-    from stillme_core.module_governance_system import (
         ModuleGovernanceSystem as CoreModuleGovernanceSystem,
     )
-    from stillme_core.validation_framework import (
         ComprehensiveValidationFramework as CoreComprehensiveValidationFramework,
     )
 except ImportError:

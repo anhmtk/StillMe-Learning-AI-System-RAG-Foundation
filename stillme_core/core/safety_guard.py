@@ -147,7 +147,6 @@ def classify(text: str) -> str | None:
     """Classify text using INTELLIGENT SEMANTIC ANALYSIS"""
 
     # B1) Normalize input
-    import unicodedata
 
     text_norm = unicodedata.normalize("NFKC", text)
     text_norm = re.sub(

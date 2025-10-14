@@ -31,7 +31,6 @@ def test_dev_agent_fast():
 
 def test_dev_agent_safe():
     """Test dev-agent safe mode"""
-    from api_server import AgentMode, DevAgentRequest, DevAgentResponse
 
     # Test request model with params
     request = DevAgentRequest(

@@ -568,7 +568,6 @@ class LocalTester:
         start_time = time.time()
         
         try:
-            import requests
             
             # Test multiple requests
             response_times = []
