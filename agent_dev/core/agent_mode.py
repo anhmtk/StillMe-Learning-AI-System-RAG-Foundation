@@ -3,6 +3,7 @@
 AgentMode - MINIMAL CONTRACT derived from tests/usages
 """
 
+from typing import TYPE_CHECKING
 from enum import Enum
 
 

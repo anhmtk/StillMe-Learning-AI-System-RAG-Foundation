@@ -3,6 +3,7 @@
 Approval System - Stub implementation
 """
 
+from typing import TYPE_CHECKING
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any
@@ -53,7 +54,7 @@ class ApprovalRequest:
 class ApprovalSystem:
     """Approval system stub implementation"""
 
-    def __init__(self, config: ApprovalConfig = None):
+    def __init__(self, config: ApprovalConfig = None) -> None:
         self.config = config or ApprovalConfig()
         self.requests: list[ApprovalRequest] = []
 

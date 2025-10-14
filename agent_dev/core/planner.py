@@ -3,6 +3,7 @@
 AgentDev Planner - Tạo execution plans
 """
 
+from typing import TYPE_CHECKING
 from dataclasses import dataclass
 from typing import Any
 
