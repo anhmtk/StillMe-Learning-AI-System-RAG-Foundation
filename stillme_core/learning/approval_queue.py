@@ -3,6 +3,7 @@
 Approval Queue - Stub implementation
 """
 
+from typing import TYPE_CHECKING
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any
@@ -27,7 +28,7 @@ class ApprovalRequest:
 class ApprovalQueue:
     """Approval queue stub implementation"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.requests: list[ApprovalRequest] = []
 
     def add_request(self, content: str, metadata: dict[str, Any] = None) -> str:
@@ -70,7 +71,7 @@ class ApprovalQueue:
 class ApprovalQueueManager:
     """Approval queue manager stub implementation"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.queue = ApprovalQueue()
 
     async def add_approval_request(

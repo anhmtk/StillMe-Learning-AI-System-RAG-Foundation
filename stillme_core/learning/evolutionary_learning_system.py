@@ -4,6 +4,7 @@ StillMe IPC Evolutionary Learning System
 Hệ thống học tập tiến hóa với real learning sessions và progress tracking
 """
 
+from typing import TYPE_CHECKING
 import logging
 import threading
 import time
@@ -18,8 +19,10 @@ import sys
 project_root = Path(__file__).resolve().parents[2]
 sys.path.append(str(project_root))
 
-from stillme_core.learning.proposals_manager import ProposalsManager
-from stillme_core.alerting.alerting_system import AlertingSystem
+if TYPE_CHECKING:
+    from stillme_core.learning.proposals_manager import ProposalsManager
+if TYPE_CHECKING:
+    from stillme_core.alerting.alerting_system import AlertingSystem
 
 # Configure logging
 logging.basicConfig(
@@ -31,7 +34,7 @@ logger = logging.getLogger(__name__)
 class EvolutionaryLearningSystem:
     """Hệ thống học tập tiến hóa với real learning sessions"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.proposals_manager = ProposalsManager()
         self.alerting_system = AlertingSystem()
         self.active_sessions = {}  # session_id -> session_data
@@ -95,7 +98,7 @@ class EvolutionaryLearningSystem:
             logger.error(f"❌ Failed to start learning session: {e}")
             return None
 
-    def _start_learning_thread(self, session_id: str):
+    def _start_learning_thread(self, session_id: str) -> None:
         """Bắt đầu thread học tập"""
 
         def learning_worker():
@@ -121,7 +124,7 @@ class EvolutionaryLearningSystem:
         self.learning_threads[session_id] = thread
         thread.start()
 
-    def _simulate_real_learning(self, session_id: str):
+    def _simulate_real_learning(self, session_id: str) -> None:
         """Mô phỏng quá trình học thật (sau này thay bằng logic thật)"""
         session_data = self.active_sessions[session_id]
         objectives = session_data["objectives"]
@@ -178,7 +181,7 @@ class EvolutionaryLearningSystem:
         session_data["status"] = "completed"
         self._complete_session(session_id, "completed")
 
-    def _update_session_progress(self, session_id: str):
+    def _update_session_progress(self, session_id: str) -> None:
         """Cập nhật tiến độ vào database"""
         try:
             session_data = self.active_sessions.get(session_id)
@@ -220,7 +223,7 @@ class EvolutionaryLearningSystem:
         except Exception as e:
             logger.error(f"❌ Failed to update session progress: {e}")
 
-    def _complete_session(self, session_id: str, status: str):
+    def _complete_session(self, session_id: str, status: str) -> None:
         """Hoàn thành session học"""
         try:
             session_data = self.active_sessions.get(session_id)

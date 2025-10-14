@@ -6,7 +6,7 @@ Generated at: 2025-09-29 23:40:22
 """
 
 
-def test_basic():
+def test_basic() -> None:
     """Basic test function"""
     assert True, "Basic test should pass"
 

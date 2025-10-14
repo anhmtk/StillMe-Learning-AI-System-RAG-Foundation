@@ -7,12 +7,14 @@ PEP 562 compatibility shim for agent_dev.security.defense
 Re-exports dynamic imports without using * or # noqa
 """
 
+from typing import TYPE_CHECKING
 import sys
 from typing import Any
 
 # Import the actual security defense module
 try:
-    from agent_dev.security.defense import *
+    if TYPE_CHECKING:
+        from agent_dev.security.defense import *
 
     _security_module = sys.modules["agent_dev.security.defense"]
 except ImportError:
