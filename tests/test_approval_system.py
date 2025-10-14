@@ -421,7 +421,6 @@ class TestIntegration:
     @pytest.mark.asyncio
     async def test_approval_with_evolutionary_system(self, temp_db):
         """Test approval system integration with evolutionary learning"""
-        from unittest.mock import MagicMock
 
         # Mock classes since they're not available in stillme_core
         EvolutionaryConfig = MagicMock

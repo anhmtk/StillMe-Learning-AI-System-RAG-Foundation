@@ -600,7 +600,6 @@ def export_data():
 
     def test_memory_leak_prevention(self) -> bool:
         """Test: 10k requests in 10 minutes → no memory leak"""
-        import os
 
         import psutil
 

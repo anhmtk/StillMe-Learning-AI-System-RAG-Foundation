@@ -596,7 +596,6 @@ def test_routing_system():
             for test in test_requests:
                 try:
                     # Create context
-                    from ...router.intelligent_router import RequestContext
 
                     context = RequestContext(
                         user_id="test_user",

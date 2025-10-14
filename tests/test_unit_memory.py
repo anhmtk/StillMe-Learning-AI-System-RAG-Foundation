@@ -342,7 +342,6 @@ class TestMemoryPerformance:
 
     def test_memory_store_performance(self):
         """Test memory store performance."""
-        import time
 
         manager = MemoryManager({})
 
@@ -356,7 +355,6 @@ class TestMemoryPerformance:
 
     def test_memory_retrieve_performance(self):
         """Test memory retrieve performance."""
-        import time
 
         manager = MemoryManager({})
 

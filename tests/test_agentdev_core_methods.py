@@ -29,7 +29,6 @@ def test_log_method():
 
 def test_run_ruff_scan():
     """Test _run_ruff_scan method"""
-    from agent_dev.core.agentdev import AgentDev
 
     agent = AgentDev()
 
@@ -54,7 +53,6 @@ def test_create_backup():
     """Test _create_backup method"""
     import tempfile
 
-    from agent_dev.core.agentdev import AgentDev
 
     # Create temporary directory
     with tempfile.TemporaryDirectory() as temp_dir:
@@ -78,9 +76,7 @@ def test_create_backup():
 
 def test_rollback():
     """Test _rollback method"""
-    import tempfile
 
-    from agent_dev.core.agentdev import AgentDev
 
     with tempfile.TemporaryDirectory() as temp_dir:
         # Create test file
@@ -105,7 +101,6 @@ def test_rollback():
 
 def test_scan_errors():
     """Test scan_errors method"""
-    from agent_dev.core.agentdev import AgentDev
 
     agent = AgentDev()
 

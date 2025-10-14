@@ -153,8 +153,6 @@ class APIConsistencyChecker:
 
         # Check Verifier classes have required methods
         try:
-            from stillme_core.core.verifier import Verifier as VerifierNew
-            from stillme_core.verifier import LegacyVerifier as VerifierOld
 
             required_methods = ["verify", "verify_test_results"]
 

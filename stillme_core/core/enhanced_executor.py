@@ -281,7 +281,6 @@ class EnhancedExecutor:
 
     def _parse_unittest_output(self, output: str) -> tuple[int, int, int, int]:
         """Parse unittest output to extract test counts"""
-        import re
 
         # Look for summary line
         summary_pattern = r"Ran (\d+) tests? in [\d.]+s"
@@ -303,7 +302,6 @@ class EnhancedExecutor:
 
     def _parse_doctest_output(self, output: str) -> tuple[int, int, int, int]:
         """Parse doctest output to extract test counts"""
-        import re
 
         # Look for summary line
         summary_pattern = r"(\d+) tests? in (\d+) items?"
@@ -325,7 +323,6 @@ class EnhancedExecutor:
 
     def _parse_nose_output(self, output: str) -> tuple[int, int, int, int]:
         """Parse nose output to extract test counts"""
-        import re
 
         # Look for summary line
         summary_pattern = r"Ran (\d+) tests? in [\d.]+s"
@@ -347,7 +344,6 @@ class EnhancedExecutor:
 
     def _extract_coverage_percent(self, output: str) -> float | None:
         """Extract coverage percentage from pytest output"""
-        import re
 
         # Look for coverage percentage
         coverage_pattern = r"TOTAL\s+(\d+)\s+(\d+)\s+(\d+)%"

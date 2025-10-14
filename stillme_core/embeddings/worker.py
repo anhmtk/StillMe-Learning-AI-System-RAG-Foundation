@@ -29,9 +29,7 @@ class EmbeddingWorker:
     def _create_worker_script(self) -> Path:
         """Create the worker script"""
         script_content = """
-import json
 import os
-import sys
 
 # Set thread limits for Windows stability
 os.environ["OMP_NUM_THREADS"] = "1"

@@ -276,7 +276,6 @@ class TestSecurityComprehensive:
         # Create temporary file with vulnerable code
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as f:
             f.write("""
-import os
 import subprocess
 
 def vulnerable_function(user_input):
@@ -473,7 +472,6 @@ class TestSecurityPerformance:
 
     def test_security_scan_performance(self, security_manager):
         """Test security scan performance"""
-        import time
 
         start_time = time.time()
         result = security_manager.scan_dependencies()
@@ -485,7 +483,6 @@ class TestSecurityPerformance:
 
     def test_encryption_performance(self, security_manager):
         """Test encryption performance"""
-        import time
 
         test_data = "x" * 10000  # 10KB of data
 

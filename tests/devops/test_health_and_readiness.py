@@ -244,7 +244,6 @@ class TestHealthEndpoints:
         """Test liveness probe returns success"""
         config = {"version": "1.0.0", "environment": "test"}
 
-        from stillme_core.health import create_health_endpoints
 
         create_health_endpoints(mock_app, config)
 
@@ -266,7 +265,6 @@ class TestHealthEndpoints:
             "database": {"path": ":memory:"},
         }
 
-        from stillme_core.health import create_health_endpoints
 
         create_health_endpoints(mock_app, config)
 
@@ -289,7 +287,6 @@ class TestHealthEndpoints:
             "database": {"path": ":memory:"},
         }
 
-        from stillme_core.health import create_health_endpoints
 
         create_health_endpoints(mock_app, config)
 

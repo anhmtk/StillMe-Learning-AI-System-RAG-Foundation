@@ -97,13 +97,11 @@ class SemanticHybridCache:
             return np.array(embedding)
         except Exception as e:
             # Log the error but don't crash
-            import logging
 
             logger = logging.getLogger(__name__)
             logger.warning(f"Embedding failed for text '{text[:50]}...': {e}")
 
             # Return a deterministic fallback embedding based on text hash
-            import hashlib
 
             text_hash = hashlib.md5(text.encode("utf-8")).hexdigest()
             # Convert hash to deterministic vector
