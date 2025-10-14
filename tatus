@@ -1,0 +1,10 @@
+[33m652224768[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mconfig/bootstrap-wave-05[m[33m, [m[1;31morigin/config/bootstrap-wave-05[m[33m)[m chore(config): bootstrap defaults + .env.example (wave-05)
+[33mcb9036dac[m[33m ([m[1;31morigin/tests/smoke-suite-wave-05[m[33m, [m[1;32mtests/smoke-suite-wave-05[m[33m)[m test: add smoke suite (learning/framework) and CI (wave-05)
+[33mb02359dff[m[33m ([m[1;31morigin/fix/learning-imports-wave-05[m[33m, [m[1;32mfix/learning-imports-wave-05[m[33m)[m docs: add Unified Learning Architecture concept to roadmap (community idea)
+[33m23b059fa0[m Merge branch 'main' of https://github.com/anhmtk/stillme_ai_ipc into fix/learning-imports-wave-05
+[33mc348df995[m fix(imports): stabilize Learning System imports for DRY_RUN (wave-05)
+[33m16810e29f[m[33m ([m[1;31morigin/docs/costs-report-wave-04[m[33m, [m[1;32mdocs/costs-report-wave-04[m[33m)[m docs: consolidate AgentDev sections - remove duplicate content, use single naming convention
+[33mef32eab8e[m docs: update README to reflect actual project status (realistic metrics, cleanup achievements)
+[33m221490c91[m Merge pull request #31 from anhmtk/docs/costs-report-wave-04
+[33m2bfde1769[m docs: add COSTS.md scaffold + weekly updater  wave-04
+[33mb4613419f[m Merge pull request #27 from anhmtk/chore/dependabot-wave-04

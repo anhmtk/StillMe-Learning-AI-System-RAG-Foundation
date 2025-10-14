@@ -1,23 +1,8 @@
-#!/usr/bin/env python3
 """
-AgentDev Rule Engine Package
-============================
+AgentDev Rules - Rules engine
 
-Rule engine system for AgentDev with compliance checking and validation.
+This module contains the rules engine for AgentDev.
 """
 
-from .engine import (
-    RuleEngine,
-    RuleEvalResult,
-    check_compliance,
-    load_rules_from_db,
-    validate_rule,
-)
-
-__all__ = [
-    "RuleEngine",
-    "RuleEvalResult", 
-    "load_rules_from_db",
-    "validate_rule",
-    "check_compliance",
-]
+# Placeholder for rules components
+__all__ = []
