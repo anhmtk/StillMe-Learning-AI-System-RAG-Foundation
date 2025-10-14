@@ -405,7 +405,6 @@ class TestPerformanceIntegration:
 
     def test_end_to_end_latency(self):
         """Test end-to-end latency."""
-        import time
 
         gateway = APIGateway({})
         router = Router({})
@@ -447,7 +446,6 @@ class TestPerformanceIntegration:
 
     def test_throughput_integration(self):
         """Test system throughput."""
-        import time
 
         gateway = APIGateway({})
         router = Router({})

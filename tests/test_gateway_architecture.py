@@ -116,7 +116,6 @@ class TestGatewayArchitecture:
 
     def test_cors_config_security_warning(self):
         """Test that CORS config provides security warnings"""
-        from stillme_platform.gateway.cors_config import CORSConfig
 
         # Test development warning
         os.environ["ENVIRONMENT"] = "development"

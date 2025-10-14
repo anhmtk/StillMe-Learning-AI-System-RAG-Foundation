@@ -53,7 +53,6 @@ except ImportError:
     pass
 
     # Define fallback types if imports fail
-    from enum import Enum
 
     class AgentType(Enum):
         AGENTDEV = "agentdev"

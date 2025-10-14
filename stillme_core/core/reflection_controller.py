@@ -604,7 +604,6 @@ if __name__ == "__main__":
 
     if should_reflect:
         # Test enhancement
-        import asyncio
 
         result = asyncio.run(controller.enhance_response(test_response, test_query))
         print(f"Improvement: {result.improvement:.3f}")

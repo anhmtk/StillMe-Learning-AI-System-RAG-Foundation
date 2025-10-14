@@ -85,7 +85,6 @@ class ProposalsManager:
         }
 
         # Save to database
-        import sqlite3
 
         with sqlite3.connect(self.db_path) as conn:
             conn.execute(
@@ -120,7 +119,6 @@ class ProposalsManager:
 
     def get_all_proposals(self) -> list["LearningProposal"]:
         """Get all proposals"""
-        import sqlite3
 
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.execute("""
@@ -163,7 +161,6 @@ class ProposalsManager:
 
     def get_pending_proposals(self, limit: int = 10) -> list["LearningProposal"]:
         """Get pending proposals"""
-        import sqlite3
 
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.execute(
@@ -241,7 +238,6 @@ class ProposalsManager:
 
     def approve_proposal(self, proposal_id: str, approved_by: str) -> bool:
         """Approve a proposal"""
-        import sqlite3
 
         with sqlite3.connect(self.db_path) as conn:
             conn.execute(
@@ -258,7 +254,6 @@ class ProposalsManager:
 
     def update_proposal_status(self, proposal_id: str, status: str) -> bool:
         """Update proposal status"""
-        import sqlite3
 
         try:
             with sqlite3.connect(self.db_path) as conn:
@@ -274,7 +269,6 @@ class ProposalsManager:
 
     def update_proposal(self, proposal_id: str, updates: dict) -> bool:
         """Update proposal with new data"""
-        import sqlite3
 
         try:
             with sqlite3.connect(self.db_path) as conn:
@@ -314,7 +308,6 @@ class ProposalsManager:
 
     def get_proposal(self, proposal_id: str) -> None:
         """Get a specific proposal by ID"""
-        import sqlite3
 
         try:
             with sqlite3.connect(self.db_path) as conn:
@@ -351,7 +344,6 @@ class ProposalsManager:
         self, proposal_id: str, rejected_by: str, reason: str = ""
     ) -> bool:
         """Reject a proposal"""
-        import sqlite3
 
         with sqlite3.connect(self.db_path) as conn:
             conn.execute(

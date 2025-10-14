@@ -116,7 +116,6 @@ class TestAgentFlow:
 
                     # Run the agent
                     controller = AgentController()
-                    import asyncio
 
                     result = asyncio.run(controller.execute_task("Run failing tests"))
 
@@ -143,7 +142,6 @@ class TestAgentFlow:
 
             # Run the agent
             controller = AgentController()
-            import asyncio
 
             result = asyncio.run(controller.execute_task("No plan goal"))
 
@@ -206,7 +204,6 @@ class TestAgentFlow:
 
                     # Run the agent
                     controller = AgentController()
-                    import asyncio
 
                     result = asyncio.run(controller.execute_task("Run multiple tests"))
 
@@ -228,7 +225,6 @@ class TestAgentFlow:
             mock_planner_class.return_value = mock_planner
 
             # Test convenience function
-            import asyncio
 
             result = asyncio.run(run_agent("Test goal"))
 
@@ -247,7 +243,6 @@ class TestAgentFlow:
 
             # Run the agent
             controller = AgentController()
-            import asyncio
 
             result = asyncio.run(controller.execute_task("Error goal"))
 

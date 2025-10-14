@@ -183,7 +183,6 @@ def import_config(
 
     try:
         if config_path.endswith(".yaml") or config_path.endswith(".yml"):
-            import yaml
 
             with open(config_file, encoding="utf-8") as f:
                 yaml.safe_load(f)

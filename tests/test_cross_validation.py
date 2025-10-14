@@ -11,7 +11,6 @@ import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock
 
-import pytest
 
 # Mock classes since they're not available in stillme_core
 BenchmarkResult = MagicMock

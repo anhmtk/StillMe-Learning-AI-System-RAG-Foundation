@@ -290,7 +290,6 @@ class TestSecurityCompliance:
 
     def test_owasp_asvs_level2_compliance(self):
         """Test OWASP ASVS Level 2 compliance"""
-        from stillme_core.security import RateLimiter, SecurityHeaders
 
         # Test security headers compliance
         headers = SecurityHeaders()
@@ -314,7 +313,6 @@ class TestSecurityCompliance:
 
     def test_owasp_asvs_level3_compliance(self):
         """Test OWASP ASVS Level 3 compliance"""
-        from stillme_core.security import RateLimiter, SecurityHeaders
 
         # Test advanced security headers
         headers = SecurityHeaders()

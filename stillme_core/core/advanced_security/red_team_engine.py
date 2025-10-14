@@ -1005,8 +1005,6 @@ class RedTeamEngine:
         """Create attack script for sandbox execution"""
         script = f"""
 import requests
-import time
-import json
 
 # Attack configuration
 attack_payload = {json.dumps(attack.payload)}

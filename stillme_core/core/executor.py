@@ -83,7 +83,6 @@ class PatchExecutor:
 
     def run_pytest(self, tests: list[str] | None = None) -> ExecResult:
         # Skip pytest and run direct test for fastest execution
-        import os
 
         if os.getenv("AGENTDEV_TEST_MODE") or os.getenv("SKIP_GIT_OPERATIONS"):
             # Run direct test bypassing pytest completely

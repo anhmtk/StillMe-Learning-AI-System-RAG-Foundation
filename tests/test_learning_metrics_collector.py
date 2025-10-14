@@ -22,7 +22,6 @@ import sys
 import tempfile
 from pathlib import Path
 
-import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -104,7 +103,6 @@ class TestLearningMetricsCollector:
         """Test loading benchmark dataset"""
         # Create a mock benchmark file for testing
         import os
-        import tempfile
 
         with tempfile.NamedTemporaryFile(mode="w", suffix=".jsonl", delete=False) as f:
             # Write some test data
@@ -117,7 +115,6 @@ class TestLearningMetricsCollector:
             temp_file = f.name
 
         # Temporarily replace the benchmark path
-        from pathlib import Path
 
         original_path = metrics_collector.benchmark_path
         metrics_collector.benchmark_path = Path(temp_file)
@@ -189,7 +186,6 @@ class TestLearningMetricsCollector:
     @pytest.mark.asyncio
     async def test_save_validation_results(self, metrics_collector):
         """Test saving validation results"""
-        from unittest.mock import MagicMock
 
         # Mock classes since they're not available in stillme_core
         BenchmarkResult = MagicMock
@@ -233,7 +229,6 @@ class TestLearningMetricsCollector:
     @pytest.mark.asyncio
     async def test_log_validation_to_transparency(self, metrics_collector):
         """Test logging to transparency logger"""
-        from unittest.mock import MagicMock
 
         # Mock classes since they're not available in stillme_core
         BenchmarkResult = MagicMock
@@ -279,7 +274,6 @@ class TestLearningMetricsCollector:
     @pytest.mark.asyncio
     async def test_check_safety_thresholds(self, metrics_collector):
         """Test safety threshold checking"""
-        from unittest.mock import MagicMock
 
         # Mock classes since they're not available in stillme_core
         BenchmarkResult = MagicMock
@@ -323,7 +317,6 @@ class TestLearningMetricsCollector:
         assert len(history) == 0
 
         # Add some mock history
-        from unittest.mock import MagicMock
 
         # Mock classes since they're not available in stillme_core
         BenchmarkResult = MagicMock
@@ -368,7 +361,6 @@ class TestLearningMetricsCollector:
         assert trends["trend"] == "insufficient_data"
 
         # Add mock history for trend analysis
-        from unittest.mock import MagicMock
 
         # Mock classes since they're not available in stillme_core
         BenchmarkResult = MagicMock
