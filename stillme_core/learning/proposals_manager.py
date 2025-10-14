@@ -5,6 +5,7 @@ StillMe IPC Learning Proposals Manager
 Manager for learning proposals with database operations.
 """
 
+from typing import TYPE_CHECKING
 import json
 import logging
 import uuid
@@ -17,7 +18,7 @@ logger = logging.getLogger(__name__)
 class ProposalsManager:
     """Manager for learning proposals"""
 
-    def __init__(self, db_path: str = "data/learning/proposals.db"):
+    def __init__(self, db_path: str = "data/learning/proposals.db") -> None:
         """Initialize proposals manager"""
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
@@ -25,7 +26,7 @@ class ProposalsManager:
         # Initialize database
         self._init_database()
 
-    def _init_database(self):
+    def _init_database(self) -> None:
         """Initialize database schema"""
         import sqlite3
 
@@ -311,7 +312,7 @@ class ProposalsManager:
             logger.error(f"Failed to update proposal: {e}")
             return False
 
-    def get_proposal(self, proposal_id: str):
+    def get_proposal(self, proposal_id: str) -> None:
         """Get a specific proposal by ID"""
         import sqlite3
 
@@ -369,7 +370,7 @@ class ProposalsManager:
 class LearningProposal:
     """Learning proposal data class"""
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         self.id = kwargs.get("id", "")
         self.title = kwargs.get("title", "")
         self.description = kwargs.get("description", "")
