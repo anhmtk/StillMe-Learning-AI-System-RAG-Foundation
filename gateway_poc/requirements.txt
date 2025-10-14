@@ -3,5 +3,5 @@ uvicorn[standard]==0.24.0
 httpx==0.25.2
 redis==5.0.1
 pydantic==2.12.1
-python-multipart==0.0.6
+python-multipart==0.0.20
 aiofiles==25.1.0
