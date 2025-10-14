@@ -17,15 +17,9 @@ on:
 permissions:
   contents: read  # đủ để checkout & đọc repo
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
   cleanup-audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    if: "!contains(github.event.head_commit.message, '[skip ci]')"
 
     steps:
       - name: Checkout

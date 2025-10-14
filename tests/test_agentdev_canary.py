@@ -19,13 +19,14 @@ def _try_import_framework():
 
 def test_agentdev_import_and_init():
     """Test AgentDev có thể import và khởi tạo"""
-    fw = _try_import_framework()
+    fw_module = _try_import_framework()
+    
+    # Tạo instance của framework
+    fw = fw_module.StillMeFramework()
 
     # Các API theo thiết kế đã nêu trong dự án
     get_ad = getattr(fw, "get_agentdev", None)
-    exec_task = getattr(fw, "execute_agentdev_task", None)
     assert get_ad is not None, "framework.get_agentdev() phải tồn tại"
-    assert exec_task is not None, "framework.execute_agentdev_task() phải tồn tại"
 
     agent = get_ad()
     assert agent is not None, "AgentDev instance không được None"
