@@ -571,10 +571,62 @@ python scripts/stillme_control.py discover
 * ✅ **Phase 1**: Read-only learning MVP (discovery → scoring → approval → ingest)
 * ✅ **Phase 2**: Interactive Dashboard & Background Automation System
 * 🔄 **Phase 3**: Self-quiz, consistency checking, and unlearning
-* 🔄 **Phase 4**: Controlled adaptation with LoRA fine-tuning
-* Increase test coverage to ≥85% lines / ≥80% branches
-* Expand open ethics/security runners (keep sensitive patterns private)
-* Iterate on documentation with community help
+* 🎯 **Phase 4**: Unified Learning Architecture (Community Idea)
+
+### 🧠 **Phase 4: Unified Learning Architecture** (Community Contribution)
+
+**Concept**: Centralized knowledge learning with intelligent distribution to specialized modules.
+
+**Current Architecture**:
+```
+StillMe Learning ←→ User (conversation patterns)
+AgentDev Learning ←→ Developers (code feedback)
+```
+
+**Proposed Architecture**:
+```
+📚 StillMe Learning (Master)
+    ↓ (intelligent knowledge distribution)
+🤖 AgentDev Learning (Specialized)
+    ↓ (applied knowledge)
+💻 Development Tasks
+```
+
+**Benefits**:
+- **Centralized Learning**: All knowledge flows through StillMe
+- **Intelligent Distribution**: Knowledge filtered and optimized for each module
+- **Cross-pollination**: Knowledge sharing between specialized systems
+- **Unified Knowledge Base**: Single source of truth for all learning
+
+**Implementation Ideas**:
+- Knowledge classification system (technical, conversational, procedural)
+- Intelligent routing based on knowledge type and context
+- Specialized learning adapters for different modules
+- Cross-module knowledge sharing protocols
+
+**Community Input Welcome**: This is an open concept for community discussion and improvement!
+
+### 💡 **Community Ideas & Contributions**
+
+**We welcome community input on:**
+- **Architecture improvements** like the Unified Learning concept above
+- **Implementation approaches** for complex features
+- **Performance optimizations** and scalability solutions
+- **Security enhancements** and best practices
+- **User experience** improvements and accessibility
+- **Documentation** and educational content
+
+**How to contribute:**
+1. **Open an issue** with your idea or suggestion
+2. **Create a discussion** for architectural concepts
+3. **Submit a PR** for implementation improvements
+4. **Share feedback** on existing features
+
+**Future Enhancements**:
+* 🔄 **Controlled adaptation** with LoRA fine-tuning
+* **Test coverage** to ≥85% lines / ≥80% branches
+* **Open ethics/security runners** (keep sensitive patterns private)
+* **Community-driven documentation** improvements
 
 ## Changelog
 
