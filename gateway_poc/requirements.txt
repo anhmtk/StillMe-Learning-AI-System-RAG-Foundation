@@ -6,7 +6,7 @@ fastapi==0.119.0
 uvicorn[standard]==0.24.0
  main
 httpx==0.25.2
-redis==5.0.1
+redis==6.4.0
 pydantic==2.12.1
 python-multipart==0.0.6
 aiofiles==25.1.0
