@@ -11,6 +11,7 @@ class AgentMode(Enum):
 
     SIMPLE = "simple"
     SENIOR = "senior"
+    DRY_RUN = "dry_run"
 
 
 __all__ = ["AgentMode"]

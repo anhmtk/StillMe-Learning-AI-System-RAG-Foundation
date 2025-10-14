@@ -1,33 +1,23 @@
 version: 2
 updates:
-  # GitHub Actions – weekly để giảm nhiễu
-  - package-ecosystem: "github-actions"
-    directory: "/"
-    schedule:
-      interval: "weekly"
-      day: "monday"
-      time: "06:00"
-    open-pull-requests-limit: 2
-    commit-message:
-      prefix: "deps(actions)"
-      include: "scope"
-    groups:
-      gha-minors:
-        patterns: ["*"]
-        update-types: ["minor", "patch"]
-
-  # Python (nếu có pyproject/requirements)
+  # Enable version updates for Python dependencies
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
-      time: "06:30"
-    open-pull-requests-limit: 2
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "stillme-ai/security-team"
+    assignees:
+      - "stillme-ai/maintainers"
     commit-message:
-      prefix: "deps(pip)"
+      prefix: "chore(deps)"
       include: "scope"
-    insecure-external-code-execution: "deny"
+    labels:
+      - "dependencies"
+      - "python"
     ignore:
       # Ignore major version updates for critical dependencies
       - dependency-name: "fastapi"
@@ -37,14 +27,40 @@ updates:
       - dependency-name: "pydantic"
         update-types: ["version-update:semver-major"]
 
-  # Docker dependencies
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "stillme-ai/security-team"
+    assignees:
+      - "stillme-ai/maintainers"
+    commit-message:
+      prefix: "chore(ci)"
+      include: "scope"
+    labels:
+      - "dependencies"
+      - "github-actions"
+
+  # Enable version updates for Docker dependencies
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "weekly"
       day: "monday"
-      time: "07:00"
-    open-pull-requests-limit: 2
+      time: "09:00"
+    open-pull-requests-limit: 5
+    reviewers:
+      - "stillme-ai/security-team"
+    assignees:
+      - "stillme-ai/maintainers"
     commit-message:
-      prefix: "deps(docker)"
+      prefix: "chore(docker)"
       include: "scope"
+    labels:
+      - "dependencies"
+      - "docker"
