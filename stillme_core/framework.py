@@ -19,6 +19,7 @@ try:
 except Exception as e:
     print("Config bootstrap note:", e)
 
+"""
 FUNCTIONALITY / CHỨC NĂNG:
 - Module loading and initialization
 - Tải và khởi tạo modules
@@ -83,9 +84,6 @@ RELATED FILES / FILES LIÊN QUAN:
 📖 DETAILED DOCUMENTATION:
 - PROJECT_OVERVIEW.md - Complete project overview
 - QUICK_REFERENCE.md - Quick reference card
-
-🎉 This is a WORLD-CLASS AI Framework ready for production!
-"""
 
 import asyncio
 import importlib.util
