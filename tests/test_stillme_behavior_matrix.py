@@ -812,7 +812,6 @@ def _confusion_and_scores(metrics):
 
 def _summary(metrics):
     import statistics as st
-    from collections import Counter, defaultdict
 
     C = Counter()
     by_expected = defaultdict(Counter)
@@ -978,7 +977,6 @@ def test_print_summary_and_dump(tmp_path, capsys):
 def _analyze_telemetry():
     """Analyze telemetry data from reports/telemetry.jsonl"""
     try:
-        import statistics as st
 
         from stillme_core.modules.telemetry import get_log_path, read_events
 
@@ -1036,8 +1034,6 @@ def _analyze_telemetry():
 
 
 def _build_markdown_report(metrics, path: Path):
-    import statistics as st
-    from collections import Counter, defaultdict
 
     def pct(n, d):
         return 0 if not d else round(100 * n / d, 1)

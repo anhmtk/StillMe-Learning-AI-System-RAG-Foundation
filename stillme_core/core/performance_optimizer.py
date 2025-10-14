@@ -398,12 +398,9 @@ class PerformanceOptimizer:
 """
 Performance Monitoring System for StillMe
 """
-import time
-import psutil
 import threading
 from typing import Dict, List
 from dataclasses import dataclass
-from datetime import datetime
 
 @dataclass
 class PerformanceAlert:

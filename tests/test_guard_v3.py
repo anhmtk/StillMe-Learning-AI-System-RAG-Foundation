@@ -16,7 +16,6 @@ safe_reply = MagicMock
 AgentDev-Guardflow Surgeon v3: Tests for upgraded guard
 """
 
-import pytest
 
 
 def test_luhn_check():

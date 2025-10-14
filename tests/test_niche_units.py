@@ -342,7 +342,6 @@ class TestContentWrapAndFilter:
         ]
 
         for pattern in injection_patterns:
-            from stillme_core.utils import wrap_content
 
             wrapped_content, injection_detected = wrap_content(pattern)
 
@@ -358,7 +357,6 @@ class TestContentWrapAndFilter:
             "![image](https://example.com/image.jpg onerror=alert('xss'))"
         )
 
-        from stillme_core.utils import wrap_content
 
         wrapped_content, injection_detected = wrap_content(malicious_markdown)
 
@@ -377,7 +375,6 @@ class TestContentWrapAndFilter:
         ]
 
         for escape in html_escapes:
-            from stillme_core.utils import wrap_content
 
             wrapped_content, injection_detected = wrap_content(escape)
 
@@ -397,7 +394,6 @@ class TestContentWrapAndFilter:
         ]
 
         for content in clean_content:
-            from stillme_core.utils import wrap_content
 
             wrapped_content, injection_detected = wrap_content(content)
 

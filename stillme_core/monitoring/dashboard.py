@@ -40,8 +40,6 @@ if TYPE_CHECKING:
     from fastapi.responses import HTMLResponse, JSONResponse
 else:
     try:
-        from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-        from fastapi.responses import HTMLResponse, JSONResponse
 
         FASTAPI_AVAILABLE = True
     except ImportError:

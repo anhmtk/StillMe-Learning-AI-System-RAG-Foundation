@@ -494,7 +494,6 @@ class AIManager:
     def _get_git_status(self) -> list[str]:
         """Get git status information with enhanced timeout handling"""
         try:
-            import os
             import subprocess
 
             # Skip git operations in test mode or if AGENTDEV_TEST_MODE is set
@@ -522,7 +521,6 @@ class AIManager:
     def _get_recent_files(self) -> list[str]:
         """Get recently modified files"""
         try:
-            import subprocess
 
             result = subprocess.run(
                 ["git", "log", "--name-only", "--oneline", "-10"],
@@ -543,7 +541,6 @@ class AIManager:
     def _get_test_status(self) -> dict[str, Any]:
         """Get current test status"""
         try:
-            import subprocess
 
             result = subprocess.run(
                 ["python", "-m", "pytest", "--collect-only", "-q"],
@@ -634,7 +631,6 @@ FORMAT: Return as JSON array of plan items with fields:
         """Parse AI response into PlanItem objects"""
         try:
             # Try to parse as JSON first
-            import json
 
             data = json.loads(response)
             if isinstance(data, list):

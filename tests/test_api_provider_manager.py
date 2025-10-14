@@ -60,7 +60,6 @@ def test_translation_basic():
 
 def test_translation_code_preservation():
     """Test that code blocks and URLs are preserved during translation"""
-    import pytest
 
     try:
         manager = UnifiedAPIManager()
@@ -87,7 +86,6 @@ def test_translation_code_preservation():
 
 def test_translation_confidence_evaluation():
     """Test translation confidence evaluation"""
-    import pytest
 
     try:
         manager = UnifiedAPIManager()

@@ -27,10 +27,6 @@ if TYPE_CHECKING:
 
 # Runtime imports with fallback
 try:
-    from .autonomous_management_system import AutonomousManagementSystem
-    from .learning_optimization_engine import LearningOptimizationEngine
-    from .phase2_integration_testing import Phase2IntegrationTesting
-    from .security_compliance_system import SecurityComplianceSystem
 except ImportError:
     # Create mock classes for testing with proper typing
     class AutonomousManagementSystem:
