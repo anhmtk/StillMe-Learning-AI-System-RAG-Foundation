@@ -69,7 +69,6 @@ def test_happy_path_fullsuite_and_pr(monkeypatch):
 
 
 def test_fullsuite_fail_no_pr(monkeypatch):
-
     def fake_run_all(self, tests_dir="tests"):
         return False, 120, 3, 11000, None
 
@@ -91,7 +90,6 @@ def test_fullsuite_fail_no_pr(monkeypatch):
 
 
 def test_pr_disabled(monkeypatch):
-
     def fake_run_all(self, tests_dir="tests"):
         return True, 1, 0, 100, None
 

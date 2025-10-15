@@ -244,7 +244,6 @@ class TestHealthEndpoints:
         """Test liveness probe returns success"""
         config = {"version": "1.0.0", "environment": "test"}
 
-
         create_health_endpoints(mock_app, config)
 
         # Get the liveness probe function
@@ -264,7 +263,6 @@ class TestHealthEndpoints:
             "environment": "test",
             "database": {"path": ":memory:"},
         }
-
 
         create_health_endpoints(mock_app, config)
 
@@ -286,7 +284,6 @@ class TestHealthEndpoints:
             "environment": "test",
             "database": {"path": ":memory:"},
         }
-
 
         create_health_endpoints(mock_app, config)
 

@@ -17,7 +17,6 @@ Version: 1.0.0
 Date: 2025-09-28
 """
 
-from typing import TYPE_CHECKING
 import json
 import logging
 import sqlite3

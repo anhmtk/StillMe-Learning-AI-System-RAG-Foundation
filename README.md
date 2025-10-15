@@ -87,6 +87,75 @@ StillMe AI automatically creates sample configuration files on first run:
 # Clone the repository
 git clone https://github.com/anhmtk/stillme_ai_ipc.git
 cd stillme_ai_ipc
+```
+
+## 🔐 Configuration & Secrets
+
+### Environment Setup
+StillMe uses a secure environment configuration system with proper hierarchy:
+
+```bash
+# 1. Copy the example configuration
+cp .env.example .env
+
+# 2. Edit .env with your actual values
+# NEVER commit .env files with real secrets!
+
+# 3. For local development overrides, create .env.local
+# .env.local takes precedence over .env
+
+# 4. Check your configuration
+python scripts/check_env.py
+```
+
+### Environment Hierarchy
+1. **`.env`** - Base configuration (committed to git)
+2. **`.env.local`** - Local overrides (ignored by git, highest priority)
+
+### Required Environment Variables
+```bash
+# Core Configuration
+STILLME_DRY_RUN=1                    # Set to 0 for production
+STILLME_TZ=Asia/Ho_Chi_Minh          # Timezone
+RUNTIME_BASE_URL=http://localhost:8000
+
+# AI Provider API Keys (Required)
+OPENAI_API_KEY=sk-REPLACE_ME         # Your OpenAI API key
+OPENROUTER_API_KEY=sk-REPLACE_ME     # Optional: OpenRouter API key
+```
+
+### Optional Environment Variables
+```bash
+# Notification System
+TELEGRAM_BOT_TOKEN=REPLACE_ME        # Telegram bot token
+TELEGRAM_CHAT_ID=                    # Your Telegram chat ID
+SMTP_SERVER=                         # SMTP server for email alerts
+SMTP_USERNAME=                       # Email username
+SMTP_PASSWORD=                       # Email password
+ALERT_EMAIL=                         # Email for alerts
+
+# Learning System
+STILLME_LEARNING_ENABLED=1           # Enable self-learning
+STILLME_ALERTS_ENABLED=1             # Enable alert system
+```
+
+### Security Best Practices
+- ✅ **NEVER commit `.env` files** with real API keys
+- ✅ **Use `.env.local`** for local development overrides
+- ✅ **Use GitHub Secrets** for CI/CD environments
+- ✅ **Rotate API keys** regularly
+- ✅ **Use app-specific passwords** for email (not main password)
+- ✅ **Run `python scripts/check_env.py`** to verify configuration
+
+### CI/CD Environment
+For GitHub Actions and other CI/CD systems, use **GitHub Secrets**:
+- `OPENAI_API_KEY`
+- `OPENROUTER_API_KEY`
+- `TELEGRAM_BOT_TOKEN`
+- `SMTP_PASSWORD`
+- etc.
+
+**Never commit real secrets to the repository!**
 
 # Install dependencies
 pip install -e .

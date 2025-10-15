@@ -14,7 +14,6 @@ Tính năng:
 8. Learning Integration - Tích hợp học hỏi
 """
 
-from typing import TYPE_CHECKING
 import hashlib
 import json
 import time
@@ -383,7 +382,9 @@ class AdaptiveStrategy:
 
         return context
 
-    def select_strategy(self, context: Context | dict[str, Any]) -> AdaptiveStrategyResult:
+    def select_strategy(
+        self, context: Context | dict[str, Any]
+    ) -> AdaptiveStrategyResult:
         """Select the best strategy for given context"""
         start_time = time.time()
 

@@ -27,6 +27,7 @@ if TYPE_CHECKING:
 
 # Runtime imports with fallback
 try:
+    from .autonomous_management_system import AutonomousManagementSystem
 except ImportError:
     # Create mock classes for testing with proper typing
     class AutonomousManagementSystem:

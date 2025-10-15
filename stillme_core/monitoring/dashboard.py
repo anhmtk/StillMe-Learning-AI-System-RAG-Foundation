@@ -40,7 +40,6 @@ if TYPE_CHECKING:
     from fastapi.responses import HTMLResponse, JSONResponse
 else:
     try:
-
         FASTAPI_AVAILABLE = True
     except ImportError:
         FASTAPI_AVAILABLE = False
