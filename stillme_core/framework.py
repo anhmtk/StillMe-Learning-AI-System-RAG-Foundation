@@ -82,7 +82,7 @@ class StillMeFramework:
 
         # Initialize core components
         self._initialize_components()
-        
+
         # Initialize core modules
         self._initialize_core_modules()
 
@@ -102,7 +102,7 @@ class StillMeFramework:
 
             # Initialize API docs
             self._api_docs = self._create_api_docs()
-            
+
             # Initialize AgentDev
             self._init_agentdev()
 

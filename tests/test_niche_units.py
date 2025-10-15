@@ -342,7 +342,6 @@ class TestContentWrapAndFilter:
         ]
 
         for pattern in injection_patterns:
-
             wrapped_content, injection_detected = wrap_content(pattern)
 
             # Injection should be detected
@@ -356,7 +355,6 @@ class TestContentWrapAndFilter:
         malicious_markdown = (
             "![image](https://example.com/image.jpg onerror=alert('xss'))"
         )
-
 
         wrapped_content, injection_detected = wrap_content(malicious_markdown)
 
@@ -375,7 +373,6 @@ class TestContentWrapAndFilter:
         ]
 
         for escape in html_escapes:
-
             wrapped_content, injection_detected = wrap_content(escape)
 
             # Injection should be detected
@@ -394,7 +391,6 @@ class TestContentWrapAndFilter:
         ]
 
         for content in clean_content:
-
             wrapped_content, injection_detected = wrap_content(content)
 
             # No injection should be detected

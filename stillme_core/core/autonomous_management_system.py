@@ -55,10 +55,12 @@ if TYPE_CHECKING:
 
 # Runtime imports with fallback
 try:
+    from stillme_core.core.validation.security_middleware import SecurityMiddleware
 except ImportError:
     SecurityMiddleware = None
 
 try:
+    from stillme_core.core.validation.performance_monitor import PerformanceMonitor
 except ImportError:
     PerformanceMonitor = None
 

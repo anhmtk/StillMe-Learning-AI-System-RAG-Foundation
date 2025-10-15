@@ -143,7 +143,9 @@ class DistributedTracer:
         """Generate unique span ID"""
         return format(uuid.uuid4().int, "016x")
 
-    def start_trace(self, name: str, attributes: dict[str, Any] | None = None) -> str | None:
+    def start_trace(
+        self, name: str, attributes: dict[str, Any] | None = None
+    ) -> str | None:
         """Start a new trace"""
         if not self._should_sample():
             return None
@@ -172,7 +174,9 @@ class DistributedTracer:
 
         # Set context variables
         current_trace_id.set(trace_id)
-        current_span_context.set(cast(Any, SpanContext(trace_id=trace_id, span_id=span_id)))
+        current_span_context.set(
+            cast(Any, SpanContext(trace_id=trace_id, span_id=span_id))
+        )
 
         print(f"🔍 Trace started: {trace_id} - {name}")
         return trace_id
@@ -230,9 +234,14 @@ class DistributedTracer:
 
         # Update context
         current_span_context.set(
-            cast(Any, SpanContext(
-                trace_id=trace_id or "", span_id=span_id, parent_span_id=parent_span_id
-            ))
+            cast(
+                Any,
+                SpanContext(
+                    trace_id=trace_id or "",
+                    span_id=span_id,
+                    parent_span_id=parent_span_id,
+                ),
+            )
         )
 
         print(f"🔍 Span started: {span_id} - {name}")
@@ -381,11 +390,11 @@ class DistributedTracer:
         for exporter in self.exporters:
             try:
                 exporter_obj: Any = exporter
-                if hasattr(exporter_obj, 'export'):
+                if hasattr(exporter_obj, "export"):
                     export_method = exporter_obj.export
                     if callable(export_method):
                         result = export_method(traces_to_export)
-                        if hasattr(result, '__await__'):
+                        if hasattr(result, "__await__"):
                             await cast(Any, result)
             except Exception as e:
                 print(f"⚠️ Export error: {e}")

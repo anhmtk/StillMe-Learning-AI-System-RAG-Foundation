@@ -85,7 +85,6 @@ async def test_bridge_safe_runs_saferunner(monkeypatch, app_with_lifespan: FastA
 
 @pytest.mark.anyio
 async def test_health_ai_endpoint(monkeypatch, app_with_lifespan: FastAPI):
-
     async def fake_health():
         return True
 

@@ -53,7 +53,6 @@ def test_create_backup():
     """Test _create_backup method"""
     import tempfile
 
-
     # Create temporary directory
     with tempfile.TemporaryDirectory() as temp_dir:
         # Create some test files
@@ -76,7 +75,6 @@ def test_create_backup():
 
 def test_rollback():
     """Test _rollback method"""
-
 
     with tempfile.TemporaryDirectory() as temp_dir:
         # Create test file

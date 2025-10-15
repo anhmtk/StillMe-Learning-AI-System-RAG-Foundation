@@ -153,7 +153,6 @@ class APIConsistencyChecker:
 
         # Check Verifier classes have required methods
         try:
-
             required_methods = ["verify", "verify_test_results"]
 
             for method in required_methods:

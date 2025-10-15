@@ -977,7 +977,6 @@ def test_print_summary_and_dump(tmp_path, capsys):
 def _analyze_telemetry():
     """Analyze telemetry data from reports/telemetry.jsonl"""
     try:
-
         from stillme_core.modules.telemetry import get_log_path, read_events
 
         log_path = get_log_path()
@@ -1034,7 +1033,6 @@ def _analyze_telemetry():
 
 
 def _build_markdown_report(metrics, path: Path):
-
     def pct(n, d):
         return 0 if not d else round(100 * n / d, 1)
 

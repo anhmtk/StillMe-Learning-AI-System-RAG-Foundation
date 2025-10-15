@@ -8,14 +8,17 @@ from typing import Any
 
 from dotenv import load_dotenv
 
+
 # Lazy import for heavy modules
 def _get_httpx():
     """Lazy import for httpx"""
     try:
         import httpx
+
         return httpx
     except ImportError:
         return None
+
 
 # Load biến môi trường từ file .env
 load_dotenv()
