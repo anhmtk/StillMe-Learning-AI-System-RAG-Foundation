@@ -547,7 +547,6 @@ class EnterpriseAuditPrivacyTestSuite:
         print("\n=== Testing Performance ===")
 
         try:
-
             # Test with large text
             large_text = "User john@example.com (555-123-4567) from 192.168.1.1 " * 100
 

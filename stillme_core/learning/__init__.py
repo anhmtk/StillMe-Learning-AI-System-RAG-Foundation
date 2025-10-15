@@ -1,13 +1,11 @@
-#!/usr/bin/env python3
 """
- fix/import-deps-sanitizer-wave-05-new
 StillMe Learning Module
 Interactive Dashboard & Automation System for AI learning management.
 
 Facade aliases for stable imports to reduce dependency fragility.
 """
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 __version__ = "2.1.0"
 __author__ = "StillMe AI Framework"
@@ -45,16 +43,7 @@ ContentSource = get_content_source()
 ProposalStatus = get_proposal_status()
 ProposalsManager = get_proposals_manager()
 
-StillMe Learning System Facade
-
-
-Facade module để cung cấp stable API cho learning system,
-giảm circular imports và tăng maintainability.
-"""
-
-from typing import TYPE_CHECKING, Any, Optional
-
-# Lazy imports để tránh circular dependencies
+# Lazy import functions for learning system components
 def _get_evolutionary_learning_system():
     """Lazy import for evolutionary learning system"""
     try:
@@ -139,11 +128,9 @@ if TYPE_CHECKING:
     from .evolutionary_learning_system import EvolutionaryLearningSystem
     from .proposals_manager import ProposalsManager
     from .approval_system import ApprovalSystem
- main
 
 # Public API
 __all__ = [
- fix/import-deps-sanitizer-wave-05-new
     # Learning Proposals System
     "LearningProposal",
     "LearningPriority",
@@ -156,10 +143,8 @@ __all__ = [
     "get_content_source",
     "get_proposal_status",
     "get_proposals_manager",
-]
-
+    # Learning System Facade
     'LearningSystemFacade',
     'get_learning_system',
     'is_learning_available'
 ]
- main

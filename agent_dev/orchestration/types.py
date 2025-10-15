@@ -11,12 +11,14 @@ class TaskSpec(TypedDict, total=False):
     created_at: datetime
     updated_at: datetime
 
+
 class ExecutionStep(TypedDict, total=False):
     step_id: str
     task_id: str
     action: str
     retries: int
     timeout: int
+
 
 class ExecutionPlan(TypedDict, total=False):
     plan_id: str
@@ -25,12 +27,14 @@ class ExecutionPlan(TypedDict, total=False):
     created_by: str
     created_at: datetime
 
+
 class FlowContext(TypedDict, total=False):
     flow_id: str
     current_task: TaskSpec
     execution_plan: ExecutionPlan
     metadata: dict[str, str]
     state: Literal["initialized", "in_progress", "paused", "completed", "error"]
+
 
 class DAGNode(TypedDict, total=False):
     node_id: str
@@ -39,6 +43,7 @@ class DAGNode(TypedDict, total=False):
     status: Literal["pending", "running", "completed", "failed"]
     retries: int
     timeout: int
+
 
 class DAGExecution(TypedDict, total=False):
     execution_id: str

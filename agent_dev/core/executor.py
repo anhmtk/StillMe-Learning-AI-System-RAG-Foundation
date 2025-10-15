@@ -3,7 +3,6 @@
 AgentDev Executor - Thực thi tasks
 """
 
-from typing import TYPE_CHECKING
 from dataclasses import dataclass
 from typing import Any, cast
 

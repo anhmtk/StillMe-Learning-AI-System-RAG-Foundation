@@ -10,5 +10,5 @@ paths = [
 ]
 
 regexes = [
-  '''FAKE|DUMMY|PLACEHOLDER|EXAMPLE_KEY|sk-xxxx|sk-dev-xxxx|sk-or-dev-xxxx|test_key_for_testing_purposes_only'''
+  '''FAKE|DUMMY|PLACEHOLDER|EXAMPLE_KEY|sk-xxxx|sk-dev-xxxx|sk-or-dev-xxxx|test_key_for_testing_purposes_only|REPLACE_ME|your_.*_here|# Your email password|# Email password'''
 ]

@@ -213,7 +213,6 @@ class TestNicheRadarE2E:
 
         # Create mock niche scores
 
-
         mock_scores = [
             NicheScore(
                 topic="AI Chatbot Development",
@@ -267,7 +266,6 @@ class TestNicheRadarE2E:
         logger.info("🧪 Testing attribution requirements...")
 
         # This test ensures every niche result has proper attribution
-
 
         mock_record = NicheRecord(
             source="GitHub",
