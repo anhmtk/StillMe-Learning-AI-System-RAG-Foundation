@@ -14,6 +14,20 @@ Thank you for your interest in contributing to StillMe! This document provides g
 
 ### Running Tests
 
+#### System Validation Tests (Required)
+Before submitting any changes, run the comprehensive system validation tests:
+
+```bash
+# Run all system validation tests (REQUIRED)
+python -m pytest tests/test_system_validation.py -v
+
+# Run specific validation tests
+python -m pytest tests/test_system_validation.py::TestSystemValidation::test_framework_import -v
+python -m pytest tests/test_system_validation.py::TestSystemValidation::test_learning_system_import -v
+python -m pytest tests/test_system_validation.py::TestSystemValidation::test_agentdev_import -v
+```
+
+#### Standard Test Suite
 ```bash
 # Run all tests
 pytest
@@ -23,7 +37,47 @@ pytest --cov=. --cov-report=html
 
 # Run specific test file
 pytest tests/test_router_fallback.py
+
+# Run smoke tests
+python -m pytest tests/test_agentdev_canary.py tests/test_config_bootstrap.py -v
 ```
+
+#### Test Requirements
+- **System validation tests**: Must pass 100%
+- **Framework tests**: Must pass 100%
+- **Learning system tests**: Must pass 100%
+- **AgentDev tests**: Must pass 100%
+- **Config bootstrap tests**: Must pass 100%
+
+### Import Optimization (Required)
+
+StillMe AI maintains strict import optimization standards. All contributions must comply with these requirements:
+
+#### Import Optimization Tools
+```bash
+# Check import density and complexity
+python tools/code_quality_analyzer.py
+
+# Scan for circular dependencies
+python tools/import_cycle_scan.py stillme_core,agent_dev,tests
+
+# Optimize imports (if needed)
+python tools/simple_import_optimizer.py stillme_core,agent_dev,tests
+```
+
+#### Import Requirements
+- **Import density**: Must be < 15% per file
+- **No circular dependencies**: All imports must be acyclic
+- **Standardized import order**: Follow PEP 8 import ordering
+- **No duplicate imports**: Each import should appear only once
+- **Lazy imports**: Use `TYPE_CHECKING` for type-only imports
+
+#### Before Submitting
+1. Run import optimization tools
+2. Verify no circular dependencies
+3. Check import density is acceptable
+4. Run system validation tests
+5. Ensure all imports work correctly
 
 ### Code Style
 

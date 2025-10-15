@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import json
 import logging
-import os
 import shutil
 import tarfile
 import zipfile
@@ -27,6 +26,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class PackageResult:
     """Result of a packaging operation."""
+
     success: bool
     package_path: Optional[str] = None
     package_type: str = "unknown"
@@ -34,6 +34,7 @@ class PackageResult:
     version: str = "1.0.0"
     error_message: Optional[str] = None
     artifacts: List[str] = field(default_factory=list)
+
 
 class LocalPackager:
     """Local application packager."""
@@ -60,7 +61,9 @@ class LocalPackager:
             with zipfile.ZipFile(package_path, "w", zipfile.ZIP_DEFLATED) as zipf:
                 root = Path(source_path)
                 for item in root.rglob("*"):
-                    if item.is_file() and self._should_include_file(item, include_patterns, exclude_patterns):
+                    if item.is_file() and self._should_include_file(
+                        item, include_patterns, exclude_patterns
+                    ):
                         zipf.write(item, item.relative_to(root))
             result = PackageResult(
                 success=True,
@@ -75,7 +78,9 @@ class LocalPackager:
             return result
         except Exception as e:  # pragma: no cover (để tránh đòi hỏi I/O lỗi trong unit)
             logger.error("ZIP packaging error: %s", e)
-            return PackageResult(success=False, error_message=str(e), package_type="zip")
+            return PackageResult(
+                success=False, error_message=str(e), package_type="zip"
+            )
 
     def create_tar_package(
         self,
@@ -90,12 +95,16 @@ class LocalPackager:
         try:
             logger.info("Creating TAR package: %s", package_name)
             mode = {"gz": "w:gz", "bz2": "w:bz2", "xz": "w:xz"}.get(compression, "w")
-            suffix = {"gz": ".tar.gz", "bz2": ".tar.bz2", "xz": ".tar.xz"}.get(compression, ".tar")
+            suffix = {"gz": ".tar.gz", "bz2": ".tar.bz2", "xz": ".tar.xz"}.get(
+                compression, ".tar"
+            )
             package_path = self.output_dir / f"{package_name}_{version}{suffix}"
             with tarfile.open(package_path, mode) as tarf:
                 root = Path(source_path)
                 for item in root.rglob("*"):
-                    if item.is_file() and self._should_include_file(item, include_patterns, exclude_patterns):
+                    if item.is_file() and self._should_include_file(
+                        item, include_patterns, exclude_patterns
+                    ):
                         tarf.add(item, arcname=item.relative_to(root))
             result = PackageResult(
                 success=True,
@@ -110,7 +119,9 @@ class LocalPackager:
             return result
         except Exception as e:  # pragma: no cover
             logger.error("TAR packaging error: %s", e)
-            return PackageResult(success=False, error_message=str(e), package_type=f"tar_{compression}")
+            return PackageResult(
+                success=False, error_message=str(e), package_type=f"tar_{compression}"
+            )
 
     def create_installer_package(
         self,
@@ -128,7 +139,9 @@ class LocalPackager:
             # copy sources (light; skip dot folders)
             root = Path(source_path)
             for item in root.rglob("*"):
-                if item.is_file() and not any(part.startswith(".") for part in item.parts):
+                if item.is_file() and not any(
+                    part.startswith(".") for part in item.parts
+                ):
                     dst = package_dir / item.relative_to(root)
                     dst.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copy2(item, dst)
@@ -145,7 +158,9 @@ class LocalPackager:
 
             script_file.write_text(script, encoding="utf-8")
 
-            readme = self._create_installer_readme(package_name, version, installer_type)
+            readme = self._create_installer_readme(
+                package_name, version, installer_type
+            )
             (package_dir / "README.md").write_text(readme, encoding="utf-8")
 
             size = self._get_dir_size(package_dir)
@@ -162,7 +177,11 @@ class LocalPackager:
             return result
         except Exception as e:  # pragma: no cover
             logger.error("Installer packaging error: %s", e)
-            return PackageResult(success=False, error_message=str(e), package_type=f"installer_{installer_type}")
+            return PackageResult(
+                success=False,
+                error_message=str(e),
+                package_type=f"installer_{installer_type}",
+            )
 
     def create_docker_package(
         self,
@@ -179,15 +198,25 @@ class LocalPackager:
 
             root = Path(source_path)
             for item in root.rglob("*"):
-                if item.is_file() and not any(part.startswith(".") for part in item.parts):
+                if item.is_file() and not any(
+                    part.startswith(".") for part in item.parts
+                ):
                     dst = package_dir / item.relative_to(root)
                     dst.parent.mkdir(parents=True, exist_ok=True)
                     shutil.copy2(item, dst)
 
-            (package_dir / "Dockerfile").write_text(self._create_dockerfile(package_name, base_image), encoding="utf-8")
-            (package_dir / "docker-compose.yml").write_text(self._create_docker_compose(package_name, version), encoding="utf-8")
-            (package_dir / ".dockerignore").write_text(self._create_dockerignore(), encoding="utf-8")
-            (package_dir / "README.md").write_text(self._create_docker_readme(package_name, version), encoding="utf-8")
+            (package_dir / "Dockerfile").write_text(
+                self._create_dockerfile(package_name, base_image), encoding="utf-8"
+            )
+            (package_dir / "docker-compose.yml").write_text(
+                self._create_docker_compose(package_name, version), encoding="utf-8"
+            )
+            (package_dir / ".dockerignore").write_text(
+                self._create_dockerignore(), encoding="utf-8"
+            )
+            (package_dir / "README.md").write_text(
+                self._create_docker_readme(package_name, version), encoding="utf-8"
+            )
 
             size = self._get_dir_size(package_dir)
             result = PackageResult(
@@ -203,7 +232,9 @@ class LocalPackager:
             return result
         except Exception as e:  # pragma: no cover
             logger.error("Docker packaging error: %s", e)
-            return PackageResult(success=False, error_message=str(e), package_type="docker")
+            return PackageResult(
+                success=False, error_message=str(e), package_type="docker"
+            )
 
     # ----------------------- helpers -----------------------
 
@@ -214,11 +245,23 @@ class LocalPackager:
         exclude_patterns: Optional[List[str]],
     ) -> bool:
         p = str(file_path)
-        if exclude_patterns and any((pat in p) or file_path.match(pat) for pat in exclude_patterns):
+        if exclude_patterns and any(
+            (pat in p) or file_path.match(pat) for pat in exclude_patterns
+        ):
             return False
         if include_patterns:
             return any((pat in p) or file_path.match(pat) for pat in include_patterns)
-        for pat in ["__pycache__", ".git", ".pytest_cache", "*.pyc", "*.pyo", ".env", "venv", "env", ".venv"]:
+        for pat in [
+            "__pycache__",
+            ".git",
+            ".pytest_cache",
+            "*.pyc",
+            "*.pyo",
+            ".env",
+            "venv",
+            "env",
+            ".venv",
+        ]:
             if (pat in p) or file_path.match(pat):
                 return False
         return True
@@ -284,7 +327,9 @@ class LocalPackager:
             """
         )
 
-    def _create_installer_readme(self, package_name: str, version: str, installer_type: str) -> str:
+    def _create_installer_readme(
+        self, package_name: str, version: str, installer_type: str
+    ) -> str:
         return textwrap.dedent(
             f"""\
             # {package_name} Installer

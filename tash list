@@ -1,0 +1,237 @@
+[33mcommit e9ef64d49fea1a6c77fe8d4d3af90aa6bc028ef8[m
+Author: anhmtk <anhnguyen.nk86@gmail.com>
+Date:   Sun Oct 12 11:54:44 2025 +0700
+
+    chore(cleanup): Wave-1b quarantine tracked high-score files to _attic_ (score  80)
+
+[33mcommit 55aafa4701214e317888a281c1061749ffc0deac[m[33m ([m[1;31morigin/cleanup/wave-1a-clean[m[33m, [m[1;32mcleanup/wave-1a-clean[m[33m)[m
+Merge: 3c71af343 03a648873
+Author: Anh Nguyen <anhnguyen.nk86@gmail.com>
+Date:   Thu Oct 2 11:51:21 2025 +0700
+
+    Merge origin/main: resolve initial divergence by keeping local versions
+
+[33mcommit fe2cf5422ad52441ce2add677741745da3235ada[m
+Merge: 65b6512f3 1e5f53e33
+Author: Anh Nguyen <anhnguyen.nk86@gmail.com>
+Date:   Thu Oct 2 11:51:21 2025 +0700
+
+    Merge origin/main: resolve initial divergence by keeping local versions
+
+[33mcommit a64fec3ddd4d0e733b473ff95268ee70f4bdf17f[m
+Author: Anh Nguyen <anhnguyen.nk86@gmail.com>
+Date:   Sun Sep 28 13:13:25 2025 +0700
+
+    feat(alerting): implement advanced multi-channel alerting system
+    
+     Advanced Multi-Channel Alerting System for AGI
+    -  AlertManager: Comprehensive alert orchestration
+    -  Multi-Channel Support: Email, Desktop, Telegram, SMS, Webhook
+    -  Learning-Specific Alerts: AGI evolution milestones, performance degradation
+    -  Intelligent Filtering: Rate limiting, cooldowns, severity-based routing
+    -  Rich Templates: HTML emails, Telegram formatting, context-aware alerts
+    -  CLI Management: Test alerts, view statistics, configure channels
+    -  Integration: Seamless integration with learning automation service
+    
+     Alert Manager Features:
+    - Multi-channel notification support (Email, Desktop, Telegram, SMS, Webhook)
+    - Intelligent alert filtering and rate limiting
+    - Rich HTML email templates with charts and metrics
+    - Smart notification scheduling and escalation
+    - Alert acknowledgment and resolution tracking
+    - Comprehensive alert analytics and statistics
+    - AGI-specific alert templates and thresholds
+    
+     Email Notifications:
+    - Rich HTML email templates with embedded metrics
+    - Plain text fallback for compatibility
+    - SMTP configuration with Gmail support
+    - Contextual information and action buttons
+    - Professional formatting with severity-based colors
+    
+     Desktop Notifications:
+    - Cross-platform desktop notifications via plyer
+    - Toast notifications with custom icons
+    - Non-intrusive popup alerts
+    - Automatic timeout and dismissal
+    
+     Telegram Integration:
+    - Markdown-formatted messages with emojis
+    - Contextual information and metrics
+    - Bot token and chat ID configuration
+    - Rich formatting with severity indicators
+    
+     SMS Alerts (Twilio):
+    - Critical alert SMS notifications
+    - Character-limited message formatting
+    - Twilio integration with phone number support
+    - High-priority alert escalation
+    
+     Webhook Support:
+    - JSON payload webhook notifications
+    - Custom headers and authentication
+    - Configurable endpoint URLs
+    - Structured alert data format
+    
+     Learning-Specific Alerts:
+    - AGI evolution milestone notifications
+    - Performance degradation detection
+    - Resource exhaustion warnings
+    - Learning session failure alerts
+    - Accuracy and error rate monitoring
+    - Training time and efficiency tracking
+    
+     Intelligent Features:
+    - Rate limiting per alert type (configurable)
+    - Cooldown periods to prevent spam
+    - Severity-based channel routing
+    - Template-based alert formatting
+    - Context-aware alert generation
+    - Automatic escalation policies
+    
+     CLI Management:
+    - Test alert functionality across channels
+    - View comprehensive alert statistics
+    - Configure notification channels
+    - Monitor alert system health
+    - Learning-specific alert testing
+    - Performance and integration testing
+    
+     Integration Features:
+    - Seamless integration with Automation Service
+    - Learning system alert integration
+    - Resource monitoring alert triggers
+    - Performance analysis alert generation
+    - Error handling alert notifications
+    - Resilience system alert coordination
+    
+     Monitoring & Analytics:
+    - Real-time alert statistics
+    - Channel success/failure tracking
+    - Alert history and trends
+    - Performance metrics
+    - System health monitoring
+    - Comprehensive reporting
+    
+    This completes Step 4 of the AGI learning automation roadmap!
+
+[33mcommit 76c3cd5af3f9a27bb72007b6a591a35415a5ead4[m
+Author: Anh Nguyen <anhnguyen.nk86@gmail.com>
+Date:   Sun Sep 28 13:13:25 2025 +0700
+
+    feat(alerting): implement advanced multi-channel alerting system
+    
+     Advanced Multi-Channel Alerting System for AGI
+    -  AlertManager: Comprehensive alert orchestration
+    -  Multi-Channel Support: Email, Desktop, Telegram, SMS, Webhook
+    -  Learning-Specific Alerts: AGI evolution milestones, performance degradation
+    -  Intelligent Filtering: Rate limiting, cooldowns, severity-based routing
+    -  Rich Templates: HTML emails, Telegram formatting, context-aware alerts
+    -  CLI Management: Test alerts, view statistics, configure channels
+    -  Integration: Seamless integration with learning automation service
+    
+     Alert Manager Features:
+    - Multi-channel notification support (Email, Desktop, Telegram, SMS, Webhook)
+    - Intelligent alert filtering and rate limiting
+    - Rich HTML email templates with charts and metrics
+    - Smart notification scheduling and escalation
+    - Alert acknowledgment and resolution tracking
+    - Comprehensive alert analytics and statistics
+    - AGI-specific alert templates and thresholds
+    
+     Email Notifications:
+    - Rich HTML email templates with embedded metrics
+    - Plain text fallback for compatibility
+    - SMTP configuration with Gmail support
+    - Contextual information and action buttons
+    - Professional formatting with severity-based colors
+    
+     Desktop Notifications:
+    - Cross-platform desktop notifications via plyer
+    - Toast notifications with custom icons
+    - Non-intrusive popup alerts
+    - Automatic timeout and dismissal
+    
+     Telegram Integration:
+    - Markdown-formatted messages with emojis
+    - Contextual information and metrics
+    - Bot token and chat ID configuration
+    - Rich formatting with severity indicators
+    
+     SMS Alerts (Twilio):
+    - Critical alert SMS notifications
+    - Character-limited message formatting
+    - Twilio integration with phone number support
+    - High-priority alert escalation
+    
+     Webhook Support:
+    - JSON payload webhook notifications
+    - Custom headers and authentication
+    - Configurable endpoint URLs
+    - Structured alert data format
+    
+     Learning-Specific Alerts:
+    - AGI evolution milestone notifications
+    - Performance degradation detection
+    - Resource exhaustion warnings
+    - Learning session failure alerts
+    - Accuracy and error rate monitoring
+    - Training time and efficiency tracking
+    
+     Intelligent Features:
+    - Rate limiting per alert type (configurable)
+    - Cooldown periods to prevent spam
+    - Severity-based channel routing
+    - Template-based alert formatting
+    - Context-aware alert generation
+    - Automatic escalation policies
+    
+     CLI Management:
+    - Test alert functionality across channels
+    - View comprehensive alert statistics
+    - Configure notification channels
+    - Monitor alert system health
+    - Learning-specific alert testing
+    - Performance and integration testing
+    
+     Integration Features:
+    - Seamless integration with Automation Service
+    - Learning system alert integration
+    - Resource monitoring alert triggers
+    - Performance analysis alert generation
+    - Error handling alert notifications
+    - Resilience system alert coordination
+    
+     Monitoring & Analytics:
+    - Real-time alert statistics
+    - Channel success/failure tracking
+    - Alert history and trends
+    - Performance metrics
+    - System health monitoring
+    - Comprehensive reporting
+    
+    This completes Step 4 of the AGI learning automation roadmap!
+
+[33mcommit 55611aaedb055b940eaa8e887385618fa94e78c7[m
+Author: Anh Nguyen <anhnguyen.nk86@gmail.com>
+Date:   Tue Sep 23 11:56:32 2025 +0700
+
+    Backup before restructure - Phase 1: Safe cleanup
+
+[33mcommit cdeacdf7696c88d6b90a005dedf914348eb9f377[m
+Author: Anh Nguyen <anhnguyen.nk86@gmail.com>
+Date:   Tue Sep 23 11:56:32 2025 +0700
+
+    Backup before restructure - Phase 1: Safe cleanup
+
+[33mcommit f56a5b935d082a636926e9f296dcefd4b6a1f5f4[m
+Author: Anh Nguyen <anhnguyen.nk86@gmail.com>
+Date:   Fri Sep 19 00:05:39 2025 +0700
+
+    chore(security): add guardrails (.cursorrules, pre-commit, gitleaks, gitignore, CI)
+
+[33mcommit 795ffb241c813898553b83efd97995955e1b5dab[m
+Author: Anh Nguyen <anhnguyen.nk86@gmail.com>
+Date:   Fri Sep 19 00:05:39 2025 +0700
+
+    chore(security): add guardrails (.cursorrules, pre-commit, gitleaks, gitignore, CI)

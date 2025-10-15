@@ -5,7 +5,6 @@ StillMe IPC Learning Proposals Manager
 Manager for learning proposals with database operations.
 """
 
-from typing import TYPE_CHECKING
 import json
 import logging
 import uuid

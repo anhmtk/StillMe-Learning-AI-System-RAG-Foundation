@@ -17,7 +17,6 @@ AgentDev-Guardflow Surgeon v3: Tests for upgraded guard
 """
 
 
-
 def test_luhn_check():
     """Test Luhn algorithm for credit card validation"""
     # Valid credit card numbers

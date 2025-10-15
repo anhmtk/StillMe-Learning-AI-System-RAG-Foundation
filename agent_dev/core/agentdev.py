@@ -8,13 +8,8 @@ import os
 from typing import Any
 
 if TYPE_CHECKING:
-    from agent_dev.core.executor import Executor
-    from agent_dev.core.planner import Planner
-    from agent_dev.monitoring.metrics import MetricsCollector
     # from agent_dev.persistence.models import create_memory_database, get_session_factory
-    from agent_dev.persistence.repo import FeedbackRepo, MetricRepo, RuleRepo
-    from agent_dev.rules.engine import RuleEngine
-    from agent_dev.security.defense import SecurityDefense
+    pass
 
 
 class AgentDev:

@@ -521,7 +521,6 @@ class AIManager:
     def _get_recent_files(self) -> list[str]:
         """Get recently modified files"""
         try:
-
             result = subprocess.run(
                 ["git", "log", "--name-only", "--oneline", "-10"],
                 capture_output=True,
@@ -541,7 +540,6 @@ class AIManager:
     def _get_test_status(self) -> dict[str, Any]:
         """Get current test status"""
         try:
-
             result = subprocess.run(
                 ["python", "-m", "pytest", "--collect-only", "-q"],
                 capture_output=True,

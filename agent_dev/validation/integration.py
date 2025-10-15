@@ -51,25 +51,36 @@ class AgentDevIntegration:
     def _default_end_fix_session(self, session: Any) -> Any:
         return None
 
-    def wrap_agentdev_function(self, original_function: Callable[..., Any]) -> Callable[..., Any]:
+    def wrap_agentdev_function(
+        self, original_function: Callable[..., Any]
+    ) -> Callable[..., Any]:
         """Wrap một function của AgentDev với validation"""
 
         def wrapped_function(*args: Any, **kwargs: Any) -> Any:
             # Validation trước khi chạy
-            before_data: dict[str, Any] = getattr(self.validator, 'validate_before_fix', self._default_validate_before_fix)()
+            before_data: dict[str, Any] = getattr(
+                self.validator, "validate_before_fix", self._default_validate_before_fix
+            )()
 
             # Chạy function gốc
             result: Any = original_function(*args, **kwargs)
 
             # Validation sau khi chạy
-            after_result: Any = getattr(self.validator, 'validate_after_fix', self._default_validate_after_fix)(before_data)
+            after_result: Any = getattr(
+                self.validator, "validate_after_fix", self._default_validate_after_fix
+            )(before_data)
 
             # Log kết quả
             self.integration_log.append(
                 {
                     "function": original_function.__name__,
                     "before_data": before_data,
-                    "after_result": cast(dict[str, Any], after_result.__dict__ if after_result and hasattr(after_result, '__dict__') else {}),
+                    "after_result": cast(
+                        dict[str, Any],
+                        after_result.__dict__
+                        if after_result and hasattr(after_result, "__dict__")
+                        else {},
+                    ),
                     "timestamp": time.time(),
                 }
             )
@@ -86,13 +97,21 @@ class AgentDevIntegration:
                 print(f"🔍 VALIDATION: Bắt đầu {func.__name__}")
 
                 # Validation trước
-                before_data: dict[str, Any] = getattr(self.validator, 'validate_before_fix', self._default_validate_before_fix)()
+                before_data: dict[str, Any] = getattr(
+                    self.validator,
+                    "validate_before_fix",
+                    self._default_validate_before_fix,
+                )()
 
                 # Chạy function
                 result: Any = func(*args, **kwargs)
 
                 # Validation sau
-                after_result: Any = getattr(self.validator, 'validate_after_fix', self._default_validate_after_fix)(before_data)
+                after_result: Any = getattr(
+                    self.validator,
+                    "validate_after_fix",
+                    self._default_validate_after_fix,
+                )(before_data)
 
                 # Hiển thị kết quả
                 self._display_validation_result(
@@ -112,10 +131,18 @@ class AgentDevIntegration:
         print(f"\n📊 KẾT QUẢ VALIDATION CHO {function_name.upper()}")
         print("-" * 50)
         print(f"🔢 Lỗi trước: {before_data['total_errors']}")
-        print(f"🔢 Lỗi sau: {result.after_errors if hasattr(result, 'after_errors') else 'N/A'}")
-        print(f"✅ Đã sửa: {result.errors_fixed if hasattr(result, 'errors_fixed') else 'N/A'}")
-        print(f"🎯 Thành công: {'✅' if (hasattr(result, 'success') and result.success) else '❌'}")
-        print(f"📁 Bằng chứng: {', '.join(result.evidence_files) if hasattr(result, 'evidence_files') else 'N/A'}")
+        print(
+            f"🔢 Lỗi sau: {result.after_errors if hasattr(result, 'after_errors') else 'N/A'}"
+        )
+        print(
+            f"✅ Đã sửa: {result.errors_fixed if hasattr(result, 'errors_fixed') else 'N/A'}"
+        )
+        print(
+            f"🎯 Thành công: {'✅' if (hasattr(result, 'success') and result.success) else '❌'}"
+        )
+        print(
+            f"📁 Bằng chứng: {', '.join(result.evidence_files) if hasattr(result, 'evidence_files') else 'N/A'}"
+        )
         print("-" * 50)
 
     def run_agentdev_with_validation(
@@ -126,7 +153,9 @@ class AgentDevIntegration:
         print("=" * 60)
 
         # Bắt đầu session
-        session: Any = getattr(self.honest_agent, 'start_fix_session', self._default_start_fix_session)(f"AgentDev: {agentdev_function.__name__}")
+        session: Any = getattr(
+            self.honest_agent, "start_fix_session", self._default_start_fix_session
+        )(f"AgentDev: {agentdev_function.__name__}")
 
         try:
             # Chạy function với validation
@@ -134,7 +163,9 @@ class AgentDevIntegration:
             result: Any = wrapped_function(*args, **kwargs)
 
             # Kết thúc session
-            validation_result: Any = getattr(self.honest_agent, 'end_fix_session', self._default_end_fix_session)(session)
+            validation_result: Any = getattr(
+                self.honest_agent, "end_fix_session", self._default_end_fix_session
+            )(session)
 
             return result, validation_result
 
@@ -162,7 +193,9 @@ class AgentDevIntegration:
 
         for log in self.integration_log:
             after_result: Any = log["after_result"]
-            total_fixes += after_result["errors_fixed"] if "errors_fixed" in after_result else 0
+            total_fixes += (
+                after_result["errors_fixed"] if "errors_fixed" in after_result else 0
+            )
             if after_result.get("success", False):
                 successful_fixes += 1
 
@@ -193,7 +226,9 @@ def with_validation(project_root: str = ".") -> Any:
 
 
 # Hàm tiện ích để chạy AgentDev với validation
-def run_agentdev_honest(agentdev_function: Callable[..., Any], *args: Any, **kwargs: Any) -> tuple[Any, Any] | tuple[None, None]:
+def run_agentdev_honest(
+    agentdev_function: Callable[..., Any], *args: Any, **kwargs: Any
+) -> tuple[Any, Any] | tuple[None, None]:
     """Chạy AgentDev function với validation tự động"""
     integration = AgentDevIntegration()
     return integration.run_agentdev_with_validation(agentdev_function, *args, **kwargs)

@@ -5,7 +5,6 @@ Task: Create a simple test file for conflict resolution
 Generated at: 2025-09-29 22:37:38
 """
 
-from typing import TYPE_CHECKING
 import sys
 
 
