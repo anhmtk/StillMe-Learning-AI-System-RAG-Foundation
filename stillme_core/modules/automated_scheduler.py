@@ -26,9 +26,12 @@ from apscheduler.triggers.interval import IntervalTrigger
 class SchedulerConfig:
     """Configuration for automated scheduler"""
 
-    # Daily learning schedule
-    daily_learning_time: str = "09:00"  # 9:00 AM daily
+    # Daily learning schedule - 12 times per day (every 2 hours)
+    daily_learning_times: list[str] = None  # Will be set to 12 times
     daily_learning_timezone: str = "Asia/Ho_Chi_Minh"
+    
+    # Auto-learning interval (every 2 hours = 120 minutes)
+    auto_learning_interval: int = 120  # 2 hours in minutes
 
     # Weekly analysis schedule
     weekly_analysis_day: int = 0  # Monday (0=Monday, 1=Tuesday, etc.)
@@ -53,6 +56,14 @@ class AutomatedScheduler:
 
     def __init__(self, config: SchedulerConfig | None = None):
         self.config = config or SchedulerConfig()
+        
+        # Set up 12 learning times per day (every 2 hours)
+        if self.config.daily_learning_times is None:
+            self.config.daily_learning_times = [
+                "00:00", "02:00", "04:00", "06:00", "08:00", "10:00",
+                "12:00", "14:00", "16:00", "18:00", "20:00", "22:00"
+            ]
+        
         self.logger = logging.getLogger(__name__)
         self.scheduler = None
         self.framework = None
@@ -61,7 +72,7 @@ class AutomatedScheduler:
 
         # Job statistics
         self.job_stats = {
-            "daily_learning": {"executed": 0, "failed": 0, "last_run": None},
+            "auto_learning": {"executed": 0, "failed": 0, "last_run": None},
             "weekly_analysis": {"executed": 0, "failed": 0, "last_run": None},
             "monthly_improvement": {"executed": 0, "failed": 0, "last_run": None},
             "health_check": {"executed": 0, "failed": 0, "last_run": None},
@@ -179,7 +190,7 @@ class AutomatedScheduler:
 
             self.logger.info("🚀 AutomatedScheduler started successfully")
             self.logger.info(
-                f"📅 Daily learning scheduled at: {self.config.daily_learning_time}"
+                f"📅 Auto learning scheduled 12 times per day: {', '.join(self.config.daily_learning_times)}"
             )
             self.logger.info(
                 f"📊 Weekly analysis scheduled: {self.config.weekly_analysis_day} at {self.config.weekly_analysis_time}"
@@ -201,19 +212,21 @@ class AutomatedScheduler:
                 self.logger.warning("Scheduler not initialized")
                 return
 
-            # Daily learning session
-            self.scheduler.add_job(
-                func=self._run_daily_learning_session,
-                trigger=CronTrigger(
-                    hour=int(self.config.daily_learning_time.split(":")[0]),
-                    minute=int(self.config.daily_learning_time.split(":")[1]),
-                    timezone=self.config.daily_learning_timezone,
-                ),
-                id="daily_learning",
-                name="Daily Learning Session",
-                replace_existing=True,
-                max_instances=1,
-            )
+            # Auto learning sessions - 12 times per day (every 2 hours)
+            for i, time_str in enumerate(self.config.daily_learning_times):
+                hour, minute = time_str.split(":")
+                self.scheduler.add_job(
+                    func=self._run_auto_learning_session,
+                    trigger=CronTrigger(
+                        hour=int(hour),
+                        minute=int(minute),
+                        timezone=self.config.daily_learning_timezone,
+                    ),
+                    id=f"auto_learning_{i}",
+                    name=f"Auto Learning Session {i+1}",
+                    replace_existing=True,
+                    max_instances=1,
+                )
 
             # Weekly analysis
             if self.scheduler:
@@ -264,57 +277,103 @@ class AutomatedScheduler:
             self.logger.error(f"❌ Failed to add scheduled jobs: {e}")
             raise
 
-    async def _run_daily_learning_session(self):
-        """Run daily learning session"""
+    async def _run_auto_learning_session(self):
+        """Run auto learning session (every 2 hours)"""
         try:
-            self.logger.info("🧠 Starting scheduled daily learning session...")
+            self.logger.info("🧠 Starting scheduled auto learning session...")
 
-            if not self.learning_manager:
-                self.logger.warning(
-                    "⚠️ Learning manager not available, skipping session"
-                )
-                return
-
-            # Select today's cases
-            today_cases = self.learning_manager.select_today_cases(max_cases=3)
-
-            if not today_cases:
-                self.logger.info("ℹ️ No learning cases available for today")
-                return
-
-            # Run learning session
-            total_score = 0
-            session_results = []
-
-            for case in today_cases:
-                # Mock response for automated session
-                response = f"Automated response for: {case.question}. This includes keywords: {', '.join(case.expected_keywords[:2])}."
-                score = 7.0  # Mock score
-
-                # Record response
-                self.learning_manager.record_response(
-                    case_id=case.id,
-                    response=response,
-                    score=score,
-                    feedback="Automated learning session",
-                )
-
-                total_score += score
-                session_results.append(
-                    {"case_id": case.id, "question": case.question, "score": score}
-                )
-
-            avg_score = total_score / len(today_cases)
-
-            # Run improvement analysis
-            improvement_result = self.learning_manager.run_learning_improvement_cycle()
-
-            self.logger.info(
-                f"✅ Daily learning session completed - Avg score: {avg_score:.1f}/10"
+            # Import learning components
+            from stillme_core.learning.proposals_manager import ProposalsManager
+            from stillme_core.learning.evolutionary_learning_system import EvolutionaryLearningSystem
+            
+            proposals_manager = ProposalsManager()
+            learning_system = EvolutionaryLearningSystem()
+            
+            # 1. Auto-approve pending proposals (if any)
+            all_proposals = proposals_manager.get_all_proposals()
+            pending_proposals = [p for p in all_proposals if p.status == "pending"]
+            
+            if pending_proposals:
+                self.logger.info(f"🔄 Found {len(pending_proposals)} pending proposals, auto-approving...")
+                for proposal in pending_proposals[:3]:  # Auto-approve max 3
+                    try:
+                        proposals_manager.approve_proposal(proposal.id, "auto_scheduler")
+                        self.logger.info(f"✅ Auto-approved: {proposal.title}")
+                        
+                        # Start learning session
+                        session_id = learning_system.start_learning_session(
+                            proposal_id=proposal.id,
+                            title=proposal.title
+                        )
+                        self.logger.info(f"🚀 Started learning session: {session_id}")
+                        
+                    except Exception as e:
+                        self.logger.error(f"❌ Failed to auto-approve {proposal.title}: {e}")
+            
+            # 2. Create new auto-proposals from learning sources
+            self.logger.info("📚 Creating new auto-proposals from learning sources...")
+            
+            # Import learning sources
+            from stillme_core.learning.sources import (
+                HackerNewsSource, RedditSource, GitHubSource, 
+                TechCrunchSource, TheVergeSource, ArXivSource,
+                NewsSource, StackOverflowSource, MediumSource
             )
-            self.logger.info(
-                f"📈 Improvement suggestions: {improvement_result.get('suggestions_count', 0)}"
-            )
+            
+            sources = [
+                HackerNewsSource(), RedditSource(), GitHubSource(),
+                TechCrunchSource(), TheVergeSource(), ArXivSource(),
+                NewsSource(), StackOverflowSource(), MediumSource()
+            ]
+            
+            new_proposals_created = 0
+            for source in sources:
+                try:
+                    # Fetch content from source
+                    content_list = await source.fetch_content(limit=1)
+                    
+                    for content in content_list:
+                        # Create auto-proposal
+                        proposal = proposals_manager.create_proposal(
+                            title=content.title,
+                            description=content.description,
+                            learning_objectives=[f"Learn about {content.title}"],
+                            prerequisites=[],
+                            expected_outcomes=[f"Understand {content.title}"],
+                            estimated_duration=60,
+                            quality_score=0.7,
+                            source=source.name.lower(),
+                            priority="medium",
+                            risk_assessment={"level": "low", "notes": f"Auto-generated from {source.name}"}
+                        )
+                        
+                        # Auto-approve and start learning
+                        proposals_manager.approve_proposal(proposal.id, "auto_scheduler")
+                        session_id = learning_system.start_learning_session(
+                            proposal_id=proposal.id,
+                            title=proposal.title
+                        )
+                        
+                        new_proposals_created += 1
+                        self.logger.info(f"✅ Created and started: {content.title}")
+                        
+                        if new_proposals_created >= 2:  # Max 2 new proposals per session
+                            break
+                    
+                    if new_proposals_created >= 2:
+                        break
+                        
+                except Exception as e:
+                    self.logger.warning(f"⚠️ Failed to fetch from {source.name}: {e}")
+                    continue
+            
+            self.logger.info(f"🎯 Auto learning session completed: {new_proposals_created} new proposals created")
+            
+            # Update job statistics
+            self.job_stats["auto_learning"]["executed"] += 1
+            self.job_stats["auto_learning"]["last_run"] = datetime.now().isoformat()
+            
+            self.logger.info("✅ Auto learning session completed successfully!")
 
         except Exception as e:
             self.logger.error(f"❌ Daily learning session failed: {e}")
@@ -440,7 +499,8 @@ class AutomatedScheduler:
             "jobs": job_info,
             "job_stats": self.job_stats,
             "config": {
-                "daily_learning_time": self.config.daily_learning_time,
+                "daily_learning_times": self.config.daily_learning_times,
+                "auto_learning_interval": self.config.auto_learning_interval,
                 "weekly_analysis_day": self.config.weekly_analysis_day,
                 "monthly_improvement_day": self.config.monthly_improvement_day,
                 "health_check_interval": self.config.health_check_interval,

@@ -1,0 +1,35 @@
+[33mcommit 1f4f57b6f2cb440e285dc8e6b8d27829e6098cb1[m
+Author: anhmtk <anhnguyen.nk86@gmail.com>
+Date:   Fri Oct 10 23:42:46 2025 +0700
+
+    feat: implement 3-source learning system
+    
+    - Add Community Learning System with GitHub voting mechanism
+    - Add Dashboard Input System for manual knowledge ingestion
+    - Update Learning Dashboard with new UI for 3 learning sources
+    - Add API endpoints for dashboard input and community proposals
+    - Support Text, Link, Image, Video input types
+    - Implement vote threshold system (50-70 votes for auto-learning)
+    - Add comprehensive statistics and monitoring
+    
+    Learning Sources:
+    1. Trusted Sources (RSS/APIs) - Complete
+    2. Dashboard Input (Manual) - Complete
+    3. Community GitHub (Voting) - Complete
+    
+    Features:
+    - Dashboard input: Text, Link, Image, Video support
+    - Community proposals: Vote system with auto-approval
+    - Real-time statistics and monitoring
+    - API integration with existing learning pipeline
+    - Comprehensive error handling and logging
+
+M	README.md
+M	dashboards/streamlit/pages/learning_dashboard.py
+M	stillme_api/main.py
+M	stillme_core/__init__.py
+M	stillme_core/learning/__init__.py
+A	stillme_core/learning/community_learning_system.py
+M	stillme_core/learning/daily_training_session.py
+A	stillme_core/learning/dashboard_input_system.py
+M	test_phase1_integration.py

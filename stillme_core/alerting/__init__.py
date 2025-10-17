@@ -32,12 +32,12 @@ from .alert_manager import (
     get_alert_manager,
     send_alert,
 )
-from .learning_alerts import (
-    LearningAlertManager,
-    LearningMetrics,
-    check_learning_alerts,
-    get_learning_alert_manager,
-)
+# from .learning_alerts import (
+#     LearningAlertManager,
+#     LearningMetrics,
+#     check_learning_alerts,
+#     get_learning_alert_manager,
+# )
 
 __all__ = [
     # Alert Manager
@@ -52,11 +52,11 @@ __all__ = [
     "WebhookNotifier",
     "get_alert_manager",
     "send_alert",
-    # Learning Alerts
-    "LearningAlertManager",
-    "LearningMetrics",
-    "get_learning_alert_manager",
-    "check_learning_alerts",
+    # Learning Alerts (temporarily disabled)
+    # "LearningAlertManager",
+    # "LearningMetrics",
+    # "get_learning_alert_manager",
+    # "check_learning_alerts",
 ]
 
 __version__ = "2.0.0"
