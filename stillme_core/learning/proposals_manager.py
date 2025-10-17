@@ -7,6 +7,7 @@ Manager for learning proposals with database operations.
 
 import json
 import logging
+import sqlite3
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -129,25 +130,46 @@ class ProposalsManager:
             proposals = []
 
             for row in rows:
-                # Handle None values safely
-                learning_objectives = row[7] if row[7] else "[]"
-                prerequisites = row[8] if row[8] else "[]"
-                expected_outcomes = row[9] if row[9] else "[]"
-                risk_assessment = row[10] if row[10] else "{}"
+                # Handle None values safely and convert to string
+                learning_objectives = str(row[7]) if row[7] is not None else "[]"
+                prerequisites = str(row[8]) if row[8] is not None else "[]"
+                expected_outcomes = str(row[9]) if row[9] is not None else "[]"
+                risk_assessment = str(row[10]) if row[10] is not None else "{}"
 
                 try:
+                    # Safe JSON parsing with fallback
+                    try:
+                        learning_objectives_parsed = json.loads(learning_objectives)
+                    except:
+                        learning_objectives_parsed = []
+                    
+                    try:
+                        prerequisites_parsed = json.loads(prerequisites)
+                    except:
+                        prerequisites_parsed = []
+                    
+                    try:
+                        expected_outcomes_parsed = json.loads(expected_outcomes)
+                    except:
+                        expected_outcomes_parsed = []
+                    
+                    try:
+                        risk_assessment_parsed = json.loads(risk_assessment)
+                    except:
+                        risk_assessment_parsed = {}
+                    
                     proposal = LearningProposal(
                         id=row[0],
                         title=row[1],
                         description=row[2],
-                        learning_objectives=json.loads(learning_objectives),
-                        prerequisites=json.loads(prerequisites),
-                        expected_outcomes=json.loads(expected_outcomes),
+                        learning_objectives=learning_objectives_parsed,
+                        prerequisites=prerequisites_parsed,
+                        expected_outcomes=expected_outcomes_parsed,
                         estimated_duration=row[6],
                         quality_score=row[11],
                         source=row[4],
                         priority=row[5],
-                        risk_assessment=json.loads(risk_assessment),
+                        risk_assessment=risk_assessment_parsed,
                         status=row[14],
                         created_at=datetime.fromisoformat(row[12]),
                     )

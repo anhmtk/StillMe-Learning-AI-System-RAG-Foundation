@@ -15,14 +15,16 @@ from typing import Dict, Any, Optional
 from pathlib import Path
 import sys
 
+if TYPE_CHECKING:
+    from .proposals_manager import ProposalsManager
+
 # Add project root to path
 project_root = Path(__file__).resolve().parents[2]
 sys.path.append(str(project_root))
 
 if TYPE_CHECKING:
     from stillme_core.learning.proposals_manager import ProposalsManager
-if TYPE_CHECKING:
-    from stillme_core.alerting.alerting_system import AlertingSystem
+    # from stillme_core.alerting.alerting_system import AlertingSystem  # Temporarily disabled
 
 # Configure logging
 logging.basicConfig(
@@ -31,14 +33,56 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+class SimpleAlertingSystem:
+    """Simple alerting system for learning notifications"""
+    
+    def __init__(self):
+        self.logger = logging.getLogger(__name__)
+    
+    def send_alert(self, title: str, message: str, level: str = "info"):
+        """Send learning alert"""
+        self.logger.info(f"📢 LEARNING ALERT [{level.upper()}]: {title} - {message}")
+        
+        # Send real notifications
+        try:
+            from stillme_core.alerting.alert_manager import send_alert
+            import asyncio
+            
+            # Send to all channels
+            asyncio.create_task(send_alert(
+                title=title,
+                message=message,
+                source="learning_system",
+                channels=["telegram", "email", "desktop"]
+            ))
+            
+        except Exception as e:
+            self.logger.warning(f"Failed to send notification: {e}")
+
+
 class EvolutionaryLearningSystem:
     """Hệ thống học tập tiến hóa với real learning sessions"""
 
     def __init__(self) -> None:
+        from .proposals_manager import ProposalsManager
         self.proposals_manager = ProposalsManager()
-        self.alerting_system = AlertingSystem()
+        # Simple alerting system
+        self.alerting_system = SimpleAlertingSystem()
         self.active_sessions = {}  # session_id -> session_data
         self.learning_threads = {}  # session_id -> thread
+
+    def get_active_sessions(self) -> Dict[str, Any]:
+        """Get all active learning sessions"""
+        return self.active_sessions
+
+    def start_learning_session(self, proposal_id: str, title: str) -> str:
+        """Start a learning session for a proposal"""
+        return self.start_session(
+            proposal_id=proposal_id,
+            title=title,
+            objectives=[f"Learn about {title}"],
+            estimated_duration=60
+        )
 
     def start_session(
         self, proposal_id: str, title: str, objectives: list, estimated_duration: int
@@ -54,11 +98,14 @@ class EvolutionaryLearningSystem:
                 "title": title,
                 "objectives": objectives,
                 "estimated_duration": estimated_duration,
-                "started_at": datetime.now(),
+                "started_at": datetime.now().isoformat(),
                 "progress": 0,
                 "status": "learning",
                 "current_objective": 0,
+                "total_objectives": len(objectives),
                 "learning_notes": [],
+                "source": "manual",
+                "quality_score": 0.8,
             }
 
             # Lưu session vào active sessions
