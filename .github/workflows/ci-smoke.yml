@@ -1,0 +1,65 @@
+name: CI – Smoke
+
+on:
+  pull_request:
+    paths:
+      - "tests/test_*smoke*.py"
+      - "tests/test_*canary*.py"
+      - "pytest.ini"
+      - "stillme_core/**"
+      - "agent_dev/**"
+      - "framework.py"
+  push:
+    branches: [ main ]
+    paths:
+      - "tests/test_*smoke*.py"
+      - "tests/test_*canary*.py"
+      - "pytest.ini"
+      - "stillme_core/**"
+      - "agent_dev/**"
+      - "framework.py"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+          
+      - name: Install dependencies
+        run: |
+          pip install -e . || true
+          pip install pytest
+          
+      - name: Run smoke tests
+        run: |
+          pytest -q -k "smoke or canary"
+        env:
+          STILLME_DRY_RUN: "1"
+          
+      - name: Run learning smoke only
+        run: |
+          pytest -q tests/test_learning_smoke.py
+        env:
+          STILLME_DRY_RUN: "1"
+          
+      - name: Run framework smoke only
+        run: |
+          pytest -q tests/test_framework_smoke.py
+        env:
+          STILLME_DRY_RUN: "1"

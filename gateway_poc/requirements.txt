@@ -1,7 +1,17 @@
+ dependabot/pip/uvicorn-standard--0.37.0
 fastapi==0.104.1
+uvicorn[standard]==0.37.0
+
+fastapi==0.119.0
 uvicorn[standard]==0.24.0
-httpx==0.25.2
+ dependabot/pip/httpx-0.28.1
+httpx==0.28.1
 redis==5.0.1
-pydantic==2.5.0
-python-multipart==0.0.6
-aiofiles==23.2.1
+
+ main
+httpx==0.25.2
+redis==6.4.0
+ main
+pydantic==2.12.1
+python-multipart==0.0.20
+aiofiles==25.1.0
