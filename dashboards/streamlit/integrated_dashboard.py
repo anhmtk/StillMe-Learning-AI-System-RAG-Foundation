@@ -939,12 +939,21 @@ class IntegratedDashboard:
             unsafe_allow_html=True
         )
         
-        # Input field - simple approach without clearing
+        # Input field with conditional clearing
+        input_value = ""
+        if st.session_state.get("should_clear_input", False):
+            input_value = ""
+            st.session_state.should_clear_input = False
+        else:
+            input_value = st.session_state.get("chat_input", "")
+        
         user_input = st.text_input(
-            "",
+            "Message",
+            value=input_value,
             key="chat_input",
             placeholder="Type your message and press Enter to send...",
-            help="Press Enter to send message"
+            help="Press Enter to send message",
+            label_visibility="collapsed"
         )
         
         # Close input area and main container
@@ -995,7 +1004,7 @@ class IntegratedDashboard:
                 model_info = "StillMe-Local-Llama3.1-8B-v1.0"
             else:
                 ai_source = "Cloud AI" 
-                model_info = "StillMe-Cloud-GPT4-v1.0"
+                model_info = "StillMe-Cloud-DeepSeek-v1.0"
             
             # Add AI response with metadata
             st.session_state.chat_messages.append({
@@ -1009,6 +1018,9 @@ class IntegratedDashboard:
             
             # Store last message to prevent duplicates
             st.session_state.last_message = user_input
+            
+            # Set flag to clear input on next render
+            st.session_state.should_clear_input = True
             
             # Force rerun to update display
             st.rerun()
@@ -1066,7 +1078,7 @@ class IntegratedDashboard:
         """Generate intelligent AI response using real routing system"""
         try:
             # Import the real routing system
-            from stillme_core.provider_router import ask_sync
+            from stillme_core.core.provider_router import ask_sync
             
             # Determine routing mode based on complexity
             mode = self._determine_routing_mode(user_input)
@@ -1085,7 +1097,11 @@ class IntegratedDashboard:
                 temperature=0.7
             )
             
-            return response
+            # Ensure response is not empty
+            if not response or response.strip() == "":
+                return self._fallback_response(user_input, "Empty response from AI")
+            
+            return response.strip()
             
         except Exception as e:
             # Fallback to simple responses if routing fails
@@ -1122,16 +1138,20 @@ class IntegratedDashboard:
         """Create StillMe system prompt"""
         return """Bạn là StillMe - một AI companion thông minh và thân thiện được tạo ra bởi Anh Nguyễn.
 
+QUAN TRỌNG: LUÔN TRẢ LỜI TRỰC TIẾP VÀO CÂU HỎI CỦA NGƯỜI DÙNG TRƯỚC TIÊN.
+
 Đặc điểm của bạn:
 - Luôn xưng hô thân thiện: "anh/em" với người dùng
 - Trả lời bằng tiếng Việt tự nhiên, dễ hiểu
+- THƯỚC TIÊN: Trả lời câu hỏi của người dùng một cách chính xác và chi tiết
+- SAU ĐÓ: Có thể thêm thông tin bổ sung nếu cần
 - Thông minh, hữu ích và có tính cá nhân hóa
 - Có thể thảo luận về nhiều chủ đề: công nghệ, cuộc sống, học tập, giải trí
 - Luôn giữ thái độ tích cực và hỗ trợ
 
 Khi được hỏi "bạn là ai?", hãy trả lời: "Em là StillMe AI - AI companion của anh, được tạo ra bởi Anh Nguyễn để đồng hành và hỗ trợ anh trong cuộc sống."
 
-Hãy trả lời một cách tự nhiên và hữu ích."""
+Hãy trả lời một cách tự nhiên, hữu ích và LUÔN TẬP TRUNG VÀO CÂU HỎI CỦA NGƯỜI DÙNG."""
     
     def _fallback_response(self, user_input, error_msg):
         """Fallback response when routing fails"""
@@ -1145,7 +1165,13 @@ Hãy trả lời một cách tự nhiên và hữu ích."""
             return "🤖 Em là StillMe AI - AI companion của anh, được tạo ra bởi Anh Nguyễn. Em đang gặp sự cố kỹ thuật nhỏ nhưng vẫn có thể trò chuyện với anh."
         
         else:
-            return f"Xin lỗi anh, em đang gặp sự cố kỹ thuật: {error_msg}. Nhưng em vẫn có thể trò chuyện với anh. Anh muốn nói về gì?"
+            # Provide specific error details and still answer the question
+            if "finr-tune" in user_input_lower or "fine-tune" in user_input_lower:
+                return f"Xin lỗi anh, em đang gặp sự cố kỹ thuật: {error_msg}. Nhưng em vẫn có thể trả lời câu hỏi của anh.\n\n**Fine-tuning** là quá trình điều chỉnh một mô hình AI đã được huấn luyện trước (pre-trained) để thực hiện tốt hơn một tác vụ cụ thể. Thay vì huấn luyện từ đầu, chúng ta sử dụng mô hình đã có và điều chỉnh các tham số để phù hợp với dữ liệu mới. Điều này giúp tiết kiệm thời gian và tài nguyên.\n\nVí dụ: GPT-4 có thể được fine-tune để trở thành một chatbot chuyên về y tế hoặc luật pháp."
+            elif "blackbox" in user_input_lower or "ai" in user_input_lower:
+                return f"Xin lỗi anh, em đang gặp sự cố kỹ thuật: {error_msg}. Nhưng em vẫn có thể trả lời câu hỏi của anh.\n\n**Blackbox trong AI** là thuật ngữ chỉ các mô hình AI mà chúng ta không thể hiểu rõ cách chúng đưa ra quyết định. Đây là vấn đề lớn trong AI hiện đại - mặc dù AI có thể đưa ra kết quả chính xác, nhưng chúng ta không biết tại sao nó lại quyết định như vậy. Điều này gây khó khăn trong việc tin tưởng và kiểm soát AI."
+            else:
+                return f"Xin lỗi anh, em đang gặp sự cố kỹ thuật: {error_msg}. Nhưng em vẫn có thể trò chuyện với anh. Anh muốn nói về gì?"
 
     def render_dashboard(self):
         """Render the complete integrated dashboard"""

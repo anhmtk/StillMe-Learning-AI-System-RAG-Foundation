@@ -187,7 +187,16 @@ class StillMeFramework:
         try:
             from stillme_core.modules.conversational_core_v1 import ConversationalCore
 
-            self.conversational_core = ConversationalCore()
+            # Create a simple persona engine placeholder
+            class SimplePersonaEngine:
+                def __init__(self):
+                    self.persona = "friendly_vietnamese"
+                
+                def adjust_response(self, response: str) -> str:
+                    return response
+
+            persona_engine = SimplePersonaEngine()
+            self.conversational_core = ConversationalCore(persona_engine=persona_engine)
         except ImportError:
             self.logger.warning("ConversationalCore not available")
 

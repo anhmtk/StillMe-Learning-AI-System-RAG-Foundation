@@ -1,41 +1,276 @@
-# 🌟 StillMe AI — Intelligent Personal Companion
+# 🌟 StillMe AI IPC — Bạn đồng hành thông minh (mời cộng đồng góp sức)
 
-[![CI Unit Tests](https://github.com/OWNER/REPO/actions/workflows/ci-unit.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/ci-unit.yml)
-[![CI Integration Tests](https://github.com/OWNER/REPO/actions/workflows/ci-integration.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/ci-integration.yml)
-[![CI Security Scans](https://github.com/OWNER/REPO/actions/workflows/ci-security.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/ci-security.yml)
-[![CI DAST Tests](https://github.com/OWNER/REPO/actions/workflows/ci-dast.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/ci-dast.yml)
-[![CD Staging](https://github.com/OWNER/REPO/actions/workflows/cd-staging.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/cd-staging.yml)
-[![CD Production](https://github.com/OWNER/REPO/actions/workflows/cd-prod.yml/badge.svg)](https://github.com/OWNER/REPO/actions/workflows/cd-prod.yml)
-[![Coverage](https://img.shields.io/badge/coverage-97%25+-green)](artifacts/coverage.html)
-[![Security](https://img.shields.io/badge/security-OWASP%20ASVS%20Level%202+-green)](docs/SECURITY_COMPLIANCE_MAP.md)
+[![Alpha](https://img.shields.io/badge/status-alpha-orange)](https://github.com/anhmtk/stillme_ai_ipc)
+[![Security-First](https://img.shields.io/badge/security-first-green)](docs/SECURITY_COMPLIANCE_MAP.md)
+[![Open to PRs](https://img.shields.io/badge/PRs-welcome-brightgreen)](CONTRIBUTING.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-**StillMe AI** is a comprehensive AI framework designed as an **Intelligent Personal Companion** with focus on **Ethics, Security, and Transparency**. The project includes a complete ecosystem with core framework, mobile/desktop applications, learning systems, and enterprise-grade security features.
+**StillMe AI IPC** là một AI companion thông minh được tạo ra bởi **Anh Nguyễn** với sự hỗ trợ lớn từ các tổ chức AI như OpenAI, Google, DeepSeek. Mục tiêu của là đồng hành và trở thành bạn bè với mọi người.
 
-> **Language note**: This README is written with AI assistance. If anything is unclear, please open an issue—I truly appreciate your help improving the docs.
+> **Lưu ý**: Dự án này đang trong giai đoạn alpha. Chúng tôi chia sẻ để nhận phản hồi sớm từ cộng đồng. Nếu bạn thấy tiềm năng, hãy giúp chúng tôi đưa nó đến mức production.
 
-## 📊 Project Overview
+## 🎯 Tầm nhìn & Sứ mệnh
 
-StillMe AI is a comprehensive AI framework with **100+ modules** across multiple components:
+**Tầm nhìn**: Tạo ra một AI companion thực sự thông minh, có thể tự học và tự tiến hóa, đồng thời duy trì an toàn và đạo đức.
 
-### Core Statistics
-- **Total Modules**: 100+ (72 in `stillme_core/`, 25 in `modules/`, 3 in `stillme_ethical_core/`)
-- **Project Size**: 22.89 MB (optimized from 5.3GB)
-- **File Count**: 1,036 files across 156 directories
-- **Complexity Level**: 8.5/10 (Enterprise-grade)
-- **Test Coverage**: 97.9% (comprehensive test suite)
+**Sứ mệnh**: 
+- 🤖 **Tự học & Tự tiến hóa**: StillMe có thể tự đề xuất và học kiến thức mới
+- 🛡️ **An toàn & Minh bạch**: Mọi quyết định học tập đều có thể kiểm soát và giám sát
+- 👥 **Cộng đồng**: Mở cửa cho cộng đồng đóng góp và phát triển
+- 🌍 **Toàn cầu**: Hỗ trợ đa ngôn ngữ, đặc biệt là tiếng Việt
+
+## 🚀 Điểm độc đáo của StillMe
+
+### 🤖 AgentDev (Alpha) - Trưởng phòng Kỹ thuật AI
+- **Tư duy Senior**: Phân tích tác động, suy nghĩ bảo mật, đánh giá kinh doanh
+- **Tự động hóa**: Giám sát hệ thống 24/7, tự động sửa lỗi, tối ưu hiệu suất
+- **Học từ kinh nghiệm**: Rút kinh nghiệm từ các lần thực hiện trước
+- **Trạng thái**: Chạy được nền tảng, còn thiếu một số module nâng cao
+
+### 🧠 Hệ thống Router thông minh
+- **Local AI trước**: Ưu tiên AI local (Llama3.1-8B) cho câu hỏi đơn giản
+- **Cloud AI khi cần**: Tự động chuyển sang DeepSeek cho câu hỏi phức tạp
+- **Fallback thông minh**: Luôn có phản hồi dự phòng khi gặp lỗi
+- **Trạng thái**: Hoạt động ổn định, đã tích hợp vào dashboard
+
+### 🧠 Trí nhớ phân tầng (Beta)
+- **Short-term**: Ghi nhớ cuộc trò chuyện hiện tại
+- **Mid-term**: Lưu trữ kiến thức trong vài ngày
+- **Long-term**: Lưu trữ kiến thức lâu dài với mã hóa
+- **Trạng thái**: Simple mode hoạt động, consolidation đang phát triển
+
+### 📚 Hệ thống học tập tiến hóa (WIP)
+- **Tự đề xuất**: StillMe tự tìm và đề xuất kiến thức mới mỗi 2 giờ
+- **12 nguồn học**: HN, Reddit, GitHub, TechCrunch, ArXiv, News, Stack Overflow, Medium, Academic, YouTube, Subreddits
+- **Phê duyệt thông minh**: Tự động phê duyệt nội dung an toàn, yêu cầu xem xét nội dung nhạy cảm
+- **Trạng thái**: Đang khôi phục từng phần, một số nguồn chưa hoạt động
+
+## 📊 Trạng thái hiện tại
+
+### ✅ Đã hoàn thành
+- [x] API server chạy ổn định trên port 8000
+- [x] Dashboard Streamlit hoạt động trên port 8529
+- [x] Chat interface với StillMe (local + cloud AI)
+- [x] Router system hoạt động (local → cloud fallback)
+- [x] Database SQLite cho proposals và sessions
+- [x] Authentication system cơ bản
+- [x] Environment protection (.env policy)
+
+### 🔄 Đang phát triển
+- [ ] Notifications (email/Telegram) cần hoàn thiện
+- [ ] 12 learning sources: đang restore từng phần
+- [ ] Community voting: chưa bật công khai
+- [ ] Mobile app: cần cập nhật UI/UX
+- [ ] Desktop app: cần tích hợp với hệ thống mới
+
+### ⚠️ Vấn đề đã biết
+- [ ] Một số learning sources chưa hoạt động (ArXiv, Medium)
+- [ ] Notification system cần cấu hình thêm
+- [ ] Dashboard UX cần cải thiện (chat panel, responsive)
+- [ ] Community features chưa hoàn thiện
+
+## 🚀 Thử ngay (Quick Start)
+
+### Windows (Đơn giản nhất)
+```bash
+# 1. Clone repository
+git clone https://github.com/anhmtk/stillme_ai_ipc.git
+cd stillme_ai_ipc
+
+# 2. Cài đặt dependencies
+pip install -r requirements.txt
+
+# 3. Chạy auto-start scripts
+start_dashboard.bat    # Mở dashboard
+start_api_server.bat   # Mở API server (terminal khác)
+```
+
+### Linux/macOS
+```bash
+# 1. Clone và cài đặt
+git clone https://github.com/anhmtk/stillme_ai_ipc.git
+cd stillme_ai_ipc
+pip install -r requirements.txt
+
+# 2. Chạy services
+python api_server.py &                    # API server
+streamlit run dashboards/streamlit/integrated_dashboard.py --server.port 8529 &
+```
+
+### Truy cập
+- **Dashboard**: http://localhost:8529
+- **API Server**: http://127.0.0.1:8000
+- **Chat với StillMe**: Mở dashboard → Click chat bubble
+
+## 🤝 Cách đóng góp trong 5 phút
+
+### 🎨 Frontend/UI/UX (Cần gấp!)
+- **Dashboard cải thiện**: Chat panel, responsive design, dark mode
+- **Mobile app**: Flutter UI/UX improvements
+- **Desktop app**: Modern UI với better UX
+
+### 🔧 Backend/API
+- **Learning sources**: Fix ArXiv, Medium, thêm nguồn mới
+- **Notification system**: Email/Telegram integration
+- **Performance**: Tối ưu response time, memory usage
+
+### 📚 Documentation
+- **API docs**: Swagger/OpenAPI documentation
+- **User guides**: Hướng dẫn sử dụng chi tiết
+- **Developer docs**: Architecture, contribution guide
+
+### 🐛 Good First Issues
+1. **Fix chat panel scrolling** (1-2h)
+2. **Add dark mode to dashboard** (2-3h)
+3. **Improve mobile responsive** (3-4h)
+4. **Add loading indicators** (1h)
+5. **Fix notification system** (4-6h)
+
+## 🗺️ Roadmap (Có deadline mềm)
+
+### 2-4 tuần tới
+- [ ] Hoàn thiện 12 learning sources
+- [ ] Fix notification system (email/Telegram)
+- [ ] Cải thiện dashboard UX
+- [ ] Mobile app responsive
+
+### 1-3 tháng tới
+- [ ] Community voting system
+- [ ] Advanced learning algorithms
+- [ ] Multi-language support
+- [ ] Performance optimization
+
+### Help Wanted
+- [ ] **UI/UX Designer**: Cải thiện giao diện dashboard và mobile
+- [ ] **Backend Developer**: Tối ưu API và database
+- [ ] **DevOps**: CI/CD, deployment automation
+- [ ] **QA Tester**: Test cases, bug reports
+
+## 🛡️ An toàn & Minh bạch (Ưu tiên hàng đầu)
+
+### 🔒 Bảo mật
+- **Environment Protection**: Không commit .env, secret scanning
+- **Input Validation**: SQL injection, XSS protection
+- **Rate Limiting**: DDoS protection
+- **Audit Logging**: Ghi log mọi hoạt động quan trọng
+
+### 📋 Minh bạch
+- **Open Source**: Toàn bộ code mở, có thể audit
+- **Learning Logs**: Ghi lại mọi quyết định học tập
+- **Approval Workflow**: Con người kiểm soát nội dung nhạy cảm
+- **Community Oversight**: Cộng đồng có thể review và đóng góp
+
+## 🎓 Quan điểm "Tự quyết học tập" (Có điều kiện)
+
+Chúng tôi đang cân nhắc cho phép StillMe **tự quyết định** việc học tập trong các giới hạn an toàn:
+
+### ✅ Được phép tự học
+- Kiến thức công khai, không nhạy cảm
+- Nội dung từ nguồn đáng tin cậy
+- Thông tin kỹ thuật, khoa học
+- Cập nhật xu hướng công nghệ
+
+### ⚠️ Cần phê duyệt
+- Nội dung chính trị, tôn giáo
+- Thông tin cá nhân, riêng tư
+- Nội dung có thể gây tranh cãi
+- Kiến thức từ nguồn không rõ ràng
+
+### 🚫 Tuyệt đối cấm
+- Nội dung độc hại, bạo lực
+- Thông tin sai lệch
+- Nội dung vi phạm pháp luật
+- Dữ liệu cá nhân không được phép
+
+## 📋 Tuyên bố về đạo đức & bảo mật
+
+### 🛡️ Nguyên tắc cốt lõi
+- **Safety & Ethics**: An toàn và đạo đức là ưu tiên số 1
+- **Privacy**: Bảo vệ quyền riêng tư của người dùng
+- **Community Responsibility**: Trách nhiệm với cộng đồng
+
+### 🔐 Cam kết cụ thể
+- **Security-first**: Thiết kế bảo mật từ đầu
+- **Transparency**: Minh bạch về cách hoạt động
+- **.env Protection**: Không bao giờ commit secrets
+- **Future Audits**: Sẵn sàng cho audit bảo mật
+- **Bug Bounty**: Khuyến khích báo cáo lỗ hổng
+
+### 📊 Trách nhiệm giải trình
+- **Learning Decisions**: Ghi lại mọi quyết định học tập
+- **Approval Process**: Quy trình phê duyệt rõ ràng
+- **Community Feedback**: Lắng nghe phản hồi cộng đồng
+- **Regular Reviews**: Đánh giá định kỳ về đạo đức
+
+### 🌍 Tầm nhìn dài hạn
+- **Global Impact**: Tác động tích cực toàn cầu
+- **Ethical AI**: AI đạo đức và có trách nhiệm
+- **Community-Driven**: Phát triển bởi cộng đồng
+- **Open Innovation**: Đổi mới mở và minh bạch
+
+## 🤝 Lời mời cộng đồng
+
+### 🎯 Chúng tôi cần sự giúp đỡ của bạn
+
+**AI Safety Researchers**: Giúp đánh giá và cải thiện hệ thống an toàn
+**Ethics Advisors**: Tư vấn về đạo đức AI và quyết định học tập
+**Developers**: Đóng góp code, fix bugs, thêm tính năng
+**Testers**: Test hệ thống, báo cáo lỗi, đề xuất cải thiện
+**Designers**: Cải thiện UI/UX, tạo mockups, design system
+**Documentation**: Viết docs, hướng dẫn, tutorials
+
+### 🚀 Cách bắt đầu
+1. **Fork repository** và tạo branch mới
+2. **Chọn issue** phù hợp với skill level
+3. **Submit PR** với description rõ ràng
+4. **Join discussion** trong GitHub Discussions
+
+### 💡 Ý tưởng đóng góp
+- **Dashboard improvements**: Chat UI, responsive design
+- **Learning sources**: Thêm nguồn mới, fix nguồn cũ
+- **Notification system**: Email, Telegram, Discord
+- **Mobile app**: Flutter improvements
+- **Testing**: Unit tests, integration tests
+- **Documentation**: API docs, user guides
+
+### 💝 Hỗ trợ dự án
+Nếu bạn thấy StillMe hữu ích và muốn hỗ trợ phát triển:
+
+**Cách hỗ trợ miễn phí:**
+- ⭐ **Star repository** - giúp dự án được nhiều người biết đến
+- 🐛 **Báo cáo bugs** - giúp cải thiện chất lượng
+- 💡 **Đề xuất tính năng** - định hướng phát triển
+- 📢 **Chia sẻ với bạn bè** - lan tỏa cộng đồng
+
+**Hỗ trợ tài chính (tùy chọn):**
+Server hosting, API costs, và thời gian phát triển đều cần chi phí. Nếu bạn muốn hỗ trợ:
+
+[![Buy me a coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee--yellow.svg?style=for-the-badge&logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/stillme)
+
+*Cảm ơn bạn đã tin tưởng và sử dụng StillMe! 🙏*
+
+## 📊 Thống kê dự án
+
+StillMe AI là một framework AI toàn diện với **100+ modules** trên nhiều thành phần:
+
+### Số liệu cốt lõi
+- **Tổng Modules**: 100+ (72 trong `stillme_core/`, 25 trong `modules/`, 3 trong `stillme_ethical_core/`)
+- **Kích thước dự án**: 22.89 MB (tối ưu từ 5.3GB)
+- **Số file**: 1,036 files trong 156 thư mục
+- **Mức độ phức tạp**: 8.5/10 (Enterprise-grade)
+- **Test Coverage**: 97.9% (bộ test toàn diện)
 - **Security Compliance**: OWASP ASVS Level 2+ (90% compliance)
 
-### 🧪 AgentDev System
+### 🧪 Hệ thống AgentDev
 
-StillMe includes **AgentDev**, a Senior Developer AI system with comprehensive capabilities:
+StillMe bao gồm **AgentDev**, một hệ thống AI Senior Developer với khả năng toàn diện:
 
-#### Test Results
+#### Kết quả Test
 ![AgentDev Tests](https://img.shields.io/badge/AgentDev%20Tests-31%2F31%20passing-green)
 ![AgentDev Coverage](https://img.shields.io/badge/AgentDev%20Coverage-97%25-green)
 ![AgentDev Security](https://img.shields.io/badge/AgentDev%20Security-100%25%20pass-green)
 
-**Status**: ✅ **PRODUCTION READY** - All quality gates met with excellent performance.
+**Trạng thái**: ✅ **SẴN SÀNG PRODUCTION** - Tất cả quality gates đạt với hiệu suất xuất sắc.
 
 #### Quality Gates
 - ✅ Test Coverage: 97.9% lines, 85% branches
@@ -45,74 +280,30 @@ StillMe includes **AgentDev**, a Senior Developer AI system with comprehensive c
 - ✅ Resilience: All chaos tests pass
 - ✅ Learning: Advanced evolutionary system
 
-### 🎯 REAL DATA Integration (Latest Update)
-
-StillMe IPC now uses **100% REAL DATA** instead of mock data:
-
-#### ✅ Dashboard Real Data Implementation
-- **Real Learning Sessions**: Live data from database with real-time progress tracking
-- **Real Metrics**: Calculated from actual learning history and engagement
-- **Real-time Updates**: Live progress bars, learning notes, and objective tracking
-- **Interactive Dashboard**: Full approval workflow with real learning system integration
-
-#### ✅ Knowledge Discovery Real Web Crawling
-- **GitHub Trending API**: Real trending repositories with quality scoring
-- **Hacker News API**: Top stories with engagement metrics
-- **arXiv RSS**: AI research papers with automatic quality assessment
-- **Reddit r/MachineLearning**: Community discussions and trends
-- **Stack Overflow API**: Programming questions with activity metrics
-- **Rate Limiting**: Intelligent API management to avoid blocking
-
-#### ✅ Real Learning System Integration
-- **Evolutionary Learning System**: Real learning sessions with threading
-- **Progress Tracking**: Real-time database updates every 30 seconds
-- **Learning Notes**: Automatic generation of learning insights
-- **Notifications**: Real Email & Telegram alerts for learning progress
-- **Approval Workflow**: Seamless integration between dashboard and learning system
-
-#### 🚀 Technical Achievements
-- **Database Schema**: Enhanced with learning progress columns
-- **Real-time Threading**: Concurrent learning sessions with progress tracking
-- **API Integration**: 5+ real data sources with error handling
-- **Quality Scoring**: Dynamic scoring based on engagement metrics
-- **Notification System**: Multi-channel alerts (Email, Telegram, Dashboard)
-
-## 🚀 Quick Start
-
-### First Run Setup
-
-StillMe AI automatically creates sample configuration files on first run:
-
-```bash
-# Clone the repository
-git clone https://github.com/anhmtk/stillme_ai_ipc.git
-cd stillme_ai_ipc
-```
-
-## 🔐 Configuration & Secrets
+## 🔧 Cấu hình & Bảo mật
 
 ### Environment Setup
-StillMe uses a secure environment configuration system with proper hierarchy:
+StillMe sử dụng hệ thống cấu hình môi trường an toàn với thứ tự ưu tiên rõ ràng:
 
 ```bash
-# 1. Copy the example configuration
+# 1. Copy file cấu hình mẫu
 cp .env.example .env
 
-# 2. Edit .env with your actual values
-# NEVER commit .env files with real secrets!
+# 2. Chỉnh sửa .env với giá trị thực tế
+# TUYỆT ĐỐI KHÔNG commit .env files với secrets thật!
 
-# 3. For local development overrides, create .env.local
-# .env.local takes precedence over .env
+# 3. Để override local, tạo .env.local
+# .env.local có ưu tiên cao hơn .env
 
-# 4. Check your configuration
+# 4. Kiểm tra cấu hình
 python scripts/check_env.py
 ```
 
-### Environment Hierarchy
-1. **`.env`** - Base configuration (committed to git)
-2. **`.env.local`** - Local overrides (ignored by git, highest priority)
+### Thứ tự ưu tiên Environment
+1. **`.env`** - Cấu hình cơ bản (commit vào git)
+2. **`.env.local`** - Override local (ignore bởi git, ưu tiên cao nhất)
 
-### Required Environment Variables
+### Environment Variables cần thiết
 ```bash
 # Core Configuration
 STILLME_DRY_RUN=1                    # Set to 0 for production
@@ -121,955 +312,19 @@ RUNTIME_BASE_URL=http://localhost:8000
 
 # AI Provider API Keys (Required)
 OPENAI_API_KEY=sk-REPLACE_ME         # Your OpenAI API key
-OPENROUTER_API_KEY=sk-REPLACE_ME     # Optional: OpenRouter API key
-```
-
-### Optional Environment Variables
-```bash
-# Notification System
-TELEGRAM_BOT_TOKEN=REPLACE_ME        # Telegram bot token
-TELEGRAM_CHAT_ID=                    # Your Telegram chat ID
-SMTP_SERVER=                         # SMTP server for email alerts
-SMTP_USERNAME=                       # Email username
-SMTP_PASSWORD=                       # Email password
-ALERT_EMAIL=                         # Email for alerts
-
-# Learning System
-STILLME_LEARNING_ENABLED=1           # Enable self-learning
-STILLME_ALERTS_ENABLED=1             # Enable alert system
+DEEPSEEK_API_KEY=sk-REPLACE_ME       # Your DeepSeek API key
 ```
 
 ### Security Best Practices
-- ✅ **NEVER commit `.env` files** with real API keys
-- ✅ **Use `.env.local`** for local development overrides
-- ✅ **Use GitHub Secrets** for CI/CD environments
-- ✅ **Rotate API keys** regularly
-- ✅ **Use app-specific passwords** for email (not main password)
-- ✅ **Run `python scripts/check_env.py`** to verify configuration
-
-### CI/CD Environment
-For GitHub Actions and other CI/CD systems, use **GitHub Secrets**:
-- `OPENAI_API_KEY`
-- `OPENROUTER_API_KEY`
-- `TELEGRAM_BOT_TOKEN`
-- `SMTP_PASSWORD`
-- etc.
-
-**Never commit real secrets to the repository!**
-
-# Install dependencies
-pip install -e .
-
-# First run creates sample config files automatically
-python -c "from stillme_core.framework import StillMeFramework; print('✅ Framework initialized')"
-```
-
-**What happens on first run:**
-- ✅ Creates `config/` directory with sample files
-- ✅ Generates `.env` from `env.example` 
-- ✅ Sets up development configuration
-- ✅ Enables DRY_RUN mode for safe testing
-
-**Sample files created:**
-- `config/reflection.yaml` - Learning system configuration
-- `config/runtime_base_url.txt` - Runtime server URL
-- `config/env/dev.yaml` - Development environment settings
-- `config/env/prod.yaml` - Production environment settings
-- `config/env/staging.yaml` - Staging environment settings
-- `.env` - Environment variables (from `env.example`)
-
-**Next steps:**
-1. Review and edit the generated config files as needed
-2. Set your API keys in `.env` (optional for DRY_RUN mode)
-3. Run tests: `pytest -q -k "smoke"`
-4. Start development: `python -m stillme_core.framework`
-
-### Configuration
-
-The framework uses a comprehensive configuration system:
-
-- **Environment Variables**: Set in `.env` file (see `env.example`)
-- **YAML Configs**: Environment-specific settings in `config/env/`
-- **Runtime Config**: Dynamic configuration via `config/runtime_base_url.txt`
-- **Bootstrap System**: Auto-creates missing config files with safe defaults
-
-## 🏗️ Architecture Overview
-
-StillMe AI follows a modular architecture with comprehensive components:
-
-### Core Framework
-- **StillMe Core**: Central framework with 10 core modules
-- **Learning Engine**: Advanced evolutionary learning system
-- **Memory System**: 3-layer memory with encryption
-- **Security System**: OWASP ASVS Level 2+ compliance
-- **AgentDev**: Senior Developer AI system
-
-### Applications
-- **Mobile App**: Flutter-based with modern UI
-- **Desktop App**: Python-based with telemetry
-- **Web Dashboard**: Streamlit-based management interface
-- **API Server**: FastAPI with comprehensive endpoints
-
-### Test Metrics
-| Component | Coverage | Status |
-|---|---|---|
-| Core Framework | 97.9% | ✅ Excellent |
-| Security Tests | 100% | ✅ Passed |
-| Performance Tests | 100% | ✅ Passed |
-| Mobile App | 95% | ✅ Ready |
-| Desktop App | 90% | ✅ Ready |
-
-## 🚀 Key Features
-
-### Core Capabilities
-- **Advanced Learning**: 4-stage evolutionary learning system
-- **Memory Management**: Secure 3-layer memory with encryption
-- **Security**: Enterprise-grade security with OWASP compliance
-- **Performance**: Optimized for production with monitoring
-- **Multi-platform**: Mobile, desktop, and web applications
-
-## 🔄 StillMe Workflow & Processing Roadmap
-
-```mermaid
-graph TB
-    subgraph "User Input Layer"
-        A[Mobile App] --> B[Desktop App]
-        B --> C[Web Dashboard]
-        C --> D[API Server]
-    end
-    
-    subgraph "Core Processing Layer"
-        D --> E[StillMe Core Framework]
-        E --> F[Learning Engine]
-        E --> G[Memory System]
-        E --> H[Security System]
-        E --> I[AgentDev System]
-    end
-    
-    subgraph "Learning & Memory"
-        F --> J[Evolutionary Learning]
-        J --> K[4-Stage Evolution]
-        K --> L[Daily Training]
-        L --> M[Self-Assessment]
-        G --> N[3-Layer Memory]
-        N --> O[Short-term]
-        N --> P[Mid-term]
-        N --> Q[Long-term]
-    end
-    
-    subgraph "Security & Compliance"
-        H --> R[OWASP ASVS Level 2+]
-        R --> S[Authentication]
-        R --> T[Authorization]
-        R --> U[Audit Logging]
-        I --> V[Senior Thinking]
-        V --> W[Impact Analysis]
-        V --> X[Security Thinking]
-        V --> Y[Business Thinking]
-    end
-    
-    subgraph "Output & Response"
-        M --> Z[Response Generation]
-        O --> Z
-        P --> Z
-        Q --> Z
-        Z --> AA[Multi-format Output]
-        AA --> BB[Text Response]
-        AA --> CC[Code Generation]
-        AA --> DD[Analytics]
-    end
-    
-    subgraph "Monitoring & Optimization"
-        BB --> EE[Performance Monitor]
-        CC --> EE
-        DD --> EE
-        EE --> FF[Real-time Metrics]
-        EE --> GG[Performance Alerts]
-        EE --> HH[Optimization Suggestions]
-    end
-    
-    %% Styling
-    classDef userLayer fill:#e1f5fe
-    classDef coreLayer fill:#f3e5f5
-    classDef learningLayer fill:#e8f5e8
-    classDef securityLayer fill:#fff3e0
-    classDef outputLayer fill:#fce4ec
-    classDef monitorLayer fill:#f1f8e9
-    
-    class A,B,C,D userLayer
-    class E,F,G,H,I coreLayer
-    class J,K,L,M,N,O,P,Q learningLayer
-    class R,S,T,U,V,W,X,Y securityLayer
-    class Z,AA,BB,CC,DD outputLayer
-    class EE,FF,GG,HH monitorLayer
-```
-
-### Processing Flow
-1. **Input Processing**: User input from mobile/desktop/web interfaces
-2. **Core Analysis**: StillMe Core Framework processes with learning, memory, security
-3. **Learning Evolution**: 4-stage evolutionary learning with daily training
-4. **Memory Management**: 3-layer memory system with secure storage
-5. **Security Validation**: OWASP compliance and AgentDev security thinking
-6. **Response Generation**: Multi-format output with real-time monitoring
-7. **Performance Optimization**: Continuous monitoring and improvement
-
-## 🚀 Quick Start
-
-### Core Framework
-```bash
-# Install dependencies
-pip install -r requirements.txt
-
-# Run tests
-pytest -q
-
-# Start core framework
-python -m stillme_core.framework
-```
-
-### Mobile App (Flutter)
-```bash
-cd mobile_app
-flutter pub get
-flutter run
-```
-
-### Desktop App
-```bash
-cd desktop_app
-python stillme_desktop_app.py
-```
-
-### Web Dashboard
-```bash
-# Start Streamlit dashboard
-streamlit run dashboards/streamlit/simple_app.py --server.port 8507
-```
-
-## 📱 Applications
-
-### Mobile App (Flutter)
-- **Modern UI**: Material 3 design with dark theme
-- **Chat Interface**: Bubble messages with markdown support
-- **Telemetry**: Real-time metrics display
-- **Founder Console**: Advanced controls with passcode protection
-- **Settings**: Server configuration and feature toggles
-
-### Desktop App (Python)
-- **Cross-platform**: Windows, macOS, Linux support
-- **Telemetry Panel**: Performance monitoring
-- **Founder Console**: Advanced AI controls
-- **Settings**: Comprehensive configuration options
-
-### Web Dashboard (Streamlit)
-- **Learning Proposals**: Human-in-the-loop approval workflow
-- **Analytics**: Performance metrics and trends
-- **Automation Control**: Background service management
-- **Real-time Updates**: Live proposal tracking
-
-## 📈 Current Status & Achievements
-
-### ✅ Completed Features
-- **Core Framework**: 10 core modules with 97.9% test coverage
-- **Mobile App**: Flutter-based with modern UI and telemetry
-- **Desktop App**: Python-based with comprehensive features
-- **Web Dashboard**: Streamlit-based management interface
-- **Learning System**: 4-stage evolutionary learning with daily training
-- **Security**: OWASP ASVS Level 2+ compliance (90% compliance)
-- **AgentDev**: Senior Developer AI with 31/31 tests passing
-- **Performance**: Optimized with real-time monitoring
-- **Documentation**: Comprehensive guides and API documentation
-
-### 🔄 In Progress
-- **Advanced Learning**: Enhanced self-improvement algorithms
-- **Mobile Optimization**: Performance improvements for mobile devices
-- **Security Hardening**: Additional security measures and compliance
-- **API Expansion**: Additional endpoints and integrations
-
-### 🎯 Future Roadmap
-- **Phase 1**: Enhanced mobile experience and offline capabilities
-- **Phase 2**: Advanced AI capabilities and multi-modal support
-- **Phase 3**: Enterprise features and advanced analytics
-- **Phase 4**: Global deployment and scaling optimizations
-
-## 🤝 Contributing
-
-Contributions are welcome—issues, docs, tests, or features.
-Please see **CONTRIBUTING.md**, **CODE_OF_CONDUCT.md**, and **SECURITY.md**.
-First-time contributors: look for the `good first issue` label.
-
-### Development Setup
-```bash
-# Clone repository
-git clone https://github.com/stillme-ai/stillme.git
-cd stillme
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run tests
-pytest -q
-
-# Start development server
-python -m stillme_core.framework
-```
-
-## 🤖 AgentDev System - Senior Developer AI
-
-**AgentDev** is StillMe's virtual Senior Developer AI, designed to think and act like a real senior developer with comprehensive capabilities.
-
-### 🚀 **Core Features**
-
-#### **Senior Thinking Capabilities**
-- **Impact Analysis**: Analyze impact before coding
-- **Business Thinking**: Evaluate business value and ROI
-- **Security Thinking**: Security-first approach to development
-- **Proactive Cleanup**: Automatic cleanup and optimization
-- **Conflict Resolution**: Intelligent conflict resolution
-- **Experience Learning**: Learn from past experiences
-- **Adaptive Strategy**: Context-aware strategy selection
-- **Red Team/Blue Team**: Security simulation and defense learning
-
-#### **Operating Modes**
-- `AgentMode.SIMPLE` - Basic task execution
-- `AgentMode.SENIOR` - Senior developer thinking (Main mode)
-
-#### **🧪 Test Results**
-- **Total Tests**: 31 tests
-- **Success Rate**: 100% (31/31 tests passed) ✅
-- **Security Tests**: 8/8 PASSED (100%) ✅
-- **E2E Scenarios**: 8/8 PASSED (100%) ✅
-- **Simple Tests**: 3/3 PASSED (100%) ✅
-- **Performance Tests**: 2/2 PASSED (100%) ✅
-
-#### **🔧 Code Quality**
-- **Pyright**: 0 errors, 0 warnings ✅
-- **Ruff**: 0 real errors ✅
-- **Security Defense**: Integrated security pattern detection ✅
-- **Type Safety**: Full type checking without # type: ignore ✅
-- **Code Standards**: All style issues resolved ✅
-
-#### **📚 Advanced Features**
-- **Documentation Generator**: Auto-documentation system ✅
-- **Advanced Debugging**: Real-time debugging infrastructure ✅
-- **Knowledge Base**: Best practices and troubleshooting guides ✅
-- **API Management**: REST API design and testing ✅
-- **Architecture Analyzer**: Design pattern recognition ✅
-- **Analytics Dashboard**: Metrics collection and analysis ✅
-
-#### **Usage**
-```python
-from agent_dev.core.agentdev import AgentDev
-
-# Initialize AgentDev in Senior mode
-agentdev = AgentDev(mode="senior")
-
-# Execute task with senior thinking
-result = agentdev.execute_task("Fix errors in codebase")
-print(result)
-```
-
-#### **Running Tests**
-```bash
-# Run all tests
-python -m pytest agentdev_tests/ -v
-
-# Generate HTML report
-python -m pytest agentdev_tests/ --html=reports/test_report.html
-```
-
-## 🧠 Unified Evolutionary Learning System
-
-StillMe features a **sophisticated self-evolving learning system** that combines the best of both experience-based and content-based learning, with full self-assessment, daily training capabilities, and built-in safety mechanisms.
-
-### 🚀 **Core Features**
-
-#### **Self-Evolution (4 Stages)**
-- **Infant** (0-7 days): Basic learning and pattern recognition
-- **Child** (8-30 days): Developing reasoning and creativity
-- **Adolescent** (31-90 days): Advanced optimization and adaptation
-- **Adult** (90+ days): Full autonomy and self-improvement
-
-#### **Daily Training Sessions**
-- **Experience Review**: Analyze yesterday's interactions and outcomes
-- **Content Learning**: Process new knowledge from external sources
-- **Self-Assessment**: Evaluate performance and identify gaps
-- **Targeted Training**: Practice weak areas with custom exercises
-- **Performance Evaluation**: Measure improvement and adjust parameters
-- **Evolution Planning**: Plan next steps for continued growth
-
-#### **Fine-Tune "Kiểu Nhà Nghèo"**
-- **Statistical Optimization**: Parameter tuning without GPU requirements
-- **Performance-Based Learning**: Adjust learning rates based on success
-- **Rule-Based Adaptation**: Smart parameter adjustment using heuristics
-- **Memory-Efficient**: Optimized for resource-constrained environments
-
-#### **Human-in-the-Loop Safety**
-- **Approval Workflow**: Human oversight for sensitive content and knowledge updates
-- **Quality Scoring**: Automatic assessment of content quality and risk levels
-- **Auto-Approval**: Intelligent approval for safe, high-quality content
-- **Audit Trail**: Complete tracking of all learning decisions and approvals
-
-### 🎯 **Learning Capabilities**
-
-#### **Multi-Source Learning**
-- **Experience Memory**: Learn from user interactions and outcomes
-- **External Content**: RSS feeds from trusted sources (arXiv, OpenAI, DeepMind)
-- **Self-Reflection**: Analyze own performance and decision-making
-- **Pattern Recognition**: Identify recurring patterns and behaviors
-
-#### **Assessment & Validation**
-- **Self-Assessment**: Regular evaluation of knowledge and skills
-- **Performance Tracking**: Monitor accuracy, response time, user satisfaction
-- **Knowledge Validation**: Verify understanding through targeted questions
-- **Learning Curve Analysis**: Track improvement over time
-
-#### **Adaptive Intelligence**
-- **Dynamic Parameters**: Automatically adjust learning parameters
-- **Context Awareness**: Adapt responses based on user preferences
-- **Error Correction**: Learn from mistakes and improve
-- **Creative Problem Solving**: Develop innovative solutions
-
-#### **Safe Learning Environment**
-- **Content Filtering**: Automatic screening of learning materials
-- **Risk Assessment**: Evaluate potential risks before learning
-- **Human Oversight**: Manual approval for critical knowledge updates
-- **Transparency**: Full visibility into learning decisions and sources
-
-### 🛠️ **How to Use**
-
-#### **Daily Training**
-```bash
-# Run daily learning session
-python -m cli.evolutionary_learning train --session-type daily
-
-# Check learning status
-python -m cli.evolutionary_learning status
-
-# Run self-assessment
-python -m cli.evolutionary_learning assess --type full
-```
-
-#### **Approval Management**
-```bash
-# List pending approval requests
-python -m cli.approval_manager list
-
-# Approve a request
-python -m cli.approval_manager approve <request_id> --approver "human" --notes "Looks good"
-
-# Check approval statistics
-python -m cli.approval_manager stats
-```
-
-#### **Evolution Management**
-```bash
-# Check evolution progress
-python -m cli.evolutionary_learning status
-
-# Force evolution to next stage
-python -m cli.evolutionary_learning evolve --force
-
-# Emergency reset (if needed)
-python -m cli.evolutionary_learning reset --confirm
-```
-
-#### **System Status**
-```bash
-# Check current learning system status
-python -m cli.evolutionary_learning status
-
-# Export learning data
-python -m cli.evolutionary_learning export --output learning_data.json
-```
-
-### 🔒 **Safety & Governance**
-
-#### **Learning Policy**
-```yaml
-# config/evolutionary_learning.toml
-[evolutionary_system]
-learning_mode = "evolutionary"
-enable_approval_workflow = true
-auto_approve_threshold = 0.9
-require_human_approval = true
-daily_training_minutes = 30
-assessment_frequency_hours = 6
-evolution_checkpoint_days = 7
-
-[parameters]
-learning_rate = 0.1
-confidence_threshold = 0.7
-creativity_factor = 0.5
-consistency_weight = 0.8
-
-[assessment]
-auto_assessment = true
-optimization_enabled = true
-fine_tune_enabled = true
-```
-
-#### **Safety Measures**
-- **Human-in-the-Loop**: Approval workflow for sensitive content and knowledge updates
-- **Quality & Risk Scoring**: Automatic assessment of content safety and value
-- **Auto-Approval**: Intelligent approval for safe, high-quality content
-- **Content Filtering**: Injection detection and malicious content screening
-- **License Validation**: Only open-licensed content from trusted sources
-- **Audit Trail**: Complete learning history, decisions, and approval records
-- **Emergency Reset**: Ability to reset learning state if needed
-
-### 📊 **Learning Metrics**
-
-The system tracks comprehensive metrics:
-- **Accuracy**: Response correctness and user satisfaction
-- **Response Time**: Speed of processing and generation
-- **Knowledge Retention**: Long-term memory effectiveness
-- **Adaptation Speed**: How quickly it learns new patterns
-- **Creativity Score**: Innovation and original thinking
-- **Consistency Score**: Reliability across similar tasks
-- **Evolution Progress**: Advancement through learning stages
-
-### 🎓 **Educational Philosophy**
-
-StillMe follows a **"learning child"** approach with built-in safety:
-- **Curiosity-Driven**: Actively seeks new knowledge from trusted sources
-- **Self-Correcting**: Identifies and fixes its own mistakes through assessment
-- **Growth-Oriented**: Continuously improves and evolves with human guidance
-- **Transparent**: Shares its learning process, reasoning, and approval decisions
-- **Ethical**: Maintains high standards of behavior and safety
-- **Human-Guided**: Seeks approval for sensitive learning and knowledge updates
-
-This makes StillMe not just an AI tool, but a **safe learning companion** that grows and improves alongside its users with appropriate human oversight.
-
-## 🎯 **Interactive Dashboard & Automation System**
-
-### **📊 Real-Time Learning Dashboard**
-- **Streamlit Dashboard**: Interactive web interface for monitoring and control
-- **Learning Proposals**: Human-in-the-loop approval workflow for new knowledge
-- **Real-time Metrics**: Pending/Approved/Completed proposals tracking
-- **Founder Mode**: Direct knowledge input with auto-approval
-- **Automation Control**: Enable/disable automatic proposal generation
-
-### **🤖 Background Automation**
-- **24/7 Background Service**: Continuous knowledge discovery and learning
-- **Smart Automation**: Rate-limited proposal generation (8/day, 3h intervals)
-- **Multi-channel Notifications**: Email (Gmail) + Telegram alerts
-- **Knowledge Discovery**: Automated scanning of tech trends, AI/ML news, programming trends
-- **Real Learning System**: Placeholder for actual AI learning engine
-
-### **🎮 Master Control System**
-```bash
-# Start background service (24/7 automation)
-python scripts/stillme_control.py background
-
-# Launch interactive dashboard
-python scripts/stillme_control.py dashboard --port 8507
-
-# Add founder knowledge (auto-approved)
-python scripts/stillme_control.py founder "Title" "Description" "priority"
-
-# Setup notifications (Email/Telegram)
-python scripts/stillme_control.py setup-notifications
-
-# Discover new knowledge manually
-python scripts/stillme_control.py discover
-```
-
-### **🔔 Notification System**
-- **Email Notifications**: Gmail SMTP with App Password authentication
-- **Telegram Notifications**: Bot API integration
-- **Desktop Alerts**: Cross-platform desktop notifications
-- **Real-time Updates**: Instant alerts for new discoveries and learning progress
-
-## Roadmap (short)
-
-* ✅ **Phase 0**: Safety hardening (kill switch, rationale logging, secrets sweep)
-* ✅ **Phase 1**: Read-only learning MVP (discovery → scoring → approval → ingest)
-* ✅ **Phase 2**: Interactive Dashboard & Background Automation System
-* 🔄 **Phase 3**: Self-quiz, consistency checking, and unlearning
-* 🔄 **Phase 4**: Controlled adaptation with LoRA fine-tuning
-* Increase test coverage to ≥85% lines / ≥80% branches
-* Expand open ethics/security runners (keep sensitive patterns private)
-* Iterate on documentation with community help
-
-## Changelog
-
-### 2025-09-29 - Interactive Dashboard & Automation System Release
-
-**🎯 Complete Dashboard & Automation System (Completed)**
-- ✅ **Interactive Streamlit Dashboard**: Real-time learning proposals management
-- ✅ **Human-in-the-Loop Workflow**: Approve/reject learning proposals with detailed UI
-- ✅ **Founder Mode**: Direct knowledge input with auto-approval bypass
-- ✅ **Background Automation**: 24/7 knowledge discovery and proposal generation
-- ✅ **Multi-channel Notifications**: Email (Gmail) + Telegram real-time alerts
-- ✅ **Master Control System**: Unified CLI for all StillMe IPC operations
-
-**🚀 Core Features:**
-- ✅ **Real-time Dashboard**: Live metrics, proposal management, learning progress
-- ✅ **Smart Automation**: Rate-limited discovery (8/day, 3h intervals)
-- ✅ **Knowledge Discovery**: Automated scanning of tech trends, AI/ML, programming
-- ✅ **Learning Proposals**: Structured learning tasks with quality scoring
-- ✅ **Notification System**: Multi-channel alerts for discoveries and progress
-- ✅ **Database Management**: SQLite-based proposal storage and tracking
-
-**🛠️ Tools & Scripts:**
-- ✅ **Master Control CLI**: `stillme_control.py` - unified command interface
-- ✅ **Background Service**: `stillme_background_service.py` - 24/7 automation
-- ✅ **Knowledge Discovery**: `knowledge_discovery.py` - automated content discovery
-- ✅ **Founder Input**: `founder_knowledge_input.py` - direct knowledge addition
-- ✅ **Notification Setup**: `setup_notifications.py` - Email/Telegram configuration
-- ✅ **Real Learning**: `start_real_learning.py` - learning engine placeholder
-
-**📊 Dashboard Features:**
-- ✅ **Learning Proposals Tab**: View, approve, reject proposals with details
-- ✅ **Founder Mode Tab**: Direct knowledge input with auto-approval
-- ✅ **Analytics Tab**: Learning metrics and performance tracking
-- ✅ **Learning Report Tab**: Comprehensive learning progress and history
-- ✅ **Automation Control**: Enable/disable automatic proposal generation
-- ✅ **Real-time Updates**: Live proposal counts and status changes
-
-**🔔 Notification System:**
-- ✅ **Email Integration**: Gmail SMTP with App Password authentication
-- ✅ **Telegram Integration**: Bot API with HTML formatting
-- ✅ **Desktop Notifications**: Cross-platform system alerts
-- ✅ **Alert Management**: Centralized alerting system with multiple channels
-- ✅ **Configuration**: Environment-based setup with .env file support
-
-**New Files & Modules:**
-- `dashboards/streamlit/simple_app.py` - Main interactive dashboard
-- `scripts/stillme_control.py` - Master control CLI
-- `scripts/stillme_background_service.py` - Background automation service
-- `scripts/knowledge_discovery.py` - Automated knowledge discovery
-- `scripts/founder_knowledge_input.py` - Founder mode knowledge input
-- `scripts/setup_notifications.py` - Notification system setup
-- `scripts/start_real_learning.py` - Real learning system
-- `stillme_core/learning/proposals.py` - Learning proposal dataclass
-- `stillme_core/learning/proposals_manager.py` - Database management
-- `stillme_core/alerting/alerting_system.py` - Centralized alerting
-- `stillme_core/alerting/email_notifier.py` - Email notifications
-- `stillme_core/alerting/telegram_notifier.py` - Telegram notifications
-
-### 2025-09-29 - AgentDev Unified Integration Release
-
-**🤖 AgentDev Unified - Trưởng phòng Kỹ thuật StillMe IPC (Completed)**
-- ✅ **Senior Thinking Modules**: Impact Analysis, Business Thinking, Security Thinking, Cleanup Manager, Conflict Resolver
-- ✅ **Learning Modules**: Experience Learner, Adaptive Strategy, Red Team/Blue Team Integration
-- ✅ **Real Code Generation**: Tạo code thật, file thật, validation thực tế
-- ✅ **24/7 Monitoring**: Tuần tra liên tục, giám sát hệ thống StillMe IPC
-- ✅ **Security Learning**: Red Team/Blue Team mô phỏng tấn công/phòng thủ
-- ✅ **Performance Optimization**: ~0.6s thinking time, real execution
-- ✅ **Code Quality**: Pyright=0, Ruff=0, Security Defense integrated
-- ✅ **Type Safety**: Full type checking without # type: ignore
-
-**🚀 Core Features:**
-- ✅ **Impact Analysis**: Dependency analysis, performance impact, security risk assessment
-- ✅ **Business Thinking**: ROI analysis, market value, strategic alignment
-- ✅ **Security Thinking**: Vulnerability detection, security best practices
-- ✅ **Cleanup Manager**: Auto cleanup temp files, dead code, duplicates
-- ✅ **Conflict Resolver**: Auto resolve import conflicts, code conflicts
-- ✅ **Experience Learning**: Learn from past experiences, pattern recognition
-- ✅ **Adaptive Strategy**: Context-aware strategy selection
-- ✅ **Red Team/Blue Team**: Security attack/defense simulation
-
-**🛠️ Integration với StillMe IPC:**
-- ✅ **Framework Integration**: Tích hợp với `stillme_core/framework.py`
-- ✅ **Learning System**: Tích hợp với learning system
-- ✅ **Memory System**: Tích hợp với memory system
-- ✅ **Security System**: Tích hợp với security system
-- ✅ **24/7 Operations**: Continuous monitoring và maintenance
-
-**New Files & Modules:**
-- `agent_dev/core/agentdev.py` - Core AgentDev system
-- `agent-dev/core/impact_analyzer.py` - Impact analysis module
-- `agent-dev/core/business_analyzer.py` - Business thinking module
-- `agent-dev/core/security_analyzer.py` - Security thinking module
-- `agent-dev/core/cleanup_manager.py` - Cleanup management module
-- `agent-dev/core/conflict_resolver.py` - Conflict resolution module
-- `agent-dev/core/experience_learner.py` - Experience learning module
-- `agent-dev/core/adaptive_strategy.py` - Adaptive strategy module
-- `agent-dev/core/red_blue_team_integration.py` - Red Team/Blue Team integration
-- `agent_dev/README.md` - AgentDev documentation
-
-### 2025-09-27 - Unified Evolutionary Learning System Release
-
-**🧠 Sophisticated Self-Evolving Learning System (Completed)**
-- ✅ **Unified Learning System**: Combined experience-based and content-based learning
-- ✅ **4-Stage Evolution**: Infant → Child → Adolescent → Adult progression
-- ✅ **Daily Training Sessions**: Automated self-improvement with 6-step workflow
-- ✅ **Self-Assessment System**: Comprehensive evaluation and gap analysis
-- ✅ **Fine-Tune "Kiểu Nhà Nghèo"**: GPU-free parameter optimization
-- ✅ **Human-in-the-Loop Approval**: Safety workflow with quality/risk scoring
-- ✅ **Learning Migration**: Seamless transition from dual to unified system
-
-**🚀 Core Features:**
-- ✅ **Experience Memory Integration**: Learn from user interactions and outcomes
-- ✅ **External Content Learning**: RSS feeds from trusted sources
-- ✅ **Self-Reflection & Analysis**: Analyze own performance and decision-making
-- ✅ **Pattern Recognition**: Identify recurring patterns and behaviors
-- ✅ **Adaptive Intelligence**: Dynamic parameter adjustment and optimization
-- ✅ **Performance Tracking**: Comprehensive metrics and learning curves
-
-**🛠️ Tools & CLI:**
-- ✅ **Evolutionary Learning CLI**: Complete management interface
-- ✅ **Approval Management CLI**: Human-in-the-loop workflow management
-- ✅ **Migration Scripts**: Automated data migration and validation
-- ✅ **Assessment System**: Self-evaluation and knowledge validation
-- ✅ **Emergency Controls**: Reset and rollback capabilities
-
-**📊 Learning Metrics:**
-- ✅ **Accuracy Tracking**: Response correctness and user satisfaction
-- ✅ **Performance Monitoring**: Response time and efficiency
-- ✅ **Knowledge Retention**: Long-term memory effectiveness
-- ✅ **Adaptation Speed**: Learning rate and improvement tracking
-- ✅ **Creativity & Consistency**: Innovation and reliability scores
-
-**New Files & Modules:**
-- `stillme_core/learning/evolutionary_learning_system.py` - Core evolutionary system
-- `stillme_core/learning/learning_assessment_system.py` - Self-assessment engine
-- `stillme_core/learning/approval_system.py` - Human-in-the-loop approval system
-- `stillme_core/learning/approval_queue.py` - Approval workflow management
-- `cli/evolutionary_learning.py` - Learning management CLI
-- `cli/approval_manager.py` - Approval workflow CLI
-- `config/approval.toml` - Approval system configuration
-- `tests/test_unified_evolutionary_learning.py` - Comprehensive test suite
-- `tests/test_approval_system.py` - Approval system test suite
-- `docs/UNIFIED_LEARNING_SYSTEM_REPORT.md` - Implementation documentation
-
-### 2025-09-26 - Daily Smart-Learning MVP Release
-
-**Phase 0: Safety Hardening (Completed)**
-- ✅ Health check script with comprehensive system validation
-- ✅ Kill switch API/CLI with audit logging
-- ✅ Rationale logging with standardized schema for careful mode
-- ✅ Secrets/PII sweep with security gates
-
-**Phase 1: Read-only Learning MVP (Completed)**
-- ✅ RSS connectors with allowlist (arXiv, OpenAI, DeepMind)
-- ✅ Content parser and normalizer
-- ✅ License gate and risk injection scanning
-- ✅ Quality scoring rubric and novelty detection
-- ✅ Vector store and claims store ingestion
-- ✅ Approval queue with human-in-the-loop
-- ✅ Daily digest and metrics reporting
-- ✅ CLI for scan/approve/ingest operations
-
-**New Files & Modules:**
-- `stillme_core/kill_switch.py` - Emergency stop mechanism
-- `stillme_core/rationale_logging.py` - Decision logging
-- `stillme_core/security/secrets_sweep.py` - Security scanning
-- `scripts/health_check.py` - System health validation
-- `cli/kill_switch.py` - Kill switch CLI
-- `policies/learning_policy.yaml` - Learning safety policies
-
-**CLI Commands:**
-- `python -m cli.evolutionary_learning status` - Check learning status
-- `python -m cli.evolutionary_learning train` - Run daily training
-- `python cli/kill_switch.py --status` - Check kill switch
-- `python scripts/health_check.py` - System health check
-
----
-
-## **🚀 Operational Readiness**
-
-### **CI/CD & DevOps Integration**
-
-**✅ Complete CI/CD Pipeline:**
-- **6 GitHub Actions Workflows**: Unit, Integration, Security, DAST, Staging, Production
-- **Multi-stage Docker Builds**: Production-ready containers với security scanning
-- **Blue-Green Deployment**: Zero-downtime deployments với automatic rollback
-- **Health Checks**: Kubernetes-ready liveness và readiness probes
-- **SLO Monitoring**: P95 latency < 500ms, error rate < 1%
-
-**🔧 DevOps Tools:**
-- **Makefile**: 20+ targets cho development, testing, deployment
-- **Docker Compose**: Staging và production environments
-- **K6 Load Testing**: Automated performance testing
-- **Prometheus/Grafana**: Monitoring và alerting stack
-- **Rollback Scripts**: Automated rollback procedures
-
-**📊 SLO Compliance:**
-- **P95 Latency**: < 500ms under normal load
-- **Error Rate**: < 1% under normal conditions
-- **Availability**: 99.9% uptime target
-- **Response Time**: < 200ms for health checks
-
-### **Advanced Security**
-
-**🔒 OWASP ASVS Compliance:**
-- **Level 2 (Standard)**: 93.3% compliance (42/45 controls)
-- **Level 3 (Advanced)**: 80.0% compliance (12/15 controls)
-- **Overall**: 90.0% compliance (54/60 controls)
-
-**🛡️ Security Features:**
-- **Security Headers**: CSP, HSTS, X-Frame-Options, và 8+ security headers
-- **Rate Limiting**: Configurable rate limits với burst protection
-- **Input Validation**: SQL injection, XSS, path traversal protection
-- **Audit Logging**: Comprehensive security event logging
-- **Kill Switch**: Automated security incident response
-
-**🔍 Security Testing:**
-- **SAST**: Bandit, Semgrep với custom rules
-- **DAST**: OWASP ZAP baseline scanning
-- **Dependency Scanning**: pip-audit, safety checks
-- **Container Security**: Trivy vulnerability scanning
-- **Fuzz Testing**: Custom HTTP fuzz testing
-
-**📈 Security Monitoring:**
-- **Real-time Dashboard**: Security metrics và risk assessment
-- **Automated Alerts**: High-risk events, rate limit violations
-- **Incident Response**: Automated kill switch activation
-- **Compliance Tracking**: OWASP ASVS compliance monitoring
-
-### **Production Readiness**
-
-**✅ Enterprise-Grade Features:**
-- **Multi-environment Support**: Dev, staging, production configurations
-- **Scalability**: Horizontal scaling với load balancing
-- **High Availability**: Blue-green deployments với health checks
-- **Monitoring**: Comprehensive metrics và alerting
-- **Security**: OWASP ASVS Level 2+ compliance
-
-**🔧 Operational Tools:**
-- **Health Endpoints**: `/healthz`, `/readyz`, `/metrics`
-- **Rollback Procedures**: Automated rollback với verification
-- **Load Testing**: K6 performance testing
-- **Security Scanning**: Automated security testing
-- **Documentation**: Comprehensive operational guides
-
-**📋 Compliance & Standards:**
-- **OWASP ASVS**: Application Security Verification Standard
-- **OWASP Top 10**: Protection against common vulnerabilities
-- **Security Headers**: Industry-standard security headers
-- **Rate Limiting**: DDoS protection và abuse prevention
-- **Audit Logging**: Comprehensive security event logging
-
-### **Quick Start**
-
-**Development:**
-```bash
-make dev          # Setup development environment
-make test         # Run all tests
-make security     # Run security scans
-make docker       # Build and run Docker container
-```
-
-**🎯 REAL DATA System Usage:**
-
-**1. Start Knowledge Discovery (Real Web Crawling):**
-```bash
-python scripts/knowledge_discovery.py
-# Discovers real knowledge from GitHub, Hacker News, arXiv, Reddit, Stack Overflow
-```
-
-**2. Start Real Learning System:**
-```bash
-python scripts/start_real_learning.py
-# Activates evolutionary learning system with real progress tracking
-```
-
-**3. Launch Dashboard (Real Data):**
-```bash
-python -m streamlit run dashboards/streamlit/simple_app.py --server.port 8501
-# Dashboard with 100% real data from database
-```
-
-**4. Test Real Learning Session:**
-```bash
-python stillme_core/learning/evolutionary_learning_system.py
-# Test real learning with progress tracking and notifications
-```
-
-**AgentDev Monitoring:**
-```bash
-python scripts/start_agentdev_monitor.py --config config/agentdev_monitor.json
-python -c "from agent-dev.core.automated_monitor import AutomatedMonitor; monitor = AutomatedMonitor(); monitor.start_monitoring()"
-```
-
-**Staging:**
-```bash
-make deploy-staging    # Deploy to staging
-make health           # Check service health
-make load-test        # Run load tests
-```
-
-**Production:**
-```bash
-make deploy-prod      # Deploy to production (manual approval required)
-make rollback TAG=v1.2.3  # Rollback to specific version
-```
-
-**Security:**
-```bash
-make security         # Run security scans
-make dast            # Run DAST tests
-make security-report # Generate security report
-```
-
-## 📊 Technical Specifications
-
-### System Requirements
-- **Python**: 3.8+ (recommended 3.11+)
-- **Memory**: 4GB RAM minimum, 8GB recommended
-- **Storage**: 10GB free space
-- **OS**: Windows 10+, macOS 10.15+, Ubuntu 18.04+
-
-### Dependencies
-- **Core**: FastAPI, Pydantic, SQLAlchemy, Redis
-- **AI/ML**: Transformers, PyTorch, NumPy, Pandas
-
-## 🔧 Code Quality & Performance
-
-### Import Optimization (Wave-06)
-StillMe has undergone comprehensive **import optimization** to improve code quality and maintainability:
-
-#### Results
-- **416 files optimized** (99.8% success rate)
-- **0 syntax errors** introduced
-- **Duplicate imports removed** across entire codebase
-- **Import order standardized** for better readability
-- **Circular dependencies eliminated**
-
-#### Tools Created
-- `tools/simple_import_optimizer.py` - Import optimization tool
-- `tools/code_quality_analyzer.py` - Code complexity analysis
-- `tools/import_cycle_scan.py` - Circular dependency detection
-- `tools/fix_import_dependencies.py` - Import dependency fixes
-
-#### Quality Metrics
-- **Import density reduced** across all modules
-- **Code maintainability improved** significantly
-- **Build time optimized** through better import structure
-- **IDE performance enhanced** with cleaner imports
-
-### Testing & Reliability
-Comprehensive **system validation** ensures stability:
-
-#### Test Coverage
-- **12 system validation tests** - 100% pass rate
-- **Framework import & initialization** ✅
-- **Learning system functionality** ✅
-- **AgentDev core functionality** ✅
-- **Config bootstrap system** ✅
-- **Import optimization validation** ✅
-
-#### Quality Assurance
-- **No circular dependencies** detected
-- **All major modules** import successfully
-- **System health checks** pass consistently
-- **Environment configuration** validated
-- **Security**: Cryptography, bcrypt, OWASP tools
-- **Monitoring**: Prometheus, Grafana, OpenTelemetry
-- **Testing**: Pytest, Coverage, Hypothesis
-
-### Performance Metrics
-- **Response Time**: P95 < 200ms
-- **Throughput**: 1000+ requests/minute
-- **Memory Usage**: < 2GB under normal load
-- **CPU Usage**: < 50% under normal load
-- **Availability**: 99.9% uptime target
-
-## 📚 Documentation
-
+- ✅ **TUYỆT ĐỐI KHÔNG commit `.env` files** với API keys thật
+- ✅ **Sử dụng `.env.local`** cho local development overrides
+- ✅ **Sử dụng GitHub Secrets** cho CI/CD environments
+- ✅ **Rotate API keys** thường xuyên
+- ✅ **Chạy `python scripts/check_env.py`** để verify cấu hình
+
+## 📚 Tài liệu & Hỗ trợ
+
+### 📖 Tài liệu
 - **API Documentation**: `/docs` endpoint
 - **Architecture Guide**: `docs/ARCHITECTURE_OVERVIEW.md`
 - **Security Guide**: `docs/SECURITY_COMPLIANCE_MAP.md`
@@ -1077,21 +332,20 @@ Comprehensive **system validation** ensures stability:
 - **Mobile App Guide**: `mobile_app/README_MOBILE.md`
 - **Desktop App Guide**: `desktop_app/README.md`
 
-## 🤝 Community & Support
-
-- **Issues**: [GitHub Issues](https://github.com/stillme-ai/stillme/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/stillme-ai/stillme/discussions)
+### 🤝 Cộng đồng & Hỗ trợ
+- **Issues**: [GitHub Issues](https://github.com/anhmtk/stillme_ai_ipc/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/anhmtk/stillme_ai_ipc/discussions)
 - **Security**: [Security Policy](SECURITY.md)
 - **Contributing**: [Contributing Guide](CONTRIBUTING.md)
 
-## 📄 License
+### 📄 License
+MIT License - xem [LICENSE](LICENSE) file để biết chi tiết.
 
-MIT License - see [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-StillMe AI is created by **Anh Nguyễn** with major support from AI organizations including OpenAI, Google, DeepMind, and the open-source community. The project aims to create a safe, intelligent, and helpful AI companion for everyone.
+### 🙏 Lời cảm ơn
+StillMe AI được tạo ra bởi **Anh Nguyễn** với sự hỗ trợ lớn từ các tổ chức AI bao gồm OpenAI, Google, DeepSeek và cộng đồng open-source. Dự án nhằm tạo ra một AI companion an toàn, thông minh và hữu ích cho mọi người.
 
 ---
 
-**StillMe AI** - *Your Intelligent Personal Companion* 🤖✨
+**StillMe AI IPC** - *Bạn đồng hành thông minh, an toàn và minh bạch* 🤖✨
+
+> **Lưu ý**: Dự án này đang trong giai đoạn alpha. Chúng tôi cố tình minh bạch về điểm yếu hiện tại để cộng đồng dễ chọn việc phù hợp và đóng góp hiệu quả.
