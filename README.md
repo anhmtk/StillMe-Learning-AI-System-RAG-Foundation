@@ -1,351 +1,249 @@
-# 🌟 StillMe AI IPC — Bạn đồng hành thông minh (mời cộng đồng góp sức)
+# 🧠 StillMe - Self-Evolving AI System
 
-[![Alpha](https://img.shields.io/badge/status-alpha-orange)](https://github.com/anhmtk/stillme_ai_ipc)
-[![Security-First](https://img.shields.io/badge/security-first-green)](docs/SECURITY_COMPLIANCE_MAP.md)
-[![Open to PRs](https://img.shields.io/badge/PRs-welcome-brightgreen)](CONTRIBUTING.md)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+<div align="center">
+  <img src="assets/logo.png" alt="StillMe Logo" width="200"/>
+</div>
 
-**StillMe AI IPC** là một AI companion thông minh được tạo ra bởi **Anh Nguyễn** với sự hỗ trợ lớn từ các tổ chức AI như OpenAI, Google, DeepSeek. Mục tiêu của là đồng hành và trở thành bạn bè với mọi người.
+> **A revolutionary AI system that learns and evolves from the internet daily, becoming smarter with each interaction.**
 
-> **Lưu ý**: Dự án này đang trong giai đoạn alpha. Chúng tôi chia sẻ để nhận phản hồi sớm từ cộng đồng. Nếu bạn thấy tiềm năng, hãy giúp chúng tôi đưa nó đến mức production.
+[![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com)
+[![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red.svg)](https://streamlit.io)
+[![Ethical AI](https://img.shields.io/badge/Ethical%20AI-Transparent-green.svg)](https://github.com/anhmtk/stillme_ai_ipc)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-## 🎯 Tầm nhìn & Sứ mệnh
+## 🌟 What is StillMe?
 
-**Tầm nhìn**: Tạo ra một AI companion thực sự thông minh, có thể tự học và tự tiến hóa, đồng thời duy trì an toàn và đạo đức.
+StillMe is a **Self-Evolving AI System** that continuously learns from the internet, adapts to new information, and evolves through different developmental stages - just like a growing organism. Unlike traditional AI systems that remain static, StillMe gets smarter every day.
 
-**Sứ mệnh**: 
-- 🤖 **Tự học & Tự tiến hóa**: StillMe có thể tự đề xuất và học kiến thức mới
-- 🛡️ **An toàn & Minh bạch**: Mọi quyết định học tập đều có thể kiểm soát và giám sát
-- 👥 **Cộng đồng**: Mở cửa cho cộng đồng đóng góp và phát triển
-- 🌍 **Toàn cầu**: Hỗ trợ đa ngôn ngữ, đặc biệt là tiếng Việt
+### 🎯 Core Concept
 
-## 🚀 Điểm độc đáo của StillMe
+- **🧬 Evolutionary Learning**: AI progresses through stages (Infant → Child → Adolescent → Adult)
+- **📚 Multi-Source Learning**: RSS feeds + Public APIs integration
+- **🌐 Real-time Data**: Live data from multiple trusted sources with transparency
+- **🛡️ Ethical Filtering**: Comprehensive ethical content filtering with complete transparency
+- **📊 Transparent Dashboard**: Complete visibility into all learning sources and data
+- **💬 Interactive Chat**: Communicate with your evolving AI assistant
 
-### 🤖 AgentDev (Alpha) - Trưởng phòng Kỹ thuật AI
-- **Tư duy Senior**: Phân tích tác động, suy nghĩ bảo mật, đánh giá kinh doanh
-- **Tự động hóa**: Giám sát hệ thống 24/7, tự động sửa lỗi, tối ưu hiệu suất
-- **Học từ kinh nghiệm**: Rút kinh nghiệm từ các lần thực hiện trước
-- **Trạng thái**: Chạy được nền tảng, còn thiếu một số module nâng cao
+## 🛡️ Ethical AI Transparency
 
-### 🧠 Hệ thống Router thông minh
-- **Local AI trước**: Ưu tiên AI local (Llama3.1-8B) cho câu hỏi đơn giản
-- **Cloud AI khi cần**: Tự động chuyển sang DeepSeek cho câu hỏi phức tạp
-- **Fallback thông minh**: Luôn có phản hồi dự phòng khi gặp lỗi
-- **Trạng thái**: Hoạt động ổn định, đã tích hợp vào dashboard
+StillMe features the world's first **completely transparent ethical filtering system**:
 
-### 🧠 Trí nhớ phân tầng (Beta)
-- **Short-term**: Ghi nhớ cuộc trò chuyện hiện tại
-- **Mid-term**: Lưu trữ kiến thức trong vài ngày
-- **Long-term**: Lưu trữ kiến thức lâu dài với mã hóa
-- **Trạng thái**: Simple mode hoạt động, consolidation đang phát triển
+- **Complete Visibility**: All ethical violations are logged and visible
+- **Open Source**: Filtering rules and algorithms are publicly available
+- **Community Driven**: Blacklist and rules can be managed by the community
+- **Audit Trail**: Full history of all ethical decisions and violations
+- **Configurable**: Ethics level can be adjusted based on community needs
 
-### 📚 Hệ thống học tập tiến hóa (WIP)
-- **Tự đề xuất**: StillMe tự tìm và đề xuất kiến thức mới mỗi 2 giờ
-- **12 nguồn học**: HN, Reddit, GitHub, TechCrunch, ArXiv, News, Stack Overflow, Medium, Academic, YouTube, Subreddits
-- **Phê duyệt thông minh**: Tự động phê duyệt nội dung an toàn, yêu cầu xem xét nội dung nhạy cảm
-- **Trạng thái**: Đang khôi phục từng phần, một số nguồn chưa hoạt động
+This transparency ensures StillMe learns responsibly while maintaining community trust.
 
-## 📊 Trạng thái hiện tại
+## 🚀 Quick Start
 
-### ✅ Đã hoàn thành
-- [x] API server chạy ổn định trên port 8000
-- [x] Dashboard Streamlit hoạt động trên port 8529
-- [x] Chat interface với StillMe (local + cloud AI)
-- [x] Router system hoạt động (local → cloud fallback)
-- [x] Database SQLite cho proposals và sessions
-- [x] Authentication system cơ bản
-- [x] Environment protection (.env policy)
-
-### 🔄 Đang phát triển
-- [ ] Notifications (email/Telegram) cần hoàn thiện
-- [ ] 12 learning sources: đang restore từng phần
-- [ ] Community voting: chưa bật công khai
-- [ ] Mobile app: cần cập nhật UI/UX
-- [ ] Desktop app: cần tích hợp với hệ thống mới
-
-### ⚠️ Vấn đề đã biết
-- [ ] Một số learning sources chưa hoạt động (ArXiv, Medium)
-- [ ] Notification system cần cấu hình thêm
-- [ ] Dashboard UX cần cải thiện (chat panel, responsive)
-- [ ] Community features chưa hoàn thiện
-
-## 🚀 Thử ngay (Quick Start)
-
-### Windows (Đơn giản nhất)
 ```bash
-# 1. Clone repository
+# Clone repository
 git clone https://github.com/anhmtk/stillme_ai_ipc.git
 cd stillme_ai_ipc
 
-# 2. Cài đặt dependencies
+# Install dependencies
 pip install -r requirements.txt
 
-# 3. Chạy auto-start scripts
-start_dashboard.bat    # Mở dashboard
-start_api_server.bat   # Mở API server (terminal khác)
+# Start backend
+python start_backend.py
+
+# Start frontend (new terminal)
+python start_frontend.py
 ```
 
-### Linux/macOS
+## 📊 Dashboard Features
+
+- **Evolution Panel**: Real-time AI stage and progress tracking
+- **Ethical Filter**: Complete transparency into ethical decisions
+- **Learning Analytics**: Historical progress with flexible timeline analysis
+- **Community Controls**: Manage ethical rules and blacklist
+- **Raw Data Access**: View actual API responses for verification
+
+## 🧬 AI Evolution Stages
+
+StillMe progresses through distinct developmental stages:
+
+### 🍼 **Infant Stage** (0-100 learning sessions)
+- Basic pattern recognition
+- Simple content categorization
+- High safety focus
+- Manual approval required
+
+### 👶 **Child Stage** (100-500 sessions)
+- Improved content understanding
+- Basic reasoning capabilities
+- Selective auto-approval
+- Enhanced safety protocols
+
+### 🧑 **Adolescent Stage** (500-1000 sessions)
+- Advanced reasoning
+- Context awareness
+- Smart auto-approval
+- Balanced learning approach
+
+### 🧠 **Adult Stage** (1000+ sessions)
+- Sophisticated understanding
+- Complex reasoning
+- Autonomous learning
+- Expert-level knowledge
+
+## 🔧 Architecture
+
+### **Backend (FastAPI)**
+- **Learning Engine**: Core evolutionary learning system
+- **RSS Pipeline**: Multi-source content fetching
+- **Ethical Filter**: Comprehensive safety system
+- **Memory Management**: Advanced knowledge storage
+- **API Integration**: Public APIs for diverse content
+
+### **Frontend (Streamlit)**
+- **Dashboard**: Real-time monitoring and control
+- **Evolution Panel**: AI stage visualization
+- **Ethical Controls**: Community management tools
+- **Analytics**: Historical learning data
+- **Chat Interface**: Interactive AI communication
+
+### **Database (SQLite)**
+- **Learning Sessions**: Track AI evolution progress
+- **Content Proposals**: Store learning opportunities
+- **Memory Items**: Advanced knowledge storage
+- **Ethical Violations**: Complete audit trail
+
+## 📚 Learning Sources
+
+StillMe learns from diverse, trusted sources:
+
+### **RSS Feeds**
+- Hacker News, Reddit, GitHub
+- TechCrunch, ArXiv, Stack Overflow
+- Medium, Academic sources
+- News outlets, Subreddits
+
+### **Public APIs**
+- NewsAPI, GNews
+- Weather, Finance data
+- Translation services
+- Image understanding APIs
+
+## 🛡️ Ethical Safety Filter
+
+StillMe features a comprehensive ethical content filtering system that ensures responsible AI learning:
+
+### **Core Principles**
+- **Beneficence**: Content must benefit learning and users
+- **Non-Maleficence**: Blocks harmful, toxic, or dangerous content
+- **Autonomy**: Protects privacy and personal information
+- **Justice**: Prevents biased or discriminatory content
+- **Transparency**: Complete visibility into all filtering decisions
+- **Accountability**: Full audit trail of ethical violations
+
+### **Filtering Capabilities**
+- **Input Filtering**: Blocks harmful content at the source (RSS/API)
+- **Content Analysis**: Detects toxicity, bias, and sensitive topics
+- **PII Protection**: Automatically identifies and blocks personal information
+- **Source Validation**: Flags unreliable or suspicious sources
+- **Real-time Monitoring**: Continuous ethical compliance checking
+
+### **Transparency Features**
+- **Violation Logging**: Complete history of all ethical violations
+- **Dashboard Integration**: Real-time ethical metrics and statistics
+- **Community Management**: Blacklist keywords and rules can be managed
+- **Audit Trail**: Full transparency into all ethical decisions
+- **API Access**: Programmatic access to ethical statistics and controls
+
+## 🔧 Configuration
+
+### **Environment Setup**
 ```bash
-# 1. Clone và cài đặt
-git clone https://github.com/anhmtk/stillme_ai_ipc.git
-cd stillme_ai_ipc
-pip install -r requirements.txt
+# Copy environment template
+cp env.example .env
 
-# 2. Chạy services
-python api_server.py &                    # API server
-streamlit run dashboards/streamlit/integrated_dashboard.py --server.port 8529 &
+# Edit with your API keys
+DEEPSEEK_API_KEY=sk-REPLACE_ME
+OPENAI_API_KEY=sk-REPLACE_ME
+ANTHROPIC_API_KEY=sk-REPLACE_ME
+
+# Learning Configuration
+MAX_DAILY_PROPOSALS=50
+AUTO_APPROVAL_THRESHOLD=0.8
+LEARNING_SESSION_HOUR=9
+
+# Notification Configuration
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USERNAME=your_email@gmail.com
+SMTP_PASSWORD=REPLACE_ME_WITH_YOUR_APP_PASSWORD
+TELEGRAM_BOT_TOKEN=REPLACE_ME_WITH_YOUR_BOT_TOKEN
+TELEGRAM_CHAT_ID=your_chat_id
+
+# Notification Settings
+NOTIFY_LEARNING=true
+NOTIFY_ERRORS=true
 ```
 
-### Truy cập
-- **Dashboard**: http://localhost:8529
-- **API Server**: http://127.0.0.1:8000
-- **Chat với StillMe**: Mở dashboard → Click chat bubble
+## 📊 API Endpoints
 
-## 🤝 Cách đóng góp trong 5 phút
+### **Core Learning APIs**
+- `GET /api/learning/sessions` - Get learning sessions
+- `POST /api/learning/sessions/run` - Trigger learning session
+- `GET /api/learning/evolution/stage` - Get current AI stage
+- `GET /api/learning/stats` - Get learning statistics
 
-### 🎨 Frontend/UI/UX (Cần gấp!)
-- **Dashboard cải thiện**: Chat panel, responsive design, dark mode
-- **Mobile app**: Flutter UI/UX improvements
-- **Desktop app**: Modern UI với better UX
+### **Content Management APIs**
+- `GET /api/learning/proposals` - Get learning proposals
+- `POST /api/learning/proposals/{id}/approve` - Approve proposal
+- `POST /api/learning/proposals/{id}/reject` - Reject proposal
+- `GET /api/learning/rss/pipeline-stats` - Get RSS pipeline stats
+- `POST /api/learning/rss/fetch-content` - Fetch content manually
 
-### 🔧 Backend/API
-- **Learning sources**: Fix ArXiv, Medium, thêm nguồn mới
-- **Notification system**: Email/Telegram integration
-- **Performance**: Tối ưu response time, memory usage
+### **Ethical Safety APIs**
+- `GET /api/learning/ethics/stats` - Get ethical filter statistics
+- `POST /api/learning/ethics/check-content` - Test content for ethical compliance
+- `GET /api/learning/ethics/violations` - Get ethical violation history
+- `POST /api/learning/ethics/clear-violations` - Clear violation log
+- `POST /api/learning/ethics/add-blacklist-keyword` - Add keyword to blacklist
+- `GET /api/learning/ethics/blacklist-keywords` - Get current blacklist
 
-### 📚 Documentation
-- **API docs**: Swagger/OpenAPI documentation
-- **User guides**: Hướng dẫn sử dụng chi tiết
-- **Developer docs**: Architecture, contribution guide
+### **Advanced Features APIs**
+- `GET /api/learning/knowledge/stats` - Get knowledge consolidation stats
+- `POST /api/learning/knowledge/consolidate` - Trigger knowledge consolidation
+- `GET /api/learning/memory/stats` - Get advanced memory management stats
+- `POST /api/learning/memory/optimize` - Optimize memory system
 
-### 🐛 Good First Issues
-1. **Fix chat panel scrolling** (1-2h)
-2. **Add dark mode to dashboard** (2-3h)
-3. **Improve mobile responsive** (3-4h)
-4. **Add loading indicators** (1h)
-5. **Fix notification system** (4-6h)
+### **Analytics APIs**
+- `GET /api/learning/analytics/historical` - Get historical learning data
+- `GET /api/learning/analytics/comparison` - Compare learning periods
+- `GET /api/learning/analytics/trends` - Get learning trends analysis
 
-## 🗺️ Roadmap (Có deadline mềm)
+## 🤝 Contributing
 
-### 2-4 tuần tới
-- [ ] Hoàn thiện 12 learning sources
-- [ ] Fix notification system (email/Telegram)
-- [ ] Cải thiện dashboard UX
-- [ ] Mobile app responsive
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 
-### 1-3 tháng tới
-- [ ] Community voting system
-- [ ] Advanced learning algorithms
-- [ ] Multi-language support
-- [ ] Performance optimization
+### **Areas for Contribution**
+- **UI/UX Improvements**: Dashboard enhancements, mobile responsiveness
+- **Learning Sources**: Add new RSS feeds and API integrations
+- **Ethical Filtering**: Improve safety algorithms and rules
+- **Documentation**: API docs, tutorials, guides
+- **Testing**: Unit tests, integration tests, performance tests
 
-### Help Wanted
-- [ ] **UI/UX Designer**: Cải thiện giao diện dashboard và mobile
-- [ ] **Backend Developer**: Tối ưu API và database
-- [ ] **DevOps**: CI/CD, deployment automation
-- [ ] **QA Tester**: Test cases, bug reports
+## 📄 License
 
-## 🛡️ An toàn & Minh bạch (Ưu tiên hàng đầu)
+MIT License - see [LICENSE](LICENSE) for details.
 
-### 🔒 Bảo mật
-- **Environment Protection**: Không commit .env, secret scanning
-- **Input Validation**: SQL injection, XSS protection
-- **Rate Limiting**: DDoS protection
-- **Audit Logging**: Ghi log mọi hoạt động quan trọng
+## 🙏 Acknowledgments
 
-### 📋 Minh bạch
-- **Open Source**: Toàn bộ code mở, có thể audit
-- **Learning Logs**: Ghi lại mọi quyết định học tập
-- **Approval Workflow**: Con người kiểm soát nội dung nhạy cảm
-- **Community Oversight**: Cộng đồng có thể review và đóng góp
+StillMe is built with love and dedication to create a truly transparent, ethical AI system. Special thanks to:
 
-## 🎓 Quan điểm "Tự quyết học tập" (Có điều kiện)
-
-Chúng tôi đang cân nhắc cho phép StillMe **tự quyết định** việc học tập trong các giới hạn an toàn:
-
-### ✅ Được phép tự học
-- Kiến thức công khai, không nhạy cảm
-- Nội dung từ nguồn đáng tin cậy
-- Thông tin kỹ thuật, khoa học
-- Cập nhật xu hướng công nghệ
-
-### ⚠️ Cần phê duyệt
-- Nội dung chính trị, tôn giáo
-- Thông tin cá nhân, riêng tư
-- Nội dung có thể gây tranh cãi
-- Kiến thức từ nguồn không rõ ràng
-
-### 🚫 Tuyệt đối cấm
-- Nội dung độc hại, bạo lực
-- Thông tin sai lệch
-- Nội dung vi phạm pháp luật
-- Dữ liệu cá nhân không được phép
-
-## 📋 Tuyên bố về đạo đức & bảo mật
-
-### 🛡️ Nguyên tắc cốt lõi
-- **Safety & Ethics**: An toàn và đạo đức là ưu tiên số 1
-- **Privacy**: Bảo vệ quyền riêng tư của người dùng
-- **Community Responsibility**: Trách nhiệm với cộng đồng
-
-### 🔐 Cam kết cụ thể
-- **Security-first**: Thiết kế bảo mật từ đầu
-- **Transparency**: Minh bạch về cách hoạt động
-- **.env Protection**: Không bao giờ commit secrets
-- **Future Audits**: Sẵn sàng cho audit bảo mật
-- **Bug Bounty**: Khuyến khích báo cáo lỗ hổng
-
-### 📊 Trách nhiệm giải trình
-- **Learning Decisions**: Ghi lại mọi quyết định học tập
-- **Approval Process**: Quy trình phê duyệt rõ ràng
-- **Community Feedback**: Lắng nghe phản hồi cộng đồng
-- **Regular Reviews**: Đánh giá định kỳ về đạo đức
-
-### 🌍 Tầm nhìn dài hạn
-- **Global Impact**: Tác động tích cực toàn cầu
-- **Ethical AI**: AI đạo đức và có trách nhiệm
-- **Community-Driven**: Phát triển bởi cộng đồng
-- **Open Innovation**: Đổi mới mở và minh bạch
-
-## 🤝 Lời mời cộng đồng
-
-### 🎯 Chúng tôi cần sự giúp đỡ của bạn
-
-**AI Safety Researchers**: Giúp đánh giá và cải thiện hệ thống an toàn
-**Ethics Advisors**: Tư vấn về đạo đức AI và quyết định học tập
-**Developers**: Đóng góp code, fix bugs, thêm tính năng
-**Testers**: Test hệ thống, báo cáo lỗi, đề xuất cải thiện
-**Designers**: Cải thiện UI/UX, tạo mockups, design system
-**Documentation**: Viết docs, hướng dẫn, tutorials
-
-### 🚀 Cách bắt đầu
-1. **Fork repository** và tạo branch mới
-2. **Chọn issue** phù hợp với skill level
-3. **Submit PR** với description rõ ràng
-4. **Join discussion** trong GitHub Discussions
-
-### 💡 Ý tưởng đóng góp
-- **Dashboard improvements**: Chat UI, responsive design
-- **Learning sources**: Thêm nguồn mới, fix nguồn cũ
-- **Notification system**: Email, Telegram, Discord
-- **Mobile app**: Flutter improvements
-- **Testing**: Unit tests, integration tests
-- **Documentation**: API docs, user guides
-
-### 💝 Hỗ trợ dự án
-Nếu bạn thấy StillMe hữu ích và muốn hỗ trợ phát triển:
-
-**Cách hỗ trợ miễn phí:**
-- ⭐ **Star repository** - giúp dự án được nhiều người biết đến
-- 🐛 **Báo cáo bugs** - giúp cải thiện chất lượng
-- 💡 **Đề xuất tính năng** - định hướng phát triển
-- 📢 **Chia sẻ với bạn bè** - lan tỏa cộng đồng
-
-**Hỗ trợ tài chính (tùy chọn):**
-Server hosting, API costs, và thời gian phát triển đều cần chi phí. Nếu bạn muốn hỗ trợ:
-
-[![Buy me a coffee](https://img.shields.io/badge/Buy%20me%20a%20coffee--yellow.svg?style=for-the-badge&logo=buy-me-a-coffee&logoColor=white)](https://buymeacoffee.com/stillme)
-
-*Cảm ơn bạn đã tin tưởng và sử dụng StillMe! 🙏*
-
-## 📊 Thống kê dự án
-
-StillMe AI là một framework AI toàn diện với **100+ modules** trên nhiều thành phần:
-
-### Số liệu cốt lõi
-- **Tổng Modules**: 100+ (72 trong `stillme_core/`, 25 trong `modules/`, 3 trong `stillme_ethical_core/`)
-- **Kích thước dự án**: 22.89 MB (tối ưu từ 5.3GB)
-- **Số file**: 1,036 files trong 156 thư mục
-- **Mức độ phức tạp**: 8.5/10 (Enterprise-grade)
-- **Test Coverage**: 97.9% (bộ test toàn diện)
-- **Security Compliance**: OWASP ASVS Level 2+ (90% compliance)
-
-### 🧪 Hệ thống AgentDev
-
-StillMe bao gồm **AgentDev**, một hệ thống AI Senior Developer với khả năng toàn diện:
-
-#### Kết quả Test
-![AgentDev Tests](https://img.shields.io/badge/AgentDev%20Tests-31%2F31%20passing-green)
-![AgentDev Coverage](https://img.shields.io/badge/AgentDev%20Coverage-97%25-green)
-![AgentDev Security](https://img.shields.io/badge/AgentDev%20Security-100%25%20pass-green)
-
-**Trạng thái**: ✅ **SẴN SÀNG PRODUCTION** - Tất cả quality gates đạt với hiệu suất xuất sắc.
-
-#### Quality Gates
-- ✅ Test Coverage: 97.9% lines, 85% branches
-- ✅ Test Pass Rate: 100% (31/31 tests)
-- ✅ Performance: P95 E2E < 200ms
-- ✅ Security: All adversarial tests pass
-- ✅ Resilience: All chaos tests pass
-- ✅ Learning: Advanced evolutionary system
-
-## 🔧 Cấu hình & Bảo mật
-
-### Environment Setup
-StillMe sử dụng hệ thống cấu hình môi trường an toàn với thứ tự ưu tiên rõ ràng:
-
-```bash
-# 1. Copy file cấu hình mẫu
-cp .env.example .env
-
-# 2. Chỉnh sửa .env với giá trị thực tế
-# TUYỆT ĐỐI KHÔNG commit .env files với secrets thật!
-
-# 3. Để override local, tạo .env.local
-# .env.local có ưu tiên cao hơn .env
-
-# 4. Kiểm tra cấu hình
-python scripts/check_env.py
-```
-
-### Thứ tự ưu tiên Environment
-1. **`.env`** - Cấu hình cơ bản (commit vào git)
-2. **`.env.local`** - Override local (ignore bởi git, ưu tiên cao nhất)
-
-### Environment Variables cần thiết
-```bash
-# Core Configuration
-STILLME_DRY_RUN=1                    # Set to 0 for production
-STILLME_TZ=Asia/Ho_Chi_Minh          # Timezone
-RUNTIME_BASE_URL=http://localhost:8000
-
-# AI Provider API Keys (Required)
-OPENAI_API_KEY=sk-REPLACE_ME         # Your OpenAI API key
-DEEPSEEK_API_KEY=sk-REPLACE_ME       # Your DeepSeek API key
-```
-
-### Security Best Practices
-- ✅ **TUYỆT ĐỐI KHÔNG commit `.env` files** với API keys thật
-- ✅ **Sử dụng `.env.local`** cho local development overrides
-- ✅ **Sử dụng GitHub Secrets** cho CI/CD environments
-- ✅ **Rotate API keys** thường xuyên
-- ✅ **Chạy `python scripts/check_env.py`** để verify cấu hình
-
-## 📚 Tài liệu & Hỗ trợ
-
-### 📖 Tài liệu
-- **API Documentation**: `/docs` endpoint
-- **Architecture Guide**: `docs/ARCHITECTURE_OVERVIEW.md`
-- **Security Guide**: `docs/SECURITY_COMPLIANCE_MAP.md`
-- **Deployment Guide**: `docs/DEPLOYMENT_GUIDE.md`
-- **Mobile App Guide**: `mobile_app/README_MOBILE.md`
-- **Desktop App Guide**: `desktop_app/README.md`
-
-### 🤝 Cộng đồng & Hỗ trợ
-- **Issues**: [GitHub Issues](https://github.com/anhmtk/stillme_ai_ipc/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/anhmtk/stillme_ai_ipc/discussions)
-- **Security**: [Security Policy](SECURITY.md)
-- **Contributing**: [Contributing Guide](CONTRIBUTING.md)
-
-### 📄 License
-MIT License - xem [LICENSE](LICENSE) file để biết chi tiết.
-
-### 🙏 Lời cảm ơn
-StillMe AI được tạo ra bởi **Anh Nguyễn** với sự hỗ trợ lớn từ các tổ chức AI bao gồm OpenAI, Google, DeepSeek và cộng đồng open-source. Dự án nhằm tạo ra một AI companion an toàn, thông minh và hữu ích cho mọi người.
+- **OpenAI** for GPT models and API access
+- **DeepSeek** for advanced AI capabilities
+- **Anthropic** for Claude integration
+- **The Open Source Community** for inspiration and support
 
 ---
 
-**StillMe AI IPC** - *Bạn đồng hành thông minh, an toàn và minh bạch* 🤖✨
+**StillMe** - *Self-Evolving AI System with Complete Ethical Transparency* 🤖✨
 
-> **Lưu ý**: Dự án này đang trong giai đoạn alpha. Chúng tôi cố tình minh bạch về điểm yếu hiện tại để cộng đồng dễ chọn việc phù hợp và đóng góp hiệu quả.
+> "The future belongs to AI systems that can learn, adapt, and evolve. StillMe is that future, today."
