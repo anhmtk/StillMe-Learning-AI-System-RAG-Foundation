@@ -1,0 +1,23 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="100" cy="100" r="95" fill="#1a1a2e" stroke="#16213e" stroke-width="2"/>
+  
+  <!-- Inner circle -->
+  <circle cx="100" cy="100" r="75" fill="#0f3460" stroke="#e94560" stroke-width="2"/>
+  
+  <!-- Brain/Neural network pattern -->
+  <circle cx="100" cy="80" r="15" fill="#e94560"/>
+  <circle cx="80" cy="100" r="12" fill="#e94560"/>
+  <circle cx="120" cy="100" r="12" fill="#e94560"/>
+  <circle cx="100" cy="120" r="15" fill="#e94560"/>
+  
+  <!-- Connection lines -->
+  <line x1="100" y1="80" x2="80" y2="100" stroke="#e94560" stroke-width="2"/>
+  <line x1="100" y1="80" x2="120" y2="100" stroke="#e94560" stroke-width="2"/>
+  <line x1="80" y1="100" x2="100" y2="120" stroke="#e94560" stroke-width="2"/>
+  <line x1="120" y1="100" x2="100" y2="120" stroke="#e94560" stroke-width="2"/>
+  
+  <!-- Text -->
+  <text x="100" y="160" text-anchor="middle" fill="#e94560" font-family="Arial, sans-serif" font-size="16" font-weight="bold">StillMe</text>
+  <text x="100" y="180" text-anchor="middle" fill="#e94560" font-family="Arial, sans-serif" font-size="10">Self-Evolving AI</text>
+</svg>
