@@ -132,9 +132,9 @@ python -m cli.evolutionary_learning ingest --experience '{"context": "...", "act
 
 ```bash
 # RSS API keys (nếu cần)
-ARXIV_API_KEY=your_arxiv_key
-OPENAI_API_KEY=your_openai_key
-DEEPMIND_API_KEY=your_deepmind_key
+ARXIV_API_KEY=REPLACE_ME_WITH_YOUR_ARXIV_KEY
+OPENAI_API_KEY=sk-REPLACE_ME
+DEEPMIND_API_KEY=REPLACE_ME_WITH_YOUR_DEEPMIND_KEY
 
 # Monitoring keys
 WEBHOOK_URL=your_webhook_url

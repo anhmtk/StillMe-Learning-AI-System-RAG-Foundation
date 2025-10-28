@@ -266,7 +266,7 @@ ENCRYPTION_KEY=your_encryption_key_here
 JWT_SECRET=your_jwt_secret_here
 
 # External Services
-OPENAI_API_KEY=your_openai_key_here
+OPENAI_API_KEY=sk-REPLACE_ME
 GOOGLE_API_KEY=your_google_key_here
 
 # Development
