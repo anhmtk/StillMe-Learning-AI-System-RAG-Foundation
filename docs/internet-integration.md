@@ -200,7 +200,7 @@ sandbox_controller.set_egress_limit(10)
 NEWSAPI_KEY=your_newsapi_key_here
 GNEWS_API_KEY=your_gnews_key_here
 OPENROUTER_API_KEY=your_openrouter_key_here
-DEEPSEEK_API_KEY=your_deepseek_key_here
+DEEPSEEK_API_KEY=sk-REPLACE_ME
 ```
 
 **Optional**:

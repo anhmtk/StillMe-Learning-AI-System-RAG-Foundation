@@ -214,3 +214,19 @@ def dev_agent(req: DevAgentRequest):
 def dev_agent_bridge(req: DevAgentRequest):
     """AgentDev bridge endpoint for internal communication"""
     return dev_agent(req)
+
+
+if __name__ == "__main__":
+    import uvicorn
+    
+    # Initialize framework
+    framework = StillMeFramework()
+    
+    # Start server
+    uvicorn.run(
+        app, 
+        host="127.0.0.1", 
+        port=8000, 
+        log_level="info",
+        access_log=True
+    )

@@ -1,0 +1,16 @@
+title: "StillMe Community Dashboard"
+emoji: "🤖"
+colorFrom: "blue"
+colorTo: "green"
+sdk: "gradio"
+sdk_version: "4.0.0"
+app_file: "app.py"
+pinned: false
+license: "mit"
+short_description: "Community dashboard for StillMe AI - vote for lessons, chat with AI, track learning progress"
+tags:
+  - ai
+  - chatbot
+  - community
+  - dashboard
+  - stillme
