@@ -1,7 +1,7 @@
 # 🧠 StillMe - Self-Evolving AI System
 
 <div align="center">
-  <img src="assets/logo.png" alt="StillMe Logo" width="200"/>
+  <img src="assets/logo.svg" alt="StillMe Logo" width="200"/>
 </div>
 
 > **A revolutionary AI system that learns and evolves from the internet daily, becoming smarter with each interaction.**
