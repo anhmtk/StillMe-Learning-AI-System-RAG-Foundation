@@ -1,3 +1,4 @@
+ security/remove-sensitive-files
 name: Security – Gitleaks
 
 on:
@@ -24,3 +25,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           args: --no-banner detect -v -c .gitleaks.toml --redact --exit-code 1
+
+ main
