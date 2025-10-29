@@ -1,0 +1,70 @@
+# docker-compose.yml for StillMe - Self-Evolving AI System
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: stillme-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONPATH=/app
+      - ENVIRONMENT=production
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+    command: python start_backend.py
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: stillme-frontend
+    ports:
+      - "8501:8501"
+    environment:
+      - PYTHONPATH=/app
+      - BACKEND_URL=http://backend:8000
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+    command: python start_frontend.py
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: stillme-scheduler
+    environment:
+      - PYTHONPATH=/app
+      - ENVIRONMENT=production
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config
+    command: python start_scheduler.py
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+networks:
+  default:
+    name: stillme-network
+

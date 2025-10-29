@@ -62,19 +62,51 @@ This transparency ensures StillMe learns responsibly while maintaining community
 
 ## 🚀 Quick Start
 
+### **Option 1: Docker (Recommended - 1-Click Setup)**
+
 ```bash
 # Clone repository
-git clone https://github.com/anhmtk/stillme_ai_ipc.git
-cd stillme_ai_ipc
+git clone https://github.com/anhmtk/StillMe---Self-Evolving-AI-System.git
+cd StillMe---Self-Evolving-AI-System
+
+# One-click setup (Linux/Mac)
+chmod +x quick-start.sh
+./quick-start.sh
+
+# Or Windows PowerShell
+.\quick-start.ps1
+
+# Or manually with Docker Compose
+docker-compose up -d
+```
+
+**Access after startup:**
+- 📊 **Dashboard**: http://localhost:8501
+- 🔌 **API**: http://localhost:8000
+- 📚 **API Docs**: http://localhost:8000/docs
+
+### **Option 2: Manual Setup**
+
+```bash
+# Clone repository
+git clone https://github.com/anhmtk/StillMe---Self-Evolving-AI-System.git
+cd StillMe---Self-Evolving-AI-System
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Start backend
+# Configure environment
+cp env.example .env
+# Edit .env with your API keys
+
+# Start backend (terminal 1)
 python start_backend.py
 
-# Start frontend (new terminal)
+# Start frontend (terminal 2)
 python start_frontend.py
+
+# Start scheduler (terminal 3, optional)
+python start_scheduler.py
 ```
 
 ## 📊 Dashboard Features
@@ -84,34 +116,99 @@ python start_frontend.py
 - **Learning Analytics**: Historical progress with flexible timeline analysis
 - **Community Controls**: Manage ethical rules and blacklist
 - **Raw Data Access**: View actual API responses for verification
+- **Community Review**: Voting interface for proposals
+- **Scheduler Control**: Monitor and control auto-learning cycles
+
+## 📊 Project Status & Metrics
+
+### **Current Status (Realistic Assessment)**
+
+**⚠️ Note**: As a **newly open-sourced project**, StillMe doesn't have traditional metrics yet (stars, users, forks). This is **normal and expected** for early-stage projects. Here's what we're tracking:
+
+| Metric | Current State | Goal |
+|--------|---------------|------|
+| **GitHub Stars** | Just launched | 100+ in first month |
+| **Active Users** | Self-hosted instances | 10+ by end of Q1 2026 |
+| **Learning Sessions** | Starting from 0 | Track evolution progress |
+| **Community Votes** | Building community | 50+ votes/month |
+| **Code Quality** | MVP stage | CI/CD + tests |
+
+**Why this is okay:**
+- ✅ **Every project starts at 0** - What matters is the foundation
+- ✅ **Quality over quantity** - Better to have 10 engaged users than 1000 passive ones
+- ✅ **Transparency from day 1** - Full audit trail from the start
+- ✅ **Community-driven growth** - Real engagement, not vanity metrics
+
+### **What We're Actually Measuring**
+
+Instead of chasing vanity metrics, StillMe focuses on **meaningful progress**:
+
+1. **Evolution Progress**: Sessions → Stages (Infant → Adult)
+2. **Knowledge Quality**: Trust scores, approval rates
+3. **Ethical Compliance**: Violation rates, community feedback
+4. **Code Health**: Test coverage, documentation quality
+5. **Community Engagement**: Votes, contributions, discussions
+
+### **Roadmap & Milestones**
+
+| Milestone | Status | Target |
+|-----------|--------|--------|
+| **v0.1** - Core System | ✅ Done | Basic learning + dashboard |
+| **v0.2** - Hybrid Learning | ✅ Done | 70/30 AI/Community split |
+| **v0.3** - Secure Voting | ✅ Done | Weighted trust + EthicsGuard |
+| **v0.4** - Docker Setup | ✅ Done | 1-click deployment |
+| **v0.5** - Enhanced Metrics | 🔄 In Progress | Accuracy, retention tracking |
+| **v1.0** - Self-Improvement Loop | 📋 Planned | Meta-learning, curriculum |
 
 ## 🧬 AI Evolution Stages
 
-StillMe progresses through distinct developmental stages:
+StillMe progresses through distinct developmental stages based on **learning sessions completed**:
 
 ### 🍼 **Infant Stage** (0-100 learning sessions)
 - Basic pattern recognition
 - Simple content categorization
 - High safety focus
 - Manual approval required
+- **Evolution Metric**: Session count only (MVP approach)
 
 ### 👶 **Child Stage** (100-500 sessions)
 - Improved content understanding
 - Basic reasoning capabilities
 - Selective auto-approval
 - Enhanced safety protocols
+- **Evolution Metric**: Session count + basic quality scores
 
 ### 🧑 **Adolescent Stage** (500-1000 sessions)
 - Advanced reasoning
 - Context awareness
 - Smart auto-approval
 - Balanced learning approach
+- **Evolution Metric**: Session count + approval rates + trust scores
 
 ### 🧠 **Adult Stage** (1000+ sessions)
 - Sophisticated understanding
 - Complex reasoning
 - Autonomous learning
 - Expert-level knowledge
+- **Evolution Metric**: Multi-dimensional (sessions, accuracy, retention, community trust)
+
+### **Current Evolution Logic (MVP)**
+
+**Honest Assessment**: The current evolution system is **session-based** (counting learning sessions). This is a **realistic MVP approach** because:
+
+- ✅ **Simple to implement and validate**
+- ✅ **Transparent and auditable**
+- ✅ **Foundation for future enhancements**
+
+**Future Enhancements (Roadmap v0.5+):**
+- 📊 **Accuracy Tracking**: Measure response quality and user satisfaction
+- 🧠 **Knowledge Retention**: Track how well knowledge persists over time
+- 📈 **Meta-Learning**: Learn from learning patterns themselves
+- 🎓 **Curriculum Learning**: Structured learning paths (not just random sessions)
+- 🔄 **Self-Improvement Loop**: Use feedback to improve the learning process
+
+> **Why start simple?**  
+> Every complex system starts with a simple foundation. StillMe's evolution stages are **transparent and auditable** - you can see exactly what triggers each stage. As we collect more data, we'll enhance the metrics, but **transparency remains the priority**.
 
 ## 🚀 The Vision: Fully Autonomous AI Evolution
 
@@ -135,27 +232,163 @@ We open these questions to the community:
 
 ## 🔧 Architecture
 
-### **Backend (FastAPI)**
+### **System Architecture Diagram**
+
+```mermaid
+graph TB
+    subgraph "External Sources"
+        RSS[RSS Feeds<br/>ArXiv, TechCrunch, HN]
+        API[Public APIs<br/>NewsAPI, GNews]
+    end
+    
+    subgraph "StillMe Core System"
+        Scheduler[Hybrid Learning Scheduler<br/>Every 4 hours]
+        Learning[Learning Engine<br/>FastAPI Backend]
+        
+        subgraph "Processing Pipeline"
+            Fetch[Content Fetching]
+            RedTeam[Red-Team Agent<br/>Safety Scanning]
+            Ethics[EthicsGuard<br/>Ethical Filter]
+            Assess[Quality Assessment]
+        end
+        
+        subgraph "Routing System"
+            Router{Smart Router<br/>DeepSeek/Ollama}
+            AutoApprove[Auto-Approve<br/>Trust > 0.8]
+            Community[Community Queue<br/>Trust 0.6-0.8]
+            HumanReview[Human Review<br/>Trust < 0.6]
+        end
+        
+        subgraph "Data Layer"
+            KB[(Knowledge Base<br/>JSON)]
+            DB[(SQLite DB<br/>Sessions, Votes)]
+            Evolution[(Evolution DB<br/>Stages)]
+        end
+        
+        Dashboard[Streamlit Dashboard<br/>Real-time Monitoring]
+        Chat[Chat Interface<br/>User Interaction]
+    end
+    
+    subgraph "Community"
+        Voters[Community Voting<br/>Weighted Trust]
+        EthicsQueue[EthicsGuard Queue]
+    end
+    
+    RSS --> Fetch
+    API --> Fetch
+    Scheduler --> Learning
+    Learning --> Fetch
+    Fetch --> RedTeam
+    RedTeam --> Ethics
+    Ethics --> Assess
+    Assess --> Router
+    Router --> AutoApprove
+    Router --> Community
+    Router --> HumanReview
+    AutoApprove --> KB
+    Community --> Voters
+    Voters --> EthicsQueue
+    EthicsQueue --> KB
+    HumanReview --> KB
+    KB --> Dashboard
+    DB --> Dashboard
+    Evolution --> Dashboard
+    Chat --> Router
+    Learning --> Evolution
+    Learning --> DB
+```
+
+### **Component Architecture**
+
+#### **Backend (FastAPI)**
 - **Learning Engine**: Core evolutionary learning system
 - **RSS Pipeline**: Multi-source content fetching
 - **Ethical Filter**: Comprehensive safety system
 - **Memory Management**: Advanced knowledge storage
 - **API Integration**: Public APIs for diverse content
+- **Hybrid Scheduler**: Auto-learning every 4 hours (6 cycles/day)
 
-### **Frontend (Streamlit)**
+#### **Frontend (Streamlit)**
 - **Dashboard**: Real-time monitoring and control
 - **Evolution Panel**: AI stage visualization
 - **Ethical Controls**: Community management tools
 - **Analytics**: Historical learning data
 - **Chat Interface**: Interactive AI communication
+- **Community Review**: Voting interface for proposals
 
-### **Database (SQLite)**
+#### **Database (SQLite)**
 - **Learning Sessions**: Track AI evolution progress
 - **Content Proposals**: Store learning opportunities
 - **Memory Items**: Advanced knowledge storage
 - **Ethical Violations**: Complete audit trail
+- **Community Votes**: Weighted voting system
+- **Evolution Stages**: Track developmental progress
 
-## 📚 Learning Sources
+### **Learning Flow**
+
+```mermaid
+sequenceDiagram
+    participant Scheduler
+    participant LearningEngine
+    participant RSS as RSS Sources
+    participant RedTeam as Red-Team Agent
+    participant EthicsGuard
+    participant Router
+    participant Community
+    participant KB as Knowledge Base
+    
+    Scheduler->>LearningEngine: Trigger (Every 4h)
+    LearningEngine->>RSS: Fetch Content
+    RSS-->>LearningEngine: New Articles
+    LearningEngine->>RedTeam: Safety Scan
+    RedTeam-->>LearningEngine: Safety Score
+    LearningEngine->>EthicsGuard: Ethics Check
+    EthicsGuard-->>LearningEngine: Pass/Fail
+    LearningEngine->>Router: Route by Trust Score
+    alt Trust > 0.8
+        Router->>KB: Auto-Approve
+    else Trust 0.6-0.8
+        Router->>Community: Queue for Voting
+        Community->>EthicsGuard: Re-check after votes
+        EthicsGuard->>KB: Approve/Reject
+    else Trust < 0.6
+        Router->>LearningEngine: Flag for Human Review
+    end
+    LearningEngine->>LearningEngine: Update Evolution Stage
+```
+
+## 👤 About the Founder
+
+### **Anh Nguyễn (Anh MTK)**
+
+StillMe was born from a simple yet powerful idea: **AI should be transparent, ethical, and community-controlled**. 
+
+As a **non-technical founder**, I built StillMe using modern AI development tools (Cursor AI, Grok, DeepSeek) to prove that you don't need to be a senior engineer to create meaningful AI systems. What matters is the **vision, commitment to transparency, and willingness to learn**.
+
+### **Why StillMe?**
+
+After witnessing the "black box" nature of major AI systems and the lack of transparency in how they learn and make decisions, I realized:
+
+- **Users deserve to know** what AI learns and why
+- **Ethics shouldn't be optional** - it must be foundational
+- **Community should have control** - not just corporations
+- **Anyone can build AI** - with the right tools and mindset
+
+StillMe is my attempt to demonstrate that **transparency + ethics + community = better AI**.
+
+### **The Journey**
+
+- **Started**: Learning AI development from scratch
+- **Built with**: Cursor AI, Grok, DeepSeek, OpenAI
+- **Philosophy**: 100% open source, 100% transparent
+- **Goal**: Create a self-evolving AI that learns ethically and transparently
+
+### **Connect**
+
+- **GitHub**: [@anhmtk](https://github.com/anhmtk)
+- **Project**: [StillMe Repository](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System)
+
+> **"I'm not a senior engineer, but I believe in transparency. StillMe proves that vision matters more than credentials."**
 
 StillMe learns from diverse, trusted sources:
 
@@ -306,6 +539,16 @@ We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
 - **Ethical Filtering**: Improve safety algorithms and rules
 - **Documentation**: API docs, tutorials, guides
 - **Testing**: Unit tests, integration tests, performance tests
+- **Evolution Metrics**: Help implement accuracy tracking, retention metrics
+- **Docker & DevOps**: Improve deployment, CI/CD pipelines
+
+### **Community Resources**
+
+- **GitHub Discussions**: [Join discussions](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System/discussions)
+- **Issues**: [Report bugs or request features](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System/issues)
+- **Pull Requests**: [Contribute code](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System/pulls)
+
+> **Note**: As a new project, we're building our community. Every contribution, no matter how small, helps StillMe evolve!
 
 ## 🤝 Join The Movement - Not Just A Project
 
