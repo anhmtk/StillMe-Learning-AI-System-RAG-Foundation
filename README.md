@@ -464,7 +464,11 @@ StillMe is **open source** and **needs your help**. If you're:
 ### **Connect**
 
 - **GitHub**: [@anhmtk](https://github.com/anhmtk)
-- **Project**: [StillMe Repository](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System)
+- **Project Repository**: [StillMe---Self-Evolving-AI-System](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System)
+- **Discussions**: [GitHub Discussions](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System/discussions) - Ask questions, share ideas, join the debate
+- **Issues**: [Report bugs or request features](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System/issues)
+
+> **Community Channels**: We're building StillMe's community! Discord, Telegram, and other channels coming soon as we grow. For now, GitHub Discussions is the best place to connect.
 
 > **"I'm not a senior engineer - I'm a founder with a vision. StillMe proves that ideas + AI tools can create something meaningful. Now it needs your expertise to become something great."**
 
@@ -649,10 +653,12 @@ Whether you support or oppose it, StillMe forces you to pay attention:
 
 This project is maintained by passion and community contributions. If you believe in the mission:
 
-- **📧 Donate**: [Donation link will be announced] - help maintain servers and development
 - **🔧 Contribute**: Code, docs, testing, translations - every contribution matters
+- **💬 Join Discussions**: [GitHub Discussions](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System/discussions) - Engage, debate, share ideas
 - **📢 Spread The Word**: Share with developer and researcher communities
-- **🎯 Provide Feedback**: Criticize, suggest, propose - help us improve
+- **🎯 Provide Feedback**: [Open an Issue](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System/issues) - Criticize, suggest, propose
+
+> **Note**: We're not accepting monetary donations yet. The best way to support StillMe is through contributions, discussions, and spreading the word. Community channels and donation options will be announced as the project grows.
 
 ## 🎯 The Bottom Line
 
