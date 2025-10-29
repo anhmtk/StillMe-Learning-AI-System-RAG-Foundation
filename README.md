@@ -151,14 +151,16 @@ Instead of chasing vanity metrics, StillMe focuses on **meaningful progress**:
 
 ### **Roadmap & Milestones**
 
-| Milestone | Status | Target |
-|-----------|--------|--------|
-| **v0.1** - Core System | ✅ Done | Basic learning + dashboard |
-| **v0.2** - Hybrid Learning | ✅ Done | 70/30 AI/Community split |
-| **v0.3** - Secure Voting | ✅ Done | Weighted trust + EthicsGuard |
-| **v0.4** - Docker Setup | ✅ Done | 1-click deployment |
-| **v0.5** - Enhanced Metrics | 🔄 In Progress | Accuracy, retention tracking |
-| **v1.0** - Self-Improvement Loop | 📋 Planned | Meta-learning, curriculum |
+| Milestone | Status | Target | Core Technology | Strategic Goal |
+|-----------|--------|--------|----------------|----------------|
+| **v0.1** - Core System | ✅ Done | Basic learning + dashboard | SQLite + JSON | Foundation |
+| **v0.2** - Hybrid Learning | ✅ Done | 70/30 AI/Community split | Community Voting System | Trust-based routing |
+| **v0.3** - Secure Voting | ✅ Done | Weighted trust + EthicsGuard | EthicsGuard + Weighted Votes | Security & Fairness |
+| **v0.4** - Docker Setup | ✅ Done | 1-click deployment | Docker + docker-compose | Easy Deployment |
+| **v0.5** - Enhanced Metrics | 🔄 In Progress | Accuracy, retention tracking | Knowledge Retention Tracker | Quality-based Evolution |
+| **v0.6** - Long-term Memory | 📋 Planned | Vector DB integration (RAG) | ChromaDB/Milvus + Embeddings | Self-Assessment via Semantic Search |
+| **v0.7** - Meta-Learning 1.0 | 📋 Planned | Curriculum Learning + Self-Optimization | Meta-Learning Agent + Retention Analytics | Learn to Learn |
+| **v1.0** - Self-Improvement Loop | 📋 Planned | Full autonomous learning cycle | Meta-Learning + Vector DB + Curriculum | True Self-Evolution |
 
 ## 🧬 AI Evolution Stages
 
@@ -201,11 +203,28 @@ StillMe progresses through distinct developmental stages based on **learning ses
 - ✅ **Foundation for future enhancements**
 
 **Future Enhancements (Roadmap v0.5+):**
+
+#### **v0.5 - Enhanced Metrics (In Progress)**
 - 📊 **Accuracy Tracking**: Measure response quality and user satisfaction
-- 🧠 **Knowledge Retention**: Track how well knowledge persists over time
-- 📈 **Meta-Learning**: Learn from learning patterns themselves
-- 🎓 **Curriculum Learning**: Structured learning paths (not just random sessions)
-- 🔄 **Self-Improvement Loop**: Use feedback to improve the learning process
+- 🧠 **Knowledge Retention Tracker**: Track how well knowledge persists over time
+- **Technical Implementation**: Session-based metrics → Quality-based metrics
+
+#### **v0.6 - Long-term Memory (Planned)**
+- 🗄️ **Vector DB Integration**: ChromaDB/Milvus for semantic knowledge retrieval
+- 🔍 **RAG (Retrieval-Augmented Generation)**: Context-aware responses using embeddings
+- **Technical Implementation**: Migrate from JSON to Vector DB, enable semantic search
+- **Strategic Goal**: Enable "Self-Assessment" - AI can find knowledge gaps and contradictions
+
+#### **v0.7 - Meta-Learning 1.0 (Planned)**
+- 📈 **Meta-Learning Agent**: Learn from learning patterns themselves
+- 🎓 **Curriculum Learning**: Structured learning paths based on effectiveness
+- **Technical Implementation**: Module analyzes retention rates, adjusts trust scores, suggests sources
+- **Strategic Goal**: Self-Optimization - AI improves its own learning process
+
+#### **v1.0 - Self-Improvement Loop (Planned)**
+- 🔄 **Full Autonomous Learning Cycle**: Complete integration of all above features
+- **Technical Implementation**: Meta-Learning + Vector DB + Curriculum = True Self-Evolution
+- **Strategic Goal**: Realize the "Thought Experiment" - AI that can improve itself
 
 > **Why start simple?**  
 > Every complex system starts with a simple foundation. StillMe's evolution stages are **transparent and auditable** - you can see exactly what triggers each stage. As we collect more data, we'll enhance the metrics, but **transparency remains the priority**.
@@ -362,6 +381,8 @@ graph TB
 - **Ethical Violations**: Complete audit trail
 - **Community Votes**: Weighted voting system
 - **Evolution Stages**: Track developmental progress
+
+> **Current State**: StillMe uses SQLite + JSON for data storage (MVP approach). See [Roadmap](#-roadmap--milestones) for planned Vector DB integration (v0.6) and Meta-Learning (v0.7).
 
 ### **Learning Flow**
 
