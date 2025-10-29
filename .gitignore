@@ -22,6 +22,12 @@ logs/
 
 # Environment and IDE
 .env
+.env.*
+.env.backup
+.env.recovered
+.env.local
+.env.prod
+.env.dev
 .venv
 .vscode/
 .idea/
@@ -32,7 +38,11 @@ Thumbs.db
 
 # Large data files
 *.csv
-*.json
 *.xml
 .coverage
 !_attic/**
+
+# Temporary/junk files with encoding issues
+responsive*
+tatus*
+"ys; print*"
