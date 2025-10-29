@@ -160,6 +160,7 @@ Instead of chasing vanity metrics, StillMe focuses on **meaningful progress**:
 | **v0.5** - Enhanced Metrics | 🔄 In Progress | Accuracy, retention tracking | Knowledge Retention Tracker | Quality-based Evolution |
 | **v0.6** - Long-term Memory | 📋 Planned | Vector DB integration (RAG) | ChromaDB/Milvus + Embeddings | Self-Assessment via Semantic Search |
 | **v0.7** - Meta-Learning 1.0 | 📋 Planned | Curriculum Learning + Self-Optimization | Meta-Learning Agent + Retention Analytics | Learn to Learn |
+| **v0.8** - AI Self-Improvement (Exploratory) | 🔬 Research | Experimental self-coding capabilities | TBD - Research phase | Proof of concept for autonomous code improvement |
 | **v1.0** - Self-Improvement Loop | 📋 Planned | Full autonomous learning cycle | Meta-Learning + Vector DB + Curriculum | True Self-Evolution |
 
 ## 🧬 AI Evolution Stages
@@ -225,6 +226,12 @@ StillMe progresses through distinct developmental stages based on **learning ses
 - 🔄 **Full Autonomous Learning Cycle**: Complete integration of all above features
 - **Technical Implementation**: Meta-Learning + Vector DB + Curriculum = True Self-Evolution
 - **Strategic Goal**: Realize the "Thought Experiment" - AI that can improve itself
+
+#### **v0.8+ - AI Self-Improvement (Future Research)**
+- 🤖 **Exploratory Research**: Can AI debug and improve its own code?
+- 🔬 **Proof of Concept**: Limited self-coding capabilities within safe boundaries
+- **Status**: Research phase - No concrete implementation yet
+- **Connection**: This relates to the "Thought Experiment" section - we're exploring the possibility, not promising it
 
 > **Why start simple?**  
 > Every complex system starts with a simple foundation. StillMe's evolution stages are **transparent and auditable** - you can see exactly what triggers each stage. As we collect more data, we'll enhance the metrics, but **transparency remains the priority**.
