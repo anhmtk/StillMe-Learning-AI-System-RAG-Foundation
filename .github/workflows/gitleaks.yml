@@ -5,6 +5,10 @@ on:
     branches: [ main, master, develop ]
   pull_request:
 
+permissions:
+  contents: read
+  pull-requests: write
+
 jobs:
   gitleaks:
     runs-on: ubuntu-latest
@@ -16,5 +20,7 @@ jobs:
 
       - name: Run gitleaks
         uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           args: --no-banner detect -v -c .gitleaks.toml --redact --exit-code 1
