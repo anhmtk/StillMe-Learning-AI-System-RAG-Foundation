@@ -12,3 +12,7 @@ paths = [
 regexes = [
   '''FAKE|DUMMY|PLACEHOLDER|EXAMPLE_KEY'''
 ]
+ fix/gitleaks-workflow
+
+
+ main
