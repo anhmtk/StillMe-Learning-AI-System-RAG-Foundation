@@ -1,7 +1,7 @@
 # 🧠 StillMe - Self-Evolving AI System
 
 <div align="center">
-  <img src="assets/logo.svg" alt="StillMe Logo" width="200"/>
+  <img src="assets/logo.png" alt="StillMe Logo" width="200" height="200">
 </div>
 
 > **A revolutionary AI system that learns and evolves from the internet daily, becoming smarter with each interaction.**
@@ -197,7 +197,33 @@ StillMe features a comprehensive ethical content filtering system that ensures r
 - **Audit Trail**: Full transparency into all ethical decisions
 - **API Access**: Programmatic access to ethical statistics and controls
 
-## 🔧 Configuration
+## 🤝 Secure Community Voting System
+
+StillMe implements a **Secure Voting System** with weighted trust and ethical safeguards:
+
+### **Security Features**
+- 🔒 **Minimum Votes**: 10 votes required (upgraded from 5)
+- 📊 **Approval Threshold**: 70% weighted approval rate (upgraded from 60%)
+- ⏰ **Cooldown Period**: 1-hour wait before finalizing decisions
+- 🛡️ **EthicsGuard**: Automatic ethical compliance check before approval
+- ⚖️ **Weighted Trust**: Votes weighted by reviewer trust scores (0.0-1.0)
+
+### **Voting Process**
+1. **Proposal Submission**: Content enters community review queue (30% of learning content)
+2. **Community Voting**: Users vote with weighted trust scores
+3. **Cooldown**: 1-hour waiting period after first vote
+4. **EthicsGuard Check**: Automatic ethical compliance verification
+5. **Final Decision**: Approved if ethics passed, rejected if failed
+
+### **Trust Scoring**
+- **High Trust Reviewers** (0.8-1.0): Votes count more heavily
+- **Medium Trust Reviewers** (0.5-0.8): Standard vote weight
+- **Low Trust Reviewers** (0.0-0.5): Reduced vote weight
+
+### **Status Indicators**
+- 🟡 **Pending Votes**: Awaiting community review
+- 🟢 **Approved**: EthicsGuard ✅ passed
+- 🔴 **Rejected**: EthicsGuard ❌ failed or low approval rate
 
 ### **Environment Setup**
 ```bash
@@ -210,9 +236,18 @@ OPENAI_API_KEY=sk-REPLACE_ME
 ANTHROPIC_API_KEY=sk-REPLACE_ME
 
 # Learning Configuration
+LEARNING_INTERVAL_HOURS=4  # 4 hours (6 cycles per day)
 MAX_DAILY_PROPOSALS=50
 AUTO_APPROVAL_THRESHOLD=0.8
+COMMUNITY_MIN=0.6
+COMMUNITY_MAX=0.8
 LEARNING_SESSION_HOUR=9
+
+# Secure Voting Configuration
+MIN_VOTES=10
+APPROVAL_THRESHOLD=0.7
+COOLDOWN_HOURS=1
+ETHICS_GUARD_THRESHOLD=0.8
 
 # Notification Configuration
 SMTP_HOST=smtp.gmail.com
