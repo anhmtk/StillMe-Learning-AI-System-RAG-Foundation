@@ -363,32 +363,50 @@ sequenceDiagram
 
 StillMe was born from a simple yet powerful idea: **AI should be transparent, ethical, and community-controlled**. 
 
-As a **non-technical founder**, I built StillMe using modern AI development tools (Cursor AI, Grok, DeepSeek) to prove that you don't need to be a senior engineer to create meaningful AI systems. What matters is the **vision, commitment to transparency, and willingness to learn**.
+### **The Honest Story**
+
+I'm a **non-technical founder** with no formal IT background. StillMe was built entirely with **AI-assisted development** (Cursor AI, Grok, DeepSeek, ChatGPT) - and I'm proud of that. This isn't a weakness; it's proof that **vision + AI tools = possibility**.
+
+**Here's what I bring:**
+- ✅ **Vision**: Unwavering commitment to transparency and ethics
+- ✅ **Learning**: Willingness to learn and iterate
+- ✅ **Persistence**: Building StillMe despite no formal coding background
+- ✅ **Humility**: Acknowledging that code will have bugs and needs improvement
+
+**Here's what StillMe proves:**
+- 🤖 **AI can build AI**: This project demonstrates AI-assisted development works
+- 🌍 **Democratization**: You don't need a CS degree to create meaningful AI systems
+- 💡 **Ideas matter**: Vision and commitment can overcome technical barriers
 
 ### **Why StillMe?**
 
-After witnessing the "black box" nature of major AI systems and the lack of transparency in how they learn and make decisions, I realized:
+After witnessing the "black box" nature of major AI systems, I realized:
 
 - **Users deserve to know** what AI learns and why
 - **Ethics shouldn't be optional** - it must be foundational
 - **Community should have control** - not just corporations
-- **Anyone can build AI** - with the right tools and mindset
+- **Anyone can build AI** - with the right tools, vision, and persistence
 
 StillMe is my attempt to demonstrate that **transparency + ethics + community = better AI**.
 
-### **The Journey**
+### **A Call to Shapers**
 
-- **Started**: Learning AI development from scratch
-- **Built with**: Cursor AI, Grok, DeepSeek, OpenAI
-- **Philosophy**: 100% open source, 100% transparent
-- **Goal**: Create a self-evolving AI that learns ethically and transparently
+StillMe is **open source** and **needs your help**. If you're:
+- 🧠 **An AI expert** who can improve architecture and metrics
+- 💻 **A developer** who can optimize code and fix bugs
+- 🧪 **A tester** who can ensure quality and reliability
+- 📚 **A documenter** who can improve clarity and guides
+
+**We need you.** This project started with an idea and AI assistance - but it needs **human expertise** to reach its full potential. Every contribution makes StillMe better.
+
+> **Note**: This is an AI-assisted project. Code may have bugs - that's why we're open source and need your help!
 
 ### **Connect**
 
 - **GitHub**: [@anhmtk](https://github.com/anhmtk)
 - **Project**: [StillMe Repository](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System)
 
-> **"I'm not a senior engineer, but I believe in transparency. StillMe proves that vision matters more than credentials."**
+> **"I'm not a senior engineer - I'm a founder with a vision. StillMe proves that ideas + AI tools can create something meaningful. Now it needs your expertise to become something great."**
 
 StillMe learns from diverse, trusted sources:
 
