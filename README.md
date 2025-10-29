@@ -246,6 +246,19 @@ Here's a question that will divide opinions and spark debate — and that's exac
 
 **This is not a feature we're building.** This is a **thought experiment** — a philosophical question that forces us to confront the future of AI autonomy.
 
+### 🔬 **Run the Experiment Yourself**
+
+> **Try it now**:  
+> → [Quick Start](#-quick-start) → Watch StillMe learn → **Ask yourself: "What if it started fixing itself?"**
+
+**Where do you stand?** (Check your position below - interactive on GitHub!)
+
+- [ ] **I support self-improvement** — Fascinated by the possibility of true AI autonomy
+- [ ] **I oppose (safety first)** — Concerned about control and unintended consequences  
+- [ ] **I want to see what happens** — Curious about the unknown, regardless of outcome
+
+**Share your thoughts**: [GitHub Discussions](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System/discussions) | [Open an Issue](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System/issues)
+
 **Why does this matter?**
 
 - **If you support it**: You're fascinated by the possibility of true AI self-improvement
