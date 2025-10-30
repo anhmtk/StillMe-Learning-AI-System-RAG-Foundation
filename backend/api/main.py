@@ -1,0 +1,363 @@
+"""
+StillMe Backend API
+FastAPI backend with RAG (Retrieval-Augmented Generation) capabilities
+"""
+
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+from typing import Optional, Dict, Any
+import os
+import logging
+import asyncio
+import httpx
+from datetime import datetime
+
+# Import RAG components
+from backend.vector_db import ChromaClient, EmbeddingService, RAGRetrieval
+from backend.learning import KnowledgeRetention, AccuracyScorer
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+app = FastAPI(
+    title="StillMe API",
+    description="Self-Evolving AI System with RAG capabilities",
+    version="0.4.0"
+)
+
+# CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Initialize RAG components
+try:
+    chroma_client = ChromaClient()
+    embedding_service = EmbeddingService()
+    rag_retrieval = RAGRetrieval(chroma_client, embedding_service)
+    knowledge_retention = KnowledgeRetention()
+    accuracy_scorer = AccuracyScorer()
+    logger.info("RAG components initialized successfully")
+except Exception as e:
+    logger.error(f"Failed to initialize RAG components: {e}")
+    # Fallback to None for graceful degradation
+    chroma_client = None
+    rag_retrieval = None
+    knowledge_retention = None
+    accuracy_scorer = None
+
+# Pydantic models
+class ChatRequest(BaseModel):
+    message: str
+    user_id: Optional[str] = "default"
+    use_rag: bool = True
+    context_limit: int = 3
+
+class ChatResponse(BaseModel):
+    response: str
+    context_used: Optional[Dict[str, Any]] = None
+    accuracy_score: Optional[float] = None
+    learning_session_id: Optional[int] = None
+
+class LearningRequest(BaseModel):
+    content: str
+    source: str
+    content_type: str = "knowledge"
+    metadata: Optional[Dict[str, Any]] = None
+
+class LearningResponse(BaseModel):
+    success: bool
+    knowledge_id: Optional[int] = None
+    message: str
+
+# API Routes
+@app.get("/")
+async def root():
+    """Root endpoint"""
+    return {
+        "message": "StillMe API v0.4.0",
+        "status": "running",
+        "rag_enabled": rag_retrieval is not None,
+        "timestamp": datetime.now().isoformat()
+    }
+
+@app.get("/health")
+async def health_check():
+    """Health check endpoint"""
+    rag_status = "enabled" if rag_retrieval else "disabled"
+    return {
+        "status": "healthy",
+        "rag_status": rag_status,
+        "timestamp": datetime.now().isoformat()
+    }
+
+@app.post("/api/chat/rag", response_model=ChatResponse)
+async def chat_with_rag(request: ChatRequest):
+    """Chat with RAG-enhanced responses"""
+    try:
+        # Get RAG context if enabled
+        context = None
+        if rag_retrieval and request.use_rag:
+            context = rag_retrieval.retrieve_context(
+                query=request.message,
+                knowledge_limit=request.context_limit,
+                conversation_limit=2
+            )
+        
+        # Generate response using AI (simplified for demo)
+        if context and context["total_context_docs"] > 0:
+            # Use context to enhance response
+            context_text = rag_retrieval.build_prompt_context(context)
+            enhanced_prompt = f"""
+            Context: {context_text}
+            
+            User Question: {request.message}
+            
+            Please provide a helpful response based on the context above.
+            """
+            response = await generate_ai_response(enhanced_prompt)
+        else:
+            # Fallback to regular AI response
+            response = await generate_ai_response(request.message)
+        
+        # Score the response
+        accuracy_score = None
+        if accuracy_scorer:
+            accuracy_score = accuracy_scorer.score_response(
+                question=request.message,
+                actual_answer=response,
+                scoring_method="semantic_similarity"
+            )
+        
+        # Record learning session
+        learning_session_id = None
+        if knowledge_retention:
+            learning_session_id = knowledge_retention.record_learning_session(
+                session_type="chat",
+                content_learned=f"Q: {request.message}\nA: {response}",
+                accuracy_score=accuracy_score or 0.5,
+                metadata={"user_id": request.user_id}
+            )
+        
+        # Store conversation in vector DB
+        if rag_retrieval:
+            rag_retrieval.add_learning_content(
+                content=f"Q: {request.message}\nA: {response}",
+                source="user_chat",
+                content_type="conversation",
+                metadata={
+                    "user_id": request.user_id,
+                    "timestamp": datetime.now().isoformat(),
+                    "accuracy_score": accuracy_score
+                }
+            )
+        
+        return ChatResponse(
+            response=response,
+            context_used=context,
+            accuracy_score=accuracy_score,
+            learning_session_id=learning_session_id
+        )
+        
+    except Exception as e:
+        logger.error(f"Chat error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/learning/add", response_model=LearningResponse)
+async def add_learning_content(request: LearningRequest):
+    """Add learning content to the system"""
+    try:
+        # Add to knowledge retention system
+        knowledge_id = None
+        if knowledge_retention:
+            knowledge_id = knowledge_retention.add_knowledge(
+                content=request.content,
+                source=request.source,
+                knowledge_type=request.content_type,
+                metadata=request.metadata
+            )
+        
+        # Add to vector database
+        if rag_retrieval:
+            success = rag_retrieval.add_learning_content(
+                content=request.content,
+                source=request.source,
+                content_type=request.content_type,
+                metadata=request.metadata
+            )
+            if not success:
+                return LearningResponse(
+                    success=False,
+                    message="Failed to add to vector database"
+                )
+        
+        return LearningResponse(
+            success=True,
+            knowledge_id=knowledge_id,
+            message="Learning content added successfully"
+        )
+        
+    except Exception as e:
+        logger.error(f"Learning error: {e}")
+        return LearningResponse(
+            success=False,
+            message=f"Error: {str(e)}"
+        )
+
+@app.get("/api/learning/metrics")
+async def get_learning_metrics():
+    """Get learning and accuracy metrics"""
+    try:
+        metrics = {}
+        
+        # Get retention metrics
+        if knowledge_retention:
+            metrics["retention"] = knowledge_retention.calculate_retention_metrics()
+        
+        # Get accuracy metrics
+        if accuracy_scorer:
+            metrics["accuracy"] = accuracy_scorer.get_accuracy_metrics()
+        
+        # Get vector DB stats
+        if chroma_client:
+            metrics["vector_db"] = chroma_client.get_collection_stats()
+        
+        return metrics
+        
+    except Exception as e:
+        logger.error(f"Metrics error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/learning/retained")
+async def get_retained_knowledge(limit: int = 10):
+    """Get retained knowledge items"""
+    try:
+        if not knowledge_retention:
+            raise HTTPException(status_code=503, detail="Knowledge retention not available")
+        
+        knowledge = knowledge_retention.get_retained_knowledge(limit=limit)
+        return {"knowledge_items": knowledge}
+        
+    except Exception as e:
+        logger.error(f"Retained knowledge error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Legacy endpoints for backward compatibility
+@app.post("/api/chat/openai")
+async def chat_openai(request: ChatRequest):
+    """Legacy OpenAI chat endpoint"""
+    return await chat_with_rag(request)
+
+@app.post("/api/chat/deepseek")
+async def chat_deepseek(request: ChatRequest):
+    """Legacy DeepSeek chat endpoint"""
+    return await chat_with_rag(request)
+
+# Helper functions
+async def generate_ai_response(prompt: str) -> str:
+    """Generate AI response (simplified for demo)"""
+    try:
+        # Check for API keys
+        openai_key = os.getenv("OPENAI_API_KEY")
+        deepseek_key = os.getenv("DEEPSEEK_API_KEY")
+        
+        if deepseek_key:
+            return await call_deepseek_api(prompt, deepseek_key)
+        elif openai_key:
+            return await call_openai_api(prompt, openai_key)
+        else:
+            return "I'm StillMe, but I need API keys to provide real responses. Please configure OPENAI_API_KEY or DEEPSEEK_API_KEY in your environment."
+            
+    except Exception as e:
+        logger.error(f"AI response error: {e}")
+        return f"I encountered an error: {str(e)}"
+
+async def call_deepseek_api(prompt: str, api_key: str) -> str:
+    """Call DeepSeek API"""
+    try:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            response = await client.post(
+                "https://api.deepseek.com/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "model": "deepseek-chat",
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "You are StillMe, a self-evolving AI system. Provide helpful, accurate responses in Vietnamese when appropriate."
+                        },
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ],
+                    "max_tokens": 2000,
+                    "temperature": 0.7
+                }
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "choices" in data and len(data["choices"]) > 0:
+                    return data["choices"][0]["message"]["content"]
+                else:
+                    return "DeepSeek API returned unexpected response format"
+            else:
+                return f"DeepSeek API error: {response.status_code}"
+                
+    except Exception as e:
+        logger.error(f"DeepSeek API error: {e}")
+        return f"DeepSeek API error: {str(e)}"
+
+async def call_openai_api(prompt: str, api_key: str) -> str:
+    """Call OpenAI API"""
+    try:
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            response = await client.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json"
+                },
+                json={
+                    "model": "gpt-3.5-turbo",
+                    "messages": [
+                        {
+                            "role": "system",
+                            "content": "You are StillMe, a self-evolving AI system. Provide helpful, accurate responses in Vietnamese when appropriate."
+                        },
+                        {
+                            "role": "user",
+                            "content": prompt
+                        }
+                    ],
+                    "max_tokens": 2000,
+                    "temperature": 0.7
+                }
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                if "choices" in data and len(data["choices"]) > 0:
+                    return data["choices"][0]["message"]["content"]
+                else:
+                    return "OpenAI API returned unexpected response format"
+            else:
+                return f"OpenAI API error: {response.status_code}"
+                
+    except Exception as e:
+        logger.error(f"OpenAI API error: {e}")
+        return f"OpenAI API error: {str(e)}"
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
