@@ -1,0 +1,10 @@
+{
+  "Test Source": {
+    "source_name": "Test Source",
+    "total_proposals": 1,
+    "successful_learnings": 1,
+    "failed_learnings": 0,
+    "avg_quality_score": 0.85,
+    "last_updated": "2025-10-28T10:34:24.784432"
+  }
+}

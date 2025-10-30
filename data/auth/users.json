@@ -1,0 +1,16 @@
+{
+  "admin": {
+    "username": "admin",
+    "password_hash": "dc06ab7c0890503642bf8250cd756f8ce4224275226a7ab12088f45737003f77:49bfff58ecdb49c213366b3d20a74d24",
+    "role": "admin",
+    "permissions": [
+      "read",
+      "write",
+      "approve",
+      "reject",
+      "admin"
+    ],
+    "created_at": "2025-10-17T11:20:28.929302",
+    "last_login": "2025-10-20T16:20:59.534201"
+  }
+}

@@ -1,55 +1,58 @@
-# AI Router Testing & Monitoring Scripts
+# StillMe Scripts
 
-This directory contains various scripts for testing, monitoring, and managing the AI router system.
+This directory contains utility scripts for running and managing the StillMe system.
 
 ## 🚀 Quick Start
 
-### 1. **Test the Router (Recommended)**
-```bash
-# Run comprehensive tests
-python scripts/test_router.py --all
+### Start Services
 
-# Or run individual test suites
-python scripts/test_router.py --unit
-python scripts/test_router.py --integration
-python scripts/test_router.py --performance
+**Windows (PowerShell):**
+```powershell
+# Start backend API server
+.\scripts\start_api.ps1
+
+# Start frontend dashboard
+.\scripts\start_web.ps1
+
+# Start scheduler
+.\scripts\start_server.ps1
 ```
 
-### 2. **Debug a Specific Prompt**
+**Linux/Mac:**
 ```bash
-# Debug why a prompt is routed to a specific model
-python scripts/debug_router.py --prompt "viết code Python tính giai thừa"
-```
+# Start backend API server
+./scripts/start_api.sh
 
-### 3. **Monitor Performance**
-```bash
-# Run performance benchmark
-python scripts/benchmark_router.py --performance
+# Start frontend dashboard  
+./scripts/start_web.sh
 
-# Or run full benchmark suite
-python scripts/benchmark_router.py --full
+# Start scheduler
+./scripts/start_server.sh
 ```
 
 ## 📋 Available Scripts
 
-### **Core Testing Scripts**
-- **`test_router.py`** - Comprehensive test suite with unit, integration, and performance tests
-- **`validate_router.py`** - Quick validation of router configuration and performance
-- **`benchmark_router.py`** - Performance benchmarking with detailed metrics
+### **Server Management**
+- **`start_api.ps1`** / **`start_api.sh`** - Start FastAPI backend server
+- **`start_web.ps1`** / **`start_web.sh`** - Start Streamlit frontend dashboard
+- **`start_server.ps1`** / **`start_server.sh`** - Start scheduler service
+- **`stop_server.ps1`** / **`stop_server.sh`** - Stop services
 
-### **Debugging & Analysis Scripts**
-- **`debug_router.py`** - Debug routing decisions with detailed analysis
-- **`router_tools.py`** - Various utility functions for testing and validation
-- **`monitor_router.py`** - Real-time performance monitoring
+### **Development & Testing**
+- **`add_manual_knowledge.py`** - Add knowledge manually to StillMe
+- **`benchmark_router.py`** - Benchmark AI router performance
+- **`check_core_security.py`** - Security checks
+- **`smoke_test.ps1`** / **`smoke_test.sh`** - Quick smoke tests
 
-### **Management Scripts**
-- **`router_manager.py`** - Router status, configuration, and maintenance
-- **`calibrate_router.py`** - Fine-tune router weights and thresholds
-- **`router_cli.py`** - Command-line interface for interactive testing
+### **Infrastructure**
+- **`compute_base_url.ps1`** / **`compute_base_url.sh`** - Compute server base URL
+- **`get_tailscale_ip.ps1`** / **`get_tailscale_ip.sh`** - Get Tailscale IP
+- **`wait_ready.ps1`** / **`wait_ready.sh`** - Wait for service readiness
+- **`detect_server_port.ps1`** - Detect available server port
 
-### **Monitoring Scripts**
-- **`router_dashboard.py`** - Real-time dashboard for router monitoring
-- **`router_cli.py`** - Interactive command-line interface
+### **Windows-specific**
+- **`install_windows_task.ps1`** - Install Windows scheduled task
+- **`kill-by-port.ps1`** - Kill process by port number
 
 ## 🎯 Common Use Cases
 

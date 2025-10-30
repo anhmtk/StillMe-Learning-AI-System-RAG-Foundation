@@ -1,0 +1,249 @@
+{
+  "hqcqkyt_XyrGD6qAuljkE9Et_M1UIHYupAml5noe0WQ": {
+    "username": "admin",
+    "role": "admin",
+    "permissions": [
+      "read",
+      "write",
+      "approve",
+      "reject",
+      "admin"
+    ],
+    "created_at": "2025-10-17T11:20:36.746960",
+    "expires_at": "2025-10-18T11:20:36.746960"
+  },
+  "_BeV_5uB7m5t8YnosWNLuXOY4WENWLckyDBAuefcO7A": {
+    "username": "admin",
+    "role": "admin",
+    "permissions": [
+      "read",
+      "write",
+      "approve",
+      "reject",
+      "admin"
+    ],
+    "created_at": "2025-10-17T11:24:37.771475",
+    "expires_at": "2025-10-18T11:24:37.771475"
+  },
+  "WJIOtrEgQ0TyKjs4s-lTVuI6MvGmN8VBYGwQxEOTJus": {
+    "username": "admin",
+    "role": "admin",
+    "permissions": [
+      "read",
+      "write",
+      "approve",
+      "reject",
+      "admin"
+    ],
+    "created_at": "2025-10-17T11:25:40.050261",
+    "expires_at": "2025-10-18T11:25:40.050261"
+  },
+  "RJUy2zqRhfnphQgJgkb38zfVpCJYNYa1fDkFu9fmYio": {
+    "username": "admin",
+    "role": "admin",
+    "permissions": [
+      "read",
+      "write",
+      "approve",
+      "reject",
+      "admin"
+    ],
+    "created_at": "2025-10-17T16:19:47.076198",
+    "expires_at": "2025-10-18T16:19:47.076198"
+  },
+  "jGNyqPWcQw_xRIci6IGc655T1DvVe-qG_j4xtkdoTwc": {
+    "username": "admin",
+    "role": "admin",
+    "permissions": [
+      "read",
+      "write",
+      "approve",
+      "reject",
+      "admin"
+    ],
+    "created_at": "2025-10-17T16:27:30.608380",
+    "expires_at": "2025-10-18T16:27:30.608380"
+  },
+  "53taC80isn3L226mihs3Jj7fNABLNKrisuK6r2pXkTU": {
+    "username": "admin",
+    "role": "admin",
+    "permissions": [
+      "read",
+      "write",
+      "approve",
+      "reject",
+      "admin"
+    ],
+    "created_at": "2025-10-17T16:30:01.143094",
+    "expires_at": "2025-10-18T16:30:01.143094"
+  },
+  "3S44FI_iEhYG8oUouLHPwS88ZzTs5rIoGJGsNAabO2A": {
+    "username": "admin",
+    "role": "admin",
+    "permissions": [
+      "read",
+      "write",
+      "approve",
+      "reject",
+      "admin"
+    ],
+    "created_at": "2025-10-17T19:18:42.003254",
+    "expires_at": "2025-10-18T19:18:42.003254"
+  },
+  "hoF_ahidR-45n7ld1ID0H658JmlJKfU3V-I3pk1ocjQ": {
+    "username": "admin",
+    "role": "admin",
+    "permissions": [
+      "read",
+      "write",
+      "approve",
+      "reject",
+      "admin"
+    ],
+    "created_at": "2025-10-17T23:27:55.387143",
+    "expires_at": "2025-10-18T23:27:55.387143"
+  },
+  "nZR9Uoa0zMEvUgu2cDl8vMH3ju5RxDh0iEGvoLwt8NU": {
+    "username": "admin",
+    "role": "admin",
+    "permissions": [
+      "read",
+      "write",
+      "approve",
+      "reject",
+      "admin"
+    ],
+    "created_at": "2025-10-17T23:40:25.569553",
+    "expires_at": "2025-10-18T23:40:25.569553"
+  },
+  "Q_hCMH4z0MQmxyQjUQ2X-tGekv9SYozeYR7SCgHxdbM": {
+    "username": "admin",
+    "role": "admin",
+    "permissions": [
+      "read",
+      "write",
+      "approve",
+      "reject",
+      "admin"
+    ],
+    "created_at": "2025-10-17T23:53:36.382555",
+    "expires_at": "2025-10-18T23:53:36.382555"
+  },
+  "hPgzuktgxzSkYuNO9h-mmJUWdKTXZdJQ2yYTMdzBvaE": {
+    "username": "admin",
+    "role": "admin",
+    "permissions": [
+      "read",
+      "write",
+      "approve",
+      "reject",
+      "admin"
+    ],
+    "created_at": "2025-10-18T13:58:37.959771",
+    "expires_at": "2025-10-19T13:58:37.959771"
+  },
+  "lBY0bI63tH1ct4rzvl8g_5F02HDN30BopZWwEAjSj_I": {
+    "username": "admin",
+    "role": "admin",
+    "permissions": [
+      "read",
+      "write",
+      "approve",
+      "reject",
+      "admin"
+    ],
+    "created_at": "2025-10-18T14:05:45.289392",
+    "expires_at": "2025-10-19T14:05:45.289392"
+  },
+  "tr2gJhcDx2GmsDZRTPSzrYs-VSDmW6SLjEHdbYzjiNg": {
+    "username": "admin",
+    "role": "admin",
+    "permissions": [
+      "read",
+      "write",
+      "approve",
+      "reject",
+      "admin"
+    ],
+    "created_at": "2025-10-18T14:09:18.549876",
+    "expires_at": "2025-10-19T14:09:18.549876"
+  },
+  "n6ftUrEsF2LW6qHFcnXogDU3N5JBatvUZjCeIxBeax8": {
+    "username": "admin",
+    "role": "admin",
+    "permissions": [
+      "read",
+      "write",
+      "approve",
+      "reject",
+      "admin"
+    ],
+    "created_at": "2025-10-18T14:27:37.098000",
+    "expires_at": "2025-10-19T14:27:37.098000"
+  },
+  "caymn0ZmdpuJb9TE_pvA8DS22224kkMS77psyisYIXs": {
+    "username": "admin",
+    "role": "admin",
+    "permissions": [
+      "read",
+      "write",
+      "approve",
+      "reject",
+      "admin"
+    ],
+    "created_at": "2025-10-18T16:55:06.857671",
+    "expires_at": "2025-10-19T16:55:06.857671"
+  },
+  "auRmd2RVIfbI6063qXWZxVIP8Ka1jI5UdldDDBopsN0": {
+    "username": "admin",
+    "role": "admin",
+    "permissions": [
+      "read",
+      "write",
+      "approve",
+      "reject",
+      "admin"
+    ],
+    "created_at": "2025-10-20T16:08:15.130343",
+    "expires_at": "2025-10-21T16:08:15.130343"
+  },
+  "JuBGuAlqvwpSIlHJ-dlMoo8IzzYhFzk6lU_c0HkIN5w": {
+    "username": "admin",
+    "role": "admin",
+    "permissions": [
+      "read",
+      "write",
+      "approve",
+      "reject",
+      "admin"
+    ],
+    "created_at": "2025-10-20T16:10:58.342730",
+    "expires_at": "2025-10-21T16:10:58.342730"
+  },
+  "e1QvNy-5gHqYIKCysswRRg3RIWof3sIkv4TuBduadRE": {
+    "username": "admin",
+    "role": "admin",
+    "permissions": [
+      "read",
+      "write",
+      "approve",
+      "reject",
+      "admin"
+    ],
+    "created_at": "2025-10-20T16:16:51.941336",
+    "expires_at": "2025-10-21T16:16:51.941336"
+  },
+  "cCARE9Cd5gYO3FwxhCQCEGR-d7EhjWZxU6F6OrfdvoE": {
+    "username": "admin",
+    "role": "admin",
+    "permissions": [
+      "read",
+      "write",
+      "approve",
+      "reject",
+      "admin"
+    ],
+    "created_at": "2025-10-20T16:20:59.534201",
+    "expires_at": "2025-10-21T16:20:59.534201"
+  }
+}

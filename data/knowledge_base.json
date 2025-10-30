@@ -1,0 +1,142 @@
+{
+  "kb_6f0cd4023428": {
+    "id": "kb_6f0cd4023428",
+    "title": "Machine Learning Fundamentals",
+    "content": "Machine learning is a subset of artificial intelligence that focuses on algorithms and statistical models.",
+    "source": "Test Source 1",
+    "category": "ai_research",
+    "quality_score": 0.9,
+    "trust_score": 0.8,
+    "created_at": "2025-10-28T11:45:21.041248",
+    "last_accessed": "2025-10-28T11:45:21.041248",
+    "access_count": 0,
+    "tags": [
+      "subset",
+      "focuses",
+      "fundamentals",
+      "learning",
+      "models",
+      "statistical",
+      "algorithms",
+      "artificial",
+      "intelligence",
+      "that"
+    ]
+  },
+  "kb_4e45f03ed857": {
+    "id": "kb_4e45f03ed857",
+    "title": "Deep Learning Basics",
+    "content": "Deep learning uses neural networks with multiple layers to learn complex patterns in data.",
+    "source": "Test Source 2",
+    "category": "ai_research",
+    "quality_score": 0.85,
+    "trust_score": 0.9,
+    "created_at": "2025-10-28T11:45:21.043651",
+    "last_accessed": "2025-10-28T11:45:21.043651",
+    "access_count": 0,
+    "tags": [
+      "learn",
+      "networks",
+      "complex",
+      "basics",
+      "learning",
+      "patterns",
+      "uses",
+      "with",
+      "deep",
+      "multiple"
+    ]
+  },
+  "kb_bfabcb030d2a": {
+    "id": "kb_bfabcb030d2a",
+    "title": "Neural Network Architecture",
+    "content": "Neural networks consist of interconnected nodes that process information similar to biological neurons.",
+    "source": "Test Source 1",
+    "category": "ai_research",
+    "quality_score": 0.8,
+    "trust_score": 0.7,
+    "created_at": "2025-10-28T11:45:21.045092",
+    "last_accessed": "2025-10-28T11:45:21.045092",
+    "access_count": 0,
+    "tags": [
+      "networks",
+      "nodes",
+      "interconnected",
+      "network",
+      "similar",
+      "neurons",
+      "information",
+      "process",
+      "biological",
+      "consist"
+    ]
+  },
+  "kb_c1d7d1d59388": {
+    "id": "kb_c1d7d1d59388",
+    "title": "Weather Forecast Today",
+    "content": "Today's weather is sunny with a high of 25 degrees Celsius and low humidity.",
+    "source": "Weather API",
+    "category": "weather",
+    "quality_score": 0.6,
+    "trust_score": 0.5,
+    "created_at": "2025-10-28T11:45:21.046461",
+    "last_accessed": "2025-10-28T11:45:21.046461",
+    "access_count": 0,
+    "tags": [
+      "weather",
+      "celsius",
+      "high",
+      "forecast",
+      "with",
+      "sunny",
+      "today",
+      "degrees",
+      "humidity"
+    ]
+  },
+  "kb_e077bb140984": {
+    "id": "kb_e077bb140984",
+    "title": "Advanced AI Techniques",
+    "content": "Advanced AI techniques include reinforcement learning, transfer learning, and meta-learning.",
+    "source": "Test Source 3",
+    "category": "ai_research",
+    "quality_score": 0.9,
+    "trust_score": 0.9,
+    "created_at": "2025-10-28T11:45:21.065538",
+    "last_accessed": "2025-10-28T11:45:21.065538",
+    "access_count": 0,
+    "tags": [
+      "reinforcement",
+      "learning",
+      "include",
+      "transfer",
+      "techniques",
+      "advanced",
+      "meta"
+    ]
+  },
+  "kb_4247b70ff9a4": {
+    "id": "kb_4247b70ff9a4",
+    "title": "Python Programming Tips",
+    "content": "Python programming tips include using list comprehensions, decorators, and context managers.",
+    "source": "Test Source 4",
+    "category": "technology",
+    "quality_score": 0.8,
+    "trust_score": 0.8,
+    "created_at": "2025-10-28T11:45:21.066539",
+    "last_accessed": "2025-10-28T11:45:21.066539",
+    "access_count": 0,
+    "tags": [
+      "python",
+      "tips",
+      "managers",
+      "comprehensions",
+      "include",
+      "context",
+      "decorators",
+      "list",
+      "programming",
+      "using"
+    ]
+  }
+}

@@ -1,0 +1,26 @@
+CURRENT TESTS TO KEEP:
+==================================================
+tests\test_batch2_http_io.py
+tests\test_batch3_templates_validation.py
+tests\test_chaos_tolerance.py
+tests\test_common_modules.py
+tests\test_connectivity.py
+tests\test_core_modules_mock.py
+tests\test_emotionsense_v1.py
+tests\test_gateway_architecture.py
+tests\test_identity_handler.py
+tests\test_identity_integration.py
+tests\test_integration_cross_module.py
+tests\test_internet_access.py
+tests\test_observability_export.py
+tests\test_performance_fixed.py
+tests\test_router_v9.py
+tests\test_security_ethics.py
+tests\test_unit_core_modules.py
+tests\test_web_access_v2.py
+tests\ethics\test_basic_ethics.py
+tests\legacy\test_dashboard_real_data.py
+tests\legacy\test_generated.py
+tests\safety\test_user_safety.py
+tests\seal_grade\conftest.py
+tests\security\test_basic_security.py
