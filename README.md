@@ -4,7 +4,7 @@
   <img src="assets/logo.png" alt="StillMe Logo" width="200" height="200">
 </div>
 
-> **A revolutionary AI system that learns and evolves from the internet daily, becoming smarter with each interaction.**
+> **A transparent AI learning system building the foundation for self-evolving AI. Currently in MVP stage with Vector DB + RAG capabilities working.**
 
 [![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com)
@@ -14,7 +14,16 @@
 
 ## 🌟 What is StillMe?
 
-StillMe is a **Self-Evolving AI System** that continuously learns from the internet, adapts to new information, and evolves through different developmental stages - just like a growing organism. Unlike traditional AI systems that remain static, StillMe gets smarter every day.
+StillMe is a **Transparent AI Learning System** building toward true self-evolution. 
+
+**Current MVP Status:** Foundation components are implemented and working:
+- ✅ **Vector Database (ChromaDB)**: Semantic search and knowledge retrieval functional
+- ✅ **RAG System**: Retrieval-Augmented Generation for context-aware responses  
+- ✅ **Knowledge Retention**: Learning metrics tracking system
+- ✅ **Accuracy Scoring**: Response quality measurement
+- ✅ **Dashboard**: Interactive UI with RAG interface and learning metrics
+
+**Vision:** Evolve through developmental stages (Infant → Child → Adolescent → Adult) with community governance, automated learning pipelines, and complete transparency.
 
 ### 🎯 Core Concept
 
@@ -100,24 +109,42 @@ cp env.example .env
 # Edit .env with your API keys
 
 # Start backend (terminal 1)
-python start_backend.py
+python -m uvicorn backend.api.main:app --host 0.0.0.0 --port 8000 --reload
 
 # Start frontend (terminal 2)
-python start_frontend.py
+streamlit run dashboard.py --server.port 8501
 
-# Start scheduler (terminal 3, optional)
-python start_scheduler.py
+# Note: RSS scheduler and automated learning pipeline are planned for future releases
 ```
+
+## ✨ What's Actually Working (MVP Status)
+
+### ✅ **Implemented & Functional:**
+- **🗄️ Vector Database (ChromaDB)**: Semantic search and knowledge retrieval working
+- **🔍 RAG System**: Retrieval-Augmented Generation fully functional
+- **🧠 Knowledge Retention**: Learning metrics tracking system
+- **📊 Accuracy Scoring**: Response quality measurement
+- **📈 Dashboard**: Streamlit UI with real-time metrics, RAG interface, and chat
+- **🔌 API Endpoints**: Full RAG API (`/api/rag/add_knowledge`, `/api/rag/query`, `/api/rag/stats`)
+
+### 🚧 **Planned/In Development:**
+- **📰 RSS Learning Pipeline**: Architecture designed, implementation planned
+- **⏰ Automated Scheduler**: Design ready, needs implementation
+- **👥 Community Voting**: Secure voting system designed, awaiting implementation
+- **🛡️ Ethical Filtering**: Framework exists, needs integration
+
+### 🔬 **Research Phase:**
+- **🎓 Meta-Learning**: Concept and research discussion
+- **🤖 AI Self-Improvement**: Philosophy exploration (see Thought Experiment section)
 
 ## 📊 Dashboard Features
 
-- **Evolution Panel**: Real-time AI stage and progress tracking
-- **Ethical Filter**: Complete transparency into ethical decisions
-- **Learning Analytics**: Historical progress with flexible timeline analysis
-- **Community Controls**: Manage ethical rules and blacklist
-- **Raw Data Access**: View actual API responses for verification
-- **Community Review**: Voting interface for proposals
-- **Scheduler Control**: Monitor and control auto-learning cycles
+- **📈 Evolution Panel**: Real-time AI stage and progress tracking
+- **💬 Chat Interface**: Interactive communication with StillMe via sidebar
+- **🔍 RAG Interface**: Add knowledge to Vector DB and test retrieval
+- **📊 Learning Sessions**: Record and score learning interactions
+- **📈 Metrics Dashboard**: Vector DB stats, accuracy metrics, retention tracking
+- **🔄 Quick Actions**: Run learning sessions, update metrics
 
 ## 📊 Project Status & Metrics
 
@@ -157,8 +184,8 @@ Instead of chasing vanity metrics, StillMe focuses on **meaningful progress**:
 | **v0.2** - Hybrid Learning | ✅ Done | 70/30 AI/Community split | Community Voting System | Trust-based routing |
 | **v0.3** - Secure Voting | ✅ Done | Weighted trust + EthicsGuard | EthicsGuard + Weighted Votes | Security & Fairness |
 | **v0.4** - Docker Setup | ✅ Done | 1-click deployment | Docker + docker-compose | Easy Deployment |
-| **v0.5** - Enhanced Metrics | 🔄 In Progress | Accuracy, retention tracking | Knowledge Retention Tracker | Quality-based Evolution |
-| **v0.6** - Long-term Memory | 📋 Planned | Vector DB integration (RAG) | ChromaDB/Milvus + Embeddings | Self-Assessment via Semantic Search |
+| **v0.5** - Enhanced Metrics | ✅ **Done (MVP)** | Accuracy, retention tracking | Knowledge Retention Tracker | Quality-based Evolution |
+| **v0.6** - Vector DB + RAG | ✅ **Done (MVP)** | Vector DB integration (RAG) | ChromaDB + Sentence Transformers | Semantic Search & Context Retrieval |
 | **v0.7** - Meta-Learning 1.0 | 📋 Planned | Curriculum Learning + Self-Optimization | Meta-Learning Agent + Retention Analytics | Learn to Learn |
 | **v0.8** - AI Self-Improvement (Exploratory) | 🔬 Research | Experimental self-coding capabilities | TBD - Research phase | Proof of concept for autonomous code improvement |
 | **v1.0** - Self-Improvement Loop | 📋 Planned | Full autonomous learning cycle | Meta-Learning + Vector DB + Curriculum | True Self-Evolution |
@@ -210,11 +237,12 @@ StillMe progresses through distinct developmental stages based on **learning ses
 - 🧠 **Knowledge Retention Tracker**: Track how well knowledge persists over time
 - **Technical Implementation**: Session-based metrics → Quality-based metrics
 
-#### **v0.6 - Long-term Memory (Planned)**
-- 🗄️ **Vector DB Integration**: ChromaDB/Milvus for semantic knowledge retrieval
-- 🔍 **RAG (Retrieval-Augmented Generation)**: Context-aware responses using embeddings
-- **Technical Implementation**: Migrate from JSON to Vector DB, enable semantic search
-- **Strategic Goal**: Enable "Self-Assessment" - AI can find knowledge gaps and contradictions
+#### **v0.6 - Vector DB + RAG (✅ Done - MVP)**
+- 🗄️ **Vector DB Integration**: ✅ ChromaDB integrated with semantic search working
+- 🔍 **RAG (Retrieval-Augmented Generation)**: ✅ Context-aware responses using embeddings functional
+- **Technical Implementation**: ✅ Vector DB + Embedding Service + RAG Retrieval implemented
+- **Strategic Goal**: ✅ Enable "Self-Assessment" - AI can find knowledge gaps via semantic search
+- **Status**: MVP functional and tested. Ready for production scaling.
 
 #### **v0.7 - Meta-Learning 1.0 (Planned)**
 - 📈 **Meta-Learning Agent**: Learn from learning patterns themselves

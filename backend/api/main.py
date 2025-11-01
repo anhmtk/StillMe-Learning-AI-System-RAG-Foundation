@@ -76,6 +76,11 @@ class LearningResponse(BaseModel):
     knowledge_id: Optional[int] = None
     message: str
 
+class RAGQueryRequest(BaseModel):
+    query: str
+    knowledge_limit: int = 3
+    conversation_limit: int = 2
+
 # API Routes
 @app.get("/")
 async def root():
@@ -247,6 +252,117 @@ async def get_retained_knowledge(limit: int = 10):
     except Exception as e:
         logger.error(f"Retained knowledge error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+# RAG-specific endpoints
+@app.post("/api/rag/add_knowledge")
+async def add_knowledge_rag(request: LearningRequest):
+    """Add knowledge to RAG vector database"""
+    try:
+        if not rag_retrieval:
+            raise HTTPException(status_code=503, detail="RAG system not available")
+        
+        success = rag_retrieval.add_learning_content(
+            content=request.content,
+            source=request.source,
+            content_type=request.content_type,
+            metadata=request.metadata
+        )
+        
+        if success:
+            return {"status": "Knowledge added successfully", "content_type": request.content_type}
+        else:
+            raise HTTPException(status_code=500, detail="Failed to add knowledge to vector DB")
+            
+    except Exception as e:
+        logger.error(f"RAG add knowledge error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/rag/query")
+async def query_rag(request: RAGQueryRequest):
+    """Query RAG system for relevant context"""
+    try:
+        if not rag_retrieval:
+            raise HTTPException(status_code=503, detail="RAG system not available")
+        
+        context = rag_retrieval.retrieve_context(
+            query=request.query,
+            knowledge_limit=request.knowledge_limit,
+            conversation_limit=request.conversation_limit
+        )
+        
+        context_text = rag_retrieval.build_prompt_context(context)
+        
+        return {
+            "status": "Context retrieved",
+            "context": context_text,
+            "raw_results": context,
+            "total_context_docs": context.get("total_context_docs", 0)
+        }
+        
+    except Exception as e:
+        logger.error(f"RAG query error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/rag/stats")
+async def get_rag_stats():
+    """Get RAG system statistics"""
+    try:
+        if not chroma_client:
+            raise HTTPException(status_code=503, detail="Vector DB not available")
+        
+        stats = chroma_client.get_collection_stats()
+        return {"stats": stats}
+        
+    except Exception as e:
+        logger.error(f"RAG stats error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/status")
+async def get_status():
+    """Get system status"""
+    try:
+        status = {
+            "stage": "Infant",
+            "sessions_completed": 0,
+            "milestone_sessions": 100,
+            "system_age_days": 0
+        }
+        
+        # Try to get from database if available
+        # For now, return default status
+        
+        return status
+        
+    except Exception as e:
+        logger.error(f"Status error: {e}")
+        return {
+            "stage": "Unknown",
+            "sessions_completed": 0,
+            "milestone_sessions": 100,
+            "system_age_days": 0
+        }
+
+@app.get("/api/learning/accuracy_metrics")
+async def get_accuracy_metrics():
+    """Get accuracy metrics"""
+    try:
+        if not accuracy_scorer:
+            return {"metrics": {
+                "total_responses": 0,
+                "average_accuracy": 0.0,
+                "trend": "N/A"
+            }}
+        
+        metrics = accuracy_scorer.get_accuracy_metrics()
+        return {"metrics": metrics}
+        
+    except Exception as e:
+        logger.error(f"Accuracy metrics error: {e}")
+        return {"metrics": {
+            "total_responses": 0,
+            "average_accuracy": 0.0,
+            "trend": "N/A"
+        }}
 
 # Legacy endpoints for backward compatibility
 @app.post("/api/chat/openai")

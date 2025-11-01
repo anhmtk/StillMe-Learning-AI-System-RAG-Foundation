@@ -42,6 +42,13 @@ Thumbs.db
 .coverage
 !_attic/**
 
+# Database and Vector DB files
+data/
+*.db
+*.sqlite
+*.sqlite3
+chroma_db/
+
 # Temporary/junk files with encoding issues
 responsive*
 tatus*
