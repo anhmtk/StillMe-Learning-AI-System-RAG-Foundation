@@ -1,0 +1,35 @@
+# Files to ignore when deploying to Railway
+# Similar to .gitignore but for Railway builds
+
+# Data files (should not be in repo)
+data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE
+.vscode/
+.idea/
+
+# Legacy files
+legacy/
+_attic/
+_graveyard/
+
+# Test files (not needed in production)
+tests/
+*.test.py
+
+# Documentation (optional - can include for reference)
+# docs/
+

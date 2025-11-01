@@ -17,7 +17,7 @@ services:
     volumes:
       - ./data:/app/data
       - ./config:/app/config
-    command: python start_backend.py
+    command: python -m uvicorn backend.api.main:app --host 0.0.0.0 --port 8000
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -39,7 +39,7 @@ services:
     volumes:
       - ./data:/app/data
       - ./config:/app/config
-    command: python start_frontend.py
+    command: streamlit run dashboard.py --server.port 8501 --server.address 0.0.0.0
     depends_on:
       backend:
         condition: service_healthy
@@ -58,7 +58,7 @@ services:
     volumes:
       - ./data:/app/data
       - ./config:/app/config
-    command: python start_scheduler.py
+    command: python -c "import asyncio; from backend.services.learning_scheduler import LearningScheduler; from backend.services.rss_fetcher import RSSFetcher; scheduler = LearningScheduler(RSSFetcher(), interval_hours=4, auto_add_to_rag=True); asyncio.run(scheduler.start())"
     depends_on:
       backend:
         condition: service_healthy
