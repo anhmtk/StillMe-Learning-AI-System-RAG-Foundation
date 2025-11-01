@@ -16,6 +16,7 @@ from datetime import datetime
 # Import RAG components
 from backend.vector_db import ChromaClient, EmbeddingService, RAGRetrieval
 from backend.learning import KnowledgeRetention, AccuracyScorer
+from backend.services.rss_fetcher import RSSFetcher
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -43,6 +44,7 @@ try:
     rag_retrieval = RAGRetrieval(chroma_client, embedding_service)
     knowledge_retention = KnowledgeRetention()
     accuracy_scorer = AccuracyScorer()
+    rss_fetcher = RSSFetcher()
     logger.info("RAG components initialized successfully")
 except Exception as e:
     logger.error(f"Failed to initialize RAG components: {e}")
@@ -51,6 +53,7 @@ except Exception as e:
     rag_retrieval = None
     knowledge_retention = None
     accuracy_scorer = None
+    rss_fetcher = None
 
 # Pydantic models
 class ChatRequest(BaseModel):
@@ -363,6 +366,66 @@ async def get_accuracy_metrics():
             "average_accuracy": 0.0,
             "trend": "N/A"
         }}
+
+# RSS Learning Pipeline endpoints
+@app.post("/api/learning/rss/fetch")
+async def fetch_rss_content(max_items: int = 5, auto_add: bool = False):
+    """Fetch content from RSS feeds
+    
+    Args:
+        max_items: Maximum items per feed
+        auto_add: If True, automatically add to RAG vector DB
+    """
+    try:
+        if not rss_fetcher:
+            raise HTTPException(status_code=503, detail="RSS fetcher not available")
+        
+        entries = rss_fetcher.fetch_feeds(max_items_per_feed=max_items)
+        
+        # Auto-add to RAG if requested
+        added_count = 0
+        if auto_add and rag_retrieval:
+            for entry in entries:
+                content = f"{entry['title']}\n{entry['summary']}"
+                success = rag_retrieval.add_learning_content(
+                    content=content,
+                    source=entry['source'],
+                    content_type="knowledge",
+                    metadata={
+                        "link": entry['link'],
+                        "published": entry['published'],
+                        "type": "rss_feed"
+                    }
+                )
+                if success:
+                    added_count += 1
+        
+        return {
+            "status": "success",
+            "entries_fetched": len(entries),
+            "entries_added": added_count if auto_add else 0,
+            "entries": entries[:10]  # Return first 10 for preview
+        }
+        
+    except Exception as e:
+        logger.error(f"RSS fetch error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/learning/rss/stats")
+async def get_rss_stats():
+    """Get RSS pipeline statistics"""
+    try:
+        if not rss_fetcher:
+            return {"feeds_configured": 0, "status": "not_available"}
+        
+        return {
+            "feeds_configured": len(rss_fetcher.feeds),
+            "status": "ready",
+            "feeds": rss_fetcher.feeds
+        }
+    except Exception as e:
+        logger.error(f"RSS stats error: {e}")
+        return {"feeds_configured": 0, "status": "error"}
 
 # Legacy endpoints for backward compatibility
 @app.post("/api/chat/openai")
