@@ -94,6 +94,30 @@ docker-compose up -d
 - 🔌 **API**: http://localhost:8000
 - 📚 **API Docs**: http://localhost:8000/docs
 
+### **Option 1b: Deploy Public Dashboard (For Community)**
+
+**🚂 Railway.app (Recommended - 5 Minutes):**
+1. Push code to GitHub (already done ✅)
+2. Go to https://railway.app → Login with GitHub
+3. Click "New Project" → "Deploy from GitHub repo"
+4. Select `StillMe---Self-Evolving-AI-System`
+5. Railway auto-detects `docker-compose.yml` → Deploy!
+6. Add environment variables:
+   - `DEEPSEEK_API_KEY=sk-your-key`
+   - `OPENAI_API_KEY=sk-your-key`
+7. Get public URLs:
+   - Dashboard: `https://stillme-dashboard.railway.app`
+   - API: `https://stillme-backend.railway.app`
+
+**✨ Render.com (Also Free - 10 Minutes):**
+1. Go to https://render.com → Login with GitHub
+2. Click "New" → "Web Service" → Connect GitHub repo
+3. Render auto-detects `render.yaml` → Configure & Deploy!
+4. Add environment variables in Render dashboard
+5. Get public URLs automatically
+
+**📝 Note:** Config files (`railway.json`, `render.yaml`) are already in repo - just connect and deploy!
+
 ### **Option 2: Manual Setup**
 
 ```bash
@@ -126,6 +150,8 @@ streamlit run dashboard.py --server.port 8501
 - **📊 Accuracy Scoring**: Response quality measurement
 - **📈 Dashboard**: Streamlit UI with real-time metrics, RAG interface, and chat
 - **🔌 API Endpoints**: Full RAG API (`/api/rag/add_knowledge`, `/api/rag/query`, `/api/rag/stats`)
+- **⏰ Automated Scheduler**: Auto-learning from RSS every 4 hours
+- **🚀 Public Deployment Ready**: Config files included (`railway.json`, `render.yaml`) - 1-click deploy
 
 ### 🚧 **MVP Ready (Manual Use):**
 - **📰 RSS Learning Pipeline**: ✅ Basic RSS fetcher working - manual trigger via API

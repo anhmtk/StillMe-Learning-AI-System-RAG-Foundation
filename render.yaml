@@ -1,0 +1,40 @@
+# Render.com deployment configuration for StillMe
+# Connect GitHub repo → Render auto-detects this file → Deploy!
+
+services:
+  # Backend API Service
+  - type: web
+    name: stillme-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python -m uvicorn backend.api.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHONPATH
+        value: /opt/render/project/src
+      - key: ENVIRONMENT
+        value: production
+      - key: DEEPSEEK_API_KEY
+        sync: false  # Set manually in Render dashboard
+      - key: OPENAI_API_KEY
+        sync: false  # Set manually in Render dashboard
+    healthCheckPath: /health
+    plan: free  # Free tier
+
+  # Frontend Dashboard Service
+  - type: web
+    name: stillme-dashboard
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run dashboard.py --server.port $PORT --server.address 0.0.0.0 --server.headless=true
+    envVars:
+      - key: PYTHONPATH
+        value: /opt/render/project/src
+      - key: STILLME_API_BASE
+        fromService:
+          type: web
+          name: stillme-backend
+          property: host
+          # Will be: https://stillme-backend.onrender.com
+    healthCheckPath: /healthz  # Streamlit health endpoint
+    plan: free  # Free tier
+
