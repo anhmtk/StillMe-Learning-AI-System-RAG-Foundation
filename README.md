@@ -127,9 +127,12 @@ streamlit run dashboard.py --server.port 8501
 - **📈 Dashboard**: Streamlit UI with real-time metrics, RAG interface, and chat
 - **🔌 API Endpoints**: Full RAG API (`/api/rag/add_knowledge`, `/api/rag/query`, `/api/rag/stats`)
 
-### 🚧 **Planned/In Development:**
-- **📰 RSS Learning Pipeline**: Architecture designed, implementation planned
-- **⏰ Automated Scheduler**: Design ready, needs implementation
+### 🚧 **MVP Ready (Manual Use):**
+- **📰 RSS Learning Pipeline**: ✅ Basic RSS fetcher working - manual trigger via API
+- **🔌 RSS API Endpoints**: ✅ `/api/learning/rss/fetch` - fetch and optionally auto-add to RAG
+
+### 📋 **Planned/In Development:**
+- **⏰ Automated Scheduler**: Design ready, needs implementation (cron/background task)
 - **👥 Community Voting**: Secure voting system designed, awaiting implementation
 - **🛡️ Ethical Filtering**: Framework exists, needs integration
 
@@ -620,12 +623,15 @@ NOTIFY_ERRORS=true
 - `GET /api/learning/evolution/stage` - Get current AI stage
 - `GET /api/learning/stats` - Get learning statistics
 
+### **RSS Learning Pipeline APIs**
+- `POST /api/learning/rss/fetch` - Fetch RSS feeds (with optional auto-add to RAG)
+  - Parameters: `max_items` (default: 5), `auto_add` (default: false)
+- `GET /api/learning/rss/stats` - Get RSS pipeline configuration stats
+
 ### **Content Management APIs**
 - `GET /api/learning/proposals` - Get learning proposals
 - `POST /api/learning/proposals/{id}/approve` - Approve proposal
 - `POST /api/learning/proposals/{id}/reject` - Reject proposal
-- `GET /api/learning/rss/pipeline-stats` - Get RSS pipeline stats
-- `POST /api/learning/rss/fetch-content` - Fetch content manually
 
 ### **Ethical Safety APIs**
 - `GET /api/learning/ethics/stats` - Get ethical filter statistics
@@ -694,6 +700,41 @@ This project is maintained by passion and community contributions. If you believ
 - **🎯 Provide Feedback**: [Open an Issue](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System/issues) - Criticize, suggest, propose
 
 > **Note**: We're not accepting monetary donations yet. The best way to support StillMe is through contributions, discussions, and spreading the word. Community channels and donation options will be announced as the project grows.
+
+## 💼 Business Model & Sustainability
+
+StillMe is **open source first**, but we're exploring sustainable paths to ensure long-term development:
+
+### **Current Model (Open Source)**
+- **100% Free**: Core features always free and open source
+- **Self-Hosted**: Full control over your data and deployment
+- **Community-Driven**: Development guided by contributors
+
+### **Future Monetization Options (Under Exploration)**
+We're transparent about exploring these options to sustain development:
+
+1. **Enterprise Tier** (Future):
+   - Managed hosting and deployment support
+   - Priority technical support
+   - Custom integrations and consulting
+   - SLAs for production use
+
+2. **API Service** (Potential):
+   - Cloud-hosted StillMe instances
+   - Usage-based pricing for high-volume users
+   - Enterprise API access
+
+3. **Support Contracts** (Future):
+   - Commercial support for self-hosted deployments
+   - Training and onboarding services
+   - Custom development
+
+### **Our Commitment**
+- **Core will always be free**: Transparency and ethics features remain open source
+- **Community input**: We'll discuss monetization plans openly before implementing
+- **Fair pricing**: If we introduce paid tiers, they'll be transparent and reasonable
+
+> **Note**: We're in early stages. These are potential directions, not commitments. Our focus now is building a great product and community. Revenue model will be defined with community input.
 
 ## 🎯 The Bottom Line
 
