@@ -296,44 +296,108 @@ We open these questions to the community:
 
 > **"This isn't our roadmap - it's a community discussion. What direction do you want AI's future to take?"**
 
-### 🤔 **The Thought Experiment: What Happens When We Step Back?**
+### 🧪 **The Transparency Experiment: Building Self-Evolving AI Publicly**
 
-Here's a question that will divide opinions and spark debate — and that's exactly the point:
+#### **The Question Everyone's Avoiding**
 
-**What if, one day, we gradually reduce human intervention in StillMe's learning process?** What if we give it the ability to not just learn content, but to **learn from its own code**, **identify bugs**, and **improve itself** — within reasonable boundaries that match our current capabilities?
+While Big Tech builds increasingly powerful AI behind closed doors, we're asking publicly: **"What does responsible AI self-improvement look like?"**
 
-**Three possible outcomes:**
+#### **Our Hypothesis: Transparency = Safety**
 
-1. **🧠 Brilliant Evolution**: StillMe becomes smarter, more efficient, and self-optimizing — a true self-evolving AI that improves faster than we can guide it.
+**Traditional approach:**
+- Build powerful AI in secret
+- Deploy when "ready"
+- Ask forgiveness, not permission
 
-2. **🗑️ Chaotic Mess**: Without human oversight, StillMe accumulates bugs, contradictions, and broken logic — creating a chaotic system that's worse than we started with.
+**StillMe's approach:**
+- Build in the open (100% transparent)
+- Community oversight at every stage
+- Ask questions BEFORE building
+- Human approval required for all major changes
 
-3. **❓ The Unknown**: Something emerges that we don't fully understand — neither perfectly smart nor completely broken, but operating in ways we can't predict or control.
+#### **The Three-Stage Technical Framework**
 
-**This is not a feature we're building.** This is a **thought experiment** — a philosophical question that forces us to confront the future of AI autonomy.
+**Stage 1: Foundation (v0.6) ✅ COMPLETE**
+- Vector DB for semantic memory (ChromaDB)
+- RAG for context-aware learning
+- Retention metrics for quality assessment
+- **Result:** AI knows what it knows (self-assessment capability)
 
-### 🔬 **Run the Experiment Yourself**
+**Stage 2: Meta-Learning (v0.7) 🚧 PLANNED (Q2 2026)**
+- Learn from learning patterns (curriculum learning)
+- Optimize knowledge acquisition strategies
+- Retention-based source trust adjustment
+- **Goal:** AI improves HOW it learns (not what it learns)
+- **Timeline:** 6-12 months research required
 
-> **Try it now**:  
-> → [Quick Start](#-quick-start) → Watch StillMe learn → **Ask yourself: "What if it started fixing itself?"**
+**Stage 3: Bounded Autonomy (v1.0) 🔬 RESEARCH PHASE**
+- Limited self-optimization within safety constraints
+- Human-approved architectural changes only
+- Complete audit trail of all modifications
+- Kill switch for emergency rollback
+- **Status:** Research only - no implementation timeline
 
-**Where do you stand?** (Check your position below - interactive on GitHub!)
+#### **What We're NOT Building**
 
-- [ ] **I support self-improvement** — Fascinated by the possibility of true AI autonomy
-- [ ] **I oppose (safety first)** — Concerned about control and unintended consequences  
-- [ ] **I want to see what happens** — Curious about the unknown, regardless of outcome
+❌ **"Skynet"** - Uncontrolled recursive self-improvement  
+❌ **Code that modifies itself without human oversight**  
+❌ **AGI or superintelligence**  
+❌ **Anything without community approval and formal safety review**  
+❌ **Self-modification that bypasses kill switches**
 
-**Share your thoughts**: [GitHub Discussions](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System/discussions) | [Open an Issue](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System/issues)
+#### **What We're ACTUALLY Exploring**
 
-**Why does this matter?**
+✅ Can AI identify its own knowledge gaps? → **v0.6: YES (RAG semantic search)**  
+✅ Can AI optimize its learning strategy? → **v0.7: Testing (meta-learning research)**  
+✅ Can AI suggest improvements to its architecture? → **v1.0: TBD (requires significant R&D)**  
+✅ Can community governance keep autonomous learning safe? → **Ongoing experiment**
 
-- **If you support it**: You're fascinated by the possibility of true AI self-improvement
-- **If you oppose it**: You're concerned about control, safety, and unintended consequences
-- **Either way**: You can't ignore a project that's willing to ask these questions publicly
+#### **Safety Mechanisms (Current & Planned)**
 
-**We're transparent about this:** StillMe is designed with human oversight. But the question remains: *What happens when we loosen the leash?*
+**Implemented (v0.6):**
+- ✅ Complete audit trail (all decisions logged)
+- ✅ Community voting system (weighted trust)
+- ✅ EthicsGuard filtering
+- ✅ Transparent codebase (100% public)
 
-> **"This question divides people into camps. That's intentional. We want you to think — to debate — to engage. Because the future of AI shouldn't be decided in silence."**
+**Planned (v0.7+):**
+- 🔄 Formal kill switch protocol
+- 🔄 External ethics board review
+- 🔄 Red team security audits
+- 🔄 Incident response procedures
+- 🔄 Automated anomaly detection
+
+#### **The Real Question**
+
+Not "Can we build self-improving AI?" (We probably can, with research)  
+But **"Should we build it? And if yes, HOW safely?"**
+
+**That's the experiment. And it requires YOU.**
+
+### 💬 **Your Role in This Experiment**
+
+**We're not asking you to trust us. We're asking you to VERIFY us.**
+
+- 📂 Every line of code is public (audit anytime)
+- 📊 Every decision is logged (complete transparency)
+- 🗳️ Every major change requires community vote (democratic governance)
+- 🚨 Anyone can audit, critique, or fork (no secrets)
+
+**Make your choice:**
+
+- [ ] **I'm monitoring this** - Skeptical but watching, want to ensure safety
+- [ ] **I'm contributing** - Want to help build responsible AI self-improvement
+- [ ] **I'm opposing this** - Think it's too risky, but value the transparency
+
+**All positions are valid. All voices are heard.**
+
+#### **Join the Discussion**
+
+**GitHub Discussions**: [Share your thoughts](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System/discussions)  
+**Open Issues**: [Report concerns or suggestions](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System/issues)  
+**Security**: [Report vulnerabilities responsibly](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System/security)
+
+> **"This isn't marketing. This isn't hype. This is an honest attempt to build AI responsibly, in public, with community oversight. The experiment requires participation — not just from supporters, but from skeptics, critics, and safety experts. Because the only way to build safe AI is to have everyone watching."**
 
 ## 🔧 Architecture
 
