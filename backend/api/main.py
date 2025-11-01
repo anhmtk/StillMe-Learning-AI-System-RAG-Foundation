@@ -17,6 +17,7 @@ from datetime import datetime
 from backend.vector_db import ChromaClient, EmbeddingService, RAGRetrieval
 from backend.learning import KnowledgeRetention, AccuracyScorer
 from backend.services.rss_fetcher import RSSFetcher
+from backend.services.learning_scheduler import LearningScheduler
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -45,6 +46,11 @@ try:
     knowledge_retention = KnowledgeRetention()
     accuracy_scorer = AccuracyScorer()
     rss_fetcher = RSSFetcher()
+    learning_scheduler = LearningScheduler(
+        rss_fetcher=rss_fetcher,
+        interval_hours=4,
+        auto_add_to_rag=True
+    )
     logger.info("RAG components initialized successfully")
 except Exception as e:
     logger.error(f"Failed to initialize RAG components: {e}")
@@ -54,6 +60,7 @@ except Exception as e:
     knowledge_retention = None
     accuracy_scorer = None
     rss_fetcher = None
+    learning_scheduler = None
 
 # Pydantic models
 class ChatRequest(BaseModel):
@@ -426,6 +433,103 @@ async def get_rss_stats():
     except Exception as e:
         logger.error(f"RSS stats error: {e}")
         return {"feeds_configured": 0, "status": "error"}
+
+# Automated Scheduler endpoints
+@app.post("/api/learning/scheduler/start")
+async def start_scheduler():
+    """Start automated learning scheduler"""
+    try:
+        if not learning_scheduler:
+            raise HTTPException(status_code=503, detail="Scheduler not available")
+        
+        if learning_scheduler.is_running:
+            return {"status": "already_running", "message": "Scheduler is already running"}
+        
+        await learning_scheduler.start()
+        return {
+            "status": "started",
+            "message": "Scheduler started successfully",
+            "interval_hours": learning_scheduler.interval_hours,
+            "next_run": learning_scheduler.next_run_time.isoformat() if learning_scheduler.next_run_time else None
+        }
+    except Exception as e:
+        logger.error(f"Start scheduler error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/learning/scheduler/stop")
+async def stop_scheduler():
+    """Stop automated learning scheduler"""
+    try:
+        if not learning_scheduler:
+            raise HTTPException(status_code=503, detail="Scheduler not available")
+        
+        if not learning_scheduler.is_running:
+            return {"status": "not_running", "message": "Scheduler is not running"}
+        
+        await learning_scheduler.stop()
+        return {
+            "status": "stopped",
+            "message": "Scheduler stopped successfully"
+        }
+    except Exception as e:
+        logger.error(f"Stop scheduler error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/learning/scheduler/status")
+async def get_scheduler_status():
+    """Get scheduler status"""
+    try:
+        if not learning_scheduler:
+            return {
+                "status": "not_available",
+                "message": "Scheduler not initialized"
+            }
+        
+        return {
+            "status": "ok",
+            **learning_scheduler.get_status()
+        }
+    except Exception as e:
+        logger.error(f"Scheduler status error: {e}")
+        return {"status": "error", "message": str(e)}
+
+@app.post("/api/learning/scheduler/run-now")
+async def run_scheduler_now():
+    """Manually trigger a learning cycle immediately"""
+    try:
+        if not learning_scheduler:
+            raise HTTPException(status_code=503, detail="Scheduler not available")
+        
+        result = await learning_scheduler.run_learning_cycle()
+        
+        # If auto_add_to_rag is enabled, add to RAG
+        if learning_scheduler.auto_add_to_rag and rag_retrieval:
+            # Get entries from last fetch and add to RAG
+            entries = learning_scheduler.rss_fetcher.fetch_feeds(max_items_per_feed=5)
+            added_count = 0
+            for entry in entries:
+                content = f"{entry['title']}\n{entry['summary']}"
+                success = rag_retrieval.add_learning_content(
+                    content=content,
+                    source=entry['source'],
+                    content_type="knowledge",
+                    metadata={
+                        "link": entry['link'],
+                        "published": entry['published'],
+                        "type": "rss_feed",
+                        "scheduler_cycle": result.get("cycle_number", 0)
+                    }
+                )
+                if success:
+                    added_count += 1
+            
+            result["entries_added_to_rag"] = added_count
+        
+        return result
+        
+    except Exception as e:
+        logger.error(f"Run scheduler now error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 # Legacy endpoints for backward compatibility
 @app.post("/api/chat/openai")

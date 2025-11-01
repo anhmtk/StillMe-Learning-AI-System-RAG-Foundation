@@ -131,14 +131,16 @@ streamlit run dashboard.py --server.port 8501
 - **📰 RSS Learning Pipeline**: ✅ Basic RSS fetcher working - manual trigger via API
 - **🔌 RSS API Endpoints**: ✅ `/api/learning/rss/fetch` - fetch and optionally auto-add to RAG
 
-### 📋 **Planned/In Development:**
-- **⏰ Automated Scheduler**: Design ready, needs implementation (cron/background task)
+### 📋 **Planned/In Development (Next 30-60 days):**
+- **⏰ Automated Scheduler**: 🔄 **CURRENTLY IMPLEMENTING** - Background task to auto-fetch RSS every 4 hours
+- **🧪 Test Coverage**: Basic tests added, expanding to critical paths (target: 40%+ coverage)
+- **🔐 Security Hardening**: Rate limiting, authentication - planned after scheduler
 - **👥 Community Voting**: Secure voting system designed, awaiting implementation
 - **🛡️ Ethical Filtering**: Framework exists, needs integration
 
-### 🔬 **Research Phase:**
-- **🎓 Meta-Learning**: Concept and research discussion
-- **🤖 AI Self-Improvement**: Philosophy exploration (see Thought Experiment section)
+### 🔬 **Research Phase (v0.7+):**
+- **🎓 Meta-Learning**: Concept and research discussion - requires 6-12 months R&D
+- **🤖 AI Self-Improvement**: Philosophy exploration (see Thought Experiment section) - Research only
 
 ## 📊 Dashboard Features
 
@@ -189,9 +191,16 @@ Instead of chasing vanity metrics, StillMe focuses on **meaningful progress**:
 | **v0.4** - Docker Setup | ✅ Done | 1-click deployment | Docker + docker-compose | Easy Deployment |
 | **v0.5** - Enhanced Metrics | ✅ **Done (MVP)** | Accuracy, retention tracking | Knowledge Retention Tracker | Quality-based Evolution |
 | **v0.6** - Vector DB + RAG | ✅ **Done (MVP)** | Vector DB integration (RAG) | ChromaDB + Sentence Transformers | Semantic Search & Context Retrieval |
-| **v0.7** - Meta-Learning 1.0 | 📋 Planned | Curriculum Learning + Self-Optimization | Meta-Learning Agent + Retention Analytics | Learn to Learn |
-| **v0.8** - AI Self-Improvement (Exploratory) | 🔬 Research | Experimental self-coding capabilities | TBD - Research phase | Proof of concept for autonomous code improvement |
-| **v1.0** - Self-Improvement Loop | 📋 Planned | Full autonomous learning cycle | Meta-Learning + Vector DB + Curriculum | True Self-Evolution |
+| **v0.6.1** - Automated Scheduler | 🔄 **IN PROGRESS** | Auto-fetch RSS every 4 hours | Background task scheduler | Complete learning loop |
+| **v0.7** - Meta-Learning 1.0 | 📋 Planned (Q2 2026) | Curriculum Learning + Self-Optimization | Meta-Learning Agent + Retention Analytics | Learn to Learn |
+| **v0.8** - AI Self-Improvement (Exploratory) | 🔬 Research | Experimental self-coding capabilities | TBD - Research phase (6-12 months) | Proof of concept for autonomous code improvement |
+| **v1.0** - Self-Improvement Loop | 📋 Planned (Q3-Q4 2026) | Full autonomous learning cycle | Meta-Learning + Vector DB + Curriculum | True Self-Evolution |
+
+**Note on Future Milestones (v0.7+):**
+- **v0.7 (Meta-Learning)**: Requires significant R&D - estimated 6-12 months from v0.6.1
+- **v0.8 (Self-Improvement)**: Research phase only - no implementation timeline committed
+- **v1.0 (Self-Evolution)**: Long-term vision - dependent on v0.7 success
+- These are **honest timelines** - we prefer realistic goals over overpromising
 
 ## 🧬 AI Evolution Stages
 
@@ -627,6 +636,12 @@ NOTIFY_ERRORS=true
 - `POST /api/learning/rss/fetch` - Fetch RSS feeds (with optional auto-add to RAG)
   - Parameters: `max_items` (default: 5), `auto_add` (default: false)
 - `GET /api/learning/rss/stats` - Get RSS pipeline configuration stats
+
+### **Automated Scheduler APIs**
+- `POST /api/learning/scheduler/start` - Start automated learning scheduler
+- `POST /api/learning/scheduler/stop` - Stop automated learning scheduler
+- `GET /api/learning/scheduler/status` - Get scheduler status and statistics
+- `POST /api/learning/scheduler/run-now` - Manually trigger a learning cycle immediately
 
 ### **Content Management APIs**
 - `GET /api/learning/proposals` - Get learning proposals
