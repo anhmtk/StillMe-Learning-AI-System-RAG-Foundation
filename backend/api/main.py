@@ -6,7 +6,7 @@ FastAPI backend with RAG (Retrieval-Augmented Generation) capabilities
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 import os
 import logging
 import asyncio
@@ -18,6 +18,8 @@ from backend.vector_db import ChromaClient, EmbeddingService, RAGRetrieval
 from backend.learning import KnowledgeRetention, AccuracyScorer
 from backend.services.rss_fetcher import RSSFetcher
 from backend.services.learning_scheduler import LearningScheduler
+from backend.services.self_diagnosis import SelfDiagnosisAgent
+from backend.services.content_curator import ContentCurator
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -51,6 +53,8 @@ try:
         interval_hours=4,
         auto_add_to_rag=True
     )
+    self_diagnosis = SelfDiagnosisAgent(rag_retrieval=rag_retrieval)
+    content_curator = ContentCurator()
     logger.info("RAG components initialized successfully")
 except Exception as e:
     logger.error(f"Failed to initialize RAG components: {e}")
@@ -61,6 +65,8 @@ except Exception as e:
     accuracy_scorer = None
     rss_fetcher = None
     learning_scheduler = None
+    self_diagnosis = None
+    content_curator = None
 
 # Pydantic models
 class ChatRequest(BaseModel):
@@ -506,18 +512,30 @@ async def run_scheduler_now():
         if learning_scheduler.auto_add_to_rag and rag_retrieval:
             # Get entries from last fetch and add to RAG
             entries = learning_scheduler.rss_fetcher.fetch_feeds(max_items_per_feed=5)
+            
+            # Prioritize content if curator available
+            if content_curator and self_diagnosis:
+                # Get knowledge gaps to prioritize
+                recent_gaps = []  # Could be from query history
+                prioritized = content_curator.prioritize_learning_content(
+                    entries,
+                    knowledge_gaps=recent_gaps
+                )
+                entries = prioritized[:5]  # Take top 5
+            
             added_count = 0
             for entry in entries:
-                content = f"{entry['title']}\n{entry['summary']}"
+                content = f"{entry.get('title', '')}\n{entry.get('summary', '')}"
                 success = rag_retrieval.add_learning_content(
                     content=content,
-                    source=entry['source'],
+                    source=entry.get('source', 'rss'),
                     content_type="knowledge",
                     metadata={
-                        "link": entry['link'],
-                        "published": entry['published'],
+                        "link": entry.get('link', ''),
+                        "published": entry.get('published', ''),
                         "type": "rss_feed",
-                        "scheduler_cycle": result.get("cycle_number", 0)
+                        "scheduler_cycle": result.get("cycle_number", 0),
+                        "priority_score": entry.get("priority_score", 0.5)
                     }
                 )
                 if success:
@@ -529,6 +547,116 @@ async def run_scheduler_now():
         
     except Exception as e:
         logger.error(f"Run scheduler now error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Self-Diagnosis & Content Curation endpoints
+@app.post("/api/learning/self-diagnosis/check-gap")
+async def check_knowledge_gap(query: str, threshold: float = 0.5):
+    """Check if there's a knowledge gap for a query"""
+    try:
+        if not self_diagnosis:
+            raise HTTPException(status_code=503, detail="Self-diagnosis not available")
+        
+        result = self_diagnosis.identify_knowledge_gaps(query, threshold)
+        return result
+    except Exception as e:
+        logger.error(f"Knowledge gap check error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/api/learning/self-diagnosis/analyze-coverage")
+async def analyze_coverage(topics: List[str]):
+    """Analyze knowledge coverage across multiple topics"""
+    try:
+        if not self_diagnosis:
+            raise HTTPException(status_code=503, detail="Self-diagnosis not available")
+        
+        result = self_diagnosis.analyze_knowledge_coverage(topics)
+        return result
+    except Exception as e:
+        logger.error(f"Coverage analysis error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/learning/self-diagnosis/suggest-focus")
+async def suggest_learning_focus(recent_queries: Optional[List[str]] = None, limit: int = 5):
+    """Suggest learning focus based on knowledge gaps"""
+    try:
+        if not self_diagnosis:
+            return {"suggestions": [], "reason": "Self-diagnosis not available"}
+        
+        # If no queries provided, return empty
+        if not recent_queries:
+            recent_queries = []
+        
+        suggestions = self_diagnosis.suggest_learning_focus(recent_queries, limit)
+        return {
+            "suggestions": suggestions,
+            "count": len(suggestions)
+        }
+    except Exception as e:
+        logger.error(f"Learning focus suggestion error: {e}")
+        return {"suggestions": [], "error": str(e)}
+
+@app.post("/api/learning/curator/prioritize")
+async def prioritize_content(content_list: List[Dict[str, Any]]):
+    """Prioritize learning content"""
+    try:
+        if not content_curator:
+            raise HTTPException(status_code=503, detail="Content curator not available")
+        
+        # Get knowledge gaps from self-diagnosis
+        knowledge_gaps = []
+        if self_diagnosis and content_list:
+            # Extract topics from content
+            topics = [item.get("title", "")[:50] for item in content_list[:10]]
+            coverage = self_diagnosis.analyze_knowledge_coverage(topics)
+            knowledge_gaps = coverage.get("gap_topics", [])
+        
+        prioritized = content_curator.prioritize_learning_content(
+            content_list,
+            knowledge_gaps=knowledge_gaps
+        )
+        return {
+            "prioritized_content": prioritized,
+            "total_items": len(prioritized)
+        }
+    except Exception as e:
+        logger.error(f"Content prioritization error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/learning/curator/stats")
+async def get_curation_stats():
+    """Get content curation statistics"""
+    try:
+        if not content_curator:
+            return {"status": "not_available"}
+        
+        stats = content_curator.get_curation_stats()
+        return {
+            "status": "ok",
+            **stats
+        }
+    except Exception as e:
+        logger.error(f"Curation stats error: {e}")
+        return {"status": "error", "message": str(e)}
+
+@app.post("/api/learning/curator/update-source-quality")
+async def update_source_quality(source: str, quality_score: float):
+    """Update quality score for a source"""
+    try:
+        if not content_curator:
+            raise HTTPException(status_code=503, detail="Content curator not available")
+        
+        if not 0.0 <= quality_score <= 1.0:
+            raise HTTPException(status_code=400, detail="Quality score must be between 0.0 and 1.0")
+        
+        content_curator.update_source_quality(source, quality_score)
+        return {
+            "status": "updated",
+            "source": source,
+            "quality_score": quality_score
+        }
+    except Exception as e:
+        logger.error(f"Update source quality error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # Legacy endpoints for backward compatibility

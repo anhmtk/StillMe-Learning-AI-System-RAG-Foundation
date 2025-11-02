@@ -151,6 +151,8 @@ streamlit run dashboard.py --server.port 8501
 - **📈 Dashboard**: Streamlit UI with real-time metrics, RAG interface, and chat
 - **🔌 API Endpoints**: Full RAG API (`/api/rag/add_knowledge`, `/api/rag/query`, `/api/rag/stats`)
 - **⏰ Automated Scheduler**: Auto-learning from RSS every 4 hours
+- **🔍 Self-Diagnosis**: Knowledge gap detection and learning focus suggestions
+- **📝 Content Curator**: Intelligent content prioritization and RSS source optimization
 - **🚀 Public Deployment Ready**: Config files included (`railway.json`, `render.yaml`) - 1-click deploy
 
 ### 🚧 **MVP Ready (Manual Use):**
@@ -218,15 +220,29 @@ Instead of chasing vanity metrics, StillMe focuses on **meaningful progress**:
 | **v0.5** - Enhanced Metrics | ✅ **Done (MVP)** | Accuracy, retention tracking | Knowledge Retention Tracker | Quality-based Evolution |
 | **v0.6** - Vector DB + RAG | ✅ **Done (MVP)** | Vector DB integration (RAG) | ChromaDB + Sentence Transformers | Semantic Search & Context Retrieval |
 | **v0.6.1** - Automated Scheduler | 🔄 **IN PROGRESS** | Auto-fetch RSS every 4 hours | Background task scheduler | Complete learning loop |
+| **v0.6.2** - Self-Diagnosis & Curation | ✅ **Done (MVP)** | Knowledge gap detection, content prioritization | SelfDiagnosisAgent + ContentCurator | AI self-awareness |
+| **v0.6.3** - Community-AI Feedback Loop | 📋 Planned (Q1 2026) | Learn from community voting patterns | Vote analysis + adaptive learning | Community-driven evolution |
 | **v0.7** - Meta-Learning 1.0 | 📋 Planned (Q2 2026) | Curriculum Learning + Self-Optimization | Meta-Learning Agent + Retention Analytics | Learn to Learn |
 | **v0.8** - AI Self-Improvement (Exploratory) | 🔬 Research | Experimental self-coding capabilities | TBD - Research phase (6-12 months) | Proof of concept for autonomous code improvement |
 | **v1.0** - Self-Improvement Loop | 📋 Planned (Q3-Q4 2026) | Full autonomous learning cycle | Meta-Learning + Vector DB + Curriculum | True Self-Evolution |
 
-**Note on Future Milestones (v0.7+):**
-- **v0.7 (Meta-Learning)**: Requires significant R&D - estimated 6-12 months from v0.6.1
+**Note on Future Milestones:**
+- **v0.6.2 (Self-Diagnosis)**: ✅ **Done** - AI can identify knowledge gaps and prioritize learning
+- **v0.6.3 (Community Feedback Loop)**: Planned Q1 2026 - Learn from community voting patterns
+- **v0.7 (Meta-Learning)**: Requires significant R&D - estimated 6-12 months from v0.6.3
 - **v0.8 (Self-Improvement)**: Research phase only - no implementation timeline committed
 - **v1.0 (Self-Evolution)**: Long-term vision - dependent on v0.7 success
 - These are **honest timelines** - we prefer realistic goals over overpromising
+
+**Strategic Evolution Path:**
+```
+v0.6 (RAG Foundation) 
+  → v0.6.1 (Automated Learning) 
+  → v0.6.2 (Self-Awareness) ✅ 
+  → v0.6.3 (Community Learning) 
+  → v0.7 (Meta-Learning) 
+  → v1.0 (Full Self-Evolution)
+```
 
 ## 🧬 AI Evolution Stages
 
@@ -237,28 +253,28 @@ StillMe progresses through distinct developmental stages based on **learning ses
 - Simple content categorization
 - High safety focus
 - Manual approval required
-- **Evolution Metric**: Session count only (MVP approach)
+- **Evolution Metric**: Session count (MVP) + Knowledge volume (v0.6.2)
 
 ### 👶 **Child Stage** (100-500 sessions)
 - Improved content understanding
 - Basic reasoning capabilities
 - Selective auto-approval
 - Enhanced safety protocols
-- **Evolution Metric**: Session count + basic quality scores
+- **Evolution Metric**: Session count + Quality scores + Knowledge coverage (v0.6.2)
 
 ### 🧑 **Adolescent Stage** (500-1000 sessions)
 - Advanced reasoning
 - Context awareness
 - Smart auto-approval
 - Balanced learning approach
-- **Evolution Metric**: Session count + approval rates + trust scores
+- **Evolution Metric**: Multi-dimensional (sessions, accuracy, coverage, community trust)
 
 ### 🧠 **Adult Stage** (1000+ sessions)
 - Sophisticated understanding
 - Complex reasoning
 - Autonomous learning
 - Expert-level knowledge
-- **Evolution Metric**: Multi-dimensional (sessions, accuracy, retention, community trust)
+- **Evolution Metric**: Full multi-dimensional (sessions, accuracy, retention, coverage, community trust, self-optimization metrics)
 
 ### **Current Evolution Logic (MVP)**
 
@@ -270,10 +286,10 @@ StillMe progresses through distinct developmental stages based on **learning ses
 
 **Future Enhancements (Roadmap v0.5+):**
 
-#### **v0.5 - Enhanced Metrics (In Progress)**
-- 📊 **Accuracy Tracking**: Measure response quality and user satisfaction
-- 🧠 **Knowledge Retention Tracker**: Track how well knowledge persists over time
-- **Technical Implementation**: Session-based metrics → Quality-based metrics
+#### **v0.5 - Enhanced Metrics (✅ Done - MVP)**
+- 📊 **Accuracy Tracking**: ✅ Measure response quality and user satisfaction
+- 🧠 **Knowledge Retention Tracker**: ✅ Track how well knowledge persists over time
+- **Technical Implementation**: ✅ Quality-based metrics integrated
 
 #### **v0.6 - Vector DB + RAG (✅ Done - MVP)**
 - 🗄️ **Vector DB Integration**: ✅ ChromaDB integrated with semantic search working
@@ -282,11 +298,32 @@ StillMe progresses through distinct developmental stages based on **learning ses
 - **Strategic Goal**: ✅ Enable "Self-Assessment" - AI can find knowledge gaps via semantic search
 - **Status**: MVP functional and tested. Ready for production scaling.
 
-#### **v0.7 - Meta-Learning 1.0 (Planned)**
+#### **v0.6.2 - Self-Diagnosis & Content Curation (✅ Done - MVP)**
+- 🔍 **Self-Diagnosis Agent**: ✅ Identify knowledge gaps using RAG semantic search
+- 📊 **Knowledge Coverage Analysis**: ✅ Analyze coverage across topics
+- 🎯 **Learning Focus Suggestions**: ✅ Suggest what to learn next based on gaps
+- 📝 **Content Curator**: ✅ Prioritize learning content based on quality and relevance
+- 🎚️ **RSS Source Optimization**: ✅ Auto-optimize RSS feeds based on quality scores
+- **Technical Implementation**: ✅ SelfDiagnosisAgent + ContentCurator modules
+- **Strategic Goal**: ✅ AI knows what it doesn't know and prioritizes learning intelligently
+- **Status**: MVP functional. API endpoints ready for integration.
+
+#### **v0.6.3 - Community-AI Feedback Loop (📋 Planned - Q1 2026)**
+- 🗳️ **Vote Pattern Analysis**: Analyze community voting behavior to identify preferences
+- 🔄 **Adaptive Content Prioritization**: Automatically prioritize content types community values
+- 📈 **Source Quality from Community**: Use community votes to update RSS source quality scores
+- **Technical Implementation**: Integration between Community Voting + Content Curator
+- **Strategic Goal**: AI learns from community preferences and adapts learning strategy
+- **Timeline**: 1-2 months after voting system implementation
+
+#### **v0.7 - Meta-Learning 1.0 (Planned - Q2 2026)**
 - 📈 **Meta-Learning Agent**: Learn from learning patterns themselves
 - 🎓 **Curriculum Learning**: Structured learning paths based on effectiveness
-- **Technical Implementation**: Module analyzes retention rates, adjusts trust scores, suggests sources
+- 📊 **Learning Efficiency Tracking**: Monitor learning velocity, retention rates, quality trends
+- 🔄 **Learning Strategy Optimization**: A/B testing different learning approaches
+- **Technical Implementation**: Module analyzes retention rates, adjusts trust scores, optimizes learning schedule
 - **Strategic Goal**: Self-Optimization - AI improves its own learning process
+- **Timeline**: 6-12 months R&D required (after v0.6.3 completion)
 
 #### **v1.0 - Self-Improvement Loop (Planned)**
 - 🔄 **Full Autonomous Learning Cycle**: Complete integration of all above features
@@ -745,6 +782,14 @@ NOTIFY_ERRORS=true
 - `POST /api/learning/ethics/clear-violations` - Clear violation log
 - `POST /api/learning/ethics/add-blacklist-keyword` - Add keyword to blacklist
 - `GET /api/learning/ethics/blacklist-keywords` - Get current blacklist
+
+### **Self-Diagnosis & Content Curation APIs**
+- `POST /api/learning/self-diagnosis/check-gap` - Check knowledge gap for a query
+- `POST /api/learning/self-diagnosis/analyze-coverage` - Analyze knowledge coverage across topics
+- `GET /api/learning/self-diagnosis/suggest-focus` - Suggest learning focus based on gaps
+- `POST /api/learning/curator/prioritize` - Prioritize learning content
+- `GET /api/learning/curator/stats` - Get content curation statistics
+- `POST /api/learning/curator/update-source-quality` - Update quality score for RSS source
 
 ### **Advanced Features APIs**
 - `GET /api/learning/knowledge/stats` - Get knowledge consolidation stats
