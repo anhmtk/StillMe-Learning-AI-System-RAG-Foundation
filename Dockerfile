@@ -13,6 +13,9 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
+# Upgrade pip and install build tools first
+RUN pip install --upgrade pip setuptools wheel
+
 # Copy requirements first for better caching
 COPY requirements.txt .
 
