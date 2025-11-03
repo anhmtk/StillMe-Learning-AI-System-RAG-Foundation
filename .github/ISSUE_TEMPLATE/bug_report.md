@@ -1,46 +1,53 @@
 ---
-name: Bug Report
-about: Create a report to help us improve
+name: 🐛 Bug Report
+about: Report a bug or unexpected behavior
 title: '[BUG] '
-labels: ['bug', 'needs-triage']
+labels: bug
 assignees: ''
 ---
 
-## Bug Description
-A clear and concise description of what the bug is.
+## 🐛 Bug Description
 
-## To Reproduce
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+<!-- Mô tả ngắn gọn về bug -->
 
-## Expected Behavior
-A clear and concise description of what you expected to happen.
+## 📋 Steps to Reproduce
 
-## Actual Behavior
-A clear and concise description of what actually happened.
+1. 
+2. 
+3. 
+4. 
 
-## Screenshots
-If applicable, add screenshots to help explain your problem.
+## 💻 Environment
 
-## Environment
-- **OS**: [e.g. Windows 10, macOS 12.0, Ubuntu 20.04]
-- **Python Version**: [e.g. 3.9.7]
-- **StillMe Version**: [e.g. 1.0.0]
-- **Browser**: [e.g. Chrome 96, Firefox 95] (if applicable)
+- **OS**: [e.g., Windows 10, macOS 13, Ubuntu 22.04]
+- **Python Version**: [e.g., 3.12]
+- **StillMe Version**: [e.g., v0.4.0]
+- **Backend Port**: [e.g., 8000]
+- **Frontend Port**: [e.g., 8501]
 
-## Error Logs
+## 🔍 Expected Behavior
+
+<!-- Mô tả behavior mong đợi -->
+
+## ✅ Actual Behavior
+
+<!-- Mô tả behavior thực tế -->
+
+## 📸 Screenshots / Logs
+
+<!-- Paste screenshots hoặc error logs ở đây -->
+
 ```
-Paste any relevant error logs here
+Paste error logs here
 ```
 
-## Additional Context
-Add any other context about the problem here.
+## 🔧 Additional Context
 
-## Checklist
-- [ ] I have searched existing issues to avoid duplicates
-- [ ] I have provided all required information
-- [ ] I have tested this on the latest version
-- [ ] I have included relevant error logs
+<!-- Bất kỳ context nào khác về bug -->
+
+## ✅ Checklist
+
+- [ ] Tôi đã check README và docs trước
+- [ ] Tôi đã check existing issues để tránh duplicate
+- [ ] Tôi đã cung cấp đầy đủ thông tin environment
+- [ ] Tôi đã include screenshots/logs nếu có
