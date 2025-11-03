@@ -1,44 +1,68 @@
 ---
-name: Feature Request
-about: Suggest an idea for this project
+name: 💡 Feature Request
+about: Suggest a new feature or enhancement
 title: '[FEATURE] '
-labels: ['enhancement', 'needs-triage']
+labels: enhancement
 assignees: ''
 ---
 
-## Feature Description
-A clear and concise description of what you want to happen.
+## 💡 Feature Description
 
-## Problem Statement
-Is your feature request related to a problem? Please describe.
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+<!-- Mô tả rõ ràng về feature bạn muốn -->
 
-## Proposed Solution
-Describe the solution you'd like.
-A clear and concise description of what you want to happen.
+## 🎯 Use Case
 
-## Alternative Solutions
-Describe any alternative solutions or features you've considered.
+<!-- Giải thích tại sao feature này cần thiết:
+- Vấn đề hiện tại là gì?
+- Feature này giải quyết được gì?
+- Ai sẽ benefit từ feature này?
+-->
 
-## Use Cases
-Describe the specific use cases for this feature:
-1. **Use Case 1**: Description
-2. **Use Case 2**: Description
-3. **Use Case 3**: Description
+## 🔧 Implementation Ideas
 
-## Implementation Considerations
-- **Complexity**: [Low/Medium/High]
-- **Dependencies**: List any dependencies or prerequisites
-- **Breaking Changes**: Will this require breaking changes?
-- **Performance Impact**: Any expected performance implications?
+<!-- Bạn có ý tưởng nào về cách implement không?
+- Technical approach
+- Design considerations
+- API changes
+-->
 
-## Additional Context
-Add any other context or screenshots about the feature request here.
+## 📊 Priority
 
-## Checklist
-- [ ] I have searched existing issues to avoid duplicates
-- [ ] I have provided a clear problem statement
-- [ ] I have described the proposed solution
-- [ ] I have considered alternative solutions
-- [ ] I have provided use cases
-- [ ] I have considered implementation complexity
+<!-- Chọn mức độ ưu tiên: -->
+
+- [ ] **High** - Blocking hoặc critical cho core functionality
+- [ ] **Medium** - Important nhưng không blocking
+- [ ] **Low** - Nice to have, enhancement
+
+## 🎨 UI/UX Considerations
+
+<!-- Nếu feature liên quan đến UI/UX:
+- Wireframes
+- Mockups
+- User flow
+-->
+
+## 🔗 Related Issues/PRs
+
+<!-- Link đến related issues hoặc PRs -->
+
+## 🤝 Willing to Contribute?
+
+<!-- Bạn có muốn contribute không? -->
+
+- [ ] **Yes** - Tôi có thể implement feature này
+- [ ] **Maybe** - Cần guidance hoặc discussion trước
+- [ ] **No** - Chỉ muốn suggest, cần community help
+
+## ✅ Acceptance Criteria
+
+<!-- Định nghĩa khi nào feature này được coi là "done":
+
+- [ ] Criteria 1
+- [ ] Criteria 2
+- [ ] Criteria 3
+-->
+
+## 📝 Additional Notes
+
+<!-- Bất kỳ notes nào khác -->
