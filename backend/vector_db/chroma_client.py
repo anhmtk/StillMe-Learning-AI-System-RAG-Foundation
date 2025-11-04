@@ -13,33 +13,85 @@ logger = logging.getLogger(__name__)
 class ChromaClient:
     """ChromaDB client for StillMe vector operations"""
     
-    def __init__(self, persist_directory: str = "data/vector_db"):
+    def __init__(self, persist_directory: str = "data/vector_db", reset_on_error: bool = False):
         """Initialize ChromaDB client
         
         Args:
             persist_directory: Directory to persist vector database
+            reset_on_error: If True, reset database on schema errors
         """
         self.persist_directory = persist_directory
-        self.client = chromadb.PersistentClient(
-            path=persist_directory,
-            settings=Settings(
-                anonymized_telemetry=False,
-                allow_reset=True
+        self.reset_on_error = reset_on_error
+        
+        try:
+            self.client = chromadb.PersistentClient(
+                path=persist_directory,
+                settings=Settings(
+                    anonymized_telemetry=False,
+                    allow_reset=True
+                )
             )
-        )
-        
-        # Create or get collections
-        self.knowledge_collection = self._get_or_create_collection(
-            "stillme_knowledge",
-            "Knowledge base for StillMe learning"
-        )
-        
-        self.conversation_collection = self._get_or_create_collection(
-            "stillme_conversations", 
-            "Conversation history for context"
-        )
-        
-        logger.info("ChromaDB client initialized successfully")
+            
+            # Create or get collections
+            self.knowledge_collection = self._get_or_create_collection(
+                "stillme_knowledge",
+                "Knowledge base for StillMe learning"
+            )
+            
+            self.conversation_collection = self._get_or_create_collection(
+                "stillme_conversations", 
+                "Conversation history for context"
+            )
+            
+            logger.info("ChromaDB client initialized successfully")
+            
+        except Exception as e:
+            error_msg = str(e).lower()
+            # Check for schema mismatch errors
+            if "no such column" in error_msg or "schema" in error_msg or "topic" in error_msg:
+                logger.warning(f"ChromaDB schema mismatch detected: {e}")
+                if self.reset_on_error:
+                    logger.info("Attempting to reset ChromaDB database...")
+                    try:
+                        # Reset client
+                        self.client = chromadb.PersistentClient(
+                            path=persist_directory,
+                            settings=Settings(
+                                anonymized_telemetry=False,
+                                allow_reset=True
+                            )
+                        )
+                        # Delete and recreate collections
+                        try:
+                            self.client.delete_collection("stillme_knowledge")
+                        except:
+                            pass
+                        try:
+                            self.client.delete_collection("stillme_conversations")
+                        except:
+                            pass
+                        
+                        # Recreate collections
+                        self.knowledge_collection = self.client.create_collection(
+                            name="stillme_knowledge",
+                            metadata={"description": "Knowledge base for StillMe learning"}
+                        )
+                        self.conversation_collection = self.client.create_collection(
+                            name="stillme_conversations",
+                            metadata={"description": "Conversation history for context"}
+                        )
+                        logger.info("✅ ChromaDB database reset successfully")
+                    except Exception as reset_error:
+                        logger.error(f"Failed to reset ChromaDB: {reset_error}")
+                        raise
+                else:
+                    raise RuntimeError(
+                        f"ChromaDB schema mismatch: {e}. "
+                        "This usually happens when ChromaDB version changed. "
+                        "You may need to delete the data/vector_db directory and restart."
+                    ) from e
+            else:
+                raise
     
     def _get_or_create_collection(self, name: str, description: str):
         """Get existing collection or create new one"""

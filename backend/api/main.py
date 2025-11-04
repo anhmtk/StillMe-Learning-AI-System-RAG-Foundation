@@ -55,8 +55,20 @@ content_curator = None
 
 try:
     logger.info("Initializing RAG components...")
-    chroma_client = ChromaClient()
-    logger.info("✓ ChromaDB client initialized")
+    # Try with reset_on_error=False first (preserve data)
+    # If schema error, will try with reset_on_error=True
+    try:
+        chroma_client = ChromaClient(reset_on_error=False)
+        logger.info("✓ ChromaDB client initialized")
+    except (RuntimeError, Exception) as e:
+        error_str = str(e).lower()
+        if "schema mismatch" in error_str or "no such column" in error_str or "topic" in error_str:
+            logger.warning("Schema mismatch detected, attempting to reset database...")
+            # Try resetting database
+            chroma_client = ChromaClient(reset_on_error=True)
+            logger.info("✓ ChromaDB client initialized (after reset)")
+        else:
+            raise
     
     embedding_service = EmbeddingService()
     logger.info("✓ Embedding service initialized")
