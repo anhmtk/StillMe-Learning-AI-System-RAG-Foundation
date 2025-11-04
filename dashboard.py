@@ -159,9 +159,26 @@ def page_overview():
                     st.session_state["last_error"] = f"❌ Failed: {e}"
     else:
         status_msg = scheduler_status.get("message", "Unknown error")
+        init_error = scheduler_status.get("initialization_error")
+        
         st.warning(f"⚠️ **Learning scheduler is not available**")
-        st.caption(f"Reason: {status_msg}")
-        st.info("💡 **Tip:** The scheduler may not have initialized properly. Check backend logs or restart the backend service.")
+        
+        # Show detailed error if available
+        if init_error:
+            with st.expander("🔍 View Initialization Error Details", expanded=False):
+                st.code(init_error, language="text")
+                st.caption("💡 This error occurred when the backend tried to initialize RAG components.")
+        
+        st.caption(f"**Reason:** {status_msg}")
+        
+        # Provide actionable tips
+        st.info(
+            "💡 **Troubleshooting Tips:**\n"
+            "1. Check backend logs in Railway dashboard for detailed error messages\n"
+            "2. Verify all dependencies are installed (chromadb, sentence-transformers, etc.)\n"
+            "3. Check if data/vector_db directory has write permissions\n"
+            "4. Try restarting the backend service"
+        )
     
     # Display persistent messages from last action
     if "last_action" in st.session_state:
