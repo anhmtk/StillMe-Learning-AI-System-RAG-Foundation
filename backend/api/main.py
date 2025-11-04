@@ -41,32 +41,57 @@ app.add_middleware(
 )
 
 # Initialize RAG components
+# Track initialization errors for better diagnostics
+_initialization_error = None
+chroma_client = None
+embedding_service = None
+rag_retrieval = None
+knowledge_retention = None
+accuracy_scorer = None
+rss_fetcher = None
+learning_scheduler = None
+self_diagnosis = None
+content_curator = None
+
 try:
+    logger.info("Initializing RAG components...")
     chroma_client = ChromaClient()
+    logger.info("✓ ChromaDB client initialized")
+    
     embedding_service = EmbeddingService()
+    logger.info("✓ Embedding service initialized")
+    
     rag_retrieval = RAGRetrieval(chroma_client, embedding_service)
+    logger.info("✓ RAG retrieval initialized")
+    
     knowledge_retention = KnowledgeRetention()
+    logger.info("✓ Knowledge retention initialized")
+    
     accuracy_scorer = AccuracyScorer()
+    logger.info("✓ Accuracy scorer initialized")
+    
     rss_fetcher = RSSFetcher()
+    logger.info("✓ RSS fetcher initialized")
+    
     learning_scheduler = LearningScheduler(
         rss_fetcher=rss_fetcher,
         interval_hours=4,
         auto_add_to_rag=True
     )
+    logger.info("✓ Learning scheduler initialized")
+    
     self_diagnosis = SelfDiagnosisAgent(rag_retrieval=rag_retrieval)
+    logger.info("✓ Self-diagnosis agent initialized")
+    
     content_curator = ContentCurator()
-    logger.info("RAG components initialized successfully")
+    logger.info("✓ Content curator initialized")
+    
+    logger.info("✅ All RAG components initialized successfully")
 except Exception as e:
-    logger.error(f"Failed to initialize RAG components: {e}")
+    _initialization_error = str(e)
+    logger.error(f"❌ Failed to initialize RAG components: {e}", exc_info=True)
     # Fallback to None for graceful degradation
-    chroma_client = None
-    rag_retrieval = None
-    knowledge_retention = None
-    accuracy_scorer = None
-    rss_fetcher = None
-    learning_scheduler = None
-    self_diagnosis = None
-    content_curator = None
+    # Components already set to None above
 
 # Pydantic models
 class ChatRequest(BaseModel):
@@ -486,9 +511,14 @@ async def get_scheduler_status():
     """Get scheduler status"""
     try:
         if not learning_scheduler:
+            # Provide more detailed error message
+            error_msg = "Scheduler not initialized"
+            if _initialization_error:
+                error_msg = f"Scheduler not initialized: {_initialization_error}"
             return {
                 "status": "not_available",
-                "message": "Scheduler not initialized"
+                "message": error_msg,
+                "initialization_error": _initialization_error if _initialization_error else None
             }
         
         return {
