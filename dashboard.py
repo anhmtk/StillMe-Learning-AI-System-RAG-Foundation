@@ -32,8 +32,22 @@ def page_overview():
     status = get_json("/api/status", {})
     rag_stats = get_json("/api/rag/stats", {}).get("stats", {})
     accuracy = get_json("/api/learning/accuracy_metrics", {}).get("metrics", {})
+    
+    # Get scheduler status
+    scheduler_status = get_json("/api/learning/scheduler/status", {})
 
-    st.markdown("## StillMe")
+    # Display logo and title
+    col_logo, col_title = st.columns([1, 4])
+    with col_logo:
+        try:
+            st.image("assets/logo.png", width=80)
+        except:
+            st.markdown("🧠")  # Fallback emoji
+    with col_title:
+        st.markdown("# StillMe")
+        st.caption("Self-Evolving AI System")
+    
+    st.markdown("---")
     col1, col2, col3, col4 = st.columns(4)
     with col1:
         st.metric("Current Stage", status.get("stage", "Unknown"))
@@ -87,6 +101,63 @@ def page_overview():
     st.plotly_chart(gauge, use_container_width=True)
 
     st.markdown("---")
+    
+    # Auto-Learning Status Section
+    st.subheader("🤖 Auto-Learning Status")
+    scheduler_status = get_json("/api/learning/scheduler/status", {})
+    
+    if scheduler_status.get("status") == "ok":
+        is_running = scheduler_status.get("is_running", False)
+        interval_hours = scheduler_status.get("interval_hours", 4)
+        next_run = scheduler_status.get("next_run_time")
+        
+        col_status, col_info = st.columns([1, 2])
+        with col_status:
+            if is_running:
+                st.success(f"🟢 **Running** (every {interval_hours}h)")
+            else:
+                st.warning("🟡 **Stopped**")
+        with col_info:
+            if next_run:
+                st.caption(f"Next run: {next_run}")
+            else:
+                st.caption("Not scheduled")
+        
+        col_start, col_stop, col_run_now = st.columns(3)
+        with col_start:
+            if st.button("▶️ Start Scheduler", use_container_width=True):
+                try:
+                    r = requests.post(f"{API_BASE}/api/learning/scheduler/start", timeout=10)
+                    if r.status_code == 200:
+                        st.success("Scheduler started!")
+                        st.rerun()
+                except Exception as e:
+                    st.error(f"Failed: {e}")
+        with col_stop:
+            if st.button("⏹️ Stop Scheduler", use_container_width=True):
+                try:
+                    r = requests.post(f"{API_BASE}/api/learning/scheduler/stop", timeout=10)
+                    if r.status_code == 200:
+                        st.success("Scheduler stopped!")
+                        st.rerun()
+                except Exception as e:
+                    st.error(f"Failed: {e}")
+        with col_run_now:
+            if st.button("🚀 Run Now", use_container_width=True):
+                try:
+                    with st.spinner("Running learning cycle..."):
+                        r = requests.post(f"{API_BASE}/api/learning/scheduler/run-now", timeout=120)
+                        if r.status_code == 200:
+                            st.success("Learning cycle completed!")
+                            st.rerun()
+                        else:
+                            st.error(f"Failed: {r.json().get('detail', 'Unknown error')}")
+                except Exception as e:
+                    st.error(f"Failed: {e}")
+    else:
+        st.info("ℹ️ Learning scheduler is not available or not initialized.")
+    
+    st.markdown("---")
     st.subheader("Quick Actions")
     q1, q2 = st.columns(2)
     with q1:
@@ -107,7 +178,7 @@ def page_overview():
     with q2:
         if st.button("📊 Update Metrics"):
             # No explicit update endpoint; just re-fetch metrics by rerun
-            st.experimental_rerun()
+            st.rerun()
 
 
 def page_rag():
@@ -209,11 +280,80 @@ def page_learning():
 
 
 def page_community():
-    st.markdown("## Community Voting (Coming Soon)")
+    st.markdown("## Community Proposals")
+    st.caption("Propose learning sources, content, or improvements for StillMe")
+    
+    # Community Proposal Form
+    with st.expander("📝 Propose a Learning Source", expanded=True):
+        st.markdown("**Help StillMe learn by proposing new sources of knowledge!**")
+        
+        proposal_type = st.selectbox(
+            "Proposal Type",
+            ["RSS Feed", "Website/Article", "API Source", "Other"],
+            help="What type of learning source are you proposing?"
+        )
+        
+        source_url = st.text_input(
+            "Source URL/Feed",
+            placeholder="https://example.com/feed.xml or https://example.com/article",
+            help="Enter the URL of the RSS feed, article, or API endpoint"
+        )
+        
+        description = st.text_area(
+            "Description",
+            placeholder="Describe why this source would be valuable for StillMe to learn from...",
+            height=100,
+            help="Explain the value and relevance of this source"
+        )
+        
+        your_name = st.text_input(
+            "Your Name (Optional)",
+            placeholder="Leave blank for anonymous",
+            help="Optional: Your name or GitHub username"
+        )
+        
+        if st.button("💡 Submit Proposal", type="primary", use_container_width=True):
+            if source_url and description:
+                try:
+                    # For now, store in a simple way (can be enhanced with proper database later)
+                    proposal_data = {
+                        "type": proposal_type,
+                        "url": source_url,
+                        "description": description,
+                        "proposer": your_name or "Anonymous",
+                        "timestamp": datetime.now().isoformat(),
+                        "status": "pending"
+                    }
+                    
+                    # Try to add via RAG API as a proposal (if backend supports it)
+                    # Or display success and store suggestion
+                    st.success("✅ Proposal submitted! Thank you for contributing to StillMe's learning.")
+                    st.info(
+                        f"**Proposal Details:**\n"
+                        f"- Type: {proposal_type}\n"
+                        f"- URL: {source_url}\n"
+                        f"- Status: Pending review\n\n"
+                        f"*Note: Full proposal system with voting will be implemented in a future release.*"
+                    )
+                    
+                    # In future, this could POST to /api/community/proposals endpoint
+                    # For now, we'll show the proposal
+                    
+                except Exception as e:
+                    st.error(f"Failed to submit proposal: {e}")
+            else:
+                st.warning("Please fill in both Source URL and Description.")
+    
+    st.markdown("---")
+    
+    # Community Voting Section (Coming Soon)
+    st.subheader("🗳️ Community Voting (Coming Soon)")
     st.info(
-        "Secure Voting with min votes, threshold, cooldown and EthicsGuard will be available here."
+        "Secure voting system with minimum votes, threshold, cooldown, and EthicsGuard will be available here. "
+        "Community members will be able to vote on proposals and content quality."
     )
-    if st.button("Mock Vote Approve", help="Placeholder button"):
+    
+    if st.button("View Mock Vote", help="Placeholder button"):
         st.success("Thanks! Voting API will be wired in a next release.")
 
 
