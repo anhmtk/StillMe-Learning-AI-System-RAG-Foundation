@@ -7,10 +7,13 @@ LABEL description="StillMe - Self-Evolving AI System with Complete Ethical Trans
 # Set working directory
 WORKDIR /app
 
-# Install system dependencies
+# Install system dependencies including build tools for chromadb
 RUN apt-get update && apt-get install -y \
     git \
     curl \
+    build-essential \
+    g++ \
+    cmake \
     && rm -rf /var/lib/apt/lists/*
 
 # Upgrade pip and install build tools first
