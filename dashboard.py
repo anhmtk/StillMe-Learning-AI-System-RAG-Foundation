@@ -257,79 +257,88 @@ def sidebar(page_for_chat: str | None = None):
         elif chat_mode == "Sidebar Chat":
             st.sidebar.subheader("💬 Chat with StillMe")
             
-            # Display chat history in a scrollable container
+            # Clear chat button (at top for easy access)
             if st.session_state.chat_history:
-                st.sidebar.markdown("**Chat History:**")
-                # Create a scrollable container for chat history
-                chat_container = st.sidebar.container()
-                with chat_container:
-                    for m in st.session_state.chat_history[-10:]:  # Show last 10 messages
-                        speaker = "You" if m["role"] == "user" else "StillMe"
-                        speaker_color = "#46b3ff" if m["role"] == "user" else "#ffffff"
-                        st.sidebar.markdown(
-                            f'<div style="margin-bottom: 10px; padding: 8px; background-color: #262730; border-radius: 5px;">'
-                            f'<strong style="color: {speaker_color};">{speaker}:</strong> '
-                            f'<span style="color: #ffffff;">{m["content"]}</span>'
-                            f'</div>',
-                            unsafe_allow_html=True
-                        )
-                
-                # Clear chat button
                 if st.sidebar.button("🗑️ Clear Chat", use_container_width=True, key="clear_chat"):
                     st.session_state.chat_history = []
                     st.rerun()
             
+            # Display chat history in a larger, scrollable container
+            if st.session_state.chat_history:
+                # Use expander for better space management
+                with st.sidebar.expander("📜 Chat History", expanded=True):
+                    # Create chat messages with better styling
+                    for idx, m in enumerate(st.session_state.chat_history[-20:]):  # Show last 20 messages
+                        speaker = "You" if m["role"] == "user" else "StillMe"
+                        speaker_color = "#46b3ff" if m["role"] == "user" else "#ffffff"
+                        bg_color = "#1e3a5f" if m["role"] == "user" else "#262730"
+                        align = "right" if m["role"] == "user" else "left"
+                        
+                        st.markdown(
+                            f'<div style="margin-bottom: 12px; padding: 12px; background-color: {bg_color}; border-radius: 8px; text-align: {align}; max-width: 90%; margin-left: {"auto" if m["role"] == "user" else "0"}; margin-right: {"0" if m["role"] == "user" else "auto"};">'
+                            f'<strong style="color: {speaker_color}; font-size: 0.9em;">{speaker}:</strong><br>'
+                            f'<span style="color: #ffffff; font-size: 0.95em;">{m["content"]}</span>'
+                            f'</div>',
+                            unsafe_allow_html=True
+                        )
+            
             st.sidebar.markdown("---")
             
-            # Chat input with Enter key support
-            user_msg = st.sidebar.text_area(
-                "Your message", 
-                height=80,
-                key="chat_input",
-                help="Type your message and press Enter to send"
-            )
+            # Use form for Enter key support
+            with st.sidebar.form(key="chat_form", clear_on_submit=True):
+                user_msg = st.text_area(
+                    "Your message", 
+                    height=100,
+                    key="chat_input_form",
+                    placeholder="Type your message and press Enter (Shift+Enter for new line)...",
+                    help="Press Enter to send, Shift+Enter for new line"
+                )
+                
+                col1, col2 = st.columns([2, 1])
+                with col1:
+                    send_button = st.form_submit_button("💬 Send", use_container_width=True)
+                with col2:
+                    if st.form_submit_button("🔄", use_container_width=True, key="refresh_form"):
+                        st.rerun()
             
-            # Handle Enter key submission (Streamlit doesn't natively support this, but we can use form)
-            col1, col2 = st.sidebar.columns([1, 1])
-            with col1:
-                send_button = st.button("💬 Send", use_container_width=True, key="send_button")
-            with col2:
-                if st.button("🔄 Refresh", use_container_width=True, key="refresh_button"):
-                    st.rerun()
-            
-            # Process message when Send button is clicked
-            if send_button and user_msg.strip():
+            # Process message when form is submitted
+            if send_button and user_msg and user_msg.strip():
                 # Store message before clearing
                 message_to_send = user_msg.strip()
                 
                 # Add user message to history
                 st.session_state.chat_history.append({"role": "user", "content": message_to_send})
                 
-                # Show loading indicator
-                with st.sidebar.spinner("StillMe is thinking..."):
-                    try:
-                        r = requests.post(
-                            f"{API_BASE}/api/chat/smart_router",
-                            json={"message": message_to_send},
-                            timeout=30,
-                        )
-                        r.raise_for_status()
-                        data = r.json()
-                        # Extract response from ChatResponse model
-                        reply = data.get("response") or data.get("message") or str(data)
-                        if isinstance(reply, dict):
-                            reply = reply.get("detail", str(reply))
-                    except requests.exceptions.RequestException as e:
-                        reply = f"❌ Error connecting to backend: {str(e)}"
-                    except Exception as e:
-                        reply = f"❌ Error: {str(e)}"
+                # Show loading status (using status instead of spinner in sidebar)
+                status_placeholder = st.sidebar.empty()
+                status_placeholder.info("🤔 StillMe is thinking...")
+                
+                try:
+                    r = requests.post(
+                        f"{API_BASE}/api/chat/smart_router",
+                        json={"message": message_to_send},
+                        timeout=30,
+                    )
+                    r.raise_for_status()
+                    data = r.json()
+                    # Extract response from ChatResponse model
+                    reply = data.get("response") or data.get("message") or str(data)
+                    if isinstance(reply, dict):
+                        reply = reply.get("detail", str(reply))
+                    
+                    status_placeholder.success("✅ Response received!")
+                except requests.exceptions.RequestException as e:
+                    reply = f"❌ Error connecting to backend: {str(e)}"
+                    status_placeholder.error("❌ Connection error")
+                except Exception as e:
+                    reply = f"❌ Error: {str(e)}"
+                    status_placeholder.error("❌ Error occurred")
                 
                 # Add assistant response to history
                 st.session_state.chat_history.append({"role": "assistant", "content": reply})
                 
-                # Clear input by setting session state and rerun
-                if "chat_input" in st.session_state:
-                    del st.session_state.chat_input
+                # Clear status and rerun to show new message
+                status_placeholder.empty()
                 st.rerun()
     
     return page
