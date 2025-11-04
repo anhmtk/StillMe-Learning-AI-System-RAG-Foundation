@@ -248,7 +248,12 @@ def sidebar(page_for_chat: str | None = None):
 
 
 def main():
-    st.set_page_config(page_title="StillMe", page_icon="🧠", layout="wide")
+    st.set_page_config(
+        page_title="StillMe", 
+        page_icon="🧠", 
+        layout="wide",
+        initial_sidebar_state="expanded"
+    )
     page = sidebar()
 
     if page == "Overview":

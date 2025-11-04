@@ -4,6 +4,9 @@ port = 8080
 address = "0.0.0.0"
 enableCORS = false
 enableXsrfProtection = false
+runOnSave = false
+maxUploadSize = 200
+maxMessageSize = 200
 
 [browser]
 gatherUsageStats = false
