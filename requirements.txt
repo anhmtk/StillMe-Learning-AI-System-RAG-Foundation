@@ -38,6 +38,9 @@ python-dateutil==2.8.2
 orjson==3.9.10
 
 # Vector Database & Embeddings
+# Note: Install torch CPU version separately to reduce build time
+# Use: pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+# For now, let sentence-transformers install torch (will be slower but compatible)
 chromadb==0.4.22
 sentence-transformers==2.2.2
 
