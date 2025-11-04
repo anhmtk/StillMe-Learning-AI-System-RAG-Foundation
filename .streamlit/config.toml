@@ -14,8 +14,8 @@ serverAddress = ""
 
 [theme]
 primaryColor = "#46b3ff"
-backgroundColor = "#ffffff"
-secondaryBackgroundColor = "#f0f2f6"
-textColor = "#262730"
+backgroundColor = "#0e1117"
+secondaryBackgroundColor = "#262730"
+textColor = "#ffffff"
 font = "sans serif"
 
