@@ -129,39 +129,67 @@ def page_overview():
                 try:
                     r = requests.post(f"{API_BASE}/api/learning/scheduler/start", timeout=10)
                     if r.status_code == 200:
-                        st.success("Scheduler started!")
+                        st.session_state["last_action"] = "✅ Scheduler started successfully!"
                         st.rerun()
                 except Exception as e:
-                    st.error(f"Failed: {e}")
+                    st.session_state["last_error"] = f"❌ Failed to start scheduler: {e}"
         with col_stop:
             if st.button("⏹️ Stop Scheduler", use_container_width=True):
                 try:
                     r = requests.post(f"{API_BASE}/api/learning/scheduler/stop", timeout=10)
                     if r.status_code == 200:
-                        st.success("Scheduler stopped!")
+                        st.session_state["last_action"] = "✅ Scheduler stopped successfully!"
                         st.rerun()
                 except Exception as e:
-                    st.error(f"Failed: {e}")
+                    st.session_state["last_error"] = f"❌ Failed to stop scheduler: {e}"
         with col_run_now:
             if st.button("🚀 Run Now", use_container_width=True):
                 try:
                     with st.spinner("Running learning cycle..."):
                         r = requests.post(f"{API_BASE}/api/learning/scheduler/run-now", timeout=120)
                         if r.status_code == 200:
-                            st.success("Learning cycle completed!")
+                            data = r.json()
+                            entries = data.get("entries_fetched", 0)
+                            added = data.get("entries_added_to_rag", 0)
+                            st.session_state["last_action"] = f"✅ Learning cycle completed! Fetched {entries} entries, added {added} to RAG."
                             st.rerun()
                         else:
-                            st.error(f"Failed: {r.json().get('detail', 'Unknown error')}")
+                            st.session_state["last_error"] = f"❌ Failed: {r.json().get('detail', 'Unknown error')}"
                 except Exception as e:
-                    st.error(f"Failed: {e}")
+                    st.session_state["last_error"] = f"❌ Failed: {e}"
     else:
-        st.info("ℹ️ Learning scheduler is not available or not initialized.")
+        status_msg = scheduler_status.get("message", "Unknown error")
+        st.warning(f"⚠️ **Learning scheduler is not available**")
+        st.caption(f"Reason: {status_msg}")
+        st.info("💡 **Tip:** The scheduler may not have initialized properly. Check backend logs or restart the backend service.")
+    
+    # Display persistent messages from last action
+    if "last_action" in st.session_state:
+        st.success(st.session_state["last_action"])
+        # Keep message for one more rerun cycle
+        if "msg_displayed" not in st.session_state:
+            st.session_state["msg_displayed"] = True
+        else:
+            # Clear after showing once
+            del st.session_state["last_action"]
+            del st.session_state["msg_displayed"]
+    
+    if "last_error" in st.session_state:
+        st.error(st.session_state["last_error"])
+        # Keep error for one more rerun cycle
+        if "error_displayed" not in st.session_state:
+            st.session_state["error_displayed"] = True
+        else:
+            # Clear after showing once
+            del st.session_state["last_error"]
+            del st.session_state["error_displayed"]
     
     st.markdown("---")
     st.subheader("Quick Actions")
-    q1, q2 = st.columns(2)
-    with q1:
-        if st.button("🚀 Run Learning Session"):
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("🚀 Run Learning Session", use_container_width=True):
             try:
                 r = requests.post(
                     f"{API_BASE}/api/learning/sessions/run",
@@ -172,13 +200,27 @@ def page_overview():
                     },
                     timeout=30,
                 )
-                st.success(r.json().get("status", "Recorded"))
+                if r.status_code == 200:
+                    status = r.json().get("status", "Recorded")
+                    st.session_state["last_action"] = f"✅ Learning session recorded successfully! Status: {status}"
+                    st.rerun()
+                else:
+                    st.session_state["last_error"] = f"❌ Failed to record session: {r.json().get('detail', 'Unknown error')}"
             except Exception as e:
-                st.warning(f"Learning session not recorded: {e}")
-    with q2:
-        if st.button("📊 Update Metrics"):
-            # No explicit update endpoint; just re-fetch metrics by rerun
+                st.session_state["last_error"] = f"❌ Learning session not recorded: {e}"
+                st.rerun()
+    
+    with col2:
+        if st.button("📊 Refresh Dashboard", use_container_width=True, help="Refresh all metrics and status (this will clear temporary messages)"):
+            # Clear any temporary messages before rerun
+            if "last_action" in st.session_state:
+                del st.session_state["last_action"]
+            if "last_error" in st.session_state:
+                del st.session_state["last_error"]
             st.rerun()
+    
+    # Help text
+    st.caption("💡 **Tip:** 'Run Learning Session' records a manual learning interaction. 'Refresh Dashboard' updates all displayed metrics.")
 
 
 def page_rag():
