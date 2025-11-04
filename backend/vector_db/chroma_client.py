@@ -97,8 +97,19 @@ class ChromaClient:
         """Get existing collection or create new one"""
         try:
             return self.client.get_collection(name=name)
-        except Exception:
-            # Collection doesn't exist, create it
+        except Exception as e:
+            error_msg = str(e).lower()
+            # Check for schema mismatch - if collection exists but schema is wrong
+            if "no such column" in error_msg or "schema" in error_msg or "topic" in error_msg:
+                logger.warning(f"Schema mismatch when getting collection {name}: {e}")
+                # Try to delete and recreate
+                try:
+                    self.client.delete_collection(name=name)
+                    logger.info(f"Deleted collection {name} due to schema mismatch")
+                except Exception as delete_error:
+                    logger.warning(f"Could not delete collection {name}: {delete_error}")
+            
+            # Collection doesn't exist or was deleted, create it
             return self.client.create_collection(
                 name=name,
                 metadata={"description": description}
