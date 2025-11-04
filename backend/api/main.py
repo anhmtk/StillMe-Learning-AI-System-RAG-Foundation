@@ -659,6 +659,16 @@ async def update_source_quality(source: str, quality_score: float):
         logger.error(f"Update source quality error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# Smart router endpoint - automatically selects best model
+@app.post("/api/chat/smart_router", response_model=ChatResponse)
+async def chat_smart_router(request: ChatRequest):
+    """
+    Smart router that automatically selects the best chat endpoint.
+    This is the main endpoint used by the dashboard.
+    """
+    # Use the RAG-enhanced chat endpoint as default
+    return await chat_with_rag(request)
+
 # Legacy endpoints for backward compatibility
 @app.post("/api/chat/openai")
 async def chat_openai(request: ChatRequest):

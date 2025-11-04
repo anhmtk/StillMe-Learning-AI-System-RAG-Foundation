@@ -7,6 +7,13 @@ import requests
 import streamlit as st
 import plotly.graph_objects as go
 
+# Import floating chat widget
+try:
+    from frontend.components.floating_chat import render_floating_chat
+    FLOATING_CHAT_AVAILABLE = True
+except ImportError:
+    FLOATING_CHAT_AVAILABLE = False
+
 
 API_BASE = os.getenv("STILLME_API_BASE", "http://localhost:8000")
 
@@ -220,30 +227,111 @@ def sidebar(page_for_chat: str | None = None):
 
     # Chat panel appears only on Overview
     if page == "Overview":
+        # Chat mode selector (Sidebar or Floating Widget)
+        chat_mode = st.sidebar.radio(
+            "Chat Mode:",
+            ["Sidebar Chat", "Floating Widget"],
+            horizontal=True,
+            help="Choose between sidebar chat or floating widget"
+        )
+        
         st.sidebar.markdown("---")
-        st.sidebar.subheader("💬 Chat with StillMe")
+        
+        # Initialize chat history in session state
         if "chat_history" not in st.session_state:
             st.session_state.chat_history = []
-        user_msg = st.sidebar.text_area("Your message", height=80)
-        if st.sidebar.button("Send", use_container_width=True):
-            if user_msg.strip():
-                st.session_state.chat_history.append({"role": "user", "content": user_msg})
-                try:
-                    r = requests.post(
-                        f"{API_BASE}/api/chat/smart_router",
-                        json={"message": user_msg},
-                        timeout=30,
-                    )
-                    data = r.json()
-                    reply = data.get("response") or data.get("message") or str(data)
-                except Exception as e:
-                    reply = f"Demo mode: backend not available ({e})"
+        
+        # Render floating widget if selected and available
+        if chat_mode == "Floating Widget" and FLOATING_CHAT_AVAILABLE:
+            # Render floating chat widget
+            render_floating_chat(
+                chat_history=st.session_state.chat_history,
+                api_base=API_BASE,
+                is_open=True
+            )
+            
+            # Note: Floating widget handles its own chat logic via JavaScript
+            st.sidebar.info("💡 Floating chat widget is active. Use the chat button in the bottom-right corner.")
+        
+        # Sidebar chat (original implementation)
+        elif chat_mode == "Sidebar Chat":
+            st.sidebar.subheader("💬 Chat with StillMe")
+            
+            # Display chat history in a scrollable container
+            if st.session_state.chat_history:
+                st.sidebar.markdown("**Chat History:**")
+                # Create a scrollable container for chat history
+                chat_container = st.sidebar.container()
+                with chat_container:
+                    for m in st.session_state.chat_history[-10:]:  # Show last 10 messages
+                        speaker = "You" if m["role"] == "user" else "StillMe"
+                        speaker_color = "#46b3ff" if m["role"] == "user" else "#ffffff"
+                        st.sidebar.markdown(
+                            f'<div style="margin-bottom: 10px; padding: 8px; background-color: #262730; border-radius: 5px;">'
+                            f'<strong style="color: {speaker_color};">{speaker}:</strong> '
+                            f'<span style="color: #ffffff;">{m["content"]}</span>'
+                            f'</div>',
+                            unsafe_allow_html=True
+                        )
+                
+                # Clear chat button
+                if st.sidebar.button("🗑️ Clear Chat", use_container_width=True, key="clear_chat"):
+                    st.session_state.chat_history = []
+                    st.rerun()
+            
+            st.sidebar.markdown("---")
+            
+            # Chat input with Enter key support
+            user_msg = st.sidebar.text_area(
+                "Your message", 
+                height=80,
+                key="chat_input",
+                help="Type your message and press Enter to send"
+            )
+            
+            # Handle Enter key submission (Streamlit doesn't natively support this, but we can use form)
+            col1, col2 = st.sidebar.columns([1, 1])
+            with col1:
+                send_button = st.button("💬 Send", use_container_width=True, key="send_button")
+            with col2:
+                if st.button("🔄 Refresh", use_container_width=True, key="refresh_button"):
+                    st.rerun()
+            
+            # Process message when Send button is clicked
+            if send_button and user_msg.strip():
+                # Store message before clearing
+                message_to_send = user_msg.strip()
+                
+                # Add user message to history
+                st.session_state.chat_history.append({"role": "user", "content": message_to_send})
+                
+                # Show loading indicator
+                with st.sidebar.spinner("StillMe is thinking..."):
+                    try:
+                        r = requests.post(
+                            f"{API_BASE}/api/chat/smart_router",
+                            json={"message": message_to_send},
+                            timeout=30,
+                        )
+                        r.raise_for_status()
+                        data = r.json()
+                        # Extract response from ChatResponse model
+                        reply = data.get("response") or data.get("message") or str(data)
+                        if isinstance(reply, dict):
+                            reply = reply.get("detail", str(reply))
+                    except requests.exceptions.RequestException as e:
+                        reply = f"❌ Error connecting to backend: {str(e)}"
+                    except Exception as e:
+                        reply = f"❌ Error: {str(e)}"
+                
+                # Add assistant response to history
                 st.session_state.chat_history.append({"role": "assistant", "content": reply})
-                st.experimental_rerun()
-        # Show last 6 messages inline in sidebar
-        for m in st.session_state.chat_history[-6:]:
-            speaker = "You" if m["role"] == "user" else "StillMe"
-            st.sidebar.caption(f"**{speaker}:** {m['content']}")
+                
+                # Clear input by setting session state and rerun
+                if "chat_input" in st.session_state:
+                    del st.session_state.chat_input
+                st.rerun()
+    
     return page
 
 
