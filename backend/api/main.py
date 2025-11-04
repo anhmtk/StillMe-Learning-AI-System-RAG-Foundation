@@ -373,37 +373,83 @@ async def get_rag_stats():
 @app.post("/api/rag/reset-database")
 async def reset_rag_database():
     """Reset ChromaDB database (deletes all data and recreates collections)"""
+    import shutil
+    import os
+    
     try:
+        persist_dir = "data/vector_db"
+        
+        # If chroma_client is None, we need to delete the directory directly
         if not chroma_client:
-            raise HTTPException(status_code=503, detail="Vector DB not available")
+            logger.warning("ChromaClient not initialized, attempting to delete vector_db directory...")
+            if os.path.exists(persist_dir):
+                try:
+                    shutil.rmtree(persist_dir)
+                    logger.info(f"Deleted {persist_dir} directory")
+                    os.makedirs(persist_dir, exist_ok=True)
+                    logger.info(f"Recreated {persist_dir} directory")
+                except Exception as dir_error:
+                    logger.error(f"Failed to delete directory: {dir_error}")
+                    raise HTTPException(
+                        status_code=500, 
+                        detail=f"Cannot delete vector_db directory: {dir_error}. You may need to restart backend service."
+                    )
+            else:
+                logger.info(f"Directory {persist_dir} does not exist, creating it...")
+                os.makedirs(persist_dir, exist_ok=True)
+            
+            return {
+                "status": "success",
+                "message": "Vector database directory deleted. Please restart the backend service to reinitialize."
+            }
         
-        # Delete existing collections
+        # If chroma_client exists, try to reset via client
         try:
-            chroma_client.client.delete_collection("stillme_knowledge")
-        except Exception:
-            pass
+            # Delete existing collections
+            try:
+                chroma_client.client.delete_collection("stillme_knowledge")
+            except Exception:
+                pass
+            
+            try:
+                chroma_client.client.delete_collection("stillme_conversations")
+            except Exception:
+                pass
+            
+            # Recreate collections
+            chroma_client.knowledge_collection = chroma_client.client.create_collection(
+                name="stillme_knowledge",
+                metadata={"description": "Knowledge base for StillMe learning"}
+            )
+            chroma_client.conversation_collection = chroma_client.client.create_collection(
+                name="stillme_conversations",
+                metadata={"description": "Conversation history for context"}
+            )
+            
+            logger.info("✅ ChromaDB database reset successfully via API")
+            return {
+                "status": "success",
+                "message": "Database reset successfully. All collections recreated."
+            }
+        except Exception as client_error:
+            # If client reset fails, try deleting directory
+            logger.warning(f"Client reset failed: {client_error}, trying directory deletion...")
+            if os.path.exists(persist_dir):
+                try:
+                    shutil.rmtree(persist_dir)
+                    os.makedirs(persist_dir, exist_ok=True)
+                    logger.info("Deleted and recreated vector_db directory")
+                    return {
+                        "status": "success",
+                        "message": "Vector database directory deleted. Please restart the backend service to reinitialize."
+                    }
+                except Exception as dir_error:
+                    raise HTTPException(status_code=500, detail=f"Failed to reset: {dir_error}")
+            else:
+                raise
         
-        try:
-            chroma_client.client.delete_collection("stillme_conversations")
-        except Exception:
-            pass
-        
-        # Recreate collections
-        chroma_client.knowledge_collection = chroma_client.client.create_collection(
-            name="stillme_knowledge",
-            metadata={"description": "Knowledge base for StillMe learning"}
-        )
-        chroma_client.conversation_collection = chroma_client.client.create_collection(
-            name="stillme_conversations",
-            metadata={"description": "Conversation history for context"}
-        )
-        
-        logger.info("✅ ChromaDB database reset successfully via API")
-        return {
-            "status": "success",
-            "message": "Database reset successfully. All collections recreated."
-        }
-        
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Database reset error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
