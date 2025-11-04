@@ -171,14 +171,32 @@ def page_overview():
         
         st.caption(f"**Reason:** {status_msg}")
         
-        # Provide actionable tips
-        st.info(
-            "💡 **Troubleshooting Tips:**\n"
-            "1. Check backend logs in Railway dashboard for detailed error messages\n"
-            "2. Verify all dependencies are installed (chromadb, sentence-transformers, etc.)\n"
-            "3. Check if data/vector_db directory has write permissions\n"
-            "4. Try restarting the backend service"
-        )
+        # Provide actionable tips and reset button
+        col_tips, col_reset = st.columns([2, 1])
+        with col_tips:
+            st.info(
+                "💡 **Troubleshooting Tips:**\n"
+                "1. Check backend logs in Railway dashboard for detailed error messages\n"
+                "2. Verify all dependencies are installed (chromadb, sentence-transformers, etc.)\n"
+                "3. Check if data/vector_db directory has write permissions\n"
+                "4. Try restarting the backend service"
+            )
+        with col_reset:
+            st.warning("⚠️ **Quick Fix:**")
+            if st.button("🔄 Reset Vector Database", use_container_width=True, type="secondary"):
+                try:
+                    with st.spinner("Resetting database..."):
+                        r = requests.post(f"{API_BASE}/api/rag/reset-database", timeout=30)
+                        if r.status_code == 200:
+                            st.session_state["last_action"] = "✅ Database reset successfully! Backend will reinitialize on next restart."
+                            st.rerun()
+                        else:
+                            st.session_state["last_error"] = f"❌ Failed to reset database: {r.json().get('detail', 'Unknown error')}"
+                    st.rerun()
+                except Exception as e:
+                    st.session_state["last_error"] = f"❌ Failed to reset database: {e}"
+                    st.rerun()
+            st.caption("⚠️ This will delete all vector data!")
     
     # Display persistent messages from last action
     if "last_action" in st.session_state:

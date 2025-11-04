@@ -370,6 +370,44 @@ async def get_rag_stats():
         logger.error(f"RAG stats error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/api/rag/reset-database")
+async def reset_rag_database():
+    """Reset ChromaDB database (deletes all data and recreates collections)"""
+    try:
+        if not chroma_client:
+            raise HTTPException(status_code=503, detail="Vector DB not available")
+        
+        # Delete existing collections
+        try:
+            chroma_client.client.delete_collection("stillme_knowledge")
+        except Exception:
+            pass
+        
+        try:
+            chroma_client.client.delete_collection("stillme_conversations")
+        except Exception:
+            pass
+        
+        # Recreate collections
+        chroma_client.knowledge_collection = chroma_client.client.create_collection(
+            name="stillme_knowledge",
+            metadata={"description": "Knowledge base for StillMe learning"}
+        )
+        chroma_client.conversation_collection = chroma_client.client.create_collection(
+            name="stillme_conversations",
+            metadata={"description": "Conversation history for context"}
+        )
+        
+        logger.info("✅ ChromaDB database reset successfully via API")
+        return {
+            "status": "success",
+            "message": "Database reset successfully. All collections recreated."
+        }
+        
+    except Exception as e:
+        logger.error(f"Database reset error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 @app.get("/api/status")
 async def get_status():
     """Get system status"""
