@@ -185,18 +185,28 @@ def page_overview():
             st.warning("⚠️ **Quick Fix:**")
             if st.button("🔄 Reset Vector Database", use_container_width=True, type="secondary"):
                 try:
-                    with st.spinner("Resetting database..."):
-                        r = requests.post(f"{API_BASE}/api/rag/reset-database", timeout=30)
+                    with st.spinner("Resetting database (this may take a moment)..."):
+                        r = requests.post(f"{API_BASE}/api/rag/reset-database", timeout=60)
                         if r.status_code == 200:
-                            st.session_state["last_action"] = "✅ Database reset successfully! Backend will reinitialize on next restart."
+                            data = r.json()
+                            message = data.get("message", "Database reset successfully")
+                            if "restart" in message.lower():
+                                st.session_state["last_action"] = "✅ Database directory deleted! Please restart backend service on Railway, then refresh this page."
+                            else:
+                                st.session_state["last_action"] = "✅ Database reset successfully!"
                             st.rerun()
                         else:
-                            st.session_state["last_error"] = f"❌ Failed to reset database: {r.json().get('detail', 'Unknown error')}"
+                            error_detail = r.json().get('detail', 'Unknown error') if r.status_code != 200 else 'Unknown error'
+                            st.session_state["last_error"] = f"❌ Failed to reset database: {error_detail}"
+                    st.rerun()
+                except requests.exceptions.RequestException as e:
+                    st.session_state["last_error"] = f"❌ Connection error: {e}. Check if backend is running."
                     st.rerun()
                 except Exception as e:
                     st.session_state["last_error"] = f"❌ Failed to reset database: {e}"
                     st.rerun()
             st.caption("⚠️ This will delete all vector data!")
+            st.caption("💡 If reset fails, restart backend service on Railway")
     
     # Display persistent messages from last action
     if "last_action" in st.session_state:
