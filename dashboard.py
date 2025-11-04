@@ -294,12 +294,11 @@ def sidebar(page_for_chat: str | None = None):
                     help="Press Enter to send, Shift+Enter for new line"
                 )
                 
-                col1, col2 = st.columns([2, 1])
-                with col1:
-                    send_button = st.form_submit_button("💬 Send", use_container_width=True)
-                with col2:
-                    if st.form_submit_button("🔄", use_container_width=True, key="refresh_form"):
-                        st.rerun()
+                send_button = st.form_submit_button("💬 Send", use_container_width=True)
+            
+            # Refresh button outside form (can't have multiple submit buttons in form)
+            if st.sidebar.button("🔄 Refresh", use_container_width=True, key="refresh_chat"):
+                st.rerun()
             
             # Process message when form is submitted
             if send_button and user_msg and user_msg.strip():
