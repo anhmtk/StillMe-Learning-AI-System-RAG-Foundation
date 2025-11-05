@@ -31,6 +31,19 @@ class ChromaClient:
             if os.path.exists(persist_directory):
                 logger.info(f"Resetting ChromaDB: deleting {persist_directory} directory...")
                 try:
+                    # Delete all files including hidden ones (like .chroma.sqlite3)
+                    for root, dirs, files in os.walk(persist_directory):
+                        for f in files:
+                            try:
+                                os.remove(os.path.join(root, f))
+                            except:
+                                pass
+                        for d in dirs:
+                            try:
+                                shutil.rmtree(os.path.join(root, d))
+                            except:
+                                pass
+                    # Now remove the directory itself
                     shutil.rmtree(persist_directory)
                     os.makedirs(persist_directory, exist_ok=True)
                     logger.info(f"✅ Deleted and recreated {persist_directory}")
@@ -38,6 +51,7 @@ class ChromaClient:
                     logger.warning(f"Could not delete directory: {dir_error}")
         
         try:
+            # Create client - if reset_on_error was True, directory is fresh
             self.client = chromadb.PersistentClient(
                 path=persist_directory,
                 settings=Settings(
@@ -49,25 +63,53 @@ class ChromaClient:
             # If reset_on_error was True, we deleted the directory, so create new collections directly
             # Otherwise, try to get existing collections or create new ones
             if reset_on_error:
-                # Fresh start - create new collections directly
+                # Fresh start - create new collections directly (don't try to delete first)
                 logger.info("Creating new collections after reset...")
+                # Don't try to delete collections - database is fresh, they don't exist
                 try:
-                    self.client.delete_collection("stillme_knowledge")
-                except:
-                    pass
-                try:
-                    self.client.delete_collection("stillme_conversations")
-                except:
-                    pass
+                    self.knowledge_collection = self.client.create_collection(
+                        name="stillme_knowledge",
+                        metadata={"description": "Knowledge base for StillMe learning"}
+                    )
+                    logger.info("✅ Created stillme_knowledge collection")
+                except Exception as create_error:
+                    # If collection already exists somehow, delete and recreate
+                    error_str = str(create_error).lower()
+                    if "already exists" in error_str or "duplicate" in error_str:
+                        logger.warning(f"Collection exists, deleting first: {create_error}")
+                        try:
+                            self.client.delete_collection("stillme_knowledge")
+                        except:
+                            pass
+                        self.knowledge_collection = self.client.create_collection(
+                            name="stillme_knowledge",
+                            metadata={"description": "Knowledge base for StillMe learning"}
+                        )
+                    else:
+                        raise
                 
-                self.knowledge_collection = self.client.create_collection(
-                    name="stillme_knowledge",
-                    metadata={"description": "Knowledge base for StillMe learning"}
-                )
-                self.conversation_collection = self.client.create_collection(
-                    name="stillme_conversations",
-                    metadata={"description": "Conversation history for context"}
-                )
+                try:
+                    self.conversation_collection = self.client.create_collection(
+                        name="stillme_conversations",
+                        metadata={"description": "Conversation history for context"}
+                    )
+                    logger.info("✅ Created stillme_conversations collection")
+                except Exception as create_error:
+                    # If collection already exists somehow, delete and recreate
+                    error_str = str(create_error).lower()
+                    if "already exists" in error_str or "duplicate" in error_str:
+                        logger.warning(f"Collection exists, deleting first: {create_error}")
+                        try:
+                            self.client.delete_collection("stillme_conversations")
+                        except:
+                            pass
+                        self.conversation_collection = self.client.create_collection(
+                            name="stillme_conversations",
+                            metadata={"description": "Conversation history for context"}
+                        )
+                    else:
+                        raise
+                
                 logger.info("✅ Created new collections after reset")
             else:
                 # Normal initialization - try to get existing or create new
