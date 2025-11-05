@@ -27,28 +27,47 @@ class ChromaClient:
         self.reset_on_error = reset_on_error
         
         # Check if database exists and needs reset
+        original_directory = persist_directory
         if reset_on_error:
+            # Delete directory completely
             if os.path.exists(persist_directory):
                 logger.info(f"Resetting ChromaDB: deleting {persist_directory} directory...")
                 try:
-                    # Delete all files including hidden ones (like .chroma.sqlite3)
-                    for root, dirs, files in os.walk(persist_directory):
+                    # Force delete all files and subdirectories
+                    for root, dirs, files in os.walk(persist_directory, topdown=False):
                         for f in files:
                             try:
-                                os.remove(os.path.join(root, f))
-                            except:
-                                pass
+                                file_path = os.path.join(root, f)
+                                os.chmod(file_path, 0o777)  # Make writable
+                                os.remove(file_path)
+                            except Exception as file_error:
+                                logger.warning(f"Could not delete file {f}: {file_error}")
                         for d in dirs:
                             try:
-                                shutil.rmtree(os.path.join(root, d))
-                            except:
-                                pass
+                                dir_path = os.path.join(root, d)
+                                os.chmod(dir_path, 0o777)
+                                shutil.rmtree(dir_path)
+                            except Exception as dir_error:
+                                logger.warning(f"Could not delete dir {d}: {dir_error}")
                     # Now remove the directory itself
-                    shutil.rmtree(persist_directory)
-                    os.makedirs(persist_directory, exist_ok=True)
-                    logger.info(f"✅ Deleted and recreated {persist_directory}")
+                    try:
+                        os.chmod(persist_directory, 0o777)
+                        shutil.rmtree(persist_directory)
+                        logger.info(f"✅ Deleted {persist_directory}")
+                    except Exception as final_error:
+                        logger.error(f"Final deletion failed: {final_error}")
+                        raise
                 except Exception as dir_error:
-                    logger.warning(f"Could not delete directory: {dir_error}")
+                    logger.error(f"Could not delete directory: {dir_error}")
+                    raise RuntimeError(f"Failed to delete vector_db directory: {dir_error}. Please manually delete data/vector_db on Railway.")
+            
+            # Wait a moment to ensure filesystem sync
+            import time
+            time.sleep(0.5)
+            
+            # Create fresh directory
+            os.makedirs(persist_directory, exist_ok=True)
+            logger.info(f"✅ Created fresh directory: {persist_directory}")
         
         try:
             # Create client - if reset_on_error was True, directory is fresh
