@@ -350,9 +350,25 @@ async def chat_with_rag(request: ChatRequest):
             learning_session_id=learning_session_id
         )
         
+    except HTTPException:
+        # Re-raise HTTP exceptions (they have proper status codes)
+        raise
     except Exception as e:
-        logger.error(f"Chat error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        # Log detailed error with context
+        logger.error(f"Chat error: {e}", exc_info=True)
+        logger.error(f"Request details: message={request.message[:100]}, user_id={request.user_id}, use_rag={request.use_rag}")
+        
+        # Check if it's a specific error we can handle
+        error_str = str(e).lower()
+        if "rag" in error_str and "not available" in error_str:
+            raise HTTPException(status_code=503, detail="RAG system is not available. Please check backend initialization.")
+        elif "embedding" in error_str or "model" in error_str:
+            raise HTTPException(status_code=503, detail="Embedding service is not available. Please check backend logs.")
+        else:
+            raise HTTPException(
+                status_code=500,
+                detail=f"Chat error: {str(e)}. Please check backend logs for details."
+            )
 
 @app.post("/api/learning/add", response_model=LearningResponse)
 async def add_learning_content(request: LearningRequest):
@@ -940,8 +956,20 @@ async def chat_smart_router(request: ChatRequest):
     Smart router that automatically selects the best chat endpoint.
     This is the main endpoint used by the dashboard.
     """
-    # Use the RAG-enhanced chat endpoint as default
-    return await chat_with_rag(request)
+    try:
+        # Use the RAG-enhanced chat endpoint as default
+        return await chat_with_rag(request)
+    except HTTPException:
+        # Re-raise HTTP exceptions (they have proper status codes)
+        raise
+    except Exception as e:
+        # Log detailed error for debugging
+        logger.error(f"Smart router error: {e}", exc_info=True)
+        # Return a more helpful error message
+        raise HTTPException(
+            status_code=500,
+            detail=f"Internal server error: {str(e)}. Please check backend logs for details."
+        )
 
 # Legacy endpoints for backward compatibility
 @app.post("/api/chat/openai")
