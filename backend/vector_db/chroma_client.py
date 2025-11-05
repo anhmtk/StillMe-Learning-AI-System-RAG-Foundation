@@ -130,6 +130,7 @@ class ChromaClient:
                         raise
                 
                 logger.info("✅ Created new collections after reset")
+                logger.info("✅ ChromaDB database fully reset and reinitialized")
             else:
                 # Normal initialization - try to get existing or create new
                 self.knowledge_collection = self._get_or_create_collection(

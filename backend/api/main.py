@@ -57,16 +57,36 @@ try:
     logger.info("Initializing RAG components...")
     # Try with reset_on_error=False first (preserve data)
     # If schema error, will try with reset_on_error=True (which deletes directory first)
+    chroma_client_ref = None
     try:
         chroma_client = ChromaClient(reset_on_error=False)
         logger.info("✓ ChromaDB client initialized")
     except (RuntimeError, Exception) as e:
         error_str = str(e).lower()
         if "schema mismatch" in error_str or "no such column" in error_str or "topic" in error_str:
-            logger.warning("Schema mismatch detected, attempting to reset database by deleting directory...")
+            logger.warning("⚠️ Schema mismatch detected!")
+            logger.warning("Attempting to reset database by deleting directory...")
+            
+            # Store reference to old client if exists (for cleanup)
+            if chroma_client_ref:
+                try:
+                    # Try to close/disconnect old client
+                    if hasattr(chroma_client_ref, 'client'):
+                        logger.info("Closing old ChromaDB client connection...")
+                        # ChromaDB PersistentClient doesn't have explicit close, but we can try to delete reference
+                        del chroma_client_ref
+                except:
+                    pass
+            
+            # Force garbage collection to ensure old client is freed
+            import gc
+            gc.collect()
+            logger.info("Garbage collected old client references")
+            
             # Try resetting database - this will delete the directory before creating client
             chroma_client = ChromaClient(reset_on_error=True)
             logger.info("✓ ChromaDB client initialized (after directory reset)")
+            logger.warning("⚠️ IMPORTANT: If errors persist, please RESTART the backend service on Railway to clear process cache.")
         else:
             raise
     
@@ -99,9 +119,14 @@ try:
     logger.info("✓ Content curator initialized")
     
     logger.info("✅ All RAG components initialized successfully")
+    logger.info("🎉 StillMe backend is ready!")
 except Exception as e:
     _initialization_error = str(e)
     logger.error(f"❌ Failed to initialize RAG components: {e}", exc_info=True)
+    if "schema mismatch" in str(e).lower() or "no such column" in str(e).lower() or "topic" in str(e).lower():
+        logger.error("⚠️ CRITICAL: Schema mismatch persists after reset attempt.")
+        logger.error("⚠️ ACTION REQUIRED: Please RESTART the backend service on Railway to clear process cache.")
+        logger.error("⚠️ The file deletion worked, but the process may be caching the old schema.")
     # Fallback to None for graceful degradation
     # Components already set to None above
 
