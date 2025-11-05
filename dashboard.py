@@ -5,6 +5,7 @@ from typing import Any, Dict
 
 import requests
 import streamlit as st
+import streamlit.components.v1 as components
 import plotly.graph_objects as go
 
 # Import floating chat widget
@@ -16,6 +17,82 @@ except ImportError:
 
 
 API_BASE = os.getenv("STILLME_API_BASE", "http://localhost:8000")
+
+
+def display_local_time(utc_time_str: str, label: str = "Next run"):
+    """
+    Display UTC time converted to user's local timezone.
+    
+    Args:
+        utc_time_str: ISO format UTC time string
+        label: Label text to display before the time
+    """
+    if not utc_time_str:
+        st.caption(f"{label}: Not scheduled")
+        return
+    
+    # Create HTML that includes both label and time in one component
+    element_id = f"local_time_label_{abs(hash(utc_time_str)) % 1000000}"
+    escaped_utc_time = utc_time_str.replace('"', '\\"').replace("'", "\\'")
+    
+    html = f"""
+    <div style="font-size: 0.88rem; color: rgb(250, 250, 250);">
+        <span>{label}: </span>
+        <span id="{element_id}" style="display: inline-block;"></span>
+    </div>
+    <script>
+        (function() {{
+            const utcTime = "{escaped_utc_time}";
+            const element = document.getElementById("{element_id}");
+            
+            if (!utcTime || utcTime === "None" || utcTime === "null" || utcTime === "") {{
+                element.textContent = "Not scheduled";
+                return;
+            }}
+            
+            try {{
+                // Parse UTC time (assume it's UTC if no timezone specified)
+                let utcDate;
+                if (utcTime.includes('Z')) {{
+                    utcDate = new Date(utcTime);
+                }} else {{
+                    // If no Z, assume UTC and add Z
+                    utcDate = new Date(utcTime + 'Z');
+                }}
+                
+                // Check if date is valid
+                if (isNaN(utcDate.getTime())) {{
+                    element.textContent = utcTime;
+                    return;
+                }}
+                
+                // Format to local time with timezone
+                const options = {{
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    timeZoneName: 'short',
+                    hour12: false
+                }};
+                
+                const localTimeStr = utcDate.toLocaleString('en-US', options);
+                const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                
+                // Format: MM/DD/YYYY, HH:MM:SS (Timezone)
+                // Remove comma and format nicely
+                const formatted = localTimeStr.replace(',', '') + ' (' + timezone + ')';
+                element.textContent = formatted;
+            }} catch (e) {{
+                console.error('Error converting UTC time:', e);
+                element.textContent = utcTime;
+            }}
+        }})();
+    </script>
+    """
+    components.html(html, height=30)
 
 
 def get_json(path: str, default: Dict[str, Any] | None = None) -> Dict[str, Any]:
@@ -119,9 +196,9 @@ def page_overview():
                 st.warning("🟡 **Stopped**")
         with col_info:
             if next_run:
-                st.caption(f"Next run: {next_run}")
+                display_local_time(next_run, "Next run")
             else:
-                st.caption("Not scheduled")
+                st.caption("Next run: Not scheduled")
         
         col_start, col_stop, col_run_now = st.columns(3)
         with col_start:
