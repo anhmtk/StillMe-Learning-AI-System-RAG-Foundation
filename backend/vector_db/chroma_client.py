@@ -46,16 +46,39 @@ class ChromaClient:
                 )
             )
             
-            # Create or get collections
-            self.knowledge_collection = self._get_or_create_collection(
-                "stillme_knowledge",
-                "Knowledge base for StillMe learning"
-            )
-            
-            self.conversation_collection = self._get_or_create_collection(
-                "stillme_conversations", 
-                "Conversation history for context"
-            )
+            # If reset_on_error was True, we deleted the directory, so create new collections directly
+            # Otherwise, try to get existing collections or create new ones
+            if reset_on_error:
+                # Fresh start - create new collections directly
+                logger.info("Creating new collections after reset...")
+                try:
+                    self.client.delete_collection("stillme_knowledge")
+                except:
+                    pass
+                try:
+                    self.client.delete_collection("stillme_conversations")
+                except:
+                    pass
+                
+                self.knowledge_collection = self.client.create_collection(
+                    name="stillme_knowledge",
+                    metadata={"description": "Knowledge base for StillMe learning"}
+                )
+                self.conversation_collection = self.client.create_collection(
+                    name="stillme_conversations",
+                    metadata={"description": "Conversation history for context"}
+                )
+                logger.info("✅ Created new collections after reset")
+            else:
+                # Normal initialization - try to get existing or create new
+                self.knowledge_collection = self._get_or_create_collection(
+                    "stillme_knowledge",
+                    "Knowledge base for StillMe learning"
+                )
+                self.conversation_collection = self._get_or_create_collection(
+                    "stillme_conversations", 
+                    "Conversation history for context"
+                )
             
             logger.info("ChromaDB client initialized successfully")
             
