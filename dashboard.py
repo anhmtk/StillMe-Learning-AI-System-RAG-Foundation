@@ -381,26 +381,44 @@ def page_rag():
                     st.warning("⚠️ Please enter some content first!")
                 else:
                     try:
-                        with st.spinner("Adding knowledge to vector database..."):
-                            r = requests.post(
-                                f"{API_BASE}/api/rag/add_knowledge",
-                                json={
-                                    "content": content,
-                                    "source": source,
-                                    "content_type": content_type,
-                                },
-                                timeout=60,
-                            )
-                            if r.status_code == 200:
-                                result = r.json()
-                                st.success(f"✅ {result.get('status', 'Knowledge added successfully!')}")
-                                st.info(f"📊 Type: {result.get('content_type', content_type)} | Source: {source}")
-                                # Clear content after successful add (optional)
-                                st.rerun()
-                            else:
-                                st.error(f"❌ Failed: {r.json().get('detail', 'Unknown error')}")
+                        # Show progress message
+                        progress_msg = st.empty()
+                        progress_msg.info("⏳ Adding knowledge... This may take 30-90 seconds (creating embeddings and saving to vector DB)")
+                        
+                        r = requests.post(
+                            f"{API_BASE}/api/rag/add_knowledge",
+                            json={
+                                "content": content,
+                                "source": source,
+                                "content_type": content_type,
+                            },
+                            timeout=180,  # Increased to 180s to handle embedding generation
+                        )
+                        progress_msg.empty()
+                        
+                        if r.status_code == 200:
+                            result = r.json()
+                            st.success(f"✅ {result.get('status', 'Knowledge added successfully!')}")
+                            st.info(f"📊 Type: {result.get('content_type', content_type)} | Source: {source}")
+                            # Clear content after successful add (optional)
+                            st.rerun()
+                        else:
+                            error_detail = r.json().get('detail', 'Unknown error')
+                            st.error(f"❌ Failed: {error_detail}")
+                            st.caption("💡 Tip: If this persists, check backend logs on Railway. The embedding model may be loading.")
+                    except requests.exceptions.Timeout:
+                        st.error("❌ Request timed out after 3 minutes. The backend may be slow or the embedding model is still loading.")
+                        st.warning("💡 **Solutions:**\n1. Wait a moment and try again (model may be cached now)\n2. Check backend logs on Railway\n3. Try with shorter content")
+                    except requests.exceptions.ConnectionError:
+                        st.error("❌ Connection error. Backend may be down or restarting.")
+                        st.info("💡 Check Railway dashboard to ensure backend service is running.")
                     except Exception as e:
-                        st.error(f"❌ Failed: {e}")
+                        error_str = str(e)
+                        if "timeout" in error_str.lower() or "timed out" in error_str.lower():
+                            st.error(f"❌ Request timed out: {error_str}")
+                            st.warning("💡 The embedding process is taking longer than expected. Try again in a moment.")
+                        else:
+                            st.error(f"❌ Failed: {error_str}")
         
         with col_info:
             # Show current stats
