@@ -20,8 +20,22 @@ class ChromaClient:
             persist_directory: Directory to persist vector database
             reset_on_error: If True, reset database on schema errors
         """
+        import os
+        import shutil
+        
         self.persist_directory = persist_directory
         self.reset_on_error = reset_on_error
+        
+        # Check if database exists and needs reset
+        if reset_on_error:
+            if os.path.exists(persist_directory):
+                logger.info(f"Resetting ChromaDB: deleting {persist_directory} directory...")
+                try:
+                    shutil.rmtree(persist_directory)
+                    os.makedirs(persist_directory, exist_ok=True)
+                    logger.info(f"✅ Deleted and recreated {persist_directory}")
+                except Exception as dir_error:
+                    logger.warning(f"Could not delete directory: {dir_error}")
         
         try:
             self.client = chromadb.PersistentClient(
