@@ -56,17 +56,17 @@ content_curator = None
 try:
     logger.info("Initializing RAG components...")
     # Try with reset_on_error=False first (preserve data)
-    # If schema error, will try with reset_on_error=True
+    # If schema error, will try with reset_on_error=True (which deletes directory first)
     try:
         chroma_client = ChromaClient(reset_on_error=False)
         logger.info("✓ ChromaDB client initialized")
     except (RuntimeError, Exception) as e:
         error_str = str(e).lower()
         if "schema mismatch" in error_str or "no such column" in error_str or "topic" in error_str:
-            logger.warning("Schema mismatch detected, attempting to reset database...")
-            # Try resetting database
+            logger.warning("Schema mismatch detected, attempting to reset database by deleting directory...")
+            # Try resetting database - this will delete the directory before creating client
             chroma_client = ChromaClient(reset_on_error=True)
-            logger.info("✓ ChromaDB client initialized (after reset)")
+            logger.info("✓ ChromaDB client initialized (after directory reset)")
         else:
             raise
     
