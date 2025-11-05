@@ -242,9 +242,13 @@ def page_overview():
         
         # Show detailed error if available
         if init_error:
-            with st.expander("🔍 View Initialization Error Details", expanded=False):
+            with st.expander("🔍 View Initialization Error Details", expanded=True):
                 st.code(init_error, language="text")
                 st.caption("💡 This error occurred when the backend tried to initialize RAG components.")
+        else:
+            # If no detailed error, show status message
+            with st.expander("🔍 View Status Details", expanded=False):
+                st.json(scheduler_status)
         
         st.caption(f"**Reason:** {status_msg}")
         
