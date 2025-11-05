@@ -654,24 +654,24 @@ def sidebar(page_for_chat: str | None = None):
 
     st.sidebar.success("Backend Connected")
 
-    # Chat panel appears only on Overview
-    if page == "Overview":
-        # Chat mode selector (Sidebar or Floating Widget)
-        chat_mode = st.sidebar.radio(
-            "Chat Mode:",
-            ["Sidebar Chat", "Floating Widget"],
-            horizontal=True,
-            help="Choose between sidebar chat or floating widget"
-        )
-        
-        st.sidebar.markdown("---")
-        
-        # Initialize chat history in session state
-        if "chat_history" not in st.session_state:
-            st.session_state.chat_history = []
-        
-        # Render floating widget if selected and available
-        if chat_mode == "Floating Widget" and FLOATING_CHAT_AVAILABLE:
+    # Chat panel now appears on all pages (improved UX)
+    st.sidebar.markdown("---")
+    # Chat mode selector (Sidebar or Floating Widget)
+    chat_mode = st.sidebar.radio(
+        "Chat Mode:",
+        ["Sidebar Chat", "Floating Widget"],
+        horizontal=True,
+        help="Choose between sidebar chat or floating widget"
+    )
+    
+    st.sidebar.markdown("---")
+    
+    # Initialize chat history in session state
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
+    
+    # Render floating widget if selected and available
+    if chat_mode == "Floating Widget" and FLOATING_CHAT_AVAILABLE:
             # Render floating chat widget
             render_floating_chat(
                 chat_history=st.session_state.chat_history,
@@ -679,11 +679,11 @@ def sidebar(page_for_chat: str | None = None):
                 is_open=True
             )
             
-            # Note: Floating widget handles its own chat logic via JavaScript
-            st.sidebar.info("💡 Floating chat widget is active. Use the chat button in the bottom-right corner.")
-        
-        # Sidebar chat (original implementation)
-        elif chat_mode == "Sidebar Chat":
+        # Note: Floating widget handles its own chat logic via JavaScript
+        st.sidebar.info("💡 Floating chat widget is active. Use the chat button in the bottom-right corner.")
+    
+    # Sidebar chat (original implementation)
+    elif chat_mode == "Sidebar Chat":
             st.sidebar.subheader("💬 Chat with StillMe")
             
             # Clear chat button (at top for easy access)
