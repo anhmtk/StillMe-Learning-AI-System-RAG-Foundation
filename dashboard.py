@@ -770,8 +770,6 @@ def sidebar(page_for_chat: str | None = None):
             st.rerun()
     
     return page
-    
-    return page
 
 
 def main():
