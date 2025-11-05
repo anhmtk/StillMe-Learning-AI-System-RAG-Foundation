@@ -354,23 +354,59 @@ def page_rag():
     st.caption("Add knowledge and test retrieval context")
 
     with st.expander("Add Knowledge", expanded=True):
-        content = st.text_area("Content", height=120)
-        source = st.text_input("Source", value="manual")
-        content_type = st.selectbox("Type", ["knowledge", "conversation"], index=0)
-        if st.button("Add to Vector DB", type="primary"):
-            try:
-                r = requests.post(
-                    f"{API_BASE}/api/rag/add_knowledge",
-                    json={
-                        "content": content,
-                        "source": source,
-                        "content_type": content_type,
-                    },
-                    timeout=60,
-                )
-                st.success(r.json().get("status", "Added"))
-            except Exception as e:
-                st.error(f"Failed: {e}")
+        st.markdown("**💡 Tip:** Add knowledge that StillMe can use to answer questions. Examples: definitions, FAQs, documentation, policies.")
+        
+        content = st.text_area(
+            "Content", 
+            height=120,
+            placeholder="Enter the knowledge content here. For example:\n\nStillMe is a self-evolving AI system that learns continuously from user interactions and external sources. It uses RAG (Retrieval-Augmented Generation) to provide accurate, context-aware responses.",
+            help="The actual text content you want StillMe to learn"
+        )
+        source = st.text_input(
+            "Source", 
+            value="manual",
+            help="Source identifier (e.g., 'manual', 'website', 'documentation', 'user_feedback')"
+        )
+        content_type = st.selectbox(
+            "Type", 
+            ["knowledge", "conversation"], 
+            index=0,
+            help="'knowledge' for general information, 'conversation' for chat examples"
+        )
+        
+        col_add, col_info = st.columns([1, 2])
+        with col_add:
+            if st.button("Add to Vector DB", type="primary", use_container_width=True):
+                if not content.strip():
+                    st.warning("⚠️ Please enter some content first!")
+                else:
+                    try:
+                        with st.spinner("Adding knowledge to vector database..."):
+                            r = requests.post(
+                                f"{API_BASE}/api/rag/add_knowledge",
+                                json={
+                                    "content": content,
+                                    "source": source,
+                                    "content_type": content_type,
+                                },
+                                timeout=60,
+                            )
+                            if r.status_code == 200:
+                                result = r.json()
+                                st.success(f"✅ {result.get('status', 'Knowledge added successfully!')}")
+                                st.info(f"📊 Type: {result.get('content_type', content_type)} | Source: {source}")
+                                # Clear content after successful add (optional)
+                                st.rerun()
+                            else:
+                                st.error(f"❌ Failed: {r.json().get('detail', 'Unknown error')}")
+                    except Exception as e:
+                        st.error(f"❌ Failed: {e}")
+        
+        with col_info:
+            # Show current stats
+            rag_stats = get_json("/api/rag/stats", {}).get("stats", {})
+            if rag_stats:
+                st.caption(f"📚 Current: {rag_stats.get('knowledge_documents', 0)} knowledge docs, {rag_stats.get('conversation_documents', 0)} conversation docs")
 
     st.markdown("---")
     st.subheader("Query RAG")
