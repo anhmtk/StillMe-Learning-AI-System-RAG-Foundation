@@ -684,53 +684,53 @@ def sidebar(page_for_chat: str | None = None):
     
     # Sidebar chat (original implementation)
     elif chat_mode == "Sidebar Chat":
-            st.sidebar.subheader("💬 Chat with StillMe")
-            
-            # Clear chat button (at top for easy access)
-            if st.session_state.chat_history:
-                if st.sidebar.button("🗑️ Clear Chat", use_container_width=True, key="clear_chat"):
-                    st.session_state.chat_history = []
-                    st.rerun()
-            
-            # Display chat history in a larger, scrollable container
-            if st.session_state.chat_history:
-                # Use expander for better space management
-                with st.sidebar.expander("📜 Chat History", expanded=True):
-                    # Create chat messages with better styling
-                    for idx, m in enumerate(st.session_state.chat_history[-20:]):  # Show last 20 messages
-                        speaker = "You" if m["role"] == "user" else "StillMe"
-                        speaker_color = "#46b3ff" if m["role"] == "user" else "#ffffff"
-                        bg_color = "#1e3a5f" if m["role"] == "user" else "#262730"
-                        align = "right" if m["role"] == "user" else "left"
-                        
-                        st.markdown(
-                            f'<div style="margin-bottom: 12px; padding: 12px; background-color: {bg_color}; border-radius: 8px; text-align: {align}; max-width: 90%; margin-left: {"auto" if m["role"] == "user" else "0"}; margin-right: {"0" if m["role"] == "user" else "auto"};">'
-                            f'<strong style="color: {speaker_color}; font-size: 0.9em;">{speaker}:</strong><br>'
-                            f'<span style="color: #ffffff; font-size: 0.95em;">{m["content"]}</span>'
-                            f'</div>',
-                            unsafe_allow_html=True
-                        )
-            
-            st.sidebar.markdown("---")
-            
-            # Use form for Enter key support
-            with st.sidebar.form(key="chat_form", clear_on_submit=True):
-                user_msg = st.text_area(
-                    "Your message", 
-                    height=100,
-                    key="chat_input_form",
-                    placeholder="Type your message and press Enter (Shift+Enter for new line)...",
-                    help="Press Enter to send, Shift+Enter for new line"
-                )
-                
-                send_button = st.form_submit_button("💬 Send", use_container_width=True)
-            
-            # Refresh button outside form (can't have multiple submit buttons in form)
-            if st.sidebar.button("🔄 Refresh", use_container_width=True, key="refresh_chat"):
+        st.sidebar.subheader("💬 Chat with StillMe")
+        
+        # Clear chat button (at top for easy access)
+        if st.session_state.chat_history:
+            if st.sidebar.button("🗑️ Clear Chat", use_container_width=True, key="clear_chat"):
+                st.session_state.chat_history = []
                 st.rerun()
+        
+        # Display chat history in a larger, scrollable container
+        if st.session_state.chat_history:
+            # Use expander for better space management
+            with st.sidebar.expander("📜 Chat History", expanded=True):
+                # Create chat messages with better styling
+                for idx, m in enumerate(st.session_state.chat_history[-20:]):  # Show last 20 messages
+                    speaker = "You" if m["role"] == "user" else "StillMe"
+                    speaker_color = "#46b3ff" if m["role"] == "user" else "#ffffff"
+                    bg_color = "#1e3a5f" if m["role"] == "user" else "#262730"
+                    align = "right" if m["role"] == "user" else "left"
+                    
+                    st.markdown(
+                        f'<div style="margin-bottom: 12px; padding: 12px; background-color: {bg_color}; border-radius: 8px; text-align: {align}; max-width: 90%; margin-left: {"auto" if m["role"] == "user" else "0"}; margin-right: {"0" if m["role"] == "user" else "auto"};">'
+                        f'<strong style="color: {speaker_color}; font-size: 0.9em;">{speaker}:</strong><br>'
+                        f'<span style="color: #ffffff; font-size: 0.95em;">{m["content"]}</span>'
+                        f'</div>',
+                        unsafe_allow_html=True
+                    )
+        
+        st.sidebar.markdown("---")
+        
+        # Use form for Enter key support
+        with st.sidebar.form(key="chat_form", clear_on_submit=True):
+            user_msg = st.text_area(
+                "Your message", 
+                height=100,
+                key="chat_input_form",
+                placeholder="Type your message and press Enter (Shift+Enter for new line)...",
+                help="Press Enter to send, Shift+Enter for new line"
+            )
             
-            # Process message when form is submitted
-            if send_button and user_msg and user_msg.strip():
+            send_button = st.form_submit_button("💬 Send", use_container_width=True)
+        
+        # Refresh button outside form (can't have multiple submit buttons in form)
+        if st.sidebar.button("🔄 Refresh", use_container_width=True, key="refresh_chat"):
+            st.rerun()
+        
+        # Process message when form is submitted
+        if send_button and user_msg and user_msg.strip():
                 # Store message before clearing
                 message_to_send = user_msg.strip()
                 
