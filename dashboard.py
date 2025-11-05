@@ -731,43 +731,45 @@ def sidebar(page_for_chat: str | None = None):
         
         # Process message when form is submitted
         if send_button and user_msg and user_msg.strip():
-                # Store message before clearing
-                message_to_send = user_msg.strip()
+            # Store message before clearing
+            message_to_send = user_msg.strip()
+            
+            # Add user message to history
+            st.session_state.chat_history.append({"role": "user", "content": message_to_send})
+            
+            # Show loading status (using status instead of spinner in sidebar)
+            status_placeholder = st.sidebar.empty()
+            status_placeholder.info("🤔 StillMe is thinking...")
+            
+            try:
+                r = requests.post(
+                    f"{API_BASE}/api/chat/smart_router",
+                    json={"message": message_to_send},
+                    timeout=30,
+                )
+                r.raise_for_status()
+                data = r.json()
+                # Extract response from ChatResponse model
+                reply = data.get("response") or data.get("message") or str(data)
+                if isinstance(reply, dict):
+                    reply = reply.get("detail", str(reply))
                 
-                # Add user message to history
-                st.session_state.chat_history.append({"role": "user", "content": message_to_send})
-                
-                # Show loading status (using status instead of spinner in sidebar)
-                status_placeholder = st.sidebar.empty()
-                status_placeholder.info("🤔 StillMe is thinking...")
-                
-                try:
-                    r = requests.post(
-                        f"{API_BASE}/api/chat/smart_router",
-                        json={"message": message_to_send},
-                        timeout=30,
-                    )
-                    r.raise_for_status()
-                    data = r.json()
-                    # Extract response from ChatResponse model
-                    reply = data.get("response") or data.get("message") or str(data)
-                    if isinstance(reply, dict):
-                        reply = reply.get("detail", str(reply))
-                    
-                    status_placeholder.success("✅ Response received!")
-                except requests.exceptions.RequestException as e:
-                    reply = f"❌ Error connecting to backend: {str(e)}"
-                    status_placeholder.error("❌ Connection error")
-                except Exception as e:
-                    reply = f"❌ Error: {str(e)}"
-                    status_placeholder.error("❌ Error occurred")
-                
-                # Add assistant response to history
-                st.session_state.chat_history.append({"role": "assistant", "content": reply})
-                
-                # Clear status and rerun to show new message
-                status_placeholder.empty()
-                st.rerun()
+                status_placeholder.success("✅ Response received!")
+            except requests.exceptions.RequestException as e:
+                reply = f"❌ Error connecting to backend: {str(e)}"
+                status_placeholder.error("❌ Connection error")
+            except Exception as e:
+                reply = f"❌ Error: {str(e)}"
+                status_placeholder.error("❌ Error occurred")
+            
+            # Add assistant response to history
+            st.session_state.chat_history.append({"role": "assistant", "content": reply})
+            
+            # Clear status and rerun to show new message
+            status_placeholder.empty()
+            st.rerun()
+    
+    return page
     
     return page
 
