@@ -444,10 +444,77 @@ def page_community():
         st.success("Thanks! Voting API will be wired in a next release.")
 
 
+def page_validation():
+    """Validation metrics and monitoring page"""
+    st.markdown("## Validation Metrics")
+    st.caption("Monitor validator chain performance and reduce hallucinations")
+    
+    # Get validation metrics
+    try:
+        metrics_data = get_json("/api/validators/metrics", {}).get("metrics", {})
+    except Exception:
+        metrics_data = {}
+    
+    if not metrics_data or metrics_data.get("total_validations", 0) == 0:
+        st.info("ℹ️ No validation data yet. Enable validators with `ENABLE_VALIDATORS=true` to start collecting metrics.")
+        return
+    
+    # Metrics overview
+    col1, col2, col3, col4 = st.columns(4)
+    with col1:
+        st.metric("Total Validations", metrics_data.get("total_validations", 0))
+    with col2:
+        pass_rate = metrics_data.get("pass_rate", 0.0)
+        st.metric("Pass Rate", f"{pass_rate:.1%}")
+    with col3:
+        st.metric("Passed", metrics_data.get("passed_count", 0))
+    with col4:
+        st.metric("Failed", metrics_data.get("failed_count", 0))
+    
+    st.markdown("---")
+    
+    # Average overlap score
+    avg_overlap = metrics_data.get("avg_overlap_score", 0.0)
+    st.subheader("Evidence Overlap")
+    st.metric("Average Overlap Score", f"{avg_overlap:.3f}")
+    st.caption("Higher overlap indicates better grounding in RAG context")
+    
+    st.markdown("---")
+    
+    # Reasons histogram
+    reasons_hist = metrics_data.get("reasons_histogram", {})
+    if reasons_hist:
+        st.subheader("Failure Reasons")
+        st.bar_chart(reasons_hist)
+    else:
+        st.info("No validation failures recorded")
+    
+    st.markdown("---")
+    
+    # Recent logs
+    recent_logs = metrics_data.get("recent_logs", [])
+    if recent_logs:
+        st.subheader("Recent Validation Logs (Last 10)")
+        for log in recent_logs[-10:]:
+            status = "✅" if log.get("passed", False) else "❌"
+            timestamp = log.get("timestamp", "Unknown")
+            reasons = log.get("reasons", [])
+            overlap = log.get("overlap_score", 0.0)
+            
+            with st.expander(f"{status} {timestamp}"):
+                st.write(f"**Passed:** {log.get('passed', False)}")
+                if reasons:
+                    st.write(f"**Reasons:** {', '.join(reasons)}")
+                if overlap > 0:
+                    st.write(f"**Overlap Score:** {overlap:.3f}")
+    else:
+        st.info("No recent validation logs")
+
+
 def sidebar(page_for_chat: str | None = None):
     st.sidebar.header("Dashboard")
     page = st.sidebar.selectbox(
-        "Choose a page:", ["Overview", "RAG", "Learning", "Community"]
+        "Choose a page:", ["Overview", "RAG", "Learning", "Validation", "Community"]
     )
 
     st.sidebar.success("Backend Connected")
@@ -585,6 +652,8 @@ def main():
         page_rag()
     elif page == "Learning":
         page_learning()
+    elif page == "Validation":
+        page_validation()
     elif page == "Community":
         page_community()
 

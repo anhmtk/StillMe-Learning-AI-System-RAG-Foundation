@@ -169,20 +169,113 @@ async def chat_with_rag(request: ChatRequest):
             )
         
         # Generate response using AI (simplified for demo)
+        enable_validators = os.getenv("ENABLE_VALIDATORS", "false").lower() == "true"
+        enable_tone_align = os.getenv("ENABLE_TONE_ALIGN", "true").lower() == "true"
+        
         if context and context["total_context_docs"] > 0:
             # Use context to enhance response
             context_text = rag_retrieval.build_prompt_context(context)
-            enhanced_prompt = f"""
+            
+            # Build base prompt
+            base_prompt = f"""
             Context: {context_text}
             
             User Question: {request.message}
             
             Please provide a helpful response based on the context above.
             """
-            response = await generate_ai_response(enhanced_prompt)
+            
+            # Inject StillMe identity if validators enabled
+            if enable_validators:
+                from backend.identity.injector import inject_identity
+                enhanced_prompt = inject_identity(base_prompt)
+            else:
+                enhanced_prompt = base_prompt
+            
+            raw_response = await generate_ai_response(enhanced_prompt)
+            
+            # Validate response if enabled
+            if enable_validators:
+                try:
+                    from backend.validators.chain import ValidatorChain
+                    from backend.validators.citation import CitationRequired
+                    from backend.validators.evidence_overlap import EvidenceOverlap
+                    from backend.validators.numeric import NumericUnitsBasic
+                    from backend.validators.ethics_adapter import EthicsAdapter
+                    
+                    # Build context docs list for validation
+                    ctx_docs = [
+                        doc["content"] for doc in context["knowledge_docs"]
+                    ] + [
+                        doc["content"] for doc in context["conversation_docs"]
+                    ]
+                    
+                    # Create validator chain
+                    chain = ValidatorChain([
+                        CitationRequired(),
+                        EvidenceOverlap(threshold=0.08),
+                        NumericUnitsBasic(),
+                        EthicsAdapter(guard_callable=None)  # TODO: wire existing ethics guard if available
+                    ])
+                    
+                    # Run validation
+                    validation_result = chain.run(raw_response, ctx_docs)
+                    
+                    # Record metrics
+                    try:
+                        from backend.validators.metrics import get_metrics
+                        metrics = get_metrics()
+                        # Extract overlap score from reasons if available
+                        overlap_score = 0.0
+                        for reason in validation_result.reasons:
+                            if reason.startswith("low_overlap:"):
+                                try:
+                                    overlap_score = float(reason.split(":")[1])
+                                except (ValueError, IndexError):
+                                    pass
+                        metrics.record_validation(
+                            passed=validation_result.passed,
+                            reasons=validation_result.reasons,
+                            overlap_score=overlap_score
+                        )
+                    except Exception as metrics_error:
+                        logger.warning(f"Failed to record metrics: {metrics_error}")
+                    
+                    if not validation_result.passed:
+                        # Use patched answer if available, otherwise return 422
+                        if validation_result.patched_answer:
+                            response = validation_result.patched_answer
+                            logger.info(f"Validation failed but using patched answer. Reasons: {validation_result.reasons}")
+                        else:
+                            logger.warning(f"Validation failed: {validation_result.reasons}")
+                            raise HTTPException(
+                                status_code=422,
+                                detail={
+                                    "error": "validation_failed",
+                                    "reasons": validation_result.reasons,
+                                    "original_response_preview": raw_response[:200] if raw_response else ""
+                                }
+                            )
+                    else:
+                        response = validation_result.patched_answer or raw_response
+                        logger.debug(f"Validation passed. Reasons: {validation_result.reasons}")
+                except HTTPException:
+                    raise
+                except Exception as validation_error:
+                    logger.error(f"Validation error: {validation_error}, falling back to raw response")
+                    response = raw_response
+            else:
+                response = raw_response
         else:
             # Fallback to regular AI response
-            response = await generate_ai_response(request.message)
+            base_prompt = request.message
+            if enable_validators:
+                from backend.identity.injector import inject_identity
+                enhanced_prompt = inject_identity(base_prompt)
+            else:
+                enhanced_prompt = base_prompt
+            
+            response = await generate_ai_response(enhanced_prompt)
         
         # Score the response
         accuracy_score = None
@@ -202,6 +295,15 @@ async def chat_with_rag(request: ChatRequest):
                 accuracy_score=accuracy_score or 0.5,
                 metadata={"user_id": request.user_id}
             )
+        
+        # Align tone if enabled
+        if enable_tone_align:
+            try:
+                from backend.tone.aligner import align_tone
+                response = align_tone(response)
+            except Exception as tone_error:
+                logger.error(f"Tone alignment error: {tone_error}, using original response")
+                # Continue with original response on error
         
         # Store conversation in vector DB
         if rag_retrieval:
@@ -477,6 +579,27 @@ async def get_status():
             "sessions_completed": 0,
             "milestone_sessions": 100,
             "system_age_days": 0
+        }
+
+@app.get("/api/validators/metrics")
+async def get_validation_metrics():
+    """Get validation metrics"""
+    try:
+        from backend.validators.metrics import get_metrics
+        metrics = get_metrics()
+        return {"metrics": metrics.get_metrics()}
+    except Exception as e:
+        logger.error(f"Validation metrics error: {e}")
+        return {
+            "metrics": {
+                "total_validations": 0,
+                "pass_rate": 0.0,
+                "passed_count": 0,
+                "failed_count": 0,
+                "avg_overlap_score": 0.0,
+                "reasons_histogram": {},
+                "recent_logs": []
+            }
         }
 
 @app.get("/api/learning/accuracy_metrics")
