@@ -61,6 +61,49 @@ class RAGRetrieval:
                 "total_context_docs": 0
             }
     
+    def retrieve_important_knowledge(self, 
+                                    query: str,
+                                    limit: int = 1,
+                                    min_importance: float = 0.7) -> List[Dict[str, Any]]:
+        """
+        Retrieve high-importance knowledge related to query
+        
+        Args:
+            query: Query string to find related knowledge
+            limit: Maximum number of important knowledge items to return
+            min_importance: Minimum importance score (0.0-1.0)
+            
+        Returns:
+            List of important knowledge documents
+        """
+        try:
+            # Generate query embedding
+            query_embedding = self.embedding_service.encode_text(query)
+            
+            # Retrieve knowledge documents (get more to filter by importance)
+            knowledge_results = self.chroma_client.search_knowledge(
+                query_embedding=query_embedding,
+                limit=limit * 3  # Get more to filter by importance
+            )
+            
+            # Filter by importance score
+            important_knowledge = []
+            for doc in knowledge_results:
+                metadata = doc.get("metadata", {})
+                importance_score = metadata.get("importance_score", 0.0)
+                
+                if importance_score >= min_importance:
+                    important_knowledge.append(doc)
+                    if len(important_knowledge) >= limit:
+                        break
+            
+            logger.info(f"Retrieved {len(important_knowledge)} important knowledge items (min_importance={min_importance})")
+            return important_knowledge
+            
+        except Exception as e:
+            logger.error(f"Error retrieving important knowledge: {e}")
+            return []
+    
     def build_prompt_context(self, context: Dict[str, Any]) -> str:
         """Build formatted context for LLM prompt"""
         try:
