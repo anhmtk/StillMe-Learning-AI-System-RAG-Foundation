@@ -28,7 +28,7 @@ While major AI companies build closed systems with proprietary algorithms, Still
 - **👁️ Complete Transparency**: See exactly what the AI learns, how it learns, and why it makes decisions
 - **🌍 Global Solution, Local Relevance**: Built for global use, particularly aligned with open technology strategies of developing nations
 - **🤝 Community Governance**: You control the AI's evolution, not corporations
-- **🚀 AI Democratization**: Proving that non-technical founders can build world-class AI systems
+- **🚧 Lowering the Barrier**: Testing the hypothesis that vision and commitment can be primary drivers in building AI systems
 
 **Current MVP Status:** Foundation components are implemented and working:
 - ✅ **Vector Database (ChromaDB)**: Semantic search and knowledge retrieval functional
@@ -692,15 +692,15 @@ StillMe is designed as a **global solution** — but built to demonstrate that d
 
 StillMe was born from a simple yet powerful idea: **AI should be transparent, ethical, and community-controlled**. 
 
-### **The Honest Story: Non-Technical Founder, AI-Assisted Development — Proof of AI Democratization**
+### **The Honest Story: Non-Technical Founder, AI-Assisted Development — Testing a Hypothesis**
 
-I'm a **non-technical founder** with no formal IT background. StillMe was built entirely with **AI-assisted development** (Cursor AI, Grok, DeepSeek, ChatGPT) — and I'm **proud of that**. This isn't a weakness; it's proof that **vision + AI tools = possibility**, and that **AI democratization is real**.
+I'm a **non-technical founder** with no formal IT background. StillMe was built entirely with **AI-assisted development** (Cursor AI, Grok, DeepSeek, ChatGPT) — and I'm **proud of that**. This is an **experiment** to test whether **vision + AI tools = possibility**. StillMe is open source and transparent because I believe this hypothesis needs **technical validation from the developer community**.
 
 **My journey represents:**
-- 🚀 **Pioneering Spirit**: Doing what others haven't done — building world-class AI without a CS degree
-- 🎯 **Different Approach**: While others wait for permission, I built StillMe using AI tools — proving you can start now
-- 🌍 **AI Democratization in Action**: StillMe demonstrates that anyone with vision can build meaningful AI systems
-- 💡 **Ideas Over Credentials**: Vision and persistence matter more than formal qualifications
+- 🚀 **Pioneering Spirit**: Exploring what's possible when vision meets AI-assisted development
+- 🎯 **Different Approach**: Building StillMe using AI tools to test a hypothesis about what's achievable
+- 🚧 **Lowering the Barrier**: A hypothesis that vision and commitment can be primary drivers in AI development
+- 💡 **Ideas Over Credentials**: Testing whether vision and persistence can meaningfully contribute alongside technical expertise
 
 **Here's what I bring:**
 - ✅ **Vision**: Unwavering commitment to transparency and ethics
@@ -711,10 +711,12 @@ I'm a **non-technical founder** with no formal IT background. StillMe was built 
 
 **Here's what StillMe proves:**
 - 🤖 **AI can build AI**: This project demonstrates AI-assisted development works
-- 🌍 **AI Democratization**: You don't need a CS degree to create meaningful AI systems
+- 🚧 **Lowering the Barrier**: A hypothesis that vision and commitment are the primary drivers, not formal credentials
 - 💡 **Ideas matter**: Vision and commitment can overcome technical barriers
 - 🔐 **Professional Standards**: Even non-technical founders can maintain code integrity through verified commits
 - 🚀 **Pioneering Path**: Doing it differently — building before asking permission
+
+> **🔬 A Call for Technical Scrutiny**: StillMe is an open invitation to the developer community to **prove or disprove this hypothesis** through technical evaluation and code contributions. We welcome skeptical professionals to examine our architecture, review our code, and contribute their expertise. If you believe formal credentials are essential, **show us through code** — submit improvements, identify flaws, or build alternative implementations. StillMe's transparency means every line of code is open for scrutiny. **Help us validate or refine this hypothesis with your technical expertise.**
 
 > **Verified Commits by Anh MTK**: All commits in this repository are signed with PGP/SSH keys to ensure authenticity and trust. This demonstrates that professionalism and transparency are not reserved for large corporations — they are accessible to anyone committed to building responsibly.
 
@@ -725,7 +727,7 @@ After witnessing the "black box" nature of major AI systems, I realized:
 - **Users deserve to know** what AI learns and why
 - **Ethics shouldn't be optional** - it must be foundational
 - **Community should have control** - not just corporations
-- **Anyone can build AI** - with the right tools, vision, and persistence
+- **Building AI is an experiment** - testing whether vision, tools, and persistence can meaningfully contribute
 
 StillMe is my attempt to demonstrate that **transparency + ethics + community = better AI**.
 
