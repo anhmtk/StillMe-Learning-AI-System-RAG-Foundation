@@ -216,7 +216,7 @@ streamlit run dashboard.py --server.port 8501
   - Importance scoring based on keyword relevance, content length, and source quality
   - Automatic alerts in chat sidebar with "Explain" button
   - Focus areas: SPICE, ethics, transparency, RAG, StillMe architecture
-  - **User Experience**: "StillMe đã học được một kiến thức mới có thể liên quan: [Title]"
+  - **User Experience**: "StillMe has learned new knowledge that may be relevant: [Title]"
 
 ### 🔬 **Research Phase (v0.7+):**
 - **🎓 Meta-Learning**: Concept and research discussion - requires 6-12 months R&D
