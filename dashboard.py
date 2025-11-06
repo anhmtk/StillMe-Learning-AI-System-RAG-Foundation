@@ -672,13 +672,13 @@ def sidebar(page_for_chat: str | None = None):
     
     # Render floating widget if selected and available
     if chat_mode == "Floating Widget" and FLOATING_CHAT_AVAILABLE:
-            # Render floating chat widget
-            render_floating_chat(
-                chat_history=st.session_state.chat_history,
-                api_base=API_BASE,
-                is_open=True
-            )
-            
+        # Render floating chat widget
+        render_floating_chat(
+            chat_history=st.session_state.chat_history,
+            api_base=API_BASE,
+            is_open=True
+        )
+        
         # Note: Floating widget handles its own chat logic via JavaScript
         st.sidebar.info("💡 Floating chat widget is active. Use the chat button in the bottom-right corner.")
     
