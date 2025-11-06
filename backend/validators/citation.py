@@ -31,12 +31,18 @@ class CitationRequired:
         
         Args:
             answer: The answer to validate
-            ctx_docs: List of context documents (unused for this validator)
+            ctx_docs: List of context documents - if empty, citations are not required
             
         Returns:
             ValidationResult with passed status
         """
         if not self.required:
+            return ValidationResult(passed=True)
+        
+        # Only require citations if we have context documents
+        # If no context, AI is using general knowledge and citations are optional
+        if not ctx_docs or len(ctx_docs) == 0:
+            logger.debug("No context documents available, citations not required")
             return ValidationResult(passed=True)
         
         has_citation = bool(CITE_RE.search(answer))
@@ -45,7 +51,7 @@ class CitationRequired:
             logger.debug("Citation found in answer")
             return ValidationResult(passed=True)
         else:
-            logger.warning("Missing citation in answer")
+            logger.warning("Missing citation in answer (context documents available but no citations found)")
             return ValidationResult(
                 passed=False,
                 reasons=["missing_citation"]
