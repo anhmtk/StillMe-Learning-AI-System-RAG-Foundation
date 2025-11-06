@@ -6,6 +6,8 @@ Handles text embedding generation using sentence-transformers
 from sentence_transformers import SentenceTransformer
 from typing import List, Union
 import logging
+import os
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
@@ -19,12 +21,58 @@ class EmbeddingService:
             model_name: Name of the sentence transformer model to use
         """
         self.model_name = model_name
+        
+        # Configure cache path for persistent storage (Railway persistent volume)
+        # This prevents re-downloading model on every restart/redeploy
+        cache_path = self._get_cache_path()
+        if cache_path:
+            os.environ["TRANSFORMERS_CACHE"] = str(cache_path)
+            os.environ["HF_HOME"] = str(cache_path)
+            logger.info(f"Using persistent cache path: {cache_path}")
+        
         try:
-            self.model = SentenceTransformer(model_name)
+            # SentenceTransformer will use TRANSFORMERS_CACHE/HF_HOME env vars
+            self.model = SentenceTransformer(model_name, cache_folder=cache_path)
             logger.info(f"Embedding model '{model_name}' loaded successfully")
+            if cache_path:
+                logger.info(f"Model cached at: {cache_path}")
         except Exception as e:
             logger.error(f"Failed to load embedding model: {e}")
             raise
+    
+    def _get_cache_path(self) -> Union[str, None]:
+        """
+        Get cache path for HuggingFace models.
+        Prioritizes persistent volume path if available.
+        
+        Returns:
+            Cache path string or None to use default
+        """
+        # Check for Railway persistent volume path (from railway.json: /app/hf_cache)
+        persistent_cache = os.getenv("PERSISTENT_CACHE_PATH")
+        if persistent_cache:
+            # If path ends with /hf_cache, use it directly, otherwise append /huggingface
+            if persistent_cache.endswith("/hf_cache") or persistent_cache.endswith("\\hf_cache"):
+                cache_dir = Path(persistent_cache)
+            else:
+                cache_dir = Path(persistent_cache) / "huggingface"
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            return str(cache_dir)
+        
+        # Check for custom cache path
+        custom_cache = os.getenv("HF_CACHE_PATH")
+        if custom_cache:
+            cache_dir = Path(custom_cache)
+            cache_dir.mkdir(parents=True, exist_ok=True)
+            return str(cache_dir)
+        
+        # Default: use system cache (ephemeral on Railway)
+        # This will be /root/.cache/huggingface/ on Railway (ephemeral)
+        logger.warning(
+            "No persistent cache path configured. Model will be re-downloaded on restart. "
+            "Set PERSISTENT_CACHE_PATH=/app/hf_cache or HF_CACHE_PATH environment variable."
+        )
+        return None
     
     def encode_text(self, text: Union[str, List[str]]) -> Union[List[float], List[List[float]]]:
         """Generate embeddings for text

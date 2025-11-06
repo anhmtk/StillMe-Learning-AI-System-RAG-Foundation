@@ -46,12 +46,14 @@ def ngram_overlap(text_a: str, text_b: str, n: int = 3) -> float:
 class EvidenceOverlap:
     """Validator that checks answer overlaps with RAG context"""
     
-    def __init__(self, threshold: float = 0.08):
+    def __init__(self, threshold: float = 0.01):
         """
         Initialize evidence overlap validator
         
         Args:
-            threshold: Minimum overlap ratio (default: 0.08 = 8%)
+            threshold: Minimum overlap ratio (default: 0.01 = 1%)
+                     Lowered from 0.08 to prevent false positives when LLM
+                     translates/summarizes content, reducing vocabulary overlap
         """
         self.threshold = float(
             os.getenv("VALIDATOR_EVIDENCE_THRESHOLD", str(threshold))
