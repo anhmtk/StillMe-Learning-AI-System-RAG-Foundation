@@ -173,10 +173,12 @@ streamlit run dashboard.py --server.port 8501
 - **🧠 Knowledge Retention**: Learning metrics tracking system
 - **📊 Accuracy Scoring**: Response quality measurement
 - **📈 Dashboard**: Streamlit UI with real-time metrics, RAG interface, validation panel, and chat
-- **🔌 API Endpoints**: Full RAG API (`/api/rag/add_knowledge`, `/api/rag/query`, `/api/rag/stats`) + Validation API (`/api/validators/metrics`)
+- **🔌 API Endpoints**: Full RAG API (`/api/rag/add_knowledge`, `/api/rag/query`, `/api/rag/stats`) + Validation API (`/api/validators/metrics`) + SPICE API (`/api/spice/*`)
 - **⏰ Automated Scheduler**: Auto-learning from RSS every 4 hours
 - **🔍 Self-Diagnosis**: Knowledge gap detection and learning focus suggestions
 - **📝 Content Curator**: Intelligent content prioritization and RSS source optimization
+- **🎯 SPICE Framework**: Self-Play In Corpus Environments architecture (v0.5+)
+- **🌐 Multilingual Support**: Automatic language detection and response in user's language (Vietnamese, English, and more)
 - **🚀 Public Deployment Ready**: Config files included (`railway.json`, `render.yaml`) - 1-click deploy
 
 ### 🚧 **MVP Ready (Manual Use):**
@@ -184,11 +186,21 @@ streamlit run dashboard.py --server.port 8501
 - **🔌 RSS API Endpoints**: ✅ `/api/learning/rss/fetch` - fetch and optionally auto-add to RAG
 
 ### 📋 **Planned/In Development (Next 30-60 days):**
-- **⏰ Automated Scheduler**: 🔄 **CURRENTLY IMPLEMENTING** - Background task to auto-fetch RSS every 4 hours
+- **⏰ Automated Scheduler**: ✅ **IMPLEMENTED** - Background task auto-fetches RSS every 4 hours
 - **🧪 Test Coverage**: Basic tests added, expanding to critical paths (target: 40%+ coverage)
 - **🔐 Security Hardening**: Rate limiting, authentication - planned after scheduler
 - **👥 Community Voting**: Secure voting system designed, awaiting implementation
 - **🛡️ Ethical Filtering**: Framework exists, needs integration
+
+### 🚀 **v0.5+ (SPICE Architecture - Framework Ready):**
+- **🎯 SPICE Engine**: Self-Play In Corpus Environments framework implemented
+  - **Challenger**: Generates challenging reasoning questions from corpus
+  - **Reasoner**: Answers questions and self-evaluates accuracy
+  - **Self-Play Loop**: Continuous adversarial learning cycle
+  - **Status**: Framework complete, implementation in progress
+  - **Expected Benefits**: +8.9% mathematical reasoning, +9.8% general reasoning improvement
+  - **Reference**: Based on Meta AI's SPICE research (https://arxiv.org/abs/2510.24684)
+  - **Documentation**: See `docs/SPICE_ARCHITECTURE.md`
 
 ### 🔬 **Research Phase (v0.7+):**
 - **🎓 Meta-Learning**: Concept and research discussion - requires 6-12 months R&D
