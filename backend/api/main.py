@@ -770,23 +770,32 @@ async def stop_scheduler():
 async def get_scheduler_status():
     """Get scheduler status"""
     try:
+        # Debug logging
+        logger.info(f"get_scheduler_status called. learning_scheduler is None: {learning_scheduler is None}")
+        logger.info(f"_initialization_error: {_initialization_error}")
+        
         if not learning_scheduler:
             # Provide more detailed error message
             error_msg = "Scheduler not initialized"
             if _initialization_error:
                 error_msg = f"Scheduler not initialized: {_initialization_error}"
+            logger.warning(f"Returning not_available status: {error_msg}")
             return {
                 "status": "not_available",
                 "message": error_msg,
                 "initialization_error": _initialization_error if _initialization_error else None
             }
         
+        # Get status from scheduler
+        status = learning_scheduler.get_status()
+        logger.info(f"Scheduler status retrieved successfully: {status}")
+        
         return {
             "status": "ok",
-            **learning_scheduler.get_status()
+            **status
         }
     except Exception as e:
-        logger.error(f"Scheduler status error: {e}")
+        logger.error(f"Scheduler status error: {e}", exc_info=True)
         return {"status": "error", "message": str(e)}
 
 @app.post("/api/learning/scheduler/run-now")
