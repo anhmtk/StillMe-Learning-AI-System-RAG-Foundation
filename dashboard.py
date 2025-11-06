@@ -857,6 +857,11 @@ def sidebar(page_for_chat: str | None = None):
             # Store message before clearing
             message_to_send = user_msg.strip()
             
+            # DEBUG: Log that we're about to send a request
+            import logging
+            logging.info(f"📤 Sending chat request to {API_BASE}/api/chat/smart_router")
+            logging.info(f"📤 Message: {message_to_send[:50]}...")
+            
             # Add user message to history
             st.session_state.chat_history.append({"role": "user", "content": message_to_send})
             
@@ -872,8 +877,13 @@ def sidebar(page_for_chat: str | None = None):
                 # Show progress message
                 status_placeholder.info("🤔 StillMe is thinking... This may take 30-90 seconds (AI generation + validation). If this is the first request, the embedding model may be loading (this can take 2-3 minutes).")
                 
+                # DEBUG: Log request details
+                chat_url = f"{API_BASE}/api/chat/smart_router"
+                logging.info(f"📤 POST {chat_url}")
+                logging.info(f"📤 API_BASE: {API_BASE}")
+                
                 r = requests.post(
-                    f"{API_BASE}/api/chat/smart_router",
+                    chat_url,
                     json={
                         "message": message_to_send,
                         "user_id": "dashboard_user",
@@ -882,6 +892,10 @@ def sidebar(page_for_chat: str | None = None):
                     },
                     timeout=300,  # Increased to 300s (5 minutes) to handle first-time model loading
                 )
+                
+                # DEBUG: Log response
+                logging.info(f"📥 Response status: {r.status_code}")
+                logging.info(f"📥 Response received from {chat_url}")
                 r.raise_for_status()
                 data = r.json()
                 # Extract response from ChatResponse model
@@ -941,17 +955,30 @@ def sidebar(page_for_chat: str | None = None):
                 status_placeholder.error("❌ Timeout")
                 st.warning("💡 **Solutions:**\n1. Try again (AI API may be slow)\n2. Check backend logs\n3. Verify API keys (OPENAI_API_KEY or DEEPSEEK_API_KEY) are set")
             except requests.exceptions.ConnectionError as e:
-                reply = "❌ **Connection Error** - Cannot connect to backend. Backend service may be down or restarting."
+                # DEBUG: Log connection error details
+                import logging
+                logging.error(f"❌ Connection Error: {e}")
+                logging.error(f"❌ API_BASE: {API_BASE}")
+                logging.error(f"❌ Attempted URL: {API_BASE}/api/chat/smart_router")
+                
+                reply = f"❌ **Connection Error** - Cannot connect to backend at `{API_BASE}`. Backend service may be down or restarting. Error: {str(e)}"
                 status_placeholder.error("❌ Connection error")
-                st.error("💡 **Backend is unreachable!** Check Railway dashboard → Service 'stillme-backend' → Ensure it's running.")
+                st.error(f"💡 **Backend is unreachable!**\n- API_BASE: `{API_BASE}`\n- Check Railway dashboard → Service 'stillme-backend' → Ensure it's running.\n- Verify `STILLME_API_BASE` environment variable is set correctly in dashboard service.")
             except requests.exceptions.RequestException as e:
                 reply = f"❌ **Request Error** - {str(e)}"
                 status_placeholder.error("❌ Request error")
                 st.error(f"💡 Request failed: {str(e)}")
             except Exception as e:
+                # DEBUG: Log all unexpected errors
+                import logging
+                import traceback
+                logging.error(f"❌ Unexpected Error in chat: {e}")
+                logging.error(f"❌ API_BASE: {API_BASE}")
+                logging.error(f"❌ Traceback: {traceback.format_exc()}")
+                
                 reply = f"❌ **Unexpected Error** - {str(e)}"
                 status_placeholder.error("❌ Error occurred")
-                st.error(f"💡 Unexpected error: {str(e)}")
+                st.error(f"💡 Unexpected error: {str(e)}\n\n**Debug Info:**\n- API_BASE: `{API_BASE}`\n- Check browser console (F12) for more details\n- Check dashboard logs for full traceback")
             
             # Add assistant response to history (with knowledge alert if available)
             # Ensure reply is set (fallback if all exceptions occurred)
