@@ -148,12 +148,31 @@ try:
 except Exception as e:
     _initialization_error = str(e)
     logger.error(f"❌ Failed to initialize RAG components: {e}", exc_info=True)
+    
+    # Log which components were successfully initialized before the error
+    logger.error(f"📊 Components status at error time:")
+    logger.error(f"  - ChromaDB: {'✓' if chroma_client else '✗'}")
+    logger.error(f"  - Embedding Service: {'✓' if embedding_service else '✗'}")
+    logger.error(f"  - RAG Retrieval: {'✓' if rag_retrieval else '✗'}")
+    logger.error(f"  - Knowledge Retention: {'✓' if knowledge_retention else '✗'}")
+    logger.error(f"  - Accuracy Scorer: {'✓' if accuracy_scorer else '✗'}")
+    
     if "schema mismatch" in str(e).lower() or "no such column" in str(e).lower() or "topic" in str(e).lower():
-        logger.error("⚠️ CRITICAL: Schema mismatch persists after reset attempt.")
-        logger.error("⚠️ ACTION REQUIRED: Please RESTART the backend service on Railway to clear process cache.")
-        logger.error("⚠️ The file deletion worked, but the process may be caching the old schema.")
-    # Fallback to None for graceful degradation
-    # Components already set to None above
+        logger.error("⚠️ CRITICAL: Schema mismatch detected!")
+        logger.error("⚠️ This usually means ChromaDB database has old schema.")
+        logger.error("⚠️ ACTION REQUIRED: Please RESTART the backend service on Railway.")
+        logger.error("⚠️ On restart, the code will automatically reset the database.")
+        
+        # If RAG components were already initialized, don't reset them
+        # They might still work for some operations
+        if rag_retrieval is not None:
+            logger.warning("⚠️ RAG retrieval was initialized before error - keeping it available")
+            logger.warning("⚠️ Some operations may fail, but basic RAG might still work")
+    else:
+        # For non-schema errors, reset components to None
+        logger.warning("⚠️ Resetting RAG components to None due to initialization error")
+        # Note: We don't explicitly set to None here because they're already None
+        # from the initial declaration, unless they were set before the exception
 
 # Pydantic models
 class ChatRequest(BaseModel):
