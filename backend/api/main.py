@@ -189,10 +189,18 @@ class RAGQueryRequest(BaseModel):
 @app.get("/")
 async def root():
     """Root endpoint"""
+    # Debug: Log RAG status for troubleshooting
+    rag_status = rag_retrieval is not None
+    if not rag_status:
+        logger.warning(f"⚠️ RAG retrieval is None! Initialization error: {_initialization_error}")
+    else:
+        logger.debug(f"✓ RAG retrieval is available: {type(rag_retrieval).__name__}")
+    
     return {
         "message": "StillMe API v0.4.0",
         "status": "running",
-        "rag_enabled": rag_retrieval is not None,
+        "rag_enabled": rag_status,
+        "rag_initialization_error": _initialization_error if _initialization_error else None,
         "timestamp": datetime.now().isoformat()
     }
 
@@ -211,8 +219,20 @@ async def startup_event():
     """Log when FastAPI/uvicorn server is ready"""
     logger.info("🚀 FastAPI application startup complete")
     logger.info("🌐 Uvicorn server is ready to accept connections")
+    
+    # Log RAG components status
+    logger.info(f"📊 RAG Components Status:")
+    logger.info(f"  - ChromaDB: {'✓' if chroma_client else '✗'}")
+    logger.info(f"  - Embedding Service: {'✓' if embedding_service else '✗'}")
+    logger.info(f"  - RAG Retrieval: {'✓' if rag_retrieval else '✗'}")
+    logger.info(f"  - Knowledge Retention: {'✓' if knowledge_retention else '✗'}")
+    logger.info(f"  - Accuracy Scorer: {'✓' if accuracy_scorer else '✗'}")
+    
     if _initialization_error:
         logger.warning(f"⚠️ Service started with initialization errors: {_initialization_error}")
+    elif rag_retrieval is None:
+        logger.error("❌ CRITICAL: RAG retrieval is None despite successful initialization logs!")
+        logger.error("   This may indicate a race condition or variable scope issue.")
 
 @app.on_event("shutdown")
 async def shutdown_event():
