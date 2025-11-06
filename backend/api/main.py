@@ -297,7 +297,7 @@ async def chat_with_rag(request: ChatRequest):
             # Special instruction for StillMe queries
             stillme_instruction = ""
             if is_stillme_query:
-                stillme_instruction = "\n\nCRITICAL: This question is about StillMe itself. You MUST use the context above to answer. Do NOT rely on your training data cutoff date. StillMe is a self-evolving AI system that learns continuously through RAG (Retrieval-Augmented Generation) from RSS feeds, arXiv, and other trusted sources every few hours. This is StillMe's core differentiator - it overcomes the knowledge cutoff limitation of base LLMs. Emphasize StillMe's continuous learning capability and transparency."
+                stillme_instruction = "\n\nCRITICAL: This question is about StillMe itself. You MUST use the context above to answer. Do NOT rely on your training data cutoff date. StillMe is a self-evolving AI system that learns continuously through RAG (Retrieval-Augmented Generation) from RSS feeds, arXiv, and other trusted sources every 4 hours (6 cycles per day). StillMe automatically fetches content, embeds it into a vector database (ChromaDB), and retrieves it when answering questions. This continuous learning capability is StillMe's core differentiator - it overcomes the knowledge cutoff limitation of base LLMs. You MUST emphasize: (1) StillMe's automated learning cycles every 4 hours, (2) RAG-based knowledge storage in vector database, (3) Continuous knowledge updates through RSS feeds, (4) StillMe is NOT limited by training data cutoff dates. Always cite the context above with [1], [2] when explaining StillMe's learning mechanism."
             
             base_prompt = f"""
             Context: {context_text}

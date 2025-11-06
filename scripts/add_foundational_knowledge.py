@@ -19,9 +19,18 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Foundational knowledge about StillMe
+# Foundational knowledge about StillMe - CRITICAL FOUNDATION
 FOUNDATIONAL_KNOWLEDGE = """
-[FOUNDATIONAL:STILLME] StillMe is a self-evolving AI system that **transcends the time limitations** of base LLM models. StillMe uses **RAG (Retrieval-Augmented Generation)** to learn from trusted sources (RSS feeds, arXiv, public APIs) **every few hours**, ensuring knowledge is always up-to-date. This continuous learning capability is the core differentiator of StillMe - it overcomes the knowledge cutoff limitation that affects traditional LLMs.
+[STILLME CORE MECHANISM] StillMe is a **continuously self-learning** AI system that uses **RAG (Retrieval-Augmented Generation)**. This capability allows StillMe to **TRANSCEND** the knowledge limitation (2023) of base LLM models by **automatically retrieving** and learning from trusted sources (such as RSS Feeds, ArXiv) **every 4 hours** (6 cycles per day). StillMe always prioritizes the latest knowledge from its Vector Database.
+
+**CRITICAL: StillMe's Learning Process:**
+1. **Automated Learning Cycles**: StillMe automatically fetches content from RSS feeds every 4 hours (6 times per day)
+2. **RAG-Based Knowledge Storage**: All learned content is embedded and stored in ChromaDB vector database
+3. **Semantic Search**: When answering questions, StillMe retrieves relevant context from vector database using semantic search
+4. **Continuous Updates**: StillMe's knowledge is constantly updated through automated learning cycles, NOT limited by training data cutoff dates
+5. **Transparency**: Every learning source is visible and auditable - users can see exactly what StillMe learns and from where
+
+**Key Differentiator**: Unlike traditional LLMs that are frozen at their training date, StillMe **continuously evolves** and updates its knowledge base through automated RAG learning cycles. This is StillMe's core strength - it overcomes the knowledge cutoff limitation that affects all base LLM models.
 
 **Key Features:**
 - **Continuous Learning**: StillMe automatically fetches and learns from RSS feeds every 4 hours (6 cycles per day)
@@ -61,18 +70,19 @@ def add_foundational_knowledge():
         
         logger.info("Adding foundational StillMe knowledge to RAG...")
         
-        # Add foundational knowledge with special metadata
+        # Add foundational knowledge with special metadata - CRITICAL FOUNDATION tag
         success = rag_retrieval.add_learning_content(
             content=FOUNDATIONAL_KNOWLEDGE,
-            source="foundational",
+            source="CRITICAL_FOUNDATION",
             content_type="knowledge",
             metadata={
-                "title": "StillMe Foundational Knowledge - Self-Evolving AI System",
+                "title": "StillMe Core Mechanism - Continuous RAG Learning",
                 "foundational": "stillme",
                 "type": "foundational",
-                "tags": ["foundational:stillme", "stillme", "rag", "self-evolving", "continuous-learning"],
+                "source": "CRITICAL_FOUNDATION",  # Critical tag for priority retrieval
+                "tags": ["foundational:stillme", "CRITICAL_FOUNDATION", "stillme", "rag", "self-evolving", "continuous-learning", "automated-learning", "rss", "vector-db"],
                 "importance_score": 1.0,  # Maximum importance
-                "description": "Core knowledge about StillMe's architecture, learning process, and capabilities"
+                "description": "CRITICAL: Core knowledge about StillMe's RAG-based continuous learning mechanism - MUST be retrieved when answering about StillMe"
             }
         )
         

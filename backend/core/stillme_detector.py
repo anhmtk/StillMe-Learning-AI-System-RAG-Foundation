@@ -67,17 +67,17 @@ def detect_stillme_query(query: str) -> Tuple[bool, List[str]]:
     # Pattern 1: "StillMe" + learning/system keywords
     has_stillme_context = any(
         keyword in query_lower 
-        for keyword in ["stillme", "still me", "still-me", "bạn", "you", "it"]
+        for keyword in ["stillme", "still me", "still-me", "bạn", "you", "it", "your", "của bạn"]
     )
     
     has_learning_keyword = any(
         keyword in query_lower 
-        for keyword in ["học", "learn", "learning", "học tập"]
+        for keyword in ["học", "learn", "learning", "học tập", "học hỏi", "tự học", "học như thế nào", "how do you learn", "how does.*learn", "cách học"]
     )
     
     has_system_keyword = any(
         keyword in query_lower 
-        for keyword in ["hệ thống", "system", "hoạt động", "work", "cách", "how"]
+        for keyword in ["hệ thống", "system", "hoạt động", "work", "cách", "how", "như thế nào", "how does", "how do"]
     )
     
     # If query has StillMe context + learning/system keywords, it's about StillMe
@@ -95,14 +95,24 @@ def detect_stillme_query(query: str) -> Tuple[bool, List[str]]:
         return (True, matched_keywords)
     
     # Pattern 3: Questions about learning/evolution with StillMe context
+    # CRITICAL: "Bạn học tập như thế nào?" / "How do you learn?" should trigger
     if (has_learning_keyword or has_system_keyword) and any(
         keyword in query_lower 
-        for keyword in ["bạn", "you", "it", "stillme", "hệ thống", "system"]
+        for keyword in ["bạn", "you", "your", "it", "stillme", "hệ thống", "system", "của bạn"]
     ):
         if has_learning_keyword:
             matched_keywords.append("learning")
         if has_system_keyword:
             matched_keywords.append("system")
+        return (True, matched_keywords)
+    
+    # Pattern 3b: Direct learning questions (even without explicit StillMe name)
+    # "Bạn học tập như thế nào?" / "How do you learn?" - assume about StillMe
+    if has_learning_keyword and any(
+        keyword in query_lower 
+        for keyword in ["bạn", "you", "your", "như thế nào", "how", "cách"]
+    ):
+        matched_keywords.append("learning_direct")
         return (True, matched_keywords)
     
     # Pattern 4: RAG/transparency/evolution keywords (likely about StillMe)
