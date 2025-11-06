@@ -321,8 +321,13 @@ def page_overview():
                         if r.status_code == 200:
                             data = r.json()
                             entries = data.get("entries_fetched", 0)
+                            filtered = data.get("entries_filtered", 0)
                             added = data.get("entries_added_to_rag", 0)
-                            st.session_state["last_action"] = f"✅ Learning cycle completed! Fetched {entries} entries, added {added} to RAG."
+                            
+                            if filtered > 0:
+                                st.session_state["last_action"] = f"✅ Learning cycle completed! Fetched {entries} entries, Filtered {filtered} (Chất lượng thấp/Ngắn), Added {added} to RAG."
+                            else:
+                                st.session_state["last_action"] = f"✅ Learning cycle completed! Fetched {entries} entries, added {added} to RAG."
                             st.rerun()
                         else:
                             st.session_state["last_error"] = f"❌ Failed: {r.json().get('detail', 'Unknown error')}"
@@ -810,6 +815,24 @@ def sidebar(page_for_chat: str | None = None):
                         f'</div>',
                         unsafe_allow_html=True
                     )
+                    
+                    # Show knowledge alert after StillMe's response
+                    if m["role"] == "assistant" and "knowledge_alert" in m:
+                        alert = m["knowledge_alert"]
+                        alert_title = alert.get("title", "Important Knowledge")
+                        alert_source = alert.get("source", "Unknown")
+                        
+                        st.sidebar.info(
+                            f"💡 **Gợi ý của StillMe:** StillMe đã học được một kiến thức mới có thể liên quan: "
+                            f"**{alert_title}** (Nguồn: {alert_source}). "
+                            f"Bạn có muốn StillMe giải thích không?"
+                        )
+                        
+                        if st.sidebar.button(f"📖 Explain {alert_title[:30]}...", key=f"explain_{idx}", use_container_width=True):
+                            # Trigger explanation query
+                            explain_query = f"Explain: {alert_title}"
+                            st.session_state.chat_history.append({"role": "user", "content": explain_query})
+                            st.rerun()
         
         st.sidebar.markdown("---")
         
@@ -861,6 +884,15 @@ def sidebar(page_for_chat: str | None = None):
                 reply = data.get("response") or data.get("message") or str(data)
                 if isinstance(reply, dict):
                     reply = reply.get("detail", str(reply))
+                
+                # Check for knowledge alert
+                knowledge_alert = data.get("knowledge_alert")
+                if knowledge_alert:
+                    alert_title = knowledge_alert.get("title", "Important Knowledge")
+                    alert_source = knowledge_alert.get("source", "Unknown")
+                    st.session_state["knowledge_alert"] = knowledge_alert
+                    import logging
+                    logging.info(f"Knowledge alert received: {alert_title}")
                 
                 status_placeholder.success("✅ Response received!")
             except requests.exceptions.HTTPError as e:
@@ -917,8 +949,15 @@ def sidebar(page_for_chat: str | None = None):
                 status_placeholder.error("❌ Error occurred")
                 st.error(f"💡 Unexpected error: {str(e)}")
             
-            # Add assistant response to history
-            st.session_state.chat_history.append({"role": "assistant", "content": reply})
+            # Add assistant response to history (with knowledge alert if available)
+            message_entry = {"role": "assistant", "content": reply}
+            if knowledge_alert:
+                message_entry["knowledge_alert"] = knowledge_alert
+            st.session_state.chat_history.append(message_entry)
+            
+            # Clear knowledge alert from session state after adding to history
+            if "knowledge_alert" in st.session_state:
+                del st.session_state["knowledge_alert"]
             
             # Clear status and rerun to show new message
             status_placeholder.empty()

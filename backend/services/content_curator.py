@@ -1,21 +1,134 @@
 """
 Content Curator for StillMe
 Prioritizes and optimizes learning content based on quality and effectiveness
+Includes Pre-Filter mechanism to reduce costs by filtering before embedding
 """
 
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple
 import logging
 from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)
 
+# Pre-Filter Configuration
+MINIMUM_CONTENT_LENGTH = 500  # Minimum characters (5-7 sentences)
+KEYWORD_SCORING_THRESHOLD = 0.5  # Minimum keyword score to pass filter
+
+# Important keywords for StillMe's mission (weighted)
+IMPORTANT_KEYWORDS = {
+    # High priority (weight: 1.0)
+    "đạo đức": 1.0, "ethics": 1.0, "ethical": 1.0,
+    "minh bạch": 1.0, "transparency": 1.0, "transparent": 1.0,
+    "quản trị ai": 1.0, "ai governance": 1.0, "governance": 1.0,
+    "rag": 1.0, "retrieval-augmented": 1.0,
+    "spice": 1.0, "self-play": 1.0, "self-evolving": 1.0,
+    "stillme": 1.0,
+    # Medium priority (weight: 0.7)
+    "machine learning": 0.7, "deep learning": 0.7, "neural network": 0.7,
+    "artificial intelligence": 0.7, "ai system": 0.7,
+    "vector database": 0.7, "embedding": 0.7,
+    "open source": 0.7, "open-source": 0.7,
+    # Lower priority (weight: 0.5)
+    "algorithm": 0.5, "model": 0.5, "training": 0.5,
+    "data": 0.5, "dataset": 0.5
+}
+
 class ContentCurator:
-    """Curates and prioritizes learning content"""
+    """Curates and prioritizes learning content with Pre-Filter for cost optimization"""
     
     def __init__(self):
         self.source_quality_scores: Dict[str, float] = {}
         self.content_priorities: Dict[str, float] = {}
-        logger.info("Content Curator initialized")
+        logger.info("Content Curator initialized with Pre-Filter")
+    
+    def pre_filter_content(self, content_list: List[Dict[str, Any]]) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+        """
+        Pre-Filter content BEFORE embedding to reduce costs
+        
+        Filters based on:
+        1. Minimum content length (MINIMUM_CONTENT_LENGTH)
+        2. Keyword scoring (KEYWORD_SCORING_THRESHOLD)
+        
+        Args:
+            content_list: List of content items to filter
+            
+        Returns:
+            Tuple of (filtered_content, rejected_content)
+        """
+        if not content_list:
+            return [], []
+        
+        filtered = []
+        rejected = []
+        
+        for content in content_list:
+            title = content.get("title", "")
+            summary = content.get("summary", "")
+            full_text = f"{title} {summary}"
+            content_length = len(full_text)
+            
+            # Filter 1: Minimum content length
+            if content_length < MINIMUM_CONTENT_LENGTH:
+                rejected.append({
+                    **content,
+                    "rejection_reason": f"Content too short ({content_length} chars < {MINIMUM_CONTENT_LENGTH})"
+                })
+                continue
+            
+            # Filter 2: Keyword scoring
+            keyword_score = self._calculate_keyword_score(full_text)
+            if keyword_score < KEYWORD_SCORING_THRESHOLD:
+                rejected.append({
+                    **content,
+                    "rejection_reason": f"Low keyword score ({keyword_score:.2f} < {KEYWORD_SCORING_THRESHOLD})",
+                    "keyword_score": keyword_score
+                })
+                continue
+            
+            # Passed both filters
+            filtered.append({
+                **content,
+                "keyword_score": keyword_score,
+                "content_length": content_length
+            })
+        
+        logger.info(
+            f"Pre-Filter: {len(filtered)}/{len(content_list)} passed. "
+            f"Rejected {len(rejected)} items (length: {sum(1 for r in rejected if 'too short' in r.get('rejection_reason', ''))}, "
+            f"keyword: {sum(1 for r in rejected if 'Low keyword' in r.get('rejection_reason', ''))})"
+        )
+        
+        return filtered, rejected
+    
+    def _calculate_keyword_score(self, text: str) -> float:
+        """
+        Calculate keyword score based on important keywords
+        
+        Args:
+            text: Text to score (title + summary)
+            
+        Returns:
+            Score from 0.0 to 1.0
+        """
+        text_lower = text.lower()
+        total_score = 0.0
+        matches = 0
+        
+        for keyword, weight in IMPORTANT_KEYWORDS.items():
+            if keyword.lower() in text_lower:
+                total_score += weight
+                matches += 1
+        
+        # Normalize: divide by max possible score (if all high-priority keywords matched)
+        # Use average weight of matched keywords, capped at 1.0
+        if matches == 0:
+            return 0.0
+        
+        # Average score per match, normalized
+        avg_score = total_score / matches
+        normalized = min(1.0, avg_score)
+        
+        return normalized
     
     def prioritize_learning_content(self, 
                                    content_list: List[Dict[str, Any]],
@@ -23,7 +136,7 @@ class ContentCurator:
         """Prioritize content based on multiple factors
         
         Args:
-            content_list: List of content items to prioritize
+            content_list: List of content items to prioritize (should be pre-filtered)
             knowledge_gaps: Topics with knowledge gaps (higher priority)
             
         Returns:
@@ -48,6 +161,42 @@ class ContentCurator:
         
         logger.info(f"Prioritized {len(scored_content)} content items")
         return scored_content
+    
+    def calculate_importance_score(self, content: Dict[str, Any]) -> float:
+        """
+        Calculate importance score for knowledge entry
+        
+        Factors:
+        1. Keyword relevance (AI, ethics, StillMe, SPICE, RAG)
+        2. Content length (longer = more detailed = higher importance)
+        3. Source quality
+        
+        Returns:
+            Importance score from 0.0 to 1.0
+        """
+        title = content.get("title", "")
+        summary = content.get("summary", "")
+        full_text = f"{title} {summary}"
+        
+        # Factor 1: Keyword score (same as pre-filter)
+        keyword_score = self._calculate_keyword_score(full_text)
+        
+        # Factor 2: Content length (normalized)
+        content_length = len(full_text)
+        length_score = min(1.0, content_length / 2000.0)  # 2000 chars = max score
+        
+        # Factor 3: Source quality
+        source = content.get("source", "")
+        source_score = self.source_quality_scores.get(source, 0.5)
+        
+        # Weighted combination
+        importance = (
+            keyword_score * 0.5 +  # Keyword relevance is most important
+            length_score * 0.3 +   # Length indicates detail
+            source_score * 0.2     # Source quality matters
+        )
+        
+        return min(1.0, importance)
     
     def _calculate_priority_score(self, content: Dict[str, Any], knowledge_gaps: set) -> float:
         """Calculate priority score for content"""

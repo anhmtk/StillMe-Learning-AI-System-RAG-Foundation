@@ -142,6 +142,7 @@ class ChatResponse(BaseModel):
     context_used: Optional[Dict[str, Any]] = None
     accuracy_score: Optional[float] = None
     learning_session_id: Optional[int] = None
+    knowledge_alert: Optional[Dict[str, Any]] = None  # Important knowledge suggestion
 
 class LearningRequest(BaseModel):
     content: str
@@ -366,11 +367,35 @@ async def chat_with_rag(request: ChatRequest):
                 }
             )
         
+        # Knowledge Alert: Retrieve important knowledge related to query
+        knowledge_alert = None
+        if rag_retrieval:
+            try:
+                important_knowledge = rag_retrieval.retrieve_important_knowledge(
+                    query=request.message,
+                    limit=1,
+                    min_importance=0.7
+                )
+                
+                if important_knowledge:
+                    doc = important_knowledge[0]
+                    metadata = doc.get("metadata", {})
+                    knowledge_alert = {
+                        "title": metadata.get("title", "Important Knowledge"),
+                        "source": metadata.get("source", "Unknown"),
+                        "importance_score": metadata.get("importance_score", 0.7),
+                        "content_preview": doc.get("content", "")[:200] + "..." if len(doc.get("content", "")) > 200 else doc.get("content", "")
+                    }
+                    logger.info(f"Knowledge alert generated: {knowledge_alert.get('title', 'Unknown')}")
+            except Exception as alert_error:
+                logger.warning(f"Knowledge alert error: {alert_error}")
+        
         return ChatResponse(
             response=response,
             context_used=context,
             accuracy_score=accuracy_score,
-            learning_session_id=learning_session_id
+            learning_session_id=learning_session_id,
+            knowledge_alert=knowledge_alert
         )
         
     except HTTPException:
@@ -409,11 +434,29 @@ async def add_learning_content(request: LearningRequest):
         
         # Add to vector database
         if rag_retrieval:
+            # Calculate importance score for knowledge alert system
+            importance_score = 0.5
+            if content_curator:
+                content_dict = {
+                    "title": request.metadata.get("title", "") if request.metadata else "",
+                    "summary": request.content[:500] if len(request.content) > 500 else request.content,
+                    "source": request.source
+                }
+                importance_score = content_curator.calculate_importance_score(content_dict)
+            
+            # Merge importance_score into metadata
+            enhanced_metadata = request.metadata or {}
+            enhanced_metadata["importance_score"] = importance_score
+            if not enhanced_metadata.get("title"):
+                content_lines = request.content.split("\n")
+                if content_lines:
+                    enhanced_metadata["title"] = content_lines[0][:200]
+            
             success = rag_retrieval.add_learning_content(
                 content=request.content,
                 source=request.source,
                 content_type=request.content_type,
-                metadata=request.metadata
+                metadata=enhanced_metadata
             )
             if not success:
                 return LearningResponse(
@@ -480,11 +523,31 @@ async def add_knowledge_rag(request: LearningRequest):
         if not rag_retrieval:
             raise HTTPException(status_code=503, detail="RAG system not available")
         
+        # Calculate importance score for knowledge alert system
+        importance_score = 0.5
+        if content_curator:
+            # Create a content dict for importance calculation
+            content_dict = {
+                "title": request.metadata.get("title", "") if request.metadata else "",
+                "summary": request.content[:500] if len(request.content) > 500 else request.content,
+                "source": request.source
+            }
+            importance_score = content_curator.calculate_importance_score(content_dict)
+        
+        # Merge importance_score into metadata
+        enhanced_metadata = request.metadata or {}
+        enhanced_metadata["importance_score"] = importance_score
+        if not enhanced_metadata.get("title"):
+            # Extract title from content if not provided
+            content_lines = request.content.split("\n")
+            if content_lines:
+                enhanced_metadata["title"] = content_lines[0][:200]
+        
         success = rag_retrieval.add_learning_content(
             content=request.content,
             source=request.source,
             content_type=request.content_type,
-            metadata=request.metadata
+            metadata=enhanced_metadata
         )
         
         if success:
@@ -835,6 +898,7 @@ async def run_scheduler_now():
             # Use entries from the learning cycle result (already fetched)
             # Don't fetch again - use the entries that were already fetched in run_learning_cycle
             entries_to_add = []
+            filtered_count = 0
             
             # Try to get entries from the RSS fetcher's last fetch
             # If that's not available, fetch again (but this should be rare)
@@ -845,7 +909,21 @@ async def run_scheduler_now():
                 all_entries = learning_scheduler.rss_fetcher.fetch_feeds(max_items_per_feed=5)
                 logger.info(f"Fetched {len(all_entries)} entries for RAG addition")
                 
-                # Prioritize content if curator available
+                # STEP 1: Pre-Filter (BEFORE embedding) to reduce costs
+                if content_curator:
+                    filtered_entries, rejected_entries = content_curator.pre_filter_content(all_entries)
+                    filtered_count = len(rejected_entries)
+                    logger.info(
+                        f"Pre-Filter: {len(filtered_entries)}/{len(all_entries)} passed. "
+                        f"Rejected {filtered_count} items (saving embedding costs)"
+                    )
+                    
+                    # Use filtered entries for further processing
+                    all_entries = filtered_entries
+                else:
+                    logger.warning("Content curator not available, skipping pre-filter (may increase costs)")
+                
+                # STEP 2: Prioritize content if curator and self_diagnosis available
                 if content_curator and self_diagnosis:
                     # Get knowledge gaps to prioritize
                     recent_gaps = []  # Could be from query history
@@ -873,6 +951,11 @@ async def run_scheduler_now():
                         logger.warning(f"Skipping empty entry: {entry.get('title', 'No title')}")
                         continue
                     
+                    # Calculate importance score for knowledge alert system
+                    importance_score = 0.5
+                    if content_curator:
+                        importance_score = content_curator.calculate_importance_score(entry)
+                    
                     success = rag_retrieval.add_learning_content(
                         content=content,
                         source=entry.get('source', 'rss'),
@@ -882,7 +965,9 @@ async def run_scheduler_now():
                             "published": entry.get('published', ''),
                             "type": "rss_feed",
                             "scheduler_cycle": result.get("cycle_number", 0),
-                            "priority_score": entry.get("priority_score", 0.5)
+                            "priority_score": entry.get("priority_score", 0.5),
+                            "importance_score": importance_score,
+                            "title": entry.get('title', '')[:200]  # Store title for knowledge alert
                         }
                     )
                     if success:
@@ -895,7 +980,12 @@ async def run_scheduler_now():
                     continue
             
             result["entries_added_to_rag"] = added_count
-            logger.info(f"Learning cycle: Fetched {result.get('entries_fetched', 0)} entries, added {added_count} to RAG")
+            result["entries_filtered"] = filtered_count
+            logger.info(
+                f"Learning cycle: Fetched {result.get('entries_fetched', 0)} entries, "
+                f"Filtered {filtered_count} (Chất lượng thấp/Ngắn), "
+                f"Added {added_count} to RAG"
+            )
         
         return result
         
