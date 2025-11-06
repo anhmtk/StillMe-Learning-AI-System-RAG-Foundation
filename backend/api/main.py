@@ -209,9 +209,18 @@ async def chat_with_rag(request: ChatRequest):
                 if num_knowledge > 0:
                     citation_instruction = f"\n\nIMPORTANT: When referencing information from the context above, include citations in the format [1], [2], etc. where the number corresponds to the context item number. For example, if you reference the first context item, use [1]."
             
+            # Detect language for language-appropriate response
+            detected_lang = detect_language(request.message)
+            language_instruction = ""
+            if detected_lang == 'vi':
+                language_instruction = "\n\nIMPORTANT: The user is asking in Vietnamese. Please respond in Vietnamese (tiếng Việt) with the same level of detail and accuracy."
+            else:
+                language_instruction = "\n\nIMPORTANT: Respond in the same language the user used. If they asked in a language other than English, respond in that language."
+            
             base_prompt = f"""
             Context: {context_text}
             {citation_instruction}
+            {language_instruction}
             
             User Question: {request.message}
             
@@ -300,8 +309,14 @@ async def chat_with_rag(request: ChatRequest):
             else:
                 response = raw_response
         else:
-            # Fallback to regular AI response
-            base_prompt = request.message
+            # Fallback to regular AI response (no RAG context)
+            # Detect language and add instruction
+            detected_lang = detect_language(request.message)
+            if detected_lang == 'vi':
+                base_prompt = f"{request.message}\n\n(Please respond in Vietnamese - tiếng Việt)"
+            else:
+                base_prompt = request.message
+            
             if enable_validators:
                 from backend.identity.injector import inject_identity
                 enhanced_prompt = inject_identity(base_prompt)
@@ -1050,9 +1065,39 @@ async def generate_ai_response(prompt: str) -> str:
         logger.error(f"AI response error: {e}")
         return f"I encountered an error: {str(e)}"
 
+def detect_language(text: str) -> str:
+    """
+    Simple language detection - detects Vietnamese vs English
+    Returns: 'vi' for Vietnamese, 'en' for English, 'auto' for unknown
+    """
+    # Vietnamese characters: àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ
+    vietnamese_chars = set('àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ')
+    
+    # Check if text contains Vietnamese characters
+    text_lower = text.lower()
+    has_vietnamese = any(char in vietnamese_chars for char in text_lower)
+    
+    # Common Vietnamese words/phrases
+    vietnamese_indicators = ['là', 'của', 'và', 'với', 'cho', 'từ', 'trong', 'này', 'đó', 'bạn', 'mình', 'tôi', 'có', 'không', 'được', 'như', 'thế', 'nào', 'gì', 'ai', 'đâu', 'sao']
+    has_vietnamese_words = any(word in text_lower for word in vietnamese_indicators)
+    
+    if has_vietnamese or has_vietnamese_words:
+        return 'vi'
+    else:
+        return 'en'
+
 async def call_deepseek_api(prompt: str, api_key: str) -> str:
     """Call DeepSeek API"""
     try:
+        # Detect language from prompt
+        detected_lang = detect_language(prompt)
+        
+        # Build system prompt with language instruction
+        if detected_lang == 'vi':
+            system_content = "You are StillMe, a self-evolving AI system. The user is asking in Vietnamese. Please respond in Vietnamese (tiếng Việt) with the same level of detail and accuracy as you would in English."
+        else:
+            system_content = "You are StillMe, a self-evolving AI system. Provide helpful, accurate responses. If the user asks in a language other than English, respond in the same language they used."
+        
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(
                 "https://api.deepseek.com/v1/chat/completions",
@@ -1065,7 +1110,7 @@ async def call_deepseek_api(prompt: str, api_key: str) -> str:
                     "messages": [
                         {
                             "role": "system",
-                            "content": "You are StillMe, a self-evolving AI system. Provide helpful, accurate responses in Vietnamese when appropriate."
+                            "content": system_content
                         },
                         {
                             "role": "user",
@@ -1093,6 +1138,15 @@ async def call_deepseek_api(prompt: str, api_key: str) -> str:
 async def call_openai_api(prompt: str, api_key: str) -> str:
     """Call OpenAI API"""
     try:
+        # Detect language from prompt
+        detected_lang = detect_language(prompt)
+        
+        # Build system prompt with language instruction
+        if detected_lang == 'vi':
+            system_content = "You are StillMe, a self-evolving AI system. The user is asking in Vietnamese. Please respond in Vietnamese (tiếng Việt) with the same level of detail and accuracy as you would in English."
+        else:
+            system_content = "You are StillMe, a self-evolving AI system. Provide helpful, accurate responses. If the user asks in a language other than English, respond in the same language they used."
+        
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(
                 "https://api.openai.com/v1/chat/completions",
@@ -1105,7 +1159,7 @@ async def call_openai_api(prompt: str, api_key: str) -> str:
                     "messages": [
                         {
                             "role": "system",
-                            "content": "You are StillMe, a self-evolving AI system. Provide helpful, accurate responses in Vietnamese when appropriate."
+                            "content": system_content
                         },
                         {
                             "role": "user",
