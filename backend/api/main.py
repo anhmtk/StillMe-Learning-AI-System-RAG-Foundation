@@ -206,6 +206,19 @@ async def health_check():
         "timestamp": datetime.now().isoformat()
     }
 
+@app.on_event("startup")
+async def startup_event():
+    """Log when FastAPI/uvicorn server is ready"""
+    logger.info("🚀 FastAPI application startup complete")
+    logger.info("🌐 Uvicorn server is ready to accept connections")
+    if _initialization_error:
+        logger.warning(f"⚠️ Service started with initialization errors: {_initialization_error}")
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    """Log when FastAPI/uvicorn server is shutting down"""
+    logger.info("🛑 FastAPI application shutting down")
+
 @app.post("/api/chat/rag", response_model=ChatResponse)
 async def chat_with_rag(request: ChatRequest):
     """Chat with RAG-enhanced responses"""
