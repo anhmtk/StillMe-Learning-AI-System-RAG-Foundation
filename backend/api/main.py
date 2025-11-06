@@ -336,9 +336,11 @@ async def chat_with_rag(request: ChatRequest):
                     ]
                     
                     # Create validator chain
+                    # Note: EvidenceOverlap threshold lowered to 0.01 to prevent false positives
+                    # when LLM translates/summarizes content (reducing vocabulary overlap)
                     chain = ValidatorChain([
                         CitationRequired(),
-                        EvidenceOverlap(threshold=0.08),
+                        EvidenceOverlap(threshold=0.01),  # Lowered from 0.08 to 0.01
                         NumericUnitsBasic(),
                         EthicsAdapter(guard_callable=None)  # TODO: wire existing ethics guard if available
                     ])
