@@ -98,17 +98,39 @@ def display_local_time(utc_time_str: str, label: str = "Next run"):
 def get_json(path: str, default: Dict[str, Any] | None = None) -> Dict[str, Any]:
     url = f"{API_BASE}{path}"
     try:
-        r = requests.get(url, timeout=5)
+        r = requests.get(url, timeout=10)  # Increased timeout
         r.raise_for_status()
         return r.json()
-    except requests.exceptions.RequestException as e:
-        # Log error for debugging
+    except requests.exceptions.ConnectionError as e:
+        # Connection failed - backend may be down
         import logging
-        logging.warning(f"Failed to fetch {url}: {e}")
+        logging.error(f"Connection error fetching {url}: {e}")
+        st.error(f"❌ **Connection Error:** Cannot reach backend at `{API_BASE}`. Please check:")
+        st.markdown("""
+        - Backend service is running on Railway
+        - Environment variable `STILLME_API_BASE` is set correctly in dashboard service
+        - Backend URL is accessible
+        """)
+        return default or {}
+    except requests.exceptions.Timeout as e:
+        # Request timed out
+        import logging
+        logging.error(f"Timeout fetching {url}: {e}")
+        return default or {}
+    except requests.exceptions.HTTPError as e:
+        # HTTP error (4xx, 5xx)
+        import logging
+        logging.error(f"HTTP error fetching {url}: Status {r.status_code} - {e}")
+        return default or {}
+    except requests.exceptions.RequestException as e:
+        # Other request errors
+        import logging
+        logging.error(f"Request error fetching {url}: {e}")
         return default or {}
     except Exception as e:
+        # Unexpected errors
         import logging
-        logging.warning(f"Unexpected error fetching {url}: {e}")
+        logging.error(f"Unexpected error fetching {url}: {e}")
         return default or {}
 
 
