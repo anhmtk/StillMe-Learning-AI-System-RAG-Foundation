@@ -251,6 +251,7 @@ def page_overview():
     else:
         status_msg = scheduler_status.get("message", "Unknown error")
         init_error = scheduler_status.get("initialization_error")
+        status_type = scheduler_status.get("status", "unknown")
         
         st.warning(f"⚠️ **Learning scheduler is not available**")
         
@@ -260,11 +261,16 @@ def page_overview():
                 st.code(init_error, language="text")
                 st.caption("💡 This error occurred when the backend tried to initialize RAG components.")
         else:
-            # If no detailed error, show status message
-            with st.expander("🔍 View Status Details", expanded=False):
+            # If no detailed error, show status message and full response for debugging
+            with st.expander("🔍 View Status Details", expanded=True):
                 st.json(scheduler_status)
+                st.caption(f"💡 Status type: {status_type}. If this is 'not_available' but backend logs show initialization succeeded, there may be a connection issue.")
         
         st.caption(f"**Reason:** {status_msg}")
+        
+        # Additional help for common cases
+        if status_type == "not_available":
+            st.info("💡 **Note:** Backend logs show scheduler initialized successfully. This may be a connection issue between dashboard and backend. Try refreshing the page.")
         
         # Provide actionable tips and reset button
         col_tips, col_reset = st.columns([2, 1])
