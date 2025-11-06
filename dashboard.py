@@ -325,7 +325,7 @@ def page_overview():
                             added = data.get("entries_added_to_rag", 0)
                             
                             if filtered > 0:
-                                st.session_state["last_action"] = f"✅ Learning cycle completed! Fetched {entries} entries, Filtered {filtered} (Chất lượng thấp/Ngắn), Added {added} to RAG."
+                                st.session_state["last_action"] = f"✅ Learning cycle completed! Fetched {entries} entries, Filtered {filtered} (Low quality/Short), Added {added} to RAG."
                             else:
                                 st.session_state["last_action"] = f"✅ Learning cycle completed! Fetched {entries} entries, added {added} to RAG."
                             st.rerun()
@@ -870,7 +870,7 @@ def sidebar(page_for_chat: str | None = None):
             
             try:
                 # Show progress message
-                status_placeholder.info("🤔 StillMe is thinking... This may take 30-60 seconds (AI generation + validation).")
+                status_placeholder.info("🤔 StillMe is thinking... This may take 30-90 seconds (AI generation + validation). If this is the first request, the embedding model may be loading (this can take 2-3 minutes).")
                 
                 r = requests.post(
                     f"{API_BASE}/api/chat/smart_router",
@@ -880,7 +880,7 @@ def sidebar(page_for_chat: str | None = None):
                         "use_rag": True,
                         "context_limit": 3
                     },
-                    timeout=180,  # Increased to 180s (3 minutes) for AI generation + validation
+                    timeout=300,  # Increased to 300s (5 minutes) to handle first-time model loading
                 )
                 r.raise_for_status()
                 data = r.json()
