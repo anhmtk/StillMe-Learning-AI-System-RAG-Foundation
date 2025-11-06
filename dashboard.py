@@ -96,6 +96,11 @@ def display_local_time(utc_time_str: str, label: str = "Next run"):
 
 
 def get_json(path: str, default: Dict[str, Any] | None = None) -> Dict[str, Any]:
+    """
+    Fetch JSON from API endpoint.
+    Returns default dict if request fails.
+    Does NOT raise exceptions - gracefully handles errors.
+    """
     url = f"{API_BASE}{path}"
     try:
         r = requests.get(url, timeout=10)  # Increased timeout
@@ -105,12 +110,6 @@ def get_json(path: str, default: Dict[str, Any] | None = None) -> Dict[str, Any]
         # Connection failed - backend may be down
         import logging
         logging.error(f"Connection error fetching {url}: {e}")
-        st.error(f"❌ **Connection Error:** Cannot reach backend at `{API_BASE}`. Please check:")
-        st.markdown("""
-        - Backend service is running on Railway
-        - Environment variable `STILLME_API_BASE` is set correctly in dashboard service
-        - Backend URL is accessible
-        """)
         return default or {}
     except requests.exceptions.Timeout as e:
         # Request timed out
@@ -120,7 +119,11 @@ def get_json(path: str, default: Dict[str, Any] | None = None) -> Dict[str, Any]
     except requests.exceptions.HTTPError as e:
         # HTTP error (4xx, 5xx)
         import logging
-        logging.error(f"HTTP error fetching {url}: Status {r.status_code} - {e}")
+        try:
+            status_code = r.status_code
+        except:
+            status_code = "unknown"
+        logging.error(f"HTTP error fetching {url}: Status {status_code} - {e}")
         return default or {}
     except requests.exceptions.RequestException as e:
         # Other request errors
@@ -210,13 +213,45 @@ def page_overview():
     
     # Auto-Learning Status Section
     st.subheader("🤖 Auto-Learning Status")
+    
+    # Show API_BASE for debugging (can be removed in production)
+    with st.expander("🔧 Debug Info", expanded=False):
+        st.code(f"API_BASE: {API_BASE}", language="text")
+        st.caption("💡 Verify this matches your backend URL on Railway")
+    
     scheduler_status = get_json("/api/learning/scheduler/status", {})
     
-    # Debug: Show what we received (can be removed later)
+    # Debug: Show what we received and test connection
     if not scheduler_status or scheduler_status == {}:
         st.error("⚠️ **Warning:** Could not fetch scheduler status from backend. API may be unreachable.")
-        st.json({"error": "Empty response from /api/learning/scheduler/status"})
-        st.caption("💡 Check if backend is running and accessible at the configured API_BASE URL.")
+        
+        # Try to provide more specific error info
+        try:
+            test_url = f"{API_BASE}/api/status"
+            test_r = requests.get(test_url, timeout=5)
+            if test_r.status_code == 200:
+                st.warning("💡 Backend is reachable at `/api/status`, but `/api/learning/scheduler/status` returned empty response.")
+                st.info("This may indicate the scheduler endpoint has an issue. Check backend logs.")
+            else:
+                st.error(f"❌ Backend returned status code {test_r.status_code} for `/api/status`")
+        except requests.exceptions.ConnectionError:
+            st.error(f"❌ **Cannot connect to backend at:** `{API_BASE}`")
+            st.markdown("""
+            **Possible causes:**
+            1. Backend service is not running on Railway
+            2. Environment variable `STILLME_API_BASE` is not set in dashboard service
+            3. Backend URL has changed
+            4. Network/firewall issue
+            
+            **Solution:**
+            - Check Railway dashboard → Service "stillme-backend" → Ensure it's running
+            - Check Railway dashboard → Service "dashboard" → Variables → Verify `STILLME_API_BASE` is set
+            - Restart dashboard service if needed
+            """)
+        except Exception as e:
+            st.warning(f"Error testing connection: {e}")
+        
+        st.json({"error": "Empty response from /api/learning/scheduler/status", "api_base": API_BASE})
         return
     
     if scheduler_status.get("status") == "ok":
