@@ -3,7 +3,7 @@ StillMe Backend API
 FastAPI backend with RAG (Retrieval-Augmented Generation) capabilities
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, Dict, Any, List
@@ -12,6 +12,9 @@ import logging
 import asyncio
 import httpx
 from datetime import datetime
+
+# Import authentication
+from backend.api.auth import require_api_key
 
 # Import RAG components
 from backend.vector_db import ChromaClient, EmbeddingService, RAGRetrieval
@@ -31,13 +34,35 @@ app = FastAPI(
     version="0.4.0"
 )
 
-# CORS middleware
+# CORS middleware - Security: Restrict origins to prevent unauthorized access
+# Read allowed origins from environment variable, default to safe localhost only
+cors_origins_env = os.getenv("CORS_ALLOWED_ORIGINS", "")
+if cors_origins_env:
+    # Parse comma-separated list of allowed origins
+    cors_origins = [origin.strip() for origin in cors_origins_env.split(",") if origin.strip()]
+else:
+    # Default: Only allow localhost for development
+    # In production, set CORS_ALLOWED_ORIGINS environment variable
+    cors_origins = [
+        "http://localhost:8501",  # Streamlit dashboard
+        "http://localhost:3000",  # Common React dev port
+        "http://127.0.0.1:8501",
+        "http://127.0.0.1:3000",
+    ]
+    logger.warning(
+        "⚠️ CORS_ALLOWED_ORIGINS not set. Using default localhost origins only. "
+        "Set CORS_ALLOWED_ORIGINS environment variable for production."
+    )
+
+# Security: Only allow credentials if origins are restricted (not "*")
+allow_creds = "*" not in cors_origins
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=cors_origins,  # Restricted origins instead of "*"
+    allow_credentials=allow_creds,  # Only allow if origins are restricted
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # Specific methods instead of "*"
+    allow_headers=["Content-Type", "Authorization", "X-API-Key"],  # Specific headers instead of "*"
 )
 
 # Initialize RAG components
@@ -185,14 +210,65 @@ async def health_check():
 async def chat_with_rag(request: ChatRequest):
     """Chat with RAG-enhanced responses"""
     try:
+        # Special Retrieval Rule: Detect StillMe-related queries
+        is_stillme_query = False
+        if rag_retrieval and request.use_rag:
+            try:
+                from backend.core.stillme_detector import detect_stillme_query, get_foundational_query_variants
+                is_stillme_query, matched_keywords = detect_stillme_query(request.message)
+                if is_stillme_query:
+                    logger.info(f"StillMe query detected! Matched keywords: {matched_keywords}")
+            except ImportError:
+                logger.warning("StillMe detector not available, skipping special retrieval rule")
+            except Exception as detector_error:
+                logger.warning(f"StillMe detector error: {detector_error}")
+        
         # Get RAG context if enabled
         context = None
         if rag_retrieval and request.use_rag:
-            context = rag_retrieval.retrieve_context(
-                query=request.message,
-                knowledge_limit=request.context_limit,
-                conversation_limit=2
-            )
+            # If StillMe query detected, prioritize foundational knowledge
+            if is_stillme_query:
+                # Try multiple query variants to ensure we get StillMe foundational knowledge
+                query_variants = get_foundational_query_variants(request.message)
+                all_knowledge_docs = []
+                
+                for variant in query_variants[:3]:  # Try first 3 variants
+                    variant_context = rag_retrieval.retrieve_context(
+                        query=variant,
+                        knowledge_limit=request.context_limit,
+                        conversation_limit=0,  # Don't need conversation for foundational queries
+                        prioritize_foundational=True
+                    )
+                    # Merge results, avoiding duplicates
+                    existing_ids = {doc.get("id") for doc in all_knowledge_docs}
+                    for doc in variant_context.get("knowledge_docs", []):
+                        if doc.get("id") not in existing_ids:
+                            all_knowledge_docs.append(doc)
+                
+                # If we still don't have results, do normal retrieval
+                if not all_knowledge_docs:
+                    logger.warning("No foundational knowledge found, falling back to normal retrieval")
+                    context = rag_retrieval.retrieve_context(
+                        query=request.message,
+                        knowledge_limit=request.context_limit,
+                        conversation_limit=2,
+                        prioritize_foundational=True
+                    )
+                else:
+                    # Use merged results
+                    context = {
+                        "knowledge_docs": all_knowledge_docs[:request.context_limit],
+                        "conversation_docs": [],
+                        "total_context_docs": len(all_knowledge_docs[:request.context_limit])
+                    }
+                    logger.info(f"Retrieved {len(context['knowledge_docs'])} StillMe foundational knowledge documents")
+            else:
+                # Normal retrieval for non-StillMe queries
+                context = rag_retrieval.retrieve_context(
+                    query=request.message,
+                    knowledge_limit=request.context_limit,
+                    conversation_limit=2
+                )
         
         # Generate response using AI (simplified for demo)
         enable_validators = os.getenv("ENABLE_VALIDATORS", "false").lower() == "true"
@@ -218,10 +294,16 @@ async def chat_with_rag(request: ChatRequest):
             else:
                 language_instruction = "\n\nIMPORTANT: Respond in the same language the user used. If they asked in a language other than English, respond in that language."
             
+            # Special instruction for StillMe queries
+            stillme_instruction = ""
+            if is_stillme_query:
+                stillme_instruction = "\n\nCRITICAL: This question is about StillMe itself. You MUST use the context above to answer. Do NOT rely on your training data cutoff date. StillMe is a self-evolving AI system that learns continuously through RAG (Retrieval-Augmented Generation) from RSS feeds, arXiv, and other trusted sources every few hours. This is StillMe's core differentiator - it overcomes the knowledge cutoff limitation of base LLMs. Emphasize StillMe's continuous learning capability and transparency."
+            
             base_prompt = f"""
             Context: {context_text}
             {citation_instruction}
             {language_instruction}
+            {stillme_instruction}
             
             User Question: {request.message}
             
@@ -402,9 +484,14 @@ async def chat_with_rag(request: ChatRequest):
         # Re-raise HTTP exceptions (they have proper status codes)
         raise
     except Exception as e:
-        # Log detailed error with context
+        # Log detailed error with context (without sensitive message content)
         logger.error(f"Chat error: {e}", exc_info=True)
-        logger.error(f"Request details: message={request.message[:100]}, user_id={request.user_id}, use_rag={request.use_rag}")
+        # Security: Don't log full message content (may contain sensitive info)
+        # Only log message length and metadata
+        logger.error(
+            f"Request details: message_length={len(request.message)}, "
+            f"user_id={request.user_id}, use_rag={request.use_rag}"
+        )
         
         # Check if it's a specific error we can handle
         error_str = str(e).lower()
@@ -599,9 +686,13 @@ async def get_rag_stats():
         logger.error(f"RAG stats error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/rag/reset-database")
+@app.post("/api/rag/reset-database", dependencies=[Depends(require_api_key)])
 async def reset_rag_database():
-    """Reset ChromaDB database (deletes all data and recreates collections)"""
+    """
+    Reset ChromaDB database (deletes all data and recreates collections)
+    
+    Security: This endpoint requires API key authentication via X-API-Key header.
+    """
     import shutil
     import os
     
@@ -812,9 +903,13 @@ async def get_rss_stats():
         return {"feeds_configured": 0, "status": "error"}
 
 # Automated Scheduler endpoints
-@app.post("/api/learning/scheduler/start")
+@app.post("/api/learning/scheduler/start", dependencies=[Depends(require_api_key)])
 async def start_scheduler():
-    """Start automated learning scheduler"""
+    """
+    Start automated learning scheduler
+    
+    Security: This endpoint requires API key authentication via X-API-Key header.
+    """
     try:
         if not learning_scheduler:
             raise HTTPException(status_code=503, detail="Scheduler not available")
@@ -833,9 +928,13 @@ async def start_scheduler():
         logger.error(f"Start scheduler error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/api/learning/scheduler/stop")
+@app.post("/api/learning/scheduler/stop", dependencies=[Depends(require_api_key)])
 async def stop_scheduler():
-    """Stop automated learning scheduler"""
+    """
+    Stop automated learning scheduler
+    
+    Security: This endpoint requires API key authentication via X-API-Key header.
+    """
     try:
         if not learning_scheduler:
             raise HTTPException(status_code=503, detail="Scheduler not available")
@@ -1083,9 +1182,13 @@ async def get_curation_stats():
         logger.error(f"Curation stats error: {e}")
         return {"status": "error", "message": str(e)}
 
-@app.post("/api/learning/curator/update-source-quality")
+@app.post("/api/learning/curator/update-source-quality", dependencies=[Depends(require_api_key)])
 async def update_source_quality(source: str, quality_score: float):
-    """Update quality score for a source"""
+    """
+    Update quality score for a source
+    
+    Security: This endpoint requires API key authentication via X-API-Key header.
+    """
     try:
         if not content_curator:
             raise HTTPException(status_code=503, detail="Content curator not available")

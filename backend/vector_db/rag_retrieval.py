@@ -27,18 +27,57 @@ class RAGRetrieval:
     def retrieve_context(self, 
                         query: str, 
                         knowledge_limit: int = 3, 
-                        conversation_limit: int = 2) -> Dict[str, Any]:
-        """Retrieve relevant context for a query"""
+                        conversation_limit: int = 2,
+                        prioritize_foundational: bool = False) -> Dict[str, Any]:
+        """Retrieve relevant context for a query
+        
+        Args:
+            query: Query string
+            knowledge_limit: Number of knowledge documents to retrieve
+            conversation_limit: Number of conversation documents to retrieve
+            prioritize_foundational: If True, prioritize foundational knowledge (tagged with 'foundational:stillme')
+        """
         try:
             # Generate query embedding
             query_embedding = self.embedding_service.encode_text(query)
             logger.info(f"Query embedding generated: {len(query_embedding)} dimensions")
             
-            # Retrieve knowledge documents
-            knowledge_results = self.chroma_client.search_knowledge(
-                query_embedding=query_embedding,
-                limit=knowledge_limit
-            )
+            # If prioritizing foundational knowledge, try to retrieve with metadata filter first
+            knowledge_results = []
+            if prioritize_foundational:
+                try:
+                    # Try to retrieve foundational knowledge first (tagged with 'foundational:stillme' or source='foundational')
+                    foundational_results = self.chroma_client.search_knowledge(
+                        query_embedding=query_embedding,
+                        limit=knowledge_limit,
+                        where={"$or": [
+                            {"foundational": "stillme"},
+                            {"source": "foundational"},
+                            {"type": "foundational"},
+                            {"tags": {"$contains": "foundational:stillme"}}
+                        ]}
+                    )
+                    if foundational_results:
+                        knowledge_results.extend(foundational_results)
+                        logger.info(f"Found {len(foundational_results)} foundational knowledge documents")
+                except Exception as foundational_error:
+                    # If metadata filter fails, continue with normal search
+                    logger.debug(f"Foundational knowledge filter not available: {foundational_error}")
+            
+            # If we don't have enough results, do normal search
+            if len(knowledge_results) < knowledge_limit:
+                normal_results = self.chroma_client.search_knowledge(
+                    query_embedding=query_embedding,
+                    limit=knowledge_limit
+                )
+                # Merge results, avoiding duplicates
+                existing_ids = {doc.get("id") for doc in knowledge_results}
+                for doc in normal_results:
+                    if doc.get("id") not in existing_ids:
+                        knowledge_results.append(doc)
+                        if len(knowledge_results) >= knowledge_limit:
+                            break
+            
             logger.info(f"Knowledge search returned {len(knowledge_results)} results")
             
             # Retrieve conversation documents
@@ -49,9 +88,9 @@ class RAGRetrieval:
             logger.info(f"Conversation search returned {len(conversation_results)} results")
             
             return {
-                "knowledge_docs": knowledge_results,
+                "knowledge_docs": knowledge_results[:knowledge_limit],
                 "conversation_docs": conversation_results,
-                "total_context_docs": len(knowledge_results) + len(conversation_results)
+                "total_context_docs": len(knowledge_results[:knowledge_limit]) + len(conversation_results)
             }
         except Exception as e:
             logger.error(f"Error retrieving context: {e}")
