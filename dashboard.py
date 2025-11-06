@@ -864,6 +864,10 @@ def sidebar(page_for_chat: str | None = None):
             status_placeholder = st.sidebar.empty()
             status_placeholder.info("🤔 StillMe is thinking...")
             
+            # Initialize knowledge_alert to None (fix UnboundLocalError)
+            knowledge_alert = None
+            reply = None
+            
             try:
                 # Show progress message
                 status_placeholder.info("🤔 StillMe is thinking... This may take 30-60 seconds (AI generation + validation).")
@@ -950,6 +954,10 @@ def sidebar(page_for_chat: str | None = None):
                 st.error(f"💡 Unexpected error: {str(e)}")
             
             # Add assistant response to history (with knowledge alert if available)
+            # Ensure reply is set (fallback if all exceptions occurred)
+            if reply is None:
+                reply = "❌ **Error** - No response received from backend."
+            
             message_entry = {"role": "assistant", "content": reply}
             if knowledge_alert:
                 message_entry["knowledge_alert"] = knowledge_alert
