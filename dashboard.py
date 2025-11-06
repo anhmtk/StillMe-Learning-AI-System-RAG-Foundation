@@ -863,20 +863,59 @@ def sidebar(page_for_chat: str | None = None):
                     reply = reply.get("detail", str(reply))
                 
                 status_placeholder.success("✅ Response received!")
+            except requests.exceptions.HTTPError as e:
+                # Handle HTTP errors (4xx, 5xx) specifically
+                status_code = e.response.status_code if hasattr(e, 'response') else "unknown"
+                if status_code == 502:
+                    reply = "❌ **502 Bad Gateway** - Backend service is not responding. Please check Railway dashboard and restart backend service if needed."
+                    status_placeholder.error("❌ 502 Bad Gateway")
+                    st.error("💡 **Backend is down!** Go to Railway → Service 'stillme-backend' → Check logs and restart if needed.")
+                elif status_code == 422:
+                    error_detail = ""
+                    try:
+                        error_data = e.response.json()
+                        error_detail = error_data.get('detail', str(e))
+                    except:
+                        error_detail = str(e)
+                    reply = f"❌ **422 Unprocessable Entity** - Request format error: {error_detail}"
+                    status_placeholder.error("❌ 422 Error")
+                    st.warning("💡 This is a request format issue. Please refresh the page and try again.")
+                elif status_code == 503:
+                    error_detail = ""
+                    try:
+                        error_data = e.response.json()
+                        error_detail = error_data.get('detail', 'Service unavailable')
+                    except:
+                        error_detail = str(e)
+                    reply = f"❌ **503 Service Unavailable** - {error_detail}"
+                    status_placeholder.error("❌ Service Unavailable")
+                    st.warning("💡 Backend service may be initializing. Please wait a moment and try again.")
+                else:
+                    error_detail = ""
+                    try:
+                        error_data = e.response.json()
+                        error_detail = error_data.get('detail', str(e))
+                    except:
+                        error_detail = str(e)
+                    reply = f"❌ **Error {status_code}** - {error_detail}"
+                    status_placeholder.error(f"❌ HTTP {status_code}")
+                    st.error(f"💡 Backend returned error {status_code}. Check backend logs for details.")
             except requests.exceptions.Timeout:
                 reply = "❌ Request timed out after 3 minutes. The AI response is taking longer than expected."
                 status_placeholder.error("❌ Timeout")
                 st.warning("💡 **Solutions:**\n1. Try again (AI API may be slow)\n2. Check backend logs\n3. Verify API keys (OPENAI_API_KEY or DEEPSEEK_API_KEY) are set")
             except requests.exceptions.ConnectionError as e:
-                reply = f"❌ Error connecting to backend: {str(e)}"
+                reply = "❌ **Connection Error** - Cannot connect to backend. Backend service may be down or restarting."
                 status_placeholder.error("❌ Connection error")
-                st.error("💡 Check if backend service is running on Railway.")
+                st.error("💡 **Backend is unreachable!** Check Railway dashboard → Service 'stillme-backend' → Ensure it's running.")
             except requests.exceptions.RequestException as e:
-                reply = f"❌ Error connecting to backend: {str(e)}"
+                reply = f"❌ **Request Error** - {str(e)}"
                 status_placeholder.error("❌ Request error")
+                st.error(f"💡 Request failed: {str(e)}")
             except Exception as e:
-                reply = f"❌ Error: {str(e)}"
+                reply = f"❌ **Unexpected Error** - {str(e)}"
                 status_placeholder.error("❌ Error occurred")
+                st.error(f"💡 Unexpected error: {str(e)}")
             
             # Add assistant response to history
             st.session_state.chat_history.append({"role": "assistant", "content": reply})
