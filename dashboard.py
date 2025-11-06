@@ -847,7 +847,12 @@ def sidebar(page_for_chat: str | None = None):
                 
                 r = requests.post(
                     f"{API_BASE}/api/chat/smart_router",
-                    json={"message": message_to_send},
+                    json={
+                        "message": message_to_send,
+                        "user_id": "dashboard_user",
+                        "use_rag": True,
+                        "context_limit": 3
+                    },
                     timeout=180,  # Increased to 180s (3 minutes) for AI generation + validation
                 )
                 r.raise_for_status()

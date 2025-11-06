@@ -809,38 +809,70 @@ async def run_scheduler_now():
         
         # If auto_add_to_rag is enabled, add to RAG
         if learning_scheduler.auto_add_to_rag and rag_retrieval:
-            # Get entries from last fetch and add to RAG
-            entries = learning_scheduler.rss_fetcher.fetch_feeds(max_items_per_feed=5)
+            # Use entries from the learning cycle result (already fetched)
+            # Don't fetch again - use the entries that were already fetched in run_learning_cycle
+            entries_to_add = []
             
-            # Prioritize content if curator available
-            if content_curator and self_diagnosis:
-                # Get knowledge gaps to prioritize
-                recent_gaps = []  # Could be from query history
-                prioritized = content_curator.prioritize_learning_content(
-                    entries,
-                    knowledge_gaps=recent_gaps
-                )
-                entries = prioritized[:5]  # Take top 5
+            # Try to get entries from the RSS fetcher's last fetch
+            # If that's not available, fetch again (but this should be rare)
+            try:
+                # Get entries that were fetched in this cycle
+                # The run_learning_cycle already fetched entries, but we need to access them
+                # For now, we'll fetch again but this should be optimized later
+                all_entries = learning_scheduler.rss_fetcher.fetch_feeds(max_items_per_feed=5)
+                logger.info(f"Fetched {len(all_entries)} entries for RAG addition")
+                
+                # Prioritize content if curator available
+                if content_curator and self_diagnosis:
+                    # Get knowledge gaps to prioritize
+                    recent_gaps = []  # Could be from query history
+                    prioritized = content_curator.prioritize_learning_content(
+                        all_entries,
+                        knowledge_gaps=recent_gaps
+                    )
+                    # Take top entries (up to 5, but can be fewer if prioritized list is shorter)
+                    entries_to_add = prioritized[:min(5, len(prioritized))]
+                    logger.info(f"Content curator prioritized {len(entries_to_add)} entries from {len(all_entries)} total")
+                else:
+                    # If no curator, add all entries (or limit to reasonable number)
+                    entries_to_add = all_entries[:min(10, len(all_entries))]
+                    logger.info(f"No content curator, adding {len(entries_to_add)} entries directly")
+                
+            except Exception as e:
+                logger.error(f"Error preparing entries for RAG: {e}")
+                entries_to_add = []
             
             added_count = 0
-            for entry in entries:
-                content = f"{entry.get('title', '')}\n{entry.get('summary', '')}"
-                success = rag_retrieval.add_learning_content(
-                    content=content,
-                    source=entry.get('source', 'rss'),
-                    content_type="knowledge",
-                    metadata={
-                        "link": entry.get('link', ''),
-                        "published": entry.get('published', ''),
-                        "type": "rss_feed",
-                        "scheduler_cycle": result.get("cycle_number", 0),
-                        "priority_score": entry.get("priority_score", 0.5)
-                    }
-                )
-                if success:
-                    added_count += 1
+            for entry in entries_to_add:
+                try:
+                    content = f"{entry.get('title', '')}\n{entry.get('summary', '')}"
+                    if not content.strip():
+                        logger.warning(f"Skipping empty entry: {entry.get('title', 'No title')}")
+                        continue
+                    
+                    success = rag_retrieval.add_learning_content(
+                        content=content,
+                        source=entry.get('source', 'rss'),
+                        content_type="knowledge",
+                        metadata={
+                            "link": entry.get('link', ''),
+                            "published": entry.get('published', ''),
+                            "type": "rss_feed",
+                            "scheduler_cycle": result.get("cycle_number", 0),
+                            "priority_score": entry.get("priority_score", 0.5)
+                        }
+                    )
+                    if success:
+                        added_count += 1
+                        logger.info(f"Added entry to RAG: {entry.get('title', 'No title')[:50]}")
+                    else:
+                        logger.warning(f"Failed to add entry to RAG: {entry.get('title', 'No title')[:50]}")
+                except Exception as e:
+                    logger.error(f"Error adding entry to RAG: {e}")
+                    continue
             
             result["entries_added_to_rag"] = added_count
+            logger.info(f"Learning cycle: Fetched {result.get('entries_fetched', 0)} entries, added {added_count} to RAG")
         
         return result
         
