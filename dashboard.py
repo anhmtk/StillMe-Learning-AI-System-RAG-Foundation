@@ -124,6 +124,11 @@ def get_json(path: str, default: Dict[str, Any] | None = None) -> Dict[str, Any]
         except:
             status_code = "unknown"
         logging.error(f"HTTP error fetching {url}: Status {status_code} - {e}")
+        
+        # Special handling for 502 Bad Gateway
+        if status_code == 502:
+            logging.error(f"502 Bad Gateway - Backend service may be down, restarting, or crashed. URL: {url}")
+        
         return default or {}
     except requests.exceptions.RequestException as e:
         # Other request errors
@@ -232,6 +237,24 @@ def page_overview():
             if test_r.status_code == 200:
                 st.warning("💡 Backend is reachable at `/api/status`, but `/api/learning/scheduler/status` returned empty response.")
                 st.info("This may indicate the scheduler endpoint has an issue. Check backend logs.")
+            elif test_r.status_code == 502:
+                st.error(f"❌ **502 Bad Gateway** - Backend service is not responding.")
+                st.markdown("""
+                **502 Bad Gateway means the backend service is down or crashed.**
+                
+                **Immediate Actions:**
+                1. Go to Railway Dashboard → Service "stillme-backend"
+                2. Check **"Deployments"** tab → See if service is running
+                3. Check **"Logs"** tab → Look for errors or crashes
+                4. If service is stopped → Click **"Redeploy"** or **"Restart"**
+                5. If service is building → Wait for deployment to complete
+                
+                **Common Causes:**
+                - Backend crashed during initialization
+                - Backend is restarting after code change
+                - Backend ran out of memory (check Railway resource limits)
+                - Database connection issues
+                """)
             else:
                 st.error(f"❌ Backend returned status code {test_r.status_code} for `/api/status`")
         except requests.exceptions.ConnectionError:
