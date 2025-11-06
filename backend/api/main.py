@@ -201,9 +201,17 @@ async def chat_with_rag(request: ChatRequest):
             # Use context to enhance response
             context_text = rag_retrieval.build_prompt_context(context)
             
-            # Build base prompt
+            # Build base prompt with citation instructions
+            citation_instruction = ""
+            if enable_validators:
+                # Count knowledge docs for citation numbering
+                num_knowledge = len(context.get("knowledge_docs", []))
+                if num_knowledge > 0:
+                    citation_instruction = f"\n\nIMPORTANT: When referencing information from the context above, include citations in the format [1], [2], etc. where the number corresponds to the context item number. For example, if you reference the first context item, use [1]."
+            
             base_prompt = f"""
             Context: {context_text}
+            {citation_instruction}
             
             User Question: {request.message}
             
