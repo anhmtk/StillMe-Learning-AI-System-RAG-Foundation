@@ -223,6 +223,39 @@ def page_overview():
     with st.expander("🔧 Debug Info", expanded=False):
         st.code(f"API_BASE: {API_BASE}", language="text")
         st.caption("💡 Verify this matches your backend URL on Railway")
+        
+        # Test backend connection
+        col_test1, col_test2 = st.columns(2)
+        with col_test1:
+            if st.button("🔍 Test Backend Connection", use_container_width=True):
+                try:
+                    test_r = requests.get(f"{API_BASE}/health", timeout=5)
+                    if test_r.status_code == 200:
+                        st.success(f"✅ Backend reachable: {test_r.status_code}")
+                        st.json(test_r.json())
+                    else:
+                        st.error(f"❌ Backend returned: {test_r.status_code}")
+                except Exception as test_e:
+                    st.error(f"❌ Connection failed: {test_e}")
+        
+        with col_test2:
+            if st.button("📤 Test Chat Endpoint", use_container_width=True):
+                try:
+                    test_r = requests.post(
+                        f"{API_BASE}/api/chat/smart_router",
+                        json={"message": "test", "user_id": "test", "use_rag": False, "context_limit": 1},
+                        timeout=10
+                    )
+                    st.success(f"✅ Chat endpoint reachable: {test_r.status_code}")
+                except Exception as test_e:
+                    st.error(f"❌ Chat endpoint failed: {test_e}")
+        
+        # Show environment info
+        st.markdown("---")
+        st.caption("**Environment Variables:**")
+        st.code(f"STILLME_API_BASE: {os.getenv('STILLME_API_BASE', 'NOT SET')}", language="text")
+        if API_BASE == "http://localhost:8000":
+            st.warning("⚠️ **WARNING:** API_BASE is still `localhost:8000`! This means `STILLME_API_BASE` environment variable is NOT set in Railway dashboard service. You need to set it to your backend URL (e.g., `https://stillme-backend-production-xxxx.up.railway.app`)")
     
     scheduler_status = get_json("/api/learning/scheduler/status", {})
     
