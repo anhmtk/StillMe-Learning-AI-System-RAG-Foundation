@@ -819,10 +819,13 @@ def sidebar(page_for_chat: str | None = None):
             status_placeholder.info("🤔 StillMe is thinking...")
             
             try:
+                # Show progress message
+                status_placeholder.info("🤔 StillMe is thinking... This may take 30-60 seconds (AI generation + validation).")
+                
                 r = requests.post(
                     f"{API_BASE}/api/chat/smart_router",
                     json={"message": message_to_send},
-                    timeout=30,
+                    timeout=180,  # Increased to 180s (3 minutes) for AI generation + validation
                 )
                 r.raise_for_status()
                 data = r.json()
@@ -832,9 +835,17 @@ def sidebar(page_for_chat: str | None = None):
                     reply = reply.get("detail", str(reply))
                 
                 status_placeholder.success("✅ Response received!")
-            except requests.exceptions.RequestException as e:
+            except requests.exceptions.Timeout:
+                reply = "❌ Request timed out after 3 minutes. The AI response is taking longer than expected."
+                status_placeholder.error("❌ Timeout")
+                st.warning("💡 **Solutions:**\n1. Try again (AI API may be slow)\n2. Check backend logs\n3. Verify API keys (OPENAI_API_KEY or DEEPSEEK_API_KEY) are set")
+            except requests.exceptions.ConnectionError as e:
                 reply = f"❌ Error connecting to backend: {str(e)}"
                 status_placeholder.error("❌ Connection error")
+                st.error("💡 Check if backend service is running on Railway.")
+            except requests.exceptions.RequestException as e:
+                reply = f"❌ Error connecting to backend: {str(e)}"
+                status_placeholder.error("❌ Request error")
             except Exception as e:
                 reply = f"❌ Error: {str(e)}"
                 status_placeholder.error("❌ Error occurred")
