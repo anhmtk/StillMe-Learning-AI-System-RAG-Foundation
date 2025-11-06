@@ -101,7 +101,14 @@ def get_json(path: str, default: Dict[str, Any] | None = None) -> Dict[str, Any]
         r = requests.get(url, timeout=5)
         r.raise_for_status()
         return r.json()
-    except Exception:
+    except requests.exceptions.RequestException as e:
+        # Log error for debugging
+        import logging
+        logging.warning(f"Failed to fetch {url}: {e}")
+        return default or {}
+    except Exception as e:
+        import logging
+        logging.warning(f"Unexpected error fetching {url}: {e}")
         return default or {}
 
 
@@ -182,6 +189,13 @@ def page_overview():
     # Auto-Learning Status Section
     st.subheader("🤖 Auto-Learning Status")
     scheduler_status = get_json("/api/learning/scheduler/status", {})
+    
+    # Debug: Show what we received (can be removed later)
+    if not scheduler_status or scheduler_status == {}:
+        st.error("⚠️ **Warning:** Could not fetch scheduler status from backend. API may be unreachable.")
+        st.json({"error": "Empty response from /api/learning/scheduler/status"})
+        st.caption("💡 Check if backend is running and accessible at the configured API_BASE URL.")
+        return
     
     if scheduler_status.get("status") == "ok":
         is_running = scheduler_status.get("is_running", False)
