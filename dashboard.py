@@ -240,15 +240,40 @@ def page_overview():
         
         with col_test2:
             if st.button("📤 Test Chat Endpoint", use_container_width=True):
-                try:
-                    test_r = requests.post(
-                        f"{API_BASE}/api/chat/smart_router",
-                        json={"message": "test", "user_id": "test", "use_rag": False, "context_limit": 1},
-                        timeout=10
-                    )
-                    st.success(f"✅ Chat endpoint reachable: {test_r.status_code}")
-                except Exception as test_e:
-                    st.error(f"❌ Chat endpoint failed: {test_e}")
+                with st.spinner("Testing chat endpoint (this may take 30-60 seconds if model is loading)..."):
+                    try:
+                        test_r = requests.post(
+                            f"{API_BASE}/api/chat/smart_router",
+                            json={"message": "test", "user_id": "test", "use_rag": False, "context_limit": 1},
+                            timeout=120  # Increased to 120s to handle model loading
+                        )
+                        if test_r.status_code == 200:
+                            st.success(f"✅ Chat endpoint reachable: {test_r.status_code}")
+                            response_data = test_r.json()
+                            if "response" in response_data:
+                                st.caption(f"Response preview: {response_data['response'][:100]}...")
+                        else:
+                            st.error(f"❌ Chat endpoint returned: {test_r.status_code}")
+                            try:
+                                st.json(test_r.json())
+                            except:
+                                st.code(test_r.text[:200])
+                    except requests.exceptions.Timeout:
+                        st.warning("⏱️ **Timeout after 2 minutes** - This usually means:")
+                        st.markdown("""
+                        - **Embedding model is still loading** (first request can take 2-3 minutes)
+                        - **AI API is slow** (DeepSeek/OpenAI may be experiencing delays)
+                        - **Backend is processing** but needs more time
+                        
+                        **Solutions:**
+                        1. Wait 1-2 minutes and try again (model may be cached now)
+                        2. Check backend logs for model loading progress
+                        3. Try actual chat (it has 5-minute timeout, more forgiving)
+                        """)
+                    except Exception as test_e:
+                        st.error(f"❌ Chat endpoint failed: {test_e}")
+                        if "timeout" in str(test_e).lower():
+                            st.info("💡 **Tip:** Chat endpoint is working but slow. Try sending an actual message - it has a longer timeout (5 minutes).")
         
         # Show environment info
         st.markdown("---")
