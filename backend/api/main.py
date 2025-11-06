@@ -214,7 +214,7 @@ async def chat_with_rag(request: ChatRequest):
             detected_lang = detect_language(request.message)
             language_instruction = ""
             if detected_lang == 'vi':
-                language_instruction = "\n\nIMPORTANT: The user is asking in Vietnamese. Please respond in Vietnamese (tiếng Việt) with the same level of detail and accuracy."
+                language_instruction = "\n\nIMPORTANT: The user is asking in Vietnamese. Please respond in Vietnamese with the same level of detail and accuracy."
             else:
                 language_instruction = "\n\nIMPORTANT: Respond in the same language the user used. If they asked in a language other than English, respond in that language."
             
@@ -314,7 +314,7 @@ async def chat_with_rag(request: ChatRequest):
             # Detect language and add instruction
             detected_lang = detect_language(request.message)
             if detected_lang == 'vi':
-                base_prompt = f"{request.message}\n\n(Please respond in Vietnamese - tiếng Việt)"
+                base_prompt = f"{request.message}\n\n(Please respond in Vietnamese)"
             else:
                 base_prompt = request.message
             
@@ -983,7 +983,7 @@ async def run_scheduler_now():
             result["entries_filtered"] = filtered_count
             logger.info(
                 f"Learning cycle: Fetched {result.get('entries_fetched', 0)} entries, "
-                f"Filtered {filtered_count} (Chất lượng thấp/Ngắn), "
+                f"Filtered {filtered_count} (Low quality/Short), "
                 f"Added {added_count} to RAG"
             )
         
@@ -1184,7 +1184,7 @@ async def call_deepseek_api(prompt: str, api_key: str) -> str:
         
         # Build system prompt with language instruction
         if detected_lang == 'vi':
-            system_content = "You are StillMe, a self-evolving AI system. The user is asking in Vietnamese. Please respond in Vietnamese (tiếng Việt) with the same level of detail and accuracy as you would in English."
+            system_content = "You are StillMe, a self-evolving AI system. The user is asking in Vietnamese. Please respond in Vietnamese with the same level of detail and accuracy as you would in English."
         else:
             system_content = "You are StillMe, a self-evolving AI system. Provide helpful, accurate responses. If the user asks in a language other than English, respond in the same language they used."
         
@@ -1233,7 +1233,7 @@ async def call_openai_api(prompt: str, api_key: str) -> str:
         
         # Build system prompt with language instruction
         if detected_lang == 'vi':
-            system_content = "You are StillMe, a self-evolving AI system. The user is asking in Vietnamese. Please respond in Vietnamese (tiếng Việt) with the same level of detail and accuracy as you would in English."
+            system_content = "You are StillMe, a self-evolving AI system. The user is asking in Vietnamese. Please respond in Vietnamese with the same level of detail and accuracy as you would in English."
         else:
             system_content = "You are StillMe, a self-evolving AI system. Provide helpful, accurate responses. If the user asks in a language other than English, respond in the same language they used."
         
