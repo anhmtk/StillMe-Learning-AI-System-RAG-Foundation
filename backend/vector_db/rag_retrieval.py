@@ -46,17 +46,35 @@ class RAGRetrieval:
             knowledge_results = []
             if prioritize_foundational:
                 try:
-                    # Try to retrieve foundational knowledge first (tagged with 'foundational:stillme' or source='foundational')
-                    foundational_results = self.chroma_client.search_knowledge(
-                        query_embedding=query_embedding,
-                        limit=knowledge_limit,
-                        where={"$or": [
-                            {"foundational": "stillme"},
-                            {"source": "foundational"},
-                            {"type": "foundational"},
-                            {"tags": {"$contains": "foundational:stillme"}}
-                        ]}
-                    )
+                    # Try to retrieve foundational knowledge first (tagged with CRITICAL_FOUNDATION or foundational:stillme)
+                    # Priority: CRITICAL_FOUNDATION > foundational:stillme > foundational
+                    try:
+                        # First try CRITICAL_FOUNDATION (highest priority)
+                        critical_results = self.chroma_client.search_knowledge(
+                            query_embedding=query_embedding,
+                            limit=knowledge_limit,
+                            where={"source": "CRITICAL_FOUNDATION"}
+                        )
+                        if critical_results:
+                            foundational_results = critical_results
+                            logger.info(f"Found {len(critical_results)} CRITICAL_FOUNDATION documents")
+                        else:
+                            # Fallback to other foundational tags
+                            foundational_results = self.chroma_client.search_knowledge(
+                                query_embedding=query_embedding,
+                                limit=knowledge_limit,
+                                where={"$or": [
+                                    {"foundational": "stillme"},
+                                    {"source": "foundational"},
+                                    {"type": "foundational"},
+                                    {"tags": {"$contains": "foundational:stillme"}},
+                                    {"tags": {"$contains": "CRITICAL_FOUNDATION"}}
+                                ]}
+                            )
+                    except Exception as filter_error:
+                        # If metadata filter fails, try without filter (ChromaDB version compatibility)
+                        logger.debug(f"Metadata filter not supported, trying without filter: {filter_error}")
+                        foundational_results = []
                     if foundational_results:
                         knowledge_results.extend(foundational_results)
                         logger.info(f"Found {len(foundational_results)} foundational knowledge documents")
