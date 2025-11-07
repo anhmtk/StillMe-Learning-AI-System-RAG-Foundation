@@ -144,16 +144,13 @@ jobs:
         run: |
           pytest tests/ \
             --cov=backend \
-            --cov=backend.api \
-            --cov=backend.services \
-            --cov=backend.learning \
-            --cov=backend.vector_db \
-            --cov=backend.validators \
+            --cov-branch \
             --cov-report=term \
             --cov-report=html \
             -v
         env:
           ENVIRONMENT: test
+          PYTHONPATH: ${{ github.workspace }}
           
       - name: Comment PR with coverage
         uses: py-cov-action/python-coverage-comment-action@v3
