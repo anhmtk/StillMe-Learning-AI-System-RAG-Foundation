@@ -326,7 +326,7 @@ async def shutdown_event():
 
 @app.post("/api/chat/rag", response_model=ChatResponse)
 @limiter.limit("10/minute", key_func=get_rate_limit_key_func)  # Chat: 10 requests per minute
-async def chat_with_rag(http_request: Request, request: ChatRequest):
+async def chat_with_rag(request: Request, chat_request: ChatRequest):
     """Chat with RAG-enhanced responses"""
     import time
     start_time = time.time()
@@ -335,10 +335,10 @@ async def chat_with_rag(http_request: Request, request: ChatRequest):
     try:
         # Special Retrieval Rule: Detect StillMe-related queries
         is_stillme_query = False
-        if rag_retrieval and request.use_rag:
+        if rag_retrieval and chat_request.use_rag:
             try:
                 from backend.core.stillme_detector import detect_stillme_query, get_foundational_query_variants
-                is_stillme_query, matched_keywords = detect_stillme_query(request.message)
+                is_stillme_query, matched_keywords = detect_stillme_query(chat_request.message)
                 if is_stillme_query:
                     logger.info(f"StillMe query detected! Matched keywords: {matched_keywords}")
             except ImportError:
@@ -349,17 +349,17 @@ async def chat_with_rag(http_request: Request, request: ChatRequest):
         # Get RAG context if enabled
         context = None
         rag_start = time.time()
-        if rag_retrieval and request.use_rag:
+        if rag_retrieval and chat_request.use_rag:
             # If StillMe query detected, prioritize foundational knowledge
             if is_stillme_query:
                 # Try multiple query variants to ensure we get StillMe foundational knowledge
-                query_variants = get_foundational_query_variants(request.message)
+                query_variants = get_foundational_query_variants(chat_request.message)
                 all_knowledge_docs = []
                 
                 for variant in query_variants[:3]:  # Try first 3 variants
                     variant_context = rag_retrieval.retrieve_context(
                         query=variant,
-                        knowledge_limit=request.context_limit,
+                        knowledge_limit=chat_request.context_limit,
                         conversation_limit=0,  # Don't need conversation for foundational queries
                         prioritize_foundational=True
                     )
@@ -373,24 +373,24 @@ async def chat_with_rag(http_request: Request, request: ChatRequest):
                 if not all_knowledge_docs:
                     logger.warning("No foundational knowledge found, falling back to normal retrieval")
                     context = rag_retrieval.retrieve_context(
-                        query=request.message,
-                        knowledge_limit=request.context_limit,
+                        query=chat_request.message,
+                        knowledge_limit=chat_request.context_limit,
                         conversation_limit=2,
                         prioritize_foundational=True
                     )
                 else:
                     # Use merged results
                     context = {
-                        "knowledge_docs": all_knowledge_docs[:request.context_limit],
+                        "knowledge_docs": all_knowledge_docs[:chat_request.context_limit],
                         "conversation_docs": [],
-                        "total_context_docs": len(all_knowledge_docs[:request.context_limit])
+                        "total_context_docs": len(all_knowledge_docs[:chat_request.context_limit])
                     }
                     logger.info(f"Retrieved {len(context['knowledge_docs'])} StillMe foundational knowledge documents")
             else:
                 # Normal retrieval for non-StillMe queries
                 context = rag_retrieval.retrieve_context(
-                    query=request.message,
-                    knowledge_limit=request.context_limit,
+                    query=chat_request.message,
+                    knowledge_limit=chat_request.context_limit,
                     conversation_limit=2
                 )
         
@@ -415,7 +415,7 @@ async def chat_with_rag(http_request: Request, request: ChatRequest):
                     citation_instruction = f"\n\nIMPORTANT: When referencing information from the context above, include citations in the format [1], [2], etc. where the number corresponds to the context item number. For example, if you reference the first context item, use [1]."
             
             # Detect language FIRST - before building prompt
-            detected_lang = detect_language(request.message)
+            detected_lang = detect_language(chat_request.message)
             lang_detect_time = time.time() - start_time
             timing_logs["language_detection"] = f"{lang_detect_time:.3f}s"
             logger.info(f"🌐 Detected language: {detected_lang} (took {lang_detect_time:.3f}s)")
@@ -468,7 +468,7 @@ Context: {context_text}
 {citation_instruction}
 {stillme_instruction}
 
-User Question: {request.message}
+User Question: {chat_request.message}
 
 Please provide a helpful response based on the context above. Remember: RESPOND IN {detected_lang_name.upper()} ONLY.
 """
@@ -571,7 +571,7 @@ Please provide a helpful response based on the context above. Remember: RESPOND 
         else:
             # Fallback to regular AI response (no RAG context)
             # Detect language FIRST
-            detected_lang = detect_language(request.message)
+            detected_lang = detect_language(chat_request.message)
             logger.info(f"🌐 Detected language (non-RAG): {detected_lang}")
             
             # Language names mapping
@@ -604,12 +604,12 @@ THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS.
 """
                 base_prompt = f"""{language_instruction}
 
-User Question: {request.message}
+User Question: {chat_request.message}
 
 Remember: RESPOND IN {detected_lang_name.upper()} ONLY.
 """
             else:
-                base_prompt = f"{request.message}\n\nIMPORTANT: Respond in English with clear and detailed explanations. Do NOT use Vietnamese or any other language."
+                base_prompt = f"{chat_request.message}\n\nIMPORTANT: Respond in English with clear and detailed explanations. Do NOT use Vietnamese or any other language."
             
             if enable_validators:
                 from backend.identity.injector import inject_identity
@@ -627,7 +627,7 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY.
         accuracy_score = None
         if accuracy_scorer:
             accuracy_score = accuracy_scorer.score_response(
-                question=request.message,
+                question=chat_request.message,
                 actual_answer=response,
                 scoring_method="semantic_similarity"
             )
@@ -637,7 +637,7 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY.
         if knowledge_retention:
             learning_session_id = knowledge_retention.record_learning_session(
                 session_type="chat",
-                content_learned=f"Q: {request.message}\nA: {response}",
+                content_learned=f"Q: {chat_request.message}\nA: {response}",
                 accuracy_score=accuracy_score or 0.5,
                 metadata={"user_id": request.user_id}
             )
@@ -664,11 +664,11 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY.
         # Store conversation in vector DB
         if rag_retrieval:
             rag_retrieval.add_learning_content(
-                content=f"Q: {request.message}\nA: {response}",
+                content=f"Q: {chat_request.message}\nA: {response}",
                 source="user_chat",
                 content_type="conversation",
                 metadata={
-                    "user_id": request.user_id,
+                    "user_id": chat_request.user_id,
                     "timestamp": datetime.now().isoformat(),
                     "accuracy_score": accuracy_score
                 }
@@ -679,7 +679,7 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY.
         if rag_retrieval:
             try:
                 important_knowledge = rag_retrieval.retrieve_important_knowledge(
-                    query=request.message,
+                    query=chat_request.message,
                     limit=1,
                     min_importance=0.7
                 )
@@ -715,8 +715,8 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY.
         # Security: Don't log full message content (may contain sensitive info)
         # Only log message length and metadata
         logger.error(
-            f"Request details: message_length={len(request.message)}, "
-            f"user_id={request.user_id}, use_rag={request.use_rag}"
+            f"Request details: message_length={len(chat_request.message)}, "
+            f"user_id={chat_request.user_id}, use_rag={chat_request.use_rag}"
         )
         
         # Check if it's a specific error we can handle
@@ -891,41 +891,41 @@ async def get_retained_knowledge(
 # RAG-specific endpoints
 @app.post("/api/rag/add_knowledge")
 @limiter.limit("20/hour", key_func=get_rate_limit_key_func)  # RAG add: 20 requests per hour (expensive)
-async def add_knowledge_rag(http_request: Request, request: LearningRequest):
+async def add_knowledge_rag(request: Request, learning_request: LearningRequest):
     """Add knowledge to RAG vector database"""
     try:
         if not rag_retrieval:
             raise HTTPException(status_code=503, detail="RAG system not available")
         
         # Calculate importance score for knowledge alert system
-        importance_score = 0.5
+            importance_score = 0.5
         if content_curator:
             # Create a content dict for importance calculation
             content_dict = {
-                "title": request.metadata.get("title", "") if request.metadata else "",
-                "summary": request.content[:500] if len(request.content) > 500 else request.content,
-                "source": request.source
+                "title": learning_request.metadata.get("title", "") if learning_request.metadata else "",
+                "summary": learning_request.content[:500] if len(learning_request.content) > 500 else learning_request.content,
+                "source": learning_request.source
             }
             importance_score = content_curator.calculate_importance_score(content_dict)
         
         # Merge importance_score into metadata
-        enhanced_metadata = request.metadata or {}
+        enhanced_metadata = learning_request.metadata or {}
         enhanced_metadata["importance_score"] = importance_score
         if not enhanced_metadata.get("title"):
             # Extract title from content if not provided
-            content_lines = request.content.split("\n")
+            content_lines = learning_request.content.split("\n")
             if content_lines:
                 enhanced_metadata["title"] = content_lines[0][:200]
         
         success = rag_retrieval.add_learning_content(
-            content=request.content,
-            source=request.source,
-            content_type=request.content_type,
+            content=learning_request.content,
+            source=learning_request.source,
+            content_type=learning_request.content_type,
             metadata=enhanced_metadata
         )
         
         if success:
-            return {"status": "Knowledge added successfully", "content_type": request.content_type}
+            return {"status": "Knowledge added successfully", "content_type": learning_request.content_type}
         else:
             raise HTTPException(status_code=500, detail="Failed to add knowledge to vector DB")
             
