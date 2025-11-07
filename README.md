@@ -776,9 +776,9 @@ StillMe is **open source** and **needs your help**. We're building a movement th
 ### **Connect**
 
 - **GitHub**: [@anhmtk](https://github.com/anhmtk)
-- **Project Repository**: [StillMe---Self-Evolving-AI-System](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System)
-- **Discussions**: [GitHub Discussions](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System/discussions) - Ask questions, share ideas, join the debate
-- **Issues**: [Report bugs or request features](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System/issues)
+- **Project Repository**: [StillMe-Learning-AI-System-RAG-Foundation](https://github.com/anhmtk/StillMe-Learning-AI-System-RAG-Foundation)
+- **Discussions**: [GitHub Discussions](https://github.com/anhmtk/StillMe-Learning-AI-System-RAG-Foundation/discussions) - Ask questions, share ideas, join the debate
+- **Issues**: [Report bugs or request features](https://github.com/anhmtk/StillMe-Learning-AI-System-RAG-Foundation/issues)
 
 > **Community Channels**: We're building StillMe's community! Discord, Telegram, and other channels coming soon as we grow. For now, GitHub Discussions is the best place to connect.
 
@@ -1150,9 +1150,9 @@ See details in [`docs/ACTION_ITEMS_IMPROVEMENT_ROADMAP.md`](docs/ACTION_ITEMS_IM
 
 ### **Professional Assessments:**
 
-- **Technical Assessment**: Xem [`docs/AI_ASSISTANT_CODEBASE_ASSESSMENT.md`](docs/AI_ASSISTANT_CODEBASE_ASSESSMENT.md)
-- **Investment Analysis**: Xem đánh giá từ VC Analyst trong professional assessment
-- **Research Evaluation**: Xem đánh giá từ AI Researcher trong professional assessment
+- **Technical Assessment**: See [`docs/AI_ASSISTANT_CODEBASE_ASSESSMENT.md`](docs/AI_ASSISTANT_CODEBASE_ASSESSMENT.md)
+- **Investment Analysis**: See assessment from VC Analyst in professional assessment
+- **Research Evaluation**: See assessment from AI Researcher in professional assessment
 
 ---
 
