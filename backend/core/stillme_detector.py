@@ -113,13 +113,13 @@ def detect_stillme_query(query: str) -> Tuple[bool, List[str]]:
         return (True, matched_keywords)
     
     # Pattern 2: Direct questions about StillMe (even without name)
-    # "What is StillMe?" / "StillMe là gì?"
+    # "What is StillMe?" / "What is StillMe?" (Vietnamese: "StillMe là gì?")
     if re.search(r'(what|gì|là gì|what is|what are).*stillme', query_lower):
         matched_keywords.append("what_is")
         return (True, matched_keywords)
     
     # Pattern 3: Questions about learning/evolution with StillMe context
-    # CRITICAL: "Bạn học tập như thế nào?" / "How do you learn?" should trigger
+    # CRITICAL: "How do you learn?" (Vietnamese: "Bạn học tập như thế nào?") should trigger
     if (has_learning_keyword or has_system_keyword) and any(
         keyword in query_lower 
         for keyword in ["bạn", "you", "your", "it", "stillme", "hệ thống", "system", "của bạn"]
@@ -131,7 +131,7 @@ def detect_stillme_query(query: str) -> Tuple[bool, List[str]]:
         return (True, matched_keywords)
     
     # Pattern 3b: Direct learning questions (even without explicit StillMe name)
-    # "Bạn học tập như thế nào?" / "How do you learn?" - assume about StillMe
+    # "How do you learn?" (Vietnamese: "Bạn học tập như thế nào?") - assume about StillMe
     if has_learning_keyword and any(
         keyword in query_lower 
         for keyword in ["bạn", "you", "your", "như thế nào", "how", "cách"]
