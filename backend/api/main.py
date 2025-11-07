@@ -1,6 +1,6 @@
 """
 StillMe Backend API
-FastAPI backend with RAG (Retrieval-Augmented Generation) capabilities
+Learning AI system with RAG foundation - FastAPI backend with RAG (Retrieval-Augmented Generation) capabilities
 """
 
 from fastapi import FastAPI, HTTPException, Depends
@@ -80,40 +80,48 @@ content_curator = None
 
 try:
     logger.info("Initializing RAG components...")
-    # Try with reset_on_error=False first (preserve data)
-    # If schema error, will try with reset_on_error=True (which deletes directory first)
-    chroma_client_ref = None
-    try:
-        chroma_client = ChromaClient(reset_on_error=False)
-        logger.info("✓ ChromaDB client initialized")
-    except (RuntimeError, Exception) as e:
-        error_str = str(e).lower()
-        if "schema mismatch" in error_str or "no such column" in error_str or "topic" in error_str:
-            logger.warning("⚠️ Schema mismatch detected!")
-            logger.warning("Attempting to reset database by deleting directory...")
-            
-            # Store reference to old client if exists (for cleanup)
-            if chroma_client_ref:
-                try:
-                    # Try to close/disconnect old client
-                    if hasattr(chroma_client_ref, 'client'):
-                        logger.info("Closing old ChromaDB client connection...")
-                        # ChromaDB PersistentClient doesn't have explicit close, but we can try to delete reference
-                        del chroma_client_ref
-                except:
-                    pass
-            
-            # Force garbage collection to ensure old client is freed
-            import gc
-            gc.collect()
-            logger.info("Garbage collected old client references")
-            
-            # Try resetting database - this will delete the directory before creating client
-            chroma_client = ChromaClient(reset_on_error=True)
-            logger.info("✓ ChromaDB client initialized (after directory reset)")
-            logger.warning("⚠️ IMPORTANT: If errors persist, please RESTART the backend service on Railway to clear process cache.")
-        else:
-            raise
+    
+    # Check for FORCE_DB_RESET_ON_STARTUP environment variable
+    force_reset = os.getenv("FORCE_DB_RESET_ON_STARTUP", "false").lower() == "true"
+    if force_reset:
+        logger.warning("🔄 FORCE_DB_RESET_ON_STARTUP=True detected - will reset ChromaDB database")
+        chroma_client = ChromaClient(reset_on_error=True)
+        logger.info("✓ ChromaDB client initialized (forced reset)")
+    else:
+        # Try with reset_on_error=False first (preserve data)
+        # If schema error, will try with reset_on_error=True (which deletes directory first)
+        chroma_client_ref = None
+        try:
+            chroma_client = ChromaClient(reset_on_error=False)
+            logger.info("✓ ChromaDB client initialized")
+        except (RuntimeError, Exception) as e:
+            error_str = str(e).lower()
+            if "schema mismatch" in error_str or "no such column" in error_str or "topic" in error_str:
+                logger.warning("⚠️ Schema mismatch detected!")
+                logger.warning("Attempting to reset database by deleting directory...")
+                
+                # Store reference to old client if exists (for cleanup)
+                if chroma_client_ref:
+                    try:
+                        # Try to close/disconnect old client
+                        if hasattr(chroma_client_ref, 'client'):
+                            logger.info("Closing old ChromaDB client connection...")
+                            # ChromaDB PersistentClient doesn't have explicit close, but we can try to delete reference
+                            del chroma_client_ref
+                    except:
+                        pass
+                
+                # Force garbage collection to ensure old client is freed
+                import gc
+                gc.collect()
+                logger.info("Garbage collected old client references")
+                
+                # Try resetting database - this will delete the directory before creating client
+                chroma_client = ChromaClient(reset_on_error=True)
+                logger.info("✓ ChromaDB client initialized (after directory reset)")
+                logger.warning("⚠️ IMPORTANT: If errors persist, please RESTART the backend service on Railway to clear process cache.")
+            else:
+                raise
     
     embedding_service = EmbeddingService()
     logger.info("✓ Embedding service initialized")
