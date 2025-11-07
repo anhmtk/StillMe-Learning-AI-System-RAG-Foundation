@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 logger = logging.getLogger(__name__)
 
 # Pre-Filter Configuration
-MINIMUM_CONTENT_LENGTH = 500  # Minimum characters (5-7 sentences)
+MINIMUM_CONTENT_LENGTH = 150  # Minimum characters (reduced from 500 to allow shorter summaries)
 KEYWORD_SCORING_THRESHOLD = 0.5  # Minimum keyword score to pass filter
 
 # Important keywords for StillMe's mission (weighted)

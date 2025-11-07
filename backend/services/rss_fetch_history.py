@@ -6,11 +6,17 @@ Tracks all RSS fetch operations with detailed status for transparency
 import sqlite3
 import json
 import logging
+import time
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
+
+# SQLite Configuration for Concurrency
+SQLITE_TIMEOUT = 10.0  # Timeout in seconds for database operations
+MAX_RETRIES = 5  # Maximum number of retries for database operations
+RETRY_DELAY_BASE = 0.1  # Base delay in seconds (exponential backoff)
 
 
 class RSSFetchHistory:
@@ -28,10 +34,60 @@ class RSSFetchHistory:
         self._init_database()
         logger.info("RSS Fetch History system initialized")
     
+    def _get_connection(self):
+        """Get SQLite connection with timeout configuration"""
+        conn = sqlite3.connect(self.db_path, timeout=SQLITE_TIMEOUT)
+        # Enable WAL mode for better concurrency
+        conn.execute("PRAGMA journal_mode=WAL")
+        return conn
+    
+    def _execute_with_retry(self, operation, *args, **kwargs):
+        """Execute database operation with retry mechanism for handling database locked errors
+        
+        Args:
+            operation: Function to execute (should accept conn as first argument)
+            *args: Additional arguments for operation
+            **kwargs: Additional keyword arguments for operation
+            
+        Returns:
+            Result of operation
+        """
+        last_exception = None
+        for attempt in range(MAX_RETRIES):
+            try:
+                conn = self._get_connection()
+                try:
+                    result = operation(conn, *args, **kwargs)
+                    conn.commit()
+                    return result
+                finally:
+                    conn.close()
+            except sqlite3.OperationalError as e:
+                if "database is locked" in str(e).lower():
+                    last_exception = e
+                    if attempt < MAX_RETRIES - 1:
+                        # Exponential backoff: 0.1s, 0.2s, 0.4s, 0.8s, 1.6s
+                        delay = RETRY_DELAY_BASE * (2 ** attempt)
+                        logger.warning(f"Database locked, retrying in {delay:.2f}s (attempt {attempt + 1}/{MAX_RETRIES})")
+                        time.sleep(delay)
+                    else:
+                        logger.error(f"Database locked after {MAX_RETRIES} attempts: {e}")
+                        raise
+                else:
+                    # Other operational errors - don't retry
+                    raise
+            except Exception as e:
+                # Other errors - don't retry
+                raise
+        
+        # If we get here, all retries failed
+        if last_exception:
+            raise last_exception
+    
     def _init_database(self):
         """Initialize database tables"""
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = self._get_connection()
             cursor = conn.cursor()
             
             # RSS fetch items table - tracks each item fetched
@@ -97,20 +153,17 @@ class RSSFetchHistory:
         Returns:
             int: Cycle ID
         """
-        try:
-            conn = sqlite3.connect(self.db_path)
+        def _create_cycle(conn):
             cursor = conn.cursor()
-            
             cursor.execute("""
                 INSERT INTO rss_fetch_cycles 
                 (cycle_number, started_at) 
                 VALUES (?, ?)
             """, (cycle_number, datetime.now().isoformat()))
-            
-            cycle_id = cursor.lastrowid
-            conn.commit()
-            conn.close()
-            
+            return cursor.lastrowid
+        
+        try:
+            cycle_id = self._execute_with_retry(_create_cycle)
             logger.info(f"Created fetch cycle {cycle_id} for cycle number {cycle_number}")
             return cycle_id
             
@@ -146,10 +199,8 @@ class RSSFetchHistory:
         Returns:
             int: Item ID
         """
-        try:
-            conn = sqlite3.connect(self.db_path)
+        def _add_item(conn):
             cursor = conn.cursor()
-            
             cursor.execute("""
                 INSERT INTO rss_fetch_items 
                 (cycle_id, title, source_url, link, summary, fetch_timestamp, 
@@ -167,14 +218,13 @@ class RSSFetchHistory:
                 vector_id,
                 added_to_rag_at
             ))
+            return cursor.lastrowid
+        
+        try:
+            item_id = self._execute_with_retry(_add_item)
             
-            item_id = cursor.lastrowid
-            
-            # Update cycle statistics
+            # Update cycle statistics (with retry)
             self._update_cycle_stats(cycle_id, status)
-            
-            conn.commit()
-            conn.close()
             
             return item_id
             
@@ -183,9 +233,8 @@ class RSSFetchHistory:
             raise
     
     def _update_cycle_stats(self, cycle_id: int, status: str):
-        """Update cycle statistics based on item status"""
-        try:
-            conn = sqlite3.connect(self.db_path)
+        """Update cycle statistics based on item status (with retry mechanism)"""
+        def _update_stats(conn):
             cursor = conn.cursor()
             
             # Get current stats
@@ -197,7 +246,7 @@ class RSSFetchHistory:
             
             row = cursor.fetchone()
             if not row:
-                return
+                return None
             
             (fetched, added, filtered, duplicate, low_score, ethical) = row
             
@@ -226,28 +275,26 @@ class RSSFetchHistory:
                     entries_ethical_filtered = ?
                 WHERE id = ?
             """, (fetched, added, filtered, duplicate, low_score, ethical, cycle_id))
-            
-            conn.commit()
-            conn.close()
-            
+            return None
+        
+        try:
+            self._execute_with_retry(_update_stats)
         except Exception as e:
             logger.error(f"Failed to update cycle stats: {e}")
     
     def complete_fetch_cycle(self, cycle_id: int):
         """Mark a fetch cycle as completed"""
-        try:
-            conn = sqlite3.connect(self.db_path)
+        def _complete_cycle(conn):
             cursor = conn.cursor()
-            
             cursor.execute("""
                 UPDATE rss_fetch_cycles
                 SET completed_at = ?
                 WHERE id = ?
             """, (datetime.now().isoformat(), cycle_id))
-            
-            conn.commit()
-            conn.close()
-            
+            return None
+        
+        try:
+            self._execute_with_retry(_complete_cycle)
         except Exception as e:
             logger.error(f"Failed to complete fetch cycle: {e}")
     
@@ -261,7 +308,7 @@ class RSSFetchHistory:
             List of fetch items with all details
         """
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = self._get_connection()
             cursor = conn.cursor()
             
             # Get the latest completed cycle
@@ -331,7 +378,7 @@ class RSSFetchHistory:
             List of all fetch items
         """
         try:
-            conn = sqlite3.connect(self.db_path)
+            conn = self._get_connection()
             cursor = conn.cursor()
             
             cursor.execute("""
