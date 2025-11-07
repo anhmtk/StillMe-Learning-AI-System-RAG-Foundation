@@ -1130,7 +1130,7 @@ async def get_accuracy_metrics():
 @app.post("/api/learning/rss/fetch")
 @limiter.limit("5/hour", key_func=get_rate_limit_key_func)  # RSS fetch: 5 requests per hour (can be expensive)
 async def fetch_rss_content(
-    http_request: Request,
+    request: Request,
     max_items: int = Query(default=5, ge=1, le=50, description="Maximum items per feed"),
     auto_add: bool = Query(default=False, description="Automatically add to RAG")
 ):
