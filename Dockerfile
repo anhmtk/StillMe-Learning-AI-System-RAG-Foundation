@@ -27,6 +27,18 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir torch torchvision --index-url https://download.pytorch.org/whl/cpu && \
     pip install --no-cache-dir -r requirements.txt
 
+# Create model cache directory (persistent in image)
+RUN mkdir -p /app/.model_cache
+
+# Set environment variables for model cache (used during build and runtime)
+ENV SENTENCE_TRANSFORMERS_HOME=/app/.model_cache
+ENV TRANSFORMERS_CACHE=/app/.model_cache
+ENV HF_HOME=/app/.model_cache
+
+# Pre-download embedding model during build stage
+# This ensures model is available in image and doesn't need to be downloaded at runtime
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2', cache_folder='/app/.model_cache')"
+
 # Copy application code (including .streamlit config)
 COPY . .
 
