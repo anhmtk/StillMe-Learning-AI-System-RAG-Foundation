@@ -187,6 +187,7 @@ class ChatResponse(BaseModel):
     accuracy_score: Optional[float] = None
     learning_session_id: Optional[int] = None
     knowledge_alert: Optional[Dict[str, Any]] = None  # Important knowledge suggestion
+    timing: Optional[Dict[str, str]] = None  # Timing breakdown for performance analysis
 
 class LearningRequest(BaseModel):
     content: str
@@ -261,6 +262,10 @@ async def shutdown_event():
 @app.post("/api/chat/rag", response_model=ChatResponse)
 async def chat_with_rag(request: ChatRequest):
     """Chat with RAG-enhanced responses"""
+    import time
+    start_time = time.time()
+    timing_logs = {}
+    
     try:
         # Special Retrieval Rule: Detect StillMe-related queries
         is_stillme_query = False
@@ -277,6 +282,7 @@ async def chat_with_rag(request: ChatRequest):
         
         # Get RAG context if enabled
         context = None
+        rag_start = time.time()
         if rag_retrieval and request.use_rag:
             # If StillMe query detected, prioritize foundational knowledge
             if is_stillme_query:
@@ -322,6 +328,10 @@ async def chat_with_rag(request: ChatRequest):
                     conversation_limit=2
                 )
         
+        rag_time = time.time() - rag_start
+        timing_logs["rag_retrieval"] = f"{rag_time:.2f}s"
+        logger.info(f"⏱️ RAG retrieval took {rag_time:.2f}s")
+        
         # Generate response using AI (simplified for demo)
         enable_validators = os.getenv("ENABLE_VALIDATORS", "false").lower() == "true"
         enable_tone_align = os.getenv("ENABLE_TONE_ALIGN", "true").lower() == "true"
@@ -338,8 +348,11 @@ async def chat_with_rag(request: ChatRequest):
                 if num_knowledge > 0:
                     citation_instruction = f"\n\nIMPORTANT: When referencing information from the context above, include citations in the format [1], [2], etc. where the number corresponds to the context item number. For example, if you reference the first context item, use [1]."
             
-            # Detect language for language-appropriate response
+            # Detect language FIRST - before building prompt
             detected_lang = detect_language(request.message)
+            lang_detect_time = time.time() - start_time
+            timing_logs["language_detection"] = f"{lang_detect_time:.3f}s"
+            logger.info(f"🌐 Detected language: {detected_lang} (took {lang_detect_time:.3f}s)")
             
             # Language names mapping
             language_names = {
@@ -354,27 +367,48 @@ async def chat_with_rag(request: ChatRequest):
             
             detected_lang_name = language_names.get(detected_lang, 'the same language as the question')
             
-            # Strong language instruction to force LLM to respond in detected language
+            # CRITICAL: Put language instruction FIRST and make it VERY STRONG
+            # This must override any language bias from context
             if detected_lang != 'en':
-                language_instruction = f"\n\n🚨 CRITICAL LANGUAGE REQUIREMENT 🚨\nThe user's question is written in {detected_lang_name}. You MUST respond EXCLUSIVELY in {detected_lang_name}. Do NOT respond in English or any other language. Every word of your response must be in {detected_lang_name}. This is mandatory - failure to respond in {detected_lang_name} is a critical error."
+                language_instruction = f"""🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨🚨🚨
+
+THE USER'S QUESTION IS WRITTEN IN {detected_lang_name.upper()}.
+
+YOU MUST RESPOND EXCLUSIVELY IN {detected_lang_name.upper()}. 
+
+DO NOT RESPOND IN VIETNAMESE, ENGLISH, OR ANY OTHER LANGUAGE.
+
+EVERY SINGLE WORD OF YOUR RESPONSE MUST BE IN {detected_lang_name.upper()}.
+
+THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS.
+
+FAILURE TO RESPOND IN {detected_lang_name.upper()} IS A CRITICAL ERROR.
+
+IGNORE THE LANGUAGE OF THE CONTEXT BELOW - RESPOND IN {detected_lang_name.upper()} ONLY.
+
+"""
             else:
-                language_instruction = "\n\nIMPORTANT: Respond in English with clear and detailed explanations."
+                language_instruction = "\n\nIMPORTANT: Respond in English with clear and detailed explanations. Do NOT use Vietnamese or any other language.\n\n"
             
             # Special instruction for StillMe queries
             stillme_instruction = ""
             if is_stillme_query:
                 stillme_instruction = "\n\nCRITICAL: This question is about StillMe itself. You MUST use the context above to answer. Do NOT rely on your training data cutoff date. StillMe is a Learning AI system with RAG foundation that learns continuously through RAG (Retrieval-Augmented Generation) from RSS feeds, arXiv, and other trusted sources every 4 hours (6 cycles per day). StillMe automatically fetches content, embeds it into a vector database (ChromaDB), and retrieves it when answering questions. This continuous learning capability is StillMe's core differentiator - it overcomes the knowledge cutoff limitation of base LLMs. You MUST emphasize: (1) StillMe's automated learning cycles every 4 hours, (2) RAG-based knowledge storage in vector database, (3) Continuous knowledge updates through RSS feeds, (4) StillMe is NOT limited by training data cutoff dates. Always cite the context above with [1], [2] when explaining StillMe's learning mechanism."
             
-            base_prompt = f"""
-            Context: {context_text}
-            {citation_instruction}
-            {language_instruction}
-            {stillme_instruction}
+            # Build prompt with language instruction FIRST (before context)
+            base_prompt = f"""{language_instruction}
+
+Context: {context_text}
+{citation_instruction}
+{stillme_instruction}
+
+User Question: {request.message}
+
+Please provide a helpful response based on the context above. Remember: RESPOND IN {detected_lang_name.upper()} ONLY.
+"""
             
-            User Question: {request.message}
-            
-            Please provide a helpful response based on the context above.
-            """
+            prompt_build_time = time.time() - start_time
+            timing_logs["prompt_building"] = f"{prompt_build_time:.3f}s"
             
             # Inject StillMe identity if validators enabled
             if enable_validators:
@@ -383,11 +417,17 @@ async def chat_with_rag(request: ChatRequest):
             else:
                 enhanced_prompt = base_prompt
             
-            raw_response = await generate_ai_response(enhanced_prompt)
+            # Generate AI response with timing
+            ai_start = time.time()
+            raw_response = await generate_ai_response(enhanced_prompt, detected_lang=detected_lang)
+            ai_time = time.time() - ai_start
+            timing_logs["ai_generation"] = f"{ai_time:.2f}s"
+            logger.info(f"⏱️ AI generation took {ai_time:.2f}s")
             
             # Validate response if enabled
             if enable_validators:
                 try:
+                    validation_start = time.time()
                     from backend.validators.chain import ValidatorChain
                     from backend.validators.citation import CitationRequired
                     from backend.validators.evidence_overlap import EvidenceOverlap
@@ -413,6 +453,9 @@ async def chat_with_rag(request: ChatRequest):
                     
                     # Run validation
                     validation_result = chain.run(raw_response, ctx_docs)
+                    validation_time = time.time() - validation_start
+                    timing_logs["validation"] = f"{validation_time:.2f}s"
+                    logger.info(f"⏱️ Validation took {validation_time:.2f}s")
                     
                     # Record metrics
                     try:
@@ -461,8 +504,9 @@ async def chat_with_rag(request: ChatRequest):
                 response = raw_response
         else:
             # Fallback to regular AI response (no RAG context)
-            # Detect language and add strong instruction
+            # Detect language FIRST
             detected_lang = detect_language(request.message)
+            logger.info(f"🌐 Detected language (non-RAG): {detected_lang}")
             
             # Language names mapping
             language_names = {
@@ -477,12 +521,29 @@ async def chat_with_rag(request: ChatRequest):
             
             detected_lang_name = language_names.get(detected_lang, 'the same language as the question')
             
-            # Strong language instruction
+            # Strong language instruction - put FIRST
             if detected_lang != 'en':
-                language_instruction = f"\n\n🚨 CRITICAL LANGUAGE REQUIREMENT 🚨\nThe user's question is written in {detected_lang_name}. You MUST respond EXCLUSIVELY in {detected_lang_name}. Do NOT respond in English or any other language. Every word of your response must be in {detected_lang_name}. This is mandatory."
-                base_prompt = f"{request.message}\n\n{language_instruction}"
+                language_instruction = f"""🚨🚨🚨 CRITICAL LANGUAGE REQUIREMENT - HIGHEST PRIORITY 🚨🚨🚨
+
+THE USER'S QUESTION IS WRITTEN IN {detected_lang_name.upper()}.
+
+YOU MUST RESPOND EXCLUSIVELY IN {detected_lang_name.upper()}. 
+
+DO NOT RESPOND IN VIETNAMESE, ENGLISH, OR ANY OTHER LANGUAGE.
+
+EVERY SINGLE WORD OF YOUR RESPONSE MUST BE IN {detected_lang_name.upper()}.
+
+THIS IS MANDATORY AND OVERRIDES ALL OTHER INSTRUCTIONS.
+
+"""
+                base_prompt = f"""{language_instruction}
+
+User Question: {request.message}
+
+Remember: RESPOND IN {detected_lang_name.upper()} ONLY.
+"""
             else:
-                base_prompt = request.message
+                base_prompt = f"{request.message}\n\nIMPORTANT: Respond in English with clear and detailed explanations. Do NOT use Vietnamese or any other language."
             
             if enable_validators:
                 from backend.identity.injector import inject_identity
@@ -490,7 +551,11 @@ async def chat_with_rag(request: ChatRequest):
             else:
                 enhanced_prompt = base_prompt
             
-            response = await generate_ai_response(enhanced_prompt)
+            ai_start = time.time()
+            response = await generate_ai_response(enhanced_prompt, detected_lang=detected_lang)
+            ai_time = time.time() - ai_start
+            timing_logs["ai_generation"] = f"{ai_time:.2f}s"
+            logger.info(f"⏱️ AI generation (non-RAG) took {ai_time:.2f}s")
         
         # Score the response
         accuracy_score = None
@@ -514,11 +579,21 @@ async def chat_with_rag(request: ChatRequest):
         # Align tone if enabled
         if enable_tone_align:
             try:
+                tone_start = time.time()
                 from backend.tone.aligner import align_tone
                 response = align_tone(response)
+                tone_time = time.time() - tone_start
+                timing_logs["tone_alignment"] = f"{tone_time:.2f}s"
+                logger.info(f"⏱️ Tone alignment took {tone_time:.2f}s")
             except Exception as tone_error:
                 logger.error(f"Tone alignment error: {tone_error}, using original response")
                 # Continue with original response on error
+        
+        # Calculate total time
+        total_time = time.time() - start_time
+        timing_logs["total"] = f"{total_time:.2f}s"
+        logger.info(f"⏱️ Total response time: {total_time:.2f}s")
+        logger.info(f"📊 Timing breakdown: {timing_logs}")
         
         # Store conversation in vector DB
         if rag_retrieval:
@@ -561,7 +636,8 @@ async def chat_with_rag(request: ChatRequest):
             context_used=context,
             accuracy_score=accuracy_score,
             learning_session_id=learning_session_id,
-            knowledge_alert=knowledge_alert
+            knowledge_alert=knowledge_alert,
+            timing=timing_logs
         )
         
     except HTTPException:
@@ -1324,17 +1400,22 @@ async def chat_deepseek(request: ChatRequest):
     return await chat_with_rag(request)
 
 # Helper functions
-async def generate_ai_response(prompt: str) -> str:
-    """Generate AI response (simplified for demo)"""
+async def generate_ai_response(prompt: str, detected_lang: str = 'en') -> str:
+    """Generate AI response (simplified for demo)
+    
+    Args:
+        prompt: User prompt
+        detected_lang: Detected language code (for system prompt)
+    """
     try:
         # Check for API keys
         openai_key = os.getenv("OPENAI_API_KEY")
         deepseek_key = os.getenv("DEEPSEEK_API_KEY")
         
         if deepseek_key:
-            return await call_deepseek_api(prompt, deepseek_key)
+            return await call_deepseek_api(prompt, deepseek_key, detected_lang=detected_lang)
         elif openai_key:
-            return await call_openai_api(prompt, openai_key)
+            return await call_openai_api(prompt, openai_key, detected_lang=detected_lang)
         else:
             return "I'm StillMe, but I need API keys to provide real responses. Please configure OPENAI_API_KEY or DEEPSEEK_API_KEY in your environment."
             
@@ -1403,12 +1484,15 @@ def detect_language(text: str) -> str:
     # Default to English
     return 'en'
 
-async def call_deepseek_api(prompt: str, api_key: str) -> str:
-    """Call DeepSeek API"""
+async def call_deepseek_api(prompt: str, api_key: str, detected_lang: str = 'en') -> str:
+    """Call DeepSeek API
+    
+    Args:
+        prompt: User prompt
+        api_key: DeepSeek API key
+        detected_lang: Detected language code
+    """
     try:
-        # Detect language from prompt
-        detected_lang = detect_language(prompt)
-        
         # Build system prompt with strong language instruction
         language_names = {
             'vi': 'Vietnamese (Tiếng Việt)',
@@ -1422,9 +1506,9 @@ async def call_deepseek_api(prompt: str, api_key: str) -> str:
         detected_lang_name = language_names.get(detected_lang, 'the same language as the question')
         
         if detected_lang != 'en':
-            system_content = f"You are StillMe, a Learning AI system with RAG foundation. CRITICAL: The user's question is in {detected_lang_name}. You MUST respond EXCLUSIVELY in {detected_lang_name}. Do NOT use English or any other language. Every word must be in {detected_lang_name}. This is mandatory."
+            system_content = f"You are StillMe, a Learning AI system with RAG foundation. CRITICAL LANGUAGE REQUIREMENT: The user's question is in {detected_lang_name}. You MUST respond EXCLUSIVELY in {detected_lang_name}. Do NOT use Vietnamese, English, or any other language. Every single word must be in {detected_lang_name}. This is mandatory and overrides all other instructions."
         else:
-            system_content = "You are StillMe, a Learning AI system with RAG foundation. Provide helpful, accurate responses in English."
+            system_content = "You are StillMe, a Learning AI system with RAG foundation. Provide helpful, accurate responses in English. Do NOT use Vietnamese or any other language."
         
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(
@@ -1463,12 +1547,15 @@ async def call_deepseek_api(prompt: str, api_key: str) -> str:
         logger.error(f"DeepSeek API error: {e}")
         return f"DeepSeek API error: {str(e)}"
 
-async def call_openai_api(prompt: str, api_key: str) -> str:
-    """Call OpenAI API"""
+async def call_openai_api(prompt: str, api_key: str, detected_lang: str = 'en') -> str:
+    """Call OpenAI API
+    
+    Args:
+        prompt: User prompt
+        api_key: OpenAI API key
+        detected_lang: Detected language code
+    """
     try:
-        # Detect language from prompt
-        detected_lang = detect_language(prompt)
-        
         # Build system prompt with strong language instruction
         language_names = {
             'vi': 'Vietnamese (Tiếng Việt)',
@@ -1482,9 +1569,9 @@ async def call_openai_api(prompt: str, api_key: str) -> str:
         detected_lang_name = language_names.get(detected_lang, 'the same language as the question')
         
         if detected_lang != 'en':
-            system_content = f"You are StillMe, a Learning AI system with RAG foundation. CRITICAL: The user's question is in {detected_lang_name}. You MUST respond EXCLUSIVELY in {detected_lang_name}. Do NOT use English or any other language. Every word must be in {detected_lang_name}. This is mandatory."
+            system_content = f"You are StillMe, a Learning AI system with RAG foundation. CRITICAL LANGUAGE REQUIREMENT: The user's question is in {detected_lang_name}. You MUST respond EXCLUSIVELY in {detected_lang_name}. Do NOT use Vietnamese, English, or any other language. Every single word must be in {detected_lang_name}. This is mandatory and overrides all other instructions."
         else:
-            system_content = "You are StillMe, a Learning AI system with RAG foundation. Provide helpful, accurate responses in English."
+            system_content = "You are StillMe, a Learning AI system with RAG foundation. Provide helpful, accurate responses in English. Do NOT use Vietnamese or any other language."
         
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(
