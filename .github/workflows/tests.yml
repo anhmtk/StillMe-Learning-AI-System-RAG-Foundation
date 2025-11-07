@@ -50,24 +50,18 @@ jobs:
           echo "Total test files:"
           find tests -name "test_*.py" -type f | wc -l
           
-      - name: Run tests with coverage
+      - name: Run tests with coverage (Codecov format)
         run: |
           pytest tests/ \
             --cov=backend \
-            --cov=backend.api \
-            --cov=backend.services \
-            --cov=backend.learning \
-            --cov=backend.vector_db \
-            --cov=backend.validators \
             --cov-branch \
             --cov-report=xml \
-            --cov-report=html \
             --cov-report=term \
+            --cov-report=html \
             --junit-xml=junit.xml \
             -v \
             --tb=short \
-            --maxfail=10 \
-            || true
+            --maxfail=10
         env:
           ENVIRONMENT: test
           DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY || 'test_key' }}
@@ -75,13 +69,20 @@ jobs:
           PYTHONPATH: ${{ github.workspace }}
         continue-on-error: true
           
-      - name: Check coverage file exists
+      - name: Verify coverage.xml was created
         run: |
           if [ -f coverage.xml ]; then
             echo "✅ coverage.xml exists"
             ls -lh coverage.xml
+            echo "First 20 lines of coverage.xml:"
+            head -20 coverage.xml
           else
-            echo "⚠️ coverage.xml not found, skipping Codecov upload"
+            echo "❌ coverage.xml not found!"
+            echo "Listing files in current directory:"
+            ls -la
+            echo "Listing files in tests directory:"
+            ls -la tests/ | head -10
+            exit 1
           fi
         continue-on-error: true
           
