@@ -639,7 +639,7 @@ Remember: RESPOND IN {detected_lang_name.upper()} ONLY.
                 session_type="chat",
                 content_learned=f"Q: {chat_request.message}\nA: {response}",
                 accuracy_score=accuracy_score or 0.5,
-                metadata={"user_id": request.user_id}
+                metadata={"user_id": chat_request.user_id}
             )
         
         # Align tone if enabled
@@ -898,7 +898,7 @@ async def add_knowledge_rag(request: Request, learning_request: LearningRequest)
             raise HTTPException(status_code=503, detail="RAG system not available")
         
         # Calculate importance score for knowledge alert system
-            importance_score = 0.5
+        importance_score = 0.5
         if content_curator:
             # Create a content dict for importance calculation
             content_dict = {
