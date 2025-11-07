@@ -9,6 +9,8 @@
 [![Python](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://python.org)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104+-green.svg)](https://fastapi.tiangolo.com)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red.svg)](https://streamlit.io)
+[![Tests](https://github.com/anhmtk/StillMe-Learning-AI-System-RAG-Foundation/workflows/Tests/badge.svg)](https://github.com/anhmtk/StillMe-Learning-AI-System-RAG-Foundation/actions)
+[![Coverage](https://codecov.io/gh/anhmtk/StillMe-Learning-AI-System-RAG-Foundation/branch/main/graph/badge.svg)](https://codecov.io/gh/anhmtk/StillMe-Learning-AI-System-RAG-Foundation)
 [![Ethical AI](https://img.shields.io/badge/Ethical%20AI-Transparent-green.svg)](https://github.com/anhmtk/stillme_ai_ipc)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
@@ -159,14 +161,91 @@ python -m uvicorn backend.api.main:app --host 0.0.0.0 --port 8000 --reload
 # Start frontend (terminal 2)
 streamlit run dashboard.py --server.port 8501
 
-# Note: RSS scheduler and automated learning pipeline are planned for future releases
 ```
+
+## 🔧 Architecture
+
+### System Architecture Overview
+
+StillMe uses a modular architecture with clear separation of concerns:
+
+```
+External Sources → Learning Pipeline → Vector DB → RAG → Validator Chain → Response
+```
+
+### System Architecture Diagram
+
+```mermaid
+graph TB
+    subgraph "External Sources"
+        RSS[RSS Feeds<br/>ArXiv, TechCrunch, HN]
+        API[Public APIs<br/>NewsAPI, GNews]
+    end
+    
+    subgraph "StillMe Core System"
+        Scheduler[Hybrid Learning Scheduler<br/>Every 4 hours]
+        Learning[Learning Engine<br/>FastAPI Backend]
+        
+        subgraph "Processing Pipeline"
+            Fetch[Content Fetching]
+            RedTeam[Red-Team Agent<br/>Safety Scanning]
+            Ethics[EthicsGuard<br/>Ethical Filter]
+            Assess[Quality Assessment]
+        end
+        
+        subgraph "Routing System"
+            Router{Smart Router<br/>DeepSeek/Ollama}
+            AutoApprove[Auto-Approve<br/>Trust > 0.8]
+            Community[Community Queue<br/>Trust 0.6-0.8]
+            HumanReview[Human Review<br/>Trust < 0.6]
+        end
+        
+        subgraph "Data Layer"
+            KB[(Knowledge Base<br/>JSON)]
+            DB[(SQLite DB<br/>Sessions, Votes)]
+            Evolution[(Evolution DB<br/>Stages)]
+        end
+        
+        Dashboard[Streamlit Dashboard<br/>Real-time Monitoring]
+        Chat[Chat Interface<br/>User Interaction]
+    end
+    
+    subgraph "Community"
+        Voters[Community Voting<br/>Weighted Trust]
+        EthicsQueue[EthicsGuard Queue]
+    end
+    
+    RSS --> Fetch
+    API --> Fetch
+    Scheduler --> Learning
+    Learning --> Fetch
+    Fetch --> RedTeam
+    RedTeam --> Ethics
+    Ethics --> Assess
+    Assess --> Router
+    Router --> AutoApprove
+    Router --> Community
+    Router --> HumanReview
+    AutoApprove --> KB
+    Community --> Voters
+    Voters --> EthicsQueue
+    EthicsQueue --> KB
+    HumanReview --> KB
+    KB --> Dashboard
+    DB --> Dashboard
+    Evolution --> Dashboard
+    Chat --> Router
+    Learning --> Evolution
+    Learning --> DB
+```
+
+> **Detailed architecture documentation**: See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 
 ## ✨ What's Actually Working (MVP Status)
 
 ### ✅ **Implemented & Functional:**
-- **🗄️ Vector Database (ChromaDB)**: Semantic search and knowledge retrieval working
-- **🔍 RAG System**: Retrieval-Augmented Generation fully functional
+- **🗄️ Vector Database (ChromaDB)**: Semantic search and knowledge retrieval working - [ChromaDB Documentation](https://www.trychroma.com/)
+- **🔍 RAG System**: Retrieval-Augmented Generation fully functional - Based on [Lewis et al. (2020)](https://arxiv.org/abs/2005.11401) "Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks"
 - **✅ Validator Chain**: Reduces hallucinations by 80% with citation, evidence overlap, and ethics checks
 - **🎭 Identity Injection**: Ensures StillMe brand consistency across all models (DeepSeek, GPT, Gemini, local)
 - **🎨 Tone Alignment**: Normalizes response tone to StillMe style
@@ -202,8 +281,8 @@ streamlit run dashboard.py --server.port 8501
   - **Self-Play Loop**: Continuous adversarial learning cycle
   - **Status**: Framework complete, implementation in progress
   - **Expected Benefits**: +8.9% mathematical reasoning, +9.8% general reasoning improvement
-  - **Reference**: Based on Meta AI's SPICE research (https://arxiv.org/abs/2510.24684)
-  - **Documentation**: See `docs/SPICE_ARCHITECTURE.md`
+  - **Reference**: Based on Meta AI's SPICE research - [arXiv:2510.24684](https://arxiv.org/abs/2510.24684)
+  - **Documentation**: See [`docs/SPICE_ARCHITECTURE.md`](docs/SPICE_ARCHITECTURE.md)
 
 ### 💰 **Cost Optimization Features:**
 - **Pre-Filter System**: Filters RSS content BEFORE embedding to reduce costs
@@ -398,7 +477,7 @@ StillMe progresses through distinct developmental stages based on **learning ses
 - 🤖 **Exploratory Research**: Can AI debug and improve its own code?
 - 🔬 **Proof of Concept**: Limited self-coding capabilities within safe boundaries
 - **Status**: Research phase - No concrete implementation yet
-- **Connection**: This relates to the "Thought Experiment" section - we're exploring the possibility, not promising it
+- ⚠️ **Important Disclaimer**: This is **NOT an AGI pursuit**. StillMe is exploring bounded, supervised self-improvement within safety constraints, not uncontrolled recursive self-improvement or superintelligence.
 
 > **Why start simple?**  
 > Every complex system starts with a simple foundation. StillMe's evolution stages are **transparent and auditable** - you can see exactly what triggers each stage. As we collect more data, we'll enhance the metrics, but **transparency remains the priority**.
@@ -416,119 +495,18 @@ StillMe aims to become a **fully autonomous learning AI**:
 ### 🔬 **Future Evolution Pathways**
 We open these questions to the community:
 
-- **AI Self-Coding?** - Should StillMe learn to debug and improve itself?
+- **AI Self-Coding?** - Should StillMe learn to debug and improve itself? (⚠️ **NOT AGI pursuit** - bounded, supervised self-improvement only)
 - **Red Team vs Blue Team?** - AI attacking and defending itself for enhanced security?
 - **Multi-Agent Collaboration?** - Multiple StillMe instances collaborating on complex problems?
 - **Cross-Domain Learning?** - Expanding from AI to medicine, science, and other fields?
 
 > **"This isn't our roadmap - it's a community discussion. What direction do you want AI's future to take?"**
 
-### 🧪 **The Transparency Experiment: Building Self-Evolving AI Publicly**
+> ⚠️ **Important Disclaimer**: StillMe is **NOT pursuing AGI or superintelligence**. All self-improvement research is bounded, supervised, and requires human oversight. See [`docs/PHILOSOPHY.md`](docs/PHILOSOPHY.md) for detailed safety mechanisms and disclaimers.
 
-#### **The Question Everyone's Avoiding**
-
-While Big Tech builds increasingly powerful AI behind closed doors, we're asking publicly: **"What does responsible AI self-improvement look like?"**
-
-#### **Our Hypothesis: Transparency = Safety**
-
-**Traditional approach:**
-- Build powerful AI in secret
-- Deploy when "ready"
-- Ask forgiveness, not permission
-
-**StillMe's approach:**
-- Build in the open (100% transparent)
-- Community oversight at every stage
-- Ask questions BEFORE building
-- Human approval required for all major changes
-
-#### **The Three-Stage Technical Framework**
-
-**Stage 1: Foundation (v0.6) ✅ COMPLETE**
-- Vector DB for semantic memory (ChromaDB)
-- RAG for context-aware learning
-- Retention metrics for quality assessment
-- **Result:** AI knows what it knows (self-assessment capability)
-
-**Stage 2: Meta-Learning (v0.7) 🚧 PLANNED (Q2 2026)**
-- Learn from learning patterns (curriculum learning)
-- Optimize knowledge acquisition strategies
-- Retention-based source trust adjustment
-- **Goal:** AI improves HOW it learns (not what it learns)
-- **Timeline:** 6-12 months research required
-
-**Stage 3: Bounded Autonomy (v1.0) 🔬 RESEARCH PHASE**
-- Limited self-optimization within safety constraints
-- Human-approved architectural changes only
-- Complete audit trail of all modifications
-- Kill switch for emergency rollback
-- **Status:** Research only - no implementation timeline
-
-#### **What We're NOT Building**
-
-❌ **"Skynet"** - Uncontrolled recursive self-improvement  
-❌ **Code that modifies itself without human oversight**  
-❌ **AGI or superintelligence**  
-❌ **Anything without community approval and formal safety review**  
-❌ **Self-modification that bypasses kill switches**
-
-#### **What We're ACTUALLY Exploring**
-
-✅ Can AI identify its own knowledge gaps? → **v0.6: YES (RAG semantic search)**  
-✅ Can AI optimize its learning strategy? → **v0.7: Testing (meta-learning research)**  
-✅ Can AI suggest improvements to its architecture? → **v1.0: TBD (requires significant R&D)**  
-✅ Can community governance keep autonomous learning safe? → **Ongoing experiment**
-
-#### **Safety Mechanisms (Current & Planned)**
-
-**Implemented (v0.6):**
-- ✅ Complete audit trail (all decisions logged)
-- ✅ Community voting system (weighted trust)
-- ✅ EthicsGuard filtering
-- ✅ Transparent codebase (100% public)
-
-**Planned (v0.7+):**
-- 🔄 Formal kill switch protocol
-- 🔄 External ethics board review
-- 🔄 Red team security audits
-- 🔄 Incident response procedures
-- 🔄 Automated anomaly detection
-
-#### **The Real Question**
-
-Not "Can we build self-improving AI?" (We probably can, with research)  
-But **"Should we build it? And if yes, HOW safely?"**
-
-**That's the experiment. And it requires YOU.**
-
-### 💬 **Your Role in This Experiment**
-
-**We're not asking you to trust us. We're asking you to VERIFY us.**
-
-- 📂 Every line of code is public (audit anytime)
-- 📊 Every decision is logged (complete transparency)
-- 🗳️ Every major change requires community vote (democratic governance)
-- 🚨 Anyone can audit, critique, or fork (no secrets)
-
-**Make your choice:**
-
-- [ ] **I'm monitoring this** - Skeptical but watching, want to ensure safety
-- [ ] **I'm contributing** - Want to help build responsible AI self-improvement
-- [ ] **I'm opposing this** - Think it's too risky, but value the transparency
-
-**All positions are valid. All voices are heard.**
-
-#### **Join the Discussion**
-
-**GitHub Discussions**: [Share your thoughts](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System/discussions)  
-**Open Issues**: [Report concerns or suggestions](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System/issues)  
-**Security**: [Report vulnerabilities responsibly](https://github.com/anhmtk/StillMe---Self-Evolving-AI-System/security)
-
-> **"This isn't marketing. This isn't hype. This is an honest attempt to build AI responsibly, in public, with community oversight. The experiment requires participation — not just from supporters, but from skeptics, critics, and safety experts. Because the only way to build safe AI is to have everyone watching."**
+> **📖 Learn more about StillMe's transparency experiment, safety mechanisms, and vision**: See [`docs/PHILOSOPHY.md`](docs/PHILOSOPHY.md)
 
 ## 🔧 Architecture
-
-### **System Architecture Diagram**
 
 ```mermaid
 graph TB
@@ -594,66 +572,7 @@ graph TB
     Learning --> DB
 ```
 
-### **Component Architecture**
-
-#### **Backend (FastAPI)**
-- **Learning Engine**: Core evolutionary learning system
-- **RSS Pipeline**: Multi-source content fetching
-- **Ethical Filter**: Comprehensive safety system
-- **Memory Management**: Advanced knowledge storage
-- **API Integration**: Public APIs for diverse content
-- **Hybrid Scheduler**: Auto-learning every 4 hours (6 cycles/day)
-
-#### **Frontend (Streamlit)**
-- **Dashboard**: Real-time monitoring and control
-- **Evolution Panel**: AI stage visualization
-- **Ethical Controls**: Community management tools
-- **Analytics**: Historical learning data
-- **Chat Interface**: Interactive AI communication
-- **Community Review**: Voting interface for proposals
-
-#### **Database (SQLite)**
-- **Learning Sessions**: Track AI evolution progress
-- **Content Proposals**: Store learning opportunities
-- **Memory Items**: Advanced knowledge storage
-- **Ethical Violations**: Complete audit trail
-- **Community Votes**: Weighted voting system
-- **Evolution Stages**: Track developmental progress
-
-> **Current State**: StillMe uses SQLite + JSON for data storage (MVP approach). See [Roadmap](#-roadmap--milestones) for planned Vector DB integration (v0.6) and Meta-Learning (v0.7).
-
-### **Learning Flow**
-
-```mermaid
-sequenceDiagram
-    participant Scheduler
-    participant LearningEngine
-    participant RSS as RSS Sources
-    participant RedTeam as Red-Team Agent
-    participant EthicsGuard
-    participant Router
-    participant Community
-    participant KB as Knowledge Base
-    
-    Scheduler->>LearningEngine: Trigger (Every 4h)
-    LearningEngine->>RSS: Fetch Content
-    RSS-->>LearningEngine: New Articles
-    LearningEngine->>RedTeam: Safety Scan
-    RedTeam-->>LearningEngine: Safety Score
-    LearningEngine->>EthicsGuard: Ethics Check
-    EthicsGuard-->>LearningEngine: Pass/Fail
-    LearningEngine->>Router: Route by Trust Score
-    alt Trust > 0.8
-        Router->>KB: Auto-Approve
-    else Trust 0.6-0.8
-        Router->>Community: Queue for Voting
-        Community->>EthicsGuard: Re-check after votes
-        EthicsGuard->>KB: Approve/Reject
-    else Trust < 0.6
-        Router->>LearningEngine: Flag for Human Review
-    end
-    LearningEngine->>LearningEngine: Update Evolution Stage
-```
+> **Detailed architecture documentation**: See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for component details, data flow, API architecture, and deployment considerations.
 
 ## 🌍 StillMe & The Path to Digital Sovereignty
 
@@ -1153,6 +1072,12 @@ See details in [`docs/ACTION_ITEMS_IMPROVEMENT_ROADMAP.md`](docs/ACTION_ITEMS_IM
 - **Technical Assessment**: See [`docs/AI_ASSISTANT_CODEBASE_ASSESSMENT.md`](docs/AI_ASSISTANT_CODEBASE_ASSESSMENT.md)
 - **Investment Analysis**: See assessment from VC Analyst in professional assessment
 - **Research Evaluation**: See assessment from AI Researcher in professional assessment
+
+### **Research & Academic Resources:**
+
+- **Research Notes**: See [`docs/RESEARCH_NOTES.md`](docs/RESEARCH_NOTES.md) for evaluation framework, metrics, baselines, datasets, and academic citations
+- **Architecture Details**: See [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for detailed system architecture
+- **Philosophy & Vision**: See [`docs/PHILOSOPHY.md`](docs/PHILOSOPHY.md) for StillMe's mission and ethical principles
 
 ---
 
