@@ -662,6 +662,68 @@ def page_learning():
     c1.metric("Total Responses", metrics.get("total_responses", 0))
     c2.metric("Average Accuracy", f"{metrics.get('average_accuracy', 0.0):.3f}")
     c3.metric("Trend", metrics.get("trend", "N/A"))
+    
+    st.markdown("---")
+    st.subheader("📚 Raw Learning Feed (Dữ liệu đã Fetch)")
+    st.caption("Hiển thị TẤT CẢ các mục đã fetch từ lần chạy thành công gần nhất")
+    
+    # Get fetch history
+    try:
+        fetch_data = get_json("/api/learning/rss/fetch-history", {}).get("items", [])
+        
+        if not fetch_data:
+            st.info("ℹ️ Chưa có dữ liệu fetch. Chạy learning cycle để xem dữ liệu.")
+        else:
+            # Status color mapping
+            def get_status_color(status: str) -> str:
+                if status == "Added to RAG":
+                    return "🟢"
+                elif status == "Filtered: Duplicate":
+                    return "🟡"
+                elif status == "Filtered: Low Score":
+                    return "⚪"
+                elif status == "Filtered: Ethical/Bias Flag":
+                    return "🔴"
+                else:
+                    return "⚪"
+            
+            # Create scrollable table
+            st.markdown(f"**Tổng số mục:** {len(fetch_data)}")
+            
+            # Display as table
+            table_data = []
+            for item in fetch_data:
+                status_icon = get_status_color(item.get("status", ""))
+                table_data.append({
+                    "Status": f"{status_icon} {item.get('status', 'Unknown')}",
+                    "Title/Headline": item.get("title", "N/A")[:80] + ("..." if len(item.get("title", "")) > 80 else ""),
+                    "Source URL": item.get("source_url", "N/A"),
+                    "Fetch Timestamp": item.get("fetch_timestamp", "N/A")[:19] if item.get("fetch_timestamp") else "N/A"
+                })
+            
+            if table_data:
+                import pandas as pd
+                df = pd.DataFrame(table_data)
+                st.dataframe(df, use_container_width=True, height=400)
+                
+                # Show details in expander
+                st.markdown("### Chi tiết từng mục")
+                for idx, item in enumerate(fetch_data[:20]):  # Show first 20
+                    with st.expander(f"{get_status_color(item.get('status', ''))} {item.get('title', 'No title')[:60]}..."):
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.write(f"**Source URL:** {item.get('source_url', 'N/A')}")
+                            st.write(f"**Link:** [{item.get('link', 'N/A')[:50]}...]({item.get('link', '#')})" if item.get('link') else "**Link:** N/A")
+                            st.write(f"**Status:** {item.get('status', 'Unknown')}")
+                        with col2:
+                            st.write(f"**Fetch Timestamp:** {item.get('fetch_timestamp', 'N/A')}")
+                            if item.get('status_reason'):
+                                st.write(f"**Reason:** {item.get('status_reason')}")
+                            if item.get('vector_id'):
+                                st.write(f"**Vector ID:** {item.get('vector_id')}")
+                        st.write(f"**Summary:** {item.get('summary', 'N/A')[:200]}...")
+    except Exception as e:
+        st.error(f"Lỗi khi lấy dữ liệu fetch: {e}")
 
 
 def page_community():
@@ -807,6 +869,77 @@ def page_validation():
                     st.write(f"**Overlap Score:** {overlap:.3f}")
     else:
         st.info("No recent validation logs")
+    
+    st.markdown("---")
+    st.subheader("🛡️ Retained Knowledge Audit Log (Nhật ký kiểm toán dữ liệu đã giữ lại)")
+    st.caption("Hiển thị các mục kiến thức đã được giữ lại, đã được nhúng và thêm vào ChromaDB thành công")
+    
+    # Get retained knowledge
+    try:
+        retained_data = get_json("/api/learning/retained?limit=100", {}).get("knowledge_items", [])
+        
+        if not retained_data:
+            st.info("ℹ️ Chưa có dữ liệu retained knowledge. Hệ thống sẽ tự động thêm sau khi học.")
+        else:
+            st.markdown(f"**Tổng số mục đã giữ lại:** {len(retained_data)}")
+            
+            # Filter options
+            col_filter1, col_filter2 = st.columns(2)
+            with col_filter1:
+                min_retention = st.slider("Minimum Retention Score", 0.0, 1.0, 0.7, 0.1)
+            with col_filter2:
+                search_term = st.text_input("🔍 Tìm kiếm (Source URL, Content)", "")
+            
+            # Filter data
+            filtered_data = retained_data
+            if min_retention > 0:
+                filtered_data = [item for item in filtered_data if item.get("retention_score", 0.0) >= min_retention]
+            if search_term:
+                search_lower = search_term.lower()
+                filtered_data = [
+                    item for item in filtered_data
+                    if search_lower in item.get("source_url", "").lower() or
+                       search_lower in item.get("retained_content_snippet", "").lower()
+                ]
+            
+            st.markdown(f"**Số mục sau khi lọc:** {len(filtered_data)}")
+            
+            # Display as table
+            if filtered_data:
+                table_data = []
+                for item in filtered_data:
+                    table_data.append({
+                        "Timestamp Added": item.get("timestamp_added", "N/A")[:19] if item.get("timestamp_added") else "N/A",
+                        "Source URL (Link)": item.get("source_url", "N/A")[:60] + ("..." if len(item.get("source_url", "")) > 60 else ""),
+                        "Content Snippet": item.get("retained_content_snippet", "N/A")[:100] + ("..." if len(item.get("retained_content_snippet", "")) > 100 else ""),
+                        "Vector ID": item.get("vector_id", "N/A"),
+                        "Retention Score": f"{item.get('retention_score', 0.0):.2f}"
+                    })
+                
+                import pandas as pd
+                df = pd.DataFrame(table_data)
+                st.dataframe(df, use_container_width=True, height=400)
+                
+                # Show details in expander
+                st.markdown("### Chi tiết từng mục")
+                for idx, item in enumerate(filtered_data[:20]):  # Show first 20
+                    with st.expander(f"📄 {item.get('source_url', 'Unknown')[:50]}... (Score: {item.get('retention_score', 0.0):.2f})"):
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.write(f"**Timestamp Added:** {item.get('timestamp_added', 'N/A')}")
+                            st.write(f"**Source URL:** [{item.get('source_url', 'N/A')}]({item.get('source_url', '#')})")
+                            st.write(f"**Vector ID:** `{item.get('vector_id', 'N/A')}`")
+                        with col2:
+                            st.write(f"**Retention Score:** {item.get('retention_score', 0.0):.2f}")
+                            st.write(f"**Access Count:** {item.get('access_count', 0)}")
+                        st.markdown("**Retained Content Snippet (5-10 câu):**")
+                        st.text_area("", item.get("retained_content_snippet", "N/A"), height=150, key=f"snippet_{idx}", disabled=True)
+                        if st.checkbox(f"Xem toàn bộ nội dung", key=f"full_{idx}"):
+                            st.text_area("Full Content", item.get("full_content", "N/A"), height=200, key=f"full_content_{idx}", disabled=True)
+            else:
+                st.info("Không có mục nào phù hợp với bộ lọc.")
+    except Exception as e:
+        st.error(f"Lỗi khi lấy dữ liệu retained knowledge: {e}")
 
 
 def sidebar(page_for_chat: str | None = None):
