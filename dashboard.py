@@ -159,7 +159,7 @@ def page_overview():
             st.markdown("🧠")  # Fallback emoji
     with col_title:
         st.markdown("# StillMe")
-        st.caption("Self-Evolving AI System")
+        st.caption("Learning AI system with RAG foundation")
     
     st.markdown("---")
     col1, col2, col3, col4 = st.columns(4)
