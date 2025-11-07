@@ -664,15 +664,15 @@ def page_learning():
     c3.metric("Trend", metrics.get("trend", "N/A"))
     
     st.markdown("---")
-    st.subheader("📚 Raw Learning Feed (Dữ liệu đã Fetch)")
-    st.caption("Hiển thị TẤT CẢ các mục đã fetch từ lần chạy thành công gần nhất")
+    st.subheader("📚 Raw Learning Feed (Fetched Data)")
+    st.caption("Display ALL items fetched from the latest successful run")
     
     # Get fetch history
     try:
         fetch_data = get_json("/api/learning/rss/fetch-history", {}).get("items", [])
         
         if not fetch_data:
-            st.info("ℹ️ Chưa có dữ liệu fetch. Chạy learning cycle để xem dữ liệu.")
+            st.info("ℹ️ No fetch data available. Run a learning cycle to view data.")
         else:
             # Status color mapping
             def get_status_color(status: str) -> str:
@@ -688,7 +688,7 @@ def page_learning():
                     return "⚪"
             
             # Create scrollable table
-            st.markdown(f"**Tổng số mục:** {len(fetch_data)}")
+            st.markdown(f"**Total items:** {len(fetch_data)}")
             
             # Display as table
             table_data = []
@@ -707,7 +707,7 @@ def page_learning():
                 st.dataframe(df, use_container_width=True, height=400)
                 
                 # Show details in expander
-                st.markdown("### Chi tiết từng mục")
+                st.markdown("### Item Details")
                 for idx, item in enumerate(fetch_data[:20]):  # Show first 20
                     with st.expander(f"{get_status_color(item.get('status', ''))} {item.get('title', 'No title')[:60]}..."):
                         col1, col2 = st.columns(2)
@@ -723,7 +723,7 @@ def page_learning():
                                 st.write(f"**Vector ID:** {item.get('vector_id')}")
                         st.write(f"**Summary:** {item.get('summary', 'N/A')[:200]}...")
     except Exception as e:
-        st.error(f"Lỗi khi lấy dữ liệu fetch: {e}")
+        st.error(f"Error fetching data: {e}")
 
 
 def page_community():
@@ -871,24 +871,24 @@ def page_validation():
         st.info("No recent validation logs")
     
     st.markdown("---")
-    st.subheader("🛡️ Retained Knowledge Audit Log (Nhật ký kiểm toán dữ liệu đã giữ lại)")
-    st.caption("Hiển thị các mục kiến thức đã được giữ lại, đã được nhúng và thêm vào ChromaDB thành công")
+    st.subheader("🛡️ Retained Knowledge Audit Log")
+    st.caption("Display knowledge items that have been retained, embedded and successfully added to ChromaDB")
     
     # Get retained knowledge
     try:
         retained_data = get_json("/api/learning/retained?limit=100", {}).get("knowledge_items", [])
         
         if not retained_data:
-            st.info("ℹ️ Chưa có dữ liệu retained knowledge. Hệ thống sẽ tự động thêm sau khi học.")
+            st.info("ℹ️ No retained knowledge data available. The system will automatically add after learning.")
         else:
-            st.markdown(f"**Tổng số mục đã giữ lại:** {len(retained_data)}")
+            st.markdown(f"**Total retained items:** {len(retained_data)}")
             
             # Filter options
             col_filter1, col_filter2 = st.columns(2)
             with col_filter1:
                 min_retention = st.slider("Minimum Retention Score", 0.0, 1.0, 0.7, 0.1)
             with col_filter2:
-                search_term = st.text_input("🔍 Tìm kiếm (Source URL, Content)", "")
+                search_term = st.text_input("🔍 Search (Source URL, Content)", "")
             
             # Filter data
             filtered_data = retained_data
@@ -902,7 +902,7 @@ def page_validation():
                        search_lower in item.get("retained_content_snippet", "").lower()
                 ]
             
-            st.markdown(f"**Số mục sau khi lọc:** {len(filtered_data)}")
+            st.markdown(f"**Items after filtering:** {len(filtered_data)}")
             
             # Display as table
             if filtered_data:
@@ -921,7 +921,7 @@ def page_validation():
                 st.dataframe(df, use_container_width=True, height=400)
                 
                 # Show details in expander
-                st.markdown("### Chi tiết từng mục")
+                st.markdown("### Item Details")
                 for idx, item in enumerate(filtered_data[:20]):  # Show first 20
                     with st.expander(f"📄 {item.get('source_url', 'Unknown')[:50]}... (Score: {item.get('retention_score', 0.0):.2f})"):
                         col1, col2 = st.columns(2)
@@ -932,14 +932,14 @@ def page_validation():
                         with col2:
                             st.write(f"**Retention Score:** {item.get('retention_score', 0.0):.2f}")
                             st.write(f"**Access Count:** {item.get('access_count', 0)}")
-                        st.markdown("**Retained Content Snippet (5-10 câu):**")
+                        st.markdown("**Retained Content Snippet (5-10 sentences):**")
                         st.text_area("", item.get("retained_content_snippet", "N/A"), height=150, key=f"snippet_{idx}", disabled=True)
-                        if st.checkbox(f"Xem toàn bộ nội dung", key=f"full_{idx}"):
+                        if st.checkbox(f"View full content", key=f"full_{idx}"):
                             st.text_area("Full Content", item.get("full_content", "N/A"), height=200, key=f"full_content_{idx}", disabled=True)
             else:
-                st.info("Không có mục nào phù hợp với bộ lọc.")
+                st.info("No items match the filter.")
     except Exception as e:
-        st.error(f"Lỗi khi lấy dữ liệu retained knowledge: {e}")
+        st.error(f"Error fetching retained knowledge data: {e}")
 
 
 def sidebar(page_for_chat: str | None = None):
@@ -1014,9 +1014,9 @@ def sidebar(page_for_chat: str | None = None):
                         alert_source = alert.get("source", "Unknown")
                         
                         st.sidebar.info(
-                            f"💡 **Gợi ý của StillMe:** StillMe đã học được một kiến thức mới có thể liên quan: "
-                            f"**{alert_title}** (Nguồn: {alert_source}). "
-                            f"Bạn có muốn StillMe giải thích không?"
+                            f"💡 **StillMe Suggestion:** StillMe has learned new knowledge that may be relevant: "
+                            f"**{alert_title}** (Source: {alert_source}). "
+                            f"Would you like StillMe to explain?"
                         )
                         
                         if st.sidebar.button(f"📖 Explain {alert_title[:30]}...", key=f"explain_{idx}", use_container_width=True):

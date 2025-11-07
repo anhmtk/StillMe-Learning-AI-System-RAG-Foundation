@@ -1121,30 +1121,30 @@ If you're in a developing nation working on:
 - ✅ Integration tests for RSS → RAG pipeline implemented
 
 **Scalability:**
-- ⚠️ SQLite database sẽ bottleneck khi scale (cần migrate PostgreSQL)
-- ⚠️ Single-threaded scheduler (cần distributed task queue)
-- ⚠️ ChromaDB memory-based (cần persistence strategy cho scale)
+- ⚠️ SQLite database will bottleneck when scaling (needs PostgreSQL migration)
+- ⚠️ Single-threaded scheduler (needs distributed task queue)
+- ⚠️ ChromaDB memory-based (needs persistence strategy for scaling)
 
 **Advanced Features:**
-- ⚠️ SPICE Engine có framework nhưng nhiều TODO (chưa complete)
-- ⚠️ Ethical filtering framework exists nhưng chưa integrated
-- ⚠️ Community voting designed nhưng chưa implemented
+- ⚠️ SPICE Engine has framework but many TODOs (not complete)
+- ⚠️ Ethical filtering framework exists but not yet integrated
+- ⚠️ Community voting designed but not yet implemented
 
 ### **Improvement Roadmap:**
 
-Xem chi tiết trong [`docs/ACTION_ITEMS_IMPROVEMENT_ROADMAP.md`](docs/ACTION_ITEMS_IMPROVEMENT_ROADMAP.md)
+See details in [`docs/ACTION_ITEMS_IMPROVEMENT_ROADMAP.md`](docs/ACTION_ITEMS_IMPROVEMENT_ROADMAP.md)
 
-**IMMEDIATE (1-2 tuần):**
+**IMMEDIATE (1-2 weeks):**
 1. ✅ Security hardening (rate limiting, input validation, SQL injection protection) - **COMPLETED**
 2. ✅ Test coverage expansion (RSS fetcher, scheduler, curator) - **COMPLETED**
 3. ✅ Error handling standardization - **COMPLETED**
 
-**SHORT-TERM (1-3 tháng):**
+**SHORT-TERM (1-3 months):**
 4. Database migration planning (SQLite → PostgreSQL)
 5. Performance optimization (Redis caching, query optimization)
 6. Monitoring & observability (health checks, metrics, logging)
 
-**MEDIUM-TERM (3-6 tháng):**
+**MEDIUM-TERM (3-6 months):**
 7. Scalability architecture (PostgreSQL, Celery, load balancer)
 8. Advanced features completion (SPICE, ethical filtering, voting)
 
