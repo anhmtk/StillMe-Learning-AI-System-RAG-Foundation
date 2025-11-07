@@ -23,12 +23,31 @@ STILLME_KEYWORDS = {
     "continuous learning", "self-learning", "learning process",
     
     # System-related (Vietnamese)
-    "hệ thống", "cách hoạt động", "hoạt động như thế nào",
-    "quá trình", "cơ chế", "kiến trúc",
+    "hệ thống", "cách hoạt động", "hoạt động như thế nào", "vận hành",
+    "quá trình", "cơ chế", "kiến trúc", "hoạt động", "vận hành như thế nào",
     
     # System-related (English)
     "system", "how does it work", "how do you work", "architecture",
-    "mechanism", "process", "how it works",
+    "mechanism", "process", "how it works", "how work", "how function",
+    "mechanisms", "functioning", "operate", "operation",
+    
+    # System-related (German)
+    "wie funktioniert", "wie arbeitet", "funktionsweise", "mechanismus",
+    "system", "prozess", "architektur",
+    
+    # System-related (French)
+    "fonctionne", "comment fonctionne", "mécanisme", "mécanismes",
+    "système", "processus", "architecture", "fonctionnement",
+    
+    # System-related (Spanish)
+    "cómo funciona", "cómo trabaja", "mecanismo", "mecanismos",
+    "sistema", "proceso", "arquitectura", "funcionamiento",
+    
+    # System-related (Chinese)
+    "如何工作", "如何运作", "机制", "系统", "过程", "架构", "运作方式",
+    
+    # System-related (Japanese)
+    "どのように機能", "どのように動作", "メカニズム", "システム", "プロセス", "アーキテクチャ",
     
     # RAG-related
     "rag", "retrieval", "vector", "knowledge base", "cơ sở tri thức",
@@ -77,7 +96,12 @@ def detect_stillme_query(query: str) -> Tuple[bool, List[str]]:
     
     has_system_keyword = any(
         keyword in query_lower 
-        for keyword in ["hệ thống", "system", "hoạt động", "work", "cách", "how", "như thế nào", "how does", "how do"]
+        for keyword in [
+            "hệ thống", "system", "hoạt động", "vận hành", "work", "cách", "how", 
+            "như thế nào", "how does", "how do", "how work", "how function",
+            "mechanisms", "wie funktioniert", "fonctionne", "comment fonctionne",
+            "cómo funciona", "如何工作", "どのように機能", "mechanism", "cơ chế"
+        ]
     )
     
     # If query has StillMe context + learning/system keywords, it's about StillMe
@@ -155,7 +179,7 @@ def get_foundational_query_variants(query: str) -> List[str]:
     """
     variants = [
         query,  # Original query
-        "StillMe self-evolving AI system RAG learning",
+        "StillMe Learning AI system RAG foundation learning",
         "StillMe continuous learning RSS arXiv",
         "StillMe transparency RAG knowledge base",
         "StillMe how it learns updates knowledge",

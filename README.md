@@ -1,4 +1,4 @@
-# 🧠 StillMe - Self-Evolving AI System
+# 🧠 StillMe - Learning AI system with RAG foundation
 
 <div align="center">
   <img src="assets/logo.png" alt="StillMe Logo" width="200" height="200">
@@ -1120,6 +1120,6 @@ StillMe is built with love and dedication to create a truly transparent, ethical
 
 ---
 
-**StillMe** - *Self-Evolving AI System with Complete Ethical Transparency* 🤖✨
+**StillMe** - *Learning AI system with RAG foundation and Complete Ethical Transparency* 🤖✨
 
 > "The future belongs to AI systems that can learn, adapt, and evolve. StillMe is that future, today."
