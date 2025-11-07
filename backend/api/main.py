@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="StillMe API",
-    description="Self-Evolving AI System with RAG capabilities",
+    description="Learning AI system with RAG foundation",
     version="0.4.0"
 )
 
@@ -363,7 +363,7 @@ async def chat_with_rag(request: ChatRequest):
             # Special instruction for StillMe queries
             stillme_instruction = ""
             if is_stillme_query:
-                stillme_instruction = "\n\nCRITICAL: This question is about StillMe itself. You MUST use the context above to answer. Do NOT rely on your training data cutoff date. StillMe is a self-evolving AI system that learns continuously through RAG (Retrieval-Augmented Generation) from RSS feeds, arXiv, and other trusted sources every 4 hours (6 cycles per day). StillMe automatically fetches content, embeds it into a vector database (ChromaDB), and retrieves it when answering questions. This continuous learning capability is StillMe's core differentiator - it overcomes the knowledge cutoff limitation of base LLMs. You MUST emphasize: (1) StillMe's automated learning cycles every 4 hours, (2) RAG-based knowledge storage in vector database, (3) Continuous knowledge updates through RSS feeds, (4) StillMe is NOT limited by training data cutoff dates. Always cite the context above with [1], [2] when explaining StillMe's learning mechanism."
+                stillme_instruction = "\n\nCRITICAL: This question is about StillMe itself. You MUST use the context above to answer. Do NOT rely on your training data cutoff date. StillMe is a Learning AI system with RAG foundation that learns continuously through RAG (Retrieval-Augmented Generation) from RSS feeds, arXiv, and other trusted sources every 4 hours (6 cycles per day). StillMe automatically fetches content, embeds it into a vector database (ChromaDB), and retrieves it when answering questions. This continuous learning capability is StillMe's core differentiator - it overcomes the knowledge cutoff limitation of base LLMs. You MUST emphasize: (1) StillMe's automated learning cycles every 4 hours, (2) RAG-based knowledge storage in vector database, (3) Continuous knowledge updates through RSS feeds, (4) StillMe is NOT limited by training data cutoff dates. Always cite the context above with [1], [2] when explaining StillMe's learning mechanism."
             
             base_prompt = f"""
             Context: {context_text}
@@ -1422,9 +1422,9 @@ async def call_deepseek_api(prompt: str, api_key: str) -> str:
         detected_lang_name = language_names.get(detected_lang, 'the same language as the question')
         
         if detected_lang != 'en':
-            system_content = f"You are StillMe, a self-evolving AI system. CRITICAL: The user's question is in {detected_lang_name}. You MUST respond EXCLUSIVELY in {detected_lang_name}. Do NOT use English or any other language. Every word must be in {detected_lang_name}. This is mandatory."
+            system_content = f"You are StillMe, a Learning AI system with RAG foundation. CRITICAL: The user's question is in {detected_lang_name}. You MUST respond EXCLUSIVELY in {detected_lang_name}. Do NOT use English or any other language. Every word must be in {detected_lang_name}. This is mandatory."
         else:
-            system_content = "You are StillMe, a self-evolving AI system. Provide helpful, accurate responses in English."
+            system_content = "You are StillMe, a Learning AI system with RAG foundation. Provide helpful, accurate responses in English."
         
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(
@@ -1482,9 +1482,9 @@ async def call_openai_api(prompt: str, api_key: str) -> str:
         detected_lang_name = language_names.get(detected_lang, 'the same language as the question')
         
         if detected_lang != 'en':
-            system_content = f"You are StillMe, a self-evolving AI system. CRITICAL: The user's question is in {detected_lang_name}. You MUST respond EXCLUSIVELY in {detected_lang_name}. Do NOT use English or any other language. Every word must be in {detected_lang_name}. This is mandatory."
+            system_content = f"You are StillMe, a Learning AI system with RAG foundation. CRITICAL: The user's question is in {detected_lang_name}. You MUST respond EXCLUSIVELY in {detected_lang_name}. Do NOT use English or any other language. Every word must be in {detected_lang_name}. This is mandatory."
         else:
-            system_content = "You are StillMe, a self-evolving AI system. Provide helpful, accurate responses in English."
+            system_content = "You are StillMe, a Learning AI system with RAG foundation. Provide helpful, accurate responses in English."
         
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(
