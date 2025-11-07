@@ -340,11 +340,25 @@ async def chat_with_rag(request: ChatRequest):
             
             # Detect language for language-appropriate response
             detected_lang = detect_language(request.message)
-            language_instruction = ""
-            if detected_lang == 'vi':
-                language_instruction = "\n\nIMPORTANT: The user is asking in Vietnamese. Please respond in Vietnamese with the same level of detail and accuracy."
+            
+            # Language names mapping
+            language_names = {
+                'vi': 'Vietnamese (Tiếng Việt)',
+                'zh': 'Chinese (中文)',
+                'de': 'German (Deutsch)',
+                'fr': 'French (Français)',
+                'es': 'Spanish (Español)',
+                'ja': 'Japanese (日本語)',
+                'en': 'English'
+            }
+            
+            detected_lang_name = language_names.get(detected_lang, 'the same language as the question')
+            
+            # Strong language instruction to force LLM to respond in detected language
+            if detected_lang != 'en':
+                language_instruction = f"\n\n🚨 CRITICAL LANGUAGE REQUIREMENT 🚨\nThe user's question is written in {detected_lang_name}. You MUST respond EXCLUSIVELY in {detected_lang_name}. Do NOT respond in English or any other language. Every word of your response must be in {detected_lang_name}. This is mandatory - failure to respond in {detected_lang_name} is a critical error."
             else:
-                language_instruction = "\n\nIMPORTANT: Respond in the same language the user used. If they asked in a language other than English, respond in that language."
+                language_instruction = "\n\nIMPORTANT: Respond in English with clear and detailed explanations."
             
             # Special instruction for StillMe queries
             stillme_instruction = ""
@@ -447,10 +461,26 @@ async def chat_with_rag(request: ChatRequest):
                 response = raw_response
         else:
             # Fallback to regular AI response (no RAG context)
-            # Detect language and add instruction
+            # Detect language and add strong instruction
             detected_lang = detect_language(request.message)
-            if detected_lang == 'vi':
-                base_prompt = f"{request.message}\n\n(Please respond in Vietnamese)"
+            
+            # Language names mapping
+            language_names = {
+                'vi': 'Vietnamese (Tiếng Việt)',
+                'zh': 'Chinese (中文)',
+                'de': 'German (Deutsch)',
+                'fr': 'French (Français)',
+                'es': 'Spanish (Español)',
+                'ja': 'Japanese (日本語)',
+                'en': 'English'
+            }
+            
+            detected_lang_name = language_names.get(detected_lang, 'the same language as the question')
+            
+            # Strong language instruction
+            if detected_lang != 'en':
+                language_instruction = f"\n\n🚨 CRITICAL LANGUAGE REQUIREMENT 🚨\nThe user's question is written in {detected_lang_name}. You MUST respond EXCLUSIVELY in {detected_lang_name}. Do NOT respond in English or any other language. Every word of your response must be in {detected_lang_name}. This is mandatory."
+                base_prompt = f"{request.message}\n\n{language_instruction}"
             else:
                 base_prompt = request.message
             
@@ -1314,24 +1344,64 @@ async def generate_ai_response(prompt: str) -> str:
 
 def detect_language(text: str) -> str:
     """
-    Simple language detection - detects Vietnamese vs English
-    Returns: 'vi' for Vietnamese, 'en' for English, 'auto' for unknown
+    Enhanced language detection - supports multiple languages
+    Returns: Language code ('vi', 'zh', 'de', 'fr', 'es', 'ja', 'en') or 'en' as default
     """
-    # Vietnamese characters: àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ
-    vietnamese_chars = set('àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ')
+    if not text or len(text.strip()) == 0:
+        return 'en'
     
-    # Check if text contains Vietnamese characters
     text_lower = text.lower()
-    has_vietnamese = any(char in vietnamese_chars for char in text_lower)
     
-    # Common Vietnamese words/phrases
+    # Chinese (Simplified/Traditional) - Check for Chinese characters
+    chinese_chars = set('的一是在不了有和人这中大为上个国我以要他时来用们生到作地于出就分对成会可主发年动同工也能下过子说产种面而方后多定行学法所民得经十三之进着等部度家电力里如水化高自二理起小物现实加量都两体制机当使点从业本去把性好应开它合还因由其些然前外天政四日那社义事平形相全表间样与关各重新线内数正心反你明看原又么利比或但质气第向道命此变条只没结解问意建月公无系军很情者最立代想已通并提直题党程展五果料象员革位入常文总次品式活设及管特件长求老头基资边流路级少图山统接知较将组见计别她手角期根论运农指几九区强放决西被干做必战先回则任取据处队南给色光门即保治北造百规热领七海口东导器压志世金增争济阶油思术极交受联什认六共权收证改清己美再采转更单风切打白教速花带安场身车例真务具万每目至达走积示议声报斗完类八离华名确才科张信马节话米整空元况今集温传土许步群广石记需段研界拉林律叫且究观越织装影算低持音众书布复容儿须际商非验连断深难近矿千周委素技备半办青省列习响约支般史感劳便团往酸历市克何除消构府称太准精值号率族维划选标写存候毛亲快效斯院查江型眼王按格养易置派层片始却专状育厂京识适属圆包火住调满县局照参红细引听该铁价严龙飞')
+    has_chinese = any(char in chinese_chars for char in text)
+    if has_chinese:
+        return 'zh'
+    
+    # Vietnamese - Check for Vietnamese characters
+    vietnamese_chars = set('àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ')
+    has_vietnamese = any(char in vietnamese_chars for char in text_lower)
     vietnamese_indicators = ['là', 'của', 'và', 'với', 'cho', 'từ', 'trong', 'này', 'đó', 'bạn', 'mình', 'tôi', 'có', 'không', 'được', 'như', 'thế', 'nào', 'gì', 'ai', 'đâu', 'sao']
     has_vietnamese_words = any(word in text_lower for word in vietnamese_indicators)
-    
     if has_vietnamese or has_vietnamese_words:
         return 'vi'
-    else:
-        return 'en'
+    
+    # German - Check for German-specific characters and common words
+    german_chars = set('äöüßÄÖÜ')
+    has_german_chars = any(char in german_chars for char in text)
+    german_indicators = ['der', 'die', 'das', 'und', 'ist', 'für', 'auf', 'mit', 'sind', 'zu', 'ein', 'eine', 'von', 'zu', 'den', 'dem', 'des', 'was', 'wie', 'wo', 'wer', 'wann', 'warum']
+    has_german_words = any(word in text_lower for word in german_indicators)
+    if has_german_chars or has_german_words:
+        return 'de'
+    
+    # French - Check for French-specific characters and common words
+    french_chars = set('àâäéèêëïîôùûüÿçÀÂÄÉÈÊËÏÎÔÙÛÜŸÇ')
+    has_french_chars = any(char in french_chars for char in text)
+    french_indicators = ['le', 'la', 'les', 'de', 'du', 'des', 'et', 'est', 'un', 'une', 'dans', 'pour', 'avec', 'sur', 'par', 'que', 'qui', 'quoi', 'comment', 'où', 'quand', 'pourquoi']
+    has_french_words = any(word in text_lower for word in french_indicators)
+    if has_french_chars or has_french_words:
+        return 'fr'
+    
+    # Spanish - Check for Spanish-specific characters and common words
+    spanish_chars = set('áéíóúñüÁÉÍÓÚÑÜ¿¡')
+    has_spanish_chars = any(char in spanish_chars for char in text)
+    spanish_indicators = ['el', 'la', 'los', 'las', 'de', 'del', 'y', 'es', 'un', 'una', 'en', 'por', 'para', 'con', 'que', 'qué', 'cómo', 'dónde', 'cuándo', 'por qué']
+    has_spanish_words = any(word in text_lower for word in spanish_indicators)
+    if has_spanish_chars or has_spanish_words:
+        return 'es'
+    
+    # Japanese - Check for Hiragana, Katakana, Kanji
+    japanese_ranges = [
+        (0x3040, 0x309F),  # Hiragana
+        (0x30A0, 0x30FF),  # Katakana
+        (0x4E00, 0x9FAF),  # CJK Unified Ideographs (Kanji)
+    ]
+    has_japanese = any(any(start <= ord(char) <= end for start, end in japanese_ranges) for char in text)
+    if has_japanese:
+        return 'ja'
+    
+    # Default to English
+    return 'en'
 
 async def call_deepseek_api(prompt: str, api_key: str) -> str:
     """Call DeepSeek API"""
@@ -1339,11 +1409,22 @@ async def call_deepseek_api(prompt: str, api_key: str) -> str:
         # Detect language from prompt
         detected_lang = detect_language(prompt)
         
-        # Build system prompt with language instruction
-        if detected_lang == 'vi':
-            system_content = "You are StillMe, a self-evolving AI system. The user is asking in Vietnamese. Please respond in Vietnamese with the same level of detail and accuracy as you would in English."
+        # Build system prompt with strong language instruction
+        language_names = {
+            'vi': 'Vietnamese (Tiếng Việt)',
+            'zh': 'Chinese (中文)',
+            'de': 'German (Deutsch)',
+            'fr': 'French (Français)',
+            'es': 'Spanish (Español)',
+            'ja': 'Japanese (日本語)',
+            'en': 'English'
+        }
+        detected_lang_name = language_names.get(detected_lang, 'the same language as the question')
+        
+        if detected_lang != 'en':
+            system_content = f"You are StillMe, a self-evolving AI system. CRITICAL: The user's question is in {detected_lang_name}. You MUST respond EXCLUSIVELY in {detected_lang_name}. Do NOT use English or any other language. Every word must be in {detected_lang_name}. This is mandatory."
         else:
-            system_content = "You are StillMe, a self-evolving AI system. Provide helpful, accurate responses. If the user asks in a language other than English, respond in the same language they used."
+            system_content = "You are StillMe, a self-evolving AI system. Provide helpful, accurate responses in English."
         
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(
@@ -1388,11 +1469,22 @@ async def call_openai_api(prompt: str, api_key: str) -> str:
         # Detect language from prompt
         detected_lang = detect_language(prompt)
         
-        # Build system prompt with language instruction
-        if detected_lang == 'vi':
-            system_content = "You are StillMe, a self-evolving AI system. The user is asking in Vietnamese. Please respond in Vietnamese with the same level of detail and accuracy as you would in English."
+        # Build system prompt with strong language instruction
+        language_names = {
+            'vi': 'Vietnamese (Tiếng Việt)',
+            'zh': 'Chinese (中文)',
+            'de': 'German (Deutsch)',
+            'fr': 'French (Français)',
+            'es': 'Spanish (Español)',
+            'ja': 'Japanese (日本語)',
+            'en': 'English'
+        }
+        detected_lang_name = language_names.get(detected_lang, 'the same language as the question')
+        
+        if detected_lang != 'en':
+            system_content = f"You are StillMe, a self-evolving AI system. CRITICAL: The user's question is in {detected_lang_name}. You MUST respond EXCLUSIVELY in {detected_lang_name}. Do NOT use English or any other language. Every word must be in {detected_lang_name}. This is mandatory."
         else:
-            system_content = "You are StillMe, a self-evolving AI system. Provide helpful, accurate responses. If the user asks in a language other than English, respond in the same language they used."
+            system_content = "You are StillMe, a self-evolving AI system. Provide helpful, accurate responses in English."
         
         async with httpx.AsyncClient(timeout=60.0) as client:
             response = await client.post(
